@@ -18,8 +18,9 @@ namespace State_Namespace
         public ControlLevel Child;
 
         //STATE UPDATE, INITIALIZATION AND TERMINATION CONTROL
-        /// <summary>The group of methods associated with this <see cref="T:State_Namespace.State"/>'s initialization.</summary>
-        private VoidDelegate StateInitialization;
+        private VoidDelegate DefaultStateInitialization;
+        private List<VoidDelegate> StateInitializations;
+        private List<string> 
         /// <summary>The group of methods associated with this <see cref="T:State_Namespace.State"/>'s fixed update.</summary>
         private VoidDelegate StateFixedUpdate;
         /// <summary>The group of methods associated with this <see cref="T:State_Namespace.State"/>'s update.</summary>
@@ -1154,6 +1155,23 @@ namespace State_Namespace
     //EpochTerminationCriteria returns bool and controls the switch from update to termination.
     public delegate void VoidDelegate();
     public delegate bool BoolDelegate();
+
+    public class StateInitializationSpecification
+    {
+        public VoidDelegate Initialization;
+        public string Name;
+
+        public StateInitializationSpecification(VoidDelegate initialization)
+        {
+            Initialization = initialization;
+        }
+
+        public StateInitializationSpecification(VoidDelegate initialization, string name)
+        {
+            Initialization = initialization;
+            Name = name;
+        }
+    }
 
     public class StateTerminationSpecification
     {

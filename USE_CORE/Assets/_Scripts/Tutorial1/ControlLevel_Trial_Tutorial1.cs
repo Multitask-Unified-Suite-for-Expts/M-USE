@@ -28,7 +28,15 @@ public class ControlLevel_Trial_Tutorial1 : ControlLevel
         State iti = new State("ITI");
         AddActiveStates(new List<State> { stimOn, collectResponse, feedback, iti });
 
-        SpecifyCurrentState(feedback);
+        //Define stimOn Stat
+        stimOn.AddStateInitializationMethod(() =>
+        {
+            trialStim.SetActive(true);
+            response = -1;
+            trialCount++;
+            Debug.Log("starting trial " + trialCount);
+        });
+        stimOn.AddTimer(1f, collectResponse);
 
 
     }

@@ -18,9 +18,9 @@ namespace State_Namespace
         public ControlLevel Child;
 
         //STATE UPDATE, INITIALIZATION AND TERMINATION CONTROL
-        private VoidDelegate DefaultStateInitialization;
-        private List<VoidDelegate> StateInitializations;
-        private List<string> 
+        public List<StateInitialization> StateInitializations;
+        public StateInitialization StateDefaultInitialization;
+        public StateInitialization StateActiveInitialization;
         /// <summary>The group of methods associated with this <see cref="T:State_Namespace.State"/>'s fixed update.</summary>
         private VoidDelegate StateFixedUpdate;
         /// <summary>The group of methods associated with this <see cref="T:State_Namespace.State"/>'s update.</summary>
@@ -82,17 +82,26 @@ namespace State_Namespace
             EndFrame = -1;
             StartTimeAbsolute = -1;
             Duration = -1;
+            StateInitializations = new List<StateInitialization>();
+            StateTerminationSpecifications = new List<StateTerminationSpecification>();
         }
 
         //UPDATE, INITIALIZATION, AND DEFAULT TERMINATION METHODS
-        /// <summary>Adds state initialization methods to <see cref="T:State_Namespace.State"/>.</summary>
-        /// <param name="method">The method to be added.</param>
-        /// <remarks>StateInitialization methods are run at the start of the first frame
-        ///  in which this <see cref="T:State_Namespace.State"/> is active.</remarks>
+        public void AddStateInitializationMethod(VoidDelegate method, string name)
+        {
+            StateInitialization init = new StateInitialization(method, name);
+            StateInitializations.Add(init);
+            if (StateDefaultInitialization == null)
+            {
+                StateDefaultInitialization = init;
+            }
+        }
         public void AddStateInitializationMethod(VoidDelegate method)
         {
-            StateInitialization += method;
+            string name = StateName + "Initialization_" + StateInitializations.Count;
+            AddStateInitializationMethod(method, name);
         }
+
         /// <summary>Adds state fixed update methods to <see cref="T:State_Namespace.State"/>.</summary>
         /// <param name="method">The method to be added.</param>
         /// <remarks>StateFixedUpdate methods are run during the Fixed Update of every
@@ -140,6 +149,10 @@ namespace State_Namespace
             if (Parent.CheckForState(terminationSpec.SuccessorState))
             {
                 StateTerminationSpecifications.Add(terminationSpec);
+                if (StateDefaultTermination == null)
+                {
+                    StateDefaultTermination = terminationSpec.Termination;
+                }
             }
             else
             {
@@ -153,17 +166,8 @@ namespace State_Namespace
         /// <remarks>Termination argument is optional, if not provided will use State's <see cref="T:State_Namespace.StateDefaultTermination"/>.</remarks>
         public void SpecifyStateTermination(BoolDelegate terminationCriterion, State successorState, VoidDelegate termination = null)
         {
-            if (StateDefaultTermination != null)
-            {
-                if (termination == null)
-                {
-                    SpecifyStateTermination(new StateTerminationSpecification(terminationCriterion, StateDefaultTermination, successorState));
-                }
-            }
-            else
-            {
-                Debug.LogError("No default termination is specified for state " + StateName + " so one must be specified when adding a new termination.");
-            }
+            SpecifyStateTermination(new StateTerminationSpecification(terminationCriterion, successorState, termination));
+
         }
         /// <summary>Adds <see cref="T:State_Namespace.StateTerminationSpecification"/> object to <see cref="T:State_Namespace.State"/>.</summary>
         /// <param name="terminationCriteria">Termination criteria (array, list, or other iEnumerable).</param>
@@ -201,6 +205,11 @@ namespace State_Namespace
             }
         }
 
+        public void AddTimer(float time, State successorState, VoidDelegate termination = null)
+        {
+            SpecifyStateTermination(() => Time.time - StartTimeAbsolute >= time, successorState, termination);
+        }
+
         private void AddChild(ControlLevel child)
         {
             Child = child;
@@ -216,7 +225,6 @@ namespace State_Namespace
         {
             if (!Paused)
             {
-                //Initialization only happens during FixedUpdate
                 CheckInitialization();
                 if (StateFixedUpdate != null)
                 {
@@ -236,6 +244,7 @@ namespace State_Namespace
         {
             if (!Paused)
             {
+                CheckInitialization();
                 if (StateUpdate != null)
                 {
                     StateUpdate();
@@ -278,10 +287,18 @@ namespace State_Namespace
                 {
                     Debug.Log("State " + StateName + " initialization on Frame " + Time.frameCount + ".");
                 }
-                if (StateInitialization != null)
+                //If previous state specified this state's initialization, run it
+                if (StateActiveInitialization != null)
                 {
-                    StateInitialization();
+                    StateActiveInitialization.InitializationMethod();
                 }
+                //Otherwise run default initialization
+                else if(StateDefaultInitialization != null)
+                {
+                    StateDefaultInitialization.InitializationMethod();
+                }
+                //reset active initialization (so it doesn't run instead of default next initialization)
+                StateActiveInitialization = null;
                 initialized = true;
                 Terminated = false;
                 Successor = null;
@@ -302,19 +319,29 @@ namespace State_Namespace
             {
                 for (int i = 0; i < StateTerminationSpecifications.Count; i++)
                 {
-                    Terminated = StateTerminationSpecifications[i].TerminationCriterion();
+                    StateTerminationSpecification termSpec = StateTerminationSpecifications[i];
+                    Terminated = termSpec.TerminationCriterion();
                     if (Terminated)
                     {
                         if (DebugActive)
                         {
                             Debug.Log("State " + StateName + " termination on Frame " + Time.frameCount + ".");
                         }
-                        if (StateTerminationSpecifications[i].Termination != null)
+                        if (termSpec.Termination != null)
                         {
-                            StateTerminationSpecifications[i].Termination();
+                            termSpec.Termination();
                         }
-                        Successor = StateTerminationSpecifications[i].SuccessorState;
+                        else if (StateDefaultTermination != null)
+                        {
+                            StateDefaultTermination();
+                        }
+                        Successor = termSpec.SuccessorState;
+                        if (termSpec.SuccessorInitialization != null)
+                        {
+                            Successor.StateActiveInitialization = termSpec.SuccessorInitialization;
+                        }
                         initialized = false;
+                        Parent.SpecifyCurrentState(Successor);
                         Duration = Time.time - StartTimeAbsolute;
                         break;
                     }
@@ -325,7 +352,7 @@ namespace State_Namespace
 
     /// <summary>Represents a Control Level of the experimental hierarchy.</summary>
     /// <remarks>Each ControlLevel contains a number of <see cref="T:State_Namespace.State"/>s, only one of which can run at a time.</remarks>
-    public class ControlLevel
+    public abstract class ControlLevel : MonoBehaviour
     {
         /// <summary>
         /// The name of the control level.
@@ -349,47 +376,50 @@ namespace State_Namespace
         /// States that are available to be added to the control level at runtime.
         /// </summary>
         /// <remarks>Available states enable the runtime specification of different Active States, thus creating different Control Levels.</remarks>
+        [System.NonSerialized]
         public List<State> AvailableStates;
         /// <summary>
         /// Names of the states that are available to be added to the control level at runtime.
         /// </summary>
+        [System.NonSerialized]
         public List<string> AvailableStateNames;
 
         private VoidDelegate controlLevelInitialization;
         private VoidDelegate controlLevelDefaultTermination;
-        private List<ControlLevelTerminationSpecification> controlLevelTerminationSpecifiation;
+        private List<ControlLevelTerminationSpecification> controlLevelTerminationSpecifications;
 
         private bool initialized;
         /// <summary>
         /// Whether this Control Level is terminated.
         /// </summary>
-        public bool Terminated;
-        /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="T:State_Namespace.ControlLevel"/> prints termination and initialization messages to the log.
-        /// </summary>
-        /// <value><c>true</c> if debug active; otherwise, <c>false</c>.</value>
-        public bool DebugActive { get; set; }
+        private bool Terminated;
 
         /// <summary>
         /// The first frame in which the Control Level was active.
         /// </summary>
+        /// 
+        [System.NonSerialized]
         public int StartFrame;
         /// <summary>
         /// The start time of the first frame in which the Control Level was active.
         /// </summary>
+        [System.NonSerialized]
         public float StartTimeAbsolute;
         /// <summary>
         /// Gets or sets a start time used to compute the StartTimeRelative of States.
         /// </summary>
         /// <value>The start time relative.</value>
-        public float StartTimeRelative { get; set; }
+        [System.NonSerialized]
+        public float StartTimeRelative;
         /// <summary>
         /// The last frame in which the Control Level was active.
         /// </summary>
+        [System.NonSerialized]
         public int EndFrame;
         /// <summary>
         /// Time from the start of the first frame to the start of the last frame in which the Control Level was active.
         /// </summary>
+        [System.NonSerialized]
         public float Duration;
 
 
@@ -399,34 +429,88 @@ namespace State_Namespace
         /// </summary>
         public bool isMainLevel;
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="T:State_Namespace.ControlLevel"/> prints termination and initialization messages to the log.
+        /// </summary>
+        /// <value><c>true</c> if debug active; otherwise, <c>false</c>.</value>
+        public bool DebugActive;
         //CONSTRUCTORS
         //no arguments - just make a plain ControlLevel to be populated later
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:State_Namespace.ControlLevel"/> class with empty or default-valued fields.
-        /// </summary>
-        /// <overloads>There are three overloads for this constructor.</overloads>
-        public ControlLevel()
-        {
-            initialized = false;
-            Terminated = false;
-            currentState = null;
-            ActiveStates = new List<State>();
-            ActiveStateNames = new List<string>();
-            AvailableStates = new List<State>();
-            AvailableStateNames = new List<string>();
-            StartFrame = -1;
-            StartTimeAbsolute = -1;
-            EndFrame = -1;
-            Duration = -1;
-        }
+        ///// <summary>
+        ///// Initializes a new instance of the <see cref="T:State_Namespace.ControlLevel"/> class with empty or default-valued fields.
+        ///// </summary>
+        ///// <overloads>There are three overloads for this constructor.</overloads>
+        //public ControlLevel()
+        //{
+        //    initialized = false;
+        //    Terminated = false;
+        //    currentState = null;
+        //    ActiveStates = new List<State>();
+        //    ActiveStateNames = new List<string>();
+        //    AvailableStates = new List<State>();
+        //    AvailableStateNames = new List<string>();
+        //    StartFrame = -1;
+        //    StartTimeAbsolute = -1;
+        //    EndFrame = -1;
+        //    Duration = -1;
+        //}
 
-        //populated ControlLevel - single state
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:State_Namespace.ControlLevel"/> class containing  a single <see cref="T:State_Namespace.State"/>.
-        /// </summary>
-        /// <param name="state"><see cref="T:State_Namespace.State"/></param>
-        public ControlLevel(State state)
+        ////populated ControlLevel - single state
+        ///// <summary>
+        ///// Initializes a new instance of the <see cref="T:State_Namespace.ControlLevel"/> class containing  a single <see cref="T:State_Namespace.State"/>.
+        ///// </summary>
+        ///// <param name="state"><see cref="T:State_Namespace.State"/></param>
+        //public ControlLevel(State state)
+        //{
+        //    initialized = false;
+        //    Terminated = false;
+        //    currentState = null;
+        //    ActiveStates = new List<State>();
+        //    ActiveStateNames = new List<string>();
+        //    AvailableStates = new List<State>();
+        //    AvailableStateNames = new List<string>();
+        //    StartFrame = -1;
+        //    StartTimeAbsolute = -1;
+        //    EndFrame = -1;
+        //    Duration = -1;
+        //    AddActiveStates(state);
+        //}
+
+        ///// <summary>
+        ///// Initializes a new instance of the <see cref="T:State_Namespace.ControlLevel"/> class containing a group of <see cref="T:State_Namespace.State"/>s.
+        ///// </summary>
+        ///// <param name="states">States.</param>
+        //public ControlLevel(IEnumerable<State> states)
+        //{
+        //    initialized = false;
+        //    Terminated = false;
+        //    currentState = null;
+        //    ActiveStates = new List<State>();
+        //    ActiveStateNames = new List<string>();
+        //    AvailableStates = new List<State>();
+        //    AvailableStateNames = new List<string>();
+        //    StartFrame = -1;
+        //    StartTimeAbsolute = -1;
+        //    EndFrame = -1;
+        //    Duration = -1;
+        //    AddActiveStates(states);
+        //}
+
+        public abstract void DefineControlLevel();
+
+        public void InitializeControlLevel(string name = "")
         {
+            if (String.IsNullOrEmpty(ControlLevelName))
+            {
+                if (String.IsNullOrEmpty(name))
+                {
+                    Debug.LogError("A Control Level requires a name.");
+                }
+                else
+                {
+                    ControlLevelName = name;
+                }
+            }
             initialized = false;
             Terminated = false;
             currentState = null;
@@ -438,26 +522,27 @@ namespace State_Namespace
             StartTimeAbsolute = -1;
             EndFrame = -1;
             Duration = -1;
+            controlLevelTerminationSpecifications = new List<ControlLevelTerminationSpecification>();
+        }
+        public void InitializeControlLevel(State state)
+        {
+            InitializeControlLevel();
             AddActiveStates(state);
         }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:State_Namespace.ControlLevel"/> class containing a group of <see cref="T:State_Namespace.State"/>s.
-        /// </summary>
-        /// <param name="states">States.</param>
-        public ControlLevel(IEnumerable<State> states)
+        public void InitializeControlLevel(IEnumerable<State> states)
         {
-            initialized = false;
-            Terminated = false;
-            currentState = null;
-            ActiveStates = new List<State>();
-            ActiveStateNames = new List<string>();
-            AvailableStates = new List<State>();
-            AvailableStateNames = new List<string>();
-            StartFrame = -1;
-            StartTimeAbsolute = -1;
-            EndFrame = -1;
-            Duration = -1;
+            InitializeControlLevel();
+            AddActiveStates(states);
+        }
+
+        public void InitializeControlLevel(string name, State state)
+        {
+            InitializeControlLevel(name);
+            AddActiveStates(state);
+        }
+        public void InitializeControlLevel(string name, IEnumerable<State> states)
+        {
+            InitializeControlLevel(name);
             AddActiveStates(states);
         }
 
@@ -490,11 +575,11 @@ namespace State_Namespace
         {
             if (method == null)
             {
-                controlLevelTerminationSpecifiation.Add(new ControlLevelTerminationSpecification(criterion, controlLevelDefaultTermination));
+                controlLevelTerminationSpecifications.Add(new ControlLevelTerminationSpecification(criterion, controlLevelDefaultTermination));
             }
             else
             {
-                controlLevelTerminationSpecifiation.Add(new ControlLevelTerminationSpecification(criterion, method));
+                controlLevelTerminationSpecifications.Add(new ControlLevelTerminationSpecification(criterion, method));
             }
         }
         /// <summary>
@@ -509,14 +594,14 @@ namespace State_Namespace
             {
                 foreach (BoolDelegate criterion in criteria)
                 {
-                    controlLevelTerminationSpecifiation.Add(new ControlLevelTerminationSpecification(criterion, controlLevelDefaultTermination));
+                    controlLevelTerminationSpecifications.Add(new ControlLevelTerminationSpecification(criterion, controlLevelDefaultTermination));
                 }
             }
             else if(criteria.Count() == methods.Count())
             {
                 for (int i = 0; i < criteria.Count(); i++)
                 {
-                    controlLevelTerminationSpecifiation.Add(new ControlLevelTerminationSpecification(criteria.ElementAt(i), methods.ElementAt(i)));
+                    controlLevelTerminationSpecifications.Add(new ControlLevelTerminationSpecification(criteria.ElementAt(i), methods.ElementAt(i)));
                 }
             }
             else
@@ -537,14 +622,16 @@ namespace State_Namespace
         {
             ActiveStates.Add(state);
             ActiveStateNames.Add(state.StateName);
+            state.Parent = this;
+            state.DebugActive = DebugActive;
             if (!AvailableStates.Contains(state))
             {
                 AvailableStates.Add(state);
                 AvailableStateNames.Add(state.StateName);
-                if (currentState == null)
-                {
-                    currentState = state;
-                }
+            }
+            if (currentState == null)
+            {
+                currentState = state;
             }
         }
 
@@ -1040,6 +1127,7 @@ namespace State_Namespace
                 {
                     Debug.LogError("Attempted to specify more than one main ControlLevel. Only one per experiment!");
                 }
+                this.DefineControlLevel();
             }
         }
         void FixedUpdate()
@@ -1064,7 +1152,7 @@ namespace State_Namespace
             }
         }
 
-        public void ActivateControlLevel(State state)
+        public void SpecifyCurrentState(State state)
         {
             currentState = state;
         }
@@ -1082,7 +1170,7 @@ namespace State_Namespace
         {
             if (currentState != null)
             {
-                currentState.RunStateFixedUpdate();
+                currentState.RunStateUpdate();
             }
         }
 
@@ -1091,10 +1179,6 @@ namespace State_Namespace
             if (currentState != null)
             {
                 currentState.RunStateLateUpdate();
-                if (currentState.Terminated)
-                {
-                    currentState = currentState.Successor;
-                }
             }
             CheckTermination();
         }
@@ -1124,24 +1208,35 @@ namespace State_Namespace
 
         void CheckTermination()
         {
-            if (controlLevelTerminationSpecifiation.Count > 0)
+            if (controlLevelTerminationSpecifications.Count > 0)
             {
-                for (int i = 0; i < controlLevelTerminationSpecifiation.Count; i++)
+                for (int i = 0; i < controlLevelTerminationSpecifications.Count; i++)
                 {
-                    Terminated = controlLevelTerminationSpecifiation[i].TerminationCriterion();
+                    Terminated = controlLevelTerminationSpecifications[i].TerminationCriterion();
                     if (Terminated)
                     {
                         if (DebugActive)
                         {
                             Debug.Log("ControlLevel " + ControlLevelName + " termination on Frame " + Time.frameCount + ".");
                         }
-                        if (controlLevelTerminationSpecifiation[i].Termination != null)
+                        
+                        if (controlLevelTerminationSpecifications[i].Termination != null)
                         {
-                            controlLevelTerminationSpecifiation[i].Termination();
+                            controlLevelTerminationSpecifications[i].Termination();
                         }
                         initialized = false;
                         EndFrame = Time.frameCount;
                         Duration = Time.time - StartTimeAbsolute;
+                        if (isMainLevel)
+                        {
+                            if (Application.isEditor) {
+                                UnityEditor.EditorApplication.isPlaying = false;
+                            }
+                            else
+                            {
+                                Application.Quit();
+                            }
+                        }
                         break;
                     }
                 }
@@ -1156,19 +1251,14 @@ namespace State_Namespace
     public delegate void VoidDelegate();
     public delegate bool BoolDelegate();
 
-    public class StateInitializationSpecification
+    public class StateInitialization
     {
-        public VoidDelegate Initialization;
+        public VoidDelegate InitializationMethod;
         public string Name;
 
-        public StateInitializationSpecification(VoidDelegate initialization)
+        public StateInitialization(VoidDelegate method, string name)
         {
-            Initialization = initialization;
-        }
-
-        public StateInitializationSpecification(VoidDelegate initialization, string name)
-        {
-            Initialization = initialization;
+            InitializationMethod = method;
             Name = name;
         }
     }
@@ -1178,13 +1268,43 @@ namespace State_Namespace
         public BoolDelegate TerminationCriterion;
         public VoidDelegate Termination;
         public State SuccessorState;
+        public StateInitialization SuccessorInitialization;
+        public string Name;
 
-        public StateTerminationSpecification(BoolDelegate terminationCriterion, VoidDelegate termination, State successorState)
+        private void InitTermination(BoolDelegate terminationCriterion, State successorState, StateInitialization init = null, VoidDelegate termination = null)
         {
-            this.TerminationCriterion = terminationCriterion;
-            this.Termination = termination;
-            this.SuccessorState = successorState;
+            TerminationCriterion = terminationCriterion;
+            if (termination != null)
+            {
+                Termination = termination;
+            }
+            SuccessorState = successorState;
+            if (init != null)
+            {
+                successorState.StateActiveInitialization = init;
+            }
         }
+
+        public StateTerminationSpecification(BoolDelegate terminationCriterion, State successorState)
+        {
+            InitTermination(terminationCriterion, successorState);
+        }
+        public StateTerminationSpecification(BoolDelegate terminationCriterion, State successorState, StateInitialization init, VoidDelegate termination = null)
+        {
+            InitTermination(terminationCriterion, successorState, init, termination);
+        }
+        public StateTerminationSpecification(BoolDelegate terminationCriterion, State successorState, VoidDelegate termination, StateInitialization init = null)
+        {
+            InitTermination(terminationCriterion, successorState, init, termination);
+        }
+
+        //public StateTerminationSpecification(BoolDelegate terminationCriterion, VoidDelegate termination, State successorState, )
+        //{
+        //    TerminationCriterion = terminationCriterion;
+        //    Termination = termination;
+        //    SuccessorState = successorState;
+        //    SuccessorInitialization = init;
+        //}
     }
 
     public class ControlLevelTerminationSpecification

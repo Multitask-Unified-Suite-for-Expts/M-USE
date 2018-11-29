@@ -1,28 +1,24 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using State_Namespace;
 
-public class CtrlLvl_Trial_Tutorial1_complete : ControlLevel
+public class ControlLevel_Trial_Tutorial1_extended : ControlLevel
 {
     //scene elements
     public GameObject trialStim;
     public GameObject goCue;
     public GameObject fb;
 
-    private Camera cam;
-
-    public int trialCount;
-
-    private int response;
-
+    //trial variables
+    [System.NonSerialized]
+    public int trialCount = 1;
+    [System.NonSerialized]
+    public int response = -1;
 
     public override void DefineControlLevel()
     {
-
-
         //initalize this Control Level
         InitializeControlLevel("CtrlLvl_Trial");
 
@@ -33,16 +29,16 @@ public class CtrlLvl_Trial_Tutorial1_complete : ControlLevel
         State iti = new State("ITI");
         AddActiveStates(new List<State> { stimOn, collectResponse, feedback, iti });
 
-
+        //Define stimOn State
         stimOn.AddStateInitializationMethod(() =>
         {
             trialStim.SetActive(true);
             response = -1;
-            trialCount++;
-            Debug.Log("starting trial " + trialCount);
+            Debug.Log("Starting trial " + trialCount);
         });
         stimOn.AddTimer(1f, collectResponse);
 
+        //Define collectResponse State
         collectResponse.AddStateInitializationMethod(() => goCue.SetActive(true));
         collectResponse.AddStateUpdateMethod(() =>
         {
@@ -56,6 +52,14 @@ public class CtrlLvl_Trial_Tutorial1_complete : ControlLevel
                     {
                         response = 1;
                     }
+                    else
+                    {
+                        response = 0;
+                    }
+                }
+                else
+                {
+                    response = 2;
                 }
             }
         });
@@ -63,6 +67,7 @@ public class CtrlLvl_Trial_Tutorial1_complete : ControlLevel
         collectResponse.SpecifyStateTermination(() => response > -1, feedback);
         collectResponse.AddStateDefaultTerminationMethod(() => goCue.SetActive(false));
 
+        //Define feedback State
         feedback.AddStateInitializationMethod(() =>
         {
             fb.SetActive(true);
@@ -72,18 +77,24 @@ public class CtrlLvl_Trial_Tutorial1_complete : ControlLevel
                 case -1:
                     col = Color.grey;
                     break;
+                case 0:
+                    col = Color.red;
+                    break;
                 case 1:
                     col = Color.green;
+                    break;
+                case 2:
+                    col = Color.black;
                     break;
             }
             fb.GetComponent<RawImage>().color = col;
         });
-        feedback.AddTimer(1f, iti, ()=>fb.SetActive(false));
+        feedback.AddTimer(1f, iti, () => fb.SetActive(false));
 
+        //Define iti state
         iti.AddStateInitializationMethod(() => trialStim.SetActive(false));
-        iti.AddTimer(2f, stimOn);
+        iti.AddTimer(2f, stimOn, () => trialCount++);
 
         AddControlLevelTerminationSpecification(() => trialCount >= 5);
     }
-
 }

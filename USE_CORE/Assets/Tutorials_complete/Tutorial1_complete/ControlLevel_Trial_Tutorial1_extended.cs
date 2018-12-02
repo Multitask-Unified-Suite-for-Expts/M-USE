@@ -7,7 +7,9 @@ using State_Namespace;
 public class ControlLevel_Trial_Tutorial1_extended : ControlLevel
 {
     //scene elements
-    public GameObject trialStim;
+    //#########CHANGE IN EXTENDED SCRIPT - 2 STIMS########
+    public GameObject stim1;
+    public GameObject stim2;
     public GameObject goCue;
     public GameObject fb;
 
@@ -16,6 +18,16 @@ public class ControlLevel_Trial_Tutorial1_extended : ControlLevel
     public int trialCount = 1;
     [System.NonSerialized]
     public int response = -1;
+
+    //#########CHANGE IN EXTENDED SCRIPT - parameters now controlled by variables instead of hardcoding########
+    float stimOnDur = 1f;
+    float responseMaxDur = 5f;
+    float fbDur = 1f;
+    float itiDur = 2f;
+    int numTrials = 100;
+    float posRange = 3f;
+    float minDistance = 1.5f;
+    float rewardProb = 0.85f;
 
     public override void DefineControlLevel()
     {
@@ -32,11 +44,21 @@ public class ControlLevel_Trial_Tutorial1_extended : ControlLevel
         //Define stimOn State
         stimOn.AddStateInitializationMethod(() =>
         {
-            trialStim.SetActive(true);
+            //#########CHANGE IN EXTENDED SCRIPT - CHANGE STIM LOCATION########
+            //choose x/y position of first stim randomly, move second stim until it is far enough away that it doesn't overlap
+            Vector3 stim1pos = AssignRandomPos();
+            Vector3 stim2pos = AssignRandomPos();
+            while (Vector3.Distance(stim1pos,stim2pos) < minDistance){
+                stim2pos = AssignRandomPos();
+            }
+            stim1.transform.position = stim1pos;
+            stim2.transform.position = stim2pos;
+            stim1.SetActive(true);
+            stim2.SetActive(true);
+
             response = -1;
-            Debug.Log("Starting trial " + trialCount);
         });
-        stimOn.AddTimer(1f, collectResponse);
+        stimOn.AddTimer(itiDur, collectResponse);
 
         //Define collectResponse State
         collectResponse.AddStateInitializationMethod(() => goCue.SetActive(true));
@@ -48,7 +70,8 @@ public class ControlLevel_Trial_Tutorial1_extended : ControlLevel
                 RaycastHit hit;
                 if (Physics.Raycast(ray, out hit))
                 {
-                    if (hit.collider.gameObject == trialStim)
+                    //#########CHANGE IN EXTENDED SCRIPT - tag-based target detection########
+                    if (hit.collider.gameObject.tag == "Target")
                     {
                         response = 1;
                     }
@@ -63,7 +86,7 @@ public class ControlLevel_Trial_Tutorial1_extended : ControlLevel
                 }
             }
         });
-        collectResponse.AddTimer(5f, feedback);
+        collectResponse.AddTimer(responseMaxDur, feedback);
         collectResponse.SpecifyStateTermination(() => response > -1, feedback);
         collectResponse.AddStateDefaultTerminationMethod(() => goCue.SetActive(false));
 
@@ -78,10 +101,23 @@ public class ControlLevel_Trial_Tutorial1_extended : ControlLevel
                     col = Color.grey;
                     break;
                 case 0:
-                    col = Color.red;
+                    if (Random.Range(0f, 1f) > rewardProb)
+                    {
+                        col = Color.green;
+                    }else
+                    {
+                        col = Color.red;
+                    }
                     break;
                 case 1:
-                    col = Color.green;
+                    if (Random.Range(0f, 1f) <= rewardProb)
+                    {
+                        col = Color.green;
+                    }
+                    else
+                    {
+                        col = Color.red;
+                    }
                     break;
                 case 2:
                     col = Color.black;
@@ -89,12 +125,22 @@ public class ControlLevel_Trial_Tutorial1_extended : ControlLevel
             }
             fb.GetComponent<RawImage>().color = col;
         });
-        feedback.AddTimer(1f, iti, () => fb.SetActive(false));
+        feedback.AddTimer(fbDur, iti, () => fb.SetActive(false));
 
         //Define iti state
-        iti.AddStateInitializationMethod(() => trialStim.SetActive(false));
-        iti.AddTimer(2f, stimOn, () => trialCount++);
+        iti.AddStateInitializationMethod(() =>
+        {
+            stim1.SetActive(false);
+            stim2.SetActive(false);
+        });
+        iti.AddTimer(itiDur, stimOn, () => trialCount++);
 
-        AddControlLevelTerminationSpecification(() => trialCount >= 5);
+        AddControlLevelTerminationSpecification(() => trialCount >= numTrials);
+    }
+
+    //#########CHANGE IN EXTENDED SCRIPT - CHOOSE RANDOM STIM LOCATION########
+    Vector3 AssignRandomPos()
+    {
+        return new Vector3(Random.Range(-posRange, posRange), Random.Range(-posRange, posRange), 0);
     }
 }

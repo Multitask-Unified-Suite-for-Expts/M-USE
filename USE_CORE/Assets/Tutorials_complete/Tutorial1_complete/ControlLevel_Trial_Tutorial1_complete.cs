@@ -19,8 +19,6 @@ public class ControlLevel_Trial_Tutorial1_complete : ControlLevel
 
     public override void DefineControlLevel()
     {
-        //initalize this Control Level
-        InitializeControlLevel("CtrlLvl_Trial");
 
         //define States within this Control Level
         State stimOn = new State("StimPres");

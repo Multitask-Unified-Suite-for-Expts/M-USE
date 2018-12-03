@@ -210,9 +210,10 @@ namespace State_Namespace
             SpecifyStateTermination(() => Time.time - StartTimeAbsolute >= time, successorState, termination);
         }
 
-        private void AddChild(ControlLevel child)
+        public void AddChildLevel(ControlLevel child)
         {
             Child = child;
+            Child.InitializeControlLevel();
         }
 
 
@@ -392,7 +393,7 @@ namespace State_Namespace
         /// <summary>
         /// Whether this Control Level is terminated.
         /// </summary>
-        private bool Terminated;
+        public bool Terminated;
 
         /// <summary>
         /// The first frame in which the Control Level was active.
@@ -498,18 +499,11 @@ namespace State_Namespace
 
         public abstract void DefineControlLevel();
 
-        public void InitializeControlLevel(string name = "")
+        public void InitializeControlLevel()
         {
             if (String.IsNullOrEmpty(ControlLevelName))
             {
-                if (String.IsNullOrEmpty(name))
-                {
-                    Debug.LogError("A Control Level requires a name.");
-                }
-                else
-                {
-                    ControlLevelName = name;
-                }
+                Debug.LogError("A Control Level requires a name.");
             }
             initialized = false;
             Terminated = false;
@@ -523,6 +517,7 @@ namespace State_Namespace
             EndFrame = -1;
             Duration = -1;
             controlLevelTerminationSpecifications = new List<ControlLevelTerminationSpecification>();
+            DefineControlLevel();
         }
         public void InitializeControlLevel(State state)
         {
@@ -532,17 +527,6 @@ namespace State_Namespace
         public void InitializeControlLevel(IEnumerable<State> states)
         {
             InitializeControlLevel();
-            AddActiveStates(states);
-        }
-
-        public void InitializeControlLevel(string name, State state)
-        {
-            InitializeControlLevel(name);
-            AddActiveStates(state);
-        }
-        public void InitializeControlLevel(string name, IEnumerable<State> states)
-        {
-            InitializeControlLevel(name);
             AddActiveStates(states);
         }
 
@@ -670,9 +654,9 @@ namespace State_Namespace
         /// <param name="names">A list or array of names of States to be added, which must have been added to AvailableStates.</param>
         public void AddActiveStates(IEnumerable<string> names)
         {
-            foreach (string name in names)
+            foreach (string n in names)
             {
-                AddActiveStates(name);
+                AddActiveStates(n);
             }
         }
         /// <summary>
@@ -1127,7 +1111,7 @@ namespace State_Namespace
                 {
                     Debug.LogError("Attempted to specify more than one main ControlLevel. Only one per experiment!");
                 }
-                this.DefineControlLevel();
+                this.InitializeControlLevel();
             }
         }
         void FixedUpdate()
@@ -1208,7 +1192,7 @@ namespace State_Namespace
 
         void CheckTermination()
         {
-            if (controlLevelTerminationSpecifications.Count > 0)
+            if (controlLevelTerminationSpecifications != null && controlLevelTerminationSpecifications.Count > 0)
             {
                 for (int i = 0; i < controlLevelTerminationSpecifications.Count; i++)
                 {

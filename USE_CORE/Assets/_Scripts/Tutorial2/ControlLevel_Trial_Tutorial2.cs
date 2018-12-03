@@ -15,24 +15,16 @@ public class ControlLevel_Trial_Tutorial2 : ControlLevel
 
     //trial variables
     [System.NonSerialized]
-    public int trialCount = 1;
-    [System.NonSerialized]
-    public int response = -1;
+    public int trialCount, response;
 
     //#########CHANGE IN EXTENDED SCRIPT - parameters now controlled by variables instead of hardcoding########
-    float stimOnDur = 1f;
-    float responseMaxDur = 5f;
-    float fbDur = 1f;
-    float itiDur = 2f;
-    int numTrials = 100;
-    float posRange = 3f;
-    float minDistance = 1.5f;
-    float rewardProb = 0.85f;
+    [System.NonSerialized]
+    public float stimOnDur = 1f, responseMaxDur = 5f, fbDur = 0.5f, itiDur = 0.5f, posRange = 3f, minDistance = 1.5f, rewardProb = 0.85f;
+    [System.NonSerialized]
+    public int numTrials, numCorrect;
 
     public override void DefineControlLevel()
     {
-        //initalize this Control Level
-        InitializeControlLevel("CtrlLvl_Trial");
 
         //define States within this Control Level
         State stimOn = new State("StimPres");
@@ -74,6 +66,7 @@ public class ControlLevel_Trial_Tutorial2 : ControlLevel
                     if (hit.collider.gameObject.tag == "Target")
                     {
                         response = 1;
+                        numCorrect++;
                     }
                     else
                     {
@@ -135,7 +128,7 @@ public class ControlLevel_Trial_Tutorial2 : ControlLevel
         });
         iti.AddTimer(itiDur, stimOn, () => trialCount++);
 
-        AddControlLevelTerminationSpecification(() => trialCount >= numTrials);
+        AddControlLevelTerminationSpecification(() => trialCount > numTrials);
     }
 
     //#########CHANGE IN EXTENDED SCRIPT - CHOOSE RANDOM STIM LOCATION########

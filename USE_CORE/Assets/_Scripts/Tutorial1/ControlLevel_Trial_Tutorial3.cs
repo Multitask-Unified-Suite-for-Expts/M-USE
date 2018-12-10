@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using State_Namespace;
 
-public class ControlLevel_Trial_Tutorial2 : ControlLevel
+public class ControlLevel_Trial_Tutorial3 : ControlLevel
 {
     //scene elements
     //#########CHANGE IN EXTENDED SCRIPT - 2 STIMS########

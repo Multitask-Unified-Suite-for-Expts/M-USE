@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using State_Namespace;
+using USE_Data;
 
-public class ControlLevel_Block_Tutorial2 : ControlLevel
+public class ControlLevel_Block_Tutorial3: ControlLevel
 {
     public GameObject stim1;
     public GameObject stim2;
@@ -12,6 +13,7 @@ public class ControlLevel_Block_Tutorial2 : ControlLevel
     public GameObject fbPanel;
 
     public int numBlocks = 3;
+    public int numTrials = 20;
     public int currentBlock = 1;
 
     public override void DefineControlLevel()
@@ -23,12 +25,12 @@ public class ControlLevel_Block_Tutorial2 : ControlLevel
 
         AddActiveStates(new List<State> { runTrials, blockFb });
 
-        ControlLevel_Trial_Tutorial2 trialLevel = transform.GetComponent<ControlLevel_Trial_Tutorial2>();
+        ControlLevel_Trial_Tutorial3 trialLevel = transform.GetComponent<ControlLevel_Trial_Tutorial3>();
         runTrials.AddChildLevel(trialLevel);
 
         runTrials.AddStateInitializationMethod(() =>
         {
-            trialLevel.numTrials = 3;
+            trialLevel.trialCount = numTrials;
             trialLevel.trialCount = 1;
             trialLevel.numCorrect = 0;
 
@@ -41,8 +43,6 @@ public class ControlLevel_Block_Tutorial2 : ControlLevel
                 stim1.tag = "NotTarget";
                 stim2.tag = "Target";
             }
-            fbText.SetActive(false);
-            fbPanel.SetActive(false);
         });
         runTrials.SpecifyStateTermination(()=> trialLevel.Terminated == true, blockFb);
 
@@ -71,18 +71,16 @@ public class ControlLevel_Block_Tutorial2 : ControlLevel
             }
 
             fbText.GetComponent<Text>().text = fbString;
-
-            //if (acc > 0.7)
-            //{
-            //    fbText.GetComponent<Text>().text = "You chose correctly on " + (acc * 100).ToString("F0") + "% of trials. Nice work! \n\nPress the space bar to start the next block.";
-            //}
-            //else
-            //{
-            //    fbText.GetComponent<Text>().text = "You chose correctly on " + (acc * 100).ToString("F0") + "% of trials. Try to get even more in the next block! \n\nPress the space bar to start the next block.";
-            //}
         });
-        blockFb.SpecifyStateTermination(() => InputBroker.GetKeyDown(KeyCode.Space), runTrials, ()=> currentBlock++);
+        blockFb.SpecifyStateTermination(() => InputBroker.GetKeyDown(KeyCode.Space), runTrials, ()=> EndBlock());
 
         AddControlLevelTerminationSpecification(() => currentBlock > numBlocks);
+    }
+
+    private void EndBlock()
+    {
+        fbText.SetActive(false);
+        fbPanel.SetActive(false);
+        currentBlock++;
     }
 }

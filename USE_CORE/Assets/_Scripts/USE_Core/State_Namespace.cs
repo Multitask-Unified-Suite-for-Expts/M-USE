@@ -154,7 +154,7 @@ namespace State_Namespace
                     StateDefaultTermination = terminationSpec.Termination;
                 }
             }
-            else
+            else if (terminationSpec.SuccessorState != null)
             {
                 Debug.LogError("Attempted to add successor state to state " + StateName + " but this state is not found in control level " + Parent.ControlLevelName);
             }
@@ -336,13 +336,18 @@ namespace State_Namespace
                         {
                             StateDefaultTermination();
                         }
-                        Successor = termSpec.SuccessorState;
-                        if (termSpec.SuccessorInitialization != null)
+
+                        if (termSpec.SuccessorState != null)
                         {
-                            Successor.StateActiveInitialization = termSpec.SuccessorInitialization;
+                            Successor = termSpec.SuccessorState;
+                            if (termSpec.SuccessorInitialization != null)
+                            {
+                                Successor.StateActiveInitialization = termSpec.SuccessorInitialization;
+                                Parent.SpecifyCurrentState(Successor);
+                            }
                         }
+
                         initialized = false;
-                        Parent.SpecifyCurrentState(Successor);
                         Duration = Time.time - StartTimeAbsolute;
                         break;
                     }

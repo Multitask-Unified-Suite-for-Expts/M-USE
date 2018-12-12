@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using State_Namespace;
-using USE_Data;
+using USE_States;
 
-public class ControlLevel_Block_Tutorial3: ControlLevel
+public class ControlLevel_Block_Tutorial3_complete: ControlLevel
 {
     public GameObject stim1;
     public GameObject stim2;
@@ -25,12 +24,12 @@ public class ControlLevel_Block_Tutorial3: ControlLevel
 
         AddActiveStates(new List<State> { runTrials, blockFb });
 
-        ControlLevel_Trial_Tutorial3 trialLevel = transform.GetComponent<ControlLevel_Trial_Tutorial3>();
+        ControlLevel_Trial_Tutorial3_complete trialLevel = transform.GetComponent<ControlLevel_Trial_Tutorial3_complete>();
         runTrials.AddChildLevel(trialLevel);
 
         runTrials.AddStateInitializationMethod(() =>
         {
-            trialLevel.trialCount = numTrials;
+            trialLevel.numTrials = numTrials;
             trialLevel.trialCount = 1;
             trialLevel.numCorrect = 0;
 

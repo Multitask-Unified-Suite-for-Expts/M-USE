@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using State_Namespace;
+using USE_States;
 
 public class ControlLevel_Trial_Tutorial1_extended : ControlLevel
 {

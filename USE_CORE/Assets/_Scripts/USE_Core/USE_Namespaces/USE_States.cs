@@ -1,11 +1,49 @@
+/*
+This software is part of the Unified Suite for Experiments (USE).
+Information on USE is available at
+http://accl.psy.vanderbilt.edu/resources/analysis-tools/unifiedsuiteforexperiments/
+
+Copyright (c) <2018> <Marcus Watson>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+1) The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+2) If this software is used as a component of a project that leads to publication
+(e.g. a paper in a scientific journal or a student thesis), the published work
+will give appropriate attribution (e.g. citation) to the following paper:
+Watson, M.R., Voloh, B., Thomas, C., Hasan, A., Womelsdorf, T. (2018). USE: An
+integrative suite for temporally-precise psychophysical experiments in virtual
+environments for human, nonhuman, and artificially intelligent agents. BioRxiv:
+DOI*****
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace State_Namespace
+namespace USE_States
 {
+    // ############################################################################################################
+    // ############################################################################################################
+    // ############################################################################################################
+
     /// <summary>Represents a single State of a ControlLevel, governing activity on each frame during this state.</summary>
     public class State
     {
@@ -129,7 +167,7 @@ namespace State_Namespace
         /// <summary>Adds default state termination methods to <see cref="T:State_Namespace.State"/>.</summary>
         /// <param name="method">The method to be added.</param>
         /// <remarks>StateTermination methods are run at the end of the last frame in
-        ///  which this <see cref="T:State_Namespace.State"/> is active. The default 
+        ///  which this <see cref="T:State_Namespace.State"/> is active. The default
         /// StateTermination will run if no other StateTermination is specified.</remarks>
         public void AddStateDefaultTerminationMethod(VoidDelegate method)
         {
@@ -146,7 +184,7 @@ namespace State_Namespace
         /// <overloads>There are three overloads for this method.</overloads>
         public void SpecifyStateTermination(StateTerminationSpecification terminationSpec)
         {
-            if (Parent.CheckForState(terminationSpec.SuccessorState))
+            if (Parent.CheckForState(terminationSpec.SuccessorState) || terminationSpec.SuccessorState == null)
             {
                 StateTerminationSpecifications.Add(terminationSpec);
                 if (StateDefaultTermination == null)
@@ -154,7 +192,7 @@ namespace State_Namespace
                     StateDefaultTermination = terminationSpec.Termination;
                 }
             }
-            else if (terminationSpec.SuccessorState != null)
+            else
             {
                 Debug.LogError("Attempted to add successor state to state " + StateName + " but this state is not found in control level " + Parent.ControlLevelName);
             }
@@ -286,7 +324,7 @@ namespace State_Namespace
             {
                 if (DebugActive)
                 {
-                    Debug.Log("State " + StateName + " initialization on Frame " + Time.frameCount + ".");
+                    Debug.Log("Control Level " + Parent.ControlLevelName + ": State " + StateName + " initialization on Frame " + Time.frameCount + ".");
                 }
                 //If previous state specified this state's initialization, run it
                 if (StateActiveInitialization != null)
@@ -324,9 +362,12 @@ namespace State_Namespace
                     Terminated = termSpec.TerminationCriterion();
                     if (Terminated)
                     {
+                        initialized = false;
+                        Duration = Time.time - StartTimeAbsolute;
+
                         if (DebugActive)
                         {
-                            Debug.Log("State " + StateName + " termination on Frame " + Time.frameCount + ".");
+                            Debug.Log("Control Level " + Parent.ControlLevelName + ": State " + StateName + " termination on Frame " + Time.frameCount + ", successor specified as " + termSpec.SuccessorState.StateName + ".");
                         }
                         if (termSpec.Termination != null)
                         {
@@ -340,21 +381,27 @@ namespace State_Namespace
                         if (termSpec.SuccessorState != null)
                         {
                             Successor = termSpec.SuccessorState;
+                            Parent.SpecifyCurrentState(Successor);
                             if (termSpec.SuccessorInitialization != null)
                             {
                                 Successor.StateActiveInitialization = termSpec.SuccessorInitialization;
-                                Parent.SpecifyCurrentState(Successor);
                             }
                         }
-
-                        initialized = false;
-                        Duration = Time.time - StartTimeAbsolute;
+                        else // if successor state is specified as null, the control level will terminate
+                        {
+                            Parent.Terminated = true;
+                            Parent.ControlLevelTermination(null);
+                        }
                         break;
                     }
                 }
             }
         }
     }
+
+    // ############################################################################################################
+    // ############################################################################################################
+    // ############################################################################################################
 
     /// <summary>Represents a Control Level of the experimental hierarchy.</summary>
     /// <remarks>Each ControlLevel contains a number of <see cref="T:State_Namespace.State"/>s, only one of which can run at a time.</remarks>
@@ -377,7 +424,7 @@ namespace State_Namespace
         /// </summary>
         private State currentState;
 
-        //Available states can optionally be added, to allow the easy runtime specification of different states in the Control Level via string names 
+        //Available states can optionally be added, to allow the easy runtime specification of different states in the Control Level via string names
         /// <summary>
         /// States that are available to be added to the control level at runtime.
         /// </summary>
@@ -403,7 +450,7 @@ namespace State_Namespace
         /// <summary>
         /// The first frame in which the Control Level was active.
         /// </summary>
-        /// 
+        ///
         [System.NonSerialized]
         public int StartFrame;
         /// <summary>
@@ -1204,36 +1251,49 @@ namespace State_Namespace
                     Terminated = controlLevelTerminationSpecifications[i].TerminationCriterion();
                     if (Terminated)
                     {
-                        if (DebugActive)
-                        {
-                            Debug.Log("ControlLevel " + ControlLevelName + " termination on Frame " + Time.frameCount + ".");
-                        }
-                        
-                        if (controlLevelTerminationSpecifications[i].Termination != null)
-                        {
-                            controlLevelTerminationSpecifications[i].Termination();
-                        }
-                        initialized = false;
-                        EndFrame = Time.frameCount;
-                        Duration = Time.time - StartTimeAbsolute;
-                        if (isMainLevel)
-                        {
-                            if (Application.isEditor) {
-                                UnityEditor.EditorApplication.isPlaying = false;
-                            }
-                            else
-                            {
-                                Application.Quit();
-                            }
-                        }
+                        ControlLevelTermination(controlLevelTerminationSpecifications[i].Termination);
                         break;
                     }
                 }
             }
         }
 
+        public void ControlLevelTermination(VoidDelegate termination)
+        {
+            if (DebugActive)
+            {
+                Debug.Log("ControlLevel " + ControlLevelName + " termination on Frame " + Time.frameCount + ".");
+            }
+
+            if (termination != null)
+            {
+                termination();
+            }
+            else if (controlLevelDefaultTermination != null)
+            {
+                controlLevelDefaultTermination();
+            }
+            initialized = false;
+            EndFrame = Time.frameCount;
+            Duration = Time.time - StartTimeAbsolute;
+            if (isMainLevel)
+            {
+                if (Application.isEditor)
+                {
+                    UnityEditor.EditorApplication.isPlaying = false;
+                }
+                else
+                {
+                    Application.Quit();
+                }
+            }
+        }
     }
 
+
+// ############################################################################################################
+// ############################################################################################################
+// ############################################################################################################
 
     //There are two delegate types, VoidDelegate returns void and is used for the initialization, fixedUpdate, update, and termination delegates.
     //EpochTerminationCriteria returns bool and controls the switch from update to termination.
@@ -1287,13 +1347,6 @@ namespace State_Namespace
             InitTermination(terminationCriterion, successorState, init, termination);
         }
 
-        //public StateTerminationSpecification(BoolDelegate terminationCriterion, VoidDelegate termination, State successorState, )
-        //{
-        //    TerminationCriterion = terminationCriterion;
-        //    Termination = termination;
-        //    SuccessorState = successorState;
-        //    SuccessorInitialization = init;
-        //}
     }
 
     public class ControlLevelTerminationSpecification

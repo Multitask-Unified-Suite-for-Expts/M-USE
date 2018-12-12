@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using State_Namespace;
+using USE_States;
 using USE_Data;
 
 public class ControlLevel_Block_Tutorial2_complete : ControlLevel

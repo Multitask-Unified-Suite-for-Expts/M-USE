@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using State_Namespace;
+using USE_States;
 
 public class ControlLevel_TextSlides : ControlLevel {
 
@@ -24,15 +24,17 @@ public class ControlLevel_TextSlides : ControlLevel {
             panelObj.SetActive(true);
         });
 
+        //display text
         textSlide.AddStateInitializationMethod(() =>
         {
-            textObj.SetActive(true);
-            textObj.GetComponent<Text>().text = slideText[slideCount] + defaultEndText;
+        textObj.SetActive(true);
+        textObj.GetComponent<Text>().text = slideText[slideCount] + defaultEndText;
             slideCount++;
         });
         textSlide.SpecifyStateTermination(() => InputBroker.GetKeyDown(defaultKey), blankSlide, ()=> textObj.SetActive(false));
 
-        blankSlide.AddTimer(blankDur, textSlide);
+        //blank slide to make slide change more obvious
+        blankSlide.AddTimer(blankDur, textSlide, () => panelObj.SetActive(true));
         blankSlide.SpecifyStateTermination(() => slideCount == slideText.Length, null, () => panelObj.SetActive(false));
 
     }

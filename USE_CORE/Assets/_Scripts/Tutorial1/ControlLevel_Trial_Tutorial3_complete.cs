@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using State_Namespace;
+using USE_States;
 
-public class ControlLevel_Trial_Tutorial3 : ControlLevel
+public class ControlLevel_Trial_Tutorial3_complete : ControlLevel
 {
     //scene elements
     //#########CHANGE IN EXTENDED SCRIPT - 2 STIMS########
@@ -25,9 +25,8 @@ public class ControlLevel_Trial_Tutorial3 : ControlLevel
 
     public override void DefineControlLevel()
     {
-
         //define States within this Control Level
-        State stimOn = new State("StimPres");
+        State stimOn = new State("StimOn");
         State collectResponse = new State("Response");
         State feedback = new State("Feedback");
         State iti = new State("ITI");
@@ -128,7 +127,7 @@ public class ControlLevel_Trial_Tutorial3 : ControlLevel
         });
         iti.AddTimer(itiDur, stimOn, () => trialCount++);
 
-        AddControlLevelTerminationSpecification(() => trialCount > numTrials);
+        AddControlLevelTerminationSpecification(() => trialCount > numTrials, ()=> Debug.Log(trialCount + " " + numTrials));
     }
 
     //#########CHANGE IN EXTENDED SCRIPT - CHOOSE RANDOM STIM LOCATION########

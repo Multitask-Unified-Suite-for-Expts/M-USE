@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using State_Namespace;
+using USE_States;
 
-public class ControlLevel_Main_Tutorial3 : ControlLevel {
+public class ControlLevel_Main_Tutorial3_complete : ControlLevel {
 
     public GameObject textObj;
     public GameObject panelObj;
@@ -19,7 +19,7 @@ public class ControlLevel_Main_Tutorial3 : ControlLevel {
         AddActiveStates(new List<State> { intro, mainTask, goodbye });
 
         ControlLevel_TextSlides slideLevel = transform.GetComponent<ControlLevel_TextSlides>();
-        ControlLevel_Block_Tutorial3 blockLevel = transform.GetComponent<ControlLevel_Block_Tutorial3>();
+        ControlLevel_Block_Tutorial3_complete blockLevel = transform.GetComponent<ControlLevel_Block_Tutorial3_complete>();
 
         slideLevel.slideText = new string[] {"Welcome to our study!\nThank you very much for participating.",
             "In this task you will be shown two objects on each trial. You will have to choose one of them by clicking on it with the mouse.",

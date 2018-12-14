@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using USE_States;
 
-public class ControlLevel_Trial_Tutorial3_complete : ControlLevel
+public class ControlLevel_Trial_Tutorial4_complete : ControlLevel
 {
     //scene elements
     //#########CHANGE IN EXTENDED SCRIPT - 2 STIMS########
@@ -14,14 +14,15 @@ public class ControlLevel_Trial_Tutorial3_complete : ControlLevel
     public GameObject fb;
 
     //trial variables
-    [System.NonSerialized]
-    public int trialCount, response;
+    public int trialCount, response, reward;
 
     //#########CHANGE IN EXTENDED SCRIPT - parameters now controlled by variables instead of hardcoding########
     [System.NonSerialized]
     public float stimOnDur = 1f, responseMaxDur = 5f, fbDur = 0.5f, itiDur = 0.5f, posRange = 3f, minDistance = 1.5f, rewardProb = 0.85f;
     [System.NonSerialized]
     public int numTrials, numCorrect;
+
+    public DataController_Trial_Tutorial4_complete trialData;
 
     public override void DefineControlLevel()
     {
@@ -32,8 +33,10 @@ public class ControlLevel_Trial_Tutorial3_complete : ControlLevel
         State iti = new State("ITI");
         AddActiveStates(new List<State> { stimOn, collectResponse, feedback, iti });
 
+        trialData = new DataController_Trial_Tutorial4_complete();
+
         //Define stimOn State
-        stimOn.AddStateInitializationMethod(() =>
+        stimOn.AddInitializationMethod(() =>
         {
             //#########CHANGE IN EXTENDED SCRIPT - CHANGE STIM LOCATION########
             //choose x/y position of first stim randomly, move second stim until it is far enough away that it doesn't overlap
@@ -52,8 +55,8 @@ public class ControlLevel_Trial_Tutorial3_complete : ControlLevel
         stimOn.AddTimer(itiDur, collectResponse);
 
         //Define collectResponse State
-        collectResponse.AddStateInitializationMethod(() => goCue.SetActive(true));
-        collectResponse.AddStateUpdateMethod(() =>
+        collectResponse.AddInitializationMethod(() => goCue.SetActive(true));
+        collectResponse.AddUpdateMethod(() =>
         {
             if (InputBroker.GetMouseButtonDown(0))
             {
@@ -79,39 +82,45 @@ public class ControlLevel_Trial_Tutorial3_complete : ControlLevel
             }
         });
         collectResponse.AddTimer(responseMaxDur, feedback);
-        collectResponse.SpecifyStateTermination(() => response > -1, feedback);
-        collectResponse.AddStateDefaultTerminationMethod(() => goCue.SetActive(false));
+        collectResponse.SpecifyTermination(() => response > -1, feedback);
+        collectResponse.AddDefaultTerminationMethod(() => goCue.SetActive(false));
 
         //Define feedback State
-        feedback.AddStateInitializationMethod(() =>
+        feedback.AddInitializationMethod(() =>
         {
             fb.SetActive(true);
             Color col = Color.white;
             switch (response)
             {
                 case -1:
+                    reward = -1;
                     col = Color.grey;
                     break;
                 case 0:
                     if (Random.Range(0f, 1f) > rewardProb)
                     {
+                        reward = 1;
                         col = Color.green;
                     }else
                     {
+                        reward = 0;
                         col = Color.red;
                     }
                     break;
                 case 1:
                     if (Random.Range(0f, 1f) <= rewardProb)
                     {
+                        reward = 1;
                         col = Color.green;
                     }
                     else
                     {
+                        reward = 0;
                         col = Color.red;
                     }
                     break;
                 case 2:
+                    reward = -2;
                     col = Color.black;
                     break;
             }
@@ -120,14 +129,14 @@ public class ControlLevel_Trial_Tutorial3_complete : ControlLevel
         feedback.AddTimer(fbDur, iti, () => fb.SetActive(false));
 
         //Define iti state
-        iti.AddStateInitializationMethod(() =>
+        iti.AddInitializationMethod(() =>
         {
             stim1.SetActive(false);
             stim2.SetActive(false);
         });
         iti.AddTimer(itiDur, stimOn, () => trialCount++);
 
-        AddControlLevelTerminationSpecification(() => trialCount > numTrials, ()=> Debug.Log(trialCount + " " + numTrials));
+        this.AddTerminationSpecification(() => trialCount > numTrials, ()=> Debug.Log(trialCount + " " + numTrials));
     }
 
     //#########CHANGE IN EXTENDED SCRIPT - CHOOSE RANDOM STIM LOCATION########

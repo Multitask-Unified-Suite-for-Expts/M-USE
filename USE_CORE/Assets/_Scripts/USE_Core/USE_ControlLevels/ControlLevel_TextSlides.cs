@@ -20,22 +20,22 @@ public class ControlLevel_TextSlides : ControlLevel {
         State blankSlide = new State("BlankSlide");
         AddActiveStates(new List<State> { textSlide, blankSlide });
 
-        AddControlLevelInitializationMethod(() => { 
+        this.AddInitializationMethod(() => { 
             panelObj.SetActive(true);
         });
 
         //display text
-        textSlide.AddStateInitializationMethod(() =>
+        textSlide.AddInitializationMethod(() =>
         {
         textObj.SetActive(true);
         textObj.GetComponent<Text>().text = slideText[slideCount] + defaultEndText;
             slideCount++;
         });
-        textSlide.SpecifyStateTermination(() => InputBroker.GetKeyDown(defaultKey), blankSlide, ()=> textObj.SetActive(false));
+        textSlide.SpecifyTermination(() => InputBroker.GetKeyDown(defaultKey), blankSlide, ()=> textObj.SetActive(false));
 
         //blank slide to make slide change more obvious
         blankSlide.AddTimer(blankDur, textSlide, () => panelObj.SetActive(true));
-        blankSlide.SpecifyStateTermination(() => slideCount == slideText.Length, null, () => panelObj.SetActive(false));
+        blankSlide.SpecifyTermination(() => slideCount == slideText.Length, null, () => panelObj.SetActive(false));
 
     }
 }

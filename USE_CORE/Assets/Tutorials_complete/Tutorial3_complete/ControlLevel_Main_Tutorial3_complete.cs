@@ -27,14 +27,14 @@ public class ControlLevel_Main_Tutorial3_complete : ControlLevel {
             "Try to learn which object gives the most reward.", "Ask the experimenter if you have any questions, otherwise we will begin the experiment."};
 
         intro.AddChildLevel(slideLevel);
-        intro.SpecifyStateTermination(() => slideLevel.Terminated, mainTask);
+        intro.SpecifyTermination(() => slideLevel.Terminated, mainTask);
 
         blockLevel.numBlocks = numBlocks;
         blockLevel.numTrials = trialsPerBlock;
         mainTask.AddChildLevel(blockLevel);
-        mainTask.SpecifyStateTermination(() => blockLevel.Terminated, goodbye);
+        mainTask.SpecifyTermination(() => blockLevel.Terminated, goodbye);
 
-        goodbye.AddStateInitializationMethod(() =>
+        goodbye.AddInitializationMethod(() =>
         {
             textObj.SetActive(true);
             panelObj.SetActive(true);

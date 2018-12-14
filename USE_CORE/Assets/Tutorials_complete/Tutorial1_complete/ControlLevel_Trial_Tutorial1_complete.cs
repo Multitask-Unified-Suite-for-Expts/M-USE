@@ -28,7 +28,7 @@ public class ControlLevel_Trial_Tutorial1_complete : ControlLevel
         AddActiveStates(new List<State> { stimOn, collectResponse, feedback, iti });
 
         //Define stimOn State
-        stimOn.AddStateInitializationMethod(() =>
+        stimOn.AddInitializationMethod(() =>
         {
             trialStim.SetActive(true);
             response = -1;
@@ -37,8 +37,8 @@ public class ControlLevel_Trial_Tutorial1_complete : ControlLevel
         stimOn.AddTimer(1f, collectResponse);
 
         //Define collectResponse State
-        collectResponse.AddStateInitializationMethod(() => goCue.SetActive(true));
-        collectResponse.AddStateUpdateMethod(() =>
+        collectResponse.AddInitializationMethod(() => goCue.SetActive(true));
+        collectResponse.AddUpdateMethod(() =>
         {
             if (InputBroker.GetMouseButtonDown(0))
             {
@@ -62,11 +62,11 @@ public class ControlLevel_Trial_Tutorial1_complete : ControlLevel
             }
         });
         collectResponse.AddTimer(5f, feedback);
-        collectResponse.SpecifyStateTermination(() => response > -1, feedback);
-        collectResponse.AddStateDefaultTerminationMethod(() => goCue.SetActive(false));
+        collectResponse.SpecifyTermination(() => response > -1, feedback);
+        collectResponse.AddDefaultTerminationMethod(() => goCue.SetActive(false));
 
         //Define feedback State
-        feedback.AddStateInitializationMethod(() =>
+        feedback.AddInitializationMethod(() =>
         {
             fb.SetActive(true);
             Color col = Color.white;
@@ -90,9 +90,9 @@ public class ControlLevel_Trial_Tutorial1_complete : ControlLevel
         feedback.AddTimer(1f, iti, () => fb.SetActive(false));
 
         //Define iti state
-        iti.AddStateInitializationMethod(() => trialStim.SetActive(false));
+        iti.AddInitializationMethod(() => trialStim.SetActive(false));
         iti.AddTimer(2f, stimOn, () => trialCount++);
 
-        AddControlLevelTerminationSpecification(() => trialCount >= 5);
+        this.AddTerminationSpecification(() => trialCount >= 5);
     }
 }

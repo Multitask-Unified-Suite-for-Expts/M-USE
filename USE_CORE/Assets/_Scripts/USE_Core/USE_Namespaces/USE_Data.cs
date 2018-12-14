@@ -4,6 +4,7 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using USE_States;
 
 namespace USE_Data
 {
@@ -42,28 +43,35 @@ namespace USE_Data
 
 
 
-    public class DataController
+    public abstract class DataController
     {
 
-        private bool storeData;
-
-        private string folderPath;
+        public bool storeData { get; set; }
+        public string folderPath { get; set; }
         public string fileName { get; set; }
-        private int capacity;
+        public int capacity { get; set; }
         private List<IDatum> data;
         private List<string> dataBuffer;
         private int frameChecker = 0;
 
+        private bool getDurationNextFrame;
 
-        public DataController(bool store, int cap, string path)
+        DataController(int cap = 100)
         {
             capacity = cap;
-            dataBuffer = new List<string>();
-            dataBuffer.Capacity = cap;
-            folderPath = path;
-            data = new List<IDatum>();
-            storeData = store;
+            DefineDataController();
         }
+
+        void Update() 
+        {
+             if (getDurationNextFrame)
+            {
+
+            }
+        }
+
+        public abstract void DefineDataController();
+
         //more overloads may need to be added here in order to define new data types
         public void AddDatum(string name, Func<int> variable)
         {
@@ -189,6 +197,18 @@ namespace USE_Data
                     dataStream.Write("\n" + String.Join("\n", dataBuffer.ToArray()));
                 }
                 dataBuffer.Clear();
+            }
+        }
+
+        public void AddStateTimingData(ControlLevel level)
+        {
+            foreach (State s in level.ActiveStates)
+            {
+                this.AddDatum(s.StateName + "_StartFrame", () => s.StartFrame);
+                this.AddDatum(s.StateName + "_EndFrame", () => s.EndFrame);
+                this.AddDatum(s.StateName + "_StartTimeAbsolute", () => s.StartTimeAbsolute);
+                this.AddDatum(s.StateName + "_StartTimeRelative", () => s.StartTimeRelative);
+                this.AddDatum(s.StateName + "_Duration", () => s.Duration);
             }
         }
 

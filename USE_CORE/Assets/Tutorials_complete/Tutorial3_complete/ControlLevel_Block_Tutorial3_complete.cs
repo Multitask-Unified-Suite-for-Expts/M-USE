@@ -27,7 +27,7 @@ public class ControlLevel_Block_Tutorial3_complete: ControlLevel
         ControlLevel_Trial_Tutorial3_complete trialLevel = transform.GetComponent<ControlLevel_Trial_Tutorial3_complete>();
         runTrials.AddChildLevel(trialLevel);
 
-        runTrials.AddStateInitializationMethod(() =>
+        runTrials.AddInitializationMethod(() =>
         {
             trialLevel.numTrials = numTrials;
             trialLevel.trialCount = 1;
@@ -43,9 +43,9 @@ public class ControlLevel_Block_Tutorial3_complete: ControlLevel
                 stim2.tag = "Target";
             }
         });
-        runTrials.SpecifyStateTermination(()=> trialLevel.Terminated == true, blockFb);
+        runTrials.SpecifyTermination(()=> trialLevel.Terminated == true, blockFb);
 
-        blockFb.AddStateInitializationMethod(() =>
+        blockFb.AddInitializationMethod(() =>
         {
             fbText.SetActive(true);
             fbPanel.SetActive(true);
@@ -71,9 +71,9 @@ public class ControlLevel_Block_Tutorial3_complete: ControlLevel
 
             fbText.GetComponent<Text>().text = fbString;
         });
-        blockFb.SpecifyStateTermination(() => InputBroker.GetKeyDown(KeyCode.Space), runTrials, ()=> EndBlock());
+        blockFb.SpecifyTermination(() => InputBroker.GetKeyDown(KeyCode.Space), runTrials, ()=> EndBlock());
 
-        AddControlLevelTerminationSpecification(() => currentBlock > numBlocks);
+        this.AddTerminationSpecification(() => currentBlock > numBlocks);
     }
 
     private void EndBlock()

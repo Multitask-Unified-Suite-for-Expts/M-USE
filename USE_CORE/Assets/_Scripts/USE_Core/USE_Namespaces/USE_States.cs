@@ -91,20 +91,21 @@ namespace USE_States
         public bool DebugActive { get; set; }
 
         //TIMEKEEPING
-        /// <summary>The Time.FrameCount of the first frame in which this <see cref="T:State_Namespace.State"/> was active.</summary>
-        public int StartFrame;
-        /// <summary>The Time.FrameCount of the last frame in which this <see cref="T:State_Namespace.State"/> was active.</summary>
-        public int EndFrame;
-        /// <summary>The Time.Time of the first frame in which this <see cref="T:State_Namespace.State"/> was active.</summary>
-        public float StartTimeAbsolute;
-        /// <summary>
-        /// The Time.Time of the first frame in which this <see cref="T:State_Namespace.State"/> was active, minus the StartTimeRelative of the parent Control Level.
-        /// </summary>
-        public float StartTimeRelative;
-        /// <summary>The Time.Time of the last frame minus the Time.Time of the first
-        ///  frame in which this <see cref="T:State_Namespace.State"/> was active.</summary>
-        /// <remarks>This does not include the duration of the last frame.</remarks>
-        public float Duration;
+        public StateTimingInfo TimingInfo;
+        ///// <summary>The Time.FrameCount of the first frame in which this <see cref="T:State_Namespace.State"/> was active.</summary>
+        //public int StartFrame;
+        ///// <summary>The Time.FrameCount of the last frame in which this <see cref="T:State_Namespace.State"/> was active.</summary>
+        //public int EndFrame;
+        ///// <summary>The Time.Time of the first frame in which this <see cref="T:State_Namespace.State"/> was active.</summary>
+        //public float StartTimeAbsolute;
+        ///// <summary>
+        ///// The Time.Time of the first frame in which this <see cref="T:State_Namespace.State"/> was active, minus the StartTimeRelative of the parent Control Level.
+        ///// </summary>
+        //public float StartTimeRelative;
+        ///// <summary>The Time.Time of the last frame minus the Time.Time of the first
+        /////  frame in which this <see cref="T:State_Namespace.State"/> was active.</summary>
+        ///// <remarks>This does not include the duration of the last frame.</remarks>
+        //public float Duration;
 
         /// <summary>Initializes a new instance of the <see cref="T:State_Namespace.State"/> class.</summary>
         /// <param name="name">The name of the State.</param>
@@ -116,16 +117,23 @@ namespace USE_States
             initialized = false;
             Terminated = false;
             Paused = false;
-            StartFrame = -1;
-            EndFrame = -1;
-            StartTimeAbsolute = -1;
-            Duration = -1;
+            TimingInfo.StartFrame = -1;
+            TimingInfo.EndFrame = -1;
+            TimingInfo.StartTimeAbsolute = -1;
+            TimingInfo.StartTimeRelative = -1;
+            TimingInfo.EndTimeAbsolute = -1;
+            TimingInfo.EndTimeRelative = -1;
+            TimingInfo.Duration = -1;
+            //StartFrame = -1;
+            //EndFrame = -1;
+            //StartTimeAbsolute = -1;
+            //Duration = -1;
             StateInitializations = new List<StateInitialization>();
             StateTerminationSpecifications = new List<StateTerminationSpecification>();
         }
 
         //UPDATE, INITIALIZATION, AND DEFAULT TERMINATION METHODS
-        public void AddStateInitializationMethod(VoidDelegate method, string name)
+        public void AddInitializationMethod(VoidDelegate method, string name)
         {
             StateInitialization init = new StateInitialization(method, name);
             StateInitializations.Add(init);
@@ -134,17 +142,28 @@ namespace USE_States
                 StateDefaultInitialization = init;
             }
         }
-        public void AddStateInitializationMethod(VoidDelegate method)
+        public void AddInitializationMethod(VoidDelegate method)
         {
             string name = StateName + "Initialization_" + StateInitializations.Count;
-            AddStateInitializationMethod(method, name);
+            AddInitializationMethod(method, name);
+        }
+        public void AddDefaultInitializationMethod(VoidDelegate method, string name)
+        {
+            StateInitialization init = new StateInitialization(method, name);
+            StateInitializations.Add(init);
+            StateDefaultInitialization = init;
+        }
+        public void AddDefaultInitializationMethod(VoidDelegate method)
+        {
+            string name = StateName + "Initialization_" + StateInitializations.Count + "_(Default)";
+            AddDefaultInitializationMethod(method, name);
         }
 
         /// <summary>Adds state fixed update methods to <see cref="T:State_Namespace.State"/>.</summary>
         /// <param name="method">The method to be added.</param>
         /// <remarks>StateFixedUpdate methods are run during the Fixed Update of every
         ///  frame in which this <see cref="T:State_Namespace.State"/> is active.</remarks>
-        public void AddStateFixedUpdateMethod(VoidDelegate method)
+        public void AddFixedUpdateMethod(VoidDelegate method)
         {
             StateFixedUpdate += method;
         }
@@ -152,7 +171,7 @@ namespace USE_States
         /// <param name="method">The method to be added.</param>
         /// <remarks>StateUpdate methods are run during the Update of every frame in
         ///  which this <see cref="T:State_Namespace.State"/> is active.</remarks>
-        public void AddStateUpdateMethod(VoidDelegate method)
+        public void AddUpdateMethod(VoidDelegate method)
         {
             StateUpdate += method;
         }
@@ -160,7 +179,7 @@ namespace USE_States
         /// <param name="method">The method to be added.</param>
         /// <remarks>StateLateUpdate methods are run during the Late Update of every
         ///  frame in which this <see cref="T:State_Namespace.State"/> is active.</remarks>
-        public void AddStateLateUpdateMethod(VoidDelegate method)
+        public void AddLateUpdateMethod(VoidDelegate method)
         {
             StateLateUpdate += method;
         }
@@ -169,83 +188,53 @@ namespace USE_States
         /// <remarks>StateTermination methods are run at the end of the last frame in
         ///  which this <see cref="T:State_Namespace.State"/> is active. The default
         /// StateTermination will run if no other StateTermination is specified.</remarks>
-        public void AddStateDefaultTerminationMethod(VoidDelegate method)
+        public void AddDefaultTerminationMethod(VoidDelegate method)
         {
             StateDefaultTermination += method;
         }
 
 
-        //Add termination specification methods
-        /// <summary>
-        /// Adds <see cref="T:State_Namespace.StateTerminationSpecification"/> object to <see cref="T:State_Namespace.State"/>.
-        /// </summary>
-        /// <param name="terminationSpec"><see cref="T:State_Namespace.StateTerminationSpecification"/>.</param>
-        /// <remarks>This overload requires a single TerminationSpecification object.</remarks>
-        /// <overloads>There are three overloads for this method.</overloads>
-        public void SpecifyStateTermination(StateTerminationSpecification terminationSpec)
+        public void SpecifyTermination(BoolDelegate terminationCriterion, State successorState)
         {
-            if (Parent.CheckForState(terminationSpec.SuccessorState) || terminationSpec.SuccessorState == null)
+            string tmp = null;
+            SpecifyTermination(terminationCriterion, successorState, tmp);
+        }
+        public void SpecifyTermination(BoolDelegate terminationCriterion, State successorState, string successorInitName, VoidDelegate termination = null)
+        {
+            if (Parent.CheckForState(successorState) || successorState == null)
             {
-                StateTerminationSpecifications.Add(terminationSpec);
-                if (StateDefaultTermination == null)
+                StateInitialization init = null;
+                if (successorInitName != null)
                 {
-                    StateDefaultTermination = terminationSpec.Termination;
+                    foreach (StateInitialization iinit in StateInitializations)
+                    {
+                        if (iinit.Name == successorInitName)
+                        {
+                            init = iinit;
+                        }
+                    }
+                }
+
+                StateTerminationSpecifications.Add(new StateTerminationSpecification(terminationCriterion, successorState, init, termination));
+                if (StateDefaultTermination == null && termination != null)
+                {
+                    StateDefaultTermination = termination;
                 }
             }
             else
             {
-                Debug.LogError("Attempted to add successor state to state " + StateName + " but this state is not found in control level " + Parent.ControlLevelName);
+                    Debug.LogError(Parent.ControlLevelName + ": Attempted to add successor state to state " + StateName + " but this state is not found in control level " + Parent.ControlLevelName);
             }
-        }
-        /// <summary>Adds <see cref="T:State_Namespace.StateTerminationSpecification"/> object to <see cref="T:State_Namespace.State"/>.</summary>
-        /// <param name="terminationCriterion">Termination criterion.</param>
-        /// <param name="successorState">Successor state.</param>
-        /// <param name="termination">Termination method.</param>
-        /// <remarks>Termination argument is optional, if not provided will use State's <see cref="T:State_Namespace.StateDefaultTermination"/>.</remarks>
-        public void SpecifyStateTermination(BoolDelegate terminationCriterion, State successorState, VoidDelegate termination = null)
-        {
-            SpecifyStateTermination(new StateTerminationSpecification(terminationCriterion, successorState, termination));
 
         }
-        /// <summary>Adds <see cref="T:State_Namespace.StateTerminationSpecification"/> object to <see cref="T:State_Namespace.State"/>.</summary>
-        /// <param name="terminationCriteria">Termination criteria (array, list, or other iEnumerable).</param>
-        /// <param name="successorStates">Successor states (array, list, or other iEnumerable).</param>
-        /// <param name="terminations">Terminations (array, list, or other iEnumerable).</param>
-        /// <remarks>Terminations argument is optional, if not provided will use State's <see cref="T:State_Namespace.StateDefaultTermination"/>. All lists/arrays must be the same length.</remarks>
-        public void SpecifyStateTermination(IEnumerable<BoolDelegate> terminationCriteria, IEnumerable<State> successorStates, IEnumerable<VoidDelegate> terminations = null)
+        public void SpecifyTermination(BoolDelegate terminationCriterion, State successorState, VoidDelegate termination, string successorInitName = null)
         {
-            if (terminationCriteria.Count() == successorStates.Count())
-            {
-                if (terminations == null)
-                {
-                    for (int i = 0; i < terminationCriteria.Count(); i++)
-                    {
-                        SpecifyStateTermination(terminationCriteria.ElementAt(i), successorStates.ElementAt(i));
-                    }
-                }
-                else if (terminationCriteria.Count() == terminations.Count())
-                {
-                    for (int i = 0; i < terminationCriteria.Count(); i++)
-                    {
-                        SpecifyStateTermination(terminationCriteria.ElementAt(i), successorStates.ElementAt(i), terminations.ElementAt(i));
-                    }
-                }
-                else
-                {
-                    Debug.LogError("Attempted to add lists of termination criteria, terminations and successor states to state "
-                                   + StateName + ", but these lists are not the same length.");
-                }
-            }
-            else
-            {
-                Debug.LogError("Attempted to add lists of termination criteria and successor states to state "
-                               + StateName + ", but these lists are not the same length.");
-            }
+            SpecifyTermination(terminationCriterion, successorState, successorInitName, termination);
         }
 
         public void AddTimer(float time, State successorState, VoidDelegate termination = null)
         {
-            SpecifyStateTermination(() => Time.time - StartTimeAbsolute >= time, successorState, termination);
+            SpecifyTermination(() => Time.time - TimingInfo.StartTimeAbsolute >= time, successorState, termination);
         }
 
         public void AddChildLevel(ControlLevel child)
@@ -326,6 +315,27 @@ namespace USE_States
                 {
                     Debug.Log("Control Level " + Parent.ControlLevelName + ": State " + StateName + " initialization on Frame " + Time.frameCount + ".");
                 }
+                //reset default State characteristics
+                StateActiveInitialization = null;
+                initialized = true;
+                Terminated = false;
+                Successor = null;
+
+                //setup State timing
+                TimingInfo.StartFrame = Time.frameCount;
+                TimingInfo.StartTimeAbsolute = Time.time;
+                TimingInfo.StartTimeRelative = TimingInfo.StartTimeAbsolute - Parent.StartTimeRelative;
+                TimingInfo.EndFrame = -1;
+                TimingInfo.EndTimeAbsolute = -1;
+                TimingInfo.EndTimeRelative = -1;
+                TimingInfo.Duration = -1;
+                if (Parent.previousState != null)
+                {
+                    // the duration of a State should include its last frame, so needs to be measured at the start of the following State
+                    Parent.previousState.TimingInfo.EndTimeAbsolute = Time.time;
+                    Parent.previousState.TimingInfo.EndTimeRelative = Time.time - Parent.StartTimeRelative;
+                    Parent.previousState.TimingInfo.Duration = Time.time - Parent.previousState.TimingInfo.StartTimeAbsolute;
+                }
                 //If previous state specified this state's initialization, run it
                 if (StateActiveInitialization != null)
                 {
@@ -336,16 +346,6 @@ namespace USE_States
                 {
                     StateDefaultInitialization.InitializationMethod();
                 }
-                //reset active initialization (so it doesn't run instead of default next initialization)
-                StateActiveInitialization = null;
-                initialized = true;
-                Terminated = false;
-                Successor = null;
-                StartFrame = Time.frameCount;
-                StartTimeAbsolute = Time.time;
-                StartTimeRelative = StartTimeAbsolute - Parent.StartTimeRelative;
-                EndFrame = -1;
-                Duration = -1;
             }
         }
 
@@ -354,30 +354,39 @@ namespace USE_States
         /// </summary>
         void CheckTermination()
         {
+            //if no State termination has been specified, State will run forever!
             if (StateTerminationSpecifications.Count > 0)
             {
+                //go through each termination in order - the first one where TerminationCriterion returns true will be triggered and end State
                 for (int i = 0; i < StateTerminationSpecifications.Count; i++)
                 {
                     StateTerminationSpecification termSpec = StateTerminationSpecifications[i];
                     Terminated = termSpec.TerminationCriterion();
-                    if (Terminated)
+                    if (Terminated) //this TerminationCriterion returned true
                     {
+
                         initialized = false;
-                        Duration = Time.time - StartTimeAbsolute;
+
+                        //Time management
+                        Parent.previousState = this;
+                        TimingInfo.EndFrame = Time.frameCount;
 
                         if (DebugActive)
                         {
                             Debug.Log("Control Level " + Parent.ControlLevelName + ": State " + StateName + " termination on Frame " + Time.frameCount + ", successor specified as " + termSpec.SuccessorState.StateName + ".");
                         }
+                        //if TerminationSpecification includes a termination method, run it
                         if (termSpec.Termination != null)
                         {
                             termSpec.Termination();
                         }
+                        //if not, and there is a default State termination method, run it
                         else if (StateDefaultTermination != null)
                         {
                             StateDefaultTermination();
                         }
 
+                        //setup Successor State
                         if (termSpec.SuccessorState != null)
                         {
                             Successor = termSpec.SuccessorState;
@@ -414,7 +423,7 @@ namespace USE_States
         /// <summary>
         /// States that can run in this control level.
         /// </summary>
-        private List<State> ActiveStates;
+        public List<State> ActiveStates;
         /// <summary>
         /// Names of the states that can run in this control level.
         /// </summary>
@@ -423,6 +432,7 @@ namespace USE_States
         /// The control level's current state.
         /// </summary>
         private State currentState;
+        public State previousState;
 
         //Available states can optionally be added, to allow the easy runtime specification of different states in the Control Level via string names
         /// <summary>
@@ -487,67 +497,6 @@ namespace USE_States
         /// </summary>
         /// <value><c>true</c> if debug active; otherwise, <c>false</c>.</value>
         public bool DebugActive;
-        //CONSTRUCTORS
-        //no arguments - just make a plain ControlLevel to be populated later
-        ///// <summary>
-        ///// Initializes a new instance of the <see cref="T:State_Namespace.ControlLevel"/> class with empty or default-valued fields.
-        ///// </summary>
-        ///// <overloads>There are three overloads for this constructor.</overloads>
-        //public ControlLevel()
-        //{
-        //    initialized = false;
-        //    Terminated = false;
-        //    currentState = null;
-        //    ActiveStates = new List<State>();
-        //    ActiveStateNames = new List<string>();
-        //    AvailableStates = new List<State>();
-        //    AvailableStateNames = new List<string>();
-        //    StartFrame = -1;
-        //    StartTimeAbsolute = -1;
-        //    EndFrame = -1;
-        //    Duration = -1;
-        //}
-
-        ////populated ControlLevel - single state
-        ///// <summary>
-        ///// Initializes a new instance of the <see cref="T:State_Namespace.ControlLevel"/> class containing  a single <see cref="T:State_Namespace.State"/>.
-        ///// </summary>
-        ///// <param name="state"><see cref="T:State_Namespace.State"/></param>
-        //public ControlLevel(State state)
-        //{
-        //    initialized = false;
-        //    Terminated = false;
-        //    currentState = null;
-        //    ActiveStates = new List<State>();
-        //    ActiveStateNames = new List<string>();
-        //    AvailableStates = new List<State>();
-        //    AvailableStateNames = new List<string>();
-        //    StartFrame = -1;
-        //    StartTimeAbsolute = -1;
-        //    EndFrame = -1;
-        //    Duration = -1;
-        //    AddActiveStates(state);
-        //}
-
-        ///// <summary>
-        ///// Initializes a new instance of the <see cref="T:State_Namespace.ControlLevel"/> class containing a group of <see cref="T:State_Namespace.State"/>s.
-        ///// </summary>
-        ///// <param name="states">States.</param>
-        //public ControlLevel(IEnumerable<State> states)
-        //{
-        //    initialized = false;
-        //    Terminated = false;
-        //    currentState = null;
-        //    ActiveStates = new List<State>();
-        //    ActiveStateNames = new List<string>();
-        //    AvailableStates = new List<State>();
-        //    AvailableStateNames = new List<string>();
-        //    StartFrame = -1;
-        //    StartTimeAbsolute = -1;
-        //    EndFrame = -1;
-        //    Duration = -1;
-        //    AddActiveStates(states);
-        //}
 
         public abstract void DefineControlLevel();
 
@@ -588,7 +537,7 @@ namespace USE_States
         /// Adds the control level initialization method.
         /// </summary>
         /// <param name="method">Method.</param>
-        public void AddControlLevelInitializationMethod(VoidDelegate method)
+        public void AddInitializationMethod(VoidDelegate method)
         {
             controlLevelInitialization += method;
         }
@@ -596,7 +545,7 @@ namespace USE_States
         /// Adds the control level default termination method.
         /// </summary>
         /// <param name="method">Method.</param>
-        public void AddControlLevelDefaultTerminationMethod(VoidDelegate method)
+        public void AddDefaultTerminationMethod(VoidDelegate method)
         {
             controlLevelDefaultTermination += method;
         }
@@ -607,7 +556,7 @@ namespace USE_States
         /// <param name="method">Method.</param>
         /// <remarks>Parameters consist of a single criterion for termination, and an optional termination method. If a termination method is not specified, the DefaultTerminationMethod will run after the TerminationCriterion returns true.</remarks>
         /// <overloads>There are two overloads for this method.</overloads>
-        public void AddControlLevelTerminationSpecification(BoolDelegate criterion, VoidDelegate method = null)
+        public void AddTerminationSpecification(BoolDelegate criterion, VoidDelegate method = null)
         {
             if (method == null)
             {
@@ -616,34 +565,6 @@ namespace USE_States
             else
             {
                 controlLevelTerminationSpecifications.Add(new ControlLevelTerminationSpecification(criterion, method));
-            }
-        }
-        /// <summary>
-        /// Adds a group of control level termination specifications.
-        /// </summary>
-        /// <param name="criteria">Criteria.</param>
-        /// <param name="methods">Methods.</param>
-        /// <remarks>Parameters consist of a list or array of criteria for termination, and an optional list or array of termination methods. If termination methods are not specified, the DefaultTerminationMethod will run after any of the TerminationCriteria return true. If they are specified, the list or array must be the same length as the list or array of TeriminationCriteria.</remarks>
-        public void AddControlLevelTerminationSpecification(IEnumerable<BoolDelegate> criteria, IEnumerable<VoidDelegate> methods = null)
-        {
-            if (methods == null)
-            {
-                foreach (BoolDelegate criterion in criteria)
-                {
-                    controlLevelTerminationSpecifications.Add(new ControlLevelTerminationSpecification(criterion, controlLevelDefaultTermination));
-                }
-            }
-            else if(criteria.Count() == methods.Count())
-            {
-                for (int i = 0; i < criteria.Count(); i++)
-                {
-                    controlLevelTerminationSpecifications.Add(new ControlLevelTerminationSpecification(criteria.ElementAt(i), methods.ElementAt(i)));
-                }
-            }
-            else
-            {
-                Debug.LogError("Attempted to add lists of termination criteria and termination methods to control level "
-                               + ControlLevelName + ", but these lists are not the same length.");
             }
         }
 
@@ -753,7 +674,7 @@ namespace USE_States
             {
                 if (CheckForState(s))
                 {
-                    s.AddStateInitializationMethod(method);
+                    s.AddInitializationMethod(method);
                 }
                 else
                 {
@@ -806,7 +727,7 @@ namespace USE_States
             {
                 if (CheckForState(s))
                 {
-                    s.AddStateFixedUpdateMethod(method);
+                    s.AddFixedUpdateMethod(method);
                 }
                 else
                 {
@@ -827,7 +748,7 @@ namespace USE_States
         {
             if (ActiveStateNames.Contains(stateName))
             {
-                AddStateInitializationMethod(method, ActiveStates[ActiveStateNames.IndexOf(stateName)]);
+                AddStateFixedUpdateMethod(method, ActiveStates[ActiveStateNames.IndexOf(stateName)]);
             }
             else
             {
@@ -859,7 +780,7 @@ namespace USE_States
             {
                 if (CheckForState(s))
                 {
-                    s.AddStateUpdateMethod(method);
+                    s.AddUpdateMethod(method);
                 }
                 else
                 {
@@ -880,7 +801,7 @@ namespace USE_States
         {
             if (ActiveStateNames.Contains(stateName))
             {
-                AddStateInitializationMethod(method, ActiveStates[ActiveStateNames.IndexOf(stateName)]);
+                AddStateUpdateMethod(method, ActiveStates[ActiveStateNames.IndexOf(stateName)]);
             }
             else
             {
@@ -912,7 +833,7 @@ namespace USE_States
             {
                 if (CheckForState(s))
                 {
-                    s.AddStateLateUpdateMethod(method);
+                    s.AddLateUpdateMethod(method);
                 }
                 else
                 {
@@ -933,7 +854,7 @@ namespace USE_States
         {
             if (ActiveStateNames.Contains(stateName))
             {
-                AddStateInitializationMethod(method, ActiveStates[ActiveStateNames.IndexOf(stateName)]);
+                AddStateLateUpdateMethod(method, ActiveStates[ActiveStateNames.IndexOf(stateName)]);
             }
             else
             {
@@ -950,112 +871,7 @@ namespace USE_States
             }
         }
 
-        public void AddStateDefaultTerminationMethod(VoidDelegate method, State state = null)
-        {
-            List<State> stateList = new List<State>();
-            if (state == null)
-            {
-                stateList = AvailableStates;
-            }
-            else
-            {
-                stateList.Add(state);
-            }
-            foreach (State s in stateList)
-            {
-                if (CheckForState(s))
-                {
-                    s.AddStateDefaultTerminationMethod(method);
-                }
-                else
-                {
-                    Debug.LogError("Attempted to add DefaultTermination method to state named " + state.StateName
-                                   + " via ControlLevel " + ControlLevelName + ", but this ControlLevel does" +
-                                   " not contain this state. Perhaps you need to add it using the ControlLevel.AddActiveStates method.");
-                }
-            }
-        }
-        public void AddStateDefaultTerminationMethod(VoidDelegate method, IEnumerable<State> states)
-        {
-            foreach (State s in states)
-            {
-                AddStateDefaultTerminationMethod(method, s);
-            }
-        }
-        public void AddStateDefaultTerminationMethod(VoidDelegate method, string stateName)
-        {
-            if (ActiveStateNames.Contains(stateName))
-            {
-                AddStateInitializationMethod(method, ActiveStates[ActiveStateNames.IndexOf(stateName)]);
-            }
-            else
-            {
-                Debug.LogError("Attempted to add DefaultTermination method to state named " + stateName +
-                               "via ControlLevel " + ControlLevelName + ", but this ControlLevel" +
-                               "does not contain a state with this name. Perhaps you need to add it uing the ControlLevel.AddActiveStates method.");
-            }
-        }
-        public void AddStateDefaultTerminationMethod(VoidDelegate method, IEnumerable<string> stateNames)
-        {
-            foreach (string s in stateNames)
-            {
-                AddStateDefaultTerminationMethod(method, s);
-            }
-        }
-
-        public void SpecifyStateTermination(StateTerminationSpecification terminationSpecification, State state = null)
-        {
-            List<State> stateList = new List<State>();
-            if (state == null)
-            {
-                stateList = AvailableStates;
-            }
-            else
-            {
-                stateList.Add(state);
-            }
-            foreach (State s in stateList)
-            {
-                if (CheckForState(s))
-                {
-                    s.SpecifyStateTermination(terminationSpecification);
-                }
-                else
-                {
-                    Debug.LogError("Attempted to specify StateTerminationSpecification for state named " + state.StateName
-                                   + " via ControlLevel " + ControlLevelName + ", but this ControlLevel does" +
-                                   " not contain this state. Perhaps you need to add it using the ControlLevel.AddActiveStates method.");
-                }
-            }
-        }
-        public void SpecifyStateTermination(StateTerminationSpecification terminationSpecification, IEnumerable<State> states)
-        {
-            foreach (State s in states)
-            {
-                SpecifyStateTermination(terminationSpecification, s);
-            }
-        }
-        public void SpecifyStateTermination(StateTerminationSpecification terminationSpecification, string stateName)
-        {
-            if (ActiveStateNames.Contains(stateName))
-            {
-                SpecifyStateTermination(terminationSpecification, ActiveStates[ActiveStateNames.IndexOf(stateName)]);
-            }
-            else
-            {
-                Debug.LogError("Attempted to specify StateTerminationSpecification method to state named " + stateName +
-                               "via ControlLevel " + ControlLevelName + ", but this ControlLevel" +
-                               "does not contain a state with this name. Perhaps you need to add it uing the ControlLevel.AddActiveStates method.");
-            }
-        }
-        public void SpecifyStateTermination(StateTerminationSpecification terminationSpecification, IEnumerable<string> stateNames)
-        {
-            foreach (string s in stateNames)
-            {
-                SpecifyStateTermination(terminationSpecification, s);
-            }
-        }
-
+        // adding termination specifications to multiple states is currently not properly supported, too many possible overloads
         public void SpecifyStateTermination(BoolDelegate terminationCriterion, State successorState, State state = null)
         {
             List<State> stateList = new List<State>();
@@ -1071,7 +887,7 @@ namespace USE_States
             {
                 if (CheckForState(s))
                 {
-                    s.SpecifyStateTermination(terminationCriterion, successorState);
+                    s.SpecifyTermination(terminationCriterion, successorState);
                 }
                 else
                 {
@@ -1097,7 +913,7 @@ namespace USE_States
             {
                 if (CheckForState(s))
                 {
-                    s.SpecifyStateTermination(terminationCriterion, successorState, termination);
+                    s.SpecifyTermination(terminationCriterion, successorState, termination);
                 }
                 else
                 {
@@ -1107,36 +923,7 @@ namespace USE_States
                 }
             }
         }
-        //public void SpecifyStateTermination(IEnumerable<BoolDelegate> terminationCriteria, IEnumerable<State> successorStates, IEnumerable<VoidDelegate> terminations = null)
-        //{
-        //    if (terminationCriteria.Count() == successorStates.Count())
-        //    {
-        //        if (terminations == null)
-        //        {
-        //            for (int i = 0; i < terminationCriteria.Count(); i++)
-        //            {
-        //                SpecifyStateTermination(terminationCriteria.ElementAt(i), successorStates.ElementAt(i));
-        //            }
-        //        }
-        //        else if (terminationCriteria.Count() == terminations.Count())
-        //        {
-        //            for (int i = 0; i < terminationCriteria.Count(); i++)
-        //            {
-        //                SpecifyStateTermination(terminationCriteria.ElementAt(i), successorStates.ElementAt(i), terminations.ElementAt(i));
-        //            }
-        //        }
-        //        else
-        //        {
-        //            Debug.LogError("Attempted to add lists of termination criteria, terminations and successor states to state "
-        //                           + StateName + ", but these lists are not the same length.");
-        //        }
-        //    }
-        //    else
-        //    {
-        //        Debug.LogError("Attempted to add lists of termination criteria and successor states to state "
-        //                       + StateName + ", but these lists are not the same length.");
-        //    }
-        //}
+
 
         public bool CheckForState(State state)
         {
@@ -1288,6 +1075,11 @@ namespace USE_States
                 }
             }
         }
+
+        public void ResetRelativeStartTime()
+        {
+            StartTimeRelative = Time.time;
+        }
     }
 
 
@@ -1296,7 +1088,7 @@ namespace USE_States
 // ############################################################################################################
 
     //There are two delegate types, VoidDelegate returns void and is used for the initialization, fixedUpdate, update, and termination delegates.
-    //EpochTerminationCriteria returns bool and controls the switch from update to termination.
+    //BoolDelegate returns bool and is used for termination criteria.
     public delegate void VoidDelegate();
     public delegate bool BoolDelegate();
 
@@ -1320,7 +1112,21 @@ namespace USE_States
         public StateInitialization SuccessorInitialization;
         public string Name;
 
-        private void InitTermination(BoolDelegate terminationCriterion, State successorState, StateInitialization init = null, VoidDelegate termination = null)
+
+        public StateTerminationSpecification(BoolDelegate terminationCriterion, State successorState)
+        {
+            DefineTermination(terminationCriterion, successorState);
+        }
+        public StateTerminationSpecification(BoolDelegate terminationCriterion, State successorState, StateInitialization successorInit, VoidDelegate termination = null)
+        {
+            DefineTermination(terminationCriterion, successorState, successorInit, termination);
+        }
+        public StateTerminationSpecification(BoolDelegate terminationCriterion, State successorState, VoidDelegate termination, StateInitialization successorInit = null)
+        {
+            DefineTermination(terminationCriterion, successorState, successorInit, termination);
+        }
+
+        private void DefineTermination(BoolDelegate terminationCriterion, State successorState, StateInitialization successorInit = null, VoidDelegate termination = null)
         {
             TerminationCriterion = terminationCriterion;
             if (termination != null)
@@ -1328,25 +1134,11 @@ namespace USE_States
                 Termination = termination;
             }
             SuccessorState = successorState;
-            if (init != null)
+            if (successorInit != null)
             {
-                successorState.StateActiveInitialization = init;
+                successorState.StateActiveInitialization = successorInit;
             }
         }
-
-        public StateTerminationSpecification(BoolDelegate terminationCriterion, State successorState)
-        {
-            InitTermination(terminationCriterion, successorState);
-        }
-        public StateTerminationSpecification(BoolDelegate terminationCriterion, State successorState, StateInitialization init, VoidDelegate termination = null)
-        {
-            InitTermination(terminationCriterion, successorState, init, termination);
-        }
-        public StateTerminationSpecification(BoolDelegate terminationCriterion, State successorState, VoidDelegate termination, StateInitialization init = null)
-        {
-            InitTermination(terminationCriterion, successorState, init, termination);
-        }
-
     }
 
     public class ControlLevelTerminationSpecification
@@ -1361,4 +1153,14 @@ namespace USE_States
     }
 
 
+    public class StateTimingInfo
+    { 
+        public int StartFrame { get; set; }
+        public int EndFrame { get; set; }
+        public float StartTimeAbsolute { get; set; }
+        public float StartTimeRelative { get; set; }
+        public float EndTimeAbsolute { get; set; }
+        public float EndTimeRelative { get; set; }
+        public float Duration { get; set; }
+    }
 }

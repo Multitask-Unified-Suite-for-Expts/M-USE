@@ -1,9 +1,40 @@
+/*
+This software is part of the Unified Suite for Experiments (USE).
+Information on USE is available at
+http://accl.psy.vanderbilt.edu/resources/analysis-tools/unifiedsuiteforexperiments/
+
+Copyright (c) <2018> <Marcus Watson>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+1) The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+2) If this software is used as a component of a project that leads to publication
+(e.g. a paper in a scientific journal or a student thesis), the published work
+will give appropriate attribution (e.g. citation) to the following paper:
+Watson, M.R., Voloh, B., Thomas, C., Hasan, A., Womelsdorf, T. (2018). USE: An
+integrative suite for temporally-precise psychophysical experiments in virtual
+environments for human, nonhuman, and artificially intelligent agents. BioRxiv:
+DOI*****
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 using UnityEngine;
 using System;
 using System.IO;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using USE_States;
 
 namespace USE_Data
@@ -41,7 +72,17 @@ namespace USE_Data
         }
     }
 
+    public class HeldDatum<T>
+    {
+        public Func<T> Variable;
+        public int Pos;
 
+        public HeldDatum(Func<T> variable, int pos)
+        {
+            Variable = variable;
+            Pos = pos;
+        }
+    }
 
     public abstract class DataController
     {
@@ -54,9 +95,10 @@ namespace USE_Data
         private List<string> dataBuffer;
         private int frameChecker = 0;
 
-        private bool getDurationNextFrame;
+        private bool includesStateTimingInfo;
+        private bool getStateTimingInfoNextFrame;
 
-        DataController(int cap = 100)
+        public DataController(int cap = 100)
         {
             capacity = cap;
             DefineDataController();
@@ -200,15 +242,54 @@ namespace USE_Data
             }
         }
 
-        public void AddStateTimingData(ControlLevel level)
+        public void AddStateTimingData(ControlLevel level, IEnumerable<string> timingTypes = null)
         {
+            includesStateTimingInfo = true;
             foreach (State s in level.ActiveStates)
             {
-                this.AddDatum(s.StateName + "_StartFrame", () => s.StartFrame);
-                this.AddDatum(s.StateName + "_EndFrame", () => s.EndFrame);
-                this.AddDatum(s.StateName + "_StartTimeAbsolute", () => s.StartTimeAbsolute);
-                this.AddDatum(s.StateName + "_StartTimeRelative", () => s.StartTimeRelative);
-                this.AddDatum(s.StateName + "_Duration", () => s.Duration);
+                if (timingTypes == null)//add all state timing information to data
+                {
+                    this.AddDatum(s.StateName + "_StartFrame", () => s.TimingInfo.StartFrame);
+                    this.AddDatum(s.StateName + "_EndFrame", () => s.TimingInfo.EndFrame);
+                    this.AddDatum(s.StateName + "_StartTimeAbsolute", () => s.TimingInfo.StartTimeAbsolute);
+                    this.AddDatum(s.StateName + "_StartTimeRelative", () => s.TimingInfo.StartTimeRelative);
+                    this.AddDatum(s.StateName + "_EndTimeAbsolute", () => s.TimingInfo.EndTimeAbsolute);
+                    this.AddDatum(s.StateName + "_EndTimeRelative", () => s.TimingInfo.EndTimeRelative);
+                    this.AddDatum(s.StateName + "_Duration", () => s.TimingInfo.Duration);
+                }
+                else //specify which timing information to add
+                {
+                    foreach(string t in timingTypes)
+                    {
+                        switch (t)
+                        {
+                            case "StartFrame":
+                                this.AddDatum(s.StateName + "_StartFrame", () => s.TimingInfo.StartFrame);
+                                break;
+                            case "EndFrame":
+                                this.AddDatum(s.StateName + "_EndFrame", () => s.TimingInfo.EndFrame);
+                                break;
+                            case "StartTimeAbsolute":
+                                this.AddDatum(s.StateName + "_StartTimeAbsolute", () => s.TimingInfo.StartTimeAbsolute);
+                                break;
+                            case "StartTimeRelative":
+                                this.AddDatum(s.StateName + "_StartTimeRelative", () => s.TimingInfo.StartTimeRelative);
+                                break;
+                            case "EndTimeAbsolute":
+                                this.AddDatum(s.StateName + "_EndTimeAbsolute", () => s.TimingInfo.EndTimeAbsolute);
+                                break;
+                            case "EndTimeRelative":
+                                this.AddDatum(s.StateName + "_EndTimeRelative", () => s.TimingInfo.EndTimeRelative);
+                                break;
+                            case "Duration":
+                                this.AddDatum(s.StateName + "_Duration", () => s.TimingInfo.Duration);
+                                break;
+                            default:
+                                Debug.Log("Attempted to add state timing information called \"" + t + "\", but this is not a known timing information type.");
+                                break;
+                        }
+                    }
+                }
             }
         }
 

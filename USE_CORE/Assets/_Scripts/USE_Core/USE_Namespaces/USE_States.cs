@@ -117,6 +117,7 @@ namespace USE_States
             initialized = false;
             Terminated = false;
             Paused = false;
+            TimingInfo = new StateTimingInfo();
             TimingInfo.StartFrame = -1;
             TimingInfo.EndFrame = -1;
             TimingInfo.StartTimeAbsolute = -1;
@@ -124,10 +125,6 @@ namespace USE_States
             TimingInfo.EndTimeAbsolute = -1;
             TimingInfo.EndTimeRelative = -1;
             TimingInfo.Duration = -1;
-            //StartFrame = -1;
-            //EndFrame = -1;
-            //StartTimeAbsolute = -1;
-            //Duration = -1;
             StateInitializations = new List<StateInitialization>();
             StateTerminationSpecifications = new List<StateTerminationSpecification>();
         }

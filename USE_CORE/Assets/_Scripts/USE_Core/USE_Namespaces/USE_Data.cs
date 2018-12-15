@@ -34,6 +34,7 @@ SOFTWARE.
 using UnityEngine;
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using USE_States;
 
@@ -72,45 +73,79 @@ namespace USE_Data
         }
     }
 
-    public class HeldDatum<T>
+    public interface IHeldDatum
     {
-        public Func<T> Variable;
-        public int Pos;
+        int Pos { get; }
+        string ValueAsString { get; }
+    }
+
+    public class HeldDatum<T> : IHeldDatum
+    {
+        public int Pos { get; }
+        delegate string stringFunction();
+        stringFunction stringFunc;
 
         public HeldDatum(Func<T> variable, int pos)
         {
-            Variable = variable;
             Pos = pos;
+            stringFunc = () => variable().ToString();
+        }
+
+        public string ValueAsString
+        {
+            get
+            {
+                return stringFunc();
+            }
         }
     }
 
     public abstract class DataController
     {
-
+        //basic settings
         public bool storeData { get; set; }
         public string folderPath { get; set; }
         public string fileName { get; set; }
         public int capacity { get; set; }
+
+        //list of data to store
         private List<IDatum> data;
+        //string to write to file
         private List<string> dataBuffer;
+        //records frame when data is appended (to prevent double-writing)
         private int frameChecker = 0;
 
-        private bool includesStateTimingInfo;
-        private bool getStateTimingInfoNextFrame;
+        //handles case where data needs to be updated next frame (e.g. State duration)
+        private bool updateDataNextFrame;
+        private bool writeDataNextFrame;
+        private List<IHeldDatum> dataToUpdateNextFrame;
+        private List<string> heldDataLine;
 
         public DataController(int cap = 100)
         {
             capacity = cap;
             DefineDataController();
+            dataToUpdateNextFrame = new List<IHeldDatum>();
         }
 
-        void Update() 
+        void Update()
         {
-             if (getDurationNextFrame)
+            if (updateDataNextFrame)
             {
-
+                for (int i = 0; i < dataToUpdateNextFrame.Count; i++)
+                {
+                    heldDataLine[i] = dataToUpdateNextFrame[i].ValueAsString;
+                }
+                dataBuffer.Add(String.Join("\t", heldDataLine));
+                updateDataNextFrame = false;
+                if (dataBuffer.Count == capacity | writeDataNextFrame)
+                {
+                    WriteData();
+                }
+                writeDataNextFrame = false;
             }
         }
+
 
         public abstract void DefineDataController();
 
@@ -200,10 +235,18 @@ namespace USE_Data
                 {
                     currentVals[i] = data[i].ValueAsString;
                 }
-                dataBuffer.Add(String.Join("\t", currentVals));
-                if (dataBuffer.Count == capacity)
+                if (!updateDataNextFrame)
                 {
-                    WriteData();
+                    dataBuffer.Add(String.Join("\t", currentVals));
+                    if (dataBuffer.Count == capacity)
+                    {
+                        WriteData();
+                    }
+                }
+                else if (dataToUpdateNextFrame.Count > 0)
+                {
+                    heldDataLine = currentVals.ToList();
+                    updateDataNextFrame = true;
                 }
                 frameChecker = Time.frameCount;
             }
@@ -234,17 +277,23 @@ namespace USE_Data
         {
             if (storeData && dataBuffer.Count > 0)
             {
-                using (StreamWriter dataStream = File.AppendText(folderPath + Path.DirectorySeparatorChar + fileName))
+                if (!updateDataNextFrame)
                 {
-                    dataStream.Write("\n" + String.Join("\n", dataBuffer.ToArray()));
+                    using (StreamWriter dataStream = File.AppendText(folderPath + Path.DirectorySeparatorChar + fileName))
+                    {
+                        dataStream.Write("\n" + String.Join("\n", dataBuffer.ToArray()));
+                    }
+                    dataBuffer.Clear();
                 }
-                dataBuffer.Clear();
+                else
+                {
+                    writeDataNextFrame = true;
+                }
             }
         }
 
         public void AddStateTimingData(ControlLevel level, IEnumerable<string> timingTypes = null)
         {
-            includesStateTimingInfo = true;
             foreach (State s in level.ActiveStates)
             {
                 if (timingTypes == null)//add all state timing information to data
@@ -254,8 +303,11 @@ namespace USE_Data
                     this.AddDatum(s.StateName + "_StartTimeAbsolute", () => s.TimingInfo.StartTimeAbsolute);
                     this.AddDatum(s.StateName + "_StartTimeRelative", () => s.TimingInfo.StartTimeRelative);
                     this.AddDatum(s.StateName + "_EndTimeAbsolute", () => s.TimingInfo.EndTimeAbsolute);
+                    this.dataToUpdateNextFrame.Add(new HeldDatum<float>(() => s.TimingInfo.EndTimeAbsolute, data.Count - 1));
                     this.AddDatum(s.StateName + "_EndTimeRelative", () => s.TimingInfo.EndTimeRelative);
+                    this.dataToUpdateNextFrame.Add(new HeldDatum<float>(() => s.TimingInfo.EndTimeRelative, data.Count - 1));
                     this.AddDatum(s.StateName + "_Duration", () => s.TimingInfo.Duration);
+                    this.dataToUpdateNextFrame.Add(new HeldDatum<float>(() => s.TimingInfo.Duration, data.Count - 1));
                 }
                 else //specify which timing information to add
                 {
@@ -277,12 +329,15 @@ namespace USE_Data
                                 break;
                             case "EndTimeAbsolute":
                                 this.AddDatum(s.StateName + "_EndTimeAbsolute", () => s.TimingInfo.EndTimeAbsolute);
+                                this.dataToUpdateNextFrame.Add(new HeldDatum<float>(() => s.TimingInfo.EndTimeAbsolute, data.Count - 1));
                                 break;
                             case "EndTimeRelative":
                                 this.AddDatum(s.StateName + "_EndTimeRelative", () => s.TimingInfo.EndTimeRelative);
+                                this.dataToUpdateNextFrame.Add(new HeldDatum<float>(() => s.TimingInfo.EndTimeRelative, data.Count - 1));
                                 break;
                             case "Duration":
                                 this.AddDatum(s.StateName + "_Duration", () => s.TimingInfo.Duration);
+                                this.dataToUpdateNextFrame.Add(new HeldDatum<float>(() => s.TimingInfo.Duration, data.Count - 1));
                                 break;
                             default:
                                 Debug.Log("Attempted to add state timing information called \"" + t + "\", but this is not a known timing information type.");

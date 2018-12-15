@@ -6,14 +6,11 @@ using USE_States;
 
 public class ControlLevel_Block_Tutorial4_complete: ControlLevel
 {
-    public GameObject stim1;
-    public GameObject stim2;
-    public GameObject fbText;
-    public GameObject fbPanel;
+    public GameObject stim1, stim2, fbText, fbPanel;
 
-    public int numBlocks = 3;
-    public int numTrials = 20;
-    public int currentBlock = 1;
+    public int numBlocks = 3, numTrials = 20, currentBlock = 1;
+
+    public int firstTrial, lastTrial;
 
     public override void DefineControlLevel()
     {
@@ -30,8 +27,9 @@ public class ControlLevel_Block_Tutorial4_complete: ControlLevel
         runTrials.AddInitializationMethod(() =>
         {
             trialLevel.numTrials = numTrials;
-            trialLevel.trialCount = 1;
+            trialLevel.trialInBlock = 1;
             trialLevel.numCorrect = 0;
+            firstTrial = trialLevel.trialInExperiment;
 
             if (Random.Range(0, 2) == 1)
             {
@@ -49,7 +47,8 @@ public class ControlLevel_Block_Tutorial4_complete: ControlLevel
         {
             fbText.SetActive(true);
             fbPanel.SetActive(true);
-            float acc = (float)trialLevel.numCorrect / (float)(trialLevel.trialCount - 1);
+            lastTrial = trialLevel.trialInExperiment;
+            float acc = (float)trialLevel.numCorrect / (float)(trialLevel.trialInBlock - 1);
 
             string fbString = "You chose correctly on " + (acc * 100).ToString("F0") + "% of trials.\n";
             if (acc >= 0.7)

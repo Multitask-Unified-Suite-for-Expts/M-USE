@@ -14,13 +14,13 @@ public class ControlLevel_Trial_Tutorial4_complete : ControlLevel
     public GameObject fb;
 
     //trial variables
-    public int trialCount, response, reward;
+    public int trialInBlock, trialInExperiment = 1, response, reward;
 
     //#########CHANGE IN EXTENDED SCRIPT - parameters now controlled by variables instead of hardcoding########
     [System.NonSerialized]
     public float stimOnDur = 1f, responseMaxDur = 5f, fbDur = 0.5f, itiDur = 0.5f, posRange = 3f, minDistance = 1.5f, rewardProb = 0.85f;
     [System.NonSerialized]
-    public int numTrials, numCorrect;
+    public int numTrials, numCorrect, numReward;
 
     public DataController_Trial_Tutorial4_complete trialData;
 
@@ -32,8 +32,6 @@ public class ControlLevel_Trial_Tutorial4_complete : ControlLevel
         State feedback = new State("Feedback");
         State iti = new State("ITI");
         AddActiveStates(new List<State> { stimOn, collectResponse, feedback, iti });
-
-        trialData = new DataController_Trial_Tutorial4_complete();
 
         //Define stimOn State
         stimOn.AddInitializationMethod(() =>
@@ -100,6 +98,7 @@ public class ControlLevel_Trial_Tutorial4_complete : ControlLevel
                     if (Random.Range(0f, 1f) > rewardProb)
                     {
                         reward = 1;
+                        numReward++;
                         col = Color.green;
                     }else
                     {
@@ -110,6 +109,7 @@ public class ControlLevel_Trial_Tutorial4_complete : ControlLevel
                 case 1:
                     if (Random.Range(0f, 1f) <= rewardProb)
                     {
+                        numReward++;
                         reward = 1;
                         col = Color.green;
                     }
@@ -134,9 +134,9 @@ public class ControlLevel_Trial_Tutorial4_complete : ControlLevel
             stim1.SetActive(false);
             stim2.SetActive(false);
         });
-        iti.AddTimer(itiDur, stimOn, () => trialCount++);
+        iti.AddTimer(itiDur, stimOn, () => { trialInBlock++; trialInExperiment++; });
 
-        this.AddTerminationSpecification(() => trialCount > numTrials, ()=> Debug.Log(trialCount + " " + numTrials));
+        this.AddTerminationSpecification(() => trialInBlock > numTrials, ()=> Debug.Log(trialInBlock + " " + numTrials));
     }
 
     //#########CHANGE IN EXTENDED SCRIPT - CHOOSE RANDOM STIM LOCATION########

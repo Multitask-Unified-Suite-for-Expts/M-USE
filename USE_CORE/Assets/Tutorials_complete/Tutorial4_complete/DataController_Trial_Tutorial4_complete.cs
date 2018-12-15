@@ -9,16 +9,14 @@ public class DataController_Trial_Tutorial4_complete : DataController {
 
     public override void DefineDataController()
     {
-        blockLevel = GameObject.Find("ControlLevels").GetComponent<ControlLevel_Block_Tutorial4_complete>();
-        trialLevel = GameObject.Find("ControlLevels").GetComponent<ControlLevel_Trial_Tutorial4_complete>();
-
         AddDatum("Block", () => blockLevel.currentBlock);
-        AddDatum("TrialInBlock", () => trialLevel.trialCount);
+        AddDatum("TrialInBlock", () => trialLevel.trialInBlock);
+        AddDatum("TrialInExperiment", () => trialLevel.trialInExperiment);
         AddDatum("Response", ()=> trialLevel.response);
         AddDatum("Reward", () => trialLevel.reward);
         AddStimData("Stim1", trialLevel.stim1);
         AddStimData("Stim2", trialLevel.stim2);
-        AddStateTimingData(trialLevel);
+        AddStateTimingData(trialLevel, new string[] { "Duration", "StartFrame", "EndFrame" });
     }
 
     void AddStimData(string name, GameObject stim)

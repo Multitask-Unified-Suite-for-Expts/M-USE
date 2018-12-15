@@ -495,6 +495,8 @@ namespace USE_States
         /// <value><c>true</c> if debug active; otherwise, <c>false</c>.</value>
         public bool DebugActive;
 
+        public bool Paused { get; set; }
+
         public abstract void DefineControlLevel();
 
         public void InitializeControlLevel()
@@ -514,6 +516,7 @@ namespace USE_States
             StartTimeAbsolute = -1;
             EndFrame = -1;
             Duration = -1;
+            Paused = false;
             controlLevelTerminationSpecifications = new List<ControlLevelTerminationSpecification>();
             DefineControlLevel();
         }
@@ -952,21 +955,21 @@ namespace USE_States
         }
         void FixedUpdate()
         {
-            if (isMainLevel)
+            if (isMainLevel & !Paused)
             {
                 RunControlLevelFixedUpdate();
             }
         }
         void Update()
         {
-            if (isMainLevel)
+            if (isMainLevel & !Paused)
             {
                 RunControlLevelUpdate();
             }
         }
         void LateUpdate()
         {
-            if (isMainLevel)
+            if (isMainLevel & !Paused)
             {
                 RunControlLevelLateUpdate();
             }

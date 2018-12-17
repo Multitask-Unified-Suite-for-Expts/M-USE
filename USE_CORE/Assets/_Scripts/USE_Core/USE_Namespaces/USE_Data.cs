@@ -100,7 +100,7 @@ namespace USE_Data
         }
     }
 
-    public abstract class DataController
+    public abstract class DataController: MonoBehaviour
     {
         //basic settings
         public bool storeData { get; set; }
@@ -121,22 +121,36 @@ namespace USE_Data
         private List<IHeldDatum> dataToUpdateNextFrame;
         private List<string> heldDataLine;
 
+        private bool Defined = false;
+
         public DataController(int cap = 100)
         {
             capacity = cap;
-            DefineDataController();
+            data = new List<IDatum>();
+            dataBuffer = new List<string>();
             dataToUpdateNextFrame = new List<IHeldDatum>();
+            heldDataLine = new List<string>();
         }
 
-        void Update()
+        //public virtual void Update()
+        void Start()
         {
+            if (!Defined)
+            {
+                Defined = true;
+                DefineDataController();
+                if(storeData)
+                {
+                    CreateFile();
+                }
+            }
             if (updateDataNextFrame)
             {
                 for (int i = 0; i < dataToUpdateNextFrame.Count; i++)
                 {
                     heldDataLine[i] = dataToUpdateNextFrame[i].ValueAsString;
                 }
-                dataBuffer.Add(String.Join("\t", heldDataLine));
+                dataBuffer.Add(String.Join("\t", heldDataLine.ToArray()));
                 updateDataNextFrame = false;
                 if (dataBuffer.Count == capacity | writeDataNextFrame)
                 {

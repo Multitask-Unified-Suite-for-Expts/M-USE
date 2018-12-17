@@ -134,9 +134,9 @@ public class ControlLevel_Trial_Tutorial4_complete : ControlLevel
             stim1.SetActive(false);
             stim2.SetActive(false);
         });
-        iti.AddTimer(itiDur, stimOn, () => { trialInBlock++; trialInExperiment++; });
+        iti.AddTimer(itiDur, stimOn, () => { trialInBlock++; trialInExperiment++; trialData.AppendData(); trialData.WriteData(); });
 
-        this.AddTerminationSpecification(() => trialInBlock > numTrials, ()=> Debug.Log(trialInBlock + " " + numTrials));
+        this.AddTerminationSpecification(() => trialInBlock > numTrials);
     }
 
     //#########CHANGE IN EXTENDED SCRIPT - CHOOSE RANDOM STIM LOCATION########

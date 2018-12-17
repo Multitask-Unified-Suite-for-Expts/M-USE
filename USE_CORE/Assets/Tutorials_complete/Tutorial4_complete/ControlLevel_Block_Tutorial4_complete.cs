@@ -12,6 +12,8 @@ public class ControlLevel_Block_Tutorial4_complete: ControlLevel
 
     public int firstTrial, lastTrial;
 
+    public DataController_Block_Tutorial4_complete blockData;
+
     public override void DefineControlLevel()
     {
 
@@ -79,6 +81,8 @@ public class ControlLevel_Block_Tutorial4_complete: ControlLevel
     {
         fbText.SetActive(false);
         fbPanel.SetActive(false);
+        blockData.AppendData();
+        blockData.WriteData();
         currentBlock++;
     }
 }

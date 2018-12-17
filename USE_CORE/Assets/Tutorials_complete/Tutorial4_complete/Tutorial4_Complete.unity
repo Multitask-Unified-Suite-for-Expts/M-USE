@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657856, g: 0.49641234, b: 0.57481724, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657868, g: 0.49641263, b: 0.57481706, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -213,6 +213,62 @@ Prefab:
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2cd2e7f9d16874255952a6e7a3713e03, type: 2}
   m_IsPrefabAsset: 0
+--- !u!1 &270767975
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 270767978}
+  - component: {fileID: 270767977}
+  - component: {fileID: 270767976}
+  m_Layer: 0
+  m_Name: DataControllers
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &270767976
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 270767975}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b695f7bac734049afba7ccf705002f07, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blockLevel: {fileID: 0}
+  trialLevel: {fileID: 0}
+--- !u!114 &270767977
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 270767975}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63af1290a273b468b82e2c6d690a9c4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blockLevel: {fileID: 0}
+  trialLevel: {fileID: 0}
+--- !u!4 &270767978
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 270767975}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 512, y: 384, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &303245624 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1627887929957692, guid: 2cd2e7f9d16874255952a6e7a3713e03,
@@ -386,7 +442,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7321ec2d5e1d46948f2058d1e0cff30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ControlLevelName: 
+  ControlLevelName: TrialLevel
   Terminated: 0
   isMainLevel: 0
   DebugActive: 0
@@ -394,9 +450,11 @@ MonoBehaviour:
   stim2: {fileID: 1380822280}
   goCue: {fileID: 303245624}
   fb: {fileID: 2010438143}
-  trialCount: 0
+  trialInBlock: 0
+  trialInExperiment: 1
   response: 0
   reward: 0
+  trialData: {fileID: 0}
 --- !u!114 &711102652
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -408,7 +466,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc06a29a8263f4da8bc5375ce18b9493, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ControlLevelName: 
+  ControlLevelName: BlockLevel
   Terminated: 0
   isMainLevel: 0
   DebugActive: 0
@@ -419,6 +477,9 @@ MonoBehaviour:
   numBlocks: 3
   numTrials: 20
   currentBlock: 1
+  firstTrial: 0
+  lastTrial: 0
+  blockData: {fileID: 0}
 --- !u!114 &711102653
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -430,14 +491,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff8d801a5bec84cc0b5f89a0a8ce345e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ControlLevelName: 
+  ControlLevelName: MainLevel
   Terminated: 0
-  isMainLevel: 0
+  isMainLevel: 1
   DebugActive: 0
   textObj: {fileID: 1951750373}
   panelObj: {fileID: 2063210973}
   numBlocks: 3
   trialsPerBlock: 10
+  dataPath: /Users/Marcus/Desktop/Data
 --- !u!1 &752371420
 GameObject:
   m_ObjectHideFlags: 0

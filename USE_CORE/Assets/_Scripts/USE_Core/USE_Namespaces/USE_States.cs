@@ -237,7 +237,7 @@ namespace USE_States
         public void AddChildLevel(ControlLevel child)
         {
             Child = child;
-            Child.InitializeControlLevel();
+            //Child.InitializeControlLevel();
         }
 
 
@@ -938,8 +938,9 @@ namespace USE_States
 
 
         //RUN STATEMACHINE
-        void Start()
+        void Awake()
         {
+            this.InitializeControlLevel();
             if (isMainLevel)
             {
                 if (!mainLevelSpecified)
@@ -950,7 +951,7 @@ namespace USE_States
                 {
                     Debug.LogError("Attempted to specify more than one main ControlLevel. Only one per experiment!");
                 }
-                this.InitializeControlLevel();
+                //this.InitializeControlLevel();
             }
         }
         void FixedUpdate()

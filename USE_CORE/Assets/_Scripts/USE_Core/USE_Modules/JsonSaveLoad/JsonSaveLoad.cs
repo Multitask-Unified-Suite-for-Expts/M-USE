@@ -2,6 +2,7 @@
 using UnityEditor;
 using System.Collections;
 using System.IO;
+using Newtonsoft.Json;
 public class JsonSaveLoad : MonoBehaviour
 {
 	public string folderPath = "";

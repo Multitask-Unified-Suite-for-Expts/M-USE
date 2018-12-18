@@ -17,19 +17,34 @@ public class ControlLevel_Block_Tutorial5_complete : ControlLevel
     public int numBlocks = 3;
     public int numTrials = 20;
     public int currentBlock = 1;
-    public List<int?> runningHistory;
     ControlLevel_Trial_Tutorial5_complete trialLevel;
-    // public void Awake(){
-    //     runningHistory = new List<int?>();
-    // }
+    public Text textSessionInfo;
+
+    bool InitScreenConfirmed = false;
+
+    public SessionDetails sessionDetails;
+    public LocateFile locateFile;
+    public void ConfirmInitializationScreen(){
+        InitScreenConfirmed = true;
+    }
 
     public override void DefineControlLevel()
     {
         //define States within this Control Level
+        State initScreen = new State("InitializationScreen");
         State runTrials = new State("RunTrials");
         State blockFb = new State("BlockFB");
 
-        AddActiveStates(new List<State> { runTrials, blockFb });
+        AddActiveStates(new List<State> { initScreen, runTrials, blockFb });
+
+        initScreen.SpecifyTermination(()=> InitScreenConfirmed == true, runTrials);
+        initScreen.AddDefaultTerminationMethod(() => {
+            string str = "";
+            str += "Subject Name: " + sessionDetails.GetItemValue("Subject Name") + "\r\n";
+            str += "Data path: " + locateFile.GetPath("Data path") + "\r\n";
+            textSessionInfo.text = str;
+            textSessionInfo.gameObject.SetActive(true);
+        });
 
         trialLevel = GameObject.FindObjectOfType<ControlLevel_Trial_Tutorial5_complete>();
         runTrials.AddChildLevel(trialLevel);

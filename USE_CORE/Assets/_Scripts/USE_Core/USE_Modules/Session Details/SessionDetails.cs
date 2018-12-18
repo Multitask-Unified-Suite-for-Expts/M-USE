@@ -5,16 +5,18 @@ using UnityEngine.UI;
 
 public class SessionDetails : MonoBehaviour {
 
+	public GameObject[] enableOnStart;
 	public GameObject[] disableOnConfirm;
 	public GameObject[] enableOnConfirm;
 
 	public Transform parentItems;	
 	public ItemSessionDetailsUI prefabItemInfo;
 	public List<ItemSessionDetails> itemLabels;
+	
 
 	public Dictionary<string, ItemSessionDetailsUI> items = new Dictionary<string, ItemSessionDetailsUI>();
-	void Awake(){
-		
+	void Start(){
+
 		foreach(ItemSessionDetails item in itemLabels){
 			GameObject g = Instantiate(prefabItemInfo.gameObject);
 			ItemSessionDetailsUI i = g.GetComponent<ItemSessionDetailsUI>();
@@ -23,6 +25,9 @@ public class SessionDetails : MonoBehaviour {
 			i.transform.SetParent(parentItems, false);
 			i.gameObject.SetActive(true);
 		}
+
+		foreach(GameObject g in enableOnStart)
+			g.SetActive(true);
 	}
 	
 	public void Confirm(){

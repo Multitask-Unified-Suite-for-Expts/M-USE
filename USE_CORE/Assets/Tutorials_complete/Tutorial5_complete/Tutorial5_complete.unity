@@ -208,6 +208,30 @@ Prefab:
       propertyPath: BlockPerformanceText
       value: 
       objectReference: {fileID: 229645309}
+    - target: {fileID: 1634035383573964, guid: 69d6da41800dd464db0cfff1cba59365, type: 2}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114202321238522924, guid: 69d6da41800dd464db0cfff1cba59365,
+        type: 2}
+      propertyPath: DebugActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114202321238522924, guid: 69d6da41800dd464db0cfff1cba59365,
+        type: 2}
+      propertyPath: ControlLevelName
+      value: BlockLevel
+      objectReference: {fileID: 0}
+    - target: {fileID: 114865091915699972, guid: 69d6da41800dd464db0cfff1cba59365,
+        type: 2}
+      propertyPath: ControlLevelName
+      value: TrialLevel
+      objectReference: {fileID: 0}
+    - target: {fileID: 114865091915699972, guid: 69d6da41800dd464db0cfff1cba59365,
+        type: 2}
+      propertyPath: DebugActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 69d6da41800dd464db0cfff1cba59365, type: 2}
   m_IsPrefabAsset: 0
@@ -311,6 +335,10 @@ Prefab:
         type: 2}
       propertyPath: m_Materials.Array.data[0]
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1297805451220176, guid: f8f5587749b8d4ff585adc5dc70e481e, type: 2}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f8f5587749b8d4ff585adc5dc70e481e, type: 2}
@@ -416,7 +444,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &914158897
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -942,7 +970,7 @@ Prefab:
       objectReference: {fileID: 245810525}
     - target: {fileID: 1870669111922940, guid: 61e30cf827ef64b6ca2c28f2b88a9cdf, type: 2}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 224065853530294094, guid: 61e30cf827ef64b6ca2c28f2b88a9cdf,
         type: 2}

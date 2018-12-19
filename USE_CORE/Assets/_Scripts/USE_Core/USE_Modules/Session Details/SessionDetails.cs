@@ -5,9 +5,6 @@ using UnityEngine.UI;
 
 public class SessionDetails : MonoBehaviour {
 
-	public GameObject[] enableOnStart;
-	public GameObject[] disableOnConfirm;
-	public GameObject[] enableOnConfirm;
 
 	public Transform parentItems;	
 	public ItemSessionDetailsUI prefabItemInfo;
@@ -26,18 +23,8 @@ public class SessionDetails : MonoBehaviour {
 			i.gameObject.SetActive(true);
 		}
 
-		foreach(GameObject g in enableOnStart)
-			g.SetActive(true);
 	}
 	
-	public void Confirm(){
-		foreach(GameObject g in disableOnConfirm)
-			g.SetActive(false);
-		
-		foreach (GameObject g in enableOnConfirm)
-			g.SetActive(true);
-	}
-
 	public string GetItemValue(string key){
 		if(items.ContainsKey(key))
 			return items[key].item.value;

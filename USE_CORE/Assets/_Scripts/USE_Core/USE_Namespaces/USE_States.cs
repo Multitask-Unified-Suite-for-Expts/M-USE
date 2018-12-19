@@ -497,6 +497,8 @@ namespace USE_States
 
         public bool Paused { get; set; }
 
+        public GameObject InitScreen;
+
         public abstract void DefineControlLevel();
 
         public void InitializeControlLevel()
@@ -519,6 +521,38 @@ namespace USE_States
             Paused = false;
             controlLevelTerminationSpecifications = new List<ControlLevelTerminationSpecification>();
             DefineControlLevel();
+
+
+            if (InitScreen != null)
+            {
+                State initScreen = new State("InitScreen");
+                initScreen.AddInitializationMethod(() =>
+                {
+                    foreach (GameObject g in InitScreen.GetComponent<InitScreen>().disableOnStart)
+                        g.SetActive(false);
+                    foreach (GameObject g in InitScreen.GetComponent<InitScreen>().enableOnStart)
+                        g.SetActive(true);
+                });
+                initScreen.SpecifyTermination(() => InitScreen.GetComponent<InitScreen>().Confirmed, ActiveStates[0], () =>
+                {
+
+                    foreach (GameObject g in InitScreen.GetComponent<InitScreen>().disableOnConfirm)
+                        g.SetActive(false);
+
+                    foreach (GameObject g in InitScreen.GetComponent<InitScreen>().enableOnConfirm)
+                        g.SetActive(true);
+                });
+
+                initScreen.Parent = this;
+                initScreen.DebugActive = DebugActive;
+
+                ActiveStates.Insert(0, initScreen);
+                ActiveStateNames.Insert(0, "InitScreen");
+                AvailableStates.Insert(0, initScreen);
+                AvailableStateNames.Insert(0, "InitScreen");
+                currentState = initScreen;
+            }
+
         }
         public void InitializeControlLevel(State state)
         {

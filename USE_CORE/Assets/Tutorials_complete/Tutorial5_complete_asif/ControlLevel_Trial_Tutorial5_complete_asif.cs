@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using USE_States;
+using ConfigDynamicUI;
 
-public class ControlLevel_Trial_Tutorial5_complete : ControlLevel
+public class ControlLevel_Trial_Tutorial5_complete_asif : ControlLevel
 {
     //scene elements
     //#########CHANGE IN EXTENDED SCRIPT - 2 STIMS########
@@ -14,20 +15,41 @@ public class ControlLevel_Trial_Tutorial5_complete : ControlLevel
     public GameObject fb;
 
     //trial variables
-    public int trialInBlock, trialInExperiment = 1, response, reward;
+    [System.NonSerialized]
+    public int trialCount = 0, response, trialInExpt = 0, rewardedTrials = 0;
+
 
     //#########CHANGE IN EXTENDED SCRIPT - parameters now controlled by variables instead of hardcoding########
     [System.NonSerialized]
-    public float stimOnDur = 1f, responseMaxDur = 5f, fbDur = 0.5f, itiDur = 0.5f, posRange = 3f, minDistance = 1.5f, rewardProb = 0.85f;
+    public float stimOnDur = 1f, responseMaxDur = 5f, fbDur = 0.5f, itiDur = 0.5f;
+    
+    [HideInInspector]
     [System.NonSerialized]
-    public int numTrials, numCorrect, numReward;
+    public ConfigNumber rewardProb, minDistance;
+    [HideInInspector]
+    [System.NonSerialized]
+    public ConfigNumberRangedInt posRange;
 
-    public DataController_Trial_Tutorial5_complete trialData;
+    [System.NonSerialized]
+    public int numTrials, numCorrect;
+
+    public ConfigUI configUI;
+
+    public event System.Action OnTrialFinished;
+    private void initConfigVariables(){
+        posRange = configUI.CreateNumberRangedInt("Position Range", 2, 4);
+        minDistance = configUI.CreateNumber("Min Distance", 1.5f).SetMin(1).SetMax(3);
+        rewardProb = configUI.CreateNumber("Reward Probability", .85f).SetMin(.6f).SetMax(1);
+        configUI.GenerateUI();
+    }
 
     public override void DefineControlLevel()
     {
+
+        initConfigVariables();
+
         //define States within this Control Level
-        State stimOn = new State("StimOn");
+        State stimOn = new State("StimPres");
         State collectResponse = new State("Response");
         State feedback = new State("Feedback");
         State iti = new State("ITI");
@@ -40,7 +62,8 @@ public class ControlLevel_Trial_Tutorial5_complete : ControlLevel
             //choose x/y position of first stim randomly, move second stim until it is far enough away that it doesn't overlap
             Vector3 stim1pos = AssignRandomPos();
             Vector3 stim2pos = AssignRandomPos();
-            while (Vector3.Distance(stim1pos,stim2pos) < minDistance){
+
+            while (Vector3.Distance(stim1pos,stim2pos) < minDistance.value){
                 stim2pos = AssignRandomPos();
             }
             stim1.transform.position = stim1pos;
@@ -50,7 +73,7 @@ public class ControlLevel_Trial_Tutorial5_complete : ControlLevel
 
             response = -1;
         });
-        stimOn.AddTimer(itiDur, collectResponse);
+        stimOn.AddTimer(stimOnDur, collectResponse);
 
         //Define collectResponse State
         collectResponse.AddInitializationMethod(() => goCue.SetActive(true));
@@ -58,13 +81,14 @@ public class ControlLevel_Trial_Tutorial5_complete : ControlLevel
         {
             if (InputBroker.GetMouseButtonDown(0))
             {
+                
                 Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
                 RaycastHit hit;
                 if (Physics.Raycast(ray, out hit))
                 {
                     //#########CHANGE IN EXTENDED SCRIPT - tag-based target detection########
                     if (hit.collider.gameObject.tag == "Target")
-                    {
+                    {                        
                         response = 1;
                         numCorrect++;
                     }
@@ -91,36 +115,30 @@ public class ControlLevel_Trial_Tutorial5_complete : ControlLevel
             switch (response)
             {
                 case -1:
-                    reward = -1;
                     col = Color.grey;
                     break;
                 case 0:
-                    if (Random.Range(0f, 1f) > rewardProb)
+                    if (Random.Range(0f, 1f) > rewardProb.value)
                     {
-                        reward = 1;
-                        numReward++;
                         col = Color.green;
+                        rewardedTrials++;
                     }else
                     {
-                        reward = 0;
                         col = Color.red;
                     }
                     break;
                 case 1:
-                    if (Random.Range(0f, 1f) <= rewardProb)
+                    if (Random.Range(0f, 1f) <= rewardProb.value)
                     {
-                        numReward++;
-                        reward = 1;
                         col = Color.green;
+                        rewardedTrials++;
                     }
                     else
                     {
-                        reward = 0;
                         col = Color.red;
                     }
                     break;
                 case 2:
-                    reward = -2;
                     col = Color.black;
                     break;
             }
@@ -134,14 +152,20 @@ public class ControlLevel_Trial_Tutorial5_complete : ControlLevel
             stim1.SetActive(false);
             stim2.SetActive(false);
         });
-        iti.AddTimer(itiDur, stimOn, () => { trialInBlock++; trialInExperiment++; trialData.AppendData(); trialData.WriteData(); });
+        iti.AddTimer(itiDur, stimOn, () => {
+                trialCount++; 
+                trialInExpt++;            
+                OnTrialFinished.Invoke();
+            });
 
-        this.AddTerminationSpecification(() => trialInBlock > numTrials);
+        this.AddTerminationSpecification(() => trialCount >= numTrials);
     }
 
     //#########CHANGE IN EXTENDED SCRIPT - CHOOSE RANDOM STIM LOCATION########
     Vector3 AssignRandomPos()
     {
-        return new Vector3(Random.Range(-posRange, posRange), Random.Range(-posRange, posRange), 0);
+        posRange.SetRandomValue();
+        return new Vector3(Random.Range(-posRange.value, posRange.value), Random.Range(-posRange.value, posRange.value), 0);
+        // return new Vector3(Random.Range(-3, 3), Random.Range(-3, 3), 0);
     }
 }

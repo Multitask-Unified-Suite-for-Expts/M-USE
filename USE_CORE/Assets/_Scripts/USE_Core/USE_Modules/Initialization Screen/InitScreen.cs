@@ -8,6 +8,7 @@ public class InitScreen : MonoBehaviour {
     public GameObject[] enableOnStart;
     public GameObject[] disableOnConfirm;
     public GameObject[] enableOnConfirm;
+    [HideInInspector] 
     public bool Confirmed;
 
 

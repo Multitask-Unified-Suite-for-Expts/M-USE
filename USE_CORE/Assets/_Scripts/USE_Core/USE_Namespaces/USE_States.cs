@@ -452,6 +452,7 @@ namespace USE_States
         /// <summary>
         /// Whether this Control Level is terminated.
         /// </summary>
+        [HideInInspector]
         public bool Terminated;
 
         /// <summary>
@@ -526,6 +527,8 @@ namespace USE_States
             if (InitScreen != null)
             {
                 State initScreen = new State("InitScreen");
+                initScreen.Parent = this;
+                initScreen.DebugActive = DebugActive;
                 initScreen.AddInitializationMethod(() =>
                 {
                     foreach (GameObject g in InitScreen.GetComponent<InitScreen>().disableOnStart)
@@ -535,7 +538,7 @@ namespace USE_States
                 });
                 initScreen.SpecifyTermination(() => InitScreen.GetComponent<InitScreen>().Confirmed, ActiveStates[0], () =>
                 {
-
+                    InitScreen.SetActive(false);
                     foreach (GameObject g in InitScreen.GetComponent<InitScreen>().disableOnConfirm)
                         g.SetActive(false);
 
@@ -543,8 +546,6 @@ namespace USE_States
                         g.SetActive(true);
                 });
 
-                initScreen.Parent = this;
-                initScreen.DebugActive = DebugActive;
 
                 ActiveStates.Insert(0, initScreen);
                 ActiveStateNames.Insert(0, "InitScreen");

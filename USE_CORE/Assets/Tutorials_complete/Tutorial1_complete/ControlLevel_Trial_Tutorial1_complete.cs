@@ -37,7 +37,11 @@ public class ControlLevel_Trial_Tutorial1_complete : ControlLevel
         stimOn.AddTimer(1f, collectResponse);
 
         //Define collectResponse State
-        collectResponse.AddInitializationMethod(() => goCue.SetActive(true));
+        collectResponse.AddInitializationMethod(() =>
+        {
+            goCue.GetComponent<Text>().text = "Rargh!";
+            goCue.SetActive(true);
+        });
         collectResponse.AddUpdateMethod(() =>
         {
             if (InputBroker.GetMouseButtonDown(0))

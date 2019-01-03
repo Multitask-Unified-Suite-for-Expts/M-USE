@@ -12,7 +12,7 @@ public class ControlLevel_Main_Tutorial5_complete : ControlLevel {
     public int numBlocks = 3;
     public int trialsPerBlock = 10;
 
-    public string dataPath;
+    public string dataPath = "Macintosh HD/Users/marcus/Desktop/Data";
 
 
 

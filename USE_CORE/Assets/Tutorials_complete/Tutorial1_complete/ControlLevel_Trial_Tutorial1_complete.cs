@@ -39,7 +39,7 @@ public class ControlLevel_Trial_Tutorial1_complete : ControlLevel
         //Define collectResponse State
         collectResponse.AddInitializationMethod(() =>
         {
-            goCue.GetComponent<Text>().text = "Rargh!";
+            goCue.GetComponent<Text>().text = "Go!";
             goCue.SetActive(true);
         });
         collectResponse.AddUpdateMethod(() =>

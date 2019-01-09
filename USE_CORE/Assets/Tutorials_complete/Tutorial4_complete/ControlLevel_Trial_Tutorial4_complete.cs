@@ -17,9 +17,9 @@ public class ControlLevel_Trial_Tutorial4_complete : ControlLevel
     public int trialInBlock, trialInExperiment = 1, response, reward;
 
     //#########CHANGE IN EXTENDED SCRIPT - parameters now controlled by variables instead of hardcoding########
-    [System.NonSerialized]
+    [HideInInspector]
     public float stimOnDur = 1f, responseMaxDur = 5f, fbDur = 0.5f, itiDur = 0.5f, posRange = 3f, minDistance = 1.5f, rewardProb = 0.85f;
-    [System.NonSerialized]
+    [HideInInspector]
     public int numTrials, numCorrect, numReward;
 
     public DataController_Trial_Tutorial4_complete trialData;

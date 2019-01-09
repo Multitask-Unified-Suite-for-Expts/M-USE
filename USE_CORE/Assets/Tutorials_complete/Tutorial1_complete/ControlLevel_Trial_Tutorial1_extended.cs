@@ -135,6 +135,11 @@ public class ControlLevel_Trial_Tutorial1_extended : ControlLevel
     //#########CHANGE IN EXTENDED SCRIPT - CHOOSE RANDOM STIM LOCATION########
     Vector3 AssignRandomPos()
     {
-        return new Vector3(Random.Range(-posRange, posRange), Random.Range(-posRange, posRange), 0);
+        Vector3 pos = new Vector3(Random.Range(-posRange, posRange), Random.Range(-posRange, posRange), 0);
+        while (Vector3.Distance(pos, new Vector3(0,0,0)) < minDistance)
+        {
+            pos = new Vector3(Random.Range(-posRange, posRange), Random.Range(-posRange, posRange), 0);
+        }
+        return pos;
     }
 }

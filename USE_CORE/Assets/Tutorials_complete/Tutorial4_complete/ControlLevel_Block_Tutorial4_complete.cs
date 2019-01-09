@@ -8,9 +8,10 @@ public class ControlLevel_Block_Tutorial4_complete: ControlLevel
 {
     public GameObject stim1, stim2, fbText, fbPanel;
 
-    public int numBlocks = 3, numTrials = 20, currentBlock = 1;
+    public int currentBlock = 1;
 
-    public int firstTrial, lastTrial;
+    [HideInInspector]
+    public int numBlocks, numTrials, firstTrial, lastTrial;
 
     public DataController_Block_Tutorial4_complete blockData;
 
@@ -31,6 +32,7 @@ public class ControlLevel_Block_Tutorial4_complete: ControlLevel
             trialLevel.numTrials = numTrials;
             trialLevel.trialInBlock = 1;
             trialLevel.numCorrect = 0;
+            trialLevel.numReward = 0;
             firstTrial = trialLevel.trialInExperiment;
 
             if (Random.Range(0, 2) == 1)

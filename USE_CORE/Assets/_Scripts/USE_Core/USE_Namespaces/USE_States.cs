@@ -328,6 +328,7 @@ namespace USE_States
                 TimingInfo.Duration = -1;
                 if (Parent.previousState != null)
                 {
+                    Debug.Log(Parent.ControlLevelName + " Prev state update: " + Time.frameCount);
                     // the duration of a State should include its last frame, so needs to be measured at the start of the following State
                     Parent.previousState.TimingInfo.EndTimeAbsolute = Time.time;
                     Parent.previousState.TimingInfo.EndTimeRelative = Time.time - Parent.StartTimeRelative;

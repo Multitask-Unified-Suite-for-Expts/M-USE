@@ -475,6 +475,16 @@ MonoBehaviour:
   trialInExperiment: 1
   response: 0
   reward: 0
+  stimOnDur: 1
+  responseMaxDur: 5
+  fbDur: 0.5
+  itiDur: 0.5
+  posRange: 3
+  minDistance: 1.5
+  rewardProb: 0.85
+  numTrials: 0
+  numCorrect: 0
+  numReward: 0
   trialData: {fileID: 0}
 --- !u!114 &711102652
 MonoBehaviour:
@@ -496,9 +506,9 @@ MonoBehaviour:
   stim2: {fileID: 1380822280}
   fbText: {fileID: 480517652}
   fbPanel: {fileID: 480517653}
+  currentBlock: 1
   numBlocks: 3
   numTrials: 1
-  currentBlock: 1
   firstTrial: 0
   lastTrial: 0
   blockData: {fileID: 0}

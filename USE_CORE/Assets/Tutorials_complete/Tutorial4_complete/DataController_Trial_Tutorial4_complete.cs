@@ -35,6 +35,6 @@ public class DataController_Trial_Tutorial4_complete : DataController {
         AddDatum("Stim2_worldZ", () => trialLevel.stim2.transform.position.z);
         AddDatum("Stim2_screenX", () => Camera.main.WorldToScreenPoint(trialLevel.stim2.transform.position).x);
         AddDatum("Stim2_screenY", () => Camera.main.WorldToScreenPoint(trialLevel.stim2.transform.position).y);
-        AddStateTimingData(trialLevel, new string[] { "Duration", "StartFrame", "EndFrame" });
+        AddStateTimingData(trialLevel);
     }
 }

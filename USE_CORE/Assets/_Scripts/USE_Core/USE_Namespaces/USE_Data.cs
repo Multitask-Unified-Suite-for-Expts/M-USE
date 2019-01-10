@@ -49,7 +49,7 @@ namespace USE_Data
 
     public class Datum<T> : IDatum
     {
-        readonly string name;
+        public string name;
         public string Name { get { return name; } }
 
         delegate string stringFunction();
@@ -63,9 +63,9 @@ namespace USE_Data
             }
         }
 
-        public Datum(string name, Func<T> variable)
+        public Datum(string nm, Func<T> variable)
         {
-            this.name = name;
+            name = nm;
             //most variables can use standard tostring method - if not will have to add if statements to build custom string methods
             {
                 stringFunc = () => variable().ToString();//toString(()=>variable());
@@ -144,11 +144,17 @@ namespace USE_Data
                     CreateFile();
                 }
             }
+        }
+
+        private void LateUpdate()
+        {
             if (updateDataNextFrame)
             {
                 for (int i = 0; i < dataToUpdateNextFrame.Count; i++)
                 {
-                    heldDataLine[i] = dataToUpdateNextFrame[i].ValueAsString;
+                    int pos = dataToUpdateNextFrame[i].Pos;
+                    heldDataLine[pos] = dataToUpdateNextFrame[i].ValueAsString;
+                    Debug.Log("asdlkfh");
                 }
                 dataBuffer.Add(String.Join("\t", heldDataLine.ToArray()));
                 updateDataNextFrame = false;
@@ -156,6 +162,11 @@ namespace USE_Data
                 {
                     WriteData();
                 }
+                writeDataNextFrame = false;
+            }
+            if (writeDataNextFrame)
+            {
+                WriteData();
                 writeDataNextFrame = false;
             }
         }
@@ -249,7 +260,7 @@ namespace USE_Data
                 {
                     currentVals[i] = data[i].ValueAsString;
                 }
-                if (!updateDataNextFrame)
+                if (dataToUpdateNextFrame.Count == 0)
                 {
                     dataBuffer.Add(String.Join("\t", currentVals));
                     if (dataBuffer.Count == capacity)
@@ -257,7 +268,7 @@ namespace USE_Data
                         WriteData();
                     }
                 }
-                else if (dataToUpdateNextFrame.Count > 0)
+                else
                 {
                     heldDataLine = currentVals.ToList();
                     updateDataNextFrame = true;
@@ -312,16 +323,16 @@ namespace USE_Data
             {
                 if (timingTypes == null)//add all state timing information to data
                 {
-                    this.AddDatum(s.StateName + "_StartFrame", () => s.TimingInfo.StartFrame);
-                    this.AddDatum(s.StateName + "_EndFrame", () => s.TimingInfo.EndFrame);
-                    this.AddDatum(s.StateName + "_StartTimeAbsolute", () => s.TimingInfo.StartTimeAbsolute);
-                    this.AddDatum(s.StateName + "_StartTimeRelative", () => s.TimingInfo.StartTimeRelative);
-                    this.AddDatum(s.StateName + "_EndTimeAbsolute", () => s.TimingInfo.EndTimeAbsolute);
-                    this.dataToUpdateNextFrame.Add(new HeldDatum<float>(() => s.TimingInfo.EndTimeAbsolute, data.Count - 1));
-                    this.AddDatum(s.StateName + "_EndTimeRelative", () => s.TimingInfo.EndTimeRelative);
-                    this.dataToUpdateNextFrame.Add(new HeldDatum<float>(() => s.TimingInfo.EndTimeRelative, data.Count - 1));
-                    this.AddDatum(s.StateName + "_Duration", () => s.TimingInfo.Duration);
-                    this.dataToUpdateNextFrame.Add(new HeldDatum<float>(() => s.TimingInfo.Duration, data.Count - 1));
+                    AddDatum(s.StateName + "_StartFrame", () => s.TimingInfo.StartFrame);
+                    AddDatum(s.StateName + "_EndFrame", () => s.TimingInfo.EndFrame);
+                    AddDatum(s.StateName + "_StartTimeAbsolute", () => s.TimingInfo.StartTimeAbsolute);
+                    AddDatum(s.StateName + "_StartTimeRelative", () => s.TimingInfo.StartTimeRelative);
+                    AddDatum(s.StateName + "_EndTimeAbsolute", () => s.TimingInfo.EndTimeAbsolute);
+                    dataToUpdateNextFrame.Add(new HeldDatum<float>(() => s.TimingInfo.EndTimeAbsolute, data.Count - 1));
+                    AddDatum(s.StateName + "_EndTimeRelative", () => s.TimingInfo.EndTimeRelative);
+                    dataToUpdateNextFrame.Add(new HeldDatum<float>(() => s.TimingInfo.EndTimeRelative, data.Count - 1));
+                    AddDatum(s.StateName + "_Duration", () => s.TimingInfo.Duration);
+                    dataToUpdateNextFrame.Add(new HeldDatum<float>(() => s.TimingInfo.Duration, data.Count - 1));
                 }
                 else //specify which timing information to add
                 {
@@ -330,28 +341,28 @@ namespace USE_Data
                         switch (t)
                         {
                             case "StartFrame":
-                                this.AddDatum(s.StateName + "_StartFrame", () => s.TimingInfo.StartFrame);
+                                AddDatum(s.StateName + "_StartFrame", () => s.TimingInfo.StartFrame);
                                 break;
                             case "EndFrame":
-                                this.AddDatum(s.StateName + "_EndFrame", () => s.TimingInfo.EndFrame);
+                                AddDatum(s.StateName + "_EndFrame", () => s.TimingInfo.EndFrame);
                                 break;
                             case "StartTimeAbsolute":
-                                this.AddDatum(s.StateName + "_StartTimeAbsolute", () => s.TimingInfo.StartTimeAbsolute);
+                                AddDatum(s.StateName + "_StartTimeAbsolute", () => s.TimingInfo.StartTimeAbsolute);
                                 break;
                             case "StartTimeRelative":
-                                this.AddDatum(s.StateName + "_StartTimeRelative", () => s.TimingInfo.StartTimeRelative);
+                                AddDatum(s.StateName + "_StartTimeRelative", () => s.TimingInfo.StartTimeRelative);
                                 break;
                             case "EndTimeAbsolute":
-                                this.AddDatum(s.StateName + "_EndTimeAbsolute", () => s.TimingInfo.EndTimeAbsolute);
-                                this.dataToUpdateNextFrame.Add(new HeldDatum<float>(() => s.TimingInfo.EndTimeAbsolute, data.Count - 1));
+                                AddDatum(s.StateName + "_EndTimeAbsolute", () => s.TimingInfo.EndTimeAbsolute);
+                                dataToUpdateNextFrame.Add(new HeldDatum<float>(() => s.TimingInfo.EndTimeAbsolute, data.Count - 1));
                                 break;
                             case "EndTimeRelative":
-                                this.AddDatum(s.StateName + "_EndTimeRelative", () => s.TimingInfo.EndTimeRelative);
-                                this.dataToUpdateNextFrame.Add(new HeldDatum<float>(() => s.TimingInfo.EndTimeRelative, data.Count - 1));
+                                AddDatum(s.StateName + "_EndTimeRelative", () => s.TimingInfo.EndTimeRelative);
+                                dataToUpdateNextFrame.Add(new HeldDatum<float>(() => s.TimingInfo.EndTimeRelative, data.Count - 1));
                                 break;
                             case "Duration":
-                                this.AddDatum(s.StateName + "_Duration", () => s.TimingInfo.Duration);
-                                this.dataToUpdateNextFrame.Add(new HeldDatum<float>(() => s.TimingInfo.Duration, data.Count - 1));
+                                AddDatum(s.StateName + "_Duration", () => s.TimingInfo.Duration);
+                                dataToUpdateNextFrame.Add(new HeldDatum<float>(() => s.TimingInfo.Duration, data.Count - 1));
                                 break;
                             default:
                                 Debug.Log("Attempted to add state timing information called \"" + t + "\", but this is not a known timing information type.");

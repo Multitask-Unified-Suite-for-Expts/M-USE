@@ -152,7 +152,6 @@ namespace USE_Data
         {
             if (updateDataNextFrame)
             {
-                Debug.Log("UpdateData " + Time.frameCount);
                 for (int i = 0; i < dataToUpdateNextFrame.Count; i++)
                 {
                     //int pos = dataToUpdateNextFrame[i].Pos;
@@ -275,7 +274,6 @@ namespace USE_Data
                 }
                 else
                 {
-                    Debug.Log("AppendData " + Time.frameCount);
                     heldDataLine = currentVals.ToList();
                     updateDataNextFrame = true;
                 }
@@ -306,20 +304,21 @@ namespace USE_Data
 
         public void WriteData()
         {
-            if (storeData && dataBuffer.Count > 0)
+            if (storeData)
             {
                 if (!updateDataNextFrame)
                 {
-                    Debug.Log("WriteData Regular " + Time.frameCount);
-                    using (StreamWriter dataStream = File.AppendText(folderPath + Path.DirectorySeparatorChar + fileName))
+                    if (dataBuffer.Count > 0)
                     {
-                        dataStream.Write("\n" + String.Join("\n", dataBuffer.ToArray()));
+                        using (StreamWriter dataStream = File.AppendText(folderPath + Path.DirectorySeparatorChar + fileName))
+                        {
+                            dataStream.Write("\n" + String.Join("\n", dataBuffer.ToArray()));
+                        }
+                        dataBuffer.Clear();
                     }
-                    dataBuffer.Clear();
                 }
                 else
                 {
-                    Debug.Log("WriteData " + Time.frameCount);
                     writeDataNextFrame = true;
                 }
             }

@@ -326,14 +326,6 @@ namespace USE_States
                 TimingInfo.EndTimeAbsolute = -1;
                 TimingInfo.EndTimeRelative = -1;
                 TimingInfo.Duration = -1;
-                if (Parent.previousState != null)
-                {
-                    Debug.Log(Parent.ControlLevelName + " Prev state update: " + Time.frameCount);
-                    // the duration of a State should include its last frame, so needs to be measured at the start of the following State
-                    Parent.previousState.TimingInfo.EndTimeAbsolute = Time.time;
-                    Parent.previousState.TimingInfo.EndTimeRelative = Time.time - Parent.StartTimeRelative;
-                    Parent.previousState.TimingInfo.Duration = Time.time - Parent.previousState.TimingInfo.StartTimeAbsolute;
-                }
                 //If previous state specified this state's initialization, run it
                 if (StateActiveInitialization != null)
                 {
@@ -368,6 +360,7 @@ namespace USE_States
                         //Time management
                         Parent.previousState = this;
                         TimingInfo.EndFrame = Time.frameCount;
+                        Parent.UpdatePreviousStateTiming = true;
 
                         if (DebugActive)
                         {
@@ -454,7 +447,7 @@ namespace USE_States
         /// Whether this Control Level is terminated.
         /// </summary>
         [HideInInspector]
-        public bool Terminated;
+        public bool Terminated, UpdatePreviousStateTiming;
 
         /// <summary>
         /// The first frame in which the Control Level was active.
@@ -1002,6 +995,14 @@ namespace USE_States
             if (isMainLevel & !Paused)
             {
                 RunControlLevelUpdate();
+            }
+            if (UpdatePreviousStateTiming)
+            {
+                // the duration of a State should include its last frame, so needs to be measured at the start of the frame following this one
+                previousState.TimingInfo.EndTimeAbsolute = Time.time;
+                previousState.TimingInfo.EndTimeRelative = Time.time - StartTimeRelative;
+                previousState.TimingInfo.Duration = Time.time - previousState.TimingInfo.StartTimeAbsolute;
+                UpdatePreviousStateTiming = false;
             }
         }
         void LateUpdate()

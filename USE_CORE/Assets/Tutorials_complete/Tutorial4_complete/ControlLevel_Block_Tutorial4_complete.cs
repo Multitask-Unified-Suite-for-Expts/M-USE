@@ -44,6 +44,7 @@ public class ControlLevel_Block_Tutorial4_complete: ControlLevel
                 stim1.tag = "NotTarget";
                 stim2.tag = "Target";
             }
+            ResetRelativeStartTime();
         });
         runTrials.SpecifyTermination(()=> trialLevel.Terminated == true, blockFb);
 

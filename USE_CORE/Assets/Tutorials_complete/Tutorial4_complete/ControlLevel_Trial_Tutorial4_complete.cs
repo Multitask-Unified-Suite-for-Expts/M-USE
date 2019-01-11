@@ -47,7 +47,7 @@ public class ControlLevel_Trial_Tutorial4_complete : ControlLevel
             stim2.transform.position = stim2pos;
             stim1.SetActive(true);
             stim2.SetActive(true);
-
+            ResetRelativeStartTime();
             response = -1;
         });
         stimOn.AddTimer(itiDur, collectResponse);

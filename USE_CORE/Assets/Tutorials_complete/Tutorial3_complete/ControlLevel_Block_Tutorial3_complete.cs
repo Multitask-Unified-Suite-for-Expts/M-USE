@@ -11,9 +11,8 @@ public class ControlLevel_Block_Tutorial3_complete: ControlLevel
     public GameObject fbText;
     public GameObject fbPanel;
 
-    public int numBlocks = 3;
-    public int numTrials = 20;
-    public int currentBlock = 1;
+    [HideInInspector]
+    public int numBlocks, numTrials, currentBlock = 1;
 
     public override void DefineControlLevel()
     {

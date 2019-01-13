@@ -12,9 +12,8 @@ public class ControlLevel_Main_Tutorial4_complete : ControlLevel {
     public int numBlocks = 3;
     public int trialsPerBlock = 10;
 
-    public string dataPath;
-
-
+    public string dataPath = "Macintosh HD/Users/marcus/Desktop/Data";
+    public bool storeData = true;
 
     public override void DefineControlLevel(){
         State intro = new State("Intro");
@@ -28,16 +27,12 @@ public class ControlLevel_Main_Tutorial4_complete : ControlLevel {
 
         DataController_Block_Tutorial4_complete blockData = GameObject.Find("DataControllers").GetComponent<DataController_Block_Tutorial4_complete>();
         DataController_Trial_Tutorial4_complete trialData = GameObject.Find("DataControllers").GetComponent<DataController_Trial_Tutorial4_complete>();
-
-        blockData.storeData = true;
-        trialData.storeData = true;
+        blockData.storeData = storeData;
+        trialData.storeData = storeData;
         blockData.folderPath = dataPath;
         trialData.folderPath = dataPath;
         blockData.fileName = "BlockData.txt";
         trialData.fileName = "TrialData.txt";
-
-        blockData.blockLevel = blockLevel;
-        trialData.trialLevel = trialLevel;
 
         blockLevel.blockData = blockData;
         trialLevel.trialData = trialData;

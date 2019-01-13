@@ -21,7 +21,7 @@ public class ControlLevel_Trial_Tutorial4_complete : ControlLevel
     public float stimOnDur = 1f, responseMaxDur = 5f, fbDur = 0.5f, itiDur = 0.5f, posRange = 3f, minDistance = 1.5f, rewardProb = 0.85f;
     [HideInInspector]
     public int numTrials, numCorrect, numReward;
-
+    [HideInInspector]
     public DataController_Trial_Tutorial4_complete trialData;
 
     public override void DefineControlLevel()

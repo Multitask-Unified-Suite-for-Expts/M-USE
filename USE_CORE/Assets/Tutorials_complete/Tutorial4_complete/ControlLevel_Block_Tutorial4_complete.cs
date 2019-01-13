@@ -8,11 +8,9 @@ public class ControlLevel_Block_Tutorial4_complete: ControlLevel
 {
     public GameObject stim1, stim2, fbText, fbPanel;
 
-    public int currentBlock = 1;
-
     [HideInInspector]
-    public int numBlocks, numTrials, firstTrial, lastTrial;
-
+    public int numBlocks, currentBlock, numTrials, firstTrial, lastTrial;
+    [HideInInspector]
     public DataController_Block_Tutorial4_complete blockData;
 
     public override void DefineControlLevel()
@@ -46,13 +44,12 @@ public class ControlLevel_Block_Tutorial4_complete: ControlLevel
             }
             ResetRelativeStartTime();
         });
-        runTrials.SpecifyTermination(()=> trialLevel.Terminated == true, blockFb);
+        runTrials.SpecifyTermination(() => trialLevel.Terminated == true, blockFb, () => lastTrial = trialLevel.trialInExperiment);
 
         blockFb.AddInitializationMethod(() =>
         {
             fbText.SetActive(true);
             fbPanel.SetActive(true);
-            lastTrial = trialLevel.trialInExperiment;
             float acc = (float)trialLevel.numCorrect / (float)(trialLevel.trialInBlock - 1);
 
             string fbString = "You chose correctly on " + (acc * 100).ToString("F0") + "% of trials.\n";

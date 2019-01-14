@@ -9,7 +9,8 @@ public class ControlLevel_Main_Tutorial5_complete : ControlLevel {
     public GameObject textObj;
     public GameObject panelObj;
 
-    public int numBlocks = 3, trialsPerBlock = 10;
+    public int numBlocks = 3;
+    public int trialsPerBlock = 10;
 
     public string dataPath = "Macintosh HD/Users/marcus/Desktop/Data";
     public bool storeData = true;
@@ -26,16 +27,12 @@ public class ControlLevel_Main_Tutorial5_complete : ControlLevel {
 
         DataController_Block_Tutorial5_complete blockData = GameObject.Find("DataControllers").GetComponent<DataController_Block_Tutorial5_complete>();
         DataController_Trial_Tutorial5_complete trialData = GameObject.Find("DataControllers").GetComponent<DataController_Trial_Tutorial5_complete>();
-
         blockData.storeData = storeData;
         trialData.storeData = storeData;
         blockData.folderPath = dataPath;
         trialData.folderPath = dataPath;
         blockData.fileName = "BlockData.txt";
         trialData.fileName = "TrialData.txt";
-
-        blockData.blockLevel = blockLevel;
-        trialData.trialLevel = trialLevel;
 
         blockLevel.blockData = blockData;
         trialLevel.trialData = trialData;

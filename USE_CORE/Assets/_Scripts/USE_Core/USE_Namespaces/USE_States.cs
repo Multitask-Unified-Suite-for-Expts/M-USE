@@ -532,12 +532,12 @@ namespace USE_States
                 });
                 initScreen.SpecifyTermination(() => InitScreen.GetComponent<InitScreen>().Confirmed, ActiveStates[0], () =>
                 {
-                    InitScreen.SetActive(false);
                     foreach (GameObject g in InitScreen.GetComponent<InitScreen>().disableOnConfirm)
                         g.SetActive(false);
 
                     foreach (GameObject g in InitScreen.GetComponent<InitScreen>().enableOnConfirm)
                         g.SetActive(true);
+                    InitScreen.SetActive(false);
                 });
 
 

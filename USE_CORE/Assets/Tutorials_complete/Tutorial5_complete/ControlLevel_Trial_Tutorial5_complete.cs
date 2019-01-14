@@ -6,22 +6,18 @@ using USE_States;
 
 public class ControlLevel_Trial_Tutorial5_complete : ControlLevel
 {
-    //scene elements
-    //#########CHANGE IN EXTENDED SCRIPT - 2 STIMS########
-    public GameObject stim1;
-    public GameObject stim2;
     public GameObject goCue;
     public GameObject fb;
+    [HideInInspector]
+    public GameObject stim1, stim2;
 
-    //trial variables
-    public int trialInBlock, trialInExperiment = 1, response, reward;
 
     //#########CHANGE IN EXTENDED SCRIPT - parameters now controlled by variables instead of hardcoding########
-    [System.NonSerialized]
+    [HideInInspector]
     public float stimOnDur = 1f, responseMaxDur = 5f, fbDur = 0.5f, itiDur = 0.5f, posRange = 3f, minDistance = 1.5f, rewardProb = 0.85f;
-    [System.NonSerialized]
-    public int numTrials, numCorrect, numReward;
-
+    [HideInInspector]
+    public int numTrials, numCorrect, numReward, trialInBlock, trialInExperiment = 1, response, reward;
+    [HideInInspector]
     public DataController_Trial_Tutorial5_complete trialData;
 
     public override void DefineControlLevel()
@@ -47,7 +43,7 @@ public class ControlLevel_Trial_Tutorial5_complete : ControlLevel
             stim2.transform.position = stim2pos;
             stim1.SetActive(true);
             stim2.SetActive(true);
-
+            ResetRelativeStartTime();
             response = -1;
         });
         stimOn.AddTimer(itiDur, collectResponse);
@@ -142,6 +138,11 @@ public class ControlLevel_Trial_Tutorial5_complete : ControlLevel
     //#########CHANGE IN EXTENDED SCRIPT - CHOOSE RANDOM STIM LOCATION########
     Vector3 AssignRandomPos()
     {
-        return new Vector3(Random.Range(-posRange, posRange), Random.Range(-posRange, posRange), 0);
+        Vector3 pos = new Vector3(Random.Range(-posRange, posRange), Random.Range(-posRange, posRange), 0);
+        while (Vector3.Distance(pos, new Vector3(0, 0, 0)) < minDistance)
+        {
+            pos = new Vector3(Random.Range(-posRange, posRange), Random.Range(-posRange, posRange), 0);
+        }
+        return pos;
     }
 }

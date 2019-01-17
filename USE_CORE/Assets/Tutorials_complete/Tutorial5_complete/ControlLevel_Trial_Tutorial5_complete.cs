@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using USE_States;
+using ConfigParsing;
 
 public class ControlLevel_Trial_Tutorial5_complete : ControlLevel
 {
@@ -12,9 +13,10 @@ public class ControlLevel_Trial_Tutorial5_complete : ControlLevel
     public GameObject stim1, stim2;
 
 
+
     //#########CHANGE IN EXTENDED SCRIPT - parameters now controlled by variables instead of hardcoding########
     [HideInInspector]
-    public float stimOnDur = 1f, responseMaxDur = 5f, fbDur = 0.5f, itiDur = 0.5f, posRange = 3f, minDistance = 1.5f, rewardProb = 0.85f;
+    public float stimOnDur, responseMaxDur, fbDur, itiDur, posRange, minDistance, rewardProb;
     [HideInInspector]
     public int numTrials, numCorrect, numReward, trialInBlock, trialInExperiment = 1, response, reward;
     [HideInInspector]

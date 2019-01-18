@@ -20,7 +20,7 @@ will give appropriate attribution (e.g. citation) to the following paper:
 Watson, M.R., Voloh, B., Thomas, C., Hasan, A., Womelsdorf, T. (2018). USE: An
 integrative suite for temporally-precise psychophysical experiments in virtual
 environments for human, nonhuman, and artificially intelligent agents. BioRxiv:
-DOI*****
+http://dx.doi.org/10.1101/434944
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -32,7 +32,7 @@ SOFTWARE.
 */
 
 
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;

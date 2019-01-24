@@ -241,6 +241,7 @@ public class ControlLevel_Trial_Tutorial6_complete : ControlLevel
     }
 
     public void SetTargetFeature(){
+        Debug.Log("setting target feature");
         // dimensions: 0 - shape, 1 - color, 2 - location
         this.targetDimension = Random.Range(0, 3);
         this.targetFeature = Random.Range(0, 2);
@@ -248,6 +249,7 @@ public class ControlLevel_Trial_Tutorial6_complete : ControlLevel
 
     void AssignFeaturesToStimuli()
     {
+        Debug.Log("AssignFeaturesToStimuli");
         // assign the features randomly
         stims = new Stim[2];
         stims[0] = new Stim(new int[this.numDimensions]);
@@ -263,14 +265,29 @@ public class ControlLevel_Trial_Tutorial6_complete : ControlLevel
                     stims[second_stim].isTarget = true;
                     targetStim = 1;
                 }else{
+                    while(true){
+                        random_feature = Random.Range(0, this.numFeatureValuesPerDimension);
+                        if (random_feature != this.targetFeature)
+                            break;
+                    }
+                    stims[second_stim].SetFeatureValue(dim, random_feature);
                     stims[first_stim].isTarget = true;   
                     targetStim = 0;
                 }
             }
-            else
-                stims[second_stim].SetFeatureValue(dim, Random.Range(0, this.numFeatureValuesPerDimension));
+            else{
+                while(true){
+                    var r = Random.Range(0, this.numFeatureValuesPerDimension);
+                    if (random_feature != r){
+                        random_feature = r;
+                        break;
+                    }
+                }
+                stims[second_stim].SetFeatureValue(dim, random_feature);
+            }
         }
 
+        Debug.Log("setting physical properties of stims");
         // set the stimuli gameobjects' properties according to the features assigned
         foreach(var stim in stims){
             // shape: 0 - sphere, 1 - cube
@@ -280,9 +297,11 @@ public class ControlLevel_Trial_Tutorial6_complete : ControlLevel
                 stim.gameObject = cube;
             
             // color
+            Debug.Log("color:" + stim.featureValues[1]);
             stim.gameObject.GetComponent<Renderer>().material.color = this.ColorFeatureValues[stim.featureValues[1]];
 
             // location
+            Debug.Log("location:" + stim.featureValues[2]);
             stim.gameObject.transform.position = this.LocationFeatureValues[stim.featureValues[2]].position;
         }
         

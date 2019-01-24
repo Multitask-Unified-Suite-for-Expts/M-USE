@@ -483,6 +483,7 @@ namespace USE_States
         /// Whether this Control Level is the Main Level of the experiment.
         /// </summary>
         public bool isMainLevel;
+        public bool CallDefineLevelAutomatically = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="T:State_Namespace.ControlLevel"/> prints termination and initialization messages to the log.
@@ -515,8 +516,9 @@ namespace USE_States
             Duration = -1;
             Paused = false;
             controlLevelTerminationSpecifications = new List<ControlLevelTerminationSpecification>();
-            DefineControlLevel();
 
+            if(CallDefineLevelAutomatically)
+                DefineControlLevel();
 
             if (InitScreen != null)
             {

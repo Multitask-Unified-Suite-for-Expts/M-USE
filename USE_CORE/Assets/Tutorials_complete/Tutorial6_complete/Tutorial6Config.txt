@@ -1,6 +1,6 @@
 //Trial variables
 float	stimOnDur	1
-float	responseMaxDur	7
+float	responseMaxDur	5
 float	fbDur	0.5
 float	itiDur	0.5
 float	posRange	3

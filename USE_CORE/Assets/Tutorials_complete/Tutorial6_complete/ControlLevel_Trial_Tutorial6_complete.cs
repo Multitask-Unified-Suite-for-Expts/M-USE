@@ -109,11 +109,14 @@ public class ControlLevel_Trial_Tutorial6_complete : ControlLevel
 
     //#########CHANGE IN EXTENDED SCRIPT - parameters now controlled by variables instead of hardcoding########
     [HideInInspector]
-    public float stimOnDur, responseMaxDur, fbDur, itiDur, posRange, minDistance, rewardProb;
+    public float responseMaxDur, fbDur, itiDur, rewardProb;
     [HideInInspector]
     public int numTrials, numCorrect, numReward, trialInBlock, trialInExperiment = 1, response, reward;
     [HideInInspector]
     public DataController_Trial_Tutorial6_complete trialData;
+
+    public System.Action OnStartTrial, OnGoPeriod;
+    public System.Action<int> OnReward, OnAbortTrial;
 
     public override void DefineControlLevel()
     {
@@ -149,11 +152,17 @@ public class ControlLevel_Trial_Tutorial6_complete : ControlLevel
             cube.SetActive(true);
             ResetRelativeStartTime();
             response = -1;
+            if(OnStartTrial != null)
+                OnStartTrial.Invoke();
         });
         stimOn.AddTimer(itiDur, collectResponse);
 
         //Define collectResponse State
-        collectResponse.AddInitializationMethod(() => goCue.SetActive(true));
+        collectResponse.AddInitializationMethod(() => {
+                goCue.SetActive(true);
+                if(OnGoPeriod != null)
+                    OnGoPeriod.Invoke();
+            });
         collectResponse.AddUpdateMethod(() =>
         {
             if (InputBroker.GetMouseButtonDown(0))
@@ -221,11 +230,22 @@ public class ControlLevel_Trial_Tutorial6_complete : ControlLevel
                     }
                     break;
                 case 2:
-                    reward = -2;
+                    reward = 0;
                     col = Color.black;
                     break;
             }
             fb.GetComponent<RawImage>().color = col;
+            Debug.Log("reward:" + reward);
+            if(reward == -1){
+                Debug.Log("calling OnAbortTrial:" + OnAbortTrial);
+                if(OnAbortTrial != null)
+                    OnAbortTrial.Invoke(-1);
+            }
+            else{
+                Debug.Log("calling OnReward:" + OnReward);
+                if(OnReward != null)
+                    OnReward.Invoke(reward);
+            }
         });
         feedback.AddTimer(fbDur, iti, () => fb.SetActive(false));
 
@@ -241,7 +261,7 @@ public class ControlLevel_Trial_Tutorial6_complete : ControlLevel
     }
 
     public void SetTargetFeature(){
-        Debug.Log("setting target feature");
+        // Debug.Log("setting target feature");
         // dimensions: 0 - shape, 1 - color, 2 - location
         this.targetDimension = Random.Range(0, 3);
         this.targetFeature = Random.Range(0, 2);
@@ -249,7 +269,7 @@ public class ControlLevel_Trial_Tutorial6_complete : ControlLevel
 
     void AssignFeaturesToStimuli()
     {
-        Debug.Log("AssignFeaturesToStimuli");
+        // Debug.Log("AssignFeaturesToStimuli");
         // assign the features randomly
         stims = new Stim[2];
         stims[0] = new Stim(new int[this.numDimensions]);
@@ -287,7 +307,7 @@ public class ControlLevel_Trial_Tutorial6_complete : ControlLevel
             }
         }
 
-        Debug.Log("setting physical properties of stims");
+        // Debug.Log("setting physical properties of stims");
         // set the stimuli gameobjects' properties according to the features assigned
         foreach(var stim in stims){
             // shape: 0 - sphere, 1 - cube
@@ -297,11 +317,11 @@ public class ControlLevel_Trial_Tutorial6_complete : ControlLevel
                 stim.gameObject = cube;
             
             // color
-            Debug.Log("color:" + stim.featureValues[1]);
+            // Debug.Log("color:" + stim.featureValues[1]);
             stim.gameObject.GetComponent<Renderer>().material.color = this.ColorFeatureValues[stim.featureValues[1]];
 
             // location
-            Debug.Log("location:" + stim.featureValues[2]);
+            // Debug.Log("location:" + stim.featureValues[2]);
             stim.gameObject.transform.position = this.LocationFeatureValues[stim.featureValues[2]].position;
         }
         

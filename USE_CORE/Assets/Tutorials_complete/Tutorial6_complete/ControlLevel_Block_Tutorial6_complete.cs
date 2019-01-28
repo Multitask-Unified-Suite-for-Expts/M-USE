@@ -41,14 +41,16 @@ public class ControlLevel_Block_Tutorial6_complete: ControlLevel
 {
     public GameObject fbText, fbPanel;
 
-    [HideInInspector]
     public int numBlocks, currentBlock, numTrials, firstTrial, lastTrial;
     [HideInInspector]
     public DataController_Block_Tutorial6_complete blockData;
 
+    public System.Action OnBlockEnd;
+
+    public bool skipTexts;
+
     public override void DefineControlLevel()
     {
-
         //define States within this Control Level
         State runTrials = new State("RunTrials");
         State blockFb = new State("BlockFB");
@@ -74,33 +76,39 @@ public class ControlLevel_Block_Tutorial6_complete: ControlLevel
 
         blockFb.AddInitializationMethod(() =>
         {
-            fbText.SetActive(true);
-            fbPanel.SetActive(true);
-            float acc = (float)trialLevel.numCorrect / (float)(trialLevel.trialInBlock - 1);
+            if(!skipTexts){
+                fbText.SetActive(true);
+                fbPanel.SetActive(true);
+                float acc = (float)trialLevel.numCorrect / (float)(trialLevel.trialInBlock - 1);
 
-            string fbString = "You chose correctly on " + (acc * 100).ToString("F0") + "% of trials.\n";
-            if (acc >= 0.7)
-            {
-                fbString += "Nice Work!\n\nPress the space bar to ";
-            }
-            else
-            {
-                fbString += "You could probably get even higher! \n\nPress the space bar to ";
-            }
-            if (currentBlock < numBlocks)
-            {
-                fbString += "start the next block.";
-            }
-            else
-            {
-                fbString += "finish the experiment.";
-            }
+                string fbString = "You chose correctly on " + (acc * 100).ToString("F0") + "% of trials.\n";
+                if (acc >= 0.7)
+                {
+                    fbString += "Nice Work!\n\nPress the space bar to ";
+                }
+                else
+                {
+                    fbString += "You could probably get even higher! \n\nPress the space bar to ";
+                }
+                if (currentBlock < numBlocks)
+                {
+                    fbString += "start the next block.";
+                }
+                else
+                {
+                    fbString += "finish the experiment.";
+                }
 
-            fbText.GetComponent<Text>().text = fbString;
+                fbText.GetComponent<Text>().text = fbString;
+            }
         });
-        blockFb.SpecifyTermination(() => InputBroker.GetKeyDown(KeyCode.Space), runTrials, ()=> EndBlock());
+        if(!skipTexts){
+            blockFb.SpecifyTermination(() => InputBroker.GetKeyDown(KeyCode.Space), runTrials, ()=> EndBlock());
+        }else{
+            blockFb.SpecifyTermination(()=>true, runTrials, ()=> EndBlock());
+        }
 
-        this.AddTerminationSpecification(() => currentBlock > numBlocks);
+        this.AddTerminationSpecification(() => currentBlock >= numBlocks);
     }
 
     private void EndBlock()
@@ -110,5 +118,7 @@ public class ControlLevel_Block_Tutorial6_complete: ControlLevel
         blockData.AppendData();
         blockData.WriteData();
         currentBlock++;
+        if(OnBlockEnd != null)
+            OnBlockEnd.Invoke();
     }
 }

@@ -484,6 +484,7 @@ namespace USE_States
         /// </summary>
         public bool isMainLevel;
         public bool CallDefineLevelAutomatically = true;
+        public bool quitApplicationAtEnd = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="T:State_Namespace.ControlLevel"/> prints termination and initialization messages to the log.
@@ -1105,13 +1106,17 @@ namespace USE_States
             Duration = Time.time - StartTimeAbsolute;
             if (isMainLevel)
             {
-                if (Application.isEditor)
-                {
-                    UnityEditor.EditorApplication.isPlaying = false;
-                }
-                else
-                {
-                    Application.Quit();
+                if(quitApplicationAtEnd){
+                    if (Application.isEditor)
+                    {
+                        UnityEditor.EditorApplication.isPlaying = false;
+                    }
+                    else
+                    {
+                        Application.Quit();
+                    }
+                }else{
+                    currentState = null;
                 }
             }
         }
@@ -1121,7 +1126,7 @@ namespace USE_States
             StartTimeRelative = Time.time;
         }
     }
-
+    
 
 // ############################################################################################################
 // ############################################################################################################

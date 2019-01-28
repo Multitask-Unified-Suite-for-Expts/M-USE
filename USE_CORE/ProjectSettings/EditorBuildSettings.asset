@@ -4,5 +4,11 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Tutorials_complete/Tutorial6_complete/AIPlayer/AIPlayer.unity
+    guid: d02ca6f2f030c436e8badc8b9453c34f
+  - enabled: 1
+    path: Assets/Tutorials_complete/Tutorial6_complete/Tutorial6_complete.unity
+    guid: a835deacbca644c68be6fe9f4ad8574b
   m_configObjects: {}

@@ -59,6 +59,10 @@ public class ControlLevel_Main_Tutorial6_complete : ControlLevel {
     DataController_Block_Tutorial6_complete blockData;
     DataController_Trial_Tutorial6_complete trialData;
 
+    public bool skipTexts;
+
+    public System.Action OnExperimentEnd;
+
     public override void DefineControlLevel(){
         State intro = new State("Intro");
         State mainTask = new State("MainTask");
@@ -83,21 +87,30 @@ public class ControlLevel_Main_Tutorial6_complete : ControlLevel {
         intro.AddInitializationMethod(() =>
         {
             ReadConfigs();
-            slideLevel.DefineControlLevel();
+            if(!skipTexts)
+                slideLevel.DefineControlLevel();
             blockLevel.DefineControlLevel();
             trialLevel.DefineControlLevel();
         });
-        intro.AddChildLevel(slideLevel);
-        intro.SpecifyTermination(() => slideLevel.Terminated, mainTask);
+        if(!skipTexts){
+            intro.AddChildLevel(slideLevel);
+            intro.SpecifyTermination(() => slideLevel.Terminated, mainTask);
+        }else{
+            intro.SpecifyTermination(()=>true, mainTask);
+        }
 
         mainTask.AddChildLevel(blockLevel);
         mainTask.SpecifyTermination(() => blockLevel.Terminated, goodbye);
 
         goodbye.AddInitializationMethod(() =>
         {
-            textObj.SetActive(true);
-            panelObj.SetActive(true);
-            textObj.GetComponent<Text>().text = "Thank you very much for your time!";
+            if(!skipTexts){
+                textObj.GetComponent<Text>().text = "Thank you very much for your time!";
+                textObj.SetActive(true);
+                panelObj.SetActive(true);
+            }
+            if(OnExperimentEnd != null)
+                OnExperimentEnd.Invoke();
         });
         goodbye.AddTimer(2f, null);
     }
@@ -121,12 +134,9 @@ public class ControlLevel_Main_Tutorial6_complete : ControlLevel {
             blockLevel.numBlocks = ConfigReader.Get("exptConfig").Int["numBlocks"];
             blockLevel.numTrials = ConfigReader.Get("exptConfig").Int["numTrials"];
 
-            trialLevel.stimOnDur = ConfigReader.Get("exptConfig").Float["stimOnDur"];
             trialLevel.responseMaxDur = ConfigReader.Get("exptConfig").Float["responseMaxDur"];
             trialLevel.fbDur = ConfigReader.Get("exptConfig").Float["fbDur"];
             trialLevel.itiDur = ConfigReader.Get("exptConfig").Float["itiDur"];
-            trialLevel.posRange = ConfigReader.Get("exptConfig").Float["posRange"];
-            trialLevel.minDistance = ConfigReader.Get("exptConfig").Float["minDistance"];
             trialLevel.rewardProb = ConfigReader.Get("exptConfig").Float["rewardProb"];
     }
 }

@@ -117,6 +117,9 @@ public class ControlLevel_Trial_Tutorial6_complete : ControlLevel
 
     public System.Action OnStartTrial, OnGoPeriod;
     public System.Action<int> OnReward, OnAbortTrial;
+    public System.Action<bool> OnTrialEnd;
+
+    public bool startTrial;
 
     public override void DefineControlLevel()
     {
@@ -128,15 +131,16 @@ public class ControlLevel_Trial_Tutorial6_complete : ControlLevel
 
         //define States within this Control Level
         State stimOn = new State("StimOn");
+        State waitToStartTrial = new State("StartTrial");
         State collectResponse = new State("Response");
         State feedback = new State("Feedback");
         State iti = new State("ITI");
-        AddActiveStates(new List<State> { stimOn, collectResponse, feedback, iti });
+        AddActiveStates(new List<State> { stimOn, waitToStartTrial, collectResponse, feedback, iti });
 
         //Define stimOn State
         stimOn.AddInitializationMethod(() =>
         {
-            Debug.Log("responseMaxDur:" + responseMaxDur);
+            Debug.Log("New trial started");
             //#########CHANGE IN EXTENDED SCRIPT - CHANGE STIM LOCATION########
             //choose x/y position of first stim randomly, move second stim until it is far enough away that it doesn't overlap
             // Vector3 stim1pos = AssignRandomPos();
@@ -155,7 +159,9 @@ public class ControlLevel_Trial_Tutorial6_complete : ControlLevel
             if(OnStartTrial != null)
                 OnStartTrial.Invoke();
         });
-        stimOn.AddTimer(itiDur, collectResponse);
+        stimOn.AddTimer(itiDur, waitToStartTrial);
+
+        waitToStartTrial.SpecifyTermination(() => startTrial, collectResponse);
 
         //Define collectResponse State
         collectResponse.AddInitializationMethod(() => {
@@ -255,7 +261,14 @@ public class ControlLevel_Trial_Tutorial6_complete : ControlLevel
             sphere.SetActive(false);
             cube.SetActive(false);
         });
-        iti.AddTimer(itiDur, stimOn, () => { trialInBlock++; trialInExperiment++; trialData.AppendData(); trialData.WriteData(); });
+        iti.AddTimer(itiDur, stimOn, () => { 
+            trialInBlock++; 
+            trialInExperiment++; 
+            trialData.AppendData(); 
+            trialData.WriteData(); 
+            if(OnTrialEnd != null)
+                OnTrialEnd.Invoke(trialInBlock > numTrials);
+        });
 
         this.AddTerminationSpecification(() => trialInBlock > numTrials);
     }

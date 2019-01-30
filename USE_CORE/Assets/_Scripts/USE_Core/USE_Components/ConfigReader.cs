@@ -42,9 +42,10 @@ using UnityEngine.SceneManagement;
 using ConfigParsing;
 
 public class ConfigReader : MonoBehaviour{
-	//public static ConfigReader instance;  
-
 	private static Dictionary<string,Settings> allConfigs = new Dictionary<string, Settings>();
+	public static void Reset(){
+		allConfigs = new Dictionary<string, Settings>();
+	}
 
 	public static Settings Get(string target){
 		if (!allConfigs.ContainsKey(target)){

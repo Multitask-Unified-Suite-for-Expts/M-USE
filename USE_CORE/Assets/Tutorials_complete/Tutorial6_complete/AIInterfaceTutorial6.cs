@@ -17,6 +17,8 @@ public class AIInterfaceTutorial6 : TaskInterface
 	bool isRewardEpoch = false;
 	bool isBlockEnded = false;
 	bool isExperimentEnded = false;
+	bool isBlockEndCheked = false;
+	bool isExperimentEndCheked = false;
 	float reward = 0;
 	bool useScreenshot;
 	string screenshot_path;
@@ -57,6 +59,7 @@ public class AIInterfaceTutorial6 : TaskInterface
     }
     public override IEnumerator next(Observation outObservation)
     {
+		seq.startTrial = true;
         yield return StartCoroutine(setObservation(outObservation));
     }
 
@@ -87,7 +90,7 @@ public class AIInterfaceTutorial6 : TaskInterface
 		}
 		isGoPeriodStarted = false;
 		InputBroker.mousePosition = new Vector2(0, 0);
-
+		yield return new WaitForEndOfFrame();
 		// populate the Observation data structure
 		// set the the observation according to the configuration of the trial
 		ls.Clear(); 
@@ -129,6 +132,7 @@ public class AIInterfaceTutorial6 : TaskInterface
     public override IEnumerator act(int action, StepResult stepResult)
     {
 		Debug.Log("action:" + action);
+		yield return new WaitForEndOfFrame();
 		yield return StartCoroutine(SelectObject(ls[action].gameObject));
 
 		// wait till reward period, and read the reward
@@ -139,15 +143,24 @@ public class AIInterfaceTutorial6 : TaskInterface
 		isRewardEpoch = false;
 		stepResult.reward = reward;
 
-		// NOT DONE YET - Set whether with this step, trial/block/experiment ended
+		// wait till block end check is done
+		while(!isBlockEndCheked){
+			yield return new WaitForEndOfFrame();
+		}
+		while(!isExperimentEndCheked){
+			yield return new WaitForEndOfFrame();
+		}
+
 		stepResult.isTrialEnd = true;
 		stepResult.isBlockEnd = isBlockEnded;
-		stepResult.isExperimentEnd = 
-		isBlockEnded = false;
+		stepResult.isExperimentEnd = isExperimentEnded;
+		isBlockEndCheked = false;
+		isExperimentEndCheked = false;
     }
 	void setup(){
 		Debug.Log("Setting AI Player for FLU");
 		InputBroker.isSimulation = true;
+		seq.startTrial = false;
 		seq.OnStartTrial += () =>
 		{
 			Debug.Log("OnStartTrial");
@@ -163,14 +176,17 @@ public class AIInterfaceTutorial6 : TaskInterface
 			Debug.Log("OnReward, with reward:" + reward);
 			this.reward = reward;
 			this.isRewardEpoch = true;
+			seq.startTrial = false;
 		};
-		seqBlock.OnBlockEnd += () => {
-			Debug.Log("Block ended");
-			this.isBlockEnded = true;
+		seqBlock.OnBlockEnd += (ended) => {
+			Debug.Log("Block ended: " + ended);
+			this.isBlockEnded = ended;
+			isBlockEndCheked = true;
 		};
-		seqMain.OnExperimentEnd += () => {
-			Debug.Log("Experiment ended");
-			this.isExperimentEnded = true;
+		seqMain.OnExperimentEnd += (ended) => {
+			Debug.Log("Experiment ended: " + ended);
+			this.isExperimentEnded = ended;
+			isExperimentEndCheked = true;
 		};
 		seq.OnAbortTrial += (abortCode) => {
 			StartCoroutine(HandleTrialAborted(abortCode));
@@ -178,8 +194,8 @@ public class AIInterfaceTutorial6 : TaskInterface
 	}
 
 	IEnumerator HandleTrialAborted(int abortCode){
-		Debug.Log("wait till the start of next trial");
-		// wait till the start of next trial, and then set the observation to the new trial configuration
+		Debug.Log("trial aborted, wait till the start of next trial");
+		// wait till the start of next trial for it to be ready to send observation upon request
 		while(!isTrialStarted){
 			yield return new WaitForEndOfFrame();
 		}

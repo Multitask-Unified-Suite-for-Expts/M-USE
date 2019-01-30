@@ -40,7 +40,7 @@ namespace AIPlayer{
         }
 
         public IEnumerator act(int action){
-            this.stepResult = new StepResult(0, false);
+            this.stepResult = new StepResult(0);
             yield return StartCoroutine(task.act(action, stepResult));
         }
 

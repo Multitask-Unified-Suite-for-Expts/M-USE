@@ -45,9 +45,18 @@ public class ControlLevel_Block_Tutorial6_complete: ControlLevel
     [HideInInspector]
     public DataController_Block_Tutorial6_complete blockData;
 
-    public System.Action OnBlockEnd;
+    public System.Action<bool> OnBlockEnd, OnAllBlocksEnd;
 
     public bool skipTexts;
+
+    void CallbackTrialEnd(bool ranAllTrials){
+        if(OnBlockEnd != null){
+            // Debug.Log("Calling OnBlockEnd");
+            OnBlockEnd.Invoke(ranAllTrials);
+        }
+        if(OnAllBlocksEnd != null)
+            OnAllBlocksEnd.Invoke(ranAllTrials && currentBlock + 1 >= numBlocks);
+    }
 
     public override void DefineControlLevel()
     {
@@ -58,8 +67,9 @@ public class ControlLevel_Block_Tutorial6_complete: ControlLevel
         AddActiveStates(new List<State> { runTrials, blockFb });
 
         ControlLevel_Trial_Tutorial6_complete trialLevel = transform.GetComponent<ControlLevel_Trial_Tutorial6_complete>();
-        runTrials.AddChildLevel(trialLevel);
+        trialLevel.OnTrialEnd += CallbackTrialEnd;
 
+        runTrials.AddChildLevel(trialLevel);
         runTrials.AddInitializationMethod(() =>
         {
             trialLevel.numTrials = numTrials;
@@ -118,7 +128,5 @@ public class ControlLevel_Block_Tutorial6_complete: ControlLevel
         blockData.AppendData();
         blockData.WriteData();
         currentBlock++;
-        if(OnBlockEnd != null)
-            OnBlockEnd.Invoke();
     }
 }

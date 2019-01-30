@@ -61,7 +61,7 @@ public class ControlLevel_Main_Tutorial6_complete : ControlLevel {
 
     public bool skipTexts;
 
-    public System.Action OnExperimentEnd;
+    public System.Action<bool> OnExperimentEnd;
 
     public override void DefineControlLevel(){
         State intro = new State("Intro");
@@ -72,6 +72,11 @@ public class ControlLevel_Main_Tutorial6_complete : ControlLevel {
         slideLevel = transform.GetComponent<ControlLevel_TextSlides>();
         blockLevel = transform.GetComponent<ControlLevel_Block_Tutorial6_complete>();
         trialLevel = transform.GetComponent<ControlLevel_Trial_Tutorial6_complete>();
+
+        blockLevel.OnAllBlocksEnd += (isAllBlocksEnded) => {
+            Debug.Log("OnAllBlocksEnd:" + isAllBlocksEnded);
+            OnExperimentEnd(isAllBlocksEnded);
+        };
 
         blockData = GameObject.Find("DataControllers").GetComponent<DataController_Block_Tutorial6_complete>();
         trialData = GameObject.Find("DataControllers").GetComponent<DataController_Trial_Tutorial6_complete>();
@@ -109,8 +114,6 @@ public class ControlLevel_Main_Tutorial6_complete : ControlLevel {
                 textObj.SetActive(true);
                 panelObj.SetActive(true);
             }
-            if(OnExperimentEnd != null)
-                OnExperimentEnd.Invoke();
         });
         goodbye.AddTimer(2f, null);
     }
@@ -118,6 +121,7 @@ public class ControlLevel_Main_Tutorial6_complete : ControlLevel {
     void ReadConfigs(){
             string dataPath = locateFile.GetPath("Data Path");
             string configPath = locateFile.GetPath("Config File");
+            ConfigReader.Reset();
             ConfigReader.ReadConfig("exptConfig", configPath);
 
             bool storeData = ConfigReader.Get("exptConfig").Bool["storeData"];

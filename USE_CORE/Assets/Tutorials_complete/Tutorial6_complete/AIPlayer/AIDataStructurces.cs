@@ -18,7 +18,7 @@ namespace AIPlayer{
         public bool isTrialEnd = false;
         public bool isExperimentEnd = false;
 
-        public StepResult(float reward, bool isDone){
+        public StepResult(float reward){
             this.reward = reward;
             
             this.isTrialEnd = false;

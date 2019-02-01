@@ -88,7 +88,7 @@ public class ControlLevel_Main_Tutorial6_complete : ControlLevel {
         slideLevel.slideText = new string[] {"Welcome to our study!\nThank you very much for participating.",
             "In this task you will be shown two objects on each trial. You will have to choose one of them by clicking on it with the mouse.",
             "Wait for the \"Go!\" signal before clicking.", "After clicking, you will get feedback. A green square means your choice was rewarded. A red square means it was not.",
-            "Try to learn which object gives the most reward.", "Ask the experimenter if you have any questions, otherwise we will begin the experiment."};
+            "Try to learn which object gives the most reward.", "Object with a particular color, or shape, or location is rewarded most.", "Ask the experimenter if you have any questions, otherwise we will begin the experiment."};
 
         intro.AddInitializationMethod(() =>
         {

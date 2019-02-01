@@ -119,7 +119,7 @@ public class ControlLevel_Trial_Tutorial6_complete : ControlLevel
     public System.Action<int> OnReward, OnAbortTrial;
     public System.Action<bool> OnTrialEnd;
 
-    public bool startTrial;
+    public bool startTrial = true;
 
     public override void DefineControlLevel()
     {
@@ -165,6 +165,7 @@ public class ControlLevel_Trial_Tutorial6_complete : ControlLevel
 
         //Define collectResponse State
         collectResponse.AddInitializationMethod(() => {
+                Debug.Log("collect response");
                 goCue.SetActive(true);
                 if(OnGoPeriod != null)
                     OnGoPeriod.Invoke();

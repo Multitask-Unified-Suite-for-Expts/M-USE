@@ -75,7 +75,8 @@ public class ControlLevel_Main_Tutorial6_complete : ControlLevel {
 
         blockLevel.OnAllBlocksEnd += (isAllBlocksEnded) => {
             Debug.Log("OnAllBlocksEnd:" + isAllBlocksEnded);
-            OnExperimentEnd(isAllBlocksEnded);
+            if(OnExperimentEnd != null)
+                OnExperimentEnd(isAllBlocksEnded);
         };
 
         blockData = GameObject.Find("DataControllers").GetComponent<DataController_Block_Tutorial6_complete>();

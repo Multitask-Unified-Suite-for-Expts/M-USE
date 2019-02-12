@@ -140,7 +140,7 @@ public class ControlLevel_Trial_Tutorial10_complete : ControlLevel
         //Define stimOn State
         stimOn.AddInitializationMethod(() =>
         {
-            Debug.Log("New trial started");
+            // Debug.Log("New trial started");
             //#########CHANGE IN EXTENDED SCRIPT - CHANGE STIM LOCATION########
             //choose x/y position of first stim randomly, move second stim until it is far enough away that it doesn't overlap
             // Vector3 stim1pos = AssignRandomPos();
@@ -165,7 +165,7 @@ public class ControlLevel_Trial_Tutorial10_complete : ControlLevel
 
         //Define collectResponse State
         collectResponse.AddInitializationMethod(() => {
-                Debug.Log("collect response");
+                // Debug.Log("collect response");
                 goCue.SetActive(true);
                 if(OnGoPeriod != null)
                     OnGoPeriod.Invoke();
@@ -174,7 +174,7 @@ public class ControlLevel_Trial_Tutorial10_complete : ControlLevel
         {
             if (InputBroker.GetMouseButtonDown(0))
             {
-                Debug.Log("mouse down");
+                // Debug.Log("mouse down");
                 Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
                 RaycastHit hit;
                 if (Physics.Raycast(ray, out hit))
@@ -242,14 +242,14 @@ public class ControlLevel_Trial_Tutorial10_complete : ControlLevel
                     break;
             }
             fb.GetComponent<RawImage>().color = col;
-            Debug.Log("reward:" + reward);
+            // Debug.Log("reward:" + reward);
             if(reward == -1){
                 Debug.Log("calling OnAbortTrial:" + OnAbortTrial);
                 if(OnAbortTrial != null)
                     OnAbortTrial.Invoke(-1);
             }
             else{
-                Debug.Log("calling OnReward:" + OnReward);
+                // Debug.Log("calling OnReward:" + OnReward);
                 if(OnReward != null)
                     OnReward.Invoke(reward);
             }

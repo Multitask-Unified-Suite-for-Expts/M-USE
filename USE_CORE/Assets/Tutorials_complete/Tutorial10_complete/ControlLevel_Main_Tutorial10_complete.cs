@@ -74,7 +74,7 @@ public class ControlLevel_Main_Tutorial10_complete : ControlLevel {
         trialLevel = transform.GetComponent<ControlLevel_Trial_Tutorial10_complete>();
 
         blockLevel.OnAllBlocksEnd += (isAllBlocksEnded) => {
-            Debug.Log("OnAllBlocksEnd:" + isAllBlocksEnded);
+            // Debug.Log("OnAllBlocksEnd:" + isAllBlocksEnded);
             if(OnExperimentEnd != null)
                 OnExperimentEnd(isAllBlocksEnded);
         };

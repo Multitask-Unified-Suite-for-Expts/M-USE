@@ -4,8 +4,8 @@ float	fbDur	0.2
 float	itiDur	0.2
 float	rewardProb	0.85 
 //Block variables
-int	numBlocks	1
-int	numTrials	3
+int	numBlocks	2
+int	numTrials	5
 
 //General variables
 bool	storeData	false

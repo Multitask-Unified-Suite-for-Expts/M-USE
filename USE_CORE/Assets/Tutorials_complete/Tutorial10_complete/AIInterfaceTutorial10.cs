@@ -6,11 +6,11 @@ using UnityEngine.Events;
 using USE_States;
 
 [System.Serializable]
-public class AIInterfaceTutorial6 : TaskInterface
+public class AIInterfaceTutorial10 : TaskInterface
 {
-	public ControlLevel_Trial_Tutorial6_complete seq;
-	public ControlLevel_Block_Tutorial6_complete seqBlock;
-	public ControlLevel_Main_Tutorial6_complete seqMain;
+	public ControlLevel_Trial_Tutorial10_complete seq;
+	public ControlLevel_Block_Tutorial10_complete seqBlock;
+	public ControlLevel_Main_Tutorial10_complete seqMain;
 	public Camera mainCamera;
 	bool isTrialStarted = false;
 	bool isGoPeriodStarted = false;

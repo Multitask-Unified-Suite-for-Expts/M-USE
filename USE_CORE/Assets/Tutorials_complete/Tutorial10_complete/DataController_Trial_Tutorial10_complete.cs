@@ -37,9 +37,9 @@ using UnityEngine;
 using System;
 using USE_Data;
 
-public class DataController_Trial_Tutorial6_complete : DataController {
-    public ControlLevel_Block_Tutorial6_complete blockLevel;
-    public ControlLevel_Trial_Tutorial6_complete trialLevel;
+public class DataController_Trial_Tutorial10_complete : DataController {
+    public ControlLevel_Block_Tutorial10_complete blockLevel;
+    public ControlLevel_Trial_Tutorial10_complete trialLevel;
 
     //public override void Update(){
     //    base.Update();
@@ -47,8 +47,8 @@ public class DataController_Trial_Tutorial6_complete : DataController {
 
     public override void DefineDataController()
     {
-        blockLevel = GameObject.Find("ControlLevels").GetComponent<ControlLevel_Block_Tutorial6_complete>();
-        trialLevel = GameObject.Find("ControlLevels").GetComponent<ControlLevel_Trial_Tutorial6_complete>();
+        blockLevel = GameObject.Find("ControlLevels").GetComponent<ControlLevel_Block_Tutorial10_complete>();
+        trialLevel = GameObject.Find("ControlLevels").GetComponent<ControlLevel_Trial_Tutorial10_complete>();
         AddDatum("Block", () => blockLevel.currentBlock);
         AddDatum("TrialInBlock", () => trialLevel.trialInBlock);
         AddDatum("TrialInExperiment", () => trialLevel.trialInExperiment);

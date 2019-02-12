@@ -35,11 +35,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using USE_Data;
 
-public class DataController_Block_Tutorial6_complete : DataController {
+public class DataController_Block_Tutorial10_complete : DataController {
     public override void DefineDataController()
     {
-        ControlLevel_Block_Tutorial6_complete blockLevel = GameObject.Find("ControlLevels").GetComponent<ControlLevel_Block_Tutorial6_complete>();
-        ControlLevel_Trial_Tutorial6_complete trialLevel = GameObject.Find("ControlLevels").GetComponent<ControlLevel_Trial_Tutorial6_complete>();
+        ControlLevel_Block_Tutorial10_complete blockLevel = GameObject.Find("ControlLevels").GetComponent<ControlLevel_Block_Tutorial10_complete>();
+        ControlLevel_Trial_Tutorial10_complete trialLevel = GameObject.Find("ControlLevels").GetComponent<ControlLevel_Trial_Tutorial10_complete>();
         AddDatum("Block", () => blockLevel.currentBlock);
         AddDatum("FirstTrial", () => blockLevel.firstTrial);
         AddDatum("LastTrial", () => blockLevel.lastTrial);

@@ -38,7 +38,7 @@ using UnityEngine.UI;
 using USE_States;
 using ConfigParsing;
 
-public class ControlLevel_Main_Tutorial6_complete : ControlLevel {
+public class ControlLevel_Main_Tutorial10_complete : ControlLevel {
 
     public GameObject textObj;
     public GameObject panelObj;
@@ -53,11 +53,11 @@ public class ControlLevel_Main_Tutorial6_complete : ControlLevel {
     public LocateFile locateFile;
 
     ControlLevel_TextSlides slideLevel;
-    ControlLevel_Block_Tutorial6_complete blockLevel;
-    ControlLevel_Trial_Tutorial6_complete trialLevel;
+    ControlLevel_Block_Tutorial10_complete blockLevel;
+    ControlLevel_Trial_Tutorial10_complete trialLevel;
 
-    DataController_Block_Tutorial6_complete blockData;
-    DataController_Trial_Tutorial6_complete trialData;
+    DataController_Block_Tutorial10_complete blockData;
+    DataController_Trial_Tutorial10_complete trialData;
 
     public bool skipTexts;
 
@@ -70,8 +70,8 @@ public class ControlLevel_Main_Tutorial6_complete : ControlLevel {
         AddActiveStates(new List<State> { intro, mainTask, goodbye });
 
         slideLevel = transform.GetComponent<ControlLevel_TextSlides>();
-        blockLevel = transform.GetComponent<ControlLevel_Block_Tutorial6_complete>();
-        trialLevel = transform.GetComponent<ControlLevel_Trial_Tutorial6_complete>();
+        blockLevel = transform.GetComponent<ControlLevel_Block_Tutorial10_complete>();
+        trialLevel = transform.GetComponent<ControlLevel_Trial_Tutorial10_complete>();
 
         blockLevel.OnAllBlocksEnd += (isAllBlocksEnded) => {
             Debug.Log("OnAllBlocksEnd:" + isAllBlocksEnded);
@@ -79,8 +79,8 @@ public class ControlLevel_Main_Tutorial6_complete : ControlLevel {
                 OnExperimentEnd(isAllBlocksEnded);
         };
 
-        blockData = GameObject.Find("DataControllers").GetComponent<DataController_Block_Tutorial6_complete>();
-        trialData = GameObject.Find("DataControllers").GetComponent<DataController_Trial_Tutorial6_complete>();
+        blockData = GameObject.Find("DataControllers").GetComponent<DataController_Block_Tutorial10_complete>();
+        trialData = GameObject.Find("DataControllers").GetComponent<DataController_Trial_Tutorial10_complete>();
 
         blockLevel.blockData = blockData;
         trialLevel.trialData = trialData;

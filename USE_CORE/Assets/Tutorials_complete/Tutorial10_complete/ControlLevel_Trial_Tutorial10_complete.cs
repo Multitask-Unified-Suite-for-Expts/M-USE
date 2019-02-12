@@ -82,7 +82,7 @@ public class Stim{
 
 }
 
-public class ControlLevel_Trial_Tutorial6_complete : ControlLevel
+public class ControlLevel_Trial_Tutorial10_complete : ControlLevel
 {
     public GameObject goCue;
     public GameObject fb;
@@ -113,7 +113,7 @@ public class ControlLevel_Trial_Tutorial6_complete : ControlLevel
     [HideInInspector]
     public int numTrials, numCorrect, numReward, trialInBlock, trialInExperiment = 1, response, reward;
     [HideInInspector]
-    public DataController_Trial_Tutorial6_complete trialData;
+    public DataController_Trial_Tutorial10_complete trialData;
 
     public System.Action OnStartTrial, OnGoPeriod;
     public System.Action<int> OnReward, OnAbortTrial;

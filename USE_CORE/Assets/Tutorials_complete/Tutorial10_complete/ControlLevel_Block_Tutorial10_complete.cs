@@ -37,13 +37,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using USE_States;
 
-public class ControlLevel_Block_Tutorial6_complete: ControlLevel
+public class ControlLevel_Block_Tutorial10_complete: ControlLevel
 {
     public GameObject fbText, fbPanel;
 
     public int numBlocks, currentBlock, numTrials, firstTrial, lastTrial;
     [HideInInspector]
-    public DataController_Block_Tutorial6_complete blockData;
+    public DataController_Block_Tutorial10_complete blockData;
 
     public System.Action<bool> OnBlockEnd, OnAllBlocksEnd;
 
@@ -66,7 +66,7 @@ public class ControlLevel_Block_Tutorial6_complete: ControlLevel
 
         AddActiveStates(new List<State> { runTrials, blockFb });
 
-        ControlLevel_Trial_Tutorial6_complete trialLevel = transform.GetComponent<ControlLevel_Trial_Tutorial6_complete>();
+        ControlLevel_Trial_Tutorial10_complete trialLevel = transform.GetComponent<ControlLevel_Trial_Tutorial10_complete>();
         trialLevel.OnTrialEnd += CallbackTrialEnd;
 
         runTrials.AddChildLevel(trialLevel);

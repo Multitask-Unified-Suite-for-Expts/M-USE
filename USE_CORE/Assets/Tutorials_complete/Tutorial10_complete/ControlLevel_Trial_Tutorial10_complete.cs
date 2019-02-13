@@ -200,7 +200,7 @@ public class ControlLevel_Trial_Tutorial10_complete : ControlLevel
             fb.GetComponent<RawImage>().color = col;
             // Debug.Log("reward:" + reward);
             if(reward == -1){
-                Debug.Log("calling OnAbortTrial:" + OnAbortTrial);
+                // Debug.Log("calling OnAbortTrial:" + OnAbortTrial);
                 if(OnAbortTrial != null)
                     OnAbortTrial.Invoke(-1);
             }

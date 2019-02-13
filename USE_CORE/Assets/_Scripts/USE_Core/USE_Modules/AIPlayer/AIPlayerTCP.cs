@@ -50,17 +50,17 @@ namespace AIPlayer{
 
 		IEnumerator handleMsg(string msg_rcvd){
 			string msg = msg_rcvd;
-			Debug.Log("cmd rcvd: " +  msg);
+			// Debug.Log("cmd rcvd: " +  msg);
 			Command cmd = JsonUtility.FromJson<Command>(msg);
 			yield return 0;
-			Debug.Log("handleMsg: " + waitAckAbortTrial);
+			// Debug.Log("handleMsg: " + waitAckAbortTrial);
 			if(waitAckAbortTrial){
 				if(cmd.CMD.Equals("ACK_ABORT_TRIAL")){
 					waitAckAbortTrial = false;
 					server.SendResponse("success");
 				}
 				else{
-					Debug.Log("ignoring client msg, waiting for ACK_ABORT_TRIAL. Resending abort_code");
+					// Debug.Log("ignoring client msg, waiting for ACK_ABORT_TRIAL. Resending abort_code");
 					this.send_abort_code(abortCode);
 				}
 			}else{

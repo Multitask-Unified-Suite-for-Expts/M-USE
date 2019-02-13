@@ -47,11 +47,11 @@ public class AIInterfaceTutorial10 : AIInterface
     {
         this.useScreenshot = useScreenshot;
         this.screenshot_path = screenshot_path;
-        Debug.Log("Reseting the AI Player");
+        // Debug.Log("Reseting the AI Player");
         CallOnStart.Invoke();
         this.setup();
 
-        Debug.Log("wait till the next trial is set");
+        // Debug.Log("wait till the next trial is set");
         // wait till the start of next trial, and then set the observation to the new trial configuration
         while (!isTrialStarted)
         {
@@ -83,7 +83,7 @@ public class AIInterfaceTutorial10 : AIInterface
     IEnumerator setObservation(Observation o)
     {
         yield return 0;
-        Debug.Log("wait till the start of next trial, and then set the observation to the new trial configuration");
+        // Debug.Log("wait till the start of next trial, and then set the observation to the new trial configuration");
         // wait till the start of next trial, and then set the observation to the new trial configuration
         while (!isTrialStarted)
         {
@@ -91,7 +91,7 @@ public class AIInterfaceTutorial10 : AIInterface
         }
         isTrialStarted = false;
 
-        Debug.Log("wait till the GO epoch, and then take the given action");
+        // Debug.Log("wait till the GO epoch, and then take the given action");
         while (!isGoPeriodStarted)
         {
             yield return new WaitForEndOfFrame();
@@ -122,7 +122,7 @@ public class AIInterfaceTutorial10 : AIInterface
             var image = getScreenshot();
             o.screenshot_path = System.IO.Path.GetFullPath(screenshot_path);
         }
-        Debug.Log("Observation:" + o.vector);
+        // Debug.Log("Observation:" + o.vector);
     }
 
     byte[] getScreenshot()
@@ -139,17 +139,17 @@ public class AIInterfaceTutorial10 : AIInterface
         byte[] bytes = tex.EncodeToJPG();
         Destroy(tex);
         System.IO.File.WriteAllBytes(screenshot_path, bytes);
-        Debug.Log("screenshot written to path: " + screenshot_path);
+        // Debug.Log("screenshot written to path: " + screenshot_path);
         return bytes;
     }
     public override IEnumerator act(int action, StepResult stepResult)
     {
-        Debug.Log("action:" + action);
+        // Debug.Log("action:" + action);
         yield return new WaitForEndOfFrame();
         yield return StartCoroutine(SelectObject(ls[action].gameObject));
 
         // wait till reward period, and read the reward
-        Debug.Log("wait till reward period, and read the reward");
+        // Debug.Log("wait till reward period, and read the reward");
         while (!isRewardEpoch)
         {
             yield return new WaitForEndOfFrame();
@@ -175,35 +175,35 @@ public class AIInterfaceTutorial10 : AIInterface
     }
     void setup()
     {
-        Debug.Log("Setting AI Player for FLU");
+        // Debug.Log("Setting AI Player for FLU");
         InputBroker.isSimulation = true;
         seq.startTrial = false;
         seq.OnStartTrial += () =>
         {
-            Debug.Log("OnStartTrial");
+            // Debug.Log("OnStartTrial");
             this.isTrialStarted = true;
         };
         seq.OnGoPeriod += () =>
         {
-            Debug.Log("OnGoPeriod");
+            // Debug.Log("OnGoPeriod");
             this.isGoPeriodStarted = true;
         };
         seq.OnReward += (reward) =>
         {
-            Debug.Log("OnReward, with reward:" + reward);
+            // Debug.Log("OnReward, with reward:" + reward);
             this.reward = reward;
             this.isRewardEpoch = true;
             seq.startTrial = false;
         };
         seqBlock.OnBlockEnd += (ended) =>
         {
-            Debug.Log("Block ended: " + ended);
+            // Debug.Log("Block ended: " + ended);
             this.isBlockEnded = ended;
             isBlockEndCheked = true;
         };
         seqMain.OnExperimentEnd += (ended) =>
         {
-            Debug.Log("Experiment ended: " + ended);
+            // Debug.Log("Experiment ended: " + ended);
             this.isExperimentEnded = ended;
             isExperimentEndCheked = true;
         };
@@ -216,7 +216,7 @@ public class AIInterfaceTutorial10 : AIInterface
 
     IEnumerator HandleTrialAborted(int abortCode)
     {
-        Debug.Log("trial aborted, wait till the start of next trial");
+        // Debug.Log("trial aborted, wait till the start of next trial");
         // wait till the start of next trial for it to be ready to send observation upon request
         while (!isTrialStarted)
         {
@@ -227,14 +227,14 @@ public class AIInterfaceTutorial10 : AIInterface
 
     IEnumerator SelectObject(GameObject g)
     {
-        Debug.Log("selecting object");
+        // Debug.Log("selecting object");
         InputBroker.mousePosition = getScreenPointForObject(g);
         // if (!Application.isEditor)
         // {
         //     InputBroker.mousePosition = InputBroker.mousePosition + new Vector3(Screen.width, 0f, 0f);
         // }
         yield return StartCoroutine(InputBroker.ClickMouseButton(0));
-        Debug.Log("object selected");
+        // Debug.Log("object selected");
     }
 
     public Vector2 getScreenPointForObject(GameObject g)

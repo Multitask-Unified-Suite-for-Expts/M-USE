@@ -28,6 +28,8 @@ public class TCPServerAI : MonoBehaviour {
 
 	public event Action<string> OnReceiveMsg;
 
+	public bool debug = false;
+
 	// Use this for initialization
 	void Start () { 		
 		// Start TcpServer background thread 		
@@ -51,7 +53,8 @@ public class TCPServerAI : MonoBehaviour {
 			// Create listener on localhost port 8052. 			
 			tcpListener = new TcpListener(IPAddress.Parse("127.0.0.1"), PORT); 			
 			tcpListener.Start();          
-			Debug.Log("Server is listening");              
+			if(debug)
+				Debug.Log("Server is listening");              
 			Byte[] bytes = new Byte[1024];  			
 			while (true) { 				
 				using (connectedTcpClient = tcpListener.AcceptTcpClient()) { 					
@@ -64,7 +67,8 @@ public class TCPServerAI : MonoBehaviour {
 							Array.Copy(bytes, 0, incommingData, 0, length);  							
 							// Convert byte array to string message. 							
 							string clientMessage = Encoding.ASCII.GetString(incommingData); 							
-							Debug.Log("client message received as: " + clientMessage); 	
+							if(debug)
+								Debug.Log("client message received as: " + clientMessage); 	
 							OnReceiveMsg.Invoke(clientMessage);
 						} 					
 					} 				
@@ -90,8 +94,9 @@ public class TCPServerAI : MonoBehaviour {
 				// Convert string message to byte array.                 
 				byte[] serverMessageAsByteArray = Encoding.ASCII.GetBytes(serverMessage); 				
 				// Write byte array to socketConnection stream.               
-				stream.Write(serverMessageAsByteArray, 0, serverMessageAsByteArray.Length);               
-				Debug.Log("Server sending message: " + serverMessage);
+				stream.Write(serverMessageAsByteArray, 0, serverMessageAsByteArray.Length);    
+				if(debug)
+					Debug.Log("Server sending message: " + serverMessage);
 			}       
 		} 		
 		catch (SocketException socketException) {             

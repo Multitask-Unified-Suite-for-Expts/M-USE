@@ -219,8 +219,10 @@ public class ControlLevel_Trial_Tutorial10_complete : ControlLevel
             cube.SetActive(false);
         });
         iti.AddTimer(itiDur, stimOn, () => { 
-            trialInBlock++; 
-            trialInExperiment++; 
+            if(reward != -1){
+                trialInBlock++; 
+                trialInExperiment++; 
+            }
             trialData.AppendData(); 
             trialData.WriteData(); 
             if(OnTrialEnd != null)

@@ -1,11 +1,11 @@
 //Trial variables
-float	responseMaxDur	5
-float	fbDur	0.2
-float	itiDur	0.2
+float	responseMaxDur	1
+float	fbDur	0.0
+float	itiDur	0.0
 float	rewardProb	0.85
 //Block variables
-int	numBlocks	2
-int	numTrials	5
+int	numBlocks	1
+int	numTrials	3
 
 //General variables
 bool	storeData	false

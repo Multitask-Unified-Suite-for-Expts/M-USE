@@ -91,7 +91,7 @@ public class TCPServerAI : MonoBehaviour {
 				byte[] serverMessageAsByteArray = Encoding.ASCII.GetBytes(serverMessage); 				
 				// Write byte array to socketConnection stream.               
 				stream.Write(serverMessageAsByteArray, 0, serverMessageAsByteArray.Length);               
-				Debug.Log("Server sent his message - should be received by client");           
+				Debug.Log("Server sending message: " + serverMessage);
 			}       
 		} 		
 		catch (SocketException socketException) {             

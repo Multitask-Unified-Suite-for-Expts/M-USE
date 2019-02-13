@@ -209,6 +209,7 @@ public class AIInterfaceTutorial10 : AIInterface
         };
         seq.OnAbortTrial += (abortCode) =>
         {
+						seq.startTrial = false;
             StartCoroutine(HandleTrialAborted(abortCode));
         };
     }

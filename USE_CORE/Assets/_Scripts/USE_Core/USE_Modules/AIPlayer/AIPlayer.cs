@@ -13,7 +13,7 @@ namespace AIPlayer{
         [HideInInspector]
         public Observation observation;
         [HideInInspector]
-        public TaskInterface task;
+        public AIInterface task;
 
         // Config Variables
         public string TaskSceneName;
@@ -32,13 +32,13 @@ namespace AIPlayer{
             {
                 yield return null;
             }
-            task = GameObject.FindObjectsOfType<TaskInterface>()[0];
+            task = GameObject.FindObjectsOfType<AIInterface>()[0];
             yield return StartCoroutine(task.reset(useScreenshot, screenshot_path));
         }
 
-        public IEnumerator next(){
+        public IEnumerator step(){
             this.observation = new Observation();
-            yield return StartCoroutine(task.next(observation));
+            yield return StartCoroutine(task.step(observation));
         }
 
         public IEnumerator act(int action){
@@ -59,7 +59,7 @@ namespace AIPlayer{
         IEnumerator TestPlay(){
             yield return StartCoroutine(reset());
             while(true){
-                yield return StartCoroutine(next());
+                yield return StartCoroutine(step());
                 int action = Random.Range(0, this.getActionSize());
                 yield return StartCoroutine(act(action));
             }

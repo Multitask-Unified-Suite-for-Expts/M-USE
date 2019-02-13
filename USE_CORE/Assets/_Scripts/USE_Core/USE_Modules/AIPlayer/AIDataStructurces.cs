@@ -20,14 +20,13 @@ namespace AIPlayer{
 
         public StepResult(float reward){
             this.reward = reward;
-            
             this.isTrialEnd = false;
             this.isExperimentEnd = false;
             this.isBlockEnd = false;
         }
     }
 
-    public abstract class TaskInterface:MonoBehaviour{
+    public abstract class AIInterface:MonoBehaviour{
         public event System.Action<int> OnAbortTrial;
 
         public void AbortTrial(int abortCode){
@@ -36,7 +35,7 @@ namespace AIPlayer{
         }
         public abstract int getActionSize();
         public abstract IEnumerator reset(bool useScreenshot, string screenshot_path="screenshot.jpg");
-        public abstract IEnumerator next(Observation outObservation);
+        public abstract IEnumerator step(Observation outObservation);
         public abstract IEnumerator act(int action, StepResult outStepResult);
     }
 }

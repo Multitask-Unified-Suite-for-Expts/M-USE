@@ -618,7 +618,7 @@ MonoBehaviour:
   panelObj: {fileID: 480517653}
   sessionDetails: {fileID: 1763895095}
   locateFile: {fileID: 1048762499}
-  skipTexts: 0
+  skipTexts: 1
 --- !u!114 &711102653
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -646,7 +646,7 @@ MonoBehaviour:
   firstTrial: 0
   lastTrial: 0
   blockData: {fileID: 0}
-  skipTexts: 0
+  skipTexts: 1
 --- !u!114 &711102654
 MonoBehaviour:
   m_ObjectHideFlags: 0

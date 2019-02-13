@@ -142,7 +142,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55146be55fb554f2aa844eb6b55d2ee9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DEBUG: 0
+  DEBUG: 1
   stepResult:
     reward: 0
     isBlockEnd: 0

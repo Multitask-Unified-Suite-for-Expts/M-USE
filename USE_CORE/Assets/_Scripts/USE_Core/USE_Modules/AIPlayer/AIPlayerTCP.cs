@@ -60,8 +60,8 @@ namespace AIPlayer{
 			else if(cmd.CMD.Equals("GET_ACTION_SIZE")){
 				server.SendResponse("" + player.getActionSize());
 			}
-			else if(cmd.CMD.Equals("NEXT")){
-				yield return StartCoroutine(player.next());
+			else if(cmd.CMD.Equals("STEP")){
+				yield return StartCoroutine(player.step());
 				var observation = player.observation;
 				var res = JsonUtility.ToJson(observation);
 				server.SendResponse(res);

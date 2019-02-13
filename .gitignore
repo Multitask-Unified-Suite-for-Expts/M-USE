@@ -34,3 +34,6 @@ ExportedObj/
 sysinfo.txt
 
 .DS_Store
+__pycache__
+.idea
+screenshot.jpg

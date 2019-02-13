@@ -42,15 +42,6 @@ using ConfigParsing;
 public class Stim{
     [System.NonSerialized]
     public GameObject gameObject;
-
-    // public const int num_of_colors = 2;
-    // public const int num_of_shapes = 2;
-    // public const int num_of_locations = 2;
-
-    // public int color_value = 0;
-    // public int shape_value = 0;
-    // public int location_value = 0;
-
     public int[] featureValues;
 
     public bool isTarget = false;
@@ -62,24 +53,6 @@ public class Stim{
     public void SetFeatureValue(int dim, int value){
         this.featureValues[dim] = value;
     }
-
-    // public Stim(int shape, int color, int location, GameObject g){
-    //     this.SetShape(shape);
-    //     this.SetColor(color);
-    //     this.SetLocation(location);
-    //     this.gameObject = g;
-    // }
-
-    // public void SetShape(int value){
-    //     this.shape_value = value;
-    // }
-    // public void SetColor(int value){
-    //     this.color_value = value;
-    // }
-    // public void SetLocation(int value){
-    //     this.location_value = value;
-    // }
-
 }
 
 public class ControlLevel_Trial_Tutorial10_complete : ControlLevel
@@ -123,12 +96,6 @@ public class ControlLevel_Trial_Tutorial10_complete : ControlLevel
 
     public override void DefineControlLevel()
     {
-
-        // this.stims[0] = new Stim(0,0,0, this.sphere);
-        // this.stims[1] = new Stim(1,1,1, this.cube);
-
-
-
         //define States within this Control Level
         State stimOn = new State("StimOn");
         State waitToStartTrial = new State("StartTrial");
@@ -140,17 +107,6 @@ public class ControlLevel_Trial_Tutorial10_complete : ControlLevel
         //Define stimOn State
         stimOn.AddInitializationMethod(() =>
         {
-            // Debug.Log("New trial started");
-            //#########CHANGE IN EXTENDED SCRIPT - CHANGE STIM LOCATION########
-            //choose x/y position of first stim randomly, move second stim until it is far enough away that it doesn't overlap
-            // Vector3 stim1pos = AssignRandomPos();
-            // Vector3 stim2pos = AssignRandomPos();
-            // while (Vector3.Distance(stim1pos,stim2pos) < minDistance){
-            //     stim2pos = AssignRandomPos();
-            // }
-            // stim1.transform.position = stim1pos;
-            // stim2.transform.position = stim2pos;
-
             AssignFeaturesToStimuli();
             sphere.SetActive(true);
             cube.SetActive(true);
@@ -275,7 +231,6 @@ public class ControlLevel_Trial_Tutorial10_complete : ControlLevel
     }
 
     public void SetTargetFeature(){
-        // Debug.Log("setting target feature");
         // dimensions: 0 - shape, 1 - color, 2 - location
         this.targetDimension = Random.Range(0, 3);
         this.targetFeature = Random.Range(0, 2);
@@ -283,7 +238,6 @@ public class ControlLevel_Trial_Tutorial10_complete : ControlLevel
 
     void AssignFeaturesToStimuli()
     {
-        // Debug.Log("AssignFeaturesToStimuli");
         // assign the features randomly
         stims = new Stim[2];
         stims[0] = new Stim(new int[this.numDimensions]);

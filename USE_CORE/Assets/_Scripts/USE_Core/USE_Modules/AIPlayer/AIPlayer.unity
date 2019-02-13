@@ -152,7 +152,7 @@ MonoBehaviour:
     vector: []
     screenshot_path: 
   task: {fileID: 0}
-  NameTaskScene: Tutorial6_complete
+  TaskSceneName: Tutorial10_complete
 --- !u!4 &660031443
 Transform:
   m_ObjectHideFlags: 0

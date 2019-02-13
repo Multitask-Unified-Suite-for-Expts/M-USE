@@ -2,7 +2,7 @@
 float	responseMaxDur	5
 float	fbDur	0.2
 float	itiDur	0.2
-float	rewardProb	0.85 
+float	rewardProb	0.85
 //Block variables
 int	numBlocks	2
 int	numTrials	5

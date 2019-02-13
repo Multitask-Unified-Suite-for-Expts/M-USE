@@ -8,23 +8,25 @@ namespace AIPlayer{
     public class AIPlayer:MonoBehaviour {
         public bool DEBUG = false;
         bool loadedScene = false;
+        [HideInInspector]
         public StepResult stepResult;
+        [HideInInspector]
         public Observation observation;
-
+        [HideInInspector]
         public TaskInterface task;
 
         // Config Variables
-        public string NameTaskScene;
+        public string TaskSceneName;
         public IEnumerator reset(bool useScreenshot = false, string screenshot_path="screenshot.jpg"){
             AsyncOperation asyncLoad = null;
             if(loadedScene){
-                asyncLoad = SceneManager.UnloadSceneAsync(NameTaskScene);
+                asyncLoad = SceneManager.UnloadSceneAsync(TaskSceneName);
                 while (!asyncLoad.isDone)
                 {
                     yield return null;
                 }
             }
-            asyncLoad = SceneManager.LoadSceneAsync(NameTaskScene, LoadSceneMode.Additive);
+            asyncLoad = SceneManager.LoadSceneAsync(TaskSceneName, LoadSceneMode.Additive);
             loadedScene = true;
             while (!asyncLoad.isDone)
             {

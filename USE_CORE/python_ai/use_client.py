@@ -8,7 +8,7 @@ from time import sleep
 import json
 
 class USE_Client:
-    def __init__(self, debug=False, PORT):
+    def __init__(self, debug=False, PORT=9999):
 
         self.debug = debug
         self.buffer_size=4096

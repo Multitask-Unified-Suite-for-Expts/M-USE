@@ -8,17 +8,18 @@ from time import sleep
 import json
 
 class USE_Client:
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, PORT):
 
         self.debug = debug
         self.buffer_size=4096
+        self.PORT = PORT
 
         # create an ipv4 (AF_INET) socket object using the tcp protocol (SOCK_STREAM)
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         # connect the client
         # client.connect((target, port))
-        self.client.connect(('127.0.0.1', 9999))
+        self.client.connect(('127.0.0.1', self.PORT))
         self.flag_stop_listening = threading.Event()
 
         self.socket_rcv_calls = Queue()

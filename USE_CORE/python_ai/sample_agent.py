@@ -5,7 +5,7 @@ from use_client import USE_Client
 class Agent:
     def __init__(self):
         self.aborted = False
-        self.use = USE_Client(debug=False)
+        self.use = USE_Client(debug=False, PORT=9999)
         self.use.reset(callbackAbortTrial=self.callbackAbort, use_screenshot=True)
         self.action_size = self.use.get_action_size()
 

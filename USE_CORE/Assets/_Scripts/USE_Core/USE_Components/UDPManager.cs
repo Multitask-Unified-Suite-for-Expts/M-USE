@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using System.Linq;
 //using System.Threading;
 using System.Runtime.Serialization.Formatters.Binary;
 using USE_Utilities;
@@ -18,6 +19,9 @@ public class UDPManager : MonoBehaviour
 	public List<string> UDPSendBuffer = new List<string>();
 	public string recvStr;
 	public string sendStr;
+
+	// receiving Thread
+//	Thread receiveThread;
 
 	// udpclient object
 	UdpClient client;
@@ -32,6 +36,7 @@ public class UDPManager : MonoBehaviour
 	// infos
 	private string lastReceivedUDPPacket = "";
 
+	public bool arduinoCalibration = false;
 	public bool startRequestNewFrame = false;
 
 	private byte[] send_data;
@@ -40,24 +45,31 @@ public class UDPManager : MonoBehaviour
 	private string[] msgs;
 	private string msgType;
 	private double pythonSentTimeStamp;
+	private string calibCommand;
+	private float GazeTimeStamp;
+	private float joyC;
+	private float ArduinoTimeStamp;
 	private double unixRecvTimestamp;
 	private double unixSendTimestamp;
 	private int frame = 2;
+	//public ExperimentInfoController experimentInfo;
+	public SessionDetails sessionDetails;
 
-	// private ExternalDataManager externalDataManager;
-	public void UpdateClientInfo(string ip){
-		IP = ip;
-		Initialize();
-	}
+
+//	public bool stopThread = false;
+
+	private ExternalDataManager externalDataManager;
+		
 
 	// This method initializes the UDP connection and sends the first two messages to Python
 	public void Initialize()
 	{
-		CloseUDP();
-		// externalDataManager = GameObject.Find ("ScriptManager").GetComponent<ExternalDataManager> ();
+		externalDataManager = GameObject.Find ("ScriptManager").GetComponent<ExternalDataManager> ();
+		//experimentInfo = GameObject.Find("ExperimenterInfo").GetComponent<ExperimentInfoController>();
 		// Define address to send data to
 		pythonEndPoint = new IPEndPoint (IPAddress.Parse (IP), pythonPort);
 		pythonSock = new Socket (AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+		pythonSock.ReceiveBufferSize = 32768;
 
 
 		// Define client to receive data at
@@ -73,15 +85,17 @@ public class UDPManager : MonoBehaviour
 	// This function takes in a string and sends it to Python
 	public void SendString(string message)
 	{
+		
 		try
 		{
 			if (!String.IsNullOrEmpty(message))
 			{
 				unixSendTimestamp = TimeStamp.ConvertToUnixTimestamp(DateTime.Now);
-				message += "\tTIME " + unixSendTimestamp;
+				message += "###TIME " + unixSendTimestamp;
 				send_data = Encoding.UTF8.GetBytes(message);
 				pythonSock.SendTo(send_data, pythonEndPoint);
-				UDPSendBuffer.Add('"' + message + '"' + "\t" + unixSendTimestamp + "\t" + TimeStamp.ConvertToUnixTimestamp(DateTime.Now) + "\n");
+				UDPSendBuffer.Add(message);
+				//message = "";
 			}
 		}
 		catch (Exception err)
@@ -90,16 +104,21 @@ public class UDPManager : MonoBehaviour
 		}
 
 	}
+//	public void calibrateArduino() 
+//	{
+//		SendString ("ARDUINO CMD:CAF 40000");
+//	}
 
-	//********* BV: eyetracker bridge specific??
-	// public void RequestData() 
-	// {
-	// 	SendString("NEWFRAME");
-	// }
+	public void RequestData() 
+	{
+		SendString("NEWFRAME");
+	}
 
 	// receive thread
 	public void ReceiveData()
 	{
+//		while (!stopThread)
+//		{
 		try
 		{
 			// Bytes empfangen.
@@ -110,7 +129,12 @@ public class UDPManager : MonoBehaviour
 
 				// Convert data to UTF8 string format
 				rawtext = Encoding.UTF8.GetString(data);
-				UDPReceiveBuffer.Add(rawtext);
+				if (rawtext.Contains('\n'))
+					UDPReceiveBuffer.AddRange(rawtext.Split('\n').ToList());
+				else if (rawtext.Contains('\r'))
+					UDPReceiveBuffer.AddRange(rawtext.Split('\r').ToList());
+				else
+					UDPReceiveBuffer.Add(rawtext);
 			}
 			// Added this to reduce Unity CPU% from 100 to 60
 //				Thread.Sleep(10);
@@ -123,30 +147,29 @@ public class UDPManager : MonoBehaviour
 	}
 		
 	public void PrepareData(){
-		PrepareData("");
-	}	
-	public void PrepareData(string prefix){
-		// string prefix = experimentInfo.SubjectName + "\t" + Time.frameCount + "\t" + Time.time + "\t";
-		prefix = prefix  + "\t" + Time.frameCount + "\t" + Time.time + "\t";
-		recvStr = String.Join ("\n" + prefix, UDPReceiveBuffer.ToArray ());
-		sendStr = String.Join ("\n" + prefix, UDPSendBuffer.ToArray ());
-		recvStr = prefix + recvStr;
-		sendStr = prefix + sendStr;
+		string prefix = Time.frameCount + "\t" + Time.time + "\t";
+		if (UDPReceiveBuffer.Count > 0)
+		{
+			recvStr = String.Join("\n" + prefix, UDPReceiveBuffer.ToArray());
+			recvStr = prefix + recvStr;
+		}
+		else
+			recvStr = "";
+		if (UDPSendBuffer.Count > 0)
+		{
+			sendStr = String.Join("\n" + prefix, UDPSendBuffer.ToArray());
+			sendStr = prefix + sendStr;
+		}
+		else
+			sendStr = "";
 		UDPReceiveBuffer.Clear ();
 		UDPSendBuffer.Clear ();
 	}
 
 	public void CloseUDP()
 	{
-//		if (receiveThread != null) 
-//		{
-//			stopThread = true;
-//			receiveThread.Join ();
-//		}
-		if (client!=null){
-			client.Close();
-			pythonSock.Close ();
-		}
+		client.Close();
+		pythonSock.Close ();
 	}
 }
 

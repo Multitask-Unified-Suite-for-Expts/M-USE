@@ -40,3 +40,7 @@ python_ai/.idea
 Build_THR/
 Allegorithmic*
 TriLib*
+
+__pycache__
+.idea
+screenshot.jpg

@@ -1,4 +1,4 @@
-﻿/*
+/*
 This software is part of the Unified Suite for Experiments (USE).
 Information on USE is available at
 http://accl.psy.vanderbilt.edu/resources/analysis-tools/unifiedsuiteforexperiments/

@@ -320,17 +320,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 127b1188d36f041318828dee27ccbd66, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  disableOnConfirm:
-  - {fileID: 0}
-  enableOnConfirm:
-  - {fileID: 0}
   parentItems: {fileID: 224406438014872108}
   prefabItemInfo: {fileID: 114605473575026972}
-  itemLabels:
-  - label: Experiment Name
-    value: TestExp
-  - label: Subject Name
-    value: sub0
+  itemLabels: []
 --- !u!114 &114448042968487286
 MonoBehaviour:
   m_ObjectHideFlags: 1

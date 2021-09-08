@@ -120,12 +120,16 @@ public class EffortControl_TrialLevel : ControlLevel
         });
 
         stimOn.AddUpdateMethod(() => {
-            // check if user clicks on left or right
-            if (InputBroker.GetMouseButtonDown(0)) {
-                mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+			// check if user clicks on left or right
+            if (InputBroker.GetMouseButtonDown(0))
+			{
+				Debug.Log("asldkhglaskdhg");
+				mouseRay = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
                 RaycastHit hit;
-                if (Physics.Raycast(mouseRay, out hit)) {
-                    if (hit.transform.name == "StimLeft") {
+                if (Physics.Raycast(mouseRay, out hit))
+				{
+					Debug.Log(hit.transform.name);
+					if (hit.transform.name == "StimLeft") {
                         numChosenLeft++;
                         Debug.Log("Chose left");
                         leftRightChoice = "left";

@@ -194,6 +194,12 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 706246560}
     m_Modifications:
+    - target: {fileID: 5307914208256568226, guid: 59d3a5683299d48af83db605b499900d,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 4874126678125670354, guid: a7467567f50954ef6ae49f52cb3350a5,
+        type: 3}
     - target: {fileID: 5307914208256568252, guid: 59d3a5683299d48af83db605b499900d,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -692,7 +698,7 @@ PrefabInstance:
     - target: {fileID: -4216859302048453862, guid: 79fedf5c0c0c9414cb56d8c2e9c25fcf,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.7780918
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 79fedf5c0c0c9414cb56d8c2e9c25fcf,
         type: 3}
@@ -739,10 +745,30 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: 79fedf5c0c0c9414cb56d8c2e9c25fcf,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: 79fedf5c0c0c9414cb56d8c2e9c25fcf,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: 79fedf5c0c0c9414cb56d8c2e9c25fcf,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: -927199367670048503, guid: 79fedf5c0c0c9414cb56d8c2e9c25fcf,
         type: 3}
       propertyPath: m_Name
       value: OutlineBest
+      objectReference: {fileID: 0}
+    - target: {fileID: -927199367670048503, guid: 79fedf5c0c0c9414cb56d8c2e9c25fcf,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 79fedf5c0c0c9414cb56d8c2e9c25fcf, type: 3}
@@ -825,6 +851,12 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 420538508575657375, guid: 85bd16935f4344cbdb0e6897ac3aac2a,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 4283939744012322380, guid: 438d53b11ce86462682cc496c9fd3b26,
+        type: 3}
     - target: {fileID: 2027913918571565121, guid: 85bd16935f4344cbdb0e6897ac3aac2a,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -880,6 +912,12 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3815595253116004619, guid: 85bd16935f4344cbdb0e6897ac3aac2a,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: -2432090755550338912, guid: 74410ec0fd4e4482faa30027927a6346,
+        type: 3}
     - target: {fileID: 7102941359381234554, guid: 85bd16935f4344cbdb0e6897ac3aac2a,
         type: 3}
       propertyPath: m_Name
@@ -1262,7 +1300,7 @@ MonoBehaviour:
   numOfCoinsRight: 5
   clickPerOutline: 1
   numTrials: 10
-  maxScale: {x: 1, y: 1, z: 1}
+  maxScale: {x: 65, y: 2, z: 65}
   slider: {fileID: 1828236110}
 --- !u!1 &1778224459
 GameObject:

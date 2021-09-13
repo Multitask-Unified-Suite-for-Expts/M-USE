@@ -123,7 +123,6 @@ public class EffortControl_TrialLevel : ControlLevel
 			// check if user clicks on left or right
             if (InputBroker.GetMouseButtonDown(0))
 			{
-				Debug.Log("asldkhglaskdhg");
 				mouseRay = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
                 RaycastHit hit;
                 if (Physics.Raycast(mouseRay, out hit))

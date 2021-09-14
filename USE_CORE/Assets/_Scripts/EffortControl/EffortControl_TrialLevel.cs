@@ -1,5 +1,6 @@
 ﻿using System;
 using USE_States;
+using USE_Data;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
@@ -43,8 +44,7 @@ public class EffortControl_TrialLevel : ControlLevel
     private int numChosenLeft;
     private int numChosenRight;
     private String leftRightChoice;
-    [System.NonSerialized] public int response = -1;
-    [System.NonSerialized] public int trialCount = 0;
+    [System.NonSerialized] public int response = -1, trialCount = 0;
     
     // vector3 variables
     private Vector3 trialStimInitLocalScale;
@@ -62,20 +62,33 @@ public class EffortControl_TrialLevel : ControlLevel
     public Slider slider;
     private float sliderValueIncreaseAmount;
 
+	//data control variables
+	public bool storeData;
+	public string dataPath;
+	public string dataFileName;
+
     public override void DefineControlLevel() {
         loadVariables();
-        
-        //define States within this Control Level
-        State initScreen = new State("InitScreen");
-        State stimOn = new State("StimPres");
+
+		EffortControl_TrialDataController trialData = GameObject.Find("DataControllers").GetComponent<EffortControl_TrialDataController>();
+		trialData.storeData = storeData;
+		trialData.folderPath = dataPath;
+		trialData.fileName = dataFileName;
+
+		//define States within this Control Level
+		State startButton = new State("StartButton");
+        State stimOn = new State("StimOn");
         State collectResponse = new State("Response");
         State feedback = new State("Feedback");
         State iti = new State("ITI");
-        AddActiveStates(new List<State> { initScreen, stimOn, collectResponse, feedback, iti });
+        AddActiveStates(new List<State> { startButton, stimOn, collectResponse, feedback, iti });
+
+		AddInitializationMethod(() => { trialData.DefineDataController(); trialData.CreateFile(); });
 
         // define initScreen state
-        initScreen.AddInitializationMethod(() => {
-            disableAllGameobjects();
+        startButton.AddInitializationMethod(() => {
+			ResetRelativeStartTime();
+			disableAllGameobjects();
             initButton.SetActive(true);
             ChangeColor(stimRight, red);
             ChangeColor(stimLeft, red);
@@ -92,7 +105,7 @@ public class EffortControl_TrialLevel : ControlLevel
             Debug.Log("ScaleUpAmountRight" + scaleUpAmountRight);
         });
 
-        initScreen.AddUpdateMethod(() => {
+        startButton.AddUpdateMethod(() => {
             if (InputBroker.GetMouseButtonDown(0)) {
                 mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
                 RaycastHit hit;
@@ -105,8 +118,8 @@ public class EffortControl_TrialLevel : ControlLevel
             }
         });
 
-        initScreen.SpecifyTermination(() => response == 0, stimOn);
-        initScreen.AddDefaultTerminationMethod(() => initButton.SetActive(false));
+        startButton.SpecifyTermination(() => response == 0, stimOn);
+        startButton.AddDefaultTerminationMethod(() => initButton.SetActive(false));
 
         // Define stimOn state
         stimOn.AddInitializationMethod(() => {
@@ -235,15 +248,17 @@ public class EffortControl_TrialLevel : ControlLevel
 
         //Define iti state
         iti.AddInitializationMethod(() => trialStim.SetActive(false));
-        iti.AddTimer(2f, initScreen);
+        iti.AddTimer(2f, startButton);
         iti.AddDefaultTerminationMethod(() => {
             Debug.Log("Trial" + trialCount + " completed");
             DestroyContainerChild(balloonContainerLeft);
             DestroyContainerChild(balloonContainerRight);
             DestroyContainerChild(rewardContainerLeft);
             DestroyContainerChild(rewardContainerRight);
-            trialStim.transform.localScale = trialStimInitLocalScale;
-        });
+            trialStim.transform.localScale = trialStimInitLocalScale; 
+            trialData.AppendData(); 
+            trialData.WriteData();
+		});
 
 
         AddTerminationSpecification(() => trialCount > numTrials);
@@ -332,30 +347,6 @@ public class EffortControl_TrialLevel : ControlLevel
     }
 }
 
-//public class TrialDef
-//{
-//    public int BlockNum;
-//    public string ConditionName;
-//    public int ConditionNum;
-//    [System.NonSerialized]
-//    public Material ContextMaterial;
-//    public string ContextName;
-//    public int? ContextNum;
-//    public string ContextPath;
-//    public float DelayDuration;
-//    // public StimDef[] IrrelevantStims;
-//    public Material ItiContextMaterial;
-//    public int? ItiContextNum;
-//    public int? NumInitialTokens;
-//    // public StimDef[] RelevantStims;
-//    public float SampleDuration;
-//    // public StimDef[] SampleStims;
-//    // public TokenReward[] TokenRewardsNegative;
-//    // public TokenReward[] TokenRewardsPositive;
-//    public int TrialCode;
-//    public string TrialName;
-//    public int numClicksForIntermediateReward;
-//}
-//SessionSettings.ImportSettings_SingleTypeArray<EffortControl_TrialDef[]>("TrialDefs", filePath);
-//EffortControl_TrialDef[] trialDefs = (EffortControl_TrialDef[])SessionSettings.Get("TrialDefs");
+
+
 

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using USE_States;
+using USE_Data;
 
 namespace ExperimentTemplate
 {
@@ -39,6 +40,7 @@ namespace ExperimentTemplate
 
 	public class ControlLevel_Trial : ControlLevel
 	{
+		protected TrialData trialData;
 		public override void DefineControlLevel()
 		{
 			//DefineTrial();
@@ -64,4 +66,21 @@ namespace ExperimentTemplate
 	}
 	public class BlockDef { }
 	public class TrialDef { }
+
+	public class BlockData : DataController
+	{
+		public override void DefineDataController()
+		{
+		}
+	}
+	public class TrialData : DataController
+	{
+		public override void DefineDataController() { 
+		
+		}
+	}
+	public class FrameData : DataController
+	{
+		public override void DefineDataController() { }
+	}
 }

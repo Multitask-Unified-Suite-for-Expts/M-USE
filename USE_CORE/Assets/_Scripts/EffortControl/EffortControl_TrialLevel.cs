@@ -1,6 +1,7 @@
 ﻿using System;
 using USE_States;
 using USE_Data;
+using USE_ExperimentTemplate;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
@@ -43,7 +44,7 @@ public class EffortControl_TrialLevel : ControlLevel
     public int numTrials;
     private int numChosenLeft;
     private int numChosenRight;
-    private String leftRightChoice;
+    public String leftRightChoice;
     [System.NonSerialized] public int response = -1, trialCount = 0;
     
     // vector3 variables
@@ -70,10 +71,10 @@ public class EffortControl_TrialLevel : ControlLevel
     public override void DefineControlLevel() {
         loadVariables();
 
-		EffortControl_TrialDataController trialData = GameObject.Find("DataControllers").GetComponent<EffortControl_TrialDataController>();
-		trialData.storeData = storeData;
-		trialData.folderPath = dataPath;
-		trialData.fileName = dataFileName;
+		//EffortControl_TrialDataController trialData = GameObject.Find("DataControllers").GetComponent<EffortControl_TrialDataController>();
+		//trialData.storeData = storeData;
+		//trialData.folderPath = dataPath;
+		//trialData.fileName = dataFileName;
 
 		//define States within this Control Level
 		State startButton = new State("StartButton");
@@ -83,10 +84,11 @@ public class EffortControl_TrialLevel : ControlLevel
         State iti = new State("ITI");
         AddActiveStates(new List<State> { startButton, stimOn, collectResponse, feedback, iti });
 
-		AddInitializationMethod(() => { trialData.DefineDataController(); trialData.CreateFile(); });
+		//AddInitializationMethod(() => { trialData.DefineDataController(); trialData.CreateFile(); });
 
         // define initScreen state
         startButton.AddInitializationMethod(() => {
+			trialCount++;
 			ResetRelativeStartTime();
 			disableAllGameobjects();
             initButton.SetActive(true);
@@ -141,37 +143,40 @@ public class EffortControl_TrialLevel : ControlLevel
                 if (Physics.Raycast(mouseRay, out hit))
 				{
 					Debug.Log(hit.transform.name);
-					if (hit.transform.name == "StimLeft") {
-                        numChosenLeft++;
-                        Debug.Log("Chose left");
-                        leftRightChoice = "left";
-                        
-                        ChangeColor(stimRight, gray);
-                        ChangeContainerColor(balloonContainerRight, gray);
-                        DestroyContainerChild(rewardContainerRight);
-                        slider.transform.Translate(-400f, 0f, 0f);
-                        
-                        trialStim = hit.transform.gameObject;
-                        numOfClicks = numOfClicksLeft;
-                        scaleUpAmount = scaleUpAmountLeft;
-                    }
-                    else if (hit.transform.name == "StimRight") {
-                        numChosenRight++;
-                        Debug.Log("Chose right");
-                        leftRightChoice = "right";
-                        
-                        ChangeColor(stimLeft, gray);
-                        ChangeContainerColor(balloonContainerLeft, gray);
-                        DestroyContainerChild(rewardContainerLeft);
-                        slider.transform.Translate(400f, 0f, 0f);
-                        
-                        trialStim = hit.transform.gameObject;
-                        numOfClicks = numOfClicksRight;
-                        scaleUpAmount = scaleUpAmountRight;
-                    } 
-                    else {
-                        Debug.Log("Didn't click on any balloon");
-                    }
+					if (hit.transform.name == "StimLeft")
+					{
+						numChosenLeft++;
+						Debug.Log("Chose left");
+						leftRightChoice = "left";
+
+						ChangeColor(stimRight, gray);
+						ChangeContainerColor(balloonContainerRight, gray);
+						DestroyContainerChild(rewardContainerRight);
+						slider.transform.Translate(-400f, 0f, 0f);
+
+						trialStim = hit.transform.gameObject;
+						numOfClicks = numOfClicksLeft;
+						scaleUpAmount = scaleUpAmountLeft;
+					}
+					else if (hit.transform.name == "StimRight")
+					{
+						numChosenRight++;
+						Debug.Log("Chose right");
+						leftRightChoice = "right";
+
+						ChangeColor(stimLeft, gray);
+						ChangeContainerColor(balloonContainerLeft, gray);
+						DestroyContainerChild(rewardContainerLeft);
+						slider.transform.Translate(400f, 0f, 0f);
+
+						trialStim = hit.transform.gameObject;
+						numOfClicks = numOfClicksRight;
+						scaleUpAmount = scaleUpAmountRight;
+					}
+					else
+					{
+						Debug.Log("Didn't click on any balloon");
+					}
                 }
             }
         });
@@ -256,8 +261,8 @@ public class EffortControl_TrialLevel : ControlLevel
             DestroyContainerChild(rewardContainerLeft);
             DestroyContainerChild(rewardContainerRight);
             trialStim.transform.localScale = trialStimInitLocalScale; 
-            trialData.AppendData(); 
-            trialData.WriteData();
+            //trialData.AppendData(); 
+            //trialData.WriteData();
 		});
 
 
@@ -345,7 +350,14 @@ public class EffortControl_TrialLevel : ControlLevel
             rewardClone.SetActive(true);
         }
     }
+
+	public class EffortControl_TrialDef : TrialDef
+	{
+
+	}
 }
+
+
 
 
 

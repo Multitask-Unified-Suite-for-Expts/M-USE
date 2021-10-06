@@ -260,6 +260,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: StartButton
       objectReference: {fileID: 0}
+    - target: {fileID: 5307914208256568255, guid: 59d3a5683299d48af83db605b499900d,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 59d3a5683299d48af83db605b499900d, type: 3}
 --- !u!4 &423808874 stripped
@@ -438,7 +443,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &613408640
 RectTransform:
   m_ObjectHideFlags: 0
@@ -630,7 +635,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &819436919
 RectTransform:
   m_ObjectHideFlags: 0
@@ -718,12 +723,12 @@ PrefabInstance:
     - target: {fileID: -4216859302048453862, guid: 79fedf5c0c0c9414cb56d8c2e9c25fcf,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 79fedf5c0c0c9414cb56d8c2e9c25fcf,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.7071067
+      value: 0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 79fedf5c0c0c9414cb56d8c2e9c25fcf,
         type: 3}
@@ -733,7 +738,7 @@ PrefabInstance:
     - target: {fileID: -4216859302048453862, guid: 79fedf5c0c0c9414cb56d8c2e9c25fcf,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
+      value: -90
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 79fedf5c0c0c9414cb56d8c2e9c25fcf,
         type: 3}
@@ -768,7 +773,7 @@ PrefabInstance:
     - target: {fileID: -927199367670048503, guid: 79fedf5c0c0c9414cb56d8c2e9c25fcf,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 79fedf5c0c0c9414cb56d8c2e9c25fcf, type: 3}
@@ -794,7 +799,7 @@ GameObject:
   m_Component:
   - component: {fileID: 878362955}
   m_Layer: 0
-  m_Name: ' BalloonContainerRight'
+  m_Name: BalloonContainerRight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -824,7 +829,7 @@ GameObject:
   m_Component:
   - component: {fileID: 908691796}
   m_Layer: 0
-  m_Name: ' BalloonContainerLeft'
+  m_Name: BalloonContainerLeft
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -860,7 +865,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &930793597
 Transform:
   m_ObjectHideFlags: 0
@@ -902,7 +907,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &957235202
 Transform:
   m_ObjectHideFlags: 0
@@ -997,6 +1002,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Prize2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7102941359381234554, guid: 85bd16935f4344cbdb0e6897ac3aac2a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 85bd16935f4344cbdb0e6897ac3aac2a, type: 3}
@@ -1148,6 +1158,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Reward
+      objectReference: {fileID: 0}
+    - target: {fileID: 2467876797009257151, guid: fcf66123593c84cb8b43541097c9426c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2987144890344421381, guid: fcf66123593c84cb8b43541097c9426c,
         type: 3}
@@ -1320,7 +1335,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1649077765
 Transform:
   m_ObjectHideFlags: 0
@@ -1354,6 +1369,7 @@ MonoBehaviour:
   CallDefineLevelAutomatically: 1
   quitApplicationAtEnd: 1
   DebugActive: 1
+  Paused: 1
   initButton: {fileID: 423808875}
   fb: {fileID: 819436918}
   goCue: {fileID: 613408639}
@@ -1375,6 +1391,7 @@ MonoBehaviour:
   numOfCoinsRight: 2
   clickPerOutline: 1
   numTrials: 5
+  leftRightChoice: 
   maxScale: {x: 65, y: 2, z: 65}
   slider: {fileID: 1828236110}
   storeData: 1
@@ -1469,7 +1486,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1828236109
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1553,7 +1570,7 @@ GameObject:
   - component: {fileID: 1925789951}
   - component: {fileID: 1925789950}
   m_Layer: 0
-  m_Name: Main Camera
+  m_Name: EffortControl_Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1642,7 +1659,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!135 &2056884958
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1750,7 +1767,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}

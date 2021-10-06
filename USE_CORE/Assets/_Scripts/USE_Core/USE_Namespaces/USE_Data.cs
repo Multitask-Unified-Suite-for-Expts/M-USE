@@ -164,8 +164,9 @@ namespace USE_Data
 		private List<string> heldDataLine;
 
 		private bool Defined = false;
+		public bool DefineManually;
 
-		void InitDataController(int cap = 100)
+		public void InitDataController(int cap = 100)
 		{
 			capacity = cap;
 			data = new List<IDatum>();
@@ -178,14 +179,27 @@ namespace USE_Data
 
 		void Start()
 		{
-			var initScreen = FindObjectOfType<InitScreen>();
-			if (initScreen != null)
+			if (!DefineManually)
 			{
-				initScreen.OnConfirm += OnStart;
+				var initScreen = FindObjectOfType<InitScreen>();
+				if (initScreen != null)
+				{
+					initScreen.OnConfirm += OnStart;
+				}
+				else
+				{
+					OnStart();
+				}
 			}
-			else
+		}
+
+		public void ManuallyDefine(int cap = 100)
+		{
+		//everything in Start() should be triggered by init screen Confirm button press
+			if (!Defined)
 			{
-				OnStart();
+				Defined = true;
+				DefineDataController();
 			}
 		}
 

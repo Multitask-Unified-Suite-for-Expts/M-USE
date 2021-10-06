@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using UnityEngine;
 using Newtonsoft.Json;
+using UnityEngine;
 
 namespace USE_Settings
 {
@@ -155,6 +154,34 @@ namespace USE_Settings
 					// split the items
 					string[] sArray = stringValue.Split(',');
 					AddSetting(key, Array.ConvertAll(stringValue.Split(','), float.Parse));
+				}
+				catch (Exception e)
+				{
+					Debug.Log("Tried to convert string \"" + stringValue + "\" to type \""
+						+ typeString + "\" to add to Setting " + key + " in Settings List " + Name + " but the conversion failed.");
+
+					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+				}
+			}
+			else if (typeString.ToLower() == "list<string>")
+			{
+				try
+				{
+					// Remove the parentheses
+					if (stringValue.StartsWith("(", StringComparison.Ordinal) && stringValue.EndsWith(")", StringComparison.Ordinal) ||
+						stringValue.StartsWith("{", StringComparison.Ordinal) && stringValue.EndsWith("}", StringComparison.Ordinal) ||
+						stringValue.StartsWith("[", StringComparison.Ordinal) && stringValue.EndsWith("]", StringComparison.Ordinal))
+					{
+						stringValue = stringValue.Substring(1, stringValue.Length - 2);
+					}
+					// split the items
+					string[] sArray = stringValue.Split(',');
+					foreach(string s in sArray)
+					{
+						s.Replace("\"", "");
+						s.Trim();
+					}
+					AddSetting(key, sArray.ToList());
 				}
 				catch (Exception e)
 				{
@@ -370,7 +397,7 @@ namespace USE_Settings
 				if (typeof(T).GetProperty(fieldName) == null & typeof(T).GetField(fieldName) == null)
 				{
 					throw new Exception("Settings file \"" + settingsName + "\" contains the header \""
-						+ fieldName + "\" but this is not a property or a field of the provided type "
+						+ fieldName + "\" but this is not a public property or field of the provided type "
 						+ typeof(T) + ".");
 				}
 			}
@@ -388,6 +415,7 @@ namespace USE_Settings
 					{
 						if (typeof(T).GetProperty(fieldName) != null)
 						{
+							Debug.Log("kldsfh");
 							//settingsArray[iLine-1].GetProperty(fieldName) = Convert.ChangeType(values[iVal], typeof(T));
 						}
 						else if (typeof(T).GetField(fieldName) != null)

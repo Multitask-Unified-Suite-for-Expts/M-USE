@@ -33,6 +33,8 @@ SOFTWARE.
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
+using System;
 
 public class LocateFile : MonoBehaviour {
 
@@ -62,6 +64,23 @@ public class LocateFile : MonoBehaviour {
 			return mapFiles[keyToFile].path;
 		}
 		return null;
+	}
+
+	public string FindFileInFolder(string keyToFolder, string stringPattern)
+	{
+		string[] possibleFiles = Directory.GetFiles(keyToFolder, stringPattern);
+		if (possibleFiles.Length == 1)
+			return possibleFiles[0];
+		else if (possibleFiles.Length == 0)
+			Debug.Log("No file following pattern " + stringPattern + " is found at path " + keyToFolder + ".");
+		else
+			Debug.Log("More than one file following pattern " + stringPattern + " is found at path " + keyToFolder + ".");
+		return "";
+	}
+
+	internal static string FindFileInFolder(object taskConfigFolder, object p)
+	{
+		throw new NotImplementedException();
 	}
 }
 

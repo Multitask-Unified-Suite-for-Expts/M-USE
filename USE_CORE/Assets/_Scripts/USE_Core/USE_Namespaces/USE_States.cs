@@ -51,14 +51,15 @@ namespace USE_States
 		/// <summary>The name of this <see cref="T:State_Namespace.State"/>.</summary>
 		public string StateName;
 		/// <summary>The parent <see cref="T:State_Namespace.ControlLevel"/> of this <see cref="T:State_Namespace.State"/>.</summary>
-		public ControlLevel Parent;
+		public ControlLevel ParentLevel;
 		/// <summary>The child <see cref="T:State_Namespace.ControlLevel"/> of this <see cref="T:State_Namespace.State"/> (optional).</summary>
-		public ControlLevel Child;
+		public ControlLevel ChildLevel;
 
 		//STATE UPDATE, INITIALIZATION AND TERMINATION CONTROL
 		public List<StateInitialization> StateInitializations;
 		public StateInitialization StateDefaultInitialization;
 		public StateInitialization StateActiveInitialization;
+		private VoidDelegate StateUniversalInitialization;
 		/// <summary>The group of methods associated with this <see cref="T:State_Namespace.State"/>'s fixed update.</summary>
 		private VoidDelegate StateFixedUpdate;
 		/// <summary>The group of methods associated with this <see cref="T:State_Namespace.State"/>'s update.</summary>
@@ -72,6 +73,7 @@ namespace USE_States
 		/// <summary>The group of methods associated by default with this <see cref="T:State_Namespace.State"/>'s
 		///  termination (other terminations can be specified with <see cref="T:State_Namespace.StateTerminationSpecification"/>s).</summary>
 		public VoidDelegate StateDefaultTermination;
+		private VoidDelegate StateUniversalTermination;
 		/// <summary>The State that will follow this one, only given a value after StateTerminationCheck returns true.</summary>
 		public State Successor;
 
@@ -127,9 +129,9 @@ namespace USE_States
 			TimingInfo.Duration = -1;
 			StateInitializations = new List<StateInitialization>();
 			StateTerminationSpecifications = new List<StateTerminationSpecification>();
-			this.Parent = parent;
-			if (this.Parent != null)
-				this.Parent.AddAvailableStates(this);
+			this.ParentLevel = parent;
+			if (this.ParentLevel != null)
+				this.ParentLevel.AddAvailableStates(this);
 		}
 
 		//UPDATE, INITIALIZATION, AND DEFAULT TERMINATION METHODS
@@ -158,6 +160,11 @@ namespace USE_States
 			string name = StateName + "Initialization_" + StateInitializations.Count + "_(Default)";
 			AddDefaultInitializationMethod(method, name);
 		}
+		public void AddUniversalInitializationMethod(VoidDelegate method)
+		{
+			StateUniversalInitialization += method;
+		}
+
 
 		/// <summary>Adds state fixed update methods to <see cref="T:State_Namespace.State"/>.</summary>
 		/// <param name="method">The method to be added.</param>
@@ -192,6 +199,10 @@ namespace USE_States
 		{
 			StateDefaultTermination += method;
 		}
+		public void AddUniversalTerminationMethod(VoidDelegate method)
+		{
+			StateUniversalTermination += method;
+		}
 
 
 		public void SpecifyTermination(BoolDelegate terminationCriterion, State successorState)
@@ -202,7 +213,7 @@ namespace USE_States
 
 		public void SpecifyTermination(BoolDelegate terminationCriterion, State successorState, string successorInitName, VoidDelegate terminationMethod = null)
 		{
-			if (Parent.CheckForAvailableState(successorState) || successorState == null)
+			if (ParentLevel.CheckForAvailableState(successorState) || successorState == null)
 			{
 				StateInitialization init = null;
 				if (successorInitName != null)
@@ -224,7 +235,7 @@ namespace USE_States
 			}
 			else
 			{
-				Debug.LogError(Parent.ControlLevelName + ": Attempted to add successor state " + successorState.StateName + " to state " + StateName + " but this state is not found in control level " + Parent.ControlLevelName);
+				Debug.LogError(ParentLevel.ControlLevelName + ": Attempted to add successor state " + successorState.StateName + " to state " + StateName + " but this state is not found in control level " + ParentLevel.ControlLevelName);
 			}
 
 		}
@@ -243,7 +254,8 @@ namespace USE_States
 
 		public void AddChildLevel(ControlLevel child)
 		{
-			Child = child;
+			child.ParentState = this;
+			ChildLevel = child;
 		}
 
 
@@ -261,9 +273,9 @@ namespace USE_States
 				{
 					StateFixedUpdate();
 				}
-				if (Child != null)
+				if (ChildLevel != null)
 				{
-					Child.RunControlLevelFixedUpdate();
+					ChildLevel.RunControlLevelFixedUpdate();
 				}
 			}
 		}
@@ -280,9 +292,9 @@ namespace USE_States
 				{
 					StateUpdate();
 				}
-				if (Child != null)
+				if (ChildLevel != null)
 				{
-					Child.RunControlLevelUpdate();
+					ChildLevel.RunControlLevelUpdate();
 				}
 			}
 		}
@@ -298,9 +310,9 @@ namespace USE_States
 				{
 					StateLateUpdate();
 				}
-				if (Child != null)
+				if (ChildLevel != null)
 				{
-					Child.RunControlLevelLateUpdate();
+					ChildLevel.RunControlLevelLateUpdate();
 				}
 				CheckTermination();
 				//Termination only happens after LateUpdate
@@ -316,7 +328,7 @@ namespace USE_States
 			{
 				if (DebugActive)
 				{
-					Debug.Log("Control Level " + Parent.ControlLevelName + ": State " + StateName + " initialization on Frame " + Time.frameCount + ".");
+					Debug.Log("Control Level " + ParentLevel.ControlLevelName + ": State " + StateName + " initialization on Frame " + Time.frameCount + ".");
 				}
 				//reset default State characteristics
 				StateActiveInitialization = null;
@@ -327,18 +339,22 @@ namespace USE_States
 				//setup State timing
 				TimingInfo.StartFrame = Time.frameCount;
 				TimingInfo.StartTimeAbsolute = Time.time;
-				TimingInfo.StartTimeRelative = TimingInfo.StartTimeAbsolute - Parent.StartTimeRelative;
+				TimingInfo.StartTimeRelative = TimingInfo.StartTimeAbsolute - ParentLevel.StartTimeRelative;
 				TimingInfo.EndFrame = -1;
 				TimingInfo.EndTimeAbsolute = -1;
 				TimingInfo.EndTimeRelative = -1;
 				TimingInfo.Duration = -1;
-				if (Parent.PreviousState != null)
+				if (ParentLevel.PreviousState != null)
 				{
 					// the duration of a State should include its last frame, so needs to be measured at the start of the following State
-					Parent.PreviousState.TimingInfo.EndTimeAbsolute = Time.time;
-					Parent.PreviousState.TimingInfo.EndTimeRelative = Time.time - Parent.StartTimeRelative;
-					Parent.PreviousState.TimingInfo.Duration = Time.time - Parent.PreviousState.TimingInfo.StartTimeAbsolute;
+					ParentLevel.PreviousState.TimingInfo.EndTimeAbsolute = Time.time;
+					ParentLevel.PreviousState.TimingInfo.EndTimeRelative = Time.time - ParentLevel.StartTimeRelative;
+					ParentLevel.PreviousState.TimingInfo.Duration = Time.time - ParentLevel.PreviousState.TimingInfo.StartTimeAbsolute;
 				}
+				//if there is a universal initialization, run it
+				if (StateUniversalInitialization != null)
+					StateUniversalInitialization();
+
 				//If previous state specified this state's initialization, run it
 				if (StateActiveInitialization != null)
 				{
@@ -366,14 +382,14 @@ namespace USE_States
 			initialized = false;
 
 			//Time management
-			Parent.PreviousState = this;
+			ParentLevel.PreviousState = this;
 			TimingInfo.EndFrame = Time.frameCount;
 
 			if (DebugActive)
 			{
-				if (termSpec.SuccessorState != null && Parent.CheckForActiveState(termSpec.SuccessorState))
+				if (termSpec.SuccessorState != null && ParentLevel.CheckForActiveState(termSpec.SuccessorState))
 				{
-					Debug.Log("Control Level " + Parent.ControlLevelName + ": State " + StateName + " termination on Frame " + Time.frameCount + ", successor specified as " + termSpec.SuccessorState.StateName + ".");
+					Debug.Log("Control Level " + ParentLevel.ControlLevelName + ": State " + StateName + " termination on Frame " + Time.frameCount + ", successor specified as " + termSpec.SuccessorState.StateName + ".");
 				}
 				else
 				{
@@ -382,7 +398,7 @@ namespace USE_States
 					//    " attempted to move to successor state " + termSpec.SuccessorState.StateName +
 					//    " but this state is not an active state in this ControlLevel.");
 					//}
-					Debug.Log("Control Level " + Parent.ControlLevelName + ": State " + StateName + " termination on Frame " + Time.frameCount + ", no successor.");
+					Debug.Log("Control Level " + ParentLevel.ControlLevelName + ": State " + StateName + " termination on Frame " + Time.frameCount + ", no successor.");
 				}
 			}
 			//if TerminationSpecification includes a termination method, run it
@@ -395,13 +411,16 @@ namespace USE_States
 			{
 				StateDefaultTermination();
 			}
+			//if there is a universal termination, run it
+			if (StateUniversalTermination != null)
+				StateUniversalTermination();
 
 			//setup Successor State
 			if (termSpec.SuccessorState != null)
 			{
 				Successor = termSpec.SuccessorState;
 				Successor.initialized = false;
-				Parent.SpecifyCurrentState(Successor);
+				ParentLevel.SpecifyCurrentState(Successor);
 				if (termSpec.SuccessorInitialization != null)
 				{
 					Successor.StateActiveInitialization = termSpec.SuccessorInitialization;
@@ -409,8 +428,8 @@ namespace USE_States
 			}
 			else // if successor state is specified as null, the control level will terminate
 			{
-				Parent.Terminated = true;
-				Parent.ControlLevelTermination(null);
+				ParentLevel.Terminated = true;
+				ParentLevel.ControlLevelTermination(null);
 			}
 		}
 
@@ -465,6 +484,7 @@ namespace USE_States
 		public State CurrentState;
 		public State PreviousState;
 		public State DefaultInitState;
+		public State ParentState;
 
 		//Available states can optionally be added, to allow the easy runtime specification of different states in the Control Level via string names
 		/// <summary>
@@ -535,7 +555,7 @@ namespace USE_States
 		/// <value><c>true</c> if debug active; otherwise, <c>false</c>.</value>
 		public bool DebugActive;
 
-		public bool Paused { get; set; }
+		public bool Paused = true;
 
 		public abstract void DefineControlLevel();
 		public virtual void LoadSettings()
@@ -549,6 +569,7 @@ namespace USE_States
 			{
 				Debug.LogError("A Control Level requires a name.");
 			}
+			Debug.Log("Initialize " + ControlLevelName);
 			initialized = false;
 			Terminated = false;
 			CurrentState = null;
@@ -560,7 +581,7 @@ namespace USE_States
 			StartTimeAbsolute = -1;
 			EndFrame = -1;
 			Duration = -1;
-			Paused = false;
+			//Paused = false;
 			controlLevelTerminationSpecifications = new List<ControlLevelTerminationSpecification>();
 
 			//should be called after Init screen confirm button press
@@ -581,6 +602,7 @@ namespace USE_States
 				if (CallDefineLevelAutomatically)
 					DefineControlLevel();
 			}
+			Paused = false;
 		}
 		public void InitializeControlLevel(State state)
 		{
@@ -641,7 +663,7 @@ namespace USE_States
 		{
 			ActiveStates.Add(state);
 			ActiveStateNames.Add(state.StateName);
-			state.Parent = this;
+			state.ParentLevel = this;
 			state.DebugActive = DebugActive;
 			if (!AvailableStates.Contains(state))
 			{
@@ -1016,6 +1038,8 @@ namespace USE_States
 		//RUN STATEMACHINE
 		void Awake()
 		{
+			Debug.Log("Awake " + ControlLevelName);
+			Paused = true;
 			InitializeControlLevel();
 			if (isMainLevel)
 			{

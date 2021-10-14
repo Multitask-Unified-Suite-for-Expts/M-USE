@@ -327,6 +327,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 		clickMarker.SetActive(false);
 		balloonOutline.SetActive(false);
 		prize.SetActive(false);
+		reward.SetActive(false);
 		GameObject.Find("Slider").SetActive(false);
 
 		//cam = Camera.main.GetComponent<Camera>();
@@ -390,10 +391,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 		pos -= new Vector3(((numOfRewards - 1) * (width / 2)), 0, 0);
 		for (int i = 0; i < numOfRewards; i++)
 		{
-			GameObject rewardClone = Instantiate(reward, pos, reward.transform.rotation);
-			rewardClone.transform.Translate(i * width, 0, 0);
+			GameObject rewardClone = Instantiate(reward, pos, reward.transform.rotation, container.transform);
+			rewardClone.transform.Translate(new Vector3(i * width, 0, 0), Space.World);
 			rewardClone.name = "Reward" + leftRightChoice + (i + 1);
-			rewardClone.transform.parent = container.transform;
+			//rewardClone.transform.parent = container.transform;
 			rewardClone.SetActive(true);
 		}
 	}

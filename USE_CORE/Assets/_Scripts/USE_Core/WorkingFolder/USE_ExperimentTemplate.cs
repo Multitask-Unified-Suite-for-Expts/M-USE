@@ -79,16 +79,22 @@ namespace USE_ExperimentTemplate
 
 			setupSession.AddDefaultInitializationMethod(() =>
 			{
-				SessionData.CreateFile();
-				foreach (ControlLevel_Task_Template tl in AvailableTaskLevels)
-				{
+			SessionData.CreateFile();
+			foreach (ControlLevel_Task_Template tl in AvailableTaskLevels)
+			{
 					if (ActiveTaskNames.Contains(tl.TaskName))
 					{
 						ActiveTaskLevels.Add(tl.TaskName, tl);
 						tl.SessionDataControllers = SessionDataControllers;
 						tl.LocateFile = LocateFile;
 						tl.SessionDataPath = SessionDataPath;
-						tl.TaskConfigPath = LocateFile.GetPath("Config File Folder") + Path.DirectorySeparatorChar + tl.TaskName;
+						if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))
+							tl.TaskConfigPath = LocateFile.GetPath("Config File Folder") + Path.DirectorySeparatorChar + tl.TaskName;
+						else
+						{
+							List<string> configFolders = (List<string>)SessionSettings.Get("Session", "ConfigFolderNames");
+							tl.TaskConfigPath = LocateFile.GetPath("Config File Folder") + Path.DirectorySeparatorChar + configFolders[ActiveTaskNames.IndexOf(tl.TaskName)];
+						}
 						tl.FilePrefix = FilePrefix;
 						tl.StoreData = StoreData;
 						tl.SubjectID = SubjectID;
@@ -257,12 +263,19 @@ namespace USE_ExperimentTemplate
 
 		protected Type TaskDefType, BlockDefType, TrialDefType;
 
-		public abstract void SpecifyTypes();
+		public virtual void SpecifyTypes() { }
 
 		private void ReadSettingsFiles()
 		{
 			//user specifies what custom types they have that inherit from TaskDef, BlockDef, and TrialDef;
 			SpecifyTypes();
+
+			if (TaskDefType == null)
+				TaskDefType = typeof(TaskDef);
+			if (BlockDefType == null)
+				BlockDefType = typeof(BlockDef);
+			if (TrialDefType == null)
+				TrialDefType = typeof(TrialDef);
 
 			//read in the TaskDef, BlockDef and TrialDef files (any of these may not exist)
 			MethodInfo readTaskDef = GetType().GetMethod(nameof(this.ReadTaskDef)).MakeGenericMethod(new Type[] { TaskDefType });
@@ -327,6 +340,8 @@ namespace USE_ExperimentTemplate
 			State finishTask = new State("FinishTask");
 			runBlock.AddChildLevel(TrialLevel);
 			AddActiveStates(new List<State> { setupTask, runBlock, blockFeedback, finishTask });
+
+			TrialLevel.TrialDefType = TrialDefType;
 
 
 			AddInitializationMethod(() => {
@@ -502,7 +517,9 @@ namespace USE_ExperimentTemplate
 		protected State SetupTrial, FinishTrial;
 
 		public TrialDef[] TrialDefs;
-		//public TrialDef CurrentTrialDef;
+		//protected TrialDef CurrentTrialDef;
+		protected T GetCurrentTrialDef<T>() where T:TrialDef { return (T) TrialDefs[TrialCount_InBlock]; }
+		public Type TrialDefType;
 
 		public void DefineTrialLevel()
 		{
@@ -530,7 +547,9 @@ namespace USE_ExperimentTemplate
 				else 
 					FrameData.fileName = FilePrefix + "__FrameData_Trial_000" + (TrialCount_InTask + 1) + ".txt";
 				FrameData.CreateFile();
-				PopulateCurrentTrialVariables();
+				//MethodInfo getCTrialDef = GetType().GetMethod(nameof(this.GetCurrentTrialDef)).MakeGenericMethod(new Type[] { TrialDefType });
+				//getCTrialDef.Invoke(this, new object[] {  });
+				//PopulateCurrentTrialVariables();
 			});
 
 			FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Length - 1, SetupTrial);

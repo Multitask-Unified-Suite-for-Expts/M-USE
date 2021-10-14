@@ -340,6 +340,7 @@ MonoBehaviour:
   SessionDataControllers: {fileID: 0}
   StoreData: 0
   SessionDataPath: 
+  TaskConfigPath: 
   TaskDataPath: 
   SubjectID: 
   SessionID: 
@@ -347,7 +348,6 @@ MonoBehaviour:
   LocateFile: {fileID: 0}
   TaskSceneName: EffortControl
   TaskCam: {fileID: 0}
-  trialLevelDupe: {fileID: 1375570697}
 --- !u!1 &1396040246
 GameObject:
   m_ObjectHideFlags: 0
@@ -716,12 +716,12 @@ PrefabInstance:
     - target: {fileID: 224237352186693110, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 224237352186693110, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 224237352186693110, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
@@ -731,7 +731,7 @@ PrefabInstance:
     - target: {fileID: 224237352186693110, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -95
       objectReference: {fileID: 0}
     - target: {fileID: 224237352186693110, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
@@ -746,12 +746,12 @@ PrefabInstance:
     - target: {fileID: 224403173370456496, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 224403173370456496, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 224403173370456496, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
@@ -761,7 +761,7 @@ PrefabInstance:
     - target: {fileID: 224403173370456496, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -170
       objectReference: {fileID: 0}
     - target: {fileID: 224403173370456496, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}

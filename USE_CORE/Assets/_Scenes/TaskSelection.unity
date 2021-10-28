@@ -254,7 +254,7 @@ MonoBehaviour:
   isMainLevel: 1
   CallDefineLevelAutomatically: 1
   quitApplicationAtEnd: 1
-  DebugActive: 1
+  DebugActive: 0
   Paused: 1
   SubjectID: 
   SessionID: 
@@ -330,7 +330,7 @@ MonoBehaviour:
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
-  CallDefineLevelAutomatically: 0
+  CallDefineLevelAutomatically: 1
   quitApplicationAtEnd: 1
   DebugActive: 1
   Paused: 1
@@ -713,6 +713,16 @@ PrefabInstance:
       propertyPath: itemLabels.Array.data[1].label
       value: SessionID
       objectReference: {fileID: 0}
+    - target: {fileID: 114635937836210574, guid: c85f9d40cb89745fe8ca96530c144cee,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114920711716742036, guid: c85f9d40cb89745fe8ca96530c144cee,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 224237352186693110, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -726,7 +736,7 @@ PrefabInstance:
     - target: {fileID: 224237352186693110, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 960
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224237352186693110, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
@@ -736,7 +746,7 @@ PrefabInstance:
     - target: {fileID: 224237352186693110, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 224237352186693110, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
@@ -756,7 +766,7 @@ PrefabInstance:
     - target: {fileID: 224403173370456496, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 960
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224403173370456496, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
@@ -766,7 +776,7 @@ PrefabInstance:
     - target: {fileID: 224403173370456496, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 1880
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224474238556160424, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}

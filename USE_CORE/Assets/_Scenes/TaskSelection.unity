@@ -231,6 +231,8 @@ GameObject:
   - component: {fileID: 1375570697}
   - component: {fileID: 1375570700}
   - component: {fileID: 1375570699}
+  - component: {fileID: 1375570702}
+  - component: {fileID: 1375570701}
   m_Layer: 0
   m_Name: ControlLevels
   m_TagString: Untagged
@@ -267,9 +269,11 @@ MonoBehaviour:
   AvailableTaskLevels:
   - {fileID: 1375570698}
   - {fileID: 1375570700}
+  - {fileID: 1375570702}
   ActiveTaskNames:
   - EffortControl
   - WhatWhenWhere
+  - CognitiveMaze
   SessionDetails: {fileID: 2102576459}
   LocateFile: {fileID: 2102576458}
 --- !u!4 &1375570696
@@ -335,7 +339,7 @@ MonoBehaviour:
   Terminated: 0
   isMainLevel: 0
   CallDefineLevelAutomatically: 1
-  quitApplicationAtEnd: 1
+  quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
   TaskName: EffortControl
@@ -417,6 +421,70 @@ MonoBehaviour:
   FilePrefix: 
   LocateFile: {fileID: 0}
   TaskSceneName: WhatWhenWhere
+  TaskCam: {fileID: 0}
+--- !u!114 &1375570701
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1375570694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18a83d13f4589439ab31980fd67d0a12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ControlLevelName: CognitiveMaze_TrialLevel
+  initScreen: {fileID: 0}
+  Terminated: 0
+  isMainLevel: 0
+  CallDefineLevelAutomatically: 1
+  quitApplicationAtEnd: 0
+  DebugActive: 0
+  Paused: 1
+  TrialData: {fileID: 0}
+  FrameData: {fileID: 0}
+  BlockCount: 0
+  TrialCount_InTask: 0
+  TrialCount_InBlock: 0
+  AbortCode: 0
+  SessionDataControllers: {fileID: 0}
+  StoreData: 0
+  TaskDataPath: 
+  FilePrefix: 
+--- !u!114 &1375570702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1375570694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05a9309cf5f344091943ed46d968e491, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ControlLevelName: CognitiveMaze_TaskLevel
+  initScreen: {fileID: 0}
+  Terminated: 0
+  isMainLevel: 0
+  CallDefineLevelAutomatically: 1
+  quitApplicationAtEnd: 0
+  DebugActive: 0
+  Paused: 0
+  TaskName: CognitiveMaze
+  BlockCount: 0
+  TrialLevel: {fileID: 1375570701}
+  SessionDataControllers: {fileID: 0}
+  StoreData: 0
+  SessionDataPath: 
+  TaskConfigPath: 
+  TaskDataPath: 
+  SubjectID: 
+  SessionID: 
+  FilePrefix: 
+  LocateFile: {fileID: 0}
+  TaskSceneName: CognitiveMaze
   TaskCam: {fileID: 0}
 --- !u!1 &1396040246
 GameObject:

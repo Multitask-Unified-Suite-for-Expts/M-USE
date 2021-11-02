@@ -229,6 +229,8 @@ GameObject:
   - component: {fileID: 1375570695}
   - component: {fileID: 1375570698}
   - component: {fileID: 1375570697}
+  - component: {fileID: 1375570700}
+  - component: {fileID: 1375570699}
   m_Layer: 0
   m_Name: ControlLevels
   m_TagString: Untagged
@@ -264,8 +266,10 @@ MonoBehaviour:
   CurrentTaskName: 
   AvailableTaskLevels:
   - {fileID: 1375570698}
+  - {fileID: 1375570700}
   ActiveTaskNames:
   - EffortControl
+  - WhatWhenWhere
   SessionDetails: {fileID: 2102576459}
   LocateFile: {fileID: 2102576458}
 --- !u!4 &1375570696
@@ -347,6 +351,72 @@ MonoBehaviour:
   FilePrefix: 
   LocateFile: {fileID: 0}
   TaskSceneName: EffortControl
+  TaskCam: {fileID: 0}
+--- !u!114 &1375570699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1375570694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28524d1e72ab24f65bf2437ce035a703, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ControlLevelName: 
+  initScreen: {fileID: 0}
+  Terminated: 0
+  isMainLevel: 0
+  CallDefineLevelAutomatically: 1
+  quitApplicationAtEnd: 0
+  DebugActive: 0
+  Paused: 1
+  TrialData: {fileID: 0}
+  FrameData: {fileID: 0}
+  BlockCount: 0
+  TrialCount_InTask: 0
+  TrialCount_InBlock: 0
+  AbortCode: 0
+  SessionDataControllers: {fileID: 0}
+  StoreData: 0
+  TaskDataPath: 
+  FilePrefix: 
+  leftRightChoice: 
+  maxScale: {x: 0, y: 0, z: 0}
+--- !u!114 &1375570700
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1375570694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80f22a2ea0d0441c19abf3660ace10ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ControlLevelName: 
+  initScreen: {fileID: 0}
+  Terminated: 0
+  isMainLevel: 0
+  CallDefineLevelAutomatically: 1
+  quitApplicationAtEnd: 0
+  DebugActive: 0
+  Paused: 1
+  TaskName: WhatWhenWhere
+  BlockCount: 0
+  TrialLevel: {fileID: 1375570699}
+  SessionDataControllers: {fileID: 0}
+  StoreData: 0
+  SessionDataPath: 
+  TaskConfigPath: 
+  TaskDataPath: 
+  SubjectID: 
+  SessionID: 
+  FilePrefix: 
+  LocateFile: {fileID: 0}
+  TaskSceneName: WhatWhenWhere
   TaskCam: {fileID: 0}
 --- !u!1 &1396040246
 GameObject:

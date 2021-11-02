@@ -67,8 +67,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
 		//define States within this Control Level
 		State StartButton = new State("StartButton");
-		State ChooseBalloon = new State("StimOn");
-		State InflateBalloon = new State("Response");
+		State ChooseBalloon = new State("ChooseBalloon");
+		State InflateBalloon = new State("InflateBalloon");
 		State Feedback = new State("Feedback");
 		State ITI = new State("ITI");
 		AddActiveStates(new List<State> { StartButton, ChooseBalloon, InflateBalloon, Feedback, ITI });
@@ -278,8 +278,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 			//trialData.AppendData(); 
 			//trialData.WriteData();
 		});
-
-
+		TrialData.AddDatum("NumOfClicks", () => numOfClicks);
 		//AddTerminationSpecification(() => trialCount > numTrials);
 	}
 

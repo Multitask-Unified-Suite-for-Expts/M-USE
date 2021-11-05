@@ -476,6 +476,8 @@ namespace USE_Settings
 								myFieldInfo.SetValue(settingsArray[iLine - 1], (float?[][])ConvertStringToType<float[][]>(values[iVal]));
 							else if (ft == typeof(TokenReward[][]))
 								myFieldInfo.SetValue(settingsArray[iLine - 1], (TokenReward[][])ConvertStringToType<TokenReward[][]>(values[iVal]));
+							else if (ft == typeof(Color))
+								myFieldInfo.SetValue(settingsArray[iLine - 1], (Color)ConvertStringToType<Color>(values[iVal]));
 							else
 								Debug.LogError("Attempted to convert value " + values[iVal] + " with header " + fieldName +
 									" to type " + ft + " but there is no conversion specified for this type.");
@@ -932,6 +934,20 @@ namespace USE_Settings
 					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
 				}
 			}
+			else if (typeof(T) == typeof(Color))
+			{
+				try
+				{
+					return (Color)ConvertStringJaggedArray<Color>(s);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+						+ typeof(T).Name + " but the conversion failed.");
+
+					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+				}
+			}
 
 			else if (typeof(T) != null)
 			{
@@ -977,6 +993,7 @@ namespace USE_Settings
 			{"ExptParameters",typeof(FLU_Common_Namespace.ExptParameters)},
 			{"BlockDef[]", typeof(FLU_Common_Namespace.BlockDef[])},
 			{"Vector3", typeof(Vector3) },
-			{"Vector2", typeof(Vector2) } };
+			{"Vector2", typeof(Vector2) },
+			{"Color", typeof(Color) } };
 	}
 }

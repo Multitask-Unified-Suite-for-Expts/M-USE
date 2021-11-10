@@ -368,7 +368,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28524d1e72ab24f65bf2437ce035a703, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ControlLevelName: 
+  ControlLevelName: WWW_TrialLevel
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
@@ -400,7 +400,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80f22a2ea0d0441c19abf3660ace10ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ControlLevelName: 
+  ControlLevelName: WWW_TaskLevel
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0

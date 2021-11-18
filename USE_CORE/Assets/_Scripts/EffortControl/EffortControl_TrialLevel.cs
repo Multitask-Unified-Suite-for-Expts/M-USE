@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using USE_States;
 using USE_ExperimentTemplate;
 using EffortControl_Namespace;
+using System.Linq;
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 {
@@ -21,6 +22,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 	// public float RewardDelay;
 	// public float StartDelay;
 	// public float StepsToProgressUpdate;
+
+	// timing variable 
+	private float? avgClickTime;
 
 	// effort reward variables
 	private int numOfClicks, clickCount;
@@ -89,6 +93,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 		StartButton.AddInitializationMethod(() => {
 			trialCount++;
 
+			avgClickTime = null;
 
 			ResetRelativeStartTime();
 			disableAllGameobjects();
@@ -189,7 +194,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 		});
 
 		// define collectResponse state
-		InflateBalloon.AddInitializationMethod(() => goCue.SetActive(true));
+		List<float> clickTimings = new List<float>();
+		float timeTracker = 0;
+
+		InflateBalloon.AddInitializationMethod(() => {
+			goCue.SetActive(true);
+			clickTimings = new List<float>();
+			timeTracker = Time.time;
+		});
 		InflateBalloon.AddUpdateMethod(() => {
 			if (InputBroker.GetMouseButtonDown(0))
 			{
@@ -202,6 +214,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 					// if the raycast hits the trialStim gameobject
 					if (hit.transform.gameObject == trialStim)
 					{
+						//add to clicktimings
+						clickTimings.Add(Time.time - timeTracker);
+						timeTracker = Time.time;
+
 						slider.value += sliderValueIncreaseAmount;
 						clickMarker.transform.position = hit.point;
 						clickMarker.SetActive(true);
@@ -228,6 +244,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 					// set prize's position to the position of the balloon
 					prize.transform.position = trialStim.transform.position + new Vector3(0f, .5f, 0f);
 					prize.SetActive(true);
+
+					//calculate average time
+					avgClickTime = clickTimings.Average();
 				}
 			}
 
@@ -280,6 +299,30 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 		});
 		TrialData.AddDatum("NumOfClicks", () => numOfClicks);
 		//AddTerminationSpecification(() => trialCount > numTrials);
+
+
+		// Additional recorded data 
+		TrialData.AddDatum("TrialName", () => CurrentTrialDef.TrialName);
+		TrialData.AddDatum("TrialCode", () => CurrentTrialDef.TrialCode);
+		TrialData.AddDatum("ContextNum", () => CurrentTrialDef.ContextNum);
+		TrialData.AddDatum("ConditionName", () => CurrentTrialDef.ConditionName);
+		TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
+		TrialData.AddDatum("ClicksPerOutline", () => CurrentTrialDef.ClicksPerOutline);
+		TrialData.AddDatum("InitialChoiceMinDuration", () => CurrentTrialDef.InitialChoiceMinDuration);
+		TrialData.AddDatum("StarttoTapDispDelay", () => CurrentTrialDef.StarttoTapDispDelay);
+		TrialData.AddDatum("FinalTouchToVisFeedbackDelay", () => CurrentTrialDef.FinalTouchToVisFeedbackDelay);
+		TrialData.AddDatum("FinalTouchToRewardDelay", () => CurrentTrialDef.FinalTouchToRewardDelay);
+
+		TrialData.AddDatum("NumOfClicksLeft", () => CurrentTrialDef.NumOfClicksLeft);
+		TrialData.AddDatum("NumOfClicksRight", () => CurrentTrialDef.NumOfClicksRight);
+		TrialData.AddDatum("NumOfCoinsLeft", () => CurrentTrialDef.NumOfCoinsLeft);
+		TrialData.AddDatum("NumOfCoinsRight", () => CurrentTrialDef.NumOfCoinsRight);
+		TrialData.AddDatum("ChosenSide", () => leftRightChoice.ToUpper());
+		TrialData.AddDatum("TimeTakenToChoose", () => ChooseBalloon.TimingInfo.Duration);
+		TrialData.AddDatum("AverageClickTimes", () => avgClickTime);
+
+
+
 	}
 
 	// set all gameobjects to setActive false

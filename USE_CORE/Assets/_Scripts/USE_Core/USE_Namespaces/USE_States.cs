@@ -91,6 +91,7 @@ namespace USE_States
 		///  will log initialization and termination messages.</summary>
 		/// <value><c>true</c> if debug active; otherwise, <c>false</c>.</value>
 		public bool DebugActive { get; set; }
+		public bool InitializationDelayed, TerminationDelayed;
 
 		//TIMEKEEPING
 		public StateTimingInfo TimingInfo;
@@ -135,30 +136,30 @@ namespace USE_States
 		}
 
 		//UPDATE, INITIALIZATION, AND DEFAULT TERMINATION METHODS
-		public void AddInitializationMethod(VoidDelegate method, string name)
+		public void AddInitializationMethod(VoidDelegate method, string name, float? initDelay = null)
 		{
-			StateInitialization init = new StateInitialization(method, name);
+			StateInitialization init = new StateInitialization(method, name, initDelay);
 			StateInitializations.Add(init);
 			if (StateDefaultInitialization == null)
 			{
 				StateDefaultInitialization = init;
 			}
 		}
-		public void AddInitializationMethod(VoidDelegate method)
+		public void AddInitializationMethod(VoidDelegate method, float? initDelay = null)
 		{
 			string name = StateName + "Initialization_" + StateInitializations.Count;
-			AddInitializationMethod(method, name);
+			AddInitializationMethod(method, name, initDelay);
 		}
-		public void AddDefaultInitializationMethod(VoidDelegate method, string name)
+		public void AddDefaultInitializationMethod(VoidDelegate method, string name, float? initDelay = null)
 		{
-			StateInitialization init = new StateInitialization(method, name);
+			StateInitialization init = new StateInitialization(method, name, initDelay);
 			StateInitializations.Add(init);
 			StateDefaultInitialization = init;
 		}
-		public void AddDefaultInitializationMethod(VoidDelegate method)
+		public void AddDefaultInitializationMethod(VoidDelegate method, float? initDelay = null)
 		{
 			string name = StateName + "Initialization_" + StateInitializations.Count + "_(Default)";
-			AddDefaultInitializationMethod(method, name);
+			AddDefaultInitializationMethod(method, name, initDelay);
 		}
 		public void AddUniversalInitializationMethod(VoidDelegate method)
 		{
@@ -269,13 +270,40 @@ namespace USE_States
 			if (!Paused)
 			{
 				CheckInitialization();
-				if (StateFixedUpdate != null)
+				if (!InitializationDelayed)
 				{
-					StateFixedUpdate();
+					if (StateFixedUpdate != null)
+					{
+						StateFixedUpdate();
+					}
+					if (ChildLevel != null)
+					{
+						ChildLevel.RunControlLevelFixedUpdate();
+					}
 				}
-				if (ChildLevel != null)
+				else
 				{
-					ChildLevel.RunControlLevelFixedUpdate();
+					float timeSinceInit = Time.time - TimingInfo.StartTimeAbsolute;
+					if (StateActiveInitialization != null)
+					{
+						if (timeSinceInit >= StateActiveInitialization.InitializationDelay)
+							InitializationDelayed = false;
+					}
+					else if (StateDefaultInitialization != null && timeSinceInit >= StateDefaultInitialization.InitializationDelay)
+						InitializationDelayed = false;
+
+					if (!InitializationDelayed)
+					{
+						RunInitializationMethods();
+						if (StateFixedUpdate != null)
+						{
+							StateFixedUpdate();
+						}
+						if (ChildLevel != null)
+						{
+							ChildLevel.RunControlLevelFixedUpdate();
+						}
+					}
 				}
 			}
 		}
@@ -288,13 +316,40 @@ namespace USE_States
 			if (!Paused)
 			{
 				CheckInitialization();
-				if (StateUpdate != null)
+				if (!InitializationDelayed)
 				{
-					StateUpdate();
+					if (StateUpdate != null)
+					{
+						StateUpdate();
+					}
+					if (ChildLevel != null)
+					{
+						ChildLevel.RunControlLevelUpdate();
+					}
 				}
-				if (ChildLevel != null)
+				else
 				{
-					ChildLevel.RunControlLevelUpdate();
+					float timeSinceInit = Time.time - TimingInfo.StartTimeAbsolute;
+					if (StateActiveInitialization != null)
+					{
+						if (timeSinceInit >= StateActiveInitialization.InitializationDelay)
+							InitializationDelayed = false;
+					}
+					else if (StateDefaultInitialization != null && timeSinceInit >= StateDefaultInitialization.InitializationDelay)
+						InitializationDelayed = false;
+
+					if (!InitializationDelayed)
+					{
+						RunInitializationMethods();
+						if (StateFixedUpdate != null)
+						{
+							StateUpdate();
+						}
+						if (ChildLevel != null)
+						{
+							ChildLevel.RunControlLevelUpdate();
+						}
+					}
 				}
 			}
 		}
@@ -351,19 +406,57 @@ namespace USE_States
 					ParentLevel.PreviousState.TimingInfo.EndTimeRelative = Time.time - ParentLevel.StartTimeRelative;
 					ParentLevel.PreviousState.TimingInfo.Duration = Time.time - ParentLevel.PreviousState.TimingInfo.StartTimeAbsolute;
 				}
-				//if there is a universal initialization, run it
-				if (StateUniversalInitialization != null)
-					StateUniversalInitialization();
-
-				//If previous state specified this state's initialization, run it
 				if (StateActiveInitialization != null)
 				{
-					StateActiveInitialization.InitializationMethod();
+					if (StateActiveInitialization.InitializationDelay != null)
+						InitializationDelayed = true;
 				}
-				//Otherwise run default initialization
-				else if (StateDefaultInitialization != null)
+				else if (StateDefaultInitialization != null && StateDefaultInitialization.InitializationDelay != null)
+					InitializationDelayed = true;
+				else
+					RunInitializationMethods();
+			}
+		}
+
+		void RunInitializationMethods()
+		{
+			//if there is a universal initialization, run it
+			if (StateUniversalInitialization != null)
+				StateUniversalInitialization();
+
+			//If previous state specified this state's initialization, run it
+			if (StateActiveInitialization != null)
+			{
+				StateActiveInitialization.InitializationMethod();
+			}
+			//Otherwise run default initialization
+			else if (StateDefaultInitialization != null)
+			{
+				StateDefaultInitialization.InitializationMethod();
+			}
+		}
+
+
+		/// <summary>
+		/// Checks it termination is needed, and if so runs <see cref="T:State_Namespace.StateTerminationSpecification"/> methods.
+		/// </summary>
+		void CheckTermination()
+		{
+			if (!initialized)
+				return;
+			//if no State termination has been specified, State will run forever!
+			if (StateTerminationSpecifications.Count > 0)
+			{
+				//go through each termination in order - the first one where TerminationCriterion returns true will be triggered and end State
+				for (int i = 0; i < StateTerminationSpecifications.Count; i++)
 				{
-					StateDefaultInitialization.InitializationMethod();
+					StateTerminationSpecification termSpec = StateTerminationSpecifications[i];
+					Terminated = termSpec.TerminationCriterion();
+					if (Terminated) //this TerminationCriterion returned true
+					{
+						TerminateState(termSpec);
+						break;
+					}
 				}
 			}
 		}
@@ -430,30 +523,6 @@ namespace USE_States
 			{
 				ParentLevel.Terminated = true;
 				ParentLevel.ControlLevelTermination(null);
-			}
-		}
-
-		/// <summary>
-		/// Checks it termination is needed, and if so runs <see cref="T:State_Namespace.StateTerminationSpecification"/> methods.
-		/// </summary>
-		void CheckTermination()
-		{
-			if (!initialized)
-				return;
-			//if no State termination has been specified, State will run forever!
-			if (StateTerminationSpecifications.Count > 0)
-			{
-				//go through each termination in order - the first one where TerminationCriterion returns true will be triggered and end State
-				for (int i = 0; i < StateTerminationSpecifications.Count; i++)
-				{
-					StateTerminationSpecification termSpec = StateTerminationSpecifications[i];
-					Terminated = termSpec.TerminationCriterion();
-					if (Terminated) //this TerminationCriterion returned true
-					{
-						TerminateState(termSpec);
-						break;
-					}
-				}
 			}
 		}
 	}
@@ -1214,11 +1283,13 @@ namespace USE_States
 	{
 		public VoidDelegate InitializationMethod;
 		public string Name;
+		public float? InitializationDelay;
 
-		public StateInitialization(VoidDelegate method, string name)
+		public StateInitialization(VoidDelegate method, string name, float? initDelay = null)
 		{
 			InitializationMethod = method;
 			Name = name;
+			InitializationDelay = initDelay;
 		}
 	}
 
@@ -1229,24 +1300,33 @@ namespace USE_States
 		public State SuccessorState;
 		public StateInitialization SuccessorInitialization;
 		public string Name;
+		public float? TerminationDelay;
 
 
-		public StateTerminationSpecification(BoolDelegate terminationCriterion, State successorState)
+		public StateTerminationSpecification(BoolDelegate terminationCriterion, State successorState, float? termDelay = null)
 		{
-			DefineTermination(terminationCriterion, successorState);
+			DefineTermination(terminationCriterion, successorState, termDelay);
 		}
-		public StateTerminationSpecification(BoolDelegate terminationCriterion, State successorState, StateInitialization successorInit, VoidDelegate termination = null)
+		public StateTerminationSpecification(BoolDelegate terminationCriterion, State successorState, StateInitialization successorInit, float? termDelay = null, VoidDelegate termination = null)
 		{
-			DefineTermination(terminationCriterion, successorState, successorInit, termination);
+			DefineTermination(terminationCriterion, successorState, termDelay, successorInit, termination);
 		}
-		public StateTerminationSpecification(BoolDelegate terminationCriterion, State successorState, VoidDelegate termination, StateInitialization successorInit = null)
+		public StateTerminationSpecification(BoolDelegate terminationCriterion, State successorState, VoidDelegate termination, float? termDelay = null, StateInitialization successorInit = null)
 		{
-			DefineTermination(terminationCriterion, successorState, successorInit, termination);
+			DefineTermination(terminationCriterion, successorState, termDelay, successorInit, termination);
 		}
-
-		private void DefineTermination(BoolDelegate terminationCriterion, State successorState, StateInitialization successorInit = null, VoidDelegate termination = null)
+		public StateTerminationSpecification(BoolDelegate terminationCriterion, State successorState, StateInitialization successorInit, VoidDelegate termination = null, float? termDelay = null)
+		{
+			DefineTermination(terminationCriterion, successorState, termDelay, successorInit, termination);
+		}
+		public StateTerminationSpecification(BoolDelegate terminationCriterion, State successorState, VoidDelegate termination, StateInitialization successorInit = null, float? termDelay = null)
+		{
+			DefineTermination(terminationCriterion, successorState, termDelay, successorInit, termination);
+		}
+		private void DefineTermination(BoolDelegate terminationCriterion, State successorState, float? termDelay = null, StateInitialization successorInit = null, VoidDelegate termination = null)
 		{
 			TerminationCriterion = terminationCriterion;
+			TerminationDelay = termDelay;
 			if (termination != null)
 			{
 				Termination = termination;

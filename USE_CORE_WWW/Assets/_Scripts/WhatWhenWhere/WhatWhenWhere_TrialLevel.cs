@@ -150,7 +150,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     //   Debug.Log("Chose 1");
                     //   sphereChoice = "1";
                     Debug.Log("SC: " + sphereCount);
-                    int correctIndex = CurrentTrialDef.ObjectNums[CurrentTrialDef.CorrectObjectTouchOrder[sphereCount]-1]-1;
+                    int num = CurrentTrialDef.CorrectObjectTouchOrder[sphereCount];
+                    Debug.Log("num: " + num);
+                    int correctIndex = CurrentTrialDef.ObjectNums[num-1]-1;
                   //  Debug.Log("preIndex: " + correctIndex);
 
                   //  correctIndex -= 1;
@@ -161,7 +163,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         //addToken
                         objects[correctIndex].SetActive(false);
                         //  if (CurrentTrialDef.CorrectObjectTouchOrder[sphereCount] == objects[sphereCount]{
-
                         // }
                         trialStim = hit.transform.gameObject;
                         sphereCount += 1;

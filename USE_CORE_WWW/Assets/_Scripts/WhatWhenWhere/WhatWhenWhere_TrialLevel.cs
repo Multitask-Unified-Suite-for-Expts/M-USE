@@ -13,11 +13,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     // game object variables
     private GameObject initButton, fb, goCue, trialStim, clickMarker;
-    private GameObject[] objects;
-    //  private string[] correctNames;
-    /// public int[] tmpNums;
-    // private GameObject[] objects = new GameObject[4];
-    //sphere1, sphere2, sphere3, sphere4,
+    private GameObject[] totalObjects;
+    private GameObject[] currentObjects;
+
     // effort reward variables
     private int clickCount, context;
     public int sphereCount = 0;
@@ -67,7 +65,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             trialCount++;
 
             ResetRelativeStartTime();
-            disableAllGameobjects();
+            if (context != 0)
+            {
+                Debug.Log(context);
+                disableAllGameobjects();
+            }
             context = CurrentTrialDef.Context;
 
             initButton.SetActive(true);
@@ -114,25 +116,21 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // Define stimOn state
         ChooseSphere.AddInitializationMethod(() =>
         {
-            //foreach (GameObject obj in objects)
-            //{
-            //   obj.SetActive(true);
-            //}
-            int j = 0;
+            currentObjects = new GameObject[CurrentTrialDef.ObjectNums.Length];
+
             for (int i = 0; i < CurrentTrialDef.ObjectNums.Length; ++i)
             {
-                objects[i].SetActive(true);
+                currentObjects[i] = totalObjects[CurrentTrialDef.ObjectNums[i]-1];
+                currentObjects[i].SetActive(true);
+                // float height = 2f * cam.orthographicSize;
+                // float w = height * cam.aspect;
+                // float w = Screen.width;
+                //float step = w / (CurrentTrialDef.ObjectNums.Length); 
+                float step = 21.0f / (float)(CurrentTrialDef.ObjectNums.Length-1);
+                currentObjects[i].transform.position = new Vector3(-10f + step*i, 0, 0);
             }
 
-            //  sphere1.SetActive(true);
-            //  sphere2.SetActive(true);
-            //  sphere3.SetActive(true);
-            //  sphere4.SetActive(true);
-
             trialStim = null;
-            //trialStim2 = null;
-            //trialStim3 = null;
-            //trialStim4 = null;
         });
 
         ChooseSphere.AddUpdateMethod(() =>
@@ -144,76 +142,32 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             RaycastHit hit;
             if (Physics.Raycast(mouseRay, out hit))
             {
-                    // if (hit.transform.name == objects[0].name)
-                    //  {
-                    //    numChosenLeft++;
-                    //   Debug.Log("Chose 1");
-                    //   sphereChoice = "1";
-                    Debug.Log("SC: " + sphereCount);
-                    int num = CurrentTrialDef.CorrectObjectTouchOrder[sphereCount];
-                    Debug.Log("num: " + num);
-                    int correctIndex = CurrentTrialDef.ObjectNums[num-1]-1;
-                  //  Debug.Log("preIndex: " + correctIndex);
-
-                  //  correctIndex -= 1;
+                    int correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[sphereCount] -1;
                     Debug.Log("index: " + correctIndex);
-                    if (hit.transform.name == objects[correctIndex].name)
-                {
-                        Debug.Log(sphereCount);
+                    if (hit.transform.name == currentObjects[correctIndex].name)
+                    {
                         //addToken
-                        objects[correctIndex].SetActive(false);
-                        //  if (CurrentTrialDef.CorrectObjectTouchOrder[sphereCount] == objects[sphereCount]{
-                        // }
+                        currentObjects[correctIndex].SetActive(false);
                         trialStim = hit.transform.gameObject;
                         sphereCount += 1;
                         response = 1;
                     }
                     else
                     {
+                        sphereChoice = hit.transform.name;
+                        trialStim = hit.transform.gameObject;
+                        response = 1;
+
                         //subtractToken
+
+                        /*   numChosenRight++;
+                             Debug.Log("Chose 2");
+                             sphereChoice = "2";
+                             objects[1].SetActive(false);
+                         */
                     }
 
                 }
-                /*  else if (hit.transform.name == objects[1].name)
-                  {
-                      numChosenRight++;
-                      Debug.Log("Chose 2");
-                      sphereChoice = "2";
-
-                      objects[1].SetActive(false);
-
-
-                      trialStim = hit.transform.gameObject;
-                      sphereCount += 1;
-                      response = 1;
-                  }
-                  else if (hit.transform.name == objects[2].name)
-                  {
-                      numChosenRight++;
-                      Debug.Log("Chose 3");
-                      sphereChoice = "3";
-
-                      objects[2].SetActive(false);
-
-                      //trialStim3 = hit.transform.gameObject;
-                      trialStim = hit.transform.gameObject;
-                      sphereCount += 1;
-                      response = 1;
-                  }
-                  else if (hit.transform.name == objects[3].name)
-                  {
-                      numChosenRight++;
-                      Debug.Log("Chose 4");
-                      sphereChoice = "4";
-
-                      objects[3].SetActive(false);
-
-
-                      // trialStim4 = hit.transform.gameObject;
-                      trialStim = hit.transform.gameObject;
-                      sphereCount += 1;
-                      response = 1;
-                  } */
                 else
                 {
                     Debug.Log("Didn't click on any sphere");
@@ -223,14 +177,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         ChooseSphere.SpecifyTermination(() => sphereCount == CurrentTrialDef.ObjectNums.Length, Feedback);
         ChooseSphere.AddDefaultTerminationMethod(() =>
         {
-            foreach (GameObject obj in objects)
+            foreach (GameObject obj in currentObjects)
             {
                 obj.SetActive(false);
             }
-            // sphere1.SetActive(false);
-            // sphere2.SetActive(false);
-            // sphere3.SetActive(false);
-            // sphere4.SetActive(false);
+            foreach (GameObject obj in totalObjects)    //reset each time??
+            {
+                obj.SetActive(false);
+            }
+
             sphereCount = 0;
 
             Debug.Log("Changed Context");
@@ -255,14 +210,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         //Define iti state
         ITI.AddInitializationMethod(() =>
         {
-            foreach (GameObject obj in objects)
+            foreach (GameObject obj in currentObjects)
             {
                 obj.SetActive(false);
             }
-            // sphere1.SetActive(false);
-            // sphere2.SetActive(false);
-            // sphere3.SetActive(false);
-            // sphere4.SetActive(false);
+            foreach (GameObject obj in totalObjects)    
+            {
+                obj.SetActive(false);
+            }
             Camera.main.backgroundColor = Color.white;
 
         });
@@ -283,14 +238,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         initButton.SetActive(false);
         fb.SetActive(false);
         goCue.SetActive(false);
-        foreach (GameObject obj in objects)
+        foreach (GameObject obj in currentObjects)
         {
             obj.SetActive(false);
         }
-        //sphere1.SetActive(false);
-        //sphere2.SetActive(false);
-        //sphere3.SetActive(false);
-        //sphere4.SetActive(false);
+        foreach (GameObject obj in totalObjects)    
+        {
+            obj.SetActive(false);
+        }
         clickMarker.SetActive(false);
 
     }
@@ -301,47 +256,24 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         initButton = GameObject.Find("StartButton");
         fb = GameObject.Find("FB");
         goCue = GameObject.Find("ResponseCue");
-        /* int len;
-         len = order.Length;
-         Debug.Log("test2");
-         Debug.Log("length" + len.ToString());
-         for (int i = 0; i < len; ++i)
-         {
-             string s = "Sphere" + order[i].ToString();
-             Debug.Log(s);
-             objects[i] = GameObject.Find(s);
-             objects[i].name = s;
-         }*/
-        //  Debug.Log("test1");
-        int len = 4;
-        objects = new GameObject[len];
+        int len = 6;
+        totalObjects = new GameObject[len];
+        System.Random rnd = new System.Random();
         for (int i = 0; i < len; ++i)
         {
             string s = "Sphere" + (i + 1).ToString();
-
-            // string s = "Sphere" + CurrentTrialDef.ObjectNums[i].ToString();
             Debug.Log(s);
-            objects[i] = GameObject.Find(s);
-            objects[i].name = s;
+            totalObjects[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            totalObjects[i].GetComponent<Renderer>().material.SetColor("_Color", new Color((float)rnd.NextDouble(), (float)rnd.NextDouble(), (float)rnd.NextDouble()));
+            totalObjects[i].name = s;
+            totalObjects[i].SetActive(false);
         }
-        //       sphereLeft = GameObject.Find("SphereLeft");
-        //       sphereRight = GameObject.Find("SphereRight");
-        //      sphere3 = GameObject.Find("Sphere3");
-
-        //  sphere1 = GameObject.Find("Sphere1");
-        //  sphere2 = GameObject.Find("Sphere2");
-        //  sphere3 = GameObject.Find("Sphere3");
-        //  sphere4 = GameObject.Find("Sphere4");
-
 
         clickMarker = GameObject.Find("ClickMarker");
         initButton.SetActive(false);
         fb.SetActive(false);
         goCue.SetActive(false);
         clickMarker.SetActive(false);
-
-
-
     }
     void placeSphere(GameObject sphere)
     {

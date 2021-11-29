@@ -12,7 +12,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public WhatWhenWhere_TrialDef CurrentTrialDef => GetCurrentTrialDef<WhatWhenWhere_TrialDef>();
 
     // game object variables
-    private GameObject initButton, fb, goCue, trialStim, clickMarker;
+    private GameObject initButton, fb, trialStim, clickMarker;
     private GameObject[] totalObjects;
     private GameObject[] currentObjects;
 
@@ -141,8 +141,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 // float w = height * cam.aspect;
                 // float w = Screen.width;
                 //float step = w / (CurrentTrialDef.ObjectNums.Length); 
-                float step = 21.0f / (float)(CurrentTrialDef.ObjectNums.Length - 1);
-                currentObjects[i].transform.position = new Vector3(-10f + step * i, 0, 0);
+                //float step = 21.0f / (float)(CurrentTrialDef.ObjectNums.Length - 1);
+                //currentObjects[i].transform.position = new Vector3(-10f + step * i, 0, 0);
+                currentObjects[i].transform.position = new Vector3(CurrentTrialDef.ObjectXLocations[i], CurrentTrialDef.ObjectYLocations[i], 0);
             }
             
             trialStim = null;
@@ -260,7 +261,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     {
         initButton.SetActive(false);
         fb.SetActive(false);
-        goCue.SetActive(false);
         slider.gameObject.SetActive(false);
         foreach (GameObject obj in currentObjects)
         {
@@ -279,7 +279,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         initButton = GameObject.Find("StartButton");
         fb = GameObject.Find("FB");
-        goCue = GameObject.Find("ResponseCue");
         clickMarker = GameObject.Find("ClickMarker");
         slider = GameObject.Find("Slider").GetComponent<Slider>();
 
@@ -299,7 +298,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         initButton.SetActive(false);
         fb.SetActive(false);
-        goCue.SetActive(false);
         clickMarker.SetActive(false);
         GameObject.Find("Slider").SetActive(false);
     }

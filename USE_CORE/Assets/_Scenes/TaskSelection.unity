@@ -268,7 +268,7 @@ MonoBehaviour:
   CurrentTaskName: 
   AvailableTaskLevels:
   - {fileID: 1375570698}
-  - {fileID: 1375570700}
+  - {fileID: 0}
   - {fileID: 1375570702}
   ActiveTaskNames:
   - EffortControl
@@ -365,14 +365,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1375570694}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 28524d1e72ab24f65bf2437ce035a703, type: 3}
+  m_Script: {fileID: 11500000, guid: aa4bbd7021ca044dcb8b7fcbcdb879ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ControlLevelName: WWW_TrialLevel
+  ControlLevelName: WhatWhenWhere_TrialLevel
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
-  CallDefineLevelAutomatically: 1
+  CallDefineLevelAutomatically: 0
   quitApplicationAtEnd: 0
   DebugActive: 0
   Paused: 1
@@ -387,7 +387,6 @@ MonoBehaviour:
   TaskDataPath: 
   FilePrefix: 
   leftRightChoice: 
-  maxScale: {x: 0, y: 0, z: 0}
 --- !u!114 &1375570700
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -397,14 +396,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1375570694}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80f22a2ea0d0441c19abf3660ace10ea, type: 3}
+  m_Script: {fileID: 11500000, guid: 21b78eaa2107046e99b638c38dd28825, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ControlLevelName: WWW_TaskLevel
+  ControlLevelName: WhatWhenWhere_TaskLevel
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
-  CallDefineLevelAutomatically: 1
+  CallDefineLevelAutomatically: 0
   quitApplicationAtEnd: 0
   DebugActive: 0
   Paused: 1

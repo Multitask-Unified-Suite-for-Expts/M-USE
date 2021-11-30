@@ -22,18 +22,19 @@ namespace WhatWhenWhere_Namespace
     {
         public string TrialName;
         public int TrialCode;
-        public int ContextNum;
+        public int Context;
         public string ContextName;
         //ObjectNums refers to items in a list of objects to be loaded from resources folder
         public int[] ObjectNums;
         //CorrectObjectOrder is an array of same length as ObjectNums, refers to elements in that array (e.g. {2 3 1 4} refers to 2nd object specified in ObjectNums
         public int[] CorrectObjectTouchOrder;
-        public Vector3[][] ObjectLocations;
+        //public Vector3[][] ObjectLocations;
+        public int[] ObjectXLocations;
+        public int[] ObjectYLocations;
         public Vector3[][] ObjectRotations;
         public int TokensAddedPerCorrectTouch;
         public int TokensSubtractedPerIncorrectTouch;
-        public int Context;
-        public Color SphereColor;
+        public Color SphereColor; 
     }
 
     //Any other custom classes useful for the functioning of the task could be included in this namespace.

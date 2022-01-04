@@ -13,23 +13,30 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public WhatWhenWhere_TrialDef CurrentTrialDef => GetCurrentTrialDef<WhatWhenWhere_TrialDef>();
 
     // game object variables
-    private GameObject initButton, goCue, trialStim, clickMarker, halo, sliderHalo;
-    private GameObject txt;
+    private GameObject initButton, goCue, trialStim, halo, sliderHalo, imageObject, txt;
 
     //  private GameObject[] halos;
     private GameObject[] totalObjects;
     private GameObject[] currentObjects;
-
+    private List<GameObject> touchedObjects = new List<GameObject>();
+    
     // effort reward variables
     private int clickCount, context;
     public int sphereCount = 0;
     private int numChosenLeft, numChosenRight;
     private bool incorrectChoice = false;
-    private int numObjMax = 10;
+    private int numObjMax = 5;
+    private int repetitionError = 0;
+    private int contextError = 0;
+    private int slotError = 0;
     private float startTime;
+    private float clickTime;
     private float timeDif;
-    private List<Color> Colors = new List<Color> { };
+    private List<Color> contextColors = new List<Color> { };
+    private List<Color> objectColors = new List<Color> { };
+    
     private SpriteRenderer sr;
+    private Color originalColor;
 
     [HideInInspector]
     public String sphereChoice;
@@ -43,9 +50,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private Ray mouseRay;
     private Slider slider;
     private float sliderValueIncreaseAmount;
-    private Color color1 = new Color(0.7f, 0.5f, 0.96f);
-    private Color color2 = new Color(0.31f, 0.69f, 0.88f);
-    private Color color3 = new Color(0.54f, 0.18f, 0.18f);
 
 
     private Camera cam;
@@ -83,7 +87,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 trialCount++;
             }
 
-            Camera.main.backgroundColor = new Color(0.5f, 0.4f, 0.96f); ;
+            Camera.main.backgroundColor = new Color(1f,1f,1f);
 
             ResetRelativeStartTime();
             if (context != 0)
@@ -96,12 +100,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             initButton.SetActive(true);
             goCue.SetActive(true);
-
-            context = CurrentTrialDef.Context;
-
+            
+            
             clickCount = 0;
             response = -1;
-
             slider.gameObject.transform.position = sliderInitPosition;
             slider.value = 0;
         });
@@ -118,7 +120,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     if (hit.transform.name == "StartButton")
                     {
                         response = 0;
-                        Camera.main.backgroundColor = Colors[context];
+                        Camera.main.backgroundColor = contextColors[context];
                     }
                 }
             }
@@ -131,7 +133,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             initButton.SetActive(false);
             goCue.SetActive(false);
-
+            
         });
 
         // Define stimOn state
@@ -144,13 +146,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 currentObjects[i] = totalObjects[CurrentTrialDef.ObjectNums[i] - 1];
                 currentObjects[i].SetActive(true);
-                Debug.Log(CurrentTrialDef.ObjectXLocations[i]);
-                currentObjects[i].transform.position = new Vector3(CurrentTrialDef.ObjectXLocations[i], CurrentTrialDef.ObjectYLocations[i], 0);
-                string h = "Halo" + (i).ToString();
+              
+                placeSphere(currentObjects[i], CurrentTrialDef.ObjectXLocations[i], CurrentTrialDef.ObjectYLocations[i], 0f);
+                //string h = "Halo" + (i).ToString();
 
             }
-
+            
             trialStim = null;
+
         });
 
         ChooseSphere.AddUpdateMethod(() =>
@@ -162,25 +165,56 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 RaycastHit hit;
                 if (Physics.Raycast(mouseRay, out hit))
                 {
+                    
                     int correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[sphereCount] - 1;
                     Debug.Log("index: " + correctIndex);
+
                     if (hit.transform.name == currentObjects[correctIndex].name)
                     {
+                        //Correct Choice
                         slider.value += sliderValueIncreaseAmount;
-                        currentObjects[correctIndex].SetActive(false);
-                        trialStim = hit.transform.gameObject;
+                        
                         sphereCount += 1;
                         response = 1;
-                    }
-                    else
-                    {
-                        halo.transform.position = hit.transform.position;
-                        sphereChoice = hit.transform.name;
                         trialStim = hit.transform.gameObject;
+                        touchedObjects.Add(trialStim);
+
+                    }
+                    else if (touchedObjects.Contains(trialStim))
+                    {
+                        //Repetition error
+                        trialStim = hit.transform.gameObject;
+                        sphereChoice = hit.transform.name;
+                        imageObject.transform.position = hit.transform.position;
+
+                        originalColor = trialStim.GetComponent<Renderer>().material.color;
+                        trialStim.GetComponent<Renderer>().material.SetColor("_Color", new Color(0.5020f, 0.5020f, 0.5020f));
                         response = 1;
+
                         TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
                         incorrectChoice = true;
+                        slider.value -= sliderValueIncreaseAmount;
+                        repetitionError += 1;
                     }
+
+
+                    else
+                    {
+                        //Slot error
+                        trialStim = hit.transform.gameObject;
+                        sphereChoice = hit.transform.name;
+                        imageObject.transform.position = hit.transform.position;
+
+                        originalColor = trialStim.GetComponent<Renderer>().material.color;
+                        trialStim.GetComponent<Renderer>().material.SetColor("_Color", new Color(0.5020f, 0.5020f, 0.5020f));
+                        response = 1;
+
+                        TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
+                        incorrectChoice = true;
+                        slider.value -= sliderValueIncreaseAmount;
+                        slotError += 1;
+                    }
+                    
 
                 }
                 else
@@ -211,23 +245,29 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         ChoseWrong.AddInitializationMethod(() =>
         {
-            halo.SetActive(true);
-
+            //halo.SetActive(true);
+            imageObject.SetActive(true);
+            trialStim.SetActive(true);
+            
         });
 
         ChoseWrong.AddTimer(0.75f, StartButton, () => {
-            halo.SetActive(false);
+            //halo.SetActive(false);
+            imageObject.SetActive(false);
             incorrectChoice = false;
+            trialStim.SetActive(false);
+            trialStim.GetComponent<Renderer>().material.SetColor("_Color",originalColor);
         });
 
         Feedback.AddInitializationMethod(() =>
         {
             sliderHalo.SetActive(true);
-            sr = sliderHalo.GetComponent<SpriteRenderer>();
+            
             sr.color = new Color(1, 1, 1, 0.2f);
             txt.SetActive(true);
             startTime = Time.time;
         });
+
         Feedback.AddUpdateMethod(() =>
         {
             Debug.Log(Time.time);
@@ -264,7 +304,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 obj.SetActive(false);
             }
             Camera.main.backgroundColor = Color.white;
-
+            txt.SetActive(false);
+            for (var i = 0; i < touchedObjects.Count; i++)
+            {
+                touchedObjects.RemoveAt(i);
+            }
+            
         });
 
         /*     ITI.AddTimer(0.2f, FinishTrial, () =>
@@ -275,7 +320,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                  //trialData.WriteData();
              });
              */
-        ITI.SpecifyTermination(() => true, FinishTrial, () => Debug.Log("Trial" + trialCount + " completed"));
+        ITI.SpecifyTermination(() => true, FinishTrial, () => Debug.Log("Trial" + CurrentTrialDef.TrialNum + " completed"));
 
         TrialData.AddDatum("ClickCount", () => clickCount);
 
@@ -290,63 +335,75 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             obj.SetActive(false);
         }
-        foreach (GameObject obj in totalObjects)
-        {
-            obj.SetActive(false);
-        }
-        clickMarker.SetActive(false);
+        
 
     }
 
     void loadVariables()
     {
         txt = GameObject.Find("FinalText");
-        txt.SetActive(false);
-        halo = GameObject.Find("Halo0");
-        halo.SetActive(false);
-        initButton = GameObject.Find("StartButton");
-        goCue = GameObject.Find("StartText");
-        clickMarker = GameObject.Find("ClickMarker");
         slider = GameObject.Find("Slider").GetComponent<Slider>();
         sliderHalo = GameObject.Find("SliderHalo");
-        sliderHalo.SetActive(false);
+        imageObject = GameObject.Find("HaloImage");
+        initButton = GameObject.Find("StartButton");
+        goCue = GameObject.Find("StartText");
+        sr = sliderHalo.GetComponent<SpriteRenderer>();
+
+        //halo = GameObject.Find("Halo0");
+        //halo.SetActive(false);
+
+
+
         sliderInitPosition = slider.gameObject.transform.position;
+        
+        
         totalObjects = new GameObject[numObjMax];
         System.Random rnd = new System.Random();
+
+        objectColors.Add(new Color(1f, 0f, 0f)); // red
+        objectColors.Add(new Color(0f, 1f, 0f)); // lime
+        objectColors.Add(new Color(0f, 0f, 1f)); // blue
+        objectColors.Add(new Color(1f, 0f, 1f)); //fuschia
+        objectColors.Add(new Color(0f, 1f, 1f)); // cyan
+        objectColors.Add(new Color(0.5412f, 0.1686f, 0.8863f)); // blue-violet
+
+        contextColors.Add(new Color(0f, 0f, 0.5451f)); // dark blue
+        contextColors.Add(new Color(0.3922f, 0.5843f, 0.9294f)); // cornflower blue
+        contextColors.Add(new Color(0.3725f, 0.6196f, 0.6275f)); // cadet blue
+        contextColors.Add(new Color(0.6902f, 0.7686f, 0.8706f)); // light steel blue
+        contextColors.Add(new Color(0.6275f, 0.3216f, 0.1765f)); // sienna
+        contextColors.Add(new Color(0.8275f, 0.8275f, 0.8275f)); // light gray
+        contextColors.Add(new Color(0.8471f, 0.7490f, 0.8471f)); // thistle
+        contextColors.Add(new Color(0.9020f, 0.9020f, 0.9804f)); // lavender
+        contextColors.Add(new Color(0f, 0f, 0f)); // black
+
         for (int i = 0; i < numObjMax; ++i)
         {
             string s = "Sphere" + (i + 1).ToString();
             Debug.Log(s);
             totalObjects[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            totalObjects[i].GetComponent<Renderer>().material.SetColor("_Color", new Color((float)rnd.NextDouble(), (float)rnd.NextDouble(), (float)rnd.NextDouble()));
+            totalObjects[i].GetComponent<Renderer>().material.SetColor("_Color", objectColors[i]);
             totalObjects[i].name = s;
             // totalObjects[i].AddComponent<Light>()
             totalObjects[i].SetActive(false);
-
-
         }
 
         initButton.SetActive(false);
         goCue.SetActive(false);
-
-        clickMarker.SetActive(false);
+        txt.SetActive(false);
+        sliderHalo.SetActive(false);
+        imageObject.SetActive(false);
         GameObject.Find("Slider").SetActive(false);
+        
 
-        Colors.Add(new Color(0.815f, 0.105f, 0.105f));
-        Colors.Add(new Color(0.929f, 0.874f, 0.270f));
-        Colors.Add(new Color(0.117f, 0.815f, 0.086f));
-        Colors.Add(new Color(0.086f, 0.0705f, 0.815f));
-        Colors.Add(new Color(0.388f, 0.501f, 0.811f));
-        Colors.Add(new Color(0.705f, 0.094f, 0.631f));
-        Colors.Add(new Color(0.705f, 0.333f, 0.094f));
-        Colors.Add(new Color(0.658f, 0.505f, 0.913f));
-        Colors.Add(new Color(0f, 0f, 0f));
-
+        Debug.Log("Done Loading Variables");
+        
     }
-    void placeSphere(GameObject sphere)
+
+    void placeSphere(GameObject sphere, float x, float y, float z)
     {
-        // set the position of the balloon 1z in front of the camera
-        sphere.transform.position = new Vector3(sphere.transform.position.x, sphere.transform.position.y, 1f);
+         //set the position of the sphere 0z in front of the camera
+        sphere.transform.position = new Vector3(x, y, z);
 
     }
 
@@ -357,6 +414,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         material.color = color;
     }
 }
+
 
 
 

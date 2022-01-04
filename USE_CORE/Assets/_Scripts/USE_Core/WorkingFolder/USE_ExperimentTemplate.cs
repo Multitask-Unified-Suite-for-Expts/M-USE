@@ -27,6 +27,7 @@ namespace USE_ExperimentTemplate
 		public string CurrentTaskName;
 		public List<ControlLevel_Task_Template> AvailableTaskLevels;
 		public List<string> ActiveTaskNames;
+		protected int taskCount;
 
 		//For Loading config information
 		public SessionDetails SessionDetails;
@@ -81,7 +82,7 @@ namespace USE_ExperimentTemplate
 			{
 			SessionData.CreateFile();
 			foreach (ControlLevel_Task_Template tl in AvailableTaskLevels)
-			{
+				{
 					if (ActiveTaskNames.Contains(tl.TaskName))
 					{
 						ActiveTaskLevels.Add(tl.TaskName, tl);
@@ -101,7 +102,7 @@ namespace USE_ExperimentTemplate
 						tl.SessionID = SessionID;
 						tl.DefineTaskLevel();
 						//LoadAsyncScene(SceneManager.GetSceneByName(tl.TaskSceneName));
-						SceneManager.LoadScene(tl.TaskSceneName, LoadSceneMode.Additive);
+						//SceneManager.LoadScene(tl.TaskSceneName, LoadSceneMode.Additive);
 					}
 				}
 			});
@@ -111,22 +112,23 @@ namespace USE_ExperimentTemplate
 			bool tasksFinished = false;
 			selectTask.AddUniversalInitializationMethod(() =>
 			{
-				SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
+				if (SceneManager.GetActiveScene().name != TaskSelectionSceneName)
+				{
+					//SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
+					SceneManager.LoadSceneAsync(TaskSelectionSceneName, LoadSceneMode.Single);
+				}
 				SessionCam.gameObject.SetActive(true);
 				foreach (ControlLevel_Task_Template tl in ActiveTaskLevels.Values)
-				{
-					if (tl.TaskCam == null)
-					{
-						tl.TaskCam = GameObject.Find(tl.TaskName + "_Camera").GetComponent<Camera>();
-						tl.TaskCam.gameObject.SetActive(false);
-					}
-				}
+				//{
+				//	if (tl.TaskCam == null)
+				//	{
+				//		tl.TaskCam = GameObject.Find(tl.TaskName + "_Camera").GetComponent<Camera>();
+				//	}
+				//	tl.TaskCam.gameObject.SetActive(false);
+				//}
 				tasksFinished = false;
-				if (AvailableTaskLevels.Count > 0)
-				{
-					CurrentTask = ActiveTaskLevels[AvailableTaskLevels[0].TaskName];
-					AvailableTaskLevels.RemoveAt(0);
-				}
+				if (taskCount < ActiveTaskLevels.Count)
+					CurrentTask = ActiveTaskLevels[AvailableTaskLevels[taskCount].TaskName];
 				else
 					tasksFinished = true;
 			});
@@ -137,9 +139,9 @@ namespace USE_ExperimentTemplate
 			//runTask.AddLateUpdateMethod
 			runTask.AddUniversalInitializationMethod(() => {
 				SessionCam.gameObject.SetActive(false);
-
+				SceneManager.LoadScene(CurrentTask.TaskSceneName, LoadSceneMode.Additive);
 			});
-			runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () => { SessionData.AppendData(); SessionData.WriteData(); });
+			runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () => { SessionData.AppendData(); SessionData.WriteData(); taskCount++; });
 
 			finishSession.SpecifyTermination(() => true, null, ()=> SessionData.AppendData());
 
@@ -149,17 +151,17 @@ namespace USE_ExperimentTemplate
 			SessionData.ManuallyDefine();
 		}
 
-		IEnumerator LoadAsyncScene(Scene scene)
-		{
+		//IEnumerator LoadAsyncScene(Scene scene)
+		//{
 
-			AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(scene.name);
+		//	AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(scene.name);
 
-			// Wait until the asynchronous scene fully loads
-			while (!asyncLoad.isDone)
-			{
-				yield return null;
-			}
-		}
+		//	// Wait until the asynchronous scene fully loads
+		//	while (!asyncLoad.isDone)
+		//	{
+		//		yield return null;
+		//	}
+		//}
 
 		void OnApplicationQuit()
 		{
@@ -193,8 +195,6 @@ namespace USE_ExperimentTemplate
 			//		udpManager.SendString("DATA###clear_data");
 			//		udpManager.CloseUDP();
 			//	}
-			Debug.Log(SessionData.folderPath);
-
 			//	//Save EditorLog and Player Log files
 			if (StoreData)
 			{
@@ -344,10 +344,16 @@ namespace USE_ExperimentTemplate
 			TrialLevel.TrialDefType = TrialDefType;
 
 
-			AddInitializationMethod(() => {
+			AddInitializationMethod(() =>
+			{
+				if (TaskCam == null)
+				{
+					TaskCam = GameObject.Find(TaskName + "_Camera").GetComponent<Camera>();
+				}
 				//cam.enabled = false;
 				TaskCam.gameObject.SetActive(true);
-				SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSceneName));
+				//SceneManager.LoadSceneAsync(TaskSceneName, LoadSceneMode.Single);
+				//SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSceneName));
 				BlockCount = -1;
 				//DetermineNumBlocksInTask();
 				//prepare blockDef[]
@@ -377,11 +383,12 @@ namespace USE_ExperimentTemplate
 			finishTask.SpecifyTermination(() => true, null);
 
 			AddDefaultTerminationMethod(() => {
-				SessionDataControllers.RemoveDataController("BlockData");
-				SessionDataControllers.RemoveDataController("TrialData");
-				SessionDataControllers.RemoveDataController("FrameData");
+				SessionDataControllers.RemoveDataController("BlockData_" + TaskName);
+				SessionDataControllers.RemoveDataController("TrialData_" + TaskName);
+				SessionDataControllers.RemoveDataController("FrameData_" + TaskName);
 				//cam.enabled = true;
 				TaskCam.gameObject.SetActive(false);
+				SceneManager.UnloadSceneAsync(TaskSceneName);
 			});
 
 
@@ -391,19 +398,19 @@ namespace USE_ExperimentTemplate
 			//Setup data management
 			TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + TaskName;
 			FilePrefix = FilePrefix + "_" + TaskName;
-			BlockData = SessionDataControllers.InstantiateBlockData(StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
+			BlockData = SessionDataControllers.InstantiateBlockData(StoreData, TaskName, TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
 			BlockData.taskLevel = this;
 			BlockData.fileName = FilePrefix + "__BlockData";
 			BlockData.InitDataController();
 
-			TrialData = SessionDataControllers.InstantiateTrialData(StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
+			TrialData = SessionDataControllers.InstantiateTrialData(StoreData, TaskName, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
 			TrialData.taskLevel = this;
 			TrialData.trialLevel = TrialLevel;
 			TrialLevel.TrialData = TrialData;
 			TrialData.fileName = FilePrefix + "__TrialData";
 			TrialData.InitDataController();
 
-			FrameData = SessionDataControllers.InstantiateFrameData(StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
+			FrameData = SessionDataControllers.InstantiateFrameData(StoreData, TaskName, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
 			FrameData.taskLevel = this;
 			FrameData.trialLevel = TrialLevel;
 			TrialLevel.FrameData = FrameData;
@@ -489,10 +496,16 @@ namespace USE_ExperimentTemplate
 
 		private void OnApplicationQuit()
 		{
-			BlockData.AppendData();
-			BlockData.WriteData();
-			FrameData.AppendData();
-			FrameData.WriteData();
+			if (BlockData != null)
+			{
+				BlockData.AppendData();
+				BlockData.WriteData();
+			}
+			if (FrameData != null)
+			{
+				FrameData.AppendData();
+				FrameData.WriteData();
+			}
 		}
 	}
 
@@ -573,8 +586,11 @@ namespace USE_ExperimentTemplate
 
 		private void OnApplicationQuit()
 		{
-			TrialData.AppendData();
-			TrialData.WriteData();
+			if (TrialData != null)
+			{
+				TrialData.AppendData();
+				TrialData.WriteData();
+			}
 		}
 
 	}
@@ -664,23 +680,23 @@ namespace USE_ExperimentTemplate
 			return dc;
 		}
 
-		public BlockData InstantiateBlockData(bool storeData, string path)
+		public BlockData InstantiateBlockData(bool storeData, string taskName, string path)
 		{
-			BlockData dc = AddContainer("BlockData").AddComponent<BlockData>();
+			BlockData dc = AddContainer("BlockData_" + taskName).AddComponent<BlockData>();
 			SpecifyParameters(dc, storeData, path);
 			return dc;
 		}
 
-		public TrialData InstantiateTrialData(bool storeData, string path)
+		public TrialData InstantiateTrialData(bool storeData, string taskName, string path)
 		{
-			TrialData dc = AddContainer("TrialData").AddComponent<TrialData>();
+			TrialData dc = AddContainer("TrialData_" + taskName).AddComponent<TrialData>();
 			SpecifyParameters(dc, storeData, path);
 			return dc;
 		}
 
-		public FrameData InstantiateFrameData(bool storeData, string path)
+		public FrameData InstantiateFrameData(bool storeData, string taskName, string path)
 		{
-			FrameData dc = AddContainer("FrameData").AddComponent<FrameData>();
+			FrameData dc = AddContainer("FrameData_" + taskName).AddComponent<FrameData>();
 			SpecifyParameters(dc, storeData, path);
 			return dc;
 		}

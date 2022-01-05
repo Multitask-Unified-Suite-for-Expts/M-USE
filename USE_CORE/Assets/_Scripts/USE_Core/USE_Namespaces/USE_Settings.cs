@@ -176,10 +176,10 @@ namespace USE_Settings
 					}
 					// split the items
 					string[] sArray = stringValue.Split(',');
-					foreach(string s in sArray)
+					for (int sCount = 0; sCount < sArray.Length; sCount++)
 					{
-						s.Replace("\"", "");
-						s.Trim();
+						sArray[sCount]= sArray[sCount].Replace("\"", "");
+						sArray[sCount] = sArray[sCount].Trim();
 					}
 					AddSetting(key, sArray.ToList());
 				}

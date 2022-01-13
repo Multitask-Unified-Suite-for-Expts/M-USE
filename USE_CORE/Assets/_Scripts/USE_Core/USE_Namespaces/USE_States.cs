@@ -33,10 +33,9 @@ SOFTWARE.
 
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+using USE_StimulusManagement;
 
 namespace USE_States
 {
@@ -581,6 +580,9 @@ namespace USE_States
 		private List<ControlLevelTerminationSpecification> controlLevelTerminationSpecifications;
 
 		public InitScreen initScreen;
+
+		private StimGroup ControlLevelAllStims;
+		private Dictionary<string, StimGroup> ControlLevelAllStimGroups;
 
 		private bool initialized;
 		/// <summary>
@@ -1275,6 +1277,7 @@ namespace USE_States
 		{
 			StartTimeRelative = Time.time;
 		}
+		
 	}
 
 

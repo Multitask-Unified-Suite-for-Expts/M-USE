@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -8,6 +7,7 @@ using UnityEngine.SceneManagement;
 using USE_States;
 using USE_Data;
 using USE_Settings;
+using USE_StimulusManagement;
 
 namespace USE_ExperimentTemplate
 {
@@ -80,8 +80,8 @@ namespace USE_ExperimentTemplate
 
 			setupSession.AddDefaultInitializationMethod(() =>
 			{
-			SessionData.CreateFile();
-			foreach (ControlLevel_Task_Template tl in AvailableTaskLevels)
+				SessionData.CreateFile();
+				foreach (ControlLevel_Task_Template tl in AvailableTaskLevels)
 				{
 					if (ActiveTaskNames.Contains(tl.TaskName))
 					{
@@ -90,19 +90,29 @@ namespace USE_ExperimentTemplate
 						tl.LocateFile = LocateFile;
 						tl.SessionDataPath = SessionDataPath;
 						if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))
-							tl.TaskConfigPath = LocateFile.GetPath("Config File Folder") + Path.DirectorySeparatorChar + tl.TaskName;
+							tl.TaskConfigPath = LocateFile.GetPath("Config File Folder") + Path.DirectorySeparatorChar +
+							                    tl.TaskName;
 						else
 						{
-							List<string> configFolders = (List<string>)SessionSettings.Get("Session", "ConfigFolderNames");
-							tl.TaskConfigPath = LocateFile.GetPath("Config File Folder") + Path.DirectorySeparatorChar + configFolders[ActiveTaskNames.IndexOf(tl.TaskName)];
+							List<string> configFolders =
+								(List<string>) SessionSettings.Get("Session", "ConfigFolderNames");
+							tl.TaskConfigPath = LocateFile.GetPath("Config File Folder") + Path.DirectorySeparatorChar +
+							                    configFolders[ActiveTaskNames.IndexOf(tl.TaskName)];
 						}
+
 						tl.FilePrefix = FilePrefix;
 						tl.StoreData = StoreData;
 						tl.SubjectID = SubjectID;
 						tl.SessionID = SessionID;
 						tl.DefineTaskLevel();
-						//LoadAsyncScene(SceneManager.GetSceneByName(tl.TaskSceneName));
-						//SceneManager.LoadScene(tl.TaskSceneName, LoadSceneMode.Additive);
+						if (tl.PreloadedStims != null && tl.PreloadedStims.Length > 0)
+						{
+							tl.AllTaskStimGroups.Add("PreloadedStims", new StimGroup("PreloadedStims"));
+							foreach (GameObject obj in tl.PreloadedStims)
+							{
+								StimDef sd = new StimDef(tl.AllTaskStimGroups["PreloadedStims"], obj);
+							}
+						}
 					}
 				}
 			});
@@ -118,14 +128,6 @@ namespace USE_ExperimentTemplate
 					SceneManager.LoadSceneAsync(TaskSelectionSceneName, LoadSceneMode.Single);
 				}
 				SessionCam.gameObject.SetActive(true);
-				foreach (ControlLevel_Task_Template tl in ActiveTaskLevels.Values)
-				//{
-				//	if (tl.TaskCam == null)
-				//	{
-				//		tl.TaskCam = GameObject.Find(tl.TaskName + "_Camera").GetComponent<Camera>();
-				//	}
-				//	tl.TaskCam.gameObject.SetActive(false);
-				//}
 				tasksFinished = false;
 				if (taskCount < ActiveTaskLevels.Count)
 					CurrentTask = ActiveTaskLevels[AvailableTaskLevels[taskCount].TaskName];
@@ -261,6 +263,11 @@ namespace USE_ExperimentTemplate
 		private BlockDef CurrentBlockDef;
 		private TrialDef[] AllTrialDefs;
 
+		
+		private StimGroup AllTaskStims;
+		public Dictionary<string, StimGroup> AllTaskStimGroups;
+		public GameObject[] PreloadedStims;
+
 		protected Type TaskDefType, BlockDefType, TrialDefType;
 
 		public virtual void SpecifyTypes() { }
@@ -386,6 +393,7 @@ namespace USE_ExperimentTemplate
 				SessionDataControllers.RemoveDataController("BlockData_" + TaskName);
 				SessionDataControllers.RemoveDataController("TrialData_" + TaskName);
 				SessionDataControllers.RemoveDataController("FrameData_" + TaskName);
+				AllTaskStims.DestroyStimGroup();
 				//cam.enabled = true;
 				TaskCam.gameObject.SetActive(false);
 				SceneManager.UnloadSceneAsync(TaskSceneName);
@@ -431,8 +439,6 @@ namespace USE_ExperimentTemplate
 			TrialLevel.FilePrefix = FilePrefix;
 			TrialLevel.DefineTrialLevel();
 		}
-
-
 
 		public void ReadTaskDef<T>(string taskConfigFolder) where T : TaskDef
 		{
@@ -506,6 +512,58 @@ namespace USE_ExperimentTemplate
 				FrameData.AppendData();
 				FrameData.WriteData();
 			}
+		}
+		
+		public void CreateStimDef(StimGroup sg)
+		{
+			StimDef sd = new StimDef(sg);
+			AllTaskStims.AddStims(sd);
+		}
+
+		public void CreateStimDef(StimGroup sg, int[] dimVals)
+		{
+			StimDef sd = new StimDef(sg, dimVals);
+			AllTaskStims.AddStims(sd);
+		}
+
+		public void CreateStimDef(StimGroup sg, GameObject obj)
+		{
+			StimDef sd = new StimDef(sg, obj);
+			AllTaskStims.AddStims(sd);
+		}
+		
+		public void CreateStimGroup(string groupName)
+		{
+			StimGroup sg = new StimGroup(groupName);
+			AllTaskStimGroups.Add(groupName, sg);
+		}
+		
+		public void CreateStimGroup(string groupName, IEnumerable<StimDef> stims)
+		{
+			StimGroup sg = new StimGroup(groupName, stims);
+			AllTaskStimGroups.Add(groupName, sg);
+			AllTaskStims.AddStims(sg.stimDefs);
+		}
+
+		public void CreateStimGroup(string groupName, IEnumerable<int[]> dimValGroup, string folderPath, IEnumerable<string[]> featureNames, string neutralPatternedColorName, Camera cam, float scale = 1) 
+		{
+			StimGroup sg = new StimGroup(groupName, dimValGroup, folderPath, featureNames, neutralPatternedColorName, cam, scale);
+			AllTaskStimGroups.Add(groupName, sg);
+			AllTaskStims.AddStims(sg.stimDefs);
+		}
+
+		public void CreateStimGroup(string groupName, string TaskName, string stimDefFilePath)
+		{
+			StimGroup sg = new StimGroup(groupName, TaskName, stimDefFilePath);
+			AllTaskStimGroups.Add(groupName, sg);
+			AllTaskStims.AddStims(sg.stimDefs);
+		}
+
+		public void CreateStimGroup(string groupName, StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)
+		{
+			StimGroup sg = new StimGroup(groupName, sgOrig, stimSubsetIndices);
+			AllTaskStimGroups.Add(groupName, sg);
+			AllTaskStims.AddStims(sg.stimDefs);
 		}
 	}
 

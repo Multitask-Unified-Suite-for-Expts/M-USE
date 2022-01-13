@@ -1,13 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using USE_Settings;
+using TriLib;
 
 namespace USE_StimulusManagement
 {
 public class StimDef{
 
-		public string StimType; //stimulus type field (e.g. sample/target/irrelevant/etc)
+		public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)
 		public string StimName;
         public string StimPath;
         public int StimCode; //optional, for analysis purposes
@@ -29,13 +30,32 @@ public class StimDef{
         public bool isRelevant;
 		public bool TriggersSonication;
 
-		public StimDef CopyStimDef()
+		public StimDef(StimGroup sg)
 		{
-			StimDef sd = new StimDef();
+			sg.stimDefs.Add(this);
+			StimGroups.Add(sg.stimGroupName, sg);
+		}
+
+		public StimDef(StimGroup sg, int[] dimVals)
+		{
+			StimDimVals = dimVals;
+			StimPath = "placeholder";
+			sg.stimDefs.Add(this);
+			StimGroups.Add(sg.stimGroupName, sg);
+		}
+
+		public StimDef(StimGroup sg, GameObject obj)
+		{
+			StimGameObject = obj;
+			sg.stimDefs.Add(this);
+			StimGroups.Add(sg.stimGroupName, sg);
+		}
+		
+		public StimDef CopyStimDef(StimGroup sg)
+		{
+			StimDef sd = new StimDef(sg);
 			if(StimName != null)
 				sd.StimName = StimName;
-			if (StimType != null)
-				sd.StimType = StimType;
 			if (BaseTokenGain != null)
 				sd.BaseTokenGain = BaseTokenGain;
 			if (BaseTokenLoss != null)
@@ -49,12 +69,9 @@ public class StimDef{
 				sd.StimDimVals = StimDimVals;
 			if (StimGameObject != null)
 				sd.StimGameObject = StimGameObject;
-			if (StimLocation != null)
-				sd.StimLocation = StimLocation;
-			if (StimRotation != null)
-				sd.StimRotation = StimRotation;
-			if (StimScreenLocation != null)
-				sd.StimScreenLocation = StimScreenLocation;
+			sd.StimLocation = StimLocation;
+			sd.StimRotation = StimRotation;
+			sd.StimScreenLocation = StimScreenLocation;
 			sd.StimLocationSet = StimLocationSet;
 			sd.StimRotationSet = StimRotationSet;
 			sd.StimTrialPositiveFbProb = StimTrialPositiveFbProb;
@@ -77,9 +94,92 @@ public class StimDef{
 			return toggled;
 		}
 
-		public void setStimType(string type)
+		public void AddToStimGroup(StimGroup sg)
 		{
-			StimType = type;
+			if (StimGroups.ContainsValue(sg))
+			{
+				sg.stimDefs.Add(this);
+				StimGroups.Add(sg.stimGroupName, sg);
+			}
+			else
+			{
+				Debug.LogWarning("Attempted to add stim " + StimName + "to StimGroup " + 
+				                 sg.stimGroupName + " but this stimulus is already a member of this StimGroup.");
+			}
+		}
+
+		public void AddToStimGroup(IEnumerable<StimGroup> stimGroups)
+		{
+			foreach (StimGroup sg in stimGroups)
+			{
+				AddToStimGroup(sg);
+			}
+		}
+
+		public void RemoveFromStimGroup(StimGroup sg)
+		{
+			if (StimGroups.ContainsValue(sg))
+			{
+				sg.stimDefs.Remove(this);
+				StimGroups.Remove(sg.stimGroupName);
+			}
+			else
+			{
+				Debug.LogWarning("Attempted to remove stim " + StimName + " from StimGroup " +
+				                 sg.stimGroupName + " but this stimulus is not a member of this StimGroup.");
+			}
+		}
+
+		public void RemoveFromStimGroup(string stimGroupName)
+		{
+			if (StimGroups.ContainsKey(stimGroupName))
+			{
+				StimGroups[stimGroupName].stimDefs.Remove(this);
+				StimGroups.Remove(stimGroupName);
+			}
+			else
+			{
+				Debug.LogWarning("Attempted to remove stim " + StimName + " from StimGroup " +
+				                 stimGroupName + " but this stimulus is not a member of this StimGroup.");
+			}
+		}
+
+		public void RemoveFromStimGroup(IEnumerable<StimGroup> sgs)
+		{
+			foreach (StimGroup sg in sgs)
+				RemoveFromStimGroup(sg);
+		}
+
+		public void RemoveFromStimGroup(IEnumerable<string> sgnames)
+		{
+			foreach (string name in sgnames)
+				RemoveFromStimGroup(name);
+		}
+
+		public GameObject Load()
+		{ 
+			if (string.IsNullOrEmpty(StimPath) && StimDimVals == null && !string.IsNullOrEmpty(StimName))
+				StimGameObject = Resources.Load<GameObject>(StimName);
+			if (!string.IsNullOrEmpty(StimPath))
+			{
+				StimGameObject = Resources.Load<GameObject>(StimPath);
+				if (StimGameObject == null)
+					StimGameObject = LoadModel();
+			}
+			else if (StimDimVals != null)
+			{
+				StimPath = FilePathFromDims("placeholder1", new List<string[]>(), "placeholder3");
+				StimGameObject = LoadModel();
+			}
+
+			return StimGameObject;
+		}
+		
+		public void Destroy()
+		{
+			foreach(StimGroup sg in StimGroups.Values)
+				RemoveFromStimGroup(sg);
+			Object.Destroy(StimGameObject);
 		}
 
 
@@ -91,18 +191,33 @@ public class StimDef{
 			}
 		}
 
-		public void loadModel(Camera cam, float scale, bool visibiility = false) {
-			LoadModel3D lm = GameObject.Find("USE_Components").GetComponent<LoadModel3D>();
-			StimGameObject = lm.Load(StimPath);
+		public GameObject LoadModel(float scale = 1, bool visibiility = false) {
+			using (var assetLoader = new AssetLoader())
+			{
+				try
+				{
+					var assetLoaderOptions = AssetLoaderOptions.CreateInstance();
+					assetLoaderOptions.AutoPlayAnimations = true;
+					assetLoaderOptions.AddAssetUnloader = true;
+					StimGameObject = assetLoader.LoadFromFile(StimPath, assetLoaderOptions);
+				}
+				catch (System.Exception e)
+				{
+					Debug.Log(StimPath);
+					Debug.LogError(e.ToString());
+					return null;
+				}
+			}
 			AddMesh();
 			StimGameObject.transform.position = StimLocation;
 			StimGameObject.transform.rotation = Quaternion.Euler(StimRotation);
 			StimGameObject.transform.localScale = new Vector3(scale, scale, scale);
-			StimScreenLocation = cam.WorldToScreenPoint(StimLocation);
 			ToggleVisibility(visibiility);
+			return StimGameObject;
 		}
+		
 
-		public void FilePathFromDims(string folderPath, IEnumerable<string[]> featureNames, string neutralPatternedColorName)
+		public string FilePathFromDims(string folderPath, IEnumerable<string[]> featureNames, string neutralPatternedColorName)
 		{
 			//UnityEngine.Debug.Log(featureVals);
 			string filename = "";
@@ -126,6 +241,8 @@ public class StimDef{
 				filename = filename.Replace(c2, c1);
 			}
 
+			return filename;
+
 			//return CheckFileName(folderPath, filename);
 		} 
 	}
@@ -134,69 +251,158 @@ public class StimDef{
 	[System.Serializable]
 	public class StimGroup:MonoBehaviour
 	{
-		public List<StimDef> StimDefs;
-		public string StimType;
+		public List<StimDef> stimDefs;
+		public string stimGroupName;
 
-		//constructor that accepts list of stimulus
-		public StimGroup(string type, List<StimDef> stims)
+		public StimGroup(string groupName)
 		{
-			StimDefs = stims;
-			StimType = type;
-			ToggleVisibility(false);
+			stimGroupName = groupName;
+			stimDefs = new List<StimDef>();
+		}
+		
+		public StimGroup(string groupName, IEnumerable<StimDef> stims)
+		{
+			stimGroupName = groupName;
+			stimDefs = new List<StimDef>();
+			AddStims(stims);
 		}
 
-		//constructor that accepts array of stimulus
-		public StimGroup(string type, StimDef[] stims)
+		public StimGroup(string groupName, IEnumerable<int[]> dimValGroup, string folderPath, IEnumerable<string[]> featureNames, string neutralPatternedColorName, Camera cam, float scale = 1) 
 		{
-			StimDefs = stims.OfType<StimDef>().ToList();
-			StimType = type;
-			ToggleVisibility(false);
+			stimGroupName = groupName;
+			stimDefs = new List<StimDef>();
+			AddStims(dimValGroup);
 		}
 
-		public StimGroup(string type, IEnumerable<int[]> stimDimVals, string folderPath, IEnumerable<string[]> featureNames, string neutralPatternedColorName, Camera cam, float scale = 1) 
+		public StimGroup(string groupName, string TaskName, string stimDefFilePath)
 		{
-			StimType = type;
-			foreach(int[] dimVals in stimDimVals)
+			stimGroupName = groupName;
+			stimDefs = new List<StimDef>();
+			AddStims(TaskName, stimDefFilePath);
+		}
+
+		public StimGroup(string groupName, StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)
+		{
+			stimGroupName = groupName;
+			stimDefs = new List<StimDef>();
+			AddStims(sgOrig, stimSubsetIndices);
+		}
+
+		public void AddStims(StimDef stim)
+		{
+			stim.AddToStimGroup(this);
+			// stim.ToggleVisibility(false);
+		}
+
+		public void AddStims(IEnumerable<StimDef> stims)
+		{
+			foreach (StimDef stim in stims)
 			{
-				StimDef sd = new StimDef();
-				sd.StimDimVals = dimVals;
-				sd.FilePathFromDims(folderPath, featureNames, neutralPatternedColorName);
-				sd.loadModel(cam, scale);
+				stim.AddToStimGroup(this);
+				// stim.ToggleVisibility(false);
 			}
 		}
 
-		public void AddStimulus(StimDef stim)
+		public void AddStims(int[] dimVals)
 		{
-			// when stimulus is added to StimGroup, its type is automatically updated to be the same as of StimGroup
-			stim.setStimType(StimType);
-			StimDefs.Add(stim);
-			stim.ToggleVisibility(false);
+			StimDef stim = new StimDef(this, dimVals);
+			// stim.ToggleVisibility(false);
 		}
 
-		public void DestroyStimGroup(float t = 0.0f)
+		public void AddStims(IEnumerable<int[]> dimValGroup)
 		{
-			foreach (StimDef stim in StimDefs)
-				Destroy(stim.StimGameObject, t);
+			foreach (int[] dimVals in dimValGroup)
+			{
+				StimDef stim = new StimDef(this, dimVals);
+				// stim.ToggleVisibility(false);
+			}
+		}
+
+		public void AddStims(string TaskName, string stimDefFilePath)
+		{
+			SessionSettings.ImportSettings_SingleTypeArray<StimDef>(TaskName + "_StimDefs", stimDefFilePath);
+			List<StimDef> sds = (List<StimDef>)SessionSettings.Get(TaskName + "_StimDefs");
+			foreach (StimDef sd in sds)
+			{
+				sd.AddToStimGroup(this);
+				// sd.ToggleVisibility(false);
+			}
+		}
+
+		public void AddStims(StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)
+		{
+			foreach (int index in stimSubsetIndices)
+			{
+				sgOrig.stimDefs[index].AddToStimGroup(this);
+				// sgOrig.stimDefs[index].ToggleVisibility(false);
+			}
+		}
+
+		public void RemoveStims(StimDef stim)
+		{
+			stim.RemoveFromStimGroup(this);
+		}
+		
+		public void RemoveStims(IEnumerable<StimDef> stims)
+		{
+			foreach (StimDef stim in stims)
+			{
+				stim.RemoveFromStimGroup(this);
+			}
+		}
+		
+		
+		public void RemoveStims(int[] dimVals)
+		{
+			foreach (StimDef sd in stimDefs)
+			{
+				if (sd.StimDimVals == dimVals)
+				{
+					sd.RemoveFromStimGroup(this);
+					return;
+				}
+			}
+			Debug.LogWarning("Attempted to remove StimDef with dimensional values " + dimVals + " from StimGroup " + stimGroupName + 
+			                 ", but this StimGroup does not include a StimDef with these dimensional values.");
+		}
+
+		public void RemoveStims(IEnumerable<int[]> dimValGroup)
+		{
+			foreach (int[] dimVals in dimValGroup)
+			{
+				RemoveStims(dimVals);
+			}
+		}
+
+		public void RemoveStims(StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)
+		{
+			foreach (int index in stimSubsetIndices)
+			{
+				sgOrig.stimDefs[index].RemoveFromStimGroup(this);
+			}
+		}
+
+		public void LoadStims()
+		{
+			foreach(StimDef sd in stimDefs)
+				sd.Load();
+		}
+
+		public void DestroyStimGroup()
+		{
+			foreach (StimDef stim in stimDefs)
+				stim.Destroy();
 			Destroy(this);
 		}
 
 		public void ToggleVisibility(bool visibility)
 		{
-			foreach (StimDef stim in StimDefs)
+			foreach (StimDef stim in stimDefs)
 			{
 				stim.ToggleVisibility(visibility);
 			}
 		}
-
-		public void AddMesh()
-		{
-			foreach (StimDef stim in StimDefs)
-			{
-				stim.AddMesh();
-			}
-			
-		}
-
+		
+		
 	}
-
 }

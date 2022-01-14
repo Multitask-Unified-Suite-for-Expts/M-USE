@@ -6,6 +6,8 @@ using USE_States;
 using StimHandling_Namespace;
 public class StimHandling_TrialLevel : ControlLevel_Trial_Template
 {
+    //add state where individual stimuli are togglevisibility/destroyed
+    
     //This variable is required for most tasks, and is defined as the output of the GetCurrentTrialDef function 
     public StimHandling_TrialDef CurrentTrialDef => GetCurrentTrialDef<StimHandling_TrialDef>();
     public override void DefineControlLevel()

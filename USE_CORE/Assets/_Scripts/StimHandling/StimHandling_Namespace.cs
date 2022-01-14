@@ -13,9 +13,6 @@ namespace StimHandling_Namespace
 
     public class StimHandling_BlockDef : BlockDef
     {
-        public string BlockName;
-        public int ContextNum;
-        public string ContextName;
     }
 
     public class StimHandling_TrialDef : TrialDef

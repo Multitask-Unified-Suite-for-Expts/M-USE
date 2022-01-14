@@ -16,15 +16,13 @@ namespace USE_ExperimentTemplate
 		protected SessionData SessionData;
 		private SessionDataControllers SessionDataControllers;
 		private bool StoreData;
-		[HideInInspector]
-		public string SubjectID, SessionID, SessionDataPath, FilePrefix;
+		[HideInInspector] public string SubjectID, SessionID, SessionDataPath, FilePrefix;
 
 		public string TaskSelectionSceneName;
 
 		protected Dictionary<string, ControlLevel_Task_Template> ActiveTaskLevels;
 		private ControlLevel_Task_Template CurrentTask;
-		[HideInInspector]
-		public string CurrentTaskName;
+		[HideInInspector] public string CurrentTaskName;
 		public List<ControlLevel_Task_Template> AvailableTaskLevels;
 		public List<string> ActiveTaskNames;
 		protected int taskCount;
@@ -45,21 +43,24 @@ namespace USE_ExperimentTemplate
 			//load session config file
 			SubjectID = SessionDetails.GetItemValue("SubjectID");
 			SessionID = SessionDetails.GetItemValue("SessionID");
-			FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" + DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
-			SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFileInFolder(LocateFile.GetPath("Config File Folder"), "*Session*"));
+			FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" +
+			             DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
+			SessionSettings.ImportSettings_MultipleType("Session",
+				LocateFile.FindFileInFolder(LocateFile.GetPath("Config File Folder"), "*Session*"));
 
 			//if there is a single event code config file for all experiments, load it
-			string eventCodeFileString = LocateFile.FindFileInFolder(LocateFile.GetPath("Config File Folder"), "*EventCode*");
+			string eventCodeFileString =
+				LocateFile.FindFileInFolder(LocateFile.GetPath("Config File Folder"), "*EventCode*");
 			if (!string.IsNullOrEmpty(eventCodeFileString))
 				SessionSettings.ImportSettings_SingleTypeJSON<EventCodeConfig>("EventCodeConfig", eventCodeFileString);
 
 			if (SessionSettings.SettingExists("Session", "TaskNames"))
-				ActiveTaskNames = (List<string>)SessionSettings.Get("Session", "TaskNames");
+				ActiveTaskNames = (List<string>) SessionSettings.Get("Session", "TaskNames");
 			else if (ActiveTaskNames.Count == 0)
 				Debug.LogError("No task names specified in Session config file or by other means.");
 
 			if (SessionSettings.SettingExists("Session", "StoreData"))
-				StoreData = (bool)SessionSettings.Get("Session", "StoreData");
+				StoreData = (bool) SessionSettings.Get("Session", "StoreData");
 
 			SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
 		}
@@ -71,7 +72,7 @@ namespace USE_ExperimentTemplate
 			State selectTask = new State("SelectTask");
 			State runTask = new State("RunTask");
 			State finishSession = new State("FinishSession");
-			AddActiveStates(new List<State> { setupSession, selectTask, runTask, finishSession });
+			AddActiveStates(new List<State> {setupSession, selectTask, runTask, finishSession});
 
 			SessionDataControllers = new SessionDataControllers(GameObject.Find("DataControllers"));
 			ActiveTaskLevels = new Dictionary<string, ControlLevel_Task_Template>();
@@ -107,10 +108,10 @@ namespace USE_ExperimentTemplate
 						tl.DefineTaskLevel();
 						if (tl.PreloadedStims != null && tl.PreloadedStims.Length > 0)
 						{
-							tl.AllTaskStimGroups.Add("PreloadedStims", new StimGroup("PreloadedStims"));
+							tl.TaskStims.AllTaskStimGroups.Add("PreloadedStims", new StimGroup("PreloadedStims"));
 							foreach (GameObject obj in tl.PreloadedStims)
 							{
-								StimDef sd = new StimDef(tl.AllTaskStimGroups["PreloadedStims"], obj);
+								StimDef sd = new StimDef(tl.TaskStims.AllTaskStimGroups["PreloadedStims"], obj);
 							}
 						}
 					}
@@ -127,6 +128,7 @@ namespace USE_ExperimentTemplate
 					//SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
 					SceneManager.LoadSceneAsync(TaskSelectionSceneName, LoadSceneMode.Single);
 				}
+
 				SessionCam.gameObject.SetActive(true);
 				tasksFinished = false;
 				if (taskCount < ActiveTaskLevels.Count)
@@ -139,13 +141,19 @@ namespace USE_ExperimentTemplate
 
 			//automatically finish tasks after running one - placeholder for proper selection
 			//runTask.AddLateUpdateMethod
-			runTask.AddUniversalInitializationMethod(() => {
+			runTask.AddUniversalInitializationMethod(() =>
+			{
 				SessionCam.gameObject.SetActive(false);
 				SceneManager.LoadScene(CurrentTask.TaskSceneName, LoadSceneMode.Additive);
 			});
-			runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () => { SessionData.AppendData(); SessionData.WriteData(); taskCount++; });
+			runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
+			{
+				SessionData.AppendData();
+				SessionData.WriteData();
+				taskCount++;
+			});
 
-			finishSession.SpecifyTermination(() => true, null, ()=> SessionData.AppendData());
+			finishSession.SpecifyTermination(() => true, null, () => SessionData.AppendData());
 
 			SessionData = SessionDataControllers.InstantiateSessionData(StoreData, SessionDataPath);
 			SessionData.sessionLevel = this;
@@ -202,32 +210,43 @@ namespace USE_ExperimentTemplate
 			{
 				System.IO.Directory.CreateDirectory(SessionDataPath + Path.DirectorySeparatorChar + "LogFile");
 				string logPath = "";
-				if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX | SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux)
+				if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX |
+				    SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux)
 				{
 					if (Application.isEditor)
-						logPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/Library/Logs/Unity/Editor.log";
+						logPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) +
+						          "/Library/Logs/Unity/Editor.log";
 					else
-						logPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/Library/Logs/Unity/Player.log";
+						logPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) +
+						          "/Library/Logs/Unity/Player.log";
 				}
 				else if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Windows)
 				{
 					if (Application.isEditor)
 					{
-						logPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Unity\\Editor\\Editor.log";
+						logPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) +
+						          "\\Unity\\Editor\\Editor.log";
 					}
 					else
 					{
-						logPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low\\" + Application.companyName + "\\" + Application.productName + "\\Player.log";
+						logPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low\\" +
+						          Application.companyName + "\\" + Application.productName + "\\Player.log";
 					}
 				}
+
 				if (Application.isEditor)
-					File.Copy(logPath, SessionDataPath + Path.DirectorySeparatorChar + "LogFile" + Path.DirectorySeparatorChar + "Editor.log");
+					File.Copy(logPath,
+						SessionDataPath + Path.DirectorySeparatorChar + "LogFile" + Path.DirectorySeparatorChar +
+						"Editor.log");
 				else
-					File.Copy(logPath, SessionDataPath + Path.DirectorySeparatorChar + "LogFile" + Path.DirectorySeparatorChar + "Player.log");
+					File.Copy(logPath,
+						SessionDataPath + Path.DirectorySeparatorChar + "LogFile" + Path.DirectorySeparatorChar +
+						"Player.log");
 
 				System.IO.Directory.CreateDirectory(SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings");
 
-				SessionSettings.StoreSettings(SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings" + Path.DirectorySeparatorChar);
+				SessionSettings.StoreSettings(SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings" +
+				                              Path.DirectorySeparatorChar);
 			}
 		}
 	}
@@ -235,23 +254,18 @@ namespace USE_ExperimentTemplate
 	public abstract class ControlLevel_Task_Template : ControlLevel
 	{
 		public string TaskName;
-		[HideInInspector]
-		public int BlockCount;
+		[HideInInspector] public int BlockCount;
 		protected int NumBlocksInTask;
 		public ControlLevel_Trial_Template TrialLevel;
 		protected BlockData BlockData;
 		protected FrameData FrameData;
 		protected TrialData TrialData;
 
-		[HideInInspector]
-		public SessionDataControllers SessionDataControllers;
+		[HideInInspector] public SessionDataControllers SessionDataControllers;
 
-		[HideInInspector]
-		public bool StoreData;
-		[HideInInspector]
-		public string SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix;
-		[HideInInspector]
-		public LocateFile LocateFile;
+		[HideInInspector] public bool StoreData;
+		[HideInInspector] public string SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix;
+		[HideInInspector] public LocateFile LocateFile;
 
 		public string TaskSceneName;
 		public Camera TaskCam;
@@ -263,14 +277,17 @@ namespace USE_ExperimentTemplate
 		private BlockDef CurrentBlockDef;
 		private TrialDef[] AllTrialDefs;
 
-		
-		private StimGroup AllTaskStims;
-		public Dictionary<string, StimGroup> AllTaskStimGroups;
+		//
+		// private StimGroup AllTaskStims;
+		// public Dictionary<string, StimGroup> AllTaskStimGroups;
+		public TaskStims TaskStims;
 		public GameObject[] PreloadedStims;
 
-		protected Type TaskDefType, BlockDefType, TrialDefType;
+		protected Type TaskDefType, BlockDefType, TrialDefType, StimDefType;
 
-		public virtual void SpecifyTypes() { }
+		public virtual void SpecifyTypes()
+		{
+		}
 
 		private void ReadSettingsFiles()
 		{
@@ -283,33 +300,49 @@ namespace USE_ExperimentTemplate
 				BlockDefType = typeof(BlockDef);
 			if (TrialDefType == null)
 				TrialDefType = typeof(TrialDef);
+			if (StimDefType == null)
+				StimDefType = typeof(StimDef);
 
-			//read in the TaskDef, BlockDef and TrialDef files (any of these may not exist)
-			MethodInfo readTaskDef = GetType().GetMethod(nameof(this.ReadTaskDef)).MakeGenericMethod(new Type[] { TaskDefType });
-			readTaskDef.Invoke(this, new object[] { TaskConfigPath });
-			MethodInfo readBlockDefs = GetType().GetMethod(nameof(this.ReadBlockDefs)).MakeGenericMethod(new Type[] { BlockDefType });
-			readBlockDefs.Invoke(this, new object[] { TaskConfigPath });
-			MethodInfo readTrialDefs = GetType().GetMethod(nameof(this.ReadTrialDefs)).MakeGenericMethod(new Type[] { TrialDefType });
-			readTrialDefs.Invoke(this, new object[] { TaskConfigPath });
+			//read in the TaskDef, BlockDef, TrialDef, and StimDef files (any of these may not exist)
+			MethodInfo readTaskDef = GetType().GetMethod(nameof(this.ReadTaskDef))
+				.MakeGenericMethod(new Type[] {TaskDefType});
+			readTaskDef.Invoke(this, new object[] {TaskConfigPath});
+			MethodInfo readBlockDefs = GetType().GetMethod(nameof(this.ReadBlockDefs))
+				.MakeGenericMethod(new Type[] {BlockDefType});
+			readBlockDefs.Invoke(this, new object[] {TaskConfigPath});
+			MethodInfo readTrialDefs = GetType().GetMethod(nameof(this.ReadTrialDefs))
+				.MakeGenericMethod(new Type[] {TrialDefType});
+			readTrialDefs.Invoke(this, new object[] {TaskConfigPath});
+			MethodInfo readStimDefs = GetType().GetMethod(nameof(this.ReadStimDefs))
+				.MakeGenericMethod(new Type[] {StimDefType});
+			readStimDefs.Invoke(this, new object[] {TaskConfigPath});
 
 			//handling of block and trial defs so that each BlockDef contains a TrialDef[] array
 
 			if (AllTrialDefs == null)
 			{
 				if (BlockDefs == null)
-					Debug.LogError("Neither BlockDef nor TrialDef config files provided in " + TaskName + " folder, no trials generated as a result.");
+					Debug.LogError("Neither BlockDef nor TrialDef config files provided in " + TaskName +
+					               " folder, no trials generated as a result.");
 				else
 				{
 					//Do something with blockdef by itself
-					Debug.LogError("BlockDef config file provided without TrialDef config file in " + TaskName + " folder, no method currently exists to handle this case.");
+					Debug.LogError("BlockDef config file provided without TrialDef config file in " + TaskName +
+					               " folder, no method currently exists to handle this case.");
 				}
 
 			}
 			else
 			{
+				foreach (TrialDef td in AllTrialDefs)
+				{
+					//check existence of files - requires either name + gameobject (if already loaded), resource path, or external path
+				}
+
 				if (BlockDefs == null)
 				{
-					Debug.Log("TrialDef config file provided without BlockDef config file in " + TaskName + " folder, BlockDefs will be generated with default values for all fields from TrialDefs.");
+					Debug.Log("TrialDef config file provided without BlockDef config file in " + TaskName +
+					          " folder, BlockDefs will be generated with default values for all fields from TrialDefs.");
 					if (AllTrialDefs[AllTrialDefs.Length - 1].BlockCount != 0)
 					{
 						if (AllTrialDefs[0].BlockCount == 0)
@@ -317,14 +350,17 @@ namespace USE_ExperimentTemplate
 						else if (AllTrialDefs[0].BlockCount == 1)
 							BlockDefs = new BlockDef[AllTrialDefs[AllTrialDefs.Length - 1].BlockCount - 1];
 						else
-							Debug.LogError("TrialDef config file in " + TaskName + " folder includes BlockCounts that are neither 0- nor 1-indexed.");
+							Debug.LogError("TrialDef config file in " + TaskName +
+							               " folder includes BlockCounts that are neither 0- nor 1-indexed.");
 					}
 					else
 					{
-						Debug.Log("TrialDef config file in " + TaskName + " folder only generates a single block (this is not a problem if you do not intend to use a block structure in your experiment).");
+						Debug.Log("TrialDef config file in " + TaskName +
+						          " folder only generates a single block (this is not a problem if you do not intend to use a block structure in your experiment).");
 						BlockDefs = new BlockDef[1];
 					}
 				}
+
 				for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
 				{
 					if (BlockDefs[iBlock] == null)
@@ -346,7 +382,7 @@ namespace USE_ExperimentTemplate
 			State blockFeedback = new State("BlockFeedback");
 			State finishTask = new State("FinishTask");
 			runBlock.AddChildLevel(TrialLevel);
-			AddActiveStates(new List<State> { setupTask, runBlock, blockFeedback, finishTask });
+			AddActiveStates(new List<State> {setupTask, runBlock, blockFeedback, finishTask});
 
 			TrialLevel.TrialDefType = TrialDefType;
 
@@ -357,6 +393,7 @@ namespace USE_ExperimentTemplate
 				{
 					TaskCam = GameObject.Find(TaskName + "_Camera").GetComponent<Camera>();
 				}
+
 				//cam.enabled = false;
 				TaskCam.gameObject.SetActive(true);
 				//SceneManager.LoadSceneAsync(TaskSceneName, LoadSceneMode.Single);
@@ -384,16 +421,25 @@ namespace USE_ExperimentTemplate
 			runBlock.SpecifyTermination(() => TrialLevel.Terminated, blockFeedback);
 
 			blockFeedback.AddLateUpdateMethod(() => FrameData.AppendData());
-			blockFeedback.SpecifyTermination(() => BlockCount < BlockDefs.Length - 1, runBlock, () => { BlockData.AppendData(); BlockData.WriteData(); });
-			blockFeedback.SpecifyTermination(() => BlockCount == BlockDefs.Length - 1, finishTask, () => { BlockData.AppendData(); BlockData.WriteData(); });
+			blockFeedback.SpecifyTermination(() => BlockCount < BlockDefs.Length - 1, runBlock, () =>
+			{
+				BlockData.AppendData();
+				BlockData.WriteData();
+			});
+			blockFeedback.SpecifyTermination(() => BlockCount == BlockDefs.Length - 1, finishTask, () =>
+			{
+				BlockData.AppendData();
+				BlockData.WriteData();
+			});
 
 			finishTask.SpecifyTermination(() => true, null);
 
-			AddDefaultTerminationMethod(() => {
+			AddDefaultTerminationMethod(() =>
+			{
 				SessionDataControllers.RemoveDataController("BlockData_" + TaskName);
 				SessionDataControllers.RemoveDataController("TrialData_" + TaskName);
 				SessionDataControllers.RemoveDataController("FrameData_" + TaskName);
-				AllTaskStims.DestroyStimGroup();
+				TaskStims.AllTaskStims.DestroyStimGroup();
 				//cam.enabled = true;
 				TaskCam.gameObject.SetActive(false);
 				SceneManager.UnloadSceneAsync(TaskSceneName);
@@ -406,19 +452,22 @@ namespace USE_ExperimentTemplate
 			//Setup data management
 			TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + TaskName;
 			FilePrefix = FilePrefix + "_" + TaskName;
-			BlockData = SessionDataControllers.InstantiateBlockData(StoreData, TaskName, TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
+			BlockData = SessionDataControllers.InstantiateBlockData(StoreData, TaskName,
+				TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
 			BlockData.taskLevel = this;
 			BlockData.fileName = FilePrefix + "__BlockData";
 			BlockData.InitDataController();
 
-			TrialData = SessionDataControllers.InstantiateTrialData(StoreData, TaskName, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
+			TrialData = SessionDataControllers.InstantiateTrialData(StoreData, TaskName,
+				TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
 			TrialData.taskLevel = this;
 			TrialData.trialLevel = TrialLevel;
 			TrialLevel.TrialData = TrialData;
 			TrialData.fileName = FilePrefix + "__TrialData";
 			TrialData.InitDataController();
 
-			FrameData = SessionDataControllers.InstantiateFrameData(StoreData, TaskName, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
+			FrameData = SessionDataControllers.InstantiateFrameData(StoreData, TaskName,
+				TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
 			FrameData.taskLevel = this;
 			FrameData.trialLevel = TrialLevel;
 			TrialLevel.FrameData = FrameData;
@@ -437,6 +486,7 @@ namespace USE_ExperimentTemplate
 
 			TrialLevel.SessionDataControllers = SessionDataControllers;
 			TrialLevel.FilePrefix = FilePrefix;
+			TrialLevel.TaskStims = TaskStims;
 			TrialLevel.DefineTrialLevel();
 		}
 
@@ -446,7 +496,7 @@ namespace USE_ExperimentTemplate
 			if (!string.IsNullOrEmpty(taskDefFile))
 			{
 				SessionSettings.ImportSettings_MultipleType(TaskName + "_TaskSettings", taskDefFile);
-				TaskDef = (T)SessionSettings.Get(TaskName + "_TaskSettings");
+				TaskDef = (T) SessionSettings.Get(TaskName + "_TaskSettings");
 			}
 			else
 				Debug.Log("No taskdef file in config folder (this may not be a problem).");
@@ -465,7 +515,7 @@ namespace USE_ExperimentTemplate
 					SessionSettings.ImportSettings_SingleTypeArray<BlockDef>("blockDefs", blockDefFile);
 				else
 					SessionSettings.ImportSettings_SingleTypeJSON<BlockDef[]>("blockDefs", blockDefFile);
-				BlockDefs = (T[])SessionSettings.Get("blockDefs");
+				BlockDefs = (T[]) SessionSettings.Get("blockDefs");
 			}
 			else
 				Debug.Log("No blockdef file in config folder (this may not be a problem).");
@@ -481,10 +531,26 @@ namespace USE_ExperimentTemplate
 					SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_TrialDefs", trialDefFile);
 				else
 					SessionSettings.ImportSettings_SingleTypeJSON<T[]>(TaskName + "_TrialDefs", trialDefFile);
-				AllTrialDefs = (T[])SessionSettings.Get(TaskName + "_TrialDefs");
+				AllTrialDefs = (T[]) SessionSettings.Get(TaskName + "_TrialDefs");
 			}
 			else
 				Debug.Log("No trialdef file in config folder (this may not be a problem).");
+		}
+
+		public void ReadStimDefs<T>(string taskConfigFolder) where T : StimDef
+		{
+			//string taskConfigFolder = LocateFile.GetPath("Config File Folder") + Path.DirectorySeparatorChar + TaskName;
+			string stimDefFile = LocateFile.FindFileInFolder(taskConfigFolder, "*" + TaskName + "*StimDef*");
+			if (!string.IsNullOrEmpty(stimDefFile))
+			{
+				if (stimDefFile.ToLower().Contains("tdf"))
+					SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_TrialDefs", stimDefFile);
+				else
+					SessionSettings.ImportSettings_SingleTypeJSON<T[]>(TaskName + "_TrialDefs", stimDefFile);
+				TaskStims.CreateStimGroup("ExternalStimDefs", (T[]) SessionSettings.Get(TaskName + "_StimDefs"));
+			}
+			else
+				Debug.Log("No stimdef file in config folder (this may not be a problem).");
 		}
 
 		public TrialDef[] GetTrialDefsInBlock(int BlockNum, TrialDef[] trialDefs)
@@ -497,6 +563,7 @@ namespace USE_ExperimentTemplate
 				if (currentBlockCount == BlockNum)
 					trialList.Add(trialDefs[iTrial]);
 			}
+
 			return trialList.ToArray();
 		}
 
@@ -507,96 +574,47 @@ namespace USE_ExperimentTemplate
 				BlockData.AppendData();
 				BlockData.WriteData();
 			}
+
 			if (FrameData != null)
 			{
 				FrameData.AppendData();
 				FrameData.WriteData();
 			}
 		}
-		
-		public void CreateStimDef(StimGroup sg)
-		{
-			StimDef sd = new StimDef(sg);
-			AllTaskStims.AddStims(sd);
-		}
 
-		public void CreateStimDef(StimGroup sg, int[] dimVals)
-		{
-			StimDef sd = new StimDef(sg, dimVals);
-			AllTaskStims.AddStims(sd);
-		}
-
-		public void CreateStimDef(StimGroup sg, GameObject obj)
-		{
-			StimDef sd = new StimDef(sg, obj);
-			AllTaskStims.AddStims(sd);
-		}
-		
-		public void CreateStimGroup(string groupName)
-		{
-			StimGroup sg = new StimGroup(groupName);
-			AllTaskStimGroups.Add(groupName, sg);
-		}
-		
-		public void CreateStimGroup(string groupName, IEnumerable<StimDef> stims)
-		{
-			StimGroup sg = new StimGroup(groupName, stims);
-			AllTaskStimGroups.Add(groupName, sg);
-			AllTaskStims.AddStims(sg.stimDefs);
-		}
-
-		public void CreateStimGroup(string groupName, IEnumerable<int[]> dimValGroup, string folderPath, IEnumerable<string[]> featureNames, string neutralPatternedColorName, Camera cam, float scale = 1) 
-		{
-			StimGroup sg = new StimGroup(groupName, dimValGroup, folderPath, featureNames, neutralPatternedColorName, cam, scale);
-			AllTaskStimGroups.Add(groupName, sg);
-			AllTaskStims.AddStims(sg.stimDefs);
-		}
-
-		public void CreateStimGroup(string groupName, string TaskName, string stimDefFilePath)
-		{
-			StimGroup sg = new StimGroup(groupName, TaskName, stimDefFilePath);
-			AllTaskStimGroups.Add(groupName, sg);
-			AllTaskStims.AddStims(sg.stimDefs);
-		}
-
-		public void CreateStimGroup(string groupName, StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)
-		{
-			StimGroup sg = new StimGroup(groupName, sgOrig, stimSubsetIndices);
-			AllTaskStimGroups.Add(groupName, sg);
-			AllTaskStims.AddStims(sg.stimDefs);
-		}
 	}
 
 
 	public abstract class ControlLevel_Trial_Template : ControlLevel
 	{
-		[HideInInspector]
-		public TrialData TrialData;
-		[HideInInspector]
-		public FrameData FrameData;
-		[HideInInspector]
-		public int BlockCount, TrialCount_InTask, TrialCount_InBlock, AbortCode;
+		[HideInInspector] public TrialData TrialData;
+		[HideInInspector] public FrameData FrameData;
+		[HideInInspector] public int BlockCount, TrialCount_InTask, TrialCount_InBlock, AbortCode;
 		protected int NumTrialsInBlock;
-		[HideInInspector]
-		public SessionDataControllers SessionDataControllers;
+		[HideInInspector] public SessionDataControllers SessionDataControllers;
 
-		[HideInInspector]
-		public bool StoreData;
-		[HideInInspector]
-		public string TaskDataPath, FilePrefix;
+		[HideInInspector] public bool StoreData;
+		[HideInInspector] public string TaskDataPath, FilePrefix;
 
 		protected State SetupTrial, FinishTrial;
 
 		public TrialDef[] TrialDefs;
+
+		public TaskStims TaskStims;
+
 		//protected TrialDef CurrentTrialDef;
-		protected T GetCurrentTrialDef<T>() where T:TrialDef { return (T) TrialDefs[TrialCount_InBlock]; }
+		protected T GetCurrentTrialDef<T>() where T : TrialDef
+		{
+			return (T) TrialDefs[TrialCount_InBlock];
+		}
+
 		public Type TrialDefType;
 
 		public void DefineTrialLevel()
 		{
 			SetupTrial = new State("SetupTrial");
 			FinishTrial = new State("FinishTrial");
-			AddActiveStates(new List<State> { SetupTrial, FinishTrial });
+			AddActiveStates(new List<State> {SetupTrial, FinishTrial});
 			//DefineTrial();
 			AddInitializationMethod(() =>
 			{
@@ -615,7 +633,7 @@ namespace USE_ExperimentTemplate
 					FrameData.fileName = FilePrefix + "__FrameData_Trial_0" + (TrialCount_InTask + 1) + ".txt";
 				else if (TrialCount_InTask >= 9)
 					FrameData.fileName = FilePrefix + "__FrameData_Trial_00" + (TrialCount_InTask + 1) + ".txt";
-				else 
+				else
 					FrameData.fileName = FilePrefix + "__FrameData_Trial_000" + (TrialCount_InTask + 1) + ".txt";
 				FrameData.CreateFile();
 				//MethodInfo getCTrialDef = GetType().GetMethod(nameof(this.GetCurrentTrialDef)).MakeGenericMethod(new Type[] { TrialDefType });
@@ -640,7 +658,9 @@ namespace USE_ExperimentTemplate
 			TrialData.CreateFile();
 		}
 
-		public virtual void PopulateCurrentTrialVariables() { }
+		public virtual void PopulateCurrentTrialVariables()
+		{
+		}
 
 		private void OnApplicationQuit()
 		{
@@ -651,6 +671,70 @@ namespace USE_ExperimentTemplate
 			}
 		}
 
+	}
+
+	public class TaskStims
+	{
+		public StimGroup AllTaskStims;
+		public Dictionary<string, StimGroup> AllTaskStimGroups;
+
+		public void CreateStimDef(StimGroup sg)
+		{
+			StimDef sd = new StimDef(sg);
+			AllTaskStims.AddStims(sd);
+		}
+
+		public void CreateStimDef(StimGroup sg, int[] dimVals)
+		{
+			StimDef sd = new StimDef(sg, dimVals);
+			AllTaskStims.AddStims(sd);
+		}
+
+		public void CreateStimDef(StimGroup sg, GameObject obj)
+		{
+			StimDef sd = new StimDef(sg, obj);
+			AllTaskStims.AddStims(sd);
+		}
+
+		public StimGroup CreateStimGroup(string groupName)
+		{
+			StimGroup sg = new StimGroup(groupName);
+			AllTaskStimGroups.Add(groupName, sg);
+			return sg;
+		}
+
+		public StimGroup CreateStimGroup(string groupName, IEnumerable<StimDef> stims)
+		{
+			StimGroup sg = new StimGroup(groupName, stims);
+			AllTaskStimGroups.Add(groupName, sg);
+			AllTaskStims.AddStims(sg.stimDefs);
+			return sg;
+		}
+
+		public StimGroup CreateStimGroup(string groupName, IEnumerable<int[]> dimValGroup, string folderPath,
+			IEnumerable<string[]> featureNames, string neutralPatternedColorName, Camera cam, float scale = 1)
+		{
+			StimGroup sg = new StimGroup(groupName, dimValGroup, folderPath, featureNames, neutralPatternedColorName, cam, scale);
+			AllTaskStimGroups.Add(groupName, sg);
+			AllTaskStims.AddStims(sg.stimDefs);
+			return sg;
+		}
+
+		public StimGroup CreateStimGroup(string groupName, string TaskName, string stimDefFilePath)
+		{
+			StimGroup sg = new StimGroup(groupName, TaskName, stimDefFilePath);
+			AllTaskStimGroups.Add(groupName, sg);
+			AllTaskStims.AddStims(sg.stimDefs);
+			return sg;
+		}
+
+		public StimGroup CreateStimGroup(string groupName, StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)
+		{
+			StimGroup sg = new StimGroup(groupName, sgOrig, stimSubsetIndices);
+			AllTaskStimGroups.Add(groupName, sg);
+			AllTaskStims.AddStims(sg.stimDefs);
+			return sg;
+		}
 	}
 
 	public class SessionData : DataController
@@ -805,6 +889,9 @@ namespace USE_ExperimentTemplate
 		public int TaskStart_Frame;
 		public float TaskStart_UnityTime;
 		public string TaskName;
+		public string StimFolder;
+		public List<string[]> FeatureNames;
+		public string neutralPatternedColorName;
 	}
 	public class BlockDef
 	{
@@ -814,6 +901,7 @@ namespace USE_ExperimentTemplate
 	public abstract class TrialDef
 	{
 		public int BlockCount, TrialCountInBlock, TrialCountInTask;
+		public int[] StimDefFileIndices;
 	}
 
 	public class EventCodeConfig

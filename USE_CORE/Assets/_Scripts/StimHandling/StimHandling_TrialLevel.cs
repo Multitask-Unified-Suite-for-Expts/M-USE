@@ -18,9 +18,11 @@ public class StimHandling_TrialLevel : ControlLevel_Trial_Template
         State makeGroupAInvisible = new State("MakeGroupAInvisible");
         State makeGroupBVisible = new State("MakeGroupBVisible");
         State destroyBothGroups = new State("DestroyBothGroups");
+
+        AddActiveStates(new List<State>
+            {startScreen, loadObjects, makeGroupAVisible, makeGroupBVisible, makeGroupAInvisible, destroyBothGroups});
         
-        AddActiveStates(new List<State>{startScreen, loadObjects,makeGroupAVisible, makeGroupBVisible, makeGroupAInvisible, destroyBothGroups});
-        
+        SetupTrial.SpecifyTermination(() => true, startScreen);
         startScreen.SpecifyTermination(()=>InputBroker.GetMouseButtonUp(0), loadObjects);
         
         loadObjects.AddDefaultInitializationMethod(() =>
@@ -57,6 +59,7 @@ public class StimHandling_TrialLevel : ControlLevel_Trial_Template
             TaskStims.AllTaskStimGroups["GroupA"].DestroyStimGroup();
             TaskStims.AllTaskStimGroups["GroupB"].DestroyStimGroup();
         });
+        destroyBothGroups.SpecifyTermination(()=>InputBroker.GetMouseButtonUp(0), FinishTrial);
 
     }
 }

@@ -233,6 +233,8 @@ GameObject:
   - component: {fileID: 1375570699}
   - component: {fileID: 1375570702}
   - component: {fileID: 1375570701}
+  - component: {fileID: 1375570704}
+  - component: {fileID: 1375570703}
   m_Layer: 0
   m_Name: ControlLevels
   m_TagString: Untagged
@@ -257,8 +259,8 @@ MonoBehaviour:
   Terminated: 0
   isMainLevel: 1
   CallDefineLevelAutomatically: 1
-  quitApplicationAtEnd: 1
-  DebugActive: 0
+  quitApplicationAtEnd: 0
+  DebugActive: 1
   Paused: 1
   SubjectID: 
   SessionID: 
@@ -268,12 +270,14 @@ MonoBehaviour:
   CurrentTaskName: 
   AvailableTaskLevels:
   - {fileID: 1375570698}
-  - {fileID: 0}
+  - {fileID: 1375570700}
   - {fileID: 1375570702}
+  - {fileID: 1375570704}
   ActiveTaskNames:
   - EffortControl
   - WhatWhenWhere
   - CognitiveMaze
+  - StimHandling
   SessionDetails: {fileID: 2102576459}
   LocateFile: {fileID: 2102576458}
 --- !u!4 &1375570696
@@ -338,7 +342,7 @@ MonoBehaviour:
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
-  CallDefineLevelAutomatically: 1
+  CallDefineLevelAutomatically: 0
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
@@ -356,6 +360,7 @@ MonoBehaviour:
   LocateFile: {fileID: 0}
   TaskSceneName: EffortControl
   TaskCam: {fileID: 0}
+  PreloadedStims: []
 --- !u!114 &1375570699
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -374,7 +379,7 @@ MonoBehaviour:
   isMainLevel: 0
   CallDefineLevelAutomatically: 0
   quitApplicationAtEnd: 0
-  DebugActive: 0
+  DebugActive: 1
   Paused: 1
   TrialData: {fileID: 0}
   FrameData: {fileID: 0}
@@ -386,7 +391,8 @@ MonoBehaviour:
   StoreData: 0
   TaskDataPath: 
   FilePrefix: 
-  leftRightChoice: 
+  sphereCount: 0
+  sphereChoice: 
 --- !u!114 &1375570700
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -405,7 +411,7 @@ MonoBehaviour:
   isMainLevel: 0
   CallDefineLevelAutomatically: 0
   quitApplicationAtEnd: 0
-  DebugActive: 0
+  DebugActive: 1
   Paused: 1
   TaskName: WhatWhenWhere
   BlockCount: 0
@@ -421,6 +427,7 @@ MonoBehaviour:
   LocateFile: {fileID: 0}
   TaskSceneName: WhatWhenWhere
   TaskCam: {fileID: 0}
+  PreloadedStims: []
 --- !u!114 &1375570701
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -437,9 +444,9 @@ MonoBehaviour:
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
-  CallDefineLevelAutomatically: 1
+  CallDefineLevelAutomatically: 0
   quitApplicationAtEnd: 0
-  DebugActive: 0
+  DebugActive: 1
   Paused: 1
   TrialData: {fileID: 0}
   FrameData: {fileID: 0}
@@ -467,9 +474,9 @@ MonoBehaviour:
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
-  CallDefineLevelAutomatically: 1
+  CallDefineLevelAutomatically: 0
   quitApplicationAtEnd: 0
-  DebugActive: 0
+  DebugActive: 1
   Paused: 0
   TaskName: CognitiveMaze
   BlockCount: 0
@@ -485,6 +492,72 @@ MonoBehaviour:
   LocateFile: {fileID: 0}
   TaskSceneName: CognitiveMaze
   TaskCam: {fileID: 0}
+  PreloadedStims: []
+--- !u!114 &1375570703
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1375570694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b0aaf97e8aaa244da44d0061005dfe4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ControlLevelName: StimHandling_Trial
+  initScreen: {fileID: 0}
+  Terminated: 0
+  isMainLevel: 0
+  CallDefineLevelAutomatically: 0
+  quitApplicationAtEnd: 0
+  DebugActive: 1
+  Paused: 1
+  TrialData: {fileID: 0}
+  FrameData: {fileID: 0}
+  BlockCount: 0
+  TrialCount_InTask: 0
+  TrialCount_InBlock: 0
+  AbortCode: 0
+  SessionDataControllers: {fileID: 0}
+  StoreData: 0
+  TaskDataPath: 
+  FilePrefix: 
+--- !u!114 &1375570704
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1375570694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96454da2820eb9a49bd578066bdf1e69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ControlLevelName: StimHandling_TaskLevel
+  initScreen: {fileID: 0}
+  Terminated: 0
+  isMainLevel: 0
+  CallDefineLevelAutomatically: 0
+  quitApplicationAtEnd: 0
+  DebugActive: 1
+  Paused: 1
+  TaskName: StimHandling
+  BlockCount: 0
+  TrialLevel: {fileID: 1375570703}
+  SessionDataControllers: {fileID: 0}
+  StoreData: 0
+  SessionDataPath: 
+  TaskConfigPath: 
+  TaskDataPath: 
+  SubjectID: 
+  SessionID: 
+  FilePrefix: 
+  LocateFile: {fileID: 0}
+  TaskSceneName: StimHandling
+  TaskCam: {fileID: 0}
+  PreloadedStims: []
 --- !u!1 &1396040246
 GameObject:
   m_ObjectHideFlags: 0

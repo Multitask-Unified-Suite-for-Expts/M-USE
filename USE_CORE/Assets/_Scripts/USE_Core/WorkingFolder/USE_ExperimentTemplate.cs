@@ -20,7 +20,8 @@ namespace USE_ExperimentTemplate
 
 		public string TaskSelectionSceneName;
 
-		protected Dictionary<string, ControlLevel_Task_Template> ActiveTaskLevels;
+		// protected Dictionary<string, ControlLevel_Task_Template> ActiveTaskLevels;
+		protected List<ControlLevel_Task_Template> ActiveTaskLevels;
 		private ControlLevel_Task_Template CurrentTask;
 		[HideInInspector] public string CurrentTaskName;
 		public List<ControlLevel_Task_Template> AvailableTaskLevels;
@@ -75,7 +76,7 @@ namespace USE_ExperimentTemplate
 			AddActiveStates(new List<State> {setupSession, selectTask, runTask, finishSession});
 
 			SessionDataControllers = new SessionDataControllers(GameObject.Find("DataControllers"));
-			ActiveTaskLevels = new Dictionary<string, ControlLevel_Task_Template>();
+			ActiveTaskLevels = new List<ControlLevel_Task_Template>();//new Dictionary<string, ControlLevel_Task_Template>();
 
 			SessionCam = Camera.main;
 
@@ -86,7 +87,8 @@ namespace USE_ExperimentTemplate
 				{
 					if (ActiveTaskNames.Contains(tl.TaskName))
 					{
-						ActiveTaskLevels.Add(tl.TaskName, tl);
+						// ActiveTaskLevels.Add(tl.TaskName, tl);
+						ActiveTaskLevels.Add(tl);	
 						tl.SessionDataControllers = SessionDataControllers;
 						tl.LocateFile = LocateFile;
 						tl.SessionDataPath = SessionDataPath;
@@ -132,19 +134,22 @@ namespace USE_ExperimentTemplate
 				SessionCam.gameObject.SetActive(true);
 				tasksFinished = false;
 				if (taskCount < ActiveTaskLevels.Count)
-					CurrentTask = ActiveTaskLevels[AvailableTaskLevels[taskCount].TaskName];
+					CurrentTask = ActiveTaskLevels[taskCount]; //ActiveTaskLevels[AvailableTaskLevels[taskCount].TaskName];
 				else
 					tasksFinished = true;
 			});
-			selectTask.SpecifyTermination(() => !tasksFinished, runTask, () => runTask.AddChildLevel(CurrentTask));
+			selectTask.SpecifyTermination(() => !tasksFinished, runTask, () =>
+			{
+				runTask.AddChildLevel(CurrentTask);
+				SessionCam.gameObject.SetActive(false);
+				SceneManager.LoadScene(CurrentTask.TaskSceneName, LoadSceneMode.Additive);
+			});
 			selectTask.SpecifyTermination(() => tasksFinished, finishSession);
 
 			//automatically finish tasks after running one - placeholder for proper selection
 			//runTask.AddLateUpdateMethod
 			runTask.AddUniversalInitializationMethod(() =>
 			{
-				SessionCam.gameObject.SetActive(false);
-				SceneManager.LoadScene(CurrentTask.TaskSceneName, LoadSceneMode.Additive);
 			});
 			runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
 			{
@@ -293,6 +298,7 @@ namespace USE_ExperimentTemplate
 		{
 			//user specifies what custom types they have that inherit from TaskDef, BlockDef, and TrialDef;
 			SpecifyTypes();
+			TaskStims = new TaskStims();
 
 			if (TaskDefType == null)
 				TaskDefType = typeof(TaskDef);
@@ -544,9 +550,9 @@ namespace USE_ExperimentTemplate
 			if (!string.IsNullOrEmpty(stimDefFile))
 			{
 				if (stimDefFile.ToLower().Contains("tdf"))
-					SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_TrialDefs", stimDefFile);
+					SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_StimDefs", stimDefFile);
 				else
-					SessionSettings.ImportSettings_SingleTypeJSON<T[]>(TaskName + "_TrialDefs", stimDefFile);
+					SessionSettings.ImportSettings_SingleTypeJSON<T[]>(TaskName + "_StimDefs", stimDefFile);
 				TaskStims.CreateStimGroup("ExternalStimDefs", (T[]) SessionSettings.Get(TaskName + "_StimDefs"));
 			}
 			else
@@ -678,6 +684,12 @@ namespace USE_ExperimentTemplate
 		public StimGroup AllTaskStims;
 		public Dictionary<string, StimGroup> AllTaskStimGroups;
 
+		public TaskStims()
+		{
+			AllTaskStims = new StimGroup("AllTaskStims");
+			AllTaskStimGroups = new Dictionary<string, StimGroup>();
+		}
+
 		public void CreateStimDef(StimGroup sg)
 		{
 			StimDef sd = new StimDef(sg);
@@ -707,7 +719,7 @@ namespace USE_ExperimentTemplate
 		{
 			StimGroup sg = new StimGroup(groupName, stims);
 			AllTaskStimGroups.Add(groupName, sg);
-			AllTaskStims.AddStims(sg.stimDefs);
+			AddNewStims(sg.stimDefs);
 			return sg;
 		}
 
@@ -716,7 +728,7 @@ namespace USE_ExperimentTemplate
 		{
 			StimGroup sg = new StimGroup(groupName, dimValGroup, folderPath, featureNames, neutralPatternedColorName, cam, scale);
 			AllTaskStimGroups.Add(groupName, sg);
-			AllTaskStims.AddStims(sg.stimDefs);
+			AddNewStims(sg.stimDefs);
 			return sg;
 		}
 
@@ -724,7 +736,7 @@ namespace USE_ExperimentTemplate
 		{
 			StimGroup sg = new StimGroup(groupName, TaskName, stimDefFilePath);
 			AllTaskStimGroups.Add(groupName, sg);
-			AllTaskStims.AddStims(sg.stimDefs);
+			AddNewStims(sg.stimDefs);
 			return sg;
 		}
 
@@ -732,8 +744,17 @@ namespace USE_ExperimentTemplate
 		{
 			StimGroup sg = new StimGroup(groupName, sgOrig, stimSubsetIndices);
 			AllTaskStimGroups.Add(groupName, sg);
-			AllTaskStims.AddStims(sg.stimDefs);
+			AddNewStims(sg.stimDefs);
 			return sg;
+		}
+
+		private void AddNewStims(List<StimDef> sds)
+		{
+			foreach (StimDef sd in sds)
+			{
+				if (!AllTaskStims.stimDefs.Contains(sd))
+					AllTaskStims.AddStims(sd);
+			}
 		}
 	}
 

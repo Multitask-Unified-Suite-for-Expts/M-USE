@@ -12,8 +12,8 @@ namespace USE_StimulusManagement
 		public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)
 		public string StimName;
 		public string StimPath;
-		private string PrefabPath;
-		private string ExternalFilePath;
+		public string PrefabPath;
+		public string ExternalFilePath;
 		public int StimCode; //optional, for analysis purposes
 		public string StimID;
 		public int[] StimDimVals; //only if this is parametrically-defined stim
@@ -32,11 +32,17 @@ namespace USE_StimulusManagement
 		public bool isRelevant;
 		public bool TriggersSonication;
 
+		public StimDef()
+		{
+			StimGroups = new Dictionary<string, StimGroup>();
+		}
+
 		public StimDef(StimGroup sg)
 		{
 			if (!(string.IsNullOrEmpty(PrefabPath) | string.IsNullOrWhiteSpace(PrefabPath))  && !(string.IsNullOrEmpty(ExternalFilePath) | string.IsNullOrWhiteSpace(PrefabPath)))
 				Debug.LogWarning("StimDef for stimulus " + StimName + " is being specified with both an external file path and a prefab path. Only the external filepath will be checked.");
 			sg.stimDefs.Add(this);
+			StimGroups = new Dictionary<string, StimGroup>();
 			StimGroups.Add(sg.stimGroupName, sg);
 		}
 
@@ -45,6 +51,7 @@ namespace USE_StimulusManagement
 			StimDimVals = dimVals;
 			StimPath = "placeholder";
 			sg.stimDefs.Add(this);
+			StimGroups = new Dictionary<string, StimGroup>();
 			StimGroups.Add(sg.stimGroupName, sg);
 		}
 
@@ -52,6 +59,7 @@ namespace USE_StimulusManagement
 		{
 			StimGameObject = obj;
 			sg.stimDefs.Add(this);
+			StimGroups = new Dictionary<string, StimGroup>();
 			StimGroups.Add(sg.stimGroupName, sg);
 		}
 
@@ -101,14 +109,14 @@ namespace USE_StimulusManagement
 
 		public void AddToStimGroup(StimGroup sg)
 		{
-			if (StimGroups.ContainsValue(sg))
+			if (!StimGroups.ContainsValue(sg))
 			{
 				sg.stimDefs.Add(this);
 				StimGroups.Add(sg.stimGroupName, sg);
 			}
 			else
 			{
-				Debug.LogWarning("Attempted to add stim " + StimName + "to StimGroup " +
+				Debug.LogWarning("Attempted to add stim " + StimName + " to StimGroup " +
 				                 sg.stimGroupName + " but this stimulus is already a member of this StimGroup.");
 			}
 		}
@@ -266,7 +274,7 @@ namespace USE_StimulusManagement
 
 
 	[System.Serializable]
-	public class StimGroup:MonoBehaviour
+	public class StimGroup
 	{
 		public List<StimDef> stimDefs;
 		public string stimGroupName;
@@ -409,7 +417,6 @@ namespace USE_StimulusManagement
 		{
 			foreach (StimDef stim in stimDefs)
 				stim.Destroy();
-			Destroy(this);
 		}
 
 		public void ToggleVisibility(bool visibility)

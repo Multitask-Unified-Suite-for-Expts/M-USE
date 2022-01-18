@@ -219,11 +219,11 @@ namespace USE_StimulusManagement
 					var assetLoaderOptions = AssetLoaderOptions.CreateInstance();
 					assetLoaderOptions.AutoPlayAnimations = true;
 					assetLoaderOptions.AddAssetUnloader = true;
-					StimGameObject = assetLoader.LoadFromFile(StimPath, assetLoaderOptions);
+					StimGameObject = assetLoader.LoadFromFile(ExternalFilePath, assetLoaderOptions);
 				}
 				catch (System.Exception e)
 				{
-					Debug.Log(StimPath);
+					Debug.Log(ExternalFilePath);
 					Debug.LogError(e.ToString());
 					return null;
 				}

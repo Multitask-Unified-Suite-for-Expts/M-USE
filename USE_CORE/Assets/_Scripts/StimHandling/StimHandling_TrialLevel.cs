@@ -4,6 +4,8 @@ using UnityEngine;
 using USE_ExperimentTemplate;
 using USE_States;
 using StimHandling_Namespace;
+using USE_StimulusManagement;
+
 public class StimHandling_TrialLevel : ControlLevel_Trial_Template
 {
     //add state where individual stimuli are togglevisibility/destroyed
@@ -23,6 +25,19 @@ public class StimHandling_TrialLevel : ControlLevel_Trial_Template
             {startScreen, loadObjects, makeGroupAVisible, makeGroupBVisible, makeGroupAInvisible, destroyBothGroups});
         
         SetupTrial.SpecifyTermination(() => true, startScreen);
+        startScreen.AddDefaultInitializationMethod(() =>
+        {
+            StimDef sd = new StimDef(new StimGroup("test"));
+            sd.ExternalFilePath =
+                "/Users/marcuswatson/Dropbox/ACCL_Games_Fall_2021/Stimuli/S00_P00_C5000000_5000000_T00_A00_E00.fbx";
+            sd.Load();
+            sd.ToggleVisibility(true);
+            // string path = 
+            //     "/Users/marcuswatson/Dropbox/ACCL_Games_Fall_2021/Stimuli/S00_P00_C5000000_5000000_T00_A00_E00.fbx";
+            // LoadModel3D loadModel3D = GameObject.Find("thingy").GetComponent<LoadModel3D>();
+            // GameObject go = loadModel3D.Load(path);
+            // go.SetActive(true);
+        });
         startScreen.SpecifyTermination(()=>InputBroker.GetMouseButtonUp(0), loadObjects);
         
         loadObjects.AddDefaultInitializationMethod(() =>

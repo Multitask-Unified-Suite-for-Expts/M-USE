@@ -4,14 +4,15 @@ using UnityEngine;
 using USE_ExperimentTemplate;
 using USE_States;
 using StimHandling_Namespace;
+using UnityEngine.UI;
 using USE_StimulusManagement;
 
 public class StimHandling_TrialLevel : ControlLevel_Trial_Template
 {
-    //add state where individual stimuli are togglevisibility/destroyed
-    
-    //This variable is required for most tasks, and is defined as the output of the GetCurrentTrialDef function 
+
+    private StimGroup externalStimsA, externalStimsB, prefabStimsA, prefabStimsB, preloadedStimsA, preloadedStimsB;
     public StimHandling_TrialDef CurrentTrialDef => GetCurrentTrialDef<StimHandling_TrialDef>();
+
     public override void DefineControlLevel()
     {
         State startScreen = new State("StartScreen");
@@ -23,58 +24,51 @@ public class StimHandling_TrialLevel : ControlLevel_Trial_Template
 
         AddActiveStates(new List<State>
             {startScreen, loadObjects, makeGroupAVisible, makeGroupBVisible, makeGroupAInvisible, destroyBothGroups});
-        
+
+        Text commandText = GameObject.Find("CommandText").GetComponent<Text>();
         SetupTrial.SpecifyTermination(() => true, startScreen);
+
+
         startScreen.AddDefaultInitializationMethod(() =>
-        {
-            StimDef sd = new StimDef(new StimGroup("test"));
-            sd.ExternalFilePath =
-                "/Users/marcuswatson/Dropbox/ACCL_Games_Fall_2021/Stimuli/S00_P00_C5000000_5000000_T00_A00_E00.fbx";
-            sd.Load();
-            sd.ToggleVisibility(true);
-            // string path = 
-            //     "/Users/marcuswatson/Dropbox/ACCL_Games_Fall_2021/Stimuli/S00_P00_C5000000_5000000_T00_A00_E00.fbx";
-            // LoadModel3D loadModel3D = GameObject.Find("thingy").GetComponent<LoadModel3D>();
-            // GameObject go = loadModel3D.Load(path);
-            // go.SetActive(true);
-        });
-        startScreen.SpecifyTermination(()=>InputBroker.GetMouseButtonUp(0), loadObjects);
-        
+            commandText.text = "Press the mouse button to load all stimuli invisibly.");
+        startScreen.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), loadObjects);
+
         loadObjects.AddDefaultInitializationMethod(() =>
         {
-            TaskStims.CreateStimGroup("GroupA", TaskStims.AllTaskStimGroups["ExternalStimDefs"], CurrentTrialDef.GroupAIndices);
-            TaskStims.AllTaskStimGroups["GroupA"].LoadStims();
-            TaskStims.AllTaskStimGroups["GroupA"].ToggleVisibility(false);
-            TaskStims.CreateStimGroup("GroupB", TaskStims.AllTaskStimGroups["ExternalStimDefs"], CurrentTrialDef.GroupBIndices);
-            TaskStims.AllTaskStimGroups["GroupB"].LoadStims();
-            TaskStims.AllTaskStimGroups["GroupB"].ToggleVisibility(false);
+            externalStimsA = CreateStimGroup("GroupA", ExternalStims, CurrentTrialDef.GroupAIndices);
+            externalStimsA.LoadStims();
+            externalStimsA.ToggleVisibility(false);
+            externalStimsA = CreateStimGroup("GroupB", ExternalStims, CurrentTrialDef.GroupBIndices);
+            externalStimsA.LoadStims();
+            externalStimsA.ToggleVisibility(false);
+            commandText.text = "Press the mouse button to make all Group A stimuli visible.";
         });
-        loadObjects.SpecifyTermination(()=>InputBroker.GetMouseButtonUp(0), makeGroupAVisible);
+        loadObjects.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), makeGroupAVisible);
 
         makeGroupAVisible.AddDefaultInitializationMethod(() =>
         {
-            TaskStims.AllTaskStimGroups["GroupA"].ToggleVisibility(true);
+            externalStimsA.ToggleVisibility(true); 
+            commandText.text = "Press the mouse button to make all Group B stimuli visible.";
         });
-        makeGroupAVisible.SpecifyTermination(()=>InputBroker.GetMouseButtonUp(0), makeGroupBVisible);
-        
+        makeGroupAVisible.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), makeGroupBVisible);
+
         makeGroupBVisible.AddDefaultInitializationMethod(() =>
         {
-            TaskStims.AllTaskStimGroups["GroupB"].ToggleVisibility(true);
+            externalStimsB.ToggleVisibility(true);
+            commandText.text = "Press the mouse button to make all Group A stimuli invisible.";
         });
-        makeGroupBVisible.SpecifyTermination(()=>InputBroker.GetMouseButtonUp(0), makeGroupAInvisible);
-        
-        makeGroupAInvisible.AddDefaultInitializationMethod(() =>
-        {
-            TaskStims.AllTaskStimGroups["GroupA"].ToggleVisibility(false);
-        });
-        makeGroupAInvisible.SpecifyTermination(()=>InputBroker.GetMouseButtonUp(0), destroyBothGroups);
-        
+        makeGroupBVisible.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), makeGroupAInvisible);
+
+        makeGroupAInvisible.AddDefaultInitializationMethod(() => { externalStimsA.ToggleVisibility(false); 
+            commandText.text = "Press the mouse button to destroy both Group A and B.";});
+        makeGroupAInvisible.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), destroyBothGroups);
+
         destroyBothGroups.AddDefaultInitializationMethod(() =>
         {
-            TaskStims.AllTaskStimGroups["GroupA"].DestroyStimGroup();
-            TaskStims.AllTaskStimGroups["GroupB"].DestroyStimGroup();
+            externalStimsA.DestroyStimGroup();
+            externalStimsB.DestroyStimGroup();
         });
-        destroyBothGroups.SpecifyTermination(()=>InputBroker.GetMouseButtonUp(0), FinishTrial);
+        destroyBothGroups.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), FinishTrial);
 
     }
 }

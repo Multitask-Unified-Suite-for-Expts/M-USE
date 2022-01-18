@@ -108,13 +108,21 @@ namespace USE_ExperimentTemplate
 						tl.SubjectID = SubjectID;
 						tl.SessionID = SessionID;
 						tl.DefineTaskLevel();
-						if (tl.PreloadedStims != null && tl.PreloadedStims.Length > 0)
+						if (tl.PreloadedStimGameObjects != null && tl.PreloadedStimGameObjects.Length > 0)
 						{
-							tl.TaskStims.AllTaskStimGroups.Add("PreloadedStims", new StimGroup("PreloadedStims"));
-							foreach (GameObject obj in tl.PreloadedStims)
+							tl.PreloadedStims = new StimGroup("PreloadedStims", tl.PreloadedStimGameObjects);
+							tl.TaskStims.AllTaskStimGroups.Add("PreloadedStims", tl.PreloadedStims);
+						}
+
+						if (tl.PrefabStimPaths != null && tl.PrefabStimPaths.Count > 0)
+						{
+							tl.PrefabStims = new StimGroup("PrefabStims");
+							foreach (string path in tl.PrefabStimPaths)
 							{
-								StimDef sd = new StimDef(tl.TaskStims.AllTaskStimGroups["PreloadedStims"], obj);
+								StimDef sd = new StimDef(tl.PrefabStims);
+								sd.PrefabPath = path;
 							}
+							tl.TaskStims.AllTaskStimGroups.Add("PrefabStims", tl.PrefabStims);
 						}
 					}
 				}
@@ -286,7 +294,9 @@ namespace USE_ExperimentTemplate
 		// private StimGroup AllTaskStims;
 		// public Dictionary<string, StimGroup> AllTaskStimGroups;
 		public TaskStims TaskStims;
-		public GameObject[] PreloadedStims;
+		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims;
+		public GameObject[] PreloadedStimGameObjects;
+		[HideInInspector] public List<string> PrefabStimPaths;
 
 		protected Type TaskDefType, BlockDefType, TrialDefType, StimDefType;
 
@@ -392,7 +402,6 @@ namespace USE_ExperimentTemplate
 
 			TrialLevel.TrialDefType = TrialDefType;
 
-
 			AddInitializationMethod(() =>
 			{
 				if (TaskCam == null)
@@ -445,6 +454,10 @@ namespace USE_ExperimentTemplate
 				SessionDataControllers.RemoveDataController("BlockData_" + TaskName);
 				SessionDataControllers.RemoveDataController("TrialData_" + TaskName);
 				SessionDataControllers.RemoveDataController("FrameData_" + TaskName);
+				foreach (StimGroup sg in TaskStims.AllTaskStimGroups.Values)
+				{
+					sg.DestroyStimGroup();
+				}
 				TaskStims.AllTaskStims.DestroyStimGroup();
 				//cam.enabled = true;
 				TaskCam.gameObject.SetActive(false);
@@ -553,7 +566,19 @@ namespace USE_ExperimentTemplate
 					SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_StimDefs", stimDefFile);
 				else
 					SessionSettings.ImportSettings_SingleTypeJSON<T[]>(TaskName + "_StimDefs", stimDefFile);
-				TaskStims.CreateStimGroup("ExternalStimDefs", (T[]) SessionSettings.Get(TaskName + "_StimDefs"));
+				ExternalStims = new StimGroup("ExternalStims", (T[]) SessionSettings.Get(TaskName + "_Stims"));
+				if (!string.IsNullOrEmpty(TaskDef.StimFolderPath))
+				{
+					foreach (StimDef sd in ExternalStims.stimDefs)
+						sd.StimFolderPath = TaskDef.StimFolderPath;
+				}
+				if (!string.IsNullOrEmpty(TaskDef.StimExtension))
+				{
+					foreach (StimDef sd in ExternalStims.stimDefs)
+						sd.StimExtension = TaskDef.StimExtension;
+				}
+				TaskStims.AllTaskStimGroups.Add("ExternalStims", ExternalStims);
+				// TaskStims.CreateStimGroup("ExternalStims", (T[]) SessionSettings.Get(TaskName + "_Stims"));
 			}
 			else
 				Debug.Log("No stimdef file in config folder (this may not be a problem).");
@@ -606,7 +631,8 @@ namespace USE_ExperimentTemplate
 
 		public TrialDef[] TrialDefs;
 
-		public TaskStims TaskStims;
+		[HideInInspector] public TaskStims TaskStims;
+		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims;
 
 		//protected TrialDef CurrentTrialDef;
 		protected T GetCurrentTrialDef<T>() where T : TrialDef
@@ -676,6 +702,38 @@ namespace USE_ExperimentTemplate
 				TrialData.WriteData();
 			}
 		}
+		
+		public StimGroup CreateStimGroup(string groupName)
+		{
+			TaskStims.CreateStimGroup(groupName);
+			return TaskStims.AllTaskStimGroups[groupName];
+		}
+
+		public StimGroup CreateStimGroup(string groupName, IEnumerable<StimDef> stims)
+		{
+			TaskStims.CreateStimGroup(groupName, stims);
+			return TaskStims.AllTaskStimGroups[groupName];
+		}
+
+		public StimGroup CreateStimGroup(string groupName, IEnumerable<int[]> dimValGroup, string folderPath,
+			IEnumerable<string[]> featureNames, string neutralPatternedColorName, Camera cam, float scale = 1)
+		{
+			TaskStims.CreateStimGroup(groupName, dimValGroup, folderPath, featureNames, neutralPatternedColorName, cam,
+				scale);
+			return TaskStims.AllTaskStimGroups[groupName];
+		}
+
+		public StimGroup CreateStimGroup(string groupName, string TaskName, string stimDefFilePath)
+		{
+			TaskStims.CreateStimGroup(groupName, TaskName, stimDefFilePath);
+			return TaskStims.AllTaskStimGroups[groupName];
+		}
+
+		public StimGroup CreateStimGroup(string groupName, StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)
+		{
+			TaskStims.CreateStimGroup(groupName, sgOrig, stimSubsetIndices);
+			return TaskStims.AllTaskStimGroups[groupName];
+		}
 
 	}
 
@@ -683,6 +741,8 @@ namespace USE_ExperimentTemplate
 	{
 		public StimGroup AllTaskStims;
 		public Dictionary<string, StimGroup> AllTaskStimGroups;
+		public string TaskStimFolderPath;
+		public string TaskStimExtension;
 
 		public TaskStims()
 		{
@@ -693,19 +753,19 @@ namespace USE_ExperimentTemplate
 		public void CreateStimDef(StimGroup sg)
 		{
 			StimDef sd = new StimDef(sg);
-			AllTaskStims.AddStims(sd);
+			CheckPathAndDuplicate(sd);
 		}
 
 		public void CreateStimDef(StimGroup sg, int[] dimVals)
 		{
 			StimDef sd = new StimDef(sg, dimVals);
-			AllTaskStims.AddStims(sd);
+			CheckPathAndDuplicate(sd);
 		}
 
 		public void CreateStimDef(StimGroup sg, GameObject obj)
 		{
 			StimDef sd = new StimDef(sg, obj);
-			AllTaskStims.AddStims(sd);
+			CheckPathAndDuplicate(sd);
 		}
 
 		public StimGroup CreateStimGroup(string groupName)
@@ -748,12 +808,30 @@ namespace USE_ExperimentTemplate
 			return sg;
 		}
 
+		private StimDef CheckPathAndDuplicate(StimDef sd)
+		{
+			if (!string.IsNullOrEmpty(TaskStimFolderPath) && string.IsNullOrEmpty(sd.StimFolderPath))
+				sd.StimFolderPath = TaskStimFolderPath;
+			if (!string.IsNullOrEmpty(TaskStimExtension) && string.IsNullOrEmpty(sd.StimExtension))
+				sd.StimExtension = TaskStimExtension;
+			
+			if (!AllTaskStims.stimDefs.Contains(sd))
+				AllTaskStims.AddStims(sd);
+			else
+				Debug.LogWarning("Attempted to add duplicate StimDef " + sd.StimName + " to AllTaskStims, " +
+				                 "duplication of object has been avoided.");
+
+			return sd;
+		}
+
 		private void AddNewStims(List<StimDef> sds)
 		{
 			foreach (StimDef sd in sds)
 			{
 				if (!AllTaskStims.stimDefs.Contains(sd))
-					AllTaskStims.AddStims(sd);
+				{
+					CheckPathAndDuplicate(sd);
+				}
 			}
 		}
 	}
@@ -910,7 +988,8 @@ namespace USE_ExperimentTemplate
 		public int TaskStart_Frame;
 		public float TaskStart_UnityTime;
 		public string TaskName;
-		public string StimFolder;
+		public string StimFolderPath;
+		public string StimExtension;
 		public List<string[]> FeatureNames;
 		public string neutralPatternedColorName;
 	}
@@ -922,7 +1001,6 @@ namespace USE_ExperimentTemplate
 	public abstract class TrialDef
 	{
 		public int BlockCount, TrialCountInBlock, TrialCountInTask;
-		public int[] StimDefFileIndices;
 	}
 
 	public class EventCodeConfig

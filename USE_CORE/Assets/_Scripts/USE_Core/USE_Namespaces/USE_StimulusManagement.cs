@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Policy;
+using JetBrains.Annotations;
 using UnityEngine;
 using USE_Settings;
 using TriLib;
@@ -14,6 +17,8 @@ namespace USE_StimulusManagement
 		public string StimPath;
 		public string PrefabPath;
 		public string ExternalFilePath;
+		public string StimFolderPath;
+		public string StimExtension;
 		public int StimCode; //optional, for analysis purposes
 		public string StimID;
 		public int[] StimDimVals; //only if this is parametrically-defined stim
@@ -21,6 +26,7 @@ namespace USE_StimulusManagement
 		public Vector3 StimLocation; //to be passed in explicitly if trial doesn't include location method
 		public Vector3 StimRotation; //to be passed in explicitly if trial doesn't include location method
 		public Vector2 StimScreenLocation; //screen position calculated during trial
+		public float? StimScale;
 		public bool StimLocationSet;
 		public bool StimRotationSet;
 		public float StimTrialPositiveFbProb; //set to -1 if stim is irrelevant
@@ -179,7 +185,7 @@ namespace USE_StimulusManagement
 			if (!string.IsNullOrEmpty(ExternalFilePath))
 				StimGameObject = LoadModel();
 			else if (!string.IsNullOrEmpty(PrefabPath))
-				StimGameObject = Resources.Load<GameObject>(StimPath);
+				StimGameObject = Resources.Load<GameObject>(PrefabPath);
 			else if (StimDimVals != null)
 			{
 				StimPath = FilePathFromDims("placeholder1", new List<string[]>(), "placeholder3");
@@ -192,6 +198,40 @@ namespace USE_StimulusManagement
 				return null;
 			}
 			return StimGameObject;
+		}
+
+		public GameObject LoadPrefabFromResources(string prefabPath = "")
+		{
+			if (!string.IsNullOrEmpty(prefabPath))
+				PrefabPath = prefabPath;
+			StimGameObject = Resources.Load<GameObject>(PrefabPath);
+			return StimGameObject;
+		}
+
+		public GameObject LoadExternalStimFromFile(string stimFilePath = "")
+		{
+			if (!string.IsNullOrEmpty(stimFilePath))
+				ExternalFilePath = stimFilePath;
+			if (!string.IsNullOrEmpty(StimFolderPath) && !ExternalFilePath.StartsWith(StimFolderPath))
+			{
+				if (!ExternalFilePath.StartsWith(Path.DirectorySeparatorChar.ToString()) &&
+				    !StimFolderPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
+					ExternalFilePath = StimFolderPath + Path.DirectorySeparatorChar + ExternalFilePath;
+				else if (ExternalFilePath.StartsWith(Path.DirectorySeparatorChar.ToString()) &&
+				         StimFolderPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
+					ExternalFilePath = StimFolderPath + ExternalFilePath.Substring(1);
+				else
+					ExternalFilePath = StimFolderPath + ExternalFilePath;
+			}
+
+			if (!string.IsNullOrEmpty(StimExtension) && !ExternalFilePath.EndsWith(StimExtension))
+			{
+				if (!StimExtension.StartsWith("."))
+					ExternalFilePath = ExternalFilePath + "." + StimExtension;
+				else
+					ExternalFilePath = ExternalFilePath + StimExtension;
+			}
+			return StimGameObject = LoadModel();
 		}
 
 		public void Destroy()
@@ -210,7 +250,7 @@ namespace USE_StimulusManagement
 			}
 		}
 
-		public GameObject LoadModel(float scale = 1, bool visibiility = false)
+		public GameObject LoadModel(bool visibiility = false)
 		{
 			using (var assetLoader = new AssetLoader())
 			{
@@ -232,7 +272,11 @@ namespace USE_StimulusManagement
 			AddMesh();
 			StimGameObject.transform.position = StimLocation;
 			StimGameObject.transform.rotation = Quaternion.Euler(StimRotation);
-			StimGameObject.transform.localScale = new Vector3(scale, scale, scale);
+
+			if (StimScale == null)
+				StimScale = 1;
+			
+			StimGameObject.transform.localScale = new Vector3(StimScale.Value, StimScale.Value, StimScale.Value);
 			ToggleVisibility(visibiility);
 			return StimGameObject;
 		}
@@ -292,6 +336,13 @@ namespace USE_StimulusManagement
 			AddStims(stims);
 		}
 
+		public StimGroup(string groupName, IEnumerable<GameObject> gos)
+		{
+			stimGroupName = groupName;
+			stimDefs = new List<StimDef>();
+			AddStims(gos);
+		}
+
 		public StimGroup(string groupName, IEnumerable<int[]> dimValGroup, string folderPath, IEnumerable<string[]> featureNames, string neutralPatternedColorName, Camera cam, float scale = 1) 
 		{
 			stimGroupName = groupName;
@@ -325,6 +376,18 @@ namespace USE_StimulusManagement
 			{
 				stim.AddToStimGroup(this);
 				// stim.ToggleVisibility(false);
+			}
+		}
+
+		public void AddStims(GameObject go)
+		{
+			StimDef stim = new StimDef(this, go);
+		}
+		public void AddStims(IEnumerable<GameObject> gos)
+		{
+			foreach (GameObject go in gos)
+			{
+				StimDef stim = new StimDef(this, go);
 			}
 		}
 
@@ -411,6 +474,18 @@ namespace USE_StimulusManagement
 		{
 			foreach(StimDef sd in stimDefs)
 				sd.Load();
+		}
+
+		public void LoadPrefabStimFromResources()
+		{
+			foreach (StimDef sd in stimDefs)
+				sd.LoadPrefabFromResources();
+		}
+
+		public void LoadExternalStims()
+		{
+			foreach (StimDef sd in stimDefs)
+				sd.LoadExternalStimFromFile();
 		}
 
 		public void DestroyStimGroup()

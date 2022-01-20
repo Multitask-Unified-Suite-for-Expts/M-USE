@@ -37,7 +37,10 @@ namespace WhatWhenWhere_Namespace
         public Vector3[][] ObjectRotations;
         public int TokensAddedPerCorrectTouch;
         public int TokensSubtractedPerIncorrectTouch;
-        public Color SphereColor; 
+        public Color SphereColor;
+        public float MinTouchDuration;
+        public float MaxTouchDuration;
+
     }
 
     //Any other custom classes useful for the functioning of the task could be included in this namespace.

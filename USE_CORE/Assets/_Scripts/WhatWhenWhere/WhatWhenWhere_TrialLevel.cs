@@ -13,7 +13,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public WhatWhenWhere_TrialDef CurrentTrialDef => GetCurrentTrialDef<WhatWhenWhere_TrialDef>();
 
     // game object variables
-    private GameObject initButton, goCue, trialStim, halo, sliderHalo, imageIncorrectObject, imageCorrectObject, txt;
+    private GameObject initButton, goCue, trialStim, halo, sliderHalo, imageIncorrectObject, imageCorrectObject, imageTimingError, txt;
 
     //  private GameObject[] halos;
     private GameObject[] totalObjects;
@@ -31,6 +31,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private int contextError = 0;
     private int totalErrors = 0;
     private int slotError = 0;
+    private int touchDurationError = 0;
     private float startTime;
     private float clickTime;
     private float timeDif;
@@ -43,9 +44,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private SpriteRenderer sr;
     private Color originalColor;
     private string touchedObj = "[";
+    private bool timingFail = false;
+    private float initialTouchTime = 0;
+    private float touchDuration = 0;
     private int min;
     private int max;
     private int tCount = 0;
+    private int initialClick = 0;
+
 
 
     [HideInInspector]
@@ -75,9 +81,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         State ChooseSphere = new State("ChooseSphere");
         State ChoseWrong = new State("ChoseWrong");
         State ChoseRight = new State("ChoseRight");
+        State TimeError = new State("TimeError");
         State Feedback = new State("Feedback");
         State ITI = new State("ITI");
-        AddActiveStates(new List<State> { StartButton, ChooseSphere, ChoseWrong, ChoseRight, Feedback, ITI });
+        AddActiveStates(new List<State> { StartButton, ChooseSphere, TimeError, ChoseWrong, ChoseRight, Feedback, ITI });
         //chosewrong state
 
         AddInitializationMethod(() =>
@@ -188,107 +195,135 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
 
             trialStim = null;
-
+            initialClick = 0;
         });
 
         ChooseSphere.AddUpdateMethod(() =>
         {
             // check if user clicks on left or right
-            if (InputBroker.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0))
             {
-                mouseRay = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(mouseRay, out hit))
+                initialTouchTime = Time.time;
+                initialClick += 1;
+            }
+            if (Input.GetMouseButtonUp(0) && initialClick == 1)
+            {
+                Debug.Log("NEW");
+                touchDuration = Time.time - initialTouchTime;
+                Debug.Log("touch duration time: " + touchDuration);
+
+                if (touchDuration > CurrentTrialDef.MaxTouchDuration)
                 {
-
-                    int correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[sphereCount] - 1;
-                    Debug.Log("index: " + correctIndex);
-                    trialStim = hit.transform.gameObject;
-
-                    if (trialStim.name == currentObjects[correctIndex].name)
-                    {
-                        //Correct Choice
-                        numTotal[correctIndex]++;
-
-                        slider.value += sliderValueIncreaseAmount;
-                        sphereCount += 1;
-                        response = 1;
-                        touchedObjects.Add(trialStim.name);
-                        sphereChoice = trialStim.name;
-                        imageCorrectObject.transform.position = trialStim.transform.position;
-
-                        correctChoice = true;
-
-                        restart = false; 
-
-                    }
-                    else if (touchedObjects.Contains(trialStim.name))
-                    {
-                        //Repetition error
-                        sphereChoice = trialStim.name;
-                        imageIncorrectObject.transform.position = trialStim.transform.position;
-                        touchedObjects.Add(trialStim.name);
-
-                        response = 1;
-
-                        slider.value -= sliderValueIncreaseAmount;
-                        repetitionError += 1;
-                        totalErrors += 1;
-
-                        numTotal[correctIndex]++;
-                        numErrors[correctIndex]++;
-                       
-                         restart = true;
-                        incorrectChoice = true;
-
-                    }
-
-
-                    else
-                    {
-                        //Slot error
-                        sphereChoice = trialStim.name;
-                        imageIncorrectObject.transform.position = trialStim.transform.position;
-                        touchedObjects.Add(trialStim.name);
-
-                        response = 1;
-
-                        slider.value -= sliderValueIncreaseAmount;
-                        slotError += 1;
-                        totalErrors += 1;
-
-                        numTotal[correctIndex]++;
-                        numErrors[correctIndex]++;
-                        
-                        restart = true;
-                        incorrectChoice = true;
-
-                    }
-                    Debug.Log(restart);
-                    string errLog = "";
-                    for (int i = 0; i < currentObjects.Length; ++i)
-                    {
-                        errLog = errLog + "Slot " + (i + 1) + ": " + numErrors[i] + "/" + numTotal[i] + "\t";
-
-                    }
-                    Debug.Log(errLog);
-
-
+                    timingFail = true;
+                    touchDurationError += 1;
                 }
+
+                else if (touchDuration < CurrentTrialDef.MinTouchDuration)
+                {
+                    timingFail = true;
+                    touchDurationError += 1;
+                }
+
                 else
                 {
-                    Debug.Log("Didn't click on any sphere");
+                    mouseRay = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
+                    RaycastHit hit;
+                    if (Physics.Raycast(mouseRay, out hit))
+                    {
+
+                        int correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[sphereCount] - 1;
+                        Debug.Log("index: " + correctIndex);
+                        trialStim = hit.transform.gameObject;
+
+                        if (trialStim.name == currentObjects[correctIndex].name)
+                        {
+                            //Correct Choice
+                            numTotal[correctIndex]++;
+
+                            slider.value += sliderValueIncreaseAmount;
+                            sphereCount += 1;
+                            response = 1;
+                            touchedObjects.Add(trialStim.name);
+                            sphereChoice = trialStim.name;
+                            imageCorrectObject.transform.position = trialStim.transform.position;
+
+                            correctChoice = true;
+
+                            restart = false;
+
+                        }
+                        else if (touchedObjects.Contains(trialStim.name))
+                        {
+                            //Repetition error
+                            sphereChoice = trialStim.name;
+                            imageIncorrectObject.transform.position = trialStim.transform.position;
+                            touchedObjects.Add(trialStim.name);
+
+                            response = 1;
+
+                            slider.value -= sliderValueIncreaseAmount;
+                            repetitionError += 1;
+                            totalErrors += 1;
+
+                            numTotal[correctIndex]++;
+                            numErrors[correctIndex]++;
+
+                            restart = true;
+                            incorrectChoice = true;
+
+                        }
+
+
+                        else
+                        {
+                            //Slot error
+                            sphereChoice = trialStim.name;
+                            imageIncorrectObject.transform.position = trialStim.transform.position;
+                            touchedObjects.Add(trialStim.name);
+
+                            response = 1;
+
+                            slider.value -= sliderValueIncreaseAmount;
+                            slotError += 1;
+                            totalErrors += 1;
+
+                            numTotal[correctIndex]++;
+                            numErrors[correctIndex]++;
+
+                            restart = true;
+                            incorrectChoice = true;
+
+                        }
+                        Debug.Log(restart);
+                        string errLog = "";
+                        for (int i = 0; i < currentObjects.Length; ++i)
+                        {
+                            errLog = errLog + "Slot " + (i + 1) + ": " + numErrors[i] + "/" + numTotal[i] + "\t";
+
+                        }
+                        Debug.Log(errLog);
+
+
+                    }
+                    else
+                    {
+                        Debug.Log("Didn't click on any sphere");
+                    }
                 }
             }
-           // Debug.Log("COND " + (sphereCount == CurrentTrialDef.ObjectNums.Length));
-           // Debug.Log("SC: " + sphereCount);
-           // Debug.Log("LEN " + CurrentTrialDef.ObjectNums.Length);
-
         });
 
+        
+       // Debug.Log("COND " + (sphereCount == CurrentTrialDef.ObjectNums.Length));
+       // Debug.Log("SC: " + sphereCount);
+       // Debug.Log("LEN " + CurrentTrialDef.ObjectNums.Length);
+       
+    
+
         ChooseSphere.SpecifyTermination(() => incorrectChoice, ChoseWrong);
-        //ChooseSphere.SpecifyTermination(() => correctChoice, ChoseRight);
+        ChooseSphere.SpecifyTermination(() => correctChoice, ChoseRight);
         ChooseSphere.SpecifyTermination(() => sphereCount == CurrentTrialDef.ObjectNums.Length, Feedback);
+        ChooseSphere.SpecifyTermination(() => timingFail, TimeError);
 
         ChoseWrong.AddInitializationMethod(() =>
         {
@@ -334,6 +369,18 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             imageCorrectObject.SetActive(false);
             correctChoice = false;
             sliderHalo.SetActive(false);
+        });
+
+        TimeError.AddInitializationMethod(() =>
+        {
+            imageTimingError.SetActive(true);
+        });
+
+        TimeError.AddTimer(0.5f, StartButton, () =>
+        {
+            imageTimingError.SetActive(false);
+            timingFail = false;
+
         });
 
         Feedback.AddInitializationMethod(() =>
@@ -452,6 +499,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         initButton = GameObject.Find("StartButton");
         goCue = GameObject.Find("StartText");
         sr = sliderHalo.GetComponent<SpriteRenderer>();
+        imageTimingError = GameObject.Find("VerticalStripesImage");
 
         //halo = GameObject.Find("Halo0");
         //halo.SetActive(false);
@@ -501,6 +549,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         sliderHalo.SetActive(false);
         imageIncorrectObject.SetActive(false);
         imageCorrectObject.SetActive(false);
+        imageTimingError.SetActive(false);
         GameObject.Find("Slider").SetActive(false);
 
 

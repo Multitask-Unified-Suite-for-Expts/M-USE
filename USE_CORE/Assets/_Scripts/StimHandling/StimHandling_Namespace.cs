@@ -8,7 +8,6 @@ namespace StimHandling_Namespace
     //However they are left here to make this script an easier template to copy.
     public class StimHandling_TaskDef : TaskDef
     {
-
     }
 
     public class StimHandling_BlockDef : BlockDef

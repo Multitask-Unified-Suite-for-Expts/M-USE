@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using USE_States;
 using USE_Data;
@@ -21,9 +22,9 @@ namespace USE_ExperimentTemplate
 		public string TaskSelectionSceneName;
 
 		// protected Dictionary<string, ControlLevel_Task_Template> ActiveTaskLevels;
+		private Dictionary<string, Type> ActiveTaskTypes = new Dictionary<string, Type>();
 		protected List<ControlLevel_Task_Template> ActiveTaskLevels;
 		private ControlLevel_Task_Template CurrentTask;
-		[HideInInspector] public string CurrentTaskName;
 		public List<ControlLevel_Task_Template> AvailableTaskLevels;
 		public List<string> ActiveTaskNames;
 		protected int taskCount;
@@ -34,6 +35,9 @@ namespace USE_ExperimentTemplate
 
 		private Camera SessionCam;
 
+		private string configFileFolder;
+		private bool TaskSceneLoaded;
+
 		//private void Awake()
 		//{
 		//	DontDestroyOnLoad(gameObject);
@@ -42,16 +46,17 @@ namespace USE_ExperimentTemplate
 		public override void LoadSettings()
 		{
 			//load session config file
+			configFileFolder = LocateFile.GetPath("Config File Folder");
 			SubjectID = SessionDetails.GetItemValue("SubjectID");
 			SessionID = SessionDetails.GetItemValue("SessionID");
 			FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" +
 			             DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
 			SessionSettings.ImportSettings_MultipleType("Session",
-				LocateFile.FindFileInFolder(LocateFile.GetPath("Config File Folder"), "*Session*"));
+				LocateFile.FindFileInFolder(configFileFolder, "*Session*"));
 
 			//if there is a single event code config file for all experiments, load it
 			string eventCodeFileString =
-				LocateFile.FindFileInFolder(LocateFile.GetPath("Config File Folder"), "*EventCode*");
+				LocateFile.FindFileInFolder(configFileFolder, "*EventCode*");
 			if (!string.IsNullOrEmpty(eventCodeFileString))
 				SessionSettings.ImportSettings_SingleTypeJSON<EventCodeConfig>("EventCodeConfig", eventCodeFileString);
 
@@ -79,66 +84,81 @@ namespace USE_ExperimentTemplate
 			ActiveTaskLevels = new List<ControlLevel_Task_Template>();//new Dictionary<string, ControlLevel_Task_Template>();
 
 			SessionCam = Camera.main;
-
 			setupSession.AddDefaultInitializationMethod(() =>
 			{
 				SessionData.CreateFile();
-				foreach (ControlLevel_Task_Template tl in AvailableTaskLevels)
+				SceneManager.sceneLoaded += OnSceneLoaded;
+			});
+			
+			int iTask = 0;
+			setupSession.AddUpdateMethod(() =>
+			{
+				if (iTask < ActiveTaskNames.Count)
 				{
-					if (ActiveTaskNames.Contains(tl.TaskName))
+					int iAvail = 0;
+					while (iAvail < AvailableTaskLevels.Count)
 					{
-						// ActiveTaskLevels.Add(tl.TaskName, tl);
-						ActiveTaskLevels.Add(tl);	
-						tl.SessionDataControllers = SessionDataControllers;
-						tl.LocateFile = LocateFile;
-						tl.SessionDataPath = SessionDataPath;
-						if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))
-							tl.TaskConfigPath = LocateFile.GetPath("Config File Folder") + Path.DirectorySeparatorChar +
-							                    tl.TaskName;
-						else
+						if (AvailableTaskLevels[iAvail].TaskName == ActiveTaskNames[iTask])
 						{
-							List<string> configFolders =
-								(List<string>) SessionSettings.Get("Session", "ConfigFolderNames");
-							tl.TaskConfigPath = LocateFile.GetPath("Config File Folder") + Path.DirectorySeparatorChar +
-							                    configFolders[ActiveTaskNames.IndexOf(tl.TaskName)];
+							break;
 						}
 
-						tl.FilePrefix = FilePrefix;
-						tl.StoreData = StoreData;
-						tl.SubjectID = SubjectID;
-						tl.SessionID = SessionID;
-						tl.DefineTaskLevel();
-						if (tl.PreloadedStimGameObjects != null && tl.PreloadedStimGameObjects.Length > 0)
-						{
-							tl.PreloadedStims = new StimGroup("PreloadedStims", tl.PreloadedStimGameObjects);
-							tl.TaskStims.AllTaskStimGroups.Add("PreloadedStims", tl.PreloadedStims);
-						}
-
-						if (tl.PrefabStimPaths != null && tl.PrefabStimPaths.Count > 0)
-						{
-							tl.PrefabStims = new StimGroup("PrefabStims");
-							foreach (string path in tl.PrefabStimPaths)
-							{
-								StimDef sd = new StimDef(tl.PrefabStims);
-								sd.PrefabPath = path;
-							}
-							tl.TaskStims.AllTaskStimGroups.Add("PrefabStims", tl.PrefabStims);
-						}
+						iAvail++;
 					}
+
+					ControlLevel_Task_Template tl = AvailableTaskLevels[iAvail];
+					tl.SessionDataControllers = SessionDataControllers;
+					tl.LocateFile = LocateFile;
+					tl.SessionDataPath = SessionDataPath;
+					if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))
+						tl.TaskConfigPath =
+							configFileFolder + Path.DirectorySeparatorChar +
+							tl.TaskName;
+					else
+					{
+						List<string> configFolders =
+							(List<string>) SessionSettings.Get("Session", "ConfigFolderNames");
+						tl.TaskConfigPath =
+							configFileFolder + Path.DirectorySeparatorChar +
+							configFolders[ActiveTaskNames.IndexOf(tl.TaskName)];
+					}
+
+					tl.FilePrefix = FilePrefix;
+					tl.StoreData = StoreData;
+					tl.SubjectID = SubjectID;
+					tl.SessionID = SessionID;
+					tl.DefineTaskLevel();
+					if (tl.PreloadedStimGameObjects != null && tl.PreloadedStimGameObjects.Length > 0)
+					{
+						tl.PreloadedStims = new StimGroup("PreloadedStims", tl.PreloadedStimGameObjects);
+						tl.TaskStims.AllTaskStimGroups.Add("PreloadedStims", tl.PreloadedStims);
+					}
+
+					if (tl.PrefabStimPaths != null && tl.PrefabStimPaths.Count > 0)
+					{
+						tl.PrefabStims = new StimGroup("PrefabStims");
+						foreach (string path in tl.PrefabStimPaths)
+						{
+							StimDef sd = new StimDef(tl.PrefabStims);
+							sd.PrefabPath = path;
+						}
+
+						tl.TaskStims.AllTaskStimGroups.Add("PrefabStims", tl.PrefabStims);
+					}
+
+					ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
+					ActiveTaskLevels.Add(tl);
+					SceneManager.LoadSceneAsync(tl.TaskName, LoadSceneMode.Additive);
+					iTask++;
+					TaskSceneLoaded = false;
 				}
 			});
-			setupSession.SpecifyTermination(() => true, selectTask);
+			setupSession.SpecifyTermination(() => iTask >= ActiveTaskNames.Count && TaskSceneLoaded, selectTask);
 
 			//tasksFinished is a placeholder, eventually there will be a proper task selection screen
 			bool tasksFinished = false;
 			selectTask.AddUniversalInitializationMethod(() =>
 			{
-				if (SceneManager.GetActiveScene().name != TaskSelectionSceneName)
-				{
-					//SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
-					SceneManager.LoadSceneAsync(TaskSelectionSceneName, LoadSceneMode.Single);
-				}
-
 				SessionCam.gameObject.SetActive(true);
 				tasksFinished = false;
 				if (taskCount < ActiveTaskLevels.Count)
@@ -150,7 +170,7 @@ namespace USE_ExperimentTemplate
 			{
 				runTask.AddChildLevel(CurrentTask);
 				SessionCam.gameObject.SetActive(false);
-				SceneManager.LoadScene(CurrentTask.TaskSceneName, LoadSceneMode.Additive);
+				SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
 			});
 			selectTask.SpecifyTermination(() => tasksFinished, finishSession);
 
@@ -161,12 +181,16 @@ namespace USE_ExperimentTemplate
 			});
 			runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
 			{
+				SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
 				SessionData.AppendData();
 				SessionData.WriteData();
 				taskCount++;
 			});
 
-			finishSession.SpecifyTermination(() => true, null, () => SessionData.AppendData());
+			finishSession.SpecifyTermination(() => true, null, () =>
+			{
+				SessionData.AppendData();
+			});
 
 			SessionData = SessionDataControllers.InstantiateSessionData(StoreData, SessionDataPath);
 			SessionData.sessionLevel = this;
@@ -174,17 +198,30 @@ namespace USE_ExperimentTemplate
 			SessionData.ManuallyDefine();
 		}
 
-		//IEnumerator LoadAsyncScene(Scene scene)
-		//{
+		void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+		{
+			Debug.Log(scene.name);
+			Debug.Log(ActiveTaskTypes[scene.name]);
+			
+			// MethodInfo readTaskDef = GetType().GetMethod(nameof(this.ReadTaskDef))
+			// 	.MakeGenericMethod(new Type[] {TaskDefType});
+			MethodInfo findTaskCam = GetType().GetMethod(nameof(this.FindTaskCam))
+				.MakeGenericMethod(new Type[] {ActiveTaskTypes[scene.name]});
+			findTaskCam.Invoke(this, new object[] {scene.name});
+			TaskSceneLoaded = true;
+		}
 
-		//	AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(scene.name);
-
-		//	// Wait until the asynchronous scene fully loads
-		//	while (!asyncLoad.isDone)
-		//	{
-		//		yield return null;
-		//	}
-		//}
+		// public void ReadTaskDef<T>(string taskConfigFolder) where T : TaskDef
+		private void FindTaskCam<T>(string taskName) where T : ControlLevel_Task_Template
+		{
+			Debug.Log(GameObject.Find("ControlLevels"));
+			Debug.Log(GameObject.Find("ControlLevels").GetComponent<T>());
+			Debug.Log(GameObject.Find(taskName + "Camera"));
+			Debug.Log(GameObject.Find(taskName + "Camera").GetComponent<Camera>());
+			ControlLevel_Task_Template tl = GameObject.Find("ControlLevels").GetComponent<T>();
+			tl.TaskCam = GameObject.Find(taskName + "Camera").GetComponent<Camera>();
+			tl.TaskCam.gameObject.SetActive(false);
+		}
 
 		void OnApplicationQuit()
 		{
@@ -280,15 +317,15 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public string SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix;
 		[HideInInspector] public LocateFile LocateFile;
 
-		public string TaskSceneName;
+		// public string TaskSceneName;
 		public Camera TaskCam;
 
 		//protected TrialDef[] AllTrialDefs;
 		//protected TrialDef[] CurrentBlockTrialDefs;
-		private TaskDef TaskDef;
-		private BlockDef[] BlockDefs;
-		private BlockDef CurrentBlockDef;
-		private TrialDef[] AllTrialDefs;
+		protected TaskDef TaskDef;
+		protected BlockDef[] BlockDefs;
+		protected BlockDef CurrentBlockDef;
+		protected TrialDef[] AllTrialDefs;
 
 		//
 		// private StimGroup AllTaskStims;
@@ -298,6 +335,7 @@ namespace USE_ExperimentTemplate
 		public GameObject[] PreloadedStimGameObjects;
 		[HideInInspector] public List<string> PrefabStimPaths;
 
+		public Type TaskLevelType;
 		protected Type TaskDefType, BlockDefType, TrialDefType, StimDefType;
 
 		public virtual void SpecifyTypes()
@@ -404,16 +442,15 @@ namespace USE_ExperimentTemplate
 
 			AddInitializationMethod(() =>
 			{
-				if (TaskCam == null)
-				{
-					TaskCam = GameObject.Find(TaskName + "_Camera").GetComponent<Camera>();
-				}
+				// if (TaskCam == null)
+				// {
+				// 	//TaskCam = GameObject.Find(TaskName + "_Camera").GetComponent<Camera>();
+				// }
 
 				//cam.enabled = false;
-				TaskCam.gameObject.SetActive(true);
-				//SceneManager.LoadSceneAsync(TaskSceneName, LoadSceneMode.Single);
-				//SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSceneName));
+				//TaskCam.gameObject.SetActive(true);
 				BlockCount = -1;
+				TaskCam.gameObject.SetActive(true);
 				//DetermineNumBlocksInTask();
 				//prepare blockDef[]
 			});
@@ -422,6 +459,10 @@ namespace USE_ExperimentTemplate
 
 			runBlock.AddUniversalInitializationMethod(() =>
 			{
+				// if (TaskCam == null)
+				// {
+				// 	TaskCam = GameObject.Find(TaskName + "_Camera").GetComponent<Camera>();
+				// }
 				BlockCount++;
 				CurrentBlockDef = BlockDefs[BlockCount];
 				TrialLevel.BlockCount = BlockCount;
@@ -456,12 +497,15 @@ namespace USE_ExperimentTemplate
 				SessionDataControllers.RemoveDataController("FrameData_" + TaskName);
 				foreach (StimGroup sg in TaskStims.AllTaskStimGroups.Values)
 				{
+					while(sg.stimDefs.Count>0)
+						sg.stimDefs[0].Destroy();
+					//foreach (StimDef sd in sg.stimDefs)
+					//	sd.Destroy();
 					sg.DestroyStimGroup();
 				}
 				TaskStims.AllTaskStims.DestroyStimGroup();
 				//cam.enabled = true;
 				TaskCam.gameObject.SetActive(false);
-				SceneManager.UnloadSceneAsync(TaskSceneName);
 			});
 
 
@@ -506,6 +550,9 @@ namespace USE_ExperimentTemplate
 			TrialLevel.SessionDataControllers = SessionDataControllers;
 			TrialLevel.FilePrefix = FilePrefix;
 			TrialLevel.TaskStims = TaskStims;
+			TrialLevel.PreloadedStims = PreloadedStims;
+			TrialLevel.PrefabStims = PrefabStims;
+			TrialLevel.ExternalStims = ExternalStims;
 			TrialLevel.DefineTrialLevel();
 		}
 
@@ -515,10 +562,12 @@ namespace USE_ExperimentTemplate
 			if (!string.IsNullOrEmpty(taskDefFile))
 			{
 				SessionSettings.ImportSettings_MultipleType(TaskName + "_TaskSettings", taskDefFile);
-				TaskDef = (T) SessionSettings.Get(TaskName + "_TaskSettings");
+				//TaskDef = (T) SessionSettings.Get(TaskName + "_TaskSettings");
 			}
 			else
+			{
 				Debug.Log("No taskdef file in config folder (this may not be a problem).");
+			}
 		}
 
 		public void ReadBlockDefs<T>(string taskConfigFolder) where T : BlockDef
@@ -542,7 +591,7 @@ namespace USE_ExperimentTemplate
 
 		public void ReadTrialDefs<T>(string taskConfigFolder) where T : TrialDef
 		{
-			//string taskConfigFolder = LocateFile.GetPath("Config File Folder") + Path.DirectorySeparatorChar + TaskName;
+			//string taskConfigFolder = configFileFolder + Path.DirectorySeparatorChar + TaskName;
 			string trialDefFile = LocateFile.FindFileInFolder(taskConfigFolder, "*" + TaskName + "*TrialDef*");
 			if (!string.IsNullOrEmpty(trialDefFile))
 			{
@@ -558,7 +607,7 @@ namespace USE_ExperimentTemplate
 
 		public void ReadStimDefs<T>(string taskConfigFolder) where T : StimDef
 		{
-			//string taskConfigFolder = LocateFile.GetPath("Config File Folder") + Path.DirectorySeparatorChar + TaskName;
+			//string taskConfigFolder = configFileFolder + Path.DirectorySeparatorChar + TaskName;
 			string stimDefFile = LocateFile.FindFileInFolder(taskConfigFolder, "*" + TaskName + "*StimDef*");
 			if (!string.IsNullOrEmpty(stimDefFile))
 			{
@@ -566,16 +615,25 @@ namespace USE_ExperimentTemplate
 					SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_StimDefs", stimDefFile);
 				else
 					SessionSettings.ImportSettings_SingleTypeJSON<T[]>(TaskName + "_StimDefs", stimDefFile);
-				ExternalStims = new StimGroup("ExternalStims", (T[]) SessionSettings.Get(TaskName + "_Stims"));
-				if (!string.IsNullOrEmpty(TaskDef.StimFolderPath))
+				ExternalStims = new StimGroup("ExternalStims", (T[]) SessionSettings.Get(TaskName + "_StimDefs"));
+				string stimFolderPath = (string) SessionSettings.Get(TaskName + "_TaskSettings", "StimFolderPath");
+				string stimExtension = (string) SessionSettings.Get(TaskName + "_TaskSettings", "StimExtension");
+				float stimScale = (float) SessionSettings.Get(TaskName + "_TaskSettings", "ExternalStimScale");
+				if (!string.IsNullOrEmpty(stimFolderPath))
 				{
 					foreach (StimDef sd in ExternalStims.stimDefs)
-						sd.StimFolderPath = TaskDef.StimFolderPath;
+						sd.StimFolderPath = stimFolderPath;
 				}
-				if (!string.IsNullOrEmpty(TaskDef.StimExtension))
+				if (!string.IsNullOrEmpty(stimExtension))
 				{
 					foreach (StimDef sd in ExternalStims.stimDefs)
-						sd.StimExtension = TaskDef.StimExtension;
+						sd.StimExtension = stimExtension;
+				}
+
+				foreach (StimDef sd in ExternalStims.stimDefs)
+					sd.StimScale = stimScale;
+				{
+					
 				}
 				TaskStims.AllTaskStimGroups.Add("ExternalStims", ExternalStims);
 				// TaskStims.CreateStimGroup("ExternalStims", (T[]) SessionSettings.Get(TaskName + "_Stims"));
@@ -735,6 +793,18 @@ namespace USE_ExperimentTemplate
 			return TaskStims.AllTaskStimGroups[groupName];
 		}
 
+		public void DestroyStimGroup(StimGroup sg)
+		{
+			sg.DestroyStimGroup();
+			TaskStims.AllTaskStimGroups.Remove(sg.stimGroupName);
+		}
+
+		public void DestroyStimGroup(string sgName)
+		{
+			TaskStims.AllTaskStimGroups[sgName].DestroyStimGroup();
+			TaskStims.AllTaskStimGroups.Remove(sgName);
+		}
+
 	}
 
 	public class TaskStims
@@ -803,7 +873,13 @@ namespace USE_ExperimentTemplate
 		public StimGroup CreateStimGroup(string groupName, StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)
 		{
 			StimGroup sg = new StimGroup(groupName, sgOrig, stimSubsetIndices);
-			AllTaskStimGroups.Add(groupName, sg);
+			if(! AllTaskStimGroups.ContainsKey(groupName))
+				AllTaskStimGroups.Add(groupName, sg);
+			else
+			{
+				Debug.LogWarning("");
+				AllTaskStimGroups[groupName] = sg;
+			}
 			AddNewStims(sg.stimDefs);
 			return sg;
 		}
@@ -896,7 +972,7 @@ namespace USE_ExperimentTemplate
 		}
 	}
 
-	public class SessionDataControllers:MonoBehaviour
+	public class SessionDataControllers//:MonoBehaviour
 	{
 		private Dictionary<string, GameObject> DataControllerContainers;
 		private GameObject DataContainer;
@@ -968,8 +1044,12 @@ namespace USE_ExperimentTemplate
 
 		public void RemoveDataController(string name)
 		{
-			Destroy(DataControllerContainers[name]);
-			DataControllerContainers.Remove(name);
+			if (DataControllerContainers.ContainsKey(name))
+			{
+				GameObject.Destroy(DataControllerContainers[name]);
+				DataControllerContainers.Remove(name);
+			}else
+				Debug.LogWarning("Attempted to destroy data controller " + name + ", but this does not exist.");
 		}
 	}
 
@@ -992,6 +1072,7 @@ namespace USE_ExperimentTemplate
 		public string StimExtension;
 		public List<string[]> FeatureNames;
 		public string neutralPatternedColorName;
+		public float? ExternalStimScale;
 	}
 	public class BlockDef
 	{

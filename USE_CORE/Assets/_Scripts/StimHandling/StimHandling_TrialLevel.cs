@@ -6,6 +6,7 @@ using USE_States;
 using StimHandling_Namespace;
 using UnityEngine.UI;
 using USE_StimulusManagement;
+using USE_Settings;
 
 public class StimHandling_TrialLevel : ControlLevel_Trial_Template
 {
@@ -25,22 +26,25 @@ public class StimHandling_TrialLevel : ControlLevel_Trial_Template
         AddActiveStates(new List<State>
             {startScreen, loadObjects, makeGroupAVisible, makeGroupBVisible, makeGroupAInvisible, destroyBothGroups});
 
-        Text commandText = GameObject.Find("CommandText").GetComponent<Text>();
+        Text commandText = null;
         SetupTrial.SpecifyTermination(() => true, startScreen);
 
 
         startScreen.AddDefaultInitializationMethod(() =>
-            commandText.text = "Press the mouse button to load all stimuli invisibly.");
+        {
+            commandText = GameObject.Find("CommandText").GetComponent<Text>();
+            commandText.text = "Press the mouse button to load all stimuli invisibly.";
+        });
         startScreen.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), loadObjects);
 
         loadObjects.AddDefaultInitializationMethod(() =>
         {
             externalStimsA = CreateStimGroup("GroupA", ExternalStims, CurrentTrialDef.GroupAIndices);
-            externalStimsA.LoadStims();
+            externalStimsA.LoadExternalStims();
             externalStimsA.ToggleVisibility(false);
-            externalStimsA = CreateStimGroup("GroupB", ExternalStims, CurrentTrialDef.GroupBIndices);
-            externalStimsA.LoadStims();
-            externalStimsA.ToggleVisibility(false);
+            externalStimsB = CreateStimGroup("GroupB", ExternalStims, CurrentTrialDef.GroupBIndices);
+            externalStimsB.LoadExternalStims();
+            externalStimsB.ToggleVisibility(false);
             commandText.text = "Press the mouse button to make all Group A stimuli visible.";
         });
         loadObjects.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), makeGroupAVisible);
@@ -65,8 +69,8 @@ public class StimHandling_TrialLevel : ControlLevel_Trial_Template
 
         destroyBothGroups.AddDefaultInitializationMethod(() =>
         {
-            externalStimsA.DestroyStimGroup();
-            externalStimsB.DestroyStimGroup();
+            DestroyStimGroup(externalStimsA);
+            DestroyStimGroup(externalStimsB);
         });
         destroyBothGroups.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), FinishTrial);
 

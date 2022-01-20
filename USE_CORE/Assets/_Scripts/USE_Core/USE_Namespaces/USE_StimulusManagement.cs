@@ -205,13 +205,17 @@ namespace USE_StimulusManagement
 			if (!string.IsNullOrEmpty(prefabPath))
 				PrefabPath = prefabPath;
 			StimGameObject = Resources.Load<GameObject>(PrefabPath);
+			PositionRotationScale();
 			return StimGameObject;
 		}
 
 		public GameObject LoadExternalStimFromFile(string stimFilePath = "")
 		{
 			if (!string.IsNullOrEmpty(stimFilePath))
+			{
 				ExternalFilePath = stimFilePath;
+			}
+
 			if (!string.IsNullOrEmpty(StimFolderPath) && !ExternalFilePath.StartsWith(StimFolderPath))
 			{
 				if (!ExternalFilePath.StartsWith(Path.DirectorySeparatorChar.ToString()) &&
@@ -232,12 +236,15 @@ namespace USE_StimulusManagement
 					ExternalFilePath = ExternalFilePath + StimExtension;
 			}
 			return StimGameObject = LoadModel();
+			PositionRotationScale();
 		}
 
 		public void Destroy()
 		{
-			foreach (StimGroup sg in StimGroups.Values)
-				RemoveFromStimGroup(sg);
+			StimGroup[] sgs = StimGroups.Values.ToArray();
+			for(int iG = 0; iG < sgs.Length; iG++)
+				RemoveFromStimGroup(sgs[iG]);
+
 			Object.Destroy(StimGameObject);
 		}
 
@@ -269,7 +276,14 @@ namespace USE_StimulusManagement
 				}
 			}
 
+			PositionRotationScale();
 			AddMesh();
+			ToggleVisibility(visibiility);
+			return StimGameObject;
+		}
+
+		private void PositionRotationScale()
+		{
 			StimGameObject.transform.position = StimLocation;
 			StimGameObject.transform.rotation = Quaternion.Euler(StimRotation);
 
@@ -277,8 +291,6 @@ namespace USE_StimulusManagement
 				StimScale = 1;
 			
 			StimGameObject.transform.localScale = new Vector3(StimScale.Value, StimScale.Value, StimScale.Value);
-			ToggleVisibility(visibiility);
-			return StimGameObject;
 		}
 
 
@@ -422,7 +434,6 @@ namespace USE_StimulusManagement
 			foreach (int index in stimSubsetIndices)
 			{
 				sgOrig.stimDefs[index].AddToStimGroup(this);
-				// sgOrig.stimDefs[index].ToggleVisibility(false);
 			}
 		}
 
@@ -490,8 +501,13 @@ namespace USE_StimulusManagement
 
 		public void DestroyStimGroup()
 		{
-			foreach (StimDef stim in stimDefs)
-				stim.Destroy();
+			for (int iS = 0; iS < stimDefs.Count; iS++)
+			{
+				GameObject.Destroy(stimDefs[iS].StimGameObject);
+				stimDefs[iS].RemoveFromStimGroup(this);
+			}
+			//	foreach (StimDef stim in stimDefs)
+		//		stim.Destroy();
 		}
 
 		public void ToggleVisibility(bool visibility)

@@ -6,9 +6,15 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Tutorials_complete/Tutorial6_complete/AIPlayer/AIPlayer.unity
+    path: Assets/_Scripts/USE_Core/USE_Modules/AIPlayer/AIPlayer.unity
     guid: d02ca6f2f030c436e8badc8b9453c34f
   - enabled: 1
-    path: Assets/Tutorials_complete/Tutorial6_complete/Tutorial6_complete.unity
+    path: Assets/Tutorials_complete/Tutorial10_complete/Tutorial10_complete.unity
     guid: a835deacbca644c68be6fe9f4ad8574b
+  - enabled: 1
+    path: Assets/_Scenes/TaskSelection.unity
+    guid: 01b9c8193a3244b039372cb483204fa5
+  - enabled: 1
+    path: Assets/_Scenes/WhatWhenWhere.unity
+    guid: e9448a1f5ad17411898e35a72bf214df
   m_configObjects: {}

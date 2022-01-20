@@ -18,7 +18,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //  private GameObject[] halos;
     private GameObject[] totalObjects;
     private GameObject[] currentObjects;
-    private List<GameObject> touchedObjects = new List<GameObject>();
+    private List<string> touchedObjects = new List<string>();
     
     // effort reward variables
     private int clickCount, context;
@@ -26,7 +26,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private int numChosenLeft, numChosenRight;
     private bool incorrectChoice = false;
     private bool correctChoice = false;
-    private int numObjMax = 5;
+    private static int numObjMax = 10;
     private int repetitionError = 0;
     private int contextError = 0;
     private int totalErrors = 0;
@@ -36,9 +36,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private float timeDif;
     private List<Color> contextColors = new List<Color> { };
     private List<Color> objectColors = new List<Color> { };
-    
+    private int[] numTotal = new int[numObjMax];
+    private int[] numErrors = new int[numObjMax];
+    private bool restart = false;
+    private int trialNum = 0;
     private SpriteRenderer sr;
     private Color originalColor;
+    private string touchedObj = "[";
+
 
     [HideInInspector]
     public String sphereChoice;
@@ -71,6 +76,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { StartButton, ChooseSphere, ChoseWrong, ChoseRight, Feedback, ITI });
         //chosewrong state
+
         AddInitializationMethod(() =>
         {
             if (!variablesLoaded)
@@ -80,11 +86,24 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
+        SetupTrial.AddUpdateMethod(() =>
+        {
+            if (restart)
+            {
+                Debug.Log("TRIALCOUNT: " + TrialCount_InBlock);
+                TrialCount_InBlock--;
+            }
+            ++trialNum;
+            touchedObj = "[";
+        });
+
         SetupTrial.SpecifyTermination(() => true, StartButton);
+
 
         // define initScreen state
         StartButton.AddInitializationMethod(() =>
         {
+
             if (incorrectChoice == false)
             {
                 trialCount++;
@@ -173,53 +192,69 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     Debug.Log("index: " + correctIndex);
                     trialStim = hit.transform.gameObject;
 
-                    if (hit.transform.name == currentObjects[correctIndex].name)
+                    if (trialStim.name == currentObjects[correctIndex].name)
                     {
                         //Correct Choice
+                        numTotal[correctIndex]++;
+
                         slider.value += sliderValueIncreaseAmount;
                         correctChoice = true;
                         sphereCount += 1;
                         response = 1;
-                        trialStim = hit.transform.gameObject;
-                        touchedObjects.Add(trialStim);
-                        sphereChoice = hit.transform.name;
-                        imageCorrectObject.transform.position = hit.transform.position;
+                        touchedObjects.Add(trialStim.name);
+                        sphereChoice = trialStim.name;
+                        imageCorrectObject.transform.position = trialStim.transform.position;
+                        restart = false;
                         
                     }
-                    else if (touchedObjects.Contains(trialStim))
+                    else if (touchedObjects.Contains(trialStim.name))
                     {
                         //Repetition error
-                        trialStim = hit.transform.gameObject;
-                        sphereChoice = hit.transform.name;
-                        imageIncorrectObject.transform.position = hit.transform.position;
+                        sphereChoice = trialStim.name;
+                        imageIncorrectObject.transform.position = trialStim.transform.position;
+                        touchedObjects.Add(trialStim.name);
 
                         response = 1;
 
-                        TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
                         incorrectChoice = true;
                         slider.value -= sliderValueIncreaseAmount;
                         repetitionError += 1;
                         totalErrors += 1;
+
+                        numTotal[correctIndex]++;
+                        numErrors[correctIndex]++;
+                        restart = true;
+
                     }
 
 
                     else
                     {
                         //Slot error
-                        trialStim = hit.transform.gameObject;
-                        sphereChoice = hit.transform.name;
-                        imageIncorrectObject.transform.position = hit.transform.position;
-                        
+                        sphereChoice = trialStim.name;
+                        imageIncorrectObject.transform.position = trialStim.transform.position;
+                        touchedObjects.Add(trialStim.name);
+
                         response = 1;
 
-                        TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
                         incorrectChoice = true;
                         slider.value -= sliderValueIncreaseAmount;
                         slotError += 1;
                         totalErrors += 1;
-                        
+
+                        numTotal[correctIndex]++;
+                        numErrors[correctIndex]++;
+                        restart = true;
+
                     }
-                    
+                    string errLog = "";
+                    for (int i = 0; i < currentObjects.Length; ++i)
+                    {
+                        errLog = errLog + "Slot " + (i+1) + ": " + numErrors[i] + "/" + numTotal[i] + "\t";
+
+                    }
+                    Debug.Log(errLog);
+
 
                 }
                 else
@@ -232,22 +267,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         ChooseSphere.SpecifyTermination(() => incorrectChoice, ChoseWrong);
         ChooseSphere.SpecifyTermination(() => correctChoice, ChoseRight);
         ChooseSphere.SpecifyTermination(() => sphereCount == CurrentTrialDef.ObjectNums.Length, Feedback);
-        /*ChooseSphere.AddDefaultTerminationMethod(() =>
-        {
-            if (!incorrectChoice)
-            {
-                foreach (GameObject obj in currentObjects)
-                {
-                    obj.SetActive(false);
-                }
-                foreach (GameObject obj in totalObjects)    //reset each time??
-                {
-                    obj.SetActive(false);
-                }
-            }
-            sphereCount = 0;
 
-        });*/
 
         ChoseWrong.AddInitializationMethod(() =>
         {
@@ -258,12 +278,18 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             imageIncorrectObject.SetActive(true);
             sliderHalo.SetActive(true);
             sr.color = new Color(1, 0, 0, 0.2f);
-
+            for (int i = 0; i < touchedObjects.Count; ++i)
+            {
+                touchedObj = touchedObj + touchedObjects[i];
+                if(i < touchedObjects.Count - 1)
+                {
+                    touchedObj = touchedObj + ", ";
+                }
+            }
+            touchedObj = touchedObj + "]";
         });
 
-
-
-        ChoseWrong.AddTimer(0.75f, StartButton, () => {
+        ChoseWrong.AddTimer(0.75f, FinishTrial, () => {
             //halo.SetActive(false);
             imageIncorrectObject.SetActive(false);
             incorrectChoice = false;
@@ -299,16 +325,19 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 obj.SetActive(false);
             }
+
+            for (int i = 0; i < touchedObjects.Count; ++i)
+            {
+                touchedObj = touchedObj + touchedObjects[i];
+            }
+            touchedObj = touchedObj + "]";
         });
 
         Feedback.AddUpdateMethod(() =>
         {
-            Debug.Log(Time.time);
-
             if ((int)(10 * (Time.time - startTime)) % 4 == 0)
             {
                 sr.color = new Color(1, 1, 1, 0.2f);
-                Debug.Log("Entered if");
             }
             else if ((int)(10 * (Time.time - startTime)) % 2 == 0)
             {
@@ -316,16 +345,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
         });
         Feedback.AddTimer(2f, ITI, () => {
-
+       
             txt.SetActive(false);
             sliderHalo.SetActive(false);
 
             slotError = 0;
             totalErrors = 0;
             repetitionError = 0;
-
-            //After we have waited 5 seconds print the time again.
-            Debug.Log("Finished test : " + Time.time);
         });
 
         //Define iti state
@@ -344,24 +370,19 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             for (var i = 0; i < touchedObjects.Count; i++)
             {
                 touchedObjects.RemoveAt(i);
-            }
-            
+            }            
 
         });
-
-        /*     ITI.AddTimer(0.2f, FinishTrial, () =>
-             {
-                 Debug.Log("Trial" + trialCount + " completed");
-
-                 //trialData.AppendData(); 
-                 //trialData.WriteData();
-             });
-             */
         ITI.SpecifyTermination(() => true, FinishTrial, () => Debug.Log("Trial" + CurrentTrialDef.TrialNum + " completed"));
 
+        TrialData.AddDatum("TrialNum", () => trialNum);
+        TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
+        TrialData.AddDatum("TouchedObjects", () => touchedObj);
         TrialData.AddDatum("SlotError", () => slotError);
         TrialData.AddDatum("RepetitionError", () => repetitionError);
         TrialData.AddDatum("TotalErrors", () => totalErrors);
+
+
     }
     // set all gameobjects to setActive false
     void disableAllGameobjects()
@@ -405,6 +426,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         objectColors.Add(new Color(1f, 0f, 1f)); //fuschia
         objectColors.Add(new Color(0f, 1f, 1f)); // cyan
         objectColors.Add(new Color(0.5412f, 0.1686f, 0.8863f)); // blue-violet
+        objectColors.Add(new Color(0.1686f, 0.5412f, 0.8863f)); // blue-violet
+        objectColors.Add(new Color(0.2f, 0.1686f, 0.1f)); // blue-violet
+        objectColors.Add(new Color(0.1686f, 0.1686f, 0.5412f)); // blue-violet
+        objectColors.Add(new Color(0.8863f, 0.1686f, 0.8863f)); // blue-violet
+
 
         contextColors.Add(new Color(0f, 0f, 0.5451f)); // dark blue
         contextColors.Add(new Color(0.3922f, 0.5843f, 0.9294f)); // cornflower blue
@@ -418,7 +444,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         for (int i = 0; i < numObjMax; ++i)
         {
-            string s = "Sphere" + (i + 1).ToString();
+            string s = (i + 1).ToString();
             Debug.Log(s);
             totalObjects[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             totalObjects[i].GetComponent<Renderer>().material.SetColor("_Color", objectColors[i]);

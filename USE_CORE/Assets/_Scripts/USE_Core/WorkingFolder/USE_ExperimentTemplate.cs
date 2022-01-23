@@ -87,7 +87,6 @@ namespace USE_ExperimentTemplate
 			setupSession.AddDefaultInitializationMethod(() =>
 			{
 				SessionData.CreateFile();
-				SceneManager.sceneLoaded += OnSceneLoaded;
 			});
 			
 			int iTask = 0;
@@ -148,7 +147,8 @@ namespace USE_ExperimentTemplate
 
 					ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
 					ActiveTaskLevels.Add(tl);
-					SceneManager.LoadSceneAsync(tl.TaskName, LoadSceneMode.Additive);
+					AsyncOperation loadScene = SceneManager.LoadSceneAsync(tl.TaskName, LoadSceneMode.Additive);
+					loadScene.completed += (_)=> SceneLoaded(tl.TaskName);
 					iTask++;
 					TaskSceneLoaded = false;
 				}
@@ -198,28 +198,18 @@ namespace USE_ExperimentTemplate
 			SessionData.ManuallyDefine();
 		}
 
-		void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+		void SceneLoaded(string sceneName)
 		{
-			Debug.Log(scene.name);
-			Debug.Log(ActiveTaskTypes[scene.name]);
-			
-			// MethodInfo readTaskDef = GetType().GetMethod(nameof(this.ReadTaskDef))
-			// 	.MakeGenericMethod(new Type[] {TaskDefType});
-			MethodInfo findTaskCam = GetType().GetMethod(nameof(this.FindTaskCam))
-				.MakeGenericMethod(new Type[] {ActiveTaskTypes[scene.name]});
-			findTaskCam.Invoke(this, new object[] {scene.name});
+			var methodInfo = typeof(ControlLevel_Session_Template).GetMethod(nameof(this.FindTaskCam));
+			MethodInfo findTaskCam = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[sceneName]});
+			findTaskCam.Invoke(this, new object[] {sceneName});
 			TaskSceneLoaded = true;
 		}
-
-		// public void ReadTaskDef<T>(string taskConfigFolder) where T : TaskDef
-		private void FindTaskCam<T>(string taskName) where T : ControlLevel_Task_Template
+		
+		public void FindTaskCam<T>(string taskName) where T : ControlLevel_Task_Template
 		{
-			Debug.Log(GameObject.Find("ControlLevels"));
-			Debug.Log(GameObject.Find("ControlLevels").GetComponent<T>());
-			Debug.Log(GameObject.Find(taskName + "Camera"));
-			Debug.Log(GameObject.Find(taskName + "Camera").GetComponent<Camera>());
 			ControlLevel_Task_Template tl = GameObject.Find("ControlLevels").GetComponent<T>();
-			tl.TaskCam = GameObject.Find(taskName + "Camera").GetComponent<Camera>();
+			tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
 			tl.TaskCam.gameObject.SetActive(false);
 		}
 
@@ -726,6 +716,7 @@ namespace USE_ExperimentTemplate
 				else
 					FrameData.fileName = FilePrefix + "__FrameData_Trial_000" + (TrialCount_InTask + 1) + ".txt";
 				FrameData.CreateFile();
+				
 				//MethodInfo getCTrialDef = GetType().GetMethod(nameof(this.GetCurrentTrialDef)).MakeGenericMethod(new Type[] { TrialDefType });
 				//getCTrialDef.Invoke(this, new object[] {  });
 				//PopulateCurrentTrialVariables();
@@ -761,35 +752,35 @@ namespace USE_ExperimentTemplate
 			}
 		}
 		
-		public StimGroup CreateStimGroup(string groupName)
+		public StimGroup CreateStimGroup(string groupName, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
-			TaskStims.CreateStimGroup(groupName);
+			TaskStims.CreateStimGroup(groupName, setActiveOnInit, setInactiveOnTerm);
 			return TaskStims.AllTaskStimGroups[groupName];
 		}
 
-		public StimGroup CreateStimGroup(string groupName, IEnumerable<StimDef> stims)
+		public StimGroup CreateStimGroup(string groupName, IEnumerable<StimDef> stims, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
-			TaskStims.CreateStimGroup(groupName, stims);
+			TaskStims.CreateStimGroup(groupName, stims, setActiveOnInit, setInactiveOnTerm);
 			return TaskStims.AllTaskStimGroups[groupName];
 		}
 
 		public StimGroup CreateStimGroup(string groupName, IEnumerable<int[]> dimValGroup, string folderPath,
-			IEnumerable<string[]> featureNames, string neutralPatternedColorName, Camera cam, float scale = 1)
+			IEnumerable<string[]> featureNames, string neutralPatternedColorName, Camera cam, float scale = 1, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
 			TaskStims.CreateStimGroup(groupName, dimValGroup, folderPath, featureNames, neutralPatternedColorName, cam,
-				scale);
+				scale, setActiveOnInit, setInactiveOnTerm);
 			return TaskStims.AllTaskStimGroups[groupName];
 		}
 
-		public StimGroup CreateStimGroup(string groupName, string TaskName, string stimDefFilePath)
+		public StimGroup CreateStimGroup(string groupName, string TaskName, string stimDefFilePath, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
-			TaskStims.CreateStimGroup(groupName, TaskName, stimDefFilePath);
+			TaskStims.CreateStimGroup(groupName, TaskName, stimDefFilePath, setActiveOnInit, setInactiveOnTerm);
 			return TaskStims.AllTaskStimGroups[groupName];
 		}
 
-		public StimGroup CreateStimGroup(string groupName, StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)
+		public StimGroup CreateStimGroup(string groupName, StimGroup sgOrig, IEnumerable<int> stimSubsetIndices, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
-			TaskStims.CreateStimGroup(groupName, sgOrig, stimSubsetIndices);
+			TaskStims.CreateStimGroup(groupName, sgOrig, stimSubsetIndices, setActiveOnInit, setInactiveOnTerm);
 			return TaskStims.AllTaskStimGroups[groupName];
 		}
 
@@ -838,41 +829,41 @@ namespace USE_ExperimentTemplate
 			CheckPathAndDuplicate(sd);
 		}
 
-		public StimGroup CreateStimGroup(string groupName)
+		public StimGroup CreateStimGroup(string groupName, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
-			StimGroup sg = new StimGroup(groupName);
+			StimGroup sg = new StimGroup(groupName, setActiveOnInit, setInactiveOnTerm);
 			AllTaskStimGroups.Add(groupName, sg);
 			return sg;
 		}
 
-		public StimGroup CreateStimGroup(string groupName, IEnumerable<StimDef> stims)
+		public StimGroup CreateStimGroup(string groupName, IEnumerable<StimDef> stims, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
-			StimGroup sg = new StimGroup(groupName, stims);
+			StimGroup sg = new StimGroup(groupName, stims, setActiveOnInit, setInactiveOnTerm);
 			AllTaskStimGroups.Add(groupName, sg);
 			AddNewStims(sg.stimDefs);
 			return sg;
 		}
 
 		public StimGroup CreateStimGroup(string groupName, IEnumerable<int[]> dimValGroup, string folderPath,
-			IEnumerable<string[]> featureNames, string neutralPatternedColorName, Camera cam, float scale = 1)
+			IEnumerable<string[]> featureNames, string neutralPatternedColorName, Camera cam, float scale = 1, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
-			StimGroup sg = new StimGroup(groupName, dimValGroup, folderPath, featureNames, neutralPatternedColorName, cam, scale);
+			StimGroup sg = new StimGroup(groupName, dimValGroup, folderPath, featureNames, neutralPatternedColorName, cam, scale, setActiveOnInit, setInactiveOnTerm);
 			AllTaskStimGroups.Add(groupName, sg);
 			AddNewStims(sg.stimDefs);
 			return sg;
 		}
 
-		public StimGroup CreateStimGroup(string groupName, string TaskName, string stimDefFilePath)
+		public StimGroup CreateStimGroup(string groupName, string TaskName, string stimDefFilePath, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
-			StimGroup sg = new StimGroup(groupName, TaskName, stimDefFilePath);
+			StimGroup sg = new StimGroup(groupName, TaskName, stimDefFilePath, setActiveOnInit, setInactiveOnTerm);
 			AllTaskStimGroups.Add(groupName, sg);
 			AddNewStims(sg.stimDefs);
 			return sg;
 		}
 
-		public StimGroup CreateStimGroup(string groupName, StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)
+		public StimGroup CreateStimGroup(string groupName, StimGroup sgOrig, IEnumerable<int> stimSubsetIndices, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
-			StimGroup sg = new StimGroup(groupName, sgOrig, stimSubsetIndices);
+			StimGroup sg = new StimGroup(groupName, sgOrig, stimSubsetIndices, setActiveOnInit, setInactiveOnTerm);
 			if(! AllTaskStimGroups.ContainsKey(groupName))
 				AllTaskStimGroups.Add(groupName, sg);
 			else
@@ -910,6 +901,11 @@ namespace USE_ExperimentTemplate
 				}
 			}
 		}
+	}
+
+	public class TrialStims : TaskStims
+	{
+		
 	}
 
 	public class SessionData : DataController
@@ -1082,6 +1078,7 @@ namespace USE_ExperimentTemplate
 	public abstract class TrialDef
 	{
 		public int BlockCount, TrialCountInBlock, TrialCountInTask;
+		public TrialStims TrialStims;
 	}
 
 	public class EventCodeConfig

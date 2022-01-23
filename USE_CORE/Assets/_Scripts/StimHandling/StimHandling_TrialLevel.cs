@@ -39,32 +39,39 @@ public class StimHandling_TrialLevel : ControlLevel_Trial_Template
 
         loadObjects.AddDefaultInitializationMethod(() =>
         {
-            externalStimsA = CreateStimGroup("GroupA", ExternalStims, CurrentTrialDef.GroupAIndices);
+            externalStimsA = CreateStimGroup("GroupA", ExternalStims, CurrentTrialDef.GroupAIndices, makeGroupAVisible, makeGroupAInvisible);
+            for (int iLoc = 0; iLoc < CurrentTrialDef.GroupALocations.Length; iLoc++)
+                externalStimsA.stimDefs[iLoc].StimLocation = CurrentTrialDef.GroupALocations[iLoc];
             externalStimsA.LoadExternalStims();
-            externalStimsA.ToggleVisibility(false);
-            externalStimsB = CreateStimGroup("GroupB", ExternalStims, CurrentTrialDef.GroupBIndices);
+            // externalStimsA.ToggleVisibility(false);
+            externalStimsB = CreateStimGroup("GroupB", ExternalStims, CurrentTrialDef.GroupBIndices, makeGroupBVisible);
+            for (int iLoc = 0; iLoc < CurrentTrialDef.GroupBLocations.Length; iLoc++)
+                externalStimsB.stimDefs[iLoc].StimLocation = CurrentTrialDef.GroupBLocations[iLoc];
             externalStimsB.LoadExternalStims();
-            externalStimsB.ToggleVisibility(false);
+            // externalStimsB.ToggleVisibility(false);
             commandText.text = "Press the mouse button to make all Group A stimuli visible.";
         });
         loadObjects.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), makeGroupAVisible);
 
         makeGroupAVisible.AddDefaultInitializationMethod(() =>
         {
-            externalStimsA.ToggleVisibility(true); 
+            // externalStimsA.ToggleVisibility(true); 
             commandText.text = "Press the mouse button to make all Group B stimuli visible.";
         });
         makeGroupAVisible.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), makeGroupBVisible);
 
         makeGroupBVisible.AddDefaultInitializationMethod(() =>
         {
-            externalStimsB.ToggleVisibility(true);
+            // externalStimsB.ToggleVisibility(true);
             commandText.text = "Press the mouse button to make all Group A stimuli invisible.";
         });
         makeGroupBVisible.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), makeGroupAInvisible);
 
-        makeGroupAInvisible.AddDefaultInitializationMethod(() => { externalStimsA.ToggleVisibility(false); 
-            commandText.text = "Press the mouse button to destroy both Group A and B.";});
+        makeGroupAInvisible.AddDefaultInitializationMethod(() =>
+        {
+            // externalStimsA.ToggleVisibility(false);
+            commandText.text = "Press the mouse button to destroy both Group A and B.";
+        });
         makeGroupAInvisible.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), destroyBothGroups);
 
         destroyBothGroups.AddDefaultInitializationMethod(() =>

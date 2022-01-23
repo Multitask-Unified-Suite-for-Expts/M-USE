@@ -92,6 +92,8 @@ namespace USE_States
 		public bool DebugActive { get; set; }
 		public bool InitializationDelayed, TerminationDelayed;
 
+		public EventHandler StateInitialization, StateTermination;
+
 		//TIMEKEEPING
 		public StateTimingInfo TimingInfo;
 		///// <summary>The Time.FrameCount of the first frame in which this <see cref="T:State_Namespace.State"/> was active.</summary>
@@ -421,7 +423,10 @@ namespace USE_States
 				else if (StateDefaultInitialization != null && StateDefaultInitialization.InitializationDelay != null)
 					InitializationDelayed = true;
 				else
+				{
 					RunInitializationMethods();
+					StateInitialization?.Invoke(this, EventArgs.Empty);
+				}
 			}
 		}
 
@@ -462,6 +467,7 @@ namespace USE_States
 					if (Terminated) //this TerminationCriterion returned true
 					{
 						TerminateState(termSpec);
+						StateTermination?.Invoke(this, EventArgs.Empty);
 						break;
 					}
 				}

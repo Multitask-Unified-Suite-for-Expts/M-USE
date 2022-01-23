@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Policy;
@@ -6,6 +7,8 @@ using JetBrains.Annotations;
 using UnityEngine;
 using USE_Settings;
 using TriLib;
+using USE_States;
+using Object = UnityEngine.Object;
 
 namespace USE_StimulusManagement
 {
@@ -37,36 +40,66 @@ namespace USE_StimulusManagement
 		public int TimesUsedInBlock;
 		public bool isRelevant;
 		public bool TriggersSonication;
+		public State SetActiveOnInitialization;
+		public State SetInactiveOnTermination;
 
 		public StimDef()
 		{
 			StimGroups = new Dictionary<string, StimGroup>();
 		}
 
-		public StimDef(StimGroup sg)
+		public StimDef(StimGroup sg, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
 			if (!(string.IsNullOrEmpty(PrefabPath) | string.IsNullOrWhiteSpace(PrefabPath))  && !(string.IsNullOrEmpty(ExternalFilePath) | string.IsNullOrWhiteSpace(PrefabPath)))
 				Debug.LogWarning("StimDef for stimulus " + StimName + " is being specified with both an external file path and a prefab path. Only the external filepath will be checked.");
 			sg.stimDefs.Add(this);
 			StimGroups = new Dictionary<string, StimGroup>();
 			StimGroups.Add(sg.stimGroupName, sg);
+			AssignStates(setActiveOnInit, setInactiveOnTerm);
 		}
 
-		public StimDef(StimGroup sg, int[] dimVals)
+		public StimDef(StimGroup sg, int[] dimVals, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
 			StimDimVals = dimVals;
 			StimPath = "placeholder";
 			sg.stimDefs.Add(this);
 			StimGroups = new Dictionary<string, StimGroup>();
 			StimGroups.Add(sg.stimGroupName, sg);
+			AssignStates(setActiveOnInit, setInactiveOnTerm);
 		}
 
-		public StimDef(StimGroup sg, GameObject obj)
+		public StimDef(StimGroup sg, GameObject obj, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
 			StimGameObject = obj;
 			sg.stimDefs.Add(this);
 			StimGroups = new Dictionary<string, StimGroup>();
 			StimGroups.Add(sg.stimGroupName, sg);
+			AssignStates(setActiveOnInit, setInactiveOnTerm);
+		}
+
+		private void AssignStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
+		{
+			if (setActiveOnInit != null)
+			{
+				SetActiveOnInitialization = setActiveOnInit;
+				if (setInactiveOnTerm == null)
+					SetInactiveOnTermination = setActiveOnInit;
+				else
+					SetInactiveOnTermination = setInactiveOnTerm;
+				SetActiveOnInitialization.StateInitialization += ActivateOnStateInit;
+				SetInactiveOnTermination.StateTermination += InactivateOnStateTerm;
+			}
+
+		}
+
+		private void ActivateOnStateInit(object sender, EventArgs e)
+		{
+			ToggleVisibility(true);
+		}
+
+		private void InactivateOnStateTerm(object sender, EventArgs e)
+		{
+			ToggleVisibility(false);
 		}
 
 		public StimDef CopyStimDef(StimGroup sg)
@@ -334,46 +367,80 @@ namespace USE_StimulusManagement
 	{
 		public List<StimDef> stimDefs;
 		public string stimGroupName;
+		public State SetActiveOnInitialization;
+		public State SetInactiveOnTermination;
 
-		public StimGroup(string groupName)
+		public StimGroup(string groupName, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
 			stimGroupName = groupName;
 			stimDefs = new List<StimDef>();
+			AssignStates(setActiveOnInit, setInactiveOnTerm);
 		}
 		
-		public StimGroup(string groupName, IEnumerable<StimDef> stims)
+		public StimGroup(string groupName, IEnumerable<StimDef> stims, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
 			stimGroupName = groupName;
 			stimDefs = new List<StimDef>();
 			AddStims(stims);
+			AssignStates(setActiveOnInit, setInactiveOnTerm);
 		}
 
-		public StimGroup(string groupName, IEnumerable<GameObject> gos)
+		public StimGroup(string groupName, IEnumerable<GameObject> gos, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
 			stimGroupName = groupName;
 			stimDefs = new List<StimDef>();
 			AddStims(gos);
+			AssignStates(setActiveOnInit, setInactiveOnTerm);
 		}
 
-		public StimGroup(string groupName, IEnumerable<int[]> dimValGroup, string folderPath, IEnumerable<string[]> featureNames, string neutralPatternedColorName, Camera cam, float scale = 1) 
+		public StimGroup(string groupName, IEnumerable<int[]> dimValGroup, string folderPath, IEnumerable<string[]> featureNames, string neutralPatternedColorName, Camera cam, float scale = 1, State setActiveOnInit = null, State setInactiveOnTerm = null) 
 		{
 			stimGroupName = groupName;
 			stimDefs = new List<StimDef>();
 			AddStims(dimValGroup);
+			AssignStates(setActiveOnInit, setInactiveOnTerm);
 		}
 
-		public StimGroup(string groupName, string TaskName, string stimDefFilePath)
+		public StimGroup(string groupName, string TaskName, string stimDefFilePath, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
 			stimGroupName = groupName;
 			stimDefs = new List<StimDef>();
 			AddStims(TaskName, stimDefFilePath);
+			AssignStates(setActiveOnInit, setInactiveOnTerm);
 		}
 
-		public StimGroup(string groupName, StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)
+		public StimGroup(string groupName, StimGroup sgOrig, IEnumerable<int> stimSubsetIndices, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
 			stimGroupName = groupName;
 			stimDefs = new List<StimDef>();
 			AddStims(sgOrig, stimSubsetIndices);
+			AssignStates(setActiveOnInit, setInactiveOnTerm);
+		}
+		
+		
+		private void AssignStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
+		{
+			if (setActiveOnInit != null)
+			{
+				SetActiveOnInitialization = setActiveOnInit;
+				if (setInactiveOnTerm == null)
+					SetInactiveOnTermination = setActiveOnInit;
+				else
+					SetInactiveOnTermination = setInactiveOnTerm;
+				SetActiveOnInitialization.StateInitialization += ActivateOnStateInit;
+				SetInactiveOnTermination.StateTermination += InactivateOnStateTerm;
+			}
+
+		}
+
+		private void ActivateOnStateInit(object sender, EventArgs e)
+		{
+			ToggleVisibility(true);
+		}
+
+		private void InactivateOnStateTerm(object sender, EventArgs e)
+		{
+			ToggleVisibility(false);
 		}
 
 		public void AddStims(StimDef stim)
@@ -501,13 +568,13 @@ namespace USE_StimulusManagement
 
 		public void DestroyStimGroup()
 		{
-			for (int iS = 0; iS < stimDefs.Count; iS++)
+			int nStims = stimDefs.Count;
+			for (int iS = 0; iS < nStims; iS++)
 			{
-				GameObject.Destroy(stimDefs[iS].StimGameObject);
-				stimDefs[iS].RemoveFromStimGroup(this);
+				StimDef sd = stimDefs[0];
+				sd.RemoveFromStimGroup(this);
+				GameObject.Destroy(sd.StimGameObject);
 			}
-			//	foreach (StimDef stim in stimDefs)
-		//		stim.Destroy();
 		}
 
 		public void ToggleVisibility(bool visibility)

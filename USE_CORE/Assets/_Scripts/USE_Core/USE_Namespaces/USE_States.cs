@@ -92,7 +92,7 @@ namespace USE_States
 		public bool DebugActive { get; set; }
 		public bool InitializationDelayed, TerminationDelayed;
 
-		public EventHandler StateInitialization, StateTermination;
+		public EventHandler StateInitializationFinished, StateTerminationFinished;
 
 		//TIMEKEEPING
 		public StateTimingInfo TimingInfo;
@@ -425,7 +425,7 @@ namespace USE_States
 				else
 				{
 					RunInitializationMethods();
-					StateInitialization?.Invoke(this, EventArgs.Empty);
+					StateInitializationFinished?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -467,7 +467,7 @@ namespace USE_States
 					if (Terminated) //this TerminationCriterion returned true
 					{
 						TerminateState(termSpec);
-						StateTermination?.Invoke(this, EventArgs.Empty);
+						StateTerminationFinished?.Invoke(this, EventArgs.Empty);
 						break;
 					}
 				}

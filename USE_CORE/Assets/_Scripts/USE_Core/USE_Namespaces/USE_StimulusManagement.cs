@@ -86,8 +86,8 @@ namespace USE_StimulusManagement
 					SetInactiveOnTermination = setActiveOnInit;
 				else
 					SetInactiveOnTermination = setInactiveOnTerm;
-				SetActiveOnInitialization.StateInitialization += ActivateOnStateInit;
-				SetInactiveOnTermination.StateTermination += InactivateOnStateTerm;
+				SetActiveOnInitialization.StateInitializationFinished += ActivateOnStateInit;
+				SetInactiveOnTermination.StateTerminationFinished += InactivateOnStateTerm;
 			}
 
 		}
@@ -174,6 +174,7 @@ namespace USE_StimulusManagement
 			{
 				sg.stimDefs.Remove(this);
 				StimGroups.Remove(sg.stimGroupName);
+				Debug.Log("Removing " + sg.stimGroupName);
 			}
 			else
 			{
@@ -216,17 +217,16 @@ namespace USE_StimulusManagement
 				return StimGameObject;
 			}
 			if (!string.IsNullOrEmpty(ExternalFilePath))
-				StimGameObject = LoadModel();
-			else if (!string.IsNullOrEmpty(PrefabPath))
-				StimGameObject = Resources.Load<GameObject>(PrefabPath);
+				StimGameObject = LoadExternalStimFromFile();
 			else if (StimDimVals != null)
 			{
-				StimPath = FilePathFromDims("placeholder1", new List<string[]>(), "placeholder3");
-				StimGameObject = LoadModel();
+				ExternalFilePath = FilePathFromDims("placeholder1", new List<string[]>(), "placeholder3");
+				StimGameObject = LoadExternalStimFromFile();
 			}
+			else if (!string.IsNullOrEmpty(PrefabPath))
+				StimGameObject = Resources.Load<GameObject>(PrefabPath);
 			else
 			{
-				
 				Debug.LogWarning("Attempting to load stimulus " + StimName + ", but no Unity Resources path, external file path, or dimensional values have been provided.");
 				return null;
 			}
@@ -374,7 +374,7 @@ namespace USE_StimulusManagement
 		{
 			stimGroupName = groupName;
 			stimDefs = new List<StimDef>();
-			AssignStates(setActiveOnInit, setInactiveOnTerm);
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
 		}
 		
 		public StimGroup(string groupName, IEnumerable<StimDef> stims, State setActiveOnInit = null, State setInactiveOnTerm = null)
@@ -382,7 +382,7 @@ namespace USE_StimulusManagement
 			stimGroupName = groupName;
 			stimDefs = new List<StimDef>();
 			AddStims(stims);
-			AssignStates(setActiveOnInit, setInactiveOnTerm);
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
 		}
 
 		public StimGroup(string groupName, IEnumerable<GameObject> gos, State setActiveOnInit = null, State setInactiveOnTerm = null)
@@ -390,7 +390,7 @@ namespace USE_StimulusManagement
 			stimGroupName = groupName;
 			stimDefs = new List<StimDef>();
 			AddStims(gos);
-			AssignStates(setActiveOnInit, setInactiveOnTerm);
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
 		}
 
 		public StimGroup(string groupName, IEnumerable<int[]> dimValGroup, string folderPath, IEnumerable<string[]> featureNames, string neutralPatternedColorName, Camera cam, float scale = 1, State setActiveOnInit = null, State setInactiveOnTerm = null) 
@@ -398,7 +398,7 @@ namespace USE_StimulusManagement
 			stimGroupName = groupName;
 			stimDefs = new List<StimDef>();
 			AddStims(dimValGroup);
-			AssignStates(setActiveOnInit, setInactiveOnTerm);
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
 		}
 
 		public StimGroup(string groupName, string TaskName, string stimDefFilePath, State setActiveOnInit = null, State setInactiveOnTerm = null)
@@ -406,7 +406,7 @@ namespace USE_StimulusManagement
 			stimGroupName = groupName;
 			stimDefs = new List<StimDef>();
 			AddStims(TaskName, stimDefFilePath);
-			AssignStates(setActiveOnInit, setInactiveOnTerm);
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
 		}
 
 		public StimGroup(string groupName, StimGroup sgOrig, IEnumerable<int> stimSubsetIndices, State setActiveOnInit = null, State setInactiveOnTerm = null)
@@ -414,11 +414,11 @@ namespace USE_StimulusManagement
 			stimGroupName = groupName;
 			stimDefs = new List<StimDef>();
 			AddStims(sgOrig, stimSubsetIndices);
-			AssignStates(setActiveOnInit, setInactiveOnTerm);
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
 		}
 		
 		
-		private void AssignStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
+		public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
 			if (setActiveOnInit != null)
 			{
@@ -427,8 +427,8 @@ namespace USE_StimulusManagement
 					SetInactiveOnTermination = setActiveOnInit;
 				else
 					SetInactiveOnTermination = setInactiveOnTerm;
-				SetActiveOnInitialization.StateInitialization += ActivateOnStateInit;
-				SetInactiveOnTermination.StateTermination += InactivateOnStateTerm;
+				SetActiveOnInitialization.StateInitializationFinished += ActivateOnStateInit;
+				SetInactiveOnTermination.StateTerminationFinished += InactivateOnStateTerm;
 			}
 
 		}
@@ -584,7 +584,37 @@ namespace USE_StimulusManagement
 				stim.ToggleVisibility(visibility);
 			}
 		}
-		
+
+		public void SetLocations(IEnumerable<Vector3> locs)
+		{
+			Vector3[] LocArray = locs.ToArray();
+			if (LocArray.Length == stimDefs.Count)
+			{
+				for (int iL = 0; iL < LocArray.Length; iL++)
+					stimDefs[iL].StimLocation = LocArray[iL];
+			}
+			else
+			{
+				Debug.LogError("Attempted to set the locations of stims in StimGroup " + stimGroupName +
+				               ", but there are " + stimDefs.Count + " stimuli in this group and " + LocArray.Length +
+				               " locations were given.");
+			}
+		}
+		public void SetRotations(IEnumerable<Vector3> rots)
+		{
+			Vector3[] rotArray = rots.ToArray();
+			if (rotArray.Length == stimDefs.Count)
+			{
+				for (int iL = 0; iL < rotArray.Length; iL++)
+					stimDefs[iL].StimLocation = rotArray[iL];
+			}
+			else
+			{
+				Debug.LogError("Attempted to set the rotations of stims in StimGroup " + stimGroupName +
+				               ", but there are " + stimDefs.Count + " stimuli in this group and " + rotArray.Length +
+				               " rotations were given.");
+			}
+		}
 		
 	}
 }

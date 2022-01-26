@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -37,11 +38,6 @@ namespace USE_ExperimentTemplate
 
 		private string configFileFolder;
 		private bool TaskSceneLoaded;
-
-		//private void Awake()
-		//{
-		//	DontDestroyOnLoad(gameObject);
-		//}
 
 		public override void LoadSettings()
 		{
@@ -127,23 +123,7 @@ namespace USE_ExperimentTemplate
 					tl.SubjectID = SubjectID;
 					tl.SessionID = SessionID;
 					tl.DefineTaskLevel();
-					if (tl.PreloadedStimGameObjects != null && tl.PreloadedStimGameObjects.Length > 0)
-					{
-						tl.PreloadedStims = new StimGroup("PreloadedStims", tl.PreloadedStimGameObjects);
-						tl.TaskStims.AllTaskStimGroups.Add("PreloadedStims", tl.PreloadedStims);
-					}
-
-					if (tl.PrefabStimPaths != null && tl.PrefabStimPaths.Count > 0)
-					{
-						tl.PrefabStims = new StimGroup("PrefabStims");
-						foreach (string path in tl.PrefabStimPaths)
-						{
-							StimDef sd = new StimDef(tl.PrefabStims);
-							sd.PrefabPath = path;
-						}
-
-						tl.TaskStims.AllTaskStimGroups.Add("PrefabStims", tl.PrefabStims);
-					}
+					
 
 					ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
 					ActiveTaskLevels.Add(tl);
@@ -294,6 +274,7 @@ namespace USE_ExperimentTemplate
 	public abstract class ControlLevel_Task_Template : ControlLevel
 	{
 		public string TaskName;
+		public string TaskProjectFolder;
 		[HideInInspector] public int BlockCount;
 		protected int NumBlocksInTask;
 		public ControlLevel_Trial_Template TrialLevel;
@@ -322,7 +303,7 @@ namespace USE_ExperimentTemplate
 		// public Dictionary<string, StimGroup> AllTaskStimGroups;
 		public TaskStims TaskStims;
 		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims;
-		public GameObject[] PreloadedStimGameObjects;
+		public List<GameObject> PreloadedStimGameObjects;
 		[HideInInspector] public List<string> PrefabStimPaths;
 
 		public Type TaskLevelType;
@@ -331,7 +312,118 @@ namespace USE_ExperimentTemplate
 		public virtual void SpecifyTypes()
 		{
 		}
+		
+		public void DefineTaskLevel()
+		{
+			ReadSettingsFiles();
+			FindStims();
 
+			State setupTask = new State("SetupTask");
+			State runBlock = new State("RunBlock");
+			State blockFeedback = new State("BlockFeedback");
+			State finishTask = new State("FinishTask");
+			runBlock.AddChildLevel(TrialLevel);
+			AddActiveStates(new List<State> {setupTask, runBlock, blockFeedback, finishTask});
+
+			TrialLevel.TrialDefType = TrialDefType;
+
+			AddInitializationMethod(() =>
+			{
+				BlockCount = -1;
+				TaskCam.gameObject.SetActive(true);
+			});
+
+			setupTask.SpecifyTermination(() => true, runBlock);
+
+			runBlock.AddUniversalInitializationMethod(() =>
+			{
+				BlockCount++;
+				CurrentBlockDef = BlockDefs[BlockCount];
+				TrialLevel.BlockCount = BlockCount;
+				if (BlockCount == 0)
+					TrialLevel.TrialCount_InTask = -1;
+				TrialLevel.TrialDefs = CurrentBlockDef.TrialDefs;
+			});
+
+			runBlock.AddLateUpdateMethod(() => FrameData.AppendData());
+
+			runBlock.SpecifyTermination(() => TrialLevel.Terminated, blockFeedback);
+
+			blockFeedback.AddLateUpdateMethod(() => FrameData.AppendData());
+			blockFeedback.SpecifyTermination(() => BlockCount < BlockDefs.Length - 1, runBlock, () =>
+			{
+				BlockData.AppendData();
+				BlockData.WriteData();
+			});
+			blockFeedback.SpecifyTermination(() => BlockCount == BlockDefs.Length - 1, finishTask, () =>
+			{
+				BlockData.AppendData();
+				BlockData.WriteData();
+			});
+
+			finishTask.SpecifyTermination(() => true, null);
+
+			AddDefaultTerminationMethod(() =>
+			{
+				SessionDataControllers.RemoveDataController("BlockData_" + TaskName);
+				SessionDataControllers.RemoveDataController("TrialData_" + TaskName);
+				SessionDataControllers.RemoveDataController("FrameData_" + TaskName);
+				foreach (StimGroup sg in TaskStims.AllTaskStimGroups.Values)
+				{
+					while(sg.stimDefs.Count>0)
+						sg.stimDefs[0].Destroy();
+					sg.DestroyStimGroup();
+				}
+				TaskStims.AllTaskStims.DestroyStimGroup();
+				TaskCam.gameObject.SetActive(false);
+			});
+			
+			//user-defined task control level 
+			DefineControlLevel();
+
+			//Setup data management
+			TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + TaskName;
+			FilePrefix = FilePrefix + "_" + TaskName;
+			BlockData = SessionDataControllers.InstantiateBlockData(StoreData, TaskName,
+				TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
+			BlockData.taskLevel = this;
+			BlockData.fileName = FilePrefix + "__BlockData";
+			BlockData.InitDataController();
+
+			TrialData = SessionDataControllers.InstantiateTrialData(StoreData, TaskName,
+				TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
+			TrialData.taskLevel = this;
+			TrialData.trialLevel = TrialLevel;
+			TrialLevel.TrialData = TrialData;
+			TrialData.fileName = FilePrefix + "__TrialData";
+			TrialData.InitDataController();
+
+			FrameData = SessionDataControllers.InstantiateFrameData(StoreData, TaskName,
+				TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
+			FrameData.taskLevel = this;
+			FrameData.trialLevel = TrialLevel;
+			TrialLevel.FrameData = FrameData;
+			FrameData.fileName = FilePrefix + "__FrameData_PreTrial";
+			FrameData.InitDataController();
+
+			BlockData.ManuallyDefine();
+			FrameData.ManuallyDefine();
+			BlockData.AddStateTimingData(this);
+			BlockData.CreateFile();
+			FrameData.CreateFile();
+
+			//AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
+
+			TrialLevel.SessionDataControllers = SessionDataControllers;
+			TrialLevel.FilePrefix = FilePrefix;
+			TrialLevel.TaskStims = TaskStims;
+			TrialLevel.PreloadedStims = PreloadedStims;
+			TrialLevel.PrefabStims = PrefabStims;
+			TrialLevel.ExternalStims = ExternalStims;
+			TrialLevel.DefineTrialLevel();
+		}
+
+		
 		private void ReadSettingsFiles()
 		{
 			//user specifies what custom types they have that inherit from TaskDef, BlockDef, and TrialDef;
@@ -378,11 +470,6 @@ namespace USE_ExperimentTemplate
 			}
 			else
 			{
-				foreach (TrialDef td in AllTrialDefs)
-				{
-					//check existence of files - requires either name + gameobject (if already loaded), resource path, or external path
-				}
-
 				if (BlockDefs == null)
 				{
 					Debug.Log("TrialDef config file provided without BlockDef config file in " + TaskName +
@@ -413,137 +500,85 @@ namespace USE_ExperimentTemplate
 					BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock, AllTrialDefs);
 				}
 			}
-
 		}
-
-
-		public void DefineTaskLevel()
+		
+		public void FindStims()
 		{
-			ReadSettingsFiles();
-
-			State setupTask = new State("SetupTask");
-			State runBlock = new State("RunBlock");
-			State blockFeedback = new State("BlockFeedback");
-			State finishTask = new State("FinishTask");
-			runBlock.AddChildLevel(TrialLevel);
-			AddActiveStates(new List<State> {setupTask, runBlock, blockFeedback, finishTask});
-
-			TrialLevel.TrialDefType = TrialDefType;
-
-			AddInitializationMethod(() =>
+			// public T TaskStimDefFromGameObject<T>(GameObject go, StimGroup sg = null) where T : StimDef, new()
+			// {
+			// 	StimDef sd = new T();
+			// 	sd.StimGameObject = go;
+			// 	if (sg != null)
+			// 		sd.AddToStimGroup(sg);
+			// 	return (T) sd;
+			// }
+			// public T TaskStimDefFromPrefabPath<T>(string prefabPath, StimGroup sg = null) where T : StimDef, new()
+			// public T CreateTaskStimDef<T>() where T : StimDef, new()
+			MethodInfo taskStimDefFromGameObject = GetType().GetMethod(nameof(TaskStimDefFromGameObject))
+				.MakeGenericMethod((new Type[] {StimDefType}));
+			MethodInfo taskStimDefFromPrefabPath = GetType().GetMethod(nameof(TaskStimDefFromPrefabPath))
+				.MakeGenericMethod((new Type[] {StimDefType}));
+			MethodInfo addTaskStimDefsToTaskStimGroup = GetType().GetMethod(nameof(this.AddTaskStimDefsToTaskStimGroup))
+				.MakeGenericMethod(new Type[] {StimDefType});
+			
+			//PreloadedStims = GameObjects in scene prior to build
+			PreloadedStims = new StimGroup("PreloadedStims");
+			TaskStims.AllTaskStimGroups.Add("PreloadedStims", PreloadedStims);
+			PrefabStims = new StimGroup("PrefabStims");
+			TaskStims.AllTaskStimGroups.Add("PrefabStims", PrefabStims);
+			//ExternalStims is already created in ReadStimDefs (not ideal as hard to follow)
+			TaskStims.AllTaskStimGroups.Add("ExternalStims", ExternalStims);
+			
+			
+			if (PreloadedStimGameObjects != null && PreloadedStimGameObjects.Count > 0)
 			{
-				// if (TaskCam == null)
-				// {
-				// 	//TaskCam = GameObject.Find(TaskName + "_Camera").GetComponent<Camera>();
-				// }
-
-				//cam.enabled = false;
-				//TaskCam.gameObject.SetActive(true);
-				BlockCount = -1;
-				TaskCam.gameObject.SetActive(true);
-				//DetermineNumBlocksInTask();
-				//prepare blockDef[]
-			});
-
-			setupTask.SpecifyTermination(() => true, runBlock);
-
-			runBlock.AddUniversalInitializationMethod(() =>
-			{
-				// if (TaskCam == null)
-				// {
-				// 	TaskCam = GameObject.Find(TaskName + "_Camera").GetComponent<Camera>();
-				// }
-				BlockCount++;
-				CurrentBlockDef = BlockDefs[BlockCount];
-				TrialLevel.BlockCount = BlockCount;
-				if (BlockCount == 0)
-					TrialLevel.TrialCount_InTask = -1;
-				TrialLevel.TrialDefs = CurrentBlockDef.TrialDefs;
-				//SendTrialDefsToTrialLevel();
-			});
-
-			runBlock.AddLateUpdateMethod(() => FrameData.AppendData());
-
-			runBlock.SpecifyTermination(() => TrialLevel.Terminated, blockFeedback);
-
-			blockFeedback.AddLateUpdateMethod(() => FrameData.AppendData());
-			blockFeedback.SpecifyTermination(() => BlockCount < BlockDefs.Length - 1, runBlock, () =>
-			{
-				BlockData.AppendData();
-				BlockData.WriteData();
-			});
-			blockFeedback.SpecifyTermination(() => BlockCount == BlockDefs.Length - 1, finishTask, () =>
-			{
-				BlockData.AppendData();
-				BlockData.WriteData();
-			});
-
-			finishTask.SpecifyTermination(() => true, null);
-
-			AddDefaultTerminationMethod(() =>
-			{
-				SessionDataControllers.RemoveDataController("BlockData_" + TaskName);
-				SessionDataControllers.RemoveDataController("TrialData_" + TaskName);
-				SessionDataControllers.RemoveDataController("FrameData_" + TaskName);
-				foreach (StimGroup sg in TaskStims.AllTaskStimGroups.Values)
+				foreach (GameObject go in PreloadedStimGameObjects)
 				{
-					while(sg.stimDefs.Count>0)
-						sg.stimDefs[0].Destroy();
-					//foreach (StimDef sd in sg.stimDefs)
-					//	sd.Destroy();
-					sg.DestroyStimGroup();
+					taskStimDefFromGameObject.Invoke(this, new object[] {go, PreloadedStims});
+					// addTaskStimDefsToTaskStimGroup.Invoke(this, new object[] {TaskConfigPath});
 				}
-				TaskStims.AllTaskStims.DestroyStimGroup();
-				//cam.enabled = true;
-				TaskCam.gameObject.SetActive(false);
-			});
+				PreloadedStims.AddStims(PreloadedStimGameObjects);
+			}
 
+			//Prefabs
+			if (PrefabStimPaths != null && PrefabStimPaths.Count > 0)
+			{
+				//Prefabs with explicit path given
+				foreach (string path in PrefabStimPaths)
+				{
+					taskStimDefFromPrefabPath.Invoke(this, new object[] {path, PreloadedStims});
+				}
 
+			}
+			else
+			{
+				//Prefabs in Prefabs/TaskFolder or TaskFolder/Prefabs
+				string[] prefabFolders =
+					{"Assets/Resources/Prefabs/" + TaskName, "Assets/Resources/USE_Tasks/" + TaskName + "Prefabs"};
+				string[] guids = AssetDatabase.FindAssets("t: GameObject", prefabFolders);
+				foreach (string guid in guids)
+				{
+					taskStimDefFromPrefabPath.Invoke(this, new object[] {AssetDatabase.GUIDToAssetPath(guid), PreloadedStims});
+				}
+			}
+			
+			// need to add check for files in stimfolderpath if there is no stimdef file (take all files)
+			string stimFolderPath = "";
+			string stimExtension = "";
+			float stimScale = 1;
+			if(SessionSettings.SettingExists(TaskName + "_TaskSettings", "ExternalStimFolderPath"))
+				stimFolderPath = (string) SessionSettings.Get(TaskName + "_TaskSettings", "ExternalStimFolderPath");
+			if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ExternalStimExtension"))
+				stimExtension = (string) SessionSettings.Get(TaskName + "_TaskSettings", "ExternalStimExtension");
+			if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ExternalStimScale"))
+				stimScale = (float) SessionSettings.Get(TaskName + "_TaskSettings", "ExternalStimScale");
 
-			DefineControlLevel();
-
-			//Setup data management
-			TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + TaskName;
-			FilePrefix = FilePrefix + "_" + TaskName;
-			BlockData = SessionDataControllers.InstantiateBlockData(StoreData, TaskName,
-				TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
-			BlockData.taskLevel = this;
-			BlockData.fileName = FilePrefix + "__BlockData";
-			BlockData.InitDataController();
-
-			TrialData = SessionDataControllers.InstantiateTrialData(StoreData, TaskName,
-				TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
-			TrialData.taskLevel = this;
-			TrialData.trialLevel = TrialLevel;
-			TrialLevel.TrialData = TrialData;
-			TrialData.fileName = FilePrefix + "__TrialData";
-			TrialData.InitDataController();
-
-			FrameData = SessionDataControllers.InstantiateFrameData(StoreData, TaskName,
-				TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
-			FrameData.taskLevel = this;
-			FrameData.trialLevel = TrialLevel;
-			TrialLevel.FrameData = FrameData;
-			FrameData.fileName = FilePrefix + "__FrameData_PreTrial";
-			FrameData.InitDataController();
-
-			BlockData.ManuallyDefine();
-			FrameData.ManuallyDefine();
-			BlockData.AddStateTimingData(this);
-			BlockData.CreateFile();
-			FrameData.CreateFile();
-
-			//AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
-
-
-
-			TrialLevel.SessionDataControllers = SessionDataControllers;
-			TrialLevel.FilePrefix = FilePrefix;
-			TrialLevel.TaskStims = TaskStims;
-			TrialLevel.PreloadedStims = PreloadedStims;
-			TrialLevel.PrefabStims = PrefabStims;
-			TrialLevel.ExternalStims = ExternalStims;
-			TrialLevel.DefineTrialLevel();
+			foreach (StimDef sd in ExternalStims.stimDefs)
+			{
+				sd.StimFolderPath = stimFolderPath;
+				sd.StimExtension = stimExtension;
+				sd.StimScale = stimScale;
+			}
 		}
 
 		public void ReadTaskDef<T>(string taskConfigFolder) where T : TaskDef
@@ -602,34 +637,41 @@ namespace USE_ExperimentTemplate
 			if (!string.IsNullOrEmpty(stimDefFile))
 			{
 				if (stimDefFile.ToLower().Contains("tdf"))
-					SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_StimDefs", stimDefFile);
+					SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_ExternalStimDefs", stimDefFile);
 				else
-					SessionSettings.ImportSettings_SingleTypeJSON<T[]>(TaskName + "_StimDefs", stimDefFile);
-				ExternalStims = new StimGroup("ExternalStims", (T[]) SessionSettings.Get(TaskName + "_StimDefs"));
-				string stimFolderPath = (string) SessionSettings.Get(TaskName + "_TaskSettings", "StimFolderPath");
-				string stimExtension = (string) SessionSettings.Get(TaskName + "_TaskSettings", "StimExtension");
-				float stimScale = (float) SessionSettings.Get(TaskName + "_TaskSettings", "ExternalStimScale");
-				if (!string.IsNullOrEmpty(stimFolderPath))
-				{
-					foreach (StimDef sd in ExternalStims.stimDefs)
-						sd.StimFolderPath = stimFolderPath;
-				}
-				if (!string.IsNullOrEmpty(stimExtension))
-				{
-					foreach (StimDef sd in ExternalStims.stimDefs)
-						sd.StimExtension = stimExtension;
-				}
-
-				foreach (StimDef sd in ExternalStims.stimDefs)
-					sd.StimScale = stimScale;
-				{
-					
-				}
-				TaskStims.AllTaskStimGroups.Add("ExternalStims", ExternalStims);
+					SessionSettings.ImportSettings_SingleTypeJSON<T[]>(TaskName + "_ExternalStimDefs", stimDefFile);
+				
+				ExternalStims = new StimGroup("ExternalStims", (T[]) SessionSettings.Get(TaskName + "_ExternalStimDefs"));
 				// TaskStims.CreateStimGroup("ExternalStims", (T[]) SessionSettings.Get(TaskName + "_Stims"));
 			}
 			else
+			{
+				ExternalStims = new StimGroup("ExternalStims");
 				Debug.Log("No stimdef file in config folder (this may not be a problem).");
+			}
+		}
+
+		public void AddTaskStimDefsToTaskStimGroup<T>(StimGroup sg, IEnumerable<T> stimDefs) where T : StimDef
+		{
+			sg.AddStims(stimDefs);
+		}
+
+		public T TaskStimDefFromGameObject<T>(GameObject go, StimGroup sg = null) where T : StimDef, new()
+		{
+			StimDef sd = new T();
+			sd.StimGameObject = go;
+			if (sg != null)
+				sd.AddToStimGroup(sg);
+			return (T) sd;
+		}
+		
+		public T TaskStimDefFromPrefabPath<T>(string prefabPath, StimGroup sg = null) where T : StimDef, new()
+		{
+			StimDef sd = new T();
+			sd.PrefabPath = prefabPath;
+			if (sg != null)
+				sd.AddToStimGroup(sg);
+			return (T) sd;
 		}
 
 		public TrialDef[] GetTrialDefsInBlock(int BlockNum, TrialDef[] trialDefs)
@@ -681,6 +723,7 @@ namespace USE_ExperimentTemplate
 
 		[HideInInspector] public TaskStims TaskStims;
 		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims;
+		[HideInInspector] public List<StimGroup> TrialStims;
 
 		//protected TrialDef CurrentTrialDef;
 		protected T GetCurrentTrialDef<T>() where T : TrialDef
@@ -699,6 +742,7 @@ namespace USE_ExperimentTemplate
 			AddInitializationMethod(() =>
 			{
 				TrialCount_InBlock = -1;
+				TrialStims = new List<StimGroup>();
 				//DetermineNumTrialsInBlock();
 			});
 
@@ -716,10 +760,11 @@ namespace USE_ExperimentTemplate
 				else
 					FrameData.fileName = FilePrefix + "__FrameData_Trial_000" + (TrialCount_InTask + 1) + ".txt";
 				FrameData.CreateFile();
-				
-				//MethodInfo getCTrialDef = GetType().GetMethod(nameof(this.GetCurrentTrialDef)).MakeGenericMethod(new Type[] { TrialDefType });
-				//getCTrialDef.Invoke(this, new object[] {  });
-				//PopulateCurrentTrialVariables();
+				DefineTrialStims();
+				foreach (StimGroup sg in TrialStims)
+				{
+					sg.LoadStims();
+				}
 			});
 
 			FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Length - 1, SetupTrial);
@@ -731,6 +776,12 @@ namespace USE_ExperimentTemplate
 				TrialData.WriteData();
 				FrameData.AppendData();
 				FrameData.WriteData();
+				int nStimGroups = TrialStims.Count;
+				for (int iG = 0; iG < nStimGroups; iG++)
+				{
+					TrialStims[0].DestroyStimGroup();
+					TrialStims.RemoveAt(0);
+				}
 				//WriteDataFiles();
 			});
 			DefineControlLevel();
@@ -739,10 +790,11 @@ namespace USE_ExperimentTemplate
 			TrialData.CreateFile();
 		}
 
-		public virtual void PopulateCurrentTrialVariables()
+		protected virtual void DefineTrialStims()
 		{
+			
 		}
-
+		
 		private void OnApplicationQuit()
 		{
 			if (TrialData != null)
@@ -751,6 +803,7 @@ namespace USE_ExperimentTemplate
 				TrialData.WriteData();
 			}
 		}
+		
 		
 		public StimGroup CreateStimGroup(string groupName, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
@@ -1064,8 +1117,9 @@ namespace USE_ExperimentTemplate
 		public int TaskStart_Frame;
 		public float TaskStart_UnityTime;
 		public string TaskName;
-		public string StimFolderPath;
-		public string StimExtension;
+		public string ExternalStimFolderPath;
+		public string PrefabStimFolderPath;
+		public string ExternalStimExtension;
 		public List<string[]> FeatureNames;
 		public string neutralPatternedColorName;
 		public float? ExternalStimScale;

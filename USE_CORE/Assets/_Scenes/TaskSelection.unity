@@ -38,12 +38,12 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641275, b: 0.5748172, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 11
+  serializedVersion: 12
   m_GIWorkflowMode: 1
   m_GISettings:
     serializedVersion: 2
@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 1
+  m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -118,6 +118,8 @@ NavMeshSettings:
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
+    maxJobWorkers: 0
+    preserveTilesOutsideBounds: 0
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
@@ -259,7 +261,7 @@ MonoBehaviour:
   Terminated: 0
   isMainLevel: 1
   CallDefineLevelAutomatically: 1
-  quitApplicationAtEnd: 0
+  quitApplicationAtEnd: 1
   DebugActive: 1
   Paused: 1
   SubjectID: 
@@ -267,7 +269,6 @@ MonoBehaviour:
   SessionDataPath: 
   FilePrefix: 
   TaskSelectionSceneName: TaskSelection
-  CurrentTaskName: 
   AvailableTaskLevels:
   - {fileID: 1375570698}
   - {fileID: 1375570700}
@@ -320,10 +321,16 @@ MonoBehaviour:
   TrialCount_InTask: 0
   TrialCount_InBlock: 0
   AbortCode: 0
-  SessionDataControllers: {fileID: 0}
   StoreData: 0
   TaskDataPath: 
   FilePrefix: 
+  PreloadedStims:
+    stimGroupName: 
+  PrefabStims:
+    stimGroupName: 
+  ExternalStims:
+    stimGroupName: 
+  TrialStims: []
   leftRightChoice: 
   maxScale: {x: 65, y: 2, z: 65}
 --- !u!114 &1375570698
@@ -347,9 +354,9 @@ MonoBehaviour:
   DebugActive: 1
   Paused: 1
   TaskName: EffortControl
+  TaskProjectFolder: 
   BlockCount: 0
   TrialLevel: {fileID: 1375570697}
-  SessionDataControllers: {fileID: 0}
   StoreData: 0
   SessionDataPath: 
   TaskConfigPath: 
@@ -358,9 +365,15 @@ MonoBehaviour:
   SessionID: 
   FilePrefix: 
   LocateFile: {fileID: 0}
-  TaskSceneName: EffortControl
   TaskCam: {fileID: 0}
-  PreloadedStims: []
+  PreloadedStims:
+    stimGroupName: 
+  PrefabStims:
+    stimGroupName: 
+  ExternalStims:
+    stimGroupName: 
+  PreloadedStimGameObjects: []
+  PrefabStimPaths: []
 --- !u!114 &1375570699
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -387,10 +400,16 @@ MonoBehaviour:
   TrialCount_InTask: 0
   TrialCount_InBlock: 0
   AbortCode: 0
-  SessionDataControllers: {fileID: 0}
   StoreData: 0
   TaskDataPath: 
   FilePrefix: 
+  PreloadedStims:
+    stimGroupName: 
+  PrefabStims:
+    stimGroupName: 
+  ExternalStims:
+    stimGroupName: 
+  TrialStims: []
   sphereCount: 0
   sphereChoice: 
 --- !u!114 &1375570700
@@ -414,9 +433,9 @@ MonoBehaviour:
   DebugActive: 1
   Paused: 1
   TaskName: WhatWhenWhere
+  TaskProjectFolder: 
   BlockCount: 0
   TrialLevel: {fileID: 1375570699}
-  SessionDataControllers: {fileID: 0}
   StoreData: 0
   SessionDataPath: 
   TaskConfigPath: 
@@ -425,9 +444,15 @@ MonoBehaviour:
   SessionID: 
   FilePrefix: 
   LocateFile: {fileID: 0}
-  TaskSceneName: WhatWhenWhere
   TaskCam: {fileID: 0}
-  PreloadedStims: []
+  PreloadedStims:
+    stimGroupName: 
+  PrefabStims:
+    stimGroupName: 
+  ExternalStims:
+    stimGroupName: 
+  PreloadedStimGameObjects: []
+  PrefabStimPaths: []
 --- !u!114 &1375570701
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -454,10 +479,16 @@ MonoBehaviour:
   TrialCount_InTask: 0
   TrialCount_InBlock: 0
   AbortCode: 0
-  SessionDataControllers: {fileID: 0}
   StoreData: 0
   TaskDataPath: 
   FilePrefix: 
+  PreloadedStims:
+    stimGroupName: 
+  PrefabStims:
+    stimGroupName: 
+  ExternalStims:
+    stimGroupName: 
+  TrialStims: []
 --- !u!114 &1375570702
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -479,9 +510,9 @@ MonoBehaviour:
   DebugActive: 1
   Paused: 0
   TaskName: CognitiveMaze
+  TaskProjectFolder: 
   BlockCount: 0
   TrialLevel: {fileID: 1375570701}
-  SessionDataControllers: {fileID: 0}
   StoreData: 0
   SessionDataPath: 
   TaskConfigPath: 
@@ -490,9 +521,15 @@ MonoBehaviour:
   SessionID: 
   FilePrefix: 
   LocateFile: {fileID: 0}
-  TaskSceneName: CognitiveMaze
   TaskCam: {fileID: 0}
-  PreloadedStims: []
+  PreloadedStims:
+    stimGroupName: 
+  PrefabStims:
+    stimGroupName: 
+  ExternalStims:
+    stimGroupName: 
+  PreloadedStimGameObjects: []
+  PrefabStimPaths: []
 --- !u!114 &1375570703
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -502,10 +539,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1375570694}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1b0aaf97e8aaa244da44d0061005dfe4, type: 3}
+  m_Script: {fileID: 11500000, guid: 65313851ea88f495f90c5685c2a8099b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ControlLevelName: StimHandling_Trial
+  ControlLevelName: StimHandling_TrialLevel
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
@@ -519,10 +556,16 @@ MonoBehaviour:
   TrialCount_InTask: 0
   TrialCount_InBlock: 0
   AbortCode: 0
-  SessionDataControllers: {fileID: 0}
   StoreData: 0
   TaskDataPath: 
   FilePrefix: 
+  PreloadedStims:
+    stimGroupName: 
+  PrefabStims:
+    stimGroupName: 
+  ExternalStims:
+    stimGroupName: 
+  TrialStims: []
 --- !u!114 &1375570704
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -532,7 +575,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1375570694}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 96454da2820eb9a49bd578066bdf1e69, type: 3}
+  m_Script: {fileID: 11500000, guid: b51ccfaef99544a8aa94ff45e4e1bb55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: StimHandling_TaskLevel
@@ -544,9 +587,9 @@ MonoBehaviour:
   DebugActive: 1
   Paused: 1
   TaskName: StimHandling
+  TaskProjectFolder: 
   BlockCount: 0
   TrialLevel: {fileID: 1375570703}
-  SessionDataControllers: {fileID: 0}
   StoreData: 0
   SessionDataPath: 
   TaskConfigPath: 
@@ -555,9 +598,15 @@ MonoBehaviour:
   SessionID: 
   FilePrefix: 
   LocateFile: {fileID: 0}
-  TaskSceneName: StimHandling
   TaskCam: {fileID: 0}
-  PreloadedStims: []
+  PreloadedStims:
+    stimGroupName: 
+  PrefabStims:
+    stimGroupName: 
+  ExternalStims:
+    stimGroupName: 
+  PreloadedStimGameObjects: []
+  PrefabStimPaths: []
 --- !u!1 &1396040246
 GameObject:
   m_ObjectHideFlags: 0
@@ -569,6 +618,7 @@ GameObject:
   - component: {fileID: 1396040249}
   - component: {fileID: 1396040248}
   - component: {fileID: 1396040247}
+  - component: {fileID: 1396040250}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -641,6 +691,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1396040250
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1396040246}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7522bbf6ac3b4764a5be0fb78844f73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1530207056
 GameObject:
   m_ObjectHideFlags: 0
@@ -717,6 +779,7 @@ Light:
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
+  m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
 --- !u!4 &1530207058
@@ -836,6 +899,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
+  m_PresetInfoIsWorld: 0
 --- !u!223 &2008034529
 Canvas:
   m_ObjectHideFlags: 0
@@ -895,6 +959,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 114443967513355164, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
+      propertyPath: files.Array.data[0].name
+      value: Config File Folder
+      objectReference: {fileID: 0}
+    - target: {fileID: 114443967513355164, guid: c85f9d40cb89745fe8ca96530c144cee,
+        type: 3}
       propertyPath: files.Array.data[1].name
       value: Data Folder
       objectReference: {fileID: 0}
@@ -902,11 +971,6 @@ PrefabInstance:
         type: 3}
       propertyPath: files.Array.data[1].isFolder
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114443967513355164, guid: c85f9d40cb89745fe8ca96530c144cee,
-        type: 3}
-      propertyPath: files.Array.data[0].name
-      value: Config File Folder
       objectReference: {fileID: 0}
     - target: {fileID: 114580301071517974, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
@@ -935,22 +999,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 224237352186693110, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224237352186693110, guid: c85f9d40cb89745fe8ca96530c144cee,
-        type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224237352186693110, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
-      propertyPath: m_AnchoredPosition.x
+      propertyPath: m_AnchorMin.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224237352186693110, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
-      propertyPath: m_AnchoredPosition.y
+      propertyPath: m_SizeDelta.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224237352186693110, guid: c85f9d40cb89745fe8ca96530c144cee,
@@ -960,7 +1019,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 224237352186693110, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
-      propertyPath: m_SizeDelta.x
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 224237352186693110, guid: c85f9d40cb89745fe8ca96530c144cee,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 224403173370456496, guid: c85f9d40cb89745fe8ca96530c144cee,
+        type: 3}
+      propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224403173370456496, guid: c85f9d40cb89745fe8ca96530c144cee,
@@ -970,7 +1039,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 224403173370456496, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
-      propertyPath: m_AnchorMax.y
+      propertyPath: m_SizeDelta.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224403173370456496, guid: c85f9d40cb89745fe8ca96530c144cee,
@@ -983,12 +1052,52 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 224403173370456496, guid: c85f9d40cb89745fe8ca96530c144cee,
+    - target: {fileID: 224474238556160424, guid: c85f9d40cb89745fe8ca96530c144cee,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
+        type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
+        type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
+        type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
       propertyPath: m_SizeDelta.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 224474238556160424, guid: c85f9d40cb89745fe8ca96530c144cee,
+    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
@@ -1010,6 +1119,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
+        type: 3}
       propertyPath: m_LocalRotation.x
       value: 0
       objectReference: {fileID: 0}
@@ -1025,12 +1139,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
+      propertyPath: m_AnchoredPosition.x
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}
-      propertyPath: m_RootOrder
+      propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
@@ -1047,56 +1161,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
-        type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
-        type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
-        type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
-        type: 3}
-      propertyPath: m_AnchorMin.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
-        type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
-        type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
-        type: 3}
-      propertyPath: m_Pivot.x
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 224770673433661620, guid: c85f9d40cb89745fe8ca96530c144cee,
-        type: 3}
-      propertyPath: m_Pivot.y
-      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c85f9d40cb89745fe8ca96530c144cee, type: 3}

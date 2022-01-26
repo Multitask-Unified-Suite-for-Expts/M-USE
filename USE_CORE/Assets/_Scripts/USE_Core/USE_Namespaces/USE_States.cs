@@ -827,6 +827,26 @@ namespace USE_States
 			}
 		}
 
+		public State GetStateFromName(string name)
+		{
+			int iS = ActiveStateNames.IndexOf(name);
+			if (iS == null)
+			{
+				Debug.LogError("Attempted to retrieve state with name " + name + " from ControlLevel " +
+				               ControlLevelName + " but no State with this name exists in this ControlLevel.");
+				return null;
+			}
+
+			if (ActiveStates[iS].StateName != name)
+			{
+				Debug.LogError("Attempted to retrieve state with name " + name + " from ControlLevel " +
+				               ControlLevelName + " but there has been an error with state name assignment.");
+				return null;
+			}
+			else
+				return ActiveStates[iS];
+		}
+
 		//Populate State method groups
 		public void AddStateInitializationMethod(VoidDelegate method, State state = null)
 		{

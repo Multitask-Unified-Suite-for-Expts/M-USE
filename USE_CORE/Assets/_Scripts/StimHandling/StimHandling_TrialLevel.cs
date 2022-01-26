@@ -16,9 +16,9 @@ public class StimHandling_TrialLevel : ControlLevel_Trial_Template
     public override void DefineControlLevel()
     {
         State startScreen = new State("StartScreen");
-        State AStimsVisible = new State("MakeGroupAVisible");
-        State BStims = new State("MakeGroupAInvisible");
-        State AStimsInvisible= new State("MakeGroupBVisible");
+        State AStimsVisible = new State("AStimsVisible");
+        State BStims = new State("BStims");
+        State AStimsInvisible= new State("AStimsInvisible");
 
         AddActiveStates(new List<State>
             {startScreen, AStimsVisible, BStims, AStimsInvisible});
@@ -31,8 +31,6 @@ public class StimHandling_TrialLevel : ControlLevel_Trial_Template
         {
             commandText = GameObject.Find("CommandText").GetComponent<Text>();
             commandText.text = "Press the mouse button to make Group A stimuli visible.";
-            externalStimsA.SetVisibilityOnOffStates(AStimsVisible, AStimsInvisible);
-            externalStimsB.SetVisibilityOnOffStates(BStims);
         });
         startScreen.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), AStimsVisible);
 
@@ -55,9 +53,11 @@ public class StimHandling_TrialLevel : ControlLevel_Trial_Template
     protected override void DefineTrialStims()
     {
         externalStimsA = new StimGroup("StimGroupA", ExternalStims, CurrentTrialDef.GroupAIndices);
-        externalStimsB = new StimGroup("StimGroupB", ExternalStims, CurrentTrialDef.GroupBIndices);
+        externalStimsA.SetVisibilityOnOffStates(GetStateFromName("AStimsVisible"), GetStateFromName("AStimsInvisible"));
         externalStimsA.SetLocations(CurrentTrialDef.GroupALocations);
+        externalStimsB = new StimGroup("StimGroupB", ExternalStims, CurrentTrialDef.GroupBIndices);
         externalStimsB.SetLocations(CurrentTrialDef.GroupBLocations);
+        externalStimsB.SetVisibilityOnOffStates(GetStateFromName("BStims"));
         TrialStims.Add(externalStimsA);
         TrialStims.Add(externalStimsB);
     }

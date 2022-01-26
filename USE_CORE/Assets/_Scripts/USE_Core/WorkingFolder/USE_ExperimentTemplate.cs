@@ -302,7 +302,7 @@ namespace USE_ExperimentTemplate
 		// private StimGroup AllTaskStims;
 		// public Dictionary<string, StimGroup> AllTaskStimGroups;
 		public TaskStims TaskStims;
-		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims;
+		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims, RuntimeStims;
 		public List<GameObject> PreloadedStimGameObjects;
 		[HideInInspector] public List<string> PrefabStimPaths;
 
@@ -420,6 +420,7 @@ namespace USE_ExperimentTemplate
 			TrialLevel.PreloadedStims = PreloadedStims;
 			TrialLevel.PrefabStims = PrefabStims;
 			TrialLevel.ExternalStims = ExternalStims;
+			TrialLevel.RuntimeStims = RuntimeStims;
 			TrialLevel.DefineTrialLevel();
 		}
 
@@ -528,6 +529,8 @@ namespace USE_ExperimentTemplate
 			TaskStims.AllTaskStimGroups.Add("PrefabStims", PrefabStims);
 			//ExternalStims is already created in ReadStimDefs (not ideal as hard to follow)
 			TaskStims.AllTaskStimGroups.Add("ExternalStims", ExternalStims);
+			RuntimeStims = new StimGroup("RuntimeStims");
+			TaskStims.AllTaskStimGroups.Add("RuntimeStims", RuntimeStims);
 			
 			
 			if (PreloadedStimGameObjects != null && PreloadedStimGameObjects.Count > 0)
@@ -722,7 +725,7 @@ namespace USE_ExperimentTemplate
 		public TrialDef[] TrialDefs;
 
 		[HideInInspector] public TaskStims TaskStims;
-		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims;
+		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims, RuntimeStims;
 		[HideInInspector] public List<StimGroup> TrialStims;
 
 		//protected TrialDef CurrentTrialDef;

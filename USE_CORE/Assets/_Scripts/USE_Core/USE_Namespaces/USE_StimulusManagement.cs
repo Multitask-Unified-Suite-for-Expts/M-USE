@@ -55,7 +55,7 @@ namespace USE_StimulusManagement
 			sg.stimDefs.Add(this);
 			StimGroups = new Dictionary<string, StimGroup>();
 			StimGroups.Add(sg.stimGroupName, sg);
-			AssignStates(setActiveOnInit, setInactiveOnTerm);
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
 		}
 
 		public StimDef(StimGroup sg, int[] dimVals, State setActiveOnInit = null, State setInactiveOnTerm = null)
@@ -65,7 +65,7 @@ namespace USE_StimulusManagement
 			sg.stimDefs.Add(this);
 			StimGroups = new Dictionary<string, StimGroup>();
 			StimGroups.Add(sg.stimGroupName, sg);
-			AssignStates(setActiveOnInit, setInactiveOnTerm);
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
 		}
 
 		public StimDef(StimGroup sg, GameObject obj, State setActiveOnInit = null, State setInactiveOnTerm = null)
@@ -74,30 +74,29 @@ namespace USE_StimulusManagement
 			sg.stimDefs.Add(this);
 			StimGroups = new Dictionary<string, StimGroup>();
 			StimGroups.Add(sg.stimGroupName, sg);
-			AssignStates(setActiveOnInit, setInactiveOnTerm);
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
 		}
 
-		private void AssignStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
+		public void SetVisibilityOnOffStates(State setActiveOnInit, State setInactiveOnTerm)
 		{
 			if (setActiveOnInit != null)
 			{
 				SetActiveOnInitialization = setActiveOnInit;
-				if (setInactiveOnTerm == null)
-					SetInactiveOnTermination = setActiveOnInit;
-				else
-					SetInactiveOnTermination = setInactiveOnTerm;
 				SetActiveOnInitialization.StateInitializationFinished += ActivateOnStateInit;
+			}
+			if (setInactiveOnTerm != null)
+			{
+				SetInactiveOnTermination = setInactiveOnTerm;
 				SetInactiveOnTermination.StateTerminationFinished += InactivateOnStateTerm;
 			}
-
 		}
 
-		private void ActivateOnStateInit(object sender, EventArgs e)
+		public void ActivateOnStateInit(object sender, EventArgs e)
 		{
 			ToggleVisibility(true);
 		}
 
-		private void InactivateOnStateTerm(object sender, EventArgs e)
+		public void InactivateOnStateTerm(object sender, EventArgs e)
 		{
 			ToggleVisibility(false);
 		}
@@ -172,9 +171,8 @@ namespace USE_StimulusManagement
 		{
 			if (StimGroups.ContainsValue(sg))
 			{
-				sg.stimDefs.Remove(this);
+				// sg.stimDefs.Remove(this);
 				StimGroups.Remove(sg.stimGroupName);
-				Debug.Log("Removing " + sg.stimGroupName);
 			}
 			else
 			{
@@ -275,10 +273,21 @@ namespace USE_StimulusManagement
 		public void Destroy()
 		{
 			StimGroup[] sgs = StimGroups.Values.ToArray();
-			for(int iG = 0; iG < sgs.Length; iG++)
+			for (int iG = 0; iG < sgs.Length; iG++)
 				RemoveFromStimGroup(sgs[iG]);
 
 			Object.Destroy(StimGameObject);
+			if (SetActiveOnInitialization != null)
+			{
+				SetActiveOnInitialization.StateInitializationFinished -= ActivateOnStateInit;
+				SetActiveOnInitialization = null;
+			}
+
+			if (SetInactiveOnTermination != null)
+			{
+				SetInactiveOnTermination.StateTerminationFinished -= InactivateOnStateTerm;
+				SetInactiveOnTermination = null;
+			}
 		}
 
 
@@ -423,14 +432,13 @@ namespace USE_StimulusManagement
 			if (setActiveOnInit != null)
 			{
 				SetActiveOnInitialization = setActiveOnInit;
-				if (setInactiveOnTerm == null)
-					SetInactiveOnTermination = setActiveOnInit;
-				else
-					SetInactiveOnTermination = setInactiveOnTerm;
 				SetActiveOnInitialization.StateInitializationFinished += ActivateOnStateInit;
+			}
+			if (setInactiveOnTerm != null)
+			{
+				SetInactiveOnTermination = setInactiveOnTerm;
 				SetInactiveOnTermination.StateTerminationFinished += InactivateOnStateTerm;
 			}
-
 		}
 
 		private void ActivateOnStateInit(object sender, EventArgs e)
@@ -573,6 +581,19 @@ namespace USE_StimulusManagement
 			{
 				StimDef sd = stimDefs[0];
 				sd.RemoveFromStimGroup(this);
+				if (sd.SetActiveOnInitialization != null)
+				{
+					sd.SetActiveOnInitialization.StateInitializationFinished -= sd.ActivateOnStateInit;
+					sd.SetActiveOnInitialization = null;
+				}
+
+				if (sd.SetInactiveOnTermination != null)
+				{
+					sd.SetInactiveOnTermination.StateTerminationFinished -= sd.InactivateOnStateTerm;
+					sd.SetInactiveOnTermination = null;
+				}
+
+				stimDefs.RemoveAt(0);
 				GameObject.Destroy(sd.StimGameObject);
 			}
 		}

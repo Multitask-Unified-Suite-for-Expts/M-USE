@@ -10,55 +10,110 @@ using USE_StimulusManagement;
 public class StimHandling_TrialLevel : ControlLevel_Trial_Template
 {
 
-    private StimGroup externalStimsA, externalStimsB, prefabStimsA, prefabStimsB, preloadedStimsA, preloadedStimsB;
+    private StimGroup externalStimsA, externalStimsB, externalStimsC;
     public StimHandling_TrialDef CurrentTrialDef => GetCurrentTrialDef<StimHandling_TrialDef>();
 
     public override void DefineControlLevel()
     {
         State startScreen = new State("StartScreen");
-        State AStimsVisible = new State("AStimsVisible");
-        State BStims = new State("BStims");
-        State AStimsInvisible= new State("AStimsInvisible");
+        State SetGroupAActive = new State("SetGroupAActive");
+        State SetGroupBActiveAndInactive = new State("SetGroupBActiveAndInactive");
+        State SetGroupC_Stim0Active = new State("SetGroupC_Stim0Active");
+        State SetGroupC_Stim1ActiveAndInactive = new State("SetGroupC_Stim1ActiveAndInactive");
+        State SetGroupsAandCInactive = new State("SetGroupsAandCInactive");
 
-        AddActiveStates(new List<State>
-            {startScreen, AStimsVisible, BStims, AStimsInvisible});
+        Text stateNameText = null, commandText = null;
+        int stateCount = 0;
 
-        Text commandText = null;
+        string[] stateNames = new string[] {"StartScreen", "SetGroupAActive", "SetGroupBActiveAndInactive", "SetGroupC_Stim0Active", "SetGroupC_Stim1ActiveAndInactive", "SetGroupsAandCInactive"};
+        
+
+        AddActiveStates(new List<State> {startScreen, SetGroupAActive, SetGroupBActiveAndInactive, SetGroupC_Stim0Active, SetGroupC_Stim1ActiveAndInactive, SetGroupsAandCInactive});
+
         SetupTrial.SpecifyTermination(() => true, startScreen);
 
 
         startScreen.AddDefaultInitializationMethod(() =>
         {
+            stateNameText = GameObject.Find("StateNameText").GetComponent<Text>();
             commandText = GameObject.Find("CommandText").GetComponent<Text>();
-            commandText.text = "Press the mouse button to make Group A stimuli visible.";
+            stateCount = 0;
+            stateNameText.text = StateNameString();
+            commandText.text = "Press the mouse button to set Group A stimuli active in initialization of next state.";
         });
-        startScreen.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), AStimsVisible);
+        startScreen.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), SetGroupAActive, ()=>stateCount++);
 
+        SetGroupAActive.AddDefaultInitializationMethod(() =>
+        {
+            stateNameText.text = StateNameString();
+            commandText.text = "Press the mouse button to set Group B stimuli active in initialization of next state.";
+        });
+        SetGroupAActive.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), SetGroupBActiveAndInactive, ()=>stateCount++);
+        
+        SetGroupBActiveAndInactive.AddDefaultInitializationMethod(() =>
+        {
+            stateNameText.text = StateNameString();
+            commandText.text = "Press the mouse button to set Group B stimuli inactive at the termination of the current state, and set Group C Stim 0 active in initialization of next state.";
+        });
+        SetGroupBActiveAndInactive.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), SetGroupC_Stim0Active, ()=>stateCount++);
+        
+        SetGroupC_Stim0Active.AddDefaultInitializationMethod(() =>
+        {
+            stateNameText.text = StateNameString();
+            commandText.text = "Press the mouse button to set Group C Stim 1 active in initialization of next state.";
+        });
+        SetGroupC_Stim0Active.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), SetGroupC_Stim1ActiveAndInactive, ()=>stateCount++);
+        
+        SetGroupC_Stim1ActiveAndInactive.AddDefaultInitializationMethod(() =>
+        {
+            stateNameText.text = StateNameString();
+            commandText.text = "Press the mouse button to set Group C Stim 1 inactive at the termination of the current state.";
+        });
+        SetGroupC_Stim1ActiveAndInactive.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), SetGroupsAandCInactive, ()=>stateCount++);
+        
+        SetGroupsAandCInactive.AddDefaultInitializationMethod(() =>
+        {
+            stateNameText.text = StateNameString();
+            commandText.text = "Press the mouse button to end the trial (all stimuli will be deleted).";
+        });
+        SetGroupsAandCInactive.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), FinishTrial);
 
-        AStimsVisible.AddDefaultInitializationMethod(() =>
-            commandText.text = "Press the mouse button to make Group B stimuli visible.");
-        AStimsVisible.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), BStims);
-        
-        BStims.AddDefaultInitializationMethod(() =>
-            commandText.text = "Press the mouse button to make Group B stimuli invisible.");
-        BStims.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), AStimsInvisible);
-        
-        
-        AStimsInvisible.AddDefaultInitializationMethod(() =>
-            commandText.text = "Press the mouse button to make Group A stimuli invisible and start the next trial.");
-        AStimsInvisible.SpecifyTermination(() => InputBroker.GetMouseButtonUp(0), FinishTrial);
+        string StateNameString()
+        {
+            if (stateCount == 0)
+                return "Prior Trial State is SetupTrial (new trial), current State: " + stateNames[stateCount] +
+                       " [" + stateCount + "], next State: " + stateNames[stateCount + 1] + " [" +
+                       (stateCount + 1) + "].";
+            else if (stateCount == stateNames.Length - 1)
+                return "Prior Trial State: " + stateNames[stateCount - 1] + " [" + (stateCount - 1) +
+                       "], current State: " + stateNames[stateCount] +
+                       " [" + (stateCount) + "], next State is FinishTrial (end of trial).";
+            else
+                return "Prior Trial State: " + stateNames[stateCount - 1] + " [" + (stateCount - 1) +
+                       "], current State: " + stateNames[stateCount] + " [" + stateCount +
+                       "], next State: " + stateNames[stateCount + 1] + " [" + (stateCount + 1) + "].";
+
+        }
 
     }
 
     protected override void DefineTrialStims()
     {
         externalStimsA = new StimGroup("StimGroupA", ExternalStims, CurrentTrialDef.GroupAIndices);
-        externalStimsA.SetVisibilityOnOffStates(GetStateFromName("AStimsVisible"), GetStateFromName("AStimsInvisible"));
+        externalStimsA.SetVisibilityOnOffStates(GetStateFromName("SetGroupAActive"), null);
         externalStimsA.SetLocations(CurrentTrialDef.GroupALocations);
         externalStimsB = new StimGroup("StimGroupB", ExternalStims, CurrentTrialDef.GroupBIndices);
         externalStimsB.SetLocations(CurrentTrialDef.GroupBLocations);
-        externalStimsB.SetVisibilityOnOffStates(GetStateFromName("BStims"));
+        externalStimsB.SetVisibilityOnOffStates(GetStateFromName("SetGroupBActiveAndInactive"),GetStateFromName("SetGroupBActiveAndInactive"));
+        externalStimsC = new StimGroup("StimGroupC", ExternalStims, CurrentTrialDef.GroupCIndices);
+        externalStimsC.SetVisibilityOnOffStates(null, GetStateFromName("SetGroupsAandCInactive"));
+        externalStimsC.stimDefs[0]
+            .SetVisibilityOnOffStates(GetStateFromName("SetGroupC_Stim0Active"), null);
+        externalStimsC.stimDefs[1].SetVisibilityOnOffStates(GetStateFromName("SetGroupC_Stim1ActiveAndInactive"), GetStateFromName("SetGroupC_Stim1ActiveAndInactive"));
+        externalStimsC.SetLocations(CurrentTrialDef.GroupCLocations);
         TrialStims.Add(externalStimsA);
         TrialStims.Add(externalStimsB);
+        TrialStims.Add(externalStimsC);
     }
+    
 }

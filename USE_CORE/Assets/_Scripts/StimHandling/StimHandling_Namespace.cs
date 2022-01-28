@@ -23,8 +23,10 @@ namespace StimHandling_Namespace
         //ObjectNums refers to items in a list of objects to be loaded from resources folder
         public int[] GroupAIndices;
         public int[] GroupBIndices;
+        public int[] GroupCIndices;
         public Vector3[] GroupALocations;
         public Vector3[] GroupBLocations;
+        public Vector3[] GroupCLocations;
     }
 
     //Any other custom classes useful for the functioning of the task could be included in this namespace.

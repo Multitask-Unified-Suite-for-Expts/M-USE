@@ -307,7 +307,7 @@ namespace USE_ExperimentTemplate
 		public List<string> PrefabStimPaths;
 
 		public Type TaskLevelType;
-		protected Type TaskDefType, BlockDefType, TrialDefType, StimDefType;
+		protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
 
 		public virtual void SpecifyTypes()
 		{
@@ -370,15 +370,17 @@ namespace USE_ExperimentTemplate
 				SessionDataControllers.RemoveDataController("FrameData_" + TaskName);
 				int sgNum = TaskStims.AllTaskStimGroups.Count;
 				for(int iSg = 0; iSg < sgNum; iSg++)
-				// foreach (StimGroup sg in TaskStims.AllTaskStimGroups.
 				{
-					StimGroup[] coll = new StimGroup[TaskStims.AllTaskStimGroups.Count];
-					TaskStims.AllTaskStimGroups.Values.CopyTo(coll, 0);
-					StimGroup sg = coll[0];
+					StimGroup[] taskSgs = new StimGroup[TaskStims.AllTaskStimGroups.Count];
+					TaskStims.AllTaskStimGroups.Values.CopyTo(taskSgs, 0);
+					StimGroup sg = taskSgs[0];
+					//WHY DOESN'T THIS WORK - it doesn't seem to matter that it doesn't
+					// string[] keys = new string[TaskStims.AllTaskStimGroups.Count];
+					// TaskStims.AllTaskStimGroups.Keys.CopyTo(keys, 0);
+					// TaskStims.AllTaskStimGroups.Remove(keys[0]);
 					while(sg.stimDefs.Count>0)
 						sg.stimDefs[0].Destroy();
 					sg.DestroyStimGroup();
-					// TaskStims.AllTaskStimGroups.Remove(TaskStims.AllTaskStimGroups.Keys[0]);
 				}
 				TaskStims.AllTaskStims.DestroyStimGroup();
 				TaskCam.gameObject.SetActive(false);

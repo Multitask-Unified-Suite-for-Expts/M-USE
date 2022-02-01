@@ -1,0 +1,22 @@
+using UnityEngine;
+using USE_ExperimentTemplate;
+using USE_States;
+using USE_StimulusManagement;
+using #TASKNAME#_Namespace;
+
+public class #TASKNAME#_TrialLevel : ControlLevel_Trial_Template
+{
+    public #TASKNAME#_TrialDef CurrentTrialDef => GetCurrentTrialDef<#TASKNAME#_TrialDef>();
+
+    public override void DefineControlLevel()
+    {
+        #NOTRIM#
+    }
+
+    protected override void DefineTrialStims()
+    {
+        //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
+        //destroyed at TrialLevel_Finish
+    }
+    
+}

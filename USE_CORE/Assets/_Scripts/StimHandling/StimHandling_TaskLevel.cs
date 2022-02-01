@@ -1,6 +1,5 @@
 ﻿using USE_ExperimentTemplate;
 using StimHandling_Namespace;
-using USE_Settings;
 
 public class StimHandling_TaskLevel : ControlLevel_Task_Template
 {

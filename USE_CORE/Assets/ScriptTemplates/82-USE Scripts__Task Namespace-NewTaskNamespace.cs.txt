@@ -1,0 +1,26 @@
+using UnityEngine;
+using USE_ExperimentTemplate;
+using USE_StimulusManagement;
+
+namespace #TASKNAME#_Namespace
+{
+    public class #TASKNAME#_TaskDef : TaskDef
+    {
+    
+    }
+
+    public class #TASKNAME#_BlockDef : BlockDef
+    {
+    
+    }
+
+    public class #TASKNAME#_TrialDef : TrialDef
+    {
+    
+    }
+
+    public class #TASKNAME#_StimDef : StimDef
+    {
+    
+    }
+}

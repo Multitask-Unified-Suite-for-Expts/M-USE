@@ -3,15 +3,6 @@ using #TASKNAME#_Namespace;
 
 public class #TASKNAME#_TaskLevel : ControlLevel_Task_Template
 {
-    public override void SpecifyTypes()
-    {
-        TaskLevelType = typeof(#TASKNAME#_TaskLevel);
-        TrialLevelType = typeof(#TASKNAME#_TrialLevel);
-        TaskDefType = typeof(#TASKNAME#_TaskDef);
-        BlockDefType = typeof(#TASKNAME#_BlockDef);
-        TrialDefType = typeof(#TASKNAME#_TrialDef);
-        StimDefType = typeof(#TASKNAME#_StimDef);
-    }
 
     public override void DefineControlLevel()
     {

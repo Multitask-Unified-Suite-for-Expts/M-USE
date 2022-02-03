@@ -4,12 +4,12 @@ using System.IO;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using USE_States;
 using USE_Data;
 using USE_Settings;
 using USE_StimulusManagement;
+// using USE_TasksCustomTypes;
 
 namespace USE_ExperimentTemplate
 {
@@ -38,7 +38,7 @@ namespace USE_ExperimentTemplate
 
 		private string configFileFolder;
 		private bool TaskSceneLoaded;
-
+		
 		public override void LoadSettings()
 		{
 			//load session config file
@@ -86,8 +86,13 @@ namespace USE_ExperimentTemplate
 			});
 			
 			int iTask = 0;
+			bool oldStyleTaskLoading = false;
+			bool newStyleTaskLoading = false;
+			bool sceneLoaded = false;
+			string taskName;
 			setupSession.AddUpdateMethod(() =>
 			{
+				oldStyleTaskLoading = false;
 				if (iTask < ActiveTaskNames.Count)
 				{
 					int iAvail = 0;
@@ -95,40 +100,37 @@ namespace USE_ExperimentTemplate
 					{
 						if (AvailableTaskLevels[iAvail].TaskName == ActiveTaskNames[iTask])
 						{
+							oldStyleTaskLoading = true;
 							break;
 						}
 
 						iAvail++;
 					}
 
-					ControlLevel_Task_Template tl = AvailableTaskLevels[iAvail];
-					tl.SessionDataControllers = SessionDataControllers;
-					tl.LocateFile = LocateFile;
-					tl.SessionDataPath = SessionDataPath;
-					if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))
-						tl.TaskConfigPath =
-							configFileFolder + Path.DirectorySeparatorChar +
-							tl.TaskName;
+					ControlLevel_Task_Template tl;
+					AsyncOperation loadScene;
+					if (oldStyleTaskLoading)
+					{
+						tl = PopulateTaskLevel(AvailableTaskLevels[iAvail]);
+						taskName = tl.TaskName;
+						loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
+						loadScene.completed += (_)=> SceneLoaded(taskName);
+					}
 					else
 					{
-						List<string> configFolders =
-							(List<string>) SessionSettings.Get("Session", "ConfigFolderNames");
-						tl.TaskConfigPath =
-							configFileFolder + Path.DirectorySeparatorChar +
-							configFolders[ActiveTaskNames.IndexOf(tl.TaskName)];
+						if (!newStyleTaskLoading)
+						{
+							newStyleTaskLoading = true;
+							taskName = ActiveTaskNames[iTask];
+							loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
+							loadScene.completed += (_) => SceneLoadedNew(taskName);
+						}
+						else
+						{
+							
+						}
 					}
 
-					tl.FilePrefix = FilePrefix;
-					tl.StoreData = StoreData;
-					tl.SubjectID = SubjectID;
-					tl.SessionID = SessionID;
-					tl.DefineTaskLevel();
-					
-
-					ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
-					ActiveTaskLevels.Add(tl);
-					AsyncOperation loadScene = SceneManager.LoadSceneAsync(tl.TaskName, LoadSceneMode.Additive);
-					loadScene.completed += (_)=> SceneLoaded(tl.TaskName);
 					iTask++;
 					TaskSceneLoaded = false;
 				}
@@ -178,14 +180,59 @@ namespace USE_ExperimentTemplate
 			SessionData.ManuallyDefine();
 		}
 
+		ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl)
+		{
+			tl.SessionDataControllers = SessionDataControllers;
+			tl.LocateFile = LocateFile;
+			tl.SessionDataPath = SessionDataPath;
+			if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))
+				tl.TaskConfigPath =
+					configFileFolder + Path.DirectorySeparatorChar +
+					tl.TaskName;
+			else
+			{
+				List<string> configFolders =
+					(List<string>) SessionSettings.Get("Session", "ConfigFolderNames");
+				tl.TaskConfigPath =
+					configFileFolder + Path.DirectorySeparatorChar +
+					configFolders[ActiveTaskNames.IndexOf(tl.TaskName)];
+			}
+
+			tl.FilePrefix = FilePrefix;
+			tl.StoreData = StoreData;
+			tl.SubjectID = SubjectID;
+			tl.SessionID = SessionID;
+			tl.DefineTaskLevel();
+			ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
+			ActiveTaskLevels.Add(tl);
+			return tl;
+		}
+
 		void SceneLoaded(string sceneName)
 		{
-			var methodInfo = typeof(ControlLevel_Session_Template).GetMethod(nameof(this.FindTaskCam));
+			var methodInfo = GetType().GetMethod(nameof(this.FindTaskCam));
 			MethodInfo findTaskCam = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[sceneName]});
 			findTaskCam.Invoke(this, new object[] {sceneName});
 			TaskSceneLoaded = true;
 		}
+
+		void SceneLoadedNew(string taskName)
+		{
+			var methodInfo = GetType().GetMethod(nameof(this.PrepareTaskLevel));
+			Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
+			MethodInfo prepareTaskLevel = methodInfo.MakeGenericMethod(new Type[] {taskType});
+			prepareTaskLevel.Invoke(this, new object[] {taskName});
+			TaskSceneLoaded = true;
+		}
 		
+		public void PrepareTaskLevel<T>(string taskName) where T : ControlLevel_Task_Template
+		{
+			ControlLevel_Task_Template tl = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
+			tl = PopulateTaskLevel(tl);
+			if(tl.TaskCam == null)
+					tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
+			tl.TaskCam.gameObject.SetActive(false);
+		}
 		public void FindTaskCam<T>(string taskName) where T : ControlLevel_Task_Template
 		{
 			ControlLevel_Task_Template tl = GameObject.Find("ControlLevels").GetComponent<T>();
@@ -311,6 +358,12 @@ namespace USE_ExperimentTemplate
 
 		public virtual void SpecifyTypes()
 		{
+			TaskLevelType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TaskLevelType;
+			TrialLevelType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TrialLevelType;
+			TaskDefType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TaskDefType;
+			BlockDefType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].BlockDefType;
+			TrialDefType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TrialDefType;
+			StimDefType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].StimDefType;
 		}
 		
 		public void DefineTaskLevel()

@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 255460420}
   - component: {fileID: 255460419}
   m_Layer: 0
-  m_Name: StimHandlingNew_Camera
+  m_Name: StimHandling_Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -427,10 +427,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1734213299}
-  - component: {fileID: 1734213298}
   - component: {fileID: 1734213297}
+  - component: {fileID: 1734213298}
   m_Layer: 0
-  m_Name: StimHandlingNew_Scripts
+  m_Name: StimHandling_Scripts
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -448,7 +448,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff82d0648671c4183ae0f5330239b16d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ControlLevelName: StimHandlingNew_TaskLevel
+  ControlLevelName: StimHandling_TaskLevel
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
@@ -456,7 +456,7 @@ MonoBehaviour:
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
-  TaskName: StimHandlingNew
+  TaskName: StimHandling
   TaskProjectFolder: 
   BlockCount: 0
   TrialLevel: {fileID: 1734213298}
@@ -491,7 +491,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69b1bccf1f15546ed830837fa6e168d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ControlLevelName: StimHandlingNew_TrialLevel
+  ControlLevelName: StimHandling_TrialLevel
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0

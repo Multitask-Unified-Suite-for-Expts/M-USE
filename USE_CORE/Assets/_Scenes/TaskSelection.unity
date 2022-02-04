@@ -235,8 +235,6 @@ GameObject:
   - component: {fileID: 1375570699}
   - component: {fileID: 1375570702}
   - component: {fileID: 1375570701}
-  - component: {fileID: 1375570704}
-  - component: {fileID: 1375570703}
   m_Layer: 0
   m_Name: ControlLevels
   m_TagString: Untagged
@@ -273,12 +271,10 @@ MonoBehaviour:
   - {fileID: 1375570698}
   - {fileID: 1375570700}
   - {fileID: 1375570702}
-  - {fileID: 1375570704}
   ActiveTaskNames:
   - EffortControl
   - WhatWhenWhere
   - CognitiveMaze
-  - StimHandling
   SessionDetails: {fileID: 2102576459}
   LocateFile: {fileID: 2102576458}
 --- !u!4 &1375570696
@@ -330,6 +326,8 @@ MonoBehaviour:
     stimGroupName: 
   ExternalStims:
     stimGroupName: 
+  RuntimeStims:
+    stimGroupName: 
   TrialStims: []
   leftRightChoice: 
   maxScale: {x: 65, y: 2, z: 65}
@@ -372,6 +370,8 @@ MonoBehaviour:
     stimGroupName: 
   ExternalStims:
     stimGroupName: 
+  RuntimeStims:
+    stimGroupName: 
   PreloadedStimGameObjects: []
   PrefabStimPaths: []
 --- !u!114 &1375570699
@@ -408,6 +408,8 @@ MonoBehaviour:
   PrefabStims:
     stimGroupName: 
   ExternalStims:
+    stimGroupName: 
+  RuntimeStims:
     stimGroupName: 
   TrialStims: []
   sphereCount: 0
@@ -451,6 +453,8 @@ MonoBehaviour:
     stimGroupName: 
   ExternalStims:
     stimGroupName: 
+  RuntimeStims:
+    stimGroupName: 
   PreloadedStimGameObjects: []
   PrefabStimPaths: []
 --- !u!114 &1375570701
@@ -487,6 +491,8 @@ MonoBehaviour:
   PrefabStims:
     stimGroupName: 
   ExternalStims:
+    stimGroupName: 
+  RuntimeStims:
     stimGroupName: 
   TrialStims: []
 --- !u!114 &1375570702
@@ -528,82 +534,7 @@ MonoBehaviour:
     stimGroupName: 
   ExternalStims:
     stimGroupName: 
-  PreloadedStimGameObjects: []
-  PrefabStimPaths: []
---- !u!114 &1375570703
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1375570694}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65313851ea88f495f90c5685c2a8099b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ControlLevelName: StimHandling_TrialLevel
-  initScreen: {fileID: 0}
-  Terminated: 0
-  isMainLevel: 0
-  CallDefineLevelAutomatically: 0
-  quitApplicationAtEnd: 0
-  DebugActive: 1
-  Paused: 1
-  TrialData: {fileID: 0}
-  FrameData: {fileID: 0}
-  BlockCount: 0
-  TrialCount_InTask: 0
-  TrialCount_InBlock: 0
-  AbortCode: 0
-  StoreData: 0
-  TaskDataPath: 
-  FilePrefix: 
-  PreloadedStims:
-    stimGroupName: 
-  PrefabStims:
-    stimGroupName: 
-  ExternalStims:
-    stimGroupName: 
-  TrialStims: []
---- !u!114 &1375570704
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1375570694}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b51ccfaef99544a8aa94ff45e4e1bb55, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ControlLevelName: StimHandling_TaskLevel
-  initScreen: {fileID: 0}
-  Terminated: 0
-  isMainLevel: 0
-  CallDefineLevelAutomatically: 0
-  quitApplicationAtEnd: 0
-  DebugActive: 1
-  Paused: 1
-  TaskName: StimHandling
-  TaskProjectFolder: 
-  BlockCount: 0
-  TrialLevel: {fileID: 1375570703}
-  StoreData: 0
-  SessionDataPath: 
-  TaskConfigPath: 
-  TaskDataPath: 
-  SubjectID: 
-  SessionID: 
-  FilePrefix: 
-  LocateFile: {fileID: 0}
-  TaskCam: {fileID: 0}
-  PreloadedStims:
-    stimGroupName: 
-  PrefabStims:
-    stimGroupName: 
-  ExternalStims:
+  RuntimeStims:
     stimGroupName: 
   PreloadedStimGameObjects: []
   PrefabStimPaths: []

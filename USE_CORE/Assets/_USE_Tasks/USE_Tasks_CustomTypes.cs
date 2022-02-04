@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using StimHandlingNew_Namespace;
+using StimHandling_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -9,14 +9,14 @@ static public class USE_Tasks_CustomTypes
     static public Dictionary<string, TaskTypes> CustomTaskDictionary = new Dictionary<string, TaskTypes>()
     {
         {
-            "StimHandlingNew", new TaskTypes
+            "StimHandling", new TaskTypes
             {
-                TaskLevelType = typeof(StimHandlingNew_TaskLevel),
-                TrialLevelType = typeof(StimHandlingNew_TrialLevel),
-                TaskDefType = typeof(StimHandlingNew_TaskDef),
-                BlockDefType = typeof(StimHandlingNew_BlockDef),
-                TrialDefType = typeof(StimHandlingNew_TrialDef),
-                StimDefType = typeof(StimHandlingNew_StimDef)
+                TaskLevelType = typeof(StimHandling_TaskLevel),
+                TrialLevelType = typeof(StimHandling_TrialLevel),
+                TaskDefType = typeof(StimHandling_TaskDef),
+                BlockDefType = typeof(StimHandling_BlockDef),
+                TrialDefType = typeof(StimHandling_TrialDef),
+                StimDefType = typeof(StimHandling_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

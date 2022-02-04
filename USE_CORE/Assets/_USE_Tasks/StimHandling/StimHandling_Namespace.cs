@@ -2,19 +2,19 @@ using UnityEngine;
 using USE_ExperimentTemplate;
 using USE_StimulusManagement;
 
-namespace StimHandlingNew_Namespace
+namespace StimHandling_Namespace
 {
-    public class StimHandlingNew_TaskDef : TaskDef
+    public class StimHandling_TaskDef : TaskDef
     {
     
     }
 
-    public class StimHandlingNew_BlockDef : BlockDef
+    public class StimHandling_BlockDef : BlockDef
     {
     
     }
 
-    public class StimHandlingNew_TrialDef : TrialDef
+    public class StimHandling_TrialDef : TrialDef
     {
         public string TrialName;
         public int TrialCode;
@@ -29,7 +29,7 @@ namespace StimHandlingNew_Namespace
         public Vector3[] GroupCLocations;
     }
 
-    public class StimHandlingNew_StimDef : StimDef
+    public class StimHandling_StimDef : StimDef
     {
     
     }

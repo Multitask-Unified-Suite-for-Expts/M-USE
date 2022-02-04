@@ -1,7 +1,7 @@
 using USE_ExperimentTemplate;
-using StimHandlingNew_Namespace;
+using StimHandling_Namespace;
 
-public class StimHandlingNew_TaskLevel : ControlLevel_Task_Template
+public class StimHandling_TaskLevel : ControlLevel_Task_Template
 {
 
     public override void DefineControlLevel()

@@ -1,18 +1,16 @@
-﻿
 using System.Collections.Generic;
 using UnityEngine;
 using USE_ExperimentTemplate;
 using USE_States;
+using USE_StimulusManagement;
 using StimHandling_Namespace;
 using UnityEngine.UI;
-using USE_StimulusManagement;
 
 public class StimHandling_TrialLevel : ControlLevel_Trial_Template
 {
-
-    private StimGroup externalStimsA, externalStimsB, externalStimsC;
     public StimHandling_TrialDef CurrentTrialDef => GetCurrentTrialDef<StimHandling_TrialDef>();
 
+    private StimGroup externalStimsA, externalStimsB, externalStimsC;
     public override void DefineControlLevel()
     {
         State startScreen = new State("StartScreen");
@@ -94,11 +92,12 @@ public class StimHandling_TrialLevel : ControlLevel_Trial_Template
                        "], next State: " + stateNames[stateCount + 1] + " [" + (stateCount + 1) + "].";
 
         }
-
     }
 
     protected override void DefineTrialStims()
     {
+        //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
+        //destroyed at TrialLevel_Finish
         externalStimsA = new StimGroup("StimGroupA", ExternalStims, CurrentTrialDef.GroupAIndices);
         externalStimsA.SetVisibilityOnOffStates(GetStateFromName("SetGroupAActive"), null);
         externalStimsA.SetLocations(CurrentTrialDef.GroupALocations);

@@ -137,13 +137,14 @@ static class TaskCreation
         Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TaskLevelType;
         Type trialType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TrialLevelType;
 
-        var methodInfo = typeof(ReflectionTypes).GetMethod(nameof(ReflectionTypes.UpdateTrialLevel));
+        var methodInfo = typeof(ReflectionTypes).GetMethod(nameof(ReflectionTypes.UpdateTaskLevel));
+        MethodInfo updateTaskLevel = methodInfo.MakeGenericMethod(new Type[] {taskType});
+        TaskLevel = (ControlLevel_Task_Template)updateTaskLevel.Invoke(new ReflectionTypes(), new object[] {scriptObject});
+        
+        methodInfo = typeof(ReflectionTypes).GetMethod(nameof(ReflectionTypes.UpdateTrialLevel));
         MethodInfo updateTrialLevel = methodInfo.MakeGenericMethod(new Type[] {trialType});
         TrialLevel = (ControlLevel_Trial_Template)updateTrialLevel.Invoke(new ReflectionTypes(), new object[] {scriptObject});
         
-        methodInfo = typeof(ReflectionTypes).GetMethod(nameof(ReflectionTypes.UpdateTaskLevel));
-        MethodInfo updateTaskLevel = methodInfo.MakeGenericMethod(new Type[] {taskType});
-        TaskLevel = (ControlLevel_Task_Template)updateTaskLevel.Invoke(new ReflectionTypes(), new object[] {scriptObject});
 
         TaskLevel.ControlLevelName = taskName + "_TaskLevel";
         TaskLevel.isMainLevel = false;

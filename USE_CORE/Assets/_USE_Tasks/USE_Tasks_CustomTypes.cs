@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using StimHandling_Namespace;
+using WWW_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -17,6 +18,17 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(StimHandling_BlockDef),
                 TrialDefType = typeof(StimHandling_TrialDef),
                 StimDefType = typeof(StimHandling_StimDef)
+            }
+        }
+        ,{
+            "WWW", new TaskTypes
+            {
+                TaskLevelType = typeof(WWW_TaskLevel),
+                TrialLevelType = typeof(WWW_TrialLevel),
+                TaskDefType = typeof(WWW_TaskDef),
+                BlockDefType = typeof(WWW_BlockDef),
+                TrialDefType = typeof(WWW_TrialDef),
+                StimDefType = typeof(WWW_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

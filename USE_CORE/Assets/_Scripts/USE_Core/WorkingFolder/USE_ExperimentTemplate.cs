@@ -111,6 +111,7 @@ namespace USE_ExperimentTemplate
 					AsyncOperation loadScene;
 					if (oldStyleTaskLoading)
 					{
+						Debug.Log("saglkhasdlkgj");
 						tl = PopulateTaskLevel(AvailableTaskLevels[iAvail]);
 						taskName = tl.TaskName;
 						loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
@@ -210,6 +211,8 @@ namespace USE_ExperimentTemplate
 
 		void SceneLoaded(string sceneName)
 		{
+			Debug.Log(sceneName);
+			Debug.Log(ActiveTaskTypes.Keys);
 			var methodInfo = GetType().GetMethod(nameof(this.FindTaskCam));
 			MethodInfo findTaskCam = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[sceneName]});
 			findTaskCam.Invoke(this, new object[] {sceneName});
@@ -358,6 +361,8 @@ namespace USE_ExperimentTemplate
 
 		public virtual void SpecifyTypes()
 		{
+			
+			Debug.Log(TaskName);
 			TaskLevelType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TaskLevelType;
 			TrialLevelType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TrialLevelType;
 			TaskDefType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TaskDefType;
@@ -618,7 +623,7 @@ namespace USE_ExperimentTemplate
 			{
 				//Prefabs in Prefabs/TaskFolder or TaskFolder/Prefabs
 				string[] prefabFolders =
-					{"Assets/Resources/Prefabs/" + TaskName, "Assets/Resources/USE_Tasks/" + TaskName + "Prefabs"};
+					{"Assets/Resources/Prefabs/" + TaskName, "Assets/Resources/USE_Tasks/" + TaskName + "/Prefabs"};
 				string[] guids = AssetDatabase.FindAssets("t: GameObject", prefabFolders);
 				foreach (string guid in guids)
 				{

@@ -33,10 +33,9 @@ SOFTWARE.
 
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+using USE_StimulusManagement;
 
 namespace USE_States
 {
@@ -92,6 +91,8 @@ namespace USE_States
 		/// <value><c>true</c> if debug active; otherwise, <c>false</c>.</value>
 		public bool DebugActive { get; set; }
 		public bool InitializationDelayed, TerminationDelayed;
+
+		public EventHandler StateInitializationFinished, StateTerminationFinished;
 
 		//TIMEKEEPING
 		public StateTimingInfo TimingInfo;
@@ -250,6 +251,14 @@ namespace USE_States
 			SpecifyTermination(() => {
 				//Debug.Log(Time.time + " " + TimingInfo.StartTimeAbsolute  + " " + time);
 				return Time.time - TimingInfo.StartTimeAbsolute >= time;
+			}, successorState, termination);
+		}
+
+		public void AddTimer(Func<float> time, State successorState, VoidDelegate termination = null)
+		{
+			SpecifyTermination(() => {
+				//Debug.Log(Time.time + " " + TimingInfo.StartTimeAbsolute  + " " + time);
+				return Time.time - TimingInfo.StartTimeAbsolute >= time();
 			}, successorState, termination);
 		}
 
@@ -414,7 +423,10 @@ namespace USE_States
 				else if (StateDefaultInitialization != null && StateDefaultInitialization.InitializationDelay != null)
 					InitializationDelayed = true;
 				else
+				{
 					RunInitializationMethods();
+					StateInitializationFinished?.Invoke(this, EventArgs.Empty);
+				}
 			}
 		}
 
@@ -455,6 +467,7 @@ namespace USE_States
 					if (Terminated) //this TerminationCriterion returned true
 					{
 						TerminateState(termSpec);
+						StateTerminationFinished?.Invoke(this, EventArgs.Empty);
 						break;
 					}
 				}
@@ -573,6 +586,9 @@ namespace USE_States
 		private List<ControlLevelTerminationSpecification> controlLevelTerminationSpecifications;
 
 		public InitScreen initScreen;
+
+		private StimGroup ControlLevelAllStims;
+		private Dictionary<string, StimGroup> ControlLevelAllStimGroups;
 
 		private bool initialized;
 		/// <summary>
@@ -809,6 +825,26 @@ namespace USE_States
 			{
 				AddAvailableStates(state);
 			}
+		}
+
+		public State GetStateFromName(string name)
+		{
+			int iS = ActiveStateNames.IndexOf(name);
+			if (iS == null)
+			{
+				Debug.LogError("Attempted to retrieve state with name " + name + " from ControlLevel " +
+				               ControlLevelName + " but no State with this name exists in this ControlLevel.");
+				return null;
+			}
+
+			if (ActiveStates[iS].StateName != name)
+			{
+				Debug.LogError("Attempted to retrieve state with name " + name + " from ControlLevel " +
+				               ControlLevelName + " but there has been an error with state name assignment.");
+				return null;
+			}
+			else
+				return ActiveStates[iS];
 		}
 
 		//Populate State method groups
@@ -1267,6 +1303,7 @@ namespace USE_States
 		{
 			StartTimeRelative = Time.time;
 		}
+		
 	}
 
 

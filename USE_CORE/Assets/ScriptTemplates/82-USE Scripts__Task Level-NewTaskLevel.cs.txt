@@ -1,0 +1,13 @@
+using USE_ExperimentTemplate;
+using #TASKNAME#_Namespace;
+
+public class #TASKNAME#_TaskLevel : ControlLevel_Task_Template
+{
+
+    public override void DefineControlLevel()
+    {
+        #NOTRIM#
+    }
+
+
+}

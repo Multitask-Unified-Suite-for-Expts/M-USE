@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -7,6 +6,7 @@ using UnityEditor;
 using System.IO;
 using UnityEditor.SceneManagement;
 using USE_ExperimentTemplate;
+using Newtonsoft.Json;
 
 static class TaskCreation
 {

@@ -35,7 +35,7 @@ namespace #TASKNAME#_Namespace
 
     public class #TASKNAME#_StimDef : StimDef
     {
-        //Already-existing fields (inherited from TrialDef)
+        //Already-existing fields (inherited from Stim  Def)
         //public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)
         //public string StimName;
         //public string StimPath;

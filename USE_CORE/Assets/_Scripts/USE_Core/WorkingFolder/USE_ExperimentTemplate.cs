@@ -1193,9 +1193,6 @@ namespace USE_ExperimentTemplate
 	}
 	public class TaskDef
 	{
-		public DateTime TaskStart_DateTime;
-		public int TaskStart_Frame;
-		public float TaskStart_UnityTime;
 		public string TaskName;
 		public string ExternalStimFolderPath;
 		public string PrefabStimFolderPath;

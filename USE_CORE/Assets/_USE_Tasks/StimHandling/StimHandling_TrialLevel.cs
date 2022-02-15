@@ -30,7 +30,6 @@ public class StimHandling_TrialLevel : ControlLevel_Trial_Template
 
         SetupTrial.SpecifyTermination(() => true, startScreen);
 
-
         startScreen.AddDefaultInitializationMethod(() =>
         {
             stateNameText = GameObject.Find("StateNameText").GetComponent<Text>();
@@ -98,6 +97,9 @@ public class StimHandling_TrialLevel : ControlLevel_Trial_Template
     {
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
+        
+        //StimGroup constructor which creates a subset of an already-existing StimGroup
+        //string Name, 
         externalStimsA = new StimGroup("StimGroupA", ExternalStims, CurrentTrialDef.GroupAIndices);
         externalStimsA.SetVisibilityOnOffStates(GetStateFromName("SetGroupAActive"), null);
         externalStimsA.SetLocations(CurrentTrialDef.GroupALocations);

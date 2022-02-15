@@ -164,15 +164,16 @@ public class ReflectionMethods
         // List<Type> fieldTypes = typeof(T).GetFields(bindingFlags).Select(field => field.FieldType).ToList();
         for (int iT = 0; iT < fieldInfos.Count; iT++)
         {
+            PropertyInfo propertyInfo;
             switch (fieldInfos[iT].FieldType.Name.ToLower())
-            {
+            { 
                 case "string":
-                    PropertyInfo prop = typeof(T).GetProperty(fieldInfos[iT].Name);
-                    prop.SetValue (dummyInstance, "SomeString", null);
+                    propertyInfo = typeof(T).GetProperty(fieldInfos[iT].Name);
+                    propertyInfo.SetValue (dummyInstance, "SomeString", null);
                     break;
                 case "vector2":
-                    PropertyInfo prop = typeof(T).GetProperty(fieldInfos[iT].Name);
-                    prop.SetValue (dummyInstance, new Vector2(1,2), null);
+                    propertyInfo = typeof(T).GetProperty(fieldInfos[iT].Name);
+                    propertyInfo.SetValue (dummyInstance, new Vector2(1,2), null);
                     break;
                 default:
                     break;

@@ -1,10 +1,11 @@
 using UnityEngine;
 using USE_ExperimentTemplate;
 using USE_StimulusManagement;
+using System.Collections.Generic;
 
-namespace #TASKNAME#_Namespace
+namespace ContinuousRecognition_Namespace
 {
-    public class #TASKNAME#_TaskDef : TaskDef
+    public class ContinuousRecognition_TaskDef : TaskDef
     {
         //Already-existing fields (inherited from TaskDef)      
         //public DateTime TaskStart_DateTime;
@@ -19,21 +20,28 @@ namespace #TASKNAME#_Namespace
         //public float? ExternalStimScale;
     }
 
-    public class #TASKNAME#_BlockDef : BlockDef
+    public class ContinuousRecognition_BlockDef : BlockDef
     {
         //Already-existing fields (inherited from BlockDef)
 		//public int BlockCount;
 		//public TrialDef[] TrialDefs;
+        public StimGroup BlockStims;
+        public int[] BlockStimIndices;
+        //BlockStimIndices provides indices to individual StimDefs in the ExternalStims StimGroup, which is automatically created at the start of the task and includes every stimulus in the ContinousRecognition_StimDef_tdf file
+        //BlockStims is a StimGroup consisting of the StimDefs specified by BlockStimIndices
     }
 
-    public class #TASKNAME#_TrialDef : TrialDef
+    public class ContinuousRecognition_TrialDef : TrialDef
     {
         //Already-existing fields (inherited from TrialDef)
 		//public int BlockCount, TrialCountInBlock, TrialCountInTask;
-		//public TrialStims TrialStims;
+		//
+        public List<int> TrialStimIndices;
+        public Vector3[] TrialStimLocations;
+        //TrialStimIndices provides indices to individual StimDefs in BlockStims (so a subset of BlockStims, which is a subset of ExternalStims).
     }
 
-    public class #TASKNAME#_StimDef : StimDef
+    public class ContinuousRecognition_StimDef : StimDef
     {
         //Already-existing fields (inherited from Stim  Def)
         //public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)
@@ -63,6 +71,7 @@ namespace #TASKNAME#_Namespace
         //public bool TriggersSonication;
         //public State SetActiveOnInitialization;
         //public State SetInactiveOnTermination;
-    
+        public bool PreviouslyChosen;
+        //This bool indicates if a stimulus was previously selected or not
     }
 }

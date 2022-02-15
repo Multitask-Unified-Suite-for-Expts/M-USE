@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using StimHandling_Namespace;
 using WWW_Namespace;
+using ContinuousRecognition_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -29,6 +30,17 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(WWW_BlockDef),
                 TrialDefType = typeof(WWW_TrialDef),
                 StimDefType = typeof(WWW_StimDef)
+            }
+        }
+        ,{
+            "ContinuousRecognition", new TaskTypes
+            {
+                TaskLevelType = typeof(ContinuousRecognition_TaskLevel),
+                TrialLevelType = typeof(ContinuousRecognition_TrialLevel),
+                TaskDefType = typeof(ContinuousRecognition_TaskDef),
+                BlockDefType = typeof(ContinuousRecognition_BlockDef),
+                TrialDefType = typeof(ContinuousRecognition_TrialDef),
+                StimDefType = typeof(ContinuousRecognition_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

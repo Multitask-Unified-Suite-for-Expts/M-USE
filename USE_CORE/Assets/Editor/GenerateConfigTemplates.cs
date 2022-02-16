@@ -68,14 +68,14 @@ public class GenerateConfigTemplates
 
     public static void CreateFiles()
     {
-        string[] splitPath = TaskFolderPath.Split(Path.DirectorySeparatorChar);
+        string[] splitPath = TaskFolderPath.Split('/');
         TaskName = splitPath[splitPath.Length - 1];
         TaskConfigFolder = ConfigFolderPath + Path.DirectorySeparatorChar + TaskName;
         PopulateConfigTypes();
         foreach (Type cType in ConfigTypes)
         {
-            string templateFolder = TaskConfigFolder + Path.DirectorySeparatorChar + "ConfigFileTemplates" +
-                                    Path.DirectorySeparatorChar + cType.Name;
+            string templateFolder = TaskConfigFolder + Path.DirectorySeparatorChar + TaskName + "_ConfigFileTemplates" +
+                                    Path.DirectorySeparatorChar + cType.Name + "_Templates";
             Directory.CreateDirectory(templateFolder);
 
             string fileName = templateFolder + Path.DirectorySeparatorChar + cType.Name;
@@ -116,7 +116,12 @@ public class ReflectionMethods
         arrayTemplate += "\n" + listValues[0];
         for (int iName = 1; iName < listValues.Count; iName++)
         {
-            arrayTemplate += "\t" + listValues[iName];
+            if (listValues[iName] != null)
+                arrayTemplate += "\t" + listValues[iName];
+            else
+            {
+                arrayTemplate += "\tnull";
+            }
         }
         File.WriteAllText(filePath, arrayTemplate);
     }
@@ -135,7 +140,7 @@ public class ReflectionMethods
     }
     public static void CreateMultipleTypeTdfTemplate<T>(string filePath = "") where T:new()
     {
-        // adapted from https://robscode.onl/c-get-member-variables-of-class/ 
+        // adapted from https://robscode.onl/c-get-member-variables-of-class/
         var bindingFlags = System.Reflection.BindingFlags.Instance |
                            System.Reflection.BindingFlags.NonPublic |
                            System.Reflection.BindingFlags.Public;
@@ -162,25 +167,81 @@ public class ReflectionMethods
         List<FieldInfo> fieldInfos = typeof(T).GetFields(bindingFlags).Select(field => field).ToList();
         // List<string> listNames = typeof(T).GetFields(bindingFlags).Select(field => field.Name).ToList();
         // List<Type> fieldTypes = typeof(T).GetFields(bindingFlags).Select(field => field.FieldType).ToList();
+        FieldInfo fi;
+        
         for (int iT = 0; iT < fieldInfos.Count; iT++)
         {
-            PropertyInfo propertyInfo;
+            test += GetCSharpRepresentation(fieldInfos[iT].FieldType, true) + "\n" + fieldInfos[iT].FieldType.FullName +
+                    "\n\n";
+            fi = typeof(T).GetField(fieldInfos[iT].Name);
+            fi.SetValue(dummyInstance, typeof(T).GetField(fieldInfos[iT].Name));
+            //fieldInfos[iT].FieldType.FullName + "\n";
             switch (fieldInfos[iT].FieldType.Name.ToLower())
-            { 
-                case "string":
-                    propertyInfo = typeof(T).GetProperty(fieldInfos[iT].Name);
-                    propertyInfo.SetValue (dummyInstance, "SomeString", null);
-                    break;
-                case "vector2":
-                    propertyInfo = typeof(T).GetProperty(fieldInfos[iT].Name);
-                    propertyInfo.SetValue (dummyInstance, new Vector2(1,2), null);
-                    break;
+            {
+                // case "int":
+                //     fi = typeof(T).GetField(fieldInfos[iT].Name);
+                //     fi.SetValue(dummyInstance, 1);
+                //     break;
+                // case "float":
+                //     fi = typeof(T).GetField(fieldInfos[iT].Name);
+                //     fi.SetValue(dummyInstance, 1.5f);
+                //     break;
+                // case "string":
+                //     fi = typeof(T).GetField(fieldInfos[iT].Name);
+                //     fi.SetValue(dummyInstance, "SomeString");
+                //     break;
                 default:
                     break;
             }
         }
 
+        File.WriteAllText("C:\\Users\\Owner\\Desktop\\test\\test.txt", test);
+        PropertyInfo propertyInfo;
         return dummyInstance;
+    }
+    
+    
+    static string GetCSharpRepresentation( Type t, bool trimArgCount ) {
+        if( t.IsGenericType ) {
+            var genericArgs = t.GetGenericArguments().ToList();
+
+            return GetCSharpRepresentation( t, trimArgCount, genericArgs );
+        }
+
+        return t.Name;
+    }
+
+    static string GetCSharpRepresentation( Type t, bool trimArgCount, List<Type> availableArguments ) {
+        if( t.IsGenericType ) {
+            string value = t.Name;
+            if( trimArgCount && value.IndexOf("`") > -1 ) {
+                value = value.Substring( 0, value.IndexOf( "`" ) );
+            }
+
+            if( t.DeclaringType != null ) {
+                // This is a nested type, build the nesting type first
+                value = GetCSharpRepresentation( t.DeclaringType, trimArgCount, availableArguments ) + "+" + value;
+            }
+
+            // Build the type arguments (if any)
+            string argString = "";
+            var thisTypeArgs = t.GetGenericArguments();
+            for( int i = 0; i < thisTypeArgs.Length && availableArguments.Count > 0; i++ ) {
+                if( i != 0 ) argString += ", ";
+
+                argString += GetCSharpRepresentation( availableArguments[0], trimArgCount );
+                availableArguments.RemoveAt( 0 );
+            }
+
+            // If there are type arguments, add them with < >
+            if( argString.Length > 0 ) {
+                value += "<" + argString + ">";
+            }
+
+            return value;
+        }
+
+        return t.Name;
     }
 }
 
@@ -202,4 +263,5 @@ public class ConfigSelectionDialog : EditorWindow
         }
     }
 }
+
 

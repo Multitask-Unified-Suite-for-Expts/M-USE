@@ -239,6 +239,8 @@ namespace USE_StimulusManagement
 				PrefabPath = prefabPath;
 			StimGameObject = Resources.Load<GameObject>(PrefabPath);
 			PositionRotationScale();
+			if (!string.IsNullOrEmpty(StimName))
+				StimGameObject.name = StimName;
 			return StimGameObject;
 		}
 
@@ -268,8 +270,11 @@ namespace USE_StimulusManagement
 				else
 					ExternalFilePath = ExternalFilePath + StimExtension;
 			}
-			return StimGameObject = LoadModel();
+			StimGameObject = LoadModel();
 			PositionRotationScale();
+			if (!string.IsNullOrEmpty(StimName))
+				StimGameObject.name = StimName;
+			return StimGameObject;
 		}
 
 		public void Destroy()

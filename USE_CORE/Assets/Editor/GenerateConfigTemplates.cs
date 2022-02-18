@@ -168,7 +168,7 @@ public class ReflectionMethods
         // List<string> listNames = typeof(T).GetFields(bindingFlags).Select(field => field.Name).ToList();
         // List<Type> fieldTypes = typeof(T).GetFields(bindingFlags).Select(field => field.FieldType).ToList();
         FieldInfo fi;
-        
+        string test = "";
         for (int iT = 0; iT < fieldInfos.Count; iT++)
         {
             test += GetCSharpRepresentation(fieldInfos[iT].FieldType, true) + "\n" + fieldInfos[iT].FieldType.FullName +

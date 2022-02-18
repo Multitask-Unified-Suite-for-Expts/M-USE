@@ -212,7 +212,6 @@ namespace USE_StimulusManagement
 			if (StimGameObject != null)
 			{
 				Debug.LogWarning("Attempting to load stimulus " + StimName + ", but there is already a GameObject associated with this stimulus loaded.");
-				return StimGameObject;
 			}
 			if (!string.IsNullOrEmpty(ExternalFilePath))
 				StimGameObject = LoadExternalStimFromFile();
@@ -228,6 +227,9 @@ namespace USE_StimulusManagement
 				Debug.LogWarning("Attempting to load stimulus " + StimName + ", but no Unity Resources path, external file path, or dimensional values have been provided.");
 				return null;
 			}
+
+			if (!string.IsNullOrEmpty(StimName))
+				StimGameObject.name = StimName;
 			return StimGameObject;
 		}
 
@@ -237,6 +239,8 @@ namespace USE_StimulusManagement
 				PrefabPath = prefabPath;
 			StimGameObject = Resources.Load<GameObject>(PrefabPath);
 			PositionRotationScale();
+			if (!string.IsNullOrEmpty(StimName))
+				StimGameObject.name = StimName;
 			return StimGameObject;
 		}
 
@@ -266,8 +270,11 @@ namespace USE_StimulusManagement
 				else
 					ExternalFilePath = ExternalFilePath + StimExtension;
 			}
-			return StimGameObject = LoadModel();
+			StimGameObject = LoadModel();
 			PositionRotationScale();
+			if (!string.IsNullOrEmpty(StimName))
+				StimGameObject.name = StimName;
+			return StimGameObject;
 		}
 
 		public void Destroy()

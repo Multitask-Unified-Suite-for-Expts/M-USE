@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using StimHandling_Namespace;
 using WWW_Namespace;
 using ContinuousRecognition_Namespace;
+using test_Namespace;
+using WorkingMemory_Namespace;
+using VisualSearch_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -41,6 +44,39 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(ContinuousRecognition_BlockDef),
                 TrialDefType = typeof(ContinuousRecognition_TrialDef),
                 StimDefType = typeof(ContinuousRecognition_StimDef)
+            }
+        }
+        ,{
+            "test", new TaskTypes
+            {
+                TaskLevelType = typeof(test_TaskLevel),
+                TrialLevelType = typeof(test_TrialLevel),
+                TaskDefType = typeof(test_TaskDef),
+                BlockDefType = typeof(test_BlockDef),
+                TrialDefType = typeof(test_TrialDef),
+                StimDefType = typeof(test_StimDef)
+            }
+        }
+        ,{
+            "WorkingMemory", new TaskTypes
+            {
+                TaskLevelType = typeof(WorkingMemory_TaskLevel),
+                TrialLevelType = typeof(WorkingMemory_TrialLevel),
+                TaskDefType = typeof(WorkingMemory_TaskDef),
+                BlockDefType = typeof(WorkingMemory_BlockDef),
+                TrialDefType = typeof(WorkingMemory_TrialDef),
+                StimDefType = typeof(WorkingMemory_StimDef)
+            }
+        }
+        ,{
+            "VisualSearch", new TaskTypes
+            {
+                TaskLevelType = typeof(VisualSearch_TaskLevel),
+                TrialLevelType = typeof(VisualSearch_TrialLevel),
+                TaskDefType = typeof(VisualSearch_TaskDef),
+                BlockDefType = typeof(VisualSearch_BlockDef),
+                TrialDefType = typeof(VisualSearch_TrialDef),
+                StimDefType = typeof(VisualSearch_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

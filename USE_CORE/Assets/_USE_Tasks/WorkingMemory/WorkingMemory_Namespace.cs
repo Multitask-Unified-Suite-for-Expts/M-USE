@@ -31,16 +31,16 @@ namespace WorkingMemory_Namespace
         //Already-existing fields (inherited from TrialDef)
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
-        public int[] TargetIndices, DistractorIndices1, DistractorIndices2;
-        public Vector3[] TargetSampleLocations, DistractorLocations1, TargetSearchLocations, DistractorLocations2;
+        public int[] TargetIndices, PostSampleDistractorIndices, PreTargetDistractorIndices;
+        public Vector3[] TargetSampleLocations, PostSampleDistractorLocations, TargetSearchLocations, PreTargetDistractorLocations;
 
         public float initTrialDuration,
             baselineDuration,
             displaySampleDuration,
-            delay1Duration,
-            displayDistractors1Duration,
-            delay2Duration,
-            maxSearchduration,
+            postSampleDelayDuration,
+            displayPostSampleDistractorsDuration,
+            preTargetDelayDuration,
+            maxSearchDuration,
             selectionFbDuration,
             tokenFbDuration,
             trialEndDuration;

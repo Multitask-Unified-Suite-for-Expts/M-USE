@@ -9,20 +9,20 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 {
     public WorkingMemory_TrialDef CurrentTrialDef => GetCurrentTrialDef<WorkingMemory_TrialDef>();
 
-    private StimGroup sampleStims, targetStims, distractorStims1, distractorStims2;
+    private StimGroup sampleStims, targetStims, postSampleDistractorStims, preTargetDistractorStims;
 
     public override void DefineControlLevel()
     {
         State initTrial = new State("InitTrial");
         State delay = new State("Delay");
         State displaySample = new State("DisplaySample");
-        State displayDistractors1 = new State("DisplayDistractors1");
+        State displayPostSampleDistractors = new State("DisplayPostSampleDistractors");
         State searchDisplay = new State("SearchDisplay");
         State selectionFeedback = new State("SelectionFeedback");
         State tokenFeedback = new State("TokenFeedback");
         State trialEnd = new State("TrialEnd");
 
-        AddActiveStates(new List<State> { initTrial, delay, displaySample, displayDistractors1, searchDisplay, selectionFeedback, tokenFeedback, trialEnd });
+        AddActiveStates(new List<State> { initTrial, delay, displaySample, displayPostSampleDistractors, searchDisplay, selectionFeedback, tokenFeedback, trialEnd });
         //
 
         State stateAfterDelay = null;
@@ -39,14 +39,14 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         displaySample.AddTimer(() => CurrentTrialDef.displaySampleDuration, delay, () =>
           {
-              stateAfterDelay = displayDistractors1;
-              delayDuration = CurrentTrialDef.delay1Duration;
+              stateAfterDelay = displayPostSampleDistractors;
+              delayDuration = CurrentTrialDef.postSampleDelayDuration;
           });
 
-        displayDistractors1.AddTimer(() => CurrentTrialDef.displayDistractors1Duration, delay, () =>
+        displayPostSampleDistractors.AddTimer(() => CurrentTrialDef.displayPostSampleDistractorsDuration, delay, () =>
           {
               stateAfterDelay = searchDisplay;
-              delayDuration = CurrentTrialDef.delay2Duration;
+              delayDuration = CurrentTrialDef.preTargetDelayDuration;
           });
 
 
@@ -54,7 +54,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         searchDisplay.AddInitializationMethod(() => responseMade = false);
         //add update function where choice is made
         searchDisplay.SpecifyTermination(() => responseMade, selectionFeedback);
-        searchDisplay.AddTimer(() => CurrentTrialDef.maxSearchduration, FinishTrial);
+        searchDisplay.AddTimer(() => CurrentTrialDef.maxSearchDuration, FinishTrial);
 
         selectionFeedback.AddInitializationMethod(() => { });
         //adapt from ChoseWrong/Right in whatwhenwhere task
@@ -89,15 +89,15 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             sd.IsTarget = true;
         TrialStims.Add(targetStims);
 
-        distractorStims1 = new StimGroup("DistractorStims1", ExternalStims, CurrentTrialDef.DistractorIndices1);
-        distractorStims1.SetVisibilityOnOffStates(GetStateFromName("DisplayDistractors1"), GetStateFromName("DisplayDistractors1"));
-        distractorStims1.SetLocations(CurrentTrialDef.DistractorLocations1);
-        TrialStims.Add(distractorStims1);
+        postSampleDistractorStims = new StimGroup("DistractorStims1", ExternalStims, CurrentTrialDef.PostSampleDistractorIndices);
+        postSampleDistractorStims.SetVisibilityOnOffStates(GetStateFromName("DisplayPostSampleDistractors"), GetStateFromName("DisplayPostSampleDistractors"));
+        postSampleDistractorStims.SetLocations(CurrentTrialDef.PostSampleDistractorLocations);
+        TrialStims.Add(postSampleDistractorStims);
 
-        distractorStims2 = new StimGroup("DistractorStims2", ExternalStims, CurrentTrialDef.DistractorIndices1);
-        distractorStims2.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
-        distractorStims2.SetLocations(CurrentTrialDef.DistractorLocations2);
-        TrialStims.Add(distractorStims2);
+        preTargetDistractorStims = new StimGroup("DistractorStims2", ExternalStims, CurrentTrialDef.PostSampleDistractorIndices);
+        preTargetDistractorStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
+        preTargetDistractorStims.SetLocations(CurrentTrialDef.PreTargetDistractorLocations);
+        TrialStims.Add(preTargetDistractorStims);
     }
 
 }

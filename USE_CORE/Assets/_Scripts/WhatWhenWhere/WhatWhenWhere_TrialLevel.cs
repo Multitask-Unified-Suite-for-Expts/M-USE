@@ -5,19 +5,23 @@ using UnityEngine.UI;
 using USE_States;
 using USE_ExperimentTemplate;
 using WhatWhenWhere_Namespace;
+using USE_StimulusManagement;
 using System.Collections;
 
 public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 {
     //This variable is required for most tasks, and is defined as the output of the GetCurrentTrialDef function 
     public WhatWhenWhere_TrialDef CurrentTrialDef => GetCurrentTrialDef<WhatWhenWhere_TrialDef>();
-
+    
     // game object variables
     private GameObject initButton, goCue, trialStim, halo, sliderHalo, imageIncorrectObject, imageCorrectObject, imageTimingError, txt;
 
+    //stim group
+    private StimGroup externalStimsA;
+    private StimDef[] totalObjects;
+    private StimDef[] currentObjects;
     //  private GameObject[] halos;
-    private GameObject[] totalObjects;
-    private GameObject[] currentObjects;
+    
     private List<string> touchedObjects = new List<string>();
 
     // effort reward variables
@@ -39,6 +43,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private List<Color> objectColors = new List<Color> { };
     private int[] numTotal = new int[numObjMax];
     private int[] numErrors = new int[numObjMax];
+
     private bool restart = false;
     private int trialNum = 0;
     private SpriteRenderer sr;
@@ -86,6 +91,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { StartButton, ChooseSphere, TimeError, ChoseWrong, ChoseRight, Feedback, ITI });
         //chosewrong state
+
+        string[] stateNames = new string[] { "StartButton", "ChooseSphere", "TimeError", "ChoseWrong", "ChoseRight", "Feedback", "ITI" };
 
         AddInitializationMethod(() =>
         {
@@ -172,6 +179,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             sliderValueIncreaseAmount = (100f / CurrentTrialDef.ObjectNums.Length) / 100f;
             slider.gameObject.SetActive(true);
+            
 
             initButton.SetActive(false);
             goCue.SetActive(false);
@@ -181,19 +189,17 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // Define stimOn state
         ChooseSphere.AddInitializationMethod(() =>
         {
-            currentObjects = new GameObject[CurrentTrialDef.ObjectNums.Length];
+            //currentObjects = new StimDef[CurrentTrialDef.ObjectNums.Length];
             // halos = new GameObject[CurrentTrialDef.ObjectNums.Length];
             GameObject.Find("Slider").SetActive(true);
-            for (int i = 0; i < CurrentTrialDef.ObjectNums.Length; ++i)
+            /*
+              for (int i = 0; i < CurrentTrialDef.ObjectNums.Length; ++i)
             {
-                currentObjects[i] = totalObjects[CurrentTrialDef.ObjectNums[i] - 1];
-                currentObjects[i].SetActive(true);
-
-                placeSphere(currentObjects[i], CurrentTrialDef.ObjectXLocations[i], CurrentTrialDef.ObjectYLocations[i], 0f);
-                //string h = "Halo" + (i).ToString();
-
+                currentObjects[i] = externalStimsA.stimDefs[i];
+                currentObjects[i].ToggleVisibility(true);
             }
-
+            */
+            externalStimsA.ToggleVisibility(true);
             trialStim = null;
             initialClick = 0;
         });
@@ -230,12 +236,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     RaycastHit hit;
                     if (Physics.Raycast(mouseRay, out hit))
                     {
-
+                        
                         int correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[sphereCount] - 1;
                         Debug.Log("index: " + correctIndex);
                         trialStim = hit.transform.gameObject;
+                        Debug.Log("This is the name: " + trialStim.name);
+                        
 
-                        if (trialStim.name == currentObjects[correctIndex].name)
+                        if (trialStim.name == totalObjects[correctIndex].StimName)
                         {
                             //Correct Choice
                             numTotal[correctIndex]++;
@@ -296,7 +304,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         }
                         Debug.Log(restart);
                         string errLog = "";
-                        for (int i = 0; i < currentObjects.Length; ++i)
+                        for (int i = 0; i < totalObjects.Length; ++i)
                         {
                             errLog = errLog + "Slot " + (i + 1) + ": " + numErrors[i] + "/" + numTotal[i] + "\t";
 
@@ -391,17 +399,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             txt.SetActive(true);
             startTime = Time.time;
 
-            foreach (GameObject obj in currentObjects)
-            {
-                obj.SetActive(false);
-            }
+            externalStimsA.ToggleVisibility(false);
 
             for (int i = 0; i < touchedObjects.Count; ++i)
             {
                 touchedObj = touchedObj + touchedObjects[i];
             }
             touchedObj = touchedObj + "]";
-
+            
        
         });
 
@@ -430,14 +435,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         //Define iti state
         ITI.AddInitializationMethod(() =>
         {
-            foreach (GameObject obj in currentObjects)
-            {
-                obj.SetActive(false);
-            }
-            foreach (GameObject obj in totalObjects)
-            {
-                obj.SetActive(false);
-            }
+            externalStimsA.ToggleVisibility(false);
+            
             Camera.main.backgroundColor = Color.white;
             txt.SetActive(false);
             for (var i = 0; i < touchedObjects.Count; i++)
@@ -480,12 +479,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     {
         initButton.SetActive(false);
         goCue.SetActive(false);
-        slider.gameObject.SetActive(false);
-        foreach (GameObject obj in currentObjects)
-        {
-            obj.SetActive(false);
-        }
-
+        txt.SetActive(false);
+        sliderHalo.SetActive(false);
+        imageIncorrectObject.SetActive(false);
+        imageCorrectObject.SetActive(false);
+        imageTimingError.SetActive(false);
+        GameObject.Find("Slider").SetActive(false);
+        externalStimsA.ToggleVisibility(false);
 
     }
 
@@ -506,8 +506,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         sliderInitPosition = slider.gameObject.transform.position;
 
-
-        totalObjects = new GameObject[numObjMax];
         System.Random rnd = new System.Random();
 
         objectColors.Add(new Color(1f, 0f, 0f)); // red
@@ -532,17 +530,30 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         contextColors.Add(new Color(0.9020f, 0.9020f, 0.9804f)); // lavender
         contextColors.Add(new Color(0f, 0f, 0f)); // black
 
+        Debug.Log("OUTSIDE OF LOOP" + numObjMax);
+        totalObjects = new StimDef[10];
         for (int i = 0; i < numObjMax; ++i)
         {
             string s = (i + 1).ToString();
             Debug.Log(s);
-            totalObjects[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            totalObjects[i] = externalStimsA.stimDefs[i];
+            totalObjects[i].StimName = "StimDef" + s ;
+            Debug.Log("INSIDE OF LOOP" + numObjMax);
+            /*
+             * totalObjects[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             totalObjects[i].GetComponent<Renderer>().material.SetColor("_Color", objectColors[i]);
             totalObjects[i].name = s;
             // totalObjects[i].AddComponent<Light>()
             totalObjects[i].SetActive(false);
+         */
         }
-
+        
+        
+        foreach (StimDef sd in totalObjects)
+        {
+            Debug.Log("stimName for StimDef in totalObjects: " + sd.StimName);
+        }
+        
         initButton.SetActive(false);
         goCue.SetActive(false);
         txt.SetActive(false);
@@ -551,7 +562,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         imageCorrectObject.SetActive(false);
         imageTimingError.SetActive(false);
         GameObject.Find("Slider").SetActive(false);
-
+        externalStimsA.ToggleVisibility(false);
 
         Debug.Log("Done Loading Variables");
 
@@ -570,6 +581,21 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         var material = obj.GetComponent<Renderer>().material;
         material.color = color;
     }
+    protected override void DefineTrialStims()
+    {
+        //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
+        //destroyed at TrialLevel_Finish
+
+        //StimGroup constructor which creates a subset of an already-existing StimGroup
+        //string Name, 
+        externalStimsA = new StimGroup("StimGroupA", ExternalStims, CurrentTrialDef.GroupAIndices);
+        //externalStimsA.SetVisibilityOnOffStates(GetStateFromName("ChooseSphere"), null);
+        externalStimsA.SetLocations(CurrentTrialDef.GroupALocations);
+        
+        TrialStims.Add(externalStimsA);
+        
+    }
+
 }
 
 

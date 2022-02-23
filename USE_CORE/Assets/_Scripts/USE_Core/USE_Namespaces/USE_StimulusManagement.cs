@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Policy;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -12,6 +13,26 @@ using Object = UnityEngine.Object;
 
 namespace USE_StimulusManagement
 {
+	public class StimDefPointer: MonoBehaviour
+	{
+		public StimDef StimDef;
+
+		public StimDefPointer()
+		{
+			StimDef = new StimDef();
+		}
+
+		public StimDefPointer(StimDef sd)
+		{
+			StimDef = sd;
+		}
+
+		public T GetStimDef<T>() where T : StimDef
+		{
+			return (T) StimDef;
+		}
+	}
+	
 	public class StimDef
 	{
 
@@ -100,6 +121,7 @@ namespace USE_StimulusManagement
 		{
 			ToggleVisibility(false);
 		}
+		
 
 		public StimDef CopyStimDef(StimGroup sg)
 		{
@@ -230,6 +252,10 @@ namespace USE_StimulusManagement
 
 			if (!string.IsNullOrEmpty(StimName))
 				StimGameObject.name = StimName;
+
+			StimGameObject.AddComponent<StimDefPointer>();
+			StimGameObject.GetComponent<StimDefPointer>().StimDef = this;
+			
 			return StimGameObject;
 		}
 
@@ -241,6 +267,8 @@ namespace USE_StimulusManagement
 			PositionRotationScale();
 			if (!string.IsNullOrEmpty(StimName))
 				StimGameObject.name = StimName;
+			StimGameObject.AddComponent<StimDefPointer>();
+			StimGameObject.GetComponent<StimDefPointer>().StimDef = this;
 			return StimGameObject;
 		}
 
@@ -274,6 +302,8 @@ namespace USE_StimulusManagement
 			PositionRotationScale();
 			if (!string.IsNullOrEmpty(StimName))
 				StimGameObject.name = StimName;
+			StimGameObject.AddComponent<StimDefPointer>();
+			StimGameObject.GetComponent<StimDefPointer>().StimDef = this;
 			return StimGameObject;
 		}
 

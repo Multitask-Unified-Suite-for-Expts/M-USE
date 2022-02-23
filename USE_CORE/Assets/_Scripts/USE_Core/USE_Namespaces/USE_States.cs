@@ -261,6 +261,16 @@ namespace USE_States
 				return Time.time - TimingInfo.StartTimeAbsolute >= time();
 			}, successorState, termination);
 		}
+		
+		
+		public void AddTimer(Func<float> time, Func<State> successorState, VoidDelegate termination = null)
+		{
+			State s = successorState();
+			SpecifyTermination(() => {
+				//Debug.Log(Time.time + " " + TimingInfo.StartTimeAbsolute  + " " + time);
+				return Time.time - TimingInfo.StartTimeAbsolute >= time();
+			}, s, termination);
+		}
 
 		public void AddChildLevel(ControlLevel child)
 		{

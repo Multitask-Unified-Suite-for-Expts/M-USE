@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Policy;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -24,6 +25,11 @@ namespace USE_StimulusManagement
 		public StimDefPointer(StimDef sd)
 		{
 			StimDef = sd;
+		}
+
+		public T GetStimDef<T>() where T : StimDef
+		{
+			return (T) StimDef;
 		}
 	}
 	

@@ -379,6 +379,7 @@ namespace USE_ExperimentTemplate
 			AddActiveStates(new List<State> {setupTask, runBlock, blockFeedback, finishTask});
 
 			TrialLevel.TrialDefType = TrialDefType;
+			TrialLevel.StimDefType = StimDefType;
 
 			AddInitializationMethod(() =>
 			{
@@ -802,7 +803,7 @@ namespace USE_ExperimentTemplate
 			return (T) TrialDefs[TrialCount_InBlock];
 		}
 
-		public Type TrialDefType;
+		public Type TrialDefType, StimDefType;
 
 		public void DefineTrialLevel()
 		{
@@ -922,6 +923,19 @@ namespace USE_ExperimentTemplate
 		{
 			TaskStims.AllTaskStimGroups[sgName].DestroyStimGroup();
 			TaskStims.AllTaskStimGroups.Remove(sgName);
+		}
+
+		// MethodInfo taskStimDefFromPrefabPath = GetType().GetMethod(nameof(TaskStimDefFromPrefabPath))
+		// 		.MakeGenericMethod((new Type[] {StimDefType}));
+		// 		taskStimDefFromPrefabPath.Invoke(this, new object[] {path, PreloadedStims});
+		
+		
+		protected T GetGameObjectStimDefComponent<T>(GameObject go) where T : StimDef
+		{
+			// return (T) go.GetComponent<StimDef>();
+			MethodInfo getStimDef = GetType().GetMethod(nameof(StimDefPointer.GetStimDef)).MakeGenericMethod((new Type[] {StimDefType}));
+			return (T)getStimDef.Invoke(this, new object[] {go});
+
 		}
 
 	}

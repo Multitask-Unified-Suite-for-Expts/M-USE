@@ -23,7 +23,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         State trialEnd = new State("TrialEnd");
 
         AddActiveStates(new List<State> { initTrial, delay, displaySample, displayPostSampleDistractors, searchDisplay, selectionFeedback, tokenFeedback, trialEnd });
-        //
 
         State stateAfterDelay = null;
         float delayDuration = 0;
@@ -52,9 +51,38 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         bool responseMade = false;
         searchDisplay.AddInitializationMethod(() => responseMade = false);
-        //add update function where choice is made
+        searchDisplay.AddUpdateMethod(() =>
+        {
+            if (InputBroker.GetMouseButtonDown(0))
+            {
+                Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+                if (Physics.Raycast(mouseRay, out RaycastHit hit))
+                {
+                    GameObject hitObj = hit.transform.root.gameObject;
+                    foreach (WorkingMemory_StimDef sd in targetStims.stimDefs)
+                    {
+                        if (ReferenceEquals(sd.StimGameObject, hitObj))
+                        {
+                            Log("Correct!");
+                            responseMade = true;
+                        }
+                    }
+                    foreach (WorkingMemory_StimDef sd in targetDistractorStims.stimDefs)
+                    {
+                        if (ReferenceEquals(sd.StimGameObject, hitObj))
+                        {
+                            Log("Incorrect!");
+                            responseMade = true;
+                        }
+                    }
+                }
+            }
+        });
         searchDisplay.SpecifyTermination(() => responseMade, selectionFeedback);
-        searchDisplay.AddTimer(() => CurrentTrialDef.maxSearchDuration, FinishTrial);
+        searchDisplay.AddTimer(() => CurrentTrialDef.maxSearchDuration, FinishTrial, () =>
+        {
+            Log("Response was not made");
+        });
 
         selectionFeedback.AddInitializationMethod(() => { });
         //adapt from ChoseWrong/Right in whatwhenwhere task
@@ -77,8 +105,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         //destroyed at TrialLevel_Finish
 
 
-        sampleStims = new StimGroup("TargetStims", ExternalStims, CurrentTrialDef.TargetIndices);
-        sampleStims.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplayState"));
+        sampleStims = new StimGroup("SampleStims", ExternalStims, CurrentTrialDef.TargetIndices);
+        sampleStims.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
         sampleStims.SetLocations(CurrentTrialDef.TargetSampleLocations);
         TrialStims.Add(sampleStims);
 
@@ -100,4 +128,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         TrialStims.Add(targetDistractorStims);
     }
 
+    private void Log(object msg)
+    {
+        Debug.Log("[WorkingMemory] " + msg);
+    }
 }

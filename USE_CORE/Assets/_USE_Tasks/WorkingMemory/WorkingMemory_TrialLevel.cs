@@ -9,7 +9,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 {
     public WorkingMemory_TrialDef CurrentTrialDef => GetCurrentTrialDef<WorkingMemory_TrialDef>();
 
-    private StimGroup sampleStims, targetStims, postSampleDistractorStims, preTargetDistractorStims;
+    private StimGroup sampleStims, targetStims, postSampleDistractorStims, targetDistractorStims;
 
     public override void DefineControlLevel()
     {
@@ -89,15 +89,15 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             sd.IsTarget = true;
         TrialStims.Add(targetStims);
 
-        postSampleDistractorStims = new StimGroup("DistractorStims1", ExternalStims, CurrentTrialDef.PostSampleDistractorIndices);
+        postSampleDistractorStims = new StimGroup("PostSampleDistractor", ExternalStims, CurrentTrialDef.PostSampleDistractorIndices);
         postSampleDistractorStims.SetVisibilityOnOffStates(GetStateFromName("DisplayPostSampleDistractors"), GetStateFromName("DisplayPostSampleDistractors"));
         postSampleDistractorStims.SetLocations(CurrentTrialDef.PostSampleDistractorLocations);
         TrialStims.Add(postSampleDistractorStims);
 
-        preTargetDistractorStims = new StimGroup("DistractorStims2", ExternalStims, CurrentTrialDef.PostSampleDistractorIndices);
-        preTargetDistractorStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
-        preTargetDistractorStims.SetLocations(CurrentTrialDef.PreTargetDistractorLocations);
-        TrialStims.Add(preTargetDistractorStims);
+        targetDistractorStims = new StimGroup("PreTargetDistractor", ExternalStims, CurrentTrialDef.TargetDistractorIndices);
+        targetDistractorStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
+        targetDistractorStims.SetLocations(CurrentTrialDef.TargetDistractorLocations);
+        TrialStims.Add(targetDistractorStims);
     }
 
 }

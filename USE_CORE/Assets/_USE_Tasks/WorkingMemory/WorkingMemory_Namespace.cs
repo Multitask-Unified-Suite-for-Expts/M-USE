@@ -31,8 +31,8 @@ namespace WorkingMemory_Namespace
         //Already-existing fields (inherited from TrialDef)
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
-        public int[] TargetIndices, PostSampleDistractorIndices, PreTargetDistractorIndices;
-        public Vector3[] TargetSampleLocations, PostSampleDistractorLocations, TargetSearchLocations, PreTargetDistractorLocations;
+        public int[] TargetIndices, PostSampleDistractorIndices, TargetDistractorIndices;
+        public Vector3[] TargetSampleLocations, PostSampleDistractorLocations, TargetSearchLocations, TargetDistractorLocations;
 
         public float initTrialDuration,
             baselineDuration,

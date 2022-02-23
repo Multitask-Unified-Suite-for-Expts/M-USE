@@ -115,9 +115,8 @@ namespace USE_StimulusManagement
 		{
 			ToggleVisibility(false);
 		}
-
-		// public void CopyStimDef
 		
+
 		public StimDef CopyStimDef(StimGroup sg)
 		{
 			StimDef sd = new StimDef(sg);

@@ -212,6 +212,12 @@ namespace USE_States
 			string tmp = null;
 			SpecifyTermination(terminationCriterion, successorState, tmp);
 		}
+		
+		public void SpecifyTermination(BoolDelegate terminationCriterion, Func<State> successorState)
+		{
+			string tmp = null;
+			SpecifyTermination(terminationCriterion, successorState, tmp);
+		}
 
 		public void SpecifyTermination(BoolDelegate terminationCriterion, State successorState, string successorInitName, VoidDelegate terminationMethod = null)
 		{
@@ -241,7 +247,39 @@ namespace USE_States
 			}
 
 		}
+		public void SpecifyTermination(BoolDelegate terminationCriterion, Func<State> successorState, string successorInitName, VoidDelegate terminationMethod = null)
+		{
+			if (ParentLevel.CheckForAvailableState(successorState()) || successorState == null)
+			{
+				StateInitialization init = null;
+				if (successorInitName != null)
+				{
+					foreach (StateInitialization iinit in StateInitializations)
+					{
+						if (iinit.Name == successorInitName)
+						{
+							init = iinit;
+						}
+					}
+				}
+
+				StateTerminationSpecifications.Add(new StateTerminationSpecification(terminationCriterion, successorState(), init, terminationMethod));
+				//if (StateDefaultTermination == null && terminationMethod != null)
+				//{
+				//    StateDefaultTermination = terminationMethod;
+				//}
+			}
+			else
+			{
+				Debug.LogError(ParentLevel.ControlLevelName + ": Attempted to add successor state " + successorState().StateName + " to state " + StateName + " but this state is not found in control level " + ParentLevel.ControlLevelName);
+			}
+
+		}
 		public void SpecifyTermination(BoolDelegate terminationCriterion, State successorState, VoidDelegate termination, string successorInitName = null)
+		{
+			SpecifyTermination(terminationCriterion, successorState, successorInitName, termination);
+		}
+		public void SpecifyTermination(BoolDelegate terminationCriterion, Func<State> successorState, VoidDelegate termination, string successorInitName = null)
 		{
 			SpecifyTermination(terminationCriterion, successorState, successorInitName, termination);
 		}
@@ -265,11 +303,10 @@ namespace USE_States
 		
 		public void AddTimer(Func<float> time, Func<State> successorState, VoidDelegate termination = null)
 		{
-			State s = successorState();
 			SpecifyTermination(() => {
 				//Debug.Log(Time.time + " " + TimingInfo.StartTimeAbsolute  + " " + time);
 				return Time.time - TimingInfo.StartTimeAbsolute >= time();
-			}, s, termination);
+			}, successorState, termination);
 		}
 
 		public void AddChildLevel(ControlLevel child)

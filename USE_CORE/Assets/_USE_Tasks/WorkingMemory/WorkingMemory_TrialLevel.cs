@@ -26,7 +26,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         State stateAfterDelay = null;
         float delayDuration = 0;
-        delay.AddTimer(() => delayDuration, stateAfterDelay);
+        delay.AddTimer(() => delayDuration, () => stateAfterDelay);
 
         SetupTrial.SpecifyTermination(() => true, initTrial);
 

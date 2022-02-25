@@ -249,7 +249,7 @@ namespace USE_States
 		}
 		public void SpecifyTermination(BoolDelegate terminationCriterion, Func<State> successorState, string successorInitName, VoidDelegate terminationMethod = null)
 		{
-			if (ParentLevel.CheckForAvailableState(successorState()) || successorState == null)
+			if (ParentLevel.CheckForAvailableState(successorState()) || successorState() == null)
 			{
 				StateInitialization init = null;
 				if (successorInitName != null)

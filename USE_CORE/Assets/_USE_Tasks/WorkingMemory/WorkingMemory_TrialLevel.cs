@@ -65,28 +65,22 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         searchDisplay.AddInitializationMethod(() => responseMade = false);
         searchDisplay.AddUpdateMethod(() =>
         {
-            if (InputBroker.GetMouseButtonDown(0))
+            GameObject clicked = GetClickedObj();
+            if (clicked is null) return;
+            foreach (WorkingMemory_StimDef sd in targetStims.stimDefs)
             {
-                Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-                if (Physics.Raycast(mouseRay, out RaycastHit hit))
+                if (ReferenceEquals(sd.StimGameObject, clicked))
                 {
-                    GameObject hitObj = hit.transform.root.gameObject;
-                    foreach (WorkingMemory_StimDef sd in targetStims.stimDefs)
-                    {
-                        if (ReferenceEquals(sd.StimGameObject, hitObj))
-                        {
-                            Log("Correct!");
-                            responseMade = true;
-                        }
-                    }
-                    foreach (WorkingMemory_StimDef sd in targetDistractorStims.stimDefs)
-                    {
-                        if (ReferenceEquals(sd.StimGameObject, hitObj))
-                        {
-                            Log("Incorrect!");
-                            responseMade = true;
-                        }
-                    }
+                    Log("Correct!");
+                    responseMade = true;
+                }
+            }
+            foreach (WorkingMemory_StimDef sd in targetDistractorStims.stimDefs)
+            {
+                if (ReferenceEquals(sd.StimGameObject, clicked))
+                {
+                    Log("Incorrect!");
+                    responseMade = true;
                 }
             }
         });

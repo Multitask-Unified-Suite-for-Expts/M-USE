@@ -148,11 +148,12 @@ public class ReflectionMethods
         List<object> listValues =
             typeof(T).GetFields(bindingFlags).Select(field => field.GetValue(dummyInstance)).ToList();
         List<string> listNames = typeof(T).GetFields(bindingFlags).Select(field => field.Name).ToList();
-        string arrayTemplate = "";
-        for (int iName = 1; iName < listValues.Count; iName++)
+        string arrayTemplate = ""; 
+        for (int iVal = 0; iVal < listNames.Count; iVal++)
         {
-            arrayTemplate += listValues[iName].GetType().Name + "\t" + listNames[iName] + "\t" + listValues[iName];
-            if (iName < listValues.Count - 1)
+            //needs type name
+            arrayTemplate += listNames[iVal] + "\t" + listValues[iVal];
+            if (iVal < listNames.Count - 1)
                 arrayTemplate += "\n";
         }
         File.WriteAllText(filePath, arrayTemplate);
@@ -169,13 +170,381 @@ public class ReflectionMethods
         // List<Type> fieldTypes = typeof(T).GetFields(bindingFlags).Select(field => field.FieldType).ToList();
         FieldInfo fi;
         string test = "";
+        Debug.Log(fieldInfos.Count);
         for (int iT = 0; iT < fieldInfos.Count; iT++)
         {
-            test += GetCSharpRepresentation(fieldInfos[iT].FieldType, true) + "\n" + fieldInfos[iT].FieldType.FullName +
-                    "\n\n";
-            fi = typeof(T).GetField(fieldInfos[iT].Name);
-            fi.SetValue(dummyInstance, typeof(T).GetField(fieldInfos[iT].Name));
+            // test += GetCSharpRepresentation(fieldInfos[iT].FieldType, true) + "\n" + fieldInfos[iT].FieldType.FullName +
+            //         "\n\n";
+            // fi = typeof(T).GetField(fieldInfos[iT].Name);
+            // fi.SetValue(dummyInstance, typeof(T).GetField(fieldInfos[iT].Name));
             //fieldInfos[iT].FieldType.FullName + "\n";
+            if (fieldInfos[iT].FieldType == typeof(string))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, "SomeString");
+            }
+            else if (fieldInfos[iT].FieldType == typeof(int))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, 1);
+            }
+            else if (fieldInfos[iT].FieldType == typeof(float))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, 1.1f);
+            }
+            else if (fieldInfos[iT].FieldType == typeof(bool))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, false);
+            }
+            else if (fieldInfos[iT].FieldType == typeof(Vector2))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new Vector2(1.1f, 1.2f));
+            }
+            else if (fieldInfos[iT].FieldType == typeof(Vector3))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new Vector3(1.1f, 1.2f, 1.3f));
+            }
+            else if (fieldInfos[iT].FieldType == typeof(Vector4))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new Vector4(1.1f, 1.2f, 1.3f, 1.4f));
+            }
+            else if (fieldInfos[iT].FieldType == typeof(int?))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, 1);
+            }
+            else if (fieldInfos[iT].FieldType == typeof(float?))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, 1.1f);
+            }
+            else if (fieldInfos[iT].FieldType == typeof(bool?))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, false);
+            }
+            else if (fieldInfos[iT].FieldType == typeof(Vector2?))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new Vector2(1.1f, 1.2f));
+            }
+            else if (fieldInfos[iT].FieldType == typeof(Vector3?))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new Vector3(1.1f, 1.2f, 1.3f));
+            }
+            else if (fieldInfos[iT].FieldType == typeof(Vector4?))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new Vector4(1.1f, 1.2f, 1.3f, 1.4f));
+            }
+            else if (fieldInfos[iT].FieldType == typeof(string[]))
+            {
+                Debug.Log("hallllllloooooo: " + fieldInfos[iT].GetValue(dummyInstance));
+                fieldInfos[iT].SetValue(dummyInstance, new[]{"SomeString1", "SomeString2", "SomeString3"});
+                string[] tester = (string[]) fieldInfos[iT].GetValue(dummyInstance);
+                Debug.Log("goooodbyyyyeeee: " + tester[0]);
+            }
+            else if (fieldInfos[iT].FieldType == typeof(int[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new int[]{1, 2, 3});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(float[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new float[]{1.1f, 1.2f, 1.3f});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(bool[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new bool[]{true, false, true});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(Vector2[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new Vector2[]{new Vector2(1.1f, 1.2f), new Vector2(2.1f, 2.2f)});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(Vector3[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new Vector3[]{new Vector3(1.1f, 1.2f, 1.3f), new Vector3(2.1f, 2.2f, 2.3f)});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(Vector4[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new Vector4[]{new Vector4(1.1f, 1.2f, 1.3f, 1.4f), new Vector4(2.1f, 2.2f, 2.3f, 1.4f)});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(string[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new string[]{"SomeString1", "SomeString2", "SomeString3"});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(int[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new int[]{1, 2, 3});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(float[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new float[]{1.1f, 1.2f, 1.3f});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(bool[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new bool[]{true, false, true});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(Vector2[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new Vector2[]{new Vector2(1.1f, 1.2f), new Vector2(2.1f, 2.2f)});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(Vector3[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new Vector3[]{new Vector3(1.1f, 1.2f, 1.3f), new Vector3(2.1f, 2.2f, 2.3f)});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(Vector4[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new Vector4[]{new Vector4(1.1f, 1.2f, 1.3f, 1.4f), new Vector4(2.1f, 2.2f, 2.3f, 1.4f)});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(int?[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new int?[]{1, 2, null});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(float?[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new float?[]{1.1f, 1.2f, null});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(bool?[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new bool?[]{true, false, null});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(Vector2?[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new Vector2?[]{new Vector2(1.1f, 1.2f), null});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(Vector3?[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new Vector3?[]{new Vector3(1.1f, 1.2f, 1.3f), null});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(Vector4?[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new Vector4?[]{new Vector4(1.1f, 1.2f, 1.3f, 1.4f), null});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<string>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<string>(){"SomeString1", "SomeString2", "SomeString3"});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<int>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<int>(){1, 2, 3});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<float>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<float>(){1.1f, 1.2f, 1.3f});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<bool>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<bool>(){true, false, true});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<Vector2>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<Vector2>(){new Vector2(1.1f, 1.2f), new Vector2(2.1f, 2.2f)});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<Vector3>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<Vector3>(){new Vector3(1.1f, 1.2f, 1.3f), new Vector3(2.1f, 2.2f, 2.3f)});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<Vector4>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<Vector4>(){new Vector4(1.1f, 1.2f, 1.3f, 1.4f), new Vector4(2.1f, 2.2f, 2.3f, 1.4f)});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<int?>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<int?>(){1, 2, null});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<float?>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<float?>(){1.1f, 1.2f, null});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<bool?>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<bool?>(){true, false, null});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<Vector2?>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<Vector2?>(){new Vector2(1.1f, 1.2f), null});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<Vector3?>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<Vector3?>(){new Vector3(1.1f, 1.2f, 1.3f), null});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<Vector4?>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<Vector4?>(){new Vector4(1.1f, 1.2f, 1.3f, 1.4f), null});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<string[]>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance,
+                    new List<string[]>()
+                    {
+                        new string[] {"SomeString1", "SomeString2", "SomeString3"},
+                        new string[] {"SomeString4", "SomeString5", "SomeString6"}
+                    });
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<int[]>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<int[]>() {new int[] {1, 2, 3}, new int[] {4, 5, 6}});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<float[]>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance,
+                    new List<float[]>() {new float[] {1.1f, 1.2f, 1.3f}, new float[] {2.1f, 2.2f, 3.3f}});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<bool[]>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<bool[]>(){new bool[]{true, false, true}, new bool[]{false, true, false}});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<Vector2[]>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance,
+                    new List<Vector2[]>()
+                    {
+                        new Vector2[] {new Vector2(1.1f, 1.2f), new Vector2(2.1f, 2.2f)},
+                        new Vector2[] {new Vector2(3.1f, 3.2f), new Vector2(4.1f, 4.2f)}
+                    });
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<Vector3[]>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<Vector3[]>()
+                {
+                    new Vector3[] {new Vector3(1.1f, 1.2f, 1.3f), new Vector3(2.1f, 2.2f, 2.3f)},
+                    new Vector3[] {new Vector3(3.1f, 3.2f, 3.3f), new Vector3(4.1f, 4.2f, 4.3f)}
+                });
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<Vector4[]>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<Vector4[]>()
+                {
+                    new Vector4[] {new Vector4(1.1f, 1.2f, 1.3f, 1.4f), new Vector4(2.1f, 2.2f, 2.3f, 2.4f)},
+                    new Vector4[] {new Vector4(3.1f, 3.2f, 3.3f, 3.4f), new Vector4(4.1f, 4.2f, 4.3f, 4.4f)}
+                });
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<int?[]>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<int?[]>() {new int?[] {1, 2, null}, new int?[] {4, 5, null}});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<float?[]>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance,
+                    new List<float?[]>() {new float?[] {1.1f, 1.2f, null}, new float?[] {2.1f, 2.2f, null}});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<bool?[]>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<bool?[]>(){new bool?[]{true, false, null}, new bool?[]{false, true, null}});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<Vector2?[]>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance,
+                    new List<Vector2?[]>()
+                    {
+                        new Vector2?[] {new Vector2(1.1f, 1.2f), null},
+                        new Vector2?[] {new Vector2(3.1f, 3.2f), null}
+                    });
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<Vector3?[]>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<Vector3?[]>()
+                {
+                    new Vector3?[] {new Vector3(1.1f, 1.2f, 1.3f), null},
+                    new Vector3?[] {new Vector3(3.1f, 3.2f, 3.3f), null}
+                });
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<Vector4?[]>))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<Vector4?[]>()
+                {
+                    new Vector4?[] {new Vector4(1.1f, 1.2f, 1.3f, 1.4f), null},
+                    new Vector4?[] {new Vector4(3.1f, 3.2f, 3.3f, 3.4f), null}
+                });
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<string>[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance,
+                    new List<string>[]
+                    {
+                        new List<string>() {"SomeString1", "SomeString2", "SomeString3"},
+                        new List<string>() {"SomeString4", "SomeString5", "SomeString6"}
+                    });
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<int>[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance,
+                    new[] {new List<int>() {1, 2, 3}, new List<int>() {4, 5, 6}});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<float>[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance,
+                    new List<float>[] {new List<float>() {1.1f, 1.2f, 1.3f}, new List<float>() {2.1f, 2.2f, 3.3f}});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<bool>[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance,
+                    new List<bool>[] {new List<bool>() {true, false, true}, new List<bool>() {false, true, false}});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<Vector2>[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance,
+                    new List<Vector2>[]
+                    {
+                        new List<Vector2> {new Vector2(1.1f, 1.2f), new Vector2(2.1f, 2.2f)},
+                        new List<Vector2> {new Vector2(3.1f, 3.2f), new Vector2(4.1f, 4.2f)}
+                    });
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<Vector3>[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<Vector3>[]
+                {
+                    new List<Vector3> {new Vector3(1.1f, 1.2f, 1.3f), new Vector3(2.1f, 2.2f, 2.3f)},
+                    new List<Vector3> {new Vector3(3.1f, 3.2f, 3.3f), new Vector3(4.1f, 4.2f, 4.3f)}
+                });
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<Vector4>[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<Vector4>[]
+                {
+                    new List<Vector4> {new Vector4(1.1f, 1.2f, 1.3f, 1.4f), new Vector4(2.1f, 2.2f, 2.3f, 2.4f)},
+                    new List<Vector4> {new Vector4(3.1f, 3.2f, 3.3f, 3.4f), new Vector4(4.1f, 4.2f, 4.3f, 4.4f)}
+                });
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<int?>[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<int?>[] {new List<int?> {1, 2, null}, new List<int?> {4, 5, null}});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<float?>[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance,
+                    new List<float?>[] {new List<float?> {1.1f, 1.2f, null}, new List<float?> {2.1f, 2.2f, null}});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<bool?>[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<bool?>[]{new List<bool?>{true, false, null}, new List<bool?>{false, true, null}});
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<Vector2?>[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance,
+                    new List<Vector2?>[]
+                    {
+                        new List<Vector2?> {new Vector2(1.1f, 1.2f), null},
+                        new List<Vector2?> {new Vector2(3.1f, 3.2f), null}
+                    });
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<Vector3?>[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<Vector3?>[]
+                {
+                    new List<Vector3?> {new Vector3(1.1f, 1.2f, 1.3f), null},
+                    new List<Vector3?> {new Vector3(3.1f, 3.2f, 3.3f), null}
+                });
+            }
+            else if (fieldInfos[iT].FieldType == typeof(List<Vector4?>[]))
+            {
+                fieldInfos[iT].SetValue(dummyInstance, new List<Vector4?>[]
+                {
+                    new List<Vector4?> {new Vector4(1.1f, 1.2f, 1.3f, 1.4f), null},
+                    new List<Vector4?> {new Vector4(3.1f, 3.2f, 3.3f, 3.4f), null}
+                });
+            }
+            else
+            {
+                test += GetCSharpRepresentation(fieldInfos[iT].FieldType, true) + "\n" +
+                        fieldInfos[iT].FieldType.FullName +
+                        "\n\n";
+                Debug.Log("salkghfjlskfhglkasdjfhglksahdfg");
+            }
+
             switch (fieldInfos[iT].FieldType.Name.ToLower())
             {
                 // case "int":

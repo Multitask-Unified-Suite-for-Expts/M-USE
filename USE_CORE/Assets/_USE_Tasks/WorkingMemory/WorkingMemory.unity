@@ -180,6 +180,8 @@ MonoBehaviour:
     stimGroupName: 
   TrialStims: []
   StartButton: {fileID: 239317670}
+  HaloPrefab: {fileID: 1546032763649933254, guid: caf1a4a4f95a86847a8d732d428239c9,
+    type: 3}
 --- !u!114 &108587574
 MonoBehaviour:
   m_ObjectHideFlags: 0

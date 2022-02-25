@@ -13,6 +13,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
     public GameObject StartButton;
 
+    public GameObject HaloPrefab;
+
     public override void DefineControlLevel()
     {
         State initTrial = new State("InitTrial");
@@ -37,7 +39,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             GameObject clicked = GetClickedObj();
             if (ReferenceEquals(clicked, StartButton))
             {
-                Log("Starting Trial");
                 started = true;
             }
         });
@@ -83,7 +84,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             Log("Response was not made");
         });
 
-        selectionFeedback.AddInitializationMethod(() => { });
+        selectionFeedback.AddInitializationMethod(() => {
+            foreach (WorkingMemory_StimDef sd in targetStims.stimDefs) {
+                GameObject halo = Instantiate(HaloPrefab);
+                halo.transform.SetParent(sd.StimGameObject.transform, false);
+            }
+        });
         //adapt from ChoseWrong/Right in whatwhenwhere task
         selectionFeedback.AddTimer(() => CurrentTrialDef.selectionFbDuration, tokenFeedback);
 

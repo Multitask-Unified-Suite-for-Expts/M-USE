@@ -150,7 +150,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 108587572}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c7dec1bfa54d65a499bd255986b0839e, type: 3}
+  m_Script: {fileID: 11500000, guid: 38ec5b47dc32495478f09556736a349c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: WorkingMemory_TrialLevel
@@ -188,7 +188,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 108587572}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dab71ba9d31b2b9479a7bc07a2f64734, type: 3}
+  m_Script: {fileID: 11500000, guid: 0ab72645e807aed4daaf05c1042c2c81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: WorkingMemory_TaskLevel
@@ -211,7 +211,7 @@ MonoBehaviour:
   SessionID: 
   FilePrefix: 
   LocateFile: {fileID: 0}
-  TaskCam: {fileID: 1812093641}
+  TaskCam: {fileID: 0}
   PreloadedStims:
     stimGroupName: 
   PrefabStims:

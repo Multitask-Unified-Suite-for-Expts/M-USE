@@ -11,6 +11,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
     private StimGroup sampleStims, targetStims, postSampleDistractorStims, targetDistractorStims;
 
+    public GameObject StartButton;
+
     public override void DefineControlLevel()
     {
         State initTrial = new State("InitTrial");
@@ -28,7 +30,17 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         float delayDuration = 0;
         delay.AddTimer(() => delayDuration, () => stateAfterDelay);
 
-        SetupTrial.SpecifyTermination(() => true, initTrial);
+        bool started = false;
+        SetupTrial.SpecifyTermination(() => started, initTrial, () => StartButton.SetActive(false));
+        SetupTrial.AddUpdateMethod(() =>
+        {
+            GameObject clicked = GetClickedObj();
+            if (ReferenceEquals(clicked, StartButton))
+            {
+                Log("Starting Trial");
+                started = true;
+            }
+        });
 
         initTrial.AddTimer(() => CurrentTrialDef.initTrialDuration, delay, () =>
           {
@@ -131,5 +143,13 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     private void Log(object msg)
     {
         Debug.Log("[WorkingMemory] " + msg);
+    }
+
+    private GameObject GetClickedObj()
+    {
+        if (!InputBroker.GetMouseButtonDown(0)) return null;
+        Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(mouseRay, out RaycastHit hit)) return hit.transform.root.gameObject;
+        return null;
     }
 }

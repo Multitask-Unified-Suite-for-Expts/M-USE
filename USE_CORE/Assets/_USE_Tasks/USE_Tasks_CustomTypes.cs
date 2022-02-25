@@ -6,6 +6,7 @@ using ContinuousRecognition_Namespace;
 using test_Namespace;
 using WorkingMemory_Namespace;
 using VisualSearch_Namespace;
+using EC_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -77,6 +78,17 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(VisualSearch_BlockDef),
                 TrialDefType = typeof(VisualSearch_TrialDef),
                 StimDefType = typeof(VisualSearch_StimDef)
+            }
+        }
+        ,{
+            "EC", new TaskTypes
+            {
+                TaskLevelType = typeof(EC_TaskLevel),
+                TrialLevelType = typeof(EC_TrialLevel),
+                TaskDefType = typeof(EC_TaskDef),
+                BlockDefType = typeof(EC_BlockDef),
+                TrialDefType = typeof(EC_TrialDef),
+                StimDefType = typeof(EC_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

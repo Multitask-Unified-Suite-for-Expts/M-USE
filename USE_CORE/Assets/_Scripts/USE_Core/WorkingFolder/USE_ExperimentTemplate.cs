@@ -169,7 +169,7 @@ namespace USE_ExperimentTemplate
 				taskCount++;
 			});
 
-			finishSession.SpecifyTermination(() => true, null, () =>
+			finishSession.SpecifyTermination(() => true, ()=> null, () =>
 			{
 				SessionData.AppendData();
 			});
@@ -415,7 +415,7 @@ namespace USE_ExperimentTemplate
 				BlockData.WriteData();
 			});
 
-			finishTask.SpecifyTermination(() => true, null);
+			finishTask.SpecifyTermination(() => true, ()=> null);
 
 			AddDefaultTerminationMethod(() =>
 			{
@@ -841,7 +841,7 @@ namespace USE_ExperimentTemplate
 			});
 
 			FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Length - 1, SetupTrial);
-			FinishTrial.SpecifyTermination(() => TrialCount_InBlock == TrialDefs.Length - 1, null);
+			FinishTrial.SpecifyTermination(() => TrialCount_InBlock == TrialDefs.Length - 1, ()=> null);
 
 			FinishTrial.AddUniversalTerminationMethod(() =>
 			{

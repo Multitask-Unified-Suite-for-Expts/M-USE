@@ -67,21 +67,14 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         {
             GameObject clicked = GetClickedObj();
             if (clicked is null) return;
-            foreach (WorkingMemory_StimDef sd in targetStims.stimDefs)
-            {
-                if (ReferenceEquals(sd.StimGameObject, clicked))
-                {
-                    Log("Correct!");
-                    responseMade = true;
-                }
+            responseMade = targetStims.stimDefs.Exists(sd => ReferenceEquals(sd.StimGameObject, clicked));
+            if (responseMade) {
+                Log("Correct!");
+                return;
             }
-            foreach (WorkingMemory_StimDef sd in targetDistractorStims.stimDefs)
-            {
-                if (ReferenceEquals(sd.StimGameObject, clicked))
-                {
-                    Log("Incorrect!");
-                    responseMade = true;
-                }
+            responseMade = targetDistractorStims.stimDefs.Exists(sd => ReferenceEquals(sd.StimGameObject, clicked));
+            if (responseMade) {
+                Log("Incorrect!");
             }
         });
         searchDisplay.SpecifyTermination(() => responseMade, selectionFeedback);
@@ -101,8 +94,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         tokenFeedback.SpecifyTermination(() => true, trialEnd); //()=> tokenUpdated, tokenFeedback);
 
         trialEnd.AddTimer(() => CurrentTrialDef.trialEndDuration, FinishTrial);
-
-        //adapt StartButton from whatwhenwhere task
     }
 
     protected override void DefineTrialStims()

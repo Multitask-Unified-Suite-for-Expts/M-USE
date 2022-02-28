@@ -17,4 +17,13 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Scenes/WhatWhenWhere.unity
     guid: e9448a1f5ad17411898e35a72bf214df
+  - enabled: 1
+    path: Assets/_USE_Tasks/StimHandling/StimHandling.unity
+    guid: 2e148fd03348e46f1b8b00dda1da7b4c
+  - enabled: 1
+    path: Assets/_USE_Tasks/WWW/WWW.unity
+    guid: beef1cd6e8c2d44e4b72cea34db0ed0b
+  - enabled: 1
+    path: Assets/_USE_Tasks/ContinuousRecognition/ContinuousRecognition.unity
+    guid: ed6c79a08bbf34d64924e0aee5ec787e
   m_configObjects: {}

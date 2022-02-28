@@ -211,7 +211,7 @@ MonoBehaviour:
   SessionID: 
   FilePrefix: 
   LocateFile: {fileID: 0}
-  TaskCam: {fileID: 0}
+  TaskCam: {fileID: 1812093641}
   PreloadedStims:
     stimGroupName: 
   PrefabStims:
@@ -354,7 +354,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1812093639}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!20 &1812093641
 Camera:
   m_ObjectHideFlags: 0

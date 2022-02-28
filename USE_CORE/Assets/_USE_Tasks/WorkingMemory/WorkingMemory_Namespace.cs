@@ -22,25 +22,25 @@ namespace WorkingMemory_Namespace
     public class WorkingMemory_BlockDef : BlockDef
     {
         //Already-existing fields (inherited from BlockDef)
-		//public int BlockCount;
-		//public TrialDef[] TrialDefs;
+        //public int BlockCount;
+        //public TrialDef[] TrialDefs;
     }
 
     public class WorkingMemory_TrialDef : TrialDef
     {
         //Already-existing fields (inherited from TrialDef)
-		//public int BlockCount, TrialCountInBlock, TrialCountInTask;
-		//public TrialStims TrialStims;
-        public int[] TargetIndices, DistractorIndices1, DistractorIndices2;
-        public Vector3[] TargetSampleLocations, DistractorLocations1, TargetSearchLocations, DistractorLocations2;
+        //public int BlockCount, TrialCountInBlock, TrialCountInTask;
+        //public TrialStims TrialStims;
+        public int[] TargetIndices, PostSampleDistractorIndices, TargetDistractorIndices;
+        public Vector3[] TargetSampleLocations, PostSampleDistractorLocations, TargetSearchLocations, TargetDistractorLocations;
 
         public float initTrialDuration,
             baselineDuration,
             displaySampleDuration,
-            delay1Duration,
-            displayDistractors1Duration,
-            delay2Duration,
-            maxSearchduration,
+            postSampleDelayDuration,
+            displayPostSampleDistractorsDuration,
+            preTargetDelayDuration,
+            maxSearchDuration,
             selectionFbDuration,
             tokenFbDuration,
             trialEndDuration;

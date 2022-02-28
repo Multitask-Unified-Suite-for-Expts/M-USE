@@ -6,6 +6,7 @@ using ContinuousRecognition_Namespace;
 using test_Namespace;
 using WorkingMemory_Namespace;
 using VisualSearch_Namespace;
+// using EC_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -79,6 +80,8 @@ static public class USE_Tasks_CustomTypes
                 StimDefType = typeof(VisualSearch_StimDef)
             }
         }
+
+        
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#
     };
 

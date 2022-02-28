@@ -212,6 +212,12 @@ namespace USE_States
 			string tmp = null;
 			SpecifyTermination(terminationCriterion, successorState, tmp);
 		}
+		
+		public void SpecifyTermination(BoolDelegate terminationCriterion, Func<State> successorState)
+		{
+			string tmp = null;
+			SpecifyTermination(terminationCriterion, successorState, tmp);
+		}
 
 		public void SpecifyTermination(BoolDelegate terminationCriterion, State successorState, string successorInitName, VoidDelegate terminationMethod = null)
 		{
@@ -241,7 +247,39 @@ namespace USE_States
 			}
 
 		}
+		public void SpecifyTermination(BoolDelegate terminationCriterion, Func<State> successorState, string successorInitName, VoidDelegate terminationMethod = null)
+		{
+			if (ParentLevel.CheckForAvailableState(successorState()) || successorState() == null)
+			{
+				StateInitialization init = null;
+				if (successorInitName != null)
+				{
+					foreach (StateInitialization iinit in StateInitializations)
+					{
+						if (iinit.Name == successorInitName)
+						{
+							init = iinit;
+						}
+					}
+				}
+
+				StateTerminationSpecifications.Add(new StateTerminationSpecification(terminationCriterion, successorState, init, terminationMethod));
+				//if (StateDefaultTermination == null && terminationMethod != null)
+				//{
+				//    StateDefaultTermination = terminationMethod;
+				//}
+			}
+			else
+			{
+				Debug.LogError(ParentLevel.ControlLevelName + ": Attempted to add successor state " + successorState().StateName + " to state " + StateName + " but this state is not found in control level " + ParentLevel.ControlLevelName);
+			}
+
+		}
 		public void SpecifyTermination(BoolDelegate terminationCriterion, State successorState, VoidDelegate termination, string successorInitName = null)
+		{
+			SpecifyTermination(terminationCriterion, successorState, successorInitName, termination);
+		}
+		public void SpecifyTermination(BoolDelegate terminationCriterion, Func<State> successorState, VoidDelegate termination, string successorInitName = null)
 		{
 			SpecifyTermination(terminationCriterion, successorState, successorInitName, termination);
 		}
@@ -255,6 +293,15 @@ namespace USE_States
 		}
 
 		public void AddTimer(Func<float> time, State successorState, VoidDelegate termination = null)
+		{
+			SpecifyTermination(() => {
+				//Debug.Log(Time.time + " " + TimingInfo.StartTimeAbsolute  + " " + time);
+				return Time.time - TimingInfo.StartTimeAbsolute >= time();
+			}, successorState, termination);
+		}
+		
+		
+		public void AddTimer(Func<float> time, Func<State> successorState, VoidDelegate termination = null)
 		{
 			SpecifyTermination(() => {
 				//Debug.Log(Time.time + " " + TimingInfo.StartTimeAbsolute  + " " + time);
@@ -466,6 +513,8 @@ namespace USE_States
 					Terminated = termSpec.TerminationCriterion();
 					if (Terminated) //this TerminationCriterion returned true
 					{
+						if (termSpec.successorIsDynamic)
+							termSpec.SuccessorState = termSpec.DynamicSuccessorState();
 						TerminateState(termSpec);
 						StateTerminationFinished?.Invoke(this, EventArgs.Empty);
 						break;
@@ -1335,9 +1384,11 @@ namespace USE_States
 		public BoolDelegate TerminationCriterion;
 		public VoidDelegate Termination;
 		public State SuccessorState;
+		public Func<State> DynamicSuccessorState;
 		public StateInitialization SuccessorInitialization;
 		public string Name;
 		public float? TerminationDelay;
+		public bool successorIsDynamic;
 
 
 		public StateTerminationSpecification(BoolDelegate terminationCriterion, State successorState, float? termDelay = null)
@@ -1373,6 +1424,43 @@ namespace USE_States
 			{
 				successorState.StateActiveInitialization = successorInit;
 			}
+		}
+		public StateTerminationSpecification(BoolDelegate terminationCriterion, Func<State> successorState, float? termDelay = null)
+		{
+			DefineTermination(terminationCriterion, successorState, termDelay);
+		}
+		public StateTerminationSpecification(BoolDelegate terminationCriterion, Func<State> successorState, StateInitialization successorInit, float? termDelay = null, VoidDelegate termination = null)
+		{
+			DefineTermination(terminationCriterion, successorState, termDelay, successorInit, termination);
+		}
+		public StateTerminationSpecification(BoolDelegate terminationCriterion, Func<State> successorState, VoidDelegate termination, float? termDelay = null, StateInitialization successorInit = null)
+		{
+			DefineTermination(terminationCriterion, successorState, termDelay, successorInit, termination);
+		}
+		public StateTerminationSpecification(BoolDelegate terminationCriterion, Func<State> successorState, StateInitialization successorInit, VoidDelegate termination = null, float? termDelay = null)
+		{
+			DefineTermination(terminationCriterion, successorState, termDelay, successorInit, termination);
+		}
+		public StateTerminationSpecification(BoolDelegate terminationCriterion, Func<State> successorState, VoidDelegate termination, StateInitialization successorInit = null, float? termDelay = null)
+		{
+			DefineTermination(terminationCriterion, successorState, termDelay, successorInit, termination);
+		}
+		private void DefineTermination(BoolDelegate terminationCriterion, Func<State> successorState, float? termDelay = null, StateInitialization successorInit = null, VoidDelegate termination = null)
+		{
+			TerminationCriterion = terminationCriterion;
+			TerminationDelay = termDelay;
+			if (termination != null)
+			{
+				Termination = termination;
+			}
+
+			DynamicSuccessorState = successorState;
+			successorIsDynamic = true;
+			// SuccessorState = successorState;
+			// if (successorInit != null)
+			// {
+			// 	successorState.StateActiveInitialization = successorInit;
+			// }
 		}
 	}
 

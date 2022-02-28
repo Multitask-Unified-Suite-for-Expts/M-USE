@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Policy;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -100,6 +101,7 @@ namespace USE_StimulusManagement
 		{
 			ToggleVisibility(false);
 		}
+		
 
 		public StimDef CopyStimDef(StimGroup sg)
 		{
@@ -230,6 +232,10 @@ namespace USE_StimulusManagement
 
 			if (!string.IsNullOrEmpty(StimName))
 				StimGameObject.name = StimName;
+
+			// StimGameObject.AddComponent<StimDefPointer>();
+			// StimGameObject.GetComponent<StimDefPointer>().StimDef = this;
+			
 			return StimGameObject;
 		}
 
@@ -241,6 +247,8 @@ namespace USE_StimulusManagement
 			PositionRotationScale();
 			if (!string.IsNullOrEmpty(StimName))
 				StimGameObject.name = StimName;
+			StimGameObject.AddComponent<StimDefPointer>();
+			StimGameObject.GetComponent<StimDefPointer>().StimDef = this;
 			return StimGameObject;
 		}
 
@@ -274,6 +282,8 @@ namespace USE_StimulusManagement
 			PositionRotationScale();
 			if (!string.IsNullOrEmpty(StimName))
 				StimGameObject.name = StimName;
+			StimGameObject.AddComponent<StimDefPointer>();
+			StimGameObject.GetComponent<StimDefPointer>().StimDef = this;
 			return StimGameObject;
 		}
 

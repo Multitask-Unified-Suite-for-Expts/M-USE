@@ -35,7 +35,7 @@ public class ControlLevel_TextSlides : ControlLevel {
 
         //blank slide to make slide change more obvious
         blankSlide.AddTimer(blankDur, textSlide, () => panelObj.SetActive(true));
-        blankSlide.SpecifyTermination(() => slideCount == slideText.Length, null, () => panelObj.SetActive(false));
+        blankSlide.SpecifyTermination(() => slideCount == slideText.Length, ()=> null, () => panelObj.SetActive(false));
 
     }
 }

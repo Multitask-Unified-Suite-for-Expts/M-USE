@@ -41,6 +41,8 @@ namespace WhatWhenWhere_Namespace
         public float MinTouchDuration;
         public float MaxTouchDuration;
 
+        public int[] GroupAIndices;
+        public Vector3[] GroupALocations;
     }
 
     //Any other custom classes useful for the functioning of the task could be included in this namespace.

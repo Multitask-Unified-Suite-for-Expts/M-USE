@@ -13,26 +13,6 @@ using Object = UnityEngine.Object;
 
 namespace USE_StimulusManagement
 {
-	public class StimDefPointer: MonoBehaviour
-	{
-		public StimDef StimDef;
-
-		public StimDefPointer()
-		{
-			StimDef = new StimDef();
-		}
-
-		public StimDefPointer(StimDef sd)
-		{
-			StimDef = sd;
-		}
-
-		public T GetStimDef<T>() where T : StimDef
-		{
-			return (T) StimDef;
-		}
-	}
-	
 	public class StimDef
 	{
 
@@ -253,8 +233,8 @@ namespace USE_StimulusManagement
 			if (!string.IsNullOrEmpty(StimName))
 				StimGameObject.name = StimName;
 
-			StimGameObject.AddComponent<StimDefPointer>();
-			StimGameObject.GetComponent<StimDefPointer>().StimDef = this;
+			// StimGameObject.AddComponent<StimDefPointer>();
+			// StimGameObject.GetComponent<StimDefPointer>().StimDef = this;
 			
 			return StimGameObject;
 		}

@@ -1,5 +1,6 @@
 ﻿using USE_ExperimentTemplate;
 using UnityEngine;
+using USE_StimulusManagement;
 
 namespace WhatWhenWhere_Namespace
 {
@@ -45,5 +46,9 @@ namespace WhatWhenWhere_Namespace
         public Vector3[] GroupALocations;
     }
 
+    public class WhatWhenWhere_StimDef : StimDef
+    {
+        public bool IsCurrentTarget;
+    }
     //Any other custom classes useful for the functioning of the task could be included in this namespace.
 }

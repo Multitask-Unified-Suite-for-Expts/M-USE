@@ -14,19 +14,19 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public WhatWhenWhere_TrialDef CurrentTrialDef => GetCurrentTrialDef<WhatWhenWhere_TrialDef>();
     
     // game object variables
-    private GameObject initButton, goCue, trialStim, halo, sliderHalo, imageIncorrectObject, imageCorrectObject, imageTimingError, txt;
+    private GameObject initButton, goCue, chosenStim, halo, sliderHalo, imageIncorrectObject, imageCorrectObject, imageTimingError, txt;
 
     //stim group
     private StimGroup externalStimsA;
     private StimDef[] totalObjects;
-    private StimDef[] currentObjects;
+    private GameObject[] currentObjects;
     //  private GameObject[] halos;
     
     private List<string> touchedObjects = new List<string>();
 
     // effort reward variables
     private int clickCount, context;
-    public int sphereCount = 0;
+    public int stimCount = 0;
     private int numChosenLeft, numChosenRight;
     private bool incorrectChoice = false;
     private bool correctChoice = false;
@@ -106,7 +106,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddInitializationMethod(() =>
         {
             ++tCount;
-            sphereCount = 0;
+            stimCount = 0;
 
             Debug.Log("TRIALNUM: " + trialNum);
             Debug.Log("tCount: " + tCount);
@@ -149,7 +149,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             initButton.SetActive(true);
             goCue.SetActive(true);
 
-            sphereCount = 0;
+            stimCount = 0;
             clickCount = 0;
             response = -1;
             slider.gameObject.transform.position = sliderInitPosition;
@@ -192,15 +192,24 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             //currentObjects = new StimDef[CurrentTrialDef.ObjectNums.Length];
             // halos = new GameObject[CurrentTrialDef.ObjectNums.Length];
             GameObject.Find("Slider").SetActive(true);
-            /*
-              for (int i = 0; i < CurrentTrialDef.ObjectNums.Length; ++i)
+            int correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[stimCount] - 1;
+            for (int i = 0; i < CurrentTrialDef.ObjectNums.Length; ++i)
             {
-                currentObjects[i] = externalStimsA.stimDefs[i];
-                currentObjects[i].ToggleVisibility(true);
+                WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef)externalStimsA.stimDefs[i];
+
+                if (i == correctIndex)
+                {
+                    sd.IsCurrentTarget = true;
+                }
+                else
+                {
+                    sd.IsCurrentTarget = false;
+                }
+                Debug.Log("NAME OF OBJECTS:" + currentObjects[i].name);
             }
-            */
+            
             externalStimsA.ToggleVisibility(true);
-            trialStim = null;
+            chosenStim = null;
             initialClick = 0;
         });
 
@@ -237,35 +246,35 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     if (Physics.Raycast(mouseRay, out hit))
                     {
                         
-                        int correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[sphereCount] - 1;
+                        int correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[stimCount] - 1;
                         Debug.Log("index: " + correctIndex);
-                        trialStim = hit.transform.gameObject;
-                        Debug.Log("This is the name: " + trialStim.name);
+                        chosenStim = hit.transform.gameObject;
+                        Debug.Log("This is the name: " + chosenStim.name);
                         
 
-                        if (trialStim.name == totalObjects[correctIndex].StimName)
+                        if (chosenStim.GetComponent<WhatWhenWhere_StimDef>().IsCurrentTarget)
                         {
                             //Correct Choice
                             numTotal[correctIndex]++;
 
                             slider.value += sliderValueIncreaseAmount;
-                            sphereCount += 1;
+                            stimCount += 1;
                             response = 1;
-                            touchedObjects.Add(trialStim.name);
-                            sphereChoice = trialStim.name;
-                            imageCorrectObject.transform.position = trialStim.transform.position;
+                            touchedObjects.Add(chosenStim.name);
+                            sphereChoice = chosenStim.name;
+                            imageCorrectObject.transform.position = chosenStim.transform.position;
 
                             correctChoice = true;
 
                             restart = false;
 
                         }
-                        else if (touchedObjects.Contains(trialStim.name))
+                        else if (touchedObjects.Contains(chosenStim.name))
                         {
                             //Repetition error
-                            sphereChoice = trialStim.name;
-                            imageIncorrectObject.transform.position = trialStim.transform.position;
-                            touchedObjects.Add(trialStim.name);
+                            sphereChoice = chosenStim.name;
+                            imageIncorrectObject.transform.position = chosenStim.transform.position;
+                            touchedObjects.Add(chosenStim.name);
 
                             response = 1;
 
@@ -285,9 +294,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         else
                         {
                             //Slot error
-                            sphereChoice = trialStim.name;
-                            imageIncorrectObject.transform.position = trialStim.transform.position;
-                            touchedObjects.Add(trialStim.name);
+                            sphereChoice = chosenStim.name;
+                            imageIncorrectObject.transform.position = chosenStim.transform.position;
+                            touchedObjects.Add(chosenStim.name);
 
                             response = 1;
 
@@ -304,7 +313,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         }
                         Debug.Log(restart);
                         string errLog = "";
-                        for (int i = 0; i < totalObjects.Length; ++i)
+                        for (int i = 0; i < currentObjects.Length; ++i)
                         {
                             errLog = errLog + "Slot " + (i + 1) + ": " + numErrors[i] + "/" + numTotal[i] + "\t";
 
@@ -330,14 +339,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         ChooseSphere.SpecifyTermination(() => incorrectChoice, ChoseWrong);
         ChooseSphere.SpecifyTermination(() => correctChoice, ChoseRight);
-        ChooseSphere.SpecifyTermination(() => sphereCount == CurrentTrialDef.ObjectNums.Length, Feedback);
+        ChooseSphere.SpecifyTermination(() => stimCount == CurrentTrialDef.ObjectNums.Length, Feedback);
         ChooseSphere.SpecifyTermination(() => timingFail, TimeError);
 
         ChoseWrong.AddInitializationMethod(() =>
         {
             //halo.SetActive(true);
-            originalColor = trialStim.GetComponent<Renderer>().material.color;
-            trialStim.GetComponent<Renderer>().material.SetColor("_Color", new Color(0.5020f, 0.5020f, 0.5020f));
+            originalColor = chosenStim.GetComponent<Renderer>().material.color;
+            chosenStim.GetComponent<Renderer>().material.SetColor("_Color", new Color(0.5020f, 0.5020f, 0.5020f));
 
             imageIncorrectObject.SetActive(true);
             sliderHalo.SetActive(true);
@@ -360,7 +369,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             incorrectChoice = false;
 
             sliderHalo.SetActive(false);
-            trialStim.GetComponent<Renderer>().material.SetColor("_Color", originalColor);
+            chosenStim.GetComponent<Renderer>().material.SetColor("_Color", originalColor);
         });
 
         ChoseRight.AddInitializationMethod(() =>
@@ -530,8 +539,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         contextColors.Add(new Color(0.9020f, 0.9020f, 0.9804f)); // lavender
         contextColors.Add(new Color(0f, 0f, 0f)); // black
 
-        Debug.Log("OUTSIDE OF LOOP" + numObjMax);
-        totalObjects = new StimDef[10];
+        //Debug.Log("OUTSIDE OF LOOP" + numObjMax);
+        /*totalObjects = new StimDef[10];
         for (int i = 0; i < numObjMax; ++i)
         {
             string s = (i + 1).ToString();
@@ -545,15 +554,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             totalObjects[i].name = s;
             // totalObjects[i].AddComponent<Light>()
             totalObjects[i].SetActive(false);
-         */
+         
         }
+        */
         
-        
-        foreach (StimDef sd in totalObjects)
+        /*foreach (StimDef sd in totalObjects)
         {
             Debug.Log("stimName for StimDef in totalObjects: " + sd.StimName);
         }
-        
+        */
         initButton.SetActive(false);
         goCue.SetActive(false);
         txt.SetActive(false);

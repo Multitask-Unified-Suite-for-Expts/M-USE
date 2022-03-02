@@ -12,8 +12,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     private StimGroup sampleStims, targetStims, postSampleDistractorStims, targetDistractorStims;
 
     public GameObject StartButton;
-
-    public GameObject HaloPrefab;
+    public GameObject YellowHaloPrefab;
+    public GameObject GrayHaloPrefab;
 
     public override void DefineControlLevel()
     {
@@ -61,33 +61,33 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
               delayDuration = CurrentTrialDef.preTargetDelayDuration;
           });
 
-
-        bool responseMade = false;
-        searchDisplay.AddInitializationMethod(() => responseMade = false);
+        bool correct = false;
+        GameObject selected = null;
+        searchDisplay.AddInitializationMethod(() => selected = null);
         searchDisplay.AddUpdateMethod(() =>
         {
             GameObject clicked = GetClickedObj();
-            if (clicked is null) return;
-            responseMade = targetStims.stimDefs.Exists(sd => ReferenceEquals(sd.StimGameObject, clicked));
-            if (responseMade) {
-                Log("Correct!");
-                return;
-            }
-            responseMade = targetDistractorStims.stimDefs.Exists(sd => ReferenceEquals(sd.StimGameObject, clicked));
-            if (responseMade) {
-                Log("Incorrect!");
-            }
-        });
-        searchDisplay.SpecifyTermination(() => responseMade, selectionFeedback);
-        searchDisplay.AddTimer(() => CurrentTrialDef.maxSearchDuration, FinishTrial, () =>
-        {
-            Log("Response was not made");
-        });
+            if (!clicked) return;
+            StimDefPointer sdPointer = clicked.GetComponent<StimDefPointer>();
+            if (!sdPointer) return;
 
-        selectionFeedback.AddInitializationMethod(() => {
-            foreach (WorkingMemory_StimDef sd in targetStims.stimDefs) {
-                GameObject halo = Instantiate(HaloPrefab);
-                halo.transform.SetParent(sd.StimGameObject.transform, false);
+            WorkingMemory_StimDef sd = sdPointer.GetStimDef<WorkingMemory_StimDef>();
+            selected = clicked;
+            correct = sd.IsTarget;
+        });
+        searchDisplay.SpecifyTermination(() => selected != null, selectionFeedback);
+        searchDisplay.AddTimer(() => CurrentTrialDef.maxSearchDuration, FinishTrial);
+
+        selectionFeedback.AddInitializationMethod(() =>
+        {
+            if (!selected) return;
+            if (correct)
+            {
+                Instantiate(YellowHaloPrefab, selected.transform);
+            }
+            else
+            {
+                Instantiate(GrayHaloPrefab, selected.transform);
             }
         });
         //adapt from ChoseWrong/Right in whatwhenwhere task

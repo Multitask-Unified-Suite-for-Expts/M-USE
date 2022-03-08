@@ -96,11 +96,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         selectionFeedback.AddTimer(() => CurrentTrialDef.selectionFbDuration, tokenFeedback);
 
 
-        tokenFeedback.AddInitializationMethod(() => {
+        tokenFeedback.AddInitializationMethod(() =>
+        {
             Destroy(halo);
-            if (correct) {
-                TokenFeedbackController.AddTokens(selected.transform.position, 3);
-            }
+            if (correct) TokenFeedbackController.AddTokens(selected.transform.position, 3);
         });
         //wait for Marcus to integrate token fb
         tokenFeedback.SpecifyTermination(() => !TokenFeedbackController.IsAnimating(), trialEnd);

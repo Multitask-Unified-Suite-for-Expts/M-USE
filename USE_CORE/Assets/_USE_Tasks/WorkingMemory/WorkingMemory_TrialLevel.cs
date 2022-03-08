@@ -43,6 +43,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
+        initTrial.AddInitializationMethod(() => TokenFeedbackController.Initialize(5, 0.2f, 0.5f, 0.5f));
         initTrial.AddTimer(() => CurrentTrialDef.initTrialDuration, delay, () =>
           {
               stateAfterDelay = displaySample;
@@ -78,26 +79,31 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         searchDisplay.SpecifyTermination(() => selected != null, selectionFeedback);
         searchDisplay.AddTimer(() => CurrentTrialDef.maxSearchDuration, FinishTrial);
 
+        GameObject halo = null;
         selectionFeedback.AddInitializationMethod(() =>
         {
             if (!selected) return;
             if (correct)
             {
-                Instantiate(YellowHaloPrefab, selected.transform);
+                halo = Instantiate(YellowHaloPrefab, selected.transform);
             }
             else
             {
-                Instantiate(GrayHaloPrefab, selected.transform);
+                halo = Instantiate(GrayHaloPrefab, selected.transform);
             }
         });
         //adapt from ChoseWrong/Right in whatwhenwhere task
         selectionFeedback.AddTimer(() => CurrentTrialDef.selectionFbDuration, tokenFeedback);
 
 
-        bool tokenUpdated = false;
-        tokenFeedback.AddInitializationMethod(() => tokenUpdated = false);
+        tokenFeedback.AddInitializationMethod(() => {
+            Destroy(halo);
+            if (correct) {
+                TokenFeedbackController.AddTokens(selected.transform.position, 3);
+            }
+        });
         //wait for Marcus to integrate token fb
-        tokenFeedback.SpecifyTermination(() => true, trialEnd); //()=> tokenUpdated, tokenFeedback);
+        tokenFeedback.SpecifyTermination(() => !TokenFeedbackController.IsAnimating(), trialEnd);
 
         trialEnd.AddTimer(() => CurrentTrialDef.trialEndDuration, FinishTrial);
     }

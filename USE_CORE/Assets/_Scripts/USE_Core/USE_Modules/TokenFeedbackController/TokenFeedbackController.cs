@@ -72,6 +72,7 @@ public class TokenFeedbackController : MonoBehaviour
         animatedTokensEndPos = tokenBoxRect.position;
         animatedTokensEndPos.x += tokenBoxPadding + CalcTokensWidth(numCollected);
 
+        // Start the animation phase state machine with the first state
         animationPhase = AnimationPhase.Show;
         animationStartTime = Time.unscaledTime;
         animationEndTime = animationStartTime + revealTime;
@@ -89,12 +90,14 @@ public class TokenFeedbackController : MonoBehaviour
         Color oldBGColor = GUI.backgroundColor;
         Color oldColor = GUI.color;
 
+        // Draw flashing box if needed
         if (animationPhase == AnimationPhase.Flashing)
         {
             GUI.backgroundColor = tokenBoxColor;
             GUI.Box(new Rect(0, 0, tokenBoxRect.width, tokenBoxRect.height), GUIContent.none, whiteStyle);
         }
 
+        // Always draw the tokens
         Vector2 startPos = Vector2.one * tokenBoxPadding;
         GUI.color = colorCollected;
         startPos = DrawTokens(startPos, numCollected);
@@ -104,6 +107,7 @@ public class TokenFeedbackController : MonoBehaviour
         GUI.backgroundColor = oldBGColor;
         GUI.EndGroup();
 
+        // Draw the animating tokens if needed
         if (animationPhase == AnimationPhase.Update)
         {
             GUI.color = colorCollected;
@@ -122,6 +126,7 @@ public class TokenFeedbackController : MonoBehaviour
     {
         if (animationPhase == AnimationPhase.None) return;
 
+        // Switch to next animation phase if the current one ended
         if (Time.unscaledTime >= animationEndTime)
         {
             animationStartTime = Time.unscaledTime;
@@ -148,6 +153,7 @@ public class TokenFeedbackController : MonoBehaviour
             }
         }
 
+        // Set up the GUI state based on the animation phase
         float dt = Time.unscaledTime - animationStartTime;
         switch (animationPhase)
         {

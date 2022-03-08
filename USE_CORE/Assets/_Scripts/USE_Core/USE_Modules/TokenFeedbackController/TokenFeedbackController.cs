@@ -35,6 +35,7 @@ public class TokenFeedbackController : MonoBehaviour
 
     public void Initialize(int numTokens, float revealTime, float updateTime, float flashingTime = 0.5f)
     {
+        numCollected = 0;
         totalTokensNum = numTokens;
         this.revealTime = revealTime;
         this.updateTime = updateTime;

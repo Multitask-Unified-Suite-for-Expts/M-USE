@@ -33,7 +33,17 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         delay.AddTimer(() => delayDuration, () => stateAfterDelay);
 
         bool started = false;
-        SetupTrial.SpecifyTermination(() => started, initTrial, () => StartButton.SetActive(false));
+        bool firstTime = true;
+        SetupTrial.AddInitializationMethod(() =>
+        {
+            started = false;
+            StartButton.SetActive(true);
+            if (firstTime)
+            {
+                TokenFeedbackController.Initialize(5, CurrentTrialDef.tokenRevealDuration, CurrentTrialDef.tokenUpdateDuration);
+                firstTime = false;
+            }
+        });
         SetupTrial.AddUpdateMethod(() =>
         {
             GameObject clicked = GetClickedObj();
@@ -42,9 +52,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 started = true;
             }
         });
+        SetupTrial.SpecifyTermination(() => started, initTrial, () => StartButton.SetActive(false));
 
-        initTrial.AddInitializationMethod(() =>
-            TokenFeedbackController.Initialize(5, CurrentTrialDef.tokenRevealDuration, CurrentTrialDef.tokenUpdateDuration));
         initTrial.AddTimer(() => CurrentTrialDef.initTrialDuration, delay, () =>
           {
               stateAfterDelay = displaySample;

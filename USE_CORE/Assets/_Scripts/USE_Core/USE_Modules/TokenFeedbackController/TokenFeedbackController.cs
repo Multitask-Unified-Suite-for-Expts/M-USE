@@ -8,6 +8,11 @@ public class TokenFeedbackController : MonoBehaviour
     public int tokenBoxYOffset = 10;
     public Texture2D tokenTexture;
 
+    // Color Constants
+    private readonly Color colorCollected = Color.green;
+    private readonly Color colorUncollected = new Color(0.5f, 0.5f, 0.5f);
+    private readonly Color colorFlashing1 = Color.blue;
+    private readonly Color colorFlashing2 = Color.red;
     // Token Counts
     private int totalTokensNum = -1;
     private int numCollected = 0;
@@ -90,9 +95,9 @@ public class TokenFeedbackController : MonoBehaviour
         }
 
         Vector2 startPos = Vector2.one * tokenBoxPadding;
-        GUI.color = new Color(0, 1.0f, 0);
+        GUI.color = colorCollected;
         startPos = DrawTokens(startPos, numCollected);
-        GUI.color = new Color(0.5f, 0.5f, 0.5f);
+        GUI.color = colorUncollected;
         DrawTokens(startPos, totalTokensNum - numCollected);
 
         GUI.backgroundColor = oldBGColor;
@@ -100,7 +105,7 @@ public class TokenFeedbackController : MonoBehaviour
 
         if (animationPhase == AnimationPhase.Update)
         {
-            GUI.color = new Color(0, 1.0f, 0);
+            GUI.color = colorCollected;
             DrawTokens(animatedTokensPos, animatedTokensNum);
         }
 
@@ -119,23 +124,20 @@ public class TokenFeedbackController : MonoBehaviour
         if (Time.unscaledTime >= animationEndTime)
         {
             animationStartTime = Time.unscaledTime;
+            animationEndTime = animationStartTime;
             switch (animationPhase)
             {
                 case AnimationPhase.Show:
                     animationPhase = AnimationPhase.Update;
-                    animationEndTime = animationStartTime + updateTime;
+                    animationEndTime += updateTime;
                     break;
                 case AnimationPhase.Update:
                     numCollected += animatedTokensNum;
-                    Debug.Log(Time.unscaledTime + ": Adding " + animatedTokensNum);
+                    animationPhase = AnimationPhase.None;
                     if (numCollected >= totalTokensNum)
                     {
                         animationPhase = AnimationPhase.Flashing;
-                        animationEndTime = animationStartTime + flashingTime;
-                    }
-                    else
-                    {
-                        animationPhase = AnimationPhase.None;
+                        animationEndTime += flashingTime;
                     }
                     break;
                 case AnimationPhase.Flashing:
@@ -154,14 +156,8 @@ public class TokenFeedbackController : MonoBehaviour
                 animatedTokensPos = Vector2.Lerp(animatedTokensStartPos, animatedTokensEndPos, dt / updateTime);
                 break;
             case AnimationPhase.Flashing:
-                if (dt < flashingTime / 2)
-                {
-                    tokenBoxColor = new Color(0, 0, 1.0f);
-                }
-                else
-                {
-                    tokenBoxColor = new Color(1.0f, 0, 0);
-                }
+                if (dt < flashingTime / 2) tokenBoxColor = colorFlashing1;
+                else tokenBoxColor = colorFlashing2;
                 break;
         }
     }

@@ -29,14 +29,14 @@ public class TokenFeedbackController : MonoBehaviour
     private Color tokenBoxColor;
     private float animationStartTime;
     private float animationEndTime;
-    private float showTime; // How long to show the token update before animating
-    private float updateTime; // How long each token update should take
+    private float revealTime; // How long to show the tokens before animating
+    private float updateTime; // How long each token update animation should take
     private float flashingTime; // How long the token bar should flash when it fills up
 
-    public void Initialize(int numTokens, float showTime, float updateTime, float flashingTime)
+    public void Initialize(int numTokens, float revealTime, float updateTime, float flashingTime = 0.5f)
     {
         totalTokensNum = numTokens;
-        this.showTime = showTime;
+        this.revealTime = revealTime;
         this.updateTime = updateTime;
         this.flashingTime = flashingTime;
 
@@ -73,7 +73,7 @@ public class TokenFeedbackController : MonoBehaviour
 
         animationPhase = AnimationPhase.Show;
         animationStartTime = Time.unscaledTime;
-        animationEndTime = animationStartTime + showTime;
+        animationEndTime = animationStartTime + revealTime;
         animatedTokensNum = numTokens;
     }
 

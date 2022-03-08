@@ -43,7 +43,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
-        initTrial.AddInitializationMethod(() => TokenFeedbackController.Initialize(5, 0.2f, 0.5f, 0.5f));
+        initTrial.AddInitializationMethod(() =>
+            TokenFeedbackController.Initialize(5, CurrentTrialDef.tokenRevealDuration, CurrentTrialDef.tokenUpdateDuration));
         initTrial.AddTimer(() => CurrentTrialDef.initTrialDuration, delay, () =>
           {
               stateAfterDelay = displaySample;

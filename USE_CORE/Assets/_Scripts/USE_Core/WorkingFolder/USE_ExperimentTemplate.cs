@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -358,6 +358,7 @@ namespace USE_ExperimentTemplate
 
 		public virtual void SpecifyTypes()
 		{
+			Debug.Log(TaskName);
 			TaskLevelType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TaskLevelType;
 			TrialLevelType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TrialLevelType;
 			TaskDefType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TaskDefType;
@@ -518,22 +519,23 @@ namespace USE_ExperimentTemplate
 
 			//handling of block and trial defs so that each BlockDef contains a TrialDef[] array
 
-			if (AllTrialDefs == null)
+			if (AllTrialDefs == null) //no trialDefs have been imported from settings files
 			{
 				if (BlockDefs == null)
 					Debug.LogError("Neither BlockDef nor TrialDef config files provided in " + TaskName +
 					               " folder, no trials generated as a result.");
 				else
 				{
-					//Do something with blockdef by itself
-					Debug.LogError("BlockDef config file provided without TrialDef config file in " + TaskName +
-					               " folder, no method currently exists to handle this case.");
+					for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+					{
+						BlockDefs[iBlock].GenerateTrialDefsFromBlockDef();
+					}
 				}
 
 			}
-			else
+			else //trialDefs imported from settings files
 			{
-				if (BlockDefs == null)
+				if (BlockDefs == null) //no blockDef file, trialdefs should be complete
 				{
 					Debug.Log("TrialDef config file provided without BlockDef config file in " + TaskName +
 					          " folder, BlockDefs will be generated with default values for all fields from TrialDefs.");
@@ -553,14 +555,25 @@ namespace USE_ExperimentTemplate
 						          " folder only generates a single block (this is not a problem if you do not intend to use a block structure in your experiment).");
 						BlockDefs = new BlockDef[1];
 					}
+					
+					//add trialDef[] for each block;
+					for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+					{
+						if (BlockDefs[iBlock] == null)
+							BlockDefs[iBlock] = new BlockDef();
+						BlockDefs[iBlock].BlockCount = iBlock;
+						BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock, AllTrialDefs);
+					}
 				}
-
-				for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+				else //there is a blockDef file, its information may need to be added to TrialDefs
 				{
-					if (BlockDefs[iBlock] == null)
-						BlockDefs[iBlock] = new BlockDef();
-					BlockDefs[iBlock].BlockCount = iBlock;
-					BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock, AllTrialDefs);
+					
+					//add trialDef[] for each block;
+					for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+					{
+						BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock, AllTrialDefs);
+						BlockDefs[iBlock].AddToTrialDefsFromBlockDef();
+					}
 				}
 			}
 		}
@@ -677,9 +690,9 @@ namespace USE_ExperimentTemplate
 				if (blockDefText.Substring(0, 10) == "BlockDef[]") // stupid legacy case, shouldn't be included
 					SessionSettings.ImportSettings_MultipleType("blockDefs", blockDefFile);
 				else if (blockDefFile.ToLower().Contains("tdf"))
-					SessionSettings.ImportSettings_SingleTypeArray<BlockDef>("blockDefs", blockDefFile);
+					SessionSettings.ImportSettings_SingleTypeArray<T>("blockDefs", blockDefFile);
 				else
-					SessionSettings.ImportSettings_SingleTypeJSON<BlockDef[]>("blockDefs", blockDefFile);
+					SessionSettings.ImportSettings_SingleTypeJSON<T[]>("blockDefs", blockDefFile);
 				BlockDefs = (T[]) SessionSettings.Get("blockDefs");
 			}
 			else
@@ -1214,6 +1227,14 @@ namespace USE_ExperimentTemplate
 	{
 		public int BlockCount;
 		public TrialDef[] TrialDefs;
+
+		public virtual void GenerateTrialDefsFromBlockDef()
+		{
+		}
+
+		public virtual void AddToTrialDefsFromBlockDef()
+		{
+		}
 	}
 	public abstract class TrialDef
 	{

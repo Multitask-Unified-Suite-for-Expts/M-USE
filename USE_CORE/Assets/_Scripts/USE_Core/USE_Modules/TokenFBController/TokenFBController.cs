@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class TokenFeedbackController : MonoBehaviour
+public class TokenFBController : MonoBehaviour
 {
     public int tokenSize = 100;
     public int tokenSpacing = 0;

@@ -180,7 +180,7 @@ MonoBehaviour:
   RuntimeStims:
     stimGroupName: 
   TrialStims: []
-  TokenFeedbackController: {fileID: 108587576}
+  TokenFBController: {fileID: 108587576}
   StartButton: {fileID: 239317670}
   YellowHaloPrefab: {fileID: 1546032763649933254, guid: caf1a4a4f95a86847a8d732d428239c9,
     type: 3}

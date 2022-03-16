@@ -37,7 +37,7 @@ namespace USE_ExperimentTemplate
 		private Camera SessionCam;
 
 		private string configFileFolder;
-		private bool TaskSceneLoaded;
+		private bool TaskSceneLoaded, SceneLoading;
 		
 		public override void LoadSettings()
 		{
@@ -88,54 +88,63 @@ namespace USE_ExperimentTemplate
 			int iTask = 0;
 			bool oldStyleTaskLoading = false;
 			bool newStyleTaskLoading = false;
-			bool sceneLoaded = false;
+			SceneLoading = false;
 			string taskName;
 			setupSession.AddUpdateMethod(() =>
 			{
-				oldStyleTaskLoading = false;
 				if (iTask < ActiveTaskNames.Count)
 				{
-					int iAvail = 0;
-					while (iAvail < AvailableTaskLevels.Count)
+					Debug.Log("11111");
+					if (!SceneLoading)
 					{
-						if (AvailableTaskLevels[iAvail].TaskName == ActiveTaskNames[iTask])
+						Debug.Log("22222");
+						oldStyleTaskLoading = false;
+						newStyleTaskLoading = false;
+						int iAvail = 0;
+						while (iAvail < AvailableTaskLevels.Count)
 						{
-							oldStyleTaskLoading = true;
-							break;
+							if (AvailableTaskLevels[iAvail].TaskName == ActiveTaskNames[iTask])
+							{
+								oldStyleTaskLoading = true;
+								break;
+							}
+
+							iAvail++;
 						}
 
-						iAvail++;
-					}
-
-					ControlLevel_Task_Template tl;
-					AsyncOperation loadScene;
-					if (oldStyleTaskLoading)
-					{
-						tl = PopulateTaskLevel(AvailableTaskLevels[iAvail]);
-						taskName = tl.TaskName;
-						loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-						loadScene.completed += (_)=> SceneLoaded(taskName);
-					}
-					else
-					{
-						if (!newStyleTaskLoading)
+						ControlLevel_Task_Template tl;
+						AsyncOperation loadScene;
+						if (oldStyleTaskLoading)
 						{
-							newStyleTaskLoading = true;
-							taskName = ActiveTaskNames[iTask];
+							SceneLoading = true;
+							tl = PopulateTaskLevel(AvailableTaskLevels[iAvail]);
+							taskName = tl.TaskName;
 							loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-							loadScene.completed += (_) => SceneLoadedNew(taskName);
+							loadScene.completed += (_) => SceneLoaded(taskName);
 						}
 						else
 						{
-							
-						}
-					}
+							if (!newStyleTaskLoading)
+							{
+								SceneLoading = true;
+								newStyleTaskLoading = true;
+								taskName = ActiveTaskNames[iTask];
+								Debug.Log(taskName);
+								loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
+								loadScene.completed += (_) => SceneLoadedNew(taskName);
+							}
+							else
+							{
 
-					iTask++;
-					TaskSceneLoaded = false;
+							}
+						}
+
+						iTask++;
+						// TaskSceneLoaded = false;
+					}
 				}
 			});
-			setupSession.SpecifyTermination(() => iTask >= ActiveTaskNames.Count && TaskSceneLoaded, selectTask);
+			setupSession.SpecifyTermination(() => iTask >= ActiveTaskNames.Count && !SceneLoading, selectTask);
 
 			//tasksFinished is a placeholder, eventually there will be a proper task selection screen
 			bool tasksFinished = false;
@@ -213,7 +222,8 @@ namespace USE_ExperimentTemplate
 			var methodInfo = GetType().GetMethod(nameof(this.FindTaskCam));
 			MethodInfo findTaskCam = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[sceneName]});
 			findTaskCam.Invoke(this, new object[] {sceneName});
-			TaskSceneLoaded = true;
+			// TaskSceneLoaded = true;
+			SceneLoading = false;
 		}
 
 		void SceneLoadedNew(string taskName)
@@ -222,11 +232,13 @@ namespace USE_ExperimentTemplate
 			Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
 			MethodInfo prepareTaskLevel = methodInfo.MakeGenericMethod(new Type[] {taskType});
 			prepareTaskLevel.Invoke(this, new object[] {taskName});
-			TaskSceneLoaded = true;
+			// TaskSceneLoaded = true;
+			SceneLoading = false;
 		}
 		
 		public void PrepareTaskLevel<T>(string taskName) where T : ControlLevel_Task_Template
 		{
+			Debug.Log(taskName);
 			ControlLevel_Task_Template tl = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
 			tl = PopulateTaskLevel(tl);
 			if(tl.TaskCam == null)

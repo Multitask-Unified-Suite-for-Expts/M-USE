@@ -94,10 +94,8 @@ namespace USE_ExperimentTemplate
 			{
 				if (iTask < ActiveTaskNames.Count)
 				{
-					Debug.Log("11111");
 					if (!SceneLoading)
 					{
-						Debug.Log("22222");
 						oldStyleTaskLoading = false;
 						newStyleTaskLoading = false;
 						int iAvail = 0;
@@ -129,7 +127,6 @@ namespace USE_ExperimentTemplate
 								SceneLoading = true;
 								newStyleTaskLoading = true;
 								taskName = ActiveTaskNames[iTask];
-								Debug.Log(taskName);
 								loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
 								loadScene.completed += (_) => SceneLoadedNew(taskName);
 							}

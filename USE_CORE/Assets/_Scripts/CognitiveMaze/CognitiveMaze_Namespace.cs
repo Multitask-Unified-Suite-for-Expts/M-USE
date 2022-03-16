@@ -17,7 +17,9 @@ namespace CognitiveMaze_Namespace
 
 	public class CognitiveMaze_TrialDef : TrialDef
 	{
-	}
+        public int Trial;
 
-	//Any other custom classes useful for the functioning of the task could be included in this namespace.
+    }
+
+    //Any other custom classes useful for the functioning of the task could be included in this namespace.
 }

@@ -31,6 +31,7 @@ public class MazeVisible : MonoBehaviour
         //  that deletes the current visible maze, moves curr maze to next maze, and creates next maze
         // TODO: Currently, this will only load one maze
         //  currMaze = mazeListScript.mazeList[0];
+
     }
 
     void Update()

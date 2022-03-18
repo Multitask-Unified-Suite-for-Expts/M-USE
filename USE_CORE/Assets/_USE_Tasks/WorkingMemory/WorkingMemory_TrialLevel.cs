@@ -11,6 +11,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
     private StimGroup sampleStims, targetStims, postSampleDistractorStims, targetDistractorStims;
 
+    public GameObject StartButton;
+    public GameObject YellowHaloPrefab;
+    public GameObject GrayHaloPrefab;
+
     public override void DefineControlLevel()
     {
         State initTrial = new State("InitTrial");
@@ -28,7 +32,16 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         float delayDuration = 0;
         delay.AddTimer(() => delayDuration, () => stateAfterDelay);
 
-        SetupTrial.SpecifyTermination(() => true, initTrial);
+        bool started = false;
+        SetupTrial.SpecifyTermination(() => started, initTrial, () => StartButton.SetActive(false));
+        SetupTrial.AddUpdateMethod(() =>
+        {
+            GameObject clicked = GetClickedObj();
+            if (ReferenceEquals(clicked, StartButton))
+            {
+                started = true;
+            }
+        });
 
         initTrial.AddTimer(() => CurrentTrialDef.initTrialDuration, delay, () =>
           {
@@ -48,43 +61,35 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
               delayDuration = CurrentTrialDef.preTargetDelayDuration;
           });
 
-
-        bool responseMade = false;
-        searchDisplay.AddInitializationMethod(() => responseMade = false);
+        bool correct = false;
+        GameObject selected = null;
+        searchDisplay.AddInitializationMethod(() => selected = null);
         searchDisplay.AddUpdateMethod(() =>
         {
-            if (InputBroker.GetMouseButtonDown(0))
+            GameObject clicked = GetClickedObj();
+            if (!clicked) return;
+            StimDefPointer sdPointer = clicked.GetComponent<StimDefPointer>();
+            if (!sdPointer) return;
+
+            WorkingMemory_StimDef sd = sdPointer.GetStimDef<WorkingMemory_StimDef>();
+            selected = clicked;
+            correct = sd.IsTarget;
+        });
+        searchDisplay.SpecifyTermination(() => selected != null, selectionFeedback);
+        searchDisplay.AddTimer(() => CurrentTrialDef.maxSearchDuration, FinishTrial);
+
+        selectionFeedback.AddInitializationMethod(() =>
+        {
+            if (!selected) return;
+            if (correct)
             {
-                Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-                if (Physics.Raycast(mouseRay, out RaycastHit hit))
-                {
-                    GameObject hitObj = hit.transform.root.gameObject;
-                    foreach (WorkingMemory_StimDef sd in targetStims.stimDefs)
-                    {
-                        if (ReferenceEquals(sd.StimGameObject, hitObj))
-                        {
-                            Log("Correct!");
-                            responseMade = true;
-                        }
-                    }
-                    foreach (WorkingMemory_StimDef sd in targetDistractorStims.stimDefs)
-                    {
-                        if (ReferenceEquals(sd.StimGameObject, hitObj))
-                        {
-                            Log("Incorrect!");
-                            responseMade = true;
-                        }
-                    }
-                }
+                Instantiate(YellowHaloPrefab, selected.transform);
+            }
+            else
+            {
+                Instantiate(GrayHaloPrefab, selected.transform);
             }
         });
-        searchDisplay.SpecifyTermination(() => responseMade, selectionFeedback);
-        searchDisplay.AddTimer(() => CurrentTrialDef.maxSearchDuration, FinishTrial, () =>
-        {
-            Log("Response was not made");
-        });
-
-        selectionFeedback.AddInitializationMethod(() => { });
         //adapt from ChoseWrong/Right in whatwhenwhere task
         selectionFeedback.AddTimer(() => CurrentTrialDef.selectionFbDuration, tokenFeedback);
 
@@ -95,8 +100,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         tokenFeedback.SpecifyTermination(() => true, trialEnd); //()=> tokenUpdated, tokenFeedback);
 
         trialEnd.AddTimer(() => CurrentTrialDef.trialEndDuration, FinishTrial);
-
-        //adapt StartButton from whatwhenwhere task
     }
 
     protected override void DefineTrialStims()
@@ -131,5 +134,13 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     private void Log(object msg)
     {
         Debug.Log("[WorkingMemory] " + msg);
+    }
+
+    private GameObject GetClickedObj()
+    {
+        if (!InputBroker.GetMouseButtonDown(0)) return null;
+        Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(mouseRay, out RaycastHit hit)) return hit.transform.root.gameObject;
+        return null;
     }
 }

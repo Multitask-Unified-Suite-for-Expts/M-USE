@@ -35,7 +35,7 @@ public class TokenFBController : MonoBehaviour
     private float updateTime; // How long each token update animation should take
     private float flashingTime; // How long the token bar should flash when it fills up
 
-    public void Initialize(int numTokens, float revealTime, float updateTime, float flashingTime = 0.5f)
+    public void Init(int numTokens, float revealTime, float updateTime, float flashingTime = 0.5f)
     {
         numCollected = 0;
         totalTokensNum = numTokens;

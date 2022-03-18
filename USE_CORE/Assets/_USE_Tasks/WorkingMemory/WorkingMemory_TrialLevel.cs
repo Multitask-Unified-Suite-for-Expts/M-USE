@@ -43,7 +43,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             StartButton.SetActive(true);
             if (firstTime)
             {
-                TokenFBController.Initialize(5, CurrentTrialDef.tokenRevealDuration, CurrentTrialDef.tokenUpdateDuration);
+                TokenFBController.Init(5, CurrentTrialDef.tokenRevealDuration, CurrentTrialDef.tokenUpdateDuration);
                 firstTime = false;
             }
         });

@@ -113,7 +113,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 AudioFBController.PlayNegative();
             }
         });
-        tokenFeedback.SpecifyTermination(() => !(TokenFBController.IsAnimating() && AudioFBController.IsPlaying()), trialEnd);
+        tokenFeedback.SpecifyTermination(() => !(TokenFBController.IsAnimating() || AudioFBController.IsPlaying()), trialEnd);
 
         // Wait for some time at the end
         trialEnd.AddTimer(() => CurrentTrialDef.trialEndDuration, FinishTrial);

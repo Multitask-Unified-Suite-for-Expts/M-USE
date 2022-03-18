@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 108587574}
   - component: {fileID: 108587573}
   - component: {fileID: 108587576}
+  - component: {fileID: 108587577}
   m_Layer: 0
   m_Name: WorkingMemory_Scripts
   m_TagString: Untagged
@@ -181,6 +182,7 @@ MonoBehaviour:
     stimGroupName: 
   TrialStims: []
   TokenFBController: {fileID: 108587576}
+  AudioFBController: {fileID: 108587577}
   StartButton: {fileID: 239317670}
   YellowHaloPrefab: {fileID: 1546032763649933254, guid: caf1a4a4f95a86847a8d732d428239c9,
     type: 3}
@@ -260,6 +262,20 @@ MonoBehaviour:
   tokenBoxPadding: 0
   tokenBoxYOffset: 20
   tokenTexture: {fileID: 2800000, guid: 5ab9409b99a52f740a325a411069f4fa, type: 3}
+--- !u!114 &108587577
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 108587572}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b02cb9b89382eb64c9108a27b75f32ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PositiveSound: {fileID: 8300000, guid: 3057c6465634bff458dbb5fc86a5aab0, type: 3}
+  NegativeSound: {fileID: 8300000, guid: b1ead77b8c99d9542827dd1ee3ef5124, type: 3}
 --- !u!1 &239317670
 GameObject:
   m_ObjectHideFlags: 0
@@ -474,7 +490,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1812093639}
-  m_Enabled: 0
+  m_Enabled: 1
 --- !u!20 &1812093641
 Camera:
   m_ObjectHideFlags: 0

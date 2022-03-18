@@ -81,7 +81,7 @@ namespace test_Namespace
         
         private List<int?>[] myintqListArray;
         private List<float?>[] myFloatqListArray;
-        private List<string?>[] myStringqListArray;
+ //       private List<string?>[] myStringqListArray;
         private List<bool?>[] myBoolqListArray;
     }
 

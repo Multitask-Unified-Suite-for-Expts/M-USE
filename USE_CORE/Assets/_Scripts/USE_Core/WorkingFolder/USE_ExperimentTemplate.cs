@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -37,7 +37,7 @@ namespace USE_ExperimentTemplate
 		private Camera SessionCam;
 
 		private string configFileFolder;
-		private bool TaskSceneLoaded;
+		private bool TaskSceneLoaded, SceneLoading;
 		
 		public override void LoadSettings()
 		{
@@ -88,54 +88,60 @@ namespace USE_ExperimentTemplate
 			int iTask = 0;
 			bool oldStyleTaskLoading = false;
 			bool newStyleTaskLoading = false;
-			bool sceneLoaded = false;
+			SceneLoading = false;
 			string taskName;
 			setupSession.AddUpdateMethod(() =>
 			{
-				oldStyleTaskLoading = false;
 				if (iTask < ActiveTaskNames.Count)
 				{
-					int iAvail = 0;
-					while (iAvail < AvailableTaskLevels.Count)
+					if (!SceneLoading)
 					{
-						if (AvailableTaskLevels[iAvail].TaskName == ActiveTaskNames[iTask])
+						oldStyleTaskLoading = false;
+						newStyleTaskLoading = false;
+						int iAvail = 0;
+						while (iAvail < AvailableTaskLevels.Count)
 						{
-							oldStyleTaskLoading = true;
-							break;
+							if (AvailableTaskLevels[iAvail].TaskName == ActiveTaskNames[iTask])
+							{
+								oldStyleTaskLoading = true;
+								break;
+							}
+
+							iAvail++;
 						}
 
-						iAvail++;
-					}
-
-					ControlLevel_Task_Template tl;
-					AsyncOperation loadScene;
-					if (oldStyleTaskLoading)
-					{
-						tl = PopulateTaskLevel(AvailableTaskLevels[iAvail]);
-						taskName = tl.TaskName;
-						loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-						loadScene.completed += (_)=> SceneLoaded(taskName);
-					}
-					else
-					{
-						if (!newStyleTaskLoading)
+						ControlLevel_Task_Template tl;
+						AsyncOperation loadScene;
+						if (oldStyleTaskLoading)
 						{
-							newStyleTaskLoading = true;
-							taskName = ActiveTaskNames[iTask];
+							SceneLoading = true;
+							tl = PopulateTaskLevel(AvailableTaskLevels[iAvail]);
+							taskName = tl.TaskName;
 							loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-							loadScene.completed += (_) => SceneLoadedNew(taskName);
+							loadScene.completed += (_) => SceneLoaded(taskName);
 						}
 						else
 						{
-							
-						}
-					}
+							if (!newStyleTaskLoading)
+							{
+								SceneLoading = true;
+								newStyleTaskLoading = true;
+								taskName = ActiveTaskNames[iTask];
+								loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
+								loadScene.completed += (_) => SceneLoadedNew(taskName);
+							}
+							else
+							{
 
-					iTask++;
-					TaskSceneLoaded = false;
+							}
+						}
+
+						iTask++;
+						// TaskSceneLoaded = false;
+					}
 				}
 			});
-			setupSession.SpecifyTermination(() => iTask >= ActiveTaskNames.Count && TaskSceneLoaded, selectTask);
+			setupSession.SpecifyTermination(() => iTask >= ActiveTaskNames.Count && !SceneLoading, selectTask);
 
 			//tasksFinished is a placeholder, eventually there will be a proper task selection screen
 			bool tasksFinished = false;
@@ -213,7 +219,8 @@ namespace USE_ExperimentTemplate
 			var methodInfo = GetType().GetMethod(nameof(this.FindTaskCam));
 			MethodInfo findTaskCam = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[sceneName]});
 			findTaskCam.Invoke(this, new object[] {sceneName});
-			TaskSceneLoaded = true;
+			// TaskSceneLoaded = true;
+			SceneLoading = false;
 		}
 
 		void SceneLoadedNew(string taskName)
@@ -222,11 +229,13 @@ namespace USE_ExperimentTemplate
 			Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
 			MethodInfo prepareTaskLevel = methodInfo.MakeGenericMethod(new Type[] {taskType});
 			prepareTaskLevel.Invoke(this, new object[] {taskName});
-			TaskSceneLoaded = true;
+			// TaskSceneLoaded = true;
+			SceneLoading = false;
 		}
 		
 		public void PrepareTaskLevel<T>(string taskName) where T : ControlLevel_Task_Template
 		{
+			Debug.Log(taskName);
 			ControlLevel_Task_Template tl = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
 			tl = PopulateTaskLevel(tl);
 			if(tl.TaskCam == null)
@@ -358,6 +367,7 @@ namespace USE_ExperimentTemplate
 
 		public virtual void SpecifyTypes()
 		{
+			Debug.Log(TaskName);
 			TaskLevelType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TaskLevelType;
 			TrialLevelType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TrialLevelType;
 			TaskDefType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TaskDefType;
@@ -518,22 +528,23 @@ namespace USE_ExperimentTemplate
 
 			//handling of block and trial defs so that each BlockDef contains a TrialDef[] array
 
-			if (AllTrialDefs == null)
+			if (AllTrialDefs == null) //no trialDefs have been imported from settings files
 			{
 				if (BlockDefs == null)
 					Debug.LogError("Neither BlockDef nor TrialDef config files provided in " + TaskName +
 					               " folder, no trials generated as a result.");
 				else
 				{
-					//Do something with blockdef by itself
-					Debug.LogError("BlockDef config file provided without TrialDef config file in " + TaskName +
-					               " folder, no method currently exists to handle this case.");
+					for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+					{
+						BlockDefs[iBlock].GenerateTrialDefsFromBlockDef();
+					}
 				}
 
 			}
-			else
+			else //trialDefs imported from settings files
 			{
-				if (BlockDefs == null)
+				if (BlockDefs == null) //no blockDef file, trialdefs should be complete
 				{
 					Debug.Log("TrialDef config file provided without BlockDef config file in " + TaskName +
 					          " folder, BlockDefs will be generated with default values for all fields from TrialDefs.");
@@ -553,14 +564,25 @@ namespace USE_ExperimentTemplate
 						          " folder only generates a single block (this is not a problem if you do not intend to use a block structure in your experiment).");
 						BlockDefs = new BlockDef[1];
 					}
+					
+					//add trialDef[] for each block;
+					for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+					{
+						if (BlockDefs[iBlock] == null)
+							BlockDefs[iBlock] = new BlockDef();
+						BlockDefs[iBlock].BlockCount = iBlock;
+						BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock, AllTrialDefs);
+					}
 				}
-
-				for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+				else //there is a blockDef file, its information may need to be added to TrialDefs
 				{
-					if (BlockDefs[iBlock] == null)
-						BlockDefs[iBlock] = new BlockDef();
-					BlockDefs[iBlock].BlockCount = iBlock;
-					BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock, AllTrialDefs);
+					
+					//add trialDef[] for each block;
+					for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+					{
+						BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock, AllTrialDefs);
+						BlockDefs[iBlock].AddToTrialDefsFromBlockDef();
+					}
 				}
 			}
 		}
@@ -677,9 +699,9 @@ namespace USE_ExperimentTemplate
 				if (blockDefText.Substring(0, 10) == "BlockDef[]") // stupid legacy case, shouldn't be included
 					SessionSettings.ImportSettings_MultipleType("blockDefs", blockDefFile);
 				else if (blockDefFile.ToLower().Contains("tdf"))
-					SessionSettings.ImportSettings_SingleTypeArray<BlockDef>("blockDefs", blockDefFile);
+					SessionSettings.ImportSettings_SingleTypeArray<T>("blockDefs", blockDefFile);
 				else
-					SessionSettings.ImportSettings_SingleTypeJSON<BlockDef[]>("blockDefs", blockDefFile);
+					SessionSettings.ImportSettings_SingleTypeJSON<T[]>("blockDefs", blockDefFile);
 				BlockDefs = (T[]) SessionSettings.Get("blockDefs");
 			}
 			else
@@ -796,6 +818,7 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public TaskStims TaskStims;
 		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims, RuntimeStims;
 		[HideInInspector] public List<StimGroup> TrialStims;
+		public TokenFeedbackController TokenFeedbackController;
 
 		//protected TrialDef CurrentTrialDef;
 		protected T GetCurrentTrialDef<T>() where T : TrialDef
@@ -1214,6 +1237,14 @@ namespace USE_ExperimentTemplate
 	{
 		public int BlockCount;
 		public TrialDef[] TrialDefs;
+
+		public virtual void GenerateTrialDefsFromBlockDef()
+		{
+		}
+
+		public virtual void AddToTrialDefsFromBlockDef()
+		{
+		}
 	}
 	public abstract class TrialDef
 	{

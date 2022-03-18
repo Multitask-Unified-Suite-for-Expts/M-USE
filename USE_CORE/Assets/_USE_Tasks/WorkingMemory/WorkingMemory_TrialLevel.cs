@@ -12,8 +12,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     private StimGroup sampleStims, targetStims, postSampleDistractorStims, targetDistractorStims;
 
     public GameObject StartButton;
-    public GameObject YellowHaloPrefab;
-    public GameObject GrayHaloPrefab;
 
     public override void DefineControlLevel()
     {
@@ -44,6 +42,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             if (firstTime)
             {
                 AudioFBController.Init();
+                HaloFBController.Init();
                 TokenFBController.Init(5, CurrentTrialDef.tokenRevealDuration, CurrentTrialDef.tokenUpdateDuration);
                 firstTime = false;
             }
@@ -95,25 +94,18 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         searchDisplay.SpecifyTermination(() => selected != null, selectionFeedback);
         searchDisplay.AddTimer(() => CurrentTrialDef.maxSearchDuration, FinishTrial);
 
-        GameObject halo = null;
         selectionFeedback.AddInitializationMethod(() =>
         {
             if (!selected) return;
-            if (correct)
-            {
-                halo = Instantiate(YellowHaloPrefab, selected.transform);
-            }
-            else
-            {
-                halo = Instantiate(GrayHaloPrefab, selected.transform);
-            }
+            if (correct) HaloFBController.ShowPositive(selected.transform);
+            else HaloFBController.ShowNegative(selected.transform);
         });
         selectionFeedback.AddTimer(() => CurrentTrialDef.selectionFbDuration, tokenFeedback);
 
         // The state that will handle the token feedback and wait for any animations
         tokenFeedback.AddInitializationMethod(() =>
         {
-            Destroy(halo);
+            HaloFBController.Destroy();
             if (correct) {
                 AudioFBController.PlayPositive();
                 TokenFBController.AddTokens(selected.transform.position, 3);

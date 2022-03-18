@@ -821,6 +821,7 @@ namespace USE_ExperimentTemplate
 		
 		// Feedback Controllers
 		public AudioFBController AudioFBController;
+		public HaloFBController HaloFBController;
 		public TokenFBController TokenFBController;
 
 		//protected TrialDef CurrentTrialDef;

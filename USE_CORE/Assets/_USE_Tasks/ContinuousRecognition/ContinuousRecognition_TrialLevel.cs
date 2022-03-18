@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using USE_StimulusManagement;
 using ContinuousRecognition_Namespace;
 using System;
-using Unity.UNetWeaver;
+// using Unity.UNetWeaver;
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
@@ -181,8 +181,20 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //destroyed at TrialLevel_Finish
         //ExternalStims in this call will be replaced with CurrentBlockDef.BlockStims once Marcus gets that working
         //StimGroup currentTrialStims = new StimGroup("CurrentTrialStims", ExternalStims, CurrentTrialDef.TrialStimIndices);
-        currentTrialStims = new StimGroup("StimGroupA", ExternalStims, CurrentTrialDef.GroupAIndices); 
-        currentTrialStims.SetLocations(CurrentTrialDef.GroupALocations);
+        
+        //add all previously chosen stimuli to current trial 
+        
+        //create new list consisting of PreviouslyChosenStimuli + one random non previously chosen stim from BlockStimIndices;
+        List<int> trialStimIndices = CurrentTrialDef.PreviouslyChosenStimuli;
+        //if currentTrialDef.TrialCountInBlock == 0
+        //choose two random stims
+        //if currenTrialDef.TrialCountInBlock % 2 == 0
+        //trialStimIndices.Add(random non previously-chosen stim);
+        //else
+        //trialStimIndices.Add(previously non chosen object);
+        
+        currentTrialStims = new StimGroup("TrialStims", ExternalStims, CurrentTrialDef.GroupAIndices); //replace groupAIndices with trialStimIndices
+        currentTrialStims.SetLocations(CurrentTrialDef.GroupALocations); 
         currentTrialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenFeedback"));
         TrialStims.Add(currentTrialStims);
     }

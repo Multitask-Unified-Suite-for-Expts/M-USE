@@ -97,8 +97,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         selectionFeedback.AddInitializationMethod(() =>
         {
             if (!selected) return;
-            if (correct) HaloFBController.ShowPositive(selected.transform);
-            else HaloFBController.ShowNegative(selected.transform);
+            if (correct) HaloFBController.ShowPositive(selected);
+            else HaloFBController.ShowNegative(selected);
         });
         selectionFeedback.AddTimer(() => CurrentTrialDef.selectionFbDuration, tokenFeedback);
 
@@ -108,7 +108,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.Destroy();
             if (correct) {
                 AudioFBController.PlayPositive();
-                TokenFBController.AddTokens(selected.transform.position, 3);
+                TokenFBController.AddTokens(selected, 3);
             } else {
                 AudioFBController.PlayNegative();
             }

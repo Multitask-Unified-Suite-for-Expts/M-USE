@@ -55,16 +55,14 @@ public class TokenFBController : MonoBehaviour
         );
     }
 
-    // gameObjPos should be at the center of the object
-    public void AddTokens(Vector2 gameObjPos, int numTokens)
+    public void AddTokens(GameObject gameObj, int numTokens)
     {
-        AnimateTokens(Color.green, gameObjPos, numTokens);
+        AnimateTokens(Color.green, gameObj, numTokens);
     }
 
-    // gameObjPos should be at the center of the object
-    public void RemoveTokens(Vector2 gameObjPos, int numTokens)
+    public void RemoveTokens(GameObject gameObj, int numTokens)
     {
-        AnimateTokens(Color.red, gameObjPos, -numTokens);
+        AnimateTokens(Color.red, gameObj, -numTokens);
     }
 
     public void OnGUI()
@@ -158,10 +156,10 @@ public class TokenFBController : MonoBehaviour
     }
 
     // gameObjPos should be at the center of the object
-    private void AnimateTokens(Color color, Vector2 gameObjPos, int numTokens)
+    private void AnimateTokens(Color color, GameObject gameObj, int numTokens)
     {
         // Viewport pos is in [0, 1] where (0, 0) is bottom right
-        Vector2 viewportPos = Camera.main.WorldToViewportPoint(gameObjPos);
+        Vector2 viewportPos = Camera.main.WorldToViewportPoint(gameObject.transform.position);
         // GUI pos has (0, 0) is top left
         Vector2 pos = new Vector2(viewportPos.x * Screen.width, (1 - viewportPos.y) * Screen.height);
         

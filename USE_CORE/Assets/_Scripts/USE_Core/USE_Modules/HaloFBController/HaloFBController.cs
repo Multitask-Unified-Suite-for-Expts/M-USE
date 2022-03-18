@@ -15,20 +15,20 @@ public class HaloFBController : MonoBehaviour
         instantiated = null;
     }
 
-    public void ShowPositive(Transform pos) {
-        Show(PositiveHaloPrefab, pos);
+    public void ShowPositive(GameObject gameObj) {
+        Show(PositiveHaloPrefab, gameObj);
     }
     
-    public void ShowNegative(Transform pos) {
-        Show(NegativeHaloPrefab, pos);
+    public void ShowNegative(GameObject gameObj) {
+        Show(NegativeHaloPrefab, gameObj);
     }
 
-    private void Show(GameObject haloPrefab, Transform pos) {
+    private void Show(GameObject haloPrefab, GameObject gameObj) {
         if (instantiated != null) {
             Debug.LogWarning("Trying to show HaloFB but one is already being shown");
             Destroy(instantiated);
         }
-        instantiated = Instantiate(haloPrefab, pos);
+        instantiated = Instantiate(haloPrefab, gameObj.transform);
     }
 
     public void Destroy() {

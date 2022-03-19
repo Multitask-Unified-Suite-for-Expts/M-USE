@@ -36,7 +36,7 @@ namespace WhatWhenWhere_Namespace
             
             for (int iTrial = 0; iTrial< TrialDefs.Length; iTrial++)
             {
-                WhatWhenWhere_TrialDef td = (WhatWhenWhere_TrialDef)TrialDefs[iTrial];
+                WhatWhenWhere_TrialDef td = new WhatWhenWhere_TrialDef();
                 td.Context = Context;
                 td.CorrectObjectTouchOrder = CorrectObjectTouchOrder;
                 td.PlayFeedbackSound_Correct = PlayFeedbackSound_Correct;
@@ -45,6 +45,7 @@ namespace WhatWhenWhere_Namespace
                 td.MaxTouchDuration = MaxTouchDuration;
                 td.SearchStimsIndices = SearchStimsIndices;
                 td.SearchStimsLocations = SearchStimsLocations;
+                TrialDefs[iTrial] = td;
             }
         }
     }

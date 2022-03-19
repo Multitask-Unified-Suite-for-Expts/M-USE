@@ -44,7 +44,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private List<Vector3> touchPositionsList; 
     private string touchPositionsString;
 
-    private bool restart = false;
+    
     private int trialNum = 0;
     private SpriteRenderer sr;
     //private Color originalColor;
@@ -52,15 +52,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private bool timingFail = false;
     private float initialTouchTime = 0;
     private float touchDuration = 0;
-    private int min;
-    private int max;
-    private int tCount = 0;
     private int initialClick = 0;
 
 
 
     [HideInInspector]
-    [System.NonSerialized] public int response = -1, trialCount = -1;
+    [System.NonSerialized] public int response = -1;
     // vector3 variables
     private Vector3 trialStimInitLocalScale;
     private Vector3 fbInitLocalScale;
@@ -106,16 +103,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddInitializationMethod(() =>
         {
             //++tCount;
-            
 
-            Debug.Log("TRIALNUM: " + trialNum);
-            Debug.Log("tCount: " + tCount);
-            if (restart)
-            {
-                Debug.Log("TRIALCOUNT: " + TrialCount_InBlock);
-                TrialCount_InBlock--;
-            }
-            ++trialNum;
+            stimCount = 0;
+
+            slotError = 0;
+            totalErrors = 0;
+            repetitionError = 0;
+            touchDurationError = 0;
+            initialClick = 0;
+            stimCount = 0;
         });
 
         SetupTrial.SpecifyTermination(() => true, StartButton);
@@ -124,16 +120,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // define initScreen state
         StartButton.AddInitializationMethod(() =>
         {
-            // min = CurrentTrialDef.nRepetitionsMinMax[0];
-            // max = CurrentTrialDef.nRepetitionsMinMax[1];
-            min = 3;
-            max = 6;
-
-            if (restart)
-            {
-                trialCount++;
-            }
-
+            
             Camera.main.backgroundColor = new Color(1f, 1f, 1f);
 
             ResetRelativeStartTime();
@@ -255,7 +242,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         timingFail = true;
                         touchDurationError += 1;
                         totalErrors += 1;
-                        restart = true;
+                       
                         touchedObjects.Add(testStim.name);
                     }
 
@@ -270,7 +257,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         touchedObjects.Add(testStim.name);
                         imageCorrectObject.transform.position = testStim.transform.position;
                         correctChoice = true;
-                        restart = false;
+                       
                     }
                     else if (touchedObjects.Contains(testStim.name))
                     {
@@ -285,8 +272,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
                         numTotal[correctIndex]++;
                         numErrors[correctIndex]++;
-
-                        restart = true;
+                        
                         incorrectChoice = true;
                     }
                     else
@@ -301,13 +287,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
                         numTotal[correctIndex]++;
                         numErrors[correctIndex]++;
-
-                        restart = true;
+                        
                         incorrectChoice = true;
                     }
                     
                     // progress report
-                    Debug.Log(restart);
+                    
                     string errLog = "";
                     for (int i = 0; i < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++i)
                     {
@@ -399,7 +384,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             correctChoice = false;
             sliderHalo.SetActive(false);
         });
-       // StimulusChosen.SpecifyTermination(() => (correctChoice && Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute >= 0.75f && stimCount == CurrentTrialDef.CorrectObjectTouchOrder.Length), ITI);
+       
         StimulusChosen.SpecifyTermination(() => (incorrectChoice && Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute >= 0.75f), ITI, () =>
         {
             imageIncorrectObject.SetActive(false);
@@ -440,12 +425,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             txt.SetActive(false);
             sliderHalo.SetActive(false);
 
-            slotError = 0;
-            totalErrors = 0;
-            repetitionError = 0;
-            touchDurationError = 0;
-            initialClick = 0;
-            stimCount = 0;
         });
 
         //Define iti state
@@ -456,31 +435,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             Camera.main.backgroundColor = Color.white;
             txt.SetActive(false);
             touchedObjects.Clear();
-           /* if (tCount < min)
-            {
-                restart = true;
-            }
-
-            Debug.Log("TC: " + tCount);
-            Debug.Log("max: " + max);
-
-            if (tCount == max)
-            {
-                restart = false;
-            }
-
-            if (restart == false)
-            {
-                tCount = 0;
-            }
-
-            */
+           
 
         });
         ITI.SpecifyTermination(() => true, FinishTrial, () => Debug.Log("Trial" + CurrentTrialDef.TrialNum + " completed"));
         
-        TrialData.AddDatum("TrialNum", () => trialNum);
-        TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
+        //TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
+        TrialData.AddDatum("Context", () => context);
         TrialData.AddDatum("TouchedObjects", () => touchedObjectsNames);
         TrialData.AddDatum("TouchDurationError", () => touchDurationError);
         TrialData.AddDatum("SlotError", () => slotError);

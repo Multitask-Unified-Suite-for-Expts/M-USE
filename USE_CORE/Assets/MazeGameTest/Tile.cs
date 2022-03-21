@@ -25,10 +25,10 @@ public class Tile : MonoBehaviour
     void OnMouseDown()
     {
         int correctnessCode;
-        correctnessCode = CognitiveMaze_TrialLevel.ManageTileTouch(this);
+        correctnessCode = MazeGame_TrialLevel.ManageTileTouch(this);
         if(correctnessCode == 99)
         {
-            CognitiveMaze_TrialLevel.setEnd(correctnessCode);
+            MazeGame_TrialLevel.setEnd(correctnessCode);
         }
         StartCoroutine(ColorFeedback(correctnessCode));
     }

@@ -56,6 +56,8 @@ public class MazeVisible : MonoBehaviour
 
          if(count != 0)
          {
+            Debug.Log("destroy");
+
             DestroyCurrMaze();
          }
 
@@ -120,8 +122,10 @@ public class MazeVisible : MonoBehaviour
                 instTile.transform.SetParent(this.transform);
             }
         }
+        Debug.Log("end");
+
     }
-    
+
 
     void DestroyCurrMaze()
     {

@@ -7,6 +7,7 @@ using test_Namespace;
 using WorkingMemory_Namespace;
 using VisualSearch_Namespace;
 // using EC_Namespace;
+using MazeGame_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -82,6 +83,17 @@ static public class USE_Tasks_CustomTypes
         }
 
         
+        ,{
+            "MazeGame", new TaskTypes
+            {
+                TaskLevelType = typeof(MazeGame_TaskLevel),
+                TrialLevelType = typeof(MazeGame_TrialLevel),
+                TaskDefType = typeof(MazeGame_TaskDef),
+                BlockDefType = typeof(MazeGame_BlockDef),
+                TrialDefType = typeof(MazeGame_TrialDef),
+                StimDefType = typeof(MazeGame_StimDef)
+            }
+        }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#
     };
 

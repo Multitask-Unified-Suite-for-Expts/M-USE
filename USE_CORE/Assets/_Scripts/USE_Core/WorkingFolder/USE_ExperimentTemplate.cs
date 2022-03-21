@@ -1245,6 +1245,10 @@ namespace USE_ExperimentTemplate
 		public virtual void AddToTrialDefsFromBlockDef()
 		{
 		}
+
+		public virtual void BlockInitializationMethod()
+		{
+		}
 	}
 	public abstract class TrialDef
 	{

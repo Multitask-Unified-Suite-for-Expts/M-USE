@@ -1,22 +1,43 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class AudioFBController : MonoBehaviour
 {
-    public AudioClip PositiveSound;
-    public AudioClip NegativeSound;
+    public Dictionary<string, AudioClip> clips;
+
+    public AudioClip PositiveClip;
+    public AudioClip NegativeClip;
 
     private AudioSource audioSource;
 
     public void Init() {
         audioSource = GameObject.FindWithTag("MainCamera").AddComponent<AudioSource>();
+        clips = new Dictionary<string, AudioClip>();
+        
+        if (PositiveClip == null) {
+            Debug.LogWarning("No positive clip specified");
+        } else {
+            Add("Positive", PositiveClip);
+        }
+
+        if (NegativeClip == null) {
+            Debug.LogWarning("No negative clip specified");
+        } else {
+            Add("Negative", NegativeClip);
+        }
     }
 
-    public void PlayPositive() {
-        audioSource.PlayOneShot(PositiveSound);
+    public AudioFBController Add(string clipName, AudioClip clip) {
+        clips.Add(clipName, clip);
+        return this;
     }
-    
-    public void PlayNegative() {
-        audioSource.PlayOneShot(NegativeSound);
+
+    public void Play(string clipName) {
+        if (clips.TryGetValue(clipName, out AudioClip clip)) {
+            audioSource.PlayOneShot(clip);
+        } else {
+            Debug.LogWarning("Trying to play clip " + clipName + " but it has not been added");
+        }
     }
 
     public bool IsPlaying() {

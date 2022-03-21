@@ -107,10 +107,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         {
             HaloFBController.Destroy();
             if (correct) {
-                AudioFBController.PlayPositive();
+                AudioFBController.Play("Positive");
                 TokenFBController.AddTokens(selected, 3);
             } else {
-                AudioFBController.PlayNegative();
+                AudioFBController.Play("Negative");
             }
         });
         tokenFeedback.SpecifyTermination(() => !(TokenFBController.IsAnimating() || AudioFBController.IsPlaying()), trialEnd);

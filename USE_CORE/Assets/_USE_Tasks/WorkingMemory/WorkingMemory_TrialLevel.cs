@@ -12,8 +12,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     private StimGroup sampleStims, targetStims, postSampleDistractorStims, targetDistractorStims;
 
     public GameObject StartButton;
-    public GameObject YellowHaloPrefab;
-    public GameObject GrayHaloPrefab;
 
     public override void DefineControlLevel()
     {
@@ -43,7 +41,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             StartButton.SetActive(true);
             if (firstTime)
             {
-                TokenFeedbackController.Initialize(5, CurrentTrialDef.tokenRevealDuration, CurrentTrialDef.tokenUpdateDuration);
+                AudioFBController.Init();
+                HaloFBController.Init();
+                TokenFBController.Init(5, CurrentTrialDef.tokenRevealDuration, CurrentTrialDef.tokenUpdateDuration);
                 firstTime = false;
             }
         });
@@ -94,28 +94,26 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         searchDisplay.SpecifyTermination(() => selected != null, selectionFeedback);
         searchDisplay.AddTimer(() => CurrentTrialDef.maxSearchDuration, FinishTrial);
 
-        GameObject halo = null;
         selectionFeedback.AddInitializationMethod(() =>
         {
             if (!selected) return;
-            if (correct)
-            {
-                halo = Instantiate(YellowHaloPrefab, selected.transform);
-            }
-            else
-            {
-                halo = Instantiate(GrayHaloPrefab, selected.transform);
-            }
+            if (correct) HaloFBController.ShowPositive(selected);
+            else HaloFBController.ShowNegative(selected);
         });
         selectionFeedback.AddTimer(() => CurrentTrialDef.selectionFbDuration, tokenFeedback);
 
         // The state that will handle the token feedback and wait for any animations
         tokenFeedback.AddInitializationMethod(() =>
         {
-            Destroy(halo);
-            if (correct) TokenFeedbackController.AddTokens(selected.transform.position, 3);
+            HaloFBController.Destroy();
+            if (correct) {
+                AudioFBController.PlayPositive();
+                TokenFBController.AddTokens(selected, 3);
+            } else {
+                AudioFBController.PlayNegative();
+            }
         });
-        tokenFeedback.SpecifyTermination(() => !TokenFeedbackController.IsAnimating(), trialEnd);
+        tokenFeedback.SpecifyTermination(() => !(TokenFBController.IsAnimating() || AudioFBController.IsPlaying()), trialEnd);
 
         // Wait for some time at the end
         trialEnd.AddTimer(() => CurrentTrialDef.trialEndDuration, FinishTrial);

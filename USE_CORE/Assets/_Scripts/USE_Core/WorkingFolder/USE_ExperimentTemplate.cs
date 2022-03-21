@@ -818,7 +818,11 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public TaskStims TaskStims;
 		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims, RuntimeStims;
 		[HideInInspector] public List<StimGroup> TrialStims;
-		public TokenFeedbackController TokenFeedbackController;
+		
+		// Feedback Controllers
+		public AudioFBController AudioFBController;
+		public HaloFBController HaloFBController;
+		public TokenFBController TokenFBController;
 
 		//protected TrialDef CurrentTrialDef;
 		protected T GetCurrentTrialDef<T>() where T : TrialDef

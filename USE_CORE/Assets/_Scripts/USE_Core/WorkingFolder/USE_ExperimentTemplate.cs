@@ -395,6 +395,7 @@ namespace USE_ExperimentTemplate
 			{
 				BlockCount = -1;
 				TaskCam.gameObject.SetActive(true);
+				//init fb controllers here
 			});
 
 			setupTask.SpecifyTermination(() => true, runBlock);
@@ -486,6 +487,7 @@ namespace USE_ExperimentTemplate
 
 			//AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
 
+			//assign fb controllers for triallevel here
 			TrialLevel.SessionDataControllers = SessionDataControllers;
 			TrialLevel.FilePrefix = FilePrefix;
 			TrialLevel.TaskStims = TaskStims;

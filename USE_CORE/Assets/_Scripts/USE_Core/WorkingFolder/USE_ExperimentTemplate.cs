@@ -145,17 +145,23 @@ namespace USE_ExperimentTemplate
 
 			//tasksFinished is a placeholder, eventually there will be a proper task selection screen
 			bool tasksFinished = false;
+			string CurrentTaskName = "";
 			selectTask.AddUniversalInitializationMethod(() =>
 			{
 				SessionCam.gameObject.SetActive(true);
 				tasksFinished = false;
 				if (taskCount < ActiveTaskLevels.Count)
-					CurrentTask = ActiveTaskLevels[taskCount]; //ActiveTaskLevels[AvailableTaskLevels[taskCount].TaskName];
+					CurrentTask = ActiveTaskLevels[taskCount];
 				else
 					tasksFinished = true;
+				//replace with 
+				//if(taskCount >= ActiveTaskLevels.Count)
+				//	tasksFinished = true;
 			});
+			//selectTask.AddUpdateMethod( get string of CurrentTaskName from button press);
 			selectTask.SpecifyTermination(() => !tasksFinished, runTask, () =>
 			{
+				CurrentTask = GetTaskLevelFromString<ActiveTaskTypes[CurrentTaskName]>("dsgsgd");
 				runTask.AddChildLevel(CurrentTask);
 				SessionCam.gameObject.SetActive(false);
 				SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
@@ -184,6 +190,12 @@ namespace USE_ExperimentTemplate
 			SessionData.sessionLevel = this;
 			SessionData.InitDataController();
 			SessionData.ManuallyDefine();
+
+			ControlLevel_Task_Template GetTaskLevelFromString<T>(string taskName)
+				where T : ControlLevel_Task_Template
+			{
+				return null;
+			}
 		}
 
 		ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl)

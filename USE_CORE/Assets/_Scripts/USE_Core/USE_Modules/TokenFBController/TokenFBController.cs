@@ -34,9 +34,12 @@ public class TokenFBController : MonoBehaviour
     private float revealTime; // How long to show the tokens before animating
     private float updateTime; // How long each token update animation should take
     private float flashingTime; // How long the token bar should flash when it fills up
+    // Audio
+    AudioFBController audioFBController;
 
-    public void Init(int numTokens, float revealTime, float updateTime, float flashingTime = 0.5f)
+    public void Init(AudioFBController audioFBController, int numTokens, float revealTime, float updateTime, float flashingTime = 0.5f)
     {
+        this.audioFBController = audioFBController;
         numCollected = 0;
         totalTokensNum = numTokens;
         this.revealTime = revealTime;
@@ -53,6 +56,9 @@ public class TokenFBController : MonoBehaviour
             width,
             tokenSize + 2 * tokenBoxPadding
         );
+
+        PositiveShowAudioClip(audioFBController.PositiveClip);
+        NegativeShowAudioClip(audioFBController.NegativeClip);
     }
 
     public void AddTokens(GameObject gameObj, int numTokens)
@@ -105,7 +111,7 @@ public class TokenFBController : MonoBehaviour
 
     public bool IsAnimating()
     {
-        return animationPhase != AnimationPhase.None;
+        return animationPhase != AnimationPhase.None || audioFBController.IsPlaying();
     }
 
     public void Update()
@@ -124,6 +130,11 @@ public class TokenFBController : MonoBehaviour
                     animationEndTime += updateTime;
                     break;
                 case AnimationPhase.Update:
+                   if (tokensChange < 0) {
+                        audioFBController.Play("NegativeUpdate");
+                    } else {
+                        audioFBController.Play("PositiveUpdate");
+                    }
                     numCollected += tokensChange;
                     animationPhase = AnimationPhase.None;
                     if (numCollected >= totalTokensNum)
@@ -133,6 +144,7 @@ public class TokenFBController : MonoBehaviour
                     }
                     break;
                 case AnimationPhase.Flashing:
+                    audioFBController.Play("Flashing");
                     numCollected = 0;
                     animationPhase = AnimationPhase.None;
                     break;
@@ -155,11 +167,36 @@ public class TokenFBController : MonoBehaviour
         }
     }
 
+    public TokenFBController PositiveShowAudioClip(AudioClip clip) {
+        audioFBController.Set("PositiveShow", clip);
+        return this;
+    }
+    
+    public TokenFBController NegativeShowAudioClip(AudioClip clip) {
+        audioFBController.Set("NegativeShow", clip);
+        return this;
+    }
+
+    public TokenFBController PositiveUpdateAudioClip(AudioClip clip) {
+        audioFBController.Set("PositiveUpdate", clip);
+        return this;
+    }
+
+    public TokenFBController NegativeUpdateAudioClip(AudioClip clip) {
+        audioFBController.Set("NegativeUpdate", clip);
+        return this;
+    }
+
+    public TokenFBController FlashingAudioClip(AudioClip clip) {
+        audioFBController.Set("Flashing", clip);
+        return this;
+    }
+
     // gameObjPos should be at the center of the object
     private void AnimateTokens(Color color, GameObject gameObj, int numTokens)
     {
         // Viewport pos is in [0, 1] where (0, 0) is bottom right
-        Vector2 viewportPos = Camera.main.WorldToViewportPoint(gameObject.transform.position);
+        Vector2 viewportPos = Camera.main.WorldToViewportPoint(gameObj.transform.position);
         // GUI pos has (0, 0) is top left
         Vector2 pos = new Vector2(viewportPos.x * Screen.width, (1 - viewportPos.y) * Screen.height);
         
@@ -185,6 +222,11 @@ public class TokenFBController : MonoBehaviour
         animatedTokensColor = color;
 
         // Start the animation phase state machine with the first state
+        if (tokensChange < 0) {
+            audioFBController.Play("NegativeShow");
+        } else {
+            audioFBController.Play("PositiveShow");
+        }
         animationPhase = AnimationPhase.Show;
         animationStartTime = Time.unscaledTime;
         animationEndTime = animationStartTime + revealTime;

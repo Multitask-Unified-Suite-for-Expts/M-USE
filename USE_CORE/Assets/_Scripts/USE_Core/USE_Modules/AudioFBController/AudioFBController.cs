@@ -17,18 +17,18 @@ public class AudioFBController : MonoBehaviour
         if (PositiveClip == null) {
             Debug.LogWarning("No positive clip specified");
         } else {
-            Add("Positive", PositiveClip);
+            Set("Positive", PositiveClip);
         }
 
         if (NegativeClip == null) {
             Debug.LogWarning("No negative clip specified");
         } else {
-            Add("Negative", NegativeClip);
+            Set("Negative", NegativeClip);
         }
     }
 
-    public AudioFBController Add(string clipName, AudioClip clip) {
-        clips.Add(clipName, clip);
+    public AudioFBController Set(string clipName, AudioClip clip) {
+        clips[clipName] = clip;
         return this;
     }
 

@@ -43,7 +43,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             {
                 AudioFBController.Init();
                 HaloFBController.Init();
-                TokenFBController.Init(5, CurrentTrialDef.tokenRevealDuration, CurrentTrialDef.tokenUpdateDuration);
+                TokenFBController.Init(AudioFBController, 5, CurrentTrialDef.tokenRevealDuration, CurrentTrialDef.tokenUpdateDuration);
                 firstTime = false;
             }
         });
@@ -107,13 +107,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         {
             HaloFBController.Destroy();
             if (correct) {
-                AudioFBController.Play("Positive");
                 TokenFBController.AddTokens(selected, 3);
             } else {
                 AudioFBController.Play("Negative");
             }
         });
-        tokenFeedback.SpecifyTermination(() => !(TokenFBController.IsAnimating() || AudioFBController.IsPlaying()), trialEnd);
+        tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), trialEnd);
 
         // Wait for some time at the end
         trialEnd.AddTimer(() => CurrentTrialDef.trialEndDuration, FinishTrial);

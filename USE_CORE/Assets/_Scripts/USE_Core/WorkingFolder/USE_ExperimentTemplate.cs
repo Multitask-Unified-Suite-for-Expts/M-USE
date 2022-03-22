@@ -381,6 +381,7 @@ namespace USE_ExperimentTemplate
 
 		public Type TaskLevelType;
 		protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
+		protected State SetupTask, RunBlock, BlockFeedback, FinishTask;
 
 		public virtual void SpecifyTypes()
 		{
@@ -398,12 +399,12 @@ namespace USE_ExperimentTemplate
 			ReadSettingsFiles();
 			FindStims();
 
-			State setupTask = new State("SetupTask");
-			State runBlock = new State("RunBlock");
-			State blockFeedback = new State("BlockFeedback");
-			State finishTask = new State("FinishTask");
-			runBlock.AddChildLevel(TrialLevel);
-			AddActiveStates(new List<State> {setupTask, runBlock, blockFeedback, finishTask});
+			SetupTask = new State("SetupTask");
+			RunBlock = new State("RunBlock");
+			BlockFeedback = new State("BlockFeedback");
+			FinishTask = new State("FinishTask");
+			RunBlock.AddChildLevel(TrialLevel);
+			AddActiveStates(new List<State> {SetupTask, RunBlock, BlockFeedback, FinishTask});
 
 			TrialLevel.TrialDefType = TrialDefType;
 			TrialLevel.StimDefType = StimDefType;
@@ -415,9 +416,9 @@ namespace USE_ExperimentTemplate
 				//init fb controllers here
 			});
 
-			setupTask.SpecifyTermination(() => true, runBlock);
+			SetupTask.SpecifyTermination(() => true, SetupTask);
 
-			runBlock.AddUniversalInitializationMethod(() =>
+			RunBlock.AddUniversalInitializationMethod(() =>
 			{
 				BlockCount++;
 				CurrentBlockDef = BlockDefs[BlockCount];
@@ -427,23 +428,23 @@ namespace USE_ExperimentTemplate
 				TrialLevel.TrialDefs = CurrentBlockDef.TrialDefs;
 			});
 
-			runBlock.AddLateUpdateMethod(() => FrameData.AppendData());
+			RunBlock.AddLateUpdateMethod(() => FrameData.AppendData());
 
-			runBlock.SpecifyTermination(() => TrialLevel.Terminated, blockFeedback);
+			RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
 
-			blockFeedback.AddLateUpdateMethod(() => FrameData.AppendData());
-			blockFeedback.SpecifyTermination(() => BlockCount < BlockDefs.Length - 1, runBlock, () =>
+			BlockFeedback.AddLateUpdateMethod(() => FrameData.AppendData());
+			BlockFeedback.SpecifyTermination(() => BlockCount < BlockDefs.Length - 1, RunBlock, () =>
 			{
 				BlockData.AppendData();
 				BlockData.WriteData();
 			});
-			blockFeedback.SpecifyTermination(() => BlockCount == BlockDefs.Length - 1, finishTask, () =>
+			BlockFeedback.SpecifyTermination(() => BlockCount == BlockDefs.Length - 1, FinishTask, () =>
 			{
 				BlockData.AppendData();
 				BlockData.WriteData();
 			});
 
-			finishTask.SpecifyTermination(() => true, ()=> null);
+			FinishTask.SpecifyTermination(() => true, ()=> null);
 
 			AddDefaultTerminationMethod(() =>
 			{

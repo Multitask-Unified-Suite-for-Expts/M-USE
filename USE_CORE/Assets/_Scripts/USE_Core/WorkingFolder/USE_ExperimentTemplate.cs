@@ -161,7 +161,9 @@ namespace USE_ExperimentTemplate
 			//selectTask.AddUpdateMethod( get string of CurrentTaskName from button press);
 			selectTask.SpecifyTermination(() => !tasksFinished, runTask, () =>
 			{
-				CurrentTask = GetTaskLevelFromString<ActiveTaskTypes[CurrentTaskName]>("dsgsgd");
+				// var methodInfo = GetType().GetMethod(nameof(GetTaskLevelFromString));
+				// MethodInfo getTaskLevel = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[CurrentTaskName]});
+				// getTaskLevel.Invoke(this, new object[0]);
 				runTask.AddChildLevel(CurrentTask);
 				SessionCam.gameObject.SetActive(false);
 				SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
@@ -191,10 +193,13 @@ namespace USE_ExperimentTemplate
 			SessionData.InitDataController();
 			SessionData.ManuallyDefine();
 
-			ControlLevel_Task_Template GetTaskLevelFromString<T>(string taskName)
+			void GetTaskLevelFromString<T>()
 				where T : ControlLevel_Task_Template
 			{
-				return null;
+				foreach (ControlLevel_Task_Template taskLevel in ActiveTaskLevels)
+					if (taskLevel.GetType() == typeof(T))
+						CurrentTask =  taskLevel;
+				CurrentTask = null;
 			}
 		}
 

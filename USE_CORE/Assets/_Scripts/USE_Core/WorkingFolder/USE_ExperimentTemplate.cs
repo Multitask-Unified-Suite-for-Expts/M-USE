@@ -37,7 +37,7 @@ namespace USE_ExperimentTemplate
 		private Camera SessionCam;
 
 		private string configFileFolder;
-		private bool TaskSceneLoaded;
+		private bool TaskSceneLoaded, SceneLoading;
 		
 		public override void LoadSettings()
 		{
@@ -88,68 +88,82 @@ namespace USE_ExperimentTemplate
 			int iTask = 0;
 			bool oldStyleTaskLoading = false;
 			bool newStyleTaskLoading = false;
-			bool sceneLoaded = false;
+			SceneLoading = false;
 			string taskName;
 			setupSession.AddUpdateMethod(() =>
 			{
-				oldStyleTaskLoading = false;
 				if (iTask < ActiveTaskNames.Count)
 				{
-					int iAvail = 0;
-					while (iAvail < AvailableTaskLevels.Count)
+					if (!SceneLoading)
 					{
-						if (AvailableTaskLevels[iAvail].TaskName == ActiveTaskNames[iTask])
+						oldStyleTaskLoading = false;
+						newStyleTaskLoading = false;
+						int iAvail = 0;
+						while (iAvail < AvailableTaskLevels.Count)
 						{
-							oldStyleTaskLoading = true;
-							break;
+							if (AvailableTaskLevels[iAvail].TaskName == ActiveTaskNames[iTask])
+							{
+								oldStyleTaskLoading = true;
+								break;
+							}
+
+							iAvail++;
 						}
 
-						iAvail++;
-					}
-
-					ControlLevel_Task_Template tl;
-					AsyncOperation loadScene;
-					if (oldStyleTaskLoading)
-					{
-						tl = PopulateTaskLevel(AvailableTaskLevels[iAvail]);
-						taskName = tl.TaskName;
-						loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-						loadScene.completed += (_)=> SceneLoaded(taskName);
-					}
-					else
-					{
-						if (!newStyleTaskLoading)
+						ControlLevel_Task_Template tl;
+						AsyncOperation loadScene;
+						if (oldStyleTaskLoading)
 						{
-							newStyleTaskLoading = true;
-							taskName = ActiveTaskNames[iTask];
+							SceneLoading = true;
+							tl = PopulateTaskLevel(AvailableTaskLevels[iAvail]);
+							taskName = tl.TaskName;
 							loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-							loadScene.completed += (_) => SceneLoadedNew(taskName);
+							loadScene.completed += (_) => SceneLoaded(taskName);
 						}
 						else
 						{
-							
-						}
-					}
+							if (!newStyleTaskLoading)
+							{
+								SceneLoading = true;
+								newStyleTaskLoading = true;
+								taskName = ActiveTaskNames[iTask];
+								loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
+								loadScene.completed += (_) => SceneLoadedNew(taskName);
+							}
+							else
+							{
 
-					iTask++;
-					TaskSceneLoaded = false;
+							}
+						}
+
+						iTask++;
+						// TaskSceneLoaded = false;
+					}
 				}
 			});
-			setupSession.SpecifyTermination(() => iTask >= ActiveTaskNames.Count && TaskSceneLoaded, selectTask);
+			setupSession.SpecifyTermination(() => iTask >= ActiveTaskNames.Count && !SceneLoading, selectTask);
 
 			//tasksFinished is a placeholder, eventually there will be a proper task selection screen
 			bool tasksFinished = false;
+			string CurrentTaskName = "";
 			selectTask.AddUniversalInitializationMethod(() =>
 			{
 				SessionCam.gameObject.SetActive(true);
 				tasksFinished = false;
 				if (taskCount < ActiveTaskLevels.Count)
-					CurrentTask = ActiveTaskLevels[taskCount]; //ActiveTaskLevels[AvailableTaskLevels[taskCount].TaskName];
+					CurrentTask = ActiveTaskLevels[taskCount];
 				else
 					tasksFinished = true;
+				//replace with 
+				//if(taskCount >= ActiveTaskLevels.Count)
+				//	tasksFinished = true;
 			});
+			//selectTask.AddUpdateMethod( get string of CurrentTaskName from button press);
 			selectTask.SpecifyTermination(() => !tasksFinished, runTask, () =>
 			{
+				// var methodInfo = GetType().GetMethod(nameof(GetTaskLevelFromString));
+				// MethodInfo getTaskLevel = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[CurrentTaskName]});
+				// getTaskLevel.Invoke(this, new object[0]);
 				runTask.AddChildLevel(CurrentTask);
 				SessionCam.gameObject.SetActive(false);
 				SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
@@ -178,6 +192,15 @@ namespace USE_ExperimentTemplate
 			SessionData.sessionLevel = this;
 			SessionData.InitDataController();
 			SessionData.ManuallyDefine();
+
+			void GetTaskLevelFromString<T>()
+				where T : ControlLevel_Task_Template
+			{
+				foreach (ControlLevel_Task_Template taskLevel in ActiveTaskLevels)
+					if (taskLevel.GetType() == typeof(T))
+						CurrentTask =  taskLevel;
+				CurrentTask = null;
+			}
 		}
 
 		ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl)
@@ -213,7 +236,8 @@ namespace USE_ExperimentTemplate
 			var methodInfo = GetType().GetMethod(nameof(this.FindTaskCam));
 			MethodInfo findTaskCam = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[sceneName]});
 			findTaskCam.Invoke(this, new object[] {sceneName});
-			TaskSceneLoaded = true;
+			// TaskSceneLoaded = true;
+			SceneLoading = false;
 		}
 
 		void SceneLoadedNew(string taskName)
@@ -222,11 +246,13 @@ namespace USE_ExperimentTemplate
 			Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
 			MethodInfo prepareTaskLevel = methodInfo.MakeGenericMethod(new Type[] {taskType});
 			prepareTaskLevel.Invoke(this, new object[] {taskName});
-			TaskSceneLoaded = true;
+			// TaskSceneLoaded = true;
+			SceneLoading = false;
 		}
 		
 		public void PrepareTaskLevel<T>(string taskName) where T : ControlLevel_Task_Template
 		{
+			Debug.Log(taskName);
 			ControlLevel_Task_Template tl = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
 			tl = PopulateTaskLevel(tl);
 			if(tl.TaskCam == null)
@@ -355,6 +381,7 @@ namespace USE_ExperimentTemplate
 
 		public Type TaskLevelType;
 		protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
+		protected State SetupTask, RunBlock, BlockFeedback, FinishTask;
 
 		public virtual void SpecifyTypes()
 		{
@@ -372,12 +399,12 @@ namespace USE_ExperimentTemplate
 			ReadSettingsFiles();
 			FindStims();
 
-			State setupTask = new State("SetupTask");
-			State runBlock = new State("RunBlock");
-			State blockFeedback = new State("BlockFeedback");
-			State finishTask = new State("FinishTask");
-			runBlock.AddChildLevel(TrialLevel);
-			AddActiveStates(new List<State> {setupTask, runBlock, blockFeedback, finishTask});
+			SetupTask = new State("SetupTask");
+			RunBlock = new State("RunBlock");
+			BlockFeedback = new State("BlockFeedback");
+			FinishTask = new State("FinishTask");
+			RunBlock.AddChildLevel(TrialLevel);
+			AddActiveStates(new List<State> {SetupTask, RunBlock, BlockFeedback, FinishTask});
 
 			TrialLevel.TrialDefType = TrialDefType;
 			TrialLevel.StimDefType = StimDefType;
@@ -386,11 +413,12 @@ namespace USE_ExperimentTemplate
 			{
 				BlockCount = -1;
 				TaskCam.gameObject.SetActive(true);
+				//init fb controllers here
 			});
 
-			setupTask.SpecifyTermination(() => true, runBlock);
+			SetupTask.SpecifyTermination(() => true, SetupTask);
 
-			runBlock.AddUniversalInitializationMethod(() =>
+			RunBlock.AddUniversalInitializationMethod(() =>
 			{
 				BlockCount++;
 				CurrentBlockDef = BlockDefs[BlockCount];
@@ -400,23 +428,23 @@ namespace USE_ExperimentTemplate
 				TrialLevel.TrialDefs = CurrentBlockDef.TrialDefs;
 			});
 
-			runBlock.AddLateUpdateMethod(() => FrameData.AppendData());
+			RunBlock.AddLateUpdateMethod(() => FrameData.AppendData());
 
-			runBlock.SpecifyTermination(() => TrialLevel.Terminated, blockFeedback);
+			RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
 
-			blockFeedback.AddLateUpdateMethod(() => FrameData.AppendData());
-			blockFeedback.SpecifyTermination(() => BlockCount < BlockDefs.Length - 1, runBlock, () =>
+			BlockFeedback.AddLateUpdateMethod(() => FrameData.AppendData());
+			BlockFeedback.SpecifyTermination(() => BlockCount < BlockDefs.Length - 1, RunBlock, () =>
 			{
 				BlockData.AppendData();
 				BlockData.WriteData();
 			});
-			blockFeedback.SpecifyTermination(() => BlockCount == BlockDefs.Length - 1, finishTask, () =>
+			BlockFeedback.SpecifyTermination(() => BlockCount == BlockDefs.Length - 1, FinishTask, () =>
 			{
 				BlockData.AppendData();
 				BlockData.WriteData();
 			});
 
-			finishTask.SpecifyTermination(() => true, ()=> null);
+			FinishTask.SpecifyTermination(() => true, ()=> null);
 
 			AddDefaultTerminationMethod(() =>
 			{
@@ -477,6 +505,7 @@ namespace USE_ExperimentTemplate
 
 			//AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
 
+			//assign fb controllers for triallevel here
 			TrialLevel.SessionDataControllers = SessionDataControllers;
 			TrialLevel.FilePrefix = FilePrefix;
 			TrialLevel.TaskStims = TaskStims;
@@ -809,6 +838,11 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public TaskStims TaskStims;
 		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims, RuntimeStims;
 		[HideInInspector] public List<StimGroup> TrialStims;
+		
+		// Feedback Controllers
+		public AudioFBController AudioFBController;
+		public HaloFBController HaloFBController;
+		public TokenFBController TokenFBController;
 
 		//protected TrialDef CurrentTrialDef;
 		protected T GetCurrentTrialDef<T>() where T : TrialDef
@@ -1233,6 +1267,10 @@ namespace USE_ExperimentTemplate
 		}
 
 		public virtual void AddToTrialDefsFromBlockDef()
+		{
+		}
+
+		public virtual void BlockInitializationMethod()
 		{
 		}
 	}

@@ -42,7 +42,8 @@ namespace WorkingMemory_Namespace
             preTargetDelayDuration,
             maxSearchDuration,
             selectionFbDuration,
-            tokenFbDuration,
+            tokenRevealDuration,
+            tokenUpdateDuration,
             trialEndDuration;
     }
 

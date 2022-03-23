@@ -14,7 +14,7 @@ public class TokenFBController : MonoBehaviour
     private readonly Color colorFlashing1 = Color.blue;
     private readonly Color colorFlashing2 = Color.red;
     // Token Counts
-    private int totalTokensNum = -1;
+    private int totalTokensNum = 5;
     private int numCollected = 0;
     // Rendering
     private Rect tokenBoxRect;
@@ -31,20 +31,16 @@ public class TokenFBController : MonoBehaviour
     private Color tokenBoxColor;
     private float animationStartTime;
     private float animationEndTime;
-    private float revealTime; // How long to show the tokens before animating
-    private float updateTime; // How long each token update animation should take
-    private float flashingTime; // How long the token bar should flash when it fills up
+    private float revealTime = 0.4f; // How long to show the tokens before animating
+    private float updateTime = 0.3f; // How long each token update animation should take
+    private float flashingTime = 0.5f; // How long the token bar should flash when it fills up
     // Audio
     AudioFBController audioFBController;
 
-    public void Init(AudioFBController audioFBController, int numTokens, float revealTime, float updateTime, float flashingTime = 0.5f)
+    public void Init(AudioFBController audioFBController)
     {
         this.audioFBController = audioFBController;
         numCollected = 0;
-        totalTokensNum = numTokens;
-        this.revealTime = revealTime;
-        this.updateTime = updateTime;
-        this.flashingTime = flashingTime;
 
         whiteStyle = new GUIStyle();
         whiteStyle.normal.background = Texture2D.whiteTexture;
@@ -57,8 +53,8 @@ public class TokenFBController : MonoBehaviour
             tokenSize + 2 * tokenBoxPadding
         );
 
-        PositiveShowAudioClip(audioFBController.PositiveClip);
-        NegativeShowAudioClip(audioFBController.NegativeClip);
+        SetPositiveShowAudioClip(audioFBController.PositiveClip);
+        SetNegativeShowAudioClip(audioFBController.NegativeClip);
     }
 
     public void AddTokens(GameObject gameObj, int numTokens)
@@ -167,27 +163,51 @@ public class TokenFBController : MonoBehaviour
         }
     }
 
-    public TokenFBController PositiveShowAudioClip(AudioClip clip) {
+    public TokenFBController SetTotalTokensNum(int numTokens)
+    {
+        totalTokensNum = numTokens;
+        return this;
+    }
+
+    public TokenFBController SetRevealTime(float revealTime)
+    {
+        this.revealTime = revealTime;
+        return this;
+    }
+
+    public TokenFBController SetUpdateTime(float updateTime)
+    {
+        this.updateTime = updateTime;
+        return this;
+    }
+
+    public TokenFBController SetFlashingTime(float flashingTime)
+    {
+        this.flashingTime = flashingTime;
+        return this;
+    }
+
+    public TokenFBController SetPositiveShowAudioClip(AudioClip clip) {
         audioFBController.Set("PositiveShow", clip);
         return this;
     }
     
-    public TokenFBController NegativeShowAudioClip(AudioClip clip) {
+    public TokenFBController SetNegativeShowAudioClip(AudioClip clip) {
         audioFBController.Set("NegativeShow", clip);
         return this;
     }
 
-    public TokenFBController PositiveUpdateAudioClip(AudioClip clip) {
+    public TokenFBController SetPositiveUpdateAudioClip(AudioClip clip) {
         audioFBController.Set("PositiveUpdate", clip);
         return this;
     }
 
-    public TokenFBController NegativeUpdateAudioClip(AudioClip clip) {
+    public TokenFBController SetNegativeUpdateAudioClip(AudioClip clip) {
         audioFBController.Set("NegativeUpdate", clip);
         return this;
     }
 
-    public TokenFBController FlashingAudioClip(AudioClip clip) {
+    public TokenFBController SetFlashingAudioClip(AudioClip clip) {
         audioFBController.Set("Flashing", clip);
         return this;
     }

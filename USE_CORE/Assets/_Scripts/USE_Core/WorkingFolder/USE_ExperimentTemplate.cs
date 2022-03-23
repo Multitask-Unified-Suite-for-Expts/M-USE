@@ -414,7 +414,7 @@ namespace USE_ExperimentTemplate
 				TaskCam.gameObject.SetActive(true);
 				TrialLevel.AudioFBController.Init();
 				TrialLevel.HaloFBController.Init();
-				TrialLevel.TokenFBController.Init(TrialLevel.AudioFBController, 5, 0.4f, 0.3f);
+				TrialLevel.TokenFBController.Init(TrialLevel.AudioFBController);
 			});
 
 			SetupTask.SpecifyTermination(() => true, RunBlock);

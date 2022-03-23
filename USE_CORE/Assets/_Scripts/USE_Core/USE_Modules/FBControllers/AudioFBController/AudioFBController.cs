@@ -1,30 +1,30 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class AudioFBController : MonoBehaviour
 {
-    public Dictionary<string, AudioClip> clips;
-
-    public AudioClip PositiveClip;
-    public AudioClip NegativeClip;
+    [Serializable]
+    public struct AudioFB {
+        public string name;
+        public AudioClip clip;
+    }
+    public AudioFB[] DefaultAudioFeedbacks;
 
     private AudioSource audioSource;
+    private Dictionary<string, AudioClip> clips;
 
     public void Init() {
         audioSource = GameObject.FindWithTag("MainCamera").AddComponent<AudioSource>();
         clips = new Dictionary<string, AudioClip>();
         
-        if (PositiveClip == null) {
-            Debug.LogWarning("No positive clip specified");
-        } else {
-            Set("Positive", PositiveClip);
+        foreach (AudioFB audioFB in DefaultAudioFeedbacks) {
+            clips.Add(audioFB.name, audioFB.clip);
         }
+    }
 
-        if (NegativeClip == null) {
-            Debug.LogWarning("No negative clip specified");
-        } else {
-            Set("Negative", NegativeClip);
-        }
+    public AudioClip Get(string clipName) {
+        return clips[clipName];
     }
 
     public AudioFBController Set(string clipName, AudioClip clip) {

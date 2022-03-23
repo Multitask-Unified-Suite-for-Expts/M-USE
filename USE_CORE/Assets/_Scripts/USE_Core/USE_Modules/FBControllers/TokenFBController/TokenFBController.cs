@@ -53,8 +53,8 @@ public class TokenFBController : MonoBehaviour
             tokenSize + 2 * tokenBoxPadding
         );
 
-        SetPositiveShowAudioClip(audioFBController.PositiveClip);
-        SetNegativeShowAudioClip(audioFBController.NegativeClip);
+        SetPositiveShowAudioClip(audioFBController.Get("Positive"));
+        SetNegativeShowAudioClip(audioFBController.Get("Negative"));
     }
 
     public void AddTokens(GameObject gameObj, int numTokens)

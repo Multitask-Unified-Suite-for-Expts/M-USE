@@ -96,7 +96,7 @@ public class TokenFBController : MonoBehaviour
         GUI.EndGroup();
 
         // Draw the animating tokens if needed
-        if (animationPhase == AnimationPhase.Update)
+        if (animationPhase == AnimationPhase.Show || animationPhase == AnimationPhase.Update)
         {
             GUI.color = animatedTokensColor;
             DrawTokens(animatedTokensPos, animatedTokensNum);

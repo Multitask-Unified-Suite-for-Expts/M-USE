@@ -362,7 +362,6 @@ namespace USE_ExperimentTemplate
 
 		// public string TaskSceneName;
 		public Camera TaskCam;
-		public GameObject FBControllersPrefab;
 
 		//protected TrialDef[] AllTrialDefs;
 		//protected TrialDef[] CurrentBlockTrialDefs;
@@ -506,7 +505,8 @@ namespace USE_ExperimentTemplate
 
 			//AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
 
-			GameObject fbControllers = Instantiate(FBControllersPrefab);
+			GameObject fbControllersPrefab = Resources.Load<GameObject>("FeedbackControllers");
+			GameObject fbControllers = Instantiate(fbControllersPrefab);
 			TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
 			TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
 			TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();

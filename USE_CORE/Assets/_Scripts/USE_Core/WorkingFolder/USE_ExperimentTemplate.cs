@@ -252,7 +252,6 @@ namespace USE_ExperimentTemplate
 		
 		public void PrepareTaskLevel<T>(string taskName) where T : ControlLevel_Task_Template
 		{
-			Debug.Log(taskName);
 			ControlLevel_Task_Template tl = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
 			tl = PopulateTaskLevel(tl);
 			if(tl.TaskCam == null)
@@ -385,7 +384,6 @@ namespace USE_ExperimentTemplate
 
 		public virtual void SpecifyTypes()
 		{
-			Debug.Log(TaskName);
 			TaskLevelType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TaskLevelType;
 			TrialLevelType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TrialLevelType;
 			TaskDefType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TaskDefType;
@@ -416,7 +414,7 @@ namespace USE_ExperimentTemplate
 				//init fb controllers here
 			});
 
-			SetupTask.SpecifyTermination(() => true, SetupTask);
+			SetupTask.SpecifyTermination(() => true, RunBlock);
 
 			RunBlock.AddUniversalInitializationMethod(() =>
 			{

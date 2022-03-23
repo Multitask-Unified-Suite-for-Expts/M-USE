@@ -34,18 +34,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         // Show blue start button and wait for click
         // Initialize the token bar if this is the first time
         bool started = false;
-        bool firstTime = true;
         SetupTrial.AddInitializationMethod(() =>
         {
             started = false;
             StartButton.SetActive(true);
-            if (firstTime)
-            {
-                AudioFBController.Init();
-                HaloFBController.Init();
-                TokenFBController.Init(AudioFBController, 5, CurrentTrialDef.tokenRevealDuration, CurrentTrialDef.tokenUpdateDuration);
-                firstTime = false;
-            }
         });
         SetupTrial.AddUpdateMethod(() =>
         {

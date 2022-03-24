@@ -32,7 +32,7 @@ namespace MazeGame_Namespace
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
         public int Trial;
-
+        public int[] nRepetitionsMinMax;
     }
 
     public class MazeGame_StimDef : StimDef

@@ -55,6 +55,19 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     private static Slider slider;
     private static float sliderValueIncreaseAmount;
+    private GameObject initButton;
+    private Ray mouseRay;
+    private int response;
+    private GameObject sliderHalo, txt, startTxt;
+    private SpriteRenderer sr;
+    private float startTime;
+    private int max;
+    private int min;
+    private static int numReps;
+    private static int curRep;
+
+
+
 
     public override void DefineControlLevel()
     {
@@ -84,32 +97,44 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
            });
            */
-        SetupTrial.SpecifyTermination(() => true, StartButton);
+        SetupTrial.SpecifyTermination(() => true, LoadMaze);
 
 
-        // define initScreen state
-        StartButton.AddInitializationMethod(() =>
-        {
-
-        });
-
-
-        StartButton.AddUpdateMethod(() =>
-        {
-
-        });
-
-        StartButton.SpecifyTermination(() => true, LoadMaze);
-        StartButton.AddDefaultTerminationMethod(() =>
-        {
-
-        });
+    
 
         // Define stimOn state
         LoadMaze.AddInitializationMethod(() =>
         {
+            slider = GameObject.Find("Slider").GetComponent<Slider>();
+            GameObject.Find("Slider").SetActive(true);
+
+            initButton = GameObject.Find("StartButton");
+            GameObject.Find("StartButton").SetActive(true);
 
 
+            txt = GameObject.Find("FinalText");
+            startTxt = GameObject.Find("StartText");
+
+            sliderHalo = GameObject.Find("SliderHalo");
+         
+            sr = sliderHalo.GetComponent<SpriteRenderer>();
+
+        //    cBeep = GameObject.Find("CorrectBeep");
+        //    eBeep = GameObject.Find("CorrectBeep");
+
+          //  cBeep.SetActive(false);
+         //   eBeep.SetActive(false);
+
+            // audioData = GetComponent<AudioSource>();
+            // audioData.Play(0);
+
+
+
+            min = CurrentTrialDef.nRepetitionsMinMax[0];
+            max = CurrentTrialDef.nRepetitionsMinMax[1];
+            System.Random rnd = new System.Random();
+            numReps = rnd.Next(min, max);
+            count = 0; 
             // Load maze from JSON
             TextAsset[] textMazes = Resources.LoadAll<TextAsset>("Mazes");
 
@@ -138,6 +163,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         GameConf.AddInitializationMethod(() =>
         {
+
+           // audioData = GetComponent<AudioSource>();
+           // audioData.Play(0);
+
             // MAZE GAME WIDTHS
 
             // TODO: Not implemented, but this should be the maximum screen width that tiles can take up without overfilling the screen
@@ -194,15 +223,61 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             TIMEOUT_SECONDS = 10.0f;
         });
 
-        GameConf.SpecifyTermination(() => true, MazeVis);
+        GameConf.SpecifyTermination(() => true, StartButton);
+
+        // define initScreen state
+        StartButton.AddInitializationMethod(() =>
+        {
+            response = -1;
+            txt.gameObject.SetActive(false);
+            sliderHalo.SetActive(false);
+            curRep = 0;
+
+
+
+        });
+
+
+        StartButton.AddUpdateMethod(() =>
+        {
+
+            if (InputBroker.GetMouseButtonDown(0))
+            {
+                mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hit;
+                if (Physics.Raycast(mouseRay, out hit))
+                {
+                    if (hit.transform.name == "StartButton")
+                    {
+                        response = 0;
+
+                    }
+                }
+            }
+
+        });
+
+        StartButton.SpecifyTermination(() => response == 0, MazeVis);
+        StartButton.AddDefaultTerminationMethod(() =>
+        {
+            startTxt.gameObject.SetActive(false);
+
+        });
 
         MazeVis.AddInitializationMethod(() =>
         {
             //  if (!mazeLoaded)
             // {
             //   mazeLoaded = true;
-            end = false;
+            Debug.Log(count);
+
+                end = false;
+                Debug.Log("entered inst");
+            slider.value = 0;
+
+
             InstantiateCurrMaze();
+            
             // TODO: Currently, this will only load one maze
             // }
         });
@@ -211,28 +286,48 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
 
         });
-        MazeVis.SpecifyTermination(() => end == true && count < mazeList.Count, MazeVis);
-        MazeVis.SpecifyTermination(() => end == true && count >= mazeList.Count, Feedback);
+        MazeVis.SpecifyTermination(() => end == true, Feedback);
+        // MazeVis.SpecifyTermination(() => end == true && count < mazeList.Count, MazeVis);
+        //MazeVis.SpecifyTermination(() => end == true && count >= mazeList.Count, Feedback);
         MazeVis.AddDefaultTerminationMethod(() =>
         {
             DestroyCurrMaze();
-            end = false;
+           // end = false;
         });
 
         Feedback.AddInitializationMethod(() =>
         {
             Debug.Log("the end");
+            sliderHalo.SetActive(true);
+            // sphereCount = 0;
+            sr.color = new Color(1, 1, 1, 0.2f);
+            txt.SetActive(true);
+            startTime = Time.time;
 
         });
 
         Feedback.AddUpdateMethod(() =>
         {
-
+            if ((int)(10 * (Time.time - startTime)) % 4 == 0)
+            {
+                sr.color = new Color(1, 1, 1, 0.2f);
+            }
+            else if ((int)(10 * (Time.time - startTime)) % 2 == 0)
+            {
+                sr.color = new Color(1, 0, 0, 0.2f);
+            }
         });
-        Feedback.AddTimer(2f, ITI, () =>
+        Feedback.AddTimer(3f, MazeVis, () =>
         {
 
+            txt.SetActive(false);
+            sliderHalo.SetActive(false);
+            slider.gameObject.SetActive(false);
+
         });
+
+      //  Feedback.SpecifyTermination(() => count < mazeList.Count, MazeVis);
+      //  Feedback.SpecifyTermination(() => count >= mazeList.Count, Feedback);
 
         //Define iti state
         ITI.AddInitializationMethod(() =>
@@ -253,16 +348,16 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     void InstantiateCurrMaze()
     {
-        slider = GameObject.Find("Slider").GetComponent<Slider>();
 
        // sliderInitPosition = slider.gameObject.transform.position;
 
-        // GameObject.Find("Slider").SetActive(true);
 
-        // slider.gameObject.SetActive(true);
+
+         slider.gameObject.SetActive(true);
+
+        Debug.Log(count);
 
         currMaze = mazeList[count];
-        Debug.Log(count);
 
         if (count != 0)
         {
@@ -273,8 +368,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         dim = currMaze.mConfigs.dim;
 
-        sliderValueIncreaseAmount = (100f / dim) / 100f;
-
+        sliderValueIncreaseAmount = (100f / (currMaze.mNumSquares + 1)) / 100f;
 
         //     tileRows = new TileRow[dim];
         Debug.Log("DIM: " + dim);
@@ -341,10 +435,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 tileRend.material.SetColor("_BaseColor", tileColor);
 
                 instTile.transform.SetParent(this.transform);
-                //  instTile.gameObject.SetActive(false);
+                // instTile.gameObject.SetActive(false);
                 // tileRows[x].mTiles[y] = instTile;
-                tiles.AddStims(tile.gameObject); //on creation of tile GameObject
-                Debug.Log("inner");
+               // tiles.AddStims(tile.gameObject); //on creation of tile GameObject
+                tiles.AddStims(instTile.gameObject); //on creation of tile GameObject
 
             }
         }
@@ -359,6 +453,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         Debug.Log("dim: " + dim);
         tile.gameObject.SetActive(false);
         tile.gameObject.GetComponent<Tile>().enabled = false;
+     //   slider.gameObject.SetActive(false);
         //  Destroy(tile);
 
         for (int x = 0; x < dim; ++x)
@@ -370,7 +465,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 // Tile temp = tileRows[x].mTiles[y];
                 // temp.gameObject.SetActive(false);
 
-               // tiles.DestroyStimGroup();
+                tiles.DestroyStimGroup();
                 // Destroy(tileRows[x].mTiles[y]);
                 Debug.Log(x + ", " + y);
 
@@ -382,14 +477,22 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     public static void setEnd(int i)
     {
-        if(i == 0 || i == 30 || i== 31)
+        if(i == 0 || i==1)
         {
             slider.value += sliderValueIncreaseAmount;
         }
         if (i == 99)
         {
             slider.value += sliderValueIncreaseAmount;
-            ++count;
+            if(curRep < numReps)
+            {
+                ++curRep;
+            }
+            else
+            {
+                ++count;
+                curRep = 0;
+            }
             end = true;
         }
     }

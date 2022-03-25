@@ -1,56 +1,63 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using USE_StimulusManagement;
 
-public abstract class SelectionHandler<T> : MonoBehaviour where T:StimDef
+// Only min duration means that selection is finished once min duration is met
+// Both min and max duration means that selection is finished once its let go
+public abstract class SelectionHandler<T> : MonoBehaviour where T : StimDef
 {
     public string SelectionType;
     public float MinDuration;
     public float? MaxDuration;
-    public T CurrentlySelectedStimDef;
-    public GameObject CurrentlySelectedGameObject;
-    public Event SelectionFinished;
-    public bool ObjectCurrentlySelected, ObjectSelectionFinished;
-    private float CurrentSelectionDuration;
-    
+
+    // When a selection has been finalized and meets all the constraints, these will be populated
+    public GameObject SelectedGameObject = null;
+    public T SelectedStimDef = null;
+
+    private GameObject currentlySelectedGameObject;
+    private float currentSelectionDuration;
+    private bool started;
+
+    public void Start()
+    {
+        started = true;
+    }
+
+    public void Stop()
+    {
+        started = false;
+    }
 
     private void Update()
     {
+        if (!started) return;
+
         GameObject go = CheckSelection();
         if (go == null)
         {
-            if (CurrentlySelectedGameObject != null && MaxDuration != null && CurrentSelectionDuration < MaxDuration.Value && CurrentSelectionDuration > MinDuration)
+            if (currentlySelectedGameObject != null)
             {
-                ObjectSelectionFinished = true;
-                //SelectionFinished. call the event 
+                // Released the selected object
+                bool withinDuration = currentSelectionDuration >= MinDuration && (currentSelectionDuration <= (MaxDuration ?? float.PositiveInfinity));
+                if (withinDuration) SelectedGameObject = currentlySelectedGameObject;
             }
-            CurrentlySelectedGameObject = null;
-            CurrentlySelectedStimDef = null;
-            ObjectCurrentlySelected = false;
-            ObjectSelectionFinished = false;
-            CurrentSelectionDuration = 0;
+            currentlySelectedGameObject = null;
+            currentSelectionDuration = 0;
         }
         else
         {
-            if (go != CurrentlySelectedGameObject)
-                CurrentSelectionDuration = 0;
+            // Do we allow them to change their selection?
+            if (go != currentlySelectedGameObject)
+                currentSelectionDuration = 0;
             else
-                CurrentSelectionDuration += Time.deltaTime;
+                currentSelectionDuration += Time.deltaTime;
 
-            CurrentlySelectedGameObject = go;
-            if(go.GetComponent<StimDefPointer>())
-                CurrentlySelectedStimDef = go.GetComponent<StimDefPointer>().GetStimDef<T>();
-            ObjectCurrentlySelected = true;
-            if (MaxDuration == null && CurrentSelectionDuration > MinDuration)
-            {
-                ObjectSelectionFinished = true;
-                //SelectionFinished. call the event 
-            }
-
+            currentlySelectedGameObject = go;
+            // if (go.GetComponent<StimDefPointer>())
+            //     CurrentlySelectedStimDef = go.GetComponent<StimDefPointer>().GetStimDef<T>();
+            if (MaxDuration == null && currentSelectionDuration >= MinDuration)
+                SelectedGameObject = go;
         }
     }
-    
+
     public abstract GameObject CheckSelection();
 }

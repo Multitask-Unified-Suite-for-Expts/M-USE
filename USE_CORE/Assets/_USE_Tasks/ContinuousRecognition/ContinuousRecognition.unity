@@ -531,10 +531,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1220726988}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 40c9b9ce9cb374f4db14365bfe9e86be, type: 3}
+  m_Script: {fileID: 11500000, guid: 8955ae81fb0fc53469d39d758a512548, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ControlLevelName: ContinousRecognition_TrialLevel
+  ControlLevelName: ContinuousRecognition_TrialLevel
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
@@ -560,10 +560,11 @@ MonoBehaviour:
   RuntimeStims:
     stimGroupName: 
   TrialStims: []
-  DisplayStimsDuration: 0
+  TokenFeedbackController: {fileID: 0}
+  DisplayStimsDuration: 5
   ChooseStimDuration: 5
-  TrialEndDuration: 5
-  TouchFeedbackDuration: 2
+  TrialEndDuration: 2
+  TouchFeedbackDuration: 1
   StartButton: {fileID: 2024946994}
   trialCount: 0
   numTrials: 10
@@ -576,7 +577,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1220726988}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ae187d64ab734103bf5bbaef18630c6, type: 3}
+  m_Script: {fileID: 11500000, guid: f593a007f4128284b926499875a5e728, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: ContinuousRecognition_TaskLevel

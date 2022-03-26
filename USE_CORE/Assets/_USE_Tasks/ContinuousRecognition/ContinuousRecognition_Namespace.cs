@@ -74,6 +74,7 @@ namespace ContinuousRecognition_Namespace
                 td.Ratio = Ratio;
                 td.UnseenStims = UnseenStims;
                 td.numTrialStims = numTrialStims;
+                td.maxNumTrials = numTrials;
                 
                 TrialDefs[iTrial] = td;
                 numTrialStims++;
@@ -90,7 +91,7 @@ namespace ContinuousRecognition_Namespace
         //which is a subset of ExternalStims).
         public int[] BlockStimIndices, nObjectsMinMax, Ratio;
         public Vector3[] TrialStimLocations;
-        public int trialCount, numTrialStims;
+        public int trialCount, numTrialStims, maxNumTrials;
 
         public List<int> PreviouslyChosenStimuli;
         public List<int> PreviouslyNotChosenStimuli;

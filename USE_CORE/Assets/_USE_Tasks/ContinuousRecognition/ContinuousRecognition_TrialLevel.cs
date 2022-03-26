@@ -140,7 +140,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         chooseStim.AddTimer(() => ChooseStimDuration, FinishTrial);
         
         GameObject halo = null;
-        bool touchFeedbackFinished = false;
+        //bool touchFeedbackFinished = false;
         touchFeedback.AddInitializationMethod(() =>
         {
             if (!StimIsChosen) return;
@@ -149,25 +149,31 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 halo = YellowHaloPrefab;
                 halo.transform.position = chosen.transform.position;
                 halo.SetActive(true);
-                touchFeedbackFinished = true;
+                //touchFeedbackFinished = true;
             }
             else
             {
                 halo = GrayHaloPrefab;
                 halo.transform.position = chosen.transform.position;
                 halo.SetActive(true);
-                touchFeedbackFinished = true;
+                //touchFeedbackFinished = true;
                 terminate = true;
             }
         });
         touchFeedback.AddTimer(() => TouchFeedbackDuration, trialEnd, ()=>halo.SetActive(false));
-        //TODO: cannot write this termination method in touchFeedback, or else it will just directly terminate
         //tokenFeedback.SpecifyTermination(()=> !isNew, trialEnd);
         
         /*
         touchFeedback.SpecifyTermination(() => touchFeedbackFinished, tokenFeedback);
         tokenFeedback.AddTimer(()=>2f, trialEnd);
         //tokenFeedback.SpecifyTermination(() => true, trialEnd, ()=>trialCount++); // from marcus*/
+        trialEnd.AddInitializationMethod(() =>
+        {
+            if (trialCount == CurrentTrialDef.maxNumTrials)
+            {
+                
+            }
+        });
         trialEnd.AddTimer(() => TrialEndDuration, FinishTrial);
         //this.AddTerminationSpecification(()=> CurrentTrialDef.trialCount > (CurrentTrialDef.nObjectsMinMax[1] - CurrentTrialDef.nObjectsMinMax[0]), ()=> Debug.Log("Current Trial Count is "+ CurrentTrialDef.trialCount));
         this.AddTerminationSpecification(()=> (trialCount > (CurrentTrialDef.nObjectsMinMax[1] - CurrentTrialDef.nObjectsMinMax[0] + 1)) || (terminate), ()=> Debug.Log("Current Trial Count is "+ CurrentTrialDef.trialCount));
@@ -291,10 +297,24 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             while (CurrentTrialDef.TrialStimIndices.Count < CurrentTrialDef.numTrialStims && N_length > 0)
             {
                 int id = CurrentTrialDef.UnseenStims[Random.Range(0, CurrentTrialDef.UnseenStims.Count-1)];
+                while (CurrentTrialDef.TrialStimIndices.Contains(id) && N_length > 0)
+                {
+                    id = CurrentTrialDef.UnseenStims[Random.Range(0, CurrentTrialDef.UnseenStims.Count-1)];
+                    N_length--;
+                }
+                if (!CurrentTrialDef.TrialStimIndices.Contains(id))
+                {
+                    Debug.Log("added new: " + id);
+                    CurrentTrialDef.TrialStimIndices.Add(id);
+                    CurrentTrialDef.UnseenStims.Remove(id);
+                    N_length--;
+                }
+                /*
+                int id = CurrentTrialDef.UnseenStims[Random.Range(0, CurrentTrialDef.UnseenStims.Count-1)];
                 Debug.Log("added new: " + id);
                 CurrentTrialDef.TrialStimIndices.Add(id);
                 CurrentTrialDef.UnseenStims.Remove(id);
-                N_length--;
+                N_length--;*/
             }
         }
         getLog(CurrentTrialDef.UnseenStims, "UnseenStims");

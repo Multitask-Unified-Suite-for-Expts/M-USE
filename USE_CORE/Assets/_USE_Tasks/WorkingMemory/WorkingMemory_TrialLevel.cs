@@ -71,6 +71,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         // Wait for a click and provide feedback accordingly
         bool correct = false;
         GameObject selected = null;
+        WorkingMemory_StimDef selectedSD = null;
         searchDisplay.AddInitializationMethod(() => selected = null);
         searchDisplay.AddUpdateMethod(() =>
         {
@@ -79,9 +80,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             StimDefPointer sdPointer = clicked.GetComponent<StimDefPointer>();
             if (!sdPointer) return;
 
-            WorkingMemory_StimDef sd = sdPointer.GetStimDef<WorkingMemory_StimDef>();
+            selectedSD = sdPointer.GetStimDef<WorkingMemory_StimDef>();
             selected = clicked;
-            correct = sd.IsTarget;
+            correct = selectedSD.IsTarget;
         });
         searchDisplay.SpecifyTermination(() => selected != null, selectionFeedback);
         searchDisplay.AddTimer(() => CurrentTrialDef.maxSearchDuration, FinishTrial);
@@ -98,10 +99,15 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         tokenFeedback.AddInitializationMethod(() =>
         {
             HaloFBController.Destroy();
-            if (correct) {
-                TokenFBController.AddTokens(selected, 3);
+            if (selectedSD.TokenUpdate == 0) {
+                if (correct) AudioFBController.Play("Positive");
+                else AudioFBController.Play("Negative");
+                return;
+            }
+            if (selectedSD.TokenUpdate > 0) {
+                TokenFBController.AddTokens(selected, selectedSD.TokenUpdate);
             } else {
-                AudioFBController.Play("Negative");
+                TokenFBController.RemoveTokens(selected, -selectedSD.TokenUpdate);
             }
         });
         tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), trialEnd);
@@ -124,8 +130,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         targetStims = new StimGroup("TargetStims", ExternalStims, CurrentTrialDef.TargetIndices);
         targetStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
         targetStims.SetLocations(CurrentTrialDef.TargetSearchLocations);
-        foreach (WorkingMemory_StimDef sd in targetStims.stimDefs)
+        int i = 0;
+        foreach (WorkingMemory_StimDef sd in targetStims.stimDefs) {
             sd.IsTarget = true;
+            sd.TokenUpdate = CurrentTrialDef.TargetTokenUpdates[i];
+            ++i;
+        }
         TrialStims.Add(targetStims);
 
         postSampleDistractorStims = new StimGroup("PostSampleDistractor", ExternalStims, CurrentTrialDef.PostSampleDistractorIndices);
@@ -136,6 +146,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         targetDistractorStims = new StimGroup("PreTargetDistractor", ExternalStims, CurrentTrialDef.TargetDistractorIndices);
         targetDistractorStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
         targetDistractorStims.SetLocations(CurrentTrialDef.TargetDistractorLocations);
+        i = 0;
+        foreach (WorkingMemory_StimDef sd in targetDistractorStims.stimDefs) {
+            sd.TokenUpdate = CurrentTrialDef.DistractorTokenUpdates[i];
+            ++i;
+        }
         TrialStims.Add(targetDistractorStims);
     }
 

@@ -219,16 +219,16 @@ public class TokenFBController : MonoBehaviour
         Vector2 viewportPos = Camera.main.WorldToViewportPoint(gameObj.transform.position);
         // GUI pos has (0, 0) is top left
         Vector2 pos = new Vector2(viewportPos.x * Screen.width, (1 - viewportPos.y) * Screen.height);
-        
-        int maxNewTokens = totalTokensNum - numCollected;
-        int maxRemovedTokens = numCollected;
+
         int tokensEndNum = numCollected;
         tokensChange = numTokens;
         if (numTokens < 0) {
-            numTokens = -numTokens;
+            numTokens = Mathf.Min(-numTokens, numCollected);
             tokensEndNum -= numTokens;
+        } else {
+            numTokens = Mathf.Min(numTokens, totalTokensNum - numCollected);
         }
-        numTokens = Mathf.Clamp(maxRemovedTokens, numTokens, maxNewTokens);
+        if (numTokens == 0) return;
 
         animatedTokensStartPos = pos;
         // No need for horizontal padding since it does nothing

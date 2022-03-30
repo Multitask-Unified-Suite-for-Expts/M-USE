@@ -3,11 +3,10 @@ using USE_StimulusManagement;
 
 // Only min duration means that selection is finished once min duration is met
 // Both min and max duration means that selection is finished once its let go
-public abstract class SelectionHandler<T> : MonoBehaviour where T : StimDef
+public abstract class SelectionHandler<T> where T : StimDef
 {
-    public string SelectionType;
-    public float MinDuration;
-    public float? MaxDuration;
+    public float MinDuration = 0;
+    public float? MaxDuration = null;
 
     // When a selection has been finalized and meets all the constraints, these will be populated
     public GameObject SelectedGameObject = null;
@@ -27,11 +26,9 @@ public abstract class SelectionHandler<T> : MonoBehaviour where T : StimDef
         started = false;
     }
 
-    private void Update()
+    public void UpdateTarget(GameObject go)
     {
         if (!started) return;
-
-        GameObject go = CheckSelection();
         if (go == null)
         {
             if (targetedGameObject != null)

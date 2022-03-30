@@ -23,11 +23,23 @@ public class AudioFBController : MonoBehaviour
         }
     }
 
-    public AudioClip Get(string clipName) {
+    public AudioClip GetClip(string clipName) {
         return clips[clipName];
     }
 
-    public AudioFBController Set(string clipName, AudioClip clip) {
+    public AudioFBController AddClip(string clipName, AudioClip clip) {
+        clips[clipName] = clip;
+        return this;
+    }
+
+    public AudioFBController AddTone(string clipName, float freq, float duration) {
+        AudioClip clip = AudioClip.Create(clipName, (int)(duration * 44100), 1, 44100, false);
+        float[] samples = new float[clip.samples];
+        for (int i = 0; i < samples.Length; i++) {
+            samples[i] = Mathf.Sin(2 * Mathf.PI * freq * i / clip.frequency);
+        }
+        clip.SetData(samples, 0);
+
         clips[clipName] = clip;
         return this;
     }

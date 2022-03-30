@@ -53,8 +53,8 @@ public class TokenFBController : MonoBehaviour
             tokenSize + 2 * tokenBoxPadding
         );
 
-        SetPositiveShowAudioClip(audioFBController.Get("Positive"));
-        SetNegativeShowAudioClip(audioFBController.Get("Negative"));
+        SetPositiveShowAudioClip(audioFBController.GetClip("Positive"));
+        SetNegativeShowAudioClip(audioFBController.GetClip("Negative"));
     }
 
     public void AddTokens(GameObject gameObj, int numTokens)
@@ -188,27 +188,27 @@ public class TokenFBController : MonoBehaviour
     }
 
     public TokenFBController SetPositiveShowAudioClip(AudioClip clip) {
-        audioFBController.Set("PositiveShow", clip);
+        audioFBController.AddClip("PositiveShow", clip);
         return this;
     }
     
     public TokenFBController SetNegativeShowAudioClip(AudioClip clip) {
-        audioFBController.Set("NegativeShow", clip);
+        audioFBController.AddClip("NegativeShow", clip);
         return this;
     }
 
     public TokenFBController SetPositiveUpdateAudioClip(AudioClip clip) {
-        audioFBController.Set("PositiveUpdate", clip);
+        audioFBController.AddClip("PositiveUpdate", clip);
         return this;
     }
 
     public TokenFBController SetNegativeUpdateAudioClip(AudioClip clip) {
-        audioFBController.Set("NegativeUpdate", clip);
+        audioFBController.AddClip("NegativeUpdate", clip);
         return this;
     }
 
     public TokenFBController SetFlashingAudioClip(AudioClip clip) {
-        audioFBController.Set("Flashing", clip);
+        audioFBController.AddClip("Flashing", clip);
         return this;
     }
 

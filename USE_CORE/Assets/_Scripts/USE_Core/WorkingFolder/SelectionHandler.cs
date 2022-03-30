@@ -13,8 +13,8 @@ public abstract class SelectionHandler<T> : MonoBehaviour where T : StimDef
     public GameObject SelectedGameObject = null;
     public T SelectedStimDef = null;
 
-    private GameObject currentlySelectedGameObject;
-    private float currentSelectionDuration;
+    private GameObject targetedGameObject;
+    private float currentTargetDuration;
     private bool started;
 
     public void Start()
@@ -34,27 +34,27 @@ public abstract class SelectionHandler<T> : MonoBehaviour where T : StimDef
         GameObject go = CheckSelection();
         if (go == null)
         {
-            if (currentlySelectedGameObject != null)
+            if (targetedGameObject != null)
             {
                 // Released the selected object
-                bool withinDuration = currentSelectionDuration >= MinDuration && (currentSelectionDuration <= (MaxDuration ?? float.PositiveInfinity));
-                if (withinDuration) SelectedGameObject = currentlySelectedGameObject;
+                bool withinDuration = currentTargetDuration >= MinDuration && (currentTargetDuration <= (MaxDuration ?? float.PositiveInfinity));
+                if (withinDuration) SelectedGameObject = targetedGameObject;
             }
-            currentlySelectedGameObject = null;
-            currentSelectionDuration = 0;
+            targetedGameObject = null;
+            currentTargetDuration = 0;
         }
         else
         {
             // Do we allow them to change their selection?
-            if (go != currentlySelectedGameObject)
-                currentSelectionDuration = 0;
+            if (go != targetedGameObject)
+                currentTargetDuration = 0;
             else
-                currentSelectionDuration += Time.deltaTime;
+                currentTargetDuration += Time.deltaTime;
 
-            currentlySelectedGameObject = go;
+            targetedGameObject = go;
             // if (go.GetComponent<StimDefPointer>())
             //     CurrentlySelectedStimDef = go.GetComponent<StimDefPointer>().GetStimDef<T>();
-            if (MaxDuration == null && currentSelectionDuration >= MinDuration)
+            if (MaxDuration == null && currentTargetDuration >= MinDuration)
                 SelectedGameObject = go;
         }
     }

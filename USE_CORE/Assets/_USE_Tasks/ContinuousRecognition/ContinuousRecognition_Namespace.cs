@@ -25,6 +25,11 @@ namespace ContinuousRecognition_Namespace
     public class ContinuousRecognition_BlockDef : BlockDef
     { 
         public int[] BlockStimIndices, nObjectsMinMax, Ratio;
+        public float
+            DisplayStimsDuration,
+            ChooseStimDuration,
+            TrialEndDuration,
+            TouchFeedbackDuration;
         public List<int> PreviouslyChosenStimuli, PreviouslyNotChosenStim, TrialStimIndices, UnseenStims;
         public List<int> NewStim;
         public Vector3[] BlockStimLocations;
@@ -75,6 +80,10 @@ namespace ContinuousRecognition_Namespace
                 td.UnseenStims = UnseenStims;
                 td.numTrialStims = numTrialStims;
                 td.maxNumTrials = numTrials;
+                td.DisplayStimsDuration = DisplayStimsDuration;
+                td.ChooseStimDuration = ChooseStimDuration;
+                td.TrialEndDuration = TrialEndDuration;
+                td.TouchFeedbackDuration = TouchFeedbackDuration;
                 
                 TrialDefs[iTrial] = td;
                 numTrialStims++;
@@ -98,15 +107,15 @@ namespace ContinuousRecognition_Namespace
         public List<int> TrialStimIndices;
         public List<int> UnseenStims;
         
-        
+        public float
+            DisplayStimsDuration,
+            ChooseStimDuration,
+            TrialEndDuration,
+            TouchFeedbackDuration;
         //ObjectNums refers to items in a list of objects to be loaded from resources folder
         public int[] ObjectNums;
         public int Context;
-        //public int[] BlockStimIndices;
         
-        
-        //----from stim handling for testing
-        public int[] GroupAIndices;
 
 
         //-------------------------------------------

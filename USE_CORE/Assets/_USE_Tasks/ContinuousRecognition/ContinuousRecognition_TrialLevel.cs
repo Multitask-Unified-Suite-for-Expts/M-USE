@@ -16,17 +16,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public ContinuousRecognition_TrialDef CurrentTrialDef => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
     private StimGroup currentTrialStims;
     
+    /*
     private float 
         DisplayStimsDuration = .2f, 
         ChooseStimDuration = 5f,
         TrialEndDuration = 2f,
-        TouchFeedbackDuration = 1f;
+        TouchFeedbackDuration = 1f;*/
 
     // game object variables
     public GameObject StartButton;
     private GameObject trialStim;
-    private GameObject YellowHaloPrefab;
-    private GameObject GrayHaloPrefab;
 
     // effort reward variables
     private int context;
@@ -37,13 +36,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private int trialCount;
     private Color[] colors = new[]
     {
-        new Color(0.210f, 0.105f, 0.96f), 
-        new Color(0.31f, 0.69f, 0.88f),
+        new Color(0.1f, 0.59f, 0.28f),
         new Color(0.54f, 0.18f, 0.18f),
-        new Color(0.1f, 0.3f, 0.5f),
         new Color(0.6275f, 0.3216f, 0.1765f),
-        new Color(0.8275f, 0.3f, 0.8275f),
-        new Color(0.46f, 0.139f, 0.8471f)
+        new Color(0.8275f, 0.3f, 0.5275f),
+        new Color(0.46f, 0.139f, 0.5471f)
     };
 
     // trial variables
@@ -76,9 +73,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         initTrial.AddInitializationMethod(() =>
         {
             trialCount++;
-            int num = Random.Range(0, colors.Length - 1);
-            Camera.main.backgroundColor = colors[num];
-            
+            if (trialCount != 1)
+            {
+                changeContext(colors);
+            }
+
             Debug.Log("TRIAL COUNT IS " + trialCount + "; MAX TRIAL COUNT IS " + (CurrentTrialDef.nObjectsMinMax[1] - CurrentTrialDef.nObjectsMinMax[0]));
             if (context != 0)
             {
@@ -113,23 +112,25 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         initTrial.SpecifyTermination(() => started, displayStims, ()=>StartButton.SetActive(false));
 
         // --------------Initialize displayStims State -----------------
-        displayStims.AddTimer(() => DisplayStimsDuration, chooseStim);
+        displayStims.AddTimer(() => CurrentTrialDef.DisplayStimsDuration, chooseStim);
 
         // --------------chooseStims State -----------------
         bool StimIsChosen = false;
         bool isNew = false;
         GameObject chosen = null;
+        GameObject selected = null;
         bool terminate = false;
         chooseStim.AddUpdateMethod(() =>
         {
             StimIsChosen = false;
             isNew = false;
-            chosen = null;
+            //chosen = null;
             if (InputBroker.GetMouseButtonDown(0))
             {
                 chosen = GetClickedObj();
                 updateBlockDefs(chosen);
-                
+
+                // con't
                 StimDefPointer sdPointer = chosen.GetComponent<StimDefPointer>();
                 if (!sdPointer)
                 {
@@ -141,8 +142,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
 
                 ContinuousRecognition_StimDef sd = sdPointer.GetStimDef<ContinuousRecognition_StimDef>();
-                bool correct = false;
-                correct = sd.PreviouslyChosen;
+                //bool correct = false;
+                //correct = sd.PreviouslyChosen;
                 if (sd.PreviouslyChosen == false)
                 {
                     Debug.Log("NOT CHOSEN BEFORE");
@@ -158,51 +159,46 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
         });
         chooseStim.SpecifyTermination(() => StimIsChosen, touchFeedback);
-        chooseStim.AddTimer(() => ChooseStimDuration, FinishTrial);
-        
-        GameObject halo = null;
-        //bool touchFeedbackFinished = false;
+        chooseStim.AddTimer(() => CurrentTrialDef.ChooseStimDuration, FinishTrial);
+
+        // --------------touchFeedback State -----------------
+        bool touchFeedbackFinish = false;
         touchFeedback.AddInitializationMethod(() =>
         {
             if (!StimIsChosen) return;
             if (isNew)
             {
-                halo = YellowHaloPrefab;
-                halo.transform.position = chosen.transform.position;
-                halo.SetActive(true);
-                //touchFeedbackFinished = true;
+                HaloFBController.ShowPositive(chosen);
             }
             else
             {
-                halo = GrayHaloPrefab;
-                halo.transform.position = chosen.transform.position;
-                halo.SetActive(true);
-                //touchFeedbackFinished = true;
+                HaloFBController.ShowNegative(chosen);
                 terminate = true;
             }
+
         });
-        touchFeedback.AddTimer(() => TouchFeedbackDuration, trialEnd, ()=>halo.SetActive(false));
-        //tokenFeedback.SpecifyTermination(()=> !isNew, trialEnd);
+        touchFeedback.AddTimer(()=> CurrentTrialDef.TouchFeedbackDuration, tokenFeedback, ()=>touchFeedbackFinish = true);
+        tokenFeedback.SpecifyTermination(()=> !isNew, trialEnd);
         
-        /*
-        touchFeedback.SpecifyTermination(() => touchFeedbackFinished, tokenFeedback);
-        tokenFeedback.AddTimer(()=>2f, trialEnd);
-        //tokenFeedback.SpecifyTermination(() => true, trialEnd, ()=>trialCount++); // from marcus*/
-        trialEnd.AddInitializationMethod(() =>
+        tokenFeedback.AddInitializationMethod(() =>
         {
-            if (trialCount == CurrentTrialDef.maxNumTrials)
+            HaloFBController.Destroy();
+            if (isNew)
             {
-                
+                TokenFBController.AddTokens(chosen, 3);
+            }
+            else
+            {
+                AudioFBController.PlayNegative();
             }
         });
-        trialEnd.AddTimer(() => TrialEndDuration, FinishTrial);
-        //this.AddTerminationSpecification(()=> CurrentTrialDef.trialCount > (CurrentTrialDef.nObjectsMinMax[1] - CurrentTrialDef.nObjectsMinMax[0]), ()=> Debug.Log("Current Trial Count is "+ CurrentTrialDef.trialCount));
-        this.AddTerminationSpecification(()=> (trialCount > (CurrentTrialDef.nObjectsMinMax[1] - CurrentTrialDef.nObjectsMinMax[0] + 1)) || (terminate), ()=> Debug.Log("Current Trial Count is "+ CurrentTrialDef.trialCount));
-
+        tokenFeedback.SpecifyTermination(()=>!TokenFBController.IsAnimating(), trialEnd);
+        trialEnd.AddTimer(() => CurrentTrialDef.TrialEndDuration, FinishTrial);
+        this.AddTerminationSpecification(()=> (trialCount > (CurrentTrialDef.nObjectsMinMax[1] - CurrentTrialDef.nObjectsMinMax[0] + 1)) || (terminate && touchFeedbackFinish), ()=> Debug.Log("Current Trial Count is "+ CurrentTrialDef.trialCount));
     }
     
     
-
+    // Helper Functions
     protected override void DefineTrialStims()
     {
         // in the first trial, just randomly choose two stims out of all stims 
@@ -212,7 +208,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 CurrentTrialDef.UnseenStims.Add(CurrentTrialDef.BlockStimIndices[i]);
             }
-            //Debug.Log("Initially have " + CurrentTrialDef.UnseenStims.Count + " Unseen Stimuli");
             int[] tmp = new int [CurrentTrialDef.nObjectsMinMax[0]];
             for (int i = 0; i < CurrentTrialDef.nObjectsMinMax[0]; i++)
             {
@@ -330,11 +325,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     {
         trialCount = 0;
         StartButton = GameObject.Find("StartButton");
-        YellowHaloPrefab = GameObject.Find("YellowHalo");
-        GrayHaloPrefab = GameObject.Find("GrayHalo");
         StartButton.SetActive(true);
-        YellowHaloPrefab.SetActive(false);
-        GrayHaloPrefab.SetActive(false);
     }
 
     private GameObject GetClickedObj()
@@ -347,10 +338,32 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
         return null;
     }
+    
+    /**
+     * This function calculate the ratio PC, N, PNC stims
+     */
+    private float[] getRatio(int[] arr)
+    {
+        float sum = 0;
+        float []result = new float [arr.Length];
+        for (int i = 0; i < arr.Length; i++)
+        {
+            sum += arr[i];
+        }
 
+        for (int i = 0; i < arr.Length; i++)
+        {
+            result[i] = arr[i] / sum;
+            ;       }
+
+        return result;
+    }
+
+    /*
+     * Calculate the number of PC, N, PNC stims in trial
+     */
     private int[] getStimNum(float[] ratio)
     {
-        //float[] ratio = getRatio(CurrentTrialDef.Ratio);
         int PC_num = (int)Math.Floor(ratio[0] * CurrentTrialDef.numTrialStims);
         int N_num = (int)Math.Floor(ratio[1] * CurrentTrialDef.numTrialStims);
         int PNC_num = (int)Math.Floor(ratio[2] * CurrentTrialDef.numTrialStims);
@@ -378,6 +391,18 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         return new[] {PC_num, N_num, PNC_num};
     }
 
+    /*
+     * This function randomly changes the context color in each trial
+     */
+    private void changeContext(Color[] colors)
+    {
+        int num = Random.Range(0, colors.Length - 1);
+        Camera.main.backgroundColor = colors[num];
+    }
+
+    /*
+     * Helper function for debug log
+     */
     private void getLog(List<int> list, string name)
     {
         string result = name + ": ";
@@ -388,35 +413,22 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         Debug.Log(result);
     }
 
-    private float[] getRatio(int[] arr)
-    {
-        float sum = 0;
-        float []result = new float [arr.Length];
-        for (int i = 0; i < arr.Length; i++)
-        {
-            sum += arr[i];
-        }
-
-        for (int i = 0; i < arr.Length; i++)
-        {
-            result[i] = arr[i] / sum;
-;       }
-
-        return result;
-    }
-    
 
     private void updateBlockDefs(GameObject chosen)
     {
         int curStimCount = currentTrialStims.stimDefs.Count;
         int chosenStimIndex = 0;
 
+        // Loop through all trial stims in current trial
         for (int i = 0; i < curStimCount; i++)
         {
             GameObject curStim = currentTrialStims.stimDefs[i].StimGameObject;
             int code = currentTrialStims.stimDefs[i].StimCode - 1;
+            
+            // find the stim that was chosen in current trial
             if (chosen == curStim)
             {
+                // Add it to previously chosen, remove it from unseen and PNC
                 chosenStimIndex = code;
                 CurrentTrialDef.PreviouslyChosenStimuli.Add(chosenStimIndex);
                 CurrentTrialDef.UnseenStims.Remove(chosenStimIndex);
@@ -424,6 +436,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
             else
             {
+                // Add not chosen stims to PNC
                 if (!CurrentTrialDef.PreviouslyNotChosenStimuli.Contains(code) && !CurrentTrialDef.PreviouslyChosenStimuli.Contains(code))
                 {
                     CurrentTrialDef.PreviouslyNotChosenStimuli.Add(code);

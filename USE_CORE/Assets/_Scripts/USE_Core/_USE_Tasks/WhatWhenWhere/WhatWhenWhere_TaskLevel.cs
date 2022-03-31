@@ -24,6 +24,8 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
            wwwTL.totalErrors_InBlock = 0 ;
+           wwwTL.errorType_InBlockString = "";
+           wwwTL.errorType_InBlock.Clear();
         });
         
 

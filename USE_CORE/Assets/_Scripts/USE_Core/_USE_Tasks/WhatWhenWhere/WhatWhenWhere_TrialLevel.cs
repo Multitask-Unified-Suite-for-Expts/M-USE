@@ -41,6 +41,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public int totalErrors_InBlock = 0;
     private int noScreenTouchError = 0;
     private string errorTypeString = "";
+    public List<String> errorType_InBlock = new List<String> { };
+    public List<String> errorType_InSession = new List<String> { };
+    public string errorType_InBlockString = "";
+    private string errorType_InSessionString = "";
     private float startTime;
     private List<Color> contextColors = new List<Color> { };
     private int[] numTotal = new int[numObjMax];
@@ -249,7 +253,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         touchDurationError += 1;
                         totalErrors_InSession += 1;
                         totalErrors_InBlock += 1;
-                       
                         touchedObjects.Add(testStim.name);
                         
                         //numTotal[correctIndex]++;
@@ -376,7 +379,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 sr.color = new Color(1, 0.8431f, 0, 0.2f);
                 errorTypeString = "None";
             }
-        
+            
         });
         
         StimulusChosen.SpecifyTermination(() => (correctChoice && Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute >= 0.75f), ChooseStimulus, () => 
@@ -407,6 +410,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         FinalFeedback.AddInitializationMethod(() =>
         {
+
             sliderHalo.SetActive(true);
             sr.color = new Color(1, 1, 1, 0.2f);
             txt.SetActive(true);
@@ -436,7 +440,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         ITI.AddInitializationMethod(() =>
         {
             searchStims.ToggleVisibility(false);
-            
             Camera.main.backgroundColor = Color.white;
             txt.SetActive(false);
             
@@ -521,7 +524,41 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
             touchedPositions = touchedPositions + "]";
             Debug.Log("Touched Positions: " + touchedPositions);
+
+            // error names data
+            errorType_InBlock.Add(errorTypeString);
+            errorType_InSession.Add(errorTypeString);
+            errorType_InBlockString = "[";
+            //errorType_InSessionString = "[";
+            for (int i = 0; i < errorType_InBlock.Count; ++i)
+            {
+                if (i < errorType_InBlock.Count - 1)
+                {
+                    errorType_InBlockString = errorType_InBlockString + errorType_InBlock[i] + ",";
+                }
+                else
+                {
+                    errorType_InBlockString = errorType_InBlockString + errorType_InBlock[i];
+                }
+            }
+            errorType_InBlockString = errorType_InBlockString + "]";
+            // session error data
+            errorType_InSessionString = "[";
+            for (int i = 0; i < errorType_InSession.Count; ++i)
+            {
+                if (i < errorType_InSession.Count - 1)
+                {
+                    errorType_InSessionString = errorType_InSessionString + errorType_InSession[i] + ",";
+                }
+                else
+                {
+                    errorType_InSessionString = errorType_InSessionString + errorType_InSession[i];
+                }
+            }
+            errorType_InSessionString = errorType_InSessionString + "]";
             Debug.Log("ErrorType" + errorTypeString);
+            Debug.Log("ErrorTypes_InBlock " + errorType_InBlockString);
+            Debug.Log("ErrorTypes_InSession " + errorType_InSessionString);
             Debug.Log("Response" +response);
         });
         ITI.SpecifyTermination(() => true, FinishTrial, () => Debug.Log("Trial " + TrialCount_InTask + " completed"));
@@ -530,6 +567,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("Context", () => context);
         TrialData.AddDatum("TouchedObjects", () => touchedObjectsNames);
         TrialData.AddDatum("ErrorType", () => errorTypeString);
+        TrialData.AddDatum("ErrorType_InBlock", () => errorType_InBlockString);
+        TrialData.AddDatum("ErrorType_InSession", () => errorType_InSessionString);
         TrialData.AddDatum("TotalErrors_InBlock", () => totalErrors_InBlock);
         TrialData.AddDatum("TotalErrors_InSession", () => totalErrors_InSession);
         TrialData.AddDatum("TouchDurations", () => touchDurationTimes);

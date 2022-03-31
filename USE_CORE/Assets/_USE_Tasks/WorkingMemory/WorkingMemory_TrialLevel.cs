@@ -12,8 +12,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     private StimGroup sampleStims, targetStims, postSampleDistractorStims, targetDistractorStims;
 
     public GameObject StartButton;
-    public GameObject YellowHaloPrefab;
-    public GameObject GrayHaloPrefab;
 
     public override void DefineControlLevel()
     {
@@ -28,39 +26,57 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         AddActiveStates(new List<State> { initTrial, delay, displaySample, displayPostSampleDistractors, searchDisplay, selectionFeedback, tokenFeedback, trialEnd });
 
+        // A state that just waits for some time
         State stateAfterDelay = null;
         float delayDuration = 0;
         delay.AddTimer(() => delayDuration, () => stateAfterDelay);
 
+        // Show blue start button and wait for click
+        // Initialize the token bar if this is the first time
         bool started = false;
-        SetupTrial.SpecifyTermination(() => started, initTrial, () => StartButton.SetActive(false));
+        bool firstTime = true;
+        SetupTrial.AddInitializationMethod(() =>
+        {
+            started = false;
+            StartButton.SetActive(true);
+            if (firstTime)
+            {
+                AudioFBController.Init();
+                HaloFBController.Init();
+                TokenFBController.Init(5, CurrentTrialDef.tokenRevealDuration, CurrentTrialDef.tokenUpdateDuration);
+                firstTime = false;
+            }
+        });
         SetupTrial.AddUpdateMethod(() =>
         {
             GameObject clicked = GetClickedObj();
-            if (ReferenceEquals(clicked, StartButton))
-            {
-                started = true;
-            }
+            if (ReferenceEquals(clicked, StartButton)) started = true;
         });
+        SetupTrial.SpecifyTermination(() => started, initTrial, () => StartButton.SetActive(false));
 
+        // Show nothing for some time
         initTrial.AddTimer(() => CurrentTrialDef.initTrialDuration, delay, () =>
           {
               stateAfterDelay = displaySample;
               delayDuration = CurrentTrialDef.baselineDuration;
           });
 
+        // Show the target/sample by itself for some time
         displaySample.AddTimer(() => CurrentTrialDef.displaySampleDuration, delay, () =>
           {
               stateAfterDelay = displayPostSampleDistractors;
               delayDuration = CurrentTrialDef.postSampleDelayDuration;
           });
 
+        // Show some distractors without the target/sample
         displayPostSampleDistractors.AddTimer(() => CurrentTrialDef.displayPostSampleDistractorsDuration, delay, () =>
           {
               stateAfterDelay = searchDisplay;
               delayDuration = CurrentTrialDef.preTargetDelayDuration;
           });
 
+        // Show the target/sample with some other distractors
+        // Wait for a click and provide feedback accordingly
         bool correct = false;
         GameObject selected = null;
         searchDisplay.AddInitializationMethod(() => selected = null);
@@ -81,24 +97,25 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         selectionFeedback.AddInitializationMethod(() =>
         {
             if (!selected) return;
-            if (correct)
-            {
-                Instantiate(YellowHaloPrefab, selected.transform);
-            }
-            else
-            {
-                Instantiate(GrayHaloPrefab, selected.transform);
-            }
+            if (correct) HaloFBController.ShowPositive(selected);
+            else HaloFBController.ShowNegative(selected);
         });
-        //adapt from ChoseWrong/Right in whatwhenwhere task
         selectionFeedback.AddTimer(() => CurrentTrialDef.selectionFbDuration, tokenFeedback);
 
+        // The state that will handle the token feedback and wait for any animations
+        tokenFeedback.AddInitializationMethod(() =>
+        {
+            HaloFBController.Destroy();
+            if (correct) {
+                AudioFBController.PlayPositive();
+                TokenFBController.AddTokens(selected, 3);
+            } else {
+                AudioFBController.PlayNegative();
+            }
+        });
+        tokenFeedback.SpecifyTermination(() => !(TokenFBController.IsAnimating() || AudioFBController.IsPlaying()), trialEnd);
 
-        bool tokenUpdated = false;
-        tokenFeedback.AddInitializationMethod(() => tokenUpdated = false);
-        //wait for Marcus to integrate token fb
-        tokenFeedback.SpecifyTermination(() => true, trialEnd); //()=> tokenUpdated, tokenFeedback);
-
+        // Wait for some time at the end
         trialEnd.AddTimer(() => CurrentTrialDef.trialEndDuration, FinishTrial);
     }
 

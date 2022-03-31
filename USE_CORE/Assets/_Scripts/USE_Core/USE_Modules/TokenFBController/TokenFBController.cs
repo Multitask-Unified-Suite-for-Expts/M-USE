@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class TokenFeedbackController : MonoBehaviour
+public class TokenFBController : MonoBehaviour
 {
     public int tokenSize = 100;
     public int tokenSpacing = 0;
@@ -20,12 +20,14 @@ public class TokenFeedbackController : MonoBehaviour
     private Rect tokenBoxRect;
     private GUIStyle whiteStyle;
     // Animation
+    private int tokensChange;
     enum AnimationPhase { None, Show, Update, Flashing };
     private AnimationPhase animationPhase = AnimationPhase.None;
     private Vector2 animatedTokensPos;
     private Vector2 animatedTokensStartPos;
     private Vector2 animatedTokensEndPos;
     private int animatedTokensNum;
+    private Color animatedTokensColor;
     private Color tokenBoxColor;
     private float animationStartTime;
     private float animationEndTime;
@@ -33,7 +35,7 @@ public class TokenFeedbackController : MonoBehaviour
     private float updateTime; // How long each token update animation should take
     private float flashingTime; // How long the token bar should flash when it fills up
 
-    public void Initialize(int numTokens, float revealTime, float updateTime, float flashingTime = 0.5f)
+    public void Init(int numTokens, float revealTime, float updateTime, float flashingTime = 0.5f)
     {
         numCollected = 0;
         totalTokensNum = numTokens;
@@ -53,30 +55,14 @@ public class TokenFeedbackController : MonoBehaviour
         );
     }
 
-    // gameObjPos should be at the center of the object
-    public void AddTokens(Vector2 gameObjPos, int numTokens)
+    public void AddTokens(GameObject gameObj, int numTokens)
     {
-        // Viewport pos is in [0, 1] where (0, 0) is bottom right
-        Vector2 viewportPos = Camera.main.WorldToViewportPoint(gameObjPos);
-        // GUI pos has (0, 0) is top left
-        Vector2 pos = new Vector2(viewportPos.x * Screen.width, (1 - viewportPos.y) * Screen.height);
-        int maxNewTokens = totalTokensNum - numCollected;
-        numTokens = Mathf.Min(numTokens, maxNewTokens);
+        AnimateTokens(Color.green, gameObj, numTokens);
+    }
 
-        animatedTokensStartPos = pos;
-        // No need for horizontal padding since it does nothing
-        animatedTokensStartPos.x -= CalcTokensWidth(numTokens) / 2;
-        animatedTokensStartPos.y -= tokenBoxPadding + tokenSize;
-        animatedTokensPos = animatedTokensStartPos;
-
-        animatedTokensEndPos = tokenBoxRect.position;
-        animatedTokensEndPos.x += tokenBoxPadding + CalcTokensWidth(numCollected);
-
-        // Start the animation phase state machine with the first state
-        animationPhase = AnimationPhase.Show;
-        animationStartTime = Time.unscaledTime;
-        animationEndTime = animationStartTime + revealTime;
-        animatedTokensNum = numTokens;
+    public void RemoveTokens(GameObject gameObj, int numTokens)
+    {
+        AnimateTokens(Color.red, gameObj, -numTokens);
     }
 
     public void OnGUI()
@@ -110,7 +96,7 @@ public class TokenFeedbackController : MonoBehaviour
         // Draw the animating tokens if needed
         if (animationPhase == AnimationPhase.Update)
         {
-            GUI.color = colorCollected;
+            GUI.color = animatedTokensColor;
             DrawTokens(animatedTokensPos, animatedTokensNum);
         }
 
@@ -138,7 +124,7 @@ public class TokenFeedbackController : MonoBehaviour
                     animationEndTime += updateTime;
                     break;
                 case AnimationPhase.Update:
-                    numCollected += animatedTokensNum;
+                    numCollected += tokensChange;
                     animationPhase = AnimationPhase.None;
                     if (numCollected >= totalTokensNum)
                     {
@@ -167,6 +153,42 @@ public class TokenFeedbackController : MonoBehaviour
                 else tokenBoxColor = colorFlashing2;
                 break;
         }
+    }
+
+    // gameObjPos should be at the center of the object
+    private void AnimateTokens(Color color, GameObject gameObj, int numTokens)
+    {
+        // Viewport pos is in [0, 1] where (0, 0) is bottom right
+        Vector2 viewportPos = Camera.main.WorldToViewportPoint(gameObject.transform.position);
+        // GUI pos has (0, 0) is top left
+        Vector2 pos = new Vector2(viewportPos.x * Screen.width, (1 - viewportPos.y) * Screen.height);
+        
+        int maxNewTokens = totalTokensNum - numCollected;
+        int maxRemovedTokens = numCollected;
+        int tokensEndNum = numCollected;
+        tokensChange = numTokens;
+        if (numTokens < 0) {
+            numTokens = -numTokens;
+            tokensEndNum -= numTokens;
+        }
+        numTokens = Mathf.Clamp(maxRemovedTokens, numTokens, maxNewTokens);
+
+        animatedTokensStartPos = pos;
+        // No need for horizontal padding since it does nothing
+        animatedTokensStartPos.x -= CalcTokensWidth(numTokens) / 2;
+        animatedTokensStartPos.y -= tokenBoxPadding + tokenSize;
+        animatedTokensPos = animatedTokensStartPos;
+
+        animatedTokensEndPos = tokenBoxRect.position;
+        animatedTokensEndPos.x += tokenBoxPadding + CalcTokensWidth(tokensEndNum);
+        
+        animatedTokensColor = color;
+
+        // Start the animation phase state machine with the first state
+        animationPhase = AnimationPhase.Show;
+        animationStartTime = Time.unscaledTime;
+        animationEndTime = animationStartTime + revealTime;
+        animatedTokensNum = numTokens;
     }
 
     private Vector2 DrawTokens(Vector2 startPos, int numTokens)

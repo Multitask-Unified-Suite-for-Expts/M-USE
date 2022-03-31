@@ -35,6 +35,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private Ray mouseRay;
     private bool variablesLoaded;
     private int trialCount;
+    private Color[] colors = new[]
+    {
+        new Color(0.210f, 0.105f, 0.96f), 
+        new Color(0.31f, 0.69f, 0.88f),
+        new Color(0.54f, 0.18f, 0.18f),
+        new Color(0.1f, 0.3f, 0.5f),
+        new Color(0.6275f, 0.3216f, 0.1765f),
+        new Color(0.8275f, 0.3f, 0.8275f),
+        new Color(0.46f, 0.139f, 0.8471f)
+    };
 
     // trial variables
 
@@ -66,7 +76,18 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         initTrial.AddInitializationMethod(() =>
         {
             trialCount++;
+            int num = Random.Range(0, colors.Length - 1);
+            Camera.main.backgroundColor = colors[num];
+            
             Debug.Log("TRIAL COUNT IS " + trialCount + "; MAX TRIAL COUNT IS " + (CurrentTrialDef.nObjectsMinMax[1] - CurrentTrialDef.nObjectsMinMax[0]));
+            if (context != 0)
+            {
+                Debug.Log("Context is " + context);
+                //Disable all game objects
+            }
+
+            context = CurrentTrialDef.Context;
+
             StartButton.SetActive(true);
         });
         
@@ -209,30 +230,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         else
         {
             Debug.Log("NumTrialStims: " + CurrentTrialDef.numTrialStims);
-            float[] ratio = getRatio(CurrentTrialDef.Ratio);
-            int PC_num = (int)Math.Floor(ratio[0] * CurrentTrialDef.numTrialStims);
-            int N_num = (int)Math.Floor(ratio[1] * CurrentTrialDef.numTrialStims);
-            int PNC_num = (int)Math.Floor(ratio[2] * CurrentTrialDef.numTrialStims);
-            if (PC_num == 0) PC_num = 1;
-            if (N_num == 0) N_num = 1;
-            if (PNC_num == 0) PNC_num = 1;
-            int tmp = 0;
-            while ((PC_num + N_num + PNC_num) < CurrentTrialDef.numTrialStims)
-            {
-                if (tmp % 3 == 0)
-                {
-                    PC_num += 1;
-                } else if (tmp % 3 == 1)
-                {
-                    N_num += 1;
-                }
-                else
-                {
-                    PNC_num += 1;
-                }
 
-                tmp++;
-            }
+            float[] ratio = getRatio(CurrentTrialDef.Ratio);
+            int[] ratio_array = getStimNum(ratio);
+            int PC_num = ratio_array[0];
+            int N_num = ratio_array[1];
+            int PNC_num = ratio_array[2];
 
             Debug.Log("Chosen Count IS: " + PC_num+ "   Count IS: " + ratio[0] * CurrentTrialDef.numTrialStims);
             Debug.Log("New Count IS: "  + N_num+ "     Count IS: " + ratio[1] * CurrentTrialDef.numTrialStims);
@@ -309,14 +312,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     CurrentTrialDef.UnseenStims.Remove(id);
                     N_length--;
                 }
-                /*
-                int id = CurrentTrialDef.UnseenStims[Random.Range(0, CurrentTrialDef.UnseenStims.Count-1)];
-                Debug.Log("added new: " + id);
-                CurrentTrialDef.TrialStimIndices.Add(id);
-                CurrentTrialDef.UnseenStims.Remove(id);
-                N_length--;*/
             }
         }
+        
         getLog(CurrentTrialDef.UnseenStims, "UnseenStims");
         getLog(CurrentTrialDef.PreviouslyChosenStimuli, "PreviouslyChosenStimuli");
         getLog(CurrentTrialDef.PreviouslyNotChosenStimuli, "PreviouslyNotChosenStimuli");
@@ -348,6 +346,36 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             return hit.transform.root.gameObject;
         }
         return null;
+    }
+
+    private int[] getStimNum(float[] ratio)
+    {
+        //float[] ratio = getRatio(CurrentTrialDef.Ratio);
+        int PC_num = (int)Math.Floor(ratio[0] * CurrentTrialDef.numTrialStims);
+        int N_num = (int)Math.Floor(ratio[1] * CurrentTrialDef.numTrialStims);
+        int PNC_num = (int)Math.Floor(ratio[2] * CurrentTrialDef.numTrialStims);
+        if (PC_num == 0) PC_num = 1;
+        if (N_num == 0) N_num = 1;
+        if (PNC_num == 0) PNC_num = 1;
+        int tmp = 0;
+        while ((PC_num + N_num + PNC_num) < CurrentTrialDef.numTrialStims)
+        {
+            if (tmp % 3 == 0)
+            {
+                PC_num += 1;
+            } else if (tmp % 3 == 1)
+            {
+                N_num += 1;
+            }
+            else
+            {
+                PNC_num += 1;
+            }
+
+            tmp++;
+        }
+
+        return new[] {PC_num, N_num, PNC_num};
     }
 
     private void getLog(List<int> list, string name)

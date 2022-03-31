@@ -27,6 +27,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private bool incorrectChoice = false;
     private bool timingFail = false;
     private bool irrelevantSelection = false;
+    private bool noSelection = false;
 
     private static int numObjMax = 20;
 
@@ -38,6 +39,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private int repetitionError = 0;
     private int totalErrors_InSession = 0;
     public int totalErrors_InBlock = 0;
+    private int noScreenTouchError = 0;
+    private string errorTypeString = "";
     private float startTime;
     private List<Color> contextColors = new List<Color> { };
     private int[] numTotal = new int[numObjMax];
@@ -107,8 +110,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             repetitionError = 0;
             touchDurationError = 0;
             irrelevantSelectionError = 0;
+            noScreenTouchError = 0;
             initialClick = 0;
             stimCount = 0;
+            response = -1;
             touchedObjects.Clear();
             touchDurations.Clear();
             choiceDurations.Clear();
@@ -119,6 +124,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             choiceDurationTimes = "[]";
             touchedPositions = "[]";
             touchedObjectsNames = "[]";
+            errorTypeString = "";
         });
 
         SetupTrial.SpecifyTermination(() => true, StartButton);
@@ -127,7 +133,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // define initScreen state
         StartButton.AddInitializationMethod(() =>
         {
-            
             Camera.main.backgroundColor = new Color(1f, 1f, 1f);
 
             ResetRelativeStartTime();
@@ -142,7 +147,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             initButton.SetActive(true);
             goCue.SetActive(true);
             
-            response = -1;
             slider.gameObject.transform.position = sliderInitPosition;
             slider.value = 0;
            
@@ -174,7 +178,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             initButton.SetActive(false);
             goCue.SetActive(false);
-
         });
 
         // Define stimOn state
@@ -230,7 +233,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 touchedPositionsList.Add(new Vector3(clickPoint[0], clickPoint[1], clickPoint[2]));
                 
                 RaycastHit hit;
-                response = 0;
                 // verify that the hit is on a stimulus
                 if (Physics.Raycast(mouseRay, out hit))
                 {
@@ -239,7 +241,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     Debug.Log("index: " + correctIndex);
                     chosenStim = hit.transform.gameObject;
                     GameObject testStim = chosenStim.transform.root.gameObject;
-                    
 
                     if (touchDuration < CurrentTrialDef.MinTouchDuration || touchDuration > CurrentTrialDef.MaxTouchDuration)
                     {
@@ -260,20 +261,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         //Correct Choice
                         numCorrect[stimCount]++;
                         numTotal[stimCount]++;
-
                         slider.value += sliderValueIncreaseAmount;
                         stimCount += 1;
 
                         touchedObjects.Add(testStim.name);
                         yellowHalo.transform.position = testStim.transform.position;
                         correctChoice = true;
-                        
-                       
                     }
                     else if (touchedObjects.Contains(testStim.name))
                     {
                         //Repetition error
-                        
                         grayHalo.transform.position = testStim.transform.position;
                         touchedObjects.Add(testStim.name);
 
@@ -292,7 +289,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         //Slot error
                         grayHalo.transform.position = testStim.transform.position;
                         touchedObjects.Add(testStim.name);
-
                         slider.value -= sliderValueIncreaseAmount;
                         slotError += 1;
                         totalErrors_InSession += 1;
@@ -309,28 +305,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     for (int i = 0; i < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++i)
                     {
                         accuracyLog = accuracyLog + "Slot " + (i + 1) + ": " + numCorrect[i] + "/" + numTotal[i] + " ";
-
                     }
                     Debug.Log("Progress: "+ accuracyLog);
-
-                    // touched objects data 
-                    touchedObjectsNames = "[";
-                    for (int i = 0; i < touchedObjects.Count; ++i)
-                    {
-                        if (i < touchedObjects.Count - 1)
-                        {
-                            touchedObjectsNames = touchedObjectsNames + touchedObjects[i] + ",";
-                        }
-                        else
-                        {
-                            touchedObjectsNames = touchedObjectsNames + touchedObjects[i];
-                        }
-                    }
-                    touchedObjectsNames = touchedObjectsNames + "]";
-
-                    Debug.Log("Touched Objects: " + touchedObjectsNames);
-
-
+                    
                 }                
                 else
                 {
@@ -349,6 +326,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             else
             {
                 Debug.Log ("Didn't click on any stimulus");
+                response = 0;
             }
             
         });
@@ -367,22 +345,27 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 imageTimingError.transform.SetAsLastSibling();
                 imageTimingError.SetActive(true);
-                //Debug.Log("Timing Error");
+                errorTypeString = "TouchDurationError";
             }
-
+           
             //Chose Incorrect
             else if (incorrectChoice)
             {
                 grayHalo.SetActive(true);
                 sliderHalo.SetActive(true);
                 sr.color = new Color(0.6627f, 0.6627f, 0.6627f, 0.2f);
-                //Debug.Log("Incorrect Choice");
+
+                if (slotError == 1)
+                    errorTypeString = "SlotError";
+                else
+                    errorTypeString = "RepetitionError";
             }
 
             //Irrelevant Selection
             else if (irrelevantSelection)
             {
                 grayHaloScreen.SetActive(true);
+                errorTypeString = "IrrelevantSelectionError";
             }
 
             //Chose correct
@@ -391,7 +374,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 yellowHalo.SetActive(true);
                 sliderHalo.SetActive(true);
                 sr.color = new Color(1, 0.8431f, 0, 0.2f);
-                //Debug.Log("Correct Choice");
+                errorTypeString = "None";
             }
         
         });
@@ -428,7 +411,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             sr.color = new Color(1, 1, 1, 0.2f);
             txt.SetActive(true);
             startTime = Time.time;
-
+            errorTypeString = "None";
             searchStims.ToggleVisibility(false);
         });
 
@@ -458,6 +441,36 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             txt.SetActive(false);
             
             GameObject.Find("Slider").SetActive(false);
+
+            if(stimCount == CurrentTrialDef.CorrectObjectTouchOrder.Length)
+            {
+                response = -1;
+            }
+            else if (response == 0)
+            {
+                noScreenTouchError++;
+                totalErrors_InSession += 1;
+                totalErrors_InBlock += 1;
+                errorTypeString = "NoSelectionMade";
+                response = -1;
+            }
+            
+            // touched objects data 
+            touchedObjectsNames = "[";
+            for (int i = 0; i < touchedObjects.Count; ++i)
+            {
+                if (i < touchedObjects.Count - 1)
+                {
+                    touchedObjectsNames = touchedObjectsNames + touchedObjects[i] + ",";
+                }
+                else
+                {
+                    touchedObjectsNames = touchedObjectsNames + touchedObjects[i];
+                }
+            }
+            touchedObjectsNames = touchedObjectsNames + "]";
+
+            Debug.Log("Touched Objects: " + touchedObjectsNames);
 
             // touch duration data
             touchDurationTimes = "[";
@@ -508,30 +521,32 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
             touchedPositions = touchedPositions + "]";
             Debug.Log("Touched Positions: " + touchedPositions);
+            Debug.Log("ErrorType" + errorTypeString);
+            Debug.Log("Response" +response);
         });
         ITI.SpecifyTermination(() => true, FinishTrial, () => Debug.Log("Trial " + TrialCount_InTask + " completed"));
         
-        TrialData.AddDatum("NumberOfObjects", () => CurrentTrialDef.CorrectObjectTouchOrder.Length);
+        TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
         TrialData.AddDatum("Context", () => context);
         TrialData.AddDatum("TouchedObjects", () => touchedObjectsNames);
-        TrialData.AddDatum("TouchDurationError", () => touchDurationError);
-        TrialData.AddDatum("SlotError", () => slotError);
-        TrialData.AddDatum("RepetitionError", () => repetitionError);
-        TrialData.AddDatum("IrrelevantSelectionError", () => irrelevantSelectionError);
-        TrialData.AddDatum("TotalErrors", () => totalErrors_InSession);
+        TrialData.AddDatum("ErrorType", () => errorTypeString);
+        TrialData.AddDatum("TotalErrors_InBlock", () => totalErrors_InBlock);
+        TrialData.AddDatum("TotalErrors_InSession", () => totalErrors_InSession);
         TrialData.AddDatum("TouchDurations", () => touchDurationTimes);
         TrialData.AddDatum("ChoiceDurations", () => choiceDurationTimes); 
         TrialData.AddDatum("Progress", () => accuracyLog);
         TrialData.AddDatum("TouchPositions", () => touchedPositions);
 
-        FrameData.AddDatum("StimCount", () => stimCount);
+        FrameData.AddDatum("ErrorType", () => errorTypeString);
+        FrameData.AddDatum("Touch", () => response);
         FrameData.AddDatum("StartButton", () => initButton.activeSelf);
         FrameData.AddDatum("StartText", () => goCue.activeSelf);
         FrameData.AddDatum("CompletionText", () => txt.activeSelf);
         FrameData.AddDatum("GrayHaloFeedback", () => (grayHalo.activeSelf||grayHaloScreen.activeSelf));
         FrameData.AddDatum("YellowHaloFeedback", () => yellowHalo.activeSelf);
         FrameData.AddDatum("TimingErrorFeedback", () => imageTimingError.activeSelf);
-        //FrameData.AddDatum("QuaddlesShown", ()=> searchStims.activeSelf)
+        FrameData.AddDatum("SliderHalo", () => sliderHalo.activeSelf);
+        FrameData.AddDatum("StimuliShown", () => searchStims.IsActive);
     }
     // set all gameobjects to setActive false
     void disableAllGameobjects()
@@ -540,7 +555,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         goCue.SetActive(false);
         txt.SetActive(false);
         sliderHalo.SetActive(false);
-        GameObject.Find("Slider").SetActive(false);
         grayHalo.SetActive(false);
         yellowHalo.SetActive(false);
         grayHaloScreen.SetActive(false);
@@ -586,7 +600,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         GameObject.Find("Slider").SetActive(false);
 
         Debug.Log("Done Loading Variables");
-
     }
 
     protected override void DefineTrialStims()

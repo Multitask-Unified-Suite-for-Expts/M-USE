@@ -1,10 +1,11 @@
 using UnityEngine;
 using USE_ExperimentTemplate;
 using USE_StimulusManagement;
+//test
 
-namespace WorkingMemory_Namespace
+namespace EC_Namespace
 {
-    public class WorkingMemory_TaskDef : TaskDef
+    public class EC_TaskDef : TaskDef
     {
         //Already-existing fields (inherited from TaskDef)      
         //public DateTime TaskStart_DateTime;
@@ -19,37 +20,38 @@ namespace WorkingMemory_Namespace
         //public float? ExternalStimScale;
     }
 
-    public class WorkingMemory_BlockDef : BlockDef
+    public class EC_BlockDef : BlockDef
     {
         //Already-existing fields (inherited from BlockDef)
-        //public int BlockCount;
-        //public TrialDef[] TrialDefs;
+		//public int BlockCount;
+		//public TrialDef[] TrialDefs;
     }
 
-    public class WorkingMemory_TrialDef : TrialDef
+    public class EC_TrialDef : TrialDef
     {
         //Already-existing fields (inherited from TrialDef)
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
-        public int[] TargetIndices, PostSampleDistractorIndices, TargetDistractorIndices;
-        public Vector3[] TargetSampleLocations, PostSampleDistractorLocations, TargetSearchLocations, TargetDistractorLocations;
-
-        public float initTrialDuration,
-            baselineDuration,
-            displaySampleDuration,
-            postSampleDelayDuration,
-            displayPostSampleDistractorsDuration,
-            preTargetDelayDuration,
-            maxSearchDuration,
-            selectionFbDuration,
-            tokenRevealDuration,
-            tokenUpdateDuration,
-            trialEndDuration;
+        public string TrialName;
+        public int TrialCode;
+        public int ContextNum;
+        public string ConditionName;
+        public string ContextName;
+        public int NumOfClicksLeft;
+        public int NumOfClicksRight;
+        public int NumOfCoinsLeft;
+        public int NumOfCoinsRight;
+        public int ClicksPerOutline;
+        public float[] TouchOnOffTimeRange;
+        public float InitialChoiceMinDuration;
+        public float StarttoTapDispDelay;
+        public float FinalTouchToVisFeedbackDelay;
+        public float FinalTouchToRewardDelay;
     }
 
-    public class WorkingMemory_StimDef : StimDef
+    public class EC_StimDef : StimDef
     {
-        //Already-existing fields (inherited from Stim  Def)
+        //Already-existing fields (inherited from TrialDef)
         //public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)
         //public string StimName;
         //public string StimPath;
@@ -60,7 +62,7 @@ namespace WorkingMemory_Namespace
         //public int StimCode; //optional, for analysis purposes
         //public string StimID;
         //public int[] StimDimVals; //only if this is parametrically-defined stim
-        //[System.NonSerialized] //public GameObject StimGameObject; //not in config, generated at runtime
+     //   [System.NonSerialized] //public GameObject StimGameObject; //not in config, generated at runtime
         //public Vector3 StimLocation; //to be passed in explicitly if trial doesn't include location method
         //public Vector3 StimRotation; //to be passed in explicitly if trial doesn't include location method
         //public Vector2 StimScreenLocation; //screen position calculated during trial
@@ -77,6 +79,6 @@ namespace WorkingMemory_Namespace
         //public bool TriggersSonication;
         //public State SetActiveOnInitialization;
         //public State SetInactiveOnTermination;
-        public bool IsTarget;
+    
     }
 }

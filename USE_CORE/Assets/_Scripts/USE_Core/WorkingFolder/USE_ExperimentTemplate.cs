@@ -411,7 +411,9 @@ namespace USE_ExperimentTemplate
 			{
 				BlockCount = -1;
 				TaskCam.gameObject.SetActive(true);
-				//init fb controllers here
+				TrialLevel.AudioFBController.Init();
+				TrialLevel.HaloFBController.Init();
+				TrialLevel.TokenFBController.Init(TrialLevel.AudioFBController);
 			});
 
 			SetupTask.SpecifyTermination(() => true, RunBlock);
@@ -502,8 +504,13 @@ namespace USE_ExperimentTemplate
 			FrameData.CreateFile();
 
 			//AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
+			GameObject fbControllersPrefab = Resources.Load<GameObject>("FeedbackControllers");
+			GameObject controllers = new GameObject("Controllers");
+			GameObject fbControllers = Instantiate(fbControllersPrefab, controllers.transform);
 
-			//assign fb controllers for triallevel here
+			TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
+			TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
+			TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
 			TrialLevel.SessionDataControllers = SessionDataControllers;
 			TrialLevel.FilePrefix = FilePrefix;
 			TrialLevel.TaskStims = TaskStims;
@@ -838,9 +845,9 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public List<StimGroup> TrialStims;
 		
 		// Feedback Controllers
-		public AudioFBController AudioFBController;
-		public HaloFBController HaloFBController;
-		public TokenFBController TokenFBController;
+		[HideInInspector] public AudioFBController AudioFBController;
+		[HideInInspector] public HaloFBController HaloFBController;
+		[HideInInspector] public TokenFBController TokenFBController;
 
 		//protected TrialDef CurrentTrialDef;
 		protected T GetCurrentTrialDef<T>() where T : TrialDef

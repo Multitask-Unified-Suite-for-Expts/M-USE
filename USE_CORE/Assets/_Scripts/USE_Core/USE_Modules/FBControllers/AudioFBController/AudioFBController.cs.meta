@@ -4,8 +4,8 @@ MonoImporter:
   externalObjects: {}
   serializedVersion: 2
   defaultReferences:
-  - PositiveSound: {fileID: 8300000, guid: 3057c6465634bff458dbb5fc86a5aab0, type: 3}
-  - NegativeSound: {fileID: 8300000, guid: b1ead77b8c99d9542827dd1ee3ef5124, type: 3}
+  - PositiveClip: {fileID: 8300000, guid: 3057c6465634bff458dbb5fc86a5aab0, type: 3}
+  - NegativeClip: {fileID: 8300000, guid: b1ead77b8c99d9542827dd1ee3ef5124, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

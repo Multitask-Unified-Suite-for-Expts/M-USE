@@ -420,14 +420,14 @@ namespace USE_ExperimentTemplate
 				foreach (string fbController in fbControllersList) {
 					switch (fbController) {
 						case "Audio":
-							if (!audioInited) TrialLevel.AudioFBController.Init();
+							if (!audioInited) TrialLevel.AudioFBController.Init(FrameData);
 							break;
 						case "Halo":
-							TrialLevel.HaloFBController.Init();
+							TrialLevel.HaloFBController.Init(FrameData);
 							break;
 						case "Token":
-							if (!audioInited) TrialLevel.AudioFBController.Init();
-							TrialLevel.TokenFBController.Init(TrialLevel.AudioFBController);
+							if (!audioInited) TrialLevel.AudioFBController.Init(FrameData);
+							TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
 							break;
 						default:
 							Debug.LogWarning(fbController + " is not a valid feedback controller.");

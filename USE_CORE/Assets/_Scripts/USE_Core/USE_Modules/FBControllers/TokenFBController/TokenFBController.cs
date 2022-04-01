@@ -1,4 +1,5 @@
 using UnityEngine;
+using USE_Data;
 
 public class TokenFBController : MonoBehaviour
 {
@@ -37,8 +38,12 @@ public class TokenFBController : MonoBehaviour
     // Audio
     AudioFBController audioFBController;
 
-    public void Init(AudioFBController audioFBController)
+    public void Init(DataController trialData, DataController frameData, AudioFBController audioFBController)
     {
+        trialData.AddDatum("TokenChange", () => tokensChange == 0 ? null : (float?)tokensChange);
+        frameData.AddDatum("TokenAnimationPhase", () => animationPhase.ToString());
+        frameData.AddDatum("TokensCollected", () => numCollected);
+
         this.audioFBController = audioFBController;
         numCollected = 0;
 

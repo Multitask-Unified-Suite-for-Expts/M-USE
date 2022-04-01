@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using USE_Data;
 
 public class AudioFBController : MonoBehaviour
 {
@@ -14,7 +15,11 @@ public class AudioFBController : MonoBehaviour
     private AudioSource audioSource;
     private Dictionary<string, AudioClip> clips;
 
-    public void Init() {
+    private string playingClipName = null;
+
+    public void Init(DataController frameData) {
+        frameData.AddDatum("PlayingAudioClipName", () => playingClipName);
+
         audioSource = GameObject.FindWithTag("MainCamera").AddComponent<AudioSource>();
         clips = new Dictionary<string, AudioClip>();
         
@@ -45,6 +50,7 @@ public class AudioFBController : MonoBehaviour
     }
 
     public void Play(string clipName) {
+        playingClipName = clipName;
         if (clips.TryGetValue(clipName, out AudioClip clip)) {
             audioSource.PlayOneShot(clip);
         } else {
@@ -54,5 +60,11 @@ public class AudioFBController : MonoBehaviour
 
     public bool IsPlaying() {
         return audioSource.isPlaying;
+    }
+
+    private void Update() {
+        if (audioSource != null && !audioSource.isPlaying) {
+            playingClipName = null;
+        }
     }
 }

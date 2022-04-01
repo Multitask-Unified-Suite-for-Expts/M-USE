@@ -407,13 +407,33 @@ namespace USE_ExperimentTemplate
 			TrialLevel.TrialDefType = TrialDefType;
 			TrialLevel.StimDefType = StimDefType;
 
+			List<string> fbControllersList = new List<string>();
+			if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FeedbackControllers"))
+				fbControllersList = (List<string>) SessionSettings.Get(TaskName + "_TaskSettings", "FeedbackControllers");
+
 			AddInitializationMethod(() =>
 			{
 				BlockCount = -1;
 				TaskCam.gameObject.SetActive(true);
-				TrialLevel.AudioFBController.Init();
-				TrialLevel.HaloFBController.Init();
-				TrialLevel.TokenFBController.Init(TrialLevel.AudioFBController);
+
+				bool audioInited = false;
+				foreach (string fbController in fbControllersList) {
+					switch (fbController) {
+						case "Audio":
+							if (!audioInited) TrialLevel.AudioFBController.Init();
+							break;
+						case "Halo":
+							TrialLevel.HaloFBController.Init();
+							break;
+						case "Token":
+							if (!audioInited) TrialLevel.AudioFBController.Init();
+							TrialLevel.TokenFBController.Init(TrialLevel.AudioFBController);
+							break;
+						default:
+							Debug.LogWarning(fbController + " is not a valid feedback controller.");
+							break;
+					}
+				}
 			});
 
 			SetupTask.SpecifyTermination(() => true, RunBlock);
@@ -1261,6 +1281,7 @@ namespace USE_ExperimentTemplate
 		public List<string[]> FeatureNames;
 		public string neutralPatternedColorName;
 		public float? ExternalStimScale;
+		public List<string[]> FeedbackControllers;
 	}
 	public class BlockDef
 	{

@@ -185,11 +185,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.Destroy();
             if (isNew)
             {
-                TokenFBController.AddTokens(chosen, 3);
+                TokenFBController.AddTokens(chosen, 1);
             }
             else
             {
-                AudioFBController.PlayNegative();
+                AudioFBController.Play("Negative");
             }
         });
         tokenFeedback.SpecifyTermination(()=>!TokenFBController.IsAnimating(), trialEnd);

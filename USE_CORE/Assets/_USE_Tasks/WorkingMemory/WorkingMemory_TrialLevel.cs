@@ -114,6 +114,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         // Wait for some time at the end
         trialEnd.AddTimer(() => CurrentTrialDef.trialEndDuration, FinishTrial);
+
+        TrialData.AddDatum("SelectedName", () => selected != null ? selected.name : null);
+        TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
+        TrialData.AddDatum("SelectionCorrect", () => correct ? 1 : 0);
     }
 
     protected override void DefineTrialStims()

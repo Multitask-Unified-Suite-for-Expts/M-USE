@@ -415,25 +415,6 @@ namespace USE_ExperimentTemplate
 			{
 				BlockCount = -1;
 				TaskCam.gameObject.SetActive(true);
-
-				bool audioInited = false;
-				foreach (string fbController in fbControllersList) {
-					switch (fbController) {
-						case "Audio":
-							if (!audioInited) TrialLevel.AudioFBController.Init(FrameData);
-							break;
-						case "Halo":
-							TrialLevel.HaloFBController.Init(FrameData);
-							break;
-						case "Token":
-							if (!audioInited) TrialLevel.AudioFBController.Init(FrameData);
-							TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
-							break;
-						default:
-							Debug.LogWarning(fbController + " is not a valid feedback controller.");
-							break;
-					}
-				}
 			});
 
 			SetupTask.SpecifyTermination(() => true, RunBlock);
@@ -531,6 +512,25 @@ namespace USE_ExperimentTemplate
 			TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
 			TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
 			TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
+			bool audioInited = false;
+			foreach (string fbController in fbControllersList) {
+				switch (fbController) {
+					case "Audio":
+						if (!audioInited) TrialLevel.AudioFBController.Init(FrameData);
+						break;
+					case "Halo":
+						TrialLevel.HaloFBController.Init(FrameData);
+						break;
+					case "Token":
+						if (!audioInited) TrialLevel.AudioFBController.Init(FrameData);
+						TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
+						break;
+					default:
+						Debug.LogWarning(fbController + " is not a valid feedback controller.");
+						break;
+				}
+			}
+
 			TrialLevel.SessionDataControllers = SessionDataControllers;
 			TrialLevel.FilePrefix = FilePrefix;
 			TrialLevel.TaskStims = TaskStims;

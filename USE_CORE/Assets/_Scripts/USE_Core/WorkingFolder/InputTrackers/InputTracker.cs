@@ -33,9 +33,9 @@ public abstract class InputTracker : MonoBehaviour
         };
     }
 
-    public void Init()
+    public void Init(DataController frameData)
     {
-        // AddFieldsToFrameData();
+        AddFieldsToFrameData(frameData);
     }
 
     private void Update()

@@ -13,7 +13,7 @@ public class MouseTracker : InputTracker
         frameData.AddDatum("MouseButton0", () => InputBroker.GetMouseButton(0));
         frameData.AddDatum("MouseButton1", () => InputBroker.GetMouseButton(1));
         frameData.AddDatum("MouseButton2", () => InputBroker.GetMouseButton(2));
-        frameData.AddDatum("HoverObject", () => HoverObject);
+        frameData.AddDatum("HoverObject", () => HoverObject != null ? HoverObject.name : null);
     }
 
     public override GameObject FindCurrentTarget()

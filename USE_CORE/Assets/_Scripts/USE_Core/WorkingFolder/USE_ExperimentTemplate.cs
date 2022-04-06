@@ -538,7 +538,7 @@ namespace USE_ExperimentTemplate
 			}
 
 			TrialLevel.MouseTracker = inputTrackers.GetComponent<MouseTracker>();
-			TrialLevel.MouseTracker.Init();
+			TrialLevel.MouseTracker.Init(FrameData);
 
 			TrialLevel.SessionDataControllers = SessionDataControllers;
 			TrialLevel.FilePrefix = FilePrefix;

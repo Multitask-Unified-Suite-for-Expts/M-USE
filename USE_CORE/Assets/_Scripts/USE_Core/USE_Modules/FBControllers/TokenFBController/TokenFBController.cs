@@ -50,6 +50,13 @@ public class TokenFBController : MonoBehaviour
         whiteStyle = new GUIStyle();
         whiteStyle.normal.background = Texture2D.whiteTexture;
 
+        RecalculateTokenBox();
+
+        SetPositiveShowAudioClip(audioFBController.GetClip("Positive"));
+        SetNegativeShowAudioClip(audioFBController.GetClip("Negative"));
+    }
+
+    private void RecalculateTokenBox() {
         float width = CalcTokensWidth(totalTokensNum) + 2 * tokenBoxPadding;
         tokenBoxRect = new Rect(
             (Screen.width - width) / 2,
@@ -57,9 +64,6 @@ public class TokenFBController : MonoBehaviour
             width,
             tokenSize + 2 * tokenBoxPadding
         );
-
-        SetPositiveShowAudioClip(audioFBController.GetClip("Positive"));
-        SetNegativeShowAudioClip(audioFBController.GetClip("Negative"));
     }
 
     public void AddTokens(GameObject gameObj, int numTokens)
@@ -171,6 +175,7 @@ public class TokenFBController : MonoBehaviour
     public TokenFBController SetTotalTokensNum(int numTokens)
     {
         totalTokensNum = numTokens;
+        RecalculateTokenBox();
         return this;
     }
 

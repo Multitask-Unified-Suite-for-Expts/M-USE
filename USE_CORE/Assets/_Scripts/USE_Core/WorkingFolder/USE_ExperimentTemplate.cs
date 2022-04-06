@@ -407,10 +407,6 @@ namespace USE_ExperimentTemplate
 			TrialLevel.TrialDefType = TrialDefType;
 			TrialLevel.StimDefType = StimDefType;
 
-			List<string> fbControllersList = new List<string>();
-			if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FeedbackControllers"))
-				fbControllersList = (List<string>) SessionSettings.Get(TaskName + "_TaskSettings", "FeedbackControllers");
-
 			AddInitializationMethod(() =>
 			{
 				BlockCount = -1;
@@ -509,6 +505,13 @@ namespace USE_ExperimentTemplate
 			GameObject controllers = new GameObject("Controllers");
 			GameObject fbControllers = Instantiate(fbControllersPrefab, controllers.transform);
 
+			List<string> fbControllersList = new List<string>();
+			if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FeedbackControllers"))
+				fbControllersList = (List<string>) SessionSettings.Get(TaskName + "_TaskSettings", "FeedbackControllers");
+			int totalTokensNum = 5;
+			if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TotalTokensNum"))
+				totalTokensNum = (int) SessionSettings.Get(TaskName + "_TaskSettings", "TotalTokensNum");
+
 			TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
 			TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
 			TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
@@ -524,6 +527,7 @@ namespace USE_ExperimentTemplate
 					case "Token":
 						if (!audioInited) TrialLevel.AudioFBController.Init(FrameData);
 						TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
+						TrialLevel.TokenFBController.SetTotalTokensNum(totalTokensNum);
 						break;
 					default:
 						Debug.LogWarning(fbController + " is not a valid feedback controller.");
@@ -1282,11 +1286,13 @@ namespace USE_ExperimentTemplate
 		public string neutralPatternedColorName;
 		public float? ExternalStimScale;
 		public List<string[]> FeedbackControllers;
+		public int? TotalTokensNum;
 	}
 	public class BlockDef
 	{
 		public int BlockCount;
 		public TrialDef[] TrialDefs;
+		public int? TotalTokensNum;
 
 		public virtual void GenerateTrialDefsFromBlockDef()
 		{

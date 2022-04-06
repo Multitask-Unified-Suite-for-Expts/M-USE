@@ -502,8 +502,10 @@ namespace USE_ExperimentTemplate
 
 			//AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
 			GameObject fbControllersPrefab = Resources.Load<GameObject>("FeedbackControllers");
+			GameObject inputTrackersPrefab = Resources.Load<GameObject>("InputTrackers");
 			GameObject controllers = new GameObject("Controllers");
 			GameObject fbControllers = Instantiate(fbControllersPrefab, controllers.transform);
+			GameObject inputTrackers = Instantiate(inputTrackersPrefab, controllers.transform);
 
 			List<string> fbControllersList = new List<string>();
 			if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FeedbackControllers"))
@@ -534,6 +536,9 @@ namespace USE_ExperimentTemplate
 						break;
 				}
 			}
+
+			TrialLevel.MouseTracker = inputTrackers.GetComponent<MouseTracker>();
+			TrialLevel.MouseTracker.Init();
 
 			TrialLevel.SessionDataControllers = SessionDataControllers;
 			TrialLevel.FilePrefix = FilePrefix;
@@ -872,6 +877,8 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public AudioFBController AudioFBController;
 		[HideInInspector] public HaloFBController HaloFBController;
 		[HideInInspector] public TokenFBController TokenFBController;
+		// Input Trackers
+		[HideInInspector] public MouseTracker MouseTracker;
 
 		//protected TrialDef CurrentTrialDef;
 		protected T GetCurrentTrialDef<T>() where T : TrialDef

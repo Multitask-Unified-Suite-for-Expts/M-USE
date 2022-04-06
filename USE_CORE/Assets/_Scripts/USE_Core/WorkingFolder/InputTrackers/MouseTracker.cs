@@ -5,7 +5,7 @@ using USE_Data;
 
 public class MouseTracker : InputTracker
 {
-    public GameObject HoverObject;
+    private GameObject HoverObject;
 
     public override void AddFieldsToFrameData(DataController frameData)
     {

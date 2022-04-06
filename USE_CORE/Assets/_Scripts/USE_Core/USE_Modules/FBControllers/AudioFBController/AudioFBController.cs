@@ -12,7 +12,7 @@ public class AudioFBController : MonoBehaviour
     }
     public AudioFB[] DefaultAudioFeedbacks;
 
-    private AudioSource audioSource;
+    public AudioSource audioSource;
     private Dictionary<string, AudioClip> clips;
 
     private string playingClipName = null;
@@ -20,11 +20,22 @@ public class AudioFBController : MonoBehaviour
     public void Init(DataController frameData) {
         frameData.AddDatum("PlayingAudioClipName", () => playingClipName);
 
-        audioSource = GameObject.FindWithTag("MainCamera").AddComponent<AudioSource>();
+        UpdateAudioSource();
         clips = new Dictionary<string, AudioClip>();
         
         foreach (AudioFB audioFB in DefaultAudioFeedbacks) {
             clips.Add(audioFB.name, audioFB.clip);
+        }
+    }
+
+    // Every time a new task is started, the old audio source is deactivated,
+    // so we need to make sure to find the new one
+    public void UpdateAudioSource() {
+        foreach (GameObject camera in GameObject.FindGameObjectsWithTag("MainCamera")) {
+            if (camera.activeInHierarchy) {
+                audioSource = camera.AddComponent<AudioSource>();
+                break;
+            }
         }
     }
 

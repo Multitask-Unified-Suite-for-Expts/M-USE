@@ -891,6 +891,7 @@ namespace USE_ExperimentTemplate
 			{
 				TrialCount_InBlock = -1;
 				TrialStims = new List<StimGroup>();
+				AudioFBController.UpdateAudioSource();
 				//DetermineNumTrialsInBlock();
 			});
 

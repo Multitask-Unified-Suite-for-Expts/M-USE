@@ -18,6 +18,8 @@ public class Tile : MonoBehaviour
     public GameObject eBeep;
     public AudioSource cAudio;
     public AudioSource eAudio;
+    public Color baseColor;
+    private int done = 0;
 
     void Start()
     {
@@ -27,6 +29,18 @@ public class Tile : MonoBehaviour
         eBeep = GameObject.Find("ErrorBeep");
         cAudio = cBeep.GetComponent<AudioSource>();
         eAudio = eBeep.GetComponent<AudioSource>();
+     //   Material newMat = Resources.Load("TestMat", typeof(Material)) as Material;
+      //  gameObject.GetComponent<MeshRenderer>().material = newMat;
+
+
+        // gameObject.GetComponent<Renderer>().material.color = gameConfigs.FINISH_COLOR;
+        // gameObject.GetComponent<Renderer>().material.color = MazeGame_TrialLevel.tileColor;
+        gameObject.GetComponent<Renderer>().material.color = baseColor;
+
+        Debug.Log("START TILE");
+
+        //   gameObject.GetComponent<Renderer>().material("_BaseColor", gameConfigs.CORRECT_COLOR);
+
 
 
 
@@ -34,8 +48,10 @@ public class Tile : MonoBehaviour
         //  eBeep.SetActive(false);
     }
 
+
     void OnMouseDown()
     {
+
         int correctnessCode;
         correctnessCode = MazeGame_TrialLevel.ManageTileTouch(this);
  
@@ -44,10 +60,20 @@ public class Tile : MonoBehaviour
         StartCoroutine(ColorFeedback(correctnessCode));
     }
 
-   // public void Reset()
+    // public void Reset()
     //{
     //    this.gameObject.SetActive(false);
     //}
+   public void setColor(Color c)
+    {
+        // baseColor = MazeGame_TrialLevel.tileColor;
+        Debug.Log("Change Color");
+        //  c = gameConfigs.CORRECT_COLOR;
+        //gameObject.GetComponent<Renderer>().sharedMaterial.color = new Color(5f, 1f, 1f);
+        baseColor = c;
+
+
+    } 
 
     public IEnumerator ColorFeedback(int code)
     {
@@ -55,21 +81,22 @@ public class Tile : MonoBehaviour
         {
             case 0:
                 // CORRECT DEFAULT
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.CORRECT_COLOR);
+                //gameObject.GetComponent<Renderer>().material.color = gameConfigs.CORRECT_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.CORRECT_COLOR;
 
-                 cAudio.Play(0);
+                cAudio.Play(0);
                 yield return new WaitForSeconds(gameConfigs.CORRECT_FEEDBACK_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.DEFAULT_TILE_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.DEFAULT_TILE_COLOR;
 
 
                 break;
             case 1:
                 // CORRECT and START
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.CORRECT_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.CORRECT_COLOR;
                 cAudio.Play(0);
 
                 yield return new WaitForSeconds(gameConfigs.CORRECT_FEEDBACK_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.START_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.START_COLOR;
 
 
                 break;
@@ -77,9 +104,9 @@ public class Tile : MonoBehaviour
                 // CORRECT and FINISH
                 cAudio.Play(0);
 
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.CORRECT_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.CORRECT_COLOR;
                 yield return new WaitForSeconds(gameConfigs.CORRECT_FEEDBACK_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.FINISH_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.FINISH_COLOR;
 
 
                 break;
@@ -87,17 +114,17 @@ public class Tile : MonoBehaviour
                 // LAST CORRECT STEP DEFAULT
                 cAudio.Play(0);
 
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.LAST_CORRECT_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.LAST_CORRECT_COLOR;
                 yield return new WaitForSeconds(gameConfigs.PREV_CORRECT_FEEDBACK_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.DEFAULT_TILE_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.DEFAULT_TILE_COLOR;
                 break;
             case 31:
                 // LAST CORRECT STEP and START
                 cAudio.Play(0);
 
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.LAST_CORRECT_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.LAST_CORRECT_COLOR;
                 yield return new WaitForSeconds(gameConfigs.PREV_CORRECT_FEEDBACK_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.START_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.START_COLOR;
 
 
                 break;
@@ -105,9 +132,9 @@ public class Tile : MonoBehaviour
                 // RULE-ABIDING INCORRECT DEFAULT
                 eAudio.Play(0);
 
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.INCORRECT_RULEABIDING_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.INCORRECT_RULEABIDING_COLOR;
                 yield return new WaitForSeconds(gameConfigs.INCORRECT_RULEABIDING_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.DEFAULT_TILE_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.DEFAULT_TILE_COLOR;
 
 
                 break;
@@ -115,43 +142,44 @@ public class Tile : MonoBehaviour
                 // RULE-ABIDING INCORRECT and START
                 eAudio.Play(0);
 
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.INCORRECT_RULEABIDING_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.INCORRECT_RULEABIDING_COLOR;
                 yield return new WaitForSeconds(gameConfigs.INCORRECT_RULEABIDING_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.START_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.START_COLOR;
                 break;
             case 12:
                 // RULE-ABIDING INCORRECT and FINISH
                 eAudio.Play(0);
 
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.INCORRECT_RULEABIDING_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.INCORRECT_RULEABIDING_COLOR;
                 yield return new WaitForSeconds(gameConfigs.INCORRECT_RULEABIDING_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.FINISH_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.FINISH_COLOR;
 
                 break;
             case 20:
                 // RULE-BREAKING INCORRECT DEFAULT
                 eAudio.Play(0);
 
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.INCORRECT_RULEBREAKING_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.INCORRECT_RULEBREAKING_COLOR;
                 yield return new WaitForSeconds(gameConfigs.INCORRECT_RULEBREAKING_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.DEFAULT_TILE_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.DEFAULT_TILE_COLOR;
                 break;
             case 21:
                 // RULE-BREAKING INCORRECT and START
                 eAudio.Play(0);
 
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.INCORRECT_RULEBREAKING_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.INCORRECT_RULEBREAKING_COLOR;
                 yield return new WaitForSeconds(gameConfigs.INCORRECT_RULEBREAKING_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.START_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.START_COLOR;
 
                 break;
             case 22:
                 // RULE-BREAKING INCORRECT and FINISH
                 eAudio.Play(0);
 
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.INCORRECT_RULEBREAKING_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.INCORRECT_RULEBREAKING_COLOR;
                 yield return new WaitForSeconds(gameConfigs.INCORRECT_RULEBREAKING_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.FINISH_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.FINISH_COLOR;
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.FINISH_COLOR;
 
                 break;
         }
@@ -193,78 +221,78 @@ public class Tile : MonoBehaviour
         {
             case 0:
                 // CORRECT DEFAULT
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.CORRECT_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.CORRECT_COLOR);
                 yield return new WaitForSeconds(gameConfigs.CORRECT_FEEDBACK_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.DEFAULT_TILE_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.DEFAULT_TILE_COLOR);
 
                 break;
             case 1:
                 // CORRECT and START
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.CORRECT_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.CORRECT_COLOR);
                 yield return new WaitForSeconds(gameConfigs.CORRECT_FEEDBACK_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.START_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.START_COLOR);
 
                 break;
             case 99:
                 // CORRECT and FINISH
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.CORRECT_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.CORRECT_COLOR);
                 yield return new WaitForSeconds(gameConfigs.CORRECT_FEEDBACK_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.FINISH_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.FINISH_COLOR);
 
                 break;
             case 30:
                 // LAST CORRECT STEP DEFAULT
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.LAST_CORRECT_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.LAST_CORRECT_COLOR);
                 yield return new WaitForSeconds(gameConfigs.PREV_CORRECT_FEEDBACK_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.DEFAULT_TILE_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.DEFAULT_TILE_COLOR);
 
                 break;
             case 31:
                 // LAST CORRECT STEP and START
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.LAST_CORRECT_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.LAST_CORRECT_COLOR);
                 yield return new WaitForSeconds(gameConfigs.PREV_CORRECT_FEEDBACK_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.START_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.START_COLOR);
 
                 break;
             case 10:
                 // RULE-ABIDING INCORRECT DEFAULT
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.INCORRECT_RULEABIDING_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.INCORRECT_RULEABIDING_COLOR);
                 yield return new WaitForSeconds(gameConfigs.INCORRECT_RULEABIDING_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.DEFAULT_TILE_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.DEFAULT_TILE_COLOR);
 
                 break;
             case 11:
                 // RULE-ABIDING INCORRECT and START
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.INCORRECT_RULEABIDING_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.INCORRECT_RULEABIDING_COLOR);
                 yield return new WaitForSeconds(gameConfigs.INCORRECT_RULEABIDING_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.START_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.START_COLOR);
                 break;
             case 12:
                 // RULE-ABIDING INCORRECT and FINISH
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.INCORRECT_RULEABIDING_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.INCORRECT_RULEABIDING_COLOR);
                 yield return new WaitForSeconds(gameConfigs.INCORRECT_RULEABIDING_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.FINISH_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.FINISH_COLOR);
 
                 break;
             case 20:
                 // RULE-BREAKING INCORRECT DEFAULT
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.INCORRECT_RULEBREAKING_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.INCORRECT_RULEBREAKING_COLOR);
                 yield return new WaitForSeconds(gameConfigs.INCORRECT_RULEBREAKING_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.DEFAULT_TILE_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.DEFAULT_TILE_COLOR);
 
                 break;
             case 21:
                 // RULE-BREAKING INCORRECT and START
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.INCORRECT_RULEBREAKING_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.INCORRECT_RULEBREAKING_COLOR);
                 yield return new WaitForSeconds(gameConfigs.INCORRECT_RULEBREAKING_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.START_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.START_COLOR);
 
                 break;
             case 22:
                 // RULE-BREAKING INCORRECT and FINISH
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.INCORRECT_RULEBREAKING_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.INCORRECT_RULEBREAKING_COLOR);
                 yield return new WaitForSeconds(gameConfigs.INCORRECT_RULEBREAKING_SECONDS);
-                gameObject.GetComponent<Renderer>().material.SetColor("_BaseColor", gameConfigs.FINISH_COLOR);
+                gameObject.GetComponent<Renderer>().material.color = gameConfigs.FINISH_COLOR);
 
                 break;
         }

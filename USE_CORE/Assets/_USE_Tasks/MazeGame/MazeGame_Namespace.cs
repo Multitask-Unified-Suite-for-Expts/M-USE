@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using USE_ExperimentTemplate;
 using USE_StimulusManagement;
 
@@ -22,8 +22,35 @@ namespace MazeGame_Namespace
     public class MazeGame_BlockDef : BlockDef
     {
         //Already-existing fields (inherited from BlockDef)
-		//public int BlockCount;
-		//public TrialDef[] TrialDefs;
+        //public int BlockCount;
+        //public TrialDef[] TrialDefs;
+
+       // public string TrialID;
+       // public int Context;
+        public int Trial;
+        public int[] nRepetitionsMinMax;
+      //  public float MinTouchDuration;
+      //  public float MaxTouchDuration;
+        public override void GenerateTrialDefsFromBlockDef()
+        {
+            //pick # of trials from minmaxokay 
+           // System.Random rnd = new System.Random();
+           // int num = rnd.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
+            TrialDefs = new TrialDef[3];//actual correct # 
+            for (int iTrial = 0; iTrial < TrialDefs.Length; iTrial++)
+            {
+                MazeGame_TrialDef td = new MazeGame_TrialDef();
+                td.TrialCount = Trial;
+              //  Debug.Log("TRIAL: " + Trial);
+                //   td.TrialID = TrialID;
+                //   td.Context = Context;
+                // td.MinTouchDuration = MinTouchDuration;
+                //   td.MaxTouchDuration = MaxTouchDuration;
+
+                TrialDefs[iTrial] = td;
+            }
+        }
+        
     }
 
     public class MazeGame_TrialDef : TrialDef
@@ -31,8 +58,10 @@ namespace MazeGame_Namespace
         //Already-existing fields (inherited from TrialDef)
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
-        public int Trial;
-        public int[] nRepetitionsMinMax;
+        public int TrialCount; 
+
+
+       // public int[] nRepetitionsMinMax;
     }
 
     public class MazeGame_StimDef : StimDef

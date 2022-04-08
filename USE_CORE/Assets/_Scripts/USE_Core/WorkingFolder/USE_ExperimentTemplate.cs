@@ -10,6 +10,7 @@ using USE_Data;
 using USE_Settings;
 using USE_StimulusManagement;
 // using USE_TasksCustomTypes;
+using USE_UI;
 
 namespace USE_ExperimentTemplate
 {
@@ -356,6 +357,9 @@ namespace USE_ExperimentTemplate
 		public Type TaskLevelType;
 		protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
 
+		// code for button
+		[HideInInspector] public USE_Button sttartButton;
+
 		public virtual void SpecifyTypes()
 		{
 			TaskLevelType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TaskLevelType;
@@ -483,6 +487,9 @@ namespace USE_ExperimentTemplate
 			TrialLevel.PrefabStims = PrefabStims;
 			TrialLevel.ExternalStims = ExternalStims;
 			TrialLevel.RuntimeStims = RuntimeStims;
+
+			TrialLevel.sttartButton = sttartButton;
+
 			TrialLevel.DefineTrialLevel();
 		}
 
@@ -653,6 +660,23 @@ namespace USE_ExperimentTemplate
 			}
 		}
 
+		// test function for button
+		protected virtual void DefineButton()
+		{
+			Vector3 ButtonPosition = new Vector3(0f, 0f, 0f);
+			Vector3 ButtonScale = new Vector3(1f, 1f, 1f);
+
+			if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
+			{
+				if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+					ButtonPosition = (Vector3) SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+				if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+					ButtonScale = (Vector3) SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+			}
+			sttartButton = new USE_Button(ButtonPosition, ButtonScale);
+			sttartButton.defineButton();
+		}
+
 		public void ReadTaskDef<T>(string taskConfigFolder) where T : TaskDef
 		{
 			string taskDefFile = LocateFile.FindFileInFolder(taskConfigFolder, "*" + TaskName + "*Task*");
@@ -797,6 +821,8 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims, RuntimeStims;
 		[HideInInspector] public List<StimGroup> TrialStims;
 
+		[HideInInspector] public USE_Button sttartButton;
+
 		//protected TrialDef CurrentTrialDef;
 		protected T GetCurrentTrialDef<T>() where T : TrialDef
 		{
@@ -833,6 +859,7 @@ namespace USE_ExperimentTemplate
 					FrameData.fileName = FilePrefix + "__FrameData_Trial_000" + (TrialCount_InTask + 1) + ".txt";
 				FrameData.CreateFile();
 				DefineTrialStims();
+				test();
 				ResetRelativeStartTime();
 				foreach (StimGroup sg in TrialStims)
 				{
@@ -867,6 +894,11 @@ namespace USE_ExperimentTemplate
 
 
 		protected virtual void DefineTrialStims()
+		{
+
+		}
+
+		protected virtual void test()
 		{
 
 		}
@@ -1209,6 +1241,11 @@ namespace USE_ExperimentTemplate
 		public List<string[]> FeatureNames;
 		public string neutralPatternedColorName;
 		public float? ExternalStimScale;
+
+		//for button
+		public Vector3 ButtonPosition;
+		public Vector3 ButtonScale;
+
 	}
 	public class BlockDef
 	{

@@ -20,10 +20,16 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_USE_Tasks/StimHandling/StimHandling.unity
     guid: 2e148fd03348e46f1b8b00dda1da7b4c
-  - enabled: 1
-    path: Assets/_USE_Tasks/EC/EC.unity
-    guid: 4f7dc19d28a2e0246ab0f05394f603ec
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 1
     path: Assets/_USE_Tasks/WWW/WWW.unity
     guid: beef1cd6e8c2d44e4b72cea34db0ed0b
+  - enabled: 1
+    path: Assets/_USE_Tasks/VisualSearch/VisualSearch.unity
+    guid: d45f4e5d048764d43b7ab6272b7f303d
+  - enabled: 1
+    path: Assets/_USE_Tasks/ContinuousRecognition/ContinuousRecognition.unity
+    guid: ed6c79a08bbf34d64924e0aee5ec787e
   m_configObjects: {}

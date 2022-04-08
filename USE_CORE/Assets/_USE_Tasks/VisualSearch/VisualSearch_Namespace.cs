@@ -42,6 +42,16 @@ namespace VisualSearch_Namespace
         public float selectionFbDuration;
         public float tokenFbDuration;
         public float trialEndDuration;
+
+        public int[] ObjectNums;
+        public int Context;
+
+        public int[] GroupAIndices;
+        public int[] GroupBIndices;
+        public int[] GroupCIndices;
+        public Vector3[] GroupALocations;
+        public Vector3[] GroupBLocations;
+        public Vector3[] GroupCLocations;
     }
 
     public class VisualSearch_StimDef : StimDef

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using ConfigDynamicUI;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -377,6 +378,7 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims, RuntimeStims;
 		public List<GameObject> PreloadedStimGameObjects;
 		public List<string> PrefabStimPaths;
+		protected ConfigVarStore ConfigUiVariables;
 
 		public Type TaskLevelType;
 		protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
@@ -518,6 +520,7 @@ namespace USE_ExperimentTemplate
 			TrialLevel.PrefabStims = PrefabStims;
 			TrialLevel.ExternalStims = ExternalStims;
 			TrialLevel.RuntimeStims = RuntimeStims;
+			TrialLevel.ConfigUiVariables = ConfigUiVariables;;
 			TrialLevel.DefineTrialLevel();
 		}
 
@@ -550,6 +553,14 @@ namespace USE_ExperimentTemplate
 			MethodInfo readStimDefs = GetType().GetMethod(nameof(this.ReadStimDefs))
 				.MakeGenericMethod(new Type[] {StimDefType});
 			readStimDefs.Invoke(this, new object[] {TaskConfigPath});
+			
+			
+			string configUIVariableFile = LocateFile.FindFileInFolder(TaskConfigPath, "*" + TaskName + "*ConfigUIDetails*");
+			if (!string.IsNullOrEmpty(configUIVariableFile))
+			{
+				SessionSettings.ImportSettings_SingleTypeJSON<ConfigVarStore>(TaskName + "_ConfigUiDetails", configUIVariableFile);
+				ConfigUiVariables = (ConfigVarStore) SessionSettings.Get(TaskName + "_ConfigUiDetails");
+			}
 
 			//handling of block and trial defs so that each BlockDef contains a TrialDef[] array
 
@@ -844,6 +855,9 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims, RuntimeStims;
 		[HideInInspector] public List<StimGroup> TrialStims;
 		
+		
+		[HideInInspector] public ConfigVarStore ConfigUiVariables;
+		
 		// Feedback Controllers
 		[HideInInspector] public AudioFBController AudioFBController;
 		[HideInInspector] public HaloFBController HaloFBController;
@@ -913,8 +927,7 @@ namespace USE_ExperimentTemplate
 			TrialData.ManuallyDefine();
 			TrialData.AddStateTimingData(this);
 			TrialData.CreateFile();
-
-
+			
 		}
 
 

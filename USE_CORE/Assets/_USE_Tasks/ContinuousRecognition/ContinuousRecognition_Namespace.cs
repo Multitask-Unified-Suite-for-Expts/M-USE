@@ -25,40 +25,90 @@ namespace ContinuousRecognition_Namespace
     public class ContinuousRecognition_BlockDef : BlockDef
     { 
         public int[] BlockStimIndices, nObjectsMinMax, Ratio;
+
         public float
             DisplayStimsDuration,
             ChooseStimDuration,
             TrialEndDuration,
-            TouchFeedbackDuration;
-        public List<int> PreviouslyChosenStimuli, PreviouslyNotChosenStim, TrialStimIndices, UnseenStims;
-        public List<int> NewStim;
-        public Vector3[] BlockStimLocations;
-        public int trialCount;
+            TouchFeedbackDuration,
+            DisplayResultDuration;
+        
+        public List<int> PreviouslyChosenStimuli, PreviouslyNotChosenStim, TrialStimIndices, UnseenStims, NewStim;
+        public Vector3[] BlockStimLocations, StimLocation;
+        public int trialCount, ManuallySpecifyLocation, row, col;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
-            BlockStimLocations = new []
-            {
-                new Vector3(-5f,1f,0f), new Vector3(0f,1f,0f), new Vector3(5f, 1f, 0f),
-                new Vector3(-5f,4f,0f), new Vector3(0f,4f,0f), new Vector3(5f, 4f, 0f),
-                new Vector3(-5f,-3f,0f), new Vector3(0f,-3f,0f), new Vector3(5f, -3f, 0f)
-            };
+            // total number of grids is row*col
+            int numGrid = row * col;
+            Debug.Log("num grid is " + numGrid + "row is " + row + "; col is " + col);
+            Vector3[] Locations = new Vector3[numGrid];
             
+            // calculate horizontal and vertical offset
+            float horizontal = 12f/col;
+            float vertical = 7.7f/row;
+            int gridIndex = 0;
+            // edges
+            float x = -6;
+            float y = 4;
+            float z = 0;
+            
+            // create grid by filling in location array
+            for (int i = 0; i < row; i++)
+            {
+                x = -6;
+                for (int j = 0; j < col; j++)
+                {
+                    Locations[gridIndex] = new Vector3(x, y, z);
+                    x += horizontal;
+                    gridIndex++;
+                }
+                y -= vertical;
+            }
+
+            // if user want to specify their own stim location, use user location, other wise, use grid
+            if (ManuallySpecifyLocation == 1)
+            {
+                if (StimLocation.Length < nObjectsMinMax[1])
+                {
+                    Debug.Log("Did not specify enough locations!");
+                    Debug.Break();
+                }
+                else
+                {
+                    BlockStimLocations = StimLocation;
+                    Debug.Log("BlockStimLocations lengths is " + BlockStimLocations.Length);
+                }
+            }
+            else
+            {
+                BlockStimLocations = Locations;
+            }
+
+            // init some lists
             PreviouslyChosenStimuli = new List<int>();
             PreviouslyNotChosenStim = new List<int>();
             UnseenStims = new List<int>();
             TrialStimIndices = new List<int>();
             NewStim = new List<int>();
+            
+            // calculate total number of trials
             int numTrials = nObjectsMinMax[1] - nObjectsMinMax[0] + 1;
             TrialDefs = new ContinuousRecognition_TrialDef[numTrials]; //actual correct # 
+            
+            // number of stims on first trial
             int numTrialStims = nObjectsMinMax[0];
+            int tmp = 0;
+            bool end = false; 
 
-            for (int iTrial = 0; iTrial< numTrials; iTrial++)
+            // trial loop 
+            for (int iTrial = 0; iTrial < numTrials && !end; iTrial++)
             {
                 ContinuousRecognition_TrialDef td = new ContinuousRecognition_TrialDef();
                 td.BlockStimIndices = BlockStimIndices;
                 td.trialCount = trialCount;
-                
+
+                // set up stim location by randomly choosing positions from grid
                 Vector3[] arr = new Vector3[nObjectsMinMax[0] + iTrial];
                 for (int i = 0; i < numTrialStims; i++)
                 {
@@ -67,7 +117,6 @@ namespace ContinuousRecognition_Namespace
                     {
                         index = Random.Range(0, BlockStimLocations.Length);
                     }
-
                     arr[i] = BlockStimLocations[index];
                 }
 
@@ -84,38 +133,44 @@ namespace ContinuousRecognition_Namespace
                 td.ChooseStimDuration = ChooseStimDuration;
                 td.TrialEndDuration = TrialEndDuration;
                 td.TouchFeedbackDuration = TouchFeedbackDuration;
-                
+                td.DisplayResultDuration = DisplayResultDuration;
+                td.ManuallySpecifyLocation = ManuallySpecifyLocation;
+                td.row = row;
+                td.col = col;
+                if (iTrial != 0)
+                {
+                    //end = !td.isNew;
+                }
+
                 TrialDefs[iTrial] = td;
                 numTrialStims++;
                 trialCount++;
-                
             }
         }
-        
     }
 
     public class ContinuousRecognition_TrialDef : TrialDef
     {
-        //TrialStimIndices provides indices to individual StimDefs in BlockStims (so a subset of BlockStims,
-        //which is a subset of ExternalStims).
         public int[] BlockStimIndices, nObjectsMinMax, Ratio;
         public Vector3[] TrialStimLocations;
         public int trialCount, numTrialStims, maxNumTrials;
+        public bool isNew;
 
-        public List<int> PreviouslyChosenStimuli;
-        public List<int> PreviouslyNotChosenStimuli;
-        public List<int> TrialStimIndices;
-        public List<int> UnseenStims;
-        
+        public List<int> PreviouslyChosenStimuli, PreviouslyNotChosenStimuli, TrialStimIndices, UnseenStims;
+        public int row, col, Context;
+
         public float
             DisplayStimsDuration,
             ChooseStimDuration,
             TrialEndDuration,
-            TouchFeedbackDuration;
+            TouchFeedbackDuration,
+            DisplayResultDuration;
+
+        public int ManuallySpecifyLocation;
+        
         //ObjectNums refers to items in a list of objects to be loaded from resources folder
         public int[] ObjectNums;
-        public int Context;
-        
+
 
 
         //-------------------------------------------

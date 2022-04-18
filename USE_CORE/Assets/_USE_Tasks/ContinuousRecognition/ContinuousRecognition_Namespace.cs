@@ -20,6 +20,7 @@ namespace ContinuousRecognition_Namespace
         //public List<string[]> FeatureNames;
         //public string neutralPatternedColorName;
         //public float? ExternalStimScale;
+        public List<int> chosenStims;
     }
 
     public class ContinuousRecognition_BlockDef : BlockDef
@@ -121,6 +122,7 @@ namespace ContinuousRecognition_Namespace
                 }
 
                 td.TrialStimLocations = arr;
+                td.Grid = Locations;
                 td.TrialStimIndices = TrialStimIndices;
                 td.PreviouslyChosenStimuli = PreviouslyChosenStimuli;
                 td.PreviouslyNotChosenStimuli = PreviouslyNotChosenStim;
@@ -155,6 +157,7 @@ namespace ContinuousRecognition_Namespace
         public Vector3[] TrialStimLocations;
         public int trialCount, numTrialStims, maxNumTrials;
         public bool isNew;
+        public Vector3[] Grid;
 
         public List<int> PreviouslyChosenStimuli, PreviouslyNotChosenStimuli, TrialStimIndices, UnseenStims;
         public int row, col, Context;

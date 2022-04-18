@@ -14,7 +14,7 @@ using Random = UnityEngine.Random;
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
     public ContinuousRecognition_TrialDef CurrentTrialDef => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
-    private StimGroup currentTrialStims, resultStims;
+    private StimGroup currentTrialStims, resultStims, display;
     
     // game object variables
     public GameObject StartButton;
@@ -49,7 +49,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State tokenFeedback = new State("TokenFeedback");
         State displayResult = new State("DisplayResult");
         State trialEnd = new State("TrialEnd");
+        SelectionHandler<ContinuousRecognition_StimDef> mouseHandler = new SelectionHandler<ContinuousRecognition_StimDef>();
         AddActiveStates(new List<State> {initTrial, displayStims, chooseStim, touchFeedback, tokenFeedback, displayResult, trialEnd});
+        
         //TODO testing
         Text commandText = null;
 
@@ -170,9 +172,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 HaloFBController.ShowNegative(chosen);
             }
         });
-        touchFeedback.AddTimer(() => CurrentTrialDef.TouchFeedbackDuration, tokenFeedback,
-            () => touchFeedbackFinish = true);
-        tokenFeedback.SpecifyTermination(() => !isNew, trialEnd);
+        touchFeedback.AddTimer(() => CurrentTrialDef.TouchFeedbackDuration, tokenFeedback);
+        //tokenFeedback.SpecifyTermination(() => !isNew, FinishTrial, ()=>Debug.Log("[tokenFeedback]: going to finishTrial"));
+        
         bool end = false;
         tokenFeedback.AddInitializationMethod(() =>
         {
@@ -184,33 +186,37 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             else
             {
                 AudioFBController.Play("Negative");
+                end = true;
             }
             Debug.Log("TRIAL COUNT IS " + trialCount + "; MAX TRIAL COUNT IS " +
                       CurrentTrialDef.maxNumTrials);
         });
+        //tokenFeedback.SpecifyTermination(() => !isNew, ()=>displayResult);
+        //tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), trialEnd);
 
-        tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), trialEnd);
+        tokenFeedback.SpecifyTermination(()=> (end || trialCount == CurrentTrialDef.maxNumTrials), displayResult);
+        tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating() && (trialCount < CurrentTrialDef.maxNumTrials) && isNew, trialEnd);
+
+        bool dd = false;
+        bool displayed = false;
         
-        //tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating() && (trialCount < CurrentTrialDef.maxNumTrials), trialEnd);
-        //tokenFeedback.SpecifyTermination(()=> trialCount == CurrentTrialDef.maxNumTrials, displayResult);
-        
-        /*displayResult.AddInitializationMethod(() =>
+        displayResult.AddInitializationMethod(() =>
         {
             Debug.Log("[DisplayResult]: in display result");
             // just for testing
             commandText = GameObject.Find("CommandText").GetComponent<Text>();
             commandText.text = "displaying result";
         });
-        displayResult.AddTimer(() => CurrentTrialDef.DisplayResultDuration, trialEnd);*/
+        displayResult.AddTimer(() => 5f, ()=>trialEnd, ()=>dd = true);
         trialEnd.AddTimer(() => CurrentTrialDef.TrialEndDuration, FinishTrial);
         
         /*
-        this.AddTerminationSpecification(
+        FinishTrial.SpecifyTermination(
             () => (trialCount > (CurrentTrialDef.nObjectsMinMax[1] - CurrentTrialDef.nObjectsMinMax[0] + 1)) ||
-                  (terminate && touchFeedbackFinish),
-            () => Debug.Log("Current Trial Count is " + CurrentTrialDef.trialCount));*/
+                  terminate && touchFeedbackFinish, ()=>null, ()=>Debug.Log("end block"));*/
+        this.AddTerminationSpecification(()=>dd);
+        //FinishTrial.SpecifyTermination(() => !isNew, () => null, ()=>Debug.Log("[FinishTrial]: finishing trial"));
     }
-
 
     // Helper Functions
     protected override void DefineTrialStims()
@@ -337,20 +343,39 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
+            List<int> results = CurrentTrialDef.PreviouslyChosenStimuli;
+
             // Log for debugging
             getLog(CurrentTrialDef.UnseenStims, "UnseenStims");
             getLog(CurrentTrialDef.PreviouslyChosenStimuli, "PreviouslyChosenStimuli");
             getLog(CurrentTrialDef.PreviouslyNotChosenStimuli, "PreviouslyNotChosenStimuli");
             getLog(CurrentTrialDef.TrialStimIndices, "TrialStimIndices");
 
+            // set trial stims for display results state    
+            display = new StimGroup("ResultStims", ExternalStims, results);
+            int len = results.Count;
+            Vector3[] locs = new Vector3[len];
+            for (int i = 0; i < len; i++)
+            {
+                locs[i] = CurrentTrialDef.Grid[i];
+            }
+            Debug.Log(locs);
+            Debug.Log(
+                "[DisplayResult]: length of location is " + locs.Length + "; length of chosen is " + results.Count);
+            display.SetLocations(locs);
+            display.SetVisibilityOnOffStates(GetStateFromName("DisplayResult"), GetStateFromName("TrialEnd"));
+            TrialStims.Add(display);
+            
             // set trial stims
             currentTrialStims = new StimGroup("TrialStims", ExternalStims, CurrentTrialDef.TrialStimIndices);
             currentTrialStims.SetLocations(CurrentTrialDef.TrialStimLocations);
             currentTrialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"),
                 GetStateFromName("TokenFeedback"));
             TrialStims.Add(currentTrialStims);
+            
         }
     }
+    
 
     void loadVariables()
     {
@@ -367,7 +392,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             return hit.transform.root.gameObject;
         }
-
         return null;
     }
 

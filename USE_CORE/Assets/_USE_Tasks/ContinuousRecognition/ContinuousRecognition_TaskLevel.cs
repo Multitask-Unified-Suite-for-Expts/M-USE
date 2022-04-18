@@ -1,9 +1,10 @@
+using System.Security.Cryptography.X509Certificates;
 using USE_ExperimentTemplate;
 using ContinuousRecognition_Namespace;
-
+using UnityEngine;
+using UnityEngine.UI;
 public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 {
-
     public override void SpecifyTypes()
     {
         //note that since EffortControl_TaskDef and EffortControl_BlockDef do not add any fields or methods to their parent types, 
@@ -17,9 +18,14 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     }
     public override void DefineControlLevel()
     {
+        BlockFeedback.AddInitializationMethod(() =>
+        {
+            
+        });
         
 
     }
+    
 
 
 }

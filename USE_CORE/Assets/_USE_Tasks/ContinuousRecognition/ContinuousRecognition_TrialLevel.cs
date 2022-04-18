@@ -6,10 +6,9 @@ using UnityEngine.UI;
 using USE_StimulusManagement;
 using ContinuousRecognition_Namespace;
 using System;
+
 using ICSharpCode.SharpZipLib.Zip.Compression;
 using Random = UnityEngine.Random;
-
-// using Unity.UNetWeaver;
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
@@ -49,7 +48,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State tokenFeedback = new State("TokenFeedback");
         State displayResult = new State("DisplayResult");
         State trialEnd = new State("TrialEnd");
-        SelectionHandler<ContinuousRecognition_StimDef> mouseHandler = new SelectionHandler<ContinuousRecognition_StimDef>();
+        //SelectionHandler<ContinuousRecognition_StimDef> mouseHandler = new SelectionHandler<ContinuousRecognition_StimDef>();
         AddActiveStates(new List<State> {initTrial, displayStims, chooseStim, touchFeedback, tokenFeedback, displayResult, trialEnd});
         
         //TODO testing
@@ -199,14 +198,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         bool dd = false;
         bool displayed = false;
-        
+        /*
         displayResult.AddInitializationMethod(() =>
         {
             Debug.Log("[DisplayResult]: in display result");
             // just for testing
             commandText = GameObject.Find("CommandText").GetComponent<Text>();
             commandText.text = "displaying result";
-        });
+        });*/
         displayResult.AddTimer(() => 5f, ()=>trialEnd, ()=>dd = true);
         trialEnd.AddTimer(() => CurrentTrialDef.TrialEndDuration, FinishTrial);
         
@@ -367,11 +366,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             TrialStims.Add(display);
             
             // set trial stims
-            currentTrialStims = new StimGroup("TrialStims", ExternalStims, CurrentTrialDef.TrialStimIndices);
-            currentTrialStims.SetLocations(CurrentTrialDef.TrialStimLocations);
-            currentTrialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"),
-                GetStateFromName("TokenFeedback"));
-            TrialStims.Add(currentTrialStims);
+            //currentTrialStims = new StimGroup("TrialStims", ExternalStims, CurrentTrialDef.TrialStimIndices);
+            //currentTrialStims.SetLocations(CurrentTrialDef.TrialStimLocations);
+            //currentTrialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"),
+              //  GetStateFromName("TokenFeedback"));
+            //TrialStims.Add(currentTrialStims);
             
         }
     }

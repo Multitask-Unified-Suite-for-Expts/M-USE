@@ -17,7 +17,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     }
     public override void DefineControlLevel()
     {
-        
+        // BlockFeedback.AddInitializationMethod();
 
     }
 

@@ -1,5 +1,8 @@
+using System.Collections.Generic;
 using USE_ExperimentTemplate;
 using ContinuousRecognition_Namespace;
+using UnityEngine;
+using USE_StimulusManagement;
 
 public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 {
@@ -17,8 +20,21 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     }
     public override void DefineControlLevel()
     {
-        // BlockFeedback.AddInitializationMethod();
-
+        StimGroup display;
+        BlockFeedback.AddInitializationMethod(() =>
+        {
+            List<int> chosen = TrialLevel.GetCurrentTrialDef<ContinuousRecognition_TrialDef>().PreviouslyChosenStimuli;
+            Vector3[] Grid = TrialLevel.GetCurrentTrialDef<ContinuousRecognition_TrialDef>().Grid;
+            Vector3[] locs = new Vector3[chosen.Count];
+            for (int i = 0; i < chosen.Count; i++)
+            {
+                locs[i] = Grid[i];
+            }
+            display = new StimGroup("display", ExternalStims, chosen);
+            display.SetLocations(locs);
+            display.ToggleVisibility(true);
+        });
+    
     }
 
 

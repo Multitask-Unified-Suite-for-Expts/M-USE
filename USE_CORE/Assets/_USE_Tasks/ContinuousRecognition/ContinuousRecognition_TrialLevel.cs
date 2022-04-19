@@ -13,7 +13,7 @@ using Random = UnityEngine.Random;
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
     public ContinuousRecognition_TrialDef CurrentTrialDef => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
-    private StimGroup currentTrialStims, resultStims, display;
+    private StimGroup currentTrialStims, resultStims;
     
     // game object variables
     public GameObject StartButton;
@@ -185,7 +185,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             else
             {
                 AudioFBController.Play("Negative");
-                end = true;
             }
             Debug.Log("TRIAL COUNT IS " + trialCount + "; MAX TRIAL COUNT IS " +
                       CurrentTrialDef.maxNumTrials);
@@ -193,11 +192,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //tokenFeedback.SpecifyTermination(() => !isNew, ()=>displayResult);
         //tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), trialEnd);
 
-        tokenFeedback.SpecifyTermination(()=> (end || trialCount == CurrentTrialDef.maxNumTrials), displayResult);
+        //FIXME: fix here
+        tokenFeedback.SpecifyTermination(()=> (!TokenFBController.IsAnimating() && (!isNew || trialCount == CurrentTrialDef.maxNumTrials)), FinishTrial, ()=> end = true);
         tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating() && (trialCount < CurrentTrialDef.maxNumTrials) && isNew, trialEnd);
 
-        bool dd = false;
-        bool displayed = false;
+        //bool dd = false;
+        //bool displayed = false;
         /*
         displayResult.AddInitializationMethod(() =>
         {
@@ -206,14 +206,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             commandText = GameObject.Find("CommandText").GetComponent<Text>();
             commandText.text = "displaying result";
         });*/
-        displayResult.AddTimer(() => 5f, ()=>trialEnd, ()=>dd = true);
+        //displayResult.AddTimer(() => 5f, ()=>trialEnd, ()=>dd = true);
         trialEnd.AddTimer(() => CurrentTrialDef.TrialEndDuration, FinishTrial);
         
         /*
         FinishTrial.SpecifyTermination(
             () => (trialCount > (CurrentTrialDef.nObjectsMinMax[1] - CurrentTrialDef.nObjectsMinMax[0] + 1)) ||
                   terminate && touchFeedbackFinish, ()=>null, ()=>Debug.Log("end block"));*/
-        this.AddTerminationSpecification(()=>dd);
+        this.AddTerminationSpecification(()=>end);
         //FinishTrial.SpecifyTermination(() => !isNew, () => null, ()=>Debug.Log("[FinishTrial]: finishing trial"));
     }
 
@@ -351,6 +351,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             getLog(CurrentTrialDef.TrialStimIndices, "TrialStimIndices");
 
             // set trial stims for display results state    
+            /*
             display = new StimGroup("ResultStims", ExternalStims, results);
             int len = results.Count;
             Vector3[] locs = new Vector3[len];
@@ -363,14 +364,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 "[DisplayResult]: length of location is " + locs.Length + "; length of chosen is " + results.Count);
             display.SetLocations(locs);
             display.SetVisibilityOnOffStates(GetStateFromName("DisplayResult"), GetStateFromName("TrialEnd"));
-            TrialStims.Add(display);
+            TrialStims.Add(display);*/
             
             // set trial stims
-            //currentTrialStims = new StimGroup("TrialStims", ExternalStims, CurrentTrialDef.TrialStimIndices);
-            //currentTrialStims.SetLocations(CurrentTrialDef.TrialStimLocations);
-            //currentTrialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"),
-              //  GetStateFromName("TokenFeedback"));
-            //TrialStims.Add(currentTrialStims);
+            currentTrialStims = new StimGroup("TrialStims", ExternalStims, CurrentTrialDef.TrialStimIndices);
+            currentTrialStims.SetLocations(CurrentTrialDef.TrialStimLocations);
+            currentTrialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"),  GetStateFromName("TokenFeedback"));
+            TrialStims.Add(currentTrialStims);
             
         }
     }

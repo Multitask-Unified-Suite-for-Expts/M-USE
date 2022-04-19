@@ -6,7 +6,9 @@ using USE_States;
 using USE_ExperimentTemplate;
 using WhatWhenWhere_Namespace;
 using USE_StimulusManagement;
+using ConfigDynamicUI;
 using System.Collections;
+using USE_Settings;
 
 public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 {
@@ -55,7 +57,23 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private List<Vector3> touchedPositionsList = new List<Vector3>(); // empty now
     
     private SpriteRenderer sr;
+
+    //UI VARIABLES
+    public ConfigUI configUI;
+    public JsonSaveLoad jsonSaveLoad;
+    public WhatWhenWhere_TrialLevel mainLevel;
+    private ExperimentInfoController experimenterInfo;
+    private bool storeData;
     
+    //UI Config Timing Variables
+    [HideInInspector]
+    public ConfigNumberRanged itiDuration, baselineDuration, covertPrepDuration, freeGazeDuration, choiceToFbDuration, fBDuration; // = 0.8f;
+    [HideInInspector]
+    public ConfigNumber Centralcuesize, CentralCueSelectionDuration, CentralCueSelectionRadius, blinkOnDuration, selectObjectDuration, blinkOffDuration, ObjectSelectionRadius, MinObjectSelectionTime, MaxReachTime;
+    [HideInInspector]
+    private float sampleDuration, delayDuration;
+
+    //data logging variables
     private string touchedObjectsNames;
     private string touchDurationTimes;
     private string choiceDurationTimes;
@@ -95,7 +113,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         State StimulusChosenSuccesorState = new State("StimulusChosenSuccesorState");
 
         AddActiveStates(new List<State> { StartButton, ChooseStimulus, StimulusChosen, FinalFeedback, ITI, StimulusChosenSuccesorState });
-        //chosewrong state
+        
 
         string[] stateNames = new string[] { "StartButton", "ChooseStimulus", "StimulusChosen", "FinalFeedback", "ITI" };
 
@@ -587,6 +605,45 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("SliderHalo", () => sliderHalo.activeSelf);
         FrameData.AddDatum("StimuliShown", () => searchStims.IsActive);
     }
+
+    public void CreateConfigUI()
+    {
+        configUI.clear();
+        
+        //jsonSaveLoad.folderPath = "./";
+        //jsonSaveLoad.isRelative = false;
+
+
+        //var configStore = jsonSaveLoad.LoadObject<ConfigVarStore>(mainLevel.FLUconfigtimingFilePath, false, true);
+        //
+        /*
+        SessionSettings.ImportSettings_SingleTypeJSON<ConfigVarStore>("ConfigUI", mainLevel.FLUconfigtimingFilePath);
+        if (storeData)
+            SessionSettings.StoreSettings(mainLevel.subjectFolder + "/SessionSettings/", "ConfigUI");
+        */
+        ConfigVarStore configStore = (ConfigVarStore)SessionSettings.Get("ConfigUI");
+        configUI.store = configStore;
+
+        itiDuration = configStore.get<ConfigNumberRanged>("itiDuration");
+        Centralcuesize = configStore.get<ConfigNumber>("Centralcuesize");
+        CentralCueSelectionRadius = configStore.get<ConfigNumber>("CentralCueSelectionRadius");
+        CentralCueSelectionDuration = configStore.get<ConfigNumber>("CentralCueSelectionDuration");
+        blinkOnDuration = configStore.get<ConfigNumber>("blinkOnDuration");
+        blinkOffDuration = configStore.get<ConfigNumber>("blinkOffDuration");
+        baselineDuration = configStore.get<ConfigNumberRanged>("baselineDuration");
+        covertPrepDuration = configStore.get<ConfigNumberRanged>("covertPrepDuration");
+        freeGazeDuration = configStore.get<ConfigNumberRanged>("freeGazeDuration");
+        selectObjectDuration = configStore.get<ConfigNumber>("selectObjectDuration");
+        choiceToFbDuration = configStore.get<ConfigNumberRanged>("choiceToFbDuration");
+        ObjectSelectionRadius = configStore.get<ConfigNumber>("ObjectSelectionRadius");
+        MinObjectSelectionTime = configStore.get<ConfigNumber>("MinObjectSelectionTime");
+        fBDuration = configStore.get<ConfigNumberRanged>("fBDuration");
+        MaxReachTime = configStore.get<ConfigNumber>("MaxReachTime");
+        
+
+        configUI.GenerateUI();
+    }
+
     // set all gameobjects to setActive false
     void disableAllGameobjects()
     {
@@ -614,6 +671,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         sr = sliderHalo.GetComponent<SpriteRenderer>();
         imageTimingError = GameObject.Find("VerticalStripesImage");
 
+        experimenterInfo = GameObject.Find("ExperimenterInfo").GetComponent<ExperimentInfoController>();
         sliderInitPosition = slider.gameObject.transform.position;
         
         contextColors.Add(new Color(0f, 0f, 0.5451f)); // dark blue
@@ -637,6 +695,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         yellowHalo.SetActive(false);
         imageTimingError.SetActive(false);
         GameObject.Find("Slider").SetActive(false);
+
+        if (jsonSaveLoad == null)
+            jsonSaveLoad = FindObjectOfType<JsonSaveLoad>();
+        if (configUI == null)
+            configUI = FindObjectOfType<ConfigUI>();
+        CreateConfigUI();
 
         Debug.Log("Done Loading Variables");
     }

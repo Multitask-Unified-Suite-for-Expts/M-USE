@@ -134,7 +134,6 @@ GameObject:
   - component: {fileID: 108587575}
   - component: {fileID: 108587574}
   - component: {fileID: 108587573}
-  - component: {fileID: 108587576}
   m_Layer: 0
   m_Name: WorkingMemory_Scripts
   m_TagString: Untagged
@@ -180,12 +179,10 @@ MonoBehaviour:
   RuntimeStims:
     stimGroupName: 
   TrialStims: []
-  TokenFeedbackController: {fileID: 108587576}
+  AudioFBController: {fileID: 0}
+  HaloFBController: {fileID: 0}
+  TokenFBController: {fileID: 0}
   StartButton: {fileID: 239317670}
-  YellowHaloPrefab: {fileID: 1546032763649933254, guid: caf1a4a4f95a86847a8d732d428239c9,
-    type: 3}
-  GrayHaloPrefab: {fileID: 5037791256376228876, guid: 4d1787c513a9ec84bb22e6d541713428,
-    type: 3}
 --- !u!114 &108587574
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -219,6 +216,8 @@ MonoBehaviour:
   FilePrefix: 
   LocateFile: {fileID: 0}
   TaskCam: {fileID: 0}
+  FBControllersPrefab: {fileID: 3175057839943392719, guid: ca42ab3ffe0272446a4ac886b11dcb57,
+    type: 3}
   PreloadedStims:
     stimGroupName: 
   PrefabStims:
@@ -243,23 +242,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &108587576
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 108587572}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c4d52f7165ef1e6428c2e82d3a7b194d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tokenSize: 100
-  tokenSpacing: 0
-  tokenBoxPadding: 0
-  tokenBoxYOffset: 20
-  tokenTexture: {fileID: 2800000, guid: 5ab9409b99a52f740a325a411069f4fa, type: 3}
 --- !u!1 &239317670
 GameObject:
   m_ObjectHideFlags: 0
@@ -474,7 +456,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1812093639}
-  m_Enabled: 0
+  m_Enabled: 1
 --- !u!20 &1812093641
 Camera:
   m_ObjectHideFlags: 0

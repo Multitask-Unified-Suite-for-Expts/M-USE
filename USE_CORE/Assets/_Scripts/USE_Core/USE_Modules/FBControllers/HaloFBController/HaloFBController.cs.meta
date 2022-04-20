@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3b9b0d55229496c40b881734b3d28261
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - PositiveHaloPrefab: {fileID: 1546032763649933254, guid: caf1a4a4f95a86847a8d732d428239c9,
+      type: 3}
+  - NegativeHaloPrefab: {fileID: 5037791256376228876, guid: 4d1787c513a9ec84bb22e6d541713428,
+      type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

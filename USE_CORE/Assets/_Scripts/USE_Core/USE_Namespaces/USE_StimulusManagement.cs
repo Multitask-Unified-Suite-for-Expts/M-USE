@@ -395,6 +395,7 @@ namespace USE_StimulusManagement
 		public string stimGroupName;
 		public State SetActiveOnInitialization;
 		public State SetInactiveOnTermination;
+		public bool IsActive;
 
 		public StimGroup(string groupName, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
@@ -621,6 +622,8 @@ namespace USE_StimulusManagement
 			{
 				stim.ToggleVisibility(visibility);
 			}
+
+			IsActive = visibility;
 		}
 
 		public void SetLocations(IEnumerable<Vector3> locs)

@@ -94,7 +94,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         string[] stateNames = new string[] { "StartButton", "LoadMaze", "GameConf", "MazeVis", "Feedback", "ITI" };
 
         SetupTrial.SpecifyTermination(() => true, LoadMaze);
-
+       // SelectionHandler<MazeGame_StimDef> mouseHandler = new SelectionHandler<MazeGame_StimDef>();
 
         // Define stimOn state
         LoadMaze.AddInitializationMethod(() =>
@@ -106,12 +106,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         //   System.Random rnd = new System.Random();
         //  numReps = rnd.Next(min, max);
         totalErrors = 0;
-    ruleAbidingErrors = 0;
-    ruleBreakingErrors = 0;
-     retouchCorrect = 0;
-    correctTouches = 0;
+        ruleAbidingErrors = 0;
+        ruleBreakingErrors = 0;
+        retouchCorrect = 0;
+        correctTouches = 0;
 
-            if(count == 0)
+            if (count == 0)
             {
                 slider = GameObject.Find("Slider").GetComponent<Slider>();
 
@@ -242,7 +242,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             }
 
         });
-
+       // MouseTracker.AddSelectionHandler(StartButton, MazeVis, mouseHandler);
         StartButton.SpecifyTermination(() => response == 0, MazeVis);
         StartButton.AddDefaultTerminationMethod(() =>
         {

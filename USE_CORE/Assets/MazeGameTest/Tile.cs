@@ -29,12 +29,18 @@ public class Tile : MonoBehaviour
         eBeep = GameObject.Find("ErrorBeep");
         cAudio = cBeep.GetComponent<AudioSource>();
         eAudio = eBeep.GetComponent<AudioSource>();
-     //   Material newMat = Resources.Load("TestMat", typeof(Material)) as Material;
-      //  gameObject.GetComponent<MeshRenderer>().material = newMat;
+        Material newMat = Resources.Load("TestMat", typeof(Material)) as Material;
+        System.Random rnd = new System.Random();
+        int num = rnd.Next(0, 9);
+        gameObject.GetComponent<MeshRenderer>().material = newMat;
+        string textStr = "Textures/Picture" + num.ToString();
+        Texture newTxt = Resources.Load(textStr, typeof(Texture)) as Texture;
+        newMat.SetTexture("_MainTex", newTxt);
 
 
-        // gameObject.GetComponent<Renderer>().material.color = gameConfigs.FINISH_COLOR;
-        // gameObject.GetComponent<Renderer>().material.color = MazeGame_TrialLevel.tileColor;
+
+        //  gameObject.GetComponent<Renderer>().material.color = MazeGame_TrialLevel.tileColor;
+
         gameObject.GetComponent<Renderer>().material.color = baseColor;
 
         Debug.Log("START TILE");
@@ -46,6 +52,8 @@ public class Tile : MonoBehaviour
 
         // cBeep.SetActive(false);
         //  eBeep.SetActive(false);
+        // gameObject.GetComponent<Renderer>().material.color = gameConfigs.FINISH_COLOR;
+
     }
 
 

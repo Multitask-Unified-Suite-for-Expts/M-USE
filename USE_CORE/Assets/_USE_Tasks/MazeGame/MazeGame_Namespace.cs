@@ -94,6 +94,6 @@ namespace MazeGame_Namespace
         //public bool TriggersSonication;
         //public State SetActiveOnInitialization;
         //public State SetInactiveOnTermination;
-    
+        public int test;
     }
 }

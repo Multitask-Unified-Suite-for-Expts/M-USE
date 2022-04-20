@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 0
+  m_UseShadowmask: 1
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -320,13 +320,20 @@ MonoBehaviour:
   FilePrefix: 
   PreloadedStims:
     stimGroupName: 
+    IsActive: 0
   PrefabStims:
     stimGroupName: 
+    IsActive: 0
   ExternalStims:
     stimGroupName: 
+    IsActive: 0
   RuntimeStims:
     stimGroupName: 
+    IsActive: 0
   TrialStims: []
+  AudioFBController: {fileID: 0}
+  HaloFBController: {fileID: 0}
+  TokenFBController: {fileID: 0}
   leftRightChoice: 
   maxScale: {x: 65, y: 2, z: 65}
 --- !u!114 &1375570698
@@ -364,12 +371,16 @@ MonoBehaviour:
   TaskCam: {fileID: 0}
   PreloadedStims:
     stimGroupName: 
+    IsActive: 0
   PrefabStims:
     stimGroupName: 
+    IsActive: 0
   ExternalStims:
     stimGroupName: 
+    IsActive: 0
   RuntimeStims:
     stimGroupName: 
+    IsActive: 0
   PreloadedStimGameObjects: []
   PrefabStimPaths: []
 --- !u!114 &1375570699
@@ -403,15 +414,21 @@ MonoBehaviour:
   FilePrefix: 
   PreloadedStims:
     stimGroupName: 
+    IsActive: 0
   PrefabStims:
     stimGroupName: 
+    IsActive: 0
   ExternalStims:
     stimGroupName: 
+    IsActive: 0
   RuntimeStims:
     stimGroupName: 
+    IsActive: 0
   TrialStims: []
+  AudioFBController: {fileID: 0}
+  HaloFBController: {fileID: 0}
+  TokenFBController: {fileID: 0}
   stimCount: 0
-  sphereChoice: 
 --- !u!114 &1375570700
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -447,12 +464,16 @@ MonoBehaviour:
   TaskCam: {fileID: 0}
   PreloadedStims:
     stimGroupName: 
+    IsActive: 0
   PrefabStims:
     stimGroupName: 
+    IsActive: 0
   ExternalStims:
     stimGroupName: 
+    IsActive: 0
   RuntimeStims:
     stimGroupName: 
+    IsActive: 0
   PreloadedStimGameObjects: []
   PrefabStimPaths: []
 --- !u!114 &1375570701
@@ -486,13 +507,37 @@ MonoBehaviour:
   FilePrefix: 
   PreloadedStims:
     stimGroupName: 
+    IsActive: 0
   PrefabStims:
     stimGroupName: 
+    IsActive: 0
   ExternalStims:
     stimGroupName: 
+    IsActive: 0
   RuntimeStims:
     stimGroupName: 
+    IsActive: 0
   TrialStims: []
+  AudioFBController: {fileID: 0}
+  HaloFBController: {fileID: 0}
+  TokenFBController: {fileID: 0}
+  mazeList: []
+  SCREEN_WIDTH: 0
+  TILE_WIDTH: 0
+  START_COLOR: {r: 0, g: 0, b: 0, a: 0}
+  FINISH_COLOR: {r: 0, g: 0, b: 0, a: 0}
+  CORRECT_COLOR: {r: 0, g: 0, b: 0, a: 0}
+  LAST_CORRECT_COLOR: {r: 0, g: 0, b: 0, a: 0}
+  INCORRECT_RULEABIDING_COLOR: {r: 0, g: 0, b: 0, a: 0}
+  INCORRECT_RULEBREAKING_COLOR: {r: 0, g: 0, b: 0, a: 0}
+  DEFAULT_TILE_COLOR: {r: 0, g: 0, b: 0, a: 0}
+  CORRECT_FEEDBACK_SECONDS: 0
+  PREV_CORRECT_FEEDBACK_SECONDS: 0
+  INCORRECT_RULEABIDING_SECONDS: 0
+  INCORRECT_RULEBREAKING_SECONDS: 0
+  TIMEOUT_SECONDS: 0
+  mazeListScript: {fileID: 0}
+  gameConfigs: {fileID: 0}
 --- !u!114 &1375570702
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -528,12 +573,16 @@ MonoBehaviour:
   TaskCam: {fileID: 0}
   PreloadedStims:
     stimGroupName: 
+    IsActive: 0
   PrefabStims:
     stimGroupName: 
+    IsActive: 0
   ExternalStims:
     stimGroupName: 
+    IsActive: 0
   RuntimeStims:
     stimGroupName: 
+    IsActive: 0
   PreloadedStimGameObjects: []
   PrefabStimPaths: []
 --- !u!1 &1396040246

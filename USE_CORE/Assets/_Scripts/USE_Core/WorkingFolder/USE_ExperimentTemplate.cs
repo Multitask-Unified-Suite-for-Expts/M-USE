@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using ConfigDynamicUI;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -377,6 +378,7 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims, RuntimeStims;
 		public List<GameObject> PreloadedStimGameObjects;
 		public List<string> PrefabStimPaths;
+		protected ConfigVarStore ConfigUiVariables;
 
 		public Type TaskLevelType;
 		protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
@@ -411,7 +413,9 @@ namespace USE_ExperimentTemplate
 			{
 				BlockCount = -1;
 				TaskCam.gameObject.SetActive(true);
-				//init fb controllers here
+				TrialLevel.AudioFBController.Init();
+				TrialLevel.HaloFBController.Init();
+				TrialLevel.TokenFBController.Init(TrialLevel.AudioFBController);
 			});
 
 			SetupTask.SpecifyTermination(() => true, RunBlock);
@@ -502,8 +506,13 @@ namespace USE_ExperimentTemplate
 			FrameData.CreateFile();
 
 			//AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
+			GameObject fbControllersPrefab = Resources.Load<GameObject>("FeedbackControllers");
+			GameObject controllers = new GameObject("Controllers");
+			GameObject fbControllers = Instantiate(fbControllersPrefab, controllers.transform);
 
-			//assign fb controllers for triallevel here
+			TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
+			TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
+			TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
 			TrialLevel.SessionDataControllers = SessionDataControllers;
 			TrialLevel.FilePrefix = FilePrefix;
 			TrialLevel.TaskStims = TaskStims;
@@ -511,6 +520,7 @@ namespace USE_ExperimentTemplate
 			TrialLevel.PrefabStims = PrefabStims;
 			TrialLevel.ExternalStims = ExternalStims;
 			TrialLevel.RuntimeStims = RuntimeStims;
+			TrialLevel.ConfigUiVariables = ConfigUiVariables;;
 			TrialLevel.DefineTrialLevel();
 		}
 
@@ -543,6 +553,14 @@ namespace USE_ExperimentTemplate
 			MethodInfo readStimDefs = GetType().GetMethod(nameof(this.ReadStimDefs))
 				.MakeGenericMethod(new Type[] {StimDefType});
 			readStimDefs.Invoke(this, new object[] {TaskConfigPath});
+			
+			
+			string configUIVariableFile = LocateFile.FindFileInFolder(TaskConfigPath, "*" + TaskName + "*ConfigUIDetails*");
+			if (!string.IsNullOrEmpty(configUIVariableFile))
+			{
+				SessionSettings.ImportSettings_SingleTypeJSON<ConfigVarStore>(TaskName + "_ConfigUiDetails", configUIVariableFile);
+				ConfigUiVariables = (ConfigVarStore) SessionSettings.Get(TaskName + "_ConfigUiDetails");
+			}
 
 			//handling of block and trial defs so that each BlockDef contains a TrialDef[] array
 
@@ -837,13 +855,16 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims, RuntimeStims;
 		[HideInInspector] public List<StimGroup> TrialStims;
 		
+		
+		[HideInInspector] public ConfigVarStore ConfigUiVariables;
+		
 		// Feedback Controllers
-		public AudioFBController AudioFBController;
-		public HaloFBController HaloFBController;
-		public TokenFBController TokenFBController;
+		[HideInInspector] public AudioFBController AudioFBController;
+		[HideInInspector] public HaloFBController HaloFBController;
+		[HideInInspector] public TokenFBController TokenFBController;
 
 		//protected TrialDef CurrentTrialDef;
-		protected T GetCurrentTrialDef<T>() where T : TrialDef
+		public T GetCurrentTrialDef<T>() where T : TrialDef
 		{
 			return (T) TrialDefs[TrialCount_InBlock];
 		}
@@ -906,8 +927,7 @@ namespace USE_ExperimentTemplate
 			TrialData.ManuallyDefine();
 			TrialData.AddStateTimingData(this);
 			TrialData.CreateFile();
-
-
+			
 		}
 
 

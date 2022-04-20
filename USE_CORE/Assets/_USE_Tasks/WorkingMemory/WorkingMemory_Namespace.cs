@@ -32,6 +32,7 @@ namespace WorkingMemory_Namespace
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
         public int[] TargetIndices, PostSampleDistractorIndices, TargetDistractorIndices;
+        public int[] TargetTokenUpdates, DistractorTokenUpdates;
         public Vector3[] TargetSampleLocations, PostSampleDistractorLocations, TargetSearchLocations, TargetDistractorLocations;
 
         public float initTrialDuration,
@@ -78,5 +79,6 @@ namespace WorkingMemory_Namespace
         //public State SetActiveOnInitialization;
         //public State SetInactiveOnTermination;
         public bool IsTarget;
+        public int TokenUpdate;
     }
 }

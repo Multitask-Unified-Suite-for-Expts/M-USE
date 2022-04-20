@@ -14,7 +14,7 @@ public class TokenFBController : MonoBehaviour
     private readonly Color colorFlashing1 = Color.blue;
     private readonly Color colorFlashing2 = Color.red;
     // Token Counts
-    private int totalTokensNum = -1;
+    private int totalTokensNum = 5;
     private int numCollected = 0;
     // Rendering
     private Rect tokenBoxRect;
@@ -31,17 +31,16 @@ public class TokenFBController : MonoBehaviour
     private Color tokenBoxColor;
     private float animationStartTime;
     private float animationEndTime;
-    private float revealTime; // How long to show the tokens before animating
-    private float updateTime; // How long each token update animation should take
-    private float flashingTime; // How long the token bar should flash when it fills up
+    private float revealTime = 0.4f; // How long to show the tokens before animating
+    private float updateTime = 0.3f; // How long each token update animation should take
+    private float flashingTime = 0.5f; // How long the token bar should flash when it fills up
+    // Audio
+    AudioFBController audioFBController;
 
-    public void Init(int numTokens, float revealTime, float updateTime, float flashingTime = 0.5f)
+    public void Init(AudioFBController audioFBController)
     {
+        this.audioFBController = audioFBController;
         numCollected = 0;
-        totalTokensNum = numTokens;
-        this.revealTime = revealTime;
-        this.updateTime = updateTime;
-        this.flashingTime = flashingTime;
 
         whiteStyle = new GUIStyle();
         whiteStyle.normal.background = Texture2D.whiteTexture;
@@ -53,6 +52,9 @@ public class TokenFBController : MonoBehaviour
             width,
             tokenSize + 2 * tokenBoxPadding
         );
+
+        SetPositiveShowAudioClip(audioFBController.GetClip("Positive"));
+        SetNegativeShowAudioClip(audioFBController.GetClip("Negative"));
     }
 
     public void AddTokens(GameObject gameObj, int numTokens)
@@ -94,7 +96,7 @@ public class TokenFBController : MonoBehaviour
         GUI.EndGroup();
 
         // Draw the animating tokens if needed
-        if (animationPhase == AnimationPhase.Update)
+        if (animationPhase == AnimationPhase.Show || animationPhase == AnimationPhase.Update)
         {
             GUI.color = animatedTokensColor;
             DrawTokens(animatedTokensPos, animatedTokensNum);
@@ -105,7 +107,7 @@ public class TokenFBController : MonoBehaviour
 
     public bool IsAnimating()
     {
-        return animationPhase != AnimationPhase.None;
+        return animationPhase != AnimationPhase.None || audioFBController.IsPlaying();
     }
 
     public void Update()
@@ -124,6 +126,11 @@ public class TokenFBController : MonoBehaviour
                     animationEndTime += updateTime;
                     break;
                 case AnimationPhase.Update:
+                   if (tokensChange < 0) {
+                        audioFBController.Play("NegativeUpdate");
+                    } else {
+                        audioFBController.Play("PositiveUpdate");
+                    }
                     numCollected += tokensChange;
                     animationPhase = AnimationPhase.None;
                     if (numCollected >= totalTokensNum)
@@ -133,6 +140,7 @@ public class TokenFBController : MonoBehaviour
                     }
                     break;
                 case AnimationPhase.Flashing:
+                    audioFBController.Play("Flashing");
                     numCollected = 0;
                     animationPhase = AnimationPhase.None;
                     break;
@@ -155,23 +163,72 @@ public class TokenFBController : MonoBehaviour
         }
     }
 
+    public TokenFBController SetTotalTokensNum(int numTokens)
+    {
+        totalTokensNum = numTokens;
+        return this;
+    }
+
+    public TokenFBController SetRevealTime(float revealTime)
+    {
+        this.revealTime = revealTime;
+        return this;
+    }
+
+    public TokenFBController SetUpdateTime(float updateTime)
+    {
+        this.updateTime = updateTime;
+        return this;
+    }
+
+    public TokenFBController SetFlashingTime(float flashingTime)
+    {
+        this.flashingTime = flashingTime;
+        return this;
+    }
+
+    public TokenFBController SetPositiveShowAudioClip(AudioClip clip) {
+        audioFBController.AddClip("PositiveShow", clip);
+        return this;
+    }
+    
+    public TokenFBController SetNegativeShowAudioClip(AudioClip clip) {
+        audioFBController.AddClip("NegativeShow", clip);
+        return this;
+    }
+
+    public TokenFBController SetPositiveUpdateAudioClip(AudioClip clip) {
+        audioFBController.AddClip("PositiveUpdate", clip);
+        return this;
+    }
+
+    public TokenFBController SetNegativeUpdateAudioClip(AudioClip clip) {
+        audioFBController.AddClip("NegativeUpdate", clip);
+        return this;
+    }
+
+    public TokenFBController SetFlashingAudioClip(AudioClip clip) {
+        audioFBController.AddClip("Flashing", clip);
+        return this;
+    }
+
     // gameObjPos should be at the center of the object
     private void AnimateTokens(Color color, GameObject gameObj, int numTokens)
     {
         // Viewport pos is in [0, 1] where (0, 0) is bottom right
-        Vector2 viewportPos = Camera.main.WorldToViewportPoint(gameObject.transform.position);
+        Vector2 viewportPos = Camera.main.WorldToViewportPoint(gameObj.transform.position);
         // GUI pos has (0, 0) is top left
         Vector2 pos = new Vector2(viewportPos.x * Screen.width, (1 - viewportPos.y) * Screen.height);
-        
-        int maxNewTokens = totalTokensNum - numCollected;
-        int maxRemovedTokens = numCollected;
+
         int tokensEndNum = numCollected;
         tokensChange = numTokens;
         if (numTokens < 0) {
-            numTokens = -numTokens;
+            numTokens = Mathf.Min(-numTokens, numCollected);
             tokensEndNum -= numTokens;
+        } else {
+            numTokens = Mathf.Min(numTokens, totalTokensNum - numCollected);
         }
-        numTokens = Mathf.Clamp(maxRemovedTokens, numTokens, maxNewTokens);
+        if (numTokens == 0) return;
 
         animatedTokensStartPos = pos;
         // No need for horizontal padding since it does nothing
@@ -185,6 +242,11 @@ public class TokenFBController : MonoBehaviour
         animatedTokensColor = color;
 
         // Start the animation phase state machine with the first state
+        if (tokensChange < 0) {
+            audioFBController.Play("NegativeShow");
+        } else {
+            audioFBController.Play("PositiveShow");
+        }
         animationPhase = AnimationPhase.Show;
         animationStartTime = Time.unscaledTime;
         animationEndTime = animationStartTime + revealTime;

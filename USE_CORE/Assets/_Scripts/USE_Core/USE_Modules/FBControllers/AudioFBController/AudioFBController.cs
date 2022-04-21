@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using USE_Data;
 
 public class AudioFBController : MonoBehaviour
 {
@@ -11,15 +12,30 @@ public class AudioFBController : MonoBehaviour
     }
     public AudioFB[] DefaultAudioFeedbacks;
 
-    private AudioSource audioSource;
+    public AudioSource audioSource;
     private Dictionary<string, AudioClip> clips;
 
-    public void Init() {
-        audioSource = GameObject.FindWithTag("MainCamera").AddComponent<AudioSource>();
+    private string playingClipName = null;
+
+    public void Init(DataController frameData) {
+        frameData.AddDatum("PlayingAudioClipName", () => playingClipName);
+
+        UpdateAudioSource();
         clips = new Dictionary<string, AudioClip>();
         
         foreach (AudioFB audioFB in DefaultAudioFeedbacks) {
             clips.Add(audioFB.name, audioFB.clip);
+        }
+    }
+
+    // Every time a new task is started, the old audio source is deactivated,
+    // so we need to make sure to find the new one
+    public void UpdateAudioSource() {
+        foreach (GameObject camera in GameObject.FindGameObjectsWithTag("MainCamera")) {
+            if (camera.activeInHierarchy) {
+                audioSource = camera.AddComponent<AudioSource>();
+                break;
+            }
         }
     }
 
@@ -45,6 +61,7 @@ public class AudioFBController : MonoBehaviour
     }
 
     public void Play(string clipName) {
+        playingClipName = clipName;
         if (clips.TryGetValue(clipName, out AudioClip clip)) {
             audioSource.PlayOneShot(clip);
         } else {
@@ -54,5 +71,11 @@ public class AudioFBController : MonoBehaviour
 
     public bool IsPlaying() {
         return audioSource.isPlaying;
+    }
+
+    private void Update() {
+        if (audioSource != null && !audioSource.isPlaying) {
+            playingClipName = null;
+        }
     }
 }

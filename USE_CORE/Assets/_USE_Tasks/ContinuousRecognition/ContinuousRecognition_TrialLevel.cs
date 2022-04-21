@@ -48,7 +48,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State tokenFeedback = new State("TokenFeedback");
         State displayResult = new State("DisplayResult");
         State trialEnd = new State("TrialEnd");
-        //SelectionHandler<ContinuousRecognition_StimDef> mouseHandler = new SelectionHandler<ContinuousRecognition_StimDef>();
+        SelectionHandler<ContinuousRecognition_StimDef> mouseHandler = new SelectionHandler<ContinuousRecognition_StimDef>();
         AddActiveStates(new List<State> {initTrial, displayStims, chooseStim, touchFeedback, tokenFeedback, displayResult, trialEnd});
         
         //TODO testing
@@ -61,11 +61,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (!variablesLoaded)
             {
                 variablesLoaded = true;
-                loadVariables();
+                //loadVariables();
             }
         });
         SetupTrial.SpecifyTermination(() => true, initTrial);
 
+        MouseTracker.AddSelectionHandler(mouseHandler, initTrial);
         initTrial.AddInitializationMethod(() =>
         {
             trialCount++;
@@ -88,6 +89,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         initTrial.AddUpdateMethod(() =>
         {
             StartButton.SetActive(true);
+            if (mouseHandler.SelectionMatches(StartButton))
+            {
+                started = true;
+            }
+            /*
             if (InputBroker.GetMouseButtonDown(0))
             {
                 mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -101,7 +107,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         started = true;
                     }
                 }
-            }
+            }*/
         });
         initTrial.SpecifyTermination(() => started, displayStims, () => StartButton.SetActive(false));
 
@@ -342,8 +348,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            List<int> results = CurrentTrialDef.PreviouslyChosenStimuli;
-
             // Log for debugging
             getLog(CurrentTrialDef.UnseenStims, "UnseenStims");
             getLog(CurrentTrialDef.PreviouslyChosenStimuli, "PreviouslyChosenStimuli");
@@ -376,12 +380,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     }
     
 
-    void loadVariables()
+    /*void loadVariables()
     {
         trialCount = 0;
         StartButton = GameObject.Find("StartButton");
         StartButton.SetActive(true);
-    }
+    }*/
 
     private GameObject GetClickedObj()
     {

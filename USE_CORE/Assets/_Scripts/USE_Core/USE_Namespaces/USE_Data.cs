@@ -83,12 +83,29 @@ namespace USE_Data
 			{
 				stringFunc = () => {
 					var v = variable();
+					string returnString = "";
 					if (v == null)
 					{
 						Debug.LogWarning("Null value returned for Datum, name: " + this.name);
-						return "null";
+						returnString = "null";
 					}
-					return v.ToString();//toString(()=>variable());
+					else if (typeof(T) == typeof(List<int>))
+					{
+						returnString = "(";
+						List<int> varList = variable() as List<int>;
+						for(int index = 0; index < varList.Count; index++)
+						{
+							returnString += varList[index].ToString();
+							if (index < varList.Count - 1)
+								returnString += ", ";
+							else
+								returnString += ")";
+						}
+					}
+					else
+						returnString = v.ToString();//toString(()=>variable());
+
+					return returnString;
 				};
 
 				//stringFunc = () => variable().ToString();//toString(()=>variable());

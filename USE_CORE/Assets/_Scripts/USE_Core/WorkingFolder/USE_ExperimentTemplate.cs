@@ -383,6 +383,8 @@ namespace USE_ExperimentTemplate
 		public Type TaskLevelType;
 		protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
 		protected State SetupTask, RunBlock, BlockFeedback, FinishTask;
+		protected bool BlockFbFinished;
+		protected float BlockFbSimpleDuration;
 
 		public virtual void SpecifyTypes()
 		{
@@ -434,13 +436,21 @@ namespace USE_ExperimentTemplate
 
 			RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
 
+			BlockFeedback.AddUpdateMethod(() =>
+			{
+				BlockFbFinished = true;
+				if (Time.time - this.StartTimeAbsolute >= BlockFbSimpleDuration)
+					BlockFbFinished = true;
+				else
+					BlockFbFinished = false;
+			});
 			BlockFeedback.AddLateUpdateMethod(() => FrameData.AppendData());
-			BlockFeedback.SpecifyTermination(() => BlockCount < BlockDefs.Length - 1, RunBlock, () =>
+			BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock, () =>
 			{
 				BlockData.AppendData();
 				BlockData.WriteData();
 			});
-			BlockFeedback.SpecifyTermination(() => BlockCount == BlockDefs.Length - 1, FinishTask, () =>
+			BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask, () =>
 			{
 				BlockData.AppendData();
 				BlockData.WriteData();

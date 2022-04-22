@@ -961,7 +961,7 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public MouseTracker MouseTracker;
 
 		//protected TrialDef CurrentTrialDef;
-		protected T GetCurrentTrialDef<T>() where T : TrialDef
+		public T GetCurrentTrialDef<T>() where T : TrialDef
 		{
 			return (T) TrialDefs[TrialCount_InBlock];
 		}

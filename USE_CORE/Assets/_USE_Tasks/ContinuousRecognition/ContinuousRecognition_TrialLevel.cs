@@ -118,19 +118,22 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         bool StimIsChosen = false;
         bool isNew = false;
         GameObject chosen = null;
-        GameObject selected = null;
+        //GameObject selected = null;
         bool terminate = false;
+        ContinuousRecognition_StimDef selectedSD = null;
+        MouseTracker.AddSelectionHandler(mouseHandler, chooseStim);
         chooseStim.AddUpdateMethod(() =>
         {
             StimIsChosen = false;
             isNew = false;
-            //chosen = null;
-            if (InputBroker.GetMouseButtonDown(0))
-            {
-                chosen = GetClickedObj();
-                updateBlockDefs(chosen);
 
-                // con't
+            chosen = mouseHandler.SelectedGameObject;
+            updateBlockDefs(chosen);
+            selectedSD = mouseHandler.SelectedStimDef;
+
+            // con't
+            if (chosen != null)
+            {
                 StimDefPointer sdPointer = chosen.GetComponent<StimDefPointer>();
                 if (!sdPointer)
                 {
@@ -140,24 +143,20 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 {
                     StimIsChosen = true;
                 }
+            }
 
-                ContinuousRecognition_StimDef sd = sdPointer.GetStimDef<ContinuousRecognition_StimDef>();
-                //bool correct = false;
-                //correct = sd.PreviouslyChosen;
-                if (sd.PreviouslyChosen == false)
-                {
-                    Debug.Log("NOT CHOSEN BEFORE");
-                    sd.PreviouslyChosen = true;
-                    Debug.Log(sd.PreviouslyChosen);
-                    isNew = true;
-                    //CurrentTrialDef.isNew = true;
-                }
-                else
-                {
-                    isNew = false;
-                    //CurrentTrialDef.isNew = false;
-                    Debug.Log("CHOSEN BEFORE");
-                }
+            //ContinuousRecognition_StimDef sd = sdPointer.GetStimDef<ContinuousRecognition_StimDef>();
+            if (selectedSD != null && selectedSD.PreviouslyChosen == false)
+            {
+                Debug.Log("NOT CHOSEN BEFORE");
+                selectedSD.PreviouslyChosen = true;
+                Debug.Log(selectedSD.PreviouslyChosen);
+                isNew = true;
+            }
+            else
+            {
+                isNew = false;
+                Debug.Log("CHOSEN BEFORE");
             }
         });
         chooseStim.SpecifyTermination(() => StimIsChosen, touchFeedback);
@@ -184,6 +183,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         tokenFeedback.AddInitializationMethod(() =>
         {
             HaloFBController.Destroy();
+            
             if (isNew)
             {
                 TokenFBController.AddTokens(chosen, 1);
@@ -349,6 +349,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
 
             // Log for debugging
+            TrialData.AddDatum("PreviouslyChosen", () =>  CurrentTrialDef.PreviouslyChosenStimuli);
             getLog(CurrentTrialDef.UnseenStims, "UnseenStims");
             getLog(CurrentTrialDef.PreviouslyChosenStimuli, "PreviouslyChosenStimuli");
             getLog(CurrentTrialDef.PreviouslyNotChosenStimuli, "PreviouslyNotChosenStimuli");

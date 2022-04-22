@@ -23,7 +23,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         StimGroup display;
         BlockFeedback.AddInitializationMethod(() =>
         {
-            /*
             List<int> chosen = TrialLevel.GetCurrentTrialDef<ContinuousRecognition_TrialDef>().PreviouslyChosenStimuli;
             Vector3[] Grid = TrialLevel.GetCurrentTrialDef<ContinuousRecognition_TrialDef>().Grid;
             Vector3[] locs = new Vector3[chosen.Count];
@@ -32,11 +31,14 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
                 locs[i] = Grid[i];
             }
             display = new StimGroup("display", ExternalStims, chosen);
+            display.LoadStims();
             display.SetLocations(locs);
-            display.ToggleVisibility(true);*/
+            display.ToggleVisibility(true);
         });
-    
+        BlockFeedback.AddUpdateMethod(() =>
+        {
+            
+        });
+        //BlockFeedback.AddTimer(()=> 5f, () => null);
     }
-
-
 }

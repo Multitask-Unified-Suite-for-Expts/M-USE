@@ -360,7 +360,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             currentTrialStims.SetLocations(CurrentTrialDef.TrialStimLocations);
             currentTrialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"),  GetStateFromName("TokenFeedback"));
             TrialStims.Add(currentTrialStims);
-            
         }
     }
     

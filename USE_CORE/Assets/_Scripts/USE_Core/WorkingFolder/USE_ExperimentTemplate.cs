@@ -439,7 +439,7 @@ namespace USE_ExperimentTemplate
 			BlockFeedback.AddUpdateMethod(() =>
 			{
 				BlockFbFinished = true;
-				if (Time.time - this.StartTimeAbsolute >= BlockFbSimpleDuration)
+				if (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= BlockFbSimpleDuration)
 					BlockFbFinished = true;
 				else
 					BlockFbFinished = false;

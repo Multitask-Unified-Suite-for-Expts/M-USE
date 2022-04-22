@@ -349,7 +349,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
 
             // Log for debugging
-            TrialData.AddDatum("PreviouslyChosen", () =>  CurrentTrialDef.PreviouslyChosenStimuli);
+            //TrialData.AddDatum("PreviouslyChosen", () =>  CurrentTrialDef.PreviouslyChosenStimuli);
             getLog(CurrentTrialDef.UnseenStims, "UnseenStims");
             getLog(CurrentTrialDef.PreviouslyChosenStimuli, "PreviouslyChosenStimuli");
             getLog(CurrentTrialDef.PreviouslyNotChosenStimuli, "PreviouslyNotChosenStimuli");

@@ -408,6 +408,11 @@ namespace USE_Data
 			IDatum datum = new Datum<List<Int64>>(name, () => variable());
 			data.Add(datum);
 		}
+		public void AddDatum(string name, Func<List<int>> variable)
+		{
+			IDatum datum = new Datum<List<int>>(name, () => variable());
+			data.Add(datum);
+		}
 
 		public event Action OnLogChanged;
 

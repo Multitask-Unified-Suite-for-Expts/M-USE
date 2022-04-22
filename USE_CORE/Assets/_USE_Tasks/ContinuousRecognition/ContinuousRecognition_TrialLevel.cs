@@ -349,27 +349,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
 
             // Log for debugging
-            //TrialData.AddDatum("PreviouslyChosen", () =>  CurrentTrialDef.PreviouslyChosenStimuli);
+            //TrialData.AddDatum("PreviouslyChosen", () => CurrentTrialDef.PreviouslyChosenStimuli);
             getLog(CurrentTrialDef.UnseenStims, "UnseenStims");
             getLog(CurrentTrialDef.PreviouslyChosenStimuli, "PreviouslyChosenStimuli");
             getLog(CurrentTrialDef.PreviouslyNotChosenStimuli, "PreviouslyNotChosenStimuli");
             getLog(CurrentTrialDef.TrialStimIndices, "TrialStimIndices");
-
-            // set trial stims for display results state    
-            /*
-            display = new StimGroup("ResultStims", ExternalStims, results);
-            int len = results.Count;
-            Vector3[] locs = new Vector3[len];
-            for (int i = 0; i < len; i++)
-            {
-                locs[i] = CurrentTrialDef.Grid[i];
-            }
-            Debug.Log(locs);
-            Debug.Log(
-                "[DisplayResult]: length of location is " + locs.Length + "; length of chosen is " + results.Count);
-            display.SetLocations(locs);
-            display.SetVisibilityOnOffStates(GetStateFromName("DisplayResult"), GetStateFromName("TrialEnd"));
-            TrialStims.Add(display);*/
             
             // set trial stims
             currentTrialStims = new StimGroup("TrialStims", ExternalStims, CurrentTrialDef.TrialStimIndices);
@@ -380,14 +364,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
     }
     
-
-    /*void loadVariables()
-    {
-        trialCount = 0;
-        StartButton = GameObject.Find("StartButton");
-        StartButton.SetActive(true);
-    }*/
-
     private GameObject GetClickedObj()
     {
         if (!InputBroker.GetMouseButtonDown(0)) return null;

@@ -403,6 +403,12 @@ namespace USE_Data
 			data.Add(datum);
 		}
 
+		public void AddDatum(string name, Func<List<Int64>> variable)
+		{
+			IDatum datum = new Datum<List<Int64>>(name, () => variable());
+			data.Add(datum);
+		}
+
 		public event Action OnLogChanged;
 
 		/// <summary>

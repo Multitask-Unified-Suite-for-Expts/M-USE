@@ -966,8 +966,6 @@ namespace USE_ExperimentTemplate
 		// Input Trackers
 		[HideInInspector] public MouseTracker MouseTracker;
 
-		[HideInInspector] public RenderTexture DrawRenderTexture;
-
 		//protected TrialDef CurrentTrialDef;
 		protected T GetCurrentTrialDef<T>() where T : TrialDef
 		{
@@ -975,11 +973,6 @@ namespace USE_ExperimentTemplate
 		}
 
 		public Type TrialDefType, StimDefType;
-
-		public void OnGUI() {
-			GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), DrawRenderTexture);
-			GUI.DrawTexture(new Rect(0, 0, 400, 300), DrawRenderTexture);
-		}
 
 		public void DefineTrialLevel()
 		{
@@ -993,14 +986,6 @@ namespace USE_ExperimentTemplate
 				TrialStims = new List<StimGroup>();
 				AudioFBController.UpdateAudioSource();
 				//DetermineNumTrialsInBlock();
-				GameObject cameraObj = new GameObject("DrawCamera");
-				Camera newCamera = cameraObj.AddComponent<Camera>();
-				newCamera.CopyFrom(Camera.main);
-				newCamera.cullingMask = 0;
-
-				DrawRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
-				DrawRenderTexture.Create();
-				Camera.main.targetTexture = DrawRenderTexture;
 			});
 
 			SetupTrial.AddUniversalInitializationMethod(() =>

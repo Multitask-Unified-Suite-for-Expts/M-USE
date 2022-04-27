@@ -78,11 +78,6 @@ public class TokenFBController : MonoBehaviour
 
     public void OnGUI()
     {
-        RenderTexture old = RenderTexture.active;
-        if (Camera.main != null) {
-            RenderTexture.active = Camera.main.targetTexture;
-        }
-
         if (totalTokensNum < 0)
         {
             return;
@@ -117,8 +112,6 @@ public class TokenFBController : MonoBehaviour
         }
 
         GUI.color = oldColor;
-
-        RenderTexture.active = old;
     }
 
     public bool IsAnimating()

@@ -5,28 +5,31 @@ using UnityEngine.UI;
 using USE_States;
 using USE_ExperimentTemplate;
 using WhatWhenWhere_Namespace;
+using USE_StimulusManagement;
 using System.Collections;
 
 public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 {
     //This variable is required for most tasks, and is defined as the output of the GetCurrentTrialDef function 
     public WhatWhenWhere_TrialDef CurrentTrialDef => GetCurrentTrialDef<WhatWhenWhere_TrialDef>();
-
+    
     // game object variables
-    private GameObject initButton, goCue, trialStim, halo, sliderHalo, imageIncorrectObject, imageCorrectObject, imageTimingError, txt;
+    private GameObject initButton, goCue, chosenStim, halo, sliderHalo, imageIncorrectObject, imageCorrectObject, imageTimingError, txt;
 
-    //  private GameObject[] halos;
-    private GameObject[] totalObjects;
-    private GameObject[] currentObjects;
+    //stim group
+    private StimGroup searchStims;
     private List<string> touchedObjects = new List<string>();
 
-    // effort reward variables
+    // feedback variables
     private int clickCount, context;
-    public int sphereCount = 0;
-    private int numChosenLeft, numChosenRight;
-    private bool incorrectChoice = false;
+    public int stimCount = 0;
     private bool correctChoice = false;
+    private bool incorrectChoice = false;
+    private bool removeFeedback = false;
     private static int numObjMax = 10;
+    
+
+    // error data variables
     private int repetitionError = 0;
     private int contextError = 0;
     private int totalErrors = 0;
@@ -36,14 +39,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private float clickTime;
     private float timeDif;
     private List<Color> contextColors = new List<Color> { };
-    private List<Color> objectColors = new List<Color> { };
     private int[] numTotal = new int[numObjMax];
     private int[] numErrors = new int[numObjMax];
+    private List<Vector3> touchPositionsList; 
+    private string touchPositionsString;
+
     private bool restart = false;
     private int trialNum = 0;
     private SpriteRenderer sr;
-    private Color originalColor;
-    private string touchedObj = "[";
+    //private Color originalColor;
+    private string touchedObjectsNames;
     private bool timingFail = false;
     private float initialTouchTime = 0;
     private float touchDuration = 0;
@@ -55,12 +60,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
 
     [HideInInspector]
-    public String sphereChoice;
     [System.NonSerialized] public int response = -1, trialCount = -1;
     // vector3 variables
     private Vector3 trialStimInitLocalScale;
     private Vector3 fbInitLocalScale;
     private Vector3 sliderInitPosition;
+    private Vector3 touchPosition;
 
     // misc variables
     private Ray mouseRay;
@@ -78,14 +83,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         //define States within this Control Level
         State StartButton = new State("StartButton");
-        State ChooseSphere = new State("ChooseSphere");
-        State ChoseWrong = new State("ChoseWrong");
-        State ChoseRight = new State("ChoseRight");
-        State TimeError = new State("TimeError");
-        State Feedback = new State("Feedback");
+        State ChooseStimulus = new State("ChooseStimulus");
+        State StimulusChosen = new State("StimulusChosen");
+        State FinalFeedback = new State("FinalFeedback");
         State ITI = new State("ITI");
-        AddActiveStates(new List<State> { StartButton, ChooseSphere, TimeError, ChoseWrong, ChoseRight, Feedback, ITI });
+        State StimulusChosenSuccesorState = new State("StimulusChosenSuccesorState");
+
+        AddActiveStates(new List<State> { StartButton, ChooseStimulus, StimulusChosen, FinalFeedback, ITI, StimulusChosenSuccesorState });
         //chosewrong state
+
+        string[] stateNames = new string[] { "StartButton", "ChooseStimulus", "StimulusChosen", "FinalFeedback", "ITI" };
 
         AddInitializationMethod(() =>
         {
@@ -98,8 +105,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         SetupTrial.AddInitializationMethod(() =>
         {
-            ++tCount;
-            sphereCount = 0;
+            //++tCount;
+            
 
             Debug.Log("TRIALNUM: " + trialNum);
             Debug.Log("tCount: " + tCount);
@@ -109,7 +116,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 TrialCount_InBlock--;
             }
             ++trialNum;
-            touchedObj = "[";
         });
 
         SetupTrial.SpecifyTermination(() => true, StartButton);
@@ -123,7 +129,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             min = 3;
             max = 6;
 
-            if (incorrectChoice == false)
+            if (restart)
             {
                 trialCount++;
             }
@@ -142,11 +148,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             initButton.SetActive(true);
             goCue.SetActive(true);
 
-            sphereCount = 0;
             clickCount = 0;
             response = -1;
             slider.gameObject.transform.position = sliderInitPosition;
             slider.value = 0;
+           
         });
 
 
@@ -167,10 +173,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
-        StartButton.SpecifyTermination(() => response == 0, ChooseSphere);
+        StartButton.SpecifyTermination(() => response == 0, ChooseStimulus);
         StartButton.AddDefaultTerminationMethod(() =>
         {
-            sliderValueIncreaseAmount = (100f / CurrentTrialDef.ObjectNums.Length) / 100f;
+            sliderValueIncreaseAmount = (100f / CurrentTrialDef.CorrectObjectTouchOrder.Length) / 100f;
             slider.gameObject.SetActive(true);
 
             initButton.SetActive(false);
@@ -179,26 +185,42 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
 
         // Define stimOn state
-        ChooseSphere.AddInitializationMethod(() =>
+        ChooseStimulus.AddInitializationMethod(() =>
         {
-            currentObjects = new GameObject[CurrentTrialDef.ObjectNums.Length];
-            // halos = new GameObject[CurrentTrialDef.ObjectNums.Length];
             GameObject.Find("Slider").SetActive(true);
-            for (int i = 0; i < CurrentTrialDef.ObjectNums.Length; ++i)
+            Debug.Log("StimCOUNT: " + stimCount);
+            
+            int correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[stimCount] - 1;
+
+            Debug.Log("Correct INDEX: " + correctIndex);
+            
+            for (int i = 0; i < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++i)
             {
-                currentObjects[i] = totalObjects[CurrentTrialDef.ObjectNums[i] - 1];
-                currentObjects[i].SetActive(true);
-
-                placeSphere(currentObjects[i], CurrentTrialDef.ObjectXLocations[i], CurrentTrialDef.ObjectYLocations[i], 0f);
-                //string h = "Halo" + (i).ToString();
-
+                WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef)searchStims.stimDefs[i];
+                
+                if (i == correctIndex)
+                {
+                    sd.IsCurrentTarget = true;
+                }
+                else
+                {
+                    sd.IsCurrentTarget = false;
+                }
+                Debug.Log("NAME OF OBJECTS:" + sd.StimGameObject.name);
+                
             }
 
-            trialStim = null;
+            foreach (StimDef thing in searchStims.stimDefs)
+            {
+                Debug.Log(thing.StimName);
+            }
+            
+            searchStims.ToggleVisibility(true);
+            chosenStim = null;
             initialClick = 0;
         });
 
-        ChooseSphere.AddUpdateMethod(() =>
+        ChooseStimulus.AddUpdateMethod(() =>
         {
             // check if user clicks on left or right
             if (Input.GetMouseButtonDown(0))
@@ -206,206 +228,202 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 initialTouchTime = Time.time;
                 initialClick += 1;
             }
+            
             if (Input.GetMouseButtonUp(0) && initialClick == 1)
             {
-                Debug.Log("NEW");
+                Debug.Log("NEW STIMULUS SELECTION");
                 touchDuration = Time.time - initialTouchTime;
                 Debug.Log("touch duration time: " + touchDuration);
+                mouseRay = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
+                RaycastHit hit;
 
-                if (touchDuration > CurrentTrialDef.MaxTouchDuration)
+                // verify that the hit is on a stimulus
+                if (Physics.Raycast(mouseRay, out hit))
                 {
-                    timingFail = true;
-                    touchDurationError += 1;
-                }
-
-                else if (touchDuration < CurrentTrialDef.MinTouchDuration)
-                {
-                    timingFail = true;
-                    touchDurationError += 1;
-                }
-
-                else
-                {
-                    mouseRay = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-                    RaycastHit hit;
-                    if (Physics.Raycast(mouseRay, out hit))
+                    response = 1;
+                    startTime = Time.time;
+                    int correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[stimCount] - 1;
+                    Debug.Log("index: " + correctIndex);
+                    chosenStim = hit.transform.gameObject;
+                    GameObject testStim = chosenStim.transform.root.gameObject;
+                    
+                    //touchPositionsList.Add(Input.mousePosition);
+                    
+                    if (touchDuration < CurrentTrialDef.MinTouchDuration || touchDuration > CurrentTrialDef.MaxTouchDuration)
                     {
+                        //Timing Error
+                        timingFail = true;
+                        touchDurationError += 1;
+                        totalErrors += 1;
+                        restart = true;
+                        touchedObjects.Add(testStim.name);
+                    }
 
-                        int correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[sphereCount] - 1;
-                        Debug.Log("index: " + correctIndex);
-                        trialStim = hit.transform.gameObject;
+                    else if (testStim.GetComponent<StimDefPointer>().GetStimDef<WhatWhenWhere_StimDef>().IsCurrentTarget)
+                    {
+                        //Correct Choice
+                        numTotal[correctIndex]++;
 
-                        if (trialStim.name == currentObjects[correctIndex].name)
-                        {
-                            //Correct Choice
-                            numTotal[correctIndex]++;
+                        slider.value += sliderValueIncreaseAmount;
+                        stimCount += 1;
 
-                            slider.value += sliderValueIncreaseAmount;
-                            sphereCount += 1;
-                            response = 1;
-                            touchedObjects.Add(trialStim.name);
-                            sphereChoice = trialStim.name;
-                            imageCorrectObject.transform.position = trialStim.transform.position;
+                        touchedObjects.Add(testStim.name);
+                        imageCorrectObject.transform.position = testStim.transform.position;
+                        correctChoice = true;
+                        restart = false;
+                    }
+                    else if (touchedObjects.Contains(testStim.name))
+                    {
+                        //Repetition error
+                        
+                        imageIncorrectObject.transform.position = testStim.transform.position;
+                        touchedObjects.Add(testStim.name);
 
-                            correctChoice = true;
+                        slider.value -= sliderValueIncreaseAmount;
+                        repetitionError += 1;
+                        totalErrors += 1;
 
-                            restart = false;
+                        numTotal[correctIndex]++;
+                        numErrors[correctIndex]++;
 
-                        }
-                        else if (touchedObjects.Contains(trialStim.name))
-                        {
-                            //Repetition error
-                            sphereChoice = trialStim.name;
-                            imageIncorrectObject.transform.position = trialStim.transform.position;
-                            touchedObjects.Add(trialStim.name);
-
-                            response = 1;
-
-                            slider.value -= sliderValueIncreaseAmount;
-                            repetitionError += 1;
-                            totalErrors += 1;
-
-                            numTotal[correctIndex]++;
-                            numErrors[correctIndex]++;
-
-                            restart = true;
-                            incorrectChoice = true;
-
-                        }
-
-
-                        else
-                        {
-                            //Slot error
-                            sphereChoice = trialStim.name;
-                            imageIncorrectObject.transform.position = trialStim.transform.position;
-                            touchedObjects.Add(trialStim.name);
-
-                            response = 1;
-
-                            slider.value -= sliderValueIncreaseAmount;
-                            slotError += 1;
-                            totalErrors += 1;
-
-                            numTotal[correctIndex]++;
-                            numErrors[correctIndex]++;
-
-                            restart = true;
-                            incorrectChoice = true;
-
-                        }
-                        Debug.Log(restart);
-                        string errLog = "";
-                        for (int i = 0; i < currentObjects.Length; ++i)
-                        {
-                            errLog = errLog + "Slot " + (i + 1) + ": " + numErrors[i] + "/" + numTotal[i] + "\t";
-
-                        }
-                        Debug.Log(errLog);
-
-
+                        restart = true;
+                        incorrectChoice = true;
                     }
                     else
                     {
-                        Debug.Log("Didn't click on any sphere");
+                        //Slot error
+                        imageIncorrectObject.transform.position = testStim.transform.position;
+                        touchedObjects.Add(testStim.name);
+
+                        slider.value -= sliderValueIncreaseAmount;
+                        slotError += 1;
+                        totalErrors += 1;
+
+                        numTotal[correctIndex]++;
+                        numErrors[correctIndex]++;
+
+                        restart = true;
+                        incorrectChoice = true;
                     }
-                }
-            }
-        });
+                    
+                    // progress report
+                    Debug.Log(restart);
+                    string errLog = "";
+                    for (int i = 0; i < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++i)
+                    {
+                        errLog = errLog + "Slot " + (i + 1) + ": " + numErrors[i] + "/" + numTotal[i] + "\t";
 
-        
-       // Debug.Log("COND " + (sphereCount == CurrentTrialDef.ObjectNums.Length));
-       // Debug.Log("SC: " + sphereCount);
-       // Debug.Log("LEN " + CurrentTrialDef.ObjectNums.Length);
-       
-    
+                    }
+                    Debug.Log(errLog);
 
-        ChooseSphere.SpecifyTermination(() => incorrectChoice, ChoseWrong);
-        ChooseSphere.SpecifyTermination(() => correctChoice, ChoseRight);
-        ChooseSphere.SpecifyTermination(() => sphereCount == CurrentTrialDef.ObjectNums.Length, Feedback);
-        ChooseSphere.SpecifyTermination(() => timingFail, TimeError);
+                    // touched objects data 
+                    touchedObjectsNames = "[";
+                    for (int i = 0; i < touchedObjects.Count; ++i)
+                    {
+                        if (i < touchedObjects.Count - 1)
+                        {
+                            touchedObjectsNames = touchedObjectsNames + touchedObjects[i] + ",";
+                        }
+                        else
+                        {
+                            touchedObjectsNames = touchedObjectsNames + touchedObjects[i];
+                        }
 
-        ChoseWrong.AddInitializationMethod(() =>
-        {
-            //halo.SetActive(true);
-            originalColor = trialStim.GetComponent<Renderer>().material.color;
-            trialStim.GetComponent<Renderer>().material.SetColor("_Color", new Color(0.5020f, 0.5020f, 0.5020f));
+                    }
+                    touchedObjectsNames = touchedObjectsNames + "]";
 
-            imageIncorrectObject.SetActive(true);
-            sliderHalo.SetActive(true);
-            sr.color = new Color(1, 0, 0, 0.2f);
-            for (int i = 0; i < touchedObjects.Count; ++i)
-            {
-                touchedObj = touchedObj + touchedObjects[i];
-                if (i < touchedObjects.Count - 1)
+                    Debug.Log("Touched Objects: " + touchedObjectsNames);
+
+                    // touched positions
+                    /*touchPositionsString = "[";
+                    for (int i = 0; i < touchPositionsList.Count; ++i)
+                    {
+                        if (i < touchPositionsList.Count - 1)
+                        {
+                            touchPositionsStrings = touchPositionsString + touchedObjects[i] + ",";
+                        }
+                        else
+                        {
+                            touchedObjectsNames = touchedObjectsNames + touchedObjects[i];
+                        }
+
+                    }
+                    touchedObjectsNames = touchedObjectsNames + "]";
+
+                    Debug.Log("Touched Objects: " + touchedObjectsNames);
+                    */
+                }                
+                else
                 {
-                    touchedObj = touchedObj + ", ";
+                        Debug.Log("Didn't click on any stimulus");
                 }
             }
-            touchedObj = touchedObj + "]";
+            
         });
-
-        ChoseWrong.AddTimer(0.75f, ITI, () =>
+        
+        ChooseStimulus.SpecifyTermination(() => response == 1, StimulusChosen);
+        ChooseStimulus.SpecifyTermination(() => stimCount == CurrentTrialDef.CorrectObjectTouchOrder.Length, FinalFeedback);
+        
+        StimulusChosen.AddUpdateMethod(() =>
         {
-            //halo.SetActive(false);
-            imageIncorrectObject.SetActive(false);
-            incorrectChoice = false;
+            response = -1;
+            // Timing Fail
+            
+            if (timingFail)
+            {
+                imageTimingError.SetActive(true);
+            }
 
-            sliderHalo.SetActive(false);
-            trialStim.GetComponent<Renderer>().material.SetColor("_Color", originalColor);
+            //Chose Incorrect
+            else if (incorrectChoice)
+            {
+                imageIncorrectObject.SetActive(true);
+                sliderHalo.SetActive(true);
+                sr.color = new Color(1, 0, 0, 0.2f);
+                
+            }
+
+            //Chose correct
+            else if (correctChoice)
+            {
+                imageCorrectObject.SetActive(true);
+                sliderHalo.SetActive(true);
+                sr.color = new Color(0, 1, 0, 0.2f);
+            }
+            
         });
-
-        ChoseRight.AddInitializationMethod(() =>
+        
+        StimulusChosen.SpecifyTermination(() => (correctChoice && Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute >= 0.75f), ChooseStimulus, () => 
         {
-            //halo.SetActive(true);
-            imageCorrectObject.SetActive(true);
-            sliderHalo.SetActive(true);
-            sr.color = new Color(0, 1, 0, 0.2f);
-        });
-
-        ChoseRight.AddTimer(0.5f, ChooseSphere, () =>
-        {
-            //halo.SetActive(false);
             imageCorrectObject.SetActive(false);
             correctChoice = false;
             sliderHalo.SetActive(false);
         });
-
-        TimeError.AddInitializationMethod(() =>
+       // StimulusChosen.SpecifyTermination(() => (correctChoice && Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute >= 0.75f && stimCount == CurrentTrialDef.CorrectObjectTouchOrder.Length), ITI);
+        StimulusChosen.SpecifyTermination(() => (incorrectChoice && Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute >= 0.75f), ITI, () =>
         {
-            imageTimingError.SetActive(true);
+            imageIncorrectObject.SetActive(false);
+            incorrectChoice = false;
+            sliderHalo.SetActive(false);
         });
-
-        TimeError.AddTimer(0.5f, StartButton, () =>
+        StimulusChosen.SpecifyTermination(() => (timingFail && (Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute) >= 0.75f), ITI, () =>
         {
             imageTimingError.SetActive(false);
             timingFail = false;
-
         });
 
-        Feedback.AddInitializationMethod(() =>
+        FinalFeedback.AddInitializationMethod(() =>
         {
             sliderHalo.SetActive(true);
-           // sphereCount = 0;
             sr.color = new Color(1, 1, 1, 0.2f);
             txt.SetActive(true);
             startTime = Time.time;
 
-            foreach (GameObject obj in currentObjects)
-            {
-                obj.SetActive(false);
-            }
+            searchStims.ToggleVisibility(false);
 
-            for (int i = 0; i < touchedObjects.Count; ++i)
-            {
-                touchedObj = touchedObj + touchedObjects[i];
-            }
-            touchedObj = touchedObj + "]";
-
-       
         });
 
-        Feedback.AddUpdateMethod(() =>
+        FinalFeedback.AddUpdateMethod(() =>
         {
             if ((int)(10 * (Time.time - startTime)) % 4 == 0)
             {
@@ -416,7 +434,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 sr.color = new Color(1, 0, 0, 0.2f);
             }
         });
-        Feedback.AddTimer(2f, ITI, () =>
+        FinalFeedback.AddTimer(2f, ITI, () =>
         {
 
             txt.SetActive(false);
@@ -425,27 +443,20 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             slotError = 0;
             totalErrors = 0;
             repetitionError = 0;
+            touchDurationError = 0;
+            initialClick = 0;
+            stimCount = 0;
         });
 
         //Define iti state
         ITI.AddInitializationMethod(() =>
         {
-            foreach (GameObject obj in currentObjects)
-            {
-                obj.SetActive(false);
-            }
-            foreach (GameObject obj in totalObjects)
-            {
-                obj.SetActive(false);
-            }
+            searchStims.ToggleVisibility(false);
+            
             Camera.main.backgroundColor = Color.white;
             txt.SetActive(false);
-            for (var i = 0; i < touchedObjects.Count; i++)
-            {
-                touchedObjects.RemoveAt(i);
-            }
-            Debug.Log(restart);
-            if (tCount < min)
+            touchedObjects.Clear();
+           /* if (tCount < min)
             {
                 restart = true;
             }
@@ -463,30 +474,32 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 tCount = 0;
             }
 
+            */
+
         });
         ITI.SpecifyTermination(() => true, FinishTrial, () => Debug.Log("Trial" + CurrentTrialDef.TrialNum + " completed"));
-
+        
         TrialData.AddDatum("TrialNum", () => trialNum);
         TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
-        TrialData.AddDatum("TouchedObjects", () => touchedObj);
+        TrialData.AddDatum("TouchedObjects", () => touchedObjectsNames);
+        TrialData.AddDatum("TouchDurationError", () => touchDurationError);
         TrialData.AddDatum("SlotError", () => slotError);
         TrialData.AddDatum("RepetitionError", () => repetitionError);
         TrialData.AddDatum("TotalErrors", () => totalErrors);
-
-
+        //TrialData.AddDatum("TouchPositions", () => touchPositionsString);
     }
     // set all gameobjects to setActive false
     void disableAllGameobjects()
     {
         initButton.SetActive(false);
         goCue.SetActive(false);
-        slider.gameObject.SetActive(false);
-        foreach (GameObject obj in currentObjects)
-        {
-            obj.SetActive(false);
-        }
-
-
+        txt.SetActive(false);
+        sliderHalo.SetActive(false);
+        imageIncorrectObject.SetActive(false);
+        imageCorrectObject.SetActive(false);
+        imageTimingError.SetActive(false);
+        GameObject.Find("Slider").SetActive(false);
+        searchStims.ToggleVisibility(false);
     }
 
     void loadVariables()
@@ -506,22 +519,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         sliderInitPosition = slider.gameObject.transform.position;
 
-
-        totalObjects = new GameObject[numObjMax];
         System.Random rnd = new System.Random();
-
-        objectColors.Add(new Color(1f, 0f, 0f)); // red
-        objectColors.Add(new Color(0f, 1f, 0f)); // lime
-        objectColors.Add(new Color(0f, 0f, 1f)); // blue
-        objectColors.Add(new Color(1f, 0f, 1f)); //fuschia
-        objectColors.Add(new Color(0f, 1f, 1f)); // cyan
-        objectColors.Add(new Color(0.5412f, 0.1686f, 0.8863f)); // blue-violet
-        objectColors.Add(new Color(0.1686f, 0.5412f, 0.8863f)); // blue-violet
-        objectColors.Add(new Color(0.2f, 0.1686f, 0.1f)); // blue-violet
-        objectColors.Add(new Color(0.1686f, 0.1686f, 0.5412f)); // blue-violet
-        objectColors.Add(new Color(0.8863f, 0.1686f, 0.8863f)); // blue-violet
-
-
+        
         contextColors.Add(new Color(0f, 0f, 0.5451f)); // dark blue
         contextColors.Add(new Color(0.3922f, 0.5843f, 0.9294f)); // cornflower blue
         contextColors.Add(new Color(0.3725f, 0.6196f, 0.6275f)); // cadet blue
@@ -531,18 +530,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         contextColors.Add(new Color(0.8471f, 0.7490f, 0.8471f)); // thistle
         contextColors.Add(new Color(0.9020f, 0.9020f, 0.9804f)); // lavender
         contextColors.Add(new Color(0f, 0f, 0f)); // black
-
-        for (int i = 0; i < numObjMax; ++i)
-        {
-            string s = (i + 1).ToString();
-            Debug.Log(s);
-            totalObjects[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            totalObjects[i].GetComponent<Renderer>().material.SetColor("_Color", objectColors[i]);
-            totalObjects[i].name = s;
-            // totalObjects[i].AddComponent<Light>()
-            totalObjects[i].SetActive(false);
-        }
-
+        
         initButton.SetActive(false);
         goCue.SetActive(false);
         txt.SetActive(false);
@@ -551,25 +539,21 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         imageCorrectObject.SetActive(false);
         imageTimingError.SetActive(false);
         GameObject.Find("Slider").SetActive(false);
-
-
+       
         Debug.Log("Done Loading Variables");
 
     }
 
-    void placeSphere(GameObject sphere, float x, float y, float z)
+    protected override void DefineTrialStims()
     {
-        //set the position of the sphere 0z in front of the camera
-        sphere.transform.position = new Vector3(x, y, z);
-
+        //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
+        //destroyed at TrialLevel_Finish
+        //StimGroup constructor which creates a subset of an already-existing StimGroup 
+        searchStims = new StimGroup("SearchStims", ExternalStims, CurrentTrialDef.SearchStimsIndices);
+        searchStims.SetLocations(CurrentTrialDef.SearchStimsLocations);       
+        TrialStims.Add(searchStims);
     }
 
-
-    void ChangeColor(GameObject obj, Color color)
-    {
-        var material = obj.GetComponent<Renderer>().material;
-        material.color = color;
-    }
 }
 
 

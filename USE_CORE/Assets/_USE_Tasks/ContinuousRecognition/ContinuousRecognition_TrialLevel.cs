@@ -16,25 +16,27 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     
     public float 
         DisplayStimsDuration = 5f, 
-        TrialEndDuration = 5f;
+        ChooseStimDuration = 5f,
+        TrialEndDuration = 2f,
+        TouchFeedbackDuration = 1f;
 
     // game object variables
-    private GameObject initButton, fb, trialStim, clickMarker;
-    private GameObject[] totalObjects;
-    private GameObject[] currentObjects;
+    public GameObject StartButton;
+    private GameObject trialStim;
+    private GameObject YellowHaloPrefab;
+    private GameObject GrayHaloPrefab;
 
     // effort reward variables
-    private int clickCount, context;
-    [System.NonSerialized] public int response = -1, trialCount = -1;
-
-    // vector3 variables
-    private Vector3 sliderInitPosition;
-
+    private int context;
+    //[System.NonSerialized] public int trialCount = -1;
+    public int trialCount;
+    
     // misc variables
-    private Slider slider;
-    private float sliderValueIncreaseAmount;
     private Ray mouseRay;
     private bool variablesLoaded;
+    
+    // trial variables
+    public int numTrials = 10;
 
     public override void DefineControlLevel()
     {
@@ -46,12 +48,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State tokenFeedback = new State("TokenFeedback");
         State trialEnd = new State("TrialEnd");
         AddActiveStates(new List<State> {initTrial, displayStims, chooseStim, touchFeedback, tokenFeedback, trialEnd});
-
         //TODO testing
         Text commandText = null;
         
         // --------------SetupTrial-----------------
-        AddInitializationMethod(() =>
+        bool started = false;
+        SetupTrial.AddUpdateMethod(() =>
         {
             if (!variablesLoaded)
             {
@@ -59,38 +61,18 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 loadVariables();
             }
         });
-
         SetupTrial.SpecifyTermination(() => true, initTrial);
-
-        // --------------Initialize InitTrial -----------------
-        //initTrial follows same logic as StartButton in WhatWhenWhere task (see Seema/Nicole)
+        
         initTrial.AddInitializationMethod(() =>
         {
             trialCount++;
-            
-            //TODO ??
-            ResetRelativeStartTime();
-
-            if (context != 0)
-            {
-                Debug.Log(context);
-                disableAllGameobjects();
-            }
-
-            context = CurrentTrialDef.Context;
-            initButton.SetActive(true);
-            context = CurrentTrialDef.Context;
-
-            clickCount = 0;
-            response = -1;
-            
-            slider.gameObject.transform.position = sliderInitPosition;
-            slider.value = 0;
+            StartButton.SetActive(true);
         });
         
         // --------------update InitTrial -----------------
         initTrial.AddUpdateMethod(() =>
         {
+            StartButton.SetActive(true);
             if (InputBroker.GetMouseButtonDown(0))
             {
                 mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -100,62 +82,98 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 {
                     if (hit.transform.name == "StartButton")
                     {
-                        Debug.Log("mousehit");
-                        response = 0; // got response
-                        initButton.SetActive(false);
-                        slider.gameObject.SetActive(true);
-                        fb.gameObject.SetActive(true);
+                        Debug.Log("pressed start button");
+                        started = true;
                     }
                 }
             }
         });
-        initTrial.SpecifyTermination(() => response == 0, displayStims);
+        initTrial.SpecifyTermination(() => started, displayStims, ()=>StartButton.SetActive(false));
 
         // --------------Initialize displayStims State -----------------
-        //displayStims.SpecifyTermination(()=>InputBroker.GetMouseButtonDown(0), chooseStim);
         displayStims.AddTimer(() => DisplayStimsDuration, chooseStim);
 
-        
         // --------------chooseStims State -----------------
         bool StimIsChosen = false;
+        bool isNew = false;
+        GameObject chosen = null;
         chooseStim.AddUpdateMethod(() =>
         {
+            StimIsChosen = false;
+            isNew = false;
+            chosen = null;
             if (InputBroker.GetMouseButtonDown(0))
             {
-                mouseRay = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(mouseRay, out hit))
+                chosen = GetClickedObj();
+                int curStimCount = currentTrialStims.stimDefs.Count;
+
+                StimDefPointer sdPointer = chosen.GetComponent<StimDefPointer>();
+                if (!sdPointer)
                 {
-                    if (currentTrialStims.stimDefs.Exists(sd =>
-                            ReferenceEquals(sd.StimGameObject, hit.transform.root.gameObject)))
-                    {
-                        Debug.Log("rachelrachel");
-                    }
+                    return;
+                }
+                else
+                {
+                    StimIsChosen = true;
+                }
+
+                ContinuousRecognition_StimDef sd = sdPointer.GetStimDef<ContinuousRecognition_StimDef>();
+                bool correct = false;
+                correct = sd.PreviouslyChosen;
+                if (sd.PreviouslyChosen == false)
+                {
+                    Debug.Log("new stimuli");
+                    sd.PreviouslyChosen = true;
+                    Debug.Log(sd.PreviouslyChosen);
+                    isNew = true;
+                }
+                else
+                {
+                    isNew = false;
+                    Debug.Log("chosen before");
                 }
             }
-            /*
-            // just for testing
-            commandText = GameObject.Find("CommandText").GetComponent<Text>();
-            commandText.text = "pressed button";
-            GameObject.Find("CommandText").SetActive(true);
-            */
-            
-            //add something that checks for click on object,
-            //checks its PreviouslyChosen bool for later token feedback,
-            //sets PreviouslyChosen and StimIsChosen to true; - see WWW
         });
         chooseStim.SpecifyTermination(() => StimIsChosen, touchFeedback);
-
-        /*
-        //touchfeedback performs touch feedback - see WWW
+        chooseStim.AddTimer(() => ChooseStimDuration, FinishTrial);
+        
+        GameObject halo = null;
         bool touchFeedbackFinished = false;
+        touchFeedback.AddInitializationMethod(() =>
+        {
+            if (!StimIsChosen) return;
+            Debug.Log("message: trialCount is " + trialCount);
+            if (isNew)
+            {
+                halo = YellowHaloPrefab;
+                halo.transform.position = chosen.transform.position;
+                halo.SetActive(true);
+                touchFeedbackFinished = true;
+            }
+            else
+            {
+                halo = GrayHaloPrefab;
+                halo.transform.position = chosen.transform.position;
+                halo.SetActive(true);
+                touchFeedbackFinished = true;
+            }
+        });
+        touchFeedback.AddTimer(() => TouchFeedbackDuration, trialEnd, ()=>halo.SetActive(false));
+        //TODO: if selected wrong stimuli, do i display token? do I go to feed back? just terminate?
+
+        //TODO: cannot write this termination method in touchFeedback, or else it will just directly terminate
+        //tokenFeedback.SpecifyTermination(()=> !isNew, trialEnd);
+        
+        /*
         touchFeedback.SpecifyTermination(() => touchFeedbackFinished, tokenFeedback);
-
-        //tokenfeedback - make empty for now, automatically jump to trialEnd
-        tokenFeedback.SpecifyTermination(() => true, trialEnd);
-
-        trialEnd.AddTimer(() => TrialEndDuration, FinishTrial);*/
+        tokenFeedback.AddTimer(()=>2f, trialEnd);
+        //tokenFeedback.SpecifyTermination(() => true, trialEnd, ()=>trialCount++); // from marcus*/
+        trialEnd.AddTimer(() => TrialEndDuration, FinishTrial);
+        this.AddTerminationSpecification(()=> trialCount > numTrials, ()=> Debug.Log("Current Trial Count is "+ trialCount));
+        
     }
+    
+    
 
     protected override void DefineTrialStims()
     {
@@ -163,55 +181,43 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //destroyed at TrialLevel_Finish
         //ExternalStims in this call will be replaced with CurrentBlockDef.BlockStims once Marcus gets that working
         //StimGroup currentTrialStims = new StimGroup("CurrentTrialStims", ExternalStims, CurrentTrialDef.TrialStimIndices);
-        currentTrialStims = new StimGroup("StimGroupA", ExternalStims, CurrentTrialDef.GroupAIndices); 
-        currentTrialStims.SetLocations(CurrentTrialDef.GroupALocations);
+        
+        //add all previously chosen stimuli to current trial 
+        
+        //create new list consisting of PreviouslyChosenStimuli + one random non previously chosen stim from BlockStimIndices;
+        List<int> trialStimIndices = CurrentTrialDef.PreviouslyChosenStimuli;
+        //if currentTrialDef.TrialCountInBlock == 0
+        //choose two random stims
+        //if currenTrialDef.TrialCountInBlock % 2 == 0
+        //trialStimIndices.Add(random non previously-chosen stim);
+        //else
+        //trialStimIndices.Add(previously non chosen object);
+        
+        currentTrialStims = new StimGroup("TrialStims", ExternalStims, CurrentTrialDef.GroupAIndices); //replace groupAIndices with trialStimIndices
+        currentTrialStims.SetLocations(CurrentTrialDef.GroupALocations); 
         currentTrialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenFeedback"));
         TrialStims.Add(currentTrialStims);
-    }
-    
-    void disableAllGameobjects()
-    {
-        initButton.SetActive(false);
-        fb.SetActive(false);
-        slider.gameObject.SetActive(false);
-        foreach (GameObject obj in currentObjects)
-        {
-            obj.SetActive(false);
-        }
-        foreach (GameObject obj in totalObjects)
-        {
-            obj.SetActive(false);
-        }
-        clickMarker.SetActive(false);
-
     }
 
     void loadVariables()
     {
-        initButton = GameObject.Find("StartButton");
-        fb = GameObject.Find("FB");
-        clickMarker = GameObject.Find("ClickMarker");
-        slider = GameObject.Find("Slider").GetComponent<Slider>();
-
-        sliderInitPosition = slider.gameObject.transform.position;
-        int len = 6;
-        totalObjects = new GameObject[len];
-        System.Random rnd = new System.Random();
-        for (int i = 0; i < len; ++i)
+        StartButton = GameObject.Find("StartButton");
+        YellowHaloPrefab = GameObject.Find("YellowHalo");
+        GrayHaloPrefab = GameObject.Find("GrayHalo");
+        StartButton.SetActive(true);
+        YellowHaloPrefab.SetActive(false);
+        GrayHaloPrefab.SetActive(false);
+    }
+    
+    private GameObject GetClickedObj()
+    {
+        if (!InputBroker.GetMouseButtonDown(0)) return null;
+        Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(mouseRay, out RaycastHit hit))
         {
-            string s = "Sphere" + (i + 1).ToString();
-            Debug.Log(s);
-            totalObjects[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            totalObjects[i].GetComponent<Renderer>().material.SetColor("_Color",
-                new Color((float) rnd.NextDouble(), (float) rnd.NextDouble(), (float) rnd.NextDouble()));
-            totalObjects[i].name = s;
-            totalObjects[i].SetActive(false);
+            return hit.transform.root.gameObject;
         }
-
-        initButton.SetActive(false);
-        fb.SetActive(false);
-        clickMarker.SetActive(false);
-        GameObject.Find("Slider").SetActive(false);
+        return null;
     }
     
     

@@ -7,7 +7,7 @@ namespace EffortControl_Namespace
 	//However they are left here to make this script an easier template to copy.
 	public class EffortControl_TaskDef : TaskDef
 	{
-
+        //testing
 	}
 
 	public class EffortControl_BlockDef : BlockDef

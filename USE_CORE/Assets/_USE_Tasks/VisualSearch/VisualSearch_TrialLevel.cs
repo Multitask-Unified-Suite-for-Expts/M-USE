@@ -8,15 +8,14 @@ using VisualSearch_Namespace;
 using System;
 using Random = UnityEngine.Random;
 using USE_UI;
+using USE_Settings;
 
 public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 {
     public VisualSearch_TrialDef CurrentTrialDef => GetCurrentTrialDef<VisualSearch_TrialDef>();
 
     private StimGroup targetStims;
-    private StimGroup distractorStims1;
-    private StimGroup distractorStims2;
-    //private StimGroup distractorStims3;
+    private StimGroup distractorStims;
     
     private USE_Button testButton;
 
@@ -25,15 +24,16 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         TrialEndDuration = 5f;
 
     // game obeject variables
-    private GameObject initButton, trialStim, clickMarker;
+    private GameObject trialStim, clickMarker;
     private GameObject[] totalObjects;
     private GameObject[] currentObjects;
     public GameObject YellowHaloPrefab;
     public GameObject GrayHaloPrefab;
+    public Canvas canvas;
 
     //effort reward variables
     private int clickCount, context;
-    [System.NonSerialized] public int response = -1, trialCount = -1, numTrials = 5;
+    [System.NonSerialized] public int trialCount = -1, numTrials = 5;
 
     // vector3 variables
     private Vector3 sliderInitPosition;
@@ -69,23 +69,15 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         State trialEnd = new State("TrialEnd");
 
         Text commandText = null;
-        //CurrentTrialDef.initTrialDuration = 20f;
 
         AddActiveStates(new List<State> {initTrial, searchDisplay, selectionFeedback, tokenFeedback, trialEnd});
 
-        bool firstTrial = true;
-
-        //adapt StartButton from whatwhenwhere task
         AddInitializationMethod(() =>
         {           
             if (!variablesLoaded)
             {
                 variablesLoaded = true;
                 loadVariables();
-            }
-            if (firstTrial){
-                //TokenFeedbackController.Initialize(5, CurrentTrialDef.tokenRevealDuration, CurrentTrialDef.tokenUpdateDuration);
-                firstTrial = false;
             }
         });
 
@@ -108,57 +100,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             }
             context = CurrentTrialDef.Context;
 
-            initButton.SetActive(true);
-
-            context = CurrentTrialDef.Context;
-
-
             clickCount = 0;
-            response = -1;
 
             slider.gameObject.transform.position = sliderInitPosition;
             slider.value = value;
         });
 
-        initTrial.AddUpdateMethod(() =>
-        {
-            if (InputBroker.GetMouseButtonDown(0))
-            {
-                mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(mouseRay, out hit))
-                {
-                    if (hit.transform.name == "StartButton")
-                    {
-                        response = 0;
-                        initButton.SetActive(false);
-                        slider.gameObject.SetActive(true);
-                        //fb.gameObject.SetActive(true);
-
-                    }
-                }
-            }
-        });
-
-        initTrial.SpecifyTermination(() => response == 0, searchDisplay);
-
-        //initTrial.AddTimer(()=>CurrentTrialDef.initTrialDuration, searchDisplay);
-
-        /* work!
-        searchDisplay.AddDefaultTerminationMethod(() =>
-        {
-            commandText = GameObject.Find("CommandText").GetComponent<Text>();
-            commandText.text = "pressed button";
-        });
-        searchDisplay.SpecifyTermination(()=>InputBroker.GetMouseButtonDown(0), selectionFeedback);
-        //displayStims.AddTimer(() => DisplayStimsDuration, chooseStim);
-
-        
-        bool responseMade = false;
-        selectionFeedback.AddInitializationMethod(() => responseMade = false);
-        */
-
-        // whether this is the familization trial
+        initTrial.SpecifyTermination(() => testButton.pressed, searchDisplay);
 
         bool responseMade = false;
 
@@ -196,26 +144,24 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         selectionFeedback.AddInitializationMethod(() =>
         {
             if (!selected) return;
-            if (correct)
-            {
-                halo = Instantiate(YellowHaloPrefab, selected.transform);
-            }
-            else
-            {
-                halo = Instantiate(GrayHaloPrefab, selected.transform);
-            }
+            if (correct) HaloFBController.ShowPositive(selected);
+            else HaloFBController.ShowNegative(selected);
 
         });
         selectionFeedback.AddTimer(() => CurrentTrialDef.selectionFbDuration, tokenFeedback);
 
         tokenFeedback.AddInitializationMethod(() =>
         {
-            //Destroy(halo);
+
+            HaloFBController.Destroy();
             if (correct){
+                AudioFBController.Play("Positive");
+                TokenFBController.AddTokens(selected, 1);
                 slider.value += (float)0.25;
                 value += (float)0.25;
             }
             else{
+                AudioFBController.Play("Negative");
                 Debug.Log("he?");
             }
         });
@@ -232,26 +178,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         trialEnd.AddTimer(() => CurrentTrialDef.trialEndDuration, FinishTrial);
         this.AddTerminationSpecification(() => trialCount > numTrials, ()=> Debug.Log(trialCount + " " + numTrials));
  
-       /*
-       bool responseMade = false;
-        searchDisplay.AddInitializationMethod(() => responseMade = false);
-        //add update function where choice is made
-        searchDisplay.SpecifyTermination(()=> responseMade, selectionFeedback);
-        searchDisplay.AddTimer(()=>CurrentTrialDef.maxSearchDuration, FinishTrial);
-
-        
-        selectionFeedback.AddInitializationMethod(() => { });
-        //adapt from ChoseWrong/Right in whatwhenwhere task
-        selectionFeedback.AddTimer(()=> CurrentTrialDef.selectionFbDuration, tokenFeedback);
-        
-        
-        bool tokenUpdated = false;
-        tokenFeedback.AddInitializationMethod(() => tokenUpdated = false);
-        //wait for Marcus to integrate token fb
-        tokenFeedback.SpecifyTermination(() => true, trialEnd); //()=> tokenUpdated, tokenFeedback);
-
-        trialEnd.AddTimer(()=>CurrentTrialDef.trialEndDuration, FinishTrial);
-        */
     }
 
     protected override void DefineTrialStims()
@@ -264,49 +190,52 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         foreach (VisualSearch_StimDef sd in targetStims.stimDefs)
             sd.IsTarget = true;
         TrialStims.Add(targetStims);
-
-        /*for(int i = 0; i <= trialCount; i++){
-            StimGroup temp = new StimGroup("TargetStims", ExternalStims, CurrentTrialDef.GroupBIndices);
-            distractorStims = temp;
-            distractorStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
-            distractorStims.SetLocations(CurrentTrialDef.GroupBLocations);
-            foreach (VisualSearch_StimDef sd in distractorStims.stimDefs)
-                sd.IsTarget = false;
-            TrialStims.Add(distractorStims);
-        }*/
-
-        // If fam, only show target, else also show distractors
         
         if(fam == true){
             fam = false;
             numDistractor = 3;
         }
         else{
-            distractorStims1 = new StimGroup("TargetStims", ExternalStims, CurrentTrialDef.GroupBIndices);
-            distractorStims1.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
-            distractorStims1.SetLocations(CurrentTrialDef.GroupBLocations);
-            foreach (VisualSearch_StimDef sd in distractorStims1.stimDefs)
+            distractorStims = new StimGroup("TargetStims", ExternalStims, CurrentTrialDef.GroupBIndices);
+            distractorStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
+            distractorStims.SetLocations(CurrentTrialDef.GroupBLocations);
+            foreach (VisualSearch_StimDef sd in distractorStims.stimDefs)
                 sd.IsTarget = false;
-            TrialStims.Add(distractorStims1);
+            TrialStims.Add(distractorStims);
 
         }
         
     }
 
     protected override void test(){
-        Debug.Log("reached");
-        /*Vector3 ButtonPosition = new Vector3(0f, 0f, 0f);
-		Vector3 ButtonScale = new Vector3(1f, 1f, 1f);
+        Vector3 buttonPosition = new Vector3(0f, 0f, 0f);
+		Vector3 buttonScale = new Vector3(1f, 1f, 1f);
+        Color buttonColor = new Color(0.1f, 0.1f, 0.1f);
+        Vector3 tempColor = new Vector3(0f, 0f, 0f);
+        string buttonText = "";
         //testButton = sttartButton;
-        testButton = new USE_Button(ButtonPosition, ButtonScale);
+        string TaskName = "VisualSearch";
+        if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
+			{
+				if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+					buttonPosition = (Vector3) SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+				if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+					buttonScale = (Vector3) SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+                if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonColor"))
+					tempColor = (Vector3) SessionSettings.Get(TaskName + "_TaskSettings", "ButtonColor");
+                    buttonColor = new Color(tempColor[0], tempColor[1], tempColor[2]);
+                if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonText"))
+					buttonText = (string) SessionSettings.Get(TaskName + "_TaskSettings", "ButtonText");
+	    }
+
+        testButton = new USE_Button(buttonPosition, buttonScale, canvas, buttonColor, buttonText);
         testButton.defineButton();
-        testButton.SetVisibilityOnOffStates(GetStateFromName("InitTrial"), GetStateFromName("InitTrial"));*/
+        testButton.SetVisibilityOnOffStates(GetStateFromName("InitTrial"), GetStateFromName("InitTrial"));
     }
 
     void disableAllGameobjects()
     {
-        initButton.SetActive(false);
-        //fb.SetActive(false);
+
         slider.gameObject.SetActive(false);
         foreach (GameObject obj in currentObjects)
         {
@@ -322,15 +251,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
     void loadVariables()
     {
-        initButton = GameObject.Find("StartButton");
-        //fb = GameObject.Find("FB");
+
         clickMarker = GameObject.Find("ClickMarker");
         slider = GameObject.Find("Slider").GetComponent<Slider>();
 
         sliderInitPosition = slider.gameObject.transform.position;
 
-        initButton.SetActive(false);
-        //fb.SetActive(false);
         clickMarker.SetActive(false);
         GameObject.Find("Slider").SetActive(false);
     }

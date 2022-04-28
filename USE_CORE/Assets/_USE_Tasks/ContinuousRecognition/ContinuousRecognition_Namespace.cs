@@ -173,9 +173,7 @@ namespace ContinuousRecognition_Namespace
         
         //ObjectNums refers to items in a list of objects to be loaded from resources folder
         public int[] ObjectNums;
-
-
-
+        
         //-------------------------------------------
         //Already-existing fields (inherited from TrialDef)
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;

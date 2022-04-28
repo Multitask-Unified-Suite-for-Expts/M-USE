@@ -194,7 +194,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
             Debug.Log("TRIAL COUNT IS " + trialCount + "; MAX TRIAL COUNT IS " +
                       CurrentTrialDef.maxNumTrials);
+            
         });
+        
+        TrialData.AddDatum("cccccccc", () => CurrentTrialDef.DisplayResultDuration);
+        TrialData.AddDatum("PreviouslyChosen", () => CurrentTrialDef.PreviouslyChosenStimuli);
+        TrialData.AddDatum("aaaaaa", () => CurrentTrialDef.isNew);
+        TrialData.AddDatum("bbbbbbb", () => CurrentTrialDef.maxNumTrials);
         //tokenFeedback.SpecifyTermination(() => !isNew, ()=>displayResult);
         //tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), trialEnd);
 
@@ -349,8 +355,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
 
             // Log for debugging
-            //TrialData.AddDatum("PreviouslyChosen", () => CurrentTrialDef.PreviouslyChosenStimuli);
-            //TrialData.AddDatum("aaaaaaa", () => CurrentTrialDef.UnseenStims);
             getLog(CurrentTrialDef.UnseenStims, "UnseenStims");
             getLog(CurrentTrialDef.PreviouslyChosenStimuli, "PreviouslyChosenStimuli");
             getLog(CurrentTrialDef.PreviouslyNotChosenStimuli, "PreviouslyNotChosenStimuli");

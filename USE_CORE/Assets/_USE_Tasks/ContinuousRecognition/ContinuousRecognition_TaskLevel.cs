@@ -27,7 +27,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             Camera.main.backgroundColor = Color.yellow;
             BlockFbSimpleDuration = 5f;
             List<int> chosen = TrialLevel.GetCurrentTrialDef<ContinuousRecognition_TrialDef>().PreviouslyChosenStimuli;
-            bool n = TrialLevel.GetCurrentTrialDef<ContinuousRecognition_TrialDef>().isNew;
+            bool n = TrialLevel.GetCurrentTrialDef<ContinuousRecognition_TrialDef>().isNewStim;
             Text chosenText = null;
             Text wrongText = null;
             
@@ -69,6 +69,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
             StimGroup d, wrong_group;
             Vector3[] loc;
+            Debug.Log("nnnnnnnnnnnnnnn isNew is: " + n);
             if (!n)
             {
                 List<int> sublist = chosen.GetRange(0, len - 1);

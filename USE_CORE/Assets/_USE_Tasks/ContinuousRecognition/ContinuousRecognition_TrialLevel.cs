@@ -143,6 +143,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 isNew = false;
                 Debug.Log("CHOSEN BEFORE");
             }
+            CurrentTrialDef.isNewStim = isNew;
         });
         chooseStim.SpecifyTermination(() => StimIsChosen, touchFeedback);
         chooseStim.AddTimer(() => CurrentTrialDef.ChooseStimDuration, FinishTrial);
@@ -150,7 +151,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("PreviouslyChosen", () => CurrentTrialDef.PreviouslyChosenStimuli);
         TrialData.AddDatum("PreviouslyUnseen", ()=>CurrentTrialDef.UnseenStims);
         TrialData.AddDatum("PreviouslyNotChosenStims", ()=>CurrentTrialDef.PreviouslyNotChosenStimuli);
-        TrialData.AddDatum("isNew", ()=>CurrentTrialDef.isNew);
+        TrialData.AddDatum("isNew", ()=>CurrentTrialDef.isNewStim);
+        TrialData.AddDatum("CurrentTrialStims", () => CurrentTrialDef.TrialStimIndices);
+        TrialData.AddDatum("PCStimsCount", ()=>CurrentTrialDef.PC_count);
+        TrialData.AddDatum("PNCStimsCount", ()=>CurrentTrialDef.PNC_count);
+        TrialData.AddDatum("UnseenStimsCount", ()=>CurrentTrialDef.new_Count);
 
         // --------------touchFeedback State -----------------
         bool touchFeedbackFinish = false;
@@ -259,6 +264,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     {
                         Debug.Log("added previously chosen: " + id);
                         CurrentTrialDef.TrialStimIndices.Add(id);
+                        CurrentTrialDef.PC_count += 1;
                         CurrentTrialDef.UnseenStims.Remove(id);
                         PC_length--;
                     }
@@ -278,6 +284,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     {
                         Debug.Log("added new: " + id);
                         CurrentTrialDef.TrialStimIndices.Add(id);
+                        CurrentTrialDef.new_Count += 1;
                         CurrentTrialDef.UnseenStims.Remove(id);
                         N_length--;
                     }
@@ -299,6 +306,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     {
                         Debug.Log("added previously not chosen: " + id);
                         CurrentTrialDef.TrialStimIndices.Add(id);
+                        CurrentTrialDef.PNC_count += 1;
                         PNC_length--;
                     }
                 }
@@ -316,11 +324,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     {
                         Debug.Log("added new: " + id);
                         CurrentTrialDef.TrialStimIndices.Add(id);
+                        CurrentTrialDef.new_Count += 1;
                         CurrentTrialDef.UnseenStims.Remove(id);
                         N_length--;
                     }
                 }
             }
+            
+            Debug.Log("xxxxxxxxxxxxx new: " + CurrentTrialDef.new_Count);
+            Debug.Log("xxxxxxxxxxxxx PNC: " + CurrentTrialDef.PNC_count);
+            Debug.Log("xxxxxxxxxxxxx PC: " + CurrentTrialDef.PC_count);
 
             // Log for debugging
             getLog(CurrentTrialDef.UnseenStims, "UnseenStims");

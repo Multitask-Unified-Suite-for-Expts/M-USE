@@ -36,7 +36,8 @@ namespace ContinuousRecognition_Namespace
         
         public List<int> PreviouslyChosenStimuli, PreviouslyNotChosenStim, TrialStimIndices, UnseenStims, NewStim;
         public Vector3[] BlockStimLocations, StimLocation;
-        public int trialCount, ManuallySpecifyLocation, row, col;
+        public int trialCount, ManuallySpecifyLocation, row, col, PC_count, PNC_count, new_count;
+        
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -139,11 +140,9 @@ namespace ContinuousRecognition_Namespace
                 td.ManuallySpecifyLocation = ManuallySpecifyLocation;
                 td.row = row;
                 td.col = col;
-                if (iTrial != 0)
-                {
-                    //end = !td.isNew;
-                }
-
+                td.PNC_count = PNC_count;
+                td.PC_count = PC_count;
+                td.new_Count = new_count;
                 TrialDefs[iTrial] = td;
                 numTrialStims++;
                 trialCount++;
@@ -156,11 +155,11 @@ namespace ContinuousRecognition_Namespace
         public int[] BlockStimIndices, nObjectsMinMax, Ratio;
         public Vector3[] TrialStimLocations;
         public int trialCount, numTrialStims, maxNumTrials;
-        public bool isNew;
+        public bool isNewStim;
         public Vector3[] Grid;
 
         public List<int> PreviouslyChosenStimuli, PreviouslyNotChosenStimuli, TrialStimIndices, UnseenStims;
-        public int row, col, Context;
+        public int row, col, Context, PC_count, PNC_count, new_Count;
 
         public float
             DisplayStimsDuration,

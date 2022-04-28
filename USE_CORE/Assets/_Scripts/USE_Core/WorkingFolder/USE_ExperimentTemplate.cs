@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -38,7 +38,7 @@ namespace USE_ExperimentTemplate
 		private Camera SessionCam;
 
 		private string configFileFolder;
-		private bool TaskSceneLoaded;
+		private bool TaskSceneLoaded, SceneLoading;
 		
 		public override void LoadSettings()
 		{
@@ -89,68 +89,82 @@ namespace USE_ExperimentTemplate
 			int iTask = 0;
 			bool oldStyleTaskLoading = false;
 			bool newStyleTaskLoading = false;
-			bool sceneLoaded = false;
+			SceneLoading = false;
 			string taskName;
 			setupSession.AddUpdateMethod(() =>
 			{
-				oldStyleTaskLoading = false;
 				if (iTask < ActiveTaskNames.Count)
 				{
-					int iAvail = 0;
-					while (iAvail < AvailableTaskLevels.Count)
+					if (!SceneLoading)
 					{
-						if (AvailableTaskLevels[iAvail].TaskName == ActiveTaskNames[iTask])
+						oldStyleTaskLoading = false;
+						newStyleTaskLoading = false;
+						int iAvail = 0;
+						while (iAvail < AvailableTaskLevels.Count)
 						{
-							oldStyleTaskLoading = true;
-							break;
+							if (AvailableTaskLevels[iAvail].TaskName == ActiveTaskNames[iTask])
+							{
+								oldStyleTaskLoading = true;
+								break;
+							}
+
+							iAvail++;
 						}
 
-						iAvail++;
-					}
-
-					ControlLevel_Task_Template tl;
-					AsyncOperation loadScene;
-					if (oldStyleTaskLoading)
-					{
-						tl = PopulateTaskLevel(AvailableTaskLevels[iAvail]);
-						taskName = tl.TaskName;
-						loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-						loadScene.completed += (_)=> SceneLoaded(taskName);
-					}
-					else
-					{
-						if (!newStyleTaskLoading)
+						ControlLevel_Task_Template tl;
+						AsyncOperation loadScene;
+						if (oldStyleTaskLoading)
 						{
-							newStyleTaskLoading = true;
-							taskName = ActiveTaskNames[iTask];
+							SceneLoading = true;
+							tl = PopulateTaskLevel(AvailableTaskLevels[iAvail]);
+							taskName = tl.TaskName;
 							loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-							loadScene.completed += (_) => SceneLoadedNew(taskName);
+							loadScene.completed += (_) => SceneLoaded(taskName);
 						}
 						else
 						{
-							
-						}
-					}
+							if (!newStyleTaskLoading)
+							{
+								SceneLoading = true;
+								newStyleTaskLoading = true;
+								taskName = ActiveTaskNames[iTask];
+								loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
+								loadScene.completed += (_) => SceneLoadedNew(taskName);
+							}
+							else
+							{
 
-					iTask++;
-					TaskSceneLoaded = false;
+							}
+						}
+
+						iTask++;
+						// TaskSceneLoaded = false;
+					}
 				}
 			});
-			setupSession.SpecifyTermination(() => iTask >= ActiveTaskNames.Count && TaskSceneLoaded, selectTask);
+			setupSession.SpecifyTermination(() => iTask >= ActiveTaskNames.Count && !SceneLoading, selectTask);
 
 			//tasksFinished is a placeholder, eventually there will be a proper task selection screen
 			bool tasksFinished = false;
+			string CurrentTaskName = "";
 			selectTask.AddUniversalInitializationMethod(() =>
 			{
 				SessionCam.gameObject.SetActive(true);
 				tasksFinished = false;
 				if (taskCount < ActiveTaskLevels.Count)
-					CurrentTask = ActiveTaskLevels[taskCount]; //ActiveTaskLevels[AvailableTaskLevels[taskCount].TaskName];
+					CurrentTask = ActiveTaskLevels[taskCount];
 				else
 					tasksFinished = true;
+				//replace with 
+				//if(taskCount >= ActiveTaskLevels.Count)
+				//	tasksFinished = true;
 			});
+			//selectTask.AddUpdateMethod( get string of CurrentTaskName from button press);
 			selectTask.SpecifyTermination(() => !tasksFinished, runTask, () =>
 			{
+				// var methodInfo = GetType().GetMethod(nameof(GetTaskLevelFromString));
+				// MethodInfo getTaskLevel = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[CurrentTaskName]});
+				// getTaskLevel.Invoke(this, new object[0]);
 				runTask.AddChildLevel(CurrentTask);
 				SessionCam.gameObject.SetActive(false);
 				SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
@@ -179,6 +193,15 @@ namespace USE_ExperimentTemplate
 			SessionData.sessionLevel = this;
 			SessionData.InitDataController();
 			SessionData.ManuallyDefine();
+
+			void GetTaskLevelFromString<T>()
+				where T : ControlLevel_Task_Template
+			{
+				foreach (ControlLevel_Task_Template taskLevel in ActiveTaskLevels)
+					if (taskLevel.GetType() == typeof(T))
+						CurrentTask =  taskLevel;
+				CurrentTask = null;
+			}
 		}
 
 		ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl)
@@ -214,7 +237,8 @@ namespace USE_ExperimentTemplate
 			var methodInfo = GetType().GetMethod(nameof(this.FindTaskCam));
 			MethodInfo findTaskCam = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[sceneName]});
 			findTaskCam.Invoke(this, new object[] {sceneName});
-			TaskSceneLoaded = true;
+			// TaskSceneLoaded = true;
+			SceneLoading = false;
 		}
 
 		void SceneLoadedNew(string taskName)
@@ -223,7 +247,8 @@ namespace USE_ExperimentTemplate
 			Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
 			MethodInfo prepareTaskLevel = methodInfo.MakeGenericMethod(new Type[] {taskType});
 			prepareTaskLevel.Invoke(this, new object[] {taskName});
-			TaskSceneLoaded = true;
+			// TaskSceneLoaded = true;
+			SceneLoading = false;
 		}
 		
 		public void PrepareTaskLevel<T>(string taskName) where T : ControlLevel_Task_Template
@@ -356,9 +381,13 @@ namespace USE_ExperimentTemplate
 
 		public Type TaskLevelType;
 		protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
+		protected State SetupTask, RunBlock, BlockFeedback, FinishTask;
 
 		// code for button
 		[HideInInspector] public USE_Button sttartButton;
+		[HideInInspector] public Vector3 ButtonPosition, ButtonScale;
+		[HideInInspector] public Color ButtonColor;
+		[HideInInspector] public string ButtonText;
 
 		public virtual void SpecifyTypes()
 		{
@@ -375,12 +404,12 @@ namespace USE_ExperimentTemplate
 			ReadSettingsFiles();
 			FindStims();
 
-			State setupTask = new State("SetupTask");
-			State runBlock = new State("RunBlock");
-			State blockFeedback = new State("BlockFeedback");
-			State finishTask = new State("FinishTask");
-			runBlock.AddChildLevel(TrialLevel);
-			AddActiveStates(new List<State> {setupTask, runBlock, blockFeedback, finishTask});
+			SetupTask = new State("SetupTask");
+			RunBlock = new State("RunBlock");
+			BlockFeedback = new State("BlockFeedback");
+			FinishTask = new State("FinishTask");
+			RunBlock.AddChildLevel(TrialLevel);
+			AddActiveStates(new List<State> {SetupTask, RunBlock, BlockFeedback, FinishTask});
 
 			TrialLevel.TrialDefType = TrialDefType;
 			TrialLevel.StimDefType = StimDefType;
@@ -389,11 +418,14 @@ namespace USE_ExperimentTemplate
 			{
 				BlockCount = -1;
 				TaskCam.gameObject.SetActive(true);
+				TrialLevel.AudioFBController.Init();
+				TrialLevel.HaloFBController.Init();
+				TrialLevel.TokenFBController.Init(TrialLevel.AudioFBController);
 			});
 
-			setupTask.SpecifyTermination(() => true, runBlock);
+			SetupTask.SpecifyTermination(() => true, RunBlock);
 
-			runBlock.AddUniversalInitializationMethod(() =>
+			RunBlock.AddUniversalInitializationMethod(() =>
 			{
 				BlockCount++;
 				CurrentBlockDef = BlockDefs[BlockCount];
@@ -403,23 +435,23 @@ namespace USE_ExperimentTemplate
 				TrialLevel.TrialDefs = CurrentBlockDef.TrialDefs;
 			});
 
-			runBlock.AddLateUpdateMethod(() => FrameData.AppendData());
+			RunBlock.AddLateUpdateMethod(() => FrameData.AppendData());
 
-			runBlock.SpecifyTermination(() => TrialLevel.Terminated, blockFeedback);
+			RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
 
-			blockFeedback.AddLateUpdateMethod(() => FrameData.AppendData());
-			blockFeedback.SpecifyTermination(() => BlockCount < BlockDefs.Length - 1, runBlock, () =>
+			BlockFeedback.AddLateUpdateMethod(() => FrameData.AppendData());
+			BlockFeedback.SpecifyTermination(() => BlockCount < BlockDefs.Length - 1, RunBlock, () =>
 			{
 				BlockData.AppendData();
 				BlockData.WriteData();
 			});
-			blockFeedback.SpecifyTermination(() => BlockCount == BlockDefs.Length - 1, finishTask, () =>
+			BlockFeedback.SpecifyTermination(() => BlockCount == BlockDefs.Length - 1, FinishTask, () =>
 			{
 				BlockData.AppendData();
 				BlockData.WriteData();
 			});
 
-			finishTask.SpecifyTermination(() => true, ()=> null);
+			FinishTask.SpecifyTermination(() => true, ()=> null);
 
 			AddDefaultTerminationMethod(() =>
 			{
@@ -479,7 +511,13 @@ namespace USE_ExperimentTemplate
 			FrameData.CreateFile();
 
 			//AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
+			GameObject fbControllersPrefab = Resources.Load<GameObject>("FeedbackControllers");
+			GameObject controllers = new GameObject("Controllers");
+			GameObject fbControllers = Instantiate(fbControllersPrefab, controllers.transform);
 
+			TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
+			TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
+			TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
 			TrialLevel.SessionDataControllers = SessionDataControllers;
 			TrialLevel.FilePrefix = FilePrefix;
 			TrialLevel.TaskStims = TaskStims;
@@ -489,6 +527,10 @@ namespace USE_ExperimentTemplate
 			TrialLevel.RuntimeStims = RuntimeStims;
 
 			TrialLevel.sttartButton = sttartButton;
+			TrialLevel.ButtonPosition = ButtonPosition;
+			TrialLevel.ButtonScale = ButtonScale;
+			TrialLevel.ButtonColor = ButtonColor;
+			TrialLevel.ButtonText = ButtonText;
 
 			TrialLevel.DefineTrialLevel();
 		}
@@ -525,22 +567,23 @@ namespace USE_ExperimentTemplate
 
 			//handling of block and trial defs so that each BlockDef contains a TrialDef[] array
 
-			if (AllTrialDefs == null)
+			if (AllTrialDefs == null) //no trialDefs have been imported from settings files
 			{
 				if (BlockDefs == null)
 					Debug.LogError("Neither BlockDef nor TrialDef config files provided in " + TaskName +
 					               " folder, no trials generated as a result.");
 				else
 				{
-					//Do something with blockdef by itself
-					Debug.LogError("BlockDef config file provided without TrialDef config file in " + TaskName +
-					               " folder, no method currently exists to handle this case.");
+					for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+					{
+						BlockDefs[iBlock].GenerateTrialDefsFromBlockDef();
+					}
 				}
 
 			}
-			else
+			else //trialDefs imported from settings files
 			{
-				if (BlockDefs == null)
+				if (BlockDefs == null) //no blockDef file, trialdefs should be complete
 				{
 					Debug.Log("TrialDef config file provided without BlockDef config file in " + TaskName +
 					          " folder, BlockDefs will be generated with default values for all fields from TrialDefs.");
@@ -560,14 +603,25 @@ namespace USE_ExperimentTemplate
 						          " folder only generates a single block (this is not a problem if you do not intend to use a block structure in your experiment).");
 						BlockDefs = new BlockDef[1];
 					}
+					
+					//add trialDef[] for each block;
+					for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+					{
+						if (BlockDefs[iBlock] == null)
+							BlockDefs[iBlock] = new BlockDef();
+						BlockDefs[iBlock].BlockCount = iBlock;
+						BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock, AllTrialDefs);
+					}
 				}
-
-				for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+				else //there is a blockDef file, its information may need to be added to TrialDefs
 				{
-					if (BlockDefs[iBlock] == null)
-						BlockDefs[iBlock] = new BlockDef();
-					BlockDefs[iBlock].BlockCount = iBlock;
-					BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock, AllTrialDefs);
+					
+					//add trialDef[] for each block;
+					for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+					{
+						BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock, AllTrialDefs);
+						BlockDefs[iBlock].AddToTrialDefsFromBlockDef();
+					}
 				}
 			}
 		}
@@ -663,18 +717,24 @@ namespace USE_ExperimentTemplate
 		// test function for button
 		protected virtual void DefineButton()
 		{
-			Vector3 ButtonPosition = new Vector3(0f, 0f, 0f);
-			Vector3 ButtonScale = new Vector3(1f, 1f, 1f);
+			Vector3 position = new Vector3(1000f, 500f, 1000f);
+			Vector3 scale = new Vector3(5f, 5f, 5f);
 
-			if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
+			Debug.Log(position);
+
+			//ButtonPosition = position;
+			//ButtonScale = scale;
+			//Canvas canvas = GameObject.Find("FB Canvas").GetComponent<Canvas>();;
+
+			/*if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
 			{
-				if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+				if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition")){}
 					ButtonPosition = (Vector3) SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-				if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+				if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale")){}
 					ButtonScale = (Vector3) SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-			}
-			sttartButton = new USE_Button(ButtonPosition, ButtonScale);
-			sttartButton.defineButton();
+			}*/
+			//sttartButton = new USE_Button(ButtonPosition, ButtonScale, canvas);
+			//sttartButton.defineButton();
 		}
 
 		public void ReadTaskDef<T>(string taskConfigFolder) where T : TaskDef
@@ -701,9 +761,9 @@ namespace USE_ExperimentTemplate
 				if (blockDefText.Substring(0, 10) == "BlockDef[]") // stupid legacy case, shouldn't be included
 					SessionSettings.ImportSettings_MultipleType("blockDefs", blockDefFile);
 				else if (blockDefFile.ToLower().Contains("tdf"))
-					SessionSettings.ImportSettings_SingleTypeArray<BlockDef>("blockDefs", blockDefFile);
+					SessionSettings.ImportSettings_SingleTypeArray<T>("blockDefs", blockDefFile);
 				else
-					SessionSettings.ImportSettings_SingleTypeJSON<BlockDef[]>("blockDefs", blockDefFile);
+					SessionSettings.ImportSettings_SingleTypeJSON<T[]>("blockDefs", blockDefFile);
 				BlockDefs = (T[]) SessionSettings.Get("blockDefs");
 			}
 			else
@@ -820,8 +880,16 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public TaskStims TaskStims;
 		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims, RuntimeStims;
 		[HideInInspector] public List<StimGroup> TrialStims;
+		
+		// Feedback Controllers
+		[HideInInspector] public AudioFBController AudioFBController;
+		[HideInInspector] public HaloFBController HaloFBController;
+		[HideInInspector] public TokenFBController TokenFBController;
 
 		[HideInInspector] public USE_Button sttartButton;
+		[HideInInspector] public Vector3 ButtonPosition, ButtonScale;
+		[HideInInspector] public Color ButtonColor;
+		[HideInInspector] public string ButtonText;
 
 		//protected TrialDef CurrentTrialDef;
 		protected T GetCurrentTrialDef<T>() where T : TrialDef
@@ -1245,12 +1313,27 @@ namespace USE_ExperimentTemplate
 		//for button
 		public Vector3 ButtonPosition;
 		public Vector3 ButtonScale;
+		public Color ButtonColor;
+		public string ButtonText;
+
 
 	}
 	public class BlockDef
 	{
 		public int BlockCount;
 		public TrialDef[] TrialDefs;
+
+		public virtual void GenerateTrialDefsFromBlockDef()
+		{
+		}
+
+		public virtual void AddToTrialDefsFromBlockDef()
+		{
+		}
+
+		public virtual void BlockInitializationMethod()
+		{
+		}
 	}
 	public abstract class TrialDef
 	{

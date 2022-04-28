@@ -12,6 +12,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         TaskDefType = typeof(WhatWhenWhere_TaskDef);
         BlockDefType = typeof(WhatWhenWhere_BlockDef);
         TrialDefType = typeof(WhatWhenWhere_TrialDef);
+        StimDefType = typeof(WhatWhenWhere_StimDef);
     }
 
     public override void DefineControlLevel()

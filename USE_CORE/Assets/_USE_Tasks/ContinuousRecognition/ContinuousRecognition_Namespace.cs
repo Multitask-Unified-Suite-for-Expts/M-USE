@@ -26,12 +26,33 @@ namespace ContinuousRecognition_Namespace
         public StimGroup BlockStims;
         //BlockStimIndices provides indices to individual StimDefs in the ExternalStims StimGroup,
         //which is automatically created at the start of the task and includes every stimulus in the ContinousRecognition_StimDef_tdf file
-        public int[] BlockStimIndices;
+        public int[] BlockStimIndices, nObjectsMinMax;
+        public List<int> PreviouslyChosenStimuli;
+        
         
         //-----------------------------------------------
         //Already-existing fields (inherited from BlockDef)
 		//public int BlockCount;
 		//public TrialDef[] TrialDefs;
+        public override void GenerateTrialDefsFromBlockDef()
+        {
+            //pick # of trials from minmax
+            PreviouslyChosenStimuli = new List<int>();
+            int numTrials = nObjectsMinMax[1] - nObjectsMinMax[0] + 1;
+            TrialDefs = new ContinuousRecognition_TrialDef[numTrials];//actual correct # 
+
+            int numTrialStims = nObjectsMinMax[0];
+            for (int iTrial = 0; iTrial< TrialDefs.Length; iTrial++)
+            {
+                ContinuousRecognition_TrialDef td = new ContinuousRecognition_TrialDef();
+                //td.TrialStimLocations = something
+                td.BlockStimIndices = BlockStimIndices;
+                td.PreviouslyChosenStimuli = PreviouslyChosenStimuli;
+                TrialDefs[iTrial] = td;
+                numTrialStims++;
+            }
+        }
+        
     }
 
     public class ContinuousRecognition_TrialDef : TrialDef
@@ -43,7 +64,8 @@ namespace ContinuousRecognition_Namespace
         //ObjectNums refers to items in a list of objects to be loaded from resources folder
         public int[] ObjectNums;
         public int Context;
-        
+        public int[] BlockStimIndices;
+        public List<int> PreviouslyChosenStimuli;
         
         //----from stim handling for testing
         public int[] GroupAIndices;

@@ -262,6 +262,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6b3687f40f59040a4a1eea2ebd327c5e, type: 3}
+--- !u!223 &11343104 stripped
+Canvas:
+  m_CorrespondingSourceObject: {fileID: 1745476778054883701, guid: 6b3687f40f59040a4a1eea2ebd327c5e,
+    type: 3}
+  m_PrefabInstance: {fileID: 11343103}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1381175214
 GameObject:
   m_ObjectHideFlags: 0
@@ -390,20 +396,27 @@ MonoBehaviour:
   FilePrefix: 
   PreloadedStims:
     stimGroupName: 
+    IsActive: 0
   PrefabStims:
     stimGroupName: 
+    IsActive: 0
   ExternalStims:
     stimGroupName: 
+    IsActive: 0
   RuntimeStims:
     stimGroupName: 
+    IsActive: 0
   TrialStims: []
-  sttartButton: {fileID: 0}
+  AudioFBController: {fileID: 0}
+  HaloFBController: {fileID: 0}
+  TokenFBController: {fileID: 0}
   DisplayStimsDuration: 5
   TrialEndDuration: 5
   YellowHaloPrefab: {fileID: 1546032763649933254, guid: 8362e78a67a754e3dbb8d71d6d51511d,
     type: 3}
   GrayHaloPrefab: {fileID: 5037791256376228876, guid: 543313d26c2e843ef9e0877ac65b342a,
     type: 3}
+  canvas: {fileID: 11343104}
 --- !u!114 &1441289829
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -439,15 +452,18 @@ MonoBehaviour:
   TaskCam: {fileID: 0}
   PreloadedStims:
     stimGroupName: 
+    IsActive: 0
   PrefabStims:
     stimGroupName: 
+    IsActive: 0
   ExternalStims:
     stimGroupName: 
+    IsActive: 0
   RuntimeStims:
     stimGroupName: 
+    IsActive: 0
   PreloadedStimGameObjects: []
   PrefabStimPaths: []
-  sttartButton: {fileID: 0}
 --- !u!4 &1441289830
 Transform:
   m_ObjectHideFlags: 0
@@ -714,6 +730,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 86505510093653519, guid: d43937b7f73df4c88831af4cb96a763e,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 86505510721767204, guid: d43937b7f73df4c88831af4cb96a763e,
         type: 3}
       propertyPath: m_RootOrder

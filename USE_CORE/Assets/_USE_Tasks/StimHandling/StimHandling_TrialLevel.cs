@@ -99,7 +99,7 @@ public class StimHandling_TrialLevel : ControlLevel_Trial_Template
         //destroyed at TrialLevel_Finish
         
         //StimGroup constructor which creates a subset of an already-existing StimGroup
-        //string Name, 
+        //string Name, .
         externalStimsA = new StimGroup("StimGroupA", ExternalStims, CurrentTrialDef.GroupAIndices);
         externalStimsA.SetVisibilityOnOffStates(GetStateFromName("SetGroupAActive"), null);
         externalStimsA.SetLocations(CurrentTrialDef.GroupALocations);

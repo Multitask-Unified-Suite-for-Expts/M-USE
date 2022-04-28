@@ -93,21 +93,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 started = true;
             }
-            /*
-            if (InputBroker.GetMouseButtonDown(0))
-            {
-                mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-
-                if (Physics.Raycast(mouseRay, out hit))
-                {
-                    if (hit.transform.name == "StartButton")
-                    {
-                        Debug.Log("pressed start button");
-                        started = true;
-                    }
-                }
-            }*/
         });
         initTrial.SpecifyTermination(() => started, displayStims, () => StartButton.SetActive(false));
 
@@ -161,6 +146,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
         chooseStim.SpecifyTermination(() => StimIsChosen, touchFeedback);
         chooseStim.AddTimer(() => CurrentTrialDef.ChooseStimDuration, FinishTrial);
+        
+        TrialData.AddDatum("PreviouslyChosen", () => CurrentTrialDef.PreviouslyChosenStimuli);
+        TrialData.AddDatum("PreviouslyUnseen", ()=>CurrentTrialDef.UnseenStims);
+        TrialData.AddDatum("PreviouslyNotChosenStims", ()=>CurrentTrialDef.PreviouslyNotChosenStimuli);
+        TrialData.AddDatum("isNew", ()=>CurrentTrialDef.isNew);
 
         // --------------touchFeedback State -----------------
         bool touchFeedbackFinish = false;
@@ -196,35 +186,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                       CurrentTrialDef.maxNumTrials);
             
         });
-        
-        TrialData.AddDatum("cccccccc", () => CurrentTrialDef.DisplayResultDuration);
-        TrialData.AddDatum("PreviouslyChosen", () => CurrentTrialDef.PreviouslyChosenStimuli);
-        TrialData.AddDatum("aaaaaa", () => CurrentTrialDef.isNew);
-        TrialData.AddDatum("bbbbbbb", () => CurrentTrialDef.maxNumTrials);
         //tokenFeedback.SpecifyTermination(() => !isNew, ()=>displayResult);
         //tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), trialEnd);
 
         //FIXME: fix here
         tokenFeedback.SpecifyTermination(()=> (!TokenFBController.IsAnimating() && (!isNew || trialCount == CurrentTrialDef.maxNumTrials)), FinishTrial, ()=> end = true);
         tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating() && (trialCount < CurrentTrialDef.maxNumTrials) && isNew, trialEnd);
-
-        //bool dd = false;
-        //bool displayed = false;
-        /*
-        displayResult.AddInitializationMethod(() =>
-        {
-            Debug.Log("[DisplayResult]: in display result");
-            // just for testing
-            commandText = GameObject.Find("CommandText").GetComponent<Text>();
-            commandText.text = "displaying result";
-        });*/
-        //displayResult.AddTimer(() => 5f, ()=>trialEnd, ()=>dd = true);
         trialEnd.AddTimer(() => CurrentTrialDef.TrialEndDuration, FinishTrial);
-        
-        /*
-        FinishTrial.SpecifyTermination(
-            () => (trialCount > (CurrentTrialDef.nObjectsMinMax[1] - CurrentTrialDef.nObjectsMinMax[0] + 1)) ||
-                  terminate && touchFeedbackFinish, ()=>null, ()=>Debug.Log("end block"));*/
         this.AddTerminationSpecification(()=>end);
         //FinishTrial.SpecifyTermination(() => !isNew, () => null, ()=>Debug.Log("[FinishTrial]: finishing trial"));
     }
@@ -473,6 +441,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 // Add it to previously chosen, remove it from unseen and PNC
                 chosenStimIndex = code;
+                TrialData.AddDatum("ChosenStim", ()=>chosenStimIndex);
                 CurrentTrialDef.PreviouslyChosenStimuli.Add(chosenStimIndex);
                 CurrentTrialDef.UnseenStims.Remove(chosenStimIndex);
                 CurrentTrialDef.PreviouslyNotChosenStimuli.Remove(chosenStimIndex);
@@ -489,19 +458,3 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
     }
 }
-
-//Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
-//destroyed at TrialLevel_Finish
-//ExternalStims in this call will be replaced with CurrentBlockDef.BlockStims once Marcus gets that working
-//StimGroup currentTrialStims = new StimGroup("CurrentTrialStims", ExternalStims, CurrentTrialDef.TrialStimIndices);
-
-//add all previously chosen stimuli to current trial 
-
-//create new list consisting of PreviouslyChosenStimuli + one random non previously chosen stim from BlockStimIndices;
-//List<int> trialStimIndices = CurrentTrialDef.PreviouslyChosenStimuli;
-//if currentTrialDef.TrialCountInBlock == 0
-//choose two random stims
-//if currenTrialDef.TrialCountInBlock % 2 == 0
-//trialStimIndices.Add(random non previously-chosen stim);
-//else
-//trialStimIndices.Add(previously non chosen object);

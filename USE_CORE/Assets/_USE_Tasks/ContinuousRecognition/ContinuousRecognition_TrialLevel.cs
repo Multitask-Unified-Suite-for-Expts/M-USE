@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using USE_StimulusManagement;
 using ContinuousRecognition_Namespace;
 using System;
-
+using System.Globalization;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 using Random = UnityEngine.Random;
 
@@ -55,6 +55,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         // --------------SetupTrial-----------------
         bool started = false;
+        bool end = false;
         SetupTrial.AddUpdateMethod(() =>
         {
             if (!variablesLoaded)
@@ -62,6 +63,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 variablesLoaded = true;
                 //loadVariables();
             }
+
+            int sum = checkStimNum();
+            if (sum > CurrentTrialDef.BlockStimIndices.Length)
+            {
+                Debug.Log("[ERROR] Number of stims is not enough. " + sum + " stims are required.");
+                end = true;
+            }
+
         });
         SetupTrial.SpecifyTermination(() => true, initTrial);
 
@@ -136,6 +145,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 selectedSD.PreviouslyChosen = true;
                 Debug.Log(selectedSD.PreviouslyChosen);
                 isNew = true;
+                Debug.Log("[METRICS] Trial " + (CurrentTrialDef.trialCount+1) +"; Correct when PNC Count = " + CurrentTrialDef.PNC_count + "; PC Count = " + CurrentTrialDef.PC_count + "; N Count = " + CurrentTrialDef.new_Count);
+
             }
             else
             {
@@ -173,7 +184,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         touchFeedback.AddTimer(() => CurrentTrialDef.TouchFeedbackDuration, tokenFeedback);
         //tokenFeedback.SpecifyTermination(() => !isNew, FinishTrial, ()=>Debug.Log("[tokenFeedback]: going to finishTrial"));
         
-        bool end = false;
         tokenFeedback.AddInitializationMethod(() =>
         {
             HaloFBController.Destroy();
@@ -228,6 +238,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
                     CurrentTrialDef.TrialStimIndices.Add(num);
                     CurrentTrialDef.UnseenStims.Remove(num);
+                    CurrentTrialDef.new_Count += 1;
                 }
             }
             else
@@ -388,6 +399,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
     }
     
+
     private GameObject GetClickedObj()
     {
         if (!InputBroker.GetMouseButtonDown(0)) return null;
@@ -418,6 +430,22 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
 
         return result;
+    }
+    
+    private int checkStimNum()
+    {
+        bool result;
+        float[] ratio = getRatio(CurrentTrialDef.Ratio);
+        int sum = 0;
+        int start = CurrentTrialDef.nObjectsMinMax[0];
+        for (int i = 0; i < CurrentTrialDef.nObjectsMinMax[1]; i++)
+        {
+            //Debug.Log("RRRRRRRRRRRRR plus" + (int) Math.Ceiling((ratio[1] * (start + i))));
+            sum += (int)Math.Ceiling((ratio[1] * (start + i)));
+        }
+        //Debug.Log("RRRRRRRRRRRRRR ratio1 is: " + ratio[1]);
+        //Debug.Log("RRRRRRRRRRRRRR: " + sum);
+        return sum;
     }
 
     /*
@@ -469,6 +497,17 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     {
         string result = name + ": ";
         foreach (var item in list)
+        {
+            result += item.ToString() + ", ";
+        }
+
+        Debug.Log(result);
+    }
+    
+    private void getLog2(int[] arr, string name)
+    {
+        string result = name + ": ";
+        foreach (var item in arr)
         {
             result += item.ToString() + ", ";
         }

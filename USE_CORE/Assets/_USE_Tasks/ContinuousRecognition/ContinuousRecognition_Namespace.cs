@@ -41,6 +41,12 @@ namespace ContinuousRecognition_Namespace
 
         public override void GenerateTrialDefsFromBlockDef()
         {
+            /*
+            if (nObjectsMinMax[1] * 2 < row * col)
+            {
+                Debug.Log("[ERROR] Number of grid not enough. Need at least " + nObjectsMinMax[1] * 2 + " grids.");
+            }*/
+            
             // total number of grids is row*col
             int numGrid = row * col;
             Debug.Log("num grid is " + numGrid + "row is " + row + "; col is " + col);
@@ -101,7 +107,7 @@ namespace ContinuousRecognition_Namespace
             // number of stims on first trial
             int numTrialStims = nObjectsMinMax[0];
             int tmp = 0;
-            bool end = false; 
+            bool end = false;
 
             // trial loop 
             for (int iTrial = 0; iTrial < numTrials && !end; iTrial++)
@@ -152,7 +158,7 @@ namespace ContinuousRecognition_Namespace
 
     public class ContinuousRecognition_TrialDef : TrialDef
     {
-        public int[] BlockStimIndices, nObjectsMinMax, Ratio;
+        public int[] BlockStimIndices, nObjectsMinMax, Ratio, metrics;
         public Vector3[] TrialStimLocations;
         public int trialCount, numTrialStims, maxNumTrials;
         public bool isNewStim;

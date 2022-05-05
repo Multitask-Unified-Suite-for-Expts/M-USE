@@ -24,6 +24,10 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         StimGroup display;
         BlockFeedback.AddInitializationMethod(() =>
         {
+            // THE NUMBER THAT MEASURE PERFORMANCE
+            
+            
+            
             Camera.main.backgroundColor = Color.yellow;
             BlockFbSimpleDuration = 5f;
             List<int> chosen = TrialLevel.GetCurrentTrialDef<ContinuousRecognition_TrialDef>().PreviouslyChosenStimuli;
@@ -69,7 +73,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
             StimGroup d, wrong_group;
             Vector3[] loc;
-            Debug.Log("nnnnnnnnnnnnnnn isNew is: " + n);
+            //Debug.Log("nnnnnnnnnnnnnnn isNew is: " + n);
             if (!n)
             {
                 List<int> sublist = chosen.GetRange(0, len - 1);

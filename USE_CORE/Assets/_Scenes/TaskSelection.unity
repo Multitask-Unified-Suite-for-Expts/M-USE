@@ -35,10 +35,10 @@ RenderSettings:
   m_DefaultReflectionMode: 0
   m_DefaultReflectionResolution: 128
   m_ReflectionBounces: 1
-  m_ReflectionIntensity: 1
+  m_ReflectionIntensity: 0
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 0}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -334,6 +334,7 @@ MonoBehaviour:
   AudioFBController: {fileID: 0}
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
+  MouseTracker: {fileID: 0}
   leftRightChoice: 
   maxScale: {x: 65, y: 2, z: 65}
 --- !u!114 &1375570698
@@ -428,6 +429,7 @@ MonoBehaviour:
   AudioFBController: {fileID: 0}
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
+  MouseTracker: {fileID: 0}
   stimCount: 0
 --- !u!114 &1375570700
 MonoBehaviour:
@@ -521,6 +523,7 @@ MonoBehaviour:
   AudioFBController: {fileID: 0}
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
+  MouseTracker: {fileID: 0}
   mazeList: []
   SCREEN_WIDTH: 0
   TILE_WIDTH: 0

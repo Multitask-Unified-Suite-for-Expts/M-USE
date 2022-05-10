@@ -17,6 +17,10 @@ namespace MazeGame_Namespace
         //public List<string[]> FeatureNames;
         //public string neutralPatternedColorName;
         //public float? ExternalStimScale;
+
+        public float[] TileColor;
+
+
     }
 
     public class MazeGame_BlockDef : BlockDef
@@ -28,20 +32,44 @@ namespace MazeGame_Namespace
        // public string TrialID;
        // public int Context;
         public int Trial;
+
         public int[] nRepetitionsMinMax;
-      //  public float MinTouchDuration;
-      //  public float MaxTouchDuration;
+      //  public Color TileColor;
+        public float[] TileColor;
+        public int Texture;
+        public int mazeDim;
+        public int mazeNumSquares;
+        public int mazeNumTurns;
+        public int viewPath; 
+     //   public string mazePath;
+
+        //  public float MinTouchDuration;
+        //  public float MaxTouchDuration;
+
+
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmaxokay 
-           // System.Random rnd = new System.Random();
-           // int num = rnd.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
-            TrialDefs = new TrialDef[3];//actual correct # 
+            // System.Random rnd = new System.Random();
+            // int num = rnd.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
+            TrialDefs = new TrialDef[1];//actual correct # 
             for (int iTrial = 0; iTrial < TrialDefs.Length; iTrial++)
             {
                 MazeGame_TrialDef td = new MazeGame_TrialDef();
                 td.TrialCount = Trial;
-              //  Debug.Log("TRIAL: " + Trial);
+                td.TileColor = TileColor;
+                td.Texture = Texture;
+                td.mazeDim = mazeDim;
+                td.mazeNumSquares = mazeNumSquares;
+                td.mazeNumTurns = mazeNumTurns;
+                td.viewPath = viewPath;
+               // td.mazePath = mazePath;
+                if (td.TileColor == null && TileColor != null)
+                    td.TileColor = TileColor;
+
+             //   if (td.Texture == null && Texture != null)
+                 //   td.Texture = Texture;
+                //  Debug.Log("TRIAL: " + Trial);
                 //   td.TrialID = TrialID;
                 //   td.Context = Context;
                 // td.MinTouchDuration = MinTouchDuration;
@@ -50,6 +78,7 @@ namespace MazeGame_Namespace
                 TrialDefs[iTrial] = td;
             }
         }
+
         
     }
 
@@ -58,10 +87,17 @@ namespace MazeGame_Namespace
         //Already-existing fields (inherited from TrialDef)
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
-        public int TrialCount; 
+        public int TrialCount;
+        public float[] TileColor;
+        public int Texture;
+        public int mazeDim;
+        public int mazeNumSquares;
+        public int mazeNumTurns;
+        public int viewPath;
 
+        //   public string mazePath;
 
-       // public int[] nRepetitionsMinMax;
+        // public int[] nRepetitionsMinMax;
     }
 
     public class MazeGame_StimDef : StimDef
@@ -94,6 +130,6 @@ namespace MazeGame_Namespace
         //public bool TriggersSonication;
         //public State SetActiveOnInitialization;
         //public State SetInactiveOnTermination;
-        public int test;
+       // public int test;
     }
 }

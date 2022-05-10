@@ -15,24 +15,24 @@ EditorBuildSettings:
     path: Assets/_Scenes/TaskSelection.unity
     guid: 01b9c8193a3244b039372cb483204fa5
   - enabled: 1
-    path: Assets/_Scenes/WhatWhenWhere.unity
+    path: Assets/_Scripts/USE_Core/_USE_Tasks/WhatWhenWhere/WhatWhenWhere.unity
     guid: e9448a1f5ad17411898e35a72bf214df
   - enabled: 1
-    path: Assets/_USE_Tasks/StimHandling/StimHandling.unity
+    path: Assets/_Scripts/USE_Core/_USE_Tasks/StimHandling/StimHandling.unity
     guid: 2e148fd03348e46f1b8b00dda1da7b4c
-  - enabled: 1
+  - enabled: 0
     path: Assets/_USE_Tasks/WWW/WWW.unity
     guid: beef1cd6e8c2d44e4b72cea34db0ed0b
   - enabled: 1
     path: Assets/MazeGameTest/Scenes/MazeScene.unity
     guid: 58274c120e35b084cbf6cede6c105106
-  - enabled: 1
+  - enabled: 0
     path: Assets/_USE_Tasks/VisualSearch/VisualSearch.unity
     guid: 7d4527fe27121c34caf020a271cce5fa
   - enabled: 1
     path: Assets/MazeGameTest/Scenes/InitSceneMaze.unity
     guid: 09b31cb18aab0f84397bcec4bb77fb4c
-  - enabled: 1
+  - enabled: 0
     path: Assets/_USE_Tasks/WorkingMemory/WorkingMemory.unity
     guid: 341064f1b0da23a4e967e772145fd10c
   m_configObjects: {}

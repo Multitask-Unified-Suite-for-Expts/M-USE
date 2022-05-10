@@ -64,6 +64,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public WhatWhenWhere_TrialLevel mainLevel;
     private ExperimentInfoController experimenterInfo;
     private bool storeData;
+    private ConfigVarStore configStore = new ConfigVarStore();
     
     //UI Config Timing Variables
     [HideInInspector]
@@ -353,6 +354,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
 
         ChooseStimulus.AddTimer(10f, ITI);
+        ChooseStimulus.AddTimer(() => configStore.get<ConfigNumber>("selectObjectDuration").value, ITI);
         ChooseStimulus.SpecifyTermination(() => response == 1, StimulusChosen);
         ChooseStimulus.SpecifyTermination(() => response == 2, StimulusChosen);
         ChooseStimulus.SpecifyTermination(() => stimCount == CurrentTrialDef.CorrectObjectTouchOrder.Length, FinalFeedback);
@@ -609,19 +611,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public void CreateConfigUI()
     {
         configUI.clear();
-        
-        //jsonSaveLoad.folderPath = "./";
-        //jsonSaveLoad.isRelative = false;
-
-
-        //var configStore = jsonSaveLoad.LoadObject<ConfigVarStore>(mainLevel.FLUconfigtimingFilePath, false, true);
-        //
-        /*
-        SessionSettings.ImportSettings_SingleTypeJSON<ConfigVarStore>("ConfigUI", mainLevel.FLUconfigtimingFilePath);
-        if (storeData)
-            SessionSettings.StoreSettings(mainLevel.subjectFolder + "/SessionSettings/", "ConfigUI");
-        */
-        ConfigVarStore configStore = (ConfigVarStore)SessionSettings.Get("ConfigUI");
+        configStore = ConfigUiVariables;
         configUI.store = configStore;
 
         itiDuration = configStore.get<ConfigNumberRanged>("itiDuration");

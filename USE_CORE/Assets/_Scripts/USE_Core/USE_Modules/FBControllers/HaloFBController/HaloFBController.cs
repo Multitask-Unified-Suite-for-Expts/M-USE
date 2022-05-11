@@ -1,4 +1,5 @@
 using UnityEngine;
+using USE_Data;
 
 public class HaloFBController : MonoBehaviour
 {
@@ -6,8 +7,14 @@ public class HaloFBController : MonoBehaviour
     public GameObject NegativeHaloPrefab;
 
     private GameObject instantiated;
+    
+    // Logging
+    private enum State { None, Positive, Negative };
+    private State state;
 
-    public void Init() {
+    public void Init(DataController frameData) {
+        frameData.AddDatum("HaloType", () => state.ToString());
+
         if (instantiated != null) {
             Debug.LogWarning("Initializing HaloFB Controller with an already visible halo");
             Destroy(instantiated);
@@ -16,10 +23,12 @@ public class HaloFBController : MonoBehaviour
     }
 
     public void ShowPositive(GameObject gameObj) {
+        state = State.Positive;
         Show(PositiveHaloPrefab, gameObj);
     }
     
     public void ShowNegative(GameObject gameObj) {
+        state = State.Negative;
         Show(NegativeHaloPrefab, gameObj);
     }
 
@@ -33,5 +42,7 @@ public class HaloFBController : MonoBehaviour
 
     public void Destroy() {
         Destroy(instantiated);
+        instantiated = null;
+        state = State.None;
     }
 }

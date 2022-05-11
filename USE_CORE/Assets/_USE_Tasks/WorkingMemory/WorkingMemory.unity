@@ -182,6 +182,8 @@ MonoBehaviour:
   AudioFBController: {fileID: 0}
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
+  MouseTracker: {fileID: 0}
+  DrawRenderTexture: {fileID: 0}
   StartButton: {fileID: 239317670}
 --- !u!114 &108587574
 MonoBehaviour:
@@ -216,8 +218,6 @@ MonoBehaviour:
   FilePrefix: 
   LocateFile: {fileID: 0}
   TaskCam: {fileID: 0}
-  FBControllersPrefab: {fileID: 3175057839943392719, guid: ca42ab3ffe0272446a4ac886b11dcb57,
-    type: 3}
   PreloadedStims:
     stimGroupName: 
   PrefabStims:
@@ -466,8 +466,8 @@ Camera:
   m_GameObject: {fileID: 1812093639}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0

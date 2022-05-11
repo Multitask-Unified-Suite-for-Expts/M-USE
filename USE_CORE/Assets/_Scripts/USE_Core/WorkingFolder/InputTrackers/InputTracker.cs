@@ -10,36 +10,38 @@ public abstract class InputTracker : MonoBehaviour
     public GameObject CurrentTargetGameObject;
     public StimDef CurrentTargetStimDef;
 
-    private EventHandler targetUpdated;
+    private event EventHandler<EventArgs> TargetUpdated;
 
-    public void AddSelectionHandler<T>(State startState, State endState, SelectionHandler<T> selectionHandler) where T : StimDef
+    public void AddSelectionHandler<T>(SelectionHandler<T> selectionHandler, State startState, State endState = null) where T : StimDef
     {
+        if (endState == null) {
+            endState = startState;
+        }
         void targetUpdatedHandler(object sender, EventArgs e) {
             selectionHandler.UpdateTarget(CurrentTargetGameObject);
         }
 
         startState.StateInitializationFinished += (object sender, EventArgs e) =>
         {
-            targetUpdated += targetUpdatedHandler;
+            TargetUpdated += targetUpdatedHandler;
             selectionHandler.Start();
         };
         endState.StateTerminationFinished += (object sender, EventArgs e) =>
         {
-            targetUpdated -= targetUpdatedHandler;
+            TargetUpdated -= targetUpdatedHandler;
             selectionHandler.Stop();
         };
     }
 
-    private void Init()
+    public void Init(DataController frameData)
     {
-        // AddFieldsToFrameData();
+        AddFieldsToFrameData(frameData);
     }
 
     private void Update()
     {
         CurrentTargetGameObject = FindCurrentTarget();
-        CurrentTargetStimDef = CurrentTargetGameObject.GetComponent<StimDef>();
-        targetUpdated.Invoke(this, EventArgs.Empty);
+        TargetUpdated?.Invoke(this, EventArgs.Empty);
     }
 
     public abstract void AddFieldsToFrameData(DataController frameData);

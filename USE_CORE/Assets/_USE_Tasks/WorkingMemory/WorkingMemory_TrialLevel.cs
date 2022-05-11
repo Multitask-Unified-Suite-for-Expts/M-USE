@@ -37,12 +37,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         MouseTracker.AddSelectionHandler(mouseHandler, SetupTrial);
         SetupTrial.AddInitializationMethod(() =>
         {
-            foreach (GameObject camera in GameObject.FindGameObjectsWithTag("MainCamera")) {
-                if (camera.activeInHierarchy) {
-                    camera.GetComponent<Camera>().backgroundColor = Color.red;
-                    break;
-                }
-            }
+            Vector3 color = CurrentTrialDef.ContextColor;
+            Camera.main.GetComponent<Camera>().backgroundColor = new Color(color[0], color[1], color[2], 1);
             StartButton.SetActive(true);
         });
         SetupTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),

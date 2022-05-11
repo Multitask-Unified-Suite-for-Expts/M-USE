@@ -39,6 +39,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         {
             Vector3 color = CurrentTrialDef.ContextColor;
             Camera.main.GetComponent<Camera>().backgroundColor = new Color(color[0], color[1], color[2], 1);
+
+            TokenFBController
+            .SetRevealTime(CurrentTrialDef.tokenRevealDuration)
+            .SetUpdateTime(CurrentTrialDef.tokenUpdateDuration);
+
             StartButton.SetActive(true);
         });
         SetupTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),

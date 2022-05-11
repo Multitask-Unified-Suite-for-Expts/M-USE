@@ -21,6 +21,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private Vector3 targetLocation;
     private List<string> distractorName;
     private List<Vector3> distractorLocations;
+
+    private int random = 0;
     
     private USE_Button testButton;
 
@@ -149,6 +151,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             }
         });*/
         searchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, selectionFeedback, () => {
+            testButton.pressed = false;
             selected = mouseHandler.SelectedGameObject;
             selectedSD = mouseHandler.SelectedStimDef;
             correct = selectedSD.IsTarget;
@@ -246,6 +249,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     }
 
     protected override void test(){
+        if(random == 1){
+            return;
+        }
         Vector3 buttonPosition = new Vector3(0f, 0f, 0f);
 		Vector3 buttonScale = new Vector3(1f, 1f, 1f);
         Color buttonColor = new Color(0.1f, 0.1f, 0.1f);
@@ -269,6 +275,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         testButton = new USE_Button(buttonPosition, buttonScale, canvas, buttonColor, buttonText);
         testButton.defineButton();
         testButton.SetVisibilityOnOffStates(GetStateFromName("InitTrial"), GetStateFromName("InitTrial"));
+        random = 1;
     }
 
     void disableAllGameobjects()

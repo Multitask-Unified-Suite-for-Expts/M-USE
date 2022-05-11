@@ -16,6 +16,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
     private StimGroup targetStims;
     private StimGroup distractorStims;
+
+    private string targetName;
+    private Vector3 targetLocation;
+    private List<string> distractorName;
+    private List<Vector3> distractorLocations;
     
     private USE_Button testButton;
 
@@ -30,10 +35,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     public GameObject YellowHaloPrefab;
     public GameObject GrayHaloPrefab;
     public Canvas canvas;
+    private int num_distractors = 0;
 
     //effort reward variables
     private int clickCount, context;
-    [System.NonSerialized] public int trialCount = -1, numTrials = 5;
+    [System.NonSerialized] public int trialCount = -1, numTrials = 4;
 
     // vector3 variables
     private Vector3 sliderInitPosition;
@@ -70,15 +76,17 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
         Text commandText = null;
 
+        SelectionHandler<VisualSearch_StimDef> mouseHandler = new SelectionHandler<VisualSearch_StimDef>();
+
         AddActiveStates(new List<State> {initTrial, searchDisplay, selectionFeedback, tokenFeedback, trialEnd});
 
         AddInitializationMethod(() =>
         {           
-            if (!variablesLoaded)
+            /*if (!variablesLoaded)
             {
                 variablesLoaded = true;
                 loadVariables();
-            }
+            }*/
         });
 
         SetupTrial.SpecifyTermination(() => true, initTrial);
@@ -102,8 +110,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
             clickCount = 0;
 
-            slider.gameObject.transform.position = sliderInitPosition;
-            slider.value = value;
+            //slider.gameObject.transform.position = sliderInitPosition;
+            //slider.value = value;
         });
 
         initTrial.SpecifyTermination(() => testButton.pressed, searchDisplay);
@@ -112,12 +120,14 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
         bool correct = false;
         GameObject selected = null;
+        VisualSearch_StimDef selectedSD = null;
         int maxClick = 3;
         int click = 0;
 
-        searchDisplay.AddInitializationMethod(() => responseMade = false);
+        MouseTracker.AddSelectionHandler(mouseHandler, searchDisplay);
+        searchDisplay.AddInitializationMethod(() => selected = null);
 
-        searchDisplay.AddUpdateMethod(() =>
+        /*searchDisplay.AddUpdateMethod(() =>
         {
             correct = false;
             GameObject clicked = GetClickedObj();
@@ -137,8 +147,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             else{
                 Debug.Log("NO");
             }
+        });*/
+        searchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, selectionFeedback, () => {
+            selected = mouseHandler.SelectedGameObject;
+            selectedSD = mouseHandler.SelectedStimDef;
+            correct = selectedSD.IsTarget;
         });
-        searchDisplay.SpecifyTermination(() => selected!=null, selectionFeedback);
+        //searchDisplay.SpecifyTermination(() => selected!=null, selectionFeedback);
 
         GameObject halo = null;
         selectionFeedback.AddInitializationMethod(() =>
@@ -148,7 +163,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             else HaloFBController.ShowNegative(selected);
 
         });
-        selectionFeedback.AddTimer(() => CurrentTrialDef.selectionFbDuration, tokenFeedback);
+        selectionFeedback.AddTimer(() => 1.0f, tokenFeedback);
 
         tokenFeedback.AddInitializationMethod(() =>
         {
@@ -157,7 +172,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (correct){
                 AudioFBController.Play("Positive");
                 TokenFBController.AddTokens(selected, 1);
-                slider.value += (float)0.25;
+                //slider.value += (float)0.25;
                 value += (float)0.25;
             }
             else{
@@ -165,8 +180,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 Debug.Log("he?");
             }
         });
+        tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), trialEnd);
         //tokenFeedback.SpecifyTermination(() => !correct, trialEnd);
-        tokenFeedback.AddTimer(0.5f, trialEnd);
+        //tokenFeedback.AddTimer(0.5f, trialEnd);
 
         // Wait for some time at the end
         trialEnd.AddInitializationMethod(() =>
@@ -176,6 +192,17 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
         trialEnd.AddTimer(0.5f, initTrial, () => trialCount++);
         trialEnd.AddTimer(() => CurrentTrialDef.trialEndDuration, FinishTrial);
+
+        TrialData.AddDatum("TargetName", () => targetName);
+        TrialData.AddDatum("TargetLocation", () => targetLocation);
+        TrialData.AddDatum("SelectedName", () => selected != null ? selected.name : null);
+        TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
+        TrialData.AddDatum("SelectionCorrect", () => correct ? 1 : 0);
+        TrialData.AddDatum("NumDistractors", () => num_distractors);
+        TrialData.AddDatum("DistarctorNames", () => String.Join(", ", distractorName.ToArray()));
+        TrialData.AddDatum("DistarctorLocations", () => String.Join(", ", distractorLocations.ToArray()));
+        
+        
         this.AddTerminationSpecification(() => trialCount > numTrials, ()=> Debug.Log(trialCount + " " + numTrials));
  
     }
@@ -184,11 +211,17 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     {
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
+        int temp = 0;
+        distractorName = new List<string>();
+        distractorLocations = new List<Vector3>();
         targetStims = new StimGroup("TargetStims", ExternalStims, CurrentTrialDef.GroupAIndices);
         targetStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
         targetStims.SetLocations(CurrentTrialDef.GroupALocations);
-        foreach (VisualSearch_StimDef sd in targetStims.stimDefs)
+        foreach (VisualSearch_StimDef sd in targetStims.stimDefs){
             sd.IsTarget = true;
+            targetName = sd.StimName;
+            targetLocation = sd.StimLocation;
+        } 
         TrialStims.Add(targetStims);
         
         if(fam == true){
@@ -199,8 +232,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             distractorStims = new StimGroup("TargetStims", ExternalStims, CurrentTrialDef.GroupBIndices);
             distractorStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
             distractorStims.SetLocations(CurrentTrialDef.GroupBLocations);
-            foreach (VisualSearch_StimDef sd in distractorStims.stimDefs)
+            foreach (VisualSearch_StimDef sd in distractorStims.stimDefs){
                 sd.IsTarget = false;
+                temp++;
+                distractorName.Add(sd.StimName);
+                distractorLocations.Add(sd.StimLocation);
+            }
+            num_distractors = temp;      
             TrialStims.Add(distractorStims);
 
         }

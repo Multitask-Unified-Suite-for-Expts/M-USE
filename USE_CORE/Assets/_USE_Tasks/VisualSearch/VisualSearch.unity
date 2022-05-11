@@ -133,6 +133,11 @@ PrefabInstance:
     - target: {fileID: 1745476777126325812, guid: 6b3687f40f59040a4a1eea2ebd327c5e,
         type: 3}
       propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1745476777440281605, guid: 6b3687f40f59040a4a1eea2ebd327c5e,
+        type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1745476777440281626, guid: 6b3687f40f59040a4a1eea2ebd327c5e,
@@ -143,7 +148,7 @@ PrefabInstance:
     - target: {fileID: 1745476777785434062, guid: 6b3687f40f59040a4a1eea2ebd327c5e,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1745476778054883702, guid: 6b3687f40f59040a4a1eea2ebd327c5e,
         type: 3}
@@ -410,6 +415,11 @@ MonoBehaviour:
   AudioFBController: {fileID: 0}
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
+  ButtonPosition: {x: 0, y: 0, z: 0}
+  ButtonScale: {x: 0, y: 0, z: 0}
+  ButtonColor: {r: 0, g: 0, b: 0, a: 0}
+  ButtonText: 
+  MouseTracker: {fileID: 0}
   DisplayStimsDuration: 5
   TrialEndDuration: 5
   YellowHaloPrefab: {fileID: 1546032763649933254, guid: 8362e78a67a754e3dbb8d71d6d51511d,
@@ -464,6 +474,10 @@ MonoBehaviour:
     IsActive: 0
   PreloadedStimGameObjects: []
   PrefabStimPaths: []
+  ButtonPosition: {x: 0, y: 0, z: 0}
+  ButtonScale: {x: 0, y: 0, z: 0}
+  ButtonColor: {r: 0, g: 0, b: 0, a: 0}
+  ButtonText: 
 --- !u!4 &1441289830
 Transform:
   m_ObjectHideFlags: 0

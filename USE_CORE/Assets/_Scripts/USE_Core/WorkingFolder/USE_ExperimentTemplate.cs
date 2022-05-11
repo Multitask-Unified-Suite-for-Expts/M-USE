@@ -498,9 +498,9 @@ namespace USE_ExperimentTemplate
 			{
 				BlockCount = -1;
 				TaskCam.gameObject.SetActive(true);
-				TrialLevel.AudioFBController.Init();
-				TrialLevel.HaloFBController.Init();
-				TrialLevel.TokenFBController.Init(TrialLevel.AudioFBController);
+				//TrialLevel.AudioFBController.Init(FrameData);
+				//TrialLevel.HaloFBController.Init(FrameData);
+				//TrialLevel.TokenFBController.Init(FrameData);
 			});
 
 			SetupTask.SpecifyTermination(() => true, RunBlock);
@@ -636,9 +636,9 @@ namespace USE_ExperimentTemplate
 			TrialLevel.MouseTracker = inputTrackers.GetComponent<MouseTracker>();
 			TrialLevel.MouseTracker.Init(FrameData);
 
-			TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
-			TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
-			TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
+			//TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
+			//TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
+			//TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
 			TrialLevel.SessionDataControllers = SessionDataControllers;
 			TrialLevel.FilePrefix = FilePrefix;
 			TrialLevel.TaskStims = TaskStims;

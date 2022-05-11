@@ -11,7 +11,6 @@ using USE_Data;
 using USE_Settings;
 using USE_StimulusManagement;
 // using USE_TasksCustomTypes;
-using USE_UI;
 
 namespace USE_ExperimentTemplate
 {
@@ -462,12 +461,8 @@ namespace USE_ExperimentTemplate
 		public Type TaskLevelType;
 		protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
 		protected State SetupTask, RunBlock, BlockFeedback, FinishTask;
-
-		// code for button
-		[HideInInspector] public USE_Button sttartButton;
-		[HideInInspector] public Vector3 ButtonPosition, ButtonScale;
-		[HideInInspector] public Color ButtonColor;
-		[HideInInspector] public string ButtonText;
+		protected bool BlockFbFinished;
+		protected float BlockFbSimpleDuration;
 
 		public virtual void SpecifyTypes()
 		{
@@ -498,9 +493,6 @@ namespace USE_ExperimentTemplate
 			{
 				BlockCount = -1;
 				TaskCam.gameObject.SetActive(true);
-				//TrialLevel.AudioFBController.Init(FrameData);
-				//TrialLevel.HaloFBController.Init(FrameData);
-				//TrialLevel.TokenFBController.Init(FrameData);
 			});
 
 			SetupTask.SpecifyTermination(() => true, RunBlock);
@@ -519,13 +511,21 @@ namespace USE_ExperimentTemplate
 
 			RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
 
+			BlockFeedback.AddUpdateMethod(() =>
+			{
+				BlockFbFinished = true;
+				if (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= BlockFbSimpleDuration)
+					BlockFbFinished = true;
+				else
+					BlockFbFinished = false;
+			});
 			BlockFeedback.AddLateUpdateMethod(() => FrameData.AppendData());
-			BlockFeedback.SpecifyTermination(() => BlockCount < BlockDefs.Length - 1, RunBlock, () =>
+			BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock, () =>
 			{
 				BlockData.AppendData();
 				BlockData.WriteData();
 			});
-			BlockFeedback.SpecifyTermination(() => BlockCount == BlockDefs.Length - 1, FinishTask, () =>
+			BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask, () =>
 			{
 				BlockData.AppendData();
 				BlockData.WriteData();
@@ -611,19 +611,13 @@ namespace USE_ExperimentTemplate
 			foreach (string fbController in fbControllersList) {
 				switch (fbController) {
 					case "Audio":
-						if (!audioInited) {
-							TrialLevel.AudioFBController.Init(FrameData);
-							audioInited = true;
-						}
+						if (!audioInited) TrialLevel.AudioFBController.Init(FrameData);
 						break;
 					case "Halo":
 						TrialLevel.HaloFBController.Init(FrameData);
 						break;
 					case "Token":
-						if (!audioInited) {
-							TrialLevel.AudioFBController.Init(FrameData);
-							audioInited = true;
-						}
+						if (!audioInited) TrialLevel.AudioFBController.Init(FrameData);
 						TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
 						TrialLevel.TokenFBController.SetTotalTokensNum(totalTokensNum);
 						break;
@@ -636,9 +630,6 @@ namespace USE_ExperimentTemplate
 			TrialLevel.MouseTracker = inputTrackers.GetComponent<MouseTracker>();
 			TrialLevel.MouseTracker.Init(FrameData);
 
-			//TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
-			//TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
-			//TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
 			TrialLevel.SessionDataControllers = SessionDataControllers;
 			TrialLevel.FilePrefix = FilePrefix;
 			TrialLevel.TaskStims = TaskStims;
@@ -646,13 +637,6 @@ namespace USE_ExperimentTemplate
 			TrialLevel.PrefabStims = PrefabStims;
 			TrialLevel.ExternalStims = ExternalStims;
 			TrialLevel.RuntimeStims = RuntimeStims;
-
-			TrialLevel.sttartButton = sttartButton;
-			TrialLevel.ButtonPosition = ButtonPosition;
-			TrialLevel.ButtonScale = ButtonScale;
-			TrialLevel.ButtonColor = ButtonColor;
-			TrialLevel.ButtonText = ButtonText;
-
 			TrialLevel.DefineTrialLevel();
 		}
 
@@ -835,29 +819,6 @@ namespace USE_ExperimentTemplate
 			}
 		}
 
-		// test function for button
-		protected virtual void DefineButton()
-		{
-			Vector3 position = new Vector3(1000f, 500f, 1000f);
-			Vector3 scale = new Vector3(5f, 5f, 5f);
-
-			Debug.Log(position);
-
-			//ButtonPosition = position;
-			//ButtonScale = scale;
-			//Canvas canvas = GameObject.Find("FB Canvas").GetComponent<Canvas>();;
-
-			/*if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
-			{
-				if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition")){}
-					ButtonPosition = (Vector3) SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-				if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale")){}
-					ButtonScale = (Vector3) SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-			}*/
-			//sttartButton = new USE_Button(ButtonPosition, ButtonScale, canvas);
-			//sttartButton.defineButton();
-		}
-
 		public void ReadTaskDef<T>(string taskConfigFolder) where T : TaskDef
 		{
 			string taskDefFile = LocateFile.FindFileInFolder(taskConfigFolder, "*" + TaskName + "*Task*");
@@ -1006,16 +967,11 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public AudioFBController AudioFBController;
 		[HideInInspector] public HaloFBController HaloFBController;
 		[HideInInspector] public TokenFBController TokenFBController;
-
-		[HideInInspector] public USE_Button sttartButton;
-		[HideInInspector] public Vector3 ButtonPosition, ButtonScale;
-		[HideInInspector] public Color ButtonColor;
-		[HideInInspector] public string ButtonText;
 		// Input Trackers
 		[HideInInspector] public MouseTracker MouseTracker;
 
 		//protected TrialDef CurrentTrialDef;
-		protected T GetCurrentTrialDef<T>() where T : TrialDef
+		public T GetCurrentTrialDef<T>() where T : TrialDef
 		{
 			return (T) TrialDefs[TrialCount_InBlock];
 		}
@@ -1051,7 +1007,6 @@ namespace USE_ExperimentTemplate
 					FrameData.fileName = FilePrefix + "__FrameData_Trial_000" + (TrialCount_InTask + 1) + ".txt";
 				FrameData.CreateFile();
 				DefineTrialStims();
-				test();
 				ResetRelativeStartTime();
 				foreach (StimGroup sg in TrialStims)
 				{
@@ -1086,11 +1041,6 @@ namespace USE_ExperimentTemplate
 
 
 		protected virtual void DefineTrialStims()
-		{
-
-		}
-
-		protected virtual void test()
 		{
 
 		}
@@ -1433,14 +1383,6 @@ namespace USE_ExperimentTemplate
 		public List<string[]> FeatureNames;
 		public string neutralPatternedColorName;
 		public float? ExternalStimScale;
-
-		//for button
-		public Vector3 ButtonPosition;
-		public Vector3 ButtonScale;
-		public Color ButtonColor;
-		public string ButtonText;
-
-
 		public List<string[]> FeedbackControllers;
 		public int? TotalTokensNum;
 	}

@@ -84,6 +84,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
         AddInitializationMethod(() =>
         {           
+            DefineStartButton();
             /*if (!variablesLoaded)
             {
                 variablesLoaded = true;
@@ -247,7 +248,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
     }
 
-    protected override void test(){
+    private void DefineStartButton(){
         if(random == 1){
             return;
         }

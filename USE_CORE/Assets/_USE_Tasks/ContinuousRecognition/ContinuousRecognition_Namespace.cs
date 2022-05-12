@@ -1,7 +1,9 @@
+using System;
 using UnityEngine;
 using USE_ExperimentTemplate;
 using USE_StimulusManagement;
 using System.Collections.Generic;
+using Random = UnityEngine.Random;
 
 namespace ContinuousRecognition_Namespace
 {
@@ -18,63 +20,164 @@ namespace ContinuousRecognition_Namespace
         //public List<string[]> FeatureNames;
         //public string neutralPatternedColorName;
         //public float? ExternalStimScale;
+        public List<int> chosenStims;
     }
 
     public class ContinuousRecognition_BlockDef : BlockDef
-    {
-        //BlockStims is a StimGroup consisting of the StimDefs specified by BlockStimIndices
-        public StimGroup BlockStims;
-        //BlockStimIndices provides indices to individual StimDefs in the ExternalStims StimGroup,
-        //which is automatically created at the start of the task and includes every stimulus in the ContinousRecognition_StimDef_tdf file
-        public int[] BlockStimIndices, nObjectsMinMax;
-        public List<int> PreviouslyChosenStimuli;
+    { 
+        public int[] BlockStimIndices, nObjectsMinMax, Ratio;
+
+        public float
+            DisplayStimsDuration,
+            ChooseStimDuration,
+            TrialEndDuration,
+            TouchFeedbackDuration,
+            DisplayResultDuration;
         
+        public List<int> PreviouslyChosenStimuli, PreviouslyNotChosenStim, TrialStimIndices, UnseenStims, NewStim;
+        public Vector3[] BlockStimLocations, StimLocation;
+        public int trialCount, ManuallySpecifyLocation, row, col, PC_count, PNC_count, new_count;
         
-        //-----------------------------------------------
-        //Already-existing fields (inherited from BlockDef)
-		//public int BlockCount;
-		//public TrialDef[] TrialDefs;
+
         public override void GenerateTrialDefsFromBlockDef()
         {
-            //pick # of trials from minmax
-            PreviouslyChosenStimuli = new List<int>();
-            int numTrials = nObjectsMinMax[1] - nObjectsMinMax[0] + 1;
-            TrialDefs = new ContinuousRecognition_TrialDef[numTrials];//actual correct # 
+            /*
+            if (nObjectsMinMax[1] * 2 < row * col)
+            {
+                Debug.Log("[ERROR] Number of grid not enough. Need at least " + nObjectsMinMax[1] * 2 + " grids.");
+            }*/
+            
+            // total number of grids is row*col
+            int numGrid = row * col;
+            Debug.Log("num grid is " + numGrid + "row is " + row + "; col is " + col);
+            Vector3[] Locations = new Vector3[numGrid];
+            
+            // calculate horizontal and vertical offset
+            float horizontal = 12f/col;
+            float vertical = 7.7f/row;
+            int gridIndex = 0;
+            // edges
+            float x = -6;
+            float y = 4;
+            float z = 0;
+            
+            // create grid by filling in location array
+            for (int i = 0; i < row; i++)
+            {
+                x = -6;
+                for (int j = 0; j < col; j++)
+                {
+                    Locations[gridIndex] = new Vector3(x, y, z);
+                    x += horizontal;
+                    gridIndex++;
+                }
+                y -= vertical;
+            }
 
+            // if user want to specify their own stim location, use user location, other wise, use grid
+            if (ManuallySpecifyLocation == 1)
+            {
+                if (StimLocation.Length < nObjectsMinMax[1])
+                {
+                    Debug.Log("Did not specify enough locations!");
+                    Debug.Break();
+                }
+                else
+                {
+                    BlockStimLocations = StimLocation;
+                    Debug.Log("BlockStimLocations lengths is " + BlockStimLocations.Length);
+                }
+            }
+            else
+            {
+                BlockStimLocations = Locations;
+            }
+
+            // init some lists
+            PreviouslyChosenStimuli = new List<int>();
+            PreviouslyNotChosenStim = new List<int>();
+            UnseenStims = new List<int>();
+            TrialStimIndices = new List<int>();
+            NewStim = new List<int>();
+            
+            // calculate total number of trials
+            int numTrials = nObjectsMinMax[1] - nObjectsMinMax[0] + 1;
+            TrialDefs = new ContinuousRecognition_TrialDef[numTrials]; //actual correct # 
+            
+            // number of stims on first trial
             int numTrialStims = nObjectsMinMax[0];
-            for (int iTrial = 0; iTrial< TrialDefs.Length; iTrial++)
+            int tmp = 0;
+            bool end = false;
+
+            // trial loop 
+            for (int iTrial = 0; iTrial < numTrials && !end; iTrial++)
             {
                 ContinuousRecognition_TrialDef td = new ContinuousRecognition_TrialDef();
-                //td.TrialStimLocations = something
                 td.BlockStimIndices = BlockStimIndices;
+                td.trialCount = trialCount;
+
+                // set up stim location by randomly choosing positions from grid
+                Vector3[] arr = new Vector3[nObjectsMinMax[0] + iTrial];
+                for (int i = 0; i < numTrialStims; i++)
+                {
+                    int index = Random.Range(0, BlockStimLocations.Length);
+                    while (Array.IndexOf(arr, BlockStimLocations[index]) != -1)
+                    {
+                        index = Random.Range(0, BlockStimLocations.Length);
+                    }
+                    arr[i] = BlockStimLocations[index];
+                }
+
+                td.TrialStimLocations = arr;
+                td.Grid = Locations;
+                td.TrialStimIndices = TrialStimIndices;
                 td.PreviouslyChosenStimuli = PreviouslyChosenStimuli;
+                td.PreviouslyNotChosenStimuli = PreviouslyNotChosenStim;
+                td.nObjectsMinMax = nObjectsMinMax;
+                td.Ratio = Ratio;
+                td.UnseenStims = UnseenStims;
+                td.numTrialStims = numTrialStims;
+                td.maxNumTrials = numTrials;
+                td.DisplayStimsDuration = DisplayStimsDuration;
+                td.ChooseStimDuration = ChooseStimDuration;
+                td.TrialEndDuration = TrialEndDuration;
+                td.TouchFeedbackDuration = TouchFeedbackDuration;
+                td.DisplayResultDuration = DisplayResultDuration;
+                td.ManuallySpecifyLocation = ManuallySpecifyLocation;
+                td.row = row;
+                td.col = col;
+                td.PNC_count = PNC_count;
+                td.PC_count = PC_count;
+                td.new_Count = new_count;
                 TrialDefs[iTrial] = td;
                 numTrialStims++;
+                trialCount++;
             }
         }
-        
     }
 
     public class ContinuousRecognition_TrialDef : TrialDef
     {
-        //TrialStimIndices provides indices to individual StimDefs in BlockStims (so a subset of BlockStims,
-        //which is a subset of ExternalStims).
-        public List<int> TrialStimIndices;
+        public int[] BlockStimIndices, nObjectsMinMax, Ratio, metrics;
         public Vector3[] TrialStimLocations;
+        public int trialCount, numTrialStims, maxNumTrials;
+        public bool isNewStim;
+        public Vector3[] Grid;
+
+        public List<int> PreviouslyChosenStimuli, PreviouslyNotChosenStimuli, TrialStimIndices, UnseenStims;
+        public int row, col, Context, PC_count, PNC_count, new_Count;
+
+        public float
+            DisplayStimsDuration,
+            ChooseStimDuration,
+            TrialEndDuration,
+            TouchFeedbackDuration,
+            DisplayResultDuration;
+
+        public int ManuallySpecifyLocation;
+        
         //ObjectNums refers to items in a list of objects to be loaded from resources folder
         public int[] ObjectNums;
-        public int Context;
-        public int[] BlockStimIndices;
-        public List<int> PreviouslyChosenStimuli;
-        
-        //----from stim handling for testing
-        public int[] GroupAIndices;
-        public int[] GroupBIndices;
-        public int[] GroupCIndices;
-        public Vector3[] GroupALocations;
-        public Vector3[] GroupBLocations;
-        public Vector3[] GroupCLocations;
-        
         
         //-------------------------------------------
         //Already-existing fields (inherited from TrialDef)
@@ -116,4 +219,5 @@ namespace ContinuousRecognition_Namespace
         //public State SetActiveOnInitialization;
         //public State SetInactiveOnTermination;
     }
+    
 }

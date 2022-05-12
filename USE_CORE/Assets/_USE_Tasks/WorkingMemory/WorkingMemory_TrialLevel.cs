@@ -24,6 +24,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         State tokenFeedback = new State("TokenFeedback");
         State trialEnd = new State("TrialEnd");
 
+        SelectionHandler<WorkingMemory_StimDef> mouseHandler = new SelectionHandler<WorkingMemory_StimDef>();
+
         AddActiveStates(new List<State> { initTrial, delay, displaySample, displayPostSampleDistractors, searchDisplay, selectionFeedback, tokenFeedback, trialEnd });
 
         // A state that just waits for some time
@@ -32,19 +34,19 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         delay.AddTimer(() => delayDuration, () => stateAfterDelay);
 
         // Show blue start button and wait for click
-        // Initialize the token bar if this is the first time
-        bool started = false;
+        MouseTracker.AddSelectionHandler(mouseHandler, SetupTrial);
         SetupTrial.AddInitializationMethod(() =>
         {
-            started = false;
+            foreach (GameObject camera in GameObject.FindGameObjectsWithTag("MainCamera")) {
+                if (camera.activeInHierarchy) {
+                    camera.GetComponent<Camera>().backgroundColor = Color.red;
+                    break;
+                }
+            }
             StartButton.SetActive(true);
         });
-        SetupTrial.AddUpdateMethod(() =>
-        {
-            GameObject clicked = GetClickedObj();
-            if (ReferenceEquals(clicked, StartButton)) started = true;
-        });
-        SetupTrial.SpecifyTermination(() => started, initTrial, () => StartButton.SetActive(false));
+        SetupTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
+            initTrial, () => StartButton.SetActive(false));
 
         // Show nothing for some time
         initTrial.AddTimer(() => CurrentTrialDef.initTrialDuration, delay, () =>
@@ -72,19 +74,13 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         bool correct = false;
         GameObject selected = null;
         WorkingMemory_StimDef selectedSD = null;
+        MouseTracker.AddSelectionHandler(mouseHandler, searchDisplay);
         searchDisplay.AddInitializationMethod(() => selected = null);
-        searchDisplay.AddUpdateMethod(() =>
-        {
-            GameObject clicked = GetClickedObj();
-            if (!clicked) return;
-            StimDefPointer sdPointer = clicked.GetComponent<StimDefPointer>();
-            if (!sdPointer) return;
-
-            selectedSD = sdPointer.GetStimDef<WorkingMemory_StimDef>();
-            selected = clicked;
+        searchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, selectionFeedback, () => {
+            selected = mouseHandler.SelectedGameObject;
+            selectedSD = mouseHandler.SelectedStimDef;
             correct = selectedSD.IsTarget;
         });
-        searchDisplay.SpecifyTermination(() => selected != null, selectionFeedback);
         searchDisplay.AddTimer(() => CurrentTrialDef.maxSearchDuration, FinishTrial);
 
         selectionFeedback.AddInitializationMethod(() =>
@@ -99,14 +95,18 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         tokenFeedback.AddInitializationMethod(() =>
         {
             HaloFBController.Destroy();
-            if (selectedSD.TokenUpdate == 0) {
+            if (selectedSD.TokenUpdate == 0)
+            {
                 if (correct) AudioFBController.Play("Positive");
                 else AudioFBController.Play("Negative");
                 return;
             }
-            if (selectedSD.TokenUpdate > 0) {
+            if (selectedSD.TokenUpdate > 0)
+            {
                 TokenFBController.AddTokens(selected, selectedSD.TokenUpdate);
-            } else {
+            }
+            else
+            {
                 TokenFBController.RemoveTokens(selected, -selectedSD.TokenUpdate);
             }
         });
@@ -114,6 +114,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         // Wait for some time at the end
         trialEnd.AddTimer(() => CurrentTrialDef.trialEndDuration, FinishTrial);
+
+        TrialData.AddDatum("SelectedName", () => selected != null ? selected.name : null);
+        TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
+        TrialData.AddDatum("SelectionCorrect", () => correct ? 1 : 0);
     }
 
     protected override void DefineTrialStims()
@@ -147,23 +151,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         targetDistractorStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
         targetDistractorStims.SetLocations(CurrentTrialDef.TargetDistractorLocations);
         i = 0;
-        foreach (WorkingMemory_StimDef sd in targetDistractorStims.stimDefs) {
+        foreach (WorkingMemory_StimDef sd in targetDistractorStims.stimDefs)
+        {
             sd.TokenUpdate = CurrentTrialDef.DistractorTokenUpdates[i];
             ++i;
         }
         TrialStims.Add(targetDistractorStims);
-    }
-
-    private void Log(object msg)
-    {
-        Debug.Log("[WorkingMemory] " + msg);
-    }
-
-    private GameObject GetClickedObj()
-    {
-        if (!InputBroker.GetMouseButtonDown(0)) return null;
-        Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(mouseRay, out RaycastHit hit)) return hit.transform.root.gameObject;
-        return null;
     }
 }

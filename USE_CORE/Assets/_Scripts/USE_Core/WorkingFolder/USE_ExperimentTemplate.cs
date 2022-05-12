@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using ConfigDynamicUI;
+using System.Runtime.InteropServices;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -266,6 +266,29 @@ namespace USE_ExperimentTemplate
 			tl.TaskCam.gameObject.SetActive(false);
 		}
 
+#if UNITY_STANDALONE_WIN
+		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+		public struct ReparseDataBuffer {
+			public uint ReparseTag;
+			public ushort ReparseDataLength;
+			public ushort Reserved;
+			public ushort SubstituteNameOffset;
+			public ushort SubstituteNameLength;
+			public ushort PrintNameOffset;
+			public ushort PrintNameLength;
+			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)] public string PathBuffer;
+		}
+
+		[DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+		static extern IntPtr CreateFile(string lpFileName, uint dwDesiredAccess, uint dwShareMode,
+			IntPtr lpSecurityAttributes, uint dwCreationDispositionulong, uint dwFlagsAndAttributes, IntPtr hTemplateFile);
+		[DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+		static extern bool DeviceIoControl(IntPtr hDevice, uint dwIoControlCode, ref ReparseDataBuffer lpInBuffer,
+			uint nInBufferSize, IntPtr lpOutBuffer, uint nOutBufferSize, IntPtr lpBytesReturned, IntPtr lpOverlapped);
+		[DllImport("Kernel32.dll")]
+		static extern bool CloseHandle(IntPtr hObject);
+#endif
+
 		void OnApplicationQuit()
 		{
 			//	performancetext.AppendData();
@@ -302,6 +325,62 @@ namespace USE_ExperimentTemplate
 			if (StoreData)
 			{
 				System.IO.Directory.CreateDirectory(SessionDataPath + Path.DirectorySeparatorChar + "LogFile");
+				string symlinkLocation = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + "LatestSession";
+#if UNITY_STANDALONE_WIN
+				uint GENERIC_READ = 0x80000000;
+				uint GENERIC_WRITE = 0x40000000;
+				uint FILE_SHARE_READ = 0x00000001;
+				uint OPEN_EXISTING = 3;
+				uint FILE_FLAG_BACKUP_SEMANTICS = 0x02000000;
+				uint FILE_FLAG_OPEN_REPARSE_POINT = 0x00200000;
+				uint FSCTL_SET_REPARSE_POINT = 0x900A4;
+				uint IO_REPARSE_TAG_MOUNT_POINT = 0xA0000003;
+				Directory.CreateDirectory(symlinkLocation);
+
+				// Open the file with the correct perms
+				IntPtr dirHandle = CreateFile(
+					symlinkLocation,
+					GENERIC_READ | GENERIC_WRITE,
+					FILE_SHARE_READ,
+					IntPtr.Zero,
+					OPEN_EXISTING,
+					FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT,
+					IntPtr.Zero
+				);
+				
+				// \??\ indicates that the path should be non-interpreted
+				string prefix = @"\??\";
+				string substituteName = prefix + SessionDataPath;
+				// char is 2 bytes because strings are UTF-16
+				int substituteByteLen = substituteName.Length * sizeof(char);
+				ReparseDataBuffer rdb = new ReparseDataBuffer
+				{
+					ReparseTag = IO_REPARSE_TAG_MOUNT_POINT,
+					// 12 bytes is the byte length from SubstituteNameOffset to
+					// before PathBuffer
+					ReparseDataLength = (ushort)(substituteByteLen + 12),
+					SubstituteNameOffset = 0,
+					SubstituteNameLength = (ushort)substituteByteLen,
+					// Needs to be at least 2 ahead (accounting for nonexistent null-terminator)
+					PrintNameOffset = (ushort)(substituteByteLen + 2),
+					PrintNameLength = 0,
+					PathBuffer = substituteName
+				};
+
+				var result = DeviceIoControl(
+					dirHandle,
+					FSCTL_SET_REPARSE_POINT,
+					ref rdb,
+					// 20 bytes is the byte length for everything but the PathBuffer
+					(uint)(substituteName.Length * sizeof(char) + 20),
+					IntPtr.Zero,
+					0,
+					IntPtr.Zero,
+					IntPtr.Zero
+				);
+
+				CloseHandle(dirHandle);
+#endif
 				string logPath = "";
 				if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX |
 				    SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux)
@@ -378,11 +457,12 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims, RuntimeStims;
 		public List<GameObject> PreloadedStimGameObjects;
 		public List<string> PrefabStimPaths;
-		protected ConfigVarStore ConfigUiVariables;
 
 		public Type TaskLevelType;
 		protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
 		protected State SetupTask, RunBlock, BlockFeedback, FinishTask;
+		protected bool BlockFbFinished;
+		protected float BlockFbSimpleDuration;
 
 		public virtual void SpecifyTypes()
 		{
@@ -413,9 +493,6 @@ namespace USE_ExperimentTemplate
 			{
 				BlockCount = -1;
 				TaskCam.gameObject.SetActive(true);
-				TrialLevel.AudioFBController.Init();
-				TrialLevel.HaloFBController.Init();
-				TrialLevel.TokenFBController.Init(TrialLevel.AudioFBController);
 			});
 
 			SetupTask.SpecifyTermination(() => true, RunBlock);
@@ -434,13 +511,21 @@ namespace USE_ExperimentTemplate
 
 			RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
 
+			BlockFeedback.AddUpdateMethod(() =>
+			{
+				BlockFbFinished = true;
+				if (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= BlockFbSimpleDuration)
+					BlockFbFinished = true;
+				else
+					BlockFbFinished = false;
+			});
 			BlockFeedback.AddLateUpdateMethod(() => FrameData.AppendData());
-			BlockFeedback.SpecifyTermination(() => BlockCount < BlockDefs.Length - 1, RunBlock, () =>
+			BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock, () =>
 			{
 				BlockData.AppendData();
 				BlockData.WriteData();
 			});
-			BlockFeedback.SpecifyTermination(() => BlockCount == BlockDefs.Length - 1, FinishTask, () =>
+			BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask, () =>
 			{
 				BlockData.AppendData();
 				BlockData.WriteData();
@@ -507,12 +592,44 @@ namespace USE_ExperimentTemplate
 
 			//AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
 			GameObject fbControllersPrefab = Resources.Load<GameObject>("FeedbackControllers");
+			GameObject inputTrackersPrefab = Resources.Load<GameObject>("InputTrackers");
 			GameObject controllers = new GameObject("Controllers");
 			GameObject fbControllers = Instantiate(fbControllersPrefab, controllers.transform);
+			GameObject inputTrackers = Instantiate(inputTrackersPrefab, controllers.transform);
+
+			List<string> fbControllersList = new List<string>();
+			if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FeedbackControllers"))
+				fbControllersList = (List<string>) SessionSettings.Get(TaskName + "_TaskSettings", "FeedbackControllers");
+			int totalTokensNum = 5;
+			if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TotalTokensNum"))
+				totalTokensNum = (int) SessionSettings.Get(TaskName + "_TaskSettings", "TotalTokensNum");
 
 			TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
 			TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
 			TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
+			bool audioInited = false;
+			foreach (string fbController in fbControllersList) {
+				switch (fbController) {
+					case "Audio":
+						if (!audioInited) TrialLevel.AudioFBController.Init(FrameData);
+						break;
+					case "Halo":
+						TrialLevel.HaloFBController.Init(FrameData);
+						break;
+					case "Token":
+						if (!audioInited) TrialLevel.AudioFBController.Init(FrameData);
+						TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
+						TrialLevel.TokenFBController.SetTotalTokensNum(totalTokensNum);
+						break;
+					default:
+						Debug.LogWarning(fbController + " is not a valid feedback controller.");
+						break;
+				}
+			}
+
+			TrialLevel.MouseTracker = inputTrackers.GetComponent<MouseTracker>();
+			TrialLevel.MouseTracker.Init(FrameData);
+
 			TrialLevel.SessionDataControllers = SessionDataControllers;
 			TrialLevel.FilePrefix = FilePrefix;
 			TrialLevel.TaskStims = TaskStims;
@@ -520,7 +637,6 @@ namespace USE_ExperimentTemplate
 			TrialLevel.PrefabStims = PrefabStims;
 			TrialLevel.ExternalStims = ExternalStims;
 			TrialLevel.RuntimeStims = RuntimeStims;
-			TrialLevel.ConfigUiVariables = ConfigUiVariables;;
 			TrialLevel.DefineTrialLevel();
 		}
 
@@ -553,14 +669,6 @@ namespace USE_ExperimentTemplate
 			MethodInfo readStimDefs = GetType().GetMethod(nameof(this.ReadStimDefs))
 				.MakeGenericMethod(new Type[] {StimDefType});
 			readStimDefs.Invoke(this, new object[] {TaskConfigPath});
-			
-			
-			string configUIVariableFile = LocateFile.FindFileInFolder(TaskConfigPath, "*" + TaskName + "*ConfigUIDetails*");
-			if (!string.IsNullOrEmpty(configUIVariableFile))
-			{
-				SessionSettings.ImportSettings_SingleTypeJSON<ConfigVarStore>(TaskName + "_ConfigUiDetails", configUIVariableFile);
-				ConfigUiVariables = (ConfigVarStore) SessionSettings.Get(TaskName + "_ConfigUiDetails");
-			}
 
 			//handling of block and trial defs so that each BlockDef contains a TrialDef[] array
 
@@ -855,13 +963,12 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims, RuntimeStims;
 		[HideInInspector] public List<StimGroup> TrialStims;
 		
-		
-		[HideInInspector] public ConfigVarStore ConfigUiVariables;
-		
 		// Feedback Controllers
 		[HideInInspector] public AudioFBController AudioFBController;
 		[HideInInspector] public HaloFBController HaloFBController;
 		[HideInInspector] public TokenFBController TokenFBController;
+		// Input Trackers
+		[HideInInspector] public MouseTracker MouseTracker;
 
 		//protected TrialDef CurrentTrialDef;
 		public T GetCurrentTrialDef<T>() where T : TrialDef
@@ -881,6 +988,7 @@ namespace USE_ExperimentTemplate
 			{
 				TrialCount_InBlock = -1;
 				TrialStims = new List<StimGroup>();
+				AudioFBController.UpdateAudioSource();
 				//DetermineNumTrialsInBlock();
 			});
 
@@ -927,7 +1035,8 @@ namespace USE_ExperimentTemplate
 			TrialData.ManuallyDefine();
 			TrialData.AddStateTimingData(this);
 			TrialData.CreateFile();
-			
+
+
 		}
 
 
@@ -1274,11 +1383,14 @@ namespace USE_ExperimentTemplate
 		public List<string[]> FeatureNames;
 		public string neutralPatternedColorName;
 		public float? ExternalStimScale;
+		public List<string[]> FeedbackControllers;
+		public int? TotalTokensNum;
 	}
 	public class BlockDef
 	{
 		public int BlockCount;
 		public TrialDef[] TrialDefs;
+		public int? TotalTokensNum;
 
 		public virtual void GenerateTrialDefsFromBlockDef()
 		{

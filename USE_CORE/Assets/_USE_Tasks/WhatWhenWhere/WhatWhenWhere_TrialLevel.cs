@@ -596,6 +596,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("Progress", () => accuracyLog);
         TrialData.AddDatum("TouchPositions", () => touchedPositions);
 
+        FrameData.AddDatum("TouchPosition", () => Input.mousePosition);
         FrameData.AddDatum("ErrorType", () => errorTypeString);
         FrameData.AddDatum("Touch", () => response);
         FrameData.AddDatum("StartButton", () => initButton.activeSelf);
@@ -606,6 +607,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("TimingErrorFeedback", () => imageTimingError.activeSelf);
         FrameData.AddDatum("SliderHalo", () => sliderHalo.activeSelf);
         FrameData.AddDatum("StimuliShown", () => searchStims.IsActive);
+        FrameData.AddDatum("SliderValue", () => slider.normalizedValue);
     }
 
     public void CreateConfigUI()

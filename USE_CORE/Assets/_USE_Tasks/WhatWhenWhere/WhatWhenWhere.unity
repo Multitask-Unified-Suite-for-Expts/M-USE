@@ -976,7 +976,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b8821702f1fa4674692388ecaa261895, type: 2}
+  - {fileID: 2100000, guid: 417218cd8ec5c42eb8eae2dee3194db6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1742,7 +1742,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1584810908}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa4bbd7021ca044dcb8b7fcbcdb879ed, type: 3}
+  m_Script: {fileID: 11500000, guid: 73a26a70a83792d4ea69c54c55375771, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: WhatWhenWhere_TrialLevel
@@ -1778,6 +1778,7 @@ MonoBehaviour:
   AudioFBController: {fileID: 0}
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
+  MouseTracker: {fileID: 0}
   stimCount: 0
   totalErrors_InBlock: 0
   errorType_InBlock: []

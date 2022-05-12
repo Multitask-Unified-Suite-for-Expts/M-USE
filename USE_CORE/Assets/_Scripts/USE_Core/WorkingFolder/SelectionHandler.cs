@@ -3,7 +3,7 @@ using USE_StimulusManagement;
 
 // Only min duration means that selection is finished once min duration is met
 // Both min and max duration means that selection is finished once its let go
-public abstract class SelectionHandler<T> where T : StimDef
+public class SelectionHandler<T> where T : StimDef
 {
     public float MinDuration = 0;
     public float? MaxDuration = null;
@@ -24,6 +24,17 @@ public abstract class SelectionHandler<T> where T : StimDef
     public void Stop()
     {
         started = false;
+        SelectedGameObject = null;
+        SelectedStimDef = null;
+        currentTargetDuration = 0;
+    }
+
+    public bool SelectionMatches(GameObject gameObj) {
+        return ReferenceEquals(SelectedGameObject, gameObj);
+    }
+
+    public bool SelectionMatches(T stimDef) {
+        return ReferenceEquals(SelectedStimDef, stimDef);
     }
 
     public void UpdateTarget(GameObject go)
@@ -49,12 +60,13 @@ public abstract class SelectionHandler<T> where T : StimDef
                 currentTargetDuration += Time.deltaTime;
 
             targetedGameObject = go;
-            // if (go.GetComponent<StimDefPointer>())
-            //     CurrentlySelectedStimDef = go.GetComponent<StimDefPointer>().GetStimDef<T>();
-            if (MaxDuration == null && currentTargetDuration >= MinDuration)
+            if (MaxDuration == null && currentTargetDuration >= MinDuration) {
                 SelectedGameObject = go;
+                SelectedStimDef = null;
+                if (SelectedGameObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer)) {
+                    SelectedStimDef = (sdPointer as StimDefPointer).GetStimDef<T>();
+                }
+            }
         }
     }
-
-    public abstract GameObject CheckSelection();
 }

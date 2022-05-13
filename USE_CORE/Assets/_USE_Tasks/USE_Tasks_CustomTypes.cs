@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using StimHandling_Namespace;
 using WhatWhenWhere_Namespace;
 using ContinuousRecognition_Namespace;
 using WorkingMemory_Namespace;
-//using VisualSearch_Namespace;
+using VisualSearch_Namespace;
 // using EC_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
@@ -12,8 +13,18 @@ static public class USE_Tasks_CustomTypes
 {
     static public Dictionary<string, TaskTypes> CustomTaskDictionary = new Dictionary<string, TaskTypes>()
     {
-        
         {
+            "StimHandling", new TaskTypes
+            {
+                TaskLevelType = typeof(StimHandling_TaskLevel),
+                TrialLevelType = typeof(StimHandling_TrialLevel),
+                TaskDefType = typeof(StimHandling_TaskDef),
+                BlockDefType = typeof(StimHandling_BlockDef),
+                TrialDefType = typeof(StimHandling_TrialDef),
+                StimDefType = typeof(StimHandling_StimDef)
+            }
+        }
+        ,{
             "WhatWhenWhere", new TaskTypes
             {
                 TaskLevelType = typeof(WhatWhenWhere_TaskLevel),
@@ -35,7 +46,6 @@ static public class USE_Tasks_CustomTypes
                 StimDefType = typeof(ContinuousRecognition_StimDef)
             }
         }
-        
         ,{
             "WorkingMemory", new TaskTypes
             {
@@ -47,7 +57,6 @@ static public class USE_Tasks_CustomTypes
                 StimDefType = typeof(WorkingMemory_StimDef)
             }
         }
-        /*
         ,{
             "VisualSearch", new TaskTypes
             {
@@ -59,7 +68,6 @@ static public class USE_Tasks_CustomTypes
                 StimDefType = typeof(VisualSearch_StimDef)
             }
         }
-        */
 
         
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

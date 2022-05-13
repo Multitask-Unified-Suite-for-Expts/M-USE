@@ -349,7 +349,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 Debug.Log ("Didn't click on any stimulus");
                 response = 0;
+
+                Debug.Log("SELECT: " + configStore.get<ConfigNumber>("selectObjectDuration").value);
             }
+
             
         });
 
@@ -616,6 +619,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         configStore = ConfigUiVariables;
         configUI.store = configStore;
 
+        /*
         itiDuration = configStore.get<ConfigNumberRanged>("itiDuration");
         Centralcuesize = configStore.get<ConfigNumber>("Centralcuesize");
         CentralCueSelectionRadius = configStore.get<ConfigNumber>("CentralCueSelectionRadius");
@@ -625,16 +629,20 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         baselineDuration = configStore.get<ConfigNumberRanged>("baselineDuration");
         covertPrepDuration = configStore.get<ConfigNumberRanged>("covertPrepDuration");
         freeGazeDuration = configStore.get<ConfigNumberRanged>("freeGazeDuration");
+        */
         selectObjectDuration = configStore.get<ConfigNumber>("selectObjectDuration");
+        Debug.Log("SELECT: " + selectObjectDuration);
+        /*
         choiceToFbDuration = configStore.get<ConfigNumberRanged>("choiceToFbDuration");
         ObjectSelectionRadius = configStore.get<ConfigNumber>("ObjectSelectionRadius");
         MinObjectSelectionTime = configStore.get<ConfigNumber>("MinObjectSelectionTime");
         fBDuration = configStore.get<ConfigNumberRanged>("fBDuration");
         MaxReachTime = configStore.get<ConfigNumber>("MaxReachTime");
-        
+        */
 
         configUI.GenerateUI();
     }
+    
 
     // set all gameobjects to setActive false
     void disableAllGameobjects()

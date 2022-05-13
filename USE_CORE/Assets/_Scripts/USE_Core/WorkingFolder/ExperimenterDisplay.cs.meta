@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:USE_CORE/Assets/_Scripts/USE_Core/WorkingFolder/ExperimenterDisplay.cs.meta
 guid: 47b7ce53f5d404a20a6facac522ee41c
+========
+guid: 4e097ea02d70caf42a03ac297582e5b5
+>>>>>>>> ExpDisplayFixed:USE_CORE/Assets/_USE_Tasks/WhatWhenWhere/HotKeys.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

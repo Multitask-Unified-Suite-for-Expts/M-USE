@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using USE_States;
 using USE_Data;
@@ -678,7 +679,7 @@ namespace USE_ExperimentTemplate
 			
 						
 			
-			string configUIVariableFile = LocateFile.FindFileInFolder(TaskConfigPath, "*" + TaskName + "*ConfigUIDetails*");
+			string configUIVariableFile = LocateFile.FindFileInFolder(TaskConfigPath, "*" + TaskName + "*ConfigUiDetails*");
 			if (!string.IsNullOrEmpty(configUIVariableFile))
 			{
 				SessionSettings.ImportSettings_SingleTypeJSON<ConfigVarStore>(TaskName + "_ConfigUiDetails", configUIVariableFile);
@@ -990,6 +991,12 @@ namespace USE_ExperimentTemplate
 		// Input Trackers
 		[HideInInspector] public MouseTracker MouseTracker;
 
+		[HideInInspector] public RenderTexture DrawRenderTexture;
+
+		public void OnGUI() {
+			GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), DrawRenderTexture);
+		}
+
 		//protected TrialDef CurrentTrialDef;
 		public T GetCurrentTrialDef<T>() where T : TrialDef
 		{
@@ -1010,6 +1017,19 @@ namespace USE_ExperimentTemplate
 				TrialStims = new List<StimGroup>();
 				AudioFBController.UpdateAudioSource();
 				//DetermineNumTrialsInBlock();
+				
+				GameObject cameraObj = new GameObject("DrawCamera");
+				Camera newCamera = cameraObj.AddComponent<Camera>();
+				newCamera.CopyFrom(Camera.main);
+				newCamera.cullingMask = 0;
+
+				DrawRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
+				DrawRenderTexture.Create();
+				Camera.main.targetTexture = DrawRenderTexture;
+				
+				RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
+				mainCameraCopy.texture = DrawRenderTexture;
+				mainCameraCopy.rectTransform.sizeDelta = new Vector2(Screen.width / 2, Screen.height / 2);
 			});
 
 			SetupTrial.AddUniversalInitializationMethod(() =>

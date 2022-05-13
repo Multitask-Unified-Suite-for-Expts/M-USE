@@ -1,5 +1,10 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:USE_CORE/Assets/_USE_Tasks/MazeGame/MazeGame.unity.meta
 guid: 9a9c597c68d62d24d953e3e164318af8
+========
+guid: dd51397d5950a1e498caa46a979a92ac
+folderAsset: yes
+>>>>>>>> ExpDisplayFixed:USE_CORE/Assets/_USE_Tasks/WhatWhenWhere.meta
 DefaultImporter:
   externalObjects: {}
   userData: 

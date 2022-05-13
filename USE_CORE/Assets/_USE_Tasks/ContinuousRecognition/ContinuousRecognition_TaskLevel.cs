@@ -21,7 +21,9 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     }
     public override void DefineControlLevel()
     {
-        StimGroup display;
+        // StimGroup display;
+        StimGroup wrong_group = new StimGroup("wrong");
+        StimGroup d = new StimGroup("display");
         BlockFeedback.AddInitializationMethod(() =>
         {
             // THE NUMBER THAT MEASURE PERFORMANCE
@@ -71,7 +73,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
                 y -= vertical;
             }
 
-            StimGroup d, wrong_group;
             Vector3[] loc;
             //Debug.Log("nnnnnnnnnnnnnnn isNew is: " + n);
             if (!n)
@@ -86,7 +87,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
                 Vector3 wrong_loc = new Vector3(-5, y - vertical, 0);
                 Vector3[] wrong_arr = new Vector3[1];
                 wrong_arr[0] = wrong_loc;
-                wrong_group = new StimGroup("wrong", ExternalStims, chosen.GetRange(len-1, 1));
+                // wrong_group = new StimGroup("wrong", ExternalStims, chosen.GetRange(len-1, 1));
+                wrong_group.AddStims(ExternalStims, chosen.GetRange(len-1, 1));
                 wrong_group.SetLocations(wrong_arr);
                 wrong_group.LoadStims();
                 wrong_group.ToggleVisibility(true);
@@ -95,7 +97,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             }
             else
             {
-                d = new StimGroup("display", ExternalStims, chosen);
+                d.AddStims(ExternalStims, chosen);
                 loc = new Vector3[len];
                 for (int i = 0; i < len; i++)
                 {
@@ -107,6 +109,15 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             d.SetLocations(loc);
             d.LoadStims();
             d.ToggleVisibility(true);
+        });
+        
+        BlockFeedback.AddUpdateMethod(() =>
+        {
+            if (BlockFbFinished)
+            {
+                d.DestroyStimGroup();
+                wrong_group.DestroyStimGroup();
+            }
         });
         //BlockFeedback.AddTimer(()=> 5f, () => null);
     }

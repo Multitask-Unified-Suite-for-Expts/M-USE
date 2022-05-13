@@ -141,9 +141,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             //ContinuousRecognition_StimDef sd = sdPointer.GetStimDef<ContinuousRecognition_StimDef>();
             if (selectedSD != null && selectedSD.PreviouslyChosen == false)
             {
-                Debug.Log("NOT CHOSEN BEFORE");
+                // Debug.Log("NOT CHOSEN BEFORE");
                 selectedSD.PreviouslyChosen = true;
-                Debug.Log(selectedSD.PreviouslyChosen);
+                // Debug.Log(selectedSD.PreviouslyChosen);
                 isNew = true;
                 Debug.Log("[METRICS] Trial " + (CurrentTrialDef.trialCount+1) +"; Correct when PNC Count = " + CurrentTrialDef.PNC_count + "; PC Count = " + CurrentTrialDef.PC_count + "; N Count = " + CurrentTrialDef.new_Count);
 
@@ -151,7 +151,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             else
             {
                 isNew = false;
-                Debug.Log("CHOSEN BEFORE");
+                // Debug.Log("CHOSEN BEFORE");
             }
             CurrentTrialDef.isNewStim = isNew;
         });
@@ -196,8 +196,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 AudioFBController.Play("Negative");
             }
-            Debug.Log("TRIAL COUNT IS " + trialCount + "; MAX TRIAL COUNT IS " +
-                      CurrentTrialDef.maxNumTrials);
+            // Debug.Log("TRIAL COUNT IS " + trialCount + "; MAX TRIAL COUNT IS " + CurrentTrialDef.maxNumTrials);
             
         });
         //tokenFeedback.SpecifyTermination(() => !isNew, ()=>displayResult);
@@ -207,8 +206,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         tokenFeedback.SpecifyTermination(()=> (!TokenFBController.IsAnimating() && (!isNew || trialCount == CurrentTrialDef.maxNumTrials)), FinishTrial, ()=> end = true);
         tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating() && (trialCount < CurrentTrialDef.maxNumTrials) && isNew, trialEnd);
         trialEnd.AddTimer(() => CurrentTrialDef.TrialEndDuration, FinishTrial);
-        this.AddTerminationSpecification(()=>end);
-        //FinishTrial.SpecifyTermination(() => !isNew, () => null, ()=>Debug.Log("[FinishTrial]: finishing trial"));
+        //this.AddTerminationSpecification(()=>end);
+        FinishTrial.SpecifyTermination(() => !isNew, () => null, ()=>Debug.Log("[FinishTrial]: finishing trial"));
     }
 
     // Helper Functions
@@ -243,7 +242,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
             else
             {
-                Debug.Log("NumTrialStims: " + CurrentTrialDef.numTrialStims);
+                // Debug.Log("NumTrialStims: " + CurrentTrialDef.numTrialStims);
 
                 float[] ratio = getRatio(CurrentTrialDef.Ratio);
                 int[] ratio_array = getStimNum(ratio);
@@ -251,10 +250,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 int N_num = ratio_array[1];
                 int PNC_num = ratio_array[2];
 
-                Debug.Log("Chosen Count IS: " + PC_num + "   Count IS: " + ratio[0] * CurrentTrialDef.numTrialStims);
-                Debug.Log("New Count IS: " + N_num + "     Count IS: " + ratio[1] * CurrentTrialDef.numTrialStims);
-                Debug.Log("Previously Not Chosen Count IS: " + PNC_num + "     Count IS: " +
-                          ratio[2] * CurrentTrialDef.numTrialStims);
+                // Debug.Log("Chosen Count IS: " + PC_num + "   Count IS: " + ratio[0] * CurrentTrialDef.numTrialStims);
+                // Debug.Log("New Count IS: " + N_num + "     Count IS: " + ratio[1] * CurrentTrialDef.numTrialStims);
+                // Debug.Log("Previously Not Chosen Count IS: " + PNC_num + "     Count IS: " + ratio[2] * CurrentTrialDef.numTrialStims);
 
 
                 CurrentTrialDef.TrialStimIndices.Clear();
@@ -314,7 +312,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
                     if (!CurrentTrialDef.TrialStimIndices.Contains(id))
                     {
-                        Debug.Log("added previously not chosen: " + id);
+                        // Debug.Log("added previously not chosen: " + id);
                         CurrentTrialDef.TrialStimIndices.Add(id);
                         CurrentTrialDef.PNC_count += 1;
                         PNC_length--;
@@ -334,7 +332,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
                         if (!CurrentTrialDef.TrialStimIndices.Contains(id))
                         {
-                            Debug.Log("added new: " + id);
+                            // Debug.Log("added new: " + id);
                             CurrentTrialDef.TrialStimIndices.Add(id);
                             CurrentTrialDef.new_Count += 1;
                             CurrentTrialDef.UnseenStims.Remove(id);
@@ -501,7 +499,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             result += item.ToString() + ", ";
         }
 
-        Debug.Log(result);
+        // Debug.Log(result);
     }
     
     private void getLog2(int[] arr, string name)
@@ -512,7 +510,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             result += item.ToString() + ", ";
         }
 
-        Debug.Log(result);
+        // Debug.Log(result);
     }
 
 

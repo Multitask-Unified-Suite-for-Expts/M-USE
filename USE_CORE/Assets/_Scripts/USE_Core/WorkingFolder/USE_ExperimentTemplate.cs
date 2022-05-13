@@ -1017,19 +1017,21 @@ namespace USE_ExperimentTemplate
 				TrialStims = new List<StimGroup>();
 				AudioFBController.UpdateAudioSource();
 				//DetermineNumTrialsInBlock();
-				
-				GameObject cameraObj = new GameObject("DrawCamera");
-				Camera newCamera = cameraObj.AddComponent<Camera>();
-				newCamera.CopyFrom(Camera.main);
-				newCamera.cullingMask = 0;
 
-				DrawRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
-				DrawRenderTexture.Create();
-				Camera.main.targetTexture = DrawRenderTexture;
-				
-				RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
-				mainCameraCopy.texture = DrawRenderTexture;
-				mainCameraCopy.rectTransform.sizeDelta = new Vector2(Screen.width / 2, Screen.height / 2);
+				if (GetType().Name == "WhatWhenWhere_TrialLevel") {
+					GameObject cameraObj = new GameObject("DrawCamera");
+					Camera newCamera = cameraObj.AddComponent<Camera>();
+					newCamera.CopyFrom(Camera.main);
+					newCamera.cullingMask = 0;
+
+					DrawRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
+					DrawRenderTexture.Create();
+					Camera.main.targetTexture = DrawRenderTexture;
+					
+					RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
+					mainCameraCopy.texture = DrawRenderTexture;
+					mainCameraCopy.rectTransform.sizeDelta = new Vector2(Screen.width / 2, Screen.height / 2);
+				}
 			});
 
 			SetupTrial.AddUniversalInitializationMethod(() =>

@@ -34,6 +34,7 @@ namespace WorkingMemory_Namespace
         public int[] TargetIndices, PostSampleDistractorIndices, TargetDistractorIndices;
         public int[] TargetTokenUpdates, DistractorTokenUpdates;
         public Vector3[] TargetSampleLocations, PostSampleDistractorLocations, TargetSearchLocations, TargetDistractorLocations;
+        public Vector3 ContextColor;
 
         public float initTrialDuration,
             baselineDuration,

@@ -56,7 +56,9 @@ public class GameConfigs : MonoBehaviour
         INCORRECT_RULEBREAKING_COLOR = new Color(0f, 0f, 0f);
 
         // Default - Off-white
-        DEFAULT_TILE_COLOR = new Color(0.95f, 0.95f, 0.95f);
+        // DEFAULT_TILE_COLOR = new Color(0.95f, 0.95f, 0.95f);
+        DEFAULT_TILE_COLOR = new Color(1, 1, 1, 1);
+
 
         //---------------------------------------------------------
 

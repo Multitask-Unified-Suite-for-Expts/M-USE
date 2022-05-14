@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641275, b: 0.5748172, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1787,67 +1787,55 @@ MonoBehaviour:
   configUI: {fileID: 0}
   jsonSaveLoad: {fileID: 0}
   mainLevel: {fileID: 0}
+  minObjectTouchDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
   itiDuration:
     name: 
     hidden: 0
-    minvalue: 0
-    maxvalue: 0
     value: 0
-    Absmin: 0
-    Absmax: 0
-    precision: 0
     isRange: 0
-  baselineDuration:
+    max: 0
+    min: 0
+    precision: 0
+  finalFbDuration:
     name: 
     hidden: 0
-    minvalue: 0
-    maxvalue: 0
     value: 0
-    Absmin: 0
-    Absmax: 0
-    precision: 0
     isRange: 0
-  covertPrepDuration:
+    max: 0
+    min: 0
+    precision: 0
+  fbDuration:
     name: 
     hidden: 0
-    minvalue: 0
-    maxvalue: 0
     value: 0
-    Absmin: 0
-    Absmax: 0
-    precision: 0
     isRange: 0
-  freeGazeDuration:
+    max: 0
+    min: 0
+    precision: 0
+  maxObjectTouchDuration:
     name: 
     hidden: 0
-    minvalue: 0
-    maxvalue: 0
     value: 0
-    Absmin: 0
-    Absmax: 0
-    precision: 0
     isRange: 0
-  choiceToFbDuration:
+    max: 0
+    min: 0
+    precision: 0
+  selectObjectDuration:
     name: 
     hidden: 0
-    minvalue: 0
-    maxvalue: 0
     value: 0
-    Absmin: 0
-    Absmax: 0
-    precision: 0
     isRange: 0
-  fBDuration:
-    name: 
-    hidden: 0
-    minvalue: 0
-    maxvalue: 0
-    value: 0
-    Absmin: 0
-    Absmax: 0
+    max: 0
+    min: 0
     precision: 0
-    isRange: 0
-  Centralcuesize:
+  sliderSize:
     name: 
     hidden: 0
     value: 0
@@ -1872,14 +1860,6 @@ MonoBehaviour:
     min: 0
     precision: 0
   blinkOnDuration:
-    name: 
-    hidden: 0
-    value: 0
-    isRange: 0
-    max: 0
-    min: 0
-    precision: 0
-  selectObjectDuration:
     name: 
     hidden: 0
     value: 0

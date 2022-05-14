@@ -356,7 +356,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             
         });
 
-        ChooseStimulus.AddTimer(selectObjectDuration.value, ITI);
+        ChooseStimulus.AddTimer(()=>selectObjectDuration.value, ITI);
         ChooseStimulus.SpecifyTermination(() => response == 1, StimulusChosen);
         ChooseStimulus.SpecifyTermination(() => response == 2, StimulusChosen);
         ChooseStimulus.SpecifyTermination(() => stimCount == CurrentTrialDef.CorrectObjectTouchOrder.Length, FinalFeedback);
@@ -452,7 +452,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 sr.color = new Color(0, 0, 0, 0.2f);
             }
         });
-        FinalFeedback.AddTimer(finalFbDuration.value, ITI, () =>
+        FinalFeedback.AddTimer(()=>finalFbDuration.value, ITI, () =>
         {
             txt.SetActive(false);
             sliderHalo.SetActive(false);

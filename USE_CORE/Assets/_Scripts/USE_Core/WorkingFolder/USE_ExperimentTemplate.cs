@@ -504,23 +504,24 @@ namespace USE_ExperimentTemplate
 			{
 				BlockCount = -1;
 				TaskCam.gameObject.SetActive(true);
-				Debug.Log("HERE: HERE");
 
-				if (true) {
-					GameObject cameraObj = new GameObject("DrawCamera");
-					cameraObj.transform.SetParent(GameObject.Find("ExperimenterInfo").transform);
-					Camera newCamera = cameraObj.AddComponent<Camera>();
-					newCamera.CopyFrom(Camera.main);
-					newCamera.cullingMask = 0;
+				GameObject experimenterInfoPrefab = Resources.Load<GameObject>("ExperimenterInfo");
+				GameObject experimenterInfo = Instantiate(experimenterInfoPrefab);
+				experimenterInfo.name = "ExperimenterInfo";
 
-					DrawRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
-					DrawRenderTexture.Create();
-					Camera.main.targetTexture = DrawRenderTexture;
-					
-					RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
-					mainCameraCopy.texture = DrawRenderTexture;
-					mainCameraCopy.rectTransform.sizeDelta = new Vector2(Screen.width / 2, Screen.height / 2);
-				}
+				GameObject cameraObj = new GameObject("DrawCamera");
+				cameraObj.transform.SetParent(experimenterInfo.transform);
+				Camera newCamera = cameraObj.AddComponent<Camera>();
+				newCamera.CopyFrom(Camera.main);
+				newCamera.cullingMask = 0;
+
+				DrawRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
+				DrawRenderTexture.Create();
+				Camera.main.targetTexture = DrawRenderTexture;
+				
+				RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
+				mainCameraCopy.texture = DrawRenderTexture;
+				mainCameraCopy.rectTransform.sizeDelta = new Vector2(Screen.width / 2, Screen.height / 2);
 			});
 
 			SetupTask.SpecifyTermination(() => true, RunBlock);

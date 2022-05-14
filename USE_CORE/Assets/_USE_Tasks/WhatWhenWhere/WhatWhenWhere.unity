@@ -1821,8 +1821,7 @@ MonoBehaviour:
   AudioFBController: {fileID: 0}
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
-  DrawRenderTexture: {fileID: 0}
-  MainCameraCopy: {fileID: 0}
+  MouseTracker: {fileID: 0}
   stimCount: 0
   totalErrors_InBlock: 0
   errorType_InBlock: []
@@ -1831,67 +1830,55 @@ MonoBehaviour:
   configUI: {fileID: 0}
   jsonSaveLoad: {fileID: 0}
   mainLevel: {fileID: 0}
+  minObjectTouchDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
   itiDuration:
     name: 
     hidden: 0
-    minvalue: 0
-    maxvalue: 0
     value: 0
-    Absmin: 0
-    Absmax: 0
-    precision: 0
     isRange: 0
-  baselineDuration:
+    max: 0
+    min: 0
+    precision: 0
+  finalFbDuration:
     name: 
     hidden: 0
-    minvalue: 0
-    maxvalue: 0
     value: 0
-    Absmin: 0
-    Absmax: 0
-    precision: 0
     isRange: 0
-  covertPrepDuration:
+    max: 0
+    min: 0
+    precision: 0
+  fbDuration:
     name: 
     hidden: 0
-    minvalue: 0
-    maxvalue: 0
     value: 0
-    Absmin: 0
-    Absmax: 0
-    precision: 0
     isRange: 0
-  freeGazeDuration:
+    max: 0
+    min: 0
+    precision: 0
+  maxObjectTouchDuration:
     name: 
     hidden: 0
-    minvalue: 0
-    maxvalue: 0
     value: 0
-    Absmin: 0
-    Absmax: 0
-    precision: 0
     isRange: 0
-  choiceToFbDuration:
+    max: 0
+    min: 0
+    precision: 0
+  selectObjectDuration:
     name: 
     hidden: 0
-    minvalue: 0
-    maxvalue: 0
     value: 0
-    Absmin: 0
-    Absmax: 0
-    precision: 0
     isRange: 0
-  fBDuration:
-    name: 
-    hidden: 0
-    minvalue: 0
-    maxvalue: 0
-    value: 0
-    Absmin: 0
-    Absmax: 0
+    max: 0
+    min: 0
     precision: 0
-    isRange: 0
-  Centralcuesize:
+  sliderSize:
     name: 
     hidden: 0
     value: 0
@@ -1916,14 +1903,6 @@ MonoBehaviour:
     min: 0
     precision: 0
   blinkOnDuration:
-    name: 
-    hidden: 0
-    value: 0
-    isRange: 0
-    max: 0
-    min: 0
-    precision: 0
-  selectObjectDuration:
     name: 
     hidden: 0
     value: 0
@@ -2010,6 +1989,7 @@ MonoBehaviour:
     IsActive: 0
   PreloadedStimGameObjects: []
   PrefabStimPaths: []
+  DrawRenderTexture: {fileID: 0}
 --- !u!1 &1860445379
 GameObject:
   m_ObjectHideFlags: 0
@@ -2645,9 +2625,9 @@ Canvas:
   m_GameObject: {fileID: 2128323196}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
-  m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
+  m_RenderMode: 1
+  m_Camera: {fileID: 1180327782}
+  m_PlaneDistance: 1
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0

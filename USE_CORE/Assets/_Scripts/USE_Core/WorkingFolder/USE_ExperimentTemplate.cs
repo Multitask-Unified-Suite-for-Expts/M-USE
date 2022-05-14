@@ -468,6 +468,12 @@ namespace USE_ExperimentTemplate
 		protected State SetupTask, RunBlock, BlockFeedback, FinishTask;
 		protected bool BlockFbFinished;
 		protected float BlockFbSimpleDuration;
+		
+		[HideInInspector] public RenderTexture DrawRenderTexture;
+
+		public void OnGUI() {
+			GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), DrawRenderTexture);
+		}
 
 		public virtual void SpecifyTypes()
 		{
@@ -498,6 +504,23 @@ namespace USE_ExperimentTemplate
 			{
 				BlockCount = -1;
 				TaskCam.gameObject.SetActive(true);
+				Debug.Log("HERE: HERE");
+
+				if (true) {
+					GameObject cameraObj = new GameObject("DrawCamera");
+					cameraObj.transform.SetParent(GameObject.Find("ExperimenterInfo").transform);
+					Camera newCamera = cameraObj.AddComponent<Camera>();
+					newCamera.CopyFrom(Camera.main);
+					newCamera.cullingMask = 0;
+
+					DrawRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
+					DrawRenderTexture.Create();
+					Camera.main.targetTexture = DrawRenderTexture;
+					
+					RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
+					mainCameraCopy.texture = DrawRenderTexture;
+					mainCameraCopy.rectTransform.sizeDelta = new Vector2(Screen.width / 2, Screen.height / 2);
+				}
 			});
 
 			SetupTask.SpecifyTermination(() => true, RunBlock);
@@ -991,12 +1014,6 @@ namespace USE_ExperimentTemplate
 		// Input Trackers
 		[HideInInspector] public MouseTracker MouseTracker;
 
-		[HideInInspector] public RenderTexture DrawRenderTexture;
-
-		public void OnGUI() {
-			GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), DrawRenderTexture);
-		}
-
 		//protected TrialDef CurrentTrialDef;
 		public T GetCurrentTrialDef<T>() where T : TrialDef
 		{
@@ -1017,21 +1034,6 @@ namespace USE_ExperimentTemplate
 				TrialStims = new List<StimGroup>();
 				AudioFBController.UpdateAudioSource();
 				//DetermineNumTrialsInBlock();
-
-				if (GetType().Name == "WhatWhenWhere_TrialLevel") {
-					GameObject cameraObj = new GameObject("DrawCamera");
-					Camera newCamera = cameraObj.AddComponent<Camera>();
-					newCamera.CopyFrom(Camera.main);
-					newCamera.cullingMask = 0;
-
-					DrawRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
-					DrawRenderTexture.Create();
-					Camera.main.targetTexture = DrawRenderTexture;
-					
-					RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
-					mainCameraCopy.texture = DrawRenderTexture;
-					mainCameraCopy.rectTransform.sizeDelta = new Vector2(Screen.width / 2, Screen.height / 2);
-				}
 			});
 
 			SetupTrial.AddUniversalInitializationMethod(() =>

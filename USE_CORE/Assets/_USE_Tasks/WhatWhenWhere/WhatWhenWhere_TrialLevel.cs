@@ -67,10 +67,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private ConfigVarStore configStore = new ConfigVarStore();
     
     //UI Config Timing Variables
+    //[HideInInspector]
+    //public ConfigNumberRanged itiDuration, baselineDuration, covertPrepDuration, freeGazeDuration, choiceToFbDuration, fBDuration; // = 0.8f;
     [HideInInspector]
-    public ConfigNumberRanged itiDuration, baselineDuration, covertPrepDuration, freeGazeDuration, choiceToFbDuration, fBDuration; // = 0.8f;
-    [HideInInspector]
-    public ConfigNumber Centralcuesize, CentralCueSelectionDuration, CentralCueSelectionRadius, blinkOnDuration, selectObjectDuration, blinkOffDuration, ObjectSelectionRadius, MinObjectSelectionTime, MaxReachTime;
+    public ConfigNumber minObjectTouchDuration, itiDuration, finalFbDuration, fbDuration, maxObjectTouchDuration, selectObjectDuration, sliderSize, CentralCueSelectionDuration, CentralCueSelectionRadius, blinkOnDuration, blinkOffDuration, ObjectSelectionRadius, MinObjectSelectionTime, MaxReachTime;
     [HideInInspector]
     private float sampleDuration, delayDuration;
 
@@ -197,6 +197,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         StartButton.AddDefaultTerminationMethod(() =>
         {
             sliderValueIncreaseAmount = (100f / CurrentTrialDef.CorrectObjectTouchOrder.Length) / 100f;
+            slider.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
+            sliderHalo.transform.localScale = new Vector3(sliderSize.value / 0.38f, sliderSize.value / 2f, 1f);
+
             slider.gameObject.SetActive(true);
 
             initButton.SetActive(false);
@@ -265,7 +268,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     chosenStim = hit.transform.gameObject;
                     GameObject testStim = chosenStim.transform.root.gameObject;
 
-                    if (touchDuration < CurrentTrialDef.MinTouchDuration || touchDuration > CurrentTrialDef.MaxTouchDuration)
+                    if (touchDuration < minObjectTouchDuration.value || touchDuration > maxObjectTouchDuration.value)
                     {
                         //Timing Error
                         timingFail = true;
@@ -349,15 +352,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 Debug.Log ("Didn't click on any stimulus");
                 response = 0;
-
-                Debug.Log("SELECT: " + configStore.get<ConfigNumber>("selectObjectDuration").value);
             }
-
             
         });
 
-        ChooseStimulus.AddTimer(10f, ITI);
-        ChooseStimulus.AddTimer(() => configStore.get<ConfigNumber>("selectObjectDuration").value, ITI);
+        ChooseStimulus.AddTimer(selectObjectDuration.value, ITI);
         ChooseStimulus.SpecifyTermination(() => response == 1, StimulusChosen);
         ChooseStimulus.SpecifyTermination(() => response == 2, StimulusChosen);
         ChooseStimulus.SpecifyTermination(() => stimCount == CurrentTrialDef.CorrectObjectTouchOrder.Length, FinalFeedback);
@@ -405,27 +404,27 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             
         });
         
-        StimulusChosen.SpecifyTermination(() => (correctChoice && Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute >= 0.75f), ChooseStimulus, () => 
+        StimulusChosen.SpecifyTermination(() => (correctChoice && Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute >= fbDuration.value), ChooseStimulus, () => 
         {
             yellowHalo.SetActive(false);
             correctChoice = false;
             sliderHalo.SetActive(false);
         });
        
-        StimulusChosen.SpecifyTermination(() => (incorrectChoice && Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute >= 0.75f), ITI, () =>
+        StimulusChosen.SpecifyTermination(() => (incorrectChoice && Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute >= fbDuration.value), ITI, () =>
         {
             grayHalo.SetActive(false);
             incorrectChoice = false;
             sliderHalo.SetActive(false);
         });
 
-        StimulusChosen.SpecifyTermination(() => (timingFail && (Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute) >= 0.75f), ITI, () =>
+        StimulusChosen.SpecifyTermination(() => (timingFail && (Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute) >= fbDuration.value), ITI, () =>
         {
             imageTimingError.SetActive(false);
             timingFail = false;
         });
 
-        StimulusChosen.SpecifyTermination(() => (irrelevantSelection && (Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute) >= 0.75f), ITI, () =>
+        StimulusChosen.SpecifyTermination(() => (irrelevantSelection && (Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute) >= fbDuration.value), ITI, () =>
         {
             grayHaloScreen.SetActive(false);
             irrelevantSelection = false;
@@ -453,7 +452,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 sr.color = new Color(0, 0, 0, 0.2f);
             }
         });
-        FinalFeedback.AddTimer(2f, ITI, () =>
+        FinalFeedback.AddTimer(finalFbDuration.value, ITI, () =>
         {
             txt.SetActive(false);
             sliderHalo.SetActive(false);
@@ -584,7 +583,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             Debug.Log("ErrorTypes_InSession " + errorType_InSessionString);
             Debug.Log("Response" +response);
         });
-        ITI.SpecifyTermination(() => true, FinishTrial, () => Debug.Log("Trial " + TrialCount_InTask + " completed"));
+        ITI.AddTimer(() => itiDuration.value, FinishTrial, () => Debug.Log("Trial " + TrialCount_InTask + " completed"));
         
         TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
         TrialData.AddDatum("Context", () => context);
@@ -619,30 +618,26 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         configStore = ConfigUiVariables;
         configUI.store = configStore;
 
-        /*
-        itiDuration = configStore.get<ConfigNumberRanged>("itiDuration");
-        Centralcuesize = configStore.get<ConfigNumber>("Centralcuesize");
-        CentralCueSelectionRadius = configStore.get<ConfigNumber>("CentralCueSelectionRadius");
-        CentralCueSelectionDuration = configStore.get<ConfigNumber>("CentralCueSelectionDuration");
-        blinkOnDuration = configStore.get<ConfigNumber>("blinkOnDuration");
-        blinkOffDuration = configStore.get<ConfigNumber>("blinkOffDuration");
-        baselineDuration = configStore.get<ConfigNumberRanged>("baselineDuration");
-        covertPrepDuration = configStore.get<ConfigNumberRanged>("covertPrepDuration");
-        freeGazeDuration = configStore.get<ConfigNumberRanged>("freeGazeDuration");
-        */
+        minObjectTouchDuration = configStore.get<ConfigNumber>("minObjectTouchDuration");
+        maxObjectTouchDuration = configStore.get<ConfigNumber>("maxObjectTouchDuration");
+        itiDuration = configStore.get<ConfigNumber>("itiDuration");
+        sliderSize = configStore.get<ConfigNumber>("sliderSize");
+        //CentralCueSelectionRadius = configStore.get<ConfigNumber>("CentralCueSelectionRadius");
+        //CentralCueSelectionDuration = configStore.get<ConfigNumber>("CentralCueSelectionDuration");
+        //blinkOnDuration = configStore.get<ConfigNumber>("blinkOnDuration");
+        //blinkOffDuration = configStore.get<ConfigNumber>("blinkOffDuration");
+        //baselineDuration = configStore.get<ConfigNumberRanged>("baselineDuration");
+        //covertPrepDuration = configStore.get<ConfigNumberRanged>("covertPrepDuration");
+        //freeGazeDuration = configStore.get<ConfigNumberRanged>("freeGazeDuration");
         selectObjectDuration = configStore.get<ConfigNumber>("selectObjectDuration");
-        Debug.Log("SELECT: " + selectObjectDuration);
-        /*
-        choiceToFbDuration = configStore.get<ConfigNumberRanged>("choiceToFbDuration");
-        ObjectSelectionRadius = configStore.get<ConfigNumber>("ObjectSelectionRadius");
-        MinObjectSelectionTime = configStore.get<ConfigNumber>("MinObjectSelectionTime");
-        fBDuration = configStore.get<ConfigNumberRanged>("fBDuration");
-        MaxReachTime = configStore.get<ConfigNumber>("MaxReachTime");
-        */
+        finalFbDuration = configStore.get<ConfigNumber>("finalFbDuration");
+        //ObjectSelectionRadius = configStore.get<ConfigNumber>("ObjectSelectionRadius");
+        fbDuration = configStore.get<ConfigNumber>("fbDuration");
+        //MaxReachTime = configStore.get<ConfigNumber>("MaxReachTime");
+
 
         configUI.GenerateUI();
     }
-    
 
     // set all gameobjects to setActive false
     void disableAllGameobjects()

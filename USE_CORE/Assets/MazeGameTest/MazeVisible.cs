@@ -31,6 +31,7 @@ public class MazeVisible : MonoBehaviour
         //  that deletes the current visible maze, moves curr maze to next maze, and creates next maze
         // TODO: Currently, this will only load one maze
         //  currMaze = mazeListScript.mazeList[0];
+
     }
 
     void Update()
@@ -55,6 +56,8 @@ public class MazeVisible : MonoBehaviour
 
          if(count != 0)
          {
+            Debug.Log("destroy");
+
             DestroyCurrMaze();
          }
 
@@ -119,8 +122,10 @@ public class MazeVisible : MonoBehaviour
                 instTile.transform.SetParent(this.transform);
             }
         }
+        Debug.Log("end");
+
     }
-    
+
 
     void DestroyCurrMaze()
     {

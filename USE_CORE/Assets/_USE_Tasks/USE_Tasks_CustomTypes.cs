@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using StimHandling_Namespace;
-using WWW_Namespace;
+using WhatWhenWhere_Namespace;
 using ContinuousRecognition_Namespace;
-using test_Namespace;
 using WorkingMemory_Namespace;
 using VisualSearch_Namespace;
 // using EC_Namespace;
+using MazeGame_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -26,14 +26,14 @@ static public class USE_Tasks_CustomTypes
             }
         }
         ,{
-            "WWW", new TaskTypes
+            "WhatWhenWhere", new TaskTypes
             {
-                TaskLevelType = typeof(WWW_TaskLevel),
-                TrialLevelType = typeof(WWW_TrialLevel),
-                TaskDefType = typeof(WWW_TaskDef),
-                BlockDefType = typeof(WWW_BlockDef),
-                TrialDefType = typeof(WWW_TrialDef),
-                StimDefType = typeof(WWW_StimDef)
+                TaskLevelType = typeof(WhatWhenWhere_TaskLevel),
+                TrialLevelType = typeof(WhatWhenWhere_TrialLevel),
+                TaskDefType = typeof(WhatWhenWhere_TaskDef),
+                BlockDefType = typeof(WhatWhenWhere_BlockDef),
+                TrialDefType = typeof(WhatWhenWhere_TrialDef),
+                StimDefType = typeof(WhatWhenWhere_StimDef)
             }
         }
         ,{
@@ -45,17 +45,6 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(ContinuousRecognition_BlockDef),
                 TrialDefType = typeof(ContinuousRecognition_TrialDef),
                 StimDefType = typeof(ContinuousRecognition_StimDef)
-            }
-        }
-        ,{
-            "test", new TaskTypes
-            {
-                TaskLevelType = typeof(test_TaskLevel),
-                TrialLevelType = typeof(test_TrialLevel),
-                TaskDefType = typeof(test_TaskDef),
-                BlockDefType = typeof(test_BlockDef),
-                TrialDefType = typeof(test_TrialDef),
-                StimDefType = typeof(test_StimDef)
             }
         }
         ,{
@@ -82,6 +71,17 @@ static public class USE_Tasks_CustomTypes
         }
 
         
+        ,{
+            "MazeGame", new TaskTypes
+            {
+                TaskLevelType = typeof(MazeGame_TaskLevel),
+                TrialLevelType = typeof(MazeGame_TrialLevel),
+                TaskDefType = typeof(MazeGame_TaskDef),
+                BlockDefType = typeof(MazeGame_BlockDef),
+                TrialDefType = typeof(MazeGame_TrialDef),
+                StimDefType = typeof(MazeGame_StimDef)
+            }
+        }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#
     };
 

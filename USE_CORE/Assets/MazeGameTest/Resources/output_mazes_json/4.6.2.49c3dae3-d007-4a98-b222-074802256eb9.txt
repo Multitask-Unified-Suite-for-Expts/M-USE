@@ -1,0 +1,1 @@
+{"mConfigs":{"dim":4,"sideRestricted":true},"mPath":[{"X":1,"Y":0},{"X":0,"Y":0},{"X":0,"Y":1},{"X":0,"Y":2},{"X":0,"Y":3},{"X":1,"Y":3}],"mStart":{"X":1,"Y":0},"mFinish":{"X":1,"Y":3},"mNumSquares":6,"mNumTurns":2}

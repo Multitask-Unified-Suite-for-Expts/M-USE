@@ -617,25 +617,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         configUI.clear();
         configStore = ConfigUiVariables;
         configUI.store = configStore;
-
-        minObjectTouchDuration = configStore.get<ConfigNumber>("minObjectTouchDuration");
-        maxObjectTouchDuration = configStore.get<ConfigNumber>("maxObjectTouchDuration");
-        itiDuration = configStore.get<ConfigNumber>("itiDuration");
-        sliderSize = configStore.get<ConfigNumber>("sliderSize");
-        //CentralCueSelectionRadius = configStore.get<ConfigNumber>("CentralCueSelectionRadius");
-        //CentralCueSelectionDuration = configStore.get<ConfigNumber>("CentralCueSelectionDuration");
-        //blinkOnDuration = configStore.get<ConfigNumber>("blinkOnDuration");
-        //blinkOffDuration = configStore.get<ConfigNumber>("blinkOffDuration");
-        //baselineDuration = configStore.get<ConfigNumberRanged>("baselineDuration");
-        //covertPrepDuration = configStore.get<ConfigNumberRanged>("covertPrepDuration");
-        //freeGazeDuration = configStore.get<ConfigNumberRanged>("freeGazeDuration");
-        selectObjectDuration = configStore.get<ConfigNumber>("selectObjectDuration");
-        finalFbDuration = configStore.get<ConfigNumber>("finalFbDuration");
-        //ObjectSelectionRadius = configStore.get<ConfigNumber>("ObjectSelectionRadius");
-        fbDuration = configStore.get<ConfigNumber>("fbDuration");
-        //MaxReachTime = configStore.get<ConfigNumber>("MaxReachTime");
-
-
         configUI.GenerateUI();
     }
 
@@ -668,7 +649,26 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         experimenterInfo = GameObject.Find("ExperimenterInfo").GetComponent<ExperimentInfoController>();
         sliderInitPosition = slider.gameObject.transform.position;
-        
+
+        //config UI variables
+        minObjectTouchDuration = configStore.get<ConfigNumber>("minObjectTouchDuration");
+        maxObjectTouchDuration = configStore.get<ConfigNumber>("maxObjectTouchDuration");
+        itiDuration = configStore.get<ConfigNumber>("itiDuration");
+        sliderSize = configStore.get<ConfigNumber>("sliderSize");
+        //CentralCueSelectionRadius = configStore.get<ConfigNumber>("CentralCueSelectionRadius");
+        //CentralCueSelectionDuration = configStore.get<ConfigNumber>("CentralCueSelectionDuration");
+        //blinkOnDuration = configStore.get<ConfigNumber>("blinkOnDuration");
+        //blinkOffDuration = configStore.get<ConfigNumber>("blinkOffDuration");
+        //baselineDuration = configStore.get<ConfigNumberRanged>("baselineDuration");
+        //covertPrepDuration = configStore.get<ConfigNumberRanged>("covertPrepDuration");
+        //freeGazeDuration = configStore.get<ConfigNumberRanged>("freeGazeDuration");
+        selectObjectDuration = configStore.get<ConfigNumber>("selectObjectDuration");
+        finalFbDuration = configStore.get<ConfigNumber>("finalFbDuration");
+        //ObjectSelectionRadius = configStore.get<ConfigNumber>("ObjectSelectionRadius");
+        fbDuration = configStore.get<ConfigNumber>("fbDuration");
+        //MaxReachTime = configStore.get<ConfigNumber>("MaxReachTime");
+
+        //Colors
         contextColors.Add(new Color(0f, 0f, 0.5451f)); // dark blue
         contextColors.Add(new Color(0.5294f, 0.8078f, 0.9804f)); // light sky blue
         contextColors.Add(new Color(0.9961f, 0.850f, 0.850f)); // light yellow

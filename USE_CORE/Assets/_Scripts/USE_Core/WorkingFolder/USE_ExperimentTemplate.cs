@@ -238,6 +238,9 @@ namespace USE_ExperimentTemplate
 			tl.DefineTaskLevel();
 			ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
 			ActiveTaskLevels.Add(tl);
+			if(tl.TaskCanvasses != null)
+				foreach (GameObject go in tl.TaskCanvasses)
+					go.SetActive(false);
 			return tl;
 		}
 
@@ -451,6 +454,7 @@ namespace USE_ExperimentTemplate
 
 		// public string TaskSceneName;
 		public Camera TaskCam;
+		public GameObject[] TaskCanvasses;
 
 		//protected TrialDef[] AllTrialDefs;
 		//protected TrialDef[] CurrentBlockTrialDefs;
@@ -511,6 +515,9 @@ namespace USE_ExperimentTemplate
 			{
 				BlockCount = -1;
 				TaskCam.gameObject.SetActive(true);
+				if(TaskCanvasses!=null)
+					foreach (GameObject go in TaskCanvasses)
+						go.SetActive(true);
 
 				GameObject experimenterInfoPrefab = Resources.Load<GameObject>("ExperimenterInfo");
 				GameObject experimenterInfo = Instantiate(experimenterInfoPrefab);
@@ -599,6 +606,10 @@ namespace USE_ExperimentTemplate
 				}
 				TaskStims.AllTaskStims.DestroyStimGroup();
 				TaskCam.gameObject.SetActive(false);
+				
+				if(TaskCanvasses!=null)
+					foreach (GameObject go in TaskCanvasses)
+						go.SetActive(false);
 			});
 			
 			//user-defined task control level 

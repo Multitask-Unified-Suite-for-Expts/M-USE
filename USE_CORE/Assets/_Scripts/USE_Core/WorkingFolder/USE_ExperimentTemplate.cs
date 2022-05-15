@@ -40,6 +40,7 @@ namespace USE_ExperimentTemplate
 		public LocateFile LocateFile;
 
 		private Camera SessionCam;
+		public DisplaySwitcher DisplaySwitcher;
 
 		private string configFileFolder;
 		private bool TaskSceneLoaded, SceneLoading;
@@ -70,6 +71,10 @@ namespace USE_ExperimentTemplate
 				StoreData = (bool) SessionSettings.Get("Session", "StoreData");
 
 			SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
+
+			if (SessionSettings.SettingExists("Session", "ToggleDisplay"))
+				if ((bool)SessionSettings.Get("Session", "ToggleDisplay"))
+					DisplaySwitcher.ToggleDisplay();
 		}
 
 		public override void DefineControlLevel()
@@ -528,7 +533,10 @@ namespace USE_ExperimentTemplate
                 if (configUI == null)
                     configUI = FindObjectOfType<ConfigUI>();
                 configUI.clear();
-                configUI.store = ConfigUiVariables;
+                if (ConfigUiVariables != null)
+	                configUI.store = ConfigUiVariables;
+                else
+	                configUI.store = new ConfigVarStore();
                 configUI.GenerateUI();
             });
 

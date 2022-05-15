@@ -460,7 +460,8 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims, RuntimeStims;
 		public List<GameObject> PreloadedStimGameObjects;
 		public List<string> PrefabStimPaths;
-		protected ConfigVarStore ConfigUiVariables;
+        protected ConfigUI configUI;
+        protected ConfigVarStore ConfigUiVariables;
 
 
 		public Type TaskLevelType;
@@ -522,7 +523,13 @@ namespace USE_ExperimentTemplate
 				RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
 				mainCameraCopy.texture = DrawRenderTexture;
 				mainCameraCopy.rectTransform.sizeDelta = new Vector2(Screen.width / 2, Screen.height / 2);
-			});
+
+                if (configUI == null)
+                    configUI = FindObjectOfType<ConfigUI>();
+                configUI.clear();
+                configUI.store = ConfigUiVariables;
+                configUI.GenerateUI();
+            });
 
 			SetupTask.SpecifyTermination(() => true, RunBlock);
 
@@ -1015,8 +1022,8 @@ namespace USE_ExperimentTemplate
 		// Input Trackers
 		[HideInInspector] public MouseTracker MouseTracker;
 
-		//protected TrialDef CurrentTrialDef;
-		public T GetCurrentTrialDef<T>() where T : TrialDef
+        //protected TrialDef CurrentTrialDef;
+        public T GetCurrentTrialDef<T>() where T : TrialDef
 		{
 			return (T) TrialDefs[TrialCount_InBlock];
 		}

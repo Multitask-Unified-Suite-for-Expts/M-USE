@@ -59,12 +59,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private SpriteRenderer sr;
 
     //UI VARIABLES
-    public ConfigUI configUI;
-    public JsonSaveLoad jsonSaveLoad;
+    //public ConfigUI configUI;
+    //public JsonSaveLoad jsonSaveLoad;
     public WhatWhenWhere_TrialLevel mainLevel;
     private ExperimentInfoController experimenterInfo;
     private bool storeData;
-    private ConfigVarStore configStore = new ConfigVarStore();
+    //private ConfigVarStore configStore = new ConfigVarStore();
     
     //UI Config Timing Variables
     //[HideInInspector]
@@ -197,6 +197,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         StartButton.AddDefaultTerminationMethod(() =>
         {
             sliderValueIncreaseAmount = (100f / CurrentTrialDef.CorrectObjectTouchOrder.Length) / 100f;
+            Debug.Log(sliderSize);
             slider.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
             sliderHalo.transform.localScale = new Vector3(sliderSize.value / 0.38f, sliderSize.value / 2f, 1f);
 
@@ -612,13 +613,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("SliderValue", () => slider.normalizedValue);
     }
 
-    public void CreateConfigUI()
-    {
-        configUI.clear();
-        configStore = ConfigUiVariables;
-        configUI.store = configStore;
-        configUI.GenerateUI();
-    }
+   // public void CreateConfigUI()
+   // {
+    //    configUI.clear();
+    //    configStore = ConfigUiVariables;
+    //    configUI.store = configStore;
+     //   configUI.GenerateUI();
+   // }
 
     // set all gameobjects to setActive false
     void disableAllGameobjects()
@@ -651,22 +652,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         sliderInitPosition = slider.gameObject.transform.position;
 
         //config UI variables
-        minObjectTouchDuration = configStore.get<ConfigNumber>("minObjectTouchDuration");
-        maxObjectTouchDuration = configStore.get<ConfigNumber>("maxObjectTouchDuration");
-        itiDuration = configStore.get<ConfigNumber>("itiDuration");
-        sliderSize = configStore.get<ConfigNumber>("sliderSize");
-        //CentralCueSelectionRadius = configStore.get<ConfigNumber>("CentralCueSelectionRadius");
-        //CentralCueSelectionDuration = configStore.get<ConfigNumber>("CentralCueSelectionDuration");
-        //blinkOnDuration = configStore.get<ConfigNumber>("blinkOnDuration");
-        //blinkOffDuration = configStore.get<ConfigNumber>("blinkOffDuration");
-        //baselineDuration = configStore.get<ConfigNumberRanged>("baselineDuration");
-        //covertPrepDuration = configStore.get<ConfigNumberRanged>("covertPrepDuration");
-        //freeGazeDuration = configStore.get<ConfigNumberRanged>("freeGazeDuration");
-        selectObjectDuration = configStore.get<ConfigNumber>("selectObjectDuration");
-        finalFbDuration = configStore.get<ConfigNumber>("finalFbDuration");
-        //ObjectSelectionRadius = configStore.get<ConfigNumber>("ObjectSelectionRadius");
-        fbDuration = configStore.get<ConfigNumber>("fbDuration");
-        //MaxReachTime = configStore.get<ConfigNumber>("MaxReachTime");
+        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
+        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
+        itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
+        sliderSize = ConfigUiVariables.get<ConfigNumber>("sliderSize");
+        selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
+        finalFbDuration = ConfigUiVariables.get<ConfigNumber>("finalFbDuration");
+        fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
 
         //Colors
         contextColors.Add(new Color(0f, 0f, 0.5451f)); // dark blue
@@ -691,11 +683,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         imageTimingError.SetActive(false);
         GameObject.Find("Slider").SetActive(false);
 
-        if (jsonSaveLoad == null)
-            jsonSaveLoad = FindObjectOfType<JsonSaveLoad>();
-        if (configUI == null)
-            configUI = FindObjectOfType<ConfigUI>();
-        CreateConfigUI();
+        //if (jsonSaveLoad == null)
+         //   jsonSaveLoad = FindObjectOfType<JsonSaveLoad>();
+       // if (configUI == null)
+            //configUI = FindObjectOfType<ConfigUI>();
+        //CreateConfigUI();
 
         Debug.Log("Done Loading Variables");
     }

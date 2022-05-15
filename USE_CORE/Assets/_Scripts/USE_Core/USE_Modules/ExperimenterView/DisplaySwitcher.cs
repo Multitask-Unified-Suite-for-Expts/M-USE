@@ -4,10 +4,6 @@ using UnityEngine;
 using USE_Settings;
 
 public class DisplaySwitcher : MonoBehaviour {
-
-	public bool toggleDisplay = false;
-
-
 	public void ToggleDisplay()
 	{
 		var cams = GameObject.FindObjectsOfType<Camera>();
@@ -22,14 +18,11 @@ public class DisplaySwitcher : MonoBehaviour {
 			c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
 		}
 
-		toggleDisplay = false;
-
 	}
 
 	void Update(){
 		if(InputBroker.GetKeyUp(KeyCode.W)){
-			toggleDisplay = true;
+			ToggleDisplay();
 		}
-		ToggleDisplay();
 	}
 }

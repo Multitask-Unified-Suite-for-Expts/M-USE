@@ -4,16 +4,15 @@ using UnityEngine;
 
 public class ApplicationQuit : MonoBehaviour {
 
-	public void Quit () {
-		if (Application.isEditor) {
-			UnityEditor.EditorApplication.isPlaying = false;
-		}
-		else
-		{
-			Application.Quit();
-		}
+	public void Quit()
+	{
+#if UNITY_EDITOR
+		UnityEditor.EditorApplication.isPlaying = false;
+#else
+	Application.Quit();
+#endif
 	}
-	
+
 	void Update () {
 		if(Input.GetKeyDown(KeyCode.Escape))
 			Quit();

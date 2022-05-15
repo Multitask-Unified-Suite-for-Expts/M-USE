@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using UnityEditor;
@@ -832,12 +833,18 @@ namespace USE_ExperimentTemplate
 			else
 			{
 				//Prefabs in Prefabs/TaskFolder or TaskFolder/Prefabs
+				List<string> prefabPaths = new List<string>();
 				string[] prefabFolders =
-					{"Assets/Resources/Prefabs/" + TaskName, "Assets/Resources/USE_Tasks/" + TaskName + "/Prefabs"};
-				string[] guids = AssetDatabase.FindAssets("t: GameObject", prefabFolders);
-				foreach (string guid in guids)
+					{"Assets/Resources/Prefabs/" + TaskName, "Assets/_USE_Tasks/" + TaskName + "/Prefabs"};
+				foreach (string path in prefabFolders)
 				{
-					taskStimDefFromPrefabPath.Invoke(this, new object[] {AssetDatabase.GUIDToAssetPath(guid), PreloadedStims});
+					if(Directory.Exists(path))
+						prefabPaths.AddRange(Directory.GetFiles(path).ToList());
+				}
+				// string[] guids = AssetDatabase.FindAssets("t: GameObject", prefabFolders);
+				foreach (string pp in prefabPaths)
+				{
+					taskStimDefFromPrefabPath.Invoke(this, new object[] {pp, PreloadedStims});
 				}
 			}
 			
@@ -946,6 +953,7 @@ namespace USE_ExperimentTemplate
 		{
 			StimDef sd = new T();
 			sd.StimGameObject = go;
+			sd.StimName = go.name;
 			if (sg != null)
 				sd.AddToStimGroup(sg);
 			return (T) sd;
@@ -955,6 +963,7 @@ namespace USE_ExperimentTemplate
 		{
 			StimDef sd = new T();
 			sd.PrefabPath = prefabPath;
+			sd.StimName = Path.GetFileName(prefabPath);
 			if (sg != null)
 				sd.AddToStimGroup(sg);
 			return (T) sd;

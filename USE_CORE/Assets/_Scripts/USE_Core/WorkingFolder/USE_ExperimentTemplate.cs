@@ -473,6 +473,8 @@ namespace USE_ExperimentTemplate
         protected ConfigUI configUI;
         protected ConfigVarStore ConfigUiVariables;
 
+        private GameObject Controllers;
+
 
 		public Type TaskLevelType;
 		protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
@@ -545,6 +547,8 @@ namespace USE_ExperimentTemplate
                 else
 	                configUI.store = new ConfigVarStore();
                 configUI.GenerateUI();
+                
+                Controllers.SetActive(true);
             });
 
 			SetupTask.SpecifyTermination(() => true, RunBlock);
@@ -610,6 +614,7 @@ namespace USE_ExperimentTemplate
 				if(TaskCanvasses!=null)
 					foreach (GameObject go in TaskCanvasses)
 						go.SetActive(false);
+				Controllers.SetActive(false);
 			});
 			
 			//user-defined task control level 
@@ -649,9 +654,9 @@ namespace USE_ExperimentTemplate
 			//AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
 			GameObject fbControllersPrefab = Resources.Load<GameObject>("FeedbackControllers");
 			GameObject inputTrackersPrefab = Resources.Load<GameObject>("InputTrackers");
-			GameObject controllers = new GameObject("Controllers");
-			GameObject fbControllers = Instantiate(fbControllersPrefab, controllers.transform);
-			GameObject inputTrackers = Instantiate(inputTrackersPrefab, controllers.transform);
+			Controllers = new GameObject("Controllers");
+			GameObject fbControllers = Instantiate(fbControllersPrefab, Controllers.transform);
+			GameObject inputTrackers = Instantiate(inputTrackersPrefab, Controllers.transform);
 
 			List<string> fbControllersList = new List<string>();
 			if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FeedbackControllers"))
@@ -685,6 +690,8 @@ namespace USE_ExperimentTemplate
 
 			TrialLevel.MouseTracker = inputTrackers.GetComponent<MouseTracker>();
 			TrialLevel.MouseTracker.Init(FrameData);
+
+			Controllers.SetActive(false);
 
 			TrialLevel.SessionDataControllers = SessionDataControllers;
 			TrialLevel.FilePrefix = FilePrefix;

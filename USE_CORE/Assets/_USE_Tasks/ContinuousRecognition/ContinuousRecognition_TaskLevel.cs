@@ -30,7 +30,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             
             
             
-            Camera.main.backgroundColor = Color.yellow;
+            //Camera.main.backgroundColor = Color.yellow;
             BlockFbSimpleDuration = 5f;
             List<int> chosen = TrialLevel.GetCurrentTrialDef<ContinuousRecognition_TrialDef>().PreviouslyChosenStimuli;
             bool n = TrialLevel.GetCurrentTrialDef<ContinuousRecognition_TrialDef>().isNewStim;

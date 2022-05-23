@@ -30,6 +30,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private bool timingFail = false;
     private bool irrelevantSelection = false;
     private bool noSelection = false;
+    private bool trialComplete = false;
 
     private static int numObjMax = 20;
 
@@ -210,29 +211,34 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // Define stimOn state
         ChooseStimulus.AddInitializationMethod(() =>
         {
-            GameObject.Find("Slider").SetActive(true);
-            int correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[stimCount] - 1;
-            Debug.Log("Correct Index: " + correctIndex);
-            
-            for (int i = 0; i < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++i)
+            if (stimCount < CurrentTrialDef.CorrectObjectTouchOrder.Length)
             {
-                WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef)searchStims.stimDefs[i];
-                
-                if (i == correctIndex)
-                {
-                    sd.IsCurrentTarget = true;
-                }
-                else
-                {
-                    sd.IsCurrentTarget = false;
-                }
-            }
+                int correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[stimCount] - 1;
 
-            foreach (StimDef thing in searchStims.stimDefs)
-            {
-                Debug.Log(thing.StimName);
+                for (int i = 0; i < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++i)
+                {
+                    WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef)searchStims.stimDefs[i];
+
+                    if (i == correctIndex)
+                    {
+                        sd.IsCurrentTarget = true;
+                    }
+                    else
+                    {
+                        sd.IsCurrentTarget = false;
+                    }
+                }
+
+                foreach (StimDef thing in searchStims.stimDefs)
+                {
+                    Debug.Log(thing.StimName);
+                }
             }
-            
+            else
+            {
+                trialComplete = true;
+            }
+                
             searchStims.ToggleVisibility(true);
             chosenStim = null;
             initialClick = 0;
@@ -240,127 +246,131 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         ChooseStimulus.AddUpdateMethod(() =>
         {
-            // check if user clicks on left or right
-            if (Input.GetMouseButtonDown(0))
-            {
-                initialTouchTime = Time.time;
-                initialClick += 1;
-                choiceDuration = initialTouchTime - ChooseStimulus.TimingInfo.StartTimeAbsolute;
-                choiceDurations.Add(choiceDuration);
-            }
             
-            if (Input.GetMouseButtonUp(0) && initialClick == 1)
-            {
-                touchDuration = Time.time - initialTouchTime;
-                touchDurations.Add(touchDuration);
-                
-                mouseRay = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-
-                var clickPoint = Input.mousePosition;
-                touchedPositionsList.Add(new Vector3(clickPoint[0], clickPoint[1], clickPoint[2]));
-                
-                RaycastHit hit;
-                // verify that the hit is on a stimulus
-                if (Physics.Raycast(mouseRay, out hit))
+                // check if user clicks on left or right
+                if (Input.GetMouseButtonDown(0))
                 {
-                    response = 1;
-                    int correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[stimCount] - 1;
-                    Debug.Log("index: " + correctIndex);
-                    chosenStim = hit.transform.gameObject;
-                    GameObject testStim = chosenStim.transform.root.gameObject;
+                    initialTouchTime = Time.time;
+                    initialClick += 1;
+                    choiceDuration = initialTouchTime - ChooseStimulus.TimingInfo.StartTimeAbsolute;
+                    choiceDurations.Add(choiceDuration);
+                }
 
-                    if (touchDuration < minObjectTouchDuration.value || touchDuration > maxObjectTouchDuration.value)
+                if (Input.GetMouseButtonUp(0) && initialClick == 1)
+                {
+                    touchDuration = Time.time - initialTouchTime;
+                    touchDurations.Add(touchDuration);
+
+                    mouseRay = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
+
+                    var clickPoint = Input.mousePosition;
+                    touchedPositionsList.Add(new Vector3(clickPoint[0], clickPoint[1], clickPoint[2]));
+
+                    RaycastHit hit;
+                    // verify that the hit is on a stimulus
+                    if (Physics.Raycast(mouseRay, out hit))
                     {
-                        //Timing Error
-                        timingFail = true;
-                        touchDurationError += 1;
-                        totalErrors_InSession += 1;
-                        totalErrors_InBlock += 1;
-                        touchedObjects.Add(testStim.name);
-                        
-                        //numTotal[correctIndex]++;
-                        numErrors[correctIndex]++;
-                    }
+                        response = 1;
+                        int correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[stimCount] - 1;
+                        Debug.Log("index: " + correctIndex);
+                        chosenStim = hit.transform.gameObject;
+                        GameObject testStim = chosenStim.transform.root.gameObject;
 
-                    else if (testStim.GetComponent<StimDefPointer>().GetStimDef<WhatWhenWhere_StimDef>().IsCurrentTarget)
-                    {
-                        //Correct Choice
-                        numCorrect[stimCount]++;
-                        numTotal[stimCount]++;
-                        slider.value += sliderValueIncreaseAmount;
-                        stimCount += 1;
+                        if (touchDuration < minObjectTouchDuration.value || touchDuration > maxObjectTouchDuration.value)
+                        {
+                            //Timing Error
+                            Debug.Log("Did not click on stimulus for long enough");
+                            timingFail = true;
+                            touchDurationError += 1;
+                            totalErrors_InSession += 1;
+                            totalErrors_InBlock += 1;
+                            touchedObjects.Add(testStim.name);
 
-                        touchedObjects.Add(testStim.name);
-                        yellowHalo.transform.position = testStim.transform.position;
-                        correctChoice = true;
-                    }
-                    else if (touchedObjects.Contains(testStim.name))
-                    {
-                        //Repetition error
-                        grayHalo.transform.position = testStim.transform.position;
-                        touchedObjects.Add(testStim.name);
+                            //numTotal[correctIndex]++;
+                            numErrors[correctIndex]++;
+                        }
 
-                        slider.value -= sliderValueIncreaseAmount;
-                        repetitionError += 1;
-                        totalErrors_InSession += 1;
-                        totalErrors_InBlock += 1;
+                        else if (testStim.GetComponent<StimDefPointer>().GetStimDef<WhatWhenWhere_StimDef>().IsCurrentTarget)
+                        {
+                            //Correct Choice
+                            Debug.Log("Clicked on the correct stimulus within the sequence");
+                            numCorrect[stimCount]++;
+                            numTotal[stimCount]++;
+                            slider.value += sliderValueIncreaseAmount;
+                            stimCount += 1;
 
-                        numTotal[stimCount]++;
-                        numErrors[stimCount]++;
-                        
-                        incorrectChoice = true;
+                            touchedObjects.Add(testStim.name);
+                            yellowHalo.transform.position = testStim.transform.position;
+                            correctChoice = true;
+                        }
+                        else if (touchedObjects.Contains(testStim.name))
+                        {
+                            //Repetition error
+                            Debug.Log("Clicked on a stimulus, but repeated a previous selection");
+                            grayHalo.transform.position = testStim.transform.position;
+                            touchedObjects.Add(testStim.name);
+
+                            slider.value -= sliderValueIncreaseAmount;
+                            repetitionError += 1;
+                            totalErrors_InSession += 1;
+                            totalErrors_InBlock += 1;
+
+                            numTotal[stimCount]++;
+                            numErrors[stimCount]++;
+
+                            incorrectChoice = true;
+                        }
+                        else
+                        {
+                            //Slot error
+                            Debug.Log("Clicked on a stimulus, but not within the correct sequence");
+                            grayHalo.transform.position = testStim.transform.position;
+                            touchedObjects.Add(testStim.name);
+                            slider.value -= sliderValueIncreaseAmount;
+                            slotError += 1;
+                            totalErrors_InSession += 1;
+                            totalErrors_InBlock += 1;
+
+                            numTotal[stimCount]++;
+                            numErrors[stimCount]++;
+
+                            incorrectChoice = true;
+                        }
+
+                        // progress report
+                        accuracyLog = "";
+                        for (int i = 0; i < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++i)
+                        {
+                            accuracyLog = accuracyLog + "Slot " + (i + 1) + ": " + numCorrect[i] + "/" + numTotal[i] + " ";
+                        }
+                        Debug.Log("Progress: " + accuracyLog);
+
                     }
                     else
                     {
-                        //Slot error
-                        grayHalo.transform.position = testStim.transform.position;
-                        touchedObjects.Add(testStim.name);
-                        slider.value -= sliderValueIncreaseAmount;
-                        slotError += 1;
+                        //Irrelevant Selection Error
+                        Debug.Log("Clicked within the scene, but not on a stimulus");
+                        response = 2;
+                        var screenPoint = Input.mousePosition;
+                        screenPoint.z = 100.0f; //distance of the plane from the camera
+                        grayHaloScreen.transform.position = Camera.main.ScreenToWorldPoint(screenPoint);
+                        irrelevantSelectionError += 1;
                         totalErrors_InSession += 1;
                         totalErrors_InBlock += 1;
-
-                        numTotal[stimCount]++;
-                        numErrors[stimCount]++;
-                        
-                        incorrectChoice = true;
+                        irrelevantSelection = true;
                     }
-
-                    // progress report
-                    accuracyLog = "";
-                    for (int i = 0; i < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++i)
-                    {
-                        accuracyLog = accuracyLog + "Slot " + (i + 1) + ": " + numCorrect[i] + "/" + numTotal[i] + " ";
-                    }
-                    Debug.Log("Progress: "+ accuracyLog);
-                    
-                }                
+                }
                 else
                 {
-                    //Irrelevant Selection Error
-                    Debug.Log("Clicked within the scene, but not on a stimulus");
-                    response = 2;
-                    var screenPoint = Input.mousePosition;
-                    screenPoint.z = 100.0f; //distance of the plane from the camera
-                    grayHaloScreen.transform.position = Camera.main.ScreenToWorldPoint(screenPoint);
-                    irrelevantSelectionError += 1;
-                    totalErrors_InSession += 1;
-                    totalErrors_InBlock += 1;
-                    irrelevantSelection = true;
+                    Debug.Log("Didn't click on any stimulus");
+                    response = 0;
                 }
-            }
-            else
-            {
-                Debug.Log ("Didn't click on any stimulus");
-                response = 0;
-            }
-            
         });
 
         ChooseStimulus.AddTimer(()=>selectObjectDuration.value, ITI);
         ChooseStimulus.SpecifyTermination(() => response == 1, StimulusChosen);
         ChooseStimulus.SpecifyTermination(() => response == 2, StimulusChosen);
-        ChooseStimulus.SpecifyTermination(() => stimCount == CurrentTrialDef.CorrectObjectTouchOrder.Length, FinalFeedback);
+        ChooseStimulus.SpecifyTermination(() => trialComplete, FinalFeedback);
         
         StimulusChosen.AddUpdateMethod(() =>
         {
@@ -433,7 +443,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         FinalFeedback.AddInitializationMethod(() =>
         {
-
+            trialComplete = false;
             sliderHalo.SetActive(true);
             sr.color = new Color(1, 1, 1, 0.2f);
             txt.SetActive(true);
@@ -466,13 +476,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             Camera.main.backgroundColor = Color.white;
             txt.SetActive(false);
             
-            GameObject.Find("Slider").SetActive(false);
-
-            if(stimCount == CurrentTrialDef.CorrectObjectTouchOrder.Length)
-            {
-                response = -1;
-            }
-            else if (response == 0)
+            slider.gameObject.SetActive(false);
+            
+            if (response == 0)
             {
                 noScreenTouchError++;
                 totalErrors_InSession += 1;

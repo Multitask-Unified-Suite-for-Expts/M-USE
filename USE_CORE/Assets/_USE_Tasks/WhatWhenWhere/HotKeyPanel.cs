@@ -1,12 +1,19 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System; 
+using System;
 
-
-
-namespace ExperimenterDisplay_Namespace
+public class HotKeyPanel : MonoBehaviour
 {
+    public HotKeyList HotKeyList;
+
+
+    public void Update()
+
+    {
+        HotKeyList.CheckAllHotKeyConditions();
+    }
+
     public class HotKey
     {
         public string keyDescription;
@@ -18,13 +25,14 @@ namespace ExperimenterDisplay_Namespace
         {
             return keyDescription + " -> " + actionName;
         }
-        
+
     }
+
     public class HotKeyList
     {
         List<HotKey> HotKeys = new List<HotKey>();
 
-        public void CheckAllHotkeyConditions()
+        public void CheckAllHotKeyConditions()
         {
             foreach (HotKey hk in HotKeys)
             {
@@ -60,12 +68,12 @@ namespace ExperimenterDisplay_Namespace
                     foreach (Camera c in cams)
                     {
                         c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-                }
+                    }
                     var canvases = GameObject.FindObjectsOfType<Canvas>();
                     foreach (Canvas c in canvases)
                     {
                         c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-                }
+                    }
                 }
             };
             HotKeyList.Add(toggleDisplays);
@@ -89,7 +97,7 @@ namespace ExperimenterDisplay_Namespace
             };
 
             HotKeyList.Add(showCursor);
-            
+
             // Quit Game Hot Key
             HotKey quitGame = new HotKey
             {
@@ -109,7 +117,9 @@ namespace ExperimenterDisplay_Namespace
 
 
 }
-    
+
+
+
 
 
 

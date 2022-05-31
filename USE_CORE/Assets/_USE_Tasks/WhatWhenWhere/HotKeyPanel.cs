@@ -2,26 +2,42 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEngine.UI;
+using Cursor = UnityEngine.Cursor;
 
 public class HotKeyPanel : MonoBehaviour
 {
-    public HotKeyList HotKeyList;
+    public HotKeyList HkList;
+    public GameObject hotKeyText;
+    public delegate bool BoolDelegate();
+    public delegate void VoidDelegate();
+    
 
+    public void Start()
+    {
+        HkList = new HotKeyList();
+        HkList.Initialize();
+        hotKeyText = transform.Find("HotKey2").gameObject;
+
+        hotKeyText.GetComponent<Text>().supportRichText = true;
+        hotKeyText.GetComponent<Text>().text = "<size=35><b>Hot Keys</b></size>" + "\n<size=20>" + HkList.GenerateHotKeyDescriptions() + "</size>";
+    }
+    
 
     public void Update()
 
     {
-        HotKeyList.CheckAllHotKeyConditions();
+        HkList.CheckAllHotKeyConditions();
     }
 
     public class HotKey
     {
         public string keyDescription;
         public string actionName;
-        public Action hotKeyAction;
-        public bool hotKeyCondition;
+        public VoidDelegate hotKeyAction;
+        public BoolDelegate hotKeyCondition;
 
-        string GenerateTextDescription()
+        public string GenerateTextDescription()
         {
             return keyDescription + " -> " + actionName;
         }
@@ -31,12 +47,26 @@ public class HotKeyPanel : MonoBehaviour
     public class HotKeyList
     {
         List<HotKey> HotKeys = new List<HotKey>();
-
-        public void CheckAllHotKeyConditions()
+        
+        public string GenerateHotKeyDescriptions()
         {
+            string completeString = "";
             foreach (HotKey hk in HotKeys)
             {
-                if (hk.hotKeyCondition)
+                completeString = completeString + hk.GenerateTextDescription() + "\n";
+            }
+            
+            Debug.Log("HotKeyDescriptions: " + completeString);
+            
+            return completeString;
+        }
+        
+        public void CheckAllHotKeyConditions()
+        {
+            
+            foreach (HotKey hk in HotKeys)
+            {
+                if (hk.hotKeyCondition())
                 {
                     hk.hotKeyAction();
                 }
@@ -60,8 +90,8 @@ public class HotKeyPanel : MonoBehaviour
             HotKey toggleDisplays = new HotKey
             {
                 keyDescription = "W",
-                actionName = "ToggleDisplays",
-                hotKeyCondition = InputBroker.GetKeyUp(KeyCode.W),
+                actionName = "Toggle Displays",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.W),
                 hotKeyAction = () =>
                 {
                     var cams = GameObject.FindObjectsOfType<Camera>();
@@ -78,35 +108,64 @@ public class HotKeyPanel : MonoBehaviour
             };
             HotKeyList.Add(toggleDisplays);
             // Remove Cursor Hot Key
-            HotKey removeCursor = new HotKey
+            HotKey toggleCursor = new HotKey
             {
-                keyDescription = "Shift + X",
-                actionName = "RemoveCursor",
-                hotKeyCondition = (InputBroker.GetKey(KeyCode.LeftShift) || InputBroker.GetKey(KeyCode.RightShift)) && InputBroker.GetKeyUp(KeyCode.X),
-                hotKeyAction = () => Cursor.visible = false
+                keyDescription = "C",
+                actionName = "Cursor Visibility",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.C),
+                hotKeyAction = () =>
+                {
+                    if (Cursor.visible)
+                        Cursor.visible = false;
+                    else
+                        Cursor.visible = true;
+                }
+
             };
-            HotKeyList.Add(removeCursor);
-
-            // Show Cursor Hot Key
-            HotKey showCursor = new HotKey
-            {
-                keyDescription = "Shift + C",
-                actionName = "ShowCursor",
-                hotKeyCondition = (InputBroker.GetKey(KeyCode.LeftShift) || InputBroker.GetKey(KeyCode.RightShift)) && InputBroker.GetKeyUp(KeyCode.C),
-                hotKeyAction = () => Cursor.visible = true
-            };
-
-            HotKeyList.Add(showCursor);
-
+            HotKeyList.Add(toggleCursor);
+            
             // Quit Game Hot Key
             HotKey quitGame = new HotKey
             {
                 keyDescription = "Esc",
-                actionName = "QuitGame",
-                hotKeyCondition = Input.GetKey("escape"),
-                hotKeyAction = () => Application.Quit()
+                actionName = "Quit",
+                hotKeyCondition = () => Input.GetKey("escape"),
+                hotKeyAction = () => 
+                {
+                    #if UNITY_EDITOR
+                    {
+                        UnityEditor.EditorApplication.isPlaying = false;
+                    }
+                    #endif
+                    {
+                        Application.Quit();
+                    }
+                }
             };
             HotKeyList.Add(quitGame);
+
+            // Pause Game Hot Key
+            HotKey pauseGame = new HotKey
+            {
+                keyDescription = "P",
+                actionName = "Pause",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.P),
+                hotKeyAction = () =>
+                {
+                    #if UNITY_EDITOR
+                    {
+                        if (!UnityEditor.EditorApplication.isPaused)
+                        {
+                           
+                        }
+                    }
+                    #endif
+                    {
+                        Application.Quit();
+                    }
+                }
+            };
+            HotKeyList.Add(pauseGame);
 
             return (HotKeyList);
         }

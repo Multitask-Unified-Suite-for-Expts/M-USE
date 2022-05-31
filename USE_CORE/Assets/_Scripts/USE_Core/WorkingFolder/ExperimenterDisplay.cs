@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace ExperimenterDisplay
 {
@@ -11,10 +12,14 @@ namespace ExperimenterDisplay
         //all panel methods are now controlled and accessible through it
         private List<ExperimenterDisplayPanel> TaskPanels;
         //any other fields necessary to control which display it is on, etc
+        public GameObject experimenterDisplayCanvas;
 
-        public void InitializeExperimenterDisplay(List<ExperimenterDisplayPanel> taskPanels = null)
+        public GameObject InitializeExperimenterDisplay(List<ExperimenterDisplayPanel> taskPanels = null)
         {
             //generate the main display, any housekeeping necessary to initialize it
+
+            experimenterDisplayCanvas = Instantiate(Resources.Load<GameObject>("ExperimenterInfo"));
+            experimenterDisplayCanvas.name = "ExperimenterDisplayCanvas";
 
             if (taskPanels != null)
                 TaskPanels = taskPanels;
@@ -26,12 +31,14 @@ namespace ExperimenterDisplay
                 panel.InitializePanel();
                 //make sure panel is a child of the ExperimenterDisplay object, any other housekeeping necessary
             }
+
+            return experimenterDisplayCanvas;
         }
 
         public void Update()
         {
             //any housekeeping necessary that applies to all panels
-            
+
             foreach (ExperimenterDisplayPanel panel in TaskPanels)
             {
                 panel.CustomUpdateMethods();
@@ -48,7 +55,38 @@ namespace ExperimenterDisplay
         public void InitializePanel()
         {
             //commands to create panel, assign it to appropriate display, assign position - anything that is universal to all panels
-            
+            GameObject myGO;
+            GameObject myText;
+            Canvas myCanvas;
+            Text text;
+            RectTransform rectTransform;
+
+            // Canvas
+            myGO = new GameObject();
+            myGO.name = "TestCanvas";
+            myGO.AddComponent<Canvas>();
+
+            myCanvas = myGO.GetComponent<Canvas>();
+            myCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            myGO.AddComponent<CanvasScaler>();
+            myGO.AddComponent<GraphicRaycaster>();
+
+            // Text
+            myText = new GameObject();
+            myText.transform.parent = myGO.transform;
+            myText.name = "text";
+
+            text = myText.AddComponent<Text>();
+            Font ArialFont = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
+            text.font = ArialFont;
+            text.text = "text";
+            text.fontSize = 100;
+
+            // Text position
+            rectTransform = text.GetComponent<RectTransform>();
+            rectTransform.localPosition = new Vector3(0, 0, 0);
+            rectTransform.sizeDelta = new Vector2(400, 200);
+
             CustomInitializationMethods();
         }
 
@@ -70,7 +108,7 @@ namespace ExperimenterDisplay
             //add any custom fields needed
             public HotkeyPanel()
             {
-                //fill in the { }s with whatever custom init and update methods are associated with this panel
+                //whatever custom init and update methods are associated with this panel
                 CustomInitializationMethods = () => { };
                 CustomUpdateMethods = () => { };
             }
@@ -81,7 +119,7 @@ namespace ExperimenterDisplay
             //add any custom fields needed
             public PlayerViewPanel()
             {
-                //fill in the { }s with whatever custom init and update methods are associated with this panel
+                //whatever custom init and update methods are associated with this panel
                 CustomInitializationMethods = () => { };
                 CustomUpdateMethods = () => { };
             }

@@ -1,5 +1,6 @@
 ﻿using USE_ExperimentTemplate;
 using WhatWhenWhere_Namespace;
+using ExperimenterDisplayPanels; 
 
 public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 {
@@ -26,6 +27,8 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
            wwwTL.totalErrors_InBlock = 0 ;
            wwwTL.errorType_InBlockString = "";
            wwwTL.errorType_InBlock.Clear();
+           Panel panel = new Panel();
+           panel.initPanel(experimenterInfo);
         });
         
 

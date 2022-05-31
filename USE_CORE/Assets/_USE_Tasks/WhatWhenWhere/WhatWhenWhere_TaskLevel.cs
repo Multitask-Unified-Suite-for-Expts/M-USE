@@ -27,8 +27,9 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
            wwwTL.totalErrors_InBlock = 0 ;
            wwwTL.errorType_InBlockString = "";
            wwwTL.errorType_InBlock.Clear();
-           Panel panel = new Panel();
+           /*Panel panel = new Panel();
            panel.initPanel(experimenterInfo);
+           */
         });
         
 

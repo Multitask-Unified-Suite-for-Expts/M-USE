@@ -9,6 +9,7 @@ using USE_StimulusManagement;
 using ConfigDynamicUI;
 using System.Collections;
 using USE_Settings;
+using USE_DisplayManagement;
 
 public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 {
@@ -59,17 +60,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     
     private SpriteRenderer sr;
 
-    //UI VARIABLES
-    //public ConfigUI configUI;
-    //public JsonSaveLoad jsonSaveLoad;
+ 
     public WhatWhenWhere_TrialLevel mainLevel;
     private ExperimentInfoController experimenterInfo;
     private bool storeData;
-    //private ConfigVarStore configStore = new ConfigVarStore();
     
-    //UI Config Timing Variables
-    //[HideInInspector]
-    //public ConfigNumberRanged itiDuration, baselineDuration, covertPrepDuration, freeGazeDuration, choiceToFbDuration, fBDuration; // = 0.8f;
     [HideInInspector]
     public ConfigNumber minObjectTouchDuration, itiDuration, finalFbDuration, fbDuration, maxObjectTouchDuration, selectObjectDuration, sliderSize, CentralCueSelectionDuration, CentralCueSelectionRadius, blinkOnDuration, blinkOffDuration, ObjectSelectionRadius, MinObjectSelectionTime, MaxReachTime;
     [HideInInspector]
@@ -101,22 +96,31 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private Camera cam;
     private bool variablesLoaded;
 
-
+    //Player View Variables
+    private PlayerViewPanel playerView;
+    private Transform playerViewParent; // Helps set things onto the player view in the experimenter display
+    public List<GameObject> playerViewTextList;
+    public GameObject playerViewText;
+    private Vector2 textLocation;
+    private bool playerViewLoaded;
 
     public override void DefineControlLevel()
     {
-
-        //define States within this Control Level
+        // --------------------------------------ADDING PLAYER VIEW STUFF------------------------------------------------------------------------------------
+        playerView = new PlayerViewPanel();
+        playerViewText = new GameObject();
+        MonitorDetails primaryMonitorDetails = new MonitorDetails(new Vector2(1920, 1080), new Vector2(10, 7), 2);
+        
+        //---------------------------------------DEFINING STATES-----------------------------------------------------------------------
         State StartButton = new State("StartButton");
         State ChooseStimulus = new State("ChooseStimulus");
         State StimulusChosen = new State("StimulusChosen");
         State FinalFeedback = new State("FinalFeedback");
         State ITI = new State("ITI");
         State StimulusChosenSuccesorState = new State("StimulusChosenSuccesorState");
-
+        
         AddActiveStates(new List<State> { StartButton, ChooseStimulus, StimulusChosen, FinalFeedback, ITI, StimulusChosenSuccesorState });
         
-
         string[] stateNames = new string[] { "StartButton", "ChooseStimulus", "StimulusChosen", "FinalFeedback", "ITI" };
 
         AddInitializationMethod(() =>
@@ -154,7 +158,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, StartButton);
 
 
-        // define initScreen state
+        // define StartButton state
         StartButton.AddInitializationMethod(() =>
         {
             Camera.main.backgroundColor = new Color(1f, 1f, 1f);
@@ -175,8 +179,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             slider.value = 0;
            
         });
-
-
         StartButton.AddUpdateMethod(() =>
         {
             if (InputBroker.GetMouseButtonDown(0))
@@ -193,7 +195,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-
         StartButton.SpecifyTermination(() => response == 0, ChooseStimulus);
         StartButton.AddDefaultTerminationMethod(() =>
         {
@@ -208,7 +209,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             goCue.SetActive(false);
         });
 
-        // Define stimOn state
+        // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddInitializationMethod(() =>
         {
             if (stimCount < CurrentTrialDef.CorrectObjectTouchOrder.Length)
@@ -227,27 +228,45 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     {
                         sd.IsCurrentTarget = false;
                     }
+                    
                 }
+                
 
-                foreach (StimDef thing in searchStims.stimDefs)
+                foreach (StimDef sd in searchStims.stimDefs)
                 {
-                    Debug.Log(thing.StimName);
+                    Debug.Log(sd.StimName);
+                    
                 }
             }
             else
             {
                 trialComplete = true;
             }
+            if (!playerViewLoaded)
+            {
+                for (int i = 0; i < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++i)
+                {
                 
+                    //Create corresponding text on player view of experimenter display
+                    textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[i].StimLocation), playerViewParent);
+                    textLocation.y += 100;
+                    playerViewText = playerView.writeText(CurrentTrialDef.CorrectObjectTouchOrder[i].ToString(), Color.red, playerViewParent, textLocation);
+                    playerViewText.GetComponent<RectTransform>().localScale = new Vector3(3, 3, 0);
+                    playerViewTextList.Add(playerViewText);
+
+                }
+                playerViewLoaded = true;
+            }
+
             searchStims.ToggleVisibility(true);
             chosenStim = null;
             initialClick = 0;
-        });
 
+            
+        });
         ChooseStimulus.AddUpdateMethod(() =>
         {
-            
-                // check if user clicks on left or right
+                // Check if user makes a selection
                 if (Input.GetMouseButtonDown(0))
                 {
                     initialTouchTime = Time.time;
@@ -264,9 +283,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     mouseRay = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
 
                     var clickPoint = Input.mousePosition;
+                    
                     touchedPositionsList.Add(new Vector3(clickPoint[0], clickPoint[1], clickPoint[2]));
-
-                    RaycastHit hit;
+                
+                RaycastHit hit;
                     // verify that the hit is on a stimulus
                     if (Physics.Raycast(mouseRay, out hit))
                     {
@@ -292,7 +312,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
                         else if (testStim.GetComponent<StimDefPointer>().GetStimDef<WhatWhenWhere_StimDef>().IsCurrentTarget)
                         {
-                            //Correct Choice
+                        //Correct Choice
                             Debug.Log("Clicked on the correct stimulus within the sequence");
                             numCorrect[stimCount]++;
                             numTotal[stimCount]++;
@@ -302,6 +322,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                             touchedObjects.Add(testStim.name);
                             yellowHalo.transform.position = testStim.transform.position;
                             correctChoice = true;
+                        
                         }
                         else if (touchedObjects.Contains(testStim.name))
                         {
@@ -411,6 +432,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 sliderHalo.SetActive(true);
                 sr.color = new Color(1, 0.8431f, 0, 0.2f);
                 errorTypeString = "None";
+
+
             }
             
         });
@@ -450,6 +473,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             startTime = Time.time;
             errorTypeString = "None";
             searchStims.ToggleVisibility(false);
+
+            foreach (GameObject txt in playerViewTextList)
+            {
+                txt.SetActive(false);
+            }
         });
 
         FinalFeedback.AddUpdateMethod(() =>
@@ -475,7 +503,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             searchStims.ToggleVisibility(false);
             Camera.main.backgroundColor = Color.white;
             txt.SetActive(false);
-            
+            playerViewLoaded = false;
+            //Destroy all created text objects on Player View of Experimenter Display
+            foreach (GameObject txt in playerViewTextList)
+            {
+                Destroy(txt);
+            }
+            playerViewTextList.Clear();
+            Debug.Log("TEXT LIST: " + playerViewTextList.Count);
             slider.gameObject.SetActive(false);
             
             if (response == 0)
@@ -619,15 +654,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("SliderValue", () => slider.normalizedValue);
     }
 
-   // public void CreateConfigUI()
-   // {
-    //    configUI.clear();
-    //    configStore = ConfigUiVariables;
-    //    configUI.store = configStore;
-     //   configUI.GenerateUI();
-   // }
-
-    // set all gameobjects to setActive false
     void disableAllGameobjects()
     {
         initButton.SetActive(false);
@@ -653,9 +679,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         goCue = GameObject.Find("StartText");
         sr = sliderHalo.GetComponent<SpriteRenderer>();
         imageTimingError = GameObject.Find("VerticalStripesImage");
-
-        experimenterInfo = GameObject.Find("ExperimenterInfo").GetComponent<ExperimentInfoController>();
         sliderInitPosition = slider.gameObject.transform.position;
+        playerViewParent = GameObject.Find("MainCameraCopy").transform;
 
         //config UI variables
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
@@ -688,13 +713,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         yellowHalo.SetActive(false);
         imageTimingError.SetActive(false);
         GameObject.Find("Slider").SetActive(false);
-
-        //if (jsonSaveLoad == null)
-         //   jsonSaveLoad = FindObjectOfType<JsonSaveLoad>();
-       // if (configUI == null)
-            //configUI = FindObjectOfType<ConfigUI>();
-        //CreateConfigUI();
-
         Debug.Log("Done Loading Variables");
     }
 
@@ -706,6 +724,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         searchStims = new StimGroup("SearchStims", ExternalStims, CurrentTrialDef.SearchStimsIndices);
         searchStims.SetLocations(CurrentTrialDef.SearchStimsLocations);       
         TrialStims.Add(searchStims);
+    }
+
+    private Vector2 playerViewPosition(Vector3 position, Transform playerViewParent)
+    {
+        Vector2 pvPosition = new Vector2((position[0] / Screen.width) * playerViewParent.GetComponent<RectTransform>().sizeDelta.x, (position[1] / Screen.height) * playerViewParent.GetComponent<RectTransform>().sizeDelta.y);
+        return pvPosition;
     }
 
 }

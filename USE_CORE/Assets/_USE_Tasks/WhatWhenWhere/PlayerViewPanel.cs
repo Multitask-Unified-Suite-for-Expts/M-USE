@@ -40,28 +40,25 @@ public class PlayerViewPanel : MonoBehaviour
         
     }
 
-    public GameObject drawCircle(Vector3 circleLocation, float distanceToScreen, float visualAngle, Transform parent)
+    public GameObject drawCircle(Vector2 circleLocation, Vector2 size)
     {
-        float radCm = 2 * distanceToScreen * (Mathf.Tan((Mathf.PI * visualAngle / 180f) / 2));
-        float radPix = 100; // dummy value 1920 used, ((MonitorDetails)SessionSettings.Get("sessionConfig", "monitorDetails")).CmSize[0]
-
         GameObject degreeCircle = new GameObject("DegreeCircle", typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UICircle));
 
         degreeCircle.AddComponent<CanvasRenderer>();
-        degreeCircle.transform.SetParent(parent);
+        //degreeCircle.transform.SetParent(parent);
         degreeCircle.GetComponent<UnityEngine.UI.Extensions.UICircle>().fill = false;
         degreeCircle.GetComponent<UnityEngine.UI.Extensions.UICircle>().thickness = 2f;
-        degreeCircle.GetComponent<RectTransform>().sizeDelta = new Vector2(radPix * 2, radPix * 2);
+        degreeCircle.GetComponent<RectTransform>().sizeDelta = size;
         degreeCircle.GetComponent<RectTransform>().anchoredPosition = circleLocation;// new Vector3(calibPointPixel.x, calibPointPixel.y, exptViewCam.nearClipPlane);
         return degreeCircle;
 
     }
-    public GameObject drawSampleLines(string lineName, Color col, Transform parent, List<Vector2> pointList) // removed GameObject parent
+    public GameObject drawSampleLines(string lineName, Color col, List<Vector2> pointList) // removed GameObject parent
     {
         float radPix = 100; // dummy value 1920 used, ((MonitorDetails)SessionSettings.Get("sessionConfig", "monitorDetails")).CmSize[0]
 
-        GameObject sampleLines = new GameObject(lineName, typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UILineRenderer));
-        sampleLines.transform.SetParent(parent);
+        GameObject sampleLines = new GameObject("Line", typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UILineRenderer));
+        //sampleLines.transform.SetParent(parent);
         sampleLines.AddComponent<CanvasRenderer>();
         sampleLines.GetComponent<RectTransform>().anchorMax = Vector2.zero;
         sampleLines.GetComponent<RectTransform>().anchorMin = Vector2.zero;
@@ -75,23 +72,16 @@ public class PlayerViewPanel : MonoBehaviour
         lineComp.relativeSize = false;
         return sampleLines;
     }
-    public GameObject writeText(string text, Color col, Transform parent, Vector2 textLocation)
+    public GameObject writeText(string text, Color col, Vector2 textLocation, Vector2 size, Transform parent)
     {
-        float radPix = 100; // dummy value 1920 used, ((MonitorDetails)SessionSettings.Get("sessionConfig", "monitorDetails")).CmSize[0]
         GameObject textObject = new GameObject("Text", typeof(RectTransform), typeof(Text));
         textObject.transform.SetParent(parent);
         textObject.GetComponent<RectTransform>().localPosition = Vector2.zero;
-        textObject.GetComponent<RectTransform>().sizeDelta = new Vector2(radPix * 2, radPix * 2);
+        textObject.GetComponent<RectTransform>().sizeDelta = size;
         textObject.GetComponent<RectTransform>().anchoredPosition = textLocation;
         textObject.GetComponent<RectTransform>().anchorMax = Vector2.zero;
         textObject.GetComponent<RectTransform>().anchorMin = Vector2.zero;
-
-        /*
-        Vector2 calibPointPixel = ProportionToPixel(calibPoint.testPoint, playerViewRes) + playerViewCanv.GetComponent<RectTransform>().anchoredPosition;
-        rt.anchoredPosition = calibPointPixel + offset +
-            new Vector2(playerViewCanv.GetComponent<RectTransform>().sizeDelta.x / 2, playerViewCanv.GetComponent<RectTransform>().sizeDelta.y / 2);
-        //still don't know why I have to add half the resolution to this but it works..
-        */
+        
         Text txt = textObject.GetComponent<Text>();
         txt.text = text;
         txt.color = col;
@@ -100,4 +90,20 @@ public class PlayerViewPanel : MonoBehaviour
 
         return textObject;
     }
+    /*
+    public GameObject drawHalo(Vector2  haloLocation, Vector2 size)
+    {
+        GameObject haloOject = new GameObject("Halo", typeof(RectTransform));
+        Behaviour halo = (Behaviour)GetComponent("Halo");
+        halo.GetType().GetProperty("enabled").SetValue(halo, false, null);
+        halo.AddComponent<"Halo">();
+        halo.AddComponent<CanvasRenderer>();
+        halo.GetComponent<Light>().flare = 
+        halo.GetComponent<UnityEngine.UI.Extensions.UICircle>().fill = false;
+        halo.GetComponent<UnityEngine.UI.Extensions.UICircle>().thickness = 2f;
+        halo.GetComponent<RectTransform>().sizeDelta = size;
+        halo.GetComponent<RectTransform>().anchoredPosition = haloLocation;// new Vector3(calibPointPixel.x, calibPointPixel.y, exptViewCam.nearClipPlane);
+        return halo;
+    }
+    */
 }

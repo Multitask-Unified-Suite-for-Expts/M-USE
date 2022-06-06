@@ -1077,8 +1077,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   trialInfoText: {fileID: 0}
-  parent: {fileID: 0}
-  exptViewRes: {x: 0, y: 0}
 --- !u!1 &3743807830035973490
 GameObject:
   m_ObjectHideFlags: 0
@@ -3336,7 +3334,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 551274933195324826, guid: ab3c101253467ac43bf5bd9906b21438, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: ab3c101253467ac43bf5bd9906b21438, type: 3}
 --- !u!224 &1540414273523235431 stripped
 RectTransform:

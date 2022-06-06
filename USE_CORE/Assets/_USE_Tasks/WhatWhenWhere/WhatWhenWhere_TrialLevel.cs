@@ -58,7 +58,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private List<float> choiceDurations = new List<float> { };
     private List<Vector3> touchedPositionsList = new List<Vector3>(); // empty now
     
-    private SpriteRenderer sr;
+    private Image sr;
 
  
     public WhatWhenWhere_TrialLevel mainLevel;
@@ -95,6 +95,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private float sliderValueIncreaseAmount;
     private Camera cam;
     private bool variablesLoaded;
+    private Material neutralMat; 
+    private Material woodMat;
 
     //Player View Variables
     private PlayerViewPanel playerView;
@@ -161,8 +163,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // define StartButton state
         StartButton.AddInitializationMethod(() =>
         {
-            Camera.main.backgroundColor = new Color(1f, 1f, 1f);
-
+            
+            RenderSettings.skybox = neutralMat;
+            
             ResetRelativeStartTime();
             if (context != 0)
             {
@@ -174,9 +177,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             initButton.SetActive(true);
             goCue.SetActive(true);
-            
-            slider.gameObject.transform.position = sliderInitPosition;
             slider.value = 0;
+            slider.gameObject.transform.position = sliderInitPosition;
+            
            
         });
         StartButton.AddUpdateMethod(() =>
@@ -190,7 +193,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     if (hit.transform.name == "StartButton")
                     {
                         response = 0;
-                        Camera.main.backgroundColor = contextColors[context];
+                        
+                        RenderSettings.skybox = woodMat;
+                        //Camera.main.GetComponent<Skybox>().CustomSkyBox = newMat;
                     }
                 }
             }
@@ -201,8 +206,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             sliderValueIncreaseAmount = (100f / CurrentTrialDef.CorrectObjectTouchOrder.Length) / 100f;
             Debug.Log(sliderSize);
             slider.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
-            sliderHalo.transform.localScale = new Vector3(sliderSize.value / 0.38f, sliderSize.value / 2f, 1f);
-
+            sliderHalo.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
+            slider.value += sliderValueIncreaseAmount / 2;
             slider.gameObject.SetActive(true);
 
             initButton.SetActive(false);
@@ -242,6 +247,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 trialComplete = true;
             }
+
             if (!playerViewLoaded)
             {
                 for (int i = 0; i < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++i)
@@ -249,9 +255,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 
                     //Create corresponding text on player view of experimenter display
                     textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[i].StimLocation), playerViewParent);
-                    textLocation.y += 100;
-                    playerViewText = playerView.writeText(CurrentTrialDef.CorrectObjectTouchOrder[i].ToString(), Color.red, playerViewParent, textLocation);
-                    playerViewText.GetComponent<RectTransform>().localScale = new Vector3(3, 3, 0);
+                    textLocation.y += 50;
+                    Vector2  textSize = new Vector2(200, 200);
+                    playerViewText = playerView.writeText(CurrentTrialDef.CorrectObjectTouchOrder[i].ToString(), Color.red, textLocation, textSize, playerViewParent);
+                    playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                     playerViewTextList.Add(playerViewText);
 
                 }
@@ -305,7 +312,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                             totalErrors_InSession += 1;
                             totalErrors_InBlock += 1;
                             touchedObjects.Add(testStim.name);
-
+                            slider.value -= sliderValueIncreaseAmount;
                             //numTotal[correctIndex]++;
                             numErrors[correctIndex]++;
                         }
@@ -379,7 +386,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         totalErrors_InSession += 1;
                         totalErrors_InBlock += 1;
                         irrelevantSelection = true;
-                    }
+                        slider.value -= sliderValueIncreaseAmount;
+                }
                 }
                 else
                 {
@@ -432,8 +440,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 sliderHalo.SetActive(true);
                 sr.color = new Color(1, 0.8431f, 0, 0.2f);
                 errorTypeString = "None";
-
-
             }
             
         });
@@ -501,7 +507,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         ITI.AddInitializationMethod(() =>
         {
             searchStims.ToggleVisibility(false);
-            Camera.main.backgroundColor = Color.white;
+            RenderSettings.skybox = neutralMat;
             txt.SetActive(false);
             playerViewLoaded = false;
             //Destroy all created text objects on Player View of Experimenter Display
@@ -669,17 +675,24 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     void loadVariables()
     {
-        txt = GameObject.Find("FinalText");
-        slider = GameObject.Find("Slider").GetComponent<Slider>();
-        sliderHalo = GameObject.Find("SliderHalo");
+        //Feedback Variables
         grayHalo = GameObject.Find("GrayHalo");
         grayHaloScreen = GameObject.Find("GrayHaloScreen");
         yellowHalo = GameObject.Find("YellowHalo");
         initButton = GameObject.Find("StartButton");
         goCue = GameObject.Find("StartText");
-        sr = sliderHalo.GetComponent<SpriteRenderer>();
         imageTimingError = GameObject.Find("VerticalStripesImage");
+
+        //Trial Completion Feedback Variables
+        sliderHalo = GameObject.Find("SliderHalo");
+        sr = sliderHalo.GetComponent<Image>();
+        txt = GameObject.Find("FinalText");
+        slider = GameObject.Find("Slider").GetComponent<Slider>();
+       
+        
         sliderInitPosition = slider.gameObject.transform.position;
+
+
         playerViewParent = GameObject.Find("MainCameraCopy").transform;
 
         //config UI variables
@@ -703,7 +716,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         contextColors.Add(new Color(0.8471f, 0.7490f, 0.8471f)); // thistle
         contextColors.Add(new Color(0.9020f, 0.9020f, 0.9804f)); // lavender
         contextColors.Add(new Color(0f, 0f, 0f)); // black
+
+        //Textures
+        List<Material> backgroundTextures = new List<Material>();
+        neutralMat = Resources.Load("SkyBoxTextures/Blank", typeof(Material)) as Material;
+        woodMat = Resources.Load("SkyBoxTextures/Wood", typeof(Material)) as Material;
         
+
         initButton.SetActive(false);
         goCue.SetActive(false);
         txt.SetActive(false);

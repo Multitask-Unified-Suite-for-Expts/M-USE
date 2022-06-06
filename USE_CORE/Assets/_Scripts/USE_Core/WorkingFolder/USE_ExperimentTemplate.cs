@@ -13,7 +13,7 @@ using USE_Data;
 using USE_Settings;
 using USE_StimulusManagement;
 using ConfigDynamicUI;
-
+using USE_ExperimenterDisplay;
 // using USE_TasksCustomTypes;
 
 namespace USE_ExperimentTemplate
@@ -41,6 +41,8 @@ namespace USE_ExperimentTemplate
 
 		private Camera SessionCam;
 		public DisplaySwitcher DisplaySwitcher;
+		private ExperimenterDisplayController ExperimenterDisplayController;
+		[HideInInspector] public RenderTexture CameraMirrorTexture;
 
 		private string configFileFolder;
 		private bool TaskSceneLoaded, SceneLoading;
@@ -90,6 +92,29 @@ namespace USE_ExperimentTemplate
 			ActiveTaskLevels = new List<ControlLevel_Task_Template>();//new Dictionary<string, ControlLevel_Task_Template>();
 
 			SessionCam = Camera.main;
+			
+			
+			GameObject experimenterDisplay = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
+			experimenterDisplay.name = "ExperimenterDisplay";
+			ExperimenterDisplayController = experimenterDisplay.AddComponent<ExperimenterDisplayController>();
+			experimenterDisplay.AddComponent<PreserveObject>();
+			ExperimenterDisplayController.InitializeExperimenterDisplay();
+
+			GameObject cameraObj = new GameObject("MirrorCamera");
+			cameraObj.transform.SetParent(experimenterDisplay.transform);
+			Camera mirrorCamera = cameraObj.AddComponent<Camera>();
+			mirrorCamera.CopyFrom(Camera.main);
+			mirrorCamera.cullingMask = 0;
+			// mirrorCamera.targetDisplay = 2;
+
+			CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
+			CameraMirrorTexture.Create();
+			Camera.main.targetTexture = CameraMirrorTexture;
+			// mirrorCamera.targetTexture = CameraMirrorTexture;
+				
+			RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
+			mainCameraCopy.texture = CameraMirrorTexture;
+			
 			setupSession.AddDefaultInitializationMethod(() =>
 			{
 				SessionData.CreateFile();
@@ -159,6 +184,9 @@ namespace USE_ExperimentTemplate
 			selectTask.AddUniversalInitializationMethod(() =>
 			{
 				SessionCam.gameObject.SetActive(true);
+				// SessionCam.targetTexture = CameraMirrorTexture;
+				// mirrorCamera.CopyFrom(SessionCam);
+				// mirrorCamera.cullingMask = 0;
 				tasksFinished = false;
 				if (taskCount < ActiveTaskLevels.Count)
 					CurrentTask = ActiveTaskLevels[taskCount];
@@ -175,6 +203,7 @@ namespace USE_ExperimentTemplate
 				// MethodInfo getTaskLevel = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[CurrentTaskName]});
 				// getTaskLevel.Invoke(this, new object[0]);
 				runTask.AddChildLevel(CurrentTask);
+				CameraMirrorTexture.Release();
 				SessionCam.gameObject.SetActive(false);
 				SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
 			});
@@ -184,12 +213,19 @@ namespace USE_ExperimentTemplate
 			//runTask.AddLateUpdateMethod
 			runTask.AddUniversalInitializationMethod(() =>
 			{
+				CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
+				CameraMirrorTexture.Create();
+				CurrentTask.TaskCam.targetTexture = CameraMirrorTexture;
+				mainCameraCopy.texture = CameraMirrorTexture;
+				// mirrorCamera.CopyFrom(CurrentTask.TaskCam);
+				// mirrorCamera.cullingMask = 0;
 			});
 			runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
 			{
 				SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
 				SessionData.AppendData();
 				SessionData.WriteData();
+				CameraMirrorTexture.Release();
 				taskCount++;
 			});
 
@@ -433,6 +469,9 @@ namespace USE_ExperimentTemplate
 				                              Path.DirectorySeparatorChar);
 			}
 		}
+		public void OnGUI() {
+			GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), CameraMirrorTexture);
+		}
 	}
 
 	public abstract class ControlLevel_Task_Template : ControlLevel
@@ -472,6 +511,7 @@ namespace USE_ExperimentTemplate
 		public List<string> PrefabStimPaths;
         protected ConfigUI configUI;
         protected ConfigVarStore ConfigUiVariables;
+        [HideInInspector] public  ExperimenterDisplayController ExperimenterDisplayController;
 
         private GameObject Controllers;
 
@@ -520,24 +560,24 @@ namespace USE_ExperimentTemplate
 				if(TaskCanvasses!=null)
 					foreach (GameObject go in TaskCanvasses)
 						go.SetActive(true);
-
-				GameObject experimenterInfoPrefab = Resources.Load<GameObject>("ExperimenterInfo");
-				GameObject experimenterInfo = Instantiate(experimenterInfoPrefab);
-				experimenterInfo.name = "ExperimenterInfo";
-
-				GameObject cameraObj = new GameObject("DrawCamera");
-				cameraObj.transform.SetParent(experimenterInfo.transform);
-				Camera newCamera = cameraObj.AddComponent<Camera>();
-				newCamera.CopyFrom(Camera.main);
-				newCamera.cullingMask = 0;
-
-				DrawRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
-				DrawRenderTexture.Create();
-				Camera.main.targetTexture = DrawRenderTexture;
-				
-				RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
-				mainCameraCopy.texture = DrawRenderTexture;
-				mainCameraCopy.rectTransform.sizeDelta = new Vector2(Screen.width / 2, Screen.height / 2);
+				//
+				// GameObject experimenterInfoPrefab = Resources.Load<GameObject>("ExperimenterInfo");
+				// GameObject experimenterInfo = Instantiate(experimenterInfoPrefab);
+				// experimenterInfo.name = "ExperimenterInfo";
+				//
+				// GameObject cameraObj = new GameObject("DrawCamera");
+				// cameraObj.transform.SetParent(experimenterInfo.transform);
+				// Camera newCamera = cameraObj.AddComponent<Camera>();
+				// newCamera.CopyFrom(Camera.main);
+				// newCamera.cullingMask = 0;
+				//
+				// DrawRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
+				// DrawRenderTexture.Create();
+				// Camera.main.targetTexture = DrawRenderTexture;
+				//
+				// RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
+				// mainCameraCopy.texture = DrawRenderTexture;
+				//mainCameraCopy.rectTransform.sizeDelta = new Vector2(Screen.width / 2, Screen.height / 2);
 
                 if (configUI == null)
                     configUI = FindObjectOfType<ConfigUI>();
@@ -1048,6 +1088,7 @@ namespace USE_ExperimentTemplate
 		
 				
 		[HideInInspector] public ConfigVarStore ConfigUiVariables;
+		[HideInInspector] public  ExperimenterDisplayController ExperimenterDisplayController;
 
 		
 		// Feedback Controllers

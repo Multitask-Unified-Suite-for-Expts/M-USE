@@ -37,17 +37,10 @@ namespace ContinuousRecognition_Namespace
         public List<int> PreviouslyChosenStimuli, PreviouslyNotChosenStim, TrialStimIndices, UnseenStims, NewStim;
         public Vector3[] BlockStimLocations, StimLocation;
         public int trialCount, ManuallySpecifyLocation, row, col, PC_count, PNC_count, new_count;
-        
+        public Vector3 ContextColor;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
-            /*
-            if (nObjectsMinMax[1] * 2 < row * col)
-            {
-                Debug.Log("[ERROR] Number of grid not enough. Need at least " + nObjectsMinMax[1] * 2 + " grids.");
-            }*/
-            
-            // total number of grids is row*col
             int numGrid = row * col;
             Debug.Log("num grid is " + numGrid + "row is " + row + "; col is " + col);
             Vector3[] Locations = new Vector3[numGrid];
@@ -112,6 +105,8 @@ namespace ContinuousRecognition_Namespace
             // trial loop 
             for (int iTrial = 0; iTrial < numTrials && !end; iTrial++)
             {
+                Debug.Log("aaaaaaaaaaa iTrial num is " + iTrial);
+                Debug.Log("aaaaaaaaaaa numTiral is " + numTrials);
                 ContinuousRecognition_TrialDef td = new ContinuousRecognition_TrialDef();
                 td.BlockStimIndices = BlockStimIndices;
                 td.trialCount = trialCount;
@@ -127,7 +122,8 @@ namespace ContinuousRecognition_Namespace
                     }
                     arr[i] = BlockStimLocations[index];
                 }
-
+                
+                // set context color according to blockConfig
                 td.TrialStimLocations = arr;
                 td.Grid = Locations;
                 td.TrialStimIndices = TrialStimIndices;
@@ -149,6 +145,7 @@ namespace ContinuousRecognition_Namespace
                 td.PNC_count = PNC_count;
                 td.PC_count = PC_count;
                 td.new_Count = new_count;
+                td.ContextColor = ContextColor;
                 TrialDefs[iTrial] = td;
                 numTrialStims++;
                 trialCount++;
@@ -163,6 +160,7 @@ namespace ContinuousRecognition_Namespace
         public int trialCount, numTrialStims, maxNumTrials;
         public bool isNewStim;
         public Vector3[] Grid;
+        public Vector3 ContextColor;
 
         public List<int> PreviouslyChosenStimuli, PreviouslyNotChosenStimuli, TrialStimIndices, UnseenStims;
         public int row, col, Context, PC_count, PNC_count, new_Count;

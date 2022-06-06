@@ -27,6 +27,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private bool variablesLoaded;
     private int trialCount;
 
+    
     private Color[] colors = new[]
     {
         new Color(0.1f, 0.59f, 0.28f),
@@ -78,10 +79,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         initTrial.AddInitializationMethod(() =>
         {
             trialCount++;
+            /*
             if (trialCount != 1)
             {
                 changeContext(colors);
-            }
+            }*/
+
+            Vector3 color = CurrentTrialDef.ContextColor;
+            Camera.main.GetComponent<Camera>().backgroundColor = new Color(color[0], color[1], color[2], 1);
+
             
             if (context != 0)
             {
@@ -141,9 +147,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             //ContinuousRecognition_StimDef sd = sdPointer.GetStimDef<ContinuousRecognition_StimDef>();
             if (selectedSD != null && selectedSD.PreviouslyChosen == false)
             {
-                // Debug.Log("NOT CHOSEN BEFORE");
                 selectedSD.PreviouslyChosen = true;
-                // Debug.Log(selectedSD.PreviouslyChosen);
                 isNew = true;
                 Debug.Log("[METRICS] Trial " + (CurrentTrialDef.trialCount+1) +"; Correct when PNC Count = " + CurrentTrialDef.PNC_count + "; PC Count = " + CurrentTrialDef.PC_count + "; N Count = " + CurrentTrialDef.new_Count);
 
@@ -151,7 +155,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             else
             {
                 isNew = false;
-                // Debug.Log("CHOSEN BEFORE");
             }
             CurrentTrialDef.isNewStim = isNew;
         });
@@ -187,7 +190,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         tokenFeedback.AddInitializationMethod(() =>
         {
             HaloFBController.Destroy();
-            
             if (isNew)
             {
                 TokenFBController.AddTokens(chosen, 1);
@@ -195,9 +197,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             else
             {
                 AudioFBController.Play("Negative");
+                
             }
             // Debug.Log("TRIAL COUNT IS " + trialCount + "; MAX TRIAL COUNT IS " + CurrentTrialDef.maxNumTrials);
-            
         });
         //tokenFeedback.SpecifyTermination(() => !isNew, ()=>displayResult);
         //tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), trialEnd);
@@ -242,18 +244,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
             else
             {
-                // Debug.Log("NumTrialStims: " + CurrentTrialDef.numTrialStims);
-
                 float[] ratio = getRatio(CurrentTrialDef.Ratio);
                 int[] ratio_array = getStimNum(ratio);
                 int PC_num = ratio_array[0];
                 int N_num = ratio_array[1];
                 int PNC_num = ratio_array[2];
-
-                // Debug.Log("Chosen Count IS: " + PC_num + "   Count IS: " + ratio[0] * CurrentTrialDef.numTrialStims);
-                // Debug.Log("New Count IS: " + N_num + "     Count IS: " + ratio[1] * CurrentTrialDef.numTrialStims);
-                // Debug.Log("Previously Not Chosen Count IS: " + PNC_num + "     Count IS: " + ratio[2] * CurrentTrialDef.numTrialStims);
-
 
                 CurrentTrialDef.TrialStimIndices.Clear();
                 int PC_length = CurrentTrialDef.PreviouslyChosenStimuli.Count;
@@ -378,10 +373,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     }
                 }
             }
-            /*
-            Debug.Log("xxxxxxxxxxxxx new: " + CurrentTrialDef.new_Count);
-            Debug.Log("xxxxxxxxxxxxx PNC: " + CurrentTrialDef.PNC_count);
-            Debug.Log("xxxxxxxxxxxxx PC: " + CurrentTrialDef.PC_count);*/
 
             // Log for debugging
             getLog(CurrentTrialDef.UnseenStims, "UnseenStims");
@@ -438,11 +429,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         int start = CurrentTrialDef.nObjectsMinMax[0];
         for (int i = 0; i < CurrentTrialDef.nObjectsMinMax[1]; i++)
         {
-            //Debug.Log("RRRRRRRRRRRRR plus" + (int) Math.Ceiling((ratio[1] * (start + i))));
             sum += (int)Math.Ceiling((ratio[1] * (start + i)));
         }
-        //Debug.Log("RRRRRRRRRRRRRR ratio1 is: " + ratio[1]);
-        //Debug.Log("RRRRRRRRRRRRRR: " + sum);
         return sum;
     }
 
@@ -482,11 +470,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     /*
      * This function randomly changes the context color in each trial
      */
-    private void changeContext(Color[] colors)
+    /*private void changeContext(Color[] colors)
     {
         int num = Random.Range(0, colors.Length - 1);
         Camera.main.backgroundColor = colors[num];
-    }
+    }*/
 
     /*
      * Helper function for debug log
@@ -498,7 +486,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             result += item.ToString() + ", ";
         }
-
         // Debug.Log(result);
     }
     
@@ -509,7 +496,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             result += item.ToString() + ", ";
         }
-
         // Debug.Log(result);
     }
 

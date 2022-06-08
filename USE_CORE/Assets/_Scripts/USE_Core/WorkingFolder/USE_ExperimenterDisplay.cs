@@ -10,16 +10,17 @@ namespace USE_ExperimenterDisplay
     {
         //this gets instantiated and added as a component of the ExperimenterDisplay at the start of each task
         //all panel methods are now controlled and accessible through it
-        private ControlLevel_Session_Template SessionLevel;
-        private ControlLevel_Task_Template TaskLevel;
-        private ControlLevel_Trial_Template TrialLevel;
+        protected ControlLevel_Session_Template SessionLevel;
+        protected ControlLevel_Task_Template TaskLevel;
+        protected ControlLevel_Trial_Template TrialLevel;
         
         private List<ExperimenterDisplayPanel> TaskPanels;
         //any other fields necessary to control which display it is on, etc
 
-        public void InitializeExperimenterDisplay(List<ExperimenterDisplayPanel> taskPanels = null)
+        public void InitializeExperimenterDisplay(ControlLevel_Session_Template sessionLevel, List<ExperimenterDisplayPanel> taskPanels = null)
         {
             //generate the main display, any housekeeping necessary to initialize it
+            SessionLevel = sessionLevel;
 
             if (taskPanels != null)
                 TaskPanels = taskPanels;
@@ -29,6 +30,7 @@ namespace USE_ExperimenterDisplay
             foreach (ExperimenterDisplayPanel panel in TaskPanels)
             {
                 panel.InitializePanel();
+                panel.SessionLevel = SessionLevel;
                 //make sure panel is a child of the ExperimenterDisplay object, any other housekeeping necessary
             }
         }
@@ -42,6 +44,18 @@ namespace USE_ExperimenterDisplay
                 panel.CustomPanelUpdate();
             }
         }
+
+        public void ResetTask(ControlLevel_Task_Template taskLevel, ControlLevel_Trial_Template trialLevel)
+        {
+            TaskLevel = taskLevel;
+            TrialLevel = trialLevel;
+            foreach (ExperimenterDisplayPanel panel in TaskPanels)
+            {
+                panel.TaskLevel = taskLevel;
+                panel.TrialLevel = trialLevel;
+            }
+            
+        }
     }
 
     public class ExperimenterDisplayPanel
@@ -50,9 +64,9 @@ namespace USE_ExperimenterDisplay
     //     protected Action CustomInitializationMethods;
     //     public Action CustomUpdateMethods;
 
-    protected ControlLevel_Session_Template SessionLevel;
-    protected ControlLevel_Task_Template TaskLevel;
-    protected ControlLevel_Trial_Template TrialLevel;
+    public ControlLevel_Session_Template SessionLevel;
+    public ControlLevel_Task_Template TaskLevel;
+    public ControlLevel_Trial_Template TrialLevel;
     protected GameObject PanelObject;
         public void InitializePanel()
         {

@@ -98,7 +98,7 @@ namespace USE_ExperimentTemplate
 			experimenterDisplay.name = "ExperimenterDisplay";
 			ExperimenterDisplayController = experimenterDisplay.AddComponent<ExperimenterDisplayController>();
 			experimenterDisplay.AddComponent<PreserveObject>();
-			ExperimenterDisplayController.InitializeExperimenterDisplay();
+			ExperimenterDisplayController.InitializeExperimenterDisplay(this);
 
 			GameObject cameraObj = new GameObject("MirrorCamera");
 			cameraObj.transform.SetParent(experimenterDisplay.transform);
@@ -206,6 +206,7 @@ namespace USE_ExperimentTemplate
 				CameraMirrorTexture.Release();
 				SessionCam.gameObject.SetActive(false);
 				SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
+				ExperimenterDisplayController.ResetTask(CurrentTask, CurrentTask.TrialLevel);
 			});
 			selectTask.SpecifyTermination(() => tasksFinished, finishSession);
 
@@ -226,6 +227,7 @@ namespace USE_ExperimentTemplate
 				SessionData.AppendData();
 				SessionData.WriteData();
 				CameraMirrorTexture.Release();
+				ExperimenterDisplayController.ResetTask(null, null);
 				taskCount++;
 			});
 
@@ -488,7 +490,7 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public SessionDataControllers SessionDataControllers;
 
 		[HideInInspector] public bool StoreData;
-		[HideInInspector] public string SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix;
+		[HideInInspector] public string SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, BlockSummaryString;
 		[HideInInspector] public LocateFile LocateFile;
 
 		// public string TaskSceneName;
@@ -1076,7 +1078,7 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public SessionDataControllers SessionDataControllers;
 
 		[HideInInspector] public bool StoreData;
-		[HideInInspector] public string TaskDataPath, FilePrefix;
+		[HideInInspector] public string TaskDataPath, FilePrefix, TrialSummaryString;
 
 		protected State SetupTrial, FinishTrial;
 

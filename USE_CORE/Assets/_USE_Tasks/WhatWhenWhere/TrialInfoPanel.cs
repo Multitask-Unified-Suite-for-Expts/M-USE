@@ -4,41 +4,52 @@ using UnityEngine;
 using System;
 using UnityEngine.UI;
 using USE_Utilities;
+using USE_ExperimenterDisplay;
 
-public class TrialInfoPanel:MonoBehaviour
+public class TrialInfoPanel: ExperimenterDisplayPanel
 {
     public TrialInfoList tiList;
     public GameObject trialInfoText;
+    public GameObject trialInfoPanel;
+    public Transform parentTransform;
+    public string trialLevelNum;
 
-    // Start is called before the first frame update
-    void Start()
+
+    public override void CustomPanelInitialization()
     {
         tiList = new TrialInfoList();
         tiList.Initialize();
-        trialInfoText = transform.Find("TrialInfoPanelText").gameObject;
-        trialInfoText.GetComponent<Text>().supportRichText = true;
-        trialInfoText.GetComponent<Text>().text = "<size=35><b><color=#2962486>Trial Info</color></b></size>" + "\n<size=20>" + tiList.GenerateTrialInfo() + "</size>";
         
+        trialInfoPanel = GameObject.Find("TrialInfoPanel");
+        trialInfoText = GameObject.Find("TrialInfoPanelText");
+        trialInfoText.transform.SetParent(trialInfoPanel.GetComponent<Transform>());
+        trialInfoText.GetComponent<Text>().supportRichText = true;
+        trialInfoText.GetComponent<Text>().text = "<size=35><b><color=#2962486> Trial Info</color></b></size>" + "\n<size=20>" + tiList.GenerateTrialInfo() + "</size>";
+        
+    }
+    public override void CustomPanelUpdate()
+    {
+        Debug.Log("TRIALLEVEL: " + trialLevelNum);
+        //trialInfoText.GetComponent<Text>().text = "<size=35><b><color=#2962486> Trial Info</color></b></size>" + "\n<size=20>" + "Trial Number: " + trialLevelNum + "</size>";
+        
+
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     public class TrialInfo
     {
         public string dataDescription;
-        //public string dataValue;
+        public string dataValue;
+
         public string GenerateTextDescription()
         {
-            return dataDescription; // add "+ dataValue" eventually
+            return (dataDescription + dataValue); // add "+ dataValue" eventually
         }
         
     }
     public class TrialInfoList
     {
+       
         List<TrialInfo> TrialInfos = new List<TrialInfo>();
         public string GenerateTrialInfo()
         {
@@ -63,6 +74,7 @@ public class TrialInfoPanel:MonoBehaviour
         }
         public List<TrialInfo> DefaultTrialInfoList()
         {
+            
             List<TrialInfo> TrialInfoList = new List<TrialInfo>();
             TrialInfo trialNumber = new TrialInfo
             {

@@ -6,29 +6,29 @@ using UnityEngine.UI;
 using Cursor = UnityEngine.Cursor;
 using ConfigDynamicUI;
 using UnityEngine.EventSystems;
+using USE_ExperimenterDisplay;
 
-public class HotKeyPanel : MonoBehaviour
+public class HotKeyPanel : ExperimenterDisplayPanel
 {
     public HotKeyList HKList;
     public HotKeyList ConfigUIList;
     public GameObject hotKeyText;
     public delegate bool BoolDelegate();
     public delegate void VoidDelegate();
-    
-    
 
 
-    public void Start()
+    public GameObject hotKeyPanel;
+
+    public override void CustomPanelInitialization()
     {
-        
-
         HKList = new HotKeyList();
         HKList.Initialize();
 
         ConfigUIList = new HotKeyList();
         ConfigUIList.InitializeConfigUI();
-
-        hotKeyText = transform.Find("HotKey2").gameObject;
+        hotKeyPanel = GameObject.Find("HotKeyPanel");
+        hotKeyText = GameObject.Find("HotKeyText");
+        hotKeyText.transform.SetParent(hotKeyPanel.GetComponent<Transform>());
 
         hotKeyText.GetComponent<Text>().supportRichText = true;
         hotKeyText.GetComponent<Text>().text = "<size=25><b>\tHot Keys</b></size>" + "\n\n<size=20>" + HKList.GenerateHotKeyDescriptions() + "</size>" + "\n\n-----------------------------------" +
@@ -36,7 +36,7 @@ public class HotKeyPanel : MonoBehaviour
 
         
     }
-    public void Update()
+    public override void CustomPanelUpdate()
 
     {
         HKList.CheckAllHotKeyConditions();
@@ -238,7 +238,7 @@ public class HotKeyPanel : MonoBehaviour
         {
             List<HotKey> ConfigUIHotKeyList = new List<HotKey>();
             List<Selectable> m_orderedSelectables = new List<Selectable>();
-            ConfigUI configUIPanelController = FindObjectOfType<ConfigUI>();
+            ConfigUI configUIPanelController = new ConfigUI();
             
             //Scroll ConfigUI HotKey
             HotKey scrollConfig = new HotKey

@@ -97,6 +97,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private bool variablesLoaded;
     private Material neutralMat; 
     private Material woodMat;
+    private Material desertMat;
+    private List<Material> backgroundTextures = new List<Material>();
 
     //Player View Variables
     private PlayerViewPanel playerView;
@@ -105,6 +107,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public GameObject playerViewText;
     private Vector2 textLocation;
     private bool playerViewLoaded;
+
+    //Experiment Info Panel Variables
+    //public TrialInfoPanel tiPanel = new TrialInfoPanel();
 
     public override void DefineControlLevel()
     {
@@ -155,6 +160,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             touchedPositions = "[]";
             touchedObjectsNames = "[]";
             errorTypeString = "";
+
+            //trialLevelNum = TrialCount_InBlock.ToString();
         });
 
         SetupTrial.SpecifyTermination(() => true, StartButton);
@@ -163,8 +170,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // define StartButton state
         StartButton.AddInitializationMethod(() =>
         {
-            
-            RenderSettings.skybox = neutralMat;
+            RenderSettings.skybox = backgroundTextures[0];
             
             ResetRelativeStartTime();
             if (context != 0)
@@ -179,6 +185,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             goCue.SetActive(true);
             slider.value = 0;
             slider.gameObject.transform.position = sliderInitPosition;
+            sliderHalo.gameObject.transform.position = sliderInitPosition;
             
            
         });
@@ -194,8 +201,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     {
                         response = 0;
                         
-                        RenderSettings.skybox = woodMat;
-                        //Camera.main.GetComponent<Skybox>().CustomSkyBox = newMat;
+                        RenderSettings.skybox = backgroundTextures[context];
                     }
                 }
             }
@@ -204,7 +210,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         StartButton.AddDefaultTerminationMethod(() =>
         {
             sliderValueIncreaseAmount = (100f / CurrentTrialDef.CorrectObjectTouchOrder.Length) / 100f;
-            Debug.Log(sliderSize);
             slider.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
             sliderHalo.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
             slider.value += sliderValueIncreaseAmount / 2;
@@ -626,14 +631,17 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
             }
             errorType_InSessionString = errorType_InSessionString + "]";
+
             Debug.Log("ErrorType" + errorTypeString);
             Debug.Log("ErrorTypes_InBlock " + errorType_InBlockString);
             Debug.Log("ErrorTypes_InSession " + errorType_InSessionString);
-            Debug.Log("Response" +response);
+            Debug.Log("Response" + response);
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial, () => Debug.Log("Trial " + TrialCount_InTask + " completed"));
-        
+
+        //------------------------------------------------------------------------ADDING VALUES TO DATA FILE--------------------------------------------------------------------------------------------------------------------------------------------------------------
         TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
+        TrialData.AddDatum("TrialNum", () => TrialCount_InTask);
         TrialData.AddDatum("Context", () => context);
         TrialData.AddDatum("TouchedObjects", () => touchedObjectsNames);
         TrialData.AddDatum("ErrorType", () => errorTypeString);
@@ -658,6 +666,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("SliderHalo", () => sliderHalo.activeSelf);
         FrameData.AddDatum("StimuliShown", () => searchStims.IsActive);
         FrameData.AddDatum("SliderValue", () => slider.normalizedValue);
+        
+
     }
 
     void disableAllGameobjects()
@@ -718,10 +728,32 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         contextColors.Add(new Color(0f, 0f, 0f)); // black
 
         //Textures
-        List<Material> backgroundTextures = new List<Material>();
-        neutralMat = Resources.Load("SkyBoxTextures/Blank", typeof(Material)) as Material;
-        woodMat = Resources.Load("SkyBoxTextures/Wood", typeof(Material)) as Material;
-        
+        //List<Material> backgroundTextures = new List<Material>();
+        Material neutralMat = new Material(Resources.Load("SkyBoxTextures/Blank", typeof(Material)) as Material);
+        Material woodMat = new Material(Resources.Load("SkyBoxTextures/Wood", typeof(Material)) as Material);
+        Material concreteMat = new Material(Resources.Load("SkyBoxTextures/Concrete", typeof(Material)) as Material);
+        Material grassMat = new Material(Resources.Load("SkyBoxTextures/Grass", typeof(Material)) as Material);
+        Material gravelMat = new Material(Resources.Load("SkyBoxTextures/Gravel", typeof(Material)) as Material);
+        Material iceMat = new Material(Resources.Load("SkyBoxTextures/Ice", typeof(Material)) as Material);
+        Material mossMat = new Material(Resources.Load("SkyBoxTextures/Moss", typeof(Material)) as Material);
+        Material mudMat = new Material(Resources.Load("SkyBoxTextures/Mud", typeof(Material)) as Material);
+        Material snowMat = new Material(Resources.Load("SkyBoxTextures/Snow", typeof(Material)) as Material);
+        Material tileMat = new Material(Resources.Load("SkyBoxTextures/Tile", typeof(Material)) as Material);
+        Material winterMat = new Material(Resources.Load("SkyBoxTextures/Winter", typeof(Material)) as Material);
+
+        backgroundTextures.Add(neutralMat);
+        backgroundTextures.Add(woodMat);
+        backgroundTextures.Add(concreteMat);
+        backgroundTextures.Add(grassMat);
+        backgroundTextures.Add(gravelMat);
+        backgroundTextures.Add(iceMat);
+        backgroundTextures.Add(mossMat);
+        backgroundTextures.Add(mudMat);
+        backgroundTextures.Add(snowMat);
+        backgroundTextures.Add(tileMat);
+        backgroundTextures.Add(winterMat);
+
+        Debug.Log("BACKGROUND: " + backgroundTextures.Count);
 
         initButton.SetActive(false);
         goCue.SetActive(false);

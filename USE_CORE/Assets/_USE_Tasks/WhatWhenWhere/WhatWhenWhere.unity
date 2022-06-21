@@ -1369,6 +1369,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: GrayHaloScreen
       objectReference: {fileID: 0}
+    - target: {fileID: 5037791256376228876, guid: f81b04e00fd1b481b9db403bfef3f414,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f81b04e00fd1b481b9db403bfef3f414, type: 3}
 --- !u!4 &1477238818 stripped
@@ -1662,6 +1667,7 @@ MonoBehaviour:
   StoreData: 0
   TaskDataPath: 
   FilePrefix: 
+  TrialSummaryString: 
   PreloadedStims:
     stimGroupName: 
     IsActive: 0
@@ -1685,6 +1691,10 @@ MonoBehaviour:
   errorType_InBlock: []
   errorType_InSession: []
   errorType_InBlockString: 
+  numTotal_InBlock: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  numTotal_InTrial: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  numErrors_InBlock: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  numCorrect_InBlock: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   mainLevel: {fileID: 0}
   minObjectTouchDuration:
     name: 
@@ -1798,8 +1808,15 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
+  accuracyLog_InSession: 
+  accuracyLog_InBlock: 
+  accuracyLog_InTrial: 
+  ExternalFilePath: 
+  MaterialFilePath: 
   playerViewTextList: []
   playerViewText: {fileID: 0}
+  tileX: 1
+  tileY: 1
 --- !u!114 &1584810911
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1831,6 +1848,7 @@ MonoBehaviour:
   SubjectID: 
   SessionID: 
   FilePrefix: 
+  BlockSummaryString: 
   LocateFile: {fileID: 0}
   TaskCam: {fileID: 0}
   TaskCanvasses:

@@ -31,8 +31,9 @@ public class HotKeyPanel : ExperimenterDisplayPanel
         hotKeyText.transform.SetParent(hotKeyPanel.GetComponent<Transform>());
 
         hotKeyText.GetComponent<Text>().supportRichText = true;
-        hotKeyText.GetComponent<Text>().text = "<size=25><b>\tHot Keys</b></size>" + "\n\n<size=20>" + HKList.GenerateHotKeyDescriptions() + "</size>" + "\n\n-----------------------------------" +
-            "\n\n<size=25><b> ConfigUI Control</b></size>" + "\n\n<size=20>" + ConfigUIList.GenerateConfigUIHotKeyDescriptions() + "</size>";
+        hotKeyText.GetComponent<Text>().alignment = TextAnchor.UpperCenter;
+        hotKeyText.GetComponent<Text>().text = "<size=25><b><color=#2d3436ff>Hot Keys</color></b></size>" + "\n\n<size=20>" + HKList.GenerateHotKeyDescriptions() + "</size>" + "\n-----------------------------------" +
+            "\n\n<size=25><b><color=#2d3436ff>ConfigUI Control</color></b></size>" + "\n\n<size=20>" + ConfigUIList.GenerateConfigUIHotKeyDescriptions() + "</size>";
 
         
     }

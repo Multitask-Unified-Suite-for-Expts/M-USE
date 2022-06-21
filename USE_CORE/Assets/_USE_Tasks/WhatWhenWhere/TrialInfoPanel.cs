@@ -23,15 +23,15 @@ public class TrialInfoPanel: ExperimenterDisplayPanel
         trialInfoPanel = GameObject.Find("TrialInfoPanel");
         trialInfoText = GameObject.Find("TrialInfoPanelText");
         trialInfoText.transform.SetParent(trialInfoPanel.GetComponent<Transform>());
-        trialInfoText.GetComponent<Text>().supportRichText = true;
-        trialInfoText.GetComponent<Text>().text = "<size=35><b><color=#2962486> Trial Info</color></b></size>" + "\n<size=20>" + tiList.GenerateTrialInfo() + "</size>";
         
     }
     public override void CustomPanelUpdate()
     {
-        Debug.Log("TRIALLEVEL: " + trialLevelNum);
-        //trialInfoText.GetComponent<Text>().text = "<size=35><b><color=#2962486> Trial Info</color></b></size>" + "\n<size=20>" + "Trial Number: " + trialLevelNum + "</size>";
-        
+        if (TrialLevel != null)
+        {
+            trialInfoText.GetComponent<Text>().supportRichText = true;
+            trialInfoText.GetComponent<Text>().text = "<size=35><b><color=#2d3436ff>Trial Info</color></b></size>" + "\n<size=25><color=#2d3436ff>" + TrialLevel.TrialSummaryString + "</color></size>";
+        }
 
     }
 

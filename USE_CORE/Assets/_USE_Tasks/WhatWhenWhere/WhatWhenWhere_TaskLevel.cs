@@ -1,10 +1,11 @@
 ﻿using USE_ExperimentTemplate;
 using WhatWhenWhere_Namespace;
-using ExperimenterDisplayPanels; 
+using ExperimenterDisplayPanels;
+using System;
 
 public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 {
-    
+    WhatWhenWhere_BlockDef bd => GetCurrentBlockDef<WhatWhenWhere_BlockDef>();
 
     public override void SpecifyTypes()
     {
@@ -21,18 +22,29 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     public override void DefineControlLevel()
     {
         WhatWhenWhere_TrialLevel wwwTL = (WhatWhenWhere_TrialLevel)TrialLevel;
-
         RunBlock.AddInitializationMethod(() =>
         {
            wwwTL.totalErrors_InBlock = 0 ;
            wwwTL.errorType_InBlockString = "";
            wwwTL.errorType_InBlock.Clear();
-           /*Panel panel = new Panel();
-           panel.initPanel(experimenterInfo);
-           */
+           Array.Clear(wwwTL.numTotal_InBlock, 0, wwwTL.numTotal_InBlock.Length);
+           Array.Clear(wwwTL.numCorrect_InBlock, 0, wwwTL.numCorrect_InBlock.Length);
+           Array.Clear(wwwTL.numErrors_InBlock, 0, wwwTL.numErrors_InBlock.Length);
+           wwwTL.accuracyLog_InBlock = "";
+           wwwTL.MaterialFilePath = bd.ContextExternalFilePath;
         });
-        
 
+        RunBlock.AddUpdateMethod(() =>
+        {
+            BlockSummaryString = "Block Num: " + (wwwTL.BlockCount + 1) + "\nTrial Count: " + (wwwTL.TrialCount_InBlock+1) +
+            "\nTotal Errors: " + wwwTL.totalErrors_InBlock + "\nError Type: " + wwwTL.errorType_InBlockString + "\nPerformance: " + wwwTL.accuracyLog_InBlock;
+        });
+
+
+    }
+    public T GetCurrentBlockDef<T>() where T : BlockDef
+    {
+        return (T)CurrentBlockDef;
     }
 
 }

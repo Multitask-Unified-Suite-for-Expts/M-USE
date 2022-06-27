@@ -4,79 +4,52 @@ using UnityEngine;
 using System;
 using UnityEngine.UI;
 using USE_Utilities;
+using USE_ExperimenterDisplay;
 
-public class TrialInfoPanel : MonoBehaviour
+public class TrialInfoPanel: ExperimenterDisplayPanel
 {
     public TrialInfoList tiList;
     public GameObject trialInfoText;
-
-    //Variables for the drawCircle
-    //Cameras and Associated Canvases
-    private Camera exptViewCam;
-    private GameObject mainCamObj;
-    private Camera mainCamCopy;
-    private Camera mainCam;
-    private Canvas exptViewCanv;
-    private GameObject playerViewCanv;
-    //Screen and Panel/Canvase Resolutions
-    public Vector2 exptViewRes;
-    private Vector2 playerViewRes;
-    private Vector2 playerViewResAnchor;
-    private Vector2 mainDisplayRes;
-    private float distanceToScreen;
-    private Vector3 circleLocation;
-    private float visualAngle;
-
-    private GameObject circle; 
+    public GameObject trialInfoPanel;
+    public Transform parentTransform;
+    public string trialLevelNum;
 
 
-    // Start is called before the first frame update
-    void Start()
+    public override void CustomPanelInitialization()
     {
-        //----------------------------------------------------------DRAW CIRCLE-------------------------------------------
-        /*exptViewRes = new Vector2(Screen.width, Screen.height);
-        mainDisplayRes = new Vector2(Screen.width, Screen.height);
-        Canvas exptViewCanv = UnityExtension.GetChildByName(gameObject, "ExperimenterCanvas").GetComponent<Canvas>();
-        exptViewCanv.worldCamera = exptViewCam;
-
-        mainCamCopy = mainCamObj.GetComponent<Camera>();
-        mainCamObj = UnityExtension.GetChildByName(gameObject, "MainCameraCopy");
-        playerViewRes = new Vector2(mainCamCopy.rect.size.x * exptViewRes.x, mainCamCopy.rect.size.y * exptViewRes.y);
-        
-        */
-        visualAngle = 2;
-        circleLocation = new Vector3(220f, -247.5f, 0f);
-        distanceToScreen = 50; // dummy value
-        drawCircle(circleLocation, distanceToScreen, visualAngle);
-        
-        
         tiList = new TrialInfoList();
         tiList.Initialize();
-        trialInfoText = transform.Find("TrialInfoPanelText").gameObject;
-        trialInfoText.GetComponent<Text>().supportRichText = true;
-        trialInfoText.GetComponent<Text>().text = "<size=35><b><color=#2962486>Trial Info</color></b></size>" + "\n<size=20>" + tiList.GenerateTrialInfo() + "</size>";
         
-
+        trialInfoPanel = GameObject.Find("TrialInfoPanel");
+        trialInfoText = GameObject.Find("TrialInfoPanelText");
+        trialInfoText.transform.SetParent(trialInfoPanel.GetComponent<Transform>());
+        
     }
-
-    // Update is called once per frame
-    void Update()
+    public override void CustomPanelUpdate()
     {
-        
+        if (TrialLevel != null)
+        {
+            trialInfoText.GetComponent<Text>().supportRichText = true;
+            trialInfoText.GetComponent<Text>().text = "<size=35><b><color=#2d3436ff>Trial Info</color></b></size>" + "\n<size=25><color=#2d3436ff>" + TrialLevel.TrialSummaryString + "</color></size>";
+        }
+
     }
+
 
     public class TrialInfo
     {
         public string dataDescription;
-        //public string dataValue;
+        public string dataValue;
+
         public string GenerateTextDescription()
         {
-            return dataDescription; // add "+ dataValue" eventually
+            return (dataDescription + dataValue); // add "+ dataValue" eventually
         }
         
     }
     public class TrialInfoList
     {
+       
         List<TrialInfo> TrialInfos = new List<TrialInfo>();
         public string GenerateTrialInfo()
         {
@@ -101,6 +74,7 @@ public class TrialInfoPanel : MonoBehaviour
         }
         public List<TrialInfo> DefaultTrialInfoList()
         {
+            
             List<TrialInfo> TrialInfoList = new List<TrialInfo>();
             TrialInfo trialNumber = new TrialInfo
             {
@@ -117,19 +91,5 @@ public class TrialInfoPanel : MonoBehaviour
             return TrialInfoList;
         }
     }
-    public GameObject drawCircle(Vector3 circleLocation, float distanceToScreen, float visualAngle)
-    {
-        float radCm = 2 * distanceToScreen * (Mathf.Tan((Mathf.PI * visualAngle / 180f) / 2));
-        float radPix = radCm * playerViewRes.x / 1920; // dummy value 1920 used, ((MonitorDetails)SessionSettings.Get("sessionConfig", "monitorDetails")).CmSize[0]
 
-        GameObject degreeCircle = new GameObject("DegreeCircle", typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UICircle));
-        degreeCircle.AddComponent<CanvasRenderer>();
-        degreeCircle.transform.SetParent(transform);
-        degreeCircle.GetComponent<UnityEngine.UI.Extensions.UICircle>().fill = false;
-        degreeCircle.GetComponent<UnityEngine.UI.Extensions.UICircle>().thickness = 2f;
-        degreeCircle.GetComponent<RectTransform>().sizeDelta = new Vector2(radPix * 2, radPix * 2);
-        degreeCircle.GetComponent<RectTransform>().anchoredPosition = circleLocation;// new Vector3(calibPointPixel.x, calibPointPixel.y, exptViewCam.nearClipPlane);
-        return degreeCircle;
-        
     }
-}

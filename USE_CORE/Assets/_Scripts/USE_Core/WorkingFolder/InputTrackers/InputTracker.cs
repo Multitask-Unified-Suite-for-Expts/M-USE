@@ -40,6 +40,7 @@ public abstract class InputTracker : MonoBehaviour
 
     private void Update()
     {
+        CustomUpdate();
         CurrentTargetGameObject = FindCurrentTarget();
         TargetUpdated?.Invoke(this, EventArgs.Empty);
     }
@@ -47,4 +48,7 @@ public abstract class InputTracker : MonoBehaviour
     public abstract void AddFieldsToFrameData(DataController frameData);
     public abstract GameObject FindCurrentTarget();
     // public abstract void UpdateFields();
+    public virtual void CustomUpdate()
+    {
+    }
 }

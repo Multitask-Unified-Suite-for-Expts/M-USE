@@ -92,7 +92,9 @@ namespace USE_ExperimenterDisplay
         public static List<ExperimenterDisplayPanel> DefaultPanelList()
         {
             List<ExperimenterDisplayPanel> defaultPanelList = new List<ExperimenterDisplayPanel>();
-            // defaultPanelList.Add(new HotkeyPanel());
+            defaultPanelList.Add(new TrialInfoPanel());
+            defaultPanelList.Add(new BlockInfoPanel());
+            defaultPanelList.Add(new HotKeyPanel());
             // defaultPanelList.Add(new PlayerViewPanel());
             //all other default panels
             return defaultPanelList;

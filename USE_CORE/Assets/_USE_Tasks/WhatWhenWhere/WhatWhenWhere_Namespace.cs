@@ -18,6 +18,7 @@ namespace WhatWhenWhere_Namespace
         // public TrialDef[] TrialDefs;
         public string TrialID;
         public int Context;
+        public string ContextName;
         public int[] CorrectObjectTouchOrder;
         public int[] nRepetitionsMinMax;
         public int PlayFeedbackSound_Correct;
@@ -25,7 +26,11 @@ namespace WhatWhenWhere_Namespace
         public float MinTouchDuration;
         public float MaxTouchDuration;
         public int[] SearchStimsIndices;
+        public int[] DistractorStimsIndices;
         public Vector3[] SearchStimsLocations;
+        public Vector3[] DistractorStimsLocations;
+        public string ContextExternalFilePath;
+        public int NumSteps;
 
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -40,13 +45,18 @@ namespace WhatWhenWhere_Namespace
                 WhatWhenWhere_TrialDef td = new WhatWhenWhere_TrialDef();
                 td.TrialID = TrialID;
                 td.Context = Context;
+                td.ContextName = ContextName;
                 td.CorrectObjectTouchOrder = CorrectObjectTouchOrder;
                 td.PlayFeedbackSound_Correct = PlayFeedbackSound_Correct;
                 td.PlayFeedbackSound_Error = PlayFeedbackSound_Error;
                 td.MinTouchDuration = MinTouchDuration;
                 td.MaxTouchDuration = MaxTouchDuration;
                 td.SearchStimsIndices = SearchStimsIndices;
+                td.DistractorStimsIndices = DistractorStimsIndices;
                 td.SearchStimsLocations = SearchStimsLocations;
+                td.DistractorStimsLocations = DistractorStimsLocations;
+                td.ContextExternalFilePath = ContextExternalFilePath;
+                td.NumSteps = NumSteps;
                 TrialDefs[iTrial] = td;
             }
         }
@@ -68,14 +78,18 @@ namespace WhatWhenWhere_Namespace
         public Vector3[][] ObjectRotations;
         public float MinTouchDuration;
         public float MaxTouchDuration;
-
         public int[] SearchStimsIndices;
+        public int[] DistractorStimsIndices;
         public Vector3[] SearchStimsLocations;
+        public Vector3[] DistractorStimsLocations;
+        public string ContextExternalFilePath;
+        public int NumSteps;
     }
 
     public class WhatWhenWhere_StimDef : StimDef
     {
         public bool IsCurrentTarget;
+        public bool IsDistractor;
     }
     //Any other custom classes useful for the functioning of the task could be included in this namespace.
 }

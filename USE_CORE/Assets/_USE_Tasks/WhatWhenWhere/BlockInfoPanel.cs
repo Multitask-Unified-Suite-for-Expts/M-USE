@@ -3,29 +3,33 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using UnityEngine.UI;
+using USE_ExperimenterDisplay;
 
-public class BlockInfoPanel : MonoBehaviour
+public class BlockInfoPanel : ExperimenterDisplayPanel
 {
     public BlockInfoList biList;
     public GameObject blockInfoText;
-
+    public GameObject blockInfoPanel;
     // Start is called before the first frame update
-    void Start()
+    public override void CustomPanelInitialization()
     {
         biList = new BlockInfoList();
         biList.Initialize();
-        blockInfoText = transform.Find("BlockInfoPanelText").gameObject;
-        blockInfoText.GetComponent<Text>().supportRichText = true;
-        blockInfoText.GetComponent<Text>().text = "<size=35><b><color=#14673641>Block Info</color></b></size>" + "\n<size=20>" + biList.GenerateBlockInfo() + "</size>";
-
+        blockInfoPanel = GameObject.Find("BlockInfoPanel");
+        blockInfoText = GameObject.Find("BlockInfoPanelText");
+        blockInfoText.transform.SetParent(blockInfoPanel.GetComponent<Transform>());
     }
 
-    // Update is called once per frame
-    void Update()
+    public override void CustomPanelUpdate()
     {
-
+        if (TrialLevel != null)
+        {
+            blockInfoText.GetComponent<Text>().supportRichText = true;
+            blockInfoText.GetComponent<Text>().text = "<size=35><b><color=#2d3436ff>Block Info</color></b></size>" + "\n<size=25><color=#2d3436ff>" + TaskLevel.BlockSummaryString + "</color></size>";
+        }
+            
     }
-    
+
     public class BlockInfo
     {
         public string dataDescription;

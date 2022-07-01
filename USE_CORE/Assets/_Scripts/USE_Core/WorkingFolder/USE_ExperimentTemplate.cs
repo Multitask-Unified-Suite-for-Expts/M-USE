@@ -13,6 +13,7 @@ using USE_Data;
 using USE_Settings;
 using USE_StimulusManagement;
 using ConfigDynamicUI;
+using UnityEngine.UIElements;
 using USE_ExperimenterDisplay;
 // using USE_TasksCustomTypes;
 
@@ -39,6 +40,9 @@ namespace USE_ExperimentTemplate
 		public SessionDetails SessionDetails;
 		public LocateFile LocateFile;
 
+		private SerialPortThreaded SerialPortController;
+		private SyncBoxController SyncBox;
+
 		private Camera SessionCam;
 		public DisplaySwitcher DisplaySwitcher;
 		private ExperimenterDisplayController ExperimenterDisplayController;
@@ -46,6 +50,9 @@ namespace USE_ExperimentTemplate
 
 		private string configFileFolder;
 		private bool TaskSceneLoaded, SceneLoading;
+		
+		private bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
+		private string EyetrackerType;
 		
 		public override void LoadSettings()
 		{
@@ -57,6 +64,12 @@ namespace USE_ExperimentTemplate
 			             DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
 			SessionSettings.ImportSettings_MultipleType("Session",
 				LocateFile.FindFileInFolder(configFileFolder, "*Session*"));
+
+			//if there is a single suyncbox config file for all experiments, load it
+			string syncBoxFileString =
+				LocateFile.FindFileInFolder(configFileFolder, "*SyncBox*");
+			if (!string.IsNullOrEmpty(syncBoxFileString))
+				SessionSettings.ImportSettings_SingleTypeJSON<EventCodeConfig>("SyncBoxConfig", syncBoxFileString);
 
 			//if there is a single event code config file for all experiments, load it
 			string eventCodeFileString =
@@ -273,6 +286,12 @@ namespace USE_ExperimentTemplate
 			tl.StoreData = StoreData;
 			tl.SubjectID = SubjectID;
 			tl.SessionID = SessionID;
+			if (SessionSettings.SettingExists("Session", "EyetrackerType"))
+				tl.EyetrackerType = (string) SessionSettings.Get("Session", "EyetrackerType");
+			if (SessionSettings.SettingExists("Session", "SelectionType"))
+				tl.SelectionType = (string) SessionSettings.Get("Session", "SelectionType");
+			// tl.SerialPortActive = SessionDetails.SerialPortActive;
+			// SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
 			tl.DefineTaskLevel();
 			ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
 			ActiveTaskLevels.Add(tl);
@@ -490,7 +509,7 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public SessionDataControllers SessionDataControllers;
 
 		[HideInInspector] public bool StoreData;
-		[HideInInspector] public string SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, BlockSummaryString;
+		[HideInInspector] public string SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, BlockSummaryString, EyetrackerType, SelectionType;
 		[HideInInspector] public LocateFile LocateFile;
 
 		// public string TaskSceneName;
@@ -732,6 +751,14 @@ namespace USE_ExperimentTemplate
 
 			TrialLevel.MouseTracker = inputTrackers.GetComponent<MouseTracker>();
 			TrialLevel.MouseTracker.Init(FrameData);
+			TrialLevel.GazeTracker = inputTrackers.GetComponent<GazeTracker>();
+			if (!string.IsNullOrEmpty(EyetrackerType) & EyetrackerType.ToLower() != "none" &
+			    EyetrackerType.ToLower() != "null")
+			{
+				TrialLevel.GazeTracker.Init(FrameData);
+			}
+
+			TrialLevel.SelectionType = SelectionType;
 
 			Controllers.SetActive(false);
 
@@ -948,7 +975,7 @@ namespace USE_ExperimentTemplate
 			if (!string.IsNullOrEmpty(taskDefFile))
 			{
 				SessionSettings.ImportSettings_MultipleType(TaskName + "_TaskSettings", taskDefFile);
-				//TaskDef = (T) SessionSettings.Get(TaskName + "_TaskSettings");
+				TaskDef = (T) SessionSettings.Get(TaskName + "_TaskSettings");
 			}
 			else
 			{
@@ -1099,6 +1126,7 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public TokenFBController TokenFBController;
 		// Input Trackers
 		[HideInInspector] public MouseTracker MouseTracker;
+		[HideInInspector] public GazeTracker GazeTracker;
 
         //protected TrialDef CurrentTrialDef;
         public T GetCurrentTrialDef<T>() where T : TrialDef
@@ -1503,6 +1531,9 @@ namespace USE_ExperimentTemplate
 		public int SessionStart_Frame;
 		public float SessionStart_UnityTime;
 		public string SessionID;
+		public bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
+		public string EyetrackerType, SelectionType;
+		
 	}
 	public class TaskDef
 	{
@@ -1515,6 +1546,8 @@ namespace USE_ExperimentTemplate
 		public float? ExternalStimScale;
 		public List<string[]> FeedbackControllers;
 		public int? TotalTokensNum;
+		public bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
+		public string SelectionType;
 	}
 	public class BlockDef
 	{

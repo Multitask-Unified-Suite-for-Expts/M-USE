@@ -1127,6 +1127,7 @@ namespace USE_ExperimentTemplate
 		// Input Trackers
 		[HideInInspector] public MouseTracker MouseTracker;
 		[HideInInspector] public GazeTracker GazeTracker;
+		[HideInInspector] public string SelectionType;
 
         //protected TrialDef CurrentTrialDef;
         public T GetCurrentTrialDef<T>() where T : TrialDef

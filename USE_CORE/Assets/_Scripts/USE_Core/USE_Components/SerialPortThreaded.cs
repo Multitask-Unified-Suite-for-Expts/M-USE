@@ -8,8 +8,8 @@ using USE_Utilities;
 
 public class SerialPortThreaded : MonoBehaviour
 {
-	public string serialPortAddress;
-	public int serialPortSpeed;
+	public string SerialPortAddress;
+	public int SerialPortSpeed;
 	private static SerialPort sp;
 	public int dataVerbosity; //(2 = full, 1 = terse, 0 = packed hex)
 
@@ -24,22 +24,21 @@ public class SerialPortThreaded : MonoBehaviour
 	public object responseCheckLocker = new object();
 	//public EventWaitHandle _waitForRecvCodeDetected = new EventWaitHandle(false, EventResetMode.AutoReset);
 
-	public int minMsBetweenSending = 3; 
-	public int msBetweenReceiving = 1, readTimeout = 1, writeTimeout = 3;
+	public int minMsBetweenSending = 3, msBetweenReceiving = 1, readTimeout = 1, writeTimeout = 3, initTimeout = 2000;
 	public long lastSentTimeStamp;
 	private EventWaitHandle _waitForSendCode = new AutoResetEvent(false), _waitForRecvCodeDetected = new AutoResetEvent(false);
 	public bool active;
 
 	public void Initialize()
 	{
-		sp = new SerialPort(serialPortAddress, serialPortSpeed);
+		sp = new SerialPort(SerialPortAddress, SerialPortSpeed);
 		sp.Open();
 		new Thread(FinishInit).Start();
 	}
 
 	private void FinishInit()
 	{
-		Thread.Sleep(2000);
+		Thread.Sleep(initTimeout);
 		sp.ReadTimeout = 1;
 		Thread.Sleep(5);
 		sp.WriteTimeout = 3;

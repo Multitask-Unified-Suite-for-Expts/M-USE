@@ -26,14 +26,12 @@ public class EventCodeManager : MonoBehaviour {
 
     public string neuralAcquisitionDevice = "Neuralynx", returnedCodePrefix = "Lynx";
 
-    private UDPManager udpManager;
-    //private SerialPortController serialPortController;
 	private SerialPortThreaded serialPortController;
+	public SyncBoxController SyncBoxController;
 
     void Awake()
     {
-        udpManager = GameObject.Find("ScriptManager").GetComponent<UDPManager>();
-        serialPortController = GameObject.Find("ScriptManager").GetComponent<SerialPortThreaded>();
+        // serialPortController = GameObject.Find("ScriptManager").GetComponent<SerialPortThreaded>();
     }
 
     public void EventCodeFixedUpdate()
@@ -92,7 +90,7 @@ public class EventCodeManager : MonoBehaviour {
 	private void SendCode(int codeToSend)
 	{
 		//Debug.Log("EventCodeManager SendCode: " + codeToSend);
-		serialPortController.AddToSend("NEU " + codeToSend.ToString(), new List<string> { returnedCodePrefix, codeToSend.ToString("X") });
+		SyncBoxController.SendCommand("NEU " + codeToSend.ToString(), new List<string> { returnedCodePrefix, codeToSend.ToString("X") });
 		sentBuffer.Add(codeToSend);
 		//}
 	}

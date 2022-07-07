@@ -41,7 +41,8 @@ namespace USE_ExperimentTemplate
 		public LocateFile LocateFile;
 
 		private SerialPortThreaded SerialPortController;
-		private SyncBoxController SyncBox;
+		private SyncBoxController SyncBoxController;
+		private EventCodeManager EventCodeManager;
 
 		private Camera SessionCam;
 		public DisplaySwitcher DisplaySwitcher;
@@ -65,17 +66,59 @@ namespace USE_ExperimentTemplate
 			SessionSettings.ImportSettings_MultipleType("Session",
 				LocateFile.FindFileInFolder(configFileFolder, "*Session*"));
 
-			//if there is a single suyncbox config file for all experiments, load it
+			
+			if (SessionSettings.SettingExists("Session", "SyncBoxActive"))
+				SyncBoxActive = (bool) SessionSettings.Get("Session", "SyncBoxActive");
+			else
+				SyncBoxActive = false;
+			
+			if (SessionSettings.SettingExists("Session", "EventCodesActive"))
+				EventCodesActive = (bool) SessionSettings.Get("Session", "EventCodesActive");
+			else
+				EventCodesActive = false;
+
+			if (SessionSettings.SettingExists("Session", "RewardPulsesActive"))
+				RewardPulsesActive = (bool) SessionSettings.Get("Session", "RewardPulsesActive");
+			else
+				RewardPulsesActive = false;
+			
+			if (SessionSettings.SettingExists("Session", "SonicationActive"))
+				SonicationActive = (bool) SessionSettings.Get("Session", "SonicationActive");
+			else
+				SonicationActive = false;
+
+			if (EventCodesActive || RewardPulsesActive || SonicationActive)
+				SyncBoxActive = true;
+			
+			//if there is a single syncbox config file for all experiments, load it
 			string syncBoxFileString =
-				LocateFile.FindFileInFolder(configFileFolder, "*SyncBox*");
+					LocateFile.FindFileInFolder(configFileFolder, "*SyncBox*");
 			if (!string.IsNullOrEmpty(syncBoxFileString))
+			{
 				SessionSettings.ImportSettings_SingleTypeJSON<EventCodeConfig>("SyncBoxConfig", syncBoxFileString);
+				SyncBoxActive = true;
+			}
 
 			//if there is a single event code config file for all experiments, load it
 			string eventCodeFileString =
 				LocateFile.FindFileInFolder(configFileFolder, "*EventCode*");
 			if (!string.IsNullOrEmpty(eventCodeFileString))
+			{
 				SessionSettings.ImportSettings_SingleTypeJSON<EventCodeConfig>("EventCodeConfig", eventCodeFileString);
+				EventCodesActive = true;
+			}
+			else if (EventCodesActive)
+				Debug.LogError("EventCodesActive variable set to true in Session Config file but no event codes file is given.");
+
+			if (SyncBoxActive)
+				SerialPortActive = true;
+			
+			if (EventCodesActive)
+			{
+				SerialPortActive = true;
+				SyncBoxActive = true;
+			}
+
 
 			if (SessionSettings.SettingExists("Session", "TaskNames"))
 				ActiveTaskNames = (List<string>) SessionSettings.Get("Session", "TaskNames");
@@ -84,6 +127,10 @@ namespace USE_ExperimentTemplate
 
 			if (SessionSettings.SettingExists("Session", "StoreData"))
 				StoreData = (bool) SessionSettings.Get("Session", "StoreData");
+
+
+			if (SessionSettings.SettingExists("Session", "SerialPortActive"))
+				SerialPortActive = (bool) SessionSettings.Get("Session", "SerialPortActive");
 
 			SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
 
@@ -127,10 +174,49 @@ namespace USE_ExperimentTemplate
 				
 			RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
 			mainCameraCopy.texture = CameraMirrorTexture;
-			
+
+			bool waitForSerialPort = false;
 			setupSession.AddDefaultInitializationMethod(() =>
 			{
 				SessionData.CreateFile();
+				if (SerialPortActive)
+				{
+					
+					if (SerialPortActive)
+						SerialPortController = new SerialPortThreaded();
+					if (SyncBoxActive)
+					{
+						SyncBoxController = new SyncBoxController();
+						SyncBoxController.serialPortController = SerialPortController;
+					}
+
+					if (EventCodesActive)
+					{
+						EventCodeManager = new EventCodeManager();
+						EventCodeManager.SyncBoxController = SyncBoxController;
+					}
+					waitForSerialPort = true;
+					if (SessionSettings.SettingExists("Session", "SerialPortAddress"))
+						SerialPortController.SerialPortAddress =
+							(string) SessionSettings.Get("Session", "SerialPortAddress");
+					else if (SessionSettings.SettingClassExists("SyncBoxConfig"))
+					{
+						if (SessionSettings.SettingExists("SyncBoxConfig", "SerialPortAddress"))
+							SerialPortController.SerialPortAddress =
+								(string) SessionSettings.Get("SyncBoxConfig", "SerialPortAddress");
+					}
+
+					if (SessionSettings.SettingExists("Session", "SerialPortSpeed"))
+						SerialPortController.SerialPortAddress =
+							(string) SessionSettings.Get("Session", "SerialPortSpeed");
+					else if (SessionSettings.SettingClassExists("SyncBoxConfig"))
+					{
+						if (SessionSettings.SettingExists("SyncBoxConfig", "SerialPortSpeed"))
+							SerialPortController.SerialPortAddress =
+								(string) SessionSettings.Get("SyncBoxConfig", "SerialPortSpeed");
+					}
+					SerialPortController.Initialize();
+				}
 			});
 			
 			int iTask = 0;
@@ -140,6 +226,9 @@ namespace USE_ExperimentTemplate
 			string taskName;
 			setupSession.AddUpdateMethod(() =>
 			{
+				if (waitForSerialPort && Time.time - StartTimeAbsolute > SerialPortController.initTimeout / 1000 + 0.5f)
+					waitForSerialPort = false;
+				
 				if (iTask < ActiveTaskNames.Count)
 				{
 					if (!SceneLoading)
@@ -189,7 +278,14 @@ namespace USE_ExperimentTemplate
 					}
 				}
 			});
-			setupSession.SpecifyTermination(() => iTask >= ActiveTaskNames.Count && !SceneLoading, selectTask);
+			setupSession.SpecifyTermination(() => iTask >= ActiveTaskNames.Count && !SceneLoading && !waitForSerialPort, selectTask,
+				() =>
+				{
+					if (SyncBoxActive)
+						if (SessionSettings.SettingClassExists("SyncBoxConfig"))
+							if (SessionSettings.SettingExists("SyncBoxConfig", "SyncBoxInitCommands"))
+								SyncBoxController.SendCommand((List<string>) SessionSettings.Get("SyncBoxConfig", "syncBoxInitCommands"));
+				});
 
 			//tasksFinished is a placeholder, eventually there will be a proper task selection screen
 			bool tasksFinished = false;
@@ -288,10 +384,35 @@ namespace USE_ExperimentTemplate
 			tl.SessionID = SessionID;
 			if (SessionSettings.SettingExists("Session", "EyetrackerType"))
 				tl.EyetrackerType = (string) SessionSettings.Get("Session", "EyetrackerType");
+			else
+				tl.EyetrackerType = "";
+			
 			if (SessionSettings.SettingExists("Session", "SelectionType"))
 				tl.SelectionType = (string) SessionSettings.Get("Session", "SelectionType");
-			// tl.SerialPortActive = SessionDetails.SerialPortActive;
-			// SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
+			else
+				tl.SelectionType = "";
+
+			tl.SyncBoxActive = SyncBoxActive;
+			if (SerialPortActive)
+				tl.SerialPortController = SerialPortController;
+			if (SyncBoxActive)
+				tl.SyncBoxController = SyncBoxController;
+			
+			if (SessionSettings.SettingExists("Session", "EventCodesActive"))
+				tl.EventCodesActive = (bool) SessionSettings.Get("Session", "EventCodesActive");
+			else
+				tl.EventCodesActive = false;
+
+			if (SessionSettings.SettingExists("Session", "RewardPulsesActive"))
+				tl.RewardPulsesActive = (bool) SessionSettings.Get("Session", "RewardPulsesActive");
+			else
+				tl.RewardPulsesActive = false;
+			
+			if (SessionSettings.SettingExists("Session", "SonicationActive"))
+				tl.SonicationActive = (bool) SessionSettings.Get("Session", "SonicationActive");
+			else
+				tl.SonicationActive = false;
+
 			tl.DefineTaskLevel();
 			ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
 			ActiveTaskLevels.Add(tl);
@@ -508,7 +629,7 @@ namespace USE_ExperimentTemplate
 
 		[HideInInspector] public SessionDataControllers SessionDataControllers;
 
-		[HideInInspector] public bool StoreData;
+		[HideInInspector] public bool StoreData, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
 		[HideInInspector] public string SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, BlockSummaryString, EyetrackerType, SelectionType;
 		[HideInInspector] public LocateFile LocateFile;
 
@@ -535,6 +656,9 @@ namespace USE_ExperimentTemplate
         [HideInInspector] public  ExperimenterDisplayController ExperimenterDisplayController;
 
         private GameObject Controllers;
+
+        [HideInInspector] public SerialPortThreaded SerialPortController;
+        [HideInInspector] public SyncBoxController SyncBoxController;
 
 
 		public Type TaskLevelType;
@@ -681,6 +805,8 @@ namespace USE_ExperimentTemplate
 			//user-defined task control level 
 			DefineControlLevel();
 
+			
+			
 			//Setup data management
 			TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + TaskName;
 			FilePrefix = FilePrefix + "_" + TaskName;
@@ -729,6 +855,11 @@ namespace USE_ExperimentTemplate
 			TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
 			TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
 			TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
+			
+
+			TrialLevel.SerialPortController = SerialPortController;
+			TrialLevel.SyncBoxController = SyncBoxController;
+			
 			bool audioInited = false;
 			foreach (string fbController in fbControllersList) {
 				switch (fbController) {
@@ -975,7 +1106,7 @@ namespace USE_ExperimentTemplate
 			if (!string.IsNullOrEmpty(taskDefFile))
 			{
 				SessionSettings.ImportSettings_MultipleType(TaskName + "_TaskSettings", taskDefFile);
-				TaskDef = (T) SessionSettings.Get(TaskName + "_TaskSettings");
+				// TaskDef = (T) SessionSettings.Get(TaskName + "_TaskSettings");
 			}
 			else
 			{
@@ -1127,7 +1258,11 @@ namespace USE_ExperimentTemplate
 		// Input Trackers
 		[HideInInspector] public MouseTracker MouseTracker;
 		[HideInInspector] public GazeTracker GazeTracker;
+		
 		[HideInInspector] public string SelectionType;
+
+		[HideInInspector] public SerialPortThreaded SerialPortController;
+		[HideInInspector] public SyncBoxController SyncBoxController;
 
         //protected TrialDef CurrentTrialDef;
         public T GetCurrentTrialDef<T>() where T : TrialDef

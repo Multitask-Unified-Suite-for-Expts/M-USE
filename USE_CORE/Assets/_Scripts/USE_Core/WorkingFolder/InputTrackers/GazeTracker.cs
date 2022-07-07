@@ -6,7 +6,7 @@ using USE_Data;
 public class GazeTracker : InputTracker
 {
     private Vector3 GazePos = new Vector3 (-1f, -1f, -1f);
-    private bool SpoofGazeWithMouse = false;
+    public bool SpoofGazeWithMouse = false;
     private GameObject HoverObject;
 
     public override void AddFieldsToFrameData(DataController frameData)

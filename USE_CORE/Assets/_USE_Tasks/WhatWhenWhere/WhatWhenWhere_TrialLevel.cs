@@ -209,8 +209,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddInitializationMethod(() =>
         {
-            mouseSelectionHandler.MinDuration = minObjectTouchDuration.value;
-            mouseSelectionHandler.MaxDuration = maxObjectTouchDuration.value;
+            //mouseSelectionHandler.MinDuration = minObjectTouchDuration.value;
+            //mouseSelectionHandler.MaxDuration = maxObjectTouchDuration.value;
             if (stimCount < CurrentTrialDef.CorrectObjectTouchOrder.Length)
             {
                 correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[stimCount] - 1;
@@ -300,76 +300,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[stimCount] - 1;
                 chosenStim = hit.transform.gameObject;
             }
-            if (choiceMade)
-                {
-                    GameObject testStim = chosenStim.transform.root.gameObject;
-                    response = 1;
-                    //Timing Error
-                    if (touchDuration < minObjectTouchDuration.value || touchDuration > maxObjectTouchDuration.value)
-                    {
-                        Debug.Log("Did not click on stimulus for long enough");
-                        timingFail = true;
-                        touchDurationError += 1;
-                        totalErrors_InSession += 1;
-                        totalErrors_InBlock += 1;
-                        touchedObjects.Add(testStim.name);
-                        slider.value -= sliderValueIncreaseAmount;
-                        numErrors_InBlock[correctIndex]++;
-                        numErrors_InSession[correctIndex]++;
-                    }
-                    //Correct Selection
-                    else if (testStim.GetComponent<StimDefPointer>().GetStimDef<WhatWhenWhere_StimDef>().IsCurrentTarget)
-                    {
-                        Debug.Log("Clicked on the correct stimulus within the sequence");
-                        CorrectSelectionProgressData();
-                        slider.value += sliderValueIncreaseAmount;
-                        stimCount += 1;
-
-                        touchedObjects.Add(testStim.name);
-                        yellowHalo.transform.position = testStim.transform.position;
-                    }
-                    //Repetition Error
-                    else if (touchedObjects.Contains(testStim.name))
-                    {
-                        Debug.Log("Clicked on a stimulus, but repeated a previous selection");
-                        grayHalo.transform.position = testStim.transform.position;
-                        touchedObjects.Add(testStim.name);
-
-                        IncorrectSelectionProgressData(correctIndex);
-
-                        slider.value -= sliderValueIncreaseAmount;
-                        repetitionError += 1;
-
-                    }
-                    //Slot Errors
-                    else
-                    {   //Distractor Slot Error
-                        if (testStim.GetComponent<StimDefPointer>().GetStimDef<WhatWhenWhere_StimDef>().IsDistractor)
-                        {
-                            Debug.Log("Clicked on a distractor");
-                            grayHalo.transform.position = testStim.transform.position;
-                            touchedObjects.Add(testStim.name);
-                            slider.value -= sliderValueIncreaseAmount;
-                            distractorSlotError += 1;
-
-                            IncorrectSelectionProgressData(correctIndex);
-                        }
-
-                        //Stimuli Slot error
-                        else
-                        {
-                            Debug.Log("Clicked on a stimulus, but not within the correct sequence");
-                            grayHalo.transform.position = testStim.transform.position;
-                            touchedObjects.Add(testStim.name);
-                            slider.value -= sliderValueIncreaseAmount;
-                            slotError += 1;
-                            IncorrectSelectionProgressData(correctIndex);
-                        }
-
-                    }
-                }
             else
-                {
+            {
                     Debug.Log("Clicked within the scene, but not on a stimulus");
 
                     response = 2;
@@ -383,6 +315,74 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     slider.value -= sliderValueIncreaseAmount;
                 }
         }
+        if (choiceMade)
+            {
+                GameObject testStim = chosenStim.transform.root.gameObject;
+                response = 1;
+                //Timing Error
+                if (touchDuration < minObjectTouchDuration.value || touchDuration > maxObjectTouchDuration.value)
+                {
+                    Debug.Log("Did not click on stimulus for long enough");
+                    timingFail = true;
+                    touchDurationError += 1;
+                    totalErrors_InSession += 1;
+                    totalErrors_InBlock += 1;
+                    touchedObjects.Add(testStim.name);
+                    slider.value -= sliderValueIncreaseAmount;
+                    numErrors_InBlock[correctIndex]++;
+                    numErrors_InSession[correctIndex]++;
+                }
+                //Correct Selection
+                else if (testStim.GetComponent<StimDefPointer>().GetStimDef<WhatWhenWhere_StimDef>().IsCurrentTarget)
+                {
+                    Debug.Log("Clicked on the correct stimulus within the sequence");
+                    CorrectSelectionProgressData();
+                    slider.value += sliderValueIncreaseAmount;
+                    stimCount += 1;
+
+                    touchedObjects.Add(testStim.name);
+                    yellowHalo.transform.position = testStim.transform.position;
+                }
+                //Repetition Error
+                else if (touchedObjects.Contains(testStim.name))
+                {
+                    Debug.Log("Clicked on a stimulus, but repeated a previous selection");
+                    grayHalo.transform.position = testStim.transform.position;
+                    touchedObjects.Add(testStim.name);
+
+                    IncorrectSelectionProgressData(correctIndex);
+
+                    slider.value -= sliderValueIncreaseAmount;
+                    repetitionError += 1;
+
+                }
+                //Slot Errors
+                else 
+                {   //Distractor Slot Error
+                    if (testStim.GetComponent<StimDefPointer>().GetStimDef<WhatWhenWhere_StimDef>().IsDistractor)
+                    {
+                        Debug.Log("Clicked on a distractor");
+                        grayHalo.transform.position = testStim.transform.position;
+                        touchedObjects.Add(testStim.name);
+                        slider.value -= sliderValueIncreaseAmount;
+                        distractorSlotError += 1;
+
+                        IncorrectSelectionProgressData(correctIndex);
+                    }
+
+                    //Stimuli Slot error
+                    else
+                    {
+                        Debug.Log("Clicked on a stimulus, but not within the correct sequence");
+                        grayHalo.transform.position = testStim.transform.position;
+                        touchedObjects.Add(testStim.name);
+                        slider.value -= sliderValueIncreaseAmount;
+                        slotError += 1;
+                        IncorrectSelectionProgressData(correctIndex);
+                    }
+
+                }
+            }
         });
         ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI);
         ChooseStimulus.SpecifyTermination(() => response == 1, StimulusChosen); // Response ==1 means "Clicked on a stimulus" and is evaluated for errors
@@ -697,7 +697,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         irrelevantSelectionError = 0;
         noScreenTouchError = 0;
         initialTouch = false;
-        choiceMade = false; ;
+        choiceMade = false; 
         stimCount = 0;
         response = -1;
         touchedObjects.Clear();

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using USE_Utilities;
 using System.Threading;
+using USE_ExperimentTemplate_Classes;
 
 public class EventCodeManager : MonoBehaviour {
 
@@ -82,9 +83,31 @@ public class EventCodeManager : MonoBehaviour {
         }
     }
 
+    public void SendCodeImmediate(EventCode ec)
+    {
+	    if (ec.Value != null)
+			SendCodeImmediate(ec.Value.Value);
+	    else
+	    {
+		    SendCodeImmediate(1);
+		    Debug.LogWarning("Attempted to send event code with no value specified, code of 1 sent instead.");
+	    }
+    }
+    
     public void SendCodeNextFrame(int code)
     {
         toSendBuffer.Add(code);
+    }
+
+    public void SendCodeNextFrame(EventCode ec)
+    {
+	    if (ec.Value != null)
+		    SendCodeNextFrame(ec.Value.Value);
+	    else
+	    {
+		    SendCodeImmediate(1);
+		    Debug.LogWarning("Attempted to send event code with no value specified, code of 1 sent instead.");
+	    }
     }
 
 	private void SendCode(int codeToSend)
@@ -136,9 +159,6 @@ public class EventCodeManager : MonoBehaviour {
 		return new List<int>();
 
 	}
-
-	private void OnApplicationQuit()
-	{
-
-	}
+	
+	
 }

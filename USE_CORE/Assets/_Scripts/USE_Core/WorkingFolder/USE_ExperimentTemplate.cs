@@ -393,15 +393,13 @@ namespace USE_ExperimentTemplate
 				tl.SelectionType = "";
 
 			tl.SyncBoxActive = SyncBoxActive;
+			tl.EventCodesActive = EventCodesActive;
 			if (SerialPortActive)
 				tl.SerialPortController = SerialPortController;
 			if (SyncBoxActive)
 				tl.SyncBoxController = SyncBoxController;
-			
-			if (SessionSettings.SettingExists("Session", "EventCodesActive"))
-				tl.EventCodesActive = (bool) SessionSettings.Get("Session", "EventCodesActive");
-			else
-				tl.EventCodesActive = false;
+			if (EventCodesActive)
+				tl.EventCodeManager = EventCodeManager;
 
 			if (SessionSettings.SettingExists("Session", "RewardPulsesActive"))
 				tl.RewardPulsesActive = (bool) SessionSettings.Get("Session", "RewardPulsesActive");
@@ -659,6 +657,7 @@ namespace USE_ExperimentTemplate
 
         [HideInInspector] public SerialPortThreaded SerialPortController;
         [HideInInspector] public SyncBoxController SyncBoxController;
+        [HideInInspector] public EventCodeManager EventCodeManager;
 
 
 		public Type TaskLevelType;
@@ -859,6 +858,7 @@ namespace USE_ExperimentTemplate
 
 			TrialLevel.SerialPortController = SerialPortController;
 			TrialLevel.SyncBoxController = SyncBoxController;
+			TrialLevel.EventCodeManager = EventCodeManager;
 			
 			bool audioInited = false;
 			foreach (string fbController in fbControllersList) {
@@ -1263,6 +1263,7 @@ namespace USE_ExperimentTemplate
 
 		[HideInInspector] public SerialPortThreaded SerialPortController;
 		[HideInInspector] public SyncBoxController SyncBoxController;
+		[HideInInspector] public EventCodeManager EventCodeManager;
 
         //protected TrialDef CurrentTrialDef;
         public T GetCurrentTrialDef<T>() where T : TrialDef

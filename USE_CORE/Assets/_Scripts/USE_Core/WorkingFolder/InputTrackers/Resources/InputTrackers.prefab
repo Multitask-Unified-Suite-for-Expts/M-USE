@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6358285946212745555}
   - component: {fileID: -4421433783915754283}
+  - component: {fileID: 6020225256618707032}
   m_Layer: 0
   m_Name: InputTrackers
   m_TagString: Untagged
@@ -41,6 +42,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2bb1a4582ce23cc419d7e5f1163f13a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CurrentTargetGameObject: {fileID: 0}
+--- !u!114 &6020225256618707032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1916987163475544777}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3d11cc2f0e904826a3b3adbcac45d3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   CurrentTargetGameObject: {fileID: 0}

@@ -17,13 +17,24 @@ namespace VisualSearch_Namespace
         //public List<string[]> FeatureNames;
         //public string neutralPatternedColorName;
         //public float? ExternalStimScale;
+
+        Vector3 ButtonPosition;
+        Vector3 ButtonScale;
+        Vector3 ButtonColor;
+        string ButtonText;
     }
 
     public class VisualSearch_BlockDef : BlockDef
     {
         //Already-existing fields (inherited from BlockDef)
-		//public int BlockCount;
-		//public TrialDef[] TrialDefs;
+        //public int BlockCount;
+        //public TrialDef[] TrialDefs;
+        public int[] GroupAIndices;
+        public int[] GroupBIndices;
+        public int[] GroupCIndices;
+        public Vector3[] GroupALocations;
+        public Vector3[] GroupBLocations;
+        public Vector3[] GroupCLocations;
     }
 
     public class VisualSearch_TrialDef : TrialDef

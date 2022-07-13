@@ -137,6 +137,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         SelectionHandler<WhatWhenWhere_StimDef> mouseSelectionHandler = new SelectionHandler<WhatWhenWhere_StimDef>();
         GazeTracker.SpoofGazeWithMouse = true;
 
+        //EventCodeManager.SendCodeImmediate(3);
+
         SetupTrial.AddInitializationMethod(() =>
         {
             ClearDataLogging();
@@ -158,6 +160,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // define StartButton state
         StartButton.AddInitializationMethod(() =>
         {
+            EventCodeManager.SendCodeImmediate(300);
             RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\Blank.png");
             ResetRelativeStartTime();
             if (context != 0)
@@ -165,14 +168,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 Debug.Log(context);
                 disableAllGameobjects();
             }
-
             context = CurrentTrialDef.Context;
-
             initButton.SetActive(true);
             goCue.SetActive(true);
-            slider.value = 0;
-            slider.gameObject.transform.position = sliderInitPosition;
-            sliderHalo.gameObject.transform.position = sliderInitPosition;
         });
         StartButton.AddUpdateMethod(() =>
         {
@@ -185,14 +183,21 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     if (hit.transform.name == "StartButton")
                     {
                         response = 0;
-                        RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png"); // Set the background texture to that of specified context
+                        // Set the background texture to that of specified context
+                        RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png"); 
                     }
                 }
             }
         });
         StartButton.SpecifyTermination(() => response == 0, ChooseStimulus);
+        
         StartButton.AddDefaultTerminationMethod(() =>
         {
+            SyncBoxController.SendRewardPulses(2, 50000);
+            
+            slider.value = 0;
+            slider.gameObject.transform.position = sliderInitPosition;
+            sliderHalo.gameObject.transform.position = sliderInitPosition;
             sliderValueIncreaseAmount = (100f / CurrentTrialDef.NumSteps) / 100f;
             slider.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
             sliderHalo.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
@@ -202,13 +207,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             initButton.SetActive(false);
             goCue.SetActive(false);
         });
-
+         
         GazeTracker.AddSelectionHandler(gazeSelectionHandler, ChooseStimulus);
         MouseTracker.AddSelectionHandler(mouseSelectionHandler, ChooseStimulus);
 
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddInitializationMethod(() =>
         {
+            
             //mouseSelectionHandler.MinDuration = minObjectTouchDuration.value;
             //mouseSelectionHandler.MaxDuration = maxObjectTouchDuration.value;
             if (stimCount < CurrentTrialDef.CorrectObjectTouchOrder.Length)
@@ -434,8 +440,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             GenerateUpdatingTrialData();
             // logging data information on the Experimenter Display Trial Info Panel
-            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1).ToString() + "\nTouched Object Names: " + touchedObjectsNames + "\nError Type: " +
-                        errorTypeString + "\nTouch Duration: " + touchDurationTimes + "\nChoice Duration: " + choiceDurationTimes + "\nPerformance: " + accuracyLog_InTrial + "\nSession Performance: " + accuracyLog_InSession;
+            TrialSummaryString = "Trial Num: " + (TrialCount_InTask).ToString() + "\nTouched Object Names: "+ 
+            touchedObjectsNames + "\nError Type: " + errorTypeString + "\nTouch Duration: " + touchDurationTimes + 
+            "\nChoice Duration: " + choiceDurationTimes + "\nPerformance: " + accuracyLog_InTrial + 
+            "\nSession Performance: " + accuracyLog_InSession;
+             
 
         });
 

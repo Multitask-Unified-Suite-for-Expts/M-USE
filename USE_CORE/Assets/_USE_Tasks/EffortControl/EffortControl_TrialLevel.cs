@@ -2,16 +2,16 @@ using UnityEngine;
 using USE_ExperimentTemplate;
 using USE_States;
 // using USE_StimulusManagement;
-using EC_Namespace;
+using EffortControl_Namespace;
 using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 //testing
 
-public class EC_TrialLevel : ControlLevel_Trial_Template
+public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 {
-    public EC_TrialDef CurrentTrialDef => GetCurrentTrialDef<EC_TrialDef>();
+    public EffortControl_TrialDef CurrentTrialDef => GetCurrentTrialDef<EffortControl_TrialDef>();
     //This variable is required for most tasks, and is defined as the output of the GetCurrentTrialDef function 
 
     // game object variables

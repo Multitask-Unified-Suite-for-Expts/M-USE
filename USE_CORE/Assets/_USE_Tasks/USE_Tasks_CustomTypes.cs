@@ -5,7 +5,7 @@ using WhatWhenWhere_Namespace;
 using ContinuousRecognition_Namespace;
 using WorkingMemory_Namespace;
 using VisualSearch_Namespace;
-// using EC_Namespace;
+using EffortControl_Namespace;
 using MazeGame_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
@@ -34,6 +34,17 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(WhatWhenWhere_BlockDef),
                 TrialDefType = typeof(WhatWhenWhere_TrialDef),
                 StimDefType = typeof(WhatWhenWhere_StimDef)
+            }
+        }
+        ,{
+            "EffortControl", new TaskTypes
+            {
+                TaskLevelType = typeof(EffortControl_TaskLevel),
+                TrialLevelType = typeof(EffortControl_TrialLevel),
+                TaskDefType = typeof(EffortControl_TaskDef),
+                BlockDefType = typeof(EffortControl_BlockDef),
+                TrialDefType = typeof(EffortControl_TrialDef),
+                StimDefType = typeof(EffortControl_StimDef)
             }
         }
         ,{

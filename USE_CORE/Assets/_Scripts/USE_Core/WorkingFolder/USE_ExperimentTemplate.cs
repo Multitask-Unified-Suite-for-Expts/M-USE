@@ -207,13 +207,13 @@ namespace USE_ExperimentTemplate
 					}
 
 					if (SessionSettings.SettingExists("Session", "SerialPortSpeed"))
-						SerialPortController.SerialPortAddress =
-							(string) SessionSettings.Get("Session", "SerialPortSpeed");
+						SerialPortController.SerialPortSpeed =
+							(int) SessionSettings.Get("Session", "SerialPortSpeed");
 					else if (SessionSettings.SettingClassExists("SyncBoxConfig"))
 					{
 						if (SessionSettings.SettingExists("SyncBoxConfig", "SerialPortSpeed"))
-							SerialPortController.SerialPortAddress =
-								(string) SessionSettings.Get("SyncBoxConfig", "SerialPortSpeed");
+							SerialPortController.SerialPortSpeed =
+								(int) SessionSettings.Get("SyncBoxConfig", "SerialPortSpeed");
 					}
 					SerialPortController.Initialize();
 				}

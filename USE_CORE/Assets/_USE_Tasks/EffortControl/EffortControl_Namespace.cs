@@ -3,9 +3,9 @@ using USE_ExperimentTemplate;
 using USE_StimulusManagement;
 //test
 
-namespace EC_Namespace
+namespace EffortControl_Namespace
 {
-    public class EC_TaskDef : TaskDef
+    public class EffortControl_TaskDef : TaskDef
     {
         //Already-existing fields (inherited from TaskDef)      
         //public DateTime TaskStart_DateTime;
@@ -20,14 +20,14 @@ namespace EC_Namespace
         //public float? ExternalStimScale;
     }
 
-    public class EC_BlockDef : BlockDef
+    public class EffortControl_BlockDef : BlockDef
     {
         //Already-existing fields (inherited from BlockDef)
 		//public int BlockCount;
 		//public TrialDef[] TrialDefs;
     }
 
-    public class EC_TrialDef : TrialDef
+    public class EffortControl_TrialDef : TrialDef
     {
         //Already-existing fields (inherited from TrialDef)
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
@@ -49,7 +49,7 @@ namespace EC_Namespace
         public float FinalTouchToRewardDelay;
     }
 
-    public class EC_StimDef : StimDef
+    public class EffortControl_StimDef : StimDef
     {
         //Already-existing fields (inherited from TrialDef)
         //public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)

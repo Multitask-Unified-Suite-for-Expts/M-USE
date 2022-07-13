@@ -15,6 +15,8 @@ using USE_StimulusManagement;
 using ConfigDynamicUI;
 using UnityEngine.UIElements;
 using USE_ExperimenterDisplay;
+using USE_ExperimentTemplate_Classes;
+
 // using USE_TasksCustomTypes;
 
 namespace USE_ExperimentTemplate
@@ -54,7 +56,8 @@ namespace USE_ExperimentTemplate
 		
 		private bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
 		private string EyetrackerType;
-		
+		private Dictionary<string, EventCode> SessionEventCodes;
+
 		public override void LoadSettings()
 		{
 			//load session config file
@@ -64,7 +67,7 @@ namespace USE_ExperimentTemplate
 			FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" +
 			             DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
 			SessionSettings.ImportSettings_MultipleType("Session",
-				LocateFile.FindFileInFolder(configFileFolder, "*Session*"));
+				LocateFile.FindFileInFolder(configFileFolder, "*SessionConfig*"));
 
 			
 			if (SessionSettings.SettingExists("Session", "SyncBoxActive"))
@@ -104,7 +107,8 @@ namespace USE_ExperimentTemplate
 				LocateFile.FindFileInFolder(configFileFolder, "*EventCode*");
 			if (!string.IsNullOrEmpty(eventCodeFileString))
 			{
-				SessionSettings.ImportSettings_SingleTypeJSON<EventCodeConfig>("EventCodeConfig", eventCodeFileString);
+				SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
+				SessionEventCodes = (Dictionary<string, EventCode>) SessionSettings.Get("EventCodeConfig");
 				EventCodesActive = true;
 			}
 			else if (EventCodesActive)
@@ -658,7 +662,7 @@ namespace USE_ExperimentTemplate
         [HideInInspector] public SerialPortThreaded SerialPortController;
         [HideInInspector] public SyncBoxController SyncBoxController;
         [HideInInspector] public EventCodeManager EventCodeManager;
-
+        protected Dictionary<string, EventCode> TaskEventCodes;
 
 		public Type TaskLevelType;
 		protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
@@ -833,6 +837,10 @@ namespace USE_ExperimentTemplate
 
 			BlockData.ManuallyDefine();
 			FrameData.ManuallyDefine();
+			
+			if(EventCodesActive)
+				FrameData.AddEventCodeColumns();
+			
 			BlockData.AddStateTimingData(this);
 			BlockData.CreateFile();
 			FrameData.CreateFile();
@@ -859,6 +867,8 @@ namespace USE_ExperimentTemplate
 			TrialLevel.SerialPortController = SerialPortController;
 			TrialLevel.SyncBoxController = SyncBoxController;
 			TrialLevel.EventCodeManager = EventCodeManager;
+			if (TaskEventCodes != null)
+				TrialLevel.TaskEventCodes = TaskEventCodes;
 			
 			bool audioInited = false;
 			foreach (string fbController in fbControllersList) {
@@ -943,7 +953,14 @@ namespace USE_ExperimentTemplate
 				SessionSettings.ImportSettings_SingleTypeJSON<ConfigVarStore>(TaskName + "_ConfigUiDetails", configUIVariableFile);
 				ConfigUiVariables = (ConfigVarStore) SessionSettings.Get(TaskName + "_ConfigUiDetails");
 			}
-
+			
+			string eventCodeFile = LocateFile.FindFileInFolder(TaskConfigPath, "*" + TaskName + "*EventCodeConfig*");
+			if (!string.IsNullOrEmpty(eventCodeFile))
+			{
+				SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string,EventCode>>(TaskName + "_EventCodeConfig", eventCodeFile);
+				TaskEventCodes = (Dictionary<string, EventCode>) SessionSettings.Get(TaskName + "_EventCodeConfig");
+				EventCodesActive = true;
+			}
 
 			//handling of block and trial defs so that each BlockDef contains a TrialDef[] array
 
@@ -1264,7 +1281,8 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public SerialPortThreaded SerialPortController;
 		[HideInInspector] public SyncBoxController SyncBoxController;
 		[HideInInspector] public EventCodeManager EventCodeManager;
-
+		[HideInInspector] public Dictionary<string, EventCode> TaskEventCodes;
+		
         //protected TrialDef CurrentTrialDef;
         public T GetCurrentTrialDef<T>() where T : TrialDef
 		{
@@ -1576,6 +1594,13 @@ namespace USE_ExperimentTemplate
 			AddDatum("TrialCount_InBlock", () => trialLevel.TrialCount_InBlock + 1);
 			AddDatum("Frame", () => Time.frameCount);
 			AddDatum("FrameStartUnity", () => Time.time);
+		}
+
+		public void AddEventCodeColumns()
+		{
+			AddDatum("EventCodes", () => string.Join(",", taskLevel.EventCodeManager.GetBuffer("sent")));
+			AddDatum("SplitEventCodes", () => string.Join(",", taskLevel.EventCodeManager.GetBuffer("split")));
+			AddDatum("PreSplitEventCodes", () => string.Join(",", taskLevel.EventCodeManager.GetBuffer("presplit")));
 		}
 	}
 

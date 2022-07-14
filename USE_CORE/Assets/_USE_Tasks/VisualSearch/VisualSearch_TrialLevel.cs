@@ -260,7 +260,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         //testButton = sttartButton;
         string TaskName = "VisualSearch";
         if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
-			{
+			{ 
 				if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
 					buttonPosition = (Vector3) SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
 				if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
@@ -274,7 +274,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
         testButton = new USE_Button(buttonPosition, buttonScale, canvas, buttonColor, buttonText);
         testButton.defineButton();
-        testButton.SetVisibilityOnOffStates(GetStateFromName("InitTrial"), GetStateFromName("InitTrial"));
+        testButton.SetVisibilityOnOffStates(GetStateFromName("InitTrial"), GetStateFromName("SearchDisplay"));
         random = 1;
     }
 

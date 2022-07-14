@@ -38,7 +38,7 @@ public class SyncBoxController
         serialPortController.AddToSend(command, codesToCheck);
     }
     
-    private void SendRewardPulses(int numPulses, int pulseSize)
+    public void SendRewardPulses(int numPulses, int pulseSize)
     {
         if (usingSonication)
         {

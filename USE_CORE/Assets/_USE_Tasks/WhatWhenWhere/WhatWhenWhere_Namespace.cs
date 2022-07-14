@@ -4,18 +4,8 @@ using USE_StimulusManagement;
 
 namespace WhatWhenWhere_Namespace
 {
-    //There is no need for the EffortControl_TaskDef or EffortControl_BlockDef 
-    //classes to be defined here, as they add nothing to their parent classes.
-    //However they are left here to make this script an easier template to copy.
-    public class WhatWhenWhere_TaskDef : TaskDef
-    {
-
-    }
-
     public class WhatWhenWhere_BlockDef : BlockDef
     {
-        // public int BlockCount;
-        // public TrialDef[] TrialDefs;
         public string TrialID;
         public int Context;
         public string ContextName;
@@ -90,6 +80,11 @@ namespace WhatWhenWhere_Namespace
     {
         public bool IsCurrentTarget;
         public bool IsDistractor;
+    }
+
+    public class WhatWhenWhere_TaskDef : TaskDef
+    {
+
     }
     //Any other custom classes useful for the functioning of the task could be included in this namespace.
 }

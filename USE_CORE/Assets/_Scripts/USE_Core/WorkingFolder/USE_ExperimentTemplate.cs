@@ -344,8 +344,8 @@ namespace USE_ExperimentTemplate
 			
 			if (EventCodesActive)
 			{
-				selectTask.AddFixedUpdateMethod(() => EventCodeManager.EventCodeFixedUpdate());
-				selectTask.AddLateUpdateMethod(() => EventCodeManager.EventCodeLateUpdate());
+				runTask.AddFixedUpdateMethod(() => EventCodeManager.EventCodeFixedUpdate());
+				runTask.AddLateUpdateMethod(() => EventCodeManager.EventCodeLateUpdate());
 			}
 			runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
 			{

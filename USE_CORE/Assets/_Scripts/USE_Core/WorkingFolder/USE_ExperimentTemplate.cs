@@ -89,7 +89,7 @@ namespace USE_ExperimentTemplate
 				SonicationActive = (bool) SessionSettings.Get("Session", "SonicationActive");
 			else
 				SonicationActive = false;
-
+			
 			if (EventCodesActive || RewardPulsesActive || SonicationActive)
 				SyncBoxActive = true;
 			
@@ -309,6 +309,13 @@ namespace USE_ExperimentTemplate
 				//if(taskCount >= ActiveTaskLevels.Count)
 				//	tasksFinished = true;
 			});
+
+			if (EventCodesActive)
+			{
+				selectTask.AddFixedUpdateMethod(() => EventCodeManager.EventCodeFixedUpdate());
+				selectTask.AddLateUpdateMethod(() => EventCodeManager.EventCodeLateUpdate());
+			}
+
 			//selectTask.AddUpdateMethod( get string of CurrentTaskName from button press);
 			selectTask.SpecifyTermination(() => !tasksFinished, runTask, () =>
 			{
@@ -334,6 +341,12 @@ namespace USE_ExperimentTemplate
 				// mirrorCamera.CopyFrom(CurrentTask.TaskCam);
 				// mirrorCamera.cullingMask = 0;
 			});
+			
+			if (EventCodesActive)
+			{
+				selectTask.AddFixedUpdateMethod(() => EventCodeManager.EventCodeFixedUpdate());
+				selectTask.AddLateUpdateMethod(() => EventCodeManager.EventCodeLateUpdate());
+			}
 			runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
 			{
 				SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));

@@ -112,7 +112,7 @@ namespace USE_ExperimentTemplate
 				EventCodesActive = true;
 			}
 			else if (EventCodesActive)
-				Debug.LogError("EventCodesActive variable set to true in Session Config file but no event codes file is given.");
+				Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");
 
 			if (SyncBoxActive)
 				SerialPortActive = true;

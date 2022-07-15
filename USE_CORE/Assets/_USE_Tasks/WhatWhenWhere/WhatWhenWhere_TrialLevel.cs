@@ -143,6 +143,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         SetupTrial.AddInitializationMethod(() =>
         {
+            ClearDataLogging();
+
             if (!variablesLoaded)
             {
                 variablesLoaded = true;
@@ -324,7 +326,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     irrelevantSelection = true;
                     slider.value -= sliderValueIncreaseAmount;
 
-                    EventCodeManager.SendCodeImmediate(TaskEventCodes["TaskTouchIrrelevantStart"]);
+                    EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchIrrelevantStart"]);
                 }
         }
         if (choiceMade)

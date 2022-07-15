@@ -198,6 +198,7 @@ namespace USE_ExperimentTemplate
 					{
 						EventCodeManager = new EventCodeManager();
 						EventCodeManager.SyncBoxController = SyncBoxController;
+						EventCodeManager.codesActive = true;
 					}
 					waitForSerialPort = true;
 					if (SessionSettings.SettingExists("Session", "SerialPortAddress"))

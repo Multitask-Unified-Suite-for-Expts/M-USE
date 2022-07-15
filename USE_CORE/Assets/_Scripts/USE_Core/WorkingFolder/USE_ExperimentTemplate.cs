@@ -98,7 +98,7 @@ namespace USE_ExperimentTemplate
 					LocateFile.FindFileInFolder(configFileFolder, "*SyncBox*");
 			if (!string.IsNullOrEmpty(syncBoxFileString))
 			{
-				SessionSettings.ImportSettings_SingleTypeJSON<EventCodeConfig>("SyncBoxConfig", syncBoxFileString);
+				SessionSettings.ImportSettings_MultipleType("SyncBoxConfig", syncBoxFileString);
 				SyncBoxActive = true;
 			}
 
@@ -1733,79 +1733,6 @@ namespace USE_ExperimentTemplate
 	{
 		public int BlockCount, TrialCountInBlock, TrialCountInTask;
 		public TrialStims TrialStims;
-	}
-
-	public class EventCodeConfig
-	{
-		public EventCode MainInitEnd;
-		public EventCode MainStartEnd;
-		public EventCode MainInstruct1End;
-		public EventCode MainInstruct2End;
-		public EventCode MainCalibEnd;
-		public EventCode MainTutorialEnd;
-		public EventCode TrlStart;
-		public EventCode TrlEnd;
-		public EventCode FixCentralCueStart;
-		public EventCode FixTargetStart;
-		public EventCode FixDistractorStart;
-		public EventCode FixIrrelevantStart;
-		public EventCode FixObjectEnd;
-		public EventCode TouchCentralCueStart;
-		public EventCode TouchTargetStart;
-		public EventCode TouchDistractorStart;
-		public EventCode TouchIrrelevantStart;
-		public EventCode TouchOtherStart;
-		public EventCode TouchOff;
-		public EventCode CorrectResponse;
-		public EventCode IncorrectResponse;
-		public EventCode Rewarded;
-		public EventCode Unrewarded;
-		public EventCode BreakFixation;
-		public EventCode NoChoice;
-		public EventCode NoFixationNoTrialStart;
-		public EventCode Recalibration;
-		public EventCode HoldKeyLift;
-		public EventCode SlowReach;
-		public EventCode FixPointOn;
-		public EventCode FixPointOff;
-		public EventCode ContextOn;
-		public EventCode ContextOff;
-		public EventCode StimOn;
-		public EventCode StimOff;
-		public EventCode GoCueOn;
-		public EventCode GoCueOff;
-		public EventCode SelectionVisualFbOn;
-		public EventCode SelectionAuditoryFbOn;
-		public EventCode TokensCompletFbOn;
-		public EventCode TokensCompletFbOff;
-		public EventCode Fluid1Onset;
-		public EventCode Fluid2Onset;
-		public EventCode TokensAddedMin;
-		public EventCode TokensAddedMax;
-		public EventCode RewardValidityMin;
-		public EventCode RewardValidityMax;
-		public EventCode DimensionalityMin;
-		public EventCode DimensionalityMax;
-		public EventCode TokenRewardPositive;
-		public EventCode TokenRewardNegative;
-		public EventCode TokenRewardNeutral;
-		public EventCode BlockConditionMin;
-		public EventCode BlockConditionMax;
-		public EventCode ContextCodeMin;
-		public EventCode ContextCodeMax;
-		public EventCode StimCodeMin;
-		public EventCode StimCodeMax;
-		public EventCode TrialIndexMin;
-		public EventCode TrialIndexMax;
-		public EventCode TrialNumberMin;
-		public EventCode TrialNumberMax;
-
-	}
-
-	public class EventCode
-	{
-		public int Value;
-		public string Description;
 	}
 
 }

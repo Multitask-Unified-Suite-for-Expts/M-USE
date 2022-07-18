@@ -7,7 +7,6 @@ namespace WhatWhenWhere_Namespace
     public class WhatWhenWhere_BlockDef : BlockDef
     {
         public string TrialID;
-        public int Context;
         public string ContextName;
         public int[] CorrectObjectTouchOrder;
         public int[] nRepetitionsMinMax;
@@ -21,6 +20,7 @@ namespace WhatWhenWhere_Namespace
         public Vector3[] DistractorStimsLocations;
         public string ContextExternalFilePath;
         public int NumSteps;
+        public bool RandomizedLocations;
 
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -34,7 +34,6 @@ namespace WhatWhenWhere_Namespace
             {
                 WhatWhenWhere_TrialDef td = new WhatWhenWhere_TrialDef();
                 td.TrialID = TrialID;
-                td.Context = Context;
                 td.ContextName = ContextName;
                 td.CorrectObjectTouchOrder = CorrectObjectTouchOrder;
                 td.PlayFeedbackSound_Correct = PlayFeedbackSound_Correct;
@@ -47,6 +46,7 @@ namespace WhatWhenWhere_Namespace
                 td.DistractorStimsLocations = DistractorStimsLocations;
                 td.ContextExternalFilePath = ContextExternalFilePath;
                 td.NumSteps = NumSteps;
+                td.RandomizedLocations = RandomizedLocations;
                 TrialDefs[iTrial] = td;
             }
         }
@@ -56,7 +56,6 @@ namespace WhatWhenWhere_Namespace
     {
         public string TrialID;
         public int TrialNum;
-        public int Context;
         public string ContextName;
         //ObjectNums refers to items in a list of objects to be loaded from resources folder
         
@@ -74,6 +73,7 @@ namespace WhatWhenWhere_Namespace
         public Vector3[] DistractorStimsLocations;
         public string ContextExternalFilePath;
         public int NumSteps;
+        public bool RandomizedLocations;
     }
 
     public class WhatWhenWhere_StimDef : StimDef

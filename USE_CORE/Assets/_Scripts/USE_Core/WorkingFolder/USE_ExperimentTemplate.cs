@@ -341,7 +341,7 @@ namespace USE_ExperimentTemplate
 			if (EventCodesActive)
 			{
 				runTask.AddFixedUpdateMethod(() => EventCodeManager.EventCodeFixedUpdate());
-				runTask.AddLateUpdateMethod(() => EventCodeManager.EventCodeLateUpdate());
+				// runTask.AddLateUpdateMethod(() => EventCodeManager.EventCodeLateUpdate());
 			}
 			runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
 			{
@@ -749,13 +749,7 @@ namespace USE_ExperimentTemplate
             });
 
 			SetupTask.SpecifyTermination(() => true, RunBlock);
-
 			
-			// if (EventCodesActive)
-			// {
-			// 	RunBlock.AddFixedUpdateMethod(() => EventCodeManager.EventCodeFixedUpdate());
-			// 	RunBlock.AddLateUpdateMethod(() => EventCodeManager.EventCodeLateUpdate());
-			// }
 			
 			RunBlock.AddUniversalInitializationMethod(() =>
 			{
@@ -770,15 +764,10 @@ namespace USE_ExperimentTemplate
 			RunBlock.AddLateUpdateMethod(() =>
 			{
 				FrameData.AppendData();
+				EventCodeManager.EventCodeLateUpdate();
 			});
 			RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
-
 			
-			if (EventCodesActive)
-			{
-				BlockFeedback.AddFixedUpdateMethod(() => EventCodeManager.EventCodeFixedUpdate());
-				BlockFeedback.AddLateUpdateMethod(() => EventCodeManager.EventCodeLateUpdate());
-			}
 			
 			BlockFeedback.AddUpdateMethod(() =>
 			{
@@ -788,7 +777,11 @@ namespace USE_ExperimentTemplate
 				else
 					BlockFbFinished = false;
 			});
-			BlockFeedback.AddLateUpdateMethod(() => FrameData.AppendData());
+			BlockFeedback.AddLateUpdateMethod(() =>
+			{
+				FrameData.AppendData();
+				EventCodeManager.EventCodeLateUpdate();
+			});
 			BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock, () =>
 			{
 				BlockData.AppendData();

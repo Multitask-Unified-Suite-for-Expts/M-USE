@@ -311,11 +311,6 @@ namespace USE_ExperimentTemplate
 				//	tasksFinished = true;
 			});
 
-			if (EventCodesActive)
-			{
-				selectTask.AddFixedUpdateMethod(() => EventCodeManager.EventCodeFixedUpdate());
-				selectTask.AddLateUpdateMethod(() => EventCodeManager.EventCodeLateUpdate());
-			}
 
 			//selectTask.AddUpdateMethod( get string of CurrentTaskName from button press);
 			selectTask.SpecifyTermination(() => !tasksFinished, runTask, () =>
@@ -755,6 +750,13 @@ namespace USE_ExperimentTemplate
 
 			SetupTask.SpecifyTermination(() => true, RunBlock);
 
+			
+			// if (EventCodesActive)
+			// {
+			// 	RunBlock.AddFixedUpdateMethod(() => EventCodeManager.EventCodeFixedUpdate());
+			// 	RunBlock.AddLateUpdateMethod(() => EventCodeManager.EventCodeLateUpdate());
+			// }
+			
 			RunBlock.AddUniversalInitializationMethod(() =>
 			{
 				BlockCount++;
@@ -765,10 +767,19 @@ namespace USE_ExperimentTemplate
 				TrialLevel.TrialDefs = CurrentBlockDef.TrialDefs;
 			});
 
-			RunBlock.AddLateUpdateMethod(() => FrameData.AppendData());
-
+			RunBlock.AddLateUpdateMethod(() =>
+			{
+				FrameData.AppendData();
+			});
 			RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
 
+			
+			if (EventCodesActive)
+			{
+				BlockFeedback.AddFixedUpdateMethod(() => EventCodeManager.EventCodeFixedUpdate());
+				BlockFeedback.AddLateUpdateMethod(() => EventCodeManager.EventCodeLateUpdate());
+			}
+			
 			BlockFeedback.AddUpdateMethod(() =>
 			{
 				// BlockFbFinished = true;

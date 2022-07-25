@@ -7,6 +7,7 @@ using USE_StimulusManagement;
 using ContinuousRecognition_Namespace;
 using System;
 using System.Globalization;
+using System.IO;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 using Random = UnityEngine.Random;
 
@@ -16,8 +17,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private StimGroup currentTrialStims, resultStims;
     
     // game object variables
-    public GameObject StartButton;
+    private GameObject StartButton;
     private GameObject trialStim;
+
+    public string MaterialFilePath;
 
     // effort reward variables
     private int context;
@@ -26,20 +29,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private Ray mouseRay;
     private bool variablesLoaded;
     private int trialCount;
-
-    
-    private Color[] colors = new[]
-    {
-        new Color(0.1f, 0.59f, 0.28f),
-        new Color(0.54f, 0.18f, 0.18f),
-        new Color(0.6275f, 0.3216f, 0.1765f),
-        new Color(0.8275f, 0.3f, 0.5275f),
-        new Color(0.46f, 0.139f, 0.5471f),
-        new Color(0.6f, 0.6f, 0f),
-        new Color(0.9f, 0.6f, 0f)
-    };
-
-    // trial variables
 
     public override void DefineControlLevel()
     {
@@ -53,7 +42,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State trialEnd = new State("TrialEnd");
         SelectionHandler<ContinuousRecognition_StimDef> mouseHandler = new SelectionHandler<ContinuousRecognition_StimDef>();
         AddActiveStates(new List<State> {initTrial, displayStims, chooseStim, touchFeedback, tokenFeedback, displayResult, trialEnd});
-
+        /*
         // --------------SetupTrial-----------------
         bool started = false;
         bool end = false;
@@ -78,12 +67,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         MouseTracker.AddSelectionHandler(mouseHandler, initTrial);
         initTrial.AddInitializationMethod(() =>
         {
-            trialCount++;
-            /*
-            if (trialCount != 1)
-            {
-                changeContext(colors);
-            }*/
 
             Vector3 color = CurrentTrialDef.ContextColor;
             Camera.main.GetComponent<Camera>().backgroundColor = new Color(color[0], color[1], color[2], 1);
@@ -109,6 +92,21 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
         });
         initTrial.SpecifyTermination(() => started, displayStims, () => StartButton.SetActive(false));
+    */
+        
+        // Show blue start button and wait for click
+        MouseTracker.AddSelectionHandler(mouseHandler, SetupTrial);
+        SetupTrial.AddInitializationMethod(() =>
+        {
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\Blank.png");
+            TokenFBController
+                .SetRevealTime(CurrentTrialDef.TokenRevealDuration)
+                .SetUpdateTime(CurrentTrialDef.TokenUpdateDuration);
+
+            StartButton.SetActive(true);
+        });
+        SetupTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
+            initTrial, () => StartButton.SetActive(false));
 
         // --------------Initialize displayStims State -----------------
         displayStims.AddTimer(() => CurrentTrialDef.DisplayStimsDuration, chooseStim);
@@ -205,7 +203,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), trialEnd);
 
         //FIXME: fix here
-        tokenFeedback.SpecifyTermination(()=> (!TokenFBController.IsAnimating() && (!isNew || trialCount == CurrentTrialDef.maxNumTrials)), FinishTrial, ()=> end = true);
+        tokenFeedback.SpecifyTermination(()=> (!TokenFBController.IsAnimating() && (!isNew || trialCount == CurrentTrialDef.maxNumTrials)), FinishTrial);
         tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating() && (trialCount < CurrentTrialDef.maxNumTrials) && isNew, trialEnd);
         trialEnd.AddTimer(() => CurrentTrialDef.TrialEndDuration, FinishTrial);
         //this.AddTerminationSpecification(()=>end);
@@ -388,7 +386,37 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
     }
     
+    public static Texture2D LoadPNG(string filePath)
+    {
 
+        Texture2D tex = null;
+        byte[] fileData;
+
+        if (File.Exists(filePath))
+        {
+            fileData = File.ReadAllBytes(filePath);
+            tex = new Texture2D(2, 2);
+            tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
+        }
+        return tex;
+    }
+    public Material CreateSkybox(string filePath)
+    {
+        Texture2D tex = null;
+        Material materialSkybox = new Material(Shader.Find("Skybox/6 Sided"));
+
+        tex = LoadPNG(filePath); // load the texture from a PNG -> Texture2D
+
+        //Set the textures of the skybox to that of the PNG
+        materialSkybox.SetTexture("_FrontTex", tex);
+        materialSkybox.SetTexture("_BackTex", tex);
+        materialSkybox.SetTexture("_LeftTex", tex);
+        materialSkybox.SetTexture("_RightTex", tex);
+        materialSkybox.SetTexture("_UpTex", tex);
+        materialSkybox.SetTexture("_DownTex", tex);
+
+        return materialSkybox;
+    }
     private GameObject GetClickedObj()
     {
         if (!InputBroker.GetMouseButtonDown(0)) return null;

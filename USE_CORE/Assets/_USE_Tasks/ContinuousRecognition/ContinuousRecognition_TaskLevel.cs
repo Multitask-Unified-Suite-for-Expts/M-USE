@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using USE_ExperimentTemplate;
 using ContinuousRecognition_Namespace;
 using UnityEngine;
 using UnityEngine.UI;
+using USE_Settings;
 using USE_StimulusManagement;
 
 public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
@@ -24,6 +26,12 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         // StimGroup display;
         StimGroup wrong_group = new StimGroup("wrong");
         StimGroup d = new StimGroup("display");
+        ContinuousRecognition_TrialLevel crTL = (ContinuousRecognition_TrialLevel)TrialLevel;
+        string TaskName = "ContinuousRecognition";
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
+            crTL.MaterialFilePath = (String) SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+
+        
         BlockFeedback.AddInitializationMethod(() =>
         {
             // THE NUMBER THAT MEASURE PERFORMANCE

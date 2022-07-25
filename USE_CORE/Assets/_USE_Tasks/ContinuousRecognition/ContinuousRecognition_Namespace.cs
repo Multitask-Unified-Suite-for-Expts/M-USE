@@ -32,7 +32,7 @@ namespace ContinuousRecognition_Namespace
             ChooseStimDuration,
             TrialEndDuration,
             TouchFeedbackDuration,
-            DisplayResultDuration;
+            DisplayResultDuration,TokenRevealDuration, TokenUpdateDuration;
         
         public List<int> PreviouslyChosenStimuli, PreviouslyNotChosenStim, TrialStimIndices, UnseenStims, NewStim;
         public Vector3[] BlockStimLocations, StimLocation;
@@ -146,6 +146,8 @@ namespace ContinuousRecognition_Namespace
                 td.PC_count = PC_count;
                 td.new_Count = new_count;
                 td.ContextColor = ContextColor;
+                td.TokenRevealDuration = TokenRevealDuration;
+                td.TokenUpdateDuration = TokenUpdateDuration;
                 TrialDefs[iTrial] = td;
                 numTrialStims++;
                 trialCount++;
@@ -170,7 +172,7 @@ namespace ContinuousRecognition_Namespace
             ChooseStimDuration,
             TrialEndDuration,
             TouchFeedbackDuration,
-            DisplayResultDuration;
+            DisplayResultDuration, TokenRevealDuration, TokenUpdateDuration;
 
         public int ManuallySpecifyLocation;
         

@@ -1,6 +1,7 @@
 using USE_ExperimentTemplate;
 using VisualSearch_Namespace;
 using System;
+using USE_Settings;
 
 public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 {
@@ -18,14 +19,16 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             Array.Clear(vsTL.numCorrect_InBlock, 0, vsTL.numCorrect_InBlock.Length);
             Array.Clear(vsTL.numErrors_InBlock, 0, vsTL.numErrors_InBlock.Length);
             vsTL.accuracyLog_InBlock = "";*/
-            vsTL.MaterialFilePath = bd.ContextExternalFilePath;
+            //vsTL.MaterialFilePath = bd.ContextExternalFilePath;
         });
+        string TaskName = "VisualSearch";
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
+            vsTL.MaterialFilePath = (String) SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
 
     }
     public T GetCurrentBlockDef<T>() where T : BlockDef
     {
         return (T)CurrentBlockDef;
     }
-
 
 }

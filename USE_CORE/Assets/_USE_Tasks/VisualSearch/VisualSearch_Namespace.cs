@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using UnityEngine;
 using USE_ExperimentTemplate;
 using USE_StimulusManagement;
@@ -22,6 +23,7 @@ namespace VisualSearch_Namespace
         Vector3 ButtonScale;
         Vector3 ButtonColor;
         string ButtonText;
+        string ContextExternalFilePath;
     }
 
     public class VisualSearch_BlockDef : BlockDef
@@ -33,8 +35,9 @@ namespace VisualSearch_Namespace
         public int[] DistractorStimsIndices;
         public Vector3[] SearchStimsLocations;
         public Vector3[] DistractorStimsLocations;
-        public string ContextName;
-        public string ContextExternalFilePath;
+        public float TokenRevealDuration;
+        public float TokenUpdateDuration;
+        public float MaxSearchDuration;
         public int[] nRepetitionsMinMax;
         public string TrialID;
 
@@ -49,7 +52,6 @@ namespace VisualSearch_Namespace
             {
                 VisualSearch_TrialDef td = new VisualSearch_TrialDef();
                 td.TrialID = TrialID;
-                td.ContextName = ContextName;
                 /*
                 td.MinTouchDuration = MinTouchDuration;
                 td.MaxTouchDuration = MaxTouchDuration;
@@ -58,7 +60,9 @@ namespace VisualSearch_Namespace
                 td.DistractorStimsIndices = DistractorStimsIndices;
                 td.SearchStimsLocations = SearchStimsLocations;
                 td.DistractorStimsLocations = DistractorStimsLocations;
-                td.ContextExternalFilePath = ContextExternalFilePath;
+                td.TokenRevealDuration = TokenRevealDuration;
+                td.TokenUpdateDuration = TokenUpdateDuration;
+                td.MaxSearchDuration = MaxSearchDuration;
                 //td.RandomizedLocations = RandomizedLocations;
                 TrialDefs[iTrial] = td;
             }
@@ -75,10 +79,11 @@ namespace VisualSearch_Namespace
         public int[] DistractorStimsIndices;
         public Vector3[] SearchStimsLocations;
         public Vector3[] DistractorStimsLocations;
-        public string ContextName;
-        public string ContextExternalFilePath;
         public int[] nRepetitionsMinMax;
         public string TrialID;
+        public float TokenRevealDuration;
+        public float TokenUpdateDuration;
+        public float MaxSearchDuration;
     }
 
     public class VisualSearch_StimDef : StimDef

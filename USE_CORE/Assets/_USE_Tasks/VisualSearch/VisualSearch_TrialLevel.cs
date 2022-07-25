@@ -10,47 +10,35 @@ using Random = UnityEngine.Random;
 using USE_UI;
 using USE_Settings;
 using System.IO;
+using System.Transactions.Configuration;
 
 public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 {
     public VisualSearch_TrialDef CurrentTrialDef => GetCurrentTrialDef<VisualSearch_TrialDef>();
 
-    private StimGroup targetStims;
-    private StimGroup distractorStims;
+    private StimGroup targetStims, distractorStims;
+    public GameObject StartButton;
 
     private string targetName;
     private Vector3 targetLocation;
     private List<string> distractorName;
     private List<Vector3> distractorLocations;
-
-    private int random = 0;
-    private Button button;
-    private USE_Button testButton;
-
+/*
     public float 
         DisplayStimsDuration = 5f, 
         TrialEndDuration = 5f;
-
+*/
     // game obeject variables
     private GameObject trialStim, clickMarker;
-    private GameObject startButton;
+    private GameObject startButton, startText;
     private GameObject[] totalObjects;
     private GameObject[] currentObjects;
-    public GameObject YellowHaloPrefab;
-    public GameObject GrayHaloPrefab;
     //public Canvas canvas;
     private int num_distractors = 0;
     private int response;
     private bool correct;
     private GameObject selected;
     VisualSearch_StimDef selectedSD = null;
-
-    //effort reward variables
-    private int clickCount, context;
-    [System.NonSerialized] public int trialCount = -1, numTrials = 4;
-
-    // vector3 variables
-    private Vector3 sliderInitPosition;
 
     // misc variables
     private Slider slider;
@@ -63,23 +51,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     //private StimGroup externalStimsA, externalStimsB, externalStimsC;
     private StimGroup TargetStims, DistractorStims;
     private int numDistractor = 0;
-
-    private bool fam = true;
-
-    private Color[] colors = new[]
-    {
-        new Color(0.1f, 0.59f, 0.28f),
-        new Color(0.54f, 0.18f, 0.18f),
-        new Color(0.6275f, 0.3216f, 0.1765f),
-        new Color(0.8275f, 0.3f, 0.5275f),
-        new Color(0.46f, 0.139f, 0.5471f)
-    };
-    private bool pressed;
-
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
-        State StartButton = new State("StartButton");
         State SearchDisplay = new State("SearchDisplay");
         State SelectionFeedback = new State("SelectionFeedback");
         State TokenFeedback = new State("TokenFeedback");
@@ -88,100 +62,34 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         Text commandText = null;
 
         SelectionHandler<VisualSearch_StimDef> mouseHandler = new SelectionHandler<VisualSearch_StimDef>();
-
-        AddActiveStates(new List<State> {InitTrial, StartButton, SearchDisplay, SelectionFeedback, TokenFeedback, TrialEnd});
-
-        AddInitializationMethod(() =>
-        {           
-            if (!variablesLoaded)
-            {
-                variablesLoaded = true;
-                loadVariables();
-                response = -1;
-            }
-            /*
-            var newButton = DefaultControls.CreateButton(new DefaultControls.Resources());
-            button = newButton.GetComponent<Button>();
-            button.transform.SetParent(GameObject.Find("Stimuli").GetComponent<Transform>());
-            button.gameObject.transform.position = new Vector3 (0, 0, 0);
-            button.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-            button.interactable = true;
-            button.onClick.AddListener(ClickEvent);
-            */
-            
-        });
-
-        SetupTrial.SpecifyTermination(() => true, StartButton);
-        
-        // define StartButton state
-        StartButton.AddInitializationMethod(() =>
+        MouseTracker.AddSelectionHandler(mouseHandler, SetupTrial);
+        AddActiveStates(new List<State> {InitTrial, SearchDisplay, SelectionFeedback, TokenFeedback, TrialEnd});
+        SetupTrial.AddInitializationMethod(() =>
         {
-            //EventCodeManager.SendCodeImmediate(300);
-            startButton.SetActive(true);
             RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\Blank.png");
-            //ResetRelativeStartTime();
-            Debug.Log("Current Block Context: " + CurrentTrialDef.ContextName);
-            //testButton.ToggleVisibility(true);
+            Debug.Log("FilePath: " + MaterialFilePath);
+            TokenFBController
+                .SetRevealTime(CurrentTrialDef.TokenRevealDuration)
+                .SetUpdateTime(CurrentTrialDef.TokenUpdateDuration);
+            StartButton.SetActive(true);
         });
-
-        StartButton.AddUpdateMethod(() =>
-        {
-            if (InputBroker.GetMouseButtonDown(0))
-            {
-                mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(mouseRay, out hit))
-                {
-                    if (hit.transform.name == "StartButton")
-                    {
-                        response = 0;
-                        //EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
-                        // Set the background texture to that of specified context
-                        //RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
-                    }
-                }
-            }
-        });
-
-        StartButton.SpecifyTermination(() => response == 0, SearchDisplay);
-
+        SetupTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
+            SearchDisplay, () => StartButton.SetActive(false));
         MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay);
-        SearchDisplay.AddInitializationMethod(() => 
-        {
-            //RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
-            startButton.SetActive(false);
-            correct = false;
-            selected = null;
-        });
-
-        SearchDisplay.AddUpdateMethod(() =>
-        {
-            correct = false;
-            GameObject clicked = GetClickedObj();
-            if (!clicked) return;
-            StimDefPointer sdPointer = clicked.GetComponent<StimDefPointer>();
-            if (!sdPointer) return;
-
-            response = 1; //selected an object
-
-            VisualSearch_StimDef sd = sdPointer.GetStimDef<VisualSearch_StimDef>();
-            selected = clicked;
-            correct = sd.IsTarget;
-
-            if(correct){
-                Debug.Log("correct");
-            }
-            else{
-                Debug.Log("NO");
-            }
-        });
+        // Show the target/sample with some other distractors
+        // Wait for a click and provide feedback accordingly
+        bool correct = false;
+        GameObject selected = null;
+        VisualSearch_StimDef selectedSD = null;
+        MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay);
+        SearchDisplay.AddInitializationMethod(() => selected = null);
         SearchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, SelectionFeedback, () => {
             //testButton.pressed = false;
             selected = mouseHandler.SelectedGameObject;
             selectedSD = mouseHandler.SelectedStimDef;
             correct = selectedSD.IsTarget;
         });
-        //searchDisplay.SpecifyTermination(() => selected!=null, selectionFeedback);
+        SearchDisplay.AddTimer(() => CurrentTrialDef.MaxSearchDuration, FinishTrial);
 
         GameObject halo = null;
         SelectionFeedback.AddInitializationMethod(() =>
@@ -191,7 +99,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             else HaloFBController.ShowNegative(selected);
 
         });
-        SelectionFeedback.AddTimer(() => 1.0f, TokenFeedback);
+        SelectionFeedback.AddTimer(() => 0.5f, TokenFeedback);
 
         TokenFeedback.AddInitializationMethod(() =>
         {
@@ -209,18 +117,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             }
         });
         TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), TrialEnd);
-        //tokenFeedback.SpecifyTermination(() => !correct, trialEnd);
-        //tokenFeedback.AddTimer(0.5f, trialEnd);
-
-        // Wait for some time at the end
-        TrialEnd.AddInitializationMethod(() =>
-        {
-            //disableAllGameobjects();
-            response = -1;
-        });
         TrialEnd.AddTimer(0.5f, FinishTrial);
-        //TrialEnd.AddTimer(() => CurrentTrialDef.trialEndDuration, FinishTrial);
-
+        
         TrialData.AddDatum("TargetName", () => targetName);
         TrialData.AddDatum("TargetLocation", () => targetLocation);
         TrialData.AddDatum("SelectedName", () => selected != null ? selected.name : null);
@@ -251,7 +149,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             targetLocation = sd.StimLocation;
         } 
         TrialStims.Add(targetStims);
-        
+        bool fam = false;
         if(fam == true){
             fam = false;
             numDistractor = 3;
@@ -272,12 +170,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         }
         
     }
-
+/*
     private USE_Button DefineStartButton(Transform parent){
         /*
         if(random == 1){
             return;
-        }*/
+        }
         Vector3 buttonPosition = new Vector3(0f, 0f, 0f);
 		Vector3 buttonScale = new Vector3(1f, 1f, 1f);
         Color buttonColor = new Color(0.1f, 0.1f, 0.1f);
@@ -299,19 +197,20 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonText"))
 					buttonText = (string) SessionSettings.Get(TaskName + "_TaskSettings", "ButtonText");
 	    }
-        
+        /*
         testButton = new USE_Button(buttonPosition, buttonScale, canvas, buttonColor, buttonText);
         testButton.defineButton();
         return (testButton);
+        
         //testButton.SetVisibilityOnOffStates(GetStateFromName("InitTrial"), GetStateFromName("SearchDisplay"));
         //random = 1;
     }
-
+*/
     void disableAllGameobjects()
     {
        // testButton.ToggleVisibility(false);
-        clickMarker.SetActive(false);
-        startButton.SetActive(false);
+       // clickMarker.SetActive(false);
+        //startButton.SetActive(false);
         //slider.gameObject.SetActive(false);
         //distractorStims.ToggleVisibility(false);
         //GameObject.Find("Slider").SetActive(false);
@@ -319,11 +218,14 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
     void loadVariables()
     {
+        /*
         GameObject.Find("Stimuli").AddComponent<Canvas>();
         GameObject.Find("Stimuli").AddComponent<GraphicRaycaster>();
         Transform parent = GameObject.Find("Stimuli").GetComponent<Transform>();
-        clickMarker = GameObject.Find("ClickMarker");
-        startButton = GameObject.Find("StartButton");
+        */
+        //clickMarker = GameObject.Find("ClickMarker");
+        //startButton = GameObject.Find("StartButton");
+        //startButton.GetComponent<Button>().onClick.AddListener(StartClick);
         //slider = GameObject.Find("Slider").GetComponent<Slider>();
         //sliderInitPosition = slider.gameObject.transform.position;
         
@@ -331,19 +233,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         disableAllGameobjects();
     }
     
-    private GameObject GetClickedObj()
-    {
-        if (!InputBroker.GetMouseButtonDown(0)) return null;
-        Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(mouseRay, out RaycastHit hit)) return hit.transform.root.gameObject;
-        return null;
-    }
-
-    private void changeContext(Color[] colors)
-    {
-        int num = Random.Range(0, colors.Length - 1);
-        Camera.main.backgroundColor = colors[num];
-    }
     public static Texture2D LoadPNG(string filePath)
     {
 
@@ -374,9 +263,5 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         materialSkybox.SetTexture("_DownTex", tex);
 
         return materialSkybox;
-    }
-    private void ClickEvent()
-    {
-        Debug.Log("hehehehe");
     }
 }

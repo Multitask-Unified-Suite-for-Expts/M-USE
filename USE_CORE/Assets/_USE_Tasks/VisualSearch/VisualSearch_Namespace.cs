@@ -29,40 +29,56 @@ namespace VisualSearch_Namespace
         //Already-existing fields (inherited from BlockDef)
         //public int BlockCount;
         //public TrialDef[] TrialDefs;
-        public int[] GroupAIndices;
-        public int[] GroupBIndices;
-        public int[] GroupCIndices;
-        public Vector3[] GroupALocations;
-        public Vector3[] GroupBLocations;
-        public Vector3[] GroupCLocations;
+        public int[] SearchStimsIndices;
+        public int[] DistractorStimsIndices;
+        public Vector3[] SearchStimsLocations;
+        public Vector3[] DistractorStimsLocations;
+        public string ContextName;
+        public string ContextExternalFilePath;
+        public int[] nRepetitionsMinMax;
+        public string TrialID;
+
+        public override void GenerateTrialDefsFromBlockDef()
+        {
+            //pick # of trials from minmax
+            System.Random rnd = new System.Random();
+            int num = rnd.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
+            TrialDefs = new TrialDef[num];//actual correct # 
+
+            for (int iTrial = 0; iTrial < TrialDefs.Length; iTrial++)
+            {
+                VisualSearch_TrialDef td = new VisualSearch_TrialDef();
+                td.TrialID = TrialID;
+                td.ContextName = ContextName;
+                /*
+                td.MinTouchDuration = MinTouchDuration;
+                td.MaxTouchDuration = MaxTouchDuration;
+                */
+                td.SearchStimsIndices = SearchStimsIndices;
+                td.DistractorStimsIndices = DistractorStimsIndices;
+                td.SearchStimsLocations = SearchStimsLocations;
+                td.DistractorStimsLocations = DistractorStimsLocations;
+                td.ContextExternalFilePath = ContextExternalFilePath;
+                //td.RandomizedLocations = RandomizedLocations;
+                TrialDefs[iTrial] = td;
+            }
+        }
+
     }
 
     public class VisualSearch_TrialDef : TrialDef
     {
         //Already-existing fields (inherited from TrialDef)
-		//public int BlockCount, TrialCountInBlock, TrialCountInTask;
-		//public TrialStims TrialStims;
-        public int[] TargetIndices;
-        public int[] DistractorIndices;
-        public Vector3[] TargetLocations;
-        public Vector3[] DistractorLocations;
-        
-        //timing variables
-        public float initTrialDuration;
-        public float maxSearchDuration;
-        public float selectionFbDuration;
-        public float tokenFbDuration;
-        public float trialEndDuration;
-
-        public int[] ObjectNums;
-        public int Context;
-
-        public int[] GroupAIndices;
-        public int[] GroupBIndices;
-        public int[] GroupCIndices;
-        public Vector3[] GroupALocations;
-        public Vector3[] GroupBLocations;
-        public Vector3[] GroupCLocations;
+        //public int BlockCount, TrialCountInBlock, TrialCountInTask;
+        //public TrialStims TrialStims;
+        public int[] SearchStimsIndices;
+        public int[] DistractorStimsIndices;
+        public Vector3[] SearchStimsLocations;
+        public Vector3[] DistractorStimsLocations;
+        public string ContextName;
+        public string ContextExternalFilePath;
+        public int[] nRepetitionsMinMax;
+        public string TrialID;
     }
 
     public class VisualSearch_StimDef : StimDef

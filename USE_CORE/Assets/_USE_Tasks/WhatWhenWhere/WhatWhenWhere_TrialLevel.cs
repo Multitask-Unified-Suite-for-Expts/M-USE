@@ -329,6 +329,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     slider.value -= sliderValueIncreaseAmount;
 
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchIrrelevantStart"]);
+                    
+                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
+                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
+                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
                 }
         }
         if (choiceMade)
@@ -349,6 +353,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     numErrors_InSession[correctIndex]++;
 
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchDurationError"]);
+                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["TouchErrorImageOn"]);
+                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
                 }
                 //Correct Selection
                 else if (testStim.GetComponent<StimDefPointer>().GetStimDef<WhatWhenWhere_StimDef>().IsCurrentTarget)
@@ -363,6 +369,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["CorrectResponse"]);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchTargetStart"]);
+                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
+                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
+                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
                 }
                 //Repetition Error
                 else if (touchedObjects.Contains(testStim.name))
@@ -379,6 +388,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["IncorrectResponse"]);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["RepetitionError"]);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchTargetStart"]);
+                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
+                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
+                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
                 }
                 //Slot Errors
                 else 
@@ -395,6 +407,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
                         EventCodeManager.SendCodeImmediate(TaskEventCodes["IncorrectResponse"]);
                         EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchDistractorStart"]);
+                        
+                        EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
+                        EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
+                        EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
                     }
 
                     //Stimuli Slot error
@@ -410,6 +426,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         EventCodeManager.SendCodeImmediate(TaskEventCodes["IncorrectResponse"]);
                         EventCodeManager.SendCodeImmediate(TaskEventCodes["SlotError"]);
                         EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchTargetStart"]);
+                        
+                        EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
+                        EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
+                        EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
 
                     }
 
@@ -431,8 +451,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 imageTimingError.transform.SetAsLastSibling();
                 imageTimingError.SetActive(true);
                 errorTypeString = "TouchDurationError";
+                /*
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchErrorImageOn"]);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionAuditoryFbOn"]);
+                */
             }
 
             //Chose Incorrect
@@ -442,9 +464,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 sliderHalo.SetActive(true);
                 sr.color = new Color(0.6627f, 0.6627f, 0.6627f, 0.2f);
 
+                /*
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["Unrewarded"]);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionVisualFbOn"]);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionAuditoryFbOn"]);
+                */
                 if (slotError == 1)
                     errorTypeString = "SlotError";
                 else if (distractorSlotError == 1)
@@ -456,10 +480,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             //Irrelevant Selection
             else if (irrelevantSelection)
             {
+                /*
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["Unrewarded"]);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionVisualFbOn"]);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionAuditoryFbOn"]);
-
+                */
                 errorTypeString = "IrrelevantSelectionError";
             }
 
@@ -469,9 +494,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 yellowHalo.SetActive(true);
                 sliderHalo.SetActive(true);
                 sr.color = new Color(1, 0.8431f, 0, 0.2f);
+                /*
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["Rewarded"]);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionVisualFbOn"]);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionAuditoryFbOn"]);
+                */
                 errorTypeString = "None";
             }
 

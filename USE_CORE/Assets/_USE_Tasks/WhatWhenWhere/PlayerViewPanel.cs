@@ -16,22 +16,7 @@ public class PlayerViewPanel : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
         parent = transform;
-        /*
-        visualAngle = 2;
-        circleLocation = new Vector3(-134f, 0.5f, 0f);
-        distanceToScreen = 50; // dummy value
-        drawCircle(circleLocation, distanceToScreen, visualAngle, parent);
-
-        List<Vector2> pointList = new List<Vector2>();
-        pointList.Add(new Vector2(200, 200));
-        pointList.Add(new Vector2(300, 200));
-        drawSampleLines("Line", Color.green, parent, pointList);
-
-        textLocation = new Vector3(200f, 200f, 0f);
-        writeText("Hi", Color.red, parent, textLocation);
-        */
     }
 
     // Update is called once per frame

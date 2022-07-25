@@ -214,6 +214,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderReset"]);
         });
          
         GazeTracker.AddSelectionHandler(gazeSelectionHandler, ChooseStimulus);

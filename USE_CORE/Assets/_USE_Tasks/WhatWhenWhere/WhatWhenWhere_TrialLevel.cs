@@ -23,14 +23,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private GameObject initButton, goCue, chosenStim, grayHalo, grayHaloScene, yellowHalo, sliderHalo, imageTimingError, txt;
     private Image sr;
     private Texture2D texture;
-    private static int numObjMax = 20;
+    private static int numObjMax = 20;// need to change if stimulus exceeds this amount, not great
 
     //stim group
     private StimGroup searchStims, distractorStims;
     private List<string> touchedObjects = new List<string>();
+    private bool randomizedLocations = false;
 
     // feedback variables
-    private int context;
     public int stimCount = 0;
     private bool correctChoice = false;
     private bool incorrectChoice = false;
@@ -165,12 +165,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             //EventCodeManager.SendCodeImmediate(300);
             RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\Blank.png");
             ResetRelativeStartTime();
-            if (context != 0)
-            {
-                Debug.Log(context);
-                disableAllGameobjects();
-            }
-            context = CurrentTrialDef.Context;
+            Debug.Log("Current Block Context: " + CurrentTrialDef.ContextName);
+            disableAllGameobjects();
+
             initButton.SetActive(true);
             goCue.SetActive(true);
         });
@@ -204,7 +201,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             sliderValueIncreaseAmount = (100f / CurrentTrialDef.NumSteps) / 100f;
             slider.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
             sliderHalo.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
-            slider.value += sliderValueIncreaseAmount;
+
+            if(CurrentTrialDef.NumSteps > CurrentTrialDef.SearchStimsIndices.Length)
+            {
+                slider.value += sliderValueIncreaseAmount*(CurrentTrialDef.NumSteps-CurrentTrialDef.SearchStimsIndices.Length);
+            }
+            
             slider.gameObject.SetActive(true);
 
             initButton.SetActive(false);
@@ -600,7 +602,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     {
         TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
         TrialData.AddDatum("TrialNum", () => TrialCount_InTask);
-        TrialData.AddDatum("Context", () => context);
+        TrialData.AddDatum("Context", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("TouchedObjects", () => touchedObjectsNames);
         TrialData.AddDatum("ErrorType", () => errorTypeString);
         TrialData.AddDatum("ErrorType_InBlock", () => errorType_InBlockString);
@@ -630,7 +632,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("SliderValue", () => slider.normalizedValue);
 
         if (contextActive)
-            FrameData.AddDatum("Context", () => context);
+            FrameData.AddDatum("Context", () => CurrentTrialDef.ContextName);
         else
             FrameData.AddDatum("Context", () => "Blank");
     }
@@ -869,20 +871,35 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         //StimGroup constructor which creates a subset of an already-existing StimGroup 
         searchStims = new StimGroup("SearchStims", ExternalStims, CurrentTrialDef.SearchStimsIndices);
         distractorStims = new StimGroup("DistractorStims", ExternalStims, CurrentTrialDef.DistractorStimsIndices);
+        foreach (StimDef sd in searchStims.stimDefs)
+        {
+            Debug.Log("STIMDEF LOCATIONS: " + sd.StimLocation);
+        }
         TrialStims.Add(searchStims);
         TrialStims.Add(distractorStims);
 
-        var totalStims = searchStims.stimDefs.Concat(distractorStims.stimDefs);
-        var stimLocations = CurrentTrialDef.SearchStimsLocations.Concat(CurrentTrialDef.DistractorStimsLocations);
-        
-        int[] positionIndexArray = Enumerable.Range(0, totalStims.Count()).ToArray();
-        System.Random random = new System.Random();
-        positionIndexArray = positionIndexArray.OrderBy(x => random.Next()).ToArray();
-        
-        for (int i = 0; i<totalStims.Count(); i++)
+        randomizedLocations = CurrentTrialDef.RandomizedLocations; 
+
+        if (randomizedLocations)
         {
-            totalStims.ElementAt(i).StimLocation = stimLocations.ElementAt(positionIndexArray[i]);
+            var totalStims = searchStims.stimDefs.Concat(distractorStims.stimDefs);
+            var stimLocations = CurrentTrialDef.SearchStimsLocations.Concat(CurrentTrialDef.DistractorStimsLocations);
+
+            int[] positionIndexArray = Enumerable.Range(0, totalStims.Count()).ToArray();
+            System.Random random = new System.Random();
+            positionIndexArray = positionIndexArray.OrderBy(x => random.Next()).ToArray();
+
+            for (int i = 0; i < totalStims.Count(); i++)
+            {
+                totalStims.ElementAt(i).StimLocation = stimLocations.ElementAt(positionIndexArray[i]);
+            }
         }
+        else
+        {
+            searchStims.SetLocations(CurrentTrialDef.SearchStimsLocations);
+            distractorStims.SetLocations(CurrentTrialDef.DistractorStimsLocations);
+        }
+        
     }
     
     //-------------------------------------------------------------MISCELLANEOUS METHODS--------------------------------------------------------------------------

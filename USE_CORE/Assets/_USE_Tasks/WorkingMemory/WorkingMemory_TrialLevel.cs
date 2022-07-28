@@ -1,4 +1,6 @@
+using ConfigDynamicUI;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using USE_ExperimentTemplate;
 using USE_States;
@@ -10,9 +12,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     public WorkingMemory_TrialDef CurrentTrialDef => GetCurrentTrialDef<WorkingMemory_TrialDef>();
 
     private StimGroup sampleStims, targetStims, postSampleDistractorStims, targetDistractorStims;
-
+    public string MaterialFilePath;
     public GameObject StartButton;
 
+    //configui variables
+    [HideInInspector]
+    public ConfigNumber minObjectTouchDuration, itiDuration, finalFbDuration, fbDuration, maxObjectTouchDuration, selectObjectDuration;
     public override void DefineControlLevel()
     {
         State initTrial = new State("InitTrial");
@@ -37,9 +42,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         MouseTracker.AddSelectionHandler(mouseHandler, SetupTrial);
         SetupTrial.AddInitializationMethod(() =>
         {
-            Vector3 color = CurrentTrialDef.ContextColor;
-            Camera.main.GetComponent<Camera>().backgroundColor = new Color(color[0], color[1], color[2], 1);
-
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\Blank.png");
             TokenFBController
             .SetRevealTime(CurrentTrialDef.tokenRevealDuration)
             .SetUpdateTime(CurrentTrialDef.tokenUpdateDuration);
@@ -47,7 +50,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             StartButton.SetActive(true);
         });
         SetupTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
-            initTrial, () => StartButton.SetActive(false));
+            initTrial, () => {
+                StartButton.SetActive(false);
+                EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]); //CHECK THIS TIMING MIGHT BE OFF
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarReset"]);
+            });
 
         // Show nothing for some time
         initTrial.AddTimer(() => CurrentTrialDef.initTrialDuration, delay, () =>
@@ -82,15 +90,30 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             selectedSD = mouseHandler.SelectedStimDef;
             correct = selectedSD.IsTarget;
         });
-        searchDisplay.AddTimer(() => CurrentTrialDef.maxSearchDuration, FinishTrial);
+        searchDisplay.AddTimer(() => selectObjectDuration.value, FinishTrial);
 
         selectionFeedback.AddInitializationMethod(() =>
         {
             if (!selected) return;
-            if (correct) HaloFBController.ShowPositive(selected);
-            else HaloFBController.ShowNegative(selected);
+            else
+            {//CHECK THIS
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
+            }
+            if (correct)
+            {
+                HaloFBController.ShowPositive(selected);
+            }
+            else
+            {
+                HaloFBController.ShowNegative(selected);
+            };
         });
-        selectionFeedback.AddTimer(() => CurrentTrialDef.selectionFbDuration, tokenFeedback);
+        selectionFeedback.AddTimer(() => fbDuration.value, tokenFeedback, () => 
+        {
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOff"]);
+        });
+
 
         // The state that will handle the token feedback and wait for any animations
         tokenFeedback.AddInitializationMethod(() =>
@@ -100,21 +123,24 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             {
                 if (correct) AudioFBController.Play("Positive");
                 else AudioFBController.Play("Negative");
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
                 return;
             }
             if (selectedSD.TokenUpdate > 0)
             {
                 TokenFBController.AddTokens(selected, selectedSD.TokenUpdate);
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
             }
             else
             {
                 TokenFBController.RemoveTokens(selected, -selectedSD.TokenUpdate);
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
             }
         });
         tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), trialEnd);
 
         // Wait for some time at the end
-        trialEnd.AddTimer(() => CurrentTrialDef.trialEndDuration, FinishTrial);
+        trialEnd.AddTimer(() => itiDuration.value, FinishTrial);
 
         TrialData.AddDatum("SelectedName", () => selected != null ? selected.name : null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
@@ -158,5 +184,46 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             ++i;
         }
         TrialStims.Add(targetDistractorStims);
+    }
+    public static Texture2D LoadPNG(string filePath)
+    {
+
+        Texture2D tex = null;
+        byte[] fileData;
+
+        if (File.Exists(filePath))
+        {
+            fileData = File.ReadAllBytes(filePath);
+            tex = new Texture2D(2, 2);
+            tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
+        }
+        return tex;
+    }
+    public Material CreateSkybox(string filePath)
+    {
+        Texture2D tex = null;
+        Material materialSkybox = new Material(Shader.Find("Skybox/6 Sided"));
+
+        tex = LoadPNG(filePath); // load the texture from a PNG -> Texture2D
+
+        //Set the textures of the skybox to that of the PNG
+        materialSkybox.SetTexture("_FrontTex", tex);
+        materialSkybox.SetTexture("_BackTex", tex);
+        materialSkybox.SetTexture("_LeftTex", tex);
+        materialSkybox.SetTexture("_RightTex", tex);
+        materialSkybox.SetTexture("_UpTex", tex);
+        materialSkybox.SetTexture("_DownTex", tex);
+
+        return materialSkybox;
+    }
+    public void loadVariables()
+    {
+        //config UI variables
+        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
+        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
+        itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
+        selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
+        finalFbDuration = ConfigUiVariables.get<ConfigNumber>("finalFbDuration");
+        fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
     }
 }

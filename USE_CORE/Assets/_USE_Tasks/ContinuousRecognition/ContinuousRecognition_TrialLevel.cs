@@ -10,25 +10,30 @@ using System.Globalization;
 using System.IO;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 using Random = UnityEngine.Random;
+using ConfigDynamicUI;
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
     public ContinuousRecognition_TrialDef CurrentTrialDef => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
     private StimGroup currentTrialStims, resultStims;
-    
+
+    //configui variables
+    [HideInInspector]
+    public ConfigNumber minObjectTouchDuration, itiDuration, finalFbDuration, fbDuration, maxObjectTouchDuration, selectObjectDuration;
     // game object variables
-    private GameObject StartButton;
+    public GameObject StartButton;
     private GameObject trialStim;
 
+    //context variables
     public string MaterialFilePath;
-
-    // effort reward variables
     private int context;
+
 
     // misc variables
     private Ray mouseRay;
     private bool variablesLoaded;
     private int trialCount;
+    private bool tokenBarComplete;
 
     public override void DefineControlLevel()
     {
@@ -42,58 +47,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State trialEnd = new State("TrialEnd");
         SelectionHandler<ContinuousRecognition_StimDef> mouseHandler = new SelectionHandler<ContinuousRecognition_StimDef>();
         AddActiveStates(new List<State> {initTrial, displayStims, chooseStim, touchFeedback, tokenFeedback, displayResult, trialEnd});
-        /*
-        // --------------SetupTrial-----------------
-        bool started = false;
-        bool end = false;
-        SetupTrial.AddUpdateMethod(() =>
-        {
-            if (!variablesLoaded)
-            {
-                variablesLoaded = true;
-                //loadVariables();
-            }
-
-            int sum = checkStimNum();
-            if (sum > CurrentTrialDef.BlockStimIndices.Length)
-            {
-                Debug.Log("[ERROR] Number of stims is not enough. " + sum + " stims are required.");
-                end = true;
-            }
-
-        });
-        SetupTrial.SpecifyTermination(() => true, initTrial);
-
-        MouseTracker.AddSelectionHandler(mouseHandler, initTrial);
-        initTrial.AddInitializationMethod(() =>
-        {
-
-            Vector3 color = CurrentTrialDef.ContextColor;
-            Camera.main.GetComponent<Camera>().backgroundColor = new Color(color[0], color[1], color[2], 1);
-
-            
-            if (context != 0)
-            {
-                Debug.Log("Context is " + context);
-                //Disable all game objects
-            }
-
-            context = CurrentTrialDef.Context;
-            StartButton.SetActive(true);
-        });
-
-        // --------------update InitTrial -----------------
-        initTrial.AddUpdateMethod(() =>
-        {
-            StartButton.SetActive(true);
-            if (mouseHandler.SelectionMatches(StartButton))
-            {
-                started = true;
-            }
-        });
-        initTrial.SpecifyTermination(() => started, displayStims, () => StartButton.SetActive(false));
-    */
         
+        // --------------SetupTrial-----------------
         // Show blue start button and wait for click
         MouseTracker.AddSelectionHandler(mouseHandler, SetupTrial);
         SetupTrial.AddInitializationMethod(() =>
@@ -106,7 +61,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             StartButton.SetActive(true);
         });
         SetupTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
-            initTrial, () => StartButton.SetActive(false));
+            displayStims, () => {
+                StartButton.SetActive(false);
+                EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]); //CHECK THIS TIMING MIGHT BE OFF
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarReset"]);
+            });
 
         // --------------Initialize displayStims State -----------------
         displayStims.AddTimer(() => CurrentTrialDef.DisplayStimsDuration, chooseStim);
@@ -157,7 +117,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             CurrentTrialDef.isNewStim = isNew;
         });
         chooseStim.SpecifyTermination(() => StimIsChosen, touchFeedback);
-        chooseStim.AddTimer(() => CurrentTrialDef.ChooseStimDuration, FinishTrial);
+        chooseStim.AddTimer(() => selectObjectDuration.value, FinishTrial);
         
         TrialData.AddDatum("PreviouslyChosen", () => CurrentTrialDef.PreviouslyChosenStimuli);
         TrialData.AddDatum("PreviouslyUnseen", ()=>CurrentTrialDef.UnseenStims);
@@ -176,13 +136,21 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (isNew)
             {
                 HaloFBController.ShowPositive(chosen);
+                
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
             }
             else
             {
                 HaloFBController.ShowNegative(chosen);
+                
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
             }
         });
-        touchFeedback.AddTimer(() => CurrentTrialDef.TouchFeedbackDuration, tokenFeedback);
+        touchFeedback.AddTimer(() => fbDuration.value, tokenFeedback, ()=>{
+
+            });
         //tokenFeedback.SpecifyTermination(() => !isNew, FinishTrial, ()=>Debug.Log("[tokenFeedback]: going to finishTrial"));
         
         tokenFeedback.AddInitializationMethod(() =>
@@ -191,21 +159,30 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (isNew)
             {
                 TokenFBController.AddTokens(chosen, 1);
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
             }
             else
             {
                 AudioFBController.Play("Negative");
-                
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
             }
             // Debug.Log("TRIAL COUNT IS " + trialCount + "; MAX TRIAL COUNT IS " + CurrentTrialDef.maxNumTrials);
         });
+
+        tokenFeedback.AddUpdateMethod(() =>
+        {
+            if (TokenFBController.IsAnimating())
+            {
+                tokenBarComplete = true;
+            }
+        });
+
         //tokenFeedback.SpecifyTermination(() => !isNew, ()=>displayResult);
         //tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), trialEnd);
-
         //FIXME: fix here
         tokenFeedback.SpecifyTermination(()=> (!TokenFBController.IsAnimating() && (!isNew || trialCount == CurrentTrialDef.maxNumTrials)), FinishTrial);
         tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating() && (trialCount < CurrentTrialDef.maxNumTrials) && isNew, trialEnd);
-        trialEnd.AddTimer(() => CurrentTrialDef.TrialEndDuration, FinishTrial);
+        trialEnd.AddTimer(() => itiDuration.value, FinishTrial);
         //this.AddTerminationSpecification(()=>end);
         FinishTrial.SpecifyTermination(() => !isNew, () => null, ()=>Debug.Log("[FinishTrial]: finishing trial"));
     }
@@ -213,51 +190,144 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     // Helper Functions
     protected override void DefineTrialStims()
     {
-        // display stims if haven't reached max trial count
-        if (CurrentTrialDef.trialCount <= (CurrentTrialDef.nObjectsMinMax[1] - CurrentTrialDef.nObjectsMinMax[0] + 1))
+        if (TrialCount_InBlock == 0)
         {
-            // in the first trial, just randomly choose two stims out of all stims 
-            if (CurrentTrialDef.trialCount == 0)
+            for (int i = 0; i < CurrentTrialDef.BlockStimIndices.Length; i++)
             {
-                for (int i = 0; i < CurrentTrialDef.BlockStimIndices.Length; i++)
+                CurrentTrialDef.UnseenStims.Add(CurrentTrialDef.BlockStimIndices[i]);
+            }
+
+            int[] tmp = new int[CurrentTrialDef.nObjectsMinMax[0]];
+            for (int i = 0; i < CurrentTrialDef.nObjectsMinMax[0]; i++)
+            {
+                int num = Random.Range(0, CurrentTrialDef.BlockStimIndices.Length);
+                while (Array.IndexOf(tmp, num) != -1)
                 {
-                    CurrentTrialDef.UnseenStims.Add(CurrentTrialDef.BlockStimIndices[i]);
+                    num = Random.Range(0, CurrentTrialDef.BlockStimIndices.Length);
                 }
 
-                int[] tmp = new int [CurrentTrialDef.nObjectsMinMax[0]];
-                for (int i = 0; i < CurrentTrialDef.nObjectsMinMax[0]; i++)
+                tmp[i] = num;
+
+                CurrentTrialDef.TrialStimIndices.Add(num);
+                CurrentTrialDef.UnseenStims.Remove(num);
+                CurrentTrialDef.new_Count += 1;
+            }
+        }
+        else
+        {
+            float[] ratio = getRatio(CurrentTrialDef.Ratio);
+            int[] ratio_array = getStimNum(ratio);
+            int PC_num = ratio_array[0];
+            int N_num = ratio_array[1];
+            int PNC_num = ratio_array[2];
+
+            CurrentTrialDef.TrialStimIndices.Clear();
+            int PC_length = CurrentTrialDef.PreviouslyChosenStimuli.Count;
+            for (int i = 0; i < PC_num && PC_length > 0; i++)
+            {
+                int id = CurrentTrialDef.PreviouslyChosenStimuli[
+                    Random.Range(0, CurrentTrialDef.PreviouslyChosenStimuli.Count - 1)];
+                while (CurrentTrialDef.TrialStimIndices.Contains(id) && PC_length > 0)
                 {
-                    int num = Random.Range(0, CurrentTrialDef.BlockStimIndices.Length);
-                    while (Array.IndexOf(tmp, num) != -1)
-                    {
-                        num = Random.Range(0, CurrentTrialDef.BlockStimIndices.Length);
-                    }
+                    id = CurrentTrialDef.PreviouslyChosenStimuli[
+                        Random.Range(0, CurrentTrialDef.PreviouslyChosenStimuli.Count - 1)];
+                    PC_length--;
+                }
 
-                    tmp[i] = num;
-
-                    CurrentTrialDef.TrialStimIndices.Add(num);
-                    CurrentTrialDef.UnseenStims.Remove(num);
-                    CurrentTrialDef.new_Count += 1;
+                if (!CurrentTrialDef.TrialStimIndices.Contains(id))
+                {
+                    Debug.Log("added previously chosen: " + id);
+                    CurrentTrialDef.TrialStimIndices.Add(id);
+                    CurrentTrialDef.PC_count += 1;
+                    CurrentTrialDef.UnseenStims.Remove(id);
+                    PC_length--;
                 }
             }
-            else
-            {
-                float[] ratio = getRatio(CurrentTrialDef.Ratio);
-                int[] ratio_array = getStimNum(ratio);
-                int PC_num = ratio_array[0];
-                int N_num = ratio_array[1];
-                int PNC_num = ratio_array[2];
 
-                CurrentTrialDef.TrialStimIndices.Clear();
-                int PC_length = CurrentTrialDef.PreviouslyChosenStimuli.Count;
-                for (int i = 0; i < PC_num && PC_length > 0; i++)
+            int N_length = CurrentTrialDef.UnseenStims.Count;
+            for (int i = 0; i < N_num && N_length > 0; i++)
+            {
+                int id = CurrentTrialDef.UnseenStims[Random.Range(0, CurrentTrialDef.UnseenStims.Count - 1)];
+                while (CurrentTrialDef.TrialStimIndices.Contains(id) && N_length > 0)
                 {
-                    int id = CurrentTrialDef.PreviouslyChosenStimuli[
-                        Random.Range(0, CurrentTrialDef.PreviouslyChosenStimuli.Count - 1)];
-                    while (CurrentTrialDef.TrialStimIndices.Contains(id) && PC_length > 0)
+                    id = CurrentTrialDef.UnseenStims[Random.Range(0, CurrentTrialDef.UnseenStims.Count - 1)];
+                    N_length--;
+                }
+
+                if (!CurrentTrialDef.TrialStimIndices.Contains(id))
+                {
+                    Debug.Log("added new: " + id);
+                    CurrentTrialDef.TrialStimIndices.Add(id);
+                    CurrentTrialDef.new_Count += 1;
+                    CurrentTrialDef.UnseenStims.Remove(id);
+                    N_length--;
+                }
+            }
+
+            int PNC_length = CurrentTrialDef.PreviouslyNotChosenStimuli.Count;
+            for (int i = 0; i < PNC_num && PNC_length > 0; i++)
+            {
+                int id = CurrentTrialDef.PreviouslyNotChosenStimuli[
+                    Random.Range(0, CurrentTrialDef.PreviouslyNotChosenStimuli.Count - 1)];
+                while (CurrentTrialDef.TrialStimIndices.Contains(id) && PNC_length > 0)
+                {
+                    id = CurrentTrialDef.PreviouslyNotChosenStimuli[
+                        Random.Range(0, CurrentTrialDef.PreviouslyNotChosenStimuli.Count - 1)];
+                    PNC_length--;
+                }
+
+                if (!CurrentTrialDef.TrialStimIndices.Contains(id))
+                {
+                    // Debug.Log("added previously not chosen: " + id);
+                    CurrentTrialDef.TrialStimIndices.Add(id);
+                    CurrentTrialDef.PNC_count += 1;
+                    PNC_length--;
+                }
+            }
+
+            while (CurrentTrialDef.TrialStimIndices.Count < CurrentTrialDef.numTrialStims)
+            {
+                if (CurrentTrialDef.UnseenStims.Count != 0)
+                {
+                    int id = CurrentTrialDef.UnseenStims[Random.Range(0, CurrentTrialDef.UnseenStims.Count - 1)];
+                    while (CurrentTrialDef.TrialStimIndices.Contains(id) && N_length > 0)
                     {
-                        id = CurrentTrialDef.PreviouslyChosenStimuli[
-                            Random.Range(0, CurrentTrialDef.PreviouslyChosenStimuli.Count - 1)];
+                        id = CurrentTrialDef.UnseenStims[Random.Range(0, CurrentTrialDef.UnseenStims.Count - 1)];
+                        N_length--;
+                    }
+
+                    if (!CurrentTrialDef.TrialStimIndices.Contains(id))
+                    {
+                        // Debug.Log("added new: " + id);
+                        CurrentTrialDef.TrialStimIndices.Add(id);
+                        CurrentTrialDef.new_Count += 1;
+                        CurrentTrialDef.UnseenStims.Remove(id);
+                        N_length--;
+                    }
+                }
+                else if (CurrentTrialDef.PreviouslyNotChosenStimuli.Count != 0)
+                {
+                    int id = CurrentTrialDef.PreviouslyNotChosenStimuli[Random.Range(0, CurrentTrialDef.PreviouslyNotChosenStimuli.Count - 1)];
+                    while (CurrentTrialDef.TrialStimIndices.Contains(id) && PNC_length > 0)
+                    {
+                        id = CurrentTrialDef.PreviouslyNotChosenStimuli[Random.Range(0, CurrentTrialDef.PreviouslyNotChosenStimuli.Count - 1)];
+                        PNC_length--;
+                    }
+
+                    if (!CurrentTrialDef.TrialStimIndices.Contains(id))
+                    {
+                        Debug.Log("added previously not chosen: " + id);
+                        CurrentTrialDef.TrialStimIndices.Add(id);
+                        CurrentTrialDef.PNC_count += 1;
+                        PNC_length--;
+                    }
+                }
+                else if (CurrentTrialDef.PreviouslyChosenStimuli.Count != 0)
+                {
+                    int id = CurrentTrialDef.PreviouslyChosenStimuli[Random.Range(0, CurrentTrialDef.PreviouslyChosenStimuli.Count - 1)];
+                    while (CurrentTrialDef.TrialStimIndices.Contains(id) && PNC_length > 0)
+                    {
+                        id = CurrentTrialDef.PreviouslyChosenStimuli[Random.Range(0, CurrentTrialDef.PreviouslyChosenStimuli.Count - 1)];
                         PC_length--;
                     }
 
@@ -270,122 +340,36 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         PC_length--;
                     }
                 }
-
-                int N_length = CurrentTrialDef.UnseenStims.Count;
-                for (int i = 0; i < N_num && N_length > 0; i++)
+                else
                 {
-                    int id = CurrentTrialDef.UnseenStims[Random.Range(0, CurrentTrialDef.UnseenStims.Count - 1)];
-                    while (CurrentTrialDef.TrialStimIndices.Contains(id) && N_length > 0)
-                    {
-                        id = CurrentTrialDef.UnseenStims[Random.Range(0, CurrentTrialDef.UnseenStims.Count - 1)];
-                        N_length--;
-                    }
-
-                    if (!CurrentTrialDef.TrialStimIndices.Contains(id))
-                    {
-                        Debug.Log("added new: " + id);
-                        CurrentTrialDef.TrialStimIndices.Add(id);
-                        CurrentTrialDef.new_Count += 1;
-                        CurrentTrialDef.UnseenStims.Remove(id);
-                        N_length--;
-                    }
-                }
-
-                int PNC_length = CurrentTrialDef.PreviouslyNotChosenStimuli.Count;
-                for (int i = 0; i < PNC_num && PNC_length > 0; i++)
-                {
-                    int id = CurrentTrialDef.PreviouslyNotChosenStimuli[
-                        Random.Range(0, CurrentTrialDef.PreviouslyNotChosenStimuli.Count - 1)];
-                    while (CurrentTrialDef.TrialStimIndices.Contains(id) && PNC_length > 0)
-                    {
-                        id = CurrentTrialDef.PreviouslyNotChosenStimuli[
-                            Random.Range(0, CurrentTrialDef.PreviouslyNotChosenStimuli.Count - 1)];
-                        PNC_length--;
-                    }
-
-                    if (!CurrentTrialDef.TrialStimIndices.Contains(id))
-                    {
-                        // Debug.Log("added previously not chosen: " + id);
-                        CurrentTrialDef.TrialStimIndices.Add(id);
-                        CurrentTrialDef.PNC_count += 1;
-                        PNC_length--;
-                    }
-                }
-
-                while (CurrentTrialDef.TrialStimIndices.Count < CurrentTrialDef.numTrialStims)
-                {
-                    if (CurrentTrialDef.UnseenStims.Count != 0)
-                    {
-                        int id = CurrentTrialDef.UnseenStims[Random.Range(0, CurrentTrialDef.UnseenStims.Count - 1)];
-                        while (CurrentTrialDef.TrialStimIndices.Contains(id) && N_length > 0)
-                        {
-                            id = CurrentTrialDef.UnseenStims[Random.Range(0, CurrentTrialDef.UnseenStims.Count - 1)];
-                            N_length--;
-                        }
-
-                        if (!CurrentTrialDef.TrialStimIndices.Contains(id))
-                        {
-                            // Debug.Log("added new: " + id);
-                            CurrentTrialDef.TrialStimIndices.Add(id);
-                            CurrentTrialDef.new_Count += 1;
-                            CurrentTrialDef.UnseenStims.Remove(id);
-                            N_length--;
-                        }
-                    } else if (CurrentTrialDef.PreviouslyNotChosenStimuli.Count != 0)
-                    {
-                        int id = CurrentTrialDef.PreviouslyNotChosenStimuli[Random.Range(0, CurrentTrialDef.PreviouslyNotChosenStimuli.Count - 1)];
-                        while (CurrentTrialDef.TrialStimIndices.Contains(id) && PNC_length > 0)
-                        {
-                            id = CurrentTrialDef.PreviouslyNotChosenStimuli[Random.Range(0, CurrentTrialDef.PreviouslyNotChosenStimuli.Count - 1)];
-                            PNC_length--;
-                        }
-
-                        if (!CurrentTrialDef.TrialStimIndices.Contains(id))
-                        {
-                            Debug.Log("added previously not chosen: " + id);
-                            CurrentTrialDef.TrialStimIndices.Add(id);
-                            CurrentTrialDef.PNC_count += 1;
-                            PNC_length--;
-                        }
-                    } else if (CurrentTrialDef.PreviouslyChosenStimuli.Count != 0)
-                    {
-                        int id = CurrentTrialDef.PreviouslyChosenStimuli[Random.Range(0, CurrentTrialDef.PreviouslyChosenStimuli.Count - 1)];
-                        while (CurrentTrialDef.TrialStimIndices.Contains(id) && PNC_length > 0)
-                        {
-                            id = CurrentTrialDef.PreviouslyChosenStimuli[Random.Range(0, CurrentTrialDef.PreviouslyChosenStimuli.Count - 1)];
-                            PC_length--;
-                        }
-
-                        if (!CurrentTrialDef.TrialStimIndices.Contains(id))
-                        {
-                            Debug.Log("added previously chosen: " + id);
-                            CurrentTrialDef.TrialStimIndices.Add(id);
-                            CurrentTrialDef.PC_count += 1;
-                            CurrentTrialDef.UnseenStims.Remove(id);
-                            PC_length--;
-                        }
-                    }
-                    else
-                    {
-                        Debug.Log("Not enough Stims");
-                    }
+                    Debug.Log("Not enough Stims");
                 }
             }
-
-            // Log for debugging
-            getLog(CurrentTrialDef.UnseenStims, "UnseenStims");
-            getLog(CurrentTrialDef.PreviouslyChosenStimuli, "PreviouslyChosenStimuli");
-            getLog(CurrentTrialDef.PreviouslyNotChosenStimuli, "PreviouslyNotChosenStimuli");
-            getLog(CurrentTrialDef.TrialStimIndices, "TrialStimIndices");
-            
-            // set trial stims
-            currentTrialStims = new StimGroup("TrialStims", ExternalStims, CurrentTrialDef.TrialStimIndices);
-            currentTrialStims.SetLocations(CurrentTrialDef.TrialStimLocations);
-            currentTrialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"),  GetStateFromName("TokenFeedback"));
-            TrialStims.Add(currentTrialStims);
         }
+
+        // Log for debugging
+        getLog(CurrentTrialDef.UnseenStims, "UnseenStims");
+        getLog(CurrentTrialDef.PreviouslyChosenStimuli, "PreviouslyChosenStimuli");
+        getLog(CurrentTrialDef.PreviouslyNotChosenStimuli, "PreviouslyNotChosenStimuli");
+        getLog(CurrentTrialDef.TrialStimIndices, "TrialStimIndices");
+
+        // set trial stims
+        currentTrialStims = new StimGroup("TrialStims", ExternalStims, CurrentTrialDef.TrialStimIndices);
+        currentTrialStims.SetLocations(CurrentTrialDef.TrialStimLocations);
+        currentTrialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenFeedback"));
+        TrialStims.Add(currentTrialStims);
+
     }
-    
+    private void loadVariables()
+    {
+        //config UI variables
+        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
+        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
+        itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
+        selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
+        finalFbDuration = ConfigUiVariables.get<ConfigNumber>("finalFbDuration");
+        fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
+    }
     public static Texture2D LoadPNG(string filePath)
     {
 

@@ -113,7 +113,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     //Syncbox variables
     private bool usingSonication = false;
-    private EventCodeManager eventCodeManager;
 
     public override void DefineControlLevel()
     {

@@ -18,13 +18,6 @@ public class PlayerViewPanel : MonoBehaviour
     {
         parent = transform;
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public GameObject drawCircle(Vector2 circleLocation, Vector2 size)
     {
         GameObject degreeCircle = new GameObject("DegreeCircle", typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UICircle));

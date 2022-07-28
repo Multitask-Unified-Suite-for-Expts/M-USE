@@ -10,7 +10,6 @@ using Random = UnityEngine.Random;
 using USE_UI;
 using USE_Settings;
 using System.IO;
-using System.Transactions.Configuration;
 
 public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 {
@@ -51,6 +50,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     //private StimGroup externalStimsA, externalStimsB, externalStimsC;
     private StimGroup TargetStims, DistractorStims;
     private int numDistractor = 0;
+    private USE_Button testButton;
+
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
@@ -72,6 +73,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 .SetRevealTime(CurrentTrialDef.TokenRevealDuration)
                 .SetUpdateTime(CurrentTrialDef.TokenUpdateDuration);
             StartButton.SetActive(true);
+            //loadVariables();
+            //testButton.ToggleVisibility(true);
+            
         });
         SetupTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
             SearchDisplay, () => StartButton.SetActive(false));
@@ -82,13 +86,17 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         GameObject selected = null;
         VisualSearch_StimDef selectedSD = null;
         MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay);
+
         SearchDisplay.AddInitializationMethod(() => selected = null);
+
+
         SearchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, SelectionFeedback, () => {
             //testButton.pressed = false;
             selected = mouseHandler.SelectedGameObject;
             selectedSD = mouseHandler.SelectedStimDef;
             correct = selectedSD.IsTarget;
         });
+
         SearchDisplay.AddTimer(() => CurrentTrialDef.MaxSearchDuration, FinishTrial);
 
         GameObject halo = null;
@@ -99,6 +107,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             else HaloFBController.ShowNegative(selected);
 
         });
+
         SelectionFeedback.AddTimer(() => 0.5f, TokenFeedback);
 
         TokenFeedback.AddInitializationMethod(() =>
@@ -170,14 +179,16 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         }
         
     }
-/*
-    private USE_Button DefineStartButton(Transform parent){
+
+    private USE_Button DefineStartButton(Transform parent)
+    {
         /*
-        if(random == 1){
+        if (random == 1)
+        {
             return;
-        }
+        }*/
         Vector3 buttonPosition = new Vector3(0f, 0f, 0f);
-		Vector3 buttonScale = new Vector3(1f, 1f, 1f);
+        Vector3 buttonScale = new Vector3(1f, 1f, 1f);
         Color buttonColor = new Color(0.1f, 0.1f, 0.1f);
         Vector3 tempColor = new Vector3(0f, 0f, 0f);
         string buttonText = "";
@@ -186,26 +197,24 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         //testButton = sttartButton;
         string TaskName = "VisualSearch";
         if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
-			{ 
-				if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-					buttonPosition = (Vector3) SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-				if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-					buttonScale = (Vector3) SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-                if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonColor"))
-					tempColor = (Vector3) SessionSettings.Get(TaskName + "_TaskSettings", "ButtonColor");
-                    buttonColor = new Color(tempColor[0], tempColor[1], tempColor[2]);
-                if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonText"))
-					buttonText = (string) SessionSettings.Get(TaskName + "_TaskSettings", "ButtonText");
-	    }
-        /*
+        {
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+                buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+                buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonColor"))
+                tempColor = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonColor");
+            buttonColor = new Color(tempColor[0], tempColor[1], tempColor[2]);
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonText"))
+                buttonText = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonText");
+        }
         testButton = new USE_Button(buttonPosition, buttonScale, canvas, buttonColor, buttonText);
         testButton.defineButton();
         return (testButton);
-        
+
         //testButton.SetVisibilityOnOffStates(GetStateFromName("InitTrial"), GetStateFromName("SearchDisplay"));
         //random = 1;
     }
-*/
     void disableAllGameobjects()
     {
        // testButton.ToggleVisibility(false);
@@ -221,15 +230,23 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         /*
         GameObject.Find("Stimuli").AddComponent<Canvas>();
         GameObject.Find("Stimuli").AddComponent<GraphicRaycaster>();
-        Transform parent = GameObject.Find("Stimuli").GetComponent<Transform>();
+        
         */
         //clickMarker = GameObject.Find("ClickMarker");
         //startButton = GameObject.Find("StartButton");
         //startButton.GetComponent<Button>().onClick.AddListener(StartClick);
         //slider = GameObject.Find("Slider").GetComponent<Slider>();
         //sliderInitPosition = slider.gameObject.transform.position;
-        
-        //testButton = DefineStartButton(parent);
+        /*
+        GameObject startButtonCanvas = GameObject.Find("StartButtonCanvas");
+        Transform parent = startButtonCanvas.GetComponent<Transform>();
+        startButtonCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
+        startButtonCanvas.GetComponent<Canvas>().worldCamera = GameObject.Find("VisualSearch_Camera").GetComponent<Camera>();
+        testButton = DefineStartButton(parent);
+
+        var newButton = DefaultControls.CreateButton(new DefaultControls.Resources());
+        newButton.transform.SetParent(parent);
+        */
         disableAllGameobjects();
     }
     
@@ -264,4 +281,5 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
         return materialSkybox;
     }
+
 }

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641275, b: 0.5748172, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -170,6 +170,7 @@ MonoBehaviour:
   StoreData: 0
   TaskDataPath: 
   FilePrefix: 
+  TrialSummaryString: 
   PreloadedStims:
     stimGroupName: 
     IsActive: 0
@@ -183,10 +184,16 @@ MonoBehaviour:
     stimGroupName: 
     IsActive: 0
   TrialStims: []
+  ExperimenterDisplayController: {fileID: 0}
   AudioFBController: {fileID: 0}
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
   MouseTracker: {fileID: 0}
+  GazeTracker: {fileID: 0}
+  SelectionType: 
+  SerialPortController: {fileID: 0}
+  EventCodeManager: {fileID: 0}
+  MaterialFilePath: 
   StartButton: {fileID: 239317670}
 --- !u!114 &108587574
 MonoBehaviour:
@@ -213,14 +220,22 @@ MonoBehaviour:
   BlockCount: 0
   TrialLevel: {fileID: 108587573}
   StoreData: 0
+  SyncBoxActive: 0
+  EventCodesActive: 0
+  RewardPulsesActive: 0
+  SonicationActive: 0
   SessionDataPath: 
   TaskConfigPath: 
   TaskDataPath: 
   SubjectID: 
   SessionID: 
   FilePrefix: 
+  BlockSummaryString: 
+  EyetrackerType: 
+  SelectionType: 
   LocateFile: {fileID: 0}
   TaskCam: {fileID: 0}
+  TaskCanvasses: []
   PreloadedStims:
     stimGroupName: 
     IsActive: 0
@@ -235,6 +250,10 @@ MonoBehaviour:
     IsActive: 0
   PreloadedStimGameObjects: []
   PrefabStimPaths: []
+  ExperimenterDisplayController: {fileID: 0}
+  SerialPortController: {fileID: 0}
+  EventCodeManager: {fileID: 0}
+  DrawRenderTexture: {fileID: 0}
 --- !u!4 &108587575
 Transform:
   m_ObjectHideFlags: 0
@@ -449,7 +468,6 @@ GameObject:
   - component: {fileID: 1812093642}
   - component: {fileID: 1812093641}
   - component: {fileID: 1812093640}
-  - component: {fileID: 1812093643}
   m_Layer: 0
   m_Name: WorkingMemory_Camera
   m_TagString: MainCamera
@@ -522,12 +540,3 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!45 &1812093643
-Skybox:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812093639}
-  m_Enabled: 1
-  m_CustomSkybox: {fileID: 2100000, guid: 644e6b806511ae94285e29bb44cd091f, type: 2}

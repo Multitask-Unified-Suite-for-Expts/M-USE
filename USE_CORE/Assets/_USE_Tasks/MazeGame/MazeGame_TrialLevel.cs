@@ -503,7 +503,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             string mazeJson = textMaze.text;
             Maze mazeObj = new Maze(mazeJson);
-            Debug.Log(mazeObj);
+            // Debug.Log(mazeObj);
             mazeList.Add(mazeObj);
         }
 

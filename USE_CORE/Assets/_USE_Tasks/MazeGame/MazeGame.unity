@@ -1394,9 +1394,9 @@ Canvas:
   m_GameObject: {fileID: 789801928}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
-  m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
+  m_RenderMode: 1
+  m_Camera: {fileID: 258609758}
+  m_PlaneDistance: 1
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
@@ -2434,6 +2434,10 @@ MonoBehaviour:
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
   MouseTracker: {fileID: 0}
+  GazeTracker: {fileID: 0}
+  SelectionType: 
+  SerialPortController: {fileID: 0}
+  EventCodeManager: {fileID: 0}
   mazeList: []
   ind: 0
   SCREEN_WIDTH: 0
@@ -2480,6 +2484,10 @@ MonoBehaviour:
   BlockCount: 0
   TrialLevel: {fileID: 1860654110}
   StoreData: 0
+  SyncBoxActive: 0
+  EventCodesActive: 0
+  RewardPulsesActive: 0
+  SonicationActive: 0
   SessionDataPath: 
   TaskConfigPath: 
   TaskDataPath: 
@@ -2487,6 +2495,8 @@ MonoBehaviour:
   SessionID: 
   FilePrefix: 
   BlockSummaryString: 
+  EyetrackerType: 
+  SelectionType: 
   LocateFile: {fileID: 0}
   TaskCam: {fileID: 0}
   TaskCanvasses: []
@@ -2505,6 +2515,8 @@ MonoBehaviour:
   PreloadedStimGameObjects: []
   PrefabStimPaths: []
   ExperimenterDisplayController: {fileID: 0}
+  SerialPortController: {fileID: 0}
+  EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
 --- !u!4 &1860654112
 Transform:

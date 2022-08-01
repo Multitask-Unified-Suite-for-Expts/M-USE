@@ -90,8 +90,8 @@ namespace USE_ExperimentTemplate
 			else
 				SonicationActive = false;
 			
-			if (EventCodesActive || RewardPulsesActive || SonicationActive)
-				SyncBoxActive = true;
+			// if (EventCodesActive || RewardPulsesActive || SonicationActive)
+			// 	SyncBoxActive = true;
 			
 			//if there is a single syncbox config file for all experiments, load it
 			string syncBoxFileString =
@@ -99,7 +99,7 @@ namespace USE_ExperimentTemplate
 			if (!string.IsNullOrEmpty(syncBoxFileString))
 			{
 				SessionSettings.ImportSettings_MultipleType("SyncBoxConfig", syncBoxFileString);
-				SyncBoxActive = true;
+				// SyncBoxActive = true;
 			}
 
 			//if there is a single event code config file for all experiments, load it
@@ -109,7 +109,7 @@ namespace USE_ExperimentTemplate
 			{
 				SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
 				SessionEventCodes = (Dictionary<string, EventCode>) SessionSettings.Get("EventCodeConfig");
-				EventCodesActive = true;
+				// EventCodesActive = true;
 			}
 			else if (EventCodesActive)
 				Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");
@@ -117,11 +117,11 @@ namespace USE_ExperimentTemplate
 			if (SyncBoxActive)
 				SerialPortActive = true;
 			
-			if (EventCodesActive)
-			{
-				SerialPortActive = true;
-				SyncBoxActive = true;
-			}
+			// if (EventCodesActive)
+			// {
+			// 	SerialPortActive = true;
+			// 	SyncBoxActive = true;
+			// }
 
 
 			if (SessionSettings.SettingExists("Session", "TaskNames"))
@@ -183,11 +183,10 @@ namespace USE_ExperimentTemplate
 			setupSession.AddDefaultInitializationMethod(() =>
 			{
 				SessionData.CreateFile();
+				EventCodeManager = new EventCodeManager();
 				if (SerialPortActive)
 				{
-					
-					if (SerialPortActive)
-						SerialPortController = new SerialPortThreaded();
+					SerialPortController = new SerialPortThreaded();
 					if (SyncBoxActive)
 					{
 						SyncBoxController = new SyncBoxController();
@@ -196,7 +195,6 @@ namespace USE_ExperimentTemplate
 
 					if (EventCodesActive)
 					{
-						EventCodeManager = new EventCodeManager();
 						EventCodeManager.SyncBoxController = SyncBoxController;
 						EventCodeManager.codesActive = true;
 					}
@@ -220,6 +218,7 @@ namespace USE_ExperimentTemplate
 							SerialPortController.SerialPortSpeed =
 								(int) SessionSettings.Get("SyncBoxConfig", "SerialPortSpeed");
 					}
+
 					SerialPortController.Initialize();
 				}
 			});
@@ -411,8 +410,8 @@ namespace USE_ExperimentTemplate
 				tl.SerialPortController = SerialPortController;
 			if (SyncBoxActive)
 				tl.SyncBoxController = SyncBoxController;
-			if (EventCodesActive)
-				tl.EventCodeManager = EventCodeManager;
+			// if (EventCodesActive)
+			tl.EventCodeManager = EventCodeManager;
 
 			if (SessionSettings.SettingExists("Session", "RewardPulsesActive"))
 				tl.RewardPulsesActive = (bool) SessionSettings.Get("Session", "RewardPulsesActive");

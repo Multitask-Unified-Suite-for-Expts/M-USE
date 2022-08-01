@@ -11,6 +11,7 @@ using USE_StimulusManagement;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using System.Data;
+using System.IO;
 
 public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 {
@@ -86,6 +87,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public static int correctTouches = 0;
 
     public static Color tileColor;
+    public string MaterialFilePath;
     public static int textureNum;
 
     public int curMDim;
@@ -121,20 +123,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         LoadMaze.AddInitializationMethod(() =>
         {
             //  Camera.main.backgroundColor = new Color(1f, 0.5f, 1f);
-            Material newMat = Resources.Load("BG_Materials/Skybox_2", typeof(Material)) as Material;
+            //Material newMat = Resources.Load("BG_Materials/Skybox_2", typeof(Material)) as Material;
             //System.Random rnd = new System.Random();
             //int num = rnd.Next(0, 9);
-            int num = 9;
-            //  gameObject.GetComponent<MeshRenderer>().material = newMat;
-            string textStr = "Textures/Picture" + num.ToString();
-            Texture newTxt = Resources.Load(textStr, typeof(Texture)) as Texture;
-            newMat.SetTexture("_MainTex", newTxt);
-            //   Canvas c = GameObject.Find("Canvas").GetComponent<Canvas>();
-            //CanvasRenderer cr = c.GetComponents<Renderer>;
-            //  c.GetComponent<Image>().material = newMat;
-            // c.GetComponent<Image>().SetMaterial(newMat, newTxt);
-
-            //  CanvasRenderer.SetMaterial(newMat, newTxt);
+            //int num = 9;
+            //string textStr = "Textures/Picture" + num.ToString();
+            //Texture newTxt = Resources.Load(textStr, typeof(Texture)) as Texture;
+            //newMat.SetTexture("_MainTex", newTxt);
             if (CurrentTrialDef.viewPath == 1)
             {
                 viewPath = true;
@@ -232,18 +227,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             if (count == 0)
             {
-                slider = GameObject.Find("Slider").GetComponent<Slider>();
-
-                initButton = GameObject.Find("StartButton");
-
-
-                txt = GameObject.Find("FinalText");
-                startTxt = GameObject.Find("StartText");
-
-                sliderHalo = GameObject.Find("SliderHalo");
-                Debug.Log("HALO FOUND");
-                sr = sliderHalo.GetComponent<SpriteRenderer>();
-
                 count = 0;
                 // Load maze from JSON
                 TextAsset[] textMazes = Resources.LoadAll<TextAsset>("Mazes");
@@ -263,15 +246,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             }
             else
             {
-                RenderSettings.skybox = newMat;
+                //RenderSettings.skybox = newMat;
             }
-
-            slider.gameObject.SetActive(true);
-            initButton.gameObject.SetActive(true);
-            startTxt.gameObject.SetActive(true);
-            Debug.Log("CHECK");
-
-
         });
 
         LoadMaze.SpecifyTermination(() => true, GameConf);
@@ -287,7 +263,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SCREEN_WIDTH = 4;
 
             // Default tile width
-            TILE_WIDTH = 0.5f;
+            TILE_WIDTH = 3f;
 
             //---------------------------------------------------------
 
@@ -352,9 +328,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         StartButton.AddInitializationMethod(() =>
         {
             response = -1;
-            txt.gameObject.SetActive(false);
-            sliderHalo.SetActive(false);
             curRep = 0;
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\Blank.png");
 
         });
 
@@ -383,16 +358,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         StartButton.AddDefaultTerminationMethod(() =>
         {
-            startTxt.gameObject.SetActive(false);
+           // startTxt.gameObject.SetActive(false);
             initButton.gameObject.SetActive(false);
-
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
         });
 
         MazeVis.AddInitializationMethod(() =>
         {
-            //  if (!mazeLoaded)
-            // {
-            //   mazeLoaded = true;
             Debug.Log(count);
 
             end = false;
@@ -400,36 +372,19 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             slider.value = 0;
 
             InstantiateCurrMaze();
-
-            // if (c)
-            // {
-            //  AudioFBController.Play("Positive");
-
-            // }
-            // else
-            // {
-            //   AudioFBController.Play("Negative");
-            // }
-
-
         });
         MazeVis.AddUpdateMethod(() => 
         {
-            Debug.Log("INSIDE1");
             if (InputBroker.GetMouseButtonDown(0))
             {
-                Debug.Log("INSIDE2");
                 mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-                //initButton.OnClick
                 RaycastHit hit;
                 if (Physics.Raycast(mouseRay, out hit))
                 {
-                    Debug.Log("INSIDE3");
                     chosenStim = hit.transform.gameObject;
                     //GameObject testStim = chosenStim.transform.root.gameObject;
                     if (chosenStim.GetComponent<Tile>() != null)
                     {
-                        Debug.Log("INSIDE4");
                         chosenStim.GetComponent<Tile>().OnMouseDown();
                     }
 
@@ -475,7 +430,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             txt.SetActive(false);
             initButton.gameObject.SetActive(false);
-
             sliderHalo.SetActive(false);
             slider.gameObject.SetActive(false);
 
@@ -661,6 +615,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 // Instantiate the tile
 
                 tile.transform.position = newTilePosition;
+                tile.transform.localScale = new Vector3(TILE_WIDTH, TILE_WIDTH, 1);
                 tile.mCoord = new Coords(x, y);
 
                 // Instantiate the row and assign the tile in the row
@@ -932,7 +887,46 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             return 22;
         }
     }
+    private void loadVariables()
+    {
+        slider = GameObject.Find("Slider").GetComponent<Slider>();
+        initButton = GameObject.Find("StartButton");
+        txt = GameObject.Find("FinalText");
+        sliderHalo = GameObject.Find("SliderHalo");
+        sr = sliderHalo.GetComponent<SpriteRenderer>();
+        
+    }
+    public static Texture2D LoadPNG(string filePath)
+    {
 
+        Texture2D tex = null;
+        byte[] fileData;
+
+        if (File.Exists(filePath))
+        {
+            fileData = File.ReadAllBytes(filePath);
+            tex = new Texture2D(2, 2);
+            tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
+        }
+        return tex;
+    }
+    public Material CreateSkybox(string filePath)
+    {
+        Texture2D tex = null;
+        Material materialSkybox = new Material(Shader.Find("Skybox/6 Sided"));
+
+        tex = LoadPNG(filePath); // load the texture from a PNG -> Texture2D
+
+        //Set the textures of the skybox to that of the PNG
+        materialSkybox.SetTexture("_FrontTex", tex);
+        materialSkybox.SetTexture("_BackTex", tex);
+        materialSkybox.SetTexture("_LeftTex", tex);
+        materialSkybox.SetTexture("_RightTex", tex);
+        materialSkybox.SetTexture("_UpTex", tex);
+        materialSkybox.SetTexture("_DownTex", tex);
+
+        return materialSkybox;
+    }
     protected override void DefineTrialStims()
     {
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 

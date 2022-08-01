@@ -2,6 +2,7 @@
 using WhatWhenWhere_Namespace;
 using ExperimenterDisplayPanels;
 using System;
+using USE_Settings;
 
 public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 {
@@ -22,6 +23,10 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     public override void DefineControlLevel()
     {
         WhatWhenWhere_TrialLevel wwwTL = (WhatWhenWhere_TrialLevel)TrialLevel;
+        string TaskName = "WhatWhenWhere";
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
+            wwwTL.MaterialFilePath = (String) SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+
         RunBlock.AddInitializationMethod(() =>
         {
            wwwTL.totalErrors_InBlock = 0 ;
@@ -31,7 +36,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
            Array.Clear(wwwTL.numCorrect_InBlock, 0, wwwTL.numCorrect_InBlock.Length);
            Array.Clear(wwwTL.numErrors_InBlock, 0, wwwTL.numErrors_InBlock.Length);
            wwwTL.accuracyLog_InBlock = "";
-           wwwTL.MaterialFilePath = bd.ContextExternalFilePath;
+           
         });
 
         RunBlock.AddUpdateMethod(() =>

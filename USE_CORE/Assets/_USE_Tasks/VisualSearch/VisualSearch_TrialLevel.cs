@@ -17,7 +17,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     public VisualSearch_TrialDef CurrentTrialDef => GetCurrentTrialDef<VisualSearch_TrialDef>();
 
     private StimGroup targetStims, distractorStims;
-    private GameObject StartButton;
+    private GameObject startButton;
 
     private string targetName;
     private Vector3 targetLocation;
@@ -77,31 +77,22 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             TokenFBController
                 .SetRevealTime(tokenRevealDuration.value)
                 .SetUpdateTime(tokenUpdateDuration.value);
-
-            Texture2D tex = LoadPNG(MaterialFilePath + "\\Ice.png");
-            Rect rect = new Rect(new Vector2(2,2), new Vector2(2, 2));
-            Transform parent = GameObject.Find("StartButtonCanvas").transform.parent;
-            StartButton = CreateStartButton(tex, rect, parent);
-            
-            StartButton.SetActive(true);
-            //StartButton.SetActive(true);
-            //USE_Button butt = DefineStartButton(GameObject.Find("StartButtonCanvas").transform.parent);
-            /* KEEP
-    EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
-            */
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
             loadVariables();
-            //testButton.ToggleVisibility(true);
+            startButton.SetActive(true);
+            TokenFBController.enabled = false;
 
         });
-        SetupTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
+        SetupTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton),
             SearchDisplay, () => 
             {
-               // StartButton.SetActive(false);
-                        /* KEEP
-                EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]); //CHECK THIS TIMING MIGHT BE OFF
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarReset"]);
-                        */
+               startButton.SetActive(false);
+               RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
+               TokenFBController.enabled = true;
+               EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]); //CHECK THIS TIMING MIGHT BE OFF
+               EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
+               EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
+               EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarReset"]);
             });
         MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay);
         // Show the target/sample with some other distractors
@@ -120,17 +111,15 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             selectedSD = mouseHandler.SelectedStimDef;
             correct = selectedSD.IsTarget;
             if (correct)
-            {       /* KEEP
+            {       
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["TouchTargetStart"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["CorrectResponse"]);
-                    */
+                  
             }
             else
             {
-                    /* KEEP
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["TouchDistractorStart"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["IncorrectResponse"]);
-                    */
             }
             string touchedObjectsNames = "";
             if (selected != null) touchedObjectsNames = selected.name;
@@ -145,9 +134,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
             {
                 Debug.Log("Timed out of selection state before making a choice");
-                /* KEEP
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
-                */
             }
         });
 
@@ -157,32 +144,25 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (!selected) return;
             else
             {
-                /* KEEP
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
-                */
             }
             if (correct)
             {
                 HaloFBController.ShowPositive(selected);
-                /*KEEP
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
-                */
             }
             else
             {
                 HaloFBController.ShowNegative(selected);
-                /* KEEP
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
-                */
             }
         });
 
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback,()=>
-        {   /* KEEP
+        {   
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOff"]);
-            */
         });
 
         TokenFeedback.AddInitializationMethod(() =>
@@ -200,9 +180,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), TrialEnd);
         TrialEnd.AddTimer(()=> itiDuration.value, FinishTrial, ()=> 
         {
-            /* KEEP
             EventCodeManager.SendCodeImmediate(TaskEventCodes["TrlEnd"]);
-            */
         });
         
         TrialData.AddDatum("TargetName", () => targetName);
@@ -236,12 +214,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             targetLocation = sd.StimLocation;
         } 
         TrialStims.Add(targetStims);
-        /*
-        bool fam = false;
-        if(fam == true){
-            fam = false;
-            numDistractor = 3;
-        }*/
         if (CurrentTrialDef.DistractorStimsIndices.Length != 0)
         {
             distractorStims = new StimGroup("TargetStims", ExternalStims, CurrentTrialDef.DistractorStimsIndices);
@@ -298,12 +270,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     }
     void disableAllGameobjects()
     {
-       // testButton.ToggleVisibility(false);
-       // clickMarker.SetActive(false);
-        //startButton.SetActive(false);
-        //slider.gameObject.SetActive(false);
-        //distractorStims.ToggleVisibility(false);
-        //GameObject.Find("Slider").SetActive(false);
+        startButton.SetActive(false);
     }
 
     void loadVariables()
@@ -314,7 +281,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         */
         //clickMarker = GameObject.Find("ClickMarker");
-        //startButton = GameObject.Find("StartButton");
+        startButton = GameObject.Find("StartButton");
         //startButton.GetComponent<Button>().onClick.AddListener(StartClick);
         //slider = GameObject.Find("Slider").GetComponent<Slider>();
         //sliderInitPosition = slider.gameObject.transform.position;
@@ -338,7 +305,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
         tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
-        disableAllGameobjects();
+        //disableAllGameobjects();
     }
     private GameObject CreateStartButton(Texture2D tex, Rect rect, Transform parent)
     {

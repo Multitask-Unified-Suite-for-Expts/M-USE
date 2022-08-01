@@ -85,7 +85,7 @@ namespace WhatWhenWhere_Namespace
 
     public class WhatWhenWhere_TaskDef : TaskDef
     {
-
+        string ContextExternalFilePath;
     }
     //Any other custom classes useful for the functioning of the task could be included in this namespace.
 }

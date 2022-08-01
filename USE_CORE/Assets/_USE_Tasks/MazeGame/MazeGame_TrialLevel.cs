@@ -612,6 +612,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         */
 
 
+        GameObject mazeContainer = new GameObject("MazeContainer");
+
         tile = Resources.Load<Tile>("Prefabs/Tile") as Tile;
 
         tiles = new StimGroup("Tiles"); //in DefineTrialStims
@@ -682,8 +684,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 // tileRend.material.SetColor("_BaseColor", tileColor);
                 // instTile.gameObject.GetComponent<Renderer>().material.color = FINISH_COLOR;
 
-                Tile instTile = Instantiate(tile);
-                instTile.transform.SetParent(this.transform);
+                Tile instTile = Instantiate(tile, mazeContainer.transform);
+                // instTile.transform.SetParent(mazeContainer.transform);
 
 
                 // instTile.gameObject.SetActive(false);

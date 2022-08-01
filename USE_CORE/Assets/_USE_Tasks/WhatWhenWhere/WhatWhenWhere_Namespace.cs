@@ -78,6 +78,7 @@ namespace WhatWhenWhere_Namespace
 
     public class WhatWhenWhere_StimDef : StimDef
     {
+        //relates to varaibles to evaluate stimuli
         public bool IsCurrentTarget;
         public bool IsDistractor;
     }

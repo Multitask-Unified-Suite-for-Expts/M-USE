@@ -25,7 +25,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public List<Maze> mazeList = new List<Maze>();
     static bool end;
     private int dim;
-    public int ind; 
+
+    public int ind;
+
     //game configs variables
     public float SCREEN_WIDTH;
     public float TILE_WIDTH;
@@ -45,13 +47,15 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     public float TIMEOUT_SECONDS;
 
-    
+
     //MazeVis Variables
     public TileRow[] tileRows;
 
     public static GameObject mazeListObj;
+
     public LoadMazeList mazeListScript;
-   // public static GameConfigs gameConfigs = new GameConfigs();
+
+    // public static GameConfigs gameConfigs = new GameConfigs();
     public static Maze currMaze;
     private bool mazeLoaded = false;
     private static int count;
@@ -61,7 +65,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     private static Slider slider;
     private static float sliderValueIncreaseAmount;
+
     private GameObject initButton;
+
     //private Button initButton;
     private Ray mouseRay;
     private int response;
@@ -91,9 +97,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     public override void DefineControlLevel()
     {
-        
-         
-           
+
+
+
 
         //define States within this Control Level
         State StartButton = new State("StartButton");
@@ -102,30 +108,30 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         State MazeVis = new State("MazeVis");
         State Feedback = new State("Feedback");
         State ITI = new State("ITI");
-        AddActiveStates(new List<State> { StartButton, LoadMaze, GameConf, MazeVis, Feedback, ITI });
+        AddActiveStates(new List<State> {StartButton, LoadMaze, GameConf, MazeVis, Feedback, ITI});
 
-        string[] stateNames = new string[] { "StartButton", "LoadMaze", "GameConf", "MazeVis", "Feedback", "ITI" };
+        string[] stateNames = new string[] {"StartButton", "LoadMaze", "GameConf", "MazeVis", "Feedback", "ITI"};
 
         SetupTrial.SpecifyTermination(() => true, LoadMaze);
 
         SelectionHandler<MazeGame_StimDef> mouseHandler = new SelectionHandler<MazeGame_StimDef>();
 
-            // Define stimOn state
+        // Define stimOn state
         LoadMaze.AddInitializationMethod(() =>
         {
-          //  Camera.main.backgroundColor = new Color(1f, 0.5f, 1f);
+            //  Camera.main.backgroundColor = new Color(1f, 0.5f, 1f);
             Material newMat = Resources.Load("BG_Materials/Skybox_2", typeof(Material)) as Material;
             //System.Random rnd = new System.Random();
             //int num = rnd.Next(0, 9);
             int num = 9;
             //  gameObject.GetComponent<MeshRenderer>().material = newMat;
-           string textStr = "Textures/Picture" + num.ToString();
+            string textStr = "Textures/Picture" + num.ToString();
             Texture newTxt = Resources.Load(textStr, typeof(Texture)) as Texture;
             newMat.SetTexture("_MainTex", newTxt);
-         //   Canvas c = GameObject.Find("Canvas").GetComponent<Canvas>();
+            //   Canvas c = GameObject.Find("Canvas").GetComponent<Canvas>();
             //CanvasRenderer cr = c.GetComponents<Renderer>;
-          //  c.GetComponent<Image>().material = newMat;
-           // c.GetComponent<Image>().SetMaterial(newMat, newTxt);
+            //  c.GetComponent<Image>().material = newMat;
+            // c.GetComponent<Image>().SetMaterial(newMat, newTxt);
 
             //  CanvasRenderer.SetMaterial(newMat, newTxt);
             if (CurrentTrialDef.viewPath == 1)
@@ -136,6 +142,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             {
                 viewPath = false;
             }
+
             DataTable tbl = new DataTable();
 
             tbl.Columns.Add(new DataColumn("dim"));
@@ -157,11 +164,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 search = search + "dim = " + curMDim.ToString();
                 and = " AND ";
             }
+
             if (curMNumSquares != null)
             {
                 search = search + and + "numSquares = " + curMNumSquares.ToString();
                 and = " AND ";
             }
+
             if (curMDim != null)
             {
                 search = search + and + "numTurns = " + curMDim.ToString();
@@ -179,6 +188,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
                 tbl.Rows.Add(dr);
             }
+
             Debug.Log("TESTROWS");
 
             /* DataRow[] testRows = tbl.Select();
@@ -193,11 +203,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             //WHY DOESNT THIS WORK FOR 3???
             foreach (DataRow row in rows)
             {
-                Debug.Log(row[0].ToString() + "   " + row[1].ToString() + "   " + row[2].ToString() + "   " + row[3].ToString());
+                Debug.Log(row[0].ToString() + "   " + row[1].ToString() + "   " + row[2].ToString() + "   " +
+                          row[3].ToString());
                 curMPath = row[3].ToString();
                 ind = tbl.Rows.IndexOf(row);
 
             }
+
             Debug.Log("LENGTH");
             Debug.Log(rows.Length);
             // Debug.Log(rows[0].Length);
@@ -209,13 +221,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             //   max = CurrentTrialDef.nRepetitionsMinMax[1];
             trialIndex = CurrentTrialDef.TrialCount - 1;
             Debug.Log("INDEX: " + trialIndex);
-        //   System.Random rnd = new System.Random();
-        //  numReps = rnd.Next(min, max);
-        totalErrors = 0;
-        ruleAbidingErrors = 0;
-        ruleBreakingErrors = 0;
-        retouchCorrect = 0;
-        correctTouches = 0;
+            //   System.Random rnd = new System.Random();
+            //  numReps = rnd.Next(min, max);
+            totalErrors = 0;
+            ruleAbidingErrors = 0;
+            ruleBreakingErrors = 0;
+            retouchCorrect = 0;
+            correctTouches = 0;
 
             if (count == 0)
             {
@@ -252,6 +264,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             {
                 RenderSettings.skybox = newMat;
             }
+
             slider.gameObject.SetActive(true);
             initButton.gameObject.SetActive(true);
             startTxt.gameObject.SetActive(true);
@@ -272,59 +285,62 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             // TODO: Not implemented, but this should be the maximum screen width that tiles can take up without overfilling the screen
             SCREEN_WIDTH = 4;
 
-             // Default tile width
-             TILE_WIDTH = 0.5f;
+            // Default tile width
+            TILE_WIDTH = 0.5f;
 
-             //---------------------------------------------------------
+            //---------------------------------------------------------
 
-             // TILE COLORS
+            // TILE COLORS
 
-             // Start - Light yellow
-             START_COLOR = new Color(0.94f, 0.93f, 0.48f);
+            // Start - Light yellow
+            START_COLOR = new Color(0.94f, 0.93f, 0.48f);
 
-             // Finish - Light blue
-             FINISH_COLOR = new Color(0.37f, 0.59f, 0.94f);
+            // Finish - Light blue
+            FINISH_COLOR = new Color(0.37f, 0.59f, 0.94f);
 
-             // Correct - Light green
-             CORRECT_COLOR = new Color(0.62f, 1f, 0.5f);
+            // Correct - Light green
+            CORRECT_COLOR = new Color(0.62f, 1f, 0.5f);
 
-             // Prev correct - Darker green
-             LAST_CORRECT_COLOR = new Color(0.2f, 0.7f, 0.5f);
+            // Prev correct - Darker green
+            LAST_CORRECT_COLOR = new Color(0.2f, 0.7f, 0.5f);
 
-             // Incorrect rule-abiding - Orange
-             INCORRECT_RULEABIDING_COLOR = new Color(1f, 0.5f, 0.25f);
+            // Incorrect rule-abiding - Orange
+            INCORRECT_RULEABIDING_COLOR = new Color(1f, 0.5f, 0.25f);
 
-             // Incorrect rule-breaking - Black
-             INCORRECT_RULEBREAKING_COLOR = new Color(0f, 0f, 0f);
+            // Incorrect rule-breaking - Black
+            INCORRECT_RULEBREAKING_COLOR = new Color(0f, 0f, 0f);
 
-             // Default - Off-white
-             // DEFAULT_TILE_COLOR = new Color(0.95f, 0.95f, 0.95f);
-             DEFAULT_TILE_COLOR = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1], CurrentTrialDef.TileColor[2]);
-             //---------------------------------------------------------
+            // Default - Off-white
+            // DEFAULT_TILE_COLOR = new Color(0.95f, 0.95f, 0.95f);
+            DEFAULT_TILE_COLOR = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1],
+                CurrentTrialDef.TileColor[2]);
+            //---------------------------------------------------------
 
-             tileColor = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1], CurrentTrialDef.TileColor[2]);
-             // FEEDBACK LENGTH IN SECONDS
+            tileColor = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1],
+                CurrentTrialDef.TileColor[2]);
+            // FEEDBACK LENGTH IN SECONDS
 
-             // Correct - 0.5 seconds
-             CORRECT_FEEDBACK_SECONDS = 0.5f;
+            // Correct - 0.5 seconds
+            CORRECT_FEEDBACK_SECONDS = 0.5f;
 
-             // Prev correct - 0.5 seconds
-             PREV_CORRECT_FEEDBACK_SECONDS = 0.5f;
+            // Prev correct - 0.5 seconds
+            PREV_CORRECT_FEEDBACK_SECONDS = 0.5f;
 
-             // Incorrect rule-abiding - 0.5 seconds
-             INCORRECT_RULEABIDING_SECONDS = 0.5f;
+            // Incorrect rule-abiding - 0.5 seconds
+            INCORRECT_RULEABIDING_SECONDS = 0.5f;
 
-             // Incorrect rule-breaking - 1.0 seconds
-             INCORRECT_RULEBREAKING_SECONDS = 1.0f;
+            // Incorrect rule-breaking - 1.0 seconds
+            INCORRECT_RULEBREAKING_SECONDS = 1.0f;
 
-             //---------------------------------------------------------
+            //---------------------------------------------------------
 
-             // TIMEOUT
+            // TIMEOUT
 
-             TIMEOUT_SECONDS = 10.0f; 
+            TIMEOUT_SECONDS = 10.0f;
             // */
             //gameConfigs.DEFAULT_TILE_COLOR = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1], CurrentTrialDef.TileColor[2]);
-            tileColor = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1], CurrentTrialDef.TileColor[2]);
+            tileColor = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1],
+                CurrentTrialDef.TileColor[2]);
 
         });
 
@@ -344,7 +360,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         StartButton.AddUpdateMethod(() =>
         {
-            
+
             if (InputBroker.GetMouseButtonDown(0))
             {
                 mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -357,11 +373,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                         response = 0;
 
                     }
-                } 
-            } 
+                }
+            }
 
         });
-      //  StartButton.SpecifyTermination(() => mouseHandler.SelectionMatches(initButton), MazeVis);
+        //  StartButton.SpecifyTermination(() => mouseHandler.SelectionMatches(initButton), MazeVis);
         StartButton.SpecifyTermination(() => response == 0, MazeVis);
 
         StartButton.AddDefaultTerminationMethod(() =>
@@ -378,36 +394,33 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             //   mazeLoaded = true;
             Debug.Log(count);
 
-                end = false;
-                Debug.Log("entered inst");
+            end = false;
+            Debug.Log("entered inst");
             slider.value = 0;
 
             InstantiateCurrMaze();
-          
-          // if (c)
-          // {
-             //  AudioFBController.Play("Positive");
 
-          // }
-         // else
-         // {
-             //   AudioFBController.Play("Negative");
-         // }
+            // if (c)
+            // {
+            //  AudioFBController.Play("Positive");
+
+            // }
+            // else
+            // {
+            //   AudioFBController.Play("Negative");
+            // }
 
 
         });
 
-        MazeVis.AddUpdateMethod(() =>
-        {
-            
-        });
+        MazeVis.AddUpdateMethod(() => { });
         MazeVis.SpecifyTermination(() => end == true, Feedback);
         // MazeVis.SpecifyTermination(() => end == true && count < mazeList.Count, MazeVis);
         //MazeVis.SpecifyTermination(() => end == true && count >= mazeList.Count, Feedback);
         MazeVis.AddDefaultTerminationMethod(() =>
         {
             DestroyCurrMaze();
-           // end = false;
+            // end = false;
         });
 
         Feedback.AddInitializationMethod(() =>
@@ -425,11 +438,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         Feedback.AddUpdateMethod(() =>
         {
-            if ((int)(10 * (Time.time - startTime)) % 4 == 0)
+            if ((int) (10 * (Time.time - startTime)) % 4 == 0)
             {
                 sr.color = new Color(1, 1, 1, 0.2f);
             }
-            else if ((int)(10 * (Time.time - startTime)) % 2 == 0)
+            else if ((int) (10 * (Time.time - startTime)) % 2 == 0)
             {
                 sr.color = new Color(1, 0, 0, 0.2f);
             }
@@ -445,14 +458,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         });
 
-      //  Feedback.SpecifyTermination(() => count < mazeList.Count, MazeVis);
-      //  Feedback.SpecifyTermination(() => count >= mazeList.Count, Feedback);
+        //  Feedback.SpecifyTermination(() => count < mazeList.Count, MazeVis);
+        //  Feedback.SpecifyTermination(() => count >= mazeList.Count, Feedback);
 
         //Define iti state
-        ITI.AddInitializationMethod(() =>
-        {
-
-        });
+        ITI.AddInitializationMethod(() => { });
         ITI.SpecifyTermination(() => true, FinishTrial, () => Debug.Log("Trial" + " completed"));
         /*
                
@@ -475,18 +485,18 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     void InstantiateCurrMaze()
     {
 
-       // sliderInitPosition = slider.gameObject.transform.position;
+        // sliderInitPosition = slider.gameObject.transform.position;
 
 
 
-         slider.gameObject.SetActive(true);
+        slider.gameObject.SetActive(true);
 
         Debug.Log("Count: " + count);
-      /*  TextAsset textMaze = Resources.Load<TextAsset>("output_mazes_json/3.6.3.c342e0c2-962d-4079-a198-ca04550a9a4f");
-        string mazeJson = textMaze.text;
-        Maze currMaze = new Maze(mazeJson);
-        Debug.Log(currMaze);
-        */
+        /*  TextAsset textMaze = Resources.Load<TextAsset>("output_mazes_json/3.6.3.c342e0c2-962d-4079-a198-ca04550a9a4f");
+          string mazeJson = textMaze.text;
+          Maze currMaze = new Maze(mazeJson);
+          Debug.Log(currMaze);
+          */
         TextAsset[] textMazes = Resources.LoadAll<TextAsset>("output_mazes_json");
 
         foreach (TextAsset textMaze in textMazes)
@@ -496,8 +506,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Debug.Log(mazeObj);
             mazeList.Add(mazeObj);
         }
+
         currMaze = mazeList[ind];
-       
+
 
         /*   TextAsset[] textMazes = Resources.LoadAll<TextAsset>("Mazes");
 
@@ -517,7 +528,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             //   DestroyCurrMaze();
             // tile.gameObject.SetActive(true);
 
-        } 
+        }
 
         dim = currMaze.mConfigs.dim;
 
@@ -600,32 +611,32 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         }
         */
 
-        
-                  tile = Resources.Load<Tile>("Prefabs/Tile") as Tile;
 
-                  tiles = new StimGroup("Tiles"); //in DefineTrialStims
-                                                  // tiles.DestroyStimGroup(); //when tiles should be destroyed
+        tile = Resources.Load<Tile>("Prefabs/Tile") as Tile;
 
-                  for (int x = 0; x < dim; ++x)
-                  {
-                      for (int y = 0; y < dim; ++y)
-                      {
-                          if (count != 0)
-                          {
-                              tile.gameObject.SetActive(true);
-                              tile.gameObject.GetComponent<Tile>().enabled = true;
-                          }
+        tiles = new StimGroup("Tiles"); //in DefineTrialStims
+        // tiles.DestroyStimGroup(); //when tiles should be destroyed
+
+        for (int x = 0; x < dim; ++x)
+        {
+            for (int y = 0; y < dim; ++y)
+            {
+                if (count != 0)
+                {
+                    tile.gameObject.SetActive(true);
+                    tile.gameObject.GetComponent<Tile>().enabled = true;
+                }
 
 
-                          //    if (count == 0)
-                          //  {
-                          float displaceX = x * TILE_WIDTH;
-                          float displaceY = y * TILE_WIDTH;
-                          Vector3 newTilePosition = bottomLeftMazePos + new Vector3(displaceX, displaceY, 0);
-                          // Instantiate the tile
+                //    if (count == 0)
+                //  {
+                float displaceX = x * TILE_WIDTH;
+                float displaceY = y * TILE_WIDTH;
+                Vector3 newTilePosition = bottomLeftMazePos + new Vector3(displaceX, displaceY, 0);
+                // Instantiate the tile
 
-                          tile.transform.position = newTilePosition;
-                          tile.mCoord = new Coords(x, y);
+                tile.transform.position = newTilePosition;
+                tile.mCoord = new Coords(x, y);
 
                 // Instantiate the row and assign the tile in the row
                 //       tileRows[x] = new TileRow(dim);
@@ -636,31 +647,31 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 // Tile instTile = Instantiate(tile);
                 //  Renderer tileRend = instTile.GetComponent<Renderer>();
 
-           
+
 
 
                 //  Color tileColor;
 
                 if (x == currMaze.mStart.X && y == currMaze.mStart.Y)
-                          {
+                {
                     Debug.Log("SET COLOR");
 
                     tile.gameObject.GetComponent<Tile>().setColor(START_COLOR);
-                     // tileColor = START_COLOR;
-                  //  tileColor = FINISH_COLOR;
+                    // tileColor = START_COLOR;
+                    //  tileColor = FINISH_COLOR;
 
 
 
                 }
                 else if (x == currMaze.mFinish.X && y == currMaze.mFinish.Y)
-                          {
+                {
                     tile.gameObject.GetComponent<Tile>().setColor(FINISH_COLOR);
 
-                    
 
-                          }
-                          else
-                          {
+
+                }
+                else
+                {
                     tile.gameObject.GetComponent<Tile>().setColor(DEFAULT_TILE_COLOR);
 
                     // tileColor = DEFAULT_TILE_COLOR;
@@ -680,11 +691,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 // tiles.AddStims(tile.gameObject); //on creation of tile GameObject
                 tiles.AddStims(instTile.gameObject); //on creation of tile GameObject
 
-                      }
+            }
 
-        } 
+        }
 
-            Debug.Log("end");
+        Debug.Log("end");
 
     }
 
@@ -695,7 +706,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         Debug.Log("dim: " + dim);
         tile.gameObject.SetActive(false);
         tile.gameObject.GetComponent<Tile>().enabled = false;
-     //   slider.gameObject.SetActive(false);
+        //   slider.gameObject.SetActive(false);
         //  Destroy(tile);
 
         for (int x = 0; x < dim; ++x)
@@ -714,37 +725,40 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             }
             //tileRows[x].gameObject.SetActive(false);
         }
+
         Debug.Log("maze should be gone");
     }
 
     public static void setEnd(int i)
     {
-        if(i == 0 || i==1)
+        if (i == 0 || i == 1)
         {
             slider.value += sliderValueIncreaseAmount;
         }
+
         if (i == 99)
         {
             slider.value += sliderValueIncreaseAmount;
-           // if(curRep < numReps)
-           // {
+            // if(curRep < numReps)
+            // {
             //    ++curRep;
-           // }
+            // }
             //else
-           // {
-                ++count;
-             //   curRep = 0;
-          //  }
+            // {
+            ++count;
+            //   curRep = 0;
+            //  }
             end = true;
         }
-        float progress = (float)correctTouches / (float)currMaze.mNumSquares;
-        float ratio = (float)correctTouches / (float)totalErrors;
+
+        float progress = (float) correctTouches / (float) currMaze.mNumSquares;
+        float ratio = (float) correctTouches / (float) totalErrors;
         Debug.Log("Progress: " + progress);
         Debug.Log("Accuracy: " + ratio);
 
     }
 
- 
+
     // ManageTileTouch - Returns correctness code
     // Return values:
     // 0 - correct and regular tile
@@ -796,7 +810,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                SceneManager.UnloadSceneAsync("MazeScene");
                SceneManager.LoadSceneAsync("MazeScene");
                SceneManager.SetActiveScene(SceneManager.GetSceneByName("MazeScene")); */
-        Debug.Log("restarted maze");
+            Debug.Log("restarted maze");
             // TODO: add maze finish operations
             currMaze.mNextStep = currMaze.mStart;
             //   mazeLoaded = false;
@@ -806,7 +820,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         }
 
         // LAST CORRECT STEP DEFAULT
-        else if (touchedCoord != currMaze.mStart && touchedCoord == currMaze.mPath[currMaze.mPath.FindIndex(pathCoord => pathCoord == currMaze.mNextStep) - 1])
+        else if (touchedCoord != currMaze.mStart && touchedCoord ==
+                 currMaze.mPath[currMaze.mPath.FindIndex(pathCoord => pathCoord == currMaze.mNextStep) - 1])
         {
             Debug.Log("last correct step");
             retouchCorrect++;
@@ -815,7 +830,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         }
 
         // LAST CORRECT STEP and START
-        else if (touchedCoord == currMaze.mStart && touchedCoord == currMaze.mPath[currMaze.mPath.FindIndex(pathCoord => pathCoord == currMaze.mNextStep) - 1])
+        else if (touchedCoord == currMaze.mStart && touchedCoord ==
+                 currMaze.mPath[currMaze.mPath.FindIndex(pathCoord => pathCoord == currMaze.mNextStep) - 1])
         {
             Debug.Log("last correct step");
             retouchCorrect++;
@@ -826,9 +842,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         // RULE-ABIDING INCORRECT DEFAULT
         // Check if this isn't the first touch and the touch was adjacent to the previous correct tile
         // In order for something to be a rule-abiding touch, there must have already been at least one correct touch on the start tile
-        else if ((currMaze.mNextStep != currMaze.mStart) && touchedCoord.isAdjacentTo(currMaze.mPath[currMaze.mPath.FindIndex(pathCoord => pathCoord == currMaze.mNextStep) - 1])
-                  && touchedCoord != currMaze.mStart
-                  && touchedCoord != currMaze.mFinish)
+        else if ((currMaze.mNextStep != currMaze.mStart) && touchedCoord.isAdjacentTo(
+                                                             currMaze.mPath[
+                                                                 currMaze.mPath.FindIndex(pathCoord =>
+                                                                     pathCoord == currMaze.mNextStep) - 1])
+                                                         && touchedCoord != currMaze.mStart
+                                                         && touchedCoord != currMaze.mFinish)
         {
             Debug.Log("rule-abiding incorrect");
             totalErrors++;
@@ -838,8 +857,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         }
 
         // RULE-ABIDING INCORRECT and START
-        else if ((currMaze.mNextStep != currMaze.mStart) && touchedCoord.isAdjacentTo(currMaze.mPath[currMaze.mPath.FindIndex(pathCoord => pathCoord == currMaze.mNextStep) - 1])
-                  && touchedCoord != currMaze.mFinish)
+        else if ((currMaze.mNextStep != currMaze.mStart) && touchedCoord.isAdjacentTo(
+                                                             currMaze.mPath[
+                                                                 currMaze.mPath.FindIndex(pathCoord =>
+                                                                     pathCoord == currMaze.mNextStep) - 1])
+                                                         && touchedCoord != currMaze.mFinish)
         {
             Debug.Log("rule-abiding incorrect");
             totalErrors++;
@@ -848,7 +870,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         }
 
         // RULE-ABIDING INCORRECT and FINISH
-        else if ((currMaze.mNextStep != currMaze.mStart) && touchedCoord.isAdjacentTo(currMaze.mPath[currMaze.mPath.FindIndex(pathCoord => pathCoord == currMaze.mNextStep) - 1]))
+        else if ((currMaze.mNextStep != currMaze.mStart) &&
+                 touchedCoord.isAdjacentTo(
+                     currMaze.mPath[currMaze.mPath.FindIndex(pathCoord => pathCoord == currMaze.mNextStep) - 1]))
         {
             Debug.Log("rule-abiding incorrect");
             totalErrors++;
@@ -883,10 +907,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             return 22;
         }
     }
+
     protected override void DefineTrialStims()
     {
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
     }
-    
+
 }

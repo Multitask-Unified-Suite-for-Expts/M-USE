@@ -35,11 +35,9 @@ namespace VisualSearch_Namespace
         public int[] DistractorStimsIndices;
         public Vector3[] SearchStimsLocations;
         public Vector3[] DistractorStimsLocations;
-        public float TokenRevealDuration;
-        public float TokenUpdateDuration;
-        public float MaxSearchDuration;
         public int[] nRepetitionsMinMax;
         public string TrialID;
+        public string ContextName;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -60,9 +58,7 @@ namespace VisualSearch_Namespace
                 td.DistractorStimsIndices = DistractorStimsIndices;
                 td.SearchStimsLocations = SearchStimsLocations;
                 td.DistractorStimsLocations = DistractorStimsLocations;
-                td.TokenRevealDuration = TokenRevealDuration;
-                td.TokenUpdateDuration = TokenUpdateDuration;
-                td.MaxSearchDuration = MaxSearchDuration;
+                td.ContextName = ContextName;
                 //td.RandomizedLocations = RandomizedLocations;
                 TrialDefs[iTrial] = td;
             }
@@ -81,9 +77,7 @@ namespace VisualSearch_Namespace
         public Vector3[] DistractorStimsLocations;
         public int[] nRepetitionsMinMax;
         public string TrialID;
-        public float TokenRevealDuration;
-        public float TokenUpdateDuration;
-        public float MaxSearchDuration;
+        public string ContextName;
     }
 
     public class VisualSearch_StimDef : StimDef

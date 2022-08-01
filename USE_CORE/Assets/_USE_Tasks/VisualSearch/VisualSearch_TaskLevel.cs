@@ -9,6 +9,10 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     public override void DefineControlLevel()
     {
         VisualSearch_TrialLevel vsTL = (VisualSearch_TrialLevel)TrialLevel;
+        string TaskName = "VisualSearch";
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
+            vsTL.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+
         RunBlock.AddInitializationMethod(() =>
         {
             /*
@@ -21,10 +25,12 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             vsTL.accuracyLog_InBlock = "";*/
             //vsTL.MaterialFilePath = bd.ContextExternalFilePath;
         });
-        string TaskName = "VisualSearch";
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            vsTL.MaterialFilePath = (String) SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-
+        
+        RunBlock.AddUpdateMethod(() =>
+        {
+            BlockSummaryString = "Block Num: " + (vsTL.BlockCount) + "\nTrial Count: " + (vsTL.TrialCount_InBlock);
+           // "\nTotal Errors: " + vsTL.totalErrors_InBlock + "\nError Type: " + vsTL.errorType_InBlockString + "\nPerformance: " + vsTL.accuracyLog_InBlock;
+        });
     }
     public T GetCurrentBlockDef<T>() where T : BlockDef
     {

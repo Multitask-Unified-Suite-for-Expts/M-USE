@@ -35,7 +35,7 @@ public class PlayerViewPanel : MonoBehaviour
     {
         float radPix = 100; // dummy value 1920 used, ((MonitorDetails)SessionSettings.Get("sessionConfig", "monitorDetails")).CmSize[0]
 
-        GameObject sampleLines = new GameObject("Line", typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UILineRenderer));
+        GameObject sampleLines = new GameObject(lineName, typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UILineRenderer));
         //sampleLines.transform.SetParent(parent);
         sampleLines.AddComponent<CanvasRenderer>();
         sampleLines.GetComponent<RectTransform>().anchorMax = Vector2.zero;

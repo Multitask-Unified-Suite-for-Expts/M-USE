@@ -22,6 +22,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public ConfigNumber minObjectTouchDuration, itiDuration, finalFbDuration, fbDuration, maxObjectTouchDuration, selectObjectDuration;
     // game object variables
     public GameObject StartButton;
+    public Button StartButtonButton;
     private GameObject trialStim;
 
     //context variables
@@ -59,7 +60,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 .SetUpdateTime(CurrentTrialDef.TokenUpdateDuration);
 
             StartButton.SetActive(true);
+            StartButtonButton.gameObject.SetActive(true);
+            //StartButtonButton.onClick.AddListener(clickEvent);
         });
+        SetupTrial.AddUpdateMethod(() =>
+        {
+            //StartButtonButton.onClick.AddListener(clickEvent);
+        });
+        
+
         SetupTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
             displayStims, () => {
                 StartButton.SetActive(false);
@@ -543,5 +552,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         }
+    }
+    public void clickEvent()
+    {
+        Debug.Log("adid it");
     }
 }

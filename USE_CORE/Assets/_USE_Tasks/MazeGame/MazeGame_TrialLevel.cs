@@ -94,6 +94,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public string curMPath;
     public static bool viewPath = false;
     public static bool c;
+    private GameObject chosenStim;
 
     public override void DefineControlLevel()
     {
@@ -412,8 +413,30 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
 
         });
+        MazeVis.AddUpdateMethod(() => 
+        {
+            Debug.Log("INSIDE1");
+            if (InputBroker.GetMouseButtonDown(0))
+            {
+                Debug.Log("INSIDE2");
+                mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+                //initButton.OnClick
+                RaycastHit hit;
+                if (Physics.Raycast(mouseRay, out hit))
+                {
+                    Debug.Log("INSIDE3");
+                    chosenStim = hit.transform.gameObject;
+                    //GameObject testStim = chosenStim.transform.root.gameObject;
+                    if (chosenStim.GetComponent<Tile>() != null)
+                    {
+                        Debug.Log("INSIDE4");
+                        chosenStim.GetComponent<Tile>().OnMouseDown();
+                    }
 
-        MazeVis.AddUpdateMethod(() => { });
+
+                }
+            }
+        });
         MazeVis.SpecifyTermination(() => end == true, Feedback);
         // MazeVis.SpecifyTermination(() => end == true && count < mazeList.Count, MazeVis);
         //MazeVis.SpecifyTermination(() => end == true && count >= mazeList.Count, Feedback);
@@ -631,7 +654,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
 
                 //    if (count == 0)
-                //  {
+                //  
                 float displaceX = x * TILE_WIDTH;
                 float displaceY = y * TILE_WIDTH;
                 Vector3 newTilePosition = bottomLeftMazePos + new Vector3(displaceX, displaceY, 0);

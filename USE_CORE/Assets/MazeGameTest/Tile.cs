@@ -36,7 +36,8 @@ public class Tile : MonoBehaviour
         //int num = rnd.Next(0, 9);
         int num = MazeGame_TrialLevel.textureNum;
         gameObject.GetComponent<MeshRenderer>().material = newMat;
-        string textStr = "Textures/Picture" + num.ToString();
+        //string textStr = "Textures/Picture" + num.ToString();
+        string textStr = "Textures/Picture5";
         Texture newTxt = Resources.Load(textStr, typeof(Texture)) as Texture;
         newMat.SetTexture("_MainTex", newTxt);
 
@@ -60,7 +61,7 @@ public class Tile : MonoBehaviour
     }
 
 
-    void OnMouseDown()
+    public void OnMouseDown()
     {
 
         int correctnessCode;

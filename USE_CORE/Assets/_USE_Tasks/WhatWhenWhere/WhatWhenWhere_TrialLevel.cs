@@ -102,6 +102,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private bool variablesLoaded;
     public string MaterialFilePath;
     private int correctIndex;
+    private GameObject sbOther;
 
     //Player View Variables
     private PlayerViewPanel playerView;
@@ -166,20 +167,22 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             ResetRelativeStartTime();
             Debug.Log("Current Block Context: " + CurrentTrialDef.ContextName);
             disableAllGameobjects();
-
+            
+            
             initButton.SetActive(true);
-            goCue.SetActive(true);
+           // goCue.SetActive(true);
         });
         StartButton.AddUpdateMethod(() =>
         {
+            Debug.Log("here1");
             if (InputBroker.GetMouseButtonDown(0))
-            {
+            {Debug.Log("here2");
                 mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
                 RaycastHit hit;
                 if (Physics.Raycast(mouseRay, out hit))
-                {
+                {Debug.Log("here3");
                     if (hit.transform.name == "StartButton")
-                    {
+                    {Debug.Log("here4");
                         response = 0;
                         EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
                         // Set the background texture to that of specified context
@@ -209,7 +212,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             slider.gameObject.SetActive(true);
 
             initButton.SetActive(false);
-            goCue.SetActive(false);
+           // goCue.SetActive(false);
 
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
@@ -626,8 +629,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
         FrameData.AddDatum("ErrorType", () => errorTypeString);
         FrameData.AddDatum("Touch", () => response);
-        FrameData.AddDatum("StartButton", () => initButton.activeSelf);
-        FrameData.AddDatum("StartText", () => goCue.activeSelf);
+        //FrameData.AddDatum("StartButton", () => initButton.activeSelf);
+        //FrameData.AddDatum("StartText", () => goCue.activeSelf);
         FrameData.AddDatum("CompletionText", () => txt.activeSelf);
         FrameData.AddDatum("GrayHaloFeedback", () => (grayHalo.activeSelf || grayHaloScene.activeSelf));
         FrameData.AddDatum("YellowHaloFeedback", () => yellowHalo.activeSelf);
@@ -828,7 +831,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     void disableAllGameobjects()
     {
         initButton.SetActive(false);
-        goCue.SetActive(false);
+        //goCue.SetActive(false);
         txt.SetActive(false);
         sliderHalo.SetActive(false);
         grayHalo.SetActive(false);
@@ -846,7 +849,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         grayHaloScene = GameObject.Find("GrayHaloScreen");
         yellowHalo = GameObject.Find("YellowHalo");
         initButton = GameObject.Find("StartButton");
-        goCue = GameObject.Find("StartText");
+        //sbOther = GameObject.Find("StartButtonImage");
+        //goCue = GameObject.Find("StartText");
         imageTimingError = GameObject.Find("VerticalStripesImage");
 
         //Trial Completion Feedback Variables

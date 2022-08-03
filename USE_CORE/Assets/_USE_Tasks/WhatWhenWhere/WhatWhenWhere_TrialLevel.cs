@@ -903,7 +903,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         Vector2 pvPosition = new Vector2((position[0] / Screen.width) * playerViewParent.GetComponent<RectTransform>().sizeDelta.x, (position[1] / Screen.height) * playerViewParent.GetComponent<RectTransform>().sizeDelta.y);
         return pvPosition;
     }
-    private GameObject CreateStartButton(Texture2D tex, Rect rect)
+    private GameObject CreateStartButton(Texture2D tex, Rect rect) //creates start button as a sprite
     {
         Vector3 buttonPosition = Vector3.zero;
         Vector3 buttonScale = Vector3.zero;

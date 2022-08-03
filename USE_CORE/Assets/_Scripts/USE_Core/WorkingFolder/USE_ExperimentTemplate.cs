@@ -677,6 +677,9 @@ namespace USE_ExperimentTemplate
 		protected State SetupTask, RunBlock, BlockFeedback, FinishTask;
 		protected bool BlockFbFinished;
 		protected float BlockFbSimpleDuration;
+		protected TaskLevelTemplate_Methods TaskLevel_Methods;
+
+		protected int? MinTrials, MaxTrials;
 		
 		[HideInInspector] public RenderTexture DrawRenderTexture;
 
@@ -696,9 +699,10 @@ namespace USE_ExperimentTemplate
 		
 		public void DefineTaskLevel()
 		{
+			TaskLevel_Methods = new TaskLevelTemplate_Methods();
 			ReadSettingsFiles();
 			FindStims();
-
+			
 			SetupTask = new State("SetupTask");
 			RunBlock = new State("RunBlock");
 			BlockFeedback = new State("BlockFeedback");
@@ -1733,6 +1737,7 @@ namespace USE_ExperimentTemplate
 		public int BlockCount;
 		public TrialDef[] TrialDefs;
 		public int? TotalTokensNum;
+		public int? MinTrials, MaxTrials;
 
 		public virtual void GenerateTrialDefsFromBlockDef()
 		{

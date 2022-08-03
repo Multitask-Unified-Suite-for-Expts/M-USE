@@ -440,6 +440,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 imageTimingError.transform.SetAsLastSibling();
                 imageTimingError.SetActive(true);
                 errorTypeString = "TouchDurationError";
+                runningAcc.Add(0);
             }
 
             //Chose Incorrect
@@ -448,6 +449,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 grayHalo.SetActive(true);
                 sliderHalo.SetActive(true);
                 sr.color = new Color(0.6627f, 0.6627f, 0.6627f, 0.2f);
+                runningAcc.Add(0);
                 if (slotError == 1)
                     errorTypeString = "SlotError";
                 else if (distractorSlotError == 1)
@@ -460,6 +462,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             else if (irrelevantSelection)
             {
                 errorTypeString = "IrrelevantSelectionError";
+                runningAcc.Add(0);
             }
 
             //Chose correct
@@ -469,6 +472,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 sliderHalo.SetActive(true);
                 sr.color = new Color(1, 0.8431f, 0, 0.2f);
                 errorTypeString = "None";
+                runningAcc.Add(1);
             }
 
             GenerateUpdatingTrialData();
@@ -543,7 +547,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         FinalFeedback.AddTimer(() => finalFbDuration.value, ITI, () =>
         {
             sliderHalo.SetActive(false);
-            runningAcc.Add(1);
             EventCodeManager.SendCodeImmediate(TaskEventCodes["SliderCompleteFbOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
@@ -574,6 +577,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 errorTypeString = "NoSelectionMade";
                 Debug.Log("Didn't click on any stimulus");
                 response = -1;
+                runningAcc.Add(0);
 
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["NoChoice"]);
             }

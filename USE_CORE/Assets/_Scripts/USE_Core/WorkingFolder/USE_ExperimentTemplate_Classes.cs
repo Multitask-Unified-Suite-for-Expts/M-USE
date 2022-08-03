@@ -44,15 +44,15 @@ namespace USE_ExperimentTemplate_Classes
 
 
             if (rAcc.Count >= windowSize)
-                immediateAvg = (float) rAcc.GetRange(rAcc.Count - windowSize + 1, windowSize).Average();
+                immediateAvg = (float) rAcc.GetRange(rAcc.Count - windowSize, windowSize).Average();
             else
                 immediateAvg = null;
 
             if (rAcc.Count >= windowSize * 2)
             {
-                prevAvg = (float) rAcc.GetRange(rAcc.Count - windowSize * 2 + 1, windowSize).Average();
-                sumdif = rAcc.GetRange(rAcc.Count - windowSize * 2 + 1, windowSize).Sum() -
-                         rAcc.GetRange(rAcc.Count - windowSize + 1, windowSize).Sum();
+                prevAvg = (float) rAcc.GetRange(rAcc.Count - windowSize * 2, windowSize).Average();
+                sumdif = rAcc.GetRange(rAcc.Count - windowSize * 2, windowSize).Sum() -
+                         rAcc.GetRange(rAcc.Count - windowSize, windowSize).Sum();
             }
             else
             {

@@ -2,6 +2,7 @@
 using WhatWhenWhere_Namespace;
 using ExperimenterDisplayPanels;
 using System;
+using UnityEngine;
 using USE_ExperimentTemplate_Classes;
 using USE_Settings;
 
@@ -36,15 +37,18 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
            Array.Clear(wwwTL.numCorrect_InBlock, 0, wwwTL.numCorrect_InBlock.Length);
            Array.Clear(wwwTL.numErrors_InBlock, 0, wwwTL.numErrors_InBlock.Length);
            wwwTL.accuracyLog_InBlock = "";
-           
+           wwwTL.runningAcc.Clear();
+           Debug.Log("trial number maximum: " + bd.TrialDefs.Length);
         });
 
         RunBlock.AddUpdateMethod(() =>
         {
             BlockSummaryString = "Block Num: " + (wwwTL.BlockCount) + "\nTrial Count: " + (wwwTL.TrialCount_InBlock) +
             "\nTotal Errors: " + wwwTL.totalErrors_InBlock + "\nError Type: " + wwwTL.errorType_InBlockString + "\nPerformance: " + wwwTL.accuracyLog_InBlock;
+            
+            
         });
-        RunBlock.SpecifyTermination(() => TaskLevel_Methods.CheckBlockEnd("SimpleThreshold", wwwTL.runningAcc, 1, 5, bd.nRepetitionsMinMax[0], bd.TrialDefs.Length));
+        RunBlock.SpecifyTermination(() => TaskLevel_Methods.CheckBlockEnd("SimpleThreshold", wwwTL.runningAcc, 1, 5, bd.nRepetitionsMinMax[0], bd.TrialDefs.Length), BlockFeedback);
 
 
 

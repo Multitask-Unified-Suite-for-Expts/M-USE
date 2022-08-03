@@ -13,7 +13,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
     private StimGroup sampleStims, targetStims, postSampleDistractorStims, targetDistractorStims;
     public string MaterialFilePath;
-    public GameObject StartButton;
+    private GameObject initButton;
+    private bool variablesLoaded;
 
     //configui variables
     [HideInInspector]
@@ -37,33 +38,47 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         State stateAfterDelay = null;
         float delayDuration = 0;
         delay.AddTimer(() => delayDuration, () => stateAfterDelay);
-
-        // Show blue start button and wait for click
-        MouseTracker.AddSelectionHandler(mouseHandler, SetupTrial);
         SetupTrial.AddInitializationMethod(() =>
         {
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\Blank.png");
+            if (!variablesLoaded)
+            {
+                variablesLoaded = true;
+                loadVariables();
+            }          
+        });
+
+        SetupTrial.SpecifyTermination(() => true, initTrial);
+
+        // Show blue start button and wait for click
+        MouseTracker.AddSelectionHandler(mouseHandler, initTrial);
+        initTrial.AddInitializationMethod(() =>
+        {
+            //RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\Blank.png");
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
             TokenFBController
             .SetRevealTime(CurrentTrialDef.tokenRevealDuration)
             .SetUpdateTime(CurrentTrialDef.tokenUpdateDuration);
 
-            StartButton.SetActive(true);
+            initButton.SetActive(true);
+            TokenFBController.enabled = false;
         });
-        SetupTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
-            initTrial, () => {
-                StartButton.SetActive(false);
+        initTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(initButton),
+            displaySample, () => {
+                initButton.SetActive(false);
+                TokenFBController.enabled = true;
+                RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]); //CHECK THIS TIMING MIGHT BE OFF
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarReset"]);
             });
-
+        /*
         // Show nothing for some time
         initTrial.AddTimer(() => CurrentTrialDef.initTrialDuration, delay, () =>
           {
               stateAfterDelay = displaySample;
               delayDuration = CurrentTrialDef.baselineDuration;
           });
-
+        */
         // Show the target/sample by itself for some time
         displaySample.AddTimer(() => CurrentTrialDef.displaySampleDuration, delay, () =>
           {
@@ -218,6 +233,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     }
     public void loadVariables()
     {
+        initButton = GameObject.Find("StartButton");
         //config UI variables
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
@@ -225,5 +241,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
         finalFbDuration = ConfigUiVariables.get<ConfigNumber>("finalFbDuration");
         fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
+
+        variablesLoaded = true;
     }
 }

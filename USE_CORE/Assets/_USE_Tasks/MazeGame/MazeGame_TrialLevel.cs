@@ -66,7 +66,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     private static Slider slider;
     private static float sliderValueIncreaseAmount;
-
     private GameObject initButton;
 
     //private Button initButton;
@@ -88,7 +87,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     public static Color tileColor;
     public string MaterialFilePath;
-    public static int textureNum;
+    public GameObject mazeBackground;
+    public Texture2D backgroundTex;
 
     public int curMDim;
     public int curMNumSquares;
@@ -100,10 +100,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     public override void DefineControlLevel()
     {
-
-
-
-
         //define States within this Control Level
         State StartButton = new State("StartButton");
         State LoadMaze = new State("LoadMaze");
@@ -122,14 +118,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         // Define stimOn state
         LoadMaze.AddInitializationMethod(() =>
         {
-            //  Camera.main.backgroundColor = new Color(1f, 0.5f, 1f);
-            //Material newMat = Resources.Load("BG_Materials/Skybox_2", typeof(Material)) as Material;
-            //System.Random rnd = new System.Random();
-            //int num = rnd.Next(0, 9);
-            //int num = 9;
-            //string textStr = "Textures/Picture" + num.ToString();
-            //Texture newTxt = Resources.Load(textStr, typeof(Texture)) as Texture;
-            //newMat.SetTexture("_MainTex", newTxt);
             if (CurrentTrialDef.viewPath == 1)
             {
                 viewPath = true;
@@ -208,17 +196,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             Debug.Log("LENGTH");
             Debug.Log(rows.Length);
-            // Debug.Log(rows[0].Length);
-
-
-
-
-            // min = CurrentTrialDef.nRepetitionsMinMax[0];
-            //   max = CurrentTrialDef.nRepetitionsMinMax[1];
             trialIndex = CurrentTrialDef.TrialCount - 1;
             Debug.Log("INDEX: " + trialIndex);
-            //   System.Random rnd = new System.Random();
-            //  numReps = rnd.Next(min, max);
             totalErrors = 0;
             ruleAbidingErrors = 0;
             ruleBreakingErrors = 0;
@@ -255,8 +234,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         GameConf.AddInitializationMethod(() =>
         {
-            textureNum = CurrentTrialDef.Texture;
-
+            loadVariables();
             // MAZE GAME WIDTHS
             ///*
             // TODO: Not implemented, but this should be the maximum screen width that tiles can take up without overfilling the screen
@@ -289,8 +267,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             // Default - Off-white
             // DEFAULT_TILE_COLOR = new Color(0.95f, 0.95f, 0.95f);
-            DEFAULT_TILE_COLOR = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1],
-                CurrentTrialDef.TileColor[2]);
+            //DEFAULT_TILE_COLOR = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1],
+             //   CurrentTrialDef.TileColor[2]);
             //---------------------------------------------------------
 
             tileColor = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1],
@@ -316,8 +294,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             TIMEOUT_SECONDS = 10.0f;
             // */
             //gameConfigs.DEFAULT_TILE_COLOR = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1], CurrentTrialDef.TileColor[2]);
-            tileColor = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1],
-                CurrentTrialDef.TileColor[2]);
+            //tileColor = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1],
+              //  CurrentTrialDef.TileColor[2]);
 
         });
 
@@ -329,8 +307,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             response = -1;
             curRep = 0;
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\Blank.png");
-
+            initButton.SetActive(true);
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
         });
 
 
@@ -347,7 +325,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     if (hit.transform.name == "StartButton")
                     {
                         response = 0;
-
                     }
                 }
             }
@@ -358,9 +335,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         StartButton.AddDefaultTerminationMethod(() =>
         {
-           // startTxt.gameObject.SetActive(false);
             initButton.gameObject.SetActive(false);
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
         });
 
         MazeVis.AddInitializationMethod(() =>
@@ -370,7 +345,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             end = false;
             Debug.Log("entered inst");
             slider.value = 0;
-
             InstantiateCurrMaze();
         });
         MazeVis.AddUpdateMethod(() => 
@@ -387,8 +361,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     {
                         chosenStim.GetComponent<Tile>().OnMouseDown();
                     }
-
-
                 }
             }
         });
@@ -408,7 +380,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             // sphereCount = 0;
             sr.color = new Color(1, 1, 1, 0.2f);
             txt.SetActive(true);
-            initButton.gameObject.SetActive(true);
 
             startTime = Time.time;
 
@@ -429,7 +400,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
 
             txt.SetActive(false);
-            initButton.gameObject.SetActive(false);
             sliderHalo.SetActive(false);
             slider.gameObject.SetActive(false);
 
@@ -441,13 +411,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         //Define iti state
         ITI.AddInitializationMethod(() => { });
         ITI.SpecifyTermination(() => true, FinishTrial, () => Debug.Log("Trial" + " completed"));
-        /*
-               
-                TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
-                TrialData.AddDatum("TouchedObjects", () => touchedObj);
-                TrialData.AddDatum("SlotError", () => slotError);
-                TrialData.AddDatum("RepetitionError", () => repetitionError);
-                */
+        
         Debug.Log("ERRORS: " + totalErrors);
         TrialData.AddDatum("TrialNum", () => CurrentTrialDef.TrialCount);
         TrialData.AddDatum("TotalErrors", () => totalErrors);
@@ -461,19 +425,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     void InstantiateCurrMaze()
     {
-
-        // sliderInitPosition = slider.gameObject.transform.position;
-
-
-
         slider.gameObject.SetActive(true);
-
+        backgroundTex = LoadPNG(MaterialFilePath + "\\MazeBackground.png");
+        mazeBackground = CreateMazeBackground(backgroundTex, new Rect(new Vector2(0,0), new Vector2(1,1)));
         Debug.Log("Count: " + count);
-        /*  TextAsset textMaze = Resources.Load<TextAsset>("output_mazes_json/3.6.3.c342e0c2-962d-4079-a198-ca04550a9a4f");
-          string mazeJson = textMaze.text;
-          Maze currMaze = new Maze(mazeJson);
-          Debug.Log(currMaze);
-          */
         TextAsset[] textMazes = Resources.LoadAll<TextAsset>("output_mazes_json");
 
         foreach (TextAsset textMaze in textMazes)
@@ -485,28 +440,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         }
 
         currMaze = mazeList[ind];
-
-
-        /*   TextAsset[] textMazes = Resources.LoadAll<TextAsset>("Mazes");
-
-           foreach (TextAsset textMaze in textMazes)
-           {
-               string mazeJson = textMaze.text;
-               Maze mazeObj = new Maze(mazeJson);
-               Debug.Log(mazeObj);
-               mazeList.Add(mazeObj);
-           }
-           currMaze = mazeList[trialIndex];
-           Debug.Log("index: " + trialIndex);
-           */
-
-        if (count != 0)
-        {
-            //   DestroyCurrMaze();
-            // tile.gameObject.SetActive(true);
-
-        }
-
         dim = currMaze.mConfigs.dim;
 
         sliderValueIncreaseAmount = (100f / (currMaze.mNumSquares)) / 100f;
@@ -519,75 +452,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         float mazeWidth = dim * TILE_WIDTH;
         Vector3 bottomLeftMazePos = mazeCenter.transform.position - (new Vector3(mazeWidth / 2, mazeWidth / 2, 0));
-
-
-
-        /*
-        for (int x = 0; x < dim; ++x)
-        {
-            for (int y = 0; y < dim; ++y)
-            {
-                GameObject c = GameObject.CreatePrimitive(PrimitiveType.Cube);
-               // c.transform.position = new Vector3(0, 1.5f, 0);
-                if (count != 0)
-                {
-                    c.gameObject.SetActive(true);
-                    c.gameObject.GetComponent<Tile>().enabled = true;
-                }
-
-
-                //    if (count == 0)
-                //  {
-                float displaceX = x * TILE_WIDTH;
-                float displaceY = y * TILE_WIDTH;
-                Vector3 newTilePosition = bottomLeftMazePos + new Vector3(displaceX, displaceY, 1);
-                // Instantiate the tile
-
-                c.transform.position = newTilePosition;
-                c.transform.localScale = new Vector3(0.5f, 0.5f, 1.5f);
-
-                // c.mCoord = new Coords(x, y);
-
-                // Instantiate the row and assign the tile in the row
-                //       tileRows[x] = new TileRow(dim);
-                // tileRows[x].mTiles[y] = tile;
-
-                // }
-
-                //  Tile instTile = Instantiate(tile);
-                Renderer tileRend = c.GetComponent<Renderer>();
-
-
-
-                Color tileColor;
-
-                if (x == currMaze.mStart.X && y == currMaze.mStart.Y)
-                {
-                    tileColor = START_COLOR;
-
-                }
-                else if (x == currMaze.mFinish.X && y == currMaze.mFinish.Y)
-                {
-                    tileColor = FINISH_COLOR;
-
-                }
-                else
-                {
-                    tileColor = DEFAULT_TILE_COLOR;
-                }
-
-                tileRend.material.SetColor("_BaseColor", tileColor);
-
-                // instTile.transform.SetParent(this.transform);
-                // instTile.gameObject.SetActive(false);
-                // tileRows[x].mTiles[y] = instTile;
-                // tiles.AddStims(tile.gameObject); //on creation of tile GameObject
-                //  tiles.AddStims(instTile.gameObject); //on creation of tile GameObject
-
-            }
-        }
-        */
-
 
         GameObject mazeContainer = new GameObject("MazeContainer");
 
@@ -615,62 +479,26 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 // Instantiate the tile
 
                 tile.transform.position = newTilePosition;
-                tile.transform.localScale = new Vector3(TILE_WIDTH, TILE_WIDTH, 1);
+                tile.transform.localScale = new Vector3(TILE_WIDTH/2, TILE_WIDTH/2, 0.1f);
                 tile.mCoord = new Coords(x, y);
-
-                // Instantiate the row and assign the tile in the row
-                //       tileRows[x] = new TileRow(dim);
-                // tileRows[x].mTiles[y] = tile;
-
-                // }
-
-                // Tile instTile = Instantiate(tile);
-                //  Renderer tileRend = instTile.GetComponent<Renderer>();
-
-
-
-
-                //  Color tileColor;
 
                 if (x == currMaze.mStart.X && y == currMaze.mStart.Y)
                 {
                     Debug.Log("SET COLOR");
 
                     tile.gameObject.GetComponent<Tile>().setColor(START_COLOR);
-                    // tileColor = START_COLOR;
-                    //  tileColor = FINISH_COLOR;
-
-
-
                 }
                 else if (x == currMaze.mFinish.X && y == currMaze.mFinish.Y)
                 {
                     tile.gameObject.GetComponent<Tile>().setColor(FINISH_COLOR);
-
-
-
                 }
                 else
                 {
                     tile.gameObject.GetComponent<Tile>().setColor(DEFAULT_TILE_COLOR);
-
-                    // tileColor = DEFAULT_TILE_COLOR;
-
                 }
-
-
-                // tileRend.material.SetColor("_BaseColor", tileColor);
-                // instTile.gameObject.GetComponent<Renderer>().material.color = FINISH_COLOR;
-
+                
                 Tile instTile = Instantiate(tile, mazeContainer.transform);
-                // instTile.transform.SetParent(mazeContainer.transform);
-
-
-                // instTile.gameObject.SetActive(false);
-                // tileRows[x].mTiles[y] = instTile;
-                // tiles.AddStims(tile.gameObject); //on creation of tile GameObject
                 tiles.AddStims(instTile.gameObject); //on creation of tile GameObject
-
             }
 
         }
@@ -764,8 +592,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             Debug.Log("correct");
             correctTouches++;
-
-
             // Every tile in maze is unique in path, path should NOT contain same tile twice
             currMaze.mNextStep = currMaze.mPath[currMaze.mPath.FindIndex(pathCoord => pathCoord == touchedCoord) + 1];
             return 0;
@@ -894,7 +720,15 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         txt = GameObject.Find("FinalText");
         sliderHalo = GameObject.Find("SliderHalo");
         sr = sliderHalo.GetComponent<SpriteRenderer>();
-        
+        disableVariables();
+    }
+    private void disableVariables()
+    {
+        slider.gameObject.SetActive(false);
+        initButton.SetActive(false);
+        txt.SetActive(false);
+        sliderHalo.SetActive(false);
+        sr.gameObject.SetActive(false);
     }
     public static Texture2D LoadPNG(string filePath)
     {
@@ -927,10 +761,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         return materialSkybox;
     }
-    protected override void DefineTrialStims()
+    private GameObject CreateMazeBackground(Texture2D tex, Rect rect)
     {
-        //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
-        //destroyed at TrialLevel_Finish
+        GameObject mazeBackground = new GameObject("MazeBackground");
+        SpriteRenderer borderSprite = mazeBackground.AddComponent<SpriteRenderer>() as SpriteRenderer;
+        borderSprite.sprite = Sprite.Create(tex, new Rect(rect.x, rect.y, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
+        return mazeBackground;
     }
 
 }

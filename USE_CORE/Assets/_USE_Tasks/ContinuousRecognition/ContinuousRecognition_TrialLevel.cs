@@ -21,8 +21,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector]
     public ConfigNumber minObjectTouchDuration, itiDuration, finalFbDuration, fbDuration, maxObjectTouchDuration, selectObjectDuration;
     // game object variables
-    public GameObject StartButton;
-    public Button StartButtonButton;
+    private GameObject initButton;
     private GameObject trialStim;
 
     //context variables
@@ -46,38 +45,46 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State tokenFeedback = new State("TokenFeedback");
         State displayResult = new State("DisplayResult");
         State trialEnd = new State("TrialEnd");
-        SelectionHandler<ContinuousRecognition_StimDef> mouseHandler = new SelectionHandler<ContinuousRecognition_StimDef>();
-        AddActiveStates(new List<State> {initTrial, displayStims, chooseStim, touchFeedback, tokenFeedback, displayResult, trialEnd});
-        
+        SelectionHandler<ContinuousRecognition_StimDef> mouseHandler =
+            new SelectionHandler<ContinuousRecognition_StimDef>();
+        AddActiveStates(new List<State>
+            { initTrial, displayStims, chooseStim, touchFeedback, tokenFeedback, displayResult, trialEnd });
+
         // --------------SetupTrial-----------------
         // Show blue start button and wait for click
-        MouseTracker.AddSelectionHandler(mouseHandler, SetupTrial);
+        MouseTracker.AddSelectionHandler(mouseHandler, initTrial);
         SetupTrial.AddInitializationMethod(() =>
         {
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\Blank.png");
+            if (!variablesLoaded)
+            {
+                variablesLoaded = true;
+                loadVariables();
+            }          
+        });
+
+        SetupTrial.SpecifyTermination(() => true, initTrial);
+
+        initTrial.AddInitializationMethod(() =>
+        {
             TokenFBController
                 .SetRevealTime(CurrentTrialDef.TokenRevealDuration)
                 .SetUpdateTime(CurrentTrialDef.TokenUpdateDuration);
-
-            StartButton.SetActive(true);
-            StartButtonButton.gameObject.SetActive(true);
-            //StartButtonButton.onClick.AddListener(clickEvent);
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\Blank.png");
+            initButton.SetActive(true);
+            TokenFBController.enabled = false;
         });
-        SetupTrial.AddUpdateMethod(() =>
-        {
-            //StartButtonButton.onClick.AddListener(clickEvent);
-        });
-        
-
-        SetupTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
-            displayStims, () => {
-                StartButton.SetActive(false);
+        initTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(initButton),
+            displayStims, () =>
+            {
+                initButton.SetActive(false);
+                TokenFBController.enabled = true;
+                RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]); //CHECK THIS TIMING MIGHT BE OFF
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarReset"]);
             });
 
-        // --------------Initialize displayStims State -----------------
+    // --------------Initialize displayStims State -----------------
         displayStims.AddTimer(() => CurrentTrialDef.DisplayStimsDuration, chooseStim);
 
         // --------------chooseStims State -----------------
@@ -371,6 +378,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     }
     private void loadVariables()
     {
+        initButton = GameObject.Find("StartButton");
         //config UI variables
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
@@ -378,6 +386,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
         finalFbDuration = ConfigUiVariables.get<ConfigNumber>("finalFbDuration");
         fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
+        variablesLoaded = true;
     }
     public static Texture2D LoadPNG(string filePath)
     {

@@ -2,6 +2,7 @@
 using WhatWhenWhere_Namespace;
 using ExperimenterDisplayPanels;
 using System;
+using USE_ExperimentTemplate_Classes;
 using USE_Settings;
 
 public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
@@ -44,6 +45,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
             BlockSummaryString = "Block Num: " + (wwwTL.BlockCount) + "\nTrial Count: " + (wwwTL.TrialCount_InBlock) +
             "\nTotal Errors: " + wwwTL.totalErrors_InBlock + "\nError Type: " + wwwTL.errorType_InBlockString + "\nPerformance: " + wwwTL.accuracyLog_InBlock;
         });
+        
 
 
     }

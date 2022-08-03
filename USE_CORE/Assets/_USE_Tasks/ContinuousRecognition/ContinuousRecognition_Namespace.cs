@@ -38,6 +38,7 @@ namespace ContinuousRecognition_Namespace
         public Vector3[] BlockStimLocations, StimLocation;
         public int trialCount, ManuallySpecifyLocation, row, col, PC_count, PNC_count, new_count;
         public Vector3 ContextColor;
+        public string ContextName;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -146,6 +147,7 @@ namespace ContinuousRecognition_Namespace
                 td.PC_count = PC_count;
                 td.new_Count = new_count;
                 td.ContextColor = ContextColor;
+                td.ContextName = ContextName;
                 td.TokenRevealDuration = TokenRevealDuration;
                 td.TokenUpdateDuration = TokenUpdateDuration;
                 TrialDefs[iTrial] = td;
@@ -163,6 +165,7 @@ namespace ContinuousRecognition_Namespace
         public bool isNewStim;
         public Vector3[] Grid;
         public Vector3 ContextColor;
+        public string ContextName;
 
         public List<int> PreviouslyChosenStimuli, PreviouslyNotChosenStimuli, TrialStimIndices, UnseenStims;
         public int row, col, Context, PC_count, PNC_count, new_Count;

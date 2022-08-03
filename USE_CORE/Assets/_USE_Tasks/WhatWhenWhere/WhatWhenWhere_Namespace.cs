@@ -10,16 +10,13 @@ namespace WhatWhenWhere_Namespace
         public string ContextName;
         public int[] CorrectObjectTouchOrder;
         public int[] nRepetitionsMinMax;
-        public int PlayFeedbackSound_Correct;
-        public int PlayFeedbackSound_Error;
-        public float MinTouchDuration;
-        public float MaxTouchDuration;
         public int[] SearchStimsIndices;
         public int[] DistractorStimsIndices;
         public Vector3[] SearchStimsLocations;
         public Vector3[] DistractorStimsLocations;
-        public string ContextExternalFilePath;
-        public int NumSteps;
+        public int[] SliderGain;
+        public int[] SliderLoss;
+        public int SliderInitial;
         public bool RandomizedLocations;
 
 
@@ -36,17 +33,14 @@ namespace WhatWhenWhere_Namespace
                 td.TrialID = TrialID;
                 td.ContextName = ContextName;
                 td.CorrectObjectTouchOrder = CorrectObjectTouchOrder;
-                td.PlayFeedbackSound_Correct = PlayFeedbackSound_Correct;
-                td.PlayFeedbackSound_Error = PlayFeedbackSound_Error;
-                td.MinTouchDuration = MinTouchDuration;
-                td.MaxTouchDuration = MaxTouchDuration;
                 td.SearchStimsIndices = SearchStimsIndices;
                 td.DistractorStimsIndices = DistractorStimsIndices;
                 td.SearchStimsLocations = SearchStimsLocations;
                 td.DistractorStimsLocations = DistractorStimsLocations;
-                td.ContextExternalFilePath = ContextExternalFilePath;
-                td.NumSteps = NumSteps;
                 td.RandomizedLocations = RandomizedLocations;
+                td.SliderGain = SliderGain;
+                td.SliderLoss = SliderLoss;
+                td.SliderInitial = SliderInitial;
                 TrialDefs[iTrial] = td;
             }
         }
@@ -55,25 +49,20 @@ namespace WhatWhenWhere_Namespace
     public class WhatWhenWhere_TrialDef : TrialDef
     {
         public string TrialID;
-        public int TrialNum;
         public string ContextName;
         //ObjectNums refers to items in a list of objects to be loaded from resources folder
         
         //CorrectObjectOrder is an array of same length as ObjectNums, refers to elements in that array (e.g. {2 3 1 4} refers to 2nd object specified in ObjectNums
         public int[] CorrectObjectTouchOrder;
         public int[] nRepetitionsMinMax;
-        public int PlayFeedbackSound_Correct;
-        public int PlayFeedbackSound_Error;
-        public Vector3[][] ObjectRotations;
-        public float MinTouchDuration;
-        public float MaxTouchDuration;
         public int[] SearchStimsIndices;
         public int[] DistractorStimsIndices;
         public Vector3[] SearchStimsLocations;
         public Vector3[] DistractorStimsLocations;
-        public string ContextExternalFilePath;
-        public int NumSteps;
         public bool RandomizedLocations;
+        public int[] SliderGain;
+        public int[] SliderLoss;
+        public int SliderInitial;
     }
 
     public class WhatWhenWhere_StimDef : StimDef
@@ -86,6 +75,8 @@ namespace WhatWhenWhere_Namespace
     public class WhatWhenWhere_TaskDef : TaskDef
     {
         string ContextExternalFilePath;
+        Vector3 ButtonPosition;
+        Vector3 ButtonScale;
     }
     //Any other custom classes useful for the functioning of the task could be included in this namespace.
 }

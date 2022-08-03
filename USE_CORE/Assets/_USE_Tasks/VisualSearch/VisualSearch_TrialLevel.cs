@@ -56,38 +56,47 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private StimGroup TargetStims, DistractorStims;
     private int numDistractor = 0;
     private USE_Button testButton;
+    private GameObject sbSprite;
 
     public override void DefineControlLevel()
     {
-        State InitTrial = new State("InitTrial");
+        State initTrial = new State("InitTrial");
         State SearchDisplay = new State("SearchDisplay");
         State SelectionFeedback = new State("SelectionFeedback");
         State TokenFeedback = new State("TokenFeedback");
         State TrialEnd = new State("TrialEnd");
 
         Text commandText = null;
-
+        AddActiveStates(new List<State> {initTrial, SearchDisplay, SelectionFeedback, TokenFeedback, TrialEnd});
         SelectionHandler<VisualSearch_StimDef> mouseHandler = new SelectionHandler<VisualSearch_StimDef>();
-        MouseTracker.AddSelectionHandler(mouseHandler, SetupTrial);
-        AddActiveStates(new List<State> {InitTrial, SearchDisplay, SelectionFeedback, TokenFeedback, TrialEnd});
         SetupTrial.AddInitializationMethod(() =>
         {
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\Blank.png");
+            if (!variablesLoaded)
+            {
+                variablesLoaded = true;
+                loadVariables();
+            }          
+        });
+
+        SetupTrial.SpecifyTermination(() => true, initTrial);
+        MouseTracker.AddSelectionHandler(mouseHandler, initTrial);
+        
+        initTrial.AddInitializationMethod(() =>
+        {
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
             Debug.Log("FilePath: " + MaterialFilePath);
             TokenFBController
                 .SetRevealTime(tokenRevealDuration.value)
                 .SetUpdateTime(tokenUpdateDuration.value);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
-            loadVariables();
             startButton.SetActive(true);
             TokenFBController.enabled = false;
 
         });
-        SetupTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton),
+        initTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton),
             SearchDisplay, () => 
             {
                startButton.SetActive(false);
-               RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
                TokenFBController.enabled = true;
                EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]); //CHECK THIS TIMING MIGHT BE OFF
                EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
@@ -275,26 +284,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
     void loadVariables()
     {
-        /*
-        GameObject.Find("Stimuli").AddComponent<Canvas>();
-        GameObject.Find("Stimuli").AddComponent<GraphicRaycaster>();
-        
-        */
-        //clickMarker = GameObject.Find("ClickMarker");
-        startButton = GameObject.Find("StartButton");
-        //startButton.GetComponent<Button>().onClick.AddListener(StartClick);
-        //slider = GameObject.Find("Slider").GetComponent<Slider>();
-        //sliderInitPosition = slider.gameObject.transform.position;
-        /*
-        GameObject startButtonCanvas = GameObject.Find("StartButtonCanvas");
-        Transform parent = startButtonCanvas.GetComponent<Transform>();
-        startButtonCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
-        startButtonCanvas.GetComponent<Canvas>().worldCamera = GameObject.Find("VisualSearch_Camera").GetComponent<Camera>();
-        testButton = DefineStartButton(parent);
-
-        var newButton = DefaultControls.CreateButton(new DefaultControls.Resources());
-        newButton.transform.SetParent(parent);
-        */
+        Texture2D buttonTex = LoadPNG(MaterialFilePath + "\\StartButtonImage.png");
+        startButton = CreateStartButton(buttonTex, new Rect(new Vector2(0,0), new Vector2(1,1)));
 
         //config UI variables
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
@@ -305,15 +296,32 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
         tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
+        variablesLoaded = true;
         //disableAllGameobjects();
     }
-    private GameObject CreateStartButton(Texture2D tex, Rect rect, Transform parent)
+    private GameObject CreateStartButton(Texture2D tex, Rect rect)
     {
-        GameObject startButton = new GameObject("StartButton", typeof(SpriteRenderer));
-        startButton.transform.SetParent(parent);
-        startButton.GetComponent<SpriteRenderer>().sprite = Sprite.Create(tex, rect, new Vector2(2,2));
-        startButton.transform.position = new Vector3(0, 0, 0);
-        startButton.transform.localScale = new Vector3(100, 100, 100);
+        Vector3 buttonPosition = Vector3.zero;
+        Vector3 buttonScale = Vector3.zero;
+        string TaskName = "VisualSearch";
+        if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
+        {
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+                buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+                buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+        }
+        else
+        {
+            Debug.Log("[ERROR] Start Button Image settings not defined in the TaskDef");
+        }
+
+        GameObject startButton = new GameObject("StartButton");
+        SpriteRenderer sr = startButton.AddComponent<SpriteRenderer>() as SpriteRenderer;
+        sr.sprite = Sprite.Create(tex, new Rect(rect.x, rect.y, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
+        startButton.AddComponent<BoxCollider>();
+        startButton.transform.localScale = buttonScale;
+        startButton.transform.position = buttonPosition;
         return startButton;
     }
     public static Texture2D LoadPNG(string filePath)

@@ -56,7 +56,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     public LoadMazeList mazeListScript;
 
-    // public static GameConfigs gameConfigs = new GameConfigs();
+    public static GameConfigs gameConfigs = new GameConfigs();
     public static Maze currMaze;
     private bool mazeLoaded = false;
     private static int count;
@@ -271,7 +271,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
              //   CurrentTrialDef.TileColor[2]);
             //---------------------------------------------------------
 
-            tileColor = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1],
+            DEFAULT_TILE_COLOR = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1],
                 CurrentTrialDef.TileColor[2]);
             // FEEDBACK LENGTH IN SECONDS
 
@@ -294,8 +294,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             TIMEOUT_SECONDS = 10.0f;
             // */
             //gameConfigs.DEFAULT_TILE_COLOR = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1], CurrentTrialDef.TileColor[2]);
-            //tileColor = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1],
-              //  CurrentTrialDef.TileColor[2]);
+            tileColor = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1],
+                CurrentTrialDef.TileColor[2]);
 
         });
 
@@ -404,10 +404,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             slider.gameObject.SetActive(false);
 
         });
-
-        //  Feedback.SpecifyTermination(() => count < mazeList.Count, MazeVis);
-        //  Feedback.SpecifyTermination(() => count >= mazeList.Count, Feedback);
-
         //Define iti state
         ITI.AddInitializationMethod(() => { });
         ITI.SpecifyTermination(() => true, FinishTrial, () => Debug.Log("Trial" + " completed"));
@@ -418,16 +414,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("Rule-Abiding Errors", () => ruleAbidingErrors);
         TrialData.AddDatum("Rule-Breaking Errors", () => ruleBreakingErrors);
         TrialData.AddDatum("RetouchCorrect", () => retouchCorrect);
-
-
-
     }
 
     void InstantiateCurrMaze()
     {
         slider.gameObject.SetActive(true);
-        backgroundTex = LoadPNG(MaterialFilePath + "\\MazeBackground.png");
-        mazeBackground = CreateMazeBackground(backgroundTex, new Rect(new Vector2(0,0), new Vector2(1,1)));
+        
         Debug.Log("Count: " + count);
         TextAsset[] textMazes = Resources.LoadAll<TextAsset>("output_mazes_json");
 
@@ -452,11 +444,14 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         float mazeWidth = dim * TILE_WIDTH;
         Vector3 bottomLeftMazePos = mazeCenter.transform.position - (new Vector3(mazeWidth / 2, mazeWidth / 2, 0));
-
+        backgroundTex = LoadPNG(MaterialFilePath + "\\MazeBackground.png");
+        mazeBackground = CreateMazeBackground(backgroundTex, new Rect(new Vector2(0,0), new Vector2(1,1)));
+        
         GameObject mazeContainer = new GameObject("MazeContainer");
-
+        mazeBackground.transform.SetParent(mazeContainer.transform);
+        mazeBackground.transform.localPosition = new Vector3(1, 0.5f, 0);
+        mazeBackground.transform.localScale = new Vector3(dim+2, dim+2, 0);
         tile = Resources.Load<Tile>("Prefabs/Tile") as Tile;
-
         tiles = new StimGroup("Tiles"); //in DefineTrialStims
         // tiles.DestroyStimGroup(); //when tiles should be destroyed
 
@@ -469,10 +464,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     tile.gameObject.SetActive(true);
                     tile.gameObject.GetComponent<Tile>().enabled = true;
                 }
-
-
-                //    if (count == 0)
-                //  
                 float displaceX = x * TILE_WIDTH;
                 float displaceY = y * TILE_WIDTH;
                 Vector3 newTilePosition = bottomLeftMazePos + new Vector3(displaceX, displaceY, 0);
@@ -495,6 +486,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 else
                 {
                     tile.gameObject.GetComponent<Tile>().setColor(DEFAULT_TILE_COLOR);
+                    Debug.Log("DEFAULT COLOR: " + DEFAULT_TILE_COLOR);
                 }
                 
                 Tile instTile = Instantiate(tile, mazeContainer.transform);
@@ -522,18 +514,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             for (int y = 0; y < dim; ++y)
             {
                 Debug.Log("FIRST: " + x + ", " + y);
-                // tileRows[x].mTiles[y].GetComponent<Tile>().enabled = false;
-                // Tile temp = tileRows[x].mTiles[y];
-                // temp.gameObject.SetActive(false);
-
                 tiles.DestroyStimGroup();
-                // Destroy(tileRows[x].mTiles[y]);
                 Debug.Log(x + ", " + y);
-
             }
-            //tileRows[x].gameObject.SetActive(false);
         }
-
         Debug.Log("maze should be gone");
     }
 
@@ -547,15 +531,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         if (i == 99)
         {
             slider.value += sliderValueIncreaseAmount;
-            // if(curRep < numReps)
-            // {
-            //    ++curRep;
-            // }
-            //else
-            // {
             ++count;
-            //   curRep = 0;
-            //  }
             end = true;
         }
 

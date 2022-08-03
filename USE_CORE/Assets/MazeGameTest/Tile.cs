@@ -25,9 +25,9 @@ public class Tile : MonoBehaviour
 
     void Start()
     {
-          GameObject gameConfigsObj = GameObject.FindWithTag("Game Configs");
-         gameConfigs = gameConfigsObj.GetComponent<GameConfigs>();
-       // gameConfigs = MazeGame_TrialLevel.gameConfigs;
+        GameObject gameConfigsObj = GameObject.FindWithTag("Game Configs");
+        gameConfigs = gameConfigsObj.GetComponent<GameConfigs>();
+        // gameConfigs = MazeGame_TrialLevel.gameConfigs;
         cBeep = GameObject.Find("CorrectBeep");
         eBeep = GameObject.Find("ErrorBeep");
         cAudio = cBeep.GetComponent<AudioSource>();
@@ -35,18 +35,19 @@ public class Tile : MonoBehaviour
         Material newMat = Resources.Load("TestMat", typeof(Material)) as Material;
         //System.Random rnd = new System.Random();
         //int num = rnd.Next(0, 9);
-        //int num = MazeGame_TrialLevel.textureNum;
         gameObject.GetComponent<MeshRenderer>().material = newMat;
         //string textStr = "Textures/Picture" + num.ToString();
-        //string textStr = "Textures/Picture5";
-        //Texture newTxt = Resources.Load("Textures/Picture1", typeof(Texture)) as Texture;
-        //newMat.SetTexture("_MainTex", newTxt);
+        string textStr = "Textures/Picture5";
+        Texture newTxt = Resources.Load(textStr, typeof(Texture)) as Texture;
+        newMat.SetTexture("_MainTex", newTxt);
 
 
 
-       // gameObject.GetComponent<Renderer>().material.color = MazeGame_TrialLevel.tileColor;
+        // gameObject.GetComponent<Renderer>().material.color = MazeGame_TrialLevel.tileColor;
 
         gameObject.GetComponent<Renderer>().material.color = baseColor;
+
+        Debug.Log("START TILE");
 
         Debug.Log("START TILE");
 

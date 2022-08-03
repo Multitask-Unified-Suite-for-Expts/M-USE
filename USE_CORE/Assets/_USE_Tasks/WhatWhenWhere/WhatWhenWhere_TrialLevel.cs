@@ -38,6 +38,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private bool irrelevantSelection = false;
     private bool noSelection = false;
     private bool trialComplete = false;
+    public List<int> runningAcc;
     
     // error data variables
     private int slotError = 0;
@@ -542,6 +543,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         FinalFeedback.AddTimer(() => finalFbDuration.value, ITI, () =>
         {
             sliderHalo.SetActive(false);
+            runningAcc.Add(1);
             EventCodeManager.SendCodeImmediate(TaskEventCodes["SliderCompleteFbOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);

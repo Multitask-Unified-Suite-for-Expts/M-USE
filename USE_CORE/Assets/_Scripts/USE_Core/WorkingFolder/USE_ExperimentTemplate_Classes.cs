@@ -29,7 +29,7 @@ namespace USE_ExperimentTemplate_Classes
         }
     }
 
-    public class TaskLevel_Methods
+    public class TaskLevelTemplate_Methods
     {
         public bool CheckBlockEnd(string blockEndType, IEnumerable<int> runningAcc, float accThreshold = 1, int windowSize = 1, int? minTrials = null, int? maxTrials = null)
         {

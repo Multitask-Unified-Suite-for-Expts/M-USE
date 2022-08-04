@@ -24,6 +24,7 @@ namespace WorkingMemory_Namespace
         //Already-existing fields (inherited from BlockDef)
         //public int BlockCount;
         //public TrialDef[] TrialDefs;
+        
     }
 
     public class WorkingMemory_TrialDef : TrialDef
@@ -34,7 +35,7 @@ namespace WorkingMemory_Namespace
         public int[] TargetIndices, PostSampleDistractorIndices, TargetDistractorIndices;
         public int[] TargetTokenUpdates, DistractorTokenUpdates;
         public Vector3[] TargetSampleLocations, PostSampleDistractorLocations, TargetSearchLocations, TargetDistractorLocations;
-        public Vector3 ContextColor;
+        public string ContextName;
 
         public float initTrialDuration,
             baselineDuration,

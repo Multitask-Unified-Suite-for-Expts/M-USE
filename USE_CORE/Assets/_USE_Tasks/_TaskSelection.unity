@@ -232,6 +232,7 @@ GameObject:
   - component: {fileID: 1017469088}
   - component: {fileID: 1017469090}
   - component: {fileID: 1017469089}
+  - component: {fileID: 1017469091}
   m_Layer: 0
   m_Name: MiscScripts
   m_TagString: Untagged
@@ -278,6 +279,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d0fb6ea02f044bbb93a41434debead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1017469091
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1017469087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 056393fca966c4dc98c2a3ad229b39a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sentBuffer: 
+  splitSentBuffer: 
+  preSplitBuffer: 
+  systemTime: 0
+  codesActive: 0
+  splitBytes: 0
+  neuralAcquisitionDevice: Neuralynx
+  returnedCodePrefix: Lynx
 --- !u!1 &1375570694
 GameObject:
   m_ObjectHideFlags: 0

@@ -44,15 +44,15 @@ namespace USE_ExperimentTemplate_Classes
 
 
             if (rAcc.Count >= windowSize)
-                immediateAvg = (float) rAcc.GetRange(rAcc.Count - windowSize + 1, windowSize).Average();
+                immediateAvg = (float) rAcc.GetRange(rAcc.Count - windowSize, windowSize).Average();
             else
                 immediateAvg = null;
 
             if (rAcc.Count >= windowSize * 2)
             {
-                prevAvg = (float) rAcc.GetRange(rAcc.Count - windowSize * 2 + 1, windowSize).Average();
-                sumdif = rAcc.GetRange(rAcc.Count - windowSize * 2 + 1, windowSize).Sum() -
-                         rAcc.GetRange(rAcc.Count - windowSize + 1, windowSize).Sum();
+                prevAvg = (float) rAcc.GetRange(rAcc.Count - windowSize * 2, windowSize).Average();
+                sumdif = rAcc.GetRange(rAcc.Count - windowSize * 2, windowSize).Sum() -
+                         rAcc.GetRange(rAcc.Count - windowSize, windowSize).Sum();
             }
             else
             {
@@ -66,7 +66,9 @@ namespace USE_ExperimentTemplate_Classes
             switch (blockEndType)
             {
                 case "SimpleThreshold":
-                    if (immediateAvg > accThreshold)
+                    Debug.Log("checkingthreshold #################################################");
+                    Debug.Log("Immediate: " + immediateAvg + ", threshold: " + accThreshold);
+                    if (immediateAvg >= accThreshold)
                     {
                         Debug.Log("Block ending due to performance above threshold.");
                         return true;
@@ -74,7 +76,7 @@ namespace USE_ExperimentTemplate_Classes
                     else
                         return false;
                 case "ThresholdAndPeak":
-                    if (immediateAvg > accThreshold && immediateAvg <= prevAvg)
+                    if (immediateAvg >= accThreshold && immediateAvg <= prevAvg)
                     {
                         Debug.Log("Block ending due to performance above threshold and no continued improvement.");
                         return true;
@@ -87,7 +89,7 @@ namespace USE_ExperimentTemplate_Classes
                         Debug.Log("Block ending due to asymptotic performance.");
                         return true;
                     }
-                    else if (immediateAvg > accThreshold)
+                    else if (immediateAvg >= accThreshold)
                     {
                         Debug.Log("Block ending due to performance above threshold.");
                         return true;

@@ -19,8 +19,6 @@ namespace MazeGame_Namespace
         //public float? ExternalStimScale;
 
         public float[] TileColor;
-
-
     }
 
     public class MazeGame_BlockDef : BlockDef
@@ -40,7 +38,8 @@ namespace MazeGame_Namespace
         public int mazeDim;
         public int mazeNumSquares;
         public int mazeNumTurns;
-        public int viewPath; 
+        public int viewPath;
+        public string ContextName;
      //   public string mazePath;
 
         //  public float MinTouchDuration;
@@ -63,6 +62,7 @@ namespace MazeGame_Namespace
                 td.mazeNumSquares = mazeNumSquares;
                 td.mazeNumTurns = mazeNumTurns;
                 td.viewPath = viewPath;
+                td.ContextName = ContextName;
                // td.mazePath = mazePath;
                 if (td.TileColor == null && TileColor != null)
                     td.TileColor = TileColor;
@@ -94,6 +94,7 @@ namespace MazeGame_Namespace
         public int mazeNumSquares;
         public int mazeNumTurns;
         public int viewPath;
+        public string ContextName;
 
         //   public string mazePath;
 

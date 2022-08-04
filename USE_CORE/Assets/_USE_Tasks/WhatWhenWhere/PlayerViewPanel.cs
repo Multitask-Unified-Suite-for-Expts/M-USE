@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerViewPanel : MonoBehaviour
+public class PlayerViewPanel //: MonoBehaviour
 {
     private GameObject circle;
-    public Transform parent;
+    // public Transform parent;
     private GameObject playerViewCanv;
     private Vector3 circleLocation;
     private float visualAngle;
@@ -16,7 +16,7 @@ public class PlayerViewPanel : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        parent = transform;
+        // parent = transform;
     }
     public GameObject drawCircle(Vector2 circleLocation, Vector2 size)
     {

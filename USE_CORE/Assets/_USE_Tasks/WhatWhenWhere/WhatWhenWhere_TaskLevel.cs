@@ -2,11 +2,13 @@
 using WhatWhenWhere_Namespace;
 using ExperimenterDisplayPanels;
 using System;
+using UnityEngine;
+using USE_ExperimentTemplate_Classes;
+using USE_Settings;
 
 public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 {
     WhatWhenWhere_BlockDef bd => GetCurrentBlockDef<WhatWhenWhere_BlockDef>();
-
     public override void SpecifyTypes()
     {
         //note that since EffortControl_TaskDef and EffortControl_BlockDef do not add any fields or methods to their parent types, 
@@ -22,6 +24,10 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     public override void DefineControlLevel()
     {
         WhatWhenWhere_TrialLevel wwwTL = (WhatWhenWhere_TrialLevel)TrialLevel;
+        string TaskName = "WhatWhenWhere";
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
+            wwwTL.MaterialFilePath = (String) SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+
         RunBlock.AddInitializationMethod(() =>
         {
            wwwTL.totalErrors_InBlock = 0 ;
@@ -31,7 +37,9 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
            Array.Clear(wwwTL.numCorrect_InBlock, 0, wwwTL.numCorrect_InBlock.Length);
            Array.Clear(wwwTL.numErrors_InBlock, 0, wwwTL.numErrors_InBlock.Length);
            wwwTL.accuracyLog_InBlock = "";
-           wwwTL.MaterialFilePath = bd.ContextExternalFilePath;
+           wwwTL.runningAcc.Clear();
+           Debug.Log("trial number maximum: " + bd.TrialDefs.Length);
+           wwwTL.MinTrials = bd.nRepetitionsMinMax[0];
         });
 
         RunBlock.AddUpdateMethod(() =>
@@ -39,6 +47,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
             BlockSummaryString = "Block Num: " + (wwwTL.BlockCount) + "\nTrial Count: " + (wwwTL.TrialCount_InBlock) +
             "\nTotal Errors: " + wwwTL.totalErrors_InBlock + "\nError Type: " + wwwTL.errorType_InBlockString + "\nPerformance: " + wwwTL.accuracyLog_InBlock;
         });
+
 
 
     }

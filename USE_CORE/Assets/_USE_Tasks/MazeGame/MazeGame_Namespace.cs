@@ -19,6 +19,8 @@ namespace MazeGame_Namespace
         //public float? ExternalStimScale;
 
         public float[] TileColor;
+        private Vector3 ButtonPosition;
+        private Vector3 ButtonScale;
     }
 
     public class MazeGame_BlockDef : BlockDef

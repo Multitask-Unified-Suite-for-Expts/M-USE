@@ -10,13 +10,15 @@ using Random = UnityEngine.Random;
 using USE_UI;
 using USE_Settings;
 using System.IO;
+using System.Linq;
 using ConfigDynamicUI;
+using USE_Utilities;
 
 public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 {
     public VisualSearch_TrialDef CurrentTrialDef => GetCurrentTrialDef<VisualSearch_TrialDef>();
 
-    private StimGroup targetStims, distractorStims;
+    private StimGroup targetStim, distractorStims;
     private GameObject startButton;
 
     private string targetName;
@@ -26,7 +28,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
     //configui variables
     [HideInInspector]
-    public ConfigNumber minObjectTouchDuration, itiDuration, finalFbDuration, fbDuration, maxObjectTouchDuration, selectObjectDuration, tokenRevealDuration, tokenUpdateDuration;
+    public ConfigNumber minObjectTouchDuration, itiDuration, finalFbDuration, fbDuration, maxObjectTouchDuration, selectObjectDuration, tokenRevealDuration, tokenUpdateDuration, searchDisplayDelay;
     /*
         public float 
             DisplayStimsDuration = 5f, 
@@ -57,6 +59,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private int numDistractor = 0;
     private USE_Button testButton;
     private GameObject sbSprite;
+    private bool randomizedLocations = false;
 
     public override void DefineControlLevel()
     {
@@ -65,9 +68,18 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         State SelectionFeedback = new State("SelectionFeedback");
         State TokenFeedback = new State("TokenFeedback");
         State TrialEnd = new State("TrialEnd");
-
+        State SearchDisplayDelay = new State("SearchDisplayDelay");
+        State delay = new State("Delay");
+        
+        AddActiveStates(new List<State> {initTrial, SearchDisplay, SelectionFeedback, TokenFeedback, TrialEnd, delay, SearchDisplayDelay});
+        
+        // A state that just waits for some time
+        State stateAfterDelay = null;
+        float delayDuration = 0;
+        delay.AddTimer(() => delayDuration, () => stateAfterDelay);
+        
         Text commandText = null;
-        AddActiveStates(new List<State> {initTrial, SearchDisplay, SelectionFeedback, TokenFeedback, TrialEnd});
+        
         SelectionHandler<VisualSearch_StimDef> mouseHandler = new SelectionHandler<VisualSearch_StimDef>();
         SetupTrial.AddInitializationMethod(() =>
         {
@@ -94,23 +106,26 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
         });
         initTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton),
-            SearchDisplay, () => 
+            SearchDisplayDelay, () => 
             {
                startButton.SetActive(false);
-               TokenFBController.enabled = true;
-               EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]); //CHECK THIS TIMING MIGHT BE OFF
-               EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
-               EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
-               EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarReset"]);
             });
-        MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay);
+        
         // Show the target/sample with some other distractors
+        SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, delay, () =>
+        {
+            stateAfterDelay = SearchDisplay;
+            TokenFBController.enabled = true;
+            EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]); //CHECK THIS TIMING MIGHT BE OFF
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarReset"]);
+        });
         // Wait for a click and provide feedback accordingly
         bool correct = false;
         GameObject selected = null;
         VisualSearch_StimDef selectedSD = null;
         MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay);
-
         SearchDisplay.AddInitializationMethod(() => selected = null);
         
         SearchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, SelectionFeedback, () => {
@@ -133,7 +148,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             string touchedObjectsNames = "";
             if (selected != null) touchedObjectsNames = selected.name;
 
-            TrialSummaryString = "Trial Num: " + (TrialCount_InTask).ToString() + "\nTarget Name: " +
+            TrialSummaryString = "Trial Num: " + TrialCount_InTask+1 + "\nTarget Name: " +
             targetName + "\nTouched Object Names: " +
             touchedObjectsNames;
         });
@@ -178,13 +193,26 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
 
             HaloFBController.Destroy();
-            if (correct){
-                AudioFBController.Play("Positive");
-                TokenFBController.AddTokens(selected, 2);
-                //slider.value += (float)0.25;
-                value += (float)0.25;
+            if (selectedSD.TokenUpdate == 0)
+            {
+                if (correct) AudioFBController.Play("Positive");
+                else AudioFBController.Play("Negative");
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
+                return;
             }
-            else AudioFBController.Play("Negative");
+            if (selectedSD.TokenUpdate > 0)
+            {
+                TokenFBController.AddTokens(selected, selectedSD.TokenUpdate);
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
+            }
+            
+            else
+            {
+                TokenFBController.RemoveTokens(selected, -selectedSD.TokenUpdate);
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
+            }
+
+            
         });
         TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), TrialEnd);
         TrialEnd.AddTimer(()=> itiDuration.value, FinishTrial, ()=> 
@@ -214,40 +242,64 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         int temp = 0;
         distractorName = new List<string>();
         distractorLocations = new List<Vector3>();
-        targetStims = new StimGroup("SearchStims", ExternalStims, CurrentTrialDef.SearchStimsIndices);
-        targetStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
-        targetStims.SetLocations(CurrentTrialDef.SearchStimsLocations);
-        foreach (VisualSearch_StimDef sd in targetStims.stimDefs){
+        targetStim = new StimGroup("TargetStim", ExternalStims, CurrentTrialDef.TargetStimIndex);
+        targetStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
+        targetStim.SetLocations(CurrentTrialDef.TargetStimLocation);
+        foreach (VisualSearch_StimDef sd in targetStim.stimDefs){
             sd.IsTarget = true;
+            sd.TokenUpdate = CurrentTrialDef.TokenGain[0];
             targetName = sd.StimName;
             targetLocation = sd.StimLocation;
         } 
-        TrialStims.Add(targetStims);
-        if (CurrentTrialDef.DistractorStimsIndices.Length != 0)
-        {
-            distractorStims = new StimGroup("TargetStims", ExternalStims, CurrentTrialDef.DistractorStimsIndices);
+        TrialStims.Add(targetStim);
+        //if (CurrentTrialDef.DistractorStimsIndices.Length != 0)
+        //{
+            distractorStims = new StimGroup("DistractorStims", ExternalStims, CurrentTrialDef.DistractorStimsIndices);
             distractorStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
             distractorStims.SetLocations(CurrentTrialDef.DistractorStimsLocations);
+            int numDistractors = 0;
             foreach (VisualSearch_StimDef sd in distractorStims.stimDefs){
                 sd.IsTarget = false;
-                temp++;
+                sd.TokenUpdate = -CurrentTrialDef.TokenLoss[numDistractors];
+                numDistractors++;
                 distractorName.Add(sd.StimName);
                 distractorLocations.Add(sd.StimLocation);
             }
-            num_distractors = temp;      
+            num_distractors = numDistractors;      
             TrialStims.Add(distractorStims);
+        //}
 
+        randomizedLocations = CurrentTrialDef.RandomizedLocations; 
+
+        if (randomizedLocations)
+        {   
+            var totalStims = targetStim.stimDefs.Concat(distractorStims.stimDefs);
+            var stimLocations = CurrentTrialDef.TargetStimLocation.Concat(CurrentTrialDef.DistractorStimsLocations);
+
+            int[] positionIndexArray = Enumerable.Range(0, totalStims.Count()).ToArray();
+            System.Random random = new System.Random();
+            positionIndexArray = positionIndexArray.OrderBy(x => random.Next()).ToArray();
+
+            for (int i = 0; i < totalStims.Count(); i++)
+            {
+                totalStims.ElementAt(i).StimLocation = stimLocations.ElementAt(positionIndexArray[i]);
+            }
+        }
+        else
+        {
+            targetStim.SetLocations(CurrentTrialDef.TargetStimLocation);
+            distractorStims.SetLocations(CurrentTrialDef.DistractorStimsLocations);
         }
         
     }
-
+/*
     private USE_Button DefineStartButton(Transform parent)
     {
         /*
         if (random == 1)
         {
             return;
-        }*/
+        }
             Vector3 buttonPosition = new Vector3(0f, 0f, 0f);
         Vector3 buttonScale = new Vector3(1f, 1f, 1f);
         Color buttonColor = new Color(0.1f, 0.1f, 0.1f);
@@ -276,7 +328,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
         //testButton.SetVisibilityOnOffStates(GetStateFromName("InitTrial"), GetStateFromName("SearchDisplay"));
         //random = 1;
-    }
+    }*/
     void disableAllGameobjects()
     {
         startButton.SetActive(false);
@@ -291,6 +343,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
+        searchDisplayDelay = ConfigUiVariables.get<ConfigNumber>("searchDisplayDelay");
         selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
         finalFbDuration = ConfigUiVariables.get<ConfigNumber>("finalFbDuration");
         fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
@@ -326,7 +379,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     }
     public static Texture2D LoadPNG(string filePath)
     {
-
         Texture2D tex = null;
         byte[] fileData;
 

@@ -12,6 +12,8 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using System.Data;
 using System.IO;
+using ConfigDynamicUI;
+using USE_Settings;
 
 public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 {
@@ -67,12 +69,19 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private static Slider slider;
     private static float sliderValueIncreaseAmount;
     private GameObject initButton;
-
+    [HideInInspector] public ConfigNumber minObjectTouchDuration,
+        itiDuration,
+        finalFbDuration,
+        fbDuration,
+        maxObjectTouchDuration,
+        selectObjectDuration,
+        sliderSize,
+        mazeOnsetDelay, tileSize;
     //private Button initButton;
     private Ray mouseRay;
     private int response;
     private GameObject sliderHalo, txt, startTxt;
-    private SpriteRenderer sr;
+    //private SpriteRenderer sr;
     private float startTime;
     private int max;
     private int min;
@@ -89,7 +98,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public string MaterialFilePath;
     public GameObject mazeBackground;
     public Texture2D backgroundTex;
-
+    private Image sr;
+    private Vector3 sliderInitPosition;
+    
     public int curMDim;
     public int curMNumSquares;
     public int curMNumTurns;
@@ -335,6 +346,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         StartButton.AddDefaultTerminationMethod(() =>
         {
+            slider.value = 0;
+            slider.gameObject.transform.position = sliderInitPosition;
+            sliderHalo.gameObject.transform.position = sliderInitPosition;
+            slider.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
+            sliderHalo.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
+
             initButton.gameObject.SetActive(false);
         });
 
@@ -371,6 +388,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             DestroyCurrMaze();
             // end = false;
+            mazeBackground.SetActive(false);
         });
 
         Feedback.AddInitializationMethod(() =>
@@ -396,7 +414,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 sr.color = new Color(1, 0, 0, 0.2f);
             }
         });
-        Feedback.AddTimer(3f, ITI, () =>
+        Feedback.AddTimer(()=>finalFbDuration.value, ITI, () =>
         {
 
             txt.SetActive(false);
@@ -450,7 +468,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         GameObject mazeContainer = new GameObject("MazeContainer");
         mazeBackground.transform.SetParent(mazeContainer.transform);
         mazeBackground.transform.localPosition = new Vector3(1, 0.5f, 0);
-        mazeBackground.transform.localScale = new Vector3(dim+2, dim+2, 0);
+        mazeBackground.transform.localScale = new Vector3(dim/9f, dim/9f, 0);
         tile = Resources.Load<Tile>("Prefabs/Tile") as Tile;
         tiles = new StimGroup("Tiles"); //in DefineTrialStims
         // tiles.DestroyStimGroup(); //when tiles should be destroyed
@@ -470,7 +488,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 // Instantiate the tile
 
                 tile.transform.position = newTilePosition;
-                tile.transform.localScale = new Vector3(TILE_WIDTH/2, TILE_WIDTH/2, 0.1f);
+                tile.transform.localScale = new Vector3(TILE_WIDTH*tileSize.value, TILE_WIDTH*tileSize.value, 0.1f);
                 tile.mCoord = new Coords(x, y);
 
                 if (x == currMaze.mStart.X && y == currMaze.mStart.Y)
@@ -689,15 +707,29 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             return 22;
         }
     }
+
     private void loadVariables()
     {
         slider = GameObject.Find("Slider").GetComponent<Slider>();
-        initButton = GameObject.Find("StartButton");
+        sliderInitPosition = slider.gameObject.transform.position;
+        Texture2D buttonTex = LoadPNG(MaterialFilePath + "\\StartButtonImage.png");
+        initButton = CreateStartButton(buttonTex, new Rect(new Vector2(0,0), new Vector2(1,1)));
         txt = GameObject.Find("FinalText");
         sliderHalo = GameObject.Find("SliderHalo");
-        sr = sliderHalo.GetComponent<SpriteRenderer>();
+        sr = sliderHalo.GetComponent<Image>();
+        
+        //config UI variables
+        //minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
+        //maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
+        itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
+        sliderSize = ConfigUiVariables.get<ConfigNumber>("sliderSize");
+        tileSize = ConfigUiVariables.get<ConfigNumber>("tileSize");
+        finalFbDuration = ConfigUiVariables.get<ConfigNumber>("finalFbDuration");
+        selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
+        mazeOnsetDelay = ConfigUiVariables.get<ConfigNumber>("mazeOnsetDelay");
         disableVariables();
     }
+
     private void disableVariables()
     {
         slider.gameObject.SetActive(false);
@@ -705,6 +737,31 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         txt.SetActive(false);
         sliderHalo.SetActive(false);
         sr.gameObject.SetActive(false);
+    }
+    private GameObject CreateStartButton(Texture2D tex, Rect rect) //creates start button as a sprite
+    {
+        Vector3 buttonPosition = Vector3.zero;
+        Vector3 buttonScale = Vector3.zero;
+        string TaskName = "MazeGame";
+        if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
+        {
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+                buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+                buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+        }
+        else
+        {
+            Debug.Log("[ERROR] Start Button Image settings not defined in the TaskDef");
+        }
+
+        GameObject startButton = new GameObject("StartButton");
+        SpriteRenderer sbSprite = startButton.AddComponent<SpriteRenderer>() as SpriteRenderer;
+        sbSprite.sprite = Sprite.Create(tex, new Rect(rect.x, rect.y, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
+        startButton.AddComponent<BoxCollider>();
+        startButton.transform.localScale = buttonScale;
+        startButton.transform.position = buttonPosition;
+        return startButton;
     }
     public static Texture2D LoadPNG(string filePath)
     {

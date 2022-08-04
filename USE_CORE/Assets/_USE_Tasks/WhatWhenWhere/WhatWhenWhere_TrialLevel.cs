@@ -39,6 +39,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private bool noSelection = false;
     private bool trialComplete = false;
     public List<int> runningAcc;
+    private int ind;
     
     // error data variables
     private int slotError = 0;
@@ -109,6 +110,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public string MaterialFilePath;
     private int correctIndex;
     private GameObject sbOther;
+    private WhatWhenWhere_StimDef selectedSD;
 
     //Player View Variables
     private PlayerViewPanel playerView;
@@ -329,6 +331,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         if (choiceMade)
             {
                 GameObject testStim = chosenStim.transform.root.gameObject;
+                selectedSD = testStim.GetComponent<StimDefPointer>().GetStimDef<WhatWhenWhere_StimDef>();
                 response = 1;
                 //Timing Error
                 if (touchDuration < minObjectTouchDuration.value || touchDuration > maxObjectTouchDuration.value)
@@ -348,11 +351,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
                 }
                 //Correct Selection
-                else if (testStim.GetComponent<StimDefPointer>().GetStimDef<WhatWhenWhere_StimDef>().IsCurrentTarget)
+                else if (selectedSD.IsCurrentTarget)
                 {
                     Debug.Log("Clicked on the correct stimulus within the sequence");
                     CorrectSelectionProgressData();
-                    slider.value += sliderValueIncreaseAmount*(CurrentTrialDef.SliderGain[stimCount]);
+                    
+                    ind = Array.IndexOf(CurrentTrialDef.SearchStimsIndices, selectedSD.StimCode-1);
+                    slider.value += sliderValueIncreaseAmount*(CurrentTrialDef.SliderGain[ind]);
                     stimCount += 1;
                     touchedObjects.Add(testStim.name);
                     yellowHalo.transform.position = testStim.transform.position;
@@ -371,7 +376,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
                     IncorrectSelectionProgressData(correctIndex);
 
-                    slider.value -= sliderValueIncreaseAmount*(CurrentTrialDef.SliderGain[stimCount]);
+                    ind = Array.IndexOf(CurrentTrialDef.DistractorStimsIndices, selectedSD.StimCode-1);
+                    slider.value -= sliderValueIncreaseAmount*(CurrentTrialDef.SliderLoss[ind]);
                     repetitionError += 1;
 
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["IncorrectResponse"]);
@@ -384,12 +390,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 //Slot Errors
                 else 
                 {   //Distractor Error
-                    if (testStim.GetComponent<StimDefPointer>().GetStimDef<WhatWhenWhere_StimDef>().IsDistractor)
+                    if (selectedSD.IsDistractor)
                     {
                         Debug.Log("Clicked on a distractor");
                         grayHalo.transform.position = testStim.transform.position;
                         touchedObjects.Add(testStim.name);
-                        slider.value -= sliderValueIncreaseAmount*(CurrentTrialDef.SliderGain[stimCount]);
+                        ind = Array.IndexOf(CurrentTrialDef.DistractorStimsIndices, selectedSD.StimCode-1);
+                        slider.value -= sliderValueIncreaseAmount*(CurrentTrialDef.SliderLoss[ind]);
                         distractorSlotError += 1;
 
                         IncorrectSelectionProgressData(correctIndex);
@@ -408,7 +415,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         Debug.Log("Clicked on a stimulus, but not within the correct sequence");
                         grayHalo.transform.position = testStim.transform.position;
                         touchedObjects.Add(testStim.name);
-                        slider.value -= sliderValueIncreaseAmount*(CurrentTrialDef.SliderGain[stimCount]);
+                        ind = Array.IndexOf(CurrentTrialDef.DistractorStimsIndices, selectedSD.StimCode-1);
+                        slider.value -= sliderValueIncreaseAmount*(CurrentTrialDef.SliderLoss[ind]);
                         slotError += 1;
                         IncorrectSelectionProgressData(correctIndex);
 
@@ -440,7 +448,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 imageTimingError.transform.SetAsLastSibling();
                 imageTimingError.SetActive(true);
                 errorTypeString = "TouchDurationError";
-                runningAcc.Add(0);
             }
 
             //Chose Incorrect
@@ -449,7 +456,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 grayHalo.SetActive(true);
                 sliderHalo.SetActive(true);
                 sr.color = new Color(0.6627f, 0.6627f, 0.6627f, 0.2f);
-                runningAcc.Add(0);
                 if (slotError == 1)
                     errorTypeString = "SlotError";
                 else if (distractorSlotError == 1)
@@ -462,7 +468,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             else if (irrelevantSelection)
             {
                 errorTypeString = "IrrelevantSelectionError";
-                runningAcc.Add(0);
             }
 
             //Chose correct
@@ -472,12 +477,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 sliderHalo.SetActive(true);
                 sr.color = new Color(1, 0.8431f, 0, 0.2f);
                 errorTypeString = "None";
-                runningAcc.Add(1);
             }
 
             GenerateUpdatingTrialData();
             // logging data information on the Experimenter Display Trial Info Panel
-            TrialSummaryString = "Trial Num: " + (TrialCount_InTask).ToString() + "\nTouched Object Names: "+ 
+            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nTouched Object Names: "+ 
             touchedObjectsNames + "\nError Type: " + errorTypeString + "\nTouch Duration: " + touchDurationTimes + 
             "\nChoice Duration: " + choiceDurationTimes + "\nPerformance: " + accuracyLog_InTrial + 
             "\nSession Performance: " + accuracyLog_InSession;
@@ -499,6 +503,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             incorrectChoice = false;
             sliderHalo.SetActive(false);
             EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionVisualFbOff"]);
+            runningAcc.Add(0);
         });
 
         StimulusChosen.SpecifyTermination(() => (timingFail && (Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute) >= fbDuration.value), ITI, () =>
@@ -506,6 +511,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             imageTimingError.SetActive(false);
             timingFail = false;
             EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchErrorImageOff"]);
+            runningAcc.Add(0);
         });
 
         StimulusChosen.SpecifyTermination(() => (irrelevantSelection && (Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute) >= fbDuration.value), ITI, () =>
@@ -513,6 +519,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             grayHaloScene.SetActive(false);
             irrelevantSelection = false;
             EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionVisualFbOff"]);
+            runningAcc.Add(0);
         });
 
         FinalFeedback.AddInitializationMethod(() =>
@@ -543,6 +550,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 sr.color = new Color(0, 0, 0, 0.2f);
             }
+            runningAcc.Add(1);
         });
         FinalFeedback.AddTimer(() => finalFbDuration.value, ITI, () =>
         {

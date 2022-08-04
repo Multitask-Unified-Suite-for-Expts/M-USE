@@ -48,7 +48,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
             
             
         });
-        RunBlock.SpecifyTermination(() => TaskLevel_Methods.CheckBlockEnd("SimpleThreshold", wwwTL.runningAcc, 1, 5, bd.nRepetitionsMinMax[0], bd.TrialDefs.Length), BlockFeedback);
+       // RunBlock.SpecifyTermination(() => TaskLevel_Methods.CheckBlockEnd("SimpleThreshold", wwwTL.runningAcc, 1, 5, bd.nRepetitionsMinMax[0], bd.TrialDefs.Length), BlockFeedback);
 
 
 

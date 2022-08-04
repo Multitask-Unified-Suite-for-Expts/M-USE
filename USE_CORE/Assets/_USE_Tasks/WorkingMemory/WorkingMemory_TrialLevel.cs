@@ -71,14 +71,14 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarReset"]);
             });
-        /*
+        
         // Show nothing for some time
         initTrial.AddTimer(() => CurrentTrialDef.initTrialDuration, delay, () =>
           {
               stateAfterDelay = displaySample;
               delayDuration = CurrentTrialDef.baselineDuration;
           });
-        */
+        
         // Show the target/sample by itself for some time
         displaySample.AddTimer(() => CurrentTrialDef.displaySampleDuration, delay, () =>
           {

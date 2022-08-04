@@ -31,13 +31,17 @@ namespace VisualSearch_Namespace
         //Already-existing fields (inherited from BlockDef)
         //public int BlockCount;
         //public TrialDef[] TrialDefs;
-        public int[] SearchStimsIndices;
+        public int[] TargetStimIndex;
         public int[] DistractorStimsIndices;
-        public Vector3[] SearchStimsLocations;
+        public Vector3[] TargetStimLocation;
         public Vector3[] DistractorStimsLocations;
         public int[] nRepetitionsMinMax;
         public string TrialID;
         public string ContextName;
+        public int[] TokenGain;
+        public int[] TokenLoss;
+        public int TokenInitial;
+        public bool RandomizedLocations;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -54,11 +58,15 @@ namespace VisualSearch_Namespace
                 td.MinTouchDuration = MinTouchDuration;
                 td.MaxTouchDuration = MaxTouchDuration;
                 */
-                td.SearchStimsIndices = SearchStimsIndices;
+                td.TargetStimIndex = TargetStimIndex;
                 td.DistractorStimsIndices = DistractorStimsIndices;
-                td.SearchStimsLocations = SearchStimsLocations;
+                td.TargetStimLocation = TargetStimLocation;
                 td.DistractorStimsLocations = DistractorStimsLocations;
                 td.ContextName = ContextName;
+                td.TokenGain = TokenGain;
+                td.TokenLoss = TokenLoss;
+                td.TokenInitial = TokenInitial;
+                td.RandomizedLocations = RandomizedLocations;
                 //td.RandomizedLocations = RandomizedLocations;
                 TrialDefs[iTrial] = td;
             }
@@ -71,12 +79,15 @@ namespace VisualSearch_Namespace
         //Already-existing fields (inherited from TrialDef)
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
-        public int[] SearchStimsIndices;
+        public int[] TargetStimIndex;
         public int[] DistractorStimsIndices;
-        public Vector3[] SearchStimsLocations;
+        public Vector3[] TargetStimLocation;
         public Vector3[] DistractorStimsLocations;
-        public int[] nRepetitionsMinMax;
         public string TrialID;
+        public int[] TokenGain;
+        public int[] TokenLoss;
+        public int TokenInitial;
+        public bool RandomizedLocations;
         public string ContextName;
     }
 
@@ -111,6 +122,7 @@ namespace VisualSearch_Namespace
         //public State SetActiveOnInitialization;
         //public State SetInactiveOnTermination;
         public bool IsTarget;
+        public int TokenUpdate;
 
     }
 }

@@ -58,7 +58,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     public LoadMazeList mazeListScript;
 
-    public static GameConfigs gameConfigs = new GameConfigs();
+    // public static GameConfigs gameConfigs = new GameConfigs();
     public static Maze currMaze;
     private bool mazeLoaded = false;
     private static int count;

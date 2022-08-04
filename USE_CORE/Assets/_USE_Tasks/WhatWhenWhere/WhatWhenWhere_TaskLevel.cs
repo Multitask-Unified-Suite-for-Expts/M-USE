@@ -39,16 +39,18 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
            wwwTL.accuracyLog_InBlock = "";
            wwwTL.runningAcc.Clear();
            Debug.Log("trial number maximum: " + bd.TrialDefs.Length);
+           wwwTL.MinTrials = bd.nRepetitionsMinMax[0];
         });
 
         RunBlock.AddUpdateMethod(() =>
         {
             BlockSummaryString = "Block Num: " + (wwwTL.BlockCount) + "\nTrial Count: " + (wwwTL.TrialCount_InBlock) +
             "\nTotal Errors: " + wwwTL.totalErrors_InBlock + "\nError Type: " + wwwTL.errorType_InBlockString + "\nPerformance: " + wwwTL.accuracyLog_InBlock;
-            
-            
         });
+<<<<<<< HEAD
        // RunBlock.SpecifyTermination(() => TaskLevel_Methods.CheckBlockEnd("SimpleThreshold", wwwTL.runningAcc, 1, 5, bd.nRepetitionsMinMax[0], bd.TrialDefs.Length), BlockFeedback);
+=======
+>>>>>>> USE_Fixes
 
 
 

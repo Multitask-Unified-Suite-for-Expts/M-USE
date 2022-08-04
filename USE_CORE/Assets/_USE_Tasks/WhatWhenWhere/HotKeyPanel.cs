@@ -239,7 +239,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
         {
             List<HotKey> ConfigUIHotKeyList = new List<HotKey>();
             List<Selectable> m_orderedSelectables = new List<Selectable>();
-            ConfigUI configUIPanelController = new ConfigUI();
+            ConfigUI configUIPanelController = GameObject.Find("Config UI").GetComponent<ConfigUI>();// new ConfigUI();
             
             //Scroll ConfigUI HotKey
             HotKey scrollConfig = new HotKey

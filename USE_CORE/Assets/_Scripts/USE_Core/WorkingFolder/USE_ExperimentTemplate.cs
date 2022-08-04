@@ -183,7 +183,7 @@ namespace USE_ExperimentTemplate
 			setupSession.AddDefaultInitializationMethod(() =>
 			{
 				SessionData.CreateFile();
-				EventCodeManager = new EventCodeManager();
+				EventCodeManager = GameObject.Find("MiscScripts").GetComponent<EventCodeManager>(); //new EventCodeManager();
 				if (SerialPortActive)
 				{
 					SerialPortController = new SerialPortThreaded();
@@ -684,7 +684,7 @@ namespace USE_ExperimentTemplate
 		[HideInInspector] public RenderTexture DrawRenderTexture;
 
 		public void OnGUI() {
-			GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), DrawRenderTexture);
+			// GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), DrawRenderTexture);
 		}
 
 		public virtual void SpecifyTypes()
@@ -1348,6 +1348,7 @@ namespace USE_ExperimentTemplate
 				}
 			});
 
+			FinishTrial.SpecifyTermination(()=> CheckBlockEnd(), ()=> null);
 			FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Length - 1, SetupTrial);
 			FinishTrial.SpecifyTermination(() => TrialCount_InBlock == TrialDefs.Length - 1, ()=> null);
 
@@ -1373,6 +1374,10 @@ namespace USE_ExperimentTemplate
 
 		}
 
+		protected virtual bool CheckBlockEnd()
+		{
+			return false;
+		}
 
 		protected virtual void DefineTrialStims()
 		{

@@ -47,10 +47,6 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
             BlockSummaryString = "Block Num: " + (wwwTL.BlockCount) + "\nTrial Count: " + (wwwTL.TrialCount_InBlock) +
             "\nTotal Errors: " + wwwTL.totalErrors_InBlock + "\nError Type: " + wwwTL.errorType_InBlockString + "\nPerformance: " + wwwTL.accuracyLog_InBlock;
         });
-<<<<<<< HEAD
-       // RunBlock.SpecifyTermination(() => TaskLevel_Methods.CheckBlockEnd("SimpleThreshold", wwwTL.runningAcc, 1, 5, bd.nRepetitionsMinMax[0], bd.TrialDefs.Length), BlockFeedback);
-=======
->>>>>>> USE_Fixes
 
 
 

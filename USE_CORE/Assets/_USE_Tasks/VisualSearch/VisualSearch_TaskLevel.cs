@@ -1,6 +1,7 @@
 using USE_ExperimentTemplate;
 using VisualSearch_Namespace;
 using System;
+using UnityEngine;
 using USE_Settings;
 
 public class VisualSearch_TaskLevel : ControlLevel_Task_Template
@@ -10,8 +11,19 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     {
         VisualSearch_TrialLevel vsTL = (VisualSearch_TrialLevel)TrialLevel;
         string TaskName = "VisualSearch";
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            vsTL.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+        if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
+        {
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
+                vsTL.MaterialFilePath =
+                    (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NumTokens"))
+                vsTL.TaskTokenNum = (int)SessionSettings.Get(TaskName + "_TaskSettings", "NumTokens");
+        }
+        else
+        {
+            Debug.Log("[ERROR] TaskDef is not in config folder");
+        }
+        
 
         RunBlock.AddInitializationMethod(() =>
         {
@@ -29,7 +41,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddUpdateMethod(() =>
         {
             BlockSummaryString = "Block Num: " + (vsTL.BlockCount) + "\nTrial Count: " + (vsTL.TrialCount_InBlock);
-           // "\nTotal Errors: " + vsTL.totalErrors_InBlock + "\nError Type: " + vsTL.errorType_InBlockString + "\nPerformance: " + vsTL.accuracyLog_InBlock;
+          //  "\nTotal Errors: " + vsTL.totalErrors_InBlock + "\nError Type: " + vsTL.errorType_InBlockString + "\nPerformance: " + vsTL.accuracyLog_InBlock;
         });
     }
     public T GetCurrentBlockDef<T>() where T : BlockDef

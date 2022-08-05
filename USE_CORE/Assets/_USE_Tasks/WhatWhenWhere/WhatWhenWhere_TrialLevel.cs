@@ -24,7 +24,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private GameObject initButton, chosenStim, grayHalo, grayHaloScene, yellowHalo, sliderHalo, imageTimingError;
     private Image sr;
     private Texture2D texture;
-    private static int numObjMax = 20;// need to change if stimulus exceeds this amount, not great
+    private static int numObjMax = 50;// need to change if stimulus exceeds this amount, not great
 
     //stim group
     private StimGroup searchStims, distractorStims;
@@ -83,6 +83,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private string touchDurationTimes;
     private string choiceDurationTimes;
     private string touchedPositions;
+    private string searchStimsLocations;
+    private string distractorStimsLocations;
     public string accuracyLog_InSession = "";
     public string accuracyLog_InBlock = "";
     public string accuracyLog_InTrial = "";
@@ -92,6 +94,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private bool initialTouch = false;
     private bool choiceMade = false;
     private bool contextActive = false;
+    private String contextName = "";
+    private List<int> trialPerformance = new List<int>();
 
     [HideInInspector]
     [System.NonSerialized] public int response = -1;
@@ -110,6 +114,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public string MaterialFilePath;
     private int correctIndex;
     private GameObject sbOther;
+    public int sliderCompleteQuantity = 0;
 
     //Player View Variables
     private PlayerViewPanel playerView;
@@ -178,11 +183,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
 
             // resetting data information on the Experimenter Display Trial Info Panel
-            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nTouched Object Names: " +
-                                 touchedObjectsNames + "\nError Type: " +
+            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nError Type: " +
                                  errorTypeString + "\nTouch Duration: " + touchDurationTimes + "\nChoice Duration: " +
                                  choiceDurationTimes + "\nProgress: " + accuracyLog_InTrial + "\nSession Progress: " +
                                  accuracyLog_InSession;
+            ;
         });
 
         SetupTrial.SpecifyTermination(() => true, StartButton);
@@ -191,6 +196,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         StartButton.AddInitializationMethod(() =>
         {
             // Set the background texture to that of specified context
+            contextActive = true;
+            contextName = CurrentTrialDef.ContextName;
             RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
             ResetRelativeStartTime();
             Debug.Log("Current Block Context: " + CurrentTrialDef.ContextName);
@@ -217,8 +224,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         StartButton.SpecifyTermination(() => response == 0, ChooseStimulusDelay);
         StartButton.AddDefaultTerminationMethod(() =>
         {
-            //SyncBoxController.SendRewardPulses(2, 50000);
-
             slider.value = 0;
             slider.gameObject.transform.position = sliderInitPosition;
             sliderHalo.gameObject.transform.position = sliderInitPosition;
@@ -245,7 +250,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddInitializationMethod(() =>
         {
-            contextActive = true;
+            
             if (stimCount < CurrentTrialDef.CorrectObjectTouchOrder.Length)
             {
                 correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[stimCount] - 1;
@@ -462,6 +467,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 imageTimingError.SetActive(true);
                 errorTypeString = "TouchDurationError";
                 runningAcc.Add(0);
+                trialPerformance.Add(0);
             }
 
             //Chose Incorrect
@@ -477,6 +483,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     errorTypeString = "DistractorSlotError";
                 else
                     errorTypeString = "RepetitionError";
+                trialPerformance.Add(0);
             }
 
             //Irrelevant Selection
@@ -484,6 +491,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 errorTypeString = "IrrelevantSelectionError";
                 runningAcc.Add(0);
+                trialPerformance.Add(0);
             }
 
             //Chose correct
@@ -493,17 +501,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 sliderHalo.SetActive(true);
                 sr.color = new Color(1, 0.8431f, 0, 0.2f);
                 errorTypeString = "None";
-                runningAcc.Add(1);
+                trialPerformance.Add(1);
             }
 
             GenerateUpdatingTrialData();
             // logging data information on the Experimenter Display Trial Info Panel
-            TrialSummaryString = "Trial Num: " + (TrialCount_InTask).ToString() + "\nTouched Object Names: " +
-                                 touchedObjectsNames + "\nError Type: " + errorTypeString + "\nTouch Duration: " +
+            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nError Type: " + errorTypeString +
+                                 "\nTouch Duration: " +
                                  touchDurationTimes +
                                  "\nChoice Duration: " + choiceDurationTimes + "\nPerformance: " + accuracyLog_InTrial +
                                  "\nSession Performance: " + accuracyLog_InSession;
-
 
         });
 
@@ -555,12 +562,17 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             searchStims.ToggleVisibility(false);
             distractorStims.ToggleVisibility(false);
             response = -1;
+            
+            runningAcc.Add(1);
+            sliderCompleteQuantity += 1;
             foreach (GameObject txt in playerViewTextList)
             {
                 txt.SetActive(false);
             }
 
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderCompleteFbOn"]);
+            SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+            //SyncBoxController.SendRewardPulses(3, 500);
         });
 
         FinalFeedback.AddUpdateMethod(() =>
@@ -588,8 +600,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             searchStims.ToggleVisibility(false);
             distractorStims.ToggleVisibility(false);
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\itiImage.png");
             contextActive = false;
+            contextName = "itiImage";
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\itiImage.png");
             playerViewLoaded = false;
             //Destroy all created text objects on Player View of Experimenter Display
             foreach (GameObject txt in playerViewTextList)
@@ -638,16 +651,20 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     protected override bool CheckBlockEnd()
     {
         TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
-        return TaskLevel_Methods.CheckBlockEnd("SimpleThreshold", runningAcc, 1, 5, MinTrials,
+        return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
+            CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, MinTrials,
             TrialDefs.Length);
     }
     //-----------------------------------------------------------------METHODS FOR DATA HANDLING----------------------------------------------------------------------
     private void LogTrialData() //All ".AddDatum" commands for Trial Data
     {
         TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
-        TrialData.AddDatum("TrialNum", () => TrialCount_InTask);
         TrialData.AddDatum("Context", () => CurrentTrialDef.ContextName);
+        TrialData.AddDatum("SearchStimsLocations", () => searchStimsLocations);
+        TrialData.AddDatum("DistractorStimsLocations", () => distractorStimsLocations);
         TrialData.AddDatum("TouchedObjects", () => touchedObjectsNames);
+        TrialData.AddDatum("TouchPositions", () => touchedPositions);
+        TrialData.AddDatum("TrialPerformance", () => trialPerformance);
         TrialData.AddDatum("ErrorType", () => errorTypeString);
         TrialData.AddDatum("ErrorType_InBlock", () => errorType_InBlockString);
         TrialData.AddDatum("ErrorType_InSession", () => errorType_InSessionString);
@@ -655,8 +672,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("TotalErrors_InSession", () => totalErrors_InSession);
         TrialData.AddDatum("TouchDurations", () => touchDurationTimes);
         TrialData.AddDatum("ChoiceDurations", () => choiceDurationTimes);
-        TrialData.AddDatum("Progress", () => accuracyLog_InSession);
-        TrialData.AddDatum("TouchPositions", () => touchedPositions);
+        TrialData.AddDatum("ProgressInSession", () => accuracyLog_InSession);
+        TrialData.AddDatum("ProgressInTrial", () => accuracyLog_InTrial);
+        TrialData.AddDatum("ProgressInBlock", () => accuracyLog_InBlock);
+        
     }
     private void LogFrameData() //All ".AddDatum" commands for Frame Data
     {
@@ -672,12 +691,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("SearchStimuliShown", () => searchStims.IsActive);
         FrameData.AddDatum("DistractorStimuliShown", () => distractorStims.IsActive);
         FrameData.AddDatum("SliderValue", () => slider.normalizedValue);
-        /* THIS NO LONGER WORKS BUT FIX LATER
-        if (contextActive)
-            FrameData.AddDatum("Context", () => CurrentTrialDef.ContextName);
-        else
-            FrameData.AddDatum("Context", () => "Blank");
-            */
+        FrameData.AddDatum("Context", () => contextName);
+        FrameData.AddDatum("ContextActive", () => contextActive);
+        
     }
     private void GenerateUpdatingTrialData() //Creates strings of data to be actively displayed on panels in experimenter view
     {
@@ -701,6 +717,37 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             accuracyLog_InTrial = accuracyLog_InTrial + "Slot " + (i + 1) + ": " + numCorrect_InTrial[i] + "/" + numTotal_InTrial[i] + " ";
         }
+        
+        // search stims locations data 
+        searchStimsLocations = "[";
+        for (int i = 0; i < searchStims.stimDefs.Count; ++i)
+        {
+            if (i < searchStims.stimDefs.Count - 1)
+            {
+                searchStimsLocations = searchStimsLocations + (searchStims.stimDefs[i].StimLocation).ToString() + ",";
+            }
+            else
+            {
+                searchStimsLocations = searchStimsLocations + searchStims.stimDefs[i].StimLocation.ToString();
+            }
+        }
+        searchStimsLocations = searchStimsLocations + "]";
+        Debug.Log("SEARCH STIMS LOCATIONS FOR DATA LOGGING" + searchStimsLocations);
+        
+        //distractors stims locations
+        distractorStimsLocations = "[";
+        for (int i = 0; i < distractorStims.stimDefs.Count; ++i)
+        {
+            if (i < distractorStims.stimDefs.Count - 1)
+            {
+                distractorStimsLocations = distractorStimsLocations + distractorStims.stimDefs[i].StimLocation.ToString() + ",";
+            }
+            else
+            {
+                distractorStimsLocations = distractorStimsLocations + distractorStims.stimDefs[i].StimLocation.ToString();
+            }
+        }
+        distractorStimsLocations = distractorStimsLocations + "]";
 
         // touched objects data 
         touchedObjectsNames = "[";
@@ -817,12 +864,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         touchDurations.Clear();
         choiceDurations.Clear();
         touchedPositionsList.Clear();
+        trialPerformance.Clear();
 
         touchedObjectsNames = "[]";
         touchDurationTimes = "[]";
         choiceDurationTimes = "[]";
         touchedPositions = "[]";
         touchedObjectsNames = "[]";
+        searchStimsLocations = "[]";
+        distractorStimsLocations = "[]";
         errorTypeString = "";
     } 
     private void DataConsoleMessages() //Generates Debug.Log messages of the data strings
@@ -912,10 +962,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         //StimGroup constructor which creates a subset of an already-existing StimGroup 
         searchStims = new StimGroup("SearchStims", ExternalStims, CurrentTrialDef.SearchStimsIndices);
         distractorStims = new StimGroup("DistractorStims", ExternalStims, CurrentTrialDef.DistractorStimsIndices);
-        foreach (StimDef sd in searchStims.stimDefs)
-        {
-            Debug.Log("STIMDEF LOCATIONS: " + sd.StimLocation);
-        }
         TrialStims.Add(searchStims);
         TrialStims.Add(distractorStims);
 
@@ -934,12 +980,26 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 totalStims.ElementAt(i).StimLocation = stimLocations.ElementAt(positionIndexArray[i]);
             }
+
+            for (int i = 0; i < totalStims.Count(); i++)
+            {
+                Debug.Log("STIM CODE: " + totalStims.ElementAt(i).StimCode + "STIM POSITION: " + totalStims.ElementAt(i).StimLocation);
+            }
         }
         else
         {
             searchStims.SetLocations(CurrentTrialDef.SearchStimsLocations);
             distractorStims.SetLocations(CurrentTrialDef.DistractorStimsLocations);
         }
+/*
+        foreach (StimDef sd in searchStims.stimDefs)
+        {
+            Debug.Log("SEARCH STIM CODE: " + sd.StimCode + "STIM POSITION: " + sd.StimLocation);
+        }
+        foreach (StimDef sd in distractorStims.stimDefs)
+        {
+            Debug.Log("DISTRACTOR STIM CODE: " + sd.StimCode + "STIM POSITION: " + sd.StimLocation);
+        }*/
         
     }
     

@@ -18,6 +18,11 @@ namespace WhatWhenWhere_Namespace
         public int[] SliderLoss;
         public int SliderInitial;
         public bool RandomizedLocations;
+        public string BlockEndType;
+        public float BlockEndThreshold;
+        public int BlockEndWindow;
+        public int NumPulses;
+        public int PulseSize;
 
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -41,6 +46,11 @@ namespace WhatWhenWhere_Namespace
                 td.SliderGain = SliderGain;
                 td.SliderLoss = SliderLoss;
                 td.SliderInitial = SliderInitial;
+                td.BlockEndType = BlockEndType;
+                td.BlockEndThreshold = BlockEndThreshold;
+                td.BlockEndWindow = BlockEndWindow;
+                td.NumPulses = NumPulses;
+                td.PulseSize = PulseSize;
                 TrialDefs[iTrial] = td;
             }
         }
@@ -63,6 +73,11 @@ namespace WhatWhenWhere_Namespace
         public int[] SliderGain;
         public int[] SliderLoss;
         public int SliderInitial;
+        public string BlockEndType;
+        public float BlockEndThreshold;
+        public int BlockEndWindow;
+        public int NumPulses;
+        public int PulseSize;
     }
 
     public class WhatWhenWhere_StimDef : StimDef

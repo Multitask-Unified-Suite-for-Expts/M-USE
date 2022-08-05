@@ -22,6 +22,7 @@ namespace VisualSearch_Namespace
         Vector3 ButtonPosition;
         Vector3 ButtonScale;
         Vector3 ButtonColor;
+        int NumTokens;
         string ButtonText;
         string ContextExternalFilePath;
     }

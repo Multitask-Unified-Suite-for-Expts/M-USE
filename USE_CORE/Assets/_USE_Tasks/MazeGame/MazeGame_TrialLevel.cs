@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using System.Data;
 using System.IO;
+using System.Windows.Forms;
 using ConfigDynamicUI;
 using USE_Settings;
 
@@ -80,7 +81,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     //private Button initButton;
     private Ray mouseRay;
     private int response;
-    private GameObject sliderHalo, txt, startTxt;
+
+    private GameObject sliderHalo;
     //private SpriteRenderer sr;
     private float startTime;
     private int max;
@@ -100,6 +102,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public Texture2D backgroundTex;
     private Image sr;
     private Vector3 sliderInitPosition;
+    private bool variablesLoaded = false;
     
     public int curMDim;
     public int curMNumSquares;
@@ -245,7 +248,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         GameConf.AddInitializationMethod(() =>
         {
-            loadVariables();
+            if (!variablesLoaded)
+            {
+                variablesLoaded = true;
+                loadVariables();
+            }
+
             // MAZE GAME WIDTHS
             ///*
             // TODO: Not implemented, but this should be the maximum screen width that tiles can take up without overfilling the screen
@@ -397,7 +405,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             sliderHalo.SetActive(true);
             // sphereCount = 0;
             sr.color = new Color(1, 1, 1, 0.2f);
-            txt.SetActive(true);
 
             startTime = Time.time;
 
@@ -416,8 +423,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         });
         Feedback.AddTimer(()=>finalFbDuration.value, ITI, () =>
         {
-
-            txt.SetActive(false);
             sliderHalo.SetActive(false);
             slider.gameObject.SetActive(false);
 
@@ -714,7 +719,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         sliderInitPosition = slider.gameObject.transform.position;
         Texture2D buttonTex = LoadPNG(MaterialFilePath + "\\StartButtonImage.png");
         initButton = CreateStartButton(buttonTex, new Rect(new Vector2(0,0), new Vector2(1,1)));
-        txt = GameObject.Find("FinalText");
         sliderHalo = GameObject.Find("SliderHalo");
         sr = sliderHalo.GetComponent<Image>();
         
@@ -734,7 +738,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         slider.gameObject.SetActive(false);
         initButton.SetActive(false);
-        txt.SetActive(false);
         sliderHalo.SetActive(false);
         sr.gameObject.SetActive(false);
     }

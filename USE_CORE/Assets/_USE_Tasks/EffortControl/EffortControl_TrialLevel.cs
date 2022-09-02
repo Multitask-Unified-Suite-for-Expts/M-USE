@@ -43,7 +43,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     // vector3 variables
     private Vector3 trialStimInitLocalScale;
     private Vector3 fbInitLocalScale;
-    private Vector3 sliderInitPosition;
     private Vector3 scaleUpAmountLeft;
     private Vector3 scaleUpAmountRight;
     private Vector3 scaleUpAmount;
@@ -53,8 +52,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     private Ray mouseRay;
     private Color red;
     private Color gray;
-    private Slider slider;
-    private float sliderValueIncreaseAmount;
 
     private bool variablesLoaded;
 
@@ -105,9 +102,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             clickCount = 0;
             response = -1;
-
-            slider.gameObject.transform.position = sliderInitPosition;
-            slider.value = 0;
 
             scaleUpAmountLeft = maxScale / CurrentTrialDef.NumOfClicksLeft;
             scaleUpAmountRight = maxScale / CurrentTrialDef.NumOfClicksRight;
@@ -161,7 +155,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                         ChangeColor(stimRight, gray);
                         ChangeContainerColor(balloonContainerRight, gray);
                         DestroyContainerChild(rewardContainerRight);
-                        slider.transform.Translate(-400f, 0f, 0f);
 
                         trialStim = hit.transform.gameObject;
                         numOfClicks = CurrentTrialDef.NumOfClicksLeft;
@@ -176,7 +169,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                         ChangeColor(stimLeft, gray);
                         ChangeContainerColor(balloonContainerLeft, gray);
                         DestroyContainerChild(rewardContainerLeft);
-                        slider.transform.Translate(400f, 0f, 0f);
 
                         trialStim = hit.transform.gameObject;
                         numOfClicks = CurrentTrialDef.NumOfClicksRight;
@@ -190,10 +182,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
         });
         ChooseBalloon.SpecifyTermination(() => trialStim != null, InflateBalloon);
-        ChooseBalloon.AddDefaultTerminationMethod(() => {
-            sliderValueIncreaseAmount = (100f / numOfClicks) / 100f;
-            slider.gameObject.SetActive(true);
-        });
 
         // define collectResponse state
         List<float> clickTimings = new List<float>();
@@ -220,7 +208,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                         clickTimings.Add(Time.time - timeTracker);
                         timeTracker = Time.time;
 
-                        slider.value += sliderValueIncreaseAmount;
                         clickMarker.transform.position = hit.point;
                         clickMarker.SetActive(true);
 
@@ -282,7 +269,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 fb.GetComponent<RawImage>().color = Color.red;
             }
             fb.SetActive(true);
-            slider.gameObject.SetActive(false);
         });
 
         Feedback.AddTimer(1f, ITI, () => fb.SetActive(false));
@@ -337,7 +323,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         stimRight.SetActive(false);
         clickMarker.SetActive(false);
         prize.SetActive(false);
-        slider.gameObject.SetActive(false);
         balloonOutline.SetActive(false);
     }
 
@@ -356,14 +341,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         prize = GameObject.Find("Prize2");
         rewardContainerLeft = GameObject.Find("RewardContainerLeft");
         rewardContainerRight = GameObject.Find("RewardContainerRight");
-        slider = GameObject.Find("Slider").GetComponent<Slider>();
         red = stimLeft.GetComponent<Renderer>().material.color;
         gray = new Color(0.5f, 0.5f, 0.5f);
         reward = GameObject.Find("Reward");
 
         fbInitLocalScale = fb.transform.localScale;
         trialStimInitLocalScale = stimLeft.transform.localScale;
-        sliderInitPosition = slider.gameObject.transform.position;
 
         initButton.SetActive(false);
         fb.SetActive(false);
@@ -372,7 +355,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         balloonOutline.SetActive(false);
         prize.SetActive(false);
         reward.SetActive(false);
-        GameObject.Find("Slider").SetActive(false);
 
         //cam = Camera.main.GetComponent<Camera>();
     }

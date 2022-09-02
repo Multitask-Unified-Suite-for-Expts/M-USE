@@ -103,10 +103,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             clickCount = 0;
             response = -1;
 
+            maxScale = new Vector3(50, 0, 50);
             scaleUpAmountLeft = maxScale / CurrentTrialDef.NumOfClicksLeft;
             scaleUpAmountRight = maxScale / CurrentTrialDef.NumOfClicksRight;
-            //Debug.Log("ScaleUpAmountLeft" + scaleUpAmountLeft);
-            //Debug.Log("ScaleUpAmountRight" + scaleUpAmountRight);
+            // Debug.Log("ScaleUpAmountLeft" + scaleUpAmountLeft);
+            // Debug.Log("ScaleUpAmountRight" + scaleUpAmountRight);
         });
 
         StartButton.AddUpdateMethod(() => {
@@ -211,7 +212,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                         clickMarker.transform.position = hit.point;
                         clickMarker.SetActive(true);
 
-                        trialStim.transform.localScale += scaleUpAmount;
+                        if (clickCount == 0) {
+                            GameObject container = (leftRightChoice == "left") ? balloonContainerLeft : balloonContainerRight;
+                            Vector3 scale = container.transform.GetChild(0).transform.localScale;
+                            scale.y = trialStim.transform.localScale.y;
+                            trialStim.transform.localScale = scale;
+                        } else {
+                            trialStim.transform.localScale += scaleUpAmount;
+                        }
                         clickCount++;
                         Debug.Log("Clicked balloon " + clickCount + " times.");
                     }

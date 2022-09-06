@@ -470,8 +470,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 4874126678125670354, guid: a7467567f50954ef6ae49f52cb3350a5,
-        type: 3}
+      objectReference: {fileID: 2100000, guid: c5c52a574b398444f811b47e4188a00a, type: 2}
     - target: {fileID: 5307914208256568252, guid: 59d3a5683299d48af83db605b499900d,
         type: 3}
       propertyPath: m_RootOrder
@@ -886,6 +885,7 @@ MonoBehaviour:
   EventCodeManager: {fileID: 0}
   leftRightChoice: 
   maxScale: {x: 0, y: 0, z: 0}
+  MaterialFilePath: 
 --- !u!114 &1719984668
 MonoBehaviour:
   m_ObjectHideFlags: 0

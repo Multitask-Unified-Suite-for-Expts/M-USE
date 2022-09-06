@@ -47,6 +47,7 @@ namespace EffortControl_Namespace
         public int PulseSizeLeft;
         public int PulseSizeRight;
         public int ClicksPerOutline;
+        public float CompleteToFeedbackDelay;
         // public float[] TouchOnOffTimeRange;
         // public float InitialChoiceMinDuration;
         // public float StarttoTapDispDelay;

@@ -73,8 +73,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         State ChooseBalloon = new State("ChooseBalloon");
         State InflateBalloon = new State("InflateBalloon");
         State Feedback = new State("Feedback");
+        State FeedbackDelay = new State("FeedbackDelay");
         State ITI = new State("ITI");
-        AddActiveStates(new List<State> { StartButton, ChooseBalloon, InflateBalloon, Feedback, ITI });
+        AddActiveStates(new List<State> { StartButton, ChooseBalloon, InflateBalloon, Feedback, FeedbackDelay, ITI });
 
         //AddInitializationMethod(() => { trialData.DefineDataController(); trialData.CreateFile(); });
 
@@ -234,13 +235,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 if (clickCount >= numOfClicks)
                 {
                     Debug.Log("User clicked enough times, popping balloon");
-                    trialStim.SetActive(false);
-                    trialStim.transform.localScale = trialStimInitLocalScale;
                     clickMarker.SetActive(false);
                     response = 1;
-                    // set prize's position to the position of the balloon
-                    prize.transform.position = trialStim.transform.position + new Vector3(0f, .5f, 0f);
-                    prize.SetActive(true);
 
                     //calculate average time
                     avgClickTime = clickTimings.Average();
@@ -253,8 +249,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
-        InflateBalloon.AddTimer(15f, Feedback);
-        InflateBalloon.SpecifyTermination(() => clickCount >= numOfClicks, Feedback);
+        InflateBalloon.AddTimer(15f, FeedbackDelay);
+        InflateBalloon.SpecifyTermination(() => clickCount >= numOfClicks, FeedbackDelay);
         InflateBalloon.AddDefaultTerminationMethod(() => {
             goCue.SetActive(false);
             if (leftRightChoice == "left")
@@ -267,9 +263,20 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
+        FeedbackDelay.AddTimer(() => CurrentTrialDef.CompleteToFeedbackDelay, Feedback);
+        FeedbackDelay.AddDefaultTerminationMethod(() => {
+            if (response == 1) {
+                trialStim.SetActive(false);
+                trialStim.transform.localScale = trialStimInitLocalScale;
+            }
+        });
+
         Feedback.AddInitializationMethod(() => {
             if (response == 1)
             {
+                // set prize's position to the position of the balloon
+                prize.transform.position = trialStim.transform.position + new Vector3(0f, .5f, 0f);
+                prize.SetActive(true);
                 fb.GetComponent<RawImage>().color = Color.green;
                 if (SyncBoxController != null) {
                     if (leftRightChoice == "left")

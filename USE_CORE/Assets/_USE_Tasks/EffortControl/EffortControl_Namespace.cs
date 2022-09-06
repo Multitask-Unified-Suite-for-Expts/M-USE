@@ -37,7 +37,7 @@ namespace EffortControl_Namespace
         // public int TrialCode;
         // public int ContextNum;
         // public string ConditionName;
-        // public string ContextName;
+        public string ContextName;
         public int NumOfClicksLeft;
         public int NumOfClicksRight;
         public int NumOfCoinsLeft;

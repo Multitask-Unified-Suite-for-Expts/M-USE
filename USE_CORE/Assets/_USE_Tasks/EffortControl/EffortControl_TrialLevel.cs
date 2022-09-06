@@ -54,6 +54,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     private Color gray;
 
     private bool variablesLoaded;
+    public string MaterialFilePath;
 
     //data control variables
     //public bool storeData;
@@ -107,8 +108,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             maxScale = new Vector3(50, 0, 50);
             scaleUpAmountLeft = maxScale / CurrentTrialDef.NumOfClicksLeft;
             scaleUpAmountRight = maxScale / CurrentTrialDef.NumOfClicksRight;
-            // Debug.Log("ScaleUpAmountLeft" + scaleUpAmountLeft);
-            // Debug.Log("ScaleUpAmountRight" + scaleUpAmountRight);
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
         });
 
         StartButton.AddUpdateMethod(() => {

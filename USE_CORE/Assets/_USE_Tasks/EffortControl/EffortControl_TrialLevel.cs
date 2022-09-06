@@ -304,16 +304,16 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
 
         // Additional recorded data 
-        TrialData.AddDatum("TrialName", () => CurrentTrialDef.TrialName);
-        TrialData.AddDatum("TrialCode", () => CurrentTrialDef.TrialCode);
-        TrialData.AddDatum("ContextNum", () => CurrentTrialDef.ContextNum);
-        TrialData.AddDatum("ConditionName", () => CurrentTrialDef.ConditionName);
-        TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
+        // TrialData.AddDatum("TrialName", () => CurrentTrialDef.TrialName);
+        // TrialData.AddDatum("TrialCode", () => CurrentTrialDef.TrialCode);
+        // TrialData.AddDatum("ContextNum", () => CurrentTrialDef.ContextNum);
+        // TrialData.AddDatum("ConditionName", () => CurrentTrialDef.ConditionName);
+        // TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("ClicksPerOutline", () => CurrentTrialDef.ClicksPerOutline);
-        TrialData.AddDatum("InitialChoiceMinDuration", () => CurrentTrialDef.InitialChoiceMinDuration);
-        TrialData.AddDatum("StarttoTapDispDelay", () => CurrentTrialDef.StarttoTapDispDelay);
-        TrialData.AddDatum("FinalTouchToVisFeedbackDelay", () => CurrentTrialDef.FinalTouchToVisFeedbackDelay);
-        TrialData.AddDatum("FinalTouchToRewardDelay", () => CurrentTrialDef.FinalTouchToRewardDelay);
+        // TrialData.AddDatum("InitialChoiceMinDuration", () => CurrentTrialDef.InitialChoiceMinDuration);
+        // TrialData.AddDatum("StarttoTapDispDelay", () => CurrentTrialDef.StarttoTapDispDelay);
+        // TrialData.AddDatum("FinalTouchToVisFeedbackDelay", () => CurrentTrialDef.FinalTouchToVisFeedbackDelay);
+        // TrialData.AddDatum("FinalTouchToRewardDelay", () => CurrentTrialDef.FinalTouchToRewardDelay);
 
         TrialData.AddDatum("NumOfClicksLeft", () => CurrentTrialDef.NumOfClicksLeft);
         TrialData.AddDatum("NumOfClicksRight", () => CurrentTrialDef.NumOfClicksRight);

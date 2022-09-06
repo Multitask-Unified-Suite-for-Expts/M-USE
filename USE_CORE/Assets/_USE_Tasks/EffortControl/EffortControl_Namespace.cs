@@ -32,11 +32,12 @@ namespace EffortControl_Namespace
         //Already-existing fields (inherited from TrialDef)
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
-        public string TrialName;
-        public int TrialCode;
-        public int ContextNum;
-        public string ConditionName;
-        public string ContextName;
+        // Commented out variables are not used so are commented out
+        // public string TrialName;
+        // public int TrialCode;
+        // public int ContextNum;
+        // public string ConditionName;
+        // public string ContextName;
         public int NumOfClicksLeft;
         public int NumOfClicksRight;
         public int NumOfCoinsLeft;
@@ -46,11 +47,11 @@ namespace EffortControl_Namespace
         public int PulseSizeLeft;
         public int PulseSizeRight;
         public int ClicksPerOutline;
-        public float[] TouchOnOffTimeRange;
-        public float InitialChoiceMinDuration;
-        public float StarttoTapDispDelay;
-        public float FinalTouchToVisFeedbackDelay;
-        public float FinalTouchToRewardDelay;
+        // public float[] TouchOnOffTimeRange;
+        // public float InitialChoiceMinDuration;
+        // public float StarttoTapDispDelay;
+        // public float FinalTouchToVisFeedbackDelay;
+        // public float FinalTouchToRewardDelay;
     }
 
     public class EffortControl_StimDef : StimDef

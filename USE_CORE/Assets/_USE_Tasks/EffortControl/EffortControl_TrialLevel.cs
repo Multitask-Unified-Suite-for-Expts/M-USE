@@ -271,6 +271,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if (response == 1)
             {
                 fb.GetComponent<RawImage>().color = Color.green;
+                if (SyncBoxController != null) {
+                    if (leftRightChoice == "left")
+                        SyncBoxController.SendRewardPulses(CurrentTrialDef.NumOfPulsesLeft, CurrentTrialDef.PulseSizeLeft);
+                    else
+                        SyncBoxController.SendRewardPulses(CurrentTrialDef.NumOfPulsesRight, CurrentTrialDef.PulseSizeRight);
+                }
             }
             else
             {

@@ -41,6 +41,10 @@ namespace EffortControl_Namespace
         public int NumOfClicksRight;
         public int NumOfCoinsLeft;
         public int NumOfCoinsRight;
+        public int NumOfPulsesLeft;
+        public int NumOfPulsesRight;
+        public int PulseSizeLeft;
+        public int PulseSizeRight;
         public int ClicksPerOutline;
         public float[] TouchOnOffTimeRange;
         public float InitialChoiceMinDuration;

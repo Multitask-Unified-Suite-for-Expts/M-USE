@@ -26,6 +26,7 @@ public class SelectionHandler<T> where T : StimDef
         started = false;
         SelectedGameObject = null;
         SelectedStimDef = null;
+        targetedGameObject = null;
         currentTargetDuration = 0;
     }
 

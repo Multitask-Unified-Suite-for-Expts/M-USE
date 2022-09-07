@@ -70,13 +70,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //trialData.fileName = dataFileName;
 
         //define States within this Control Level
-        State StartButton = new State("StartButton");
+        State InitTrial = new State("InitTrial");
         State ChooseBalloon = new State("ChooseBalloon");
         State InflateBalloon = new State("InflateBalloon");
         State Feedback = new State("Feedback");
         State FeedbackDelay = new State("FeedbackDelay");
         State ITI = new State("ITI");
-        AddActiveStates(new List<State> { StartButton, ChooseBalloon, InflateBalloon, Feedback, FeedbackDelay, ITI });
+        AddActiveStates(new List<State> { InitTrial, ChooseBalloon, InflateBalloon, Feedback, FeedbackDelay, ITI });
 
         //AddInitializationMethod(() => { trialData.DefineDataController(); trialData.CreateFile(); });
 
@@ -88,10 +88,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
-        SetupTrial.SpecifyTermination(() => true, StartButton);
+        SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         // define initScreen state
-        StartButton.AddInitializationMethod(() => {
+        InitTrial.AddInitializationMethod(() => {
             trialCount++;
 
             avgClickTime = null;
@@ -111,7 +111,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
         });
 
-        StartButton.AddUpdateMethod(() => {
+        InitTrial.AddUpdateMethod(() => {
             if (InputBroker.GetMouseButtonDown(0))
             {
                 mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -126,8 +126,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
-        StartButton.SpecifyTermination(() => response == 0, ChooseBalloon);
-        StartButton.AddDefaultTerminationMethod(() => initButton.SetActive(false));
+        InitTrial.SpecifyTermination(() => response == 0, ChooseBalloon);
+        InitTrial.AddDefaultTerminationMethod(() => initButton.SetActive(false));
 
         // Define stimOn state
         ChooseBalloon.AddInitializationMethod(() => {

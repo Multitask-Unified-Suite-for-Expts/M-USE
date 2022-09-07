@@ -71,12 +71,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         //define States within this Control Level
         State InitTrial = new State("InitTrial");
+        State InitDelay = new State("InitDelay");
         State ChooseBalloon = new State("ChooseBalloon");
         State InflateBalloon = new State("InflateBalloon");
         State Feedback = new State("Feedback");
         State FeedbackDelay = new State("FeedbackDelay");
         State ITI = new State("ITI");
-        AddActiveStates(new List<State> { InitTrial, ChooseBalloon, InflateBalloon, Feedback, FeedbackDelay, ITI });
+        AddActiveStates(new List<State> { InitTrial, InitDelay, ChooseBalloon, InflateBalloon, Feedback, FeedbackDelay, ITI });
 
         //AddInitializationMethod(() => { trialData.DefineDataController(); trialData.CreateFile(); });
 
@@ -126,8 +127,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
-        InitTrial.SpecifyTermination(() => response == 0, ChooseBalloon);
+        InitTrial.SpecifyTermination(() => response == 0, InitDelay);
         InitTrial.AddDefaultTerminationMethod(() => initButton.SetActive(false));
+
+        InitDelay.AddTimer(() => CurrentTrialDef.InitToBalloonDelay, ChooseBalloon);
 
         // Define stimOn state
         ChooseBalloon.AddInitializationMethod(() => {

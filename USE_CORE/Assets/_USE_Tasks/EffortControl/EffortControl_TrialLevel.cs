@@ -79,6 +79,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, InitDelay, ChooseBalloon, InflateBalloon, Feedback, FeedbackDelay, ITI });
 
+        SelectionHandler<EffortControl_StimDef> mouseHandler = new SelectionHandler<EffortControl_StimDef>();
+
         //AddInitializationMethod(() => { trialData.DefineDataController(); trialData.CreateFile(); });
 
         AddInitializationMethod(() => {
@@ -92,6 +94,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         // define initScreen state
+        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
         InitTrial.AddInitializationMethod(() => {
             trialCount++;
 
@@ -112,22 +115,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
         });
 
-        InitTrial.AddUpdateMethod(() => {
-            if (InputBroker.GetMouseButtonDown(0))
-            {
-                mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(mouseRay, out hit))
-                {
-                    if (hit.transform.name == "StartButton")
-                    {
-                        response = 0;
-                    }
-                }
-            }
-        });
-
-        InitTrial.SpecifyTermination(() => response == 0, InitDelay);
+        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(initButton), InitDelay);
         InitTrial.AddDefaultTerminationMethod(() => initButton.SetActive(false));
 
         InitDelay.AddTimer(() => CurrentTrialDef.InitToBalloonDelay, ChooseBalloon);
@@ -143,47 +131,36 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             createRewards(CurrentTrialDef.NumOfCoinsRight, rewardContainerRight.transform.position, rewardContainerRight);
         });
 
+        MouseTracker.AddSelectionHandler(mouseHandler, ChooseBalloon);
         ChooseBalloon.AddUpdateMethod(() => {
             // check if user clicks on left or right
-            if (InputBroker.GetMouseButtonDown(0))
+            GameObject hit = mouseHandler.SelectedGameObject;
+            if (hit == null) return;
+            if (hit.transform.name == "StimLeft")
             {
-                mouseRay = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(mouseRay, out hit))
-                {
-                    if (hit.transform.name == "StimLeft")
-                    {
-                        numChosenLeft++;
-                        Debug.Log("Chose left");
-                        leftRightChoice = "left";
+                numChosenLeft++;
+                leftRightChoice = "left";
 
-                        ChangeColor(stimRight, gray);
-                        ChangeContainerColor(balloonContainerRight, gray);
-                        DestroyContainerChild(rewardContainerRight);
+                ChangeColor(stimRight, gray);
+                ChangeContainerColor(balloonContainerRight, gray);
+                DestroyContainerChild(rewardContainerRight);
 
-                        trialStim = hit.transform.gameObject;
-                        numOfClicks = CurrentTrialDef.NumOfClicksLeft;
-                        scaleUpAmount = scaleUpAmountLeft;
-                    }
-                    else if (hit.transform.name == "StimRight")
-                    {
-                        numChosenRight++;
-                        Debug.Log("Chose right");
-                        leftRightChoice = "right";
+                trialStim = hit.transform.gameObject;
+                numOfClicks = CurrentTrialDef.NumOfClicksLeft;
+                scaleUpAmount = scaleUpAmountLeft;
+            }
+            else if (hit.transform.name == "StimRight")
+            {
+                numChosenRight++;
+                leftRightChoice = "right";
 
-                        ChangeColor(stimLeft, gray);
-                        ChangeContainerColor(balloonContainerLeft, gray);
-                        DestroyContainerChild(rewardContainerLeft);
+                ChangeColor(stimLeft, gray);
+                ChangeContainerColor(balloonContainerLeft, gray);
+                DestroyContainerChild(rewardContainerLeft);
 
-                        trialStim = hit.transform.gameObject;
-                        numOfClicks = CurrentTrialDef.NumOfClicksRight;
-                        scaleUpAmount = scaleUpAmountRight;
-                    }
-                    else
-                    {
-                        Debug.Log("Didn't click on any balloon");
-                    }
-                }
+                trialStim = hit.transform.gameObject;
+                numOfClicks = CurrentTrialDef.NumOfClicksRight;
+                scaleUpAmount = scaleUpAmountRight;
             }
         });
         ChooseBalloon.SpecifyTermination(() => trialStim != null, InflateBalloon);
@@ -197,41 +174,34 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             clickTimings = new List<float>();
             timeTracker = Time.time;
         });
+        MouseTracker.AddSelectionHandler(mouseHandler, InflateBalloon);
         InflateBalloon.AddUpdateMethod(() => {
             if (InputBroker.GetMouseButtonDown(0))
             {
-                // store the point of click
-                mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-
-                if (Physics.Raycast(mouseRay, out hit))
+                if (mouseHandler.SelectionMatches(trialStim))
                 {
-                    // if the raycast hits the trialStim gameobject
-                    if (hit.transform.gameObject == trialStim)
-                    {
-                        //add to clicktimings
-                        clickTimings.Add(Time.time - timeTracker);
-                        timeTracker = Time.time;
+                    //add to clicktimings
+                    clickTimings.Add(Time.time - timeTracker);
+                    timeTracker = Time.time;
 
-                        clickMarker.transform.position = hit.point;
-                        clickMarker.SetActive(true);
+                    clickMarker.transform.position = mouseHandler.SelectedGameObject.transform.position;
+                    clickMarker.SetActive(true);
 
-                        if (clickCount == 0) {
-                            GameObject container = (leftRightChoice == "left") ? balloonContainerLeft : balloonContainerRight;
-                            Vector3 scale = container.transform.GetChild(0).transform.localScale;
-                            scale.y = trialStim.transform.localScale.y;
-                            trialStim.transform.localScale = scale;
-                        } else {
-                            trialStim.transform.localScale += scaleUpAmount;
-                        }
-                        clickCount++;
-                        Debug.Log("Clicked balloon " + clickCount + " times.");
+                    if (clickCount == 0) {
+                        GameObject container = (leftRightChoice == "left") ? balloonContainerLeft : balloonContainerRight;
+                        Vector3 scale = container.transform.GetChild(0).transform.localScale;
+                        scale.y = trialStim.transform.localScale.y;
+                        trialStim.transform.localScale = scale;
+                    } else {
+                        trialStim.transform.localScale += scaleUpAmount;
                     }
-                    else
-                    {
-                        Debug.Log("Clicked on something else");
-                        // cam.backgroundColor = Color.red;
-                    }
+                    clickCount++;
+                    Debug.Log("Clicked balloon " + clickCount + " times.");
+                }
+                else
+                {
+                    Debug.Log("Clicked on something else");
+                    // cam.backgroundColor = Color.red;
                 }
 
                 // disable gameObject if the user clicks enough time

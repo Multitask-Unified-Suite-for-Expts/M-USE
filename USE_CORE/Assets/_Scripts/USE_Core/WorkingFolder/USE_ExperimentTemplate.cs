@@ -31,11 +31,11 @@ namespace USE_ExperimentTemplate
 		public string TaskSelectionSceneName;
 
 		// protected Dictionary<string, ControlLevel_Task_Template> ActiveTaskLevels;
-		private Dictionary<string, Type> ActiveTaskTypes = new Dictionary<string, Type>();
+		// private Dictionary<string, Type> ActiveTaskTypes = new Dictionary<string, Type>();
 		protected List<ControlLevel_Task_Template> ActiveTaskLevels;
 		private ControlLevel_Task_Template CurrentTask;
-		public List<ControlLevel_Task_Template> AvailableTaskLevels;
-		public List<string> ActiveTaskNames;
+		// public List<ControlLevel_Task_Template> AvailableTaskLevels;
+		private List<string> TaskNames;
 		protected int taskCount;
 
 		//For Loading config information
@@ -125,8 +125,8 @@ namespace USE_ExperimentTemplate
 
 
 			if (SessionSettings.SettingExists("Session", "TaskNames"))
-				ActiveTaskNames = (List<string>) SessionSettings.Get("Session", "TaskNames");
-			else if (ActiveTaskNames.Count == 0)
+				TaskNames = (List<string>) SessionSettings.Get("Session", "TaskNames");
+			else if (TaskNames.Count == 0)
 				Debug.LogError("No task names specified in Session config file or by other means.");
 
 			if (SessionSettings.SettingExists("Session", "StoreData"))
@@ -233,56 +233,25 @@ namespace USE_ExperimentTemplate
 				if (waitForSerialPort && Time.time - StartTimeAbsolute > SerialPortController.initTimeout / 1000 + 0.5f)
 					waitForSerialPort = false;
 				
-				if (iTask < ActiveTaskNames.Count)
+				if (iTask < TaskNames.Count)
 				{
 					if (!SceneLoading)
 					{
 						oldStyleTaskLoading = false;
 						newStyleTaskLoading = false;
-						int iAvail = 0;
-						while (iAvail < AvailableTaskLevels.Count)
-						{
-							if (AvailableTaskLevels[iAvail].TaskName == ActiveTaskNames[iTask])
-							{
-								oldStyleTaskLoading = true;
-								break;
-							}
-
-							iAvail++;
-						}
 
 						ControlLevel_Task_Template tl;
 						AsyncOperation loadScene;
-						if (oldStyleTaskLoading)
-						{
-							SceneLoading = true;
-							tl = PopulateTaskLevel(AvailableTaskLevels[iAvail]);
-							taskName = tl.TaskName;
-							loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-							loadScene.completed += (_) => SceneLoaded(taskName);
-						}
-						else
-						{
-							if (!newStyleTaskLoading)
-							{
-								SceneLoading = true;
-								newStyleTaskLoading = true;
-								taskName = ActiveTaskNames[iTask];
-								loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-								loadScene.completed += (_) => SceneLoadedNew(taskName);
-							}
-							else
-							{
-
-							}
-						}
+						SceneLoading = true;
+						taskName = TaskNames[iTask];
+						loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
+						loadScene.completed += (_) => SceneLoadedNew(taskName);
 
 						iTask++;
-						// TaskSceneLoaded = false;
 					}
 				}
 			});
-			setupSession.SpecifyTermination(() => iTask >= ActiveTaskNames.Count && !SceneLoading && !waitForSerialPort, selectTask,
+			setupSession.SpecifyTermination(() => iTask >= TaskNames.Count && !SceneLoading && !waitForSerialPort, selectTask,
 				() =>
 				{
 					if (SyncBoxActive)
@@ -305,9 +274,6 @@ namespace USE_ExperimentTemplate
 					CurrentTask = ActiveTaskLevels[taskCount];
 				else
 					tasksFinished = true;
-				//replace with 
-				//if(taskCount >= ActiveTaskLevels.Count)
-				//	tasksFinished = true;
 			});
 
 
@@ -344,6 +310,7 @@ namespace USE_ExperimentTemplate
 			}
 			runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
 			{
+				Debug.Log("333333");
 				SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
 				SessionData.AppendData();
 				SessionData.WriteData();
@@ -387,7 +354,7 @@ namespace USE_ExperimentTemplate
 					(List<string>) SessionSettings.Get("Session", "ConfigFolderNames");
 				tl.TaskConfigPath =
 					configFileFolder + Path.DirectorySeparatorChar +
-					configFolders[ActiveTaskNames.IndexOf(tl.TaskName)];
+					configFolders[TaskNames.IndexOf(tl.TaskName)];
 			}
 
 			tl.FilePrefix = FilePrefix;
@@ -424,22 +391,22 @@ namespace USE_ExperimentTemplate
 				tl.SonicationActive = false;
 
 			tl.DefineTaskLevel();
-			ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
+			// ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
 			ActiveTaskLevels.Add(tl);
 			if(tl.TaskCanvasses != null)
 				foreach (GameObject go in tl.TaskCanvasses)
 					go.SetActive(false);
 			return tl;
 		}
-
-		void SceneLoaded(string sceneName)
-		{
-			var methodInfo = GetType().GetMethod(nameof(this.FindTaskCam));
-			MethodInfo findTaskCam = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[sceneName]});
-			findTaskCam.Invoke(this, new object[] {sceneName});
-			// TaskSceneLoaded = true;
-			SceneLoading = false;
-		}
+		//
+		// void SceneLoaded(string sceneName)
+		// {
+		// 	var methodInfo = GetType().GetMethod(nameof(this.FindTaskCam));
+		// 	MethodInfo findTaskCam = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[sceneName]});
+		// 	findTaskCam.Invoke(this, new object[] {sceneName});
+		// 	// TaskSceneLoaded = true;
+		// 	SceneLoading = false;
+		// }
 
 		void SceneLoadedNew(string taskName)
 		{
@@ -459,12 +426,12 @@ namespace USE_ExperimentTemplate
 					tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
 			tl.TaskCam.gameObject.SetActive(false);
 		}
-		public void FindTaskCam<T>(string taskName) where T : ControlLevel_Task_Template
-		{
-			ControlLevel_Task_Template tl = GameObject.Find("ControlLevels").GetComponent<T>();
-			tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
-			tl.TaskCam.gameObject.SetActive(false);
-		}
+		// public void FindTaskCam<T>(string taskName) where T : ControlLevel_Task_Template
+		// {
+		// 	ControlLevel_Task_Template tl = GameObject.Find("ControlLevels").GetComponent<T>();
+		// 	tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
+		// 	tl.TaskCam.gameObject.SetActive(false);
+		// }
 
 #if UNITY_STANDALONE_WIN
 		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]

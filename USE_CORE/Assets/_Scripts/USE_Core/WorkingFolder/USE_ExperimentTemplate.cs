@@ -780,10 +780,15 @@ namespace USE_ExperimentTemplate
 					// string[] keys = new string[TaskStims.AllTaskStimGroups.Count];
 					// TaskStims.AllTaskStimGroups.Keys.CopyTo(keys, 0);
 					// TaskStims.AllTaskStimGroups.Remove(keys[0]);
-					while(sg.stimDefs.Count>0)
+					while (sg.stimDefs.Count > 0)
+					{
 						sg.stimDefs[0].Destroy();
+						sg.stimDefs.RemoveAt(0);
+					}
+
 					sg.DestroyStimGroup();
 				}
+				
 				TaskStims.AllTaskStims.DestroyStimGroup();
 				TaskCam.gameObject.SetActive(false);
 				
@@ -791,6 +796,7 @@ namespace USE_ExperimentTemplate
 					foreach (GameObject go in TaskCanvasses)
 						go.SetActive(false);
 				Controllers.SetActive(false);
+				
 			});
 			
 			//user-defined task control level 

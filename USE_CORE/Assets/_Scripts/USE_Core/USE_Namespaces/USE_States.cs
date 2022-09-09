@@ -1311,20 +1311,16 @@ namespace USE_States
 				Debug.Log("ControlLevel " + ControlLevelName + " termination on Frame " + Time.frameCount + ".");
 			}
 
-			Debug.Log("00000");
 			if (termination != null)
 			{
-				Debug.Log("11111");
 				termination();
 			}
 			else if (controlLevelDefaultTermination != null)
 			{
-				Debug.Log("22222");
 				controlLevelDefaultTermination();
 			}
 			CurrentState = null;
 			initialized = false;
-			Terminated = true;
 			EndFrame = Time.frameCount;
 			Duration = Time.time - StartTimeAbsolute;
 			if (isMainLevel)

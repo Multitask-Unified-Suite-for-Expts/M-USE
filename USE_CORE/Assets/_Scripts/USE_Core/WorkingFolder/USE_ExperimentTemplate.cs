@@ -245,7 +245,7 @@ namespace USE_ExperimentTemplate
 						SceneLoading = true;
 						taskName = TaskNames[iTask];
 						loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-						loadScene.completed += (_) => SceneLoadedNew(taskName);
+						loadScene.completed += (_) => SceneLoaded(taskName);
 
 						iTask++;
 					}
@@ -407,7 +407,7 @@ namespace USE_ExperimentTemplate
 		// 	SceneLoading = false;
 		// }
 
-		void SceneLoadedNew(string taskName)
+		void SceneLoaded(string taskName)
 		{
 			var methodInfo = GetType().GetMethod(nameof(this.PrepareTaskLevel));
 			Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;

@@ -224,10 +224,9 @@ namespace USE_ExperimentTemplate
 			});
 			
 			int iTask = 0;
-			bool oldStyleTaskLoading = false;
-			bool newStyleTaskLoading = false;
 			SceneLoading = false;
-			string taskName;
+			string taskName = "";
+			AsyncOperation loadScene = null;
 			setupSession.AddUpdateMethod(() =>
 			{
 				if (waitForSerialPort && Time.time - StartTimeAbsolute > SerialPortController.initTimeout / 1000 + 0.5f)
@@ -237,21 +236,23 @@ namespace USE_ExperimentTemplate
 				{
 					if (!SceneLoading)
 					{
-						oldStyleTaskLoading = false;
-						newStyleTaskLoading = false;
-
-						ControlLevel_Task_Template tl;
-						AsyncOperation loadScene;
+						//AsyncOperation loadScene;
 						SceneLoading = true;
 						taskName = TaskNames[iTask];
 						loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-						loadScene.completed += (_) => SceneLoaded(taskName);
+						// Unload it after memory because this loads the assets into memory but destroys the objects
+						loadScene.completed += (_) => {
+							SceneManager.UnloadSceneAsync(taskName);
+							SceneLoading = false;
+							iTask++;
+						};
+						// loadScene.completed += (_) => SceneLoaded(taskName);
+						//SceneManager.SetActiveScene(SceneManager.GetSceneByName(taskName));
 
-						iTask++;
 					}
 				}
 			});
-			setupSession.SpecifyTermination(() => iTask >= TaskNames.Count && !SceneLoading && !waitForSerialPort, selectTask,
+			setupSession.SpecifyTermination(() => iTask >= TaskNames.Count && !waitForSerialPort, selectTask,
 				() =>
 				{
 					if (SyncBoxActive)
@@ -262,23 +263,27 @@ namespace USE_ExperimentTemplate
 
 			//tasksFinished is a placeholder, eventually there will be a proper task selection screen
 			bool tasksFinished = false;
-			string CurrentTaskName = "";
 			selectTask.AddUniversalInitializationMethod(() =>
 			{
 				SessionCam.gameObject.SetActive(true);
 				// SessionCam.targetTexture = CameraMirrorTexture;
 				// mirrorCamera.CopyFrom(SessionCam);
 				// mirrorCamera.cullingMask = 0;
-				tasksFinished = false;
-				if (taskCount < ActiveTaskLevels.Count)
-					CurrentTask = ActiveTaskLevels[taskCount];
-				else
+				SceneLoading = true;
+				if (taskCount >= TaskNames.Count) {	
 					tasksFinished = true;
+					return;
+				}
+				loadScene = SceneManager.LoadSceneAsync(TaskNames[taskCount], LoadSceneMode.Additive);
+				loadScene.completed += (_) => {
+					SceneLoaded(TaskNames[taskCount]);
+					CurrentTask = ActiveTaskLevels[taskCount];
+				};
 			});
 
 
 			//selectTask.AddUpdateMethod( get string of CurrentTaskName from button press);
-			selectTask.SpecifyTermination(() => !tasksFinished, runTask, () =>
+			selectTask.SpecifyTermination(() => !SceneLoading, runTask, () =>
 			{
 				// var methodInfo = GetType().GetMethod(nameof(GetTaskLevelFromString));
 				// MethodInfo getTaskLevel = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[CurrentTaskName]});

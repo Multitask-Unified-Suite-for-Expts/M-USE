@@ -13,7 +13,6 @@ using USE_Data;
 using USE_Settings;
 using USE_StimulusManagement;
 using ConfigDynamicUI;
-using UnityEngine.UIElements;
 using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Classes;
 
@@ -171,13 +170,7 @@ namespace USE_ExperimentTemplate
 			mirrorCamera.cullingMask = 0;
 			// mirrorCamera.targetDisplay = 2;
 
-			CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
-			CameraMirrorTexture.Create();
-			Camera.main.targetTexture = CameraMirrorTexture;
-			// mirrorCamera.targetTexture = CameraMirrorTexture;
-				
 			RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
-			mainCameraCopy.texture = CameraMirrorTexture;
 
 			bool waitForSerialPort = false;
 			setupSession.AddDefaultInitializationMethod(() =>
@@ -263,19 +256,26 @@ namespace USE_ExperimentTemplate
 
 			//tasksFinished is a placeholder, eventually there will be a proper task selection screen
 			bool tasksFinished = false;
+			GameObject taskButtons = null;
 			selectTask.AddUniversalInitializationMethod(() =>
 			{
 				SessionCam.gameObject.SetActive(true);
-				// SessionCam.targetTexture = CameraMirrorTexture;
-				// mirrorCamera.CopyFrom(SessionCam);
-				// mirrorCamera.cullingMask = 0;
+				CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
+				CameraMirrorTexture.Create();
+				Camera.main.targetTexture = CameraMirrorTexture;
+				mainCameraCopy.texture = CameraMirrorTexture;
+
 				SceneLoading = true;
 				if (taskCount >= TaskNames.Count) {	
 					tasksFinished = true;
 					return;
 				}
 
-				GameObject taskButtons = new GameObject("TaskButtons");
+				if (taskButtons != null) {
+					taskButtons.SetActive(true);
+					return;
+				}
+				taskButtons = new GameObject("TaskButtons");
 				taskButtons.transform.parent = GameObject.Find("TaskSelectionCanvas").transform;
 				taskButtons.transform.localPosition = Vector3.zero;
 				taskButtons.transform.localScale = Vector3.one;
@@ -286,25 +286,27 @@ namespace USE_ExperimentTemplate
 				float buttonsWidth = numTasks * buttonSize + (numTasks - 1) * buttonSpacing;
 				float buttonStart = (buttonSize - buttonsWidth) / 2;
 				foreach (string taskName in TaskNames) {
-					GameObject button = new GameObject(taskName + "Button");
-					button.transform.parent = taskButtons.transform;
-					RawImage image = button.AddComponent<RawImage>();
+					GameObject taskButton = new GameObject(taskName + "Button");
+					taskButton.transform.parent = taskButtons.transform;
+
+					RawImage image = taskButton.AddComponent<RawImage>();
 					image.texture = Resources.Load<Texture2D>("TaskButtonImages/" + taskName);
 					image.rectTransform.localPosition = new Vector3(buttonStart, 0.0f, 0.0f);
 					image.rectTransform.localScale = Vector3.one;
 					image.rectTransform.sizeDelta = buttonSize * Vector3.one;
 					buttonStart += buttonSize + buttonSpacing;
+
+					Button button = taskButton.AddComponent<Button>();
+					button.onClick.AddListener(() => {
+						taskButtons.SetActive(false);
+						loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
+						loadScene.completed += (_) => {
+							SceneLoaded(TaskNames[taskCount]);
+							CurrentTask = ActiveTaskLevels[taskCount];
+						};
+					});
 				}
-
-				// loadScene = SceneManager.LoadSceneAsync(TaskNames[taskCount], LoadSceneMode.Additive);
-				// loadScene.completed += (_) => {
-				// 	SceneLoaded(TaskNames[taskCount]);
-				// 	CurrentTask = ActiveTaskLevels[taskCount];
-				// };
 			});
-
-
-			//selectTask.AddUpdateMethod( get string of CurrentTaskName from button press);
 			selectTask.SpecifyTermination(() => !SceneLoading, runTask, () =>
 			{
 				// var methodInfo = GetType().GetMethod(nameof(GetTaskLevelFromString));
@@ -337,6 +339,7 @@ namespace USE_ExperimentTemplate
 			}
 			runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
 			{
+				SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
 				SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
 				SessionData.AppendData();
 				SessionData.WriteData();
@@ -615,7 +618,7 @@ namespace USE_ExperimentTemplate
 			}
 		}
 		public void OnGUI() {
-			if (CameraMirrorTexture == null) return;
+			// if (CameraMirrorTexture == null) return;
 			GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), CameraMirrorTexture);
 		}
 	}

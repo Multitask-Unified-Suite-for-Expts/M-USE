@@ -274,11 +274,33 @@ namespace USE_ExperimentTemplate
 					tasksFinished = true;
 					return;
 				}
-				loadScene = SceneManager.LoadSceneAsync(TaskNames[taskCount], LoadSceneMode.Additive);
-				loadScene.completed += (_) => {
-					SceneLoaded(TaskNames[taskCount]);
-					CurrentTask = ActiveTaskLevels[taskCount];
-				};
+
+				GameObject taskButtons = new GameObject("TaskButtons");
+				taskButtons.transform.parent = GameObject.Find("TaskSelectionCanvas").transform;
+				taskButtons.transform.localPosition = Vector3.zero;
+				taskButtons.transform.localScale = Vector3.one;
+				// We'll use height for the calculations because it is generally smaller than the width
+				int numTasks = TaskNames.Count;
+				float buttonSize = 200;
+				float buttonSpacing = 20;
+				float buttonsWidth = numTasks * buttonSize + (numTasks - 1) * buttonSpacing;
+				float buttonStart = (buttonSize - buttonsWidth) / 2;
+				foreach (string taskName in TaskNames) {
+					GameObject button = new GameObject(taskName + "Button");
+					button.transform.parent = taskButtons.transform;
+					RawImage image = button.AddComponent<RawImage>();
+					image.texture = Resources.Load<Texture2D>("TaskButtonImages/" + taskName);
+					image.rectTransform.localPosition = new Vector3(buttonStart, 0.0f, 0.0f);
+					image.rectTransform.localScale = Vector3.one;
+					image.rectTransform.sizeDelta = buttonSize * Vector3.one;
+					buttonStart += buttonSize + buttonSpacing;
+				}
+
+				// loadScene = SceneManager.LoadSceneAsync(TaskNames[taskCount], LoadSceneMode.Additive);
+				// loadScene.completed += (_) => {
+				// 	SceneLoaded(TaskNames[taskCount]);
+				// 	CurrentTask = ActiveTaskLevels[taskCount];
+				// };
 			});
 
 

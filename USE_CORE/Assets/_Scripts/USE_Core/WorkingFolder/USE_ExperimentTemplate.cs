@@ -299,6 +299,9 @@ namespace USE_ExperimentTemplate
 					Button button = taskButton.AddComponent<Button>();
 					button.onClick.AddListener(() => {
 						taskButtons.SetActive(false);
+						image.color = Color.gray;
+						Destroy(button);
+
 						loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
 						loadScene.completed += (_) => {
 							SceneLoaded(TaskNames[taskCount]);

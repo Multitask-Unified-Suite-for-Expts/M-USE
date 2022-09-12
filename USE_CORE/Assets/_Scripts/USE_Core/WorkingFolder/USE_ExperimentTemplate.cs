@@ -13,7 +13,6 @@ using USE_Data;
 using USE_Settings;
 using USE_StimulusManagement;
 using ConfigDynamicUI;
-using UnityEngine.UIElements;
 using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Classes;
 
@@ -31,11 +30,11 @@ namespace USE_ExperimentTemplate
 		public string TaskSelectionSceneName;
 
 		// protected Dictionary<string, ControlLevel_Task_Template> ActiveTaskLevels;
-		private Dictionary<string, Type> ActiveTaskTypes = new Dictionary<string, Type>();
+		// private Dictionary<string, Type> ActiveTaskTypes = new Dictionary<string, Type>();
 		protected List<ControlLevel_Task_Template> ActiveTaskLevels;
 		private ControlLevel_Task_Template CurrentTask;
-		public List<ControlLevel_Task_Template> AvailableTaskLevels;
-		public List<string> ActiveTaskNames;
+		// public List<ControlLevel_Task_Template> AvailableTaskLevels;
+		private List<string> TaskNames;
 		protected int taskCount;
 
 		//For Loading config information
@@ -125,8 +124,8 @@ namespace USE_ExperimentTemplate
 
 
 			if (SessionSettings.SettingExists("Session", "TaskNames"))
-				ActiveTaskNames = (List<string>) SessionSettings.Get("Session", "TaskNames");
-			else if (ActiveTaskNames.Count == 0)
+				TaskNames = (List<string>) SessionSettings.Get("Session", "TaskNames");
+			else if (TaskNames.Count == 0)
 				Debug.LogError("No task names specified in Session config file or by other means.");
 
 			if (SessionSettings.SettingExists("Session", "StoreData"))
@@ -171,13 +170,7 @@ namespace USE_ExperimentTemplate
 			mirrorCamera.cullingMask = 0;
 			// mirrorCamera.targetDisplay = 2;
 
-			CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
-			CameraMirrorTexture.Create();
-			Camera.main.targetTexture = CameraMirrorTexture;
-			// mirrorCamera.targetTexture = CameraMirrorTexture;
-				
 			RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
-			mainCameraCopy.texture = CameraMirrorTexture;
 
 			bool waitForSerialPort = false;
 			setupSession.AddDefaultInitializationMethod(() =>
@@ -224,65 +217,32 @@ namespace USE_ExperimentTemplate
 			});
 			
 			int iTask = 0;
-			bool oldStyleTaskLoading = false;
-			bool newStyleTaskLoading = false;
 			SceneLoading = false;
-			string taskName;
+			string taskName = "";
+			AsyncOperation loadScene = null;
 			setupSession.AddUpdateMethod(() =>
 			{
 				if (waitForSerialPort && Time.time - StartTimeAbsolute > SerialPortController.initTimeout / 1000 + 0.5f)
 					waitForSerialPort = false;
 				
-				if (iTask < ActiveTaskNames.Count)
+				if (iTask < TaskNames.Count)
 				{
 					if (!SceneLoading)
 					{
-						oldStyleTaskLoading = false;
-						newStyleTaskLoading = false;
-						int iAvail = 0;
-						while (iAvail < AvailableTaskLevels.Count)
-						{
-							if (AvailableTaskLevels[iAvail].TaskName == ActiveTaskNames[iTask])
-							{
-								oldStyleTaskLoading = true;
-								break;
-							}
-
-							iAvail++;
-						}
-
-						ControlLevel_Task_Template tl;
-						AsyncOperation loadScene;
-						if (oldStyleTaskLoading)
-						{
-							SceneLoading = true;
-							tl = PopulateTaskLevel(AvailableTaskLevels[iAvail]);
-							taskName = tl.TaskName;
-							loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-							loadScene.completed += (_) => SceneLoaded(taskName);
-						}
-						else
-						{
-							if (!newStyleTaskLoading)
-							{
-								SceneLoading = true;
-								newStyleTaskLoading = true;
-								taskName = ActiveTaskNames[iTask];
-								loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-								loadScene.completed += (_) => SceneLoadedNew(taskName);
-							}
-							else
-							{
-
-							}
-						}
-
-						iTask++;
-						// TaskSceneLoaded = false;
+						//AsyncOperation loadScene;
+						SceneLoading = true;
+						taskName = TaskNames[iTask];
+						loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
+						// Unload it after memory because this loads the assets into memory but destroys the objects
+						loadScene.completed += (_) => {
+							SceneManager.UnloadSceneAsync(taskName);
+							SceneLoading = false;
+							iTask++;
+						};
 					}
 				}
 			});
-			setupSession.SpecifyTermination(() => iTask >= ActiveTaskNames.Count && !SceneLoading && !waitForSerialPort, selectTask,
+			setupSession.SpecifyTermination(() => iTask >= TaskNames.Count && !waitForSerialPort, selectTask,
 				() =>
 				{
 					if (SyncBoxActive)
@@ -293,26 +253,61 @@ namespace USE_ExperimentTemplate
 
 			//tasksFinished is a placeholder, eventually there will be a proper task selection screen
 			bool tasksFinished = false;
-			string CurrentTaskName = "";
+			GameObject taskButtons = null;
 			selectTask.AddUniversalInitializationMethod(() =>
 			{
 				SessionCam.gameObject.SetActive(true);
-				// SessionCam.targetTexture = CameraMirrorTexture;
-				// mirrorCamera.CopyFrom(SessionCam);
-				// mirrorCamera.cullingMask = 0;
-				tasksFinished = false;
-				if (taskCount < ActiveTaskLevels.Count)
-					CurrentTask = ActiveTaskLevels[taskCount];
-				else
+				CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
+				CameraMirrorTexture.Create();
+				Camera.main.targetTexture = CameraMirrorTexture;
+				mainCameraCopy.texture = CameraMirrorTexture;
+
+				SceneLoading = true;
+				if (taskCount >= TaskNames.Count) {	
 					tasksFinished = true;
-				//replace with 
-				//if(taskCount >= ActiveTaskLevels.Count)
-				//	tasksFinished = true;
+					return;
+				}
+
+				if (taskButtons != null) {
+					taskButtons.SetActive(true);
+					return;
+				}
+				taskButtons = new GameObject("TaskButtons");
+				taskButtons.transform.parent = GameObject.Find("TaskSelectionCanvas").transform;
+				taskButtons.transform.localPosition = Vector3.zero;
+				taskButtons.transform.localScale = Vector3.one;
+				// We'll use height for the calculations because it is generally smaller than the width
+				int numTasks = TaskNames.Count;
+				float buttonSize = 200;
+				float buttonSpacing = 20;
+				float buttonsWidth = numTasks * buttonSize + (numTasks - 1) * buttonSpacing;
+				float buttonStart = (buttonSize - buttonsWidth) / 2;
+				foreach (string taskName in TaskNames) {
+					GameObject taskButton = new GameObject(taskName + "Button");
+					taskButton.transform.parent = taskButtons.transform;
+
+					RawImage image = taskButton.AddComponent<RawImage>();
+					image.texture = Resources.Load<Texture2D>("TaskButtonImages/" + taskName);
+					image.rectTransform.localPosition = new Vector3(buttonStart, 0.0f, 0.0f);
+					image.rectTransform.localScale = Vector3.one;
+					image.rectTransform.sizeDelta = buttonSize * Vector3.one;
+					buttonStart += buttonSize + buttonSpacing;
+
+					Button button = taskButton.AddComponent<Button>();
+					button.onClick.AddListener(() => {
+						taskButtons.SetActive(false);
+						image.color = Color.gray;
+						Destroy(button);
+
+						loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
+						loadScene.completed += (_) => {
+							SceneLoaded(taskName);
+							CurrentTask = ActiveTaskLevels.Find((task) => task.TaskName == taskName);
+						};
+					});
+				}
 			});
-
-
-			//selectTask.AddUpdateMethod( get string of CurrentTaskName from button press);
-			selectTask.SpecifyTermination(() => !tasksFinished, runTask, () =>
+			selectTask.SpecifyTermination(() => !SceneLoading, runTask, () =>
 			{
 				// var methodInfo = GetType().GetMethod(nameof(GetTaskLevelFromString));
 				// MethodInfo getTaskLevel = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[CurrentTaskName]});
@@ -344,6 +339,7 @@ namespace USE_ExperimentTemplate
 			}
 			runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
 			{
+				SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
 				SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
 				SessionData.AppendData();
 				SessionData.WriteData();
@@ -387,7 +383,7 @@ namespace USE_ExperimentTemplate
 					(List<string>) SessionSettings.Get("Session", "ConfigFolderNames");
 				tl.TaskConfigPath =
 					configFileFolder + Path.DirectorySeparatorChar +
-					configFolders[ActiveTaskNames.IndexOf(tl.TaskName)];
+					configFolders[TaskNames.IndexOf(tl.TaskName)];
 			}
 
 			tl.FilePrefix = FilePrefix;
@@ -424,24 +420,24 @@ namespace USE_ExperimentTemplate
 				tl.SonicationActive = false;
 
 			tl.DefineTaskLevel();
-			ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
+			// ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
 			ActiveTaskLevels.Add(tl);
 			if(tl.TaskCanvasses != null)
 				foreach (GameObject go in tl.TaskCanvasses)
 					go.SetActive(false);
 			return tl;
 		}
+		//
+		// void SceneLoaded(string sceneName)
+		// {
+		// 	var methodInfo = GetType().GetMethod(nameof(this.FindTaskCam));
+		// 	MethodInfo findTaskCam = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[sceneName]});
+		// 	findTaskCam.Invoke(this, new object[] {sceneName});
+		// 	// TaskSceneLoaded = true;
+		// 	SceneLoading = false;
+		// }
 
-		void SceneLoaded(string sceneName)
-		{
-			var methodInfo = GetType().GetMethod(nameof(this.FindTaskCam));
-			MethodInfo findTaskCam = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[sceneName]});
-			findTaskCam.Invoke(this, new object[] {sceneName});
-			// TaskSceneLoaded = true;
-			SceneLoading = false;
-		}
-
-		void SceneLoadedNew(string taskName)
+		void SceneLoaded(string taskName)
 		{
 			var methodInfo = GetType().GetMethod(nameof(this.PrepareTaskLevel));
 			Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
@@ -459,12 +455,12 @@ namespace USE_ExperimentTemplate
 					tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
 			tl.TaskCam.gameObject.SetActive(false);
 		}
-		public void FindTaskCam<T>(string taskName) where T : ControlLevel_Task_Template
-		{
-			ControlLevel_Task_Template tl = GameObject.Find("ControlLevels").GetComponent<T>();
-			tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
-			tl.TaskCam.gameObject.SetActive(false);
-		}
+		// public void FindTaskCam<T>(string taskName) where T : ControlLevel_Task_Template
+		// {
+		// 	ControlLevel_Task_Template tl = GameObject.Find("ControlLevels").GetComponent<T>();
+		// 	tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
+		// 	tl.TaskCam.gameObject.SetActive(false);
+		// }
 
 #if UNITY_STANDALONE_WIN
 		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
@@ -622,6 +618,7 @@ namespace USE_ExperimentTemplate
 			}
 		}
 		public void OnGUI() {
+			if (CameraMirrorTexture == null) return;
 			GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), CameraMirrorTexture);
 		}
 	}
@@ -813,10 +810,15 @@ namespace USE_ExperimentTemplate
 					// string[] keys = new string[TaskStims.AllTaskStimGroups.Count];
 					// TaskStims.AllTaskStimGroups.Keys.CopyTo(keys, 0);
 					// TaskStims.AllTaskStimGroups.Remove(keys[0]);
-					while(sg.stimDefs.Count>0)
+					while (sg.stimDefs.Count > 0)
+					{
 						sg.stimDefs[0].Destroy();
+						sg.stimDefs.RemoveAt(0);
+					}
+
 					sg.DestroyStimGroup();
 				}
+				
 				TaskStims.AllTaskStims.DestroyStimGroup();
 				TaskCam.gameObject.SetActive(false);
 				
@@ -824,6 +826,7 @@ namespace USE_ExperimentTemplate
 					foreach (GameObject go in TaskCanvasses)
 						go.SetActive(false);
 				Controllers.SetActive(false);
+				
 			});
 			
 			//user-defined task control level 
@@ -1451,6 +1454,38 @@ namespace USE_ExperimentTemplate
 
 		}
 
+		public static Texture2D LoadPNG(string filePath)
+		{
+
+			Texture2D tex = null;
+			byte[] fileData;
+
+			if (File.Exists(filePath))
+			{
+				fileData = File.ReadAllBytes(filePath);
+				tex = new Texture2D(2, 2);
+				tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
+			}
+			return tex;
+		}
+		
+		public Material CreateSkybox(string filePath)
+		{
+			Texture2D tex = null;
+			Material materialSkybox = new Material(Shader.Find("Skybox/6 Sided"));
+
+			tex = LoadPNG(filePath); // load the texture from a PNG -> Texture2D
+
+			//Set the textures of the skybox to that of the PNG
+			materialSkybox.SetTexture("_FrontTex", tex);
+			materialSkybox.SetTexture("_BackTex", tex);
+			materialSkybox.SetTexture("_LeftTex", tex);
+			materialSkybox.SetTexture("_RightTex", tex);
+			materialSkybox.SetTexture("_UpTex", tex);
+			materialSkybox.SetTexture("_DownTex", tex);
+
+			return materialSkybox;
+		}
 	}
 
 	public class TaskStims

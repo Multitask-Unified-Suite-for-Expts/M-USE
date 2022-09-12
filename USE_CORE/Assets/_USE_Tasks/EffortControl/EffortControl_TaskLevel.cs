@@ -1,4 +1,6 @@
+using System;
 using USE_ExperimentTemplate;
+using USE_Settings;
 using EffortControl_Namespace;
 //test
 
@@ -18,6 +20,10 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     */
     public override void DefineControlLevel()
     {
+        EffortControl_TrialLevel wmTL = (EffortControl_TrialLevel)TrialLevel;
+        string TaskName = "EffortControl";
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
+            wmTL.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
 
     }
 

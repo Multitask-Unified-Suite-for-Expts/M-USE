@@ -43,7 +43,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     // vector3 variables
     private Vector3 trialStimInitLocalScale;
     private Vector3 fbInitLocalScale;
-    private Vector3 sliderInitPosition;
     private Vector3 scaleUpAmountLeft;
     private Vector3 scaleUpAmountRight;
     private Vector3 scaleUpAmount;
@@ -53,10 +52,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     private Ray mouseRay;
     private Color red;
     private Color gray;
-    private Slider slider;
-    private float sliderValueIncreaseAmount;
 
     private bool variablesLoaded;
+    public string MaterialFilePath;
 
     //data control variables
     //public bool storeData;
@@ -72,12 +70,16 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //trialData.fileName = dataFileName;
 
         //define States within this Control Level
-        State StartButton = new State("StartButton");
+        State InitTrial = new State("InitTrial");
+        State InitDelay = new State("InitDelay");
         State ChooseBalloon = new State("ChooseBalloon");
         State InflateBalloon = new State("InflateBalloon");
         State Feedback = new State("Feedback");
+        State FeedbackDelay = new State("FeedbackDelay");
         State ITI = new State("ITI");
-        AddActiveStates(new List<State> { StartButton, ChooseBalloon, InflateBalloon, Feedback, ITI });
+        AddActiveStates(new List<State> { InitTrial, InitDelay, ChooseBalloon, InflateBalloon, Feedback, FeedbackDelay, ITI });
+
+        SelectionHandler<EffortControl_StimDef> mouseHandler = new SelectionHandler<EffortControl_StimDef>();
 
         //AddInitializationMethod(() => { trialData.DefineDataController(); trialData.CreateFile(); });
 
@@ -89,10 +91,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
-        SetupTrial.SpecifyTermination(() => true, StartButton);
+        SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         // define initScreen state
-        StartButton.AddInitializationMethod(() => {
+        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
+        InitTrial.AddInitializationMethod(() => {
             trialCount++;
 
             avgClickTime = null;
@@ -106,32 +109,16 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             clickCount = 0;
             response = -1;
 
-            slider.gameObject.transform.position = sliderInitPosition;
-            slider.value = 0;
-
+            maxScale = new Vector3(50, 0, 50);
             scaleUpAmountLeft = maxScale / CurrentTrialDef.NumOfClicksLeft;
             scaleUpAmountRight = maxScale / CurrentTrialDef.NumOfClicksRight;
-            //Debug.Log("ScaleUpAmountLeft" + scaleUpAmountLeft);
-            //Debug.Log("ScaleUpAmountRight" + scaleUpAmountRight);
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
         });
 
-        StartButton.AddUpdateMethod(() => {
-            if (InputBroker.GetMouseButtonDown(0))
-            {
-                mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(mouseRay, out hit))
-                {
-                    if (hit.transform.name == "StartButton")
-                    {
-                        response = 0;
-                    }
-                }
-            }
-        });
+        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(initButton), InitDelay);
+        InitTrial.AddDefaultTerminationMethod(() => initButton.SetActive(false));
 
-        StartButton.SpecifyTermination(() => response == 0, ChooseBalloon);
-        StartButton.AddDefaultTerminationMethod(() => initButton.SetActive(false));
+        InitDelay.AddTimer(() => CurrentTrialDef.InitToBalloonDelay, ChooseBalloon);
 
         // Define stimOn state
         ChooseBalloon.AddInitializationMethod(() => {
@@ -144,56 +131,39 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             createRewards(CurrentTrialDef.NumOfCoinsRight, rewardContainerRight.transform.position, rewardContainerRight);
         });
 
+        MouseTracker.AddSelectionHandler(mouseHandler, ChooseBalloon);
         ChooseBalloon.AddUpdateMethod(() => {
             // check if user clicks on left or right
-            if (InputBroker.GetMouseButtonDown(0))
+            GameObject hit = mouseHandler.SelectedGameObject;
+            if (hit == null) return;
+            if (hit.transform.name == "StimLeft")
             {
-                mouseRay = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(mouseRay, out hit))
-                {
-                    if (hit.transform.name == "StimLeft")
-                    {
-                        numChosenLeft++;
-                        Debug.Log("Chose left");
-                        leftRightChoice = "left";
+                numChosenLeft++;
+                leftRightChoice = "left";
 
-                        ChangeColor(stimRight, gray);
-                        ChangeContainerColor(balloonContainerRight, gray);
-                        DestroyContainerChild(rewardContainerRight);
-                        slider.transform.Translate(-400f, 0f, 0f);
+                ChangeColor(stimRight, gray);
+                ChangeContainerColor(balloonContainerRight, gray);
+                DestroyContainerChild(rewardContainerRight);
 
-                        trialStim = hit.transform.gameObject;
-                        numOfClicks = CurrentTrialDef.NumOfClicksLeft;
-                        scaleUpAmount = scaleUpAmountLeft;
-                    }
-                    else if (hit.transform.name == "StimRight")
-                    {
-                        numChosenRight++;
-                        Debug.Log("Chose right");
-                        leftRightChoice = "right";
+                trialStim = hit.transform.gameObject;
+                numOfClicks = CurrentTrialDef.NumOfClicksLeft;
+                scaleUpAmount = scaleUpAmountLeft;
+            }
+            else if (hit.transform.name == "StimRight")
+            {
+                numChosenRight++;
+                leftRightChoice = "right";
 
-                        ChangeColor(stimLeft, gray);
-                        ChangeContainerColor(balloonContainerLeft, gray);
-                        DestroyContainerChild(rewardContainerLeft);
-                        slider.transform.Translate(400f, 0f, 0f);
+                ChangeColor(stimLeft, gray);
+                ChangeContainerColor(balloonContainerLeft, gray);
+                DestroyContainerChild(rewardContainerLeft);
 
-                        trialStim = hit.transform.gameObject;
-                        numOfClicks = CurrentTrialDef.NumOfClicksRight;
-                        scaleUpAmount = scaleUpAmountRight;
-                    }
-                    else
-                    {
-                        Debug.Log("Didn't click on any balloon");
-                    }
-                }
+                trialStim = hit.transform.gameObject;
+                numOfClicks = CurrentTrialDef.NumOfClicksRight;
+                scaleUpAmount = scaleUpAmountRight;
             }
         });
         ChooseBalloon.SpecifyTermination(() => trialStim != null, InflateBalloon);
-        ChooseBalloon.AddDefaultTerminationMethod(() => {
-            sliderValueIncreaseAmount = (100f / numOfClicks) / 100f;
-            slider.gameObject.SetActive(true);
-        });
 
         // define collectResponse state
         List<float> clickTimings = new List<float>();
@@ -204,48 +174,42 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             clickTimings = new List<float>();
             timeTracker = Time.time;
         });
+        MouseTracker.AddSelectionHandler(mouseHandler, InflateBalloon);
         InflateBalloon.AddUpdateMethod(() => {
             if (InputBroker.GetMouseButtonDown(0))
             {
-                // store the point of click
-                mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-
-                if (Physics.Raycast(mouseRay, out hit))
+                if (mouseHandler.SelectionMatches(trialStim))
                 {
-                    // if the raycast hits the trialStim gameobject
-                    if (hit.transform.gameObject == trialStim)
-                    {
-                        //add to clicktimings
-                        clickTimings.Add(Time.time - timeTracker);
-                        timeTracker = Time.time;
+                    //add to clicktimings
+                    clickTimings.Add(Time.time - timeTracker);
+                    timeTracker = Time.time;
 
-                        slider.value += sliderValueIncreaseAmount;
-                        clickMarker.transform.position = hit.point;
-                        clickMarker.SetActive(true);
+                    clickMarker.transform.position = mouseHandler.SelectedGameObject.transform.position;
+                    clickMarker.SetActive(true);
 
+                    if (clickCount == 0) {
+                        GameObject container = (leftRightChoice == "left") ? balloonContainerLeft : balloonContainerRight;
+                        Vector3 scale = container.transform.GetChild(0).transform.localScale;
+                        scale.y = trialStim.transform.localScale.y;
+                        trialStim.transform.localScale = scale;
+                    } else {
                         trialStim.transform.localScale += scaleUpAmount;
-                        clickCount++;
-                        Debug.Log("Clicked balloon " + clickCount + " times.");
                     }
-                    else
-                    {
-                        Debug.Log("Clicked on something else");
-                        // cam.backgroundColor = Color.red;
-                    }
+                    clickCount++;
+                    Debug.Log("Clicked balloon " + clickCount + " times.");
+                }
+                else
+                {
+                    Debug.Log("Clicked on something else");
+                    // cam.backgroundColor = Color.red;
                 }
 
                 // disable gameObject if the user clicks enough time
                 if (clickCount >= numOfClicks)
                 {
                     Debug.Log("User clicked enough times, popping balloon");
-                    trialStim.SetActive(false);
-                    trialStim.transform.localScale = trialStimInitLocalScale;
                     clickMarker.SetActive(false);
                     response = 1;
-                    // set prize's position to the position of the balloon
-                    prize.transform.position = trialStim.transform.position + new Vector3(0f, .5f, 0f);
-                    prize.SetActive(true);
 
                     //calculate average time
                     avgClickTime = clickTimings.Average();
@@ -258,8 +222,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
-        InflateBalloon.AddTimer(15f, Feedback);
-        InflateBalloon.SpecifyTermination(() => clickCount >= numOfClicks, Feedback);
+        InflateBalloon.AddTimer(15f, FeedbackDelay);
+        InflateBalloon.SpecifyTermination(() => clickCount >= numOfClicks, FeedbackDelay);
         InflateBalloon.AddDefaultTerminationMethod(() => {
             goCue.SetActive(false);
             if (leftRightChoice == "left")
@@ -272,17 +236,33 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
+        FeedbackDelay.AddTimer(() => CurrentTrialDef.CompleteToFeedbackDelay, Feedback);
+        FeedbackDelay.AddDefaultTerminationMethod(() => {
+            if (response == 1) {
+                trialStim.SetActive(false);
+                trialStim.transform.localScale = trialStimInitLocalScale;
+            }
+        });
+
         Feedback.AddInitializationMethod(() => {
             if (response == 1)
             {
+                // set prize's position to the position of the balloon
+                prize.transform.position = trialStim.transform.position + new Vector3(0f, .5f, 0f);
+                prize.SetActive(true);
                 fb.GetComponent<RawImage>().color = Color.green;
+                if (SyncBoxController != null) {
+                    if (leftRightChoice == "left")
+                        SyncBoxController.SendRewardPulses(CurrentTrialDef.NumOfPulsesLeft, CurrentTrialDef.PulseSizeLeft);
+                    else
+                        SyncBoxController.SendRewardPulses(CurrentTrialDef.NumOfPulsesRight, CurrentTrialDef.PulseSizeRight);
+                }
             }
             else
             {
                 fb.GetComponent<RawImage>().color = Color.red;
             }
             fb.SetActive(true);
-            slider.gameObject.SetActive(false);
         });
 
         Feedback.AddTimer(1f, ITI, () => fb.SetActive(false));
@@ -304,16 +284,16 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
 
         // Additional recorded data 
-        TrialData.AddDatum("TrialName", () => CurrentTrialDef.TrialName);
-        TrialData.AddDatum("TrialCode", () => CurrentTrialDef.TrialCode);
-        TrialData.AddDatum("ContextNum", () => CurrentTrialDef.ContextNum);
-        TrialData.AddDatum("ConditionName", () => CurrentTrialDef.ConditionName);
-        TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
+        // TrialData.AddDatum("TrialName", () => CurrentTrialDef.TrialName);
+        // TrialData.AddDatum("TrialCode", () => CurrentTrialDef.TrialCode);
+        // TrialData.AddDatum("ContextNum", () => CurrentTrialDef.ContextNum);
+        // TrialData.AddDatum("ConditionName", () => CurrentTrialDef.ConditionName);
+        // TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("ClicksPerOutline", () => CurrentTrialDef.ClicksPerOutline);
-        TrialData.AddDatum("InitialChoiceMinDuration", () => CurrentTrialDef.InitialChoiceMinDuration);
-        TrialData.AddDatum("StarttoTapDispDelay", () => CurrentTrialDef.StarttoTapDispDelay);
-        TrialData.AddDatum("FinalTouchToVisFeedbackDelay", () => CurrentTrialDef.FinalTouchToVisFeedbackDelay);
-        TrialData.AddDatum("FinalTouchToRewardDelay", () => CurrentTrialDef.FinalTouchToRewardDelay);
+        // TrialData.AddDatum("InitialChoiceMinDuration", () => CurrentTrialDef.InitialChoiceMinDuration);
+        // TrialData.AddDatum("StarttoTapDispDelay", () => CurrentTrialDef.StarttoTapDispDelay);
+        // TrialData.AddDatum("FinalTouchToVisFeedbackDelay", () => CurrentTrialDef.FinalTouchToVisFeedbackDelay);
+        // TrialData.AddDatum("FinalTouchToRewardDelay", () => CurrentTrialDef.FinalTouchToRewardDelay);
 
         TrialData.AddDatum("NumOfClicksLeft", () => CurrentTrialDef.NumOfClicksLeft);
         TrialData.AddDatum("NumOfClicksRight", () => CurrentTrialDef.NumOfClicksRight);
@@ -337,7 +317,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         stimRight.SetActive(false);
         clickMarker.SetActive(false);
         prize.SetActive(false);
-        slider.gameObject.SetActive(false);
         balloonOutline.SetActive(false);
     }
 
@@ -356,14 +335,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         prize = GameObject.Find("Prize2");
         rewardContainerLeft = GameObject.Find("RewardContainerLeft");
         rewardContainerRight = GameObject.Find("RewardContainerRight");
-        slider = GameObject.Find("Slider").GetComponent<Slider>();
         red = stimLeft.GetComponent<Renderer>().material.color;
         gray = new Color(0.5f, 0.5f, 0.5f);
         reward = GameObject.Find("Reward");
 
         fbInitLocalScale = fb.transform.localScale;
         trialStimInitLocalScale = stimLeft.transform.localScale;
-        sliderInitPosition = slider.gameObject.transform.position;
 
         initButton.SetActive(false);
         fb.SetActive(false);
@@ -372,7 +349,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         balloonOutline.SetActive(false);
         prize.SetActive(false);
         reward.SetActive(false);
-        GameObject.Find("Slider").SetActive(false);
 
         //cam = Camera.main.GetComponent<Camera>();
     }

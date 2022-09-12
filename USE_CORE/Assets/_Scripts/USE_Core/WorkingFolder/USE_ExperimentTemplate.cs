@@ -239,9 +239,6 @@ namespace USE_ExperimentTemplate
 							SceneLoading = false;
 							iTask++;
 						};
-						// loadScene.completed += (_) => SceneLoaded(taskName);
-						//SceneManager.SetActiveScene(SceneManager.GetSceneByName(taskName));
-
 					}
 				}
 			});
@@ -304,8 +301,8 @@ namespace USE_ExperimentTemplate
 
 						loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
 						loadScene.completed += (_) => {
-							SceneLoaded(TaskNames[taskCount]);
-							CurrentTask = ActiveTaskLevels[taskCount];
+							SceneLoaded(taskName);
+							CurrentTask = ActiveTaskLevels.Find((task) => task.TaskName == taskName);
 						};
 					});
 				}

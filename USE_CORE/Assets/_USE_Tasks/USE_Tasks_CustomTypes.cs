@@ -7,6 +7,7 @@ using WorkingMemory_Namespace;
 using VisualSearch_Namespace;
 using EffortControl_Namespace;
 using MazeGame_Namespace;
+using FlexLearning_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -91,6 +92,17 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(MazeGame_BlockDef),
                 TrialDefType = typeof(MazeGame_TrialDef),
                 StimDefType = typeof(MazeGame_StimDef)
+            }
+        },
+        {
+            "FlexLearning", new TaskTypes
+            {
+                TaskLevelType = typeof(FlexLearning_TaskLevel),
+                TrialLevelType = typeof(FlexLearning_TrialLevel),
+                TaskDefType = typeof(FlexLearning_TaskDef),
+                BlockDefType = typeof(FlexLearning_BlockDef),
+                TrialDefType = typeof(FlexLearning_TrialDef),
+                StimDefType = typeof(FlexLearning_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

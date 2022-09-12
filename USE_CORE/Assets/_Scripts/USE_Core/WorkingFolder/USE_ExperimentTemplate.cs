@@ -621,7 +621,7 @@ namespace USE_ExperimentTemplate
 			}
 		}
 		public void OnGUI() {
-			// if (CameraMirrorTexture == null) return;
+			if (CameraMirrorTexture == null) return;
 			GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), CameraMirrorTexture);
 		}
 	}

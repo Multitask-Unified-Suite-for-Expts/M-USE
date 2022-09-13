@@ -249,6 +249,7 @@ namespace USE_ExperimentTemplate
 						if (SessionSettings.SettingClassExists("SyncBoxConfig"))
 							if (SessionSettings.SettingExists("SyncBoxConfig", "SyncBoxInitCommands"))
 								SyncBoxController.SendCommand((List<string>) SessionSettings.Get("SyncBoxConfig", "syncBoxInitCommands"));
+					SessionSettings.Save();
 				});
 
 			//tasksFinished is a placeholder, eventually there will be a proper task selection screen
@@ -256,6 +257,7 @@ namespace USE_ExperimentTemplate
 			GameObject taskButtons = null;
 			selectTask.AddUniversalInitializationMethod(() =>
 			{
+				SessionSettings.Restore();
 				SessionCam.gameObject.SetActive(true);
 				CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
 				CameraMirrorTexture.Create();

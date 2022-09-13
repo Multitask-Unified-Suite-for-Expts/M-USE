@@ -259,11 +259,24 @@ namespace USE_Settings
 	public static class SessionSettings
 	{
 		private static Dictionary<string, Settings> allSettings = new Dictionary<string, Settings>();
+		private static Dictionary<string, Settings> savedSettings = new Dictionary<string, Settings>();
 
 		//public static void Reset()
 		//{
 		//    allSettings = new Dictionary<string, Settings>();
 		//}
+
+		public static void Save()
+		{
+			// Perform shallow copy
+			savedSettings = new Dictionary<string, Settings>(allSettings);
+		}
+
+		public static void Restore()
+		{
+			// Perform shallow copy
+			allSettings = new Dictionary<string, Settings>(savedSettings);
+		}
 
 		public static bool SettingClassExists(string key)
 		{

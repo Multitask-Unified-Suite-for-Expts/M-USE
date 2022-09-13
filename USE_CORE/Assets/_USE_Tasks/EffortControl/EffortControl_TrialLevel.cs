@@ -230,17 +230,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
-        InflateBalloon.AddTimer(15f, FeedbackDelay);
+        InflateBalloon.AddTimer(1f, Feedback);
         InflateBalloon.SpecifyTermination(() => clickCount >= numOfClicks, FeedbackDelay);
         InflateBalloon.AddDefaultTerminationMethod(() => {
             goCue.SetActive(false);
-            if (leftRightChoice == "left")
-            {
-                DestroyContainerChild(balloonContainerLeft);
-            }
-            else
-            {
-                DestroyContainerChild(balloonContainerRight);
+            if (response == 1) {
+                if (leftRightChoice == "left") DestroyContainerChild(balloonContainerLeft);
+                else DestroyContainerChild(balloonContainerRight);
             }
         });
 
@@ -276,7 +272,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Feedback.AddTimer(1f, ITI, () => fb.SetActive(false));
 
         //Define iti state
-        ITI.AddInitializationMethod(() => trialStim.SetActive(false));
+        ITI.AddInitializationMethod(() => {
+            trialStim.SetActive(false);
+            DestroyContainerChild(balloonContainerLeft);
+            DestroyContainerChild(balloonContainerRight);
+        });
         ITI.AddTimer(2f, FinishTrial, () => {
             Debug.Log("Trial" + trialCount + " completed");
             DestroyContainerChild(balloonContainerLeft);

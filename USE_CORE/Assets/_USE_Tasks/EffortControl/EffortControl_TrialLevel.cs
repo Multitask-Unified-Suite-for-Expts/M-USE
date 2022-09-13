@@ -163,7 +163,15 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 scaleUpAmount = scaleUpAmountRight;
             }
         });
-        ChooseBalloon.SpecifyTermination(() => trialStim != null, InflateBalloon);
+        ChooseBalloon.SpecifyTermination(() => trialStim != null, InflateBalloon, () => {
+            if (leftRightChoice == "left") {
+                DestroyContainerChild(balloonContainerRight);
+                stimRight.SetActive(false);
+            } else {
+                DestroyContainerChild(balloonContainerLeft);
+                stimLeft.SetActive(false);
+            }
+        });
 
         // define collectResponse state
         List<float> clickTimings = new List<float>();

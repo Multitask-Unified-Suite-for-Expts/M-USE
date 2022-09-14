@@ -230,7 +230,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
-        InflateBalloon.AddTimer(1f, Feedback);
+        InflateBalloon.AddTimer(45f, Feedback);
         InflateBalloon.SpecifyTermination(() => clickCount >= numOfClicks, FeedbackDelay);
         InflateBalloon.AddDefaultTerminationMethod(() => {
             goCue.SetActive(false);

@@ -23,6 +23,7 @@ namespace WhatWhenWhere_Namespace
         public int BlockEndWindow;
         public int NumPulses;
         public int PulseSize;
+        public bool LeaveFeedbackOn;
 
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -51,6 +52,7 @@ namespace WhatWhenWhere_Namespace
                 td.BlockEndWindow = BlockEndWindow;
                 td.NumPulses = NumPulses;
                 td.PulseSize = PulseSize;
+                td.LeaveFeedbackOn = LeaveFeedbackOn;
                 TrialDefs[iTrial] = td;
             }
         }
@@ -78,6 +80,7 @@ namespace WhatWhenWhere_Namespace
         public int BlockEndWindow;
         public int NumPulses;
         public int PulseSize;
+        public bool LeaveFeedbackOn;
     }
 
     public class WhatWhenWhere_StimDef : StimDef

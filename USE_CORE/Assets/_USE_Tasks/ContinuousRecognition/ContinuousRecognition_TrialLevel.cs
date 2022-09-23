@@ -11,6 +11,7 @@ using System.IO;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 using Random = UnityEngine.Random;
 using ConfigDynamicUI;
+using USE_Settings;
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
@@ -21,7 +22,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector]
     public ConfigNumber minObjectTouchDuration, itiDuration, finalFbDuration, fbDuration, maxObjectTouchDuration, selectObjectDuration;
     // game object variables
-    private GameObject initButton;
+    private GameObject startButton;
     private GameObject trialStim;
 
     //context variables
@@ -70,13 +71,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 .SetRevealTime(CurrentTrialDef.TokenRevealDuration)
                 .SetUpdateTime(CurrentTrialDef.TokenUpdateDuration);
             RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\Blank.png");
-            initButton.SetActive(true);
+            startButton.SetActive(true);
             TokenFBController.enabled = false;
         });
-        initTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(initButton),
+        initTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton),
             displayStims, () =>
             {
-                initButton.SetActive(false);
+                startButton.SetActive(false);
                 TokenFBController.enabled = true;
                 RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]); //CHECK THIS TIMING MIGHT BE OFF
@@ -378,7 +379,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     }
     private void loadVariables()
     {
-        initButton = GameObject.Find("StartButton");
+        Texture2D buttonTex = LoadPNG(MaterialFilePath + "\\StartButtonImage.png");
+        startButton = CreateStartButton(buttonTex, new Rect(new Vector2(0, 0), new Vector2(1, 1)));
         //config UI variables
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
@@ -534,5 +536,32 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public void clickEvent()
     {
         Debug.Log("adid it");
+    }
+    private GameObject CreateStartButton(Texture2D tex, Rect rect)
+    {
+        Vector3 buttonPosition = Vector3.zero;
+        Vector3 buttonScale = Vector3.zero;
+        string TaskName = "ContinuousRecognition";
+        if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
+        {
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+                buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+            else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+                buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+            else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
+        }
+        else
+        {
+            Debug.Log("[ERROR] TaskDef is not in config folder");
+        }
+
+        GameObject startButton = new GameObject("StartButton");
+        SpriteRenderer sr = startButton.AddComponent<SpriteRenderer>() as SpriteRenderer;
+        sr.sprite = Sprite.Create(tex, new Rect(rect.x, rect.y, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
+        startButton.AddComponent<BoxCollider>();
+        startButton.transform.localScale = buttonScale;
+        startButton.transform.position = buttonPosition;
+        return startButton;
     }
 }

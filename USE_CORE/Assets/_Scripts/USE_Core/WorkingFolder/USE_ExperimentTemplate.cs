@@ -313,8 +313,8 @@ namespace USE_ExperimentTemplate
 
 						loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
 						loadScene.completed += (_) => {
-							SceneLoaded(taskName);
-							CurrentTask = ActiveTaskLevels.Find((task) => task.TaskName == taskName);
+							SceneLoaded(configName);
+							CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigName == configName);
 						};
 					});
 				}
@@ -388,7 +388,7 @@ namespace USE_ExperimentTemplate
 			if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))
 				tl.TaskConfigPath =
 					configFileFolder + Path.DirectorySeparatorChar +
-					tl.TaskName;
+					tl.ConfigName;
 			else
 			{
 				List<string> configFolders =
@@ -396,7 +396,7 @@ namespace USE_ExperimentTemplate
 				int index = 0;
 				foreach (string k in TaskMappings.Keys)
 				{
-					if (k.Equals(tl.TaskName)) break;
+					if (k.Equals(tl.ConfigName)) break;
 					++index;
 				}
 				tl.TaskConfigPath =
@@ -455,19 +455,22 @@ namespace USE_ExperimentTemplate
 		// 	SceneLoading = false;
 		// }
 
-		void SceneLoaded(string taskName)
+		void SceneLoaded(string configName)
 		{
+			string taskName = (string)TaskMappings[configName];
 			var methodInfo = GetType().GetMethod(nameof(this.PrepareTaskLevel));
 			Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
 			MethodInfo prepareTaskLevel = methodInfo.MakeGenericMethod(new Type[] {taskType});
-			prepareTaskLevel.Invoke(this, new object[] {taskName});
+			prepareTaskLevel.Invoke(this, new object[] {configName});
 			// TaskSceneLoaded = true;
 			SceneLoading = false;
 		}
 		
-		public void PrepareTaskLevel<T>(string taskName) where T : ControlLevel_Task_Template
+		public void PrepareTaskLevel<T>(string configName) where T : ControlLevel_Task_Template
 		{
+			string taskName = (string)TaskMappings[configName];
 			ControlLevel_Task_Template tl = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
+			tl.ConfigName = configName;
 			tl = PopulateTaskLevel(tl);
 			if(tl.TaskCam == null)
 					tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
@@ -643,6 +646,7 @@ namespace USE_ExperimentTemplate
 
 	public abstract class ControlLevel_Task_Template : ControlLevel
 	{
+		public string ConfigName;
 		public string TaskName;
 		public string TaskProjectFolder;
 		[HideInInspector] public int BlockCount;

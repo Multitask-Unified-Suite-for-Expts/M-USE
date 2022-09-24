@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -34,7 +36,7 @@ namespace USE_ExperimentTemplate
 		protected List<ControlLevel_Task_Template> ActiveTaskLevels;
 		private ControlLevel_Task_Template CurrentTask;
 		// public List<ControlLevel_Task_Template> AvailableTaskLevels;
-		private List<string> TaskNames;
+		private OrderedDictionary TaskMappings;
 		protected int taskCount;
 
 		//For Loading config information
@@ -123,10 +125,16 @@ namespace USE_ExperimentTemplate
 			// }
 
 
-			if (SessionSettings.SettingExists("Session", "TaskNames"))
-				TaskNames = (List<string>) SessionSettings.Get("Session", "TaskNames");
-			else if (TaskNames.Count == 0)
-				Debug.LogError("No task names specified in Session config file or by other means.");
+			List<string> taskNames;
+			if (SessionSettings.SettingExists("Session", "TaskNames")) {
+				taskNames = (List<string>) SessionSettings.Get("Session", "TaskNames");
+				TaskMappings = new OrderedDictionary();
+				taskNames.ForEach((taskName) => TaskMappings.Add(taskName, taskName));
+			} else if (SessionSettings.SettingExists("Session", "TaskMappings")) {
+				TaskMappings = (OrderedDictionary) SessionSettings.Get("Session", "TaskMappings");
+			} else if (TaskMappings.Count == 0) {
+				Debug.LogError("No task names or task mappings specified in Session config file or by other means.");
+			}
 
 			if (SessionSettings.SettingExists("Session", "StoreData"))
 				StoreData = (bool) SessionSettings.Get("Session", "StoreData");
@@ -225,13 +233,13 @@ namespace USE_ExperimentTemplate
 				if (waitForSerialPort && Time.time - StartTimeAbsolute > SerialPortController.initTimeout / 1000 + 0.5f)
 					waitForSerialPort = false;
 				
-				if (iTask < TaskNames.Count)
+				if (iTask < TaskMappings.Count)
 				{
 					if (!SceneLoading)
 					{
 						//AsyncOperation loadScene;
 						SceneLoading = true;
-						taskName = TaskNames[iTask];
+						taskName = (string)TaskMappings[iTask];
 						loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
 						// Unload it after memory because this loads the assets into memory but destroys the objects
 						loadScene.completed += (_) => {
@@ -242,7 +250,7 @@ namespace USE_ExperimentTemplate
 					}
 				}
 			});
-			setupSession.SpecifyTermination(() => iTask >= TaskNames.Count && !waitForSerialPort, selectTask,
+			setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort, selectTask,
 				() =>
 				{
 					if (SyncBoxActive)
@@ -265,7 +273,7 @@ namespace USE_ExperimentTemplate
 				mainCameraCopy.texture = CameraMirrorTexture;
 
 				SceneLoading = true;
-				if (taskCount >= TaskNames.Count) {	
+				if (taskCount >= TaskMappings.Count) {	
 					tasksFinished = true;
 					return;
 				}
@@ -279,13 +287,15 @@ namespace USE_ExperimentTemplate
 				taskButtons.transform.localPosition = Vector3.zero;
 				taskButtons.transform.localScale = Vector3.one;
 				// We'll use height for the calculations because it is generally smaller than the width
-				int numTasks = TaskNames.Count;
+				int numTasks = TaskMappings.Count;
 				float buttonSize = 200;
 				float buttonSpacing = 20;
 				float buttonsWidth = numTasks * buttonSize + (numTasks - 1) * buttonSpacing;
 				float buttonStart = (buttonSize - buttonsWidth) / 2;
-				foreach (string taskName in TaskNames) {
-					GameObject taskButton = new GameObject(taskName + "Button");
+				foreach (DictionaryEntry task in TaskMappings) {
+					string configName = (string)task.Key;
+					string taskName = (string)task.Value;
+					GameObject taskButton = new GameObject(configName + "Button");
 					taskButton.transform.parent = taskButtons.transform;
 
 					RawImage image = taskButton.AddComponent<RawImage>();
@@ -383,9 +393,15 @@ namespace USE_ExperimentTemplate
 			{
 				List<string> configFolders =
 					(List<string>) SessionSettings.Get("Session", "ConfigFolderNames");
+				int index = 0;
+				foreach (string k in TaskMappings.Keys)
+				{
+					if (k.Equals(tl.TaskName)) break;
+					++index;
+				}
 				tl.TaskConfigPath =
 					configFileFolder + Path.DirectorySeparatorChar +
-					configFolders[TaskNames.IndexOf(tl.TaskName)];
+					configFolders[index];
 			}
 
 			tl.FilePrefix = FilePrefix;

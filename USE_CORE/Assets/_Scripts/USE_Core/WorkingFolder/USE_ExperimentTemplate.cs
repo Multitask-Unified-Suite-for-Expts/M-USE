@@ -37,6 +37,8 @@ namespace USE_ExperimentTemplate
 		private ControlLevel_Task_Template CurrentTask;
 		// public List<ControlLevel_Task_Template> AvailableTaskLevels;
 		private OrderedDictionary TaskMappings;
+		private string ContextName;
+		private string ContextExternalFilePath;
 		private string TaskIconsFolderPath;
 		private Dictionary<string, string> TaskIcons;
 		protected int taskCount;
@@ -139,8 +141,14 @@ namespace USE_ExperimentTemplate
 				Debug.LogError("No task names or task mappings specified in Session config file or by other means.");
 			}
 
+			if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
+				ContextExternalFilePath = (string) SessionSettings.Get("Session", "ContextExternalFilePath");
+
 			if (SessionSettings.SettingExists("Session", "TaskIconsFolderPath"))
 				TaskIconsFolderPath = (string) SessionSettings.Get("Session", "TaskIconsFolderPath");
+
+			if (SessionSettings.SettingExists("Session", "ContextName"))
+				ContextName = (string) SessionSettings.Get("Session", "ContextName");
 
 			if (SessionSettings.SettingExists("Session", "TaskIcons"))
 				TaskIcons = (Dictionary<string, string>) SessionSettings.Get("Session", "TaskIcons");
@@ -150,6 +158,7 @@ namespace USE_ExperimentTemplate
 
 			if (SessionSettings.SettingExists("Session", "TaskSelectionTimeout"))
 				TaskSelectionTimeout = (float) SessionSettings.Get("Session", "TaskSelectionTimeout");
+				
 
 			if (SessionSettings.SettingExists("Session", "SerialPortActive"))
 				SerialPortActive = (bool) SessionSettings.Get("Session", "SerialPortActive");
@@ -278,6 +287,7 @@ namespace USE_ExperimentTemplate
 			string selectedConfigName = null;
 			selectTask.AddUniversalInitializationMethod(() =>
 			{
+				RenderSettings.skybox = ControlLevel_Trial_Template.CreateSkybox(ContextExternalFilePath + "/" + ContextName + ".png");
 				SessionSettings.Restore();
 				selectedConfigName = null;
 
@@ -1525,7 +1535,7 @@ namespace USE_ExperimentTemplate
 			return tex;
 		}
 		
-		public Material CreateSkybox(string filePath)
+		public static Material CreateSkybox(string filePath)
 		{
 			Texture2D tex = null;
 			Material materialSkybox = new Material(Shader.Find("Skybox/6 Sided"));

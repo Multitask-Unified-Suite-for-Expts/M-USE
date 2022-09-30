@@ -192,6 +192,40 @@ namespace USE_Settings
 					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
 				}
 			}
+			else if (typeString.ToLower() == "dictionary<string,string>")
+			{
+				try
+				{
+					// Remove the parentheses
+					if (stringValue.StartsWith("(", StringComparison.Ordinal) && stringValue.EndsWith(")", StringComparison.Ordinal) ||
+						stringValue.StartsWith("{", StringComparison.Ordinal) && stringValue.EndsWith("}", StringComparison.Ordinal) ||
+						stringValue.StartsWith("[", StringComparison.Ordinal) && stringValue.EndsWith("]", StringComparison.Ordinal))
+					{
+						stringValue = stringValue.Substring(1, stringValue.Length - 2);
+					}
+					// split the items
+					string[] sArray = stringValue.Split(',');
+					Dictionary<string, string> pairs = new Dictionary<string, string>();
+					for (int sCount = 0; sCount < sArray.Length; sCount++)
+					{
+						sArray[sCount]= sArray[sCount].Replace("\"", "");
+						sArray[sCount] = sArray[sCount].Trim();
+						string[] sArray2 = sArray[sCount].Split(':');
+						if (sArray2.Length != 2) {
+							throw new Exception("Each pair should have exactly a single colon");
+						}
+						pairs.Add(sArray2[0].Trim(), sArray2[1].Trim());
+					}
+					AddSetting(key, pairs);
+				}
+				catch (Exception e)
+				{
+					Debug.Log("Tried to convert string \"" + stringValue + "\" to type \""
+						+ typeString + "\" to add to Setting " + key + " in Settings List " + Name + " but the conversion failed.");
+
+					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+				}
+			}
 			else if (typeString.ToLower() == "ordereddictionary<string,string>")
 			{
 				try
@@ -281,6 +315,7 @@ namespace USE_Settings
 			{"float[]",typeof(float[])},
 			{"Dictionary<string,List<string>>",typeof(Dictionary<string,List<string>>)},
 			{"Dictionary<string,int>",typeof(Dictionary<string,int>)},
+			{"Dictionary<string,string>",typeof(Dictionary<string, string>)},
 			{"OrderedDictionary<string,string>",typeof(OrderedDictionary)},
 			{"SortedList<string,List<string>>",typeof(SortedList<string,List<string>>)},
 			{"List<string[]>",typeof(List<string[]>)},

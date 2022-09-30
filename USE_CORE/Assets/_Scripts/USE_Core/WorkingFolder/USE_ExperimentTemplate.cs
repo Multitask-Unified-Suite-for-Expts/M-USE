@@ -37,6 +37,8 @@ namespace USE_ExperimentTemplate
 		private ControlLevel_Task_Template CurrentTask;
 		// public List<ControlLevel_Task_Template> AvailableTaskLevels;
 		private OrderedDictionary TaskMappings;
+		private string TaskIconsFolderPath;
+		private Dictionary<string, string> TaskIcons;
 		protected int taskCount;
 		private float TaskSelectionTimeout;
 
@@ -136,6 +138,12 @@ namespace USE_ExperimentTemplate
 			} else if (TaskMappings.Count == 0) {
 				Debug.LogError("No task names or task mappings specified in Session config file or by other means.");
 			}
+
+			if (SessionSettings.SettingExists("Session", "TaskIconsFolderPath"))
+				TaskIconsFolderPath = (string) SessionSettings.Get("Session", "TaskIconsFolderPath");
+
+			if (SessionSettings.SettingExists("Session", "TaskIcons"))
+				TaskIcons = (Dictionary<string, string>) SessionSettings.Get("Session", "TaskIcons");
 
 			if (SessionSettings.SettingExists("Session", "StoreData"))
 				StoreData = (bool) SessionSettings.Get("Session", "StoreData");
@@ -307,7 +315,8 @@ namespace USE_ExperimentTemplate
 					taskButton.transform.parent = taskButtons.transform;
 
 					RawImage image = taskButton.AddComponent<RawImage>();
-					image.texture = Resources.Load<Texture2D>("TaskButtonImages/" + taskName);
+					string taskIcon = TaskIcons[configName];
+					image.texture = ControlLevel_Trial_Template.LoadPNG(TaskIconsFolderPath + "/" + taskIcon + ".png");
 					image.rectTransform.localPosition = new Vector3(buttonStart, 0.0f, 0.0f);
 					image.rectTransform.localScale = Vector3.one;
 					image.rectTransform.sizeDelta = buttonSize * Vector3.one;

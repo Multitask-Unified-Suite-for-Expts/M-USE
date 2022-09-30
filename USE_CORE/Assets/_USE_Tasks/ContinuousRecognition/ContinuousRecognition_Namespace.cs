@@ -9,17 +9,6 @@ namespace ContinuousRecognition_Namespace
 {
     public class ContinuousRecognition_TaskDef : TaskDef
     {
-        //Already-existing fields (inherited from TaskDef)      
-        //public DateTime TaskStart_DateTime;
-        //public int TaskStart_Frame;
-        //public float TaskStart_UnityTime;
-        //public string TaskName;
-        //public string ExternalStimFolderPath;
-        //public string PrefabStimFolderPath;
-        //public string ExternalStimExtension;
-        //public List<string[]> FeatureNames;
-        //public string neutralPatternedColorName;
-        //public float? ExternalStimScale;
         public List<int> chosenStims;
     }
 
@@ -27,19 +16,18 @@ namespace ContinuousRecognition_Namespace
     { 
         public int[] BlockStimIndices, nObjectsMinMax, Ratio;
 
-        public float
-            DisplayStimsDuration,
-            ChooseStimDuration,
-            TrialEndDuration,
-            TouchFeedbackDuration,
+        //variables for the data from the Block Config file. 
+        public float DisplayStimsDuration, ChooseStimDuration, TrialEndDuration, TouchFeedbackDuration,
             DisplayResultDuration,TokenRevealDuration, TokenUpdateDuration;
-        
-        public List<int> PreviouslyChosenStimuli, PreviouslyNotChosenStim, TrialStimIndices, UnseenStims, NewStim;
+        public int row, col, ManuallySpecifyLocation;
+
+        public List<int> PreviouslyChosenStim, PreviouslyNotChosenStimuli, TrialStimIndices, UnseenStims, NewStim;
         public Vector3[] BlockStimLocations, StimLocation;
-        public int trialCount, ManuallySpecifyLocation, row, col, PC_count, PNC_count, new_count;
+        public int trialCount, PC_count, PNC_count, new_count;
         public Vector3 ContextColor;
         public string ContextName;
 
+        //takes a block and generates corresponding trials. Gets called in the USE Template!
         public override void GenerateTrialDefsFromBlockDef()
         {
             int numGrid = row * col;
@@ -47,18 +35,18 @@ namespace ContinuousRecognition_Namespace
             Vector3[] Locations = new Vector3[numGrid];
             
             // calculate horizontal and vertical offset
-            float horizontal = 12f/col;
-            float vertical = 7.7f/row;
+            float horizontal = 12f/(col*2.1f);
+            float vertical = 7.7f /(row*2.1f);
             int gridIndex = 0;
             // edges
-            float x = -6;
-            float y = 4;
+            float x = -3;
+            float y = 2;
             float z = 0;
             
             // create grid by filling in location array
             for (int i = 0; i < row; i++)
             {
-                x = -6;
+                x = -3;
                 for (int j = 0; j < col; j++)
                 {
                     Locations[gridIndex] = new Vector3(x, y, z);
@@ -88,29 +76,26 @@ namespace ContinuousRecognition_Namespace
             }
 
             // init some lists
-            PreviouslyChosenStimuli = new List<int>();
-            PreviouslyNotChosenStim = new List<int>();
+            PreviouslyChosenStim = new List<int>();
+            PreviouslyNotChosenStimuli = new List<int>();
             UnseenStims = new List<int>();
             TrialStimIndices = new List<int>();
             NewStim = new List<int>();
             
             // calculate total number of trials
             int numTrials = nObjectsMinMax[1] - nObjectsMinMax[0] + 1;
-            TrialDefs = new ContinuousRecognition_TrialDef[numTrials]; //actual correct # 
+            TrialDefs = new ContinuousRecognition_TrialDef[numTrials];
             
-            // number of stims on first trial
+            // number of stims on first trial (we increase by 1 after each iteration below)
             int numTrialStims = nObjectsMinMax[0];
-            int tmp = 0;
             bool end = false;
 
             // trial loop 
             for (int iTrial = 0; iTrial < numTrials && !end; iTrial++)
             {
-                Debug.Log("aaaaaaaaaaa iTrial num is " + iTrial);
-                Debug.Log("aaaaaaaaaaa numTiral is " + numTrials);
-                ContinuousRecognition_TrialDef td = new ContinuousRecognition_TrialDef();
-                td.BlockStimIndices = BlockStimIndices;
-                td.trialCount = trialCount;
+                ContinuousRecognition_TrialDef trial = new ContinuousRecognition_TrialDef();
+                trial.BlockStimIndices = BlockStimIndices;
+                trial.trialCount = trialCount;
 
                 // set up stim location by randomly choosing positions from grid
                 Vector3[] arr = new Vector3[nObjectsMinMax[0] + iTrial];
@@ -124,33 +109,33 @@ namespace ContinuousRecognition_Namespace
                     arr[i] = BlockStimLocations[index];
                 }
                 
-                // set context color according to blockConfig
-                td.TrialStimLocations = arr;
-                td.Grid = Locations;
-                td.TrialStimIndices = TrialStimIndices;
-                td.PreviouslyChosenStimuli = PreviouslyChosenStimuli;
-                td.PreviouslyNotChosenStimuli = PreviouslyNotChosenStim;
-                td.nObjectsMinMax = nObjectsMinMax;
-                td.Ratio = Ratio;
-                td.UnseenStims = UnseenStims;
-                td.numTrialStims = numTrialStims;
-                td.maxNumTrials = numTrials;
-                td.DisplayStimsDuration = DisplayStimsDuration;
-                td.ChooseStimDuration = ChooseStimDuration;
-                td.TrialEndDuration = TrialEndDuration;
-                td.TouchFeedbackDuration = TouchFeedbackDuration;
-                td.DisplayResultDuration = DisplayResultDuration;
-                td.ManuallySpecifyLocation = ManuallySpecifyLocation;
-                td.row = row;
-                td.col = col;
-                td.PNC_count = PNC_count;
-                td.PC_count = PC_count;
-                td.new_Count = new_count;
-                td.ContextColor = ContextColor;
-                td.ContextName = ContextName;
-                td.TokenRevealDuration = TokenRevealDuration;
-                td.TokenUpdateDuration = TokenUpdateDuration;
-                TrialDefs[iTrial] = td;
+                trial.TrialStimLocations = arr;
+                trial.Grid = Locations;
+                trial.TrialStimIndices = TrialStimIndices;
+                trial.PreviouslyChosenStim = PreviouslyChosenStim;
+                trial.PreviouslyNotChosenStimuli = PreviouslyNotChosenStimuli;
+                trial.nObjectsMinMax = nObjectsMinMax;
+                trial.Ratio = Ratio;
+                trial.UnseenStims = UnseenStims;
+                trial.numTrialStims = numTrialStims;
+                trial.maxNumTrials = numTrials;
+                trial.DisplayStimsDuration = DisplayStimsDuration;
+                trial.ChooseStimDuration = ChooseStimDuration;
+                trial.TrialEndDuration = TrialEndDuration;
+                trial.TouchFeedbackDuration = TouchFeedbackDuration;
+                trial.DisplayResultDuration = DisplayResultDuration;
+                trial.ManuallySpecifyLocation = ManuallySpecifyLocation;
+                trial.row = row;
+                trial.col = col;
+                trial.PNC_count = PNC_count;
+                trial.PC_count = PC_count;
+                trial.new_Count = new_count;
+                trial.ContextColor = ContextColor;
+                trial.ContextName = ContextName;
+                trial.TokenRevealDuration = TokenRevealDuration;
+                trial.TokenUpdateDuration = TokenUpdateDuration;
+
+                TrialDefs[iTrial] = trial;
                 numTrialStims++;
                 trialCount++;
             }
@@ -167,7 +152,7 @@ namespace ContinuousRecognition_Namespace
         public Vector3 ContextColor;
         public string ContextName;
 
-        public List<int> PreviouslyChosenStimuli, PreviouslyNotChosenStimuli, TrialStimIndices, UnseenStims;
+        public List<int> PreviouslyChosenStim, PreviouslyNotChosenStimuli, TrialStimIndices, UnseenStims;
         public int row, col, Context, PC_count, PNC_count, new_Count;
 
         public float
@@ -181,46 +166,12 @@ namespace ContinuousRecognition_Namespace
         
         //ObjectNums refers to items in a list of objects to be loaded from resources folder
         public int[] ObjectNums;
-        
-        //-------------------------------------------
-        //Already-existing fields (inherited from TrialDef)
-        //public int BlockCount, TrialCountInBlock, TrialCountInTask;
+       
     }
 
     public class ContinuousRecognition_StimDef : StimDef
     {
-        //This bool indicates if a stimulus was previously selected or not
         public bool PreviouslyChosen;
-        
-        //------------------------------------------------
-        //Already-existing fields (inherited from Stim  Def)
-        //public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)
-        //public string StimName;
-        //public string StimPath;
-        //public string PrefabPath;
-        //public string ExternalFilePath;
-        //public string StimFolderPath;
-        //public string StimExtension;
-        //public int StimCode; //optional, for analysis purposes
-        //public string StimID;
-        //public int[] StimDimVals; //only if this is parametrically-defined stim
-        //[System.NonSerialized] //public GameObject StimGameObject; //not in config, generated at runtime
-        //public Vector3 StimLocation; //to be passed in explicitly if trial doesn't include location method
-        //public Vector3 StimRotation; //to be passed in explicitly if trial doesn't include location method
-        //public Vector2 StimScreenLocation; //screen position calculated during trial
-        //public float? StimScale;
-        //public bool StimLocationSet;
-        //public bool StimRotationSet;
-        //public float StimTrialPositiveFbProb; //set to -1 if stim is irrelevant
-        //public float StimTrialRewardMag; //set to -1 if stim is irrelevant
-        //public TokenReward[] TokenRewards;
-        //public int[] BaseTokenGain;
-        //public int[] BaseTokenLoss;
-        //public int TimesUsedInBlock;
-        //public bool isRelevant;
-        //public bool TriggersSonication;
-        //public State SetActiveOnInitialization;
-        //public State SetInactiveOnTermination;
     }
     
 }

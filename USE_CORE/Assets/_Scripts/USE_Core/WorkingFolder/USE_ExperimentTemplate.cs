@@ -38,6 +38,7 @@ namespace USE_ExperimentTemplate
 		// public List<ControlLevel_Task_Template> AvailableTaskLevels;
 		private OrderedDictionary TaskMappings;
 		protected int taskCount;
+		private float TaskSelectionTimeout;
 
 		//For Loading config information
 		public SessionDetails SessionDetails;
@@ -139,6 +140,8 @@ namespace USE_ExperimentTemplate
 			if (SessionSettings.SettingExists("Session", "StoreData"))
 				StoreData = (bool) SessionSettings.Get("Session", "StoreData");
 
+			if (SessionSettings.SettingExists("Session", "TaskSelectionTimeout"))
+				TaskSelectionTimeout = (float) SessionSettings.Get("Session", "TaskSelectionTimeout");
 
 			if (SessionSettings.SettingExists("Session", "SerialPortActive"))
 				SerialPortActive = (bool) SessionSettings.Get("Session", "SerialPortActive");
@@ -155,9 +158,10 @@ namespace USE_ExperimentTemplate
 			//DontDestroyOnLoad(gameObject);
 			State setupSession = new State("SetupSession");
 			State selectTask = new State("SelectTask");
+			State loadTask = new State("LoadTask");
 			State runTask = new State("RunTask");
 			State finishSession = new State("FinishSession");
-			AddActiveStates(new List<State> {setupSession, selectTask, runTask, finishSession});
+			AddActiveStates(new List<State> {setupSession, selectTask, loadTask, runTask, finishSession});
 
 			SessionDataControllers = new SessionDataControllers(GameObject.Find("DataControllers"));
 			ActiveTaskLevels = new List<ControlLevel_Task_Template>();//new Dictionary<string, ControlLevel_Task_Template>();
@@ -260,12 +264,15 @@ namespace USE_ExperimentTemplate
 					SessionSettings.Save();
 				});
 
-			//tasksFinished is a placeholder, eventually there will be a proper task selection screen
 			bool tasksFinished = false;
 			GameObject taskButtons = null;
+			Dictionary<string, GameObject> taskButtonsDict = new Dictionary<string, GameObject>();
+			string selectedConfigName = null;
 			selectTask.AddUniversalInitializationMethod(() =>
 			{
 				SessionSettings.Restore();
+				selectedConfigName = null;
+
 				SessionCam.gameObject.SetActive(true);
 				CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
 				CameraMirrorTexture.Create();
@@ -296,6 +303,7 @@ namespace USE_ExperimentTemplate
 					string configName = (string)task.Key;
 					string taskName = (string)task.Value;
 					GameObject taskButton = new GameObject(configName + "Button");
+					taskButtonsDict.Add(configName, taskButton);
 					taskButton.transform.parent = taskButtons.transform;
 
 					RawImage image = taskButton.AddComponent<RawImage>();
@@ -306,31 +314,48 @@ namespace USE_ExperimentTemplate
 					buttonStart += buttonSize + buttonSpacing;
 
 					Button button = taskButton.AddComponent<Button>();
-					button.onClick.AddListener(() => {
-						taskButtons.SetActive(false);
-						image.color = Color.gray;
-						Destroy(button);
-
-						loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-						loadScene.completed += (_) => {
-							SceneLoaded(configName);
-							CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigName == configName);
-						};
-					});
+					button.onClick.AddListener(() => selectedConfigName = configName);
 				}
 			});
-			selectTask.SpecifyTermination(() => !SceneLoading, runTask, () =>
+			selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask);
+			if (TaskSelectionTimeout >= 0) {
+				selectTask.AddTimer(TaskSelectionTimeout, loadTask, () => {
+					foreach (DictionaryEntry task in TaskMappings) {
+						string configName = (string)task.Key;
+						string taskName = (string)task.Value;
+						GameObject taskButton = taskButtonsDict[configName];
+
+						if (taskButton.GetComponent<Button>() == null) continue;
+						selectedConfigName = configName;
+						break;
+					}
+				});
+			}
+			selectTask.SpecifyTermination(() => tasksFinished, finishSession);
+
+			loadTask.AddInitializationMethod(() => {
+				taskButtons.SetActive(false);
+				GameObject taskButton = taskButtonsDict[selectedConfigName];
+				RawImage image = taskButton.GetComponent<RawImage>();
+				Button button = taskButton.GetComponent<Button>();
+				image.color = Color.gray;
+				Destroy(button);
+
+				string taskName = (string)TaskMappings[selectedConfigName];
+				loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
+				loadScene.completed += (_) => {
+					SceneLoaded(selectedConfigName);
+					CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigName == selectedConfigName);
+				};
+			});
+			loadTask.SpecifyTermination(() => !SceneLoading, runTask, () =>
 			{
-				// var methodInfo = GetType().GetMethod(nameof(GetTaskLevelFromString));
-				// MethodInfo getTaskLevel = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[CurrentTaskName]});
-				// getTaskLevel.Invoke(this, new object[0]);
 				runTask.AddChildLevel(CurrentTask);
 				CameraMirrorTexture.Release();
 				SessionCam.gameObject.SetActive(false);
 				SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
 				ExperimenterDisplayController.ResetTask(CurrentTask, CurrentTask.TrialLevel);
 			});
-			selectTask.SpecifyTermination(() => tasksFinished, finishSession);
 
 			//automatically finish tasks after running one - placeholder for proper selection
 			//runTask.AddLateUpdateMethod

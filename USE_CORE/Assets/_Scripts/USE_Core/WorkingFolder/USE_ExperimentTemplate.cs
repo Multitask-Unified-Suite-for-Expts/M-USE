@@ -857,15 +857,15 @@ namespace USE_ExperimentTemplate
 			
 			
 			//Setup data management
-			TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + TaskName;
-			FilePrefix = FilePrefix + "_" + TaskName;
-			BlockData = SessionDataControllers.InstantiateBlockData(StoreData, TaskName,
+			TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
+			FilePrefix = FilePrefix + "_" + ConfigName;
+			BlockData = SessionDataControllers.InstantiateBlockData(StoreData, ConfigName,
 				TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
 			BlockData.taskLevel = this;
 			BlockData.fileName = FilePrefix + "__BlockData";
 			BlockData.InitDataController();
 
-			TrialData = SessionDataControllers.InstantiateTrialData(StoreData, TaskName,
+			TrialData = SessionDataControllers.InstantiateTrialData(StoreData, ConfigName,
 				TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
 			TrialData.taskLevel = this;
 			TrialData.trialLevel = TrialLevel;
@@ -873,7 +873,7 @@ namespace USE_ExperimentTemplate
 			TrialData.fileName = FilePrefix + "__TrialData";
 			TrialData.InitDataController();
 
-			FrameData = SessionDataControllers.InstantiateFrameData(StoreData, TaskName,
+			FrameData = SessionDataControllers.InstantiateFrameData(StoreData, ConfigName,
 				TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
 			FrameData.taskLevel = this;
 			FrameData.trialLevel = TrialLevel;

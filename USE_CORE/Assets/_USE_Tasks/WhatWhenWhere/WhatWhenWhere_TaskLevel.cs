@@ -33,7 +33,13 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
            wwwTL.totalErrors_InBlock = 0 ;
            wwwTL.errorType_InBlockString = "";
            wwwTL.errorType_InBlock.Clear();
-           Array.Clear(wwwTL.numTotal_InBlock, 0, wwwTL.numTotal_InBlock.Length);
+           wwwTL.slotErrorCount = 0;
+           wwwTL.distractorSlotErrorCount = 0;
+           wwwTL.repetitionErrorCount = 0;
+           wwwTL.touchDurationErrorCount = 0;
+           wwwTL.irrelevantSelectionErrorCount = 0;
+           wwwTL.noScreenTouchErrorCount = 0;
+            Array.Clear(wwwTL.numTotal_InBlock, 0, wwwTL.numTotal_InBlock.Length);
            Array.Clear(wwwTL.numCorrect_InBlock, 0, wwwTL.numCorrect_InBlock.Length);
            Array.Clear(wwwTL.numErrors_InBlock, 0, wwwTL.numErrors_InBlock.Length);
            wwwTL.accuracyLog_InBlock = "";

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2128326103051848068}
   - component: {fileID: 3110259958995290988}
   m_Layer: 0
-  m_Name: RedHalo
+  m_Name: GrayHalo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

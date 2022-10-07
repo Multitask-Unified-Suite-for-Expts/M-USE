@@ -1,177 +1,135 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using USE_ExperimentTemplate;
 using USE_StimulusManagement;
-using System.Collections.Generic;
 using Random = UnityEngine.Random;
 
 namespace ContinuousRecognition_Namespace
 {
     public class ContinuousRecognition_TaskDef : TaskDef
     {
-        public List<int> chosenStims;
     }
 
     public class ContinuousRecognition_BlockDef : BlockDef
-    { 
-        public int[] BlockStimIndices, nObjectsMinMax, Ratio;
+    {
+        // public int[] TrialDefs,
+        public int[] BlockStimIndices;
+        public int[] NumObjectsMinMax;
+        public int[] InitialStimRatio;
 
-        //variables for the data from the Block Config file. 
-        public float DisplayStimsDuration, ChooseStimDuration, TrialEndDuration, TouchFeedbackDuration,
-            DisplayResultDuration,TokenRevealDuration, TokenUpdateDuration;
-        public int row, col, ManuallySpecifyLocation;
+        public List<int> PC_Stim;
+        public List<int> PNC_Stim;
+        public List<int> New_Stim;
+        public List<int> Unseen_Stim;
+        public List<int> TrialStimIndices;
 
-        public List<int> PreviouslyChosenStim, PreviouslyNotChosenStimuli, TrialStimIndices, UnseenStims, NewStim;
-        public Vector3[] BlockStimLocations, StimLocation;
-        public int trialCount, PC_count, PNC_count, new_count;
-        public Vector3 ContextColor;
+        public Vector3[] BlockStimLocations;
+
+        // public int BlockCount, TotalTokenNums, MaxTrials
+        public int TrialCount, NumRewardPulses,
+            PC_Count, New_Count, PNC_Count; //I removed the PNC_Count, New_Count, PC_Count;
+
+        public float DisplayStimsDuration, ChooseStimDuration, TouchFeedbackDuration, TrialEndDuration,
+            DisplayResultDuration, TokenRevealDuration, TokenUpdateDuration;
+
+        public string BlockName;
         public string ContextName;
 
-        //takes a block and generates corresponding trials. Gets called in the USE Template!
         public override void GenerateTrialDefsFromBlockDef()
         {
-            int numGrid = row * col;
-            Debug.Log("num grid is " + numGrid + "row is " + row + "; col is " + col);
-            Vector3[] Locations = new Vector3[numGrid];
-            
-            // calculate horizontal and vertical offset
-            float horizontal = 12f/(col*2.1f);
-            float vertical = 7.7f /(row*2.1f);
-            int gridIndex = 0;
-            // edges
-            float x = -3;
-            float y = 2;
-            float z = 0;
-            
-            // create grid by filling in location array
-            for (int i = 0; i < row; i++)
-            {
-                x = -3;
-                for (int j = 0; j < col; j++)
-                {
-                    Locations[gridIndex] = new Vector3(x, y, z);
-                    x += horizontal;
-                    gridIndex++;
-                }
-                y -= vertical;
-            }
-
-            // if user want to specify their own stim location, use user location, other wise, use grid
-            if (ManuallySpecifyLocation == 1)
-            {
-                if (StimLocation.Length < nObjectsMinMax[1])
-                {
-                    Debug.Log("Did not specify enough locations!");
-                    Debug.Break();
-                }
-                else
-                {
-                    BlockStimLocations = StimLocation;
-                    Debug.Log("BlockStimLocations lengths is " + BlockStimLocations.Length);
-                }
-            }
-            else
-            {
-                BlockStimLocations = Locations;
-            }
-
-            // init some lists
-            PreviouslyChosenStim = new List<int>();
-            PreviouslyNotChosenStimuli = new List<int>();
-            UnseenStims = new List<int>();
+            PC_Stim = new List<int>();
+            PNC_Stim = new List<int>();
+            New_Stim = new List<int>();
+            Unseen_Stim = new List<int>();
             TrialStimIndices = new List<int>();
-            NewStim = new List<int>();
-            
-            // calculate total number of trials
-            int numTrials = nObjectsMinMax[1] - nObjectsMinMax[0] + 1;
-            TrialDefs = new ContinuousRecognition_TrialDef[numTrials];
-            
-            // number of stims on first trial (we increase by 1 after each iteration below)
-            int numTrialStims = nObjectsMinMax[0];
-            bool end = false;
 
-            // trial loop 
-            for (int iTrial = 0; iTrial < numTrials && !end; iTrial++)
+            int maxNumTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
+            TrialDefs = new ContinuousRecognition_TrialDef[maxNumTrials];
+            int numTrialStims = NumObjectsMinMax[0]; //incremented at end
+            bool theEnd = false;
+
+            for(int trialIndex = 0; trialIndex < maxNumTrials && !theEnd; trialIndex++)
             {
                 ContinuousRecognition_TrialDef trial = new ContinuousRecognition_TrialDef();
                 trial.BlockStimIndices = BlockStimIndices;
-                trial.trialCount = trialCount;
+                trial.TrialCount = TrialCount;
 
-                // set up stim location by randomly choosing positions from grid
-                Vector3[] arr = new Vector3[nObjectsMinMax[0] + iTrial];
-                for (int i = 0; i < numTrialStims; i++)
+                Vector3[] trialStimLocations = new Vector3[NumObjectsMinMax[0] + trialIndex];
+
+                for(int i = 0; i < numTrialStims; i++)
                 {
-                    int index = Random.Range(0, BlockStimLocations.Length);
-                    while (Array.IndexOf(arr, BlockStimLocations[index]) != -1)
+                    int randomIndex = Random.Range(0, BlockStimLocations.Length);
+                    while(Array.IndexOf(trialStimLocations, BlockStimLocations[randomIndex]) != -1)
                     {
-                        index = Random.Range(0, BlockStimLocations.Length);
+                        randomIndex = Random.Range(0, BlockStimIndices.Length);    
                     }
-                    arr[i] = BlockStimLocations[index];
+                    trialStimLocations[i] = BlockStimLocations[randomIndex];
                 }
-                
-                trial.TrialStimLocations = arr;
-                trial.Grid = Locations;
+                trial.TrialStimLocations = trialStimLocations;
                 trial.TrialStimIndices = TrialStimIndices;
-                trial.PreviouslyChosenStim = PreviouslyChosenStim;
-                trial.PreviouslyNotChosenStimuli = PreviouslyNotChosenStimuli;
-                trial.nObjectsMinMax = nObjectsMinMax;
-                trial.Ratio = Ratio;
-                trial.UnseenStims = UnseenStims;
-                trial.numTrialStims = numTrialStims;
-                trial.maxNumTrials = numTrials;
+                trial.PC_Stim = PC_Stim;
+                trial.PNC_Stim = PNC_Stim;
+                trial.Unseen_Stim = Unseen_Stim;
+                trial.New_Stim = New_Stim;
+                trial.PNC_Count = PNC_Count;
+                trial.PC_Count = PC_Count;
+                trial.New_Count = New_Count;
+                trial.NumObjectsMinMax = NumObjectsMinMax;
+                trial.InitialStimRatio = InitialStimRatio;
+                trial.NumTrialStims = numTrialStims;
+                trial.MaxNumTrials = maxNumTrials;
                 trial.DisplayStimsDuration = DisplayStimsDuration;
                 trial.ChooseStimDuration = ChooseStimDuration;
                 trial.TrialEndDuration = TrialEndDuration;
                 trial.TouchFeedbackDuration = TouchFeedbackDuration;
-                trial.DisplayResultDuration = DisplayResultDuration;
-                trial.ManuallySpecifyLocation = ManuallySpecifyLocation;
-                trial.row = row;
-                trial.col = col;
-                trial.PNC_count = PNC_count;
-                trial.PC_count = PC_count;
-                trial.new_Count = new_count;
-                trial.ContextColor = ContextColor;
                 trial.ContextName = ContextName;
                 trial.TokenRevealDuration = TokenRevealDuration;
                 trial.TokenUpdateDuration = TokenUpdateDuration;
 
-                TrialDefs[iTrial] = trial;
+                TrialDefs[trialIndex] = trial;
                 numTrialStims++;
-                trialCount++;
+                TrialCount++;
             }
         }
+
     }
 
     public class ContinuousRecognition_TrialDef : TrialDef
     {
-        public int[] BlockStimIndices, nObjectsMinMax, Ratio, metrics;
         public Vector3[] TrialStimLocations;
-        public int trialCount, numTrialStims, maxNumTrials;
-        public bool isNewStim;
-        public Vector3[] Grid;
-        public Vector3 ContextColor;
-        public string ContextName;
 
-        public List<int> PreviouslyChosenStim, PreviouslyNotChosenStimuli, TrialStimIndices, UnseenStims;
-        public int row, col, Context, PC_count, PNC_count, new_Count;
+        public int[] BlockStimIndices;
+        public int[] NumObjectsMinMax;
+        public int[] InitialStimRatio;
 
-        public float
-            DisplayStimsDuration,
-            ChooseStimDuration,
-            TrialEndDuration,
-            TouchFeedbackDuration,
+        public List<int> PC_Stim;
+        public List<int> PNC_Stim;
+        public List<int> Unseen_Stim;
+        public List<int> New_Stim;
+        public List<int> TrialStimIndices;
+
+        public int WrongStimIndex;
+
+        public int TrialCount;
+        public int NumTrialStims;
+        public int MaxNumTrials;
+        public int PC_Count;
+        public int PNC_Count;
+        public int New_Count;
+
+        public float DisplayStimsDuration, ChooseStimDuration, TrialEndDuration, TouchFeedbackDuration, 
             DisplayResultDuration, TokenRevealDuration, TokenUpdateDuration;
 
-        public int ManuallySpecifyLocation;
-        
-        //ObjectNums refers to items in a list of objects to be loaded from resources folder
-        public int[] ObjectNums;
-       
+        public bool IsNewStim;
+        public string ContextName;
     }
 
     public class ContinuousRecognition_StimDef : StimDef
     {
         public bool PreviouslyChosen;
     }
-    
+
 }

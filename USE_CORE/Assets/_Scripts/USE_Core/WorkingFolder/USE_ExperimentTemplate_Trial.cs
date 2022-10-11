@@ -8,6 +8,7 @@ using USE_StimulusManagement;
 using ConfigDynamicUI;
 using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Classes;
+using USE_ExperimentTemplate_Data;
 
 namespace USE_ExperimentTemplate
 {

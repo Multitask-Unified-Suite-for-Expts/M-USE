@@ -232,9 +232,20 @@ namespace USE_ExperimentTemplate
         }
     }
 
-    
+    public class TrialStims : TaskStims
+    {
+
+    }
+
+
+    public abstract class TrialDef
+    {
+        public int BlockCount, TrialCountInBlock, TrialCountInTask;
+        public TrialStims TrialStims;
+    }
+
     public class TrialLevel_Methods
     {
-        
+
     }
 }

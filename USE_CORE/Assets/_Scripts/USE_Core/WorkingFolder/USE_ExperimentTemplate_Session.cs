@@ -536,26 +536,27 @@ namespace USE_ExperimentTemplate
         // }
 
 #if UNITY_STANDALONE_WIN
-		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-		public struct ReparseDataBuffer {
-			public uint ReparseTag;
-			public ushort ReparseDataLength;
-			public ushort Reserved;
-			public ushort SubstituteNameOffset;
-			public ushort SubstituteNameLength;
-			public ushort PrintNameOffset;
-			public ushort PrintNameLength;
-			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)] public string PathBuffer;
-		}
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        public struct ReparseDataBuffer
+        {
+            public uint ReparseTag;
+            public ushort ReparseDataLength;
+            public ushort Reserved;
+            public ushort SubstituteNameOffset;
+            public ushort SubstituteNameLength;
+            public ushort PrintNameOffset;
+            public ushort PrintNameLength;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)] public string PathBuffer;
+        }
 
-		[DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-		static extern IntPtr CreateFile(string lpFileName, uint dwDesiredAccess, uint dwShareMode,
-			IntPtr lpSecurityAttributes, uint dwCreationDispositionulong, uint dwFlagsAndAttributes, IntPtr hTemplateFile);
-		[DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-		static extern bool DeviceIoControl(IntPtr hDevice, uint dwIoControlCode, ref ReparseDataBuffer lpInBuffer,
-			uint nInBufferSize, IntPtr lpOutBuffer, uint nOutBufferSize, IntPtr lpBytesReturned, IntPtr lpOverlapped);
-		[DllImport("Kernel32.dll")]
-		static extern bool CloseHandle(IntPtr hObject);
+        [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        static extern IntPtr CreateFile(string lpFileName, uint dwDesiredAccess, uint dwShareMode,
+            IntPtr lpSecurityAttributes, uint dwCreationDispositionulong, uint dwFlagsAndAttributes, IntPtr hTemplateFile);
+        [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        static extern bool DeviceIoControl(IntPtr hDevice, uint dwIoControlCode, ref ReparseDataBuffer lpInBuffer,
+            uint nInBufferSize, IntPtr lpOutBuffer, uint nOutBufferSize, IntPtr lpBytesReturned, IntPtr lpOverlapped);
+        [DllImport("Kernel32.dll")]
+        static extern bool CloseHandle(IntPtr hObject);
 #endif
 
         void OnApplicationQuit()
@@ -596,59 +597,59 @@ namespace USE_ExperimentTemplate
                 System.IO.Directory.CreateDirectory(SessionDataPath + Path.DirectorySeparatorChar + "LogFile");
                 string symlinkLocation = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + "LatestSession";
 #if UNITY_STANDALONE_WIN
-				uint GENERIC_READ = 0x80000000;
-				uint GENERIC_WRITE = 0x40000000;
-				uint FILE_SHARE_READ = 0x00000001;
-				uint OPEN_EXISTING = 3;
-				uint FILE_FLAG_BACKUP_SEMANTICS = 0x02000000;
-				uint FILE_FLAG_OPEN_REPARSE_POINT = 0x00200000;
-				uint FSCTL_SET_REPARSE_POINT = 0x900A4;
-				uint IO_REPARSE_TAG_MOUNT_POINT = 0xA0000003;
-				Directory.CreateDirectory(symlinkLocation);
+                uint GENERIC_READ = 0x80000000;
+                uint GENERIC_WRITE = 0x40000000;
+                uint FILE_SHARE_READ = 0x00000001;
+                uint OPEN_EXISTING = 3;
+                uint FILE_FLAG_BACKUP_SEMANTICS = 0x02000000;
+                uint FILE_FLAG_OPEN_REPARSE_POINT = 0x00200000;
+                uint FSCTL_SET_REPARSE_POINT = 0x900A4;
+                uint IO_REPARSE_TAG_MOUNT_POINT = 0xA0000003;
+                Directory.CreateDirectory(symlinkLocation);
 
-				// Open the file with the correct perms
-				IntPtr dirHandle = CreateFile(
-					symlinkLocation,
-					GENERIC_READ | GENERIC_WRITE,
-					FILE_SHARE_READ,
-					IntPtr.Zero,
-					OPEN_EXISTING,
-					FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT,
-					IntPtr.Zero
-				);
-				
-				// \??\ indicates that the path should be non-interpreted
-				string prefix = @"\??\";
-				string substituteName = prefix + SessionDataPath;
-				// char is 2 bytes because strings are UTF-16
-				int substituteByteLen = substituteName.Length * sizeof(char);
-				ReparseDataBuffer rdb = new ReparseDataBuffer
-				{
-					ReparseTag = IO_REPARSE_TAG_MOUNT_POINT,
-					// 12 bytes is the byte length from SubstituteNameOffset to
-					// before PathBuffer
-					ReparseDataLength = (ushort)(substituteByteLen + 12),
-					SubstituteNameOffset = 0,
-					SubstituteNameLength = (ushort)substituteByteLen,
-					// Needs to be at least 2 ahead (accounting for nonexistent null-terminator)
-					PrintNameOffset = (ushort)(substituteByteLen + 2),
-					PrintNameLength = 0,
-					PathBuffer = substituteName
-				};
+                // Open the file with the correct perms
+                IntPtr dirHandle = CreateFile(
+                    symlinkLocation,
+                    GENERIC_READ | GENERIC_WRITE,
+                    FILE_SHARE_READ,
+                    IntPtr.Zero,
+                    OPEN_EXISTING,
+                    FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT,
+                    IntPtr.Zero
+                );
 
-				var result = DeviceIoControl(
-					dirHandle,
-					FSCTL_SET_REPARSE_POINT,
-					ref rdb,
-					// 20 bytes is the byte length for everything but the PathBuffer
-					(uint)(substituteName.Length * sizeof(char) + 20),
-					IntPtr.Zero,
-					0,
-					IntPtr.Zero,
-					IntPtr.Zero
-				);
+                // \??\ indicates that the path should be non-interpreted
+                string prefix = @"\??\";
+                string substituteName = prefix + SessionDataPath;
+                // char is 2 bytes because strings are UTF-16
+                int substituteByteLen = substituteName.Length * sizeof(char);
+                ReparseDataBuffer rdb = new ReparseDataBuffer
+                {
+                    ReparseTag = IO_REPARSE_TAG_MOUNT_POINT,
+                    // 12 bytes is the byte length from SubstituteNameOffset to
+                    // before PathBuffer
+                    ReparseDataLength = (ushort)(substituteByteLen + 12),
+                    SubstituteNameOffset = 0,
+                    SubstituteNameLength = (ushort)substituteByteLen,
+                    // Needs to be at least 2 ahead (accounting for nonexistent null-terminator)
+                    PrintNameOffset = (ushort)(substituteByteLen + 2),
+                    PrintNameLength = 0,
+                    PathBuffer = substituteName
+                };
 
-				CloseHandle(dirHandle);
+                var result = DeviceIoControl(
+                    dirHandle,
+                    FSCTL_SET_REPARSE_POINT,
+                    ref rdb,
+                    // 20 bytes is the byte length for everything but the PathBuffer
+                    (uint)(substituteName.Length * sizeof(char) + 20),
+                    IntPtr.Zero,
+                    0,
+                    IntPtr.Zero,
+                    IntPtr.Zero
+                );
+
+                CloseHandle(dirHandle);
 #endif
                 string logPath = "";
                 if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX |
@@ -695,5 +696,16 @@ namespace USE_ExperimentTemplate
             if (CameraMirrorTexture == null) return;
             GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), CameraMirrorTexture);
         }
+    }
+
+    public class SessionDef
+    {
+        public string Subject;
+        public DateTime SessionStart_DateTime;
+        public int SessionStart_Frame;
+        public float SessionStart_UnityTime;
+        public string SessionID;
+        public bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
+        public string EyetrackerType, SelectionType;
     }
 }

@@ -95,6 +95,7 @@ namespace USE_ExperimenterDisplay
             defaultPanelList.Add(new TrialInfoPanel());
             defaultPanelList.Add(new BlockInfoPanel());
             defaultPanelList.Add(new HotKeyPanel());
+            defaultPanelList.Add(new LogPanel());
             // defaultPanelList.Add(new PlayerViewPanel());
             //all other default panels
             return defaultPanelList;

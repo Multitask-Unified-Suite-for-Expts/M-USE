@@ -1,7 +1,6 @@
 using System;
-using USE_ExperimentTemplate;
+using USE_ExperimentTemplate_Task;
 using USE_Settings;
-using WorkingMemory_Namespace;
 
 public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
 {

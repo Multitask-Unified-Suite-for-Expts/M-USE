@@ -1,5 +1,5 @@
-﻿using USE_ExperimentTemplate;
-using CognitiveMaze_Namespace;
+﻿using CognitiveMaze_Namespace;
+using USE_ExperimentTemplate_Task;
 
 public class CognitiveMaze_TaskLevel : ControlLevel_Task_Template
 {

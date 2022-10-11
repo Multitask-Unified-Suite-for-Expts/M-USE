@@ -9,8 +9,9 @@ using ConfigDynamicUI;
 using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
+using USE_ExperimentTemplate_Task;
 
-namespace USE_ExperimentTemplate
+namespace USE_ExperimentTemplate_Trial
 {
     public abstract class ControlLevel_Trial_Template : ControlLevel
     {

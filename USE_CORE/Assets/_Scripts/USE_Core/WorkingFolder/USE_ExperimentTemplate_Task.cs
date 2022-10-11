@@ -11,8 +11,10 @@ using ConfigDynamicUI;
 using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
+using USE_ExperimentTemplate_Trial;
+using USE_ExperimentTemplate_Block;
 
-namespace USE_ExperimentTemplate
+namespace USE_ExperimentTemplate_Task
 {
 
     public abstract class ControlLevel_Task_Template : ControlLevel

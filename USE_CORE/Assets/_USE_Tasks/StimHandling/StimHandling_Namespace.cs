@@ -1,5 +1,7 @@
 using UnityEngine;
-using USE_ExperimentTemplate;
+using USE_ExperimentTemplate_Block;
+using USE_ExperimentTemplate_Task;
+using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
 
 namespace StimHandling_Namespace

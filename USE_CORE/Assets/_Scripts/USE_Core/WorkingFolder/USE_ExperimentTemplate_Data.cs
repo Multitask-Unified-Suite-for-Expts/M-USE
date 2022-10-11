@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using USE_Data;
-using USE_ExperimentTemplate;
+using USE_ExperimentTemplate_Session;
+using USE_ExperimentTemplate_Task;
+using USE_ExperimentTemplate_Trial;
 
 namespace USE_ExperimentTemplate_Data
 {

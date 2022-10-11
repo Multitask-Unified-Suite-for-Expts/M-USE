@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using USE_ExperimentTemplate;
 using ContinuousRecognition_Namespace;
 using UnityEngine;
 using UnityEngine.UI;
 using USE_Settings;
 using USE_StimulusManagement;
+using USE_ExperimentTemplate_Task;
 
 public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 {

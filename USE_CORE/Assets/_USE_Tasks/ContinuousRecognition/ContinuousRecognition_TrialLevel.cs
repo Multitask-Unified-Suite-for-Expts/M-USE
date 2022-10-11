@@ -1,16 +1,12 @@
 using UnityEngine;
 using System.Collections.Generic;
-using USE_ExperimentTemplate;
 using USE_States;
-using UnityEngine.UI;
 using USE_StimulusManagement;
 using ContinuousRecognition_Namespace;
 using System;
-using System.Globalization;
-using System.IO;
-using ICSharpCode.SharpZipLib.Zip.Compression;
 using Random = UnityEngine.Random;
 using ConfigDynamicUI;
+using USE_ExperimentTemplate_Trial;
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {

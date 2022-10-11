@@ -5,8 +5,8 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 using UnityEditor.SceneManagement;
-using USE_ExperimentTemplate;
-using Newtonsoft.Json;
+using USE_ExperimentTemplate_Task;
+using USE_ExperimentTemplate_Trial;
 
 static class TaskCreation
 {

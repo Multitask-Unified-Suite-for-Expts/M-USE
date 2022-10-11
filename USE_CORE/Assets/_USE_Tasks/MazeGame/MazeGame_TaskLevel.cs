@@ -1,6 +1,5 @@
 using System;
-using USE_ExperimentTemplate;
-using MazeGame_Namespace;
+using USE_ExperimentTemplate_Task;
 using USE_Settings;
 
 public class MazeGame_TaskLevel : ControlLevel_Task_Template

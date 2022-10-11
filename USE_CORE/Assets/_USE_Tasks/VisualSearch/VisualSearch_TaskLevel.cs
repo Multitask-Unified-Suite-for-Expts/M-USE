@@ -1,8 +1,9 @@
-using USE_ExperimentTemplate;
 using VisualSearch_Namespace;
 using System;
 using UnityEngine;
 using USE_Settings;
+using USE_ExperimentTemplate_Task;
+using USE_ExperimentTemplate_Block;
 
 public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 {

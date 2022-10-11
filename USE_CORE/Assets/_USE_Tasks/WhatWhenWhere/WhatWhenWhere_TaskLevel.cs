@@ -1,10 +1,9 @@
-﻿using USE_ExperimentTemplate;
-using WhatWhenWhere_Namespace;
-using ExperimenterDisplayPanels;
+﻿using WhatWhenWhere_Namespace;
 using System;
 using UnityEngine;
-using USE_ExperimentTemplate_Classes;
 using USE_Settings;
+using USE_ExperimentTemplate_Task;
+using USE_ExperimentTemplate_Block;
 
 public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 {

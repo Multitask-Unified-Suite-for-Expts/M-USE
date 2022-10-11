@@ -1,20 +1,16 @@
 using UnityEngine;
-using USE_ExperimentTemplate;
 using USE_States;
 using USE_StimulusManagement;
 using MazeGame_Namespace;
 
 
 using HiddenMaze;
-using UnityEngine.SceneManagement;
-using USE_StimulusManagement;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using System.Data;
-using System.IO;
-using System.Windows.Forms;
 using ConfigDynamicUI;
 using USE_Settings;
+using USE_ExperimentTemplate_Trial;
 
 public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 {

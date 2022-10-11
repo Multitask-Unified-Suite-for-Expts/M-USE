@@ -1,5 +1,4 @@
 using UnityEngine;
-using USE_ExperimentTemplate;
 using USE_States;
 // using USE_StimulusManagement;
 using EffortControl_Namespace;
@@ -7,6 +6,7 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using USE_ExperimentTemplate_Trial;
 //testing
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template

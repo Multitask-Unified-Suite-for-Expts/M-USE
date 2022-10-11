@@ -11,7 +11,6 @@ using USE_ExperimentTemplate_Classes;
 
 namespace USE_ExperimentTemplate
 {
-
     public abstract class ControlLevel_Trial_Template : ControlLevel
     {
         [HideInInspector] public TrialData TrialData;
@@ -230,5 +229,11 @@ namespace USE_ExperimentTemplate
 
             return materialSkybox;
         }
+    }
+
+    
+    public class TrialLevel_Methods
+    {
+        
     }
 }

@@ -1,19 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
-using USE_ExperimentTemplate;
 using USE_States;
 using UnityEngine.UI;
 using USE_StimulusManagement;
 using VisualSearch_Namespace;
-using System;
-using Random = UnityEngine.Random;
 using USE_UI;
 using USE_Settings;
-using System.IO;
 using System.Linq;
 using ConfigDynamicUI;
-using USE_ExperimentTemplate_Classes;
-using USE_Utilities;
+using USE_ExperimentTemplate_Trial;
 
 public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 {

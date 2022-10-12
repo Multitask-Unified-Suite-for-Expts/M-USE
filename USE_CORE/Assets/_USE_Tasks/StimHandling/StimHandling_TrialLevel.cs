@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
-using USE_ExperimentTemplate;
 using USE_States;
 using USE_StimulusManagement;
 using StimHandling_Namespace;
 using UnityEngine.UI;
+using USE_ExperimentTemplate_Trial;
 
 public class StimHandling_TrialLevel : ControlLevel_Trial_Template
 {

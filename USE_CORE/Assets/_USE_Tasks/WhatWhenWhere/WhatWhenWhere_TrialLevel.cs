@@ -3,17 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using USE_States;
-using USE_ExperimentTemplate;
 using WhatWhenWhere_Namespace;
 using USE_StimulusManagement;
 using ConfigDynamicUI;
-using System.Collections;
 using USE_Settings;
 using USE_DisplayManagement;
 using System.Linq;
 using System.IO;
-using USE_ExperimentTemplate_Classes;
-using TriLib;
+using USE_ExperimentTemplate_Trial;
+using USE_ExperimentTemplate_Task;
 
 public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 {

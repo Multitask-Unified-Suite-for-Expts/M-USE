@@ -325,6 +325,14 @@ namespace USE_ExperimentTemplate_Session
                 {
                     string configName = (string)task.Key;
                     string taskName = (string)task.Value;
+
+                    string taskFolder = GetConfigFolderPath(configName);
+                    if (!Directory.Exists(taskFolder))
+                    {
+                        Destroy(taskButtons);
+                        throw new DirectoryNotFoundException($"Task folder for '{configName}' at '{taskFolder}' does not exist.");
+                    }
+
                     GameObject taskButton = new GameObject(configName + "Button");
                     taskButtonsDict.Add(configName, taskButton);
                     taskButton.transform.parent = taskButtons.transform;
@@ -434,15 +442,10 @@ namespace USE_ExperimentTemplate_Session
             }
         }
 
-        ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl)
+        string GetConfigFolderPath(string configName)
         {
-            tl.SessionDataControllers = SessionDataControllers;
-            tl.LocateFile = LocateFile;
-            tl.SessionDataPath = SessionDataPath;
             if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))
-                tl.TaskConfigPath =
-                    configFileFolder + Path.DirectorySeparatorChar +
-                    tl.ConfigName;
+                return configFileFolder + Path.DirectorySeparatorChar + configName;
             else
             {
                 List<string> configFolders =
@@ -450,13 +453,19 @@ namespace USE_ExperimentTemplate_Session
                 int index = 0;
                 foreach (string k in TaskMappings.Keys)
                 {
-                    if (k.Equals(tl.ConfigName)) break;
+                    if (k.Equals(configName)) break;
                     ++index;
                 }
-                tl.TaskConfigPath =
-                    configFileFolder + Path.DirectorySeparatorChar +
-                    configFolders[index];
+                return configFileFolder + Path.DirectorySeparatorChar + configFolders[index];
             }
+        }
+
+        ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl)
+        {
+            tl.SessionDataControllers = SessionDataControllers;
+            tl.LocateFile = LocateFile;
+            tl.SessionDataPath = SessionDataPath;
+            tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName);
 
             tl.FilePrefix = FilePrefix;
             tl.StoreData = StoreData;

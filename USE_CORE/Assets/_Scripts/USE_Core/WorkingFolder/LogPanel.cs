@@ -9,6 +9,8 @@ public class LogPanel: ExperimenterDisplayPanel
     private Text logPanelText;
     private string logText = "";
 
+    private readonly LogType[] LOGGED_LOG_TYPES = {LogType.Error, LogType.Exception};
+
     public override void CustomPanelInitialization()
     {
         Application.logMessageReceived += HandleLog;
@@ -23,7 +25,7 @@ public class LogPanel: ExperimenterDisplayPanel
     }
 
     private void HandleLog(string condition, string stackTrace, LogType type) {
-        if (type == LogType.Exception) {
+        if (Array.IndexOf(LOGGED_LOG_TYPES, type) > -1) {
             logText += condition + "\n";
         }
     }

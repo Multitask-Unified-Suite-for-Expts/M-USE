@@ -997,6 +997,7 @@ namespace USE_ExperimentTemplate
 				{
 					for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
 					{
+						Debug.Log($"Iblock = {iBlock}");
 						BlockDefs[iBlock].GenerateTrialDefsFromBlockDef();
 					}
 				}
@@ -1357,6 +1358,9 @@ namespace USE_ExperimentTemplate
 
 			FinishTrial.AddUniversalTerminationMethod(() =>
 			{
+				Debug.Log($"CHECK BLOCK END = {CheckBlockEnd()}");
+				Debug.Log($"TRIAL COUNT IN BLOCK = {TrialCount_InBlock}");
+			
 				TrialData.AppendData();
 				TrialData.WriteData();
 				FrameData.AppendData();

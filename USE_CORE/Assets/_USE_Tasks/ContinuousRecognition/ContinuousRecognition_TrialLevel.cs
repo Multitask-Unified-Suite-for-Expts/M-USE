@@ -6,19 +6,28 @@ using UnityEngine.UI;
 using USE_StimulusManagement;
 using ContinuousRecognition_Namespace;
 using System;
-using System.Globalization;
-using System.IO;
-using ICSharpCode.SharpZipLib.Zip.Compression;
 using Random = UnityEngine.Random;
 using ConfigDynamicUI;
 using USE_Settings;
-using USE_ExperimentTemplate_Classes;
+using System.Collections;
+using System.Linq;
+//using USE_ExperimentTemplate_Classes;
+//using static UnityEngine.Networking.UnityWebRequest;
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
     public ContinuousRecognition_TrialDef currentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
 
-    public bool EndBlock = false;
+    public bool EndBlock;
+    bool isNew;
+    bool stimIsChosen;
+
+    public GameObject GreenBorderPrefab;
+    public GameObject RedBorderPrefab;
+
+    public List<GameObject> BorderPrefabList;
+
+    public GameObject Starfield;
 
     //Game object variables
     [NonSerialized]
@@ -35,6 +44,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public string MaterialFilePath;
     private bool variablesLoaded;
 
+    //GameObject canvasGO;
+    //Canvas canvas;
+    //GameObject resultsTextGO;
+    //Text resultsText;
+
 
     public override void DefineControlLevel()
     {        
@@ -43,8 +57,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State ChooseStim = new State("ChooseStim");
         State TouchFeedback = new State("TouchFeedback");
         State TokenUpdate = new State("TokenUpdate");
+        State DisplayResults = new State("DisplayResults");
         State ITI = new State("ITI");
-        AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, ITI });
+        AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
         TokenFBController.enabled = false;
 
@@ -62,6 +77,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
+            currentTrial.IsNewStim = false;
+            EndBlock = false;
+            stimIsChosen = false;
+            isNew = false;
+
             RenderSettings.skybox = CreateSkybox($"{MaterialFilePath}\\{currentTrial.ContextName}.png");
             TokenFBController.enabled = false;
             SetTokenFeedbackTimes();
@@ -82,16 +102,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         DisplayStims.AddTimer(() => currentTrial.DisplayStimsDuration, ChooseStim);
 
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
-        bool stimIsChosen = false;
-        bool isNew = false;
+
         GameObject chosenStimObj = null;
         ContinuousRecognition_StimDef chosenStimDef = null;
         MouseTracker.AddSelectionHandler(mouseHandler, ChooseStim);
 
         ChooseStim.AddUpdateMethod(() =>
         {
-            stimIsChosen = false;
-            isNew = false;
+            
             chosenStimObj = mouseHandler.SelectedGameObject;
             chosenStimDef = mouseHandler.SelectedStimDef;
 
@@ -106,7 +124,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         Debug.Log($"Right! Player chose a PNC_Stim with Index =  {chosenStimDef.StimCode - 1}");
                         currentTrial.PNC_Stim.Remove(chosenStimDef.StimCode - 1);
                     }
-                    if(currentTrial.New_Stim.Contains(chosenStimDef.StimCode -1))
+                    if(currentTrial.New_Stim.Contains(chosenStimDef.StimCode -1)) //If they chose a New Stim...
                     {
                         Debug.Log($"Right! Player chose a NEW_Stim with Index =  {chosenStimDef.StimCode - 1}");
                         currentTrial.New_Stim.Remove(chosenStimDef.StimCode - 1);
@@ -129,7 +147,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 {
                     Debug.Log($"WRONG! CHOSE A PREVIOUSLY CHOSEN STIM WITH INDEX =  {chosenStimDef.StimCode - 1}");
                     currentTrial.WrongStimIndex = chosenStimDef.StimCode-1; //identifies the stim they got wrong for Block FB purposes. 
-                    //EndBlock = true;  //I'm going to end the block down below during ITI, so they have time for wrong feedback.
+
                 }
             }
             if (chosenStimObj != null) //if they chose a stimObj and it has a pointer to the actual stimDef.  
@@ -168,27 +186,211 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 AudioFBController.Play("Negative");
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
+                EndBlock = true; //moved from inside ITI initializaation method. 
+
             }
         });
-        TokenUpdate.SpecifyTermination(() => !TokenFBController.IsAnimating(), ITI);
+        TokenUpdate.SpecifyTermination(() => !TokenFBController.IsAnimating(), DisplayResults);
 
-        ITI.AddInitializationMethod(() =>
+        StimGroup rightGroup = new StimGroup("Right");
+
+        DisplayResults.AddInitializationMethod(() =>
         {
-            if (!isNew) EndBlock = true; //telling block to end! doing here instead of when they get wrong so that there's time for the feedback. 
-        });
-        ITI.AddTimer(() => itiDuration.value, FinishTrial);
+            if (EndBlock) //IF THEY LOST, DISPLAY RESULTS
+            {
+                Starfield.SetActive(false);
+                TokenFBController.enabled = false;
+                RenderSettings.skybox = CreateSkybox($"{MaterialFilePath}\\LinearDark.png");
 
-        //Block will end if ENDBLOCK = True   (see CheckBlockEnd method below)
+                List<int> chosenStimIndices = currentTrial.PC_Stim;
+
+                Vector3[] FeedbackLocations = new Vector3[chosenStimIndices.Count];
+                for (int i = 0; i < chosenStimIndices.Count; i++)
+                {
+                    FeedbackLocations[i] = currentTrial.TrialFeedbackLocations[i];
+                }
+
+                rightGroup = new StimGroup("Right", ExternalStims, chosenStimIndices);
+                TrialStims.Add(rightGroup);
+                rightGroup.SetLocations(FeedbackLocations);
+                rightGroup.LoadStims();
+                rightGroup.ToggleVisibility(true);
+
+                BorderPrefabList = new List<GameObject>();
+                foreach (ContinuousRecognition_StimDef stim in rightGroup.stimDefs)
+                {
+                    if(stim.StimCode -1 == currentTrial.WrongStimIndex)
+                    {
+                        GameObject borderPrefab = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
+                        BorderPrefabList.Add(borderPrefab);
+                    }
+                    else
+                    {
+                        GameObject borderPrefab = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
+                        BorderPrefabList.Add(borderPrefab);
+                    }
+                }
+            }
+        });
+        DisplayResults.AddTimer(() => currentTrial.DisplayResultDuration, ITI, () => DestroyBorders(rightGroup));
+        DisplayResults.SpecifyTermination(() => !EndBlock, ITI);
+
+        ITI.AddTimer(() => itiDuration.value, FinishTrial, () => Starfield.SetActive(true));
     }
 
-    private void ShuffleList(List<int> list)
+
+
+    private void DestroyBorders(StimGroup group)
     {
-        for(int i = 0; i < list.Count-1; i++)
+        foreach (GameObject border in BorderPrefabList)
         {
-            int temp = list[i];
-            int rand = Random.Range(1, list.Count);
-            list[i] = list[rand];
-            list[rand] = temp;
+            if(border != null) border.SetActive(false);
+        }
+        BorderPrefabList.Clear();
+    }
+
+
+    //Generate the correct number of New, PC, and PNC stim for each trial. 
+    //Called when the trial is defined!
+    //The stim are auto loaded in the SetupTrial StateInitialization, and destroyed in the FinishTrial StateTermination
+    protected override void DefineTrialStims()
+    {
+
+        if(TrialCount_InBlock == 0)
+        {
+            //clear stim lists in case it's NOT the first block!
+            ClearCurrentTrialStimLists();
+
+            //Add each block stim to unseen list.
+            var numBlockStims = currentTrial.BlockStimIndices.Length;
+            for (int i = 0; i < numBlockStims; i++)
+            {
+                currentTrial.Unseen_Stim.Add(currentTrial.BlockStimIndices[i]);
+            }
+
+            //Pick 2 random New stim and add to TrialStimIndices and NewStim. Also remove from UnseenStim.
+            int[] tempArray = new int[currentTrial.NumObjectsMinMax[0]];
+            for (int i = 0; i < currentTrial.NumObjectsMinMax[0]; i++) //Pick2 stim randomly from blockStimIndices. 
+            {
+                int ranNum = Random.Range(0, numBlockStims);
+                while (Array.IndexOf(tempArray, ranNum) != -1)
+                {
+                    ranNum = Random.Range(0, numBlockStims);
+                }
+                tempArray[i] = ranNum;
+                currentTrial.TrialStimIndices.Add(ranNum);
+                currentTrial.Unseen_Stim.Remove(ranNum);
+                currentTrial.New_Stim.Add(ranNum);
+            }
+            Debug.Log($"{currentTrial.New_Stim.Count} STIM WERE GENERATED FOR TRIAL #{TrialCount_InBlock}");
+
+            trialStims = new StimGroup("TrialStims", ExternalStims, currentTrial.TrialStimIndices);
+            trialStims.SetLocations(currentTrial.TrialStimLocations);
+            trialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenUpdate")); //Visible when start DisplayStims, invisible when finish TokenUpdate.
+            TrialStims.Add(trialStims);
+
+            foreach (ContinuousRecognition_StimDef stim in trialStims.stimDefs)
+            {
+                stim.PreviouslyChosen = false;
+            }
+
+        }
+
+        else 
+        {
+            currentTrial.TrialStimIndices.Clear();
+
+            float[] stimPercentages = GetStimRatioPercentages(currentTrial.InitialStimRatio);
+            int[] stimNumbers = GetStimNumbers(stimPercentages);
+
+            int PC_Num = stimNumbers[0];
+            int New_Num = stimNumbers[1];
+            int PNC_Num = stimNumbers[2]; ///num needed!
+
+            Debug.Log($"CALCULATED FOR TRIAL {TrialCount_InBlock}: PC_Stim: {PC_Num}, New_Stim: {New_Num}, PNC_Stim: {PNC_Num}");
+
+            List<int> NewStim_Copy = ShuffleList(currentTrial.Unseen_Stim).ToList();
+            if (NewStim_Copy.Count > 1) NewStim_Copy = NewStim_Copy.GetRange(0, New_Num);
+            for (int i = 0; i < NewStim_Copy.Count; i++)
+            {
+                int current = NewStim_Copy[i]; //BREAKS HERE ON TRIAL 12
+                currentTrial.TrialStimIndices.Add(current);
+                currentTrial.Unseen_Stim.Remove(current);
+                currentTrial.New_Stim.Add(current);
+            }
+
+            List<int> PC_Copy = ShuffleList(currentTrial.PC_Stim).ToList();
+            if (PC_Copy.Count > 1) PC_Copy = PC_Copy.GetRange(0, PC_Num); //if more than 1, grab the correct amount. 
+            for(int i = 0; i < PC_Copy.Count; i++)
+            {
+                currentTrial.TrialStimIndices.Add(PC_Copy[i]);
+            }
+
+            List<int> PNC_Copy = ShuffleList(currentTrial.PNC_Stim).ToList();
+            if(PNC_Copy.Count > 1) PNC_Copy = PNC_Copy.GetRange(0, PNC_Num);
+            for(int i = 0; i < PNC_Copy.Count; i++)
+            {
+                currentTrial.TrialStimIndices.Add(PNC_Copy[i]);
+            }
+
+            int numGenerated = NewStim_Copy.Count + PC_Copy.Count + PNC_Copy.Count;
+            int numNeeded = PC_Num + New_Num + PNC_Num;
+            if (numGenerated == numNeeded) Debug.Log($"THE CORRECT AMOUNT OF STIM ({numGenerated}) WERE GENERATED FOR TRIAL #{TrialCount_InBlock}");
+            else Debug.Log($"NUM OF STIM GENERATED ({numGenerated}) DOES NOT EQUAL THE NUMBER NEEDED ({numNeeded}) FOR TRIAL #{TrialCount_InBlock}");
+
+            trialStims = new StimGroup($"TrialStims", ExternalStims, currentTrial.TrialStimIndices);
+            trialStims.SetLocations(currentTrial.TrialStimLocations);
+            trialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenUpdate")); //Visible when start DisplayStims, invisible when finish TokenUpdate.
+            TrialStims.Add(trialStims);
+
+        }
+        getLog(currentTrial.Unseen_Stim, "Unseen_Stims");
+        getLog(currentTrial.PC_Stim, "PC_Stims");
+        getLog(currentTrial.New_Stim, "New_Stims");
+        getLog(currentTrial.PNC_Stim, "PNC_Stims");
+        getLog(currentTrial.TrialStimIndices, "TrialStimIndices");
+    }
+
+    public void CreateCanvasAndComponents()
+    {
+        GameObject canvasGO = new GameObject();
+        canvasGO.AddComponent<Canvas>();
+        canvasGO.AddComponent<CanvasScaler>();
+        canvasGO.AddComponent<GraphicRaycaster>();
+
+        Canvas canvas = canvasGO.GetComponent<Canvas>();
+        canvas.name = "Results_Canvas";
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+
+        GameObject resultsTextGO = new GameObject();
+        resultsTextGO.transform.parent = canvasGO.transform;
+        resultsTextGO.AddComponent<Text>();
+
+        Text resultsText = resultsTextGO.GetComponent<Text>();
+        resultsText.name = "Results_Text";
+        resultsText.text = "Results";
+        resultsText.fontSize = 36;
+        resultsText.color = Color.white;
+
+        RectTransform rectTransform = resultsText.GetComponent<RectTransform>();
+        rectTransform.localPosition = new Vector3(-825, -175, 0);
+        rectTransform.sizeDelta = new Vector2(600, 200);
+    }
+
+    private List<int> ShuffleList(List<int> list)
+    {
+        if (list.Count == 1) return list;
+        
+        else
+        {
+            for (int i = 0; i < list.Count - 1; i++)
+            {
+                int temp = list[i];
+                int rand = Random.Range(1, list.Count);
+                list[i] = list[rand];
+                list[rand] = temp;
+            }
+            return list;
         }
     }
 
@@ -204,118 +406,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("PNC_Stim", () => currentTrial.PNC_Stim);
         TrialData.AddDatum("IsNewStim", () => currentTrial.IsNewStim);
         TrialData.AddDatum("CurrentTrialStims", () => currentTrial.TrialStimIndices);
-        //TrialData.AddDatum("PC_Count", () => currentTrial.PC_Count);
-        //TrialData.AddDatum("PNC_Count", () => currentTrial.PNC_Count);
-        //TrialData.AddDatum("Unseen_Count", () => currentTrial.New_Count);
     }
-   
 
-    protected override void DefineTrialStims()
+    private void ClearCurrentTrialStimLists()
     {
-        //Generate the correct number of New, PC, and PNC stim for each trial. 
-        //Called when the trial is defined!
-        //The stim are auto loaded in the SetupTrial StateInitialization, and destroyed in the FinishTrial StateTermination
-
-        currentTrial.TrialCount++;
-        currentTrial.TrialStimIndices.Clear();
-
-        if(currentTrial.TrialCount == 1)
-        {
-            var numBlockStims = currentTrial.BlockStimIndices.Length;
-            for (int i = 0; i < numBlockStims; i++)
-            {
-                currentTrial.Unseen_Stim.Add(currentTrial.BlockStimIndices[i]); //Add each block stim to unseen list.
-            }
-
-            int[] tempArray = new int[currentTrial.NumObjectsMinMax[0]];
-            for (int i = 0; i < currentTrial.NumObjectsMinMax[0]; i++) //Pick2 stim randomly from blockStimIndices. 
-            {
-                int ranNum = Random.Range(0, numBlockStims);
-                while (Array.IndexOf(tempArray, ranNum) != -1)
-                {
-                    ranNum = Random.Range(0, numBlockStims);
-                }
-                tempArray[i] = ranNum;
-                currentTrial.TrialStimIndices.Add(ranNum); //Add to TrialStimIndices
-                currentTrial.Unseen_Stim.Remove(ranNum);   //Remove from Unseen stim list
-                currentTrial.New_Stim.Add(ranNum); //Add it to list of new stim's indices.
-            }
-            Debug.Log($"{currentTrial.New_Stim.Count} STIM WERE GENERATED FOR TRIAL #{currentTrial.TrialCount}");
-        }
-        
-        else 
-        {
-            float[] stimPercentages = GetStimRatioPercentages(currentTrial.InitialStimRatio);
-            int[] stimNumbers = GetStimNumbers(stimPercentages);
-            int PC_Num = stimNumbers[0];
-            int New_Num = stimNumbers[1];
-            int PNC_Num = stimNumbers[2];
-
-            Debug.Log($"NUM OF PC_Stim CALCULATED FOR TRIAL {currentTrial.TrialCount} = {PC_Num}");
-            Debug.Log($"NUM OF NEW_Stim CALCULATED FOR TRIAL {currentTrial.TrialCount} = {New_Num}");
-            Debug.Log($"NUM OF PNC_Stim CALCULATED FOR TRIAL {currentTrial.TrialCount} = {PNC_Num}");
-
-
-            //Generate New_Stim needed for trial. Add to Indices, remove from Unseen, add to NewList.
-            //int numUnseen = currentTrial.Unseen_Stim.Count;
-
-            //for (int i = 0; i < New_Num && numUnseen > 0; i++)
-            //{
-            //    int New_Id = currentTrial.Unseen_Stim[Random.Range(0, numUnseen)];
-            //    while (currentTrial.TrialStimIndices.Contains(New_Id) && numUnseen > 0)
-            //    {
-            //        New_Id = currentTrial.Unseen_Stim[Random.Range(0, numUnseen)];
-            //        numUnseen--;
-            //    }
-            //    Debug.Log($"CURRENT TRIAL NEW_STIM: {New_Id}");
-            //    currentTrial.TrialStimIndices.Add(New_Id);
-            //    currentTrial.Unseen_Stim.Remove(New_Id);
-            //    currentTrial.New_Stim.Add(New_Id);
-            //    numUnseen--;
-            //}
-
-            List<int> NewStim_Sublist = currentTrial.Unseen_Stim.GetRange(0, New_Num);
-            foreach (int stimIndex in NewStim_Sublist)
-            {
-                Debug.Log($"CURRENT TRIAL NEW_STIM: {stimIndex}");
-                currentTrial.TrialStimIndices.Add(stimIndex);
-                currentTrial.Unseen_Stim.Remove(stimIndex);
-                currentTrial.New_Stim.Add(stimIndex);
-            }
-
-            //Generate PC_Stim needed for trial. Add to Indices.
-            List<int> PC_Copy = currentTrial.PC_Stim;
-            ShuffleList(PC_Copy);
-            foreach (int stimIndex in PC_Copy)
-            {
-                Debug.Log($"CURRENT TRIAL PC:  {stimIndex}");
-                currentTrial.TrialStimIndices.Add(stimIndex);
-            }
-
-            //Generate PNC_Stim needed for trial. Add to Indices.
-            List<int> PNC_Copy = currentTrial.PNC_Stim;
-            ShuffleList(PNC_Copy);
-            foreach(int stimIndex in PNC_Copy)
-            {
-                Debug.Log($"CURRENT TRIAL PNC:  {stimIndex}");
-                currentTrial.TrialStimIndices.Add(stimIndex);
-            }
-
-            int numGenerated = currentTrial.New_Stim.Count + currentTrial.PC_Stim.Count + currentTrial.PNC_Stim.Count;
-            int numNeeded = PC_Num + New_Num + PNC_Num;
-            if (numGenerated == numNeeded) Debug.Log($"THE CORRECT AMOUNT OF STIM ({numGenerated}) WERE GENERATED FOR TRIAL #{currentTrial.TrialCount}");
-            else Debug.Log($"NUM OF STIM GENERATED ({numGenerated}) DOES NOT EQUAL THE NUMBER NEEDED ({numNeeded}) FOR TRIAL #{currentTrial.TrialCount}");
-        }
-
-        getLog(currentTrial.Unseen_Stim, "Unseen_Stims");
-        getLog(currentTrial.PC_Stim, "PC_Stims");
-        getLog(currentTrial.PNC_Stim, "PNC_Stims");
-        getLog(currentTrial.TrialStimIndices, "TrialStimIndices");
-
-        trialStims = new StimGroup($"TrialStims", ExternalStims, currentTrial.TrialStimIndices);
-        trialStims.SetLocations(currentTrial.TrialStimLocations);
-        trialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenUpdate")); //Visible when start DisplayStims, invisible when finish TokenUpdate.
-        TrialStims.Add(trialStims);
+        currentTrial.New_Stim.Clear();
+        currentTrial.PNC_Stim.Clear();
+        currentTrial.PC_Stim.Clear();
+        currentTrial.Unseen_Stim.Clear();
     }
 
     private void getLog(List<int> list, string name)
@@ -366,36 +464,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         Debug.Log($"PNC NUM = {PNC_num}");
 
         return new[] { PC_num, New_num, PNC_num };
-
-
-        //if (TrialCount_InBlock == 1) return new int[3] { 1, 1, 1 };
-        
-        //int PC_Num = (int) Math.Floor(idealStimRatio[0] * currentTrial.NumTrialStims);  
-        //int New_Num = (int) Math.Floor(idealStimRatio[1] * currentTrial.NumTrialStims);
-        //int PNC_Num = (int) Math.Floor(idealStimRatio[2] * currentTrial.NumTrialStims);
-
-        //while ((PC_Num + New_Num + PNC_Num) < currentTrial.NumTrialStims)
-        //{
-        //    var numShort = currentTrial.NumTrialStims - (PC_Num + New_Num + PNC_Num);
-
-        //    if (currentTrial.NumTrialStims % 2 == 0) New_Num++;
-            
-        //    else //odd amount of TotalTrialStim
-        //    {
-        //        if (numShort == 1) PNC_Num++;
-        //        if (numShort == 2)
-        //        {
-        //            PNC_Num++;
-        //            New_Num++;
-        //        }
-        //        else Debug.Log("CALCULATED STIM # ARE SHORT BY MORE THAN 2!");
-        //    }  
-        //}
-        //Debug.Log($"PC NUM = {PC_Num}");
-        //Debug.Log($"NEW NUM = {New_Num}");
-        //Debug.Log($"PNC NUM = {PNC_Num}");
-
-        //return new int[3] { PC_Num, New_Num, PNC_Num};
     }
 
     private void CreateStartButton()

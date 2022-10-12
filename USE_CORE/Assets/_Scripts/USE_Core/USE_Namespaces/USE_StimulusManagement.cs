@@ -443,9 +443,9 @@ namespace USE_StimulusManagement
 			AddStims(sgOrig, stimSubsetIndices);
 			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
 		}
-		
-		
-		public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
+
+
+        public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
 			if (setActiveOnInit != null)
 			{

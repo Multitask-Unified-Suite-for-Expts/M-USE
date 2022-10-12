@@ -57,7 +57,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         maxObjectTouchDuration,
         selectObjectDuration,
         sliderSize,
-        chooseStimOnsetDelay;
+        ChooseStimOnsetDelay;
     //data logging variables
     private string touchedObjectsNames, touchDurationTimes, choiceDurationTimes, touchedPositions, searchStimsLocations, distractorStimsLocations;
     public string accuracyLog_InSession, accuracyLog_InBlock, accuracyLog_InTrial = "";
@@ -206,7 +206,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderReset"]);
         });
-        ChooseStimulusDelay.AddTimer(() => chooseStimOnsetDelay.value, delay,
+        ChooseStimulusDelay.AddTimer(() => ChooseStimOnsetDelay.value, delay,
             () => { stateAfterDelay = ChooseStimulus; });
         GazeTracker.AddSelectionHandler(gazeSelectionHandler, ChooseStimulus);
         MouseTracker.AddSelectionHandler(mouseSelectionHandler, ChooseStimulus);
@@ -948,7 +948,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
         finalFbDuration = ConfigUiVariables.get<ConfigNumber>("finalFbDuration");
         fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
-        chooseStimOnsetDelay = ConfigUiVariables.get<ConfigNumber>("chooseStimOnsetDelay");
+        ChooseStimOnsetDelay = ConfigUiVariables.get<ConfigNumber>("ChooseStimOnsetDelay");
 
         disableAllGameobjects();
         Debug.Log("Done Loading Variables");

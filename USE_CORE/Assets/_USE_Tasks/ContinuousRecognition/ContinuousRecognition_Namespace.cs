@@ -29,8 +29,7 @@ namespace ContinuousRecognition_Namespace
         public Vector3[] BlockStimLocations;
 
         // public int BlockCount, TotalTokenNums, MaxTrials
-        public int TrialCount, NumRewardPulses,
-            PC_Count, New_Count, PNC_Count; //I removed the PNC_Count, New_Count, PC_Count;
+        public int TrialCount, NumRewardPulses;
 
         public float DisplayStimsDuration, ChooseStimDuration, TouchFeedbackDuration, TrialEndDuration,
             DisplayResultDuration, TokenRevealDuration, TokenUpdateDuration;
@@ -52,19 +51,25 @@ namespace ContinuousRecognition_Namespace
             bool theEnd = false;
 
             for(int trialIndex = 0; trialIndex < maxNumTrials && !theEnd; trialIndex++)
-            {
+            {   
                 ContinuousRecognition_TrialDef trial = new ContinuousRecognition_TrialDef();
                 trial.BlockStimIndices = BlockStimIndices;
-                trial.TrialCount = TrialCount;
+
+                //I have locations in the config file reading like a book. top left to right, down a row, etc...
+                //currently holds 24 spots.
+                Vector3[] trialFeedbackLocations = new Vector3[NumObjectsMinMax[0] + trialIndex];
+                for(int i = 0; i < numTrialStims; i++) 
+                {
+                    trialFeedbackLocations[i] = BlockStimLocations[i]; 
+                }
 
                 Vector3[] trialStimLocations = new Vector3[NumObjectsMinMax[0] + trialIndex];
-
                 for(int i = 0; i < numTrialStims; i++)
                 {
                     int randomIndex = Random.Range(0, BlockStimLocations.Length);
                     while(Array.IndexOf(trialStimLocations, BlockStimLocations[randomIndex]) != -1)
                     {
-                        randomIndex = Random.Range(0, BlockStimIndices.Length);    
+                        randomIndex = Random.Range(0, BlockStimLocations.Length);    
                     }
                     trialStimLocations[i] = BlockStimLocations[randomIndex];
                 }
@@ -74,24 +79,22 @@ namespace ContinuousRecognition_Namespace
                 trial.PNC_Stim = PNC_Stim;
                 trial.Unseen_Stim = Unseen_Stim;
                 trial.New_Stim = New_Stim;
-                trial.PNC_Count = PNC_Count;
-                trial.PC_Count = PC_Count;
-                trial.New_Count = New_Count;
                 trial.NumObjectsMinMax = NumObjectsMinMax;
                 trial.InitialStimRatio = InitialStimRatio;
                 trial.NumTrialStims = numTrialStims;
                 trial.MaxNumTrials = maxNumTrials;
                 trial.DisplayStimsDuration = DisplayStimsDuration;
                 trial.ChooseStimDuration = ChooseStimDuration;
+                trial.DisplayResultDuration = DisplayResultDuration;
                 trial.TrialEndDuration = TrialEndDuration;
                 trial.TouchFeedbackDuration = TouchFeedbackDuration;
                 trial.ContextName = ContextName;
                 trial.TokenRevealDuration = TokenRevealDuration;
                 trial.TokenUpdateDuration = TokenUpdateDuration;
+                trial.TrialFeedbackLocations = trialFeedbackLocations;
 
                 TrialDefs[trialIndex] = trial;
                 numTrialStims++;
-                TrialCount++;
             }
         }
 
@@ -100,6 +103,7 @@ namespace ContinuousRecognition_Namespace
     public class ContinuousRecognition_TrialDef : TrialDef
     {
         public Vector3[] TrialStimLocations;
+        public Vector3[] TrialFeedbackLocations;
 
         public int[] BlockStimIndices;
         public int[] NumObjectsMinMax;
@@ -112,13 +116,8 @@ namespace ContinuousRecognition_Namespace
         public List<int> TrialStimIndices;
 
         public int WrongStimIndex;
-
-        public int TrialCount;
         public int NumTrialStims;
         public int MaxNumTrials;
-        public int PC_Count;
-        public int PNC_Count;
-        public int New_Count;
 
         public float DisplayStimsDuration, ChooseStimDuration, TrialEndDuration, TouchFeedbackDuration, 
             DisplayResultDuration, TokenRevealDuration, TokenUpdateDuration;

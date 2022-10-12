@@ -34,12 +34,12 @@ namespace VisualSearch_Namespace
         //public TrialDef[] TrialDefs;
         public int[] TrialStimIndices;
         public Vector3[] TrialStimLocations;
-        public int BlockNum;
+        public int BlockCount;
         public float[] TrialStimTokenReward;
         public int[] nRepetitionsMinMax;
         public string TrialID;
         public string ContextName;
-        public int TokenInitial;
+        public int NumInitialTokens;
         public bool RandomizedLocations;
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -61,9 +61,9 @@ namespace VisualSearch_Namespace
                 td.TrialStimLocations = TrialStimLocations;
                 td.ContextName = ContextName;
                 td.TrialStimTokenReward = TrialStimTokenReward;
-                td.TokenInitial = TokenInitial;
+                td.NumInitialTokens = NumInitialTokens;
                 td.RandomizedLocations = RandomizedLocations;
-                td.BlockNum = BlockNum;
+                td.BlockCount = BlockCount;
                 //td.RandomizedLocations = RandomizedLocations;
                 TrialDefs[iTrial] = td;
             }
@@ -80,10 +80,10 @@ namespace VisualSearch_Namespace
         public Vector3[] TrialStimLocations;
         public string TrialID;
         public float[] TrialStimTokenReward;
-        public int TokenInitial;
+        public int NumInitialTokens;
         public bool RandomizedLocations;
         public string ContextName;
-        public int BlockNum;
+        public int BlockCount;
     }
 
     public class VisualSearch_StimDef : StimDef

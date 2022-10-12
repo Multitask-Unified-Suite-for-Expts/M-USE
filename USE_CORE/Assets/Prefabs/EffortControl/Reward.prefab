@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 2987144890344421381}
   - component: {fileID: 2223551052623722400}
   - component: {fileID: 4125108895054414698}
-  - component: {fileID: 5344151161085927102}
   m_Layer: 0
   m_Name: Reward
   m_TagString: Untagged
@@ -56,6 +55,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -81,15 +81,4 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!114 &5344151161085927102
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2467876797009257151}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 98a6ad2b30e4a450ea0f65aff004ef61, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_AdditionalVertexStreams: {fileID: 0}

@@ -1,18 +1,16 @@
 using UnityEngine;
 using System.Collections.Generic;
-using USE_ExperimentTemplate;
 using USE_States;
-using UnityEngine.UI;
 using USE_StimulusManagement;
 using ContinuousRecognition_Namespace;
 using System;
 using Random = UnityEngine.Random;
 using ConfigDynamicUI;
 using USE_Settings;
+using USE_ExperimentTemplate_Trial;
 using System.Collections;
 using System.Linq;
-//using USE_ExperimentTemplate_Classes;
-//using static UnityEngine.Networking.UnityWebRequest;
+using UnityEngine.UI;
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
@@ -134,7 +132,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
                     //TRYING TO REMOVE ALL NEW STIM THAT WEREN'T CHOSEN, FROM NEW STIM AND INTO PNC STIM. 
                     List<int> newStimToRemove = currentTrial.New_Stim.ToList();
-                    foreach(var stim in newStimToRemove)
+                    foreach (var stim in newStimToRemove)
                     {
                         if(currentTrial.New_Stim.Contains(stim) && stim != chosenStimDef.StimCode-1)
                         {

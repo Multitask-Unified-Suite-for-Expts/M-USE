@@ -1,4 +1,5 @@
-using USE_ExperimentTemplate;
+using USE_ExperimentTemplate_Task;
+using USE_ExperimentTemplate_Block;
 using FlexLearning_Namespace;
 using System;
 using UnityEngine;
@@ -6,6 +7,7 @@ using USE_Settings;
 
 public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 {
+ 
     FlexLearning_BlockDef flBD => GetCurrentBlockDef<FlexLearning_BlockDef>();
     public override void DefineControlLevel()
     {
@@ -16,8 +18,8 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
                 flTL.MaterialFilePath =
                     (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NumTokens"))
-                flTL.TaskTokenNum = (int)SessionSettings.Get(TaskName + "_TaskSettings", "NumTokens");
+            //if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NumTokens"))
+            //    flTL.TaskTokenNum = (int)SessionSettings.Get(TaskName + "_TaskSettings", "NumTokens");
         }
         else
         {
@@ -37,7 +39,11 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             flTL.accuracyLog_InBlock = "";
             */
             flTL.runningAcc.Clear();
-            flTL.MinTrials = flBD.nRepetitionsMinMax[0];
+            flTL.MinTrials = flBD.MinMaxTrials[0];
+            System.Random rnd = new System.Random();
+             
+            flTL.MaxTrials = rnd.Next(flBD.MinMaxTrials[0], flBD.MinMaxTrials[1]);
+            Debug.Log("TRIAL DEFS COUNT: " + CurrentBlockDef.TrialDefs.Length);
         });
 
         RunBlock.AddUpdateMethod(() =>

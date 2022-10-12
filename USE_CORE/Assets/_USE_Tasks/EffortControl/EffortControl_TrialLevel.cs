@@ -1,5 +1,4 @@
 using UnityEngine;
-using USE_ExperimentTemplate;
 using USE_States;
 // using USE_StimulusManagement;
 using EffortControl_Namespace;
@@ -7,6 +6,7 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using USE_ExperimentTemplate_Trial;
 //testing
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
@@ -163,7 +163,15 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 scaleUpAmount = scaleUpAmountRight;
             }
         });
-        ChooseBalloon.SpecifyTermination(() => trialStim != null, InflateBalloon);
+        ChooseBalloon.SpecifyTermination(() => trialStim != null, InflateBalloon, () => {
+            if (leftRightChoice == "left") {
+                DestroyContainerChild(balloonContainerRight);
+                stimRight.SetActive(false);
+            } else {
+                DestroyContainerChild(balloonContainerLeft);
+                stimLeft.SetActive(false);
+            }
+        });
 
         // define collectResponse state
         List<float> clickTimings = new List<float>();
@@ -222,17 +230,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
-        InflateBalloon.AddTimer(15f, FeedbackDelay);
+        InflateBalloon.AddTimer(45f, Feedback);
         InflateBalloon.SpecifyTermination(() => clickCount >= numOfClicks, FeedbackDelay);
         InflateBalloon.AddDefaultTerminationMethod(() => {
             goCue.SetActive(false);
-            if (leftRightChoice == "left")
-            {
-                DestroyContainerChild(balloonContainerLeft);
-            }
-            else
-            {
-                DestroyContainerChild(balloonContainerRight);
+            if (response == 1) {
+                if (leftRightChoice == "left") DestroyContainerChild(balloonContainerLeft);
+                else DestroyContainerChild(balloonContainerRight);
             }
         });
 
@@ -268,7 +272,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Feedback.AddTimer(1f, ITI, () => fb.SetActive(false));
 
         //Define iti state
-        ITI.AddInitializationMethod(() => trialStim.SetActive(false));
+        ITI.AddInitializationMethod(() => {
+            trialStim.SetActive(false);
+            DestroyContainerChild(balloonContainerLeft);
+            DestroyContainerChild(balloonContainerRight);
+        });
         ITI.AddTimer(2f, FinishTrial, () => {
             Debug.Log("Trial" + trialCount + " completed");
             DestroyContainerChild(balloonContainerLeft);

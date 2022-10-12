@@ -1,6 +1,7 @@
-using System.Runtime.InteropServices;
 using UnityEngine;
-using USE_ExperimentTemplate;
+using USE_ExperimentTemplate_Block;
+using USE_ExperimentTemplate_Task;
+using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
 
 namespace VisualSearch_Namespace
@@ -32,16 +33,14 @@ namespace VisualSearch_Namespace
         //Already-existing fields (inherited from BlockDef)
         //public int BlockCount;
         //public TrialDef[] TrialDefs;
-        public int[] TargetStimIndex;
-        public int[] DistractorStimsIndices;
-        public Vector3[] TargetStimLocation;
-        public Vector3[] DistractorStimsLocations;
+        public int[] TrialStimIndices;
+        public Vector3[] TrialStimLocations;
+        public int BlockCount;
+        public float[] TrialStimTokenReward;
         public int[] nRepetitionsMinMax;
         public string TrialID;
         public string ContextName;
-        public int[] TokenGain;
-        public int[] TokenLoss;
-        public int TokenInitial;
+        public int NumInitialTokens;
         public bool RandomizedLocations;
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -59,15 +58,13 @@ namespace VisualSearch_Namespace
                 td.MinTouchDuration = MinTouchDuration;
                 td.MaxTouchDuration = MaxTouchDuration;
                 */
-                td.TargetStimIndex = TargetStimIndex;
-                td.DistractorStimsIndices = DistractorStimsIndices;
-                td.TargetStimLocation = TargetStimLocation;
-                td.DistractorStimsLocations = DistractorStimsLocations;
+                td.TrialStimIndices = TrialStimIndices;
+                td.TrialStimLocations = TrialStimLocations;
                 td.ContextName = ContextName;
-                td.TokenGain = TokenGain;
-                td.TokenLoss = TokenLoss;
-                td.TokenInitial = TokenInitial;
+                td.TrialStimTokenReward = TrialStimTokenReward;
+                td.NumInitialTokens = NumInitialTokens;
                 td.RandomizedLocations = RandomizedLocations;
+                td.BlockCount = BlockCount;
                 //td.RandomizedLocations = RandomizedLocations;
                 TrialDefs[iTrial] = td;
             }
@@ -80,16 +77,14 @@ namespace VisualSearch_Namespace
         //Already-existing fields (inherited from TrialDef)
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
-        public int[] TargetStimIndex;
-        public int[] DistractorStimsIndices;
-        public Vector3[] TargetStimLocation;
-        public Vector3[] DistractorStimsLocations;
+        public int[] TrialStimIndices;
+        public Vector3[] TrialStimLocations;
         public string TrialID;
-        public int[] TokenGain;
-        public int[] TokenLoss;
-        public int TokenInitial;
+        public float[] TrialStimTokenReward;
+        public int NumInitialTokens;
         public bool RandomizedLocations;
         public string ContextName;
+        public int BlockCount;
     }
 
     public class VisualSearch_StimDef : StimDef

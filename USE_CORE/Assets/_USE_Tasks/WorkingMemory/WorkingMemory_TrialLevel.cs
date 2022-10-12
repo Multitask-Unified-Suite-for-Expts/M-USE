@@ -1,8 +1,7 @@
 using ConfigDynamicUI;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
-using USE_ExperimentTemplate;
+using USE_ExperimentTemplate_Trial;
 using USE_States;
 using USE_StimulusManagement;
 using WorkingMemory_Namespace;

@@ -1,5 +1,7 @@
-﻿using USE_ExperimentTemplate;
-using UnityEngine;
+﻿using UnityEngine;
+using USE_ExperimentTemplate_Block;
+using USE_ExperimentTemplate_Task;
+using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
 
 namespace WhatWhenWhere_Namespace
@@ -24,6 +26,7 @@ namespace WhatWhenWhere_Namespace
         public int NumPulses;
         public int PulseSize;
         public bool LeaveFeedbackOn;
+        public int ErrorThreshold;
 
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -53,6 +56,7 @@ namespace WhatWhenWhere_Namespace
                 td.NumPulses = NumPulses;
                 td.PulseSize = PulseSize;
                 td.LeaveFeedbackOn = LeaveFeedbackOn;
+                td.ErrorThreshold = ErrorThreshold;
                 TrialDefs[iTrial] = td;
             }
         }
@@ -81,6 +85,7 @@ namespace WhatWhenWhere_Namespace
         public int NumPulses;
         public int PulseSize;
         public bool LeaveFeedbackOn;
+        public int ErrorThreshold;
     }
 
     public class WhatWhenWhere_StimDef : StimDef

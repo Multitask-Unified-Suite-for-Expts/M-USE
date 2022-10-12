@@ -1,34 +1,31 @@
 using System.Collections.Generic;
 using UnityEngine;
-using USE_ExperimentTemplate;
 using USE_States;
-using UnityEngine.UI;
 using USE_StimulusManagement;
 using FlexLearning_Namespace;
-using System;
+using USE_ExperimentTemplate_Trial;
 using Random = UnityEngine.Random;
 using USE_UI;
 using USE_Settings;
 using System.IO;
 using System.Linq;
 using ConfigDynamicUI;
-using USE_ExperimentTemplate_Classes;
-using USE_Utilities;
+using UnityEngine.UI;
+using USE_ExperimentTemplate_Task;
+using System;
 
 public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 {
     public FlexLearning_TrialDef CurrentTrialDef => GetCurrentTrialDef<FlexLearning_TrialDef>();
 
-    private StimGroup targetStim, distractorStims;
+    private StimGroup tStim;
     private GameObject startButton;
     private string targetName;
     private Vector3 targetLocation;
-    private List<string> distractorName;
-    private List<Vector3> distractorLocations;
 
     //block end variables
     public List<int> runningAcc;
-    public int MinTrials;
+    public int MinTrials, MaxTrials;
 
     //configui variables
     [HideInInspector]
@@ -47,7 +44,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     private Ray mouseRay;
     private bool variablesLoaded;
     public string MaterialFilePath;
-    public int TaskTokenNum;
 
     //Player View Variables
     private PlayerViewPanel playerView;
@@ -105,7 +101,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         initTrial.AddInitializationMethod(() =>
         {
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
             Debug.Log("FilePath: " + MaterialFilePath);
             TokenFBController
                 .SetRevealTime(tokenRevealDuration.value)
@@ -126,7 +122,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             stateAfterDelay = SearchDisplay;
             TokenFBController.enabled = true;
-            TokenFBController.SetTotalTokensNum(TaskTokenNum);
+            TokenFBController.SetTotalTokensNum(CurrentTrialDef.NumTokens);
             EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]); //CHECK THIS TIMING MIGHT BE OFF
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
@@ -142,6 +138,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             selected = null;
             if (!playerViewLoaded)
             {
+                /*
                 //Create corresponding text on player view of experimenter display
                 textLocation =
                     playerViewPosition(Camera.main.WorldToScreenPoint(targetStim.stimDefs[0].StimLocation),
@@ -153,6 +150,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                 playerViewTextList.Add(playerViewText);
                 playerViewLoaded = true;
+                */
             }
         });
 
@@ -167,7 +165,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["TouchTargetStart"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["CorrectResponse"]);
                 runningAcc.Add(1);
-
             }
             else
             {
@@ -178,8 +175,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             string touchedObjectsNames = "";
             if (selected != null) touchedObjectsNames = selected.name;
 
-            TrialSummaryString = "Trial Num: " + TrialCount_InTask + 1 + "\nTarget Name: " +
-            targetName + "\nTouched Object Names: " +
+            TrialSummaryString = "Trial Num: " + TrialCount_InTask + 1 +  "\nTouched Object Names: " +
             touchedObjectsNames;
         });
 
@@ -255,14 +251,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         });
 
-        TrialData.AddDatum("TargetName", () => targetName);
-        TrialData.AddDatum("TargetLocation", () => targetLocation);
         TrialData.AddDatum("SelectedName", () => selected != null ? selected.name : null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
         TrialData.AddDatum("SelectionCorrect", () => correct ? 1 : 0);
         TrialData.AddDatum("NumDistractors", () => num_distractors);
-        TrialData.AddDatum("DistractorNames", () => string.Join(", ", distractorName.ToArray()));
-        TrialData.AddDatum("DistractorLocations", () => string.Join(", ", distractorLocations.ToArray()));
 
 
         //this.AddTerminationSpecification(() => trialCount > numTrials, ()=> Debug.Log(trialCount + " " + numTrials));
@@ -274,97 +266,40 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
         int temp = 0;
-        distractorName = new List<string>();
-        distractorLocations = new List<Vector3>();
-        targetStim = new StimGroup("TargetStim", ExternalStims, CurrentTrialDef.TargetStimIndex);
-        targetStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
-        targetStim.SetLocations(CurrentTrialDef.TargetStimLocation);
-        foreach (FlexLearning_StimDef sd in targetStim.stimDefs)
+        //Debug.Log("CURRENT TRIAL DEF: " + CurrentTrialDef);
+        //Debug.Log("trial count in block: " + TrialCount_InBlock);
+        //Debug.Log("trial LENGTH: " + TrialDefs.Length);
+        //Debug.Log("TRIAL STIM INDICES: " + CurrentTrialDef.TrialStimIndices[0]);
+        tStim = new StimGroup("SearchStimuli", ExternalStims, CurrentTrialDef.TrialStimIndices);
+        tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
+        TrialStims.Add(tStim);
+        for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
-            sd.IsTarget = true;
-            sd.TokenUpdate = CurrentTrialDef.TokenGain[0];
-            targetName = sd.StimName;
-            targetLocation = sd.StimLocation;
+            FlexLearning_StimDef sd = (FlexLearning_StimDef)tStim.stimDefs[i];
+            //sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.TrialStimTokenReward);
+            //if (sd.StimTrialRewardMag > 0) sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!!
+            //else sd.IsTarget = false;
+
         }
-        TrialStims.Add(targetStim);
-        //if (CurrentTrialDef.DistractorStimsIndices.Length != 0)
-        //{
-        distractorStims = new StimGroup("DistractorStims", ExternalStims, CurrentTrialDef.DistractorStimsIndices);
-        distractorStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
-        distractorStims.SetLocations(CurrentTrialDef.DistractorStimsLocations);
-        int numDistractors = 0;
-        foreach (FlexLearning_StimDef sd in distractorStims.stimDefs)
-        {
-            sd.IsTarget = false;
-            sd.TokenUpdate = -CurrentTrialDef.TokenLoss[numDistractors];
-            numDistractors++;
-            distractorName.Add(sd.StimName);
-            distractorLocations.Add(sd.StimLocation);
-        }
-        num_distractors = numDistractors;
-        TrialStims.Add(distractorStims);
-        //}
 
         randomizedLocations = CurrentTrialDef.RandomizedLocations;
 
         if (randomizedLocations)
         {
-            var totalStims = targetStim.stimDefs.Concat(distractorStims.stimDefs);
-            var stimLocations = CurrentTrialDef.TargetStimLocation.Concat(CurrentTrialDef.DistractorStimsLocations);
-
-            int[] positionIndexArray = Enumerable.Range(0, totalStims.Count()).ToArray();
+            int[] positionIndexArray = Enumerable.Range(0, CurrentTrialDef.TrialStimIndices.Length).ToArray();
             System.Random random = new System.Random();
             positionIndexArray = positionIndexArray.OrderBy(x => random.Next()).ToArray();
 
-            for (int i = 0; i < totalStims.Count(); i++)
+            for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
             {
-                totalStims.ElementAt(i).StimLocation = stimLocations.ElementAt(positionIndexArray[i]);
+                tStim.stimDefs[i].StimLocation = CurrentTrialDef.TrialStimLocations.ElementAt(positionIndexArray[i]);
             }
         }
         else
         {
-            targetStim.SetLocations(CurrentTrialDef.TargetStimLocation);
-            distractorStims.SetLocations(CurrentTrialDef.DistractorStimsLocations);
+            tStim.SetLocations(CurrentTrialDef.TrialStimLocations);
         }
-
     }
-    /*
-        private USE_Button DefineStartButton(Transform parent)
-        {
-            /*
-            if (random == 1)
-            {
-                return;
-            }
-                Vector3 buttonPosition = new Vector3(0f, 0f, 0f);
-            Vector3 buttonScale = new Vector3(1f, 1f, 1f);
-            Color buttonColor = new Color(0.1f, 0.1f, 0.1f);
-            Vector3 tempColor = new Vector3(0f, 0f, 0f);
-            string buttonText = "";
-            Canvas canvas = parent.GetComponent<Canvas>();
-
-            //testButton = sttartButton;
-            string TaskName = "VisualSearch";
-            if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
-            {
-                if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-                    buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-                if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-                    buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-                if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonColor"))
-                    tempColor = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonColor");
-                buttonColor = new Color(tempColor[0], tempColor[1], tempColor[2]);
-                if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonText"))
-                    buttonText = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonText");
-            }
-            testButton = new USE_Button(buttonPosition, buttonScale, canvas, buttonColor, buttonText);
-            testButton.defineButton();
-
-            return (testButton);
-
-            //testButton.SetVisibilityOnOffStates(GetStateFromName("InitTrial"), GetStateFromName("SearchDisplay"));
-            //random = 1;
-        }*/
     void loadVariables()
     {
         Texture2D buttonTex = LoadPNG(MaterialFilePath + "\\StartButtonImage.png");
@@ -388,9 +323,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     protected override bool CheckBlockEnd()
     {
         TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
-        return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
+        return (TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
             CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, MinTrials,
-            TrialDefs.Length);
+            TrialDefs.Length) || TrialCount_InBlock == MaxTrials);
+        
     }
     private GameObject CreateStartButton(Texture2D tex, Rect rect)
     {
@@ -454,5 +390,30 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         Vector2 pvPosition = new Vector2((position[0] / Screen.width) * playerViewParent.GetComponent<RectTransform>().sizeDelta.x, (position[1] / Screen.height) * playerViewParent.GetComponent<RectTransform>().sizeDelta.y);
         return pvPosition;
     }
+    public int ChooseTokenReward(TokenReward[] tokenRewards)
+    {
+        float totalProbability = 0;
+        for (int i = 0; i < tokenRewards.Length; i++)
+        {
+            totalProbability += tokenRewards[i].Probability;
+        }
 
+        if (Math.Abs(totalProbability - 1) > 0.001)
+            Debug.LogError("Sum of token reward probabilities on this trial is " + totalProbability + ", probabilities will be scaled to sum to 1.");
+
+        float randomNumber = UnityEngine.Random.Range(0, totalProbability);
+
+        TokenReward selectedReward = tokenRewards[0];
+        float curProbSum = 0;
+        foreach (TokenReward tr in tokenRewards)
+        {
+            curProbSum += tr.Probability;
+            if (curProbSum >= randomNumber)
+            {
+                selectedReward = tr;
+                break;
+            }
+        }
+        return selectedReward.NumTokens;
+    }
 }

@@ -3,17 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using USE_States;
-using USE_ExperimentTemplate;
 using WhatWhenWhere_Namespace;
 using USE_StimulusManagement;
 using ConfigDynamicUI;
-using System.Collections;
 using USE_Settings;
 using USE_DisplayManagement;
 using System.Linq;
 using System.IO;
-using USE_ExperimentTemplate_Classes;
-using TriLib;
+using USE_ExperimentTemplate_Trial;
+using USE_ExperimentTemplate_Task;
 
 public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 {
@@ -33,11 +31,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     // feedback variables
     public int stimCount = 0;
-    private bool correctChoice, incorrectChoice, timingFail, irrelevantSelection, noSelection, trialComplete = false;
+    private bool correctChoice, incorrectChoice, noSelection, trialComplete = false;
     
     
     // error data variables
-    private int slotError, distractorSlotError, touchDurationError, irrelevantSelectionError, repetitionError, totalErrors_InSession, noScreenTouchError = 0;
+    public int slotErrorCount, distractorSlotErrorCount, touchDurationErrorCount, irrelevantSelectionErrorCount, repetitionErrorCount, totalErrors_InSession, noScreenTouchErrorCount = 0;
     public int totalErrors_InBlock = 0;
     private string errorTypeString = "";
     public List<String> errorType_InBlock = new List<String> { };
@@ -45,9 +43,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public string errorType_InBlockString = "";
     private string errorType_InSessionString = "";
     private float startTime;
-    private int[] numTotal_InSession, numErrors_InSession, numCorrect_InSession = new int[numObjMax];
-    public int[] numTotal_InBlock, numTotal_InTrial, numErrors_InBlock, numErrors_InTrial, numCorrect_InBlock, numCorrect_InTrial = new int[numObjMax];
-    private List<float> touchDurations,choiceDurations  = new List<float> { };
+    private int[] numTotal_InSession = new int[numObjMax], numErrors_InSession = new int[numObjMax], numCorrect_InSession = new int[numObjMax];
+    public int[] numTotal_InBlock = new int[numObjMax], numTotal_InTrial = new int[numObjMax], numErrors_InBlock = new int[numObjMax], 
+        numErrors_InTrial = new int[numObjMax], numCorrect_InBlock = new int[numObjMax], numCorrect_InTrial = new int[numObjMax];
+    private List<float> touchDurations  = new List<float> { };
+    private List<float> choiceDurations = new List<float> { };
     private List<Vector3> touchedPositionsList = new List<Vector3>(); // empty now
     public List<int> runningAcc;
     [HideInInspector] public ConfigNumber minObjectTouchDuration,
@@ -57,14 +57,17 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         maxObjectTouchDuration,
         selectObjectDuration,
         sliderSize,
-        ChooseStimOnsetDelay;
+        chooseStimOnsetDelay, 
+        startButtonDelay,
+        timeoutDuration;
     //data logging variables
     private string touchedObjectsNames, touchDurationTimes, choiceDurationTimes, touchedPositions, searchStimsLocations, distractorStimsLocations;
     public string accuracyLog_InSession, accuracyLog_InBlock, accuracyLog_InTrial = "";
-    private float initialTouchTime, touchDuration, choiceDuration = 0;
-    private bool initialTouch, choiceMade, contextActive,halosDestroyed = false;
+    private float initialTouchTime, touchDuration, choiceDuration, sbDelay = 0;
+    private bool initialTouch, choiceMade, contextActive,halosDestroyed, slotError, distractorSlotError, touchDurationError, irrelevantSelectionError, repetitionError, noScreenTouchError = false;
     private String contextName = "";
     private List<int> trialPerformance = new List<int>();
+    private int timeoutCondition = 3;
 
     [HideInInspector]
     [System.NonSerialized] public int response = -1;
@@ -79,7 +82,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private bool variablesLoaded;
     public string MaterialFilePath;
     private int correctIndex;
-    //private GameObject sbOther;
     public int sliderCompleteQuantity = 0;
 
     //Player View Variables
@@ -103,6 +105,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         //---------------------------------------DEFINING STATES-----------------------------------------------------------------------
         State StartButton = new State("StartButton");
+        State StartButtonDelay = new State("StartButtonDelay");
         State ChooseStimulus = new State("ChooseStimulus");
         State ChooseStimulusDelay = new State("ChooseStimulusDelay");
         State StimulusChosen = new State("StimulusChosen");
@@ -113,12 +116,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         AddActiveStates(new List<State>
         {
-            StartButton, ChooseStimulus, StimulusChosen, FinalFeedback, ITI, StimulusChosenSuccesorState,
+            StartButton, StartButtonDelay, ChooseStimulus, StimulusChosen, FinalFeedback, ITI, StimulusChosenSuccesorState,
             ChooseStimulusDelay, delay
         });
 
         string[] stateNames = new string[]
-            {"StartButton", "ChooseStimulus", "StimulusChosen", "FinalFeedback", "ITI", "Delay", "ChooseStimulusDelay"};
+            {"StartButton", "StartButtonDelay", "ChooseStimulus", "StimulusChosen", "FinalFeedback", "ITI", "Delay", "ChooseStimulusDelay"};
 
         // A state that just waits for some time
         State stateAfterDelay = null;
@@ -140,6 +143,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         SetupTrial.AddInitializationMethod(() =>
         {
+
+            // Set the background texture to that of specified context
+            contextActive = true;
+            contextName = CurrentTrialDef.ContextName;
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
+            ResetRelativeStartTime();
+            Debug.Log("Current Block Context: " + CurrentTrialDef.ContextName);
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
             if (!variablesLoaded)
             {
                 variablesLoaded = true;
@@ -151,23 +162,27 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                                  errorTypeString + "\nTouch Duration: " + touchDurationTimes + "\nChoice Duration: " +
                                  choiceDurationTimes + "\nProgress: " + accuracyLog_InTrial + "\nSession Progress: " +
                                  accuracyLog_InSession;
-            
+            Debug.Log("sloterror: " + slotErrorCount);
+            if (slotErrorCount >= CurrentTrialDef.ErrorThreshold || distractorSlotErrorCount > CurrentTrialDef.ErrorThreshold || touchDurationErrorCount > CurrentTrialDef.ErrorThreshold || irrelevantSelectionErrorCount > CurrentTrialDef.ErrorThreshold || repetitionErrorCount > CurrentTrialDef.ErrorThreshold || noScreenTouchErrorCount > CurrentTrialDef.ErrorThreshold)
+            {
+                Debug.Log("IN THE TIMEOUT LOOP");
+                sbDelay = timeoutDuration.value;
+                Debug.Log("DELAY DURATION: " + startButtonDelay);
+            }
+            else
+            {
+                sbDelay = startButtonDelay.value;
+            }
         });
-
-        SetupTrial.SpecifyTermination(() => true, StartButton);
+        SetupTrial.SpecifyTermination(() => true,  StartButtonDelay);
+        StartButtonDelay.AddTimer(() => sbDelay, delay,
+            () => { stateAfterDelay = StartButton; });
 
         // define StartButton state
         StartButton.AddInitializationMethod(() =>
         {
-            // Set the background texture to that of specified context
-            contextActive = true;
-            contextName = CurrentTrialDef.ContextName;
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
-            ResetRelativeStartTime();
-            Debug.Log("Current Block Context: " + CurrentTrialDef.ContextName);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
             initButton.SetActive(true);
-            
+
         });
         StartButton.AddUpdateMethod(() =>
         {
@@ -206,7 +221,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderReset"]);
         });
-        ChooseStimulusDelay.AddTimer(() => ChooseStimOnsetDelay.value, delay,
+        ChooseStimulusDelay.AddTimer(() => chooseStimOnsetDelay.value, delay,
             () => { stateAfterDelay = ChooseStimulus; });
         GazeTracker.AddSelectionHandler(gazeSelectionHandler, ChooseStimulus);
         MouseTracker.AddSelectionHandler(mouseSelectionHandler, ChooseStimulus);
@@ -300,10 +315,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     var screenPoint = Input.mousePosition;
                     screenPoint.z = 100.0f; //distance of the plane from the camera
                     grayHaloScene.transform.position = Camera.main.ScreenToWorldPoint(screenPoint);
-                    irrelevantSelectionError += 1;
+                    irrelevantSelectionErrorCount += 1;
+                    irrelevantSelectionError = true;
                     totalErrors_InSession += 1;
                     totalErrors_InBlock += 1;
-                    irrelevantSelection = true;
                     slider.value -= sliderValueIncreaseAmount;
 
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchIrrelevantStart"]);
@@ -321,12 +336,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 if (touchDuration < minObjectTouchDuration.value || touchDuration > maxObjectTouchDuration.value)
                 {
                     Debug.Log("Did not click on stimulus for long enough");
-                    timingFail = true;
-                    touchDurationError += 1;
+
+                    touchDurationErrorCount += 1;
+                    touchDurationError = true;
                     totalErrors_InSession += 1;
                     totalErrors_InBlock += 1;
                     touchedObjects.Add(testStim.name);
-                    //slider.value -= sliderValueIncreaseAmount;
                     numErrors_InBlock[correctIndex]++;
                     numErrors_InSession[correctIndex]++;
 
@@ -368,7 +383,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     IncorrectSelectionProgressData(correctIndex);
 
                     slider.value -= sliderValueIncreaseAmount * (CurrentTrialDef.SliderGain[stimCount]);
-                    repetitionError += 1;
+                    repetitionErrorCount += 1;
+                    repetitionError = true;
 
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["IncorrectResponse"]);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["RepetitionError"]);
@@ -387,7 +403,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         grayHalo.transform.position = testStim.transform.position;
                         touchedObjects.Add(testStim.name);
                         slider.value -= sliderValueIncreaseAmount * (CurrentTrialDef.SliderGain[stimCount]);
-                        distractorSlotError += 1;
+                        distractorSlotErrorCount += 1;
+                        distractorSlotError = true;
 
                         IncorrectSelectionProgressData(correctIndex);
 
@@ -406,7 +423,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         grayHalo.transform.position = testStim.transform.position;
                         touchedObjects.Add(testStim.name);
                         slider.value -= sliderValueIncreaseAmount * (CurrentTrialDef.SliderGain[stimCount]);
-                        slotError += 1;
+                        slotErrorCount += 1;
+                        slotError = true;
                         IncorrectSelectionProgressData(correctIndex);
 
                         EventCodeManager.SendCodeImmediate(TaskEventCodes["IncorrectResponse"]);
@@ -432,9 +450,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         StimulusChosen.AddInitializationMethod(() =>
         {
             response = -1;
-
+            
             // Timing Fail
-            if (timingFail)
+            if (touchDurationError)
             {
                 imageTimingError.transform.SetAsLastSibling();
                 imageTimingError.SetActive(true);
@@ -450,9 +468,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 sliderHalo.SetActive(true);
                 sr.color = new Color(0.6627f, 0.6627f, 0.6627f, 0.2f);
                 runningAcc.Add(0);
-                if (slotError == 1)
+                if (slotError)
                     errorTypeString = "SlotError";
-                else if (distractorSlotError == 1)
+                else if (distractorSlotError)
                     errorTypeString = "DistractorSlotError";
                 else
                     errorTypeString = "RepetitionError";
@@ -460,7 +478,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
 
             //Irrelevant Selection
-            else if (irrelevantSelection)
+            else if (irrelevantSelectionError)
             {
                 errorTypeString = "IrrelevantSelectionError";
                 runningAcc.Add(0);
@@ -491,7 +509,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                                  touchDurationTimes +
                                  "\nChoice Duration: " + choiceDurationTimes + "\nPerformance: " + accuracyLog_InTrial +
                                  "\nSession Performance: " + accuracyLog_InSession;
-
+            
         });
 
         StimulusChosen.SpecifyTermination(
@@ -518,20 +536,20 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             });
 
         StimulusChosen.SpecifyTermination(
-            () => (timingFail && (Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute) >= fbDuration.value), ITI,
+            () => (touchDurationError && (Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute) >= fbDuration.value), ITI,
             () =>
             {
                 imageTimingError.SetActive(false);
-                timingFail = false;
+                touchDurationError = false;
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchErrorImageOff"]);
             });
 
         StimulusChosen.SpecifyTermination(
-            () => (irrelevantSelection &&
+            () => (irrelevantSelectionError &&
                    (Time.time - StimulusChosen.TimingInfo.StartTimeAbsolute) >= fbDuration.value), ITI, () =>
             {
                 grayHaloScene.SetActive(false);
-                irrelevantSelection = false;
+                irrelevantSelectionError = false;
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionVisualFbOff"]);
             });
 
@@ -552,11 +570,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 txt.SetActive(false);
             }
-            foreach (Transform child in GameObject.Find("HaloContainer").transform) {
-                GameObject.Destroy(child.gameObject);
-                halosDestroyed = true;
+            if (CurrentTrialDef.LeaveFeedbackOn)
+            {
+                foreach (Transform child in GameObject.Find("HaloContainer").transform)
+                {
+                    GameObject.Destroy(child.gameObject);
+                    halosDestroyed = true;
+                }
             }
-
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderCompleteFbOn"]);
            // SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize); //USE THIS LINE WHEN CONNECTED TO A SYNCBOX
             //SyncBoxController.SendRewardPulses(3, 500);
@@ -597,7 +618,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 Destroy(txt);
             }
 
-            if (!halosDestroyed)
+            if (!halosDestroyed && CurrentTrialDef.LeaveFeedbackOn)
             {
                 foreach (Transform child in GameObject.Find("HaloContainer").transform) {
                     GameObject.Destroy(child.gameObject);
@@ -608,7 +629,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             if (response == 0)
             {
-                noScreenTouchError++;
+                noScreenTouchErrorCount++;
                 totalErrors_InSession += 1;
                 totalErrors_InBlock += 1;
                 errorTypeString = "NoSelectionMade";
@@ -842,12 +863,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     } 
     private void ClearDataLogging() //Sets data collecting variables to 0
     {
-        slotError = 0;
-        distractorSlotError = 0;
-        repetitionError = 0;
-        touchDurationError = 0;
-        irrelevantSelectionError = 0;
-        noScreenTouchError = 0;
+        slotError = false;
+        distractorSlotError = false;
+        repetitionError = false;
+        touchDurationError = false;
+        irrelevantSelectionError = false;
+        noScreenTouchError = false; 
+
         initialTouch = false;
         choiceMade = false;
         contextActive = false;
@@ -948,7 +970,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
         finalFbDuration = ConfigUiVariables.get<ConfigNumber>("finalFbDuration");
         fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
-        ChooseStimOnsetDelay = ConfigUiVariables.get<ConfigNumber>("ChooseStimOnsetDelay");
+        chooseStimOnsetDelay = ConfigUiVariables.get<ConfigNumber>("chooseStimOnsetDelay");
+        timeoutDuration = ConfigUiVariables.get<ConfigNumber>("timeoutDuration");
+        startButtonDelay = ConfigUiVariables.get<ConfigNumber>("startButtonDelay");
 
         disableAllGameobjects();
         Debug.Log("Done Loading Variables");

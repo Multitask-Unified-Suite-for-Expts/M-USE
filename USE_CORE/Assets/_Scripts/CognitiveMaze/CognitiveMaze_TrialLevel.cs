@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using USE_States;
-using USE_ExperimentTemplate;
-using CognitiveMaze_Namespace;
 
 
 using HiddenMaze;
 using UnityEngine.SceneManagement;
 using USE_StimulusManagement;
+using USE_ExperimentTemplate_Trial;
 
 public class CognitiveMaze_TrialLevel : ControlLevel_Trial_Template
 {

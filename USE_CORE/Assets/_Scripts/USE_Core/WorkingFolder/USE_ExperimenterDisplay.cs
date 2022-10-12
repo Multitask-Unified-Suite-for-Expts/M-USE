@@ -1,8 +1,8 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using USE_ExperimentTemplate;
+using USE_ExperimentTemplate_Session;
+using USE_ExperimentTemplate_Task;
+using USE_ExperimentTemplate_Trial;
 
 namespace USE_ExperimenterDisplay
 {
@@ -95,6 +95,7 @@ namespace USE_ExperimenterDisplay
             defaultPanelList.Add(new TrialInfoPanel());
             defaultPanelList.Add(new BlockInfoPanel());
             defaultPanelList.Add(new HotKeyPanel());
+            defaultPanelList.Add(new LogPanel());
             // defaultPanelList.Add(new PlayerViewPanel());
             //all other default panels
             return defaultPanelList;

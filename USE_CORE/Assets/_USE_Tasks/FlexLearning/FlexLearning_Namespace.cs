@@ -1,6 +1,7 @@
-using System.Runtime.InteropServices;
 using UnityEngine;
-using USE_ExperimentTemplate;
+using USE_ExperimentTemplate_Block;
+using USE_ExperimentTemplate_Task;
+using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
 
 namespace FlexLearning_Namespace
@@ -22,7 +23,6 @@ namespace FlexLearning_Namespace
         Vector3 ButtonPosition;
         Vector3 ButtonScale;
         Vector3 ButtonColor;
-        int NumTokens;
         string ButtonText;
         string ContextExternalFilePath;
     }
@@ -32,19 +32,18 @@ namespace FlexLearning_Namespace
         //Already-existing fields (inherited from BlockDef)
         //public int BlockCount;
         //public TrialDef[] TrialDefs;
-        public int[] TargetStimIndex;
-        public int[] DistractorStimsIndices;
-        public Vector3[] TargetStimLocation;
-        public Vector3[] DistractorStimsLocations;
-        public int[] nRepetitionsMinMax;
+        public int[] TrialStimIndices;
+        public Vector3[] TrialStimLocations;
+        public int[] MinMaxTrials;
         public string TrialID;
+        public string BlockName;
         public string ContextName;
-        public int[] TokenGain;
-        public int[] TokenLoss;
-        public int TokenInitial;
+        public int NumInitialTokens;
+        public TokenReward[] TrialStimTokenReward;
         public string BlockEndType;
         public float BlockEndThreshold;
         public int BlockEndWindow;
+        public int NumTokens;
         public int NumPulses;
         public int PulseSize;
         public bool RandomizedLocations;
@@ -53,35 +52,47 @@ namespace FlexLearning_Namespace
         {
             //pick # of trials from minmax
             System.Random rnd = new System.Random();
-            int num = rnd.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
+            int num = rnd.Next(MinMaxTrials[0], MinMaxTrials[1]);
             TrialDefs = new TrialDef[num];//actual correct # 
 
             for (int iTrial = 0; iTrial < TrialDefs.Length; iTrial++)
             {
                 FlexLearning_TrialDef td = new FlexLearning_TrialDef();
                 td.TrialID = TrialID;
-                /*
-                td.MinTouchDuration = MinTouchDuration;
-                td.MaxTouchDuration = MaxTouchDuration;
-                */
-                td.TargetStimIndex = TargetStimIndex;
-                td.DistractorStimsIndices = DistractorStimsIndices;
-                td.TargetStimLocation = TargetStimLocation;
-                td.DistractorStimsLocations = DistractorStimsLocations;
+                td.BlockName = BlockName;
+                td.TrialStimIndices = TrialStimIndices;
+                td.TrialStimLocations = TrialStimLocations;
                 td.ContextName = ContextName;
-                td.TokenGain = TokenGain;
-                td.TokenLoss = TokenLoss;
-                td.TokenInitial = TokenInitial;
+                td.TrialStimTokenReward = TrialStimTokenReward;
+                td.NumInitialTokens = NumInitialTokens;
                 td.RandomizedLocations = RandomizedLocations;
                 td.BlockEndType = BlockEndType;
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
                 td.NumPulses = NumPulses;
+                td.NumTokens = NumTokens;
                 td.PulseSize = PulseSize;
                 TrialDefs[iTrial] = td;
             }
         }
-
+        public override void AddToTrialDefsFromBlockDef()
+        {
+            Debug.Log("TRIAL DEFS NAMESPACE: " + TrialDefs.Length);
+            for (int iTrial = 0; iTrial < TrialDefs.Length; iTrial++)
+            {
+                FlexLearning_TrialDef td = new FlexLearning_TrialDef();
+                td.BlockName = BlockName;
+                td.NumInitialTokens = NumInitialTokens;
+                td.RandomizedLocations = RandomizedLocations;
+                td.BlockEndType = BlockEndType;
+                td.BlockEndThreshold = BlockEndThreshold;
+                td.BlockEndWindow = BlockEndWindow;
+                td.NumPulses = NumPulses;
+                td.NumTokens = NumTokens;
+                td.PulseSize = PulseSize;
+                TrialDefs[iTrial] = td;
+            }
+        }
     }
 
     public class FlexLearning_TrialDef : TrialDef
@@ -89,20 +100,19 @@ namespace FlexLearning_Namespace
         //Already-existing fields (inherited from TrialDef)
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
-        public int[] TargetStimIndex;
-        public int[] DistractorStimsIndices;
-        public Vector3[] TargetStimLocation;
-        public Vector3[] DistractorStimsLocations;
+        public int[] TrialStimIndices;
+        public Vector3[] TrialStimLocations;
+        public string BlockName;
         public string TrialID;
-        public int[] TokenGain;
-        public int[] TokenLoss;
-        public int TokenInitial;
+        public TokenReward[] TrialStimTokenReward;
         public bool RandomizedLocations;
         public string ContextName;
         public string BlockEndType;
         public float BlockEndThreshold;
         public int BlockEndWindow;
         public int NumPulses;
+        public int NumInitialTokens;
+        public int NumTokens;
         public int PulseSize;
 
     }

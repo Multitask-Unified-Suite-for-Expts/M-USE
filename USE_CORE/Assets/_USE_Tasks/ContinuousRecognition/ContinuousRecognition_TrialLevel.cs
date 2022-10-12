@@ -109,7 +109,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         ChooseStim.AddUpdateMethod(() =>
         {
-            
             chosenStimObj = mouseHandler.SelectedGameObject;
             chosenStimDef = mouseHandler.SelectedStimDef;
 
@@ -133,15 +132,24 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     chosenStimDef.PreviouslyChosen = true;
                     currentTrial.PC_Stim.Add(chosenStimDef.StimCode - 1);
 
-                    List<int> newStimToRemove = currentTrial.New_Stim;
-
-                    for (int i = 0; i < newStimToRemove.Count; i++)
+                    //TRYING TO REMOVE ALL NEW STIM THAT WEREN'T CHOSEN, FROM NEW STIM AND INTO PNC STIM. 
+                    List<int> newStimToRemove = currentTrial.New_Stim.ToList();
+                    foreach(var stim in newStimToRemove)
                     {
-                        var currentNum = newStimToRemove[i];
-                        currentTrial.PNC_Stim.Add(currentNum);
-                        currentTrial.New_Stim.Remove(currentNum);
-                        newStimToRemove.Remove(currentNum);
+                        if(currentTrial.New_Stim.Contains(stim) && stim != chosenStimDef.StimCode-1)
+                        {
+                            currentTrial.New_Stim.Remove(stim);
+                            currentTrial.PNC_Stim.Add(stim);
+                        }
                     }
+
+                    //for (int i = 0; i < newStimToRemove.Count; i++)
+                    //{
+                    //    var currentNum = newStimToRemove[i];
+                    //    currentTrial.PNC_Stim.Add(currentNum);
+                    //    currentTrial.New_Stim.Remove(currentNum);
+                    //    newStimToRemove.Remove(currentNum);
+                    //}
                 }
                 else //THEY GUESSED WRONG
                 {
@@ -232,22 +240,31 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-        DisplayResults.AddTimer(() => currentTrial.DisplayResultDuration, ITI, () => DestroyBorders(rightGroup));
+        DisplayResults.AddTimer(() => currentTrial.DisplayResultDuration, ITI, () => StartCoroutine(DestroyBorders()));
         DisplayResults.SpecifyTermination(() => !EndBlock, ITI);
 
         ITI.AddTimer(() => itiDuration.value, FinishTrial, () => Starfield.SetActive(true));
     }
 
 
-
-    private void DestroyBorders(StimGroup group)
+    private IEnumerator DestroyBorders()
     {
-        foreach (GameObject border in BorderPrefabList)
+        yield return new WaitForSeconds(1f);
+        foreach(GameObject border in BorderPrefabList)
         {
-            if(border != null) border.SetActive(false);
+            if (border != null) border.SetActive(false);
         }
         BorderPrefabList.Clear();
     }
+
+    //private void DestroyBorders()
+    //{
+    //    foreach (GameObject border in BorderPrefabList)
+    //    {
+    //        if(border != null) border.SetActive(false);
+    //    }
+    //    BorderPrefabList.Clear();
+    //}
 
 
     //Generate the correct number of New, PC, and PNC stim for each trial. 

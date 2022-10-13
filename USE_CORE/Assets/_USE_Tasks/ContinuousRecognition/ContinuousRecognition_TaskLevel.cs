@@ -23,6 +23,12 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         string TaskName = "ContinuousRecognition";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+
+        //Clearing the list of picked stim indices at beginning of each block. 
+        RunBlock.AddInitializationMethod(() =>
+        {
+            trialLevel.ChosenStimIndices.Clear();
+        });
     }
 
 }

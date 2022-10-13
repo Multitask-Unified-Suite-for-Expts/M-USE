@@ -29,6 +29,7 @@ namespace ContinuousRecognition_Namespace
         public List<int> TrialStimIndices;
 
         public Vector3[] BlockStimLocations;
+        public Vector3[] TrialSubsetFBLocations;
 
         // public int BlockCount, TotalTokenNums, MaxTrials
         public int TrialCount, NumRewardPulses;
@@ -57,12 +58,12 @@ namespace ContinuousRecognition_Namespace
                 ContinuousRecognition_TrialDef trial = new ContinuousRecognition_TrialDef();
                 trial.BlockStimIndices = BlockStimIndices;
 
-                //I have locations in the config file reading like a book. top left to right, down a row, etc...
+                //I have locations in the config file reading like a book.top left to right, down a row, etc...
                 //currently holds 24 spots.
                 Vector3[] trialFeedbackLocations = new Vector3[NumObjectsMinMax[0] + trialIndex];
-                for(int i = 0; i < numTrialStims; i++) 
+                for (int i = 0; i < numTrialStims; i++)
                 {
-                    trialFeedbackLocations[i] = BlockStimLocations[i]; 
+                    trialFeedbackLocations[i] = BlockStimLocations[i];
                 }
 
                 Vector3[] trialStimLocations = new Vector3[NumObjectsMinMax[0] + trialIndex];
@@ -93,6 +94,7 @@ namespace ContinuousRecognition_Namespace
                 trial.ContextName = ContextName;
                 trial.TokenRevealDuration = TokenRevealDuration;
                 trial.TokenUpdateDuration = TokenUpdateDuration;
+                trial.TrialSubsetFBLocations = TrialSubsetFBLocations; //using for when they get less than 13 right. 
                 trial.TrialFeedbackLocations = trialFeedbackLocations;
 
                 TrialDefs[trialIndex] = trial;
@@ -106,6 +108,7 @@ namespace ContinuousRecognition_Namespace
     {
         public Vector3[] TrialStimLocations;
         public Vector3[] TrialFeedbackLocations;
+        public Vector3[] TrialSubsetFBLocations; //using for when they got less than 13 right. will display stim closer to middle of screen.
 
         public int[] BlockStimIndices;
         public int[] NumObjectsMinMax;

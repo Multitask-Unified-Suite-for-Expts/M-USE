@@ -11,6 +11,7 @@ using USE_ExperimentTemplate_Trial;
 using System.Collections;
 using System.Linq;
 using UnityEngine.UI;
+using USE_ExperimentTemplate_Block;
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
@@ -19,6 +20,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public bool EndBlock;
     bool isNew;
     bool stimIsChosen;
+
+    public List<int> ChosenStimIndices;
 
     public GameObject GreenBorderPrefab;
     public GameObject RedBorderPrefab;
@@ -104,9 +107,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if(chosenStimDef != null)
             {
+                Debug.Log($"PREVIOUSLY CHOSEN = {chosenStimDef.PreviouslyChosen}");
                 if(chosenStimDef.PreviouslyChosen == false) //THEY GUESSED RIGHT
                 {
                     isNew = true;
+                    chosenStimDef.PreviouslyChosen = true;
+                    currentTrial.PC_Stim.Add(chosenStimDef.StimCode - 1);
+
+                    ChosenStimIndices.Add(chosenStimDef.StimCode - 1); //also adding to chosenIndices so I can keep in order for display results. 
 
                     if(currentTrial.PNC_Stim.Contains(chosenStimDef.StimCode - 1)) //If they chose a PNC stim...
                     {
@@ -119,8 +127,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         currentTrial.New_Stim.Remove(chosenStimDef.StimCode - 1);
                     }
 
-                    chosenStimDef.PreviouslyChosen = true;
-                    currentTrial.PC_Stim.Add(chosenStimDef.StimCode - 1);
 
                     //TRYING TO REMOVE ALL NEW STIM THAT WEREN'T CHOSEN, FROM NEW STIM AND INTO PNC STIM. 
                     List<int> newStimToRemove = currentTrial.New_Stim.ToList();
@@ -132,7 +138,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                             currentTrial.PNC_Stim.Add(stim);
                         }
                     }
-
                 }
                 else //THEY GUESSED WRONG
                 {
@@ -176,42 +181,39 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 AudioFBController.Play("Negative");
                 //ADD CODE TO ADD A GREY TOKEN TO THE TOKENBAR!
-                TokenFBController.RemoveTokens(chosenStimObj, 1);
+                TokenFBController.RemoveTokens(chosenStimObj, 1, Color.grey);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
                 EndBlock = true;
             }
         });
-        TokenUpdate.AddTimer(() => 1.9f, DisplayResults);
+        TokenUpdate.AddTimer(() => 1.5f, DisplayResults);
         //TokenUpdate.SpecifyTermination(() => !TokenFBController.IsAnimating(), DisplayResults);
 
-        StimGroup rightGroup = new StimGroup("Right");
+        StimGroup feedbackGroup = new StimGroup("Feedback");
 
         DisplayResults.AddInitializationMethod(() =>
         {
             if (EndBlock) //IF THEY LOST, DISPLAY RESULTS
-            {
+            {                
                 Starfield.SetActive(false);
                 TokenFBController.enabled = false;
                 RenderSettings.skybox = CreateSkybox($"{MaterialFilePath}\\LinearDark.png");
 
-                List<int> chosenStimIndices = currentTrial.PC_Stim;
+                //List<int> chosenStimIndices = currentTrial.PC_Stim.ToList();
 
-                Vector3[] FeedbackLocations = new Vector3[chosenStimIndices.Count];
-                for (int i = 0; i < chosenStimIndices.Count; i++)
+                Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count];
+                for (int i = 0; i < ChosenStimIndices.Count; i++)
                 {
-                    FeedbackLocations[i] = currentTrial.TrialFeedbackLocations[i];
+                    if (ChosenStimIndices.Count < 13) FeedbackLocations[i] = currentTrial.TrialSubsetFBLocations[i];
+                    else FeedbackLocations[i] = currentTrial.TrialFeedbackLocations[i];
                 }
 
-                rightGroup = new StimGroup("Right", ExternalStims, chosenStimIndices);
-                TrialStims.Add(rightGroup);
-                rightGroup.SetLocations(FeedbackLocations);
-                rightGroup.LoadStims();
-                rightGroup.ToggleVisibility(true);
-
-                GenerateBorders(rightGroup);
+                feedbackGroup = new StimGroup("Feedback", ExternalStims, ChosenStimIndices);
+                GenerateFeedbackStim(feedbackGroup, FeedbackLocations);
+                GenerateFeedbackBorders(feedbackGroup);
             }
         });
-        DisplayResults.AddTimer(() => currentTrial.DisplayResultDuration, ITI, () => StartCoroutine(DestroyBorders()));
+        DisplayResults.AddTimer(() => currentTrial.DisplayResultDuration, ITI, () => StartCoroutine(DestroyFeedbackBorders()));
         DisplayResults.SpecifyTermination(() => !EndBlock, ITI);
 
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
@@ -223,8 +225,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     //Called when the trial is defined!
     //The TrialStims group are auto loaded in the SetupTrial StateInitialization, and destroyed in the FinishTrial StateTermination
     protected override void DefineTrialStims()
-    {
-
+    {        
         if(TrialCount_InBlock == 0)
         {
             //clear stim lists in case it's NOT the first block!
@@ -316,7 +317,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         getLog(currentTrial.TrialStimIndices, "TrialStimIndices");
     }
 
-    private void GenerateBorders(StimGroup group)
+    private void GenerateFeedbackStim(StimGroup group, Vector3[] locations)
+    {
+        TrialStims.Add(group);
+        group.SetLocations(locations);
+        group.LoadStims();
+        group.ToggleVisibility(true);
+    }
+
+    private void GenerateFeedbackBorders(StimGroup group)
     {
         BorderPrefabList = new List<GameObject>();
         foreach (ContinuousRecognition_StimDef stim in group.stimDefs)
@@ -334,9 +343,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    private IEnumerator DestroyBorders()
+    private IEnumerator DestroyFeedbackBorders() //trying to match up the dissapearance of borders and stim.
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(.5f);
         foreach (GameObject border in BorderPrefabList)
         {
             if (border != null) border.SetActive(false);

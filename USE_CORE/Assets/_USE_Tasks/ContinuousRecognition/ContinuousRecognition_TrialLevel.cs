@@ -143,6 +143,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 {
                     Debug.Log($"WRONG! CHOSE A PREVIOUSLY CHOSEN STIM WITH INDEX =  {chosenStimDef.StimCode - 1}");
                     currentTrial.WrongStimIndex = chosenStimDef.StimCode-1; //identifies the stim they got wrong for Block FB purposes. 
+                    chosenStimDef.PreviouslyChosen = false; //reset the stim. was having issues with later blocks. 
                 }
             }
             if (chosenStimObj != null) //if they chose a stimObj and it has a pointer to the actual stimDef.  

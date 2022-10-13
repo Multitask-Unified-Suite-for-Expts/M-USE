@@ -22,16 +22,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     public GameObject GreenBorderPrefab;
     public GameObject RedBorderPrefab;
-
+    public GameObject Starfield;
     public List<GameObject> BorderPrefabList;
 
-    public GameObject Starfield;
-
-    //Game object variables
     [NonSerialized]
     public GameObject StartButton;
 
-    //Stim Group
     public StimGroup trialStims;
 
     //Config Variables
@@ -41,11 +37,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     //Misc Variables
     public string MaterialFilePath;
     private bool variablesLoaded;
-
-    //GameObject canvasGO;
-    //Canvas canvas;
-    //GameObject resultsTextGO;
-    //Text resultsText;
 
 
     public override void DefineControlLevel()
@@ -81,6 +72,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             isNew = false;
 
             RenderSettings.skybox = CreateSkybox($"{MaterialFilePath}\\{currentTrial.ContextName}.png");
+            Starfield.SetActive(true);
             TokenFBController.enabled = false;
             SetTokenFeedbackTimes();
             StartButton.SetActive(true);
@@ -141,19 +133,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         }
                     }
 
-                    //for (int i = 0; i < newStimToRemove.Count; i++)
-                    //{
-                    //    var currentNum = newStimToRemove[i];
-                    //    currentTrial.PNC_Stim.Add(currentNum);
-                    //    currentTrial.New_Stim.Remove(currentNum);
-                    //    newStimToRemove.Remove(currentNum);
-                    //}
                 }
                 else //THEY GUESSED WRONG
                 {
                     Debug.Log($"WRONG! CHOSE A PREVIOUSLY CHOSEN STIM WITH INDEX =  {chosenStimDef.StimCode - 1}");
                     currentTrial.WrongStimIndex = chosenStimDef.StimCode-1; //identifies the stim they got wrong for Block FB purposes. 
-
                 }
             }
             if (chosenStimObj != null) //if they chose a stimObj and it has a pointer to the actual stimDef.  
@@ -191,12 +175,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             else
             {
                 AudioFBController.Play("Negative");
+                //ADD CODE TO ADD A GREY TOKEN TO THE TOKENBAR!
+                TokenFBController.RemoveTokens(chosenStimObj, 1);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
-                EndBlock = true; //moved from inside ITI initializaation method. 
-
+                EndBlock = true;
             }
         });
-        TokenUpdate.SpecifyTermination(() => !TokenFBController.IsAnimating(), DisplayResults);
+        TokenUpdate.AddTimer(() => 1.9f, DisplayResults);
+        //TokenUpdate.SpecifyTermination(() => !TokenFBController.IsAnimating(), DisplayResults);
 
         StimGroup rightGroup = new StimGroup("Right");
 
@@ -222,52 +208,20 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 rightGroup.LoadStims();
                 rightGroup.ToggleVisibility(true);
 
-                BorderPrefabList = new List<GameObject>();
-                foreach (ContinuousRecognition_StimDef stim in rightGroup.stimDefs)
-                {
-                    if(stim.StimCode -1 == currentTrial.WrongStimIndex)
-                    {
-                        GameObject borderPrefab = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
-                        BorderPrefabList.Add(borderPrefab);
-                    }
-                    else
-                    {
-                        GameObject borderPrefab = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
-                        BorderPrefabList.Add(borderPrefab);
-                    }
-                }
+                GenerateBorders(rightGroup);
             }
         });
         DisplayResults.AddTimer(() => currentTrial.DisplayResultDuration, ITI, () => StartCoroutine(DestroyBorders()));
         DisplayResults.SpecifyTermination(() => !EndBlock, ITI);
 
-        ITI.AddTimer(() => itiDuration.value, FinishTrial, () => Starfield.SetActive(true));
+        ITI.AddTimer(() => itiDuration.value, FinishTrial);
     }
 
-
-    private IEnumerator DestroyBorders()
-    {
-        yield return new WaitForSeconds(1f);
-        foreach(GameObject border in BorderPrefabList)
-        {
-            if (border != null) border.SetActive(false);
-        }
-        BorderPrefabList.Clear();
-    }
-
-    //private void DestroyBorders()
-    //{
-    //    foreach (GameObject border in BorderPrefabList)
-    //    {
-    //        if(border != null) border.SetActive(false);
-    //    }
-    //    BorderPrefabList.Clear();
-    //}
-
+   
 
     //Generate the correct number of New, PC, and PNC stim for each trial. 
     //Called when the trial is defined!
-    //The stim are auto loaded in the SetupTrial StateInitialization, and destroyed in the FinishTrial StateTermination
+    //The TrialStims group are auto loaded in the SetupTrial StateInitialization, and destroyed in the FinishTrial StateTermination
     protected override void DefineTrialStims()
     {
 
@@ -304,11 +258,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             trialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenUpdate")); //Visible when start DisplayStims, invisible when finish TokenUpdate.
             TrialStims.Add(trialStims);
 
-            foreach (ContinuousRecognition_StimDef stim in trialStims.stimDefs)
-            {
-                stim.PreviouslyChosen = false;
-            }
-
+            foreach (ContinuousRecognition_StimDef stim in trialStims.stimDefs) stim.PreviouslyChosen = false;
         }
 
         else 
@@ -366,8 +316,42 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         getLog(currentTrial.TrialStimIndices, "TrialStimIndices");
     }
 
+    private void GenerateBorders(StimGroup group)
+    {
+        BorderPrefabList = new List<GameObject>();
+        foreach (ContinuousRecognition_StimDef stim in group.stimDefs)
+        {
+            if (stim.StimCode - 1 == currentTrial.WrongStimIndex)
+            {
+                GameObject borderPrefab = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
+                BorderPrefabList.Add(borderPrefab); //add to list so I can access and destroy them together
+            }
+            else
+            {
+                GameObject borderPrefab = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
+                BorderPrefabList.Add(borderPrefab); //add to list so I can access and destroy them together. 
+            }
+        }
+    }
+
+    private IEnumerator DestroyBorders()
+    {
+        yield return new WaitForSeconds(1f);
+        foreach (GameObject border in BorderPrefabList)
+        {
+            if (border != null) border.SetActive(false);
+        }
+        BorderPrefabList.Clear();
+    }
+
     public void CreateCanvasAndComponents()
     {
+        //put these up top if end up using this;
+        //GameObject canvasGO;
+        //Canvas canvas;
+        //GameObject resultsTextGO;
+        //Text resultsText;
+
         GameObject canvasGO = new GameObject();
         canvasGO.AddComponent<Canvas>();
         canvasGO.AddComponent<CanvasScaler>();

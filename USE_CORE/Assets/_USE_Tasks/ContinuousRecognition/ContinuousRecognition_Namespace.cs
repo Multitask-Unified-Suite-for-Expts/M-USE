@@ -28,8 +28,18 @@ namespace ContinuousRecognition_Namespace
         public List<int> Unseen_Stim;
         public List<int> TrialStimIndices;
 
-        public Vector3[] BlockStimLocations;
-        public Vector3[] TrialSubsetFBLocations;
+        public int NumRows;
+        public int NumColumns;
+        public float X_Start;
+        public float Y_Start;
+        public float X_Gap;
+        public float Y_Gap;
+
+        public Vector3[] BlockStimLocations; //from Config if user specifies!!!
+        public Vector3[] StimLocations; //calculated below in case they don't specify locations!
+
+        public Vector3[] BlockFeedbackLocations; //from config.
+        public Vector3[] SubsetFeedbackLocations; //from config. 
 
         // public int BlockCount, TotalTokenNums, MaxTrials
         public int TrialCount, NumRewardPulses;
@@ -40,6 +50,8 @@ namespace ContinuousRecognition_Namespace
         public string BlockName;
         public string ContextName;
 
+        public int ManuallySpecifyLocation;
+
         public override void GenerateTrialDefsFromBlockDef()
         {
             PC_Stim = new List<int>();
@@ -48,23 +60,39 @@ namespace ContinuousRecognition_Namespace
             Unseen_Stim = new List<int>();
             TrialStimIndices = new List<int>();
 
+
+            //Calculate BlockStimLocations:
+            StimLocations = new Vector3[NumRows * NumColumns];
+            float x = X_Start;
+            float y = Y_Start;
+            int index = 0;
+
+            for(int i = 0; i < NumRows; i++)
+            {
+                y = Y_Start;
+                for(int j = 0; j < NumColumns; j++)
+                {
+                    StimLocations[index] = new Vector3(x, y, 0);
+                    y -= Y_Gap;
+                    index++;
+                }
+                x += X_Gap;
+            }
+            if(ManuallySpecifyLocation == 0) //they aren't inputting manually, so use the calculated StimLocations from above. 
+            {
+                BlockStimLocations = StimLocations;
+            }
+
+
             int maxNumTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
             TrialDefs = new ContinuousRecognition_TrialDef[maxNumTrials];
             int numTrialStims = NumObjectsMinMax[0]; //incremented at end
             bool theEnd = false;
 
-            for(int trialIndex = 0; trialIndex < maxNumTrials && !theEnd; trialIndex++)
+            for (int trialIndex = 0; trialIndex < maxNumTrials && !theEnd; trialIndex++)
             {   
                 ContinuousRecognition_TrialDef trial = new ContinuousRecognition_TrialDef();
                 trial.BlockStimIndices = BlockStimIndices;
-
-                //I have locations in the config file reading like a book.top left to right, down a row, etc...
-                //currently holds 24 spots.
-                Vector3[] trialFeedbackLocations = new Vector3[NumObjectsMinMax[0] + trialIndex];
-                for (int i = 0; i < numTrialStims; i++)
-                {
-                    trialFeedbackLocations[i] = BlockStimLocations[i];
-                }
 
                 Vector3[] trialStimLocations = new Vector3[NumObjectsMinMax[0] + trialIndex];
                 for(int i = 0; i < numTrialStims; i++)
@@ -77,6 +105,8 @@ namespace ContinuousRecognition_Namespace
                     trialStimLocations[i] = BlockStimLocations[randomIndex];
                 }
                 trial.TrialStimLocations = trialStimLocations;
+                trial.TrialFeedbackLocations = BlockFeedbackLocations; //currently 24 FB locations added in config file. 
+                trial.SubsetFeedbackLocations = SubsetFeedbackLocations; //using for when they get less than 13 right. 
                 trial.TrialStimIndices = TrialStimIndices;
                 trial.PC_Stim = PC_Stim;
                 trial.PNC_Stim = PNC_Stim;
@@ -94,8 +124,6 @@ namespace ContinuousRecognition_Namespace
                 trial.ContextName = ContextName;
                 trial.TokenRevealDuration = TokenRevealDuration;
                 trial.TokenUpdateDuration = TokenUpdateDuration;
-                trial.TrialSubsetFBLocations = TrialSubsetFBLocations; //using for when they get less than 13 right. 
-                trial.TrialFeedbackLocations = trialFeedbackLocations;
 
                 TrialDefs[trialIndex] = trial;
                 numTrialStims++;
@@ -108,7 +136,7 @@ namespace ContinuousRecognition_Namespace
     {
         public Vector3[] TrialStimLocations;
         public Vector3[] TrialFeedbackLocations;
-        public Vector3[] TrialSubsetFBLocations; //using for when they got less than 13 right. will display stim closer to middle of screen.
+        public Vector3[] SubsetFeedbackLocations; //using for when they got less than 13 right. will display stim closer to middle of screen.
 
         public int[] BlockStimIndices;
         public int[] NumObjectsMinMax;

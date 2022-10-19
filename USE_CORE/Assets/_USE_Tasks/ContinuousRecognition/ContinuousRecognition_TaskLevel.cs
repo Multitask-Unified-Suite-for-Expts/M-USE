@@ -35,13 +35,15 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
             trialLevel.NumTrials_Block = 0;
             trialLevel.NumCorrect_Block = 0;
+            trialLevel.NumTokenBarCompletions_Block = 0;
 
         });
         RunBlock.AddUpdateMethod(() =>
         {
             BlockSummaryString = "Block Name: " + currentBlock.BlockName +
                                 "\n# Trials: " + trialLevel.NumTrials_Block +
-                                "\n# Correct: " + trialLevel.NumCorrect_Block;                               
+                                "\n# Correct: " + trialLevel.NumCorrect_Block +
+                                "\n# TokenBarCompletions: " + trialLevel.NumTokenBarCompletions_Block;
         });
     }
 

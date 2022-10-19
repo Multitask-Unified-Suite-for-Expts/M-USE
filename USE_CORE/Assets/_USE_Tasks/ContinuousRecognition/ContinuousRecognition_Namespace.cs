@@ -34,12 +34,13 @@ namespace ContinuousRecognition_Namespace
         public float Y_Start;
         public float X_Gap;
         public float Y_Gap;
+        public float X_Gap_FB;
+        public float Y_Gap_FB;
 
         public Vector3[] BlockStimLocations; //from Config if user specifies!!!
         public Vector3[] StimLocations; //calculated below in case they don't specify locations!
 
         public Vector3[] BlockFeedbackLocations; //from config.
-        public Vector3[] SubsetFeedbackLocations; //from config. 
 
         // public int BlockCount, TotalTokenNums, MaxTrials
         public int TrialCount, NumRewardPulses;
@@ -67,21 +68,43 @@ namespace ContinuousRecognition_Namespace
             float y = Y_Start;
             int index = 0;
 
-            for(int i = 0; i < NumRows; i++)
+            for(int i = 0; i < NumColumns; i++) //Y loop
             {
-                y = Y_Start;
-                for(int j = 0; j < NumColumns; j++)
+                x = X_Start;
+                for(int j = 0; j < NumRows; j++) //X Loop
                 {
                     StimLocations[index] = new Vector3(x, y, 0);
-                    y -= Y_Gap;
+                    x += X_Gap;
                     index++;
                 }
-                x += X_Gap;
+                y -= Y_Gap;
             }
-            if(ManuallySpecifyLocation == 0) //they aren't inputting manually, so use the calculated StimLocations from above. 
+
+            if(ManuallySpecifyLocation == 0)    BlockStimLocations = StimLocations;
+
+
+            //Calculate FeedbackLocations;
+            BlockFeedbackLocations = new Vector3[NumRows * NumColumns];
+            x = X_Start;
+            y = Y_Start;
+            index = 0;
+
+            for (int i = 0; i < NumColumns; i++)
             {
-                BlockStimLocations = StimLocations;
+                x = X_Start;
+                for (int j = 0; j < NumRows; j++)
+                {
+                    BlockFeedbackLocations[index] = new Vector3(x, y, 0);
+                    x += X_Gap_FB;
+                    index++;
+                }
+                y -= Y_Gap_FB;
             }
+
+
+            var s = "";
+            foreach (var location in BlockFeedbackLocations) s += location;
+            Debug.Log(s);
 
 
             int maxNumTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
@@ -104,9 +127,8 @@ namespace ContinuousRecognition_Namespace
                     }
                     trialStimLocations[i] = BlockStimLocations[randomIndex];
                 }
+                trial.TrialFeedbackLocations = BlockFeedbackLocations;
                 trial.TrialStimLocations = trialStimLocations;
-                trial.TrialFeedbackLocations = BlockFeedbackLocations; //currently 24 FB locations added in config file. 
-                trial.SubsetFeedbackLocations = SubsetFeedbackLocations; //using for when they get less than 13 right. 
                 trial.TrialStimIndices = TrialStimIndices;
                 trial.PC_Stim = PC_Stim;
                 trial.PNC_Stim = PNC_Stim;
@@ -124,6 +146,7 @@ namespace ContinuousRecognition_Namespace
                 trial.ContextName = ContextName;
                 trial.TokenRevealDuration = TokenRevealDuration;
                 trial.TokenUpdateDuration = TokenUpdateDuration;
+                trial.TotalTokensNum = TotalTokensNum;
 
                 TrialDefs[trialIndex] = trial;
                 numTrialStims++;
@@ -136,7 +159,6 @@ namespace ContinuousRecognition_Namespace
     {
         public Vector3[] TrialStimLocations;
         public Vector3[] TrialFeedbackLocations;
-        public Vector3[] SubsetFeedbackLocations; //using for when they got less than 13 right. will display stim closer to middle of screen.
 
         public int[] BlockStimIndices;
         public int[] NumObjectsMinMax;
@@ -151,6 +173,8 @@ namespace ContinuousRecognition_Namespace
         public int WrongStimIndex;
         public int NumTrialStims;
         public int MaxNumTrials;
+
+        public int? TotalTokensNum;
 
         public float DisplayStimsDuration, ChooseStimDuration, TrialEndDuration, TouchFeedbackDuration, 
             DisplayResultDuration, TokenRevealDuration, TokenUpdateDuration;

@@ -12,6 +12,7 @@ using System.Collections;
 using System.Linq;
 using UnityEngine.UI;
 using USE_ExperimentTemplate_Block;
+using System.IO;
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
@@ -37,8 +38,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     public int NumCorrect_Block;
     public int NumTrials_Block;
+    public int NumTokenBarCompletions_Block;
 
-
+    public int TokenCount;
 
     //Config Variables
     [HideInInspector]
@@ -66,7 +68,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
-            RenderSettings.skybox = CreateSkybox($"{MaterialFilePath}\\{currentTrial.ContextName}.png");
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + currentTrial.ContextName + ".png");
             ContextActive = true;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
             Starfield.SetActive(true);
@@ -178,7 +180,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             currentTrial.IsNewStim = GotCorrect;
         });
         ChooseStim.SpecifyTermination(() => stimIsChosen, TouchFeedback);
-        ChooseStim.AddTimer(() => selectObjectDuration.value, TouchFeedback, () => EventCodeManager.SendCodeImmediate(TaskEventCodes["NoChoice"]));
+        ChooseStim.AddTimer(() => selectObjectDuration.value, ITI, () =>     //if no choice, skip touchFB/tokenFB and go to display results so the event codes can send.
+        {
+            EndBlock = true;
+            EventCodeManager.SendCodeImmediate(TaskEventCodes["NoChoice"]); 
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
+        });
 
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------
         TouchFeedback.AddInitializationMethod(() =>
@@ -200,11 +209,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 TokenFBController.AddTokens(chosenStimObj, 1); //will put "currentTrial.StimTrialRewardMag" here !
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
+                TokenCount++;
+                HandleTokenUpdate();
             }
             else
             {
                 TokenFBController.RemoveTokens(chosenStimObj, 1, Color.grey);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
+                TokenCount--;
+                HandleTokenUpdate();
                 EndBlock = true;
             }
         });
@@ -213,7 +226,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         DisplayResults.AddInitializationMethod(() =>
         {
-            if (EndBlock || CompletedAllTrials) GenerateBlockFeedback(); //IF THEY LOST, DISPLAY RESULTS
+            if (EndBlock || CompletedAllTrials) GenerateBlockFeedback(); //IF THEY LOST or CompletedAllTrial, DISPLAY RESULTS
         });
 
         DisplayResults.AddTimer(() => currentTrial.DisplayResultDuration, ITI, () =>
@@ -224,7 +237,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
         });
             
-        DisplayResults.SpecifyTermination(() => !EndBlock, ITI, () =>
+        DisplayResults.SpecifyTermination(() => !EndBlock && !CompletedAllTrials, ITI, () =>
         {
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
@@ -240,11 +253,19 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]); //next trial starts next frame
         });
         
-
         AddTrialData();
         AddFrameData();
+    }
 
- 
+
+
+    private void HandleTokenUpdate()
+    {
+        if(TokenCount == currentTrial.TotalTokensNum)
+        {
+            NumTokenBarCompletions_Block++;
+            TokenCount = 0;
+        }
     }
 
     private void CorrectSelectionUpdateData()
@@ -254,8 +275,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void GenerateBlockFeedback()
     {
+        Starfield.SetActive(false);
+        TokenFBController.enabled = false;
+
+        
         StimGroup rightGroup = new StimGroup("Right");
-        //StimGroup wrongGroup = new StimGroup("Wrong");
 
         Starfield.SetActive(false);
         TokenFBController.enabled = false;
@@ -263,14 +287,39 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count];
         for (int i = 0; i < ChosenStimIndices.Count; i++)
         {
-            if (ChosenStimIndices.Count < 13) FeedbackLocations[i] = currentTrial.SubsetFeedbackLocations[i];
-            else FeedbackLocations[i] = currentTrial.TrialFeedbackLocations[i];
+            FeedbackLocations[i] = currentTrial.TrialFeedbackLocations[i];
         }
         CenterFeedbackLocations(FeedbackLocations);
 
         rightGroup = new StimGroup("Right", ExternalStims, ChosenStimIndices);
         GenerateFeedbackStim(rightGroup, FeedbackLocations);
         GenerateFeedbackBorders(rightGroup);
+
+
+        //StimGroup FeedbackGroup;
+
+        //Vector3[] Locations = new Vector3[ChosenStimIndices.Count];
+        //var IndexForWrongStim = 0; 
+        //for (int i = 0; i < ChosenStimIndices.Count; i++)
+        //{
+        //    Locations[i] = currentTrial.TrialFeedbackLocations[i];
+        //    IndexForWrongStim++;
+        //}
+        ////Add the last location for the Wrong stim.
+        //Locations[IndexForWrongStim] = currentTrial.TrialFeedbackLocations[IndexForWrongStim];
+
+        //CenterFeedbackLocations(Locations);
+
+        ////Create copy of chosenIndices and add the Duplicate (got wrong) index to the list. 
+        //List<int> StimIndices = ChosenStimIndices.ToList();
+        //StimIndices.Add(currentTrial.WrongStimIndex);
+
+        //FeedbackGroup = new StimGroup("Right", ExternalStims, StimIndices);
+        //GenerateFeedbackStim(FeedbackGroup, Locations);
+        //GenerateFeedbackBorders(FeedbackGroup);
+
+
+
     }
 
 
@@ -569,7 +618,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void CreateStartButton()
     {
-        Texture2D tex = LoadPNG($"{MaterialFilePath}\\StartButtonImage.png");
+        Texture2D tex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
         Rect rect = new Rect(new Vector2(0, 0), new Vector2(1, 1));
 
         Vector3 buttonPosition = Vector3.zero;

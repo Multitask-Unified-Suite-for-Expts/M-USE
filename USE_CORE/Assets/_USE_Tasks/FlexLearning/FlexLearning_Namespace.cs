@@ -43,7 +43,7 @@ namespace FlexLearning_Namespace
         public string BlockEndType;
         public float BlockEndThreshold;
         public int BlockEndWindow;
-        public int NumTokens;
+        public int NumTokenBar;
         public int NumPulses;
         public int PulseSize;
         public bool RandomizedLocations;
@@ -70,7 +70,7 @@ namespace FlexLearning_Namespace
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
                 td.NumPulses = NumPulses;
-                td.NumTokens = NumTokens;
+                td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
                 TrialDefs[iTrial] = td;
             }
@@ -80,7 +80,7 @@ namespace FlexLearning_Namespace
             Debug.Log("TRIAL DEFS NAMESPACE: " + TrialDefs.Length);
             for (int iTrial = 0; iTrial < TrialDefs.Length; iTrial++)
             {
-                FlexLearning_TrialDef td = new FlexLearning_TrialDef();
+                FlexLearning_TrialDef td = (FlexLearning_TrialDef)TrialDefs[iTrial];
                 td.BlockName = BlockName;
                 td.NumInitialTokens = NumInitialTokens;
                 td.RandomizedLocations = RandomizedLocations;
@@ -88,7 +88,7 @@ namespace FlexLearning_Namespace
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
                 td.NumPulses = NumPulses;
-                td.NumTokens = NumTokens;
+                td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
                 TrialDefs[iTrial] = td;
             }
@@ -112,7 +112,7 @@ namespace FlexLearning_Namespace
         public int BlockEndWindow;
         public int NumPulses;
         public int NumInitialTokens;
-        public int NumTokens;
+        public int NumTokenBar;
         public int PulseSize;
 
     }

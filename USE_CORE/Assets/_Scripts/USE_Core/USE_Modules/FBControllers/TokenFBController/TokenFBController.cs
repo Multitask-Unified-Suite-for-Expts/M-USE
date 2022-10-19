@@ -76,6 +76,11 @@ public class TokenFBController : MonoBehaviour
         AnimateTokens(Color.red, gameObj, -numTokens);
     }
 
+    public void RemoveTokens(GameObject gameObj, int numTokens, Color color)
+    {
+        AnimateTokens(color, gameObj, -numTokens);
+    }
+
     public void OnGUI()
     {
         RenderTexture old = RenderTexture.active;

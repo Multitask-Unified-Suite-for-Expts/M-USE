@@ -29,4 +29,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_USE_Tasks/MazeGame/MazeGame.unity
     guid: 9a9c597c68d62d24d953e3e164318af8
+  - enabled: 1
+    path: Assets/_USE_Tasks/_TaskSelection.unity
+    guid: 9a1f28b05dbef0648ac823063674b557
+  - enabled: 1
+    path: Assets/_USE_Tasks/FlexLearning/FlexLearning.unity
+    guid: a25508fa0608ebf44858b79271ccc086
   m_configObjects: {}

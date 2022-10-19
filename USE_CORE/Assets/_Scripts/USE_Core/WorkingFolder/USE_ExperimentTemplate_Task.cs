@@ -438,7 +438,11 @@ namespace USE_ExperimentTemplate_Task
                     //add trialDef[] for each block;
                     for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
                     {
+<<<<<<< HEAD
                         BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock+1, AllTrialDefs);
+=======
+                        BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock + 1, AllTrialDefs);
+>>>>>>> origin/USE_Fixes
                         BlockDefs[iBlock].AddToTrialDefsFromBlockDef();
                     }
                 }

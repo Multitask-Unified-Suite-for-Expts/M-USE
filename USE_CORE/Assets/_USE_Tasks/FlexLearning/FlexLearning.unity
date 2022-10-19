@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641275, b: 0.5748172, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -257,7 +257,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1578732250}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f429bacb04c77f84aa09e33019c804df, type: 3}
+  m_Script: {fileID: 11500000, guid: 81a6e069fdc5bd5448effa50f1987818, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: FlexLearning_TrialLevel
@@ -300,6 +300,9 @@ MonoBehaviour:
   SelectionType: 
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
+  runningAcc: 
+  MinTrials: 0
+  MaxTrials: 0
   minObjectTouchDuration:
     name: 
     hidden: 0
@@ -372,9 +375,7 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  tokenBarComplete: 0
   MaterialFilePath: 
-  TaskTokenNum: 0
   playerViewTextList: []
   playerViewText: {fileID: 0}
 --- !u!114 &1578732254
@@ -386,7 +387,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1578732250}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f30be21f5bd2fd14d88bed926855fc7e, type: 3}
+  m_Script: {fileID: 11500000, guid: 723c88929ceb00341ba9319d5f5a881d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: FlexLearning_TaskLevel
@@ -396,7 +397,8 @@ MonoBehaviour:
   CallDefineLevelAutomatically: 0
   quitApplicationAtEnd: 0
   DebugActive: 1
-  Paused: 1
+  Paused: 0
+  ConfigName: 
   TaskName: FlexLearning
   TaskProjectFolder: 
   BlockCount: 0

@@ -80,7 +80,7 @@ namespace FlexLearning_Namespace
             Debug.Log("TRIAL DEFS NAMESPACE: " + TrialDefs.Length);
             for (int iTrial = 0; iTrial < TrialDefs.Length; iTrial++)
             {
-                FlexLearning_TrialDef td = new FlexLearning_TrialDef();
+                FlexLearning_TrialDef td = (FlexLearning_TrialDef)TrialDefs[iTrial];//new FlexLearning_TrialDef();
                 td.BlockName = BlockName;
                 td.NumInitialTokens = NumInitialTokens;
                 td.RandomizedLocations = RandomizedLocations;

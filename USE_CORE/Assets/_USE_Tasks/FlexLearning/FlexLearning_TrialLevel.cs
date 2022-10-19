@@ -266,10 +266,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
         int temp = 0;
-        //Debug.Log("CURRENT TRIAL DEF: " + CurrentTrialDef);
-        //Debug.Log("trial count in block: " + TrialCount_InBlock);
-        //Debug.Log("trial LENGTH: " + TrialDefs.Length);
-        //Debug.Log("TRIAL STIM INDICES: " + CurrentTrialDef.TrialStimIndices[0]);
+        Debug.Log("CURRENT TRIAL DEF: " + CurrentTrialDef);
+        Debug.Log("trial count in block: " + TrialCount_InBlock);
+        Debug.Log("trial LENGTH: " + TrialDefs.Length);
+        Debug.Log("TRIAL STIM INDICES: " + CurrentTrialDef.TrialStimIndices[0]);
         tStim = new StimGroup("SearchStimuli", ExternalStims, CurrentTrialDef.TrialStimIndices);
         tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
         TrialStims.Add(tStim);
@@ -302,7 +302,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     }
     void loadVariables()
     {
-        Texture2D buttonTex = LoadPNG(MaterialFilePath + "\\StartButtonImage.png");
+        Texture2D buttonTex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
         startButton = CreateStartButton(buttonTex, new Rect(new Vector2(0, 0), new Vector2(1, 1)));
 
         playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display

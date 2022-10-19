@@ -267,7 +267,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         for (int i =0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
             VisualSearch_StimDef sd = (VisualSearch_StimDef)tStim.stimDefs[i];
-            sd.StimTrialRewardMag = CurrentTrialDef.TrialStimTokenReward[i];
+            sd.StimTrialRewardMag = (int)CurrentTrialDef.TrialStimTokenReward[i];
             if (CurrentTrialDef.TrialStimTokenReward[i] > 0) sd.IsTarget = true;
             else sd.IsTarget = false;
             

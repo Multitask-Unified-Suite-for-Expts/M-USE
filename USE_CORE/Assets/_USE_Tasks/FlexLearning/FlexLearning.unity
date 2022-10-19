@@ -397,11 +397,7 @@ MonoBehaviour:
   CallDefineLevelAutomatically: 0
   quitApplicationAtEnd: 0
   DebugActive: 1
-<<<<<<< HEAD
   Paused: 1
-=======
-  Paused: 0
->>>>>>> origin/USE_Fixes
   ConfigName: 
   TaskName: FlexLearning
   TaskProjectFolder: 

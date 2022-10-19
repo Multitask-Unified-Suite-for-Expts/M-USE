@@ -108,28 +108,37 @@ namespace USE_StimulusManagement
 			StimDef sd = new StimDef(sg);
 			if (StimName != null)
 				sd.StimName = StimName;
-			if (BaseTokenGain != null)
-				sd.BaseTokenGain = BaseTokenGain;
-			if (BaseTokenLoss != null)
-				sd.BaseTokenLoss = BaseTokenLoss;
 			if (StimPath != null)
 				sd.StimPath = StimPath;
+			if (PrefabPath != null)
+				sd.PrefabPath = PrefabPath;
+			if (ExternalFilePath != null)
+				sd.ExternalFilePath = ExternalFilePath;
+			if (StimFolderPath != null)
+				sd.StimFolderPath = StimFolderPath;
+			if (StimExtension != null)
+				sd.StimExtension = StimExtension;
 			sd.StimCode = StimCode;
 			if (StimID != null)
 				sd.StimID = StimID;
 			if (StimDimVals != null)
 				sd.StimDimVals = StimDimVals;
-			if (StimGameObject != null)
-				sd.StimGameObject = StimGameObject;
+			// if (StimGameObject != null)
+			// 	sd.StimGameObject = StimGameObject; // this is bad, we should be copying this
 			sd.StimLocation = StimLocation;
 			sd.StimRotation = StimRotation;
 			sd.StimScreenLocation = StimScreenLocation;
+			sd.StimScale = StimScale;
 			sd.StimLocationSet = StimLocationSet;
 			sd.StimRotationSet = StimRotationSet;
 			sd.StimTrialPositiveFbProb = StimTrialPositiveFbProb;
 			sd.StimTrialRewardMag = StimTrialRewardMag;
 			if (TokenRewards != null)
 				sd.TokenRewards = TokenRewards;
+			if (BaseTokenGain != null)
+				sd.BaseTokenGain = BaseTokenGain;
+			if (BaseTokenLoss != null)
+				sd.BaseTokenLoss = BaseTokenLoss;
 			sd.TimesUsedInBlock = TimesUsedInBlock;
 			sd.isRelevant = isRelevant;
 			return sd;
@@ -215,8 +224,12 @@ namespace USE_StimulusManagement
 			{
 				Debug.LogWarning("Attempting to load stimulus " + StimName + ", but there is already a GameObject associated with this stimulus loaded.");
 			}
+
 			if (!string.IsNullOrEmpty(ExternalFilePath))
+			{
 				StimGameObject = LoadExternalStimFromFile();
+				Debug.Log(StimGameObject.name);
+			}
 			else if (StimDimVals != null)
 			{
 				ExternalFilePath = FilePathFromDims("placeholder1", new List<string[]>(), "placeholder3");

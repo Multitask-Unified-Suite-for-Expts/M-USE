@@ -63,7 +63,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
         TokenFBController.enabled = false;
-        Starfield.SetActive(false);
+        //Starfield.SetActive(false);
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
@@ -278,11 +278,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         Starfield.SetActive(false);
         TokenFBController.enabled = false;
 
-
         StimGroup rightGroup = new StimGroup("Right");
-
-        Starfield.SetActive(false);
-        TokenFBController.enabled = false;
 
         Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count + 1];
 
@@ -300,44 +296,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         GenerateFeedbackStim(rightGroup, FeedbackLocations.Take(FeedbackLocations.Length-1).ToArray());
         GenerateFeedbackBorders(rightGroup);
 
-        Debug.Log("wrongstimindex: " + currentTrial.WrongStimIndex);
-
         StimGroup wrongGroup = new StimGroup("wrong");
         StimDef wrongStim = ExternalStims.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(wrongGroup);
         wrongStim.StimGameObject = null;
-        Debug.Log("loc: " + FeedbackLocations.Skip(FeedbackLocations.Length-1).Take(1).ToArray()[0]);
 
-        // StimGroup wrongGroup = new StimGroup("Wrong", ExternalStims, new List<int>() {currentTrial.WrongStimIndex});
-
-        // Vector3[] wrongFBLocation = new Vector3[] { currentTrial.TrialFeedbackLocations[locCount]};
-        // wrongFBLocation = CenterFeedbackLocations(wrongFBLocation);
         GenerateFeedbackStim(wrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length-1).Take(1).ToArray());
-
-
-
-        //StimGroup FeedbackGroup;
-
-        //Vector3[] Locations = new Vector3[ChosenStimIndices.Count];
-        //var IndexForWrongStim = 0; 
-        //for (int i = 0; i < ChosenStimIndices.Count; i++)
-        //{
-        //    Locations[i] = currentTrial.TrialFeedbackLocations[i];
-        //    IndexForWrongStim++;
-        //}
-        ////Add the last location for the Wrong stim.
-        //Locations[IndexForWrongStim] = currentTrial.TrialFeedbackLocations[IndexForWrongStim];
-
-        //CenterFeedbackLocations(Locations);
-
-        ////Create copy of chosenIndices and add the Duplicate (got wrong) index to the list. 
-        //List<int> StimIndices = ChosenStimIndices.ToList();
-        //StimIndices.Add(currentTrial.WrongStimIndex);
-
-        //FeedbackGroup = new StimGroup("Right", ExternalStims, StimIndices);
-        //GenerateFeedbackStim(FeedbackGroup, Locations);
-        //GenerateFeedbackBorders(FeedbackGroup);
-
-
+        GenerateFeedbackBorders(wrongGroup);
 
     }
 
@@ -478,26 +442,38 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TrialStims.Add(group);
         group.SetLocations(locations);
         group.LoadStims();
-        Debug.Log("lasjhglkahsg: " + group.stimDefs[0].StimGameObject.name);
         group.ToggleVisibility(true);
     }
 
     private void GenerateFeedbackBorders(StimGroup group)
     {
-        BorderPrefabList = new List<GameObject>();
-        foreach (ContinuousRecognition_StimDef stim in group.stimDefs)
+        if (BorderPrefabList.Count == 0) BorderPrefabList = new List<GameObject>();
+
+
+       
+        if(group.stimDefs.Count == 1 && group.stimDefs[0].StimCode-1 == currentTrial.WrongStimIndex)
         {
-            if (stim.StimCode - 1 == currentTrial.WrongStimIndex)
-            {
-                GameObject borderPrefab = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
-                BorderPrefabList.Add(borderPrefab); //add to list so I can access and destroy them together
-            }
-            else
-            {
-                GameObject borderPrefab = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
-                BorderPrefabList.Add(borderPrefab); //add to list so I can access and destroy them together. 
-            }
+            GameObject borderPrefab = Instantiate(RedBorderPrefab, group.stimDefs[0].StimGameObject.transform.position, Quaternion.identity);
+            BorderPrefabList.Add(borderPrefab);
         }
+        else
+        {
+            foreach (ContinuousRecognition_StimDef stim in group.stimDefs)
+            {
+                if (stim.StimCode - 1 == currentTrial.WrongStimIndex)
+                {
+                    GameObject borderPrefab = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
+                    BorderPrefabList.Add(borderPrefab); //add each to list so I can destroy them together
+                }
+                else
+                {
+                    GameObject borderPrefab = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
+                    BorderPrefabList.Add(borderPrefab); //add to list so I can access and destroy them together. 
+                }
+            }
+
+        }
+
     }
 
     private IEnumerator DestroyFeedbackBorders() //trying to match up the dissapearance of borders and stim.
@@ -510,37 +486,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         BorderPrefabList.Clear();
     }
 
-    public void CreateCanvasAndComponents()
-    {
-        //put these up top if end up using this;
-        //GameObject canvasGO;
-        //Canvas canvas;
-        //GameObject resultsTextGO;
-        //Text resultsText;
-
-        GameObject canvasGO = new GameObject();
-        canvasGO.AddComponent<Canvas>();
-        canvasGO.AddComponent<CanvasScaler>();
-        canvasGO.AddComponent<GraphicRaycaster>();
-
-        Canvas canvas = canvasGO.GetComponent<Canvas>();
-        canvas.name = "Results_Canvas";
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-
-        GameObject resultsTextGO = new GameObject();
-        resultsTextGO.transform.parent = canvasGO.transform;
-        resultsTextGO.AddComponent<Text>();
-
-        Text resultsText = resultsTextGO.GetComponent<Text>();
-        resultsText.name = "Results_Text";
-        resultsText.text = "Results";
-        resultsText.fontSize = 36;
-        resultsText.color = Color.white;
-
-        RectTransform rectTransform = resultsText.GetComponent<RectTransform>();
-        rectTransform.localPosition = new Vector3(-825, -175, 0);
-        rectTransform.sizeDelta = new Vector2(600, 200);
-    }
 
     private List<int> ShuffleList(List<int> list)
     {
@@ -682,5 +627,38 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.SetRevealTime(currentTrial.TokenRevealDuration);
         TokenFBController.SetUpdateTime(currentTrial.TokenUpdateDuration);
     }
+
+    //public void CreateCanvasAndComponents()
+    //{
+    //    //put these up top if end up using this;
+    //    //GameObject canvasGO;
+    //    //Canvas canvas;
+    //    //GameObject resultsTextGO;
+    //    //Text resultsText;
+
+    //    GameObject canvasGO = new GameObject();
+    //    canvasGO.AddComponent<Canvas>();
+    //    canvasGO.AddComponent<CanvasScaler>();
+    //    canvasGO.AddComponent<GraphicRaycaster>();
+
+    //    Canvas canvas = canvasGO.GetComponent<Canvas>();
+    //    canvas.name = "Results_Canvas";
+    //    canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+
+    //    GameObject resultsTextGO = new GameObject();
+    //    resultsTextGO.transform.parent = canvasGO.transform;
+    //    resultsTextGO.AddComponent<Text>();
+
+    //    Text resultsText = resultsTextGO.GetComponent<Text>();
+    //    resultsText.name = "Results_Text";
+    //    resultsText.text = "Results";
+    //    resultsText.fontSize = 36;
+    //    resultsText.color = Color.white;
+
+    //    RectTransform rectTransform = resultsText.GetComponent<RectTransform>();
+    //    rectTransform.localPosition = new Vector3(-825, -175, 0);
+    //    rectTransform.sizeDelta = new Vector2(600, 200);
+    //}
+
 
 }

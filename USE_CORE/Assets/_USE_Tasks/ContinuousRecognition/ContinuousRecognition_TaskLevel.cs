@@ -11,10 +11,13 @@ using USE_ExperimentTemplate_Block;
 public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 {
     public List<int> NumCorrect_Task;
-    public float AvgNumCorrect_Task;
+    public float AvgNumCorrect;
 
     public List<int> NumTrials_Task;
-    public float AvgNumTrials_Task;
+    public float AvgNumTrials;
+
+    public List<int> NumTbCompletions_Task;
+    public float AvgNumTbCompletions;
 
     ContinuousRecognition_BlockDef currentBlock => GetCurrentBlockDef<ContinuousRecognition_BlockDef>();
     public override void SpecifyTypes()
@@ -42,7 +45,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.NumTrials_Block = 0; //reset num trials per block at beg of each block
             trialLevel.NumCorrect_Block = 0; //reset num correct per block at beg of each block
 
-            trialLevel.TokenBarCompletions_Block = 0;
+            trialLevel.NumTbCompletions_Block = 0;
 
 
         });
@@ -51,14 +54,15 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
             BlockSummaryString ="\n" +
                                 "BLOCK AVERAGES: " +
-                                "\nAvgNumTrials: " + AvgNumTrials_Task +
-                                "\nAvgNumCorrect: " + AvgNumCorrect_Task + 
+                                "\nAvg NumTrials: " + AvgNumTrials +
+                                "\nAvg Correct: " + AvgNumCorrect +
+                                "\nAvg TbCompletions: " + AvgNumTbCompletions +
                                 "\n" +
                                 "\nCURRENT BLOCK:" +
                                 "\nBlock Name: " + currentBlock.BlockName +
                                 "\nTrials: " + trialLevel.NumTrials_Block +
                                 "\nCorrect: " + trialLevel.NumCorrect_Block +
-                                "\nTokenBarCompletions: " + trialLevel.TokenBarCompletions_Block;
+                                "\nTokenBarCompletions: " + trialLevel.NumTbCompletions_Block;
         });
 
 
@@ -67,6 +71,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         {
             NumTrials_Task.Add(trialLevel.NumTrials_Block); // at end of each block, add block's NumTrials to task List;
             NumCorrect_Task.Add(trialLevel.NumCorrect_Block); //at end of each block, add block's NumCorrect to task List;
+            NumTbCompletions_Task.Add(trialLevel.NumTbCompletions_Block);
 
             CalculateBlockAverages();
 
@@ -78,25 +83,41 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     private void CalculateBlockAverages()
     {
+        float avg;
+        float truncated;
+
         //Avg Num Trials
-        if (NumTrials_Task.Count == 0) AvgNumTrials_Task = 0;
+        if (NumTrials_Task.Count == 0) AvgNumTrials = 0;
         else
         {
             int numTrials = 0;
             foreach (int num in NumTrials_Task) numTrials += num;
-            AvgNumTrials_Task = (float) numTrials / NumTrials_Task.Count;
+            avg = (float) numTrials / NumTrials_Task.Count;
+            truncated = (float)(Math.Truncate((double)avg * 100.0) / 100.0);
+            AvgNumTrials = (float)(Math.Round((double)avg, 1));
         }
 
         //Avg Num Correct
-        if (NumCorrect_Task.Count == 0) AvgNumCorrect_Task = 0;
+        if (NumCorrect_Task.Count == 0) AvgNumCorrect = 0;
         else
         {
             int numCorrect = 0;
             foreach (int num in NumCorrect_Task) numCorrect += num;
-            AvgNumCorrect_Task = (float) numCorrect / NumCorrect_Task.Count;
+            avg = (float) numCorrect / NumCorrect_Task.Count;
+            truncated = (float)(Math.Truncate((double)avg * 100.0) / 100.0);
+            AvgNumCorrect = (float)(Math.Round((double)avg, 1));
         }
 
-
+        //Avg Num TokenBar Completions
+        if (NumTbCompletions_Task.Count == 0) AvgNumTbCompletions = 0;
+        else
+        {
+            int numCompletions = 0;
+            foreach (int num in NumTbCompletions_Task) numCompletions += num;
+            avg = (float) numCompletions / NumTbCompletions_Task.Count;
+            truncated = (float)(Math.Truncate((double)avg * 100.0) / 100.0);
+            AvgNumTbCompletions = (float)(Math.Round((double)avg, 1));
+        }
 
 
 
@@ -109,7 +130,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("BlockName", () => currentBlock.BlockName);
         BlockData.AddDatum("NumTrials", () => trialLevel.NumTrials_Block);
         BlockData.AddDatum("NumCorrect", () => trialLevel.NumCorrect_Block);
-        BlockData.AddDatum("TokenBarCompletions", () => trialLevel.TokenBarCompletions_Block);
+        BlockData.AddDatum("TokenBarCompletions", () => trialLevel.NumTbCompletions_Block);
     }
 
     public T GetCurrentBlockDef<T>() where T : BlockDef

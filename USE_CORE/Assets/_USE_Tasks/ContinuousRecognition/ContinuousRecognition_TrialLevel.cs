@@ -41,7 +41,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public int NumTrials_Block;
     public int NumCorrect_Block;
 
-    public int TokenBarCompletions_Block;
+    public int NumTbCompletions_Block;
     public List<float> TimeChosen_Block;
     public List <float> TimeToChoice_Block;
 
@@ -472,7 +472,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     {
         if (TokenCount == currentTrial.TotalTokensNum)
         {
-            TokenBarCompletions_Block++;
+            NumTbCompletions_Block++;
             TokenCount = 0;
         }
     }

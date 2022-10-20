@@ -37,13 +37,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     public int TokenCount;
 
+    public float TimeToCompletion_StartTime; //start time to be used in TimeToCompletion calc. 
+
     //Display Data
     public int NumTrials_Block;
     public int NumCorrect_Block;
-
     public int NumTbCompletions_Block;
-    public List<float> TimeChosen_Block;
     public List <float> TimeToChoice_Block;
+    public float AvgTimeToChoice_Block;
+    public float TimeToCompletion_Block;
 
     //Config Variables
     [HideInInspector]
@@ -77,7 +79,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             Starfield.SetActive(true);
             CreateStartButton();
             if (!variablesLoaded) LoadConfigUIVariables();
-            TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) +
+
+            TrialSummaryString ="\n" +
+                                "Trial Number " + (TrialCount_InBlock + 1) +
                                 "\nNew_Stim: " + currentTrial.New_Stim.Count +
                                 "\nPC_Stim: " + currentTrial.PC_Stim.Count +
                                 "\nPNC_Stim: " + currentTrial.PNC_Stim.Count;
@@ -118,6 +122,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         ContinuousRecognition_StimDef chosenStimDef = null;
         MouseTracker.AddSelectionHandler(mouseHandler, ChooseStim);
 
+        ChooseStim.AddInitializationMethod(() =>
+        {
+            if (TrialCount_InBlock == 0) TimeToCompletion_StartTime = Time.time;
+        });
+
         ChooseStim.AddUpdateMethod(() =>
         {
             chosenStimObj = mouseHandler.SelectedGameObject;
@@ -127,9 +136,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 currentTrial.TimeChosen = Time.time;
                 currentTrial.TimeToChoice = currentTrial.TimeChosen - ChooseStim.TimingInfo.StartTimeAbsolute;
-                TimeChosen_Block.Add(currentTrial.TimeChosen);
                 TimeToChoice_Block.Add(currentTrial.TimeToChoice);
-
+                CalculateBlockAvgTimeToChoice();
 
                 if (!ChosenStimIndices.Contains(chosenStimDef.StimCode - 1)) //THEY GUESSED RIGHT
                 {
@@ -169,11 +177,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     //SINCE THEY GOT IT RIGHT, CHECK IF LAST TRIAL IN BLOCK. IF SO, MAKE THE GOTALLTRIALSCORRECT VARIABLE TRUE. 
                     if(TrialCount_InBlock + 1 == currentTrial.MaxNumTrials)
                     {
+                        TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
                         CompletedAllTrials = true;
                     }
                 }
                 else //THEY GUESSED WRONG
                 {
+                    TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchDistractorStart"]);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["IncorrectResponse"]);
                     Debug.Log($"WRONG! CHOSE A PREVIOUSLY CHOSEN STIM WITH INDEX =  {chosenStimDef.StimCode - 1}");
@@ -271,7 +281,20 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         LogFrameData();
     }
 
+    private void CalculateBlockAvgTimeToChoice()
+    {
+        if (TimeToChoice_Block.Count == 0) AvgTimeToChoice_Block = 0;
 
+        float sum = 0;
+        foreach (float choice in TimeToChoice_Block) sum += choice;
+        AvgTimeToChoice_Block = sum / TimeToChoice_Block.Count;
+
+        //float sum = 0;
+        //foreach (float choice in TimeToChoice_Block) sum += choice;
+        //float avg = (float)sum / TimeToChoice_Block.Count;
+        //float truncated = (float)(Math.Truncate((double)avg * 100.0) / 100.0);
+        //AvgTimeToChoice_Block = (float)(Math.Round((double)avg, 6));
+    }
 
     private void GenerateBlockFeedback()
     {
@@ -321,16 +344,19 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             if (stim.StimCode - 1 == currentTrial.WrongStimIndex)
             {
-                GameObject redBorderPrefab = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
-                BorderPrefabList.Add(redBorderPrefab); //add each to list so I can destroy them together
+                GameObject redBorder = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
+                BorderPrefabList.Add(redBorder); //Add each to list so I can destroy them together
             }
             else
             {
-                GameObject greenBorderPrefab = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
-                BorderPrefabList.Add(greenBorderPrefab); //add to list so I can access and destroy them together. 
+                GameObject greenBorder = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
+                BorderPrefabList.Add(greenBorder);
             }
         }
     }
+
+
+
 
     private IEnumerator DestroyFeedbackBorders() //trying to match up the dissapearance of borders and stim.
     {

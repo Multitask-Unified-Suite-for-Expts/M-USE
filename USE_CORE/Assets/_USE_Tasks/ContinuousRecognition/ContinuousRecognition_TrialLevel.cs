@@ -27,21 +27,23 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     public GameObject GreenBorderPrefab;
     public GameObject RedBorderPrefab;
-    public GameObject InsideGreyBorderPrefab;
     public GameObject Starfield;
     public List<GameObject> BorderPrefabList;
     [NonSerialized]
     public GameObject StartButton;
 
     public StimGroup trialStims;
-
     public List<int> ChosenStimIndices;
 
-    public int NumCorrect_Block;
-    public int NumTrials_Block;
-    public int TokenBarCompletions_Block;
-
     public int TokenCount;
+
+    //Display Data
+    public int NumTrials_Block;
+    public int NumCorrect_Block;
+
+    public int TokenBarCompletions_Block;
+    public List<float> TimeChosen_Block;
+    public List <float> TimeToChoice_Block;
 
     //Config Variables
     [HideInInspector]
@@ -123,10 +125,17 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (chosenStimDef != null) //They Clicked a Stim
             {
+                currentTrial.TimeChosen = Time.time;
+                currentTrial.TimeToChoice = currentTrial.TimeChosen - ChooseStim.TimingInfo.StartTimeAbsolute;
+                TimeChosen_Block.Add(currentTrial.TimeChosen);
+                TimeToChoice_Block.Add(currentTrial.TimeToChoice);
+
+
                 if (!ChosenStimIndices.Contains(chosenStimDef.StimCode - 1)) //THEY GUESSED RIGHT
                 {
                     GotCorrect = true;
-                    CorrectSelectionUpdateData();
+                    NumCorrect_Block++;
+
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["CorrectResponse"]);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchTargetStart"]);
 
@@ -246,7 +255,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
 
 
-        ITI.AddInitializationMethod(() => ContextActive = false);
+        ITI.AddInitializationMethod(() =>
+        {
+            Starfield.SetActive(false);
+            ContextActive = false;
+        });
 
         ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
         {
@@ -259,20 +272,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     }
 
 
-
-    private void HandleTokenUpdate()
-    {
-        if(TokenCount == currentTrial.TotalTokensNum)
-        {
-            TokenBarCompletions_Block++;
-            TokenCount = 0;
-        }
-    }
-
-    private void CorrectSelectionUpdateData()
-    {
-        NumCorrect_Block++;
-    }
 
     private void GenerateBlockFeedback()
     {
@@ -306,6 +305,42 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     }
 
+    private void GenerateFeedbackStim(StimGroup group, Vector3[] locations)
+    {
+        TrialStims.Add(group);
+        group.SetLocations(locations);
+        group.LoadStims();
+        group.ToggleVisibility(true);
+    }
+
+    private void GenerateFeedbackBorders(StimGroup group)
+    {
+        if (BorderPrefabList.Count == 0) BorderPrefabList = new List<GameObject>();
+
+        foreach (var stim in group.stimDefs)
+        {
+            if (stim.StimCode - 1 == currentTrial.WrongStimIndex)
+            {
+                GameObject redBorderPrefab = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
+                BorderPrefabList.Add(redBorderPrefab); //add each to list so I can destroy them together
+            }
+            else
+            {
+                GameObject greenBorderPrefab = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
+                BorderPrefabList.Add(greenBorderPrefab); //add to list so I can access and destroy them together. 
+            }
+        }
+    }
+
+    private IEnumerator DestroyFeedbackBorders() //trying to match up the dissapearance of borders and stim.
+    {
+        yield return new WaitForSeconds(.5f);
+        foreach (GameObject border in BorderPrefabList)
+        {
+            if (border != null) border.SetActive(false);
+        }
+        BorderPrefabList.Clear();
+    }
 
     private Vector3[] CenterFeedbackLocations(Vector3[] locations)
     {
@@ -413,7 +448,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 currentTrial.TrialStimIndices.Add(PNC_Copy[i]);
             }
-
+           
             int numGenerated = NewStim_Copy.Count + PC_Copy.Count + PNC_Copy.Count;
             int numNeeded = PC_Num + New_Num + PNC_Num;
             if (numGenerated == numNeeded) Debug.Log($"THE CORRECT AMOUNT OF STIM ({numGenerated}) WERE GENERATED FOR TRIAL #{TrialCount_InBlock}");
@@ -432,54 +467,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         getLog(currentTrial.TrialStimIndices, "TrialStimIndices");
     }
 
-    private void GenerateFeedbackStim(StimGroup group, Vector3[] locations)
+
+    private void HandleTokenUpdate()
     {
-        TrialStims.Add(group);
-        group.SetLocations(locations);
-        group.LoadStims();
-        group.ToggleVisibility(true);
-    }
-
-    private void GenerateFeedbackBorders(StimGroup group)
-    {
-        if (BorderPrefabList.Count == 0) BorderPrefabList = new List<GameObject>();
-
-        if (group.stimGroupName == "Wrong")
+        if (TokenCount == currentTrial.TotalTokensNum)
         {
-            GameObject borderPrefab = Instantiate(RedBorderPrefab, group.stimDefs[0].StimGameObject.transform.position, Quaternion.identity);
-            BorderPrefabList.Add(borderPrefab);
+            TokenBarCompletions_Block++;
+            TokenCount = 0;
         }
-
-        else
-        {
-            foreach (ContinuousRecognition_StimDef stim in group.stimDefs)
-            {
-                if (stim.StimCode - 1 == currentTrial.WrongStimIndex)
-                {
-                    GameObject borderPrefab = Instantiate(InsideGreyBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
-                    BorderPrefabList.Add(borderPrefab); //add each to list so I can destroy them together
-                }
-                else
-                {
-                    GameObject borderPrefab = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
-                    BorderPrefabList.Add(borderPrefab); //add to list so I can access and destroy them together. 
-                }
-            }
-
-        }
-
     }
-
-    private IEnumerator DestroyFeedbackBorders() //trying to match up the dissapearance of borders and stim.
-    {
-        yield return new WaitForSeconds(.5f);
-        foreach (GameObject border in BorderPrefabList)
-        {
-            if (border != null) border.SetActive(false);
-        }
-        BorderPrefabList.Clear();
-    }
-
 
     private List<int> ShuffleList(List<int> list)
     {

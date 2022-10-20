@@ -13,6 +13,7 @@ namespace ContinuousRecognition_Namespace
 {
     public class ContinuousRecognition_TaskDef : TaskDef
     {
+
     }
 
     public class ContinuousRecognition_BlockDef : BlockDef
@@ -82,7 +83,6 @@ namespace ContinuousRecognition_Namespace
 
             if(ManuallySpecifyLocation == 0)    BlockStimLocations = StimLocations;
 
-
             //Calculate FeedbackLocations;
             BlockFeedbackLocations = new Vector3[NumRows * NumColumns];
             x = X_Start;
@@ -100,11 +100,6 @@ namespace ContinuousRecognition_Namespace
                 }
                 y -= Y_Gap_FB;
             }
-
-
-            var s = "";
-            foreach (var location in BlockFeedbackLocations) s += location;
-            Debug.Log(s);
 
 
             int maxNumTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
@@ -181,6 +176,10 @@ namespace ContinuousRecognition_Namespace
 
         public bool IsNewStim;
         public string ContextName;
+
+        //Data:
+        public float TimeChosen;
+        public float TimeToChoice;
     }
 
     public class ContinuousRecognition_StimDef : StimDef

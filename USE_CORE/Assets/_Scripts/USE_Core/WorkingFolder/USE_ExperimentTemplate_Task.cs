@@ -561,10 +561,10 @@ namespace USE_ExperimentTemplate_Task
 				if (filenames.Count == 1)
                     sd.ExternalFilePath = filenames[0];
 				else if (filenames.Count == 0)
-					Debug.LogError("During task setup attempted to find stimulus " + sd.ExternalFilePath + " in folder " + 
+					Debug.LogError("During task setup for " + TaskName + " attempted to find stimulus " + sd.ExternalFilePath + " in folder " + 
                                    sd.StimFolderPath + "but no file matching this pattern was found in this folder or subdirectories.");
 				else
-					Debug.LogError("During task setup attempted to find stimulus " + sd.ExternalFilePath + " in folder " + 
+					Debug.LogError("During task setup for " + TaskName + " attempted to find stimulus " + sd.ExternalFilePath + " in folder " + 
                                    sd.StimFolderPath + "but multiple files matching this pattern were found in this folder or subdirectories.");
 			}
 			else

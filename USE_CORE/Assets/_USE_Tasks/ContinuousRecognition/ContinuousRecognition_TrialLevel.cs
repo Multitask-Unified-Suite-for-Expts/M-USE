@@ -278,22 +278,41 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         Starfield.SetActive(false);
         TokenFBController.enabled = false;
 
-        
+
         StimGroup rightGroup = new StimGroup("Right");
 
         Starfield.SetActive(false);
         TokenFBController.enabled = false;
 
-        Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count];
+        Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count + 1];
+
+        int locCount = 0;
         for (int i = 0; i < ChosenStimIndices.Count; i++)
         {
             FeedbackLocations[i] = currentTrial.TrialFeedbackLocations[i];
+            locCount++;
         }
-        CenterFeedbackLocations(FeedbackLocations);
+
+        FeedbackLocations[locCount] = currentTrial.TrialFeedbackLocations[locCount];
+        FeedbackLocations = CenterFeedbackLocations(FeedbackLocations);
 
         rightGroup = new StimGroup("Right", ExternalStims, ChosenStimIndices);
-        GenerateFeedbackStim(rightGroup, FeedbackLocations);
+        GenerateFeedbackStim(rightGroup, FeedbackLocations.Take(FeedbackLocations.Length-1).ToArray());
         GenerateFeedbackBorders(rightGroup);
+
+        Debug.Log("wrongstimindex: " + currentTrial.WrongStimIndex);
+
+        StimGroup wrongGroup = new StimGroup("wrong");
+        StimDef wrongStim = ExternalStims.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(wrongGroup);
+        wrongStim.StimGameObject = null;
+        Debug.Log("loc: " + FeedbackLocations.Skip(FeedbackLocations.Length-1).Take(1).ToArray()[0]);
+
+        // StimGroup wrongGroup = new StimGroup("Wrong", ExternalStims, new List<int>() {currentTrial.WrongStimIndex});
+
+        // Vector3[] wrongFBLocation = new Vector3[] { currentTrial.TrialFeedbackLocations[locCount]};
+        // wrongFBLocation = CenterFeedbackLocations(wrongFBLocation);
+        GenerateFeedbackStim(wrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length-1).Take(1).ToArray());
+
 
 
         //StimGroup FeedbackGroup;
@@ -323,7 +342,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     }
 
 
-    private void CenterFeedbackLocations(Vector3[] locations)
+    private Vector3[] CenterFeedbackLocations(Vector3[] locations)
     {
         //----- CENTER HORIZONTALLY--------
         float leftMargin = locations[0].x + 4f;
@@ -353,6 +372,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             locations[i].y -= shiftDownAmount;
         }
+
+        return locations;
     }
 
 
@@ -457,6 +478,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TrialStims.Add(group);
         group.SetLocations(locations);
         group.LoadStims();
+        Debug.Log("lasjhglkahsg: " + group.stimDefs[0].StimGameObject.name);
         group.ToggleVisibility(true);
     }
 

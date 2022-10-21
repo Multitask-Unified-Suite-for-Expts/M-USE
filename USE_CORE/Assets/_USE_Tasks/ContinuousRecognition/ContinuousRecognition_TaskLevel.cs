@@ -25,6 +25,12 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     public List<float> TimeToCompletion_Task;
     public float AvgTimeToCompletion;
 
+    public List<float> NumRewards_Task;
+    public float AvgNumRewards;
+
+    //public List<float> StandardDeviations_Task;
+    //public float AvgStandardDeviation;
+
     ContinuousRecognition_BlockDef currentBlock => GetCurrentBlockDef<ContinuousRecognition_BlockDef>();
     public override void SpecifyTypes()
     {
@@ -58,28 +64,32 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
             trialLevel.TimeToCompletion_Block = 0;
 
-            
+            trialLevel.NumRewards_Block = 0;
+
+
+
+        
 
         });
         RunBlock.AddUpdateMethod(() =>
         {
 
-            BlockSummaryString ="\nAvg NumTrials: " + AvgNumTrials.ToString("0.00") +
+            BlockSummaryString ="\nAvg Trials: " + AvgNumTrials.ToString("0.00") +
                                 "\nAvg Correct: " + AvgNumCorrect.ToString("0.00") +
                                 "\nAvg TbCompletions: " + AvgNumTbCompletions.ToString("0.00") +
                                 "\nAvg TimeToPick: " + AvgTimeToChoice.ToString("0.00") +
                                 "\nAvg TimeToCompletion: " + AvgTimeToCompletion.ToString("0.00") +
+                                "\nAvg Rewards: " + AvgNumRewards.ToString("0.00") +
 
                                 "\n" +
-                                "\nCURRENT BLOCK " + "(" + currentBlock.BlockName + "):" +
+                                "\n" + "<size=27><b><color=#2d3436ff>Current Block </color></b></size>" + "(" + currentBlock.BlockName + "):" +
                                 "\nTrials: " + trialLevel.NumTrials_Block +
                                 "\nCorrect: " + trialLevel.NumCorrect_Block +
                                 "\nTbCompletions: " + trialLevel.NumTbCompletions_Block +
                                 "\nAvgTimeToChoice: " + trialLevel.AvgTimeToChoice_Block.ToString("0.00") +
                                 "\nTimeToCompletion: " + trialLevel.TimeToCompletion_Block.ToString("0.00") +
-
-                                "\n"
-                                ;
+                                "\nRewards: " + trialLevel.NumRewards_Block +
+                                "\n";
         });
 
 
@@ -91,6 +101,10 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             NumTbCompletions_Task.Add(trialLevel.NumTbCompletions_Block);
             TimeToChoice_Task.Add(trialLevel.AvgTimeToChoice_Block);
             TimeToCompletion_Task.Add(trialLevel.TimeToCompletion_Block);
+            NumRewards_Task.Add(trialLevel.NumRewards_Block);
+
+           
+
 
             CalculateBlockAverages();
 
@@ -162,6 +176,14 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             //AvgTimeToCompletion = (float)(Math.Round((double)avg, 2));
         }
 
+        if (NumRewards_Task.Count == 0) AvgNumRewards = 0;
+        else
+        {
+            float sum = 0;
+            foreach (float num in NumRewards_Task) sum += num;
+            AvgNumRewards = (float)sum / NumRewards_Task.Count;
+        }
+
 
     }
 
@@ -174,6 +196,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("TokenBarCompletions", () => trialLevel.NumTbCompletions_Block);
         BlockData.AddDatum("TimeToChoice", () => trialLevel.AvgTimeToChoice_Block);
         BlockData.AddDatum("TimeToCompletion", () => trialLevel.TimeToCompletion_Block);
+        BlockData.AddDatum("NumRewards", () => trialLevel.NumRewards_Block);
 
     }
 

@@ -46,6 +46,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public List <float> TimeToChoice_Block;
     public float AvgTimeToChoice_Block;
     public float TimeToCompletion_Block;
+    public int NumRewards_Block;
 
     //Config Variables
     [HideInInspector]
@@ -80,11 +81,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             CreateStartButton();
             if (!variablesLoaded) LoadConfigUIVariables();
 
-            TrialSummaryString ="\n" +
-                                "Trial Number " + (TrialCount_InBlock + 1) +
-                                "\nNew_Stim: " + currentTrial.New_Stim.Count +
+            TrialSummaryString = "\n" +
+                                "Trial #" + (TrialCount_InBlock + 1) +
+                                "\n" +
                                 "\nPC_Stim: " + currentTrial.PC_Stim.Count +
-                                "\nPNC_Stim: " + currentTrial.PNC_Stim.Count;
+                                "\nNew_Stim: " + currentTrial.New_Stim.Count +
+                                "\nPNC_Stim: " + currentTrial.PNC_Stim.Count +
+                                "\n" +
+                                "\nTotal Stim: " + (currentTrial.New_Stim.Count + currentTrial.PC_Stim.Count + currentTrial.PNC_Stim.Count);
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial); //auto terminates after doing everything.
 
@@ -237,8 +241,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 TokenFBController.RemoveTokens(chosenStimObj, 1, Color.grey);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
                 TokenCount--;
-                HandleTokenUpdate();
                 EndBlock = true;
+                HandleTokenUpdate();
             }
         });
         TokenUpdate.AddTimer(() => currentTrial.TokenUpdateDuration + currentTrial.TokenRevealDuration , DisplayResults);
@@ -355,9 +359,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-
-
-
     private IEnumerator DestroyFeedbackBorders() //trying to match up the dissapearance of borders and stim.
     {
         yield return new WaitForSeconds(.5f);
@@ -449,8 +450,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             int New_Num = stimNumbers[1];
             int PNC_Num = stimNumbers[2];
 
-            Debug.Log($"CALCULATED FOR TRIAL {TrialCount_InBlock}: PC_Stim: {PC_Num}, New_Stim: {New_Num}, PNC_Stim: {PNC_Num}");
-
             List<int> NewStim_Copy = ShuffleList(currentTrial.Unseen_Stim).ToList();
             if (NewStim_Copy.Count > 1) NewStim_Copy = NewStim_Copy.GetRange(0, New_Num);
             for (int i = 0; i < NewStim_Copy.Count; i++)
@@ -486,7 +485,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             TrialStims.Add(trialStims); 
 
         }
-        getLog(currentTrial.Unseen_Stim, "Unseen_Stims");
+        Debug.Log("Unseen_Stim Count: " + currentTrial.Unseen_Stim.Count);
         getLog(currentTrial.PC_Stim, "PC_Stims");
         getLog(currentTrial.New_Stim, "New_Stims");
         getLog(currentTrial.PNC_Stim, "PNC_Stims");
@@ -496,9 +495,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void HandleTokenUpdate()
     {
-        if (TokenCount == currentTrial.TotalTokensNum)
+        if (TokenCount == currentTrial.TotalTokensNum && !EndBlock)
         {
             NumTbCompletions_Block++;
+            NumRewards_Block += currentTrial.NumRewardPulses;
             TokenCount = 0;
         }
     }

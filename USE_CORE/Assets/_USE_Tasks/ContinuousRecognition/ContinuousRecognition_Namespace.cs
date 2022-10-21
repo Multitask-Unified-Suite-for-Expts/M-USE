@@ -142,6 +142,7 @@ namespace ContinuousRecognition_Namespace
                 trial.TokenRevealDuration = TokenRevealDuration;
                 trial.TokenUpdateDuration = TokenUpdateDuration;
                 trial.TotalTokensNum = TotalTokensNum;
+                trial.NumRewardPulses = NumRewardPulses;
 
                 TrialDefs[trialIndex] = trial;
                 numTrialStims++;
@@ -170,6 +171,7 @@ namespace ContinuousRecognition_Namespace
         public int MaxNumTrials;
 
         public int? TotalTokensNum;
+        public int NumRewardPulses;
 
         public float DisplayStimsDuration, ChooseStimDuration, TrialEndDuration, TouchFeedbackDuration, 
             DisplayResultDuration, TokenRevealDuration, TokenUpdateDuration;

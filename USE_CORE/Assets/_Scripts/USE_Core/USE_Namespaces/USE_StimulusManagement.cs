@@ -220,15 +220,15 @@ namespace USE_StimulusManagement
 
 		public GameObject Load()
 		{
-			if (StimGameObject != null)
-			{
-				Debug.LogWarning("Attempting to load stimulus " + StimName + ", but there is already a GameObject associated with this stimulus loaded.");
-			}
+			//if (StimGameObject != null)
+			//{
+			//	Debug.LogWarning("Attempting to load stimulus " + StimName + ", but there is already a GameObject associated with this stimulus loaded.");
+			//}
 
 			if (!string.IsNullOrEmpty(ExternalFilePath))
 			{
 				StimGameObject = LoadExternalStimFromFile();
-				Debug.Log(StimGameObject.name);
+				//Debug.Log(StimGameObject.name);
 			}
 			else if (StimDimVals != null)
 			{

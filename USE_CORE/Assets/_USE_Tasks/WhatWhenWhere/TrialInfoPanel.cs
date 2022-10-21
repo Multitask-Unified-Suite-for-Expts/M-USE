@@ -30,7 +30,7 @@ public class TrialInfoPanel: ExperimenterDisplayPanel
         if (TrialLevel != null)
         {
             trialInfoText.GetComponent<Text>().supportRichText = true;
-            trialInfoText.GetComponent<Text>().text = "<size=35><b><color=#2d3436ff>Trial Info</color></b></size>" + "\n<size=25><color=#2d3436ff>" + TrialLevel.TrialSummaryString + "</color></size>";
+            trialInfoText.GetComponent<Text>().text = "<size=27><b><color=#2d3436ff>Current Trial: </color></b></size>" + "\n<size=24><color=#2d3436ff>" + TrialLevel.TrialSummaryString + "</color></size>";
         }
 
     }

@@ -579,7 +579,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
             }
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderCompleteFbOn"]);
-           // SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize); //USE THIS LINE WHEN CONNECTED TO A SYNCBOX
+           //SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize); //USE THIS LINE WHEN CONNECTED TO A SYNCBOX
             //SyncBoxController.SendRewardPulses(3, 500);
         });
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using USE_States;
@@ -110,6 +111,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         initTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton),
             SearchDisplayDelay, () => 
             {
+                EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
                startButton.SetActive(false);
             });
         
@@ -118,8 +120,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             stateAfterDelay = SearchDisplay;
             TokenFBController.enabled = true;
-            TokenFBController.SetTotalTokensNum(TaskTokenNum);
-            EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]); //CHECK THIS TIMING MIGHT BE OFF
+            TokenFBController.SetTotalTokensNum(TaskTokenNum); //CHECK THIS TIMING MIGHT BE OFF
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarReset"]);
@@ -135,18 +136,24 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             tStim.ToggleVisibility(true);
             if (!playerViewLoaded)
             {
-                /*
                 //Create corresponding text on player view of experimenter display
-                textLocation =
-                    playerViewPosition(Camera.main.WorldToScreenPoint(targetStim.stimDefs[0].StimLocation),
-                        playerViewParent);
-                textLocation.y += 50;
-                Vector2 textSize = new Vector2(200, 200);
-                playerViewText = playerView.writeText("TARGET",
-                    Color.red, textLocation, textSize, playerViewParent);
-                playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
-                playerViewTextList.Add(playerViewText);
-                playerViewLoaded = true;*/
+                foreach (VisualSearch_StimDef stim in tStim.stimDefs)
+                {
+                    if (stim.IsTarget)
+                    {
+                        textLocation =
+                            playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation),
+                                playerViewParent);
+                        textLocation.y += 50;
+                        Vector2 textSize = new Vector2(200, 200);
+                        playerViewText = playerView.writeText("TARGET",
+                            Color.red, textLocation, textSize, playerViewParent);
+                        playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
+                        playerViewTextList.Add(playerViewText);
+                        playerViewLoaded = true;
+                    }
+                }
+                
             }
         });
         
@@ -214,28 +221,26 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         TokenFeedback.AddInitializationMethod(() =>
         {
             HaloFBController.Destroy();
-            tStim.ToggleVisibility(false);
-            if (selectedSD.TokenUpdate == 0)
+            if (selectedSD.StimTrialRewardMag > 0)
             {
-                if (correct) AudioFBController.Play("Positive");
-                else AudioFBController.Play("Negative");
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
-                return;
-            }
-            if (selectedSD.TokenUpdate > 0)
-            {
-                TokenFBController.AddTokens(selected, selectedSD.TokenUpdate);
+                TokenFBController.AddTokens(selected, selectedSD.StimTrialRewardMag);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
+                AudioFBController.Play("Positive");
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
+                
             }
-            
+
             else
             {
-                TokenFBController.RemoveTokens(selected, -selectedSD.TokenUpdate);
+                AudioFBController.Play("Negative");
+                TokenFBController.RemoveTokens(selected, -selectedSD.StimTrialRewardMag);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
             }
         });
         TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), TrialEnd, () =>
         {
+            tStim.ToggleVisibility(false);
             foreach (GameObject txt in playerViewTextList)
             {
                 txt.SetActive(false);
@@ -264,13 +269,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         int temp = 0;
         tStim = new StimGroup("SearchStimuli", ExternalStims, CurrentTrialDef.TrialStimIndices);
         TrialStims.Add(tStim);
-        for (int i =0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
+        for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
             VisualSearch_StimDef sd = (VisualSearch_StimDef)tStim.stimDefs[i];
-            sd.StimTrialRewardMag = (int)CurrentTrialDef.TrialStimTokenReward[i];
-            if (CurrentTrialDef.TrialStimTokenReward[i] > 0) sd.IsTarget = true;
+            sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.TrialStimTokenReward);
+            if (sd.StimTrialRewardMag > 0) sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!!
             else sd.IsTarget = false;
-            
+
         }
         
         randomizedLocations = CurrentTrialDef.RandomizedLocations; 
@@ -379,6 +384,32 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     {
         Vector2 pvPosition = new Vector2((position[0] / Screen.width) * playerViewParent.GetComponent<RectTransform>().sizeDelta.x, (position[1] / Screen.height) * playerViewParent.GetComponent<RectTransform>().sizeDelta.y);
         return pvPosition;
+    }
+    public int ChooseTokenReward(TokenReward[] tokenRewards)
+    {
+        float totalProbability = 0;
+        for (int i = 0; i < tokenRewards.Length; i++)
+        {
+            totalProbability += tokenRewards[i].Probability;
+        }
+
+        if (Math.Abs(totalProbability - 1) > 0.001)
+            Debug.LogError("Sum of token reward probabilities on this trial is " + totalProbability + ", probabilities will be scaled to sum to 1.");
+
+        float randomNumber = UnityEngine.Random.Range(0, totalProbability);
+
+        TokenReward selectedReward = tokenRewards[0];
+        float curProbSum = 0;
+        foreach (TokenReward tr in tokenRewards)
+        {
+            curProbSum += tr.Probability;
+            if (curProbSum >= randomNumber)
+            {
+                selectedReward = tr;
+                break;
+            }
+        }
+        return selectedReward.NumTokens;
     }
 
 }

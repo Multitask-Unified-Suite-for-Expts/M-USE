@@ -1,7 +1,9 @@
 using ConfigDynamicUI;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using USE_ExperimentTemplate_Trial;
+using USE_Settings;
 using USE_States;
 using USE_StimulusManagement;
 using WorkingMemory_Namespace;
@@ -12,8 +14,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
     private StimGroup sampleStims, targetStims, postSampleDistractorStims, targetDistractorStims;
     public string MaterialFilePath;
-    private GameObject initButton;
+    private GameObject startButton;
     private bool variablesLoaded;
+    private Transform playerViewParent; // Helps set things onto the player view in the experimenter display
 
     //configui variables
     [HideInInspector]
@@ -53,19 +56,19 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         initTrial.AddInitializationMethod(() =>
         {
             //RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\Blank.png");
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
             TokenFBController
             .SetRevealTime(CurrentTrialDef.tokenRevealDuration)
             .SetUpdateTime(CurrentTrialDef.tokenUpdateDuration);
 
-            initButton.SetActive(true);
+            startButton.SetActive(true);
             TokenFBController.enabled = false;
         });
-        initTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(initButton),
+        initTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton),
             displaySample, () => {
-                initButton.SetActive(false);
+                startButton.SetActive(false);
                 TokenFBController.enabled = true;
-                RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
+                RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]); //CHECK THIS TIMING MIGHT BE OFF
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarReset"]);
@@ -202,7 +205,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
     public void loadVariables()
     {
-        initButton = GameObject.Find("StartButton");
+        Texture2D buttonTex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
+        startButton = CreateStartButton(buttonTex, new Rect(new Vector2(0, 0), new Vector2(1, 1)));
+
+        playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
         //config UI variables
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
@@ -212,5 +218,32 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
 
         variablesLoaded = true;
+    }
+    private GameObject CreateStartButton(Texture2D tex, Rect rect)
+    {
+        Vector3 buttonPosition = Vector3.zero;
+        Vector3 buttonScale = Vector3.zero;
+        string TaskName = "WorkingMemory";
+        if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
+        {
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+                buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+            else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+                buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+            else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
+        }
+        else
+        {
+            Debug.Log("[ERROR] TaskDef is not in config folder");
+        }
+
+        GameObject startButton = new GameObject("StartButton");
+        SpriteRenderer sr = startButton.AddComponent<SpriteRenderer>() as SpriteRenderer;
+        sr.sprite = Sprite.Create(tex, new Rect(rect.x, rect.y, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
+        startButton.AddComponent<BoxCollider>();
+        startButton.transform.localScale = buttonScale;
+        startButton.transform.position = buttonPosition;
+        return startButton;
     }
 }

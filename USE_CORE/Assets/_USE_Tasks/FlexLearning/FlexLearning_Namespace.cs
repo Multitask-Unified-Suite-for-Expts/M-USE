@@ -77,7 +77,6 @@ namespace FlexLearning_Namespace
         }
         public override void AddToTrialDefsFromBlockDef()
         {
-            Debug.Log("TRIAL DEFS NAMESPACE: " + TrialDefs.Length);
             for (int iTrial = 0; iTrial < TrialDefs.Length; iTrial++)
             {
                 FlexLearning_TrialDef td = (FlexLearning_TrialDef)TrialDefs[iTrial];

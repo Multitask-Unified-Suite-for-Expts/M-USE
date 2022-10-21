@@ -264,10 +264,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
         int temp = 0;
-        Debug.Log("CURRENT TRIAL DEF: " + CurrentTrialDef);
-        Debug.Log("trial count in block: " + TrialCount_InBlock);
-        Debug.Log("trial LENGTH: " + TrialDefs.Length);
-        Debug.Log("TRIAL STIM INDICES: " + CurrentTrialDef.TrialStimIndices[0]);
         tStim = new StimGroup("SearchStimuli", ExternalStims, CurrentTrialDef.TrialStimIndices);
         tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
         TrialStims.Add(tStim);

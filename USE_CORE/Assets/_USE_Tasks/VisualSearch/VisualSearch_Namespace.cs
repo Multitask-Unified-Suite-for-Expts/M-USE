@@ -23,7 +23,7 @@ namespace VisualSearch_Namespace
         Vector3 ButtonPosition;
         Vector3 ButtonScale;
         Vector3 ButtonColor;
-        int NumTokens;
+        //int NumTokens;
         string ButtonText;
         string ContextExternalFilePath;
     }
@@ -33,14 +33,14 @@ namespace VisualSearch_Namespace
         //Already-existing fields (inherited from BlockDef)
         //public int BlockCount;
         //public TrialDef[] TrialDefs;
-        public int[] TrialStimIndices;
-        public Vector3[] TrialStimLocations;
-        public int BlockCount;
-        public float[] TrialStimTokenReward;
+        public string BlockName;
+        public TokenReward[] TrialStimTokenReward;
         public int[] nRepetitionsMinMax;
-        public string TrialID;
         public string ContextName;
+        public int NumPulses;
         public int NumInitialTokens;
+        public int NumTokenBar;
+        public int PulseSize;
         public bool RandomizedLocations;
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -53,23 +53,28 @@ namespace VisualSearch_Namespace
             for (int iTrial = 0; iTrial < TrialDefs.Length; iTrial++)
             {
                 VisualSearch_TrialDef td = new VisualSearch_TrialDef();
-                td.TrialID = TrialID;
-                /*
-                td.MinTouchDuration = MinTouchDuration;
-                td.MaxTouchDuration = MaxTouchDuration;
-                */
-                td.TrialStimIndices = TrialStimIndices;
-                td.TrialStimLocations = TrialStimLocations;
                 td.ContextName = ContextName;
                 td.TrialStimTokenReward = TrialStimTokenReward;
                 td.NumInitialTokens = NumInitialTokens;
                 td.RandomizedLocations = RandomizedLocations;
                 td.BlockCount = BlockCount;
-                //td.RandomizedLocations = RandomizedLocations;
                 TrialDefs[iTrial] = td;
             }
         }
-
+        public override void AddToTrialDefsFromBlockDef()
+        {
+            for (int iTrial = 0; iTrial < TrialDefs.Length; iTrial++)
+            {
+                VisualSearch_TrialDef td = (VisualSearch_TrialDef)TrialDefs[iTrial];
+                td.BlockName = BlockName;
+                td.NumInitialTokens = NumInitialTokens;
+                td.RandomizedLocations = RandomizedLocations;
+                td.NumPulses = NumPulses;
+                td.NumTokenBar = NumTokenBar;
+                td.PulseSize = PulseSize;
+                TrialDefs[iTrial] = td;
+            }
+        }
     }
 
     public class VisualSearch_TrialDef : TrialDef
@@ -80,11 +85,14 @@ namespace VisualSearch_Namespace
         public int[] TrialStimIndices;
         public Vector3[] TrialStimLocations;
         public string TrialID;
-        public float[] TrialStimTokenReward;
+        public TokenReward[] TrialStimTokenReward;
+        public int NumPulses;
         public int NumInitialTokens;
+        public int NumTokenBar;
+        public int PulseSize;
         public bool RandomizedLocations;
         public string ContextName;
-        public int BlockCount;
+        public string BlockName;
     }
 
     public class VisualSearch_StimDef : StimDef

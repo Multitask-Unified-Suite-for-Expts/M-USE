@@ -34,7 +34,7 @@ namespace VisualSearch_Namespace
         //public int BlockCount;
         //public TrialDef[] TrialDefs;
         public string BlockName;
-        public TokenReward[] TrialStimTokenReward;
+        public TokenReward[][]TrialStimTokenReward;
         public int[] nRepetitionsMinMax;
         public string ContextName;
         public int NumPulses;
@@ -85,7 +85,7 @@ namespace VisualSearch_Namespace
         public int[] TrialStimIndices;
         public Vector3[] TrialStimLocations;
         public string TrialID;
-        public TokenReward[] TrialStimTokenReward;
+        public TokenReward[][] TrialStimTokenReward;
         public int NumPulses;
         public int NumInitialTokens;
         public int NumTokenBar;

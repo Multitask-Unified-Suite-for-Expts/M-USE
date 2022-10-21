@@ -267,23 +267,9 @@ namespace USE_StimulusManagement
 
 		public GameObject LoadExternalStimFromFile(string stimFilePath = "")
 		{
-			if (!string.IsNullOrEmpty(stimFilePath))
-			{
-				ExternalFilePath = stimFilePath;
-			}
-
-			if (!string.IsNullOrEmpty(StimFolderPath) && !ExternalFilePath.StartsWith(StimFolderPath))
-			{
-				if (!ExternalFilePath.StartsWith(Path.DirectorySeparatorChar.ToString()) &&
-				    !StimFolderPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
-					ExternalFilePath = StimFolderPath + Path.DirectorySeparatorChar + ExternalFilePath;
-				else if (ExternalFilePath.StartsWith(Path.DirectorySeparatorChar.ToString()) &&
-				         StimFolderPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
-					ExternalFilePath = StimFolderPath + ExternalFilePath.Substring(1);
-				else
-					ExternalFilePath = StimFolderPath + ExternalFilePath;
-			}
-
+			
+			
+			//add StimExtesion to file path if it doesn't already contain it
 			if (!string.IsNullOrEmpty(StimExtension) && !ExternalFilePath.EndsWith(StimExtension))
 			{
 				if (!StimExtension.StartsWith("."))
@@ -291,6 +277,46 @@ namespace USE_StimulusManagement
 				else
 					ExternalFilePath = ExternalFilePath + StimExtension;
 			}
+			
+			//by default stimFilePath argument is empty, and files are found using StimFolderPath + ExternalFilePath
+			//so usually this first if statement is never called - used for cases where we might want to find a file in an unusual location
+			if (!string.IsNullOrEmpty(stimFilePath))
+			{
+				ExternalFilePath = stimFilePath;
+				//should add a method to check this file exists and return error if not
+			}
+			//we will only use StimFolderPath if ExternalFilePath doesn't already contain it
+			else if (!string.IsNullOrEmpty(StimFolderPath) && !ExternalFilePath.StartsWith(StimFolderPath))
+			{
+				// if (!ExternalFilePath.StartsWith(Path.DirectorySeparatorChar.ToString()) &&
+				//     !StimFolderPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
+				// 	ExternalFilePath = StimFolderPath + Path.DirectorySeparatorChar + ExternalFilePath;
+				// else if (ExternalFilePath.StartsWith(Path.DirectorySeparatorChar.ToString()) &&
+				//          StimFolderPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
+				// 	ExternalFilePath = StimFolderPath + ExternalFilePath.Substring(1);
+				// else
+				// 	ExternalFilePath = StimFolderPath + ExternalFilePath;
+				
+				//this checking needs to be done during task setup - check each stim exists at start of session instead
+				//of at start of each trial
+				List<string> filenames = Directory.GetFiles(StimFolderPath, ExternalFilePath, SearchOption.AllDirectories).ToList();
+				if (filenames.Count == 1)
+					ExternalFilePath = filenames[0];
+				else if (filenames.Count == 0)
+					Debug.LogError("Attempted to load stimulus " + ExternalFilePath + " in folder " + 
+					               StimFolderPath + "but no file matching this pattern was found in this folder or subdirectories.");
+				else
+					Debug.LogError("Attempted to load stimulus " + ExternalFilePath + " in folder " + 
+					               StimFolderPath + "but multiple files matching this pattern were found in this folder or subdirectories.");
+			}
+			else
+			{
+				//if ExternalFilePath already contains the StimFolerPath string, do not change it,
+				//but should also have method to check this file exists
+			}
+
+
+	
 			StimGameObject = LoadModel();
 			PositionRotationScale();
 			if (!string.IsNullOrEmpty(StimName))

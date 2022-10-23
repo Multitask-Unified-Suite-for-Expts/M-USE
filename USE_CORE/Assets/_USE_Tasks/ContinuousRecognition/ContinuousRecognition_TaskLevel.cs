@@ -13,8 +13,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     public List<int> NumCorrect_Task;
     public float AvgNumCorrect;
 
-    public List<int> NumTrials_Task;
-    public float AvgNumTrials;
+    //public List<int> NumTrials_Task;
+    //public float AvgNumTrials;
 
     public List<int> NumTbCompletions_Task;
     public float AvgNumTbCompletions;
@@ -28,8 +28,9 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     public List<float> NumRewards_Task;
     public float AvgNumRewards;
 
-    //public List<float> StandardDeviations_Task;
-    //public float AvgStandardDeviation;
+    public List<double> StanDevs_Task;
+    public double AvgStanDev;
+    
 
     ContinuousRecognition_BlockDef currentBlock => GetCurrentBlockDef<ContinuousRecognition_BlockDef>();
     public override void SpecifyTypes()
@@ -65,25 +66,24 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.TimeToCompletion_Block = 0;
 
             trialLevel.NumRewards_Block = 0;
-
-
-
         
 
         });
         RunBlock.AddUpdateMethod(() =>
         {
 
-            BlockSummaryString ="\nAvg Trials: " + AvgNumTrials.ToString("0.00") +
+            BlockSummaryString =
+                                //"\nAvg Trials: " + AvgNumTrials.ToString("0.00") +
                                 "\nAvg Correct: " + AvgNumCorrect.ToString("0.00") +
+                                "\nAvg StanDev: " + AvgStanDev.ToString("0.00") +
                                 "\nAvg TbCompletions: " + AvgNumTbCompletions.ToString("0.00") +
                                 "\nAvg TimeToPick: " + AvgTimeToChoice.ToString("0.00") +
                                 "\nAvg TimeToCompletion: " + AvgTimeToCompletion.ToString("0.00") +
                                 "\nAvg Rewards: " + AvgNumRewards.ToString("0.00") +
 
                                 "\n" +
-                                "\n" + "<size=27><b><color=#2d3436ff>Current Block </color></b></size>" + "(" + currentBlock.BlockName + "):" +
-                                "\nTrials: " + trialLevel.NumTrials_Block +
+                                "\n" + "<size=26><b><color=#2d3436ff>Current Block </color></b></size>" + "(" + currentBlock.BlockName + "):" +
+                                //"\nTrials: " + trialLevel.NumTrials_Block +
                                 "\nCorrect: " + trialLevel.NumCorrect_Block +
                                 "\nTbCompletions: " + trialLevel.NumTbCompletions_Block +
                                 "\nAvgTimeToChoice: " + trialLevel.AvgTimeToChoice_Block.ToString("0.00") +
@@ -96,37 +96,60 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddInitializationMethod(() =>
         {
-            NumTrials_Task.Add(trialLevel.NumTrials_Block); // at end of each block, add block's NumTrials to task List;
+            //NumTrials_Task.Add(trialLevel.NumTrials_Block); // at end of each block, add block's NumTrials to task List;
             NumCorrect_Task.Add(trialLevel.NumCorrect_Block); //at end of each block, add block's NumCorrect to task List;
             NumTbCompletions_Task.Add(trialLevel.NumTbCompletions_Block);
             TimeToChoice_Task.Add(trialLevel.AvgTimeToChoice_Block);
             TimeToCompletion_Task.Add(trialLevel.TimeToCompletion_Block);
             NumRewards_Task.Add(trialLevel.NumRewards_Block);
 
-           
-
-
             CalculateBlockAverages();
-
+            CalculateStanDev();
 
             LogBlockData(trialLevel);
         });
     }
 
+    //NOT RIGHT
+    private void CalculateStanDev()
+    {
+        StanDevs_Task.Clear();
+
+        double blockMean = (double)AvgNumCorrect;
+        Debug.Log("BLOCKMEAN = " + blockMean);
+        double blockSumOfSquares = 0;
+
+        foreach (int num in NumCorrect_Task)
+        {
+            blockSumOfSquares += Math.Pow(num - blockMean, 2);
+            double BlockStanDev = Math.Sqrt(blockSumOfSquares / NumCorrect_Task.Count);
+            StanDevs_Task.Add(BlockStanDev);
+        }
+
+        if (NumCorrect_Task.Count == 0) AvgStanDev = 0;
+        else
+        {
+            double sum = 0;
+            foreach (double num in StanDevs_Task) sum += num;
+            AvgStanDev = (double)sum / StanDevs_Task.Count;
+        }
+
+    }
 
     private void CalculateBlockAverages()
     {
         //Avg Num Trials
-        if (NumTrials_Task.Count == 0) AvgNumTrials = 0;
-        else
-        {
-            float sum = 0;
-            foreach (int num in NumTrials_Task) sum += num;
-            AvgNumTrials = (float)sum / NumTrials_Task.Count;
-            //float avg = (float) sum / NumTrials_Task.Count;
-            //float truncated = (float)(Math.Truncate((double)avg * 100.0) / 100.0);
-            //AvgNumTrials = (float)(Math.Round((double)avg, 1));
-        }
+        //if (NumTrials_Task.Count == 0) AvgNumTrials = 0;
+        //else
+        //{
+        //    float sum = 0;
+        //    foreach (int num in NumTrials_Task) sum += num;
+        //    AvgNumTrials = (float)sum / NumTrials_Task.Count;
+
+        //    //float avg = (float) sum / NumTrials_Task.Count;
+        //    //float truncated = (float)(Math.Truncate((double)avg * 100.0) / 100.0);
+        //    //AvgNumTrials = (float)(Math.Round((double)avg, 1));
+        //}
 
         //Avg Num Correct
         if (NumCorrect_Task.Count == 0) AvgNumCorrect = 0;

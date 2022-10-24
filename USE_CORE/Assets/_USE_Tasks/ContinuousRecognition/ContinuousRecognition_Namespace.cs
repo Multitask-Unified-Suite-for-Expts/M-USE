@@ -13,6 +13,7 @@ namespace ContinuousRecognition_Namespace
 {
     public class ContinuousRecognition_TaskDef : TaskDef
     {
+
     }
 
     public class ContinuousRecognition_BlockDef : BlockDef
@@ -39,10 +40,14 @@ namespace ContinuousRecognition_Namespace
 
         public Vector3[] BlockStimLocations; //from Config if user specifies!!!
         public Vector3[] StimLocations; //calculated below in case they don't specify locations!
+        public Vector3[] BlockFeedbackLocations;
+        public float[] X_Locations;
+        public float[] Y_Locations;
+        public float[] X_FbLocations;
+        public float[] Y_FbLocations;
 
-        public Vector3[] BlockFeedbackLocations; //from config.
+        public int NumTokens; //BUT HOW DO WE LINK IT TO THE TOKENBAR?
 
-        // public int BlockCount, TotalTokenNums, MaxTrials
         public int TrialCount, NumRewardPulses;
 
         public float DisplayStimsDuration, ChooseStimDuration, TouchFeedbackDuration, TrialEndDuration,
@@ -63,48 +68,35 @@ namespace ContinuousRecognition_Namespace
 
 
             //Calculate BlockStimLocations:
-            StimLocations = new Vector3[NumRows * NumColumns];
-            float x = X_Start;
-            float y = Y_Start;
-            int index = 0;
+            StimLocations = new Vector3[X_Locations.Length * Y_Locations.Length];
 
-            for(int i = 0; i < NumColumns; i++) //Y loop
+            int index = 0;
+            for (int i = 0; i < Y_Locations.Length; i++)
             {
-                x = X_Start;
-                for(int j = 0; j < NumRows; j++) //X Loop
+                float y = Y_Locations[i];
+                for (int j = 0; j < X_Locations.Length; j++)
                 {
+                    float x = X_Locations[j];
                     StimLocations[index] = new Vector3(x, y, 0);
-                    x += X_Gap;
+                    Debug.Log(StimLocations[index]);
                     index++;
                 }
-                y -= Y_Gap;
             }
-
             if(ManuallySpecifyLocation == 0)    BlockStimLocations = StimLocations;
 
-
             //Calculate FeedbackLocations;
-            BlockFeedbackLocations = new Vector3[NumRows * NumColumns];
-            x = X_Start;
-            y = Y_Start;
+            BlockFeedbackLocations = new Vector3[X_FbLocations.Length * Y_FbLocations.Length];
             index = 0;
-
-            for (int i = 0; i < NumColumns; i++)
+            for (int i = 0; i < Y_FbLocations.Length; i++)
             {
-                x = X_Start;
-                for (int j = 0; j < NumRows; j++)
+                float y = Y_FbLocations[i];
+                for (int j = 0; j < X_FbLocations.Length; j++)
                 {
+                    float x = X_FbLocations[j];
                     BlockFeedbackLocations[index] = new Vector3(x, y, 0);
-                    x += X_Gap_FB;
                     index++;
                 }
-                y -= Y_Gap_FB;
             }
-
-
-            var s = "";
-            foreach (var location in BlockFeedbackLocations) s += location;
-            Debug.Log(s);
 
 
             int maxNumTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
@@ -147,6 +139,7 @@ namespace ContinuousRecognition_Namespace
                 trial.TokenRevealDuration = TokenRevealDuration;
                 trial.TokenUpdateDuration = TokenUpdateDuration;
                 trial.TotalTokensNum = TotalTokensNum;
+                trial.NumRewardPulses = NumRewardPulses;
 
                 TrialDefs[trialIndex] = trial;
                 numTrialStims++;
@@ -175,12 +168,17 @@ namespace ContinuousRecognition_Namespace
         public int MaxNumTrials;
 
         public int? TotalTokensNum;
+        public int NumRewardPulses;
 
         public float DisplayStimsDuration, ChooseStimDuration, TrialEndDuration, TouchFeedbackDuration, 
             DisplayResultDuration, TokenRevealDuration, TokenUpdateDuration;
 
         public bool IsNewStim;
         public string ContextName;
+
+        //Data:
+        public float TimeChosen;
+        public float TimeToChoice;
     }
 
     public class ContinuousRecognition_StimDef : StimDef

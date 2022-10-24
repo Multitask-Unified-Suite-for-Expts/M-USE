@@ -25,7 +25,7 @@ public class BlockInfoPanel : ExperimenterDisplayPanel
         if (TrialLevel != null)
         {
             blockInfoText.GetComponent<Text>().supportRichText = true;
-            blockInfoText.GetComponent<Text>().text = "<size=35><b><color=#2d3436ff>Block Info</color></b></size>" + "\n<size=25><color=#2d3436ff>" + TaskLevel.BlockSummaryString + "</color></size>";
+            blockInfoText.GetComponent<Text>().text = "<size=27><b><color=#2d3436ff>Block Averages: </color></b></size>" + "<size=24><color=#2d3436ff>" + TaskLevel.BlockSummaryString + "</color></size>";
         }
             
     }

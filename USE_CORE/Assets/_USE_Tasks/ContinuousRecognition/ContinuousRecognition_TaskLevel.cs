@@ -89,7 +89,11 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
                                 "\nAvgTimeToChoice: " + trialLevel.AvgTimeToChoice_Block.ToString("0.00") +
                                 "\nTimeToCompletion: " + trialLevel.TimeToCompletion_Block.ToString("0.00") +
                                 "\nRewards: " + trialLevel.NumRewards_Block +
-                                "\n";
+                                "\n" +
+                                "\nTESTING FOR SCROLL" +
+                                "\nTESTING FOR SCROLL" +
+                                "\nTESTING FOR SCROLL" +
+                                "\nTESTING FOR SCROLL";
         });
 
 

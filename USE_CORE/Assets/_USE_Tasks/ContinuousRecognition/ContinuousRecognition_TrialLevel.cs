@@ -184,6 +184,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
                         CompletedAllTrials = true;
                     }
+
+                    Debug.Log("NUMBER OF PNC STIM AFTER THEY CHOSE = " + currentTrial.PNC_Stim.Count);
                 }
                 else //THEY GUESSED WRONG
                 {

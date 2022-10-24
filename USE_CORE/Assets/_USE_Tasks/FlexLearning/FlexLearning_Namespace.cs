@@ -3,6 +3,7 @@ using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
+using System.Collections.Generic;
 
 namespace FlexLearning_Namespace
 {
@@ -53,9 +54,9 @@ namespace FlexLearning_Namespace
             //pick # of trials from minmax
             System.Random rnd = new System.Random();
             int num = rnd.Next(MinMaxTrials[0], MinMaxTrials[1]);
-            TrialDefs = new TrialDef[num];//actual correct # 
+            TrialDefs = new List<FlexLearning_TrialDef>().ConvertAll(x=>(TrialDef)x);//actual correct # 
 
-            for (int iTrial = 0; iTrial < TrialDefs.Length; iTrial++)
+            for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
             {
                 FlexLearning_TrialDef td = new FlexLearning_TrialDef();
                 td.TrialID = TrialID;
@@ -77,7 +78,7 @@ namespace FlexLearning_Namespace
         }
         public override void AddToTrialDefsFromBlockDef()
         {
-            for (int iTrial = 0; iTrial < TrialDefs.Length; iTrial++)
+            for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
             {
                 FlexLearning_TrialDef td = (FlexLearning_TrialDef)TrialDefs[iTrial];
                 td.BlockName = BlockName;

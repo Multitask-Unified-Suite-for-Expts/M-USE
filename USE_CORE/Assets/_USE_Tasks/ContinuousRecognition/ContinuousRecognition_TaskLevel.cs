@@ -30,6 +30,10 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     public List<double> StanDevs_Task;
     public double AvgStanDev;
+
+    public string BlockAveragesString;
+    public string CurrentBlockString;
+    public string PreviousBlocksString;
     
 
     ContinuousRecognition_BlockDef currentBlock => GetCurrentBlockDef<ContinuousRecognition_BlockDef>();
@@ -71,35 +75,20 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         });
         RunBlock.AddUpdateMethod(() =>
         {
+            CalculateBlockAveragesString();
+            CalculateCurrentBlockString(trialLevel);
 
-            BlockSummaryString =
-                                //"\nAvg Trials: " + AvgNumTrials.ToString("0.00") +
-                                "\nAvg Correct: " + AvgNumCorrect.ToString("0.00") +
-                                "\nAvg StanDev: " + AvgStanDev.ToString("0.00") +
-                                "\nAvg TbCompletions: " + AvgNumTbCompletions.ToString("0.00") +
-                                "\nAvg TimeToPick: " + AvgTimeToChoice.ToString("0.00") +
-                                "\nAvg TimeToCompletion: " + AvgTimeToCompletion.ToString("0.00") +
-                                "\nAvg Rewards: " + AvgNumRewards.ToString("0.00") +
+            BlockSummaryString = BlockAveragesString + "\n" +
+                                 CurrentBlockString + "\n" +
+                                 PreviousBlocksString;
 
-                                "\n" +
-                                "\n" + "<size=26><b><color=#2d3436ff>Current Block </color></b></size>" + "(" + currentBlock.BlockName + "):" +
-                                //"\nTrials: " + trialLevel.NumTrials_Block +
-                                "\nCorrect: " + trialLevel.NumCorrect_Block +
-                                "\nTbCompletions: " + trialLevel.NumTbCompletions_Block +
-                                "\nAvgTimeToChoice: " + trialLevel.AvgTimeToChoice_Block.ToString("0.00") +
-                                "\nTimeToCompletion: " + trialLevel.TimeToCompletion_Block.ToString("0.00") +
-                                "\nRewards: " + trialLevel.NumRewards_Block +
-                                "\n" +
-                                "\nTESTING FOR SCROLL" +
-                                "\nTESTING FOR SCROLL" +
-                                "\nTESTING FOR SCROLL" +
-                                "\nTESTING FOR SCROLL";
         });
-
 
 
         BlockFeedback.AddInitializationMethod(() =>
         {
+            PreviousBlocksString += CurrentBlockString; //Add current block string to full list of previous blocks. 
+
             //NumTrials_Task.Add(trialLevel.NumTrials_Block); // at end of each block, add block's NumTrials to task List;
             NumCorrect_Task.Add(trialLevel.NumCorrect_Block); //at end of each block, add block's NumCorrect to task List;
             NumTbCompletions_Task.Add(trialLevel.NumTbCompletions_Block);
@@ -113,6 +102,31 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             LogBlockData(trialLevel);
         });
     }
+
+
+    private void CalculateBlockAveragesString()
+    {
+        BlockAveragesString = 
+        "\nAvg Correct: " + AvgNumCorrect.ToString("0.00") +
+        "\nAvg StanDev: " + AvgStanDev.ToString("0.00") +
+        "\nAvg TbCompletions: " + AvgNumTbCompletions.ToString("0.00") +
+        "\nAvg TimeToPick: " + AvgTimeToChoice.ToString("0.00") +
+        "\nAvg TimeToCompletion: " + AvgTimeToCompletion.ToString("0.00") +
+        "\nAvg Rewards: " + AvgNumRewards.ToString("0.00");
+    }
+
+    private void CalculateCurrentBlockString(ContinuousRecognition_TrialLevel trialLevel)
+    {
+        CurrentBlockString =
+        "\n" + "<size=26><b><color=#2d3436ff>Block </color></b></size>" + "(" + currentBlock.BlockName + "):" +
+        //"\nTrials: " + trialLevel.NumTrials_Block +
+        "\nCorrect: " + trialLevel.NumCorrect_Block +
+        "\nTbCompletions: " + trialLevel.NumTbCompletions_Block +
+        "\nAvgTimeToChoice: " + trialLevel.AvgTimeToChoice_Block.ToString("0.00") +
+        "\nTimeToCompletion: " + trialLevel.TimeToCompletion_Block.ToString("0.00") +
+        "\nRewards: " + trialLevel.NumRewards_Block;
+    }
+
 
     //NOT RIGHT
     private void CalculateStanDev()

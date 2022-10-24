@@ -570,7 +570,7 @@ namespace USE_ExperimentTemplate_Task
                                                  sd.ExternalFilePath + " in folder " + sd.StimFolderPath +
                                                  ", but files with this name are found at both " + firstFilename +
                                                  " and "
-                                                 + filenames[iFile] + ".");
+                                                 + filenames[iFile] + ".  Only the first will be used.");
                                 filenames.RemoveAt(iFile);
                             }
                         }

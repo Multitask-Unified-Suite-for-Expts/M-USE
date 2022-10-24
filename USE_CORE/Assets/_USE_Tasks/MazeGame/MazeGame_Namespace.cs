@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
@@ -55,7 +56,7 @@ namespace MazeGame_Namespace
             //pick # of trials from minmaxokay 
             // System.Random rnd = new System.Random();
             // int num = rnd.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
-            TrialDefs = new TrialDef[1];//actual correct # 
+            TrialDefs = new List<TrialDef>();//actual correct # 
             for (int iTrial = 0; iTrial < TrialDefs.Length; iTrial++)
             {
                 MazeGame_TrialDef td = new MazeGame_TrialDef();

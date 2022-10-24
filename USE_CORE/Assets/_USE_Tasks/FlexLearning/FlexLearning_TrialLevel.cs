@@ -122,7 +122,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             stateAfterDelay = SearchDisplay;
             TokenFBController.enabled = true;
-            TokenFBController.SetTotalTokensNum(CurrentTrialDef.NumTokens);
+            TokenFBController.SetTotalTokensNum(CurrentTrialDef.NumTokenBar);
             EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]); //CHECK THIS TIMING MIGHT BE OFF
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
@@ -218,23 +218,21 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         TokenFeedback.AddInitializationMethod(() =>
         {
             HaloFBController.Destroy();
-            if (selectedSD.TokenUpdate == 0)
+            if (selectedSD.StimTrialRewardMag > 0)
             {
-                if (correct) AudioFBController.Play("Positive");
-                else AudioFBController.Play("Negative");
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
-                return;
-            }
-            if (selectedSD.TokenUpdate > 0)
-            {
-                TokenFBController.AddTokens(selected, selectedSD.TokenUpdate);
+                TokenFBController.AddTokens(selected, selectedSD.StimTrialRewardMag);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
+                AudioFBController.Play("Positive");
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
+                
             }
 
             else
             {
-                TokenFBController.RemoveTokens(selected, -selectedSD.TokenUpdate);
+                AudioFBController.Play("Negative");
+                TokenFBController.RemoveTokens(selected, -selectedSD.StimTrialRewardMag);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
             }
         });
         TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), TrialEnd, () =>
@@ -266,19 +264,15 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
         int temp = 0;
-        Debug.Log("CURRENT TRIAL DEF: " + CurrentTrialDef);
-        Debug.Log("trial count in block: " + TrialCount_InBlock);
-        Debug.Log("trial LENGTH: " + TrialDefs.Length);
-        Debug.Log("TRIAL STIM INDICES: " + CurrentTrialDef.TrialStimIndices[0]);
         tStim = new StimGroup("SearchStimuli", ExternalStims, CurrentTrialDef.TrialStimIndices);
         tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
         TrialStims.Add(tStim);
         for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
             FlexLearning_StimDef sd = (FlexLearning_StimDef)tStim.stimDefs[i];
-            //sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.TrialStimTokenReward);
-            //if (sd.StimTrialRewardMag > 0) sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!!
-            //else sd.IsTarget = false;
+            sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.TrialStimTokenReward);
+            if (sd.StimTrialRewardMag > 0) sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!!
+            else sd.IsTarget = false;
 
         }
 

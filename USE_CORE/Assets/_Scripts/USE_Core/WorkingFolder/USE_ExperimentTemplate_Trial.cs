@@ -26,7 +26,7 @@ namespace USE_ExperimentTemplate_Trial
 
         protected State SetupTrial, FinishTrial;
 
-        public TrialDef[] TrialDefs;
+        public List<TrialDef> TrialDefs;
 
         [HideInInspector] public TaskStims TaskStims;
         [HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims, RuntimeStims;
@@ -97,8 +97,8 @@ namespace USE_ExperimentTemplate_Trial
             });
 
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
-            FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Length - 1, SetupTrial);
-            FinishTrial.SpecifyTermination(() => TrialCount_InBlock == TrialDefs.Length - 1, () => null);
+            FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Count - 1, SetupTrial);
+            FinishTrial.SpecifyTermination(() => TrialCount_InBlock == TrialDefs.Count - 1, () => null);
 
             FinishTrial.AddUniversalTerminationMethod(() =>
             {

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using USE_ExperimentTemplate_Trial;
 
 namespace USE_ExperimentTemplate_Block
@@ -5,7 +6,7 @@ namespace USE_ExperimentTemplate_Block
 	public class BlockDef
 	{
 		public int BlockCount;
-		public TrialDef[] TrialDefs;
+		public List<TrialDef> TrialDefs;
 		public int? TotalTokensNum;
 		public int? MinTrials, MaxTrials;
 

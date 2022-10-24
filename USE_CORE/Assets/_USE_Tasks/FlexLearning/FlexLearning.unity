@@ -397,7 +397,7 @@ MonoBehaviour:
   CallDefineLevelAutomatically: 0
   quitApplicationAtEnd: 0
   DebugActive: 1
-  Paused: 0
+  Paused: 1
   ConfigName: 
   TaskName: FlexLearning
   TaskProjectFolder: 

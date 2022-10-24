@@ -696,7 +696,7 @@ namespace USE_ExperimentTemplate_Task
             return (T)sd;
         }
 
-        public TrialDef[] GetTrialDefsInBlock(int BlockNum, TrialDef[] trialDefs)
+        public List<TrialDef> GetTrialDefsInBlock(int BlockNum, TrialDef[] trialDefs)
         {
             List<TrialDef> trialList = new List<TrialDef>();
             int currentBlockCount = -1;
@@ -707,7 +707,7 @@ namespace USE_ExperimentTemplate_Task
                     trialList.Add(trialDefs[iTrial]);
             }
 
-            return trialList.ToArray();
+            return trialList;
         }
 
         private void OnApplicationQuit()

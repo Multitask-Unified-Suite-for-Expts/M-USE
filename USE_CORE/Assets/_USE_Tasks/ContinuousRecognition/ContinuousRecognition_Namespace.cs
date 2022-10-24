@@ -100,7 +100,7 @@ namespace ContinuousRecognition_Namespace
 
 
             int maxNumTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
-            TrialDefs = new ContinuousRecognition_TrialDef[maxNumTrials];
+            TrialDefs = new List<ContinuousRecognition_TrialDef>().ConvertAll(x=>(TrialDef)x);
             int numTrialStims = NumObjectsMinMax[0]; //incremented at end
             bool theEnd = false;
 
@@ -141,7 +141,7 @@ namespace ContinuousRecognition_Namespace
                 trial.TotalTokensNum = TotalTokensNum;
                 trial.NumRewardPulses = NumRewardPulses;
 
-                TrialDefs[trialIndex] = trial;
+                TrialDefs.Add(trial);
                 numTrialStims++;
             }
         }

@@ -536,43 +536,68 @@ namespace USE_ExperimentTemplate_Task
                 sd.StimFolderPath = stimFolderPath;
                 sd.StimExtension = stimExtension;
                 sd.StimScale = stimScale;
-                
-                
-			//add StimExtesion to file path if it doesn't already contain it
-			if (!string.IsNullOrEmpty(sd.StimExtension) && !sd.ExternalFilePath.EndsWith(sd.StimExtension))
-			{
-				if (!sd.StimExtension.StartsWith("."))
-                    sd.ExternalFilePath = sd.ExternalFilePath + "." + sd.StimExtension;
-				else
-                    sd.ExternalFilePath = sd.ExternalFilePath + sd.StimExtension;
-			}
-			
-			
-			//we will only use StimFolderPath if ExternalFilePath doesn't already contain it
-			if (!string.IsNullOrEmpty(sd.StimFolderPath) && !sd.ExternalFilePath.StartsWith(sd.StimFolderPath))
-			{
-				
-                //unclear if this check will work if there are multiple levels of subfolders - may need to use recursive
-                //method like https://developerslogblog.wordpress.com/2020/02/25/c-how-to-find-all-files-recursively-in-a-folder/
-                
-				//this checking needs to be done during task setup - check each stim exists at start of session instead
-				//of at start of each trial
-				List<string> filenames = Directory.GetFiles(sd.StimFolderPath, sd.ExternalFilePath, SearchOption.AllDirectories).ToList();
-				if (filenames.Count == 1)
-                    sd.ExternalFilePath = filenames[0];
-				else if (filenames.Count == 0)
-					Debug.LogError("During task setup for " + TaskName + " attempted to find stimulus " + sd.ExternalFilePath + " in folder " + 
-                                   sd.StimFolderPath + "but no file matching this pattern was found in this folder or subdirectories.");
-				else
-					Debug.LogError("During task setup for " + TaskName + " attempted to find stimulus " + sd.ExternalFilePath + " in folder " + 
-                                   sd.StimFolderPath + "but multiple files matching this pattern were found in this folder or subdirectories.");
-			}
-			else
-			{
-				//if ExternalFilePath already contains the StimFolerPath string, do not change it,
-				//but should also have method to check this file exists
-			}
-                
+
+
+                //add StimExtesion to file path if it doesn't already contain it
+                if (!string.IsNullOrEmpty(sd.StimExtension) && !sd.ExternalFilePath.EndsWith(sd.StimExtension))
+                {
+                    if (!sd.StimExtension.StartsWith("."))
+                        sd.ExternalFilePath = sd.ExternalFilePath + "." + sd.StimExtension;
+                    else
+                        sd.ExternalFilePath = sd.ExternalFilePath + sd.StimExtension;
+                }
+
+
+                //we will only use StimFolderPath if ExternalFilePath doesn't already contain it
+                if (!string.IsNullOrEmpty(sd.StimFolderPath) && !sd.ExternalFilePath.StartsWith(sd.StimFolderPath))
+                {
+
+                    //this checking needs to be done during task setup - check each stim exists at start of session instead
+                    //of at start of each trial
+                    List<string> filenames = Directory
+                        .GetFiles(sd.StimFolderPath, sd.ExternalFilePath, SearchOption.AllDirectories).ToList();
+                    
+                    filenames.RemoveAll(t => t.StartsWith("."));
+
+                    if (filenames.Count > 1)
+                    {
+                        string firstFilename = Path.GetFileName(filenames[0]);
+                        for (int iFile = filenames.Count - 1; iFile > 0; iFile--)
+                        {
+                            if (Path.GetFileName(filenames[iFile]) == firstFilename)
+                            {
+                                Debug.LogWarning("During task setup for " + TaskName + " attempted to find stimulus " +
+                                                 sd.ExternalFilePath + " in folder " + sd.StimFolderPath +
+                                                 ", but files with this name are found at both " + firstFilename +
+                                                 " and "
+                                                 + filenames[iFile] + ".");
+                                filenames.RemoveAt(iFile);
+                            }
+                        }
+                    }
+                    
+
+                    if (filenames.Count == 1)
+                        sd.ExternalFilePath = filenames[0];
+                    else if (filenames.Count == 0)
+                        Debug.LogError("During task setup for " + TaskName + " attempted to find stimulus " +
+                                       sd.ExternalFilePath + " in folder " +
+                                       sd.StimFolderPath +
+                                       " but no file matching this pattern was found in this folder or subdirectories.");
+                    else
+                    {
+                        Debug.LogError("During task setup for " + TaskName + " attempted to find stimulus " +
+                                       sd.ExternalFilePath + " in folder " +
+                                       sd.StimFolderPath +
+                                       " but multiple non-identical files matching this pattern were found in this folder or subdirectories.");
+                    }
+                }
+                else
+                {
+                    //if ExternalFilePath already contains the StimFolerPath string, do not change it,
+                    //but should also have method to check this file exists
+                }
+
             }
         }
 

@@ -43,7 +43,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             System.Random rnd = new System.Random();
              
             flTL.MaxTrials = rnd.Next(flBD.MinMaxTrials[0], flBD.MinMaxTrials[1]);
-            Debug.Log("TRIAL DEFS COUNT: " + CurrentBlockDef.TrialDefs.Length);
+            Debug.Log("TRIAL DEFS COUNT: " + CurrentBlockDef.TrialDefs.Count);
         });
 
         RunBlock.AddUpdateMethod(() =>

@@ -203,6 +203,7 @@ namespace USE_ExperimentTemplate_Session
             RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
 
             bool waitForSerialPort = false;
+            bool taskAutomaticallySelected = false;
             setupSession.AddDefaultInitializationMethod(() =>
             {
                 SessionData.CreateFile();
@@ -346,7 +347,10 @@ namespace USE_ExperimentTemplate_Session
                     buttonStart += buttonSize + buttonSpacing;
 
                     Button button = taskButton.AddComponent<Button>();
-                    button.onClick.AddListener(() => selectedConfigName = configName);
+                    button.onClick.AddListener(() => {
+                        taskAutomaticallySelected = false;
+                        selectedConfigName = configName;
+                    });
                 }
             });
             selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask);
@@ -361,6 +365,7 @@ namespace USE_ExperimentTemplate_Session
                         GameObject taskButton = taskButtonsDict[configName];
 
                         if (taskButton.GetComponent<Button>() == null) continue;
+                        taskAutomaticallySelected = true;
                         selectedConfigName = configName;
                         break;
                     }
@@ -422,15 +427,16 @@ namespace USE_ExperimentTemplate_Session
                 taskCount++;
             });
 
-            finishSession.SpecifyTermination(() => true, () => null, () =>
-            {
-                SessionData.AppendData();
-            });
+            finishSession.SpecifyTermination(() => true, () => null);
 
             SessionData = SessionDataControllers.InstantiateSessionData(StoreData, SessionDataPath);
+            SessionData.fileName = FilePrefix + "__SessionData";
             SessionData.sessionLevel = this;
             SessionData.InitDataController();
             SessionData.ManuallyDefine();
+
+            SessionData.AddDatum("SelectedTaskConfigName", () => selectedConfigName);
+            SessionData.AddDatum("TaskAutomaticallySelected", () => taskAutomaticallySelected);
 
             void GetTaskLevelFromString<T>()
                 where T : ControlLevel_Task_Template

@@ -18,7 +18,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
     public ContinuousRecognition_TrialDef currentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
 
-    public bool CompletedAllTrials;
     public bool EndBlock;
     bool GotCorrect;
     bool stimIsChosen;
@@ -99,7 +98,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         InitTrial.AddInitializationMethod(() =>
         {
             currentTrial.IsNewStim = false;
-            CompletedAllTrials = false;
             EndBlock = false;
             stimIsChosen = false;
             GotCorrect = false;
@@ -179,10 +177,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     }
 
                     //SINCE THEY GOT IT RIGHT, CHECK IF LAST TRIAL IN BLOCK. IF SO, MAKE THE GOTALLTRIALSCORRECT VARIABLE TRUE. 
-                    if(TrialCount_InBlock + 1 == currentTrial.MaxNumTrials)
+                    if(TrialCount_InBlock == currentTrial.MaxNumTrials-2)
                     {
                         TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
-                        CompletedAllTrials = true;
+                        EndBlock = true;
                     }
 
                     Debug.Log("NUMBER OF PNC STIM AFTER THEY CHOSE = " + currentTrial.PNC_Stim.Count);
@@ -252,7 +250,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         DisplayResults.AddInitializationMethod(() =>
         {
-            if (EndBlock || CompletedAllTrials) GenerateBlockFeedback(); //IF THEY LOST or CompletedAllTrial, DISPLAY RESULTS
+            if (EndBlock) GenerateBlockFeedback(); //IF THEY LOST or CompletedAllTrial, DISPLAY RESULTS
         });
 
         DisplayResults.AddTimer(() => currentTrial.DisplayResultDuration, ITI, () =>
@@ -263,7 +261,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
         });
             
-        DisplayResults.SpecifyTermination(() => !EndBlock && !CompletedAllTrials, ITI, () =>
+        DisplayResults.SpecifyTermination(() => !EndBlock, ITI, () =>
         {
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
@@ -294,12 +292,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         float sum = 0;
         foreach (float choice in TimeToChoice_Block) sum += choice;
         AvgTimeToChoice_Block = sum / TimeToChoice_Block.Count;
-
-        //float sum = 0;
-        //foreach (float choice in TimeToChoice_Block) sum += choice;
-        //float avg = (float)sum / TimeToChoice_Block.Count;
-        //float truncated = (float)(Math.Truncate((double)avg * 100.0) / 100.0);
-        //AvgTimeToChoice_Block = (float)(Math.Round((double)avg, 6));
     }
 
     private void GenerateBlockFeedback()
@@ -404,7 +396,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     //Called when the trial is defined!
     //The TrialStims group are auto loaded in the SetupTrial StateInitialization, and destroyed in the FinishTrial StateTermination
     protected override void DefineTrialStims()
-    {        
+    {
         if(TrialCount_InBlock == 0)
         {
             //clear stim lists in case it's NOT the first block!
@@ -440,8 +432,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             TrialStims.Add(trialStims);
 
         }
-
-        else 
+        else if(TrialCount_InBlock > 0 && TrialCount_InBlock <= (currentTrial.MaxNumStim-2))
         {
             currentTrial.TrialStimIndices.Clear();
 
@@ -464,18 +455,18 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             List<int> PC_Copy = ShuffleList(currentTrial.PC_Stim).ToList();
             if (PC_Copy.Count > 1) PC_Copy = PC_Copy.GetRange(0, PC_Num);
-            for(int i = 0; i < PC_Copy.Count; i++)
+            for (int i = 0; i < PC_Copy.Count; i++)
             {
                 currentTrial.TrialStimIndices.Add(PC_Copy[i]);
             }
 
             List<int> PNC_Copy = ShuffleList(currentTrial.PNC_Stim).ToList();
-            if(PNC_Copy.Count > 1) PNC_Copy = PNC_Copy.GetRange(0, PNC_Num);
-            for(int i = 0; i < PNC_Copy.Count; i++)
+            if (PNC_Copy.Count > 1) PNC_Copy = PNC_Copy.GetRange(0, PNC_Num);
+            for (int i = 0; i < PNC_Copy.Count; i++)
             {
                 currentTrial.TrialStimIndices.Add(PNC_Copy[i]);
             }
-           
+
             int numGenerated = NewStim_Copy.Count + PC_Copy.Count + PNC_Copy.Count;
             int numNeeded = PC_Num + New_Num + PNC_Num;
             if (numGenerated == numNeeded) Debug.Log($"THE CORRECT AMOUNT OF STIM ({numGenerated}) WERE GENERATED FOR TRIAL #{TrialCount_InBlock}");
@@ -484,9 +475,29 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             trialStims = new StimGroup($"TrialStims", ExternalStims, currentTrial.TrialStimIndices);
             trialStims.SetLocations(currentTrial.TrialStimLocations);
             trialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenUpdate")); //Visible when start DisplayStims, invisible when finish TokenUpdate.
-            TrialStims.Add(trialStims); 
-
+            TrialStims.Add(trialStims);
         }
+
+        else //The Non-Increasing trials
+        {
+            currentTrial.TrialStimIndices.Clear();
+
+            var totalNeeded = currentTrial.NumObjectsMinMax[1];
+            var num_PNC = currentTrial.PNC_Stim.Count;
+            var num_PC = totalNeeded - num_PNC;
+
+            //Add PNC Stim to trialIndices
+            foreach (int num in currentTrial.PNC_Stim) currentTrial.TrialStimIndices.Add(num);
+
+            //Add PC Stim to trialIndices.
+            for(int i = 0; i < num_PC; i++) currentTrial.TrialStimIndices.Add(currentTrial.PC_Stim[i]);
+            
+            trialStims = new StimGroup($"TrialStims", ExternalStims, currentTrial.TrialStimIndices);
+            trialStims.SetLocations(currentTrial.TrialStimLocations);
+            trialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenUpdate")); //Visible when start DisplayStims, invisible when finish TokenUpdate.
+            TrialStims.Add(trialStims);
+        }
+
         Debug.Log("Unseen_Stim Count: " + currentTrial.Unseen_Stim.Count);
         getLog(currentTrial.PC_Stim, "PC_Stims");
         getLog(currentTrial.New_Stim, "New_Stims");
@@ -646,38 +657,5 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.SetRevealTime(currentTrial.TokenRevealDuration);
         TokenFBController.SetUpdateTime(currentTrial.TokenUpdateDuration);
     }
-
-    //public void CreateCanvasAndComponents()
-    //{
-    //    //put these up top if end up using this;
-    //    //GameObject canvasGO;
-    //    //Canvas canvas;
-    //    //GameObject resultsTextGO;
-    //    //Text resultsText;
-
-    //    GameObject canvasGO = new GameObject();
-    //    canvasGO.AddComponent<Canvas>();
-    //    canvasGO.AddComponent<CanvasScaler>();
-    //    canvasGO.AddComponent<GraphicRaycaster>();
-
-    //    Canvas canvas = canvasGO.GetComponent<Canvas>();
-    //    canvas.name = "Results_Canvas";
-    //    canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-
-    //    GameObject resultsTextGO = new GameObject();
-    //    resultsTextGO.transform.parent = canvasGO.transform;
-    //    resultsTextGO.AddComponent<Text>();
-
-    //    Text resultsText = resultsTextGO.GetComponent<Text>();
-    //    resultsText.name = "Results_Text";
-    //    resultsText.text = "Results";
-    //    resultsText.fontSize = 36;
-    //    resultsText.color = Color.white;
-
-    //    RectTransform rectTransform = resultsText.GetComponent<RectTransform>();
-    //    rectTransform.localPosition = new Vector3(-825, -175, 0);
-    //    rectTransform.sizeDelta = new Vector2(600, 200);
-    //}
-
 
 }

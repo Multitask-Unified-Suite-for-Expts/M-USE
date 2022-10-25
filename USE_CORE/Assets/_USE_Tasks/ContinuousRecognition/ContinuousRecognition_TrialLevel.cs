@@ -18,6 +18,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
     public ContinuousRecognition_TrialDef currentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
 
+    public bool CompletedAllTrials;
     public bool EndBlock;
     bool GotCorrect;
     bool stimIsChosen;
@@ -177,9 +178,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     }
 
                     //SINCE THEY GOT IT RIGHT, CHECK IF LAST TRIAL IN BLOCK. IF SO, MAKE THE GOTALLTRIALSCORRECT VARIABLE TRUE. 
-                    if(TrialCount_InBlock == currentTrial.MaxNumTrials-2)
+                    //if(TrialCount_InBlock == currentTrial.MaxNumTrials-2)
+                    if(currentTrial.PNC_Stim.Count == 0)
                     {
                         TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
+                        CompletedAllTrials = true;
                         EndBlock = true;
                     }
 
@@ -250,7 +253,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         DisplayResults.AddInitializationMethod(() =>
         {
-            if (EndBlock) GenerateBlockFeedback(); //IF THEY LOST or CompletedAllTrial, DISPLAY RESULTS
+            if (EndBlock) GenerateBlockFeedback();
         });
 
         DisplayResults.AddTimer(() => currentTrial.DisplayResultDuration, ITI, () =>
@@ -261,7 +264,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
         });
             
-        DisplayResults.SpecifyTermination(() => !EndBlock, ITI, () =>
+        DisplayResults.SpecifyTermination(() => !EndBlock && !CompletedAllTrials, ITI, () =>
         {
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
@@ -285,6 +288,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         LogFrameData();
     }
 
+
+
     private void CalculateBlockAvgTimeToChoice()
     {
         if (TimeToChoice_Block.Count == 0) AvgTimeToChoice_Block = 0;
@@ -294,35 +299,50 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         AvgTimeToChoice_Block = sum / TimeToChoice_Block.Count;
     }
 
+
     private void GenerateBlockFeedback()
     {
         Starfield.SetActive(false);
         TokenFBController.enabled = false;
 
-        StimGroup rightGroup = new StimGroup("Right");
-
-        Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count + 1];
-
-        int locCount = 0;
-        for (int i = 0; i < ChosenStimIndices.Count; i++)
+        if(CompletedAllTrials)
         {
-            FeedbackLocations[i] = currentTrial.TrialFeedbackLocations[i];
-            locCount++;
+            StimGroup rightGroup = new StimGroup("Right");
+            Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count];
+            for (int i = 0; i < ChosenStimIndices.Count; i++)
+            {
+                FeedbackLocations[i] = currentTrial.TrialFeedbackLocations[i];
+            }
+            FeedbackLocations = CenterFeedbackLocations(FeedbackLocations);
+            Debug.Log("CHOSEN STIM INDICES COUNT = " + ChosenStimIndices.Count);
+            rightGroup = new StimGroup("Right", ExternalStims, ChosenStimIndices);
+            GenerateFeedbackStim(rightGroup, FeedbackLocations);
+            GenerateFeedbackBorders(rightGroup);
         }
+        else
+        {
+            StimGroup rightGroup = new StimGroup("Right");
+            Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count + 1];
+            int locCount = 0;
+            for (int i = 0; i < ChosenStimIndices.Count; i++)
+            {
+                FeedbackLocations[i] = currentTrial.TrialFeedbackLocations[i];
+                locCount++;
+            }
+            FeedbackLocations[locCount] = currentTrial.TrialFeedbackLocations[locCount];
+            FeedbackLocations = CenterFeedbackLocations(FeedbackLocations);
 
-        FeedbackLocations[locCount] = currentTrial.TrialFeedbackLocations[locCount];
-        FeedbackLocations = CenterFeedbackLocations(FeedbackLocations);
+            rightGroup = new StimGroup("Right", ExternalStims, ChosenStimIndices);
+            GenerateFeedbackStim(rightGroup, FeedbackLocations.Take(FeedbackLocations.Length - 1).ToArray());
+            GenerateFeedbackBorders(rightGroup);
 
-        rightGroup = new StimGroup("Right", ExternalStims, ChosenStimIndices);
-        GenerateFeedbackStim(rightGroup, FeedbackLocations.Take(FeedbackLocations.Length-1).ToArray());
-        GenerateFeedbackBorders(rightGroup);
+            StimGroup wrongGroup = new StimGroup("Wrong");
+            StimDef wrongStim = ExternalStims.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(wrongGroup);
+            wrongStim.StimGameObject = null;
 
-        StimGroup wrongGroup = new StimGroup("Wrong");
-        StimDef wrongStim = ExternalStims.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(wrongGroup);
-        wrongStim.StimGameObject = null;
-
-        GenerateFeedbackStim(wrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length-1).Take(1).ToArray());
-        GenerateFeedbackBorders(wrongGroup);
+            GenerateFeedbackStim(wrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length - 1).Take(1).ToArray());
+            GenerateFeedbackBorders(wrongGroup);
+        }
 
     }
 

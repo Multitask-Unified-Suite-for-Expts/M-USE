@@ -8,24 +8,27 @@ using USE_ExperimenterDisplay;
 public class BlockInfoPanel : ExperimenterDisplayPanel
 {
     public BlockInfoList biList;
-    public GameObject blockInfoText;
     public GameObject blockInfoPanel;
+    public GameObject blockInfoPanelText;
+
     // Start is called before the first frame update
     public override void CustomPanelInitialization()
     {
         biList = new BlockInfoList();
         biList.Initialize();
         blockInfoPanel = GameObject.Find("BlockInfoPanel");
-        blockInfoText = GameObject.Find("BlockInfoPanelText");
-        blockInfoText.transform.SetParent(blockInfoPanel.GetComponent<Transform>());
+        blockInfoPanelText = GameObject.Find("BlockInfoSummaryText");
     }
 
     public override void CustomPanelUpdate()
     {
         if (TrialLevel != null)
         {
-            blockInfoText.GetComponent<Text>().supportRichText = true;
-            blockInfoText.GetComponent<Text>().text = "<size=27><b><color=#2d3436ff>Block Averages: </color></b></size>" + "<size=24><color=#2d3436ff>" + TaskLevel.BlockSummaryString + "</color></size>";
+            if(!string.IsNullOrEmpty(TaskLevel.BlockSummaryString))
+            {
+                blockInfoPanelText.GetComponent<Text>().supportRichText = true;
+                blockInfoPanelText.GetComponent<Text>().text = "<size=18><color=#2d3436ff>" + TaskLevel.BlockSummaryString + "</color></size>";
+            }
         }
             
     }

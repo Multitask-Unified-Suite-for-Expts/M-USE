@@ -424,11 +424,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             //Add each block stim to unseen list.
             var numBlockStims = currentTrial.BlockStimIndices.Length;
-            for (int i = 0; i < numBlockStims; i++)
-            {
-                currentTrial.Unseen_Stim.Add(currentTrial.BlockStimIndices[i]);
-            }
-
+            for (int i = 0; i < numBlockStims; i++) currentTrial.Unseen_Stim.Add(currentTrial.BlockStimIndices[i]);
+            
             //Pick 2 random New stim and add to TrialStimIndices and NewStim. Also remove from UnseenStim.
             int[] tempArray = new int[currentTrial.NumObjectsMinMax[0]];
             for (int i = 0; i < currentTrial.NumObjectsMinMax[0]; i++) //Pick2 stim randomly from blockStimIndices. 
@@ -443,8 +440,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 currentTrial.Unseen_Stim.Remove(ranNum);
                 currentTrial.New_Stim.Add(ranNum);
             }
-            Debug.Log($"{currentTrial.New_Stim.Count} STIM WERE GENERATED FOR TRIAL #{TrialCount_InBlock}");
-
             trialStims = new StimGroup("TrialStims", ExternalStims, currentTrial.TrialStimIndices);
             foreach (ContinuousRecognition_StimDef stim in trialStims.stimDefs) stim.PreviouslyChosen = false;
             trialStims.SetLocations(currentTrial.TrialStimLocations);
@@ -518,7 +513,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             TrialStims.Add(trialStims);
         }
 
-        Debug.Log("Unseen_Stim Count: " + currentTrial.Unseen_Stim.Count);
         getLog(currentTrial.PC_Stim, "PC_Stims");
         getLog(currentTrial.New_Stim, "New_Stims");
         getLog(currentTrial.PNC_Stim, "PNC_Stims");
@@ -567,7 +561,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("PNC_Stim", () => currentTrial.PNC_Stim);
         TrialData.AddDatum("IsNewStim", () => currentTrial.IsNewStim);
         TrialData.AddDatum("CurrentTrialStims", () => currentTrial.TrialStimIndices);
-        TrialData.AddDatum("Context", () => currentTrial.ContextName);
     }
 
     private void LogFrameData()

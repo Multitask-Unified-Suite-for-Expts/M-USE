@@ -169,6 +169,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             AvgTimeToCompletion = (float)sum / TimeToCompletion_Task.Count;
         }
 
+        //Avg NumRewards
         if (NumRewards_Task.Count == 0) AvgNumRewards = 0;
         else
         {

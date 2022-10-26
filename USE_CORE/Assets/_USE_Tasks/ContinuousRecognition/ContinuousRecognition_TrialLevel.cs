@@ -150,16 +150,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["CorrectResponse"]);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchTargetStart"]);
 
-                    if (currentTrial.PNC_Stim.Contains(chosenStimDef.StimCode - 1)) //If they chose a PNC stim...
-                    {
-                        Debug.Log($"Right! Player chose a PNC_Stim with Index =  {chosenStimDef.StimCode - 1}");
-                        currentTrial.PNC_Stim.Remove(chosenStimDef.StimCode - 1);
-                    }
-                    if (currentTrial.New_Stim.Contains(chosenStimDef.StimCode - 1)) //If they chose a New Stim...
-                    {
-                        Debug.Log($"Right! Player chose a NEW_Stim with Index =  {chosenStimDef.StimCode - 1}");
-                        currentTrial.New_Stim.Remove(chosenStimDef.StimCode - 1);
-                    }
+                    //If chose a PNC Stim
+                    if (currentTrial.PNC_Stim.Contains(chosenStimDef.StimCode - 1)) currentTrial.PNC_Stim.Remove(chosenStimDef.StimCode - 1);
+                    //If Chose a New Stim
+                    if (currentTrial.New_Stim.Contains(chosenStimDef.StimCode - 1)) currentTrial.New_Stim.Remove(chosenStimDef.StimCode - 1);
 
                     chosenStimDef.PreviouslyChosen = true;
                     currentTrial.PC_Stim.Add(chosenStimDef.StimCode - 1);
@@ -171,7 +165,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     {
                         if (currentTrial.New_Stim.Contains(stim) && stim != chosenStimDef.StimCode - 1)
                         {
-                            Debug.Log($"REMOVING STIM #{stim} FROM NEW AND ADDING TO PNC");
                             currentTrial.New_Stim.Remove(stim);
                             currentTrial.PNC_Stim.Add(stim);
                         }
@@ -193,7 +186,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchDistractorStart"]);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["IncorrectResponse"]);
-                    Debug.Log($"WRONG! CHOSE A PREVIOUSLY CHOSEN STIM WITH INDEX =  {chosenStimDef.StimCode - 1}");
                     currentTrial.WrongStimIndex = chosenStimDef.StimCode - 1; //identifies the stim they got wrong for Block FB purposes. 
                 }
             }
@@ -527,6 +519,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             NumTbCompletions_Block++;
             NumRewards_Block += currentTrial.NumRewardPulses;
             TokenCount = 0;
+
+            if (SyncBoxController != null)
+            {
+                SyncBoxController.SendRewardPulses(currentTrial.NumRewardPulses, currentTrial.PulseSize);
+                EventCodeManager.SendCodeImmediate(TaskEventCodes["Fluid1Onset"]);
+            }
         }
     }
 

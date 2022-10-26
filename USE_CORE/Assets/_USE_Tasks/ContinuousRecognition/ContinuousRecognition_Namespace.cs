@@ -49,9 +49,10 @@ namespace ContinuousRecognition_Namespace
         public float[] X_FbLocations;
         public float[] Y_FbLocations;
 
+
         public int NumTokens; //BUT HOW DO WE LINK IT TO THE TOKENBAR?
 
-        public int TrialCount, NumRewardPulses;
+        public int TrialCount, NumRewardPulses, PulseSize;
 
         public float DisplayStimsDuration, ChooseStimDuration, TouchFeedbackDuration, TrialEndDuration,
             DisplayResultDuration, TokenRevealDuration, TokenUpdateDuration;
@@ -152,6 +153,7 @@ namespace ContinuousRecognition_Namespace
                 trial.TokenUpdateDuration = TokenUpdateDuration;
                 trial.TotalTokensNum = TotalTokensNum;
                 trial.NumRewardPulses = NumRewardPulses;
+                trial.PulseSize = PulseSize;
 
                 TrialDefs.Add(trial);
                 numTrialStims++;
@@ -164,9 +166,6 @@ namespace ContinuousRecognition_Namespace
             {
                 {2,3},{3,4},{4,5},{5,6},{6,7},{7,9},{8,11},{9,13},{10,15},{11,18},{12,21},{13,23},{14,26}
             };
-            if (!pairs.ContainsKey(maxNumStim))Debug.Log("KEY NOT IN THE DICTIONARY!!!!");
-            else Debug.Log("MAX NUM TRIALS = " + pairs.Keys.ElementAt(maxNumStim));
-
             return pairs.Keys.ElementAt(maxNumStim);
         }
 
@@ -194,6 +193,7 @@ namespace ContinuousRecognition_Namespace
 
         public int? TotalTokensNum;
         public int NumRewardPulses;
+        public int PulseSize;
 
         public float DisplayStimsDuration, ChooseStimDuration, TrialEndDuration, TouchFeedbackDuration, 
             DisplayResultDuration, TokenRevealDuration, TokenUpdateDuration;

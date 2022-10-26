@@ -43,7 +43,6 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
            Array.Clear(wwwTL.numErrors_InBlock, 0, wwwTL.numErrors_InBlock.Length);
            wwwTL.accuracyLog_InBlock = "";
            wwwTL.runningAcc.Clear();
-           Debug.Log("trial number maximum: " + bd.TrialDefs.Count);
            wwwTL.MinTrials = bd.nRepetitionsMinMax[0];
         });
 

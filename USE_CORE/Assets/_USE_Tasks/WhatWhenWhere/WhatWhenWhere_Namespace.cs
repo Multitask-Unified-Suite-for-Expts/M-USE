@@ -36,8 +36,8 @@ namespace WhatWhenWhere_Namespace
             System.Random rnd = new System.Random();
             int num = rnd.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
 
-            List<TrialDef> TrialDefs = new List<TrialDef>(new TrialDef[num]);
-            for (int iTrial = 0; iTrial< TrialDefs.Count; iTrial++)
+            TrialDefs = new List<WhatWhenWhere_TrialDef>().ConvertAll(x => (TrialDef)x);
+            for (int iTrial = 0; iTrial< num; iTrial++)
             {
                 WhatWhenWhere_TrialDef td = new WhatWhenWhere_TrialDef();
                 td.TrialID = TrialID;
@@ -58,7 +58,7 @@ namespace WhatWhenWhere_Namespace
                 td.PulseSize = PulseSize;
                 td.LeaveFeedbackOn = LeaveFeedbackOn;
                 td.ErrorThreshold = ErrorThreshold;
-                TrialDefs[iTrial] = td;
+                TrialDefs.Add(td);
             }
         }
     }

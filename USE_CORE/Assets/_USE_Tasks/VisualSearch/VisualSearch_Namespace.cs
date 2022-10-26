@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
@@ -48,9 +49,9 @@ namespace VisualSearch_Namespace
             //pick # of trials from minmax
             System.Random rnd = new System.Random();
             int num = rnd.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
-            TrialDefs = new TrialDef[num];//actual correct # 
+            List<TrialDef> TrialDefs = new List<TrialDef>(new TrialDef[num]);
 
-            for (int iTrial = 0; iTrial < TrialDefs.Length; iTrial++)
+            for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
             {
                 VisualSearch_TrialDef td = new VisualSearch_TrialDef();
                 td.ContextName = ContextName;
@@ -63,7 +64,7 @@ namespace VisualSearch_Namespace
         }
         public override void AddToTrialDefsFromBlockDef()
         {
-            for (int iTrial = 0; iTrial < TrialDefs.Length; iTrial++)
+            for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
             {
                 VisualSearch_TrialDef td = (VisualSearch_TrialDef)TrialDefs[iTrial];
                 td.BlockName = BlockName;

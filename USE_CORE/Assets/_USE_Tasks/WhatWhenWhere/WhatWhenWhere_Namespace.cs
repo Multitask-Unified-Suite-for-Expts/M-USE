@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
@@ -34,9 +35,9 @@ namespace WhatWhenWhere_Namespace
             //pick # of trials from minmax
             System.Random rnd = new System.Random();
             int num = rnd.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
-            
-            TrialDefs = new TrialDef[num];//actual correct # 
-            for (int iTrial = 0; iTrial< TrialDefs.Length; iTrial++)
+
+            List<TrialDef> TrialDefs = new List<TrialDef>(new TrialDef[num]);
+            for (int iTrial = 0; iTrial< TrialDefs.Count; iTrial++)
             {
                 WhatWhenWhere_TrialDef td = new WhatWhenWhere_TrialDef();
                 td.TrialID = TrialID;

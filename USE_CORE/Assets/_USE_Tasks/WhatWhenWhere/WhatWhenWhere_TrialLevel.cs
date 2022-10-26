@@ -667,7 +667,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
         return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
             CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, MinTrials,
-            TrialDefs.Length);
+            TrialDefs.Count);
     }
     //-----------------------------------------------------------------METHODS FOR DATA HANDLING----------------------------------------------------------------------
     private void LogTrialData() //All ".AddDatum" commands for Trial Data

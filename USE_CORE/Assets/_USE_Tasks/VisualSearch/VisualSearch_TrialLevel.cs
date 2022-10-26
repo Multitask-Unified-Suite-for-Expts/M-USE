@@ -10,6 +10,7 @@ using USE_Settings;
 using System.Linq;
 using ConfigDynamicUI;
 using USE_ExperimentTemplate_Trial;
+using System.IO;
 
 public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 {
@@ -335,7 +336,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     }*/
     void loadVariables()
     {
-        Texture2D buttonTex = LoadPNG(MaterialFilePath + "\\StartButtonImage.png");
+        Texture2D buttonTex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
         startButton = CreateStartButton(buttonTex, new Rect(new Vector2(0,0), new Vector2(1,1)));
 
         playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display

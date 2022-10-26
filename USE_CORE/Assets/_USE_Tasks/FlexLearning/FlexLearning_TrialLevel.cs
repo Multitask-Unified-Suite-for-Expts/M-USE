@@ -319,7 +319,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
         return (TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
             CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, MinTrials,
-            TrialDefs.Length) || TrialCount_InBlock == MaxTrials);
+            TrialDefs.Count) || TrialCount_InBlock == MaxTrials);
         
     }
     private GameObject CreateStartButton(Texture2D tex, Rect rect)

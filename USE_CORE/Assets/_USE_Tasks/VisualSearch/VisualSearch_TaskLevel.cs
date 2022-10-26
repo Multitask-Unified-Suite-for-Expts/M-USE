@@ -17,8 +17,15 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
                 vsTL.MaterialFilePath =
                     (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NumTokens"))
-                vsTL.TaskTokenNum = (int)SessionSettings.Get(TaskName + "_TaskSettings", "NumTokens");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+                vsTL.buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+            else Debug.LogError("[ERROR] Start Button Position settings not defined in the TaskDef");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+                vsTL.buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+            else Debug.LogError("[ERROR] Start Button Scale settings not defined in the TaskDef");
+            
+            Debug.Log("button scale: " + vsTL.buttonScale);
+            Debug.Log("button position: " + vsTL.buttonPosition);
         }
         else
         {
@@ -36,7 +43,8 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             Array.Clear(vsTL.numCorrect_InBlock, 0, vsTL.numCorrect_InBlock.Length);
             Array.Clear(vsTL.numErrors_InBlock, 0, vsTL.numErrors_InBlock.Length);
             vsTL.accuracyLog_InBlock = "";*/
-            //vsTL.MaterialFilePath = bd.ContextExternalFilePath;
+            vsTL.NumTokenBar = bd.NumTokenBar;
+            TrialLevel.TokenFBController.SetTokenBarValue(bd.NumInitialTokens); 
         });
         
         RunBlock.AddUpdateMethod(() =>

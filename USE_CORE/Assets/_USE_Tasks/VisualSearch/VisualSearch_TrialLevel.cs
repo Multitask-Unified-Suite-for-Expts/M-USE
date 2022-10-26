@@ -11,6 +11,7 @@ using System.Linq;
 using ConfigDynamicUI;
 using USE_ExperimentTemplate_Trial;
 using System.IO;
+using UnityEngine.Serialization;
 
 public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 {
@@ -45,8 +46,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private Ray mouseRay;
     private bool variablesLoaded;
     public string MaterialFilePath;
-    public int TaskTokenNum;
-    
+    public Vector3 buttonPosition, buttonScale;
+    [FormerlySerializedAs("TaskTokenNum")] public int NumTokenBar;
+    public int NumInitialTokens;
+
     //Player View Variables
     private PlayerViewPanel playerView;
     private Transform playerViewParent; // Helps set things onto the player view in the experimenter display
@@ -99,7 +102,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         initTrial.AddInitializationMethod(() =>
         {
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar +  CurrentTrialDef.ContextName + ".png");
             Debug.Log("FilePath: " + MaterialFilePath);
             TokenFBController
                 .SetRevealTime(tokenRevealDuration.value)
@@ -121,7 +124,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             stateAfterDelay = SearchDisplay;
             TokenFBController.enabled = true;
-            TokenFBController.SetTotalTokensNum(TaskTokenNum); //CHECK THIS TIMING MIGHT BE OFF
+            TokenFBController.SetTotalTokensNum(NumTokenBar); 
+            
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarReset"]);
@@ -254,9 +258,22 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             
         });
         
+        // trial data
         TrialData.AddDatum("SelectedName", () => selected != null ? selected.name : null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
         TrialData.AddDatum("SelectionCorrect", () => correct ? 1 : 0);
+        
+        // frame date
+        FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
+        FrameData.AddDatum("Touch", () => response);
+        FrameData.AddDatum("StartButton", () => startButton.activeSelf);/*
+        FrameData.AddDatum("TimingErrorFeedback", () => imageTimingError.activeSelf);
+        FrameData.AddDatum("TokenBarFlashing", () => sliderHalo.activeSelf);
+        FrameData.AddDatum("Slider", () => slider.gameObject.activeSelf);*/
+        FrameData.AddDatum("TrialStimuliShown", () => tStim.IsActive);
+        /*FrameData.AddDatum("TokenBarValue", () => slider.normalizedValue);
+        FrameData.AddDatum("Context", () => contextName);
+        FrameData.AddDatum("ContextActive", () => contextActive);*/
         
         
         //this.AddTerminationSpecification(() => trialCount > numTrials, ()=> Debug.Log(trialCount + " " + numTrials));
@@ -276,7 +293,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.TrialStimTokenReward[i]);
             if (sd.StimTrialRewardMag > 0) sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!!
             else sd.IsTarget = false;
-
         }
         
         randomizedLocations = CurrentTrialDef.RandomizedLocations; 
@@ -297,43 +313,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             tStim.SetLocations(CurrentTrialDef.TrialStimLocations);
         }
     }
-/*
-    private USE_Button DefineStartButton(Transform parent)
-    {
-        /*
-        if (random == 1)
-        {
-            return;
-        }
-            Vector3 buttonPosition = new Vector3(0f, 0f, 0f);
-        Vector3 buttonScale = new Vector3(1f, 1f, 1f);
-        Color buttonColor = new Color(0.1f, 0.1f, 0.1f);
-        Vector3 tempColor = new Vector3(0f, 0f, 0f);
-        string buttonText = "";
-        Canvas canvas = parent.GetComponent<Canvas>();
-
-        //testButton = sttartButton;
-        string TaskName = "VisualSearch";
-        if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
-        {
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-                buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-                buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonColor"))
-                tempColor = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonColor");
-            buttonColor = new Color(tempColor[0], tempColor[1], tempColor[2]);
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonText"))
-                buttonText = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonText");
-        }
-        testButton = new USE_Button(buttonPosition, buttonScale, canvas, buttonColor, buttonText);
-        testButton.defineButton();
-        
-        return (testButton);
-
-        //testButton.SetVisibilityOnOffStates(GetStateFromName("InitTrial"), GetStateFromName("SearchDisplay"));
-        //random = 1;
-    }*/
     void loadVariables()
     {
         Texture2D buttonTex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
@@ -352,33 +331,17 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
         variablesLoaded = true;
-        //disableAllGameobjects();
     }
     private GameObject CreateStartButton(Texture2D tex, Rect rect)
     {
-        Vector3 buttonPosition = Vector3.zero;
-        Vector3 buttonScale = Vector3.zero;
-        string TaskName = "VisualSearch";
-        if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
-        {
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-                buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-            else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-                buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-            else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
-        }
-        else
-        {
-            Debug.Log("[ERROR] TaskDef is not in config folder");
-        }
-
         GameObject startButton = new GameObject("StartButton");
         SpriteRenderer sr = startButton.AddComponent<SpriteRenderer>() as SpriteRenderer;
         sr.sprite = Sprite.Create(tex, new Rect(rect.x, rect.y, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
         startButton.AddComponent<BoxCollider>();
         startButton.transform.localScale = buttonScale;
+        Debug.Log("button scale: " + buttonScale);
         startButton.transform.position = buttonPosition;
+        Debug.Log("button position: " + buttonPosition);
         return startButton;
     }
     private Vector2 playerViewPosition(Vector3 position, Transform playerViewParent)

@@ -54,9 +54,9 @@ namespace FlexLearning_Namespace
             //pick # of trials from minmax
             System.Random rnd = new System.Random();
             int num = rnd.Next(MinMaxTrials[0], MinMaxTrials[1]);
-            List<TrialDef> TrialDefs = new List<TrialDef>(new TrialDef[num]);
+            TrialDefs = new List<FlexLearning_TrialDef>().ConvertAll(x => (TrialDef)x);
 
-            for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
+            for (int iTrial = 0; iTrial < num; iTrial++)
             {
                 FlexLearning_TrialDef td = new FlexLearning_TrialDef();
                 td.TrialID = TrialID;
@@ -73,7 +73,7 @@ namespace FlexLearning_Namespace
                 td.NumPulses = NumPulses;
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
-                TrialDefs[iTrial] = td;
+                TrialDefs.Add(td);
             }
         }
         public override void AddToTrialDefsFromBlockDef()

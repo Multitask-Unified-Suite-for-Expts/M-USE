@@ -18,8 +18,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
                 flTL.MaterialFilePath =
                     (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-            //if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NumTokens"))
-            //    flTL.TaskTokenNum = (int)SessionSettings.Get(TaskName + "_TaskSettings", "NumTokens");
         }
         else
         {
@@ -43,6 +41,8 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             System.Random rnd = new System.Random();
              
             flTL.MaxTrials = rnd.Next(flBD.MinMaxTrials[0], flBD.MinMaxTrials[1]);
+            flTL.NumTokenBar = flBD.NumTokenBar;
+            TrialLevel.TokenFBController.SetTokenBarValue(flBD.NumInitialTokens); 
         });
 
         RunBlock.AddUpdateMethod(() =>

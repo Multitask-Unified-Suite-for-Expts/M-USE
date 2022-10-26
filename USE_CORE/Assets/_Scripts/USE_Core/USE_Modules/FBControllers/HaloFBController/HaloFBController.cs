@@ -14,7 +14,8 @@ public class HaloFBController : MonoBehaviour
 
     public void Init(DataController frameData) {
         frameData.AddDatum("HaloType", () => state.ToString());
-
+        frameData.AddDatum("PositiveHalo", () => PositiveHaloPrefab.activeSelf);
+        frameData.AddDatum("NegativeHalo", () => NegativeHaloPrefab.activeSelf);
         if (instantiated != null) {
             Debug.LogWarning("Initializing HaloFB Controller with an already visible halo");
             Destroy(instantiated);

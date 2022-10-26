@@ -32,19 +32,18 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     public ConfigNumber minObjectTouchDuration, itiDuration, finalFbDuration, fbDuration, maxObjectTouchDuration, selectObjectDuration, tokenRevealDuration, tokenUpdateDuration, searchDisplayDelay;
 
     // game object variables
-    private GameObject trialStim, clickMarker, selected;
+    private GameObject trialStim, selected;
     private GameObject[] totalObjects, currentObjects;
-    private int response, num_distractors = 0, tokenBarComplete = 0;
+    private int response, num_distractors = 0;
     private bool correct;
     FlexLearning_StimDef selectedSD = null;
 
     // misc variables
-    private Slider slider;
-    private float value = 0.0f, sliderValueIncreaseAmount;
-    private Ray mouseRay;
     private bool variablesLoaded;
     public string MaterialFilePath;
-
+    public int NumTokenBar;
+    public int NumInitialTokens;
+    
     //Player View Variables
     private PlayerViewPanel playerView;
     private Transform playerViewParent; // Helps set things onto the player view in the experimenter display
@@ -52,12 +51,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     public GameObject playerViewText;
     private Vector2 textLocation;
     private bool playerViewLoaded;
-
-    //private StimGroup externalStimsA, externalStimsB, externalStimsC;
-    private StimGroup TargetStims, DistractorStims;
-    private int numDistractor = 0;
-    private USE_Button testButton;
-    private GameObject sbSprite;
     private bool randomizedLocations = false;
 
     public override void DefineControlLevel()
@@ -122,7 +115,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             stateAfterDelay = SearchDisplay;
             TokenFBController.enabled = true;
-            TokenFBController.SetTotalTokensNum(CurrentTrialDef.NumTokenBar);
+            TokenFBController.SetTotalTokensNum(NumTokenBar);
             EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]); //CHECK THIS TIMING MIGHT BE OFF
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
@@ -248,11 +241,22 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeImmediate(TaskEventCodes["TrlEnd"]);
 
         });
-
+        // trial data
         TrialData.AddDatum("SelectedName", () => selected != null ? selected.name : null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
         TrialData.AddDatum("SelectionCorrect", () => correct ? 1 : 0);
-        TrialData.AddDatum("NumDistractors", () => num_distractors);
+        
+        // frame date
+        FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
+        FrameData.AddDatum("Touch", () => response);
+        FrameData.AddDatum("StartButton", () => startButton.activeSelf);
+        /*FrameData.AddDatum("GrayHaloFeedback", () => (grayHalo.activeSelf || grayHaloScene.activeSelf));
+        FrameData.AddDatum("YellowHaloFeedback", () => yellowHalo.activeSelf);
+        FrameData.AddDatum("TimingErrorFeedback", () => imageTimingError.activeSelf);*/
+        FrameData.AddDatum("TrialStimuliShown", () => tStim.IsActive);
+        /*FrameData.AddDatum("TokenBarValue", () => slider.normalizedValue);
+        FrameData.AddDatum("Context", () => contextName);
+        FrameData.AddDatum("ContextActive", () => contextActive);*/
 
 
         //this.AddTerminationSpecification(() => trialCount > numTrials, ()=> Debug.Log(trialCount + " " + numTrials));

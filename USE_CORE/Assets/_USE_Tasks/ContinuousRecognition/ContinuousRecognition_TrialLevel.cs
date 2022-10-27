@@ -159,7 +159,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     currentTrial.PC_Stim.Add(chosenStimDef.StimCode - 1);
                     ChosenStimIndices.Add(chosenStimDef.StimCode - 1); //also adding to chosenIndices so I can keep in order for display results. 
 
-                    //TRYING TO REMOVE ALL NEW STIM THAT WEREN'T CHOSEN, FROM NEW STIM AND INTO PNC STIM. 
+                    //REMOVE ALL NEW STIM THAT WEREN'T CHOSEN, FROM NEW STIM AND INTO PNC STIM. 
                     List<int> newStimToRemove = currentTrial.New_Stim.ToList();
                     foreach (var stim in newStimToRemove)
                     {
@@ -170,17 +170,18 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         }
                     }
 
-                    //SINCE THEY GOT IT RIGHT, CHECK IF LAST TRIAL IN BLOCK. IF SO, MAKE THE GOTALLTRIALSCORRECT VARIABLE TRUE. 
-                    //if(TrialCount_InBlock == currentTrial.MaxNumTrials-2)
-                    if(currentTrial.PNC_Stim.Count == 0)
+                    //SINCE THEY GOT IT RIGHT, CHECK IF LAST TRIAL IN BLOCK OR IF THEY FOUND ALL THE STIM. 
+                    if(currentTrial.PNC_Stim.Count == 0 || TrialCount_InBlock == currentTrial.MaxNumTrials-1)
                     {
+                        if (currentTrial.PNC_Stim.Count == 0) Debug.Log("FOUND ALL STIM!");
+                        else Debug.Log("FINISHED ALL TRIALS IN BLOCK");
+
                         TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
                         CompletedAllTrials = true;
                         EndBlock = true;
                     }
-
-                    Debug.Log("NUMBER OF PNC STIM AFTER THEY CHOSE = " + currentTrial.PNC_Stim.Count);
                 }
+
                 else //THEY GUESSED WRONG
                 {
                     TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
@@ -439,7 +440,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             TrialStims.Add(trialStims);
 
         }
-        else if(TrialCount_InBlock > 0 && TrialCount_InBlock <= (currentTrial.MaxNumStim-2))
+        else if((TrialCount_InBlock > 0 && TrialCount_InBlock <= (currentTrial.MaxNumStim-2)) || TrialCount_InBlock > 0 && currentTrial.FindAllStim == 0)
         {
             currentTrial.TrialStimIndices.Clear();
 

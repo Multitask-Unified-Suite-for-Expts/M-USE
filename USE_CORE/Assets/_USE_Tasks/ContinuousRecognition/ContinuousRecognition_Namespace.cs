@@ -67,7 +67,9 @@ namespace ContinuousRecognition_Namespace
         public override void GenerateTrialDefsFromBlockDef()
         {
             MaxNumStim = NumObjectsMinMax[1];
-            MaxNumTrials = CalculateMaxNumTrials(MaxNumStim);
+            if (FindAllStim == 1) MaxNumTrials = CalculateMaxNumTrials(MaxNumStim);
+            else MaxNumTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
+            Debug.Log("MAX NUM TRIALS = " + MaxNumTrials);
 
             PC_Stim = new List<int>();
             PNC_Stim = new List<int>();
@@ -108,6 +110,7 @@ namespace ContinuousRecognition_Namespace
 
 
             TrialDefs = new List<ContinuousRecognition_TrialDef>().ConvertAll(x=>(TrialDef)x);
+
             int numTrialStims = NumObjectsMinMax[0]; //incremented at end
             bool theEnd = false;
 
@@ -117,7 +120,7 @@ namespace ContinuousRecognition_Namespace
                 trial.BlockStimIndices = BlockStimIndices;
 
                 Vector3[] trialStimLocations;
-                if(trialIndex > MaxNumStim-2)
+                if (FindAllStim == 1 && trialIndex > MaxNumStim - 2)
                 {
                     trialStimLocations = new Vector3[MaxNumStim];
                     numTrialStims = MaxNumStim;
@@ -165,14 +168,12 @@ namespace ContinuousRecognition_Namespace
 
         private int CalculateMaxNumTrials(int maxNumStim)
         {
-            var k = maxNumStim + CalculateNumRemaining_EOT(maxNumStim);
-            Debug.Log("MAX NUM STIM = " + k);
-            return k;
+            return maxNumStim + CalculateNumRemaining_EOT(maxNumStim);
         }
 
         private int CalculateNumRemaining_EOT(int totalTrialStim)
         {
-            int NumRemaining_BEG = 1;
+            int NumRemaining_BEG = 0;
             int NumRemaining_END = 0;
             for(int i = 0; i <= totalTrialStim-2; i++)
             {
@@ -187,7 +188,7 @@ namespace ContinuousRecognition_Namespace
        
         private int GetNumNewStim_Trial(int totalTrialStim)
         {
-            float[] stimPercentages = GetStimRatioPercentages();
+            float[] stimPercentages = GetStimPercentages();
 
             int Num_PC = (int)Math.Floor((double)stimPercentages[0] * totalTrialStim);
             int Num_New = (int)Math.Floor((double)stimPercentages[1] * totalTrialStim);
@@ -207,7 +208,7 @@ namespace ContinuousRecognition_Namespace
             return Num_New;
         }
 
-        private float[] GetStimRatioPercentages()
+        private float[] GetStimPercentages()
         {
             var ratio = InitialStimRatio;
             float sum = 0;
@@ -218,15 +219,6 @@ namespace ContinuousRecognition_Namespace
             
             return stimPercentages;
         }
-
-        //private int CalculateMaxTrials(int maxNumStim)
-        //{
-        //    Dictionary<int, int> pairs = new Dictionary<int, int>()  //{MaxNumStim, MaxNumTrials}
-        //    {
-        //        {2,3},{3,4},{4,5},{5,6},{6,7},{7,9},{8,11},{9,13},{10,15},{11,18},{12,21},{13,23},{14,26}
-        //    };
-        //    return pairs.Keys.ElementAt(maxNumStim);
-        //}
 
     }
 

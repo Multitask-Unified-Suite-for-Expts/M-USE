@@ -474,11 +474,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 currentTrial.TrialStimIndices.Add(PNC_Copy[i]);
             }
 
-            int numGenerated = NewStim_Copy.Count + PC_Copy.Count + PNC_Copy.Count;
-            int numNeeded = PC_Num + New_Num + PNC_Num;
-            if (numGenerated == numNeeded) Debug.Log($"THE CORRECT AMOUNT OF STIM ({numGenerated}) WERE GENERATED FOR TRIAL #{TrialCount_InBlock}");
-            else Debug.Log($"NUM OF STIM GENERATED ({numGenerated}) DOES NOT EQUAL THE NUMBER NEEDED ({numNeeded}) FOR TRIAL #{TrialCount_InBlock}");
-
             trialStims = new StimGroup($"TrialStims", ExternalStims, currentTrial.TrialStimIndices);
             trialStims.SetLocations(currentTrial.TrialStimLocations);
             trialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenUpdate")); //Visible when start DisplayStims, invisible when finish TokenUpdate.

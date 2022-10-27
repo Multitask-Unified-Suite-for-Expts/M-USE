@@ -49,7 +49,6 @@ namespace ContinuousRecognition_Namespace
         public float[] X_FbLocations;
         public float[] Y_FbLocations;
 
-
         public int NumTokens; //BUT HOW DO WE LINK IT TO THE TOKENBAR?
 
         public int TrialCount, NumRewardPulses, PulseSize;
@@ -61,6 +60,9 @@ namespace ContinuousRecognition_Namespace
         public string ContextName;
 
         public int ManuallySpecifyLocation;
+        public int FindAllStim; //basically a bool used to determine whether they playing original ending or CappedStim/FindAll ending. 
+
+
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -154,6 +156,7 @@ namespace ContinuousRecognition_Namespace
                 trial.TotalTokensNum = TotalTokensNum;
                 trial.NumRewardPulses = NumRewardPulses;
                 trial.PulseSize = PulseSize;
+                trial.FindAllStim = FindAllStim;
 
                 TrialDefs.Add(trial);
                 numTrialStims++;
@@ -162,17 +165,75 @@ namespace ContinuousRecognition_Namespace
 
         private int CalculateMaxNumTrials(int maxNumStim)
         {
-            Dictionary<int, int> pairs = new Dictionary<int, int>()  //{MaxNumStim, MaxNumTrials}
-            {
-                {2,3},{3,4},{4,5},{5,6},{6,7},{7,9},{8,11},{9,13},{10,15},{11,18},{12,21},{13,23},{14,26}
-            };
-            return pairs.Keys.ElementAt(maxNumStim);
+            var k = maxNumStim + CalculateNumRemaining_EOT(maxNumStim);
+            Debug.Log("MAX NUM STIM = " + k);
+            return k;
         }
+
+        private int CalculateNumRemaining_EOT(int totalTrialStim)
+        {
+            int NumRemaining_BEG = 1;
+            int NumRemaining_END = 0;
+            for(int i = 0; i <= totalTrialStim-2; i++)
+            {
+                int num_New = GetNumNewStim_Trial(i+2);
+               
+                NumRemaining_END = NumRemaining_BEG + num_New - 1;
+                NumRemaining_BEG = NumRemaining_END;
+            }
+            return NumRemaining_END;
+        }
+
+       
+        private int GetNumNewStim_Trial(int totalTrialStim)
+        {
+            float[] stimPercentages = GetStimRatioPercentages();
+
+            int Num_PC = (int)Math.Floor((double)stimPercentages[0] * totalTrialStim);
+            int Num_New = (int)Math.Floor((double)stimPercentages[1] * totalTrialStim);
+            int Num_PNC = (int)Math.Floor((double)stimPercentages[2] * totalTrialStim);
+            if (Num_PC == 0) Num_PC = 1;
+            if (Num_New == 0) Num_New = 1;
+            if (Num_PNC == 0) Num_PNC = 1;
+
+            int temp = 0;
+            while ((Num_PC + Num_New + Num_PNC) < totalTrialStim)
+            {
+                if (temp % 3 == 0) Num_PC += 1;
+                else if (temp % 3 == 1) Num_New += 1;
+                else Num_PC += 1;
+                temp++;
+            }
+            return Num_New;
+        }
+
+        private float[] GetStimRatioPercentages()
+        {
+            var ratio = InitialStimRatio;
+            float sum = 0;
+            float[] stimPercentages = new float[ratio.Length];
+
+            foreach (var num in ratio)  sum += num;
+            for (int i = 0; i < ratio.Length; i++)  stimPercentages[i] = ratio[i] / sum;
+            
+            return stimPercentages;
+        }
+
+        //private int CalculateMaxTrials(int maxNumStim)
+        //{
+        //    Dictionary<int, int> pairs = new Dictionary<int, int>()  //{MaxNumStim, MaxNumTrials}
+        //    {
+        //        {2,3},{3,4},{4,5},{5,6},{6,7},{7,9},{8,11},{9,13},{10,15},{11,18},{12,21},{13,23},{14,26}
+        //    };
+        //    return pairs.Keys.ElementAt(maxNumStim);
+        //}
 
     }
 
     public class ContinuousRecognition_TrialDef : TrialDef
     {
+        public int FindAllStim; //basically a bool used to determine whether they playing original ending or CappedStim/FindAll ending. 
+
         public Vector3[] TrialStimLocations;
         public Vector3[] TrialFeedbackLocations;
 

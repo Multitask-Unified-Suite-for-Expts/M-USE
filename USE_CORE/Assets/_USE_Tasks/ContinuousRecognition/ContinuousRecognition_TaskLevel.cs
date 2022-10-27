@@ -191,6 +191,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("TimeToChoice", () => trialLevel.AvgTimeToChoice_Block);
         BlockData.AddDatum("TimeToCompletion", () => trialLevel.TimeToCompletion_Block);
         BlockData.AddDatum("NumRewards", () => trialLevel.NumRewards_Block);
+        BlockData.AddDatum("MaxNumTrials", () => currentBlock.MaxNumTrials);
 
     }
 

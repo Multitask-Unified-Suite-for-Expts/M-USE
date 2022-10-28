@@ -30,6 +30,10 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     public string BlockAveragesString;
     public string CurrentBlockString;
     public string PreviousBlocksString;
+
+    public int TrialCount;
+
+    public GameObject Starfield;
     
 
     ContinuousRecognition_BlockDef currentBlock => GetCurrentBlockDef<ContinuousRecognition_BlockDef>();
@@ -53,6 +57,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         //Clearing the list of picked stim indices at beginning of each block. 
         RunBlock.AddInitializationMethod(() =>
         {
+            //Starfield.SetActive(true);
+
             trialLevel.ChosenStimIndices.Clear();
 
             trialLevel.NumTrials_Block = 0;
@@ -62,28 +68,19 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.AvgTimeToChoice_Block = 0;
             trialLevel.TimeToCompletion_Block = 0;
             trialLevel.NumRewards_Block = 0;
-        
 
+            CalculateBlockSummaryString(trialLevel);
         });
+
+
+
         RunBlock.AddUpdateMethod(() =>
         {
-            BlockAveragesString = "<size=19><b>Block Averages:</b></size>" +
-                            "\nAvg Correct: " + AvgNumCorrect.ToString("0.00") +
-                            "\nAvg TbCompletions: " + AvgNumTbCompletions.ToString("0.00") +
-                            "\nAvg TimeToPick: " + AvgTimeToChoice.ToString("0.00") + "s" +
-                            "\nAvg TimeToCompletion: " + AvgTimeToCompletion.ToString("0.00") + "s" +
-                            "\nAvg Rewards: " + AvgNumRewards.ToString("0.00") +
-                            "\nStandard Deviation: " + StanDev.ToString("0.00") +
-                            "\n";
-
-            CurrentBlockString = "<b>Block" + "(" + currentBlock.BlockName + "):" + "</b>" +
-                            "\nCorrect: " + trialLevel.NumCorrect_Block +
-                            "\nTbCompletions: " + trialLevel.NumTbCompletions_Block +
-                            "\nAvgTimeToChoice: " + trialLevel.AvgTimeToChoice_Block.ToString("0.00") + "s" +
-                            "\nTimeToCompletion: " + trialLevel.TimeToCompletion_Block.ToString("0.00") + "s" +
-                            "\nRewards: " + trialLevel.NumRewards_Block;
-
-            BlockSummaryString = BlockAveragesString + "\n"  + CurrentBlockString + "\n" + "\n" + PreviousBlocksString;
+            if (trialLevel.TrialComplete)
+            {
+                CalculateBlockSummaryString(trialLevel); //Update string if they finish a trial 
+                trialLevel.TrialComplete = false;
+            }
         });
 
 
@@ -104,6 +101,28 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         });
     }
 
+
+    private void CalculateBlockSummaryString(ContinuousRecognition_TrialLevel trialLevel)
+    {
+        BlockAveragesString = "<size=19><b>Block Averages " + $"({BlockCount});" + "</b></size>" +
+                          "\nAvg Correct: " + AvgNumCorrect.ToString("0.00") +
+                          "\nAvg TbCompletions: " + AvgNumTbCompletions.ToString("0.00") +
+                          "\nAvg TimeToPick: " + AvgTimeToChoice.ToString("0.00") + "s" +
+                          "\nAvg TimeToCompletion: " + AvgTimeToCompletion.ToString("0.00") + "s" +
+                          "\nAvg Rewards: " + AvgNumRewards.ToString("0.00") +
+                          "\nStandard Deviation: " + StanDev.ToString("0.00") +
+                          "\n";
+
+        CurrentBlockString = "<b>Block" + "(" + currentBlock.BlockName + "):" + "</b>" +
+                        "\nCorrect: " + trialLevel.NumCorrect_Block +
+                        "\nTbCompletions: " + trialLevel.NumTbCompletions_Block +
+                        "\nAvgTimeToChoice: " + trialLevel.AvgTimeToChoice_Block.ToString("0.00") + "s" +
+                        "\nTimeToCompletion: " + trialLevel.TimeToCompletion_Block.ToString("0.00") + "s" +
+                        "\nRewards: " + trialLevel.NumRewards_Block +
+                        "\n";
+
+        BlockSummaryString = BlockAveragesString + "\n" + CurrentBlockString + "\n" + PreviousBlocksString;
+    }
 
     private void CalculateStanDev()
     {

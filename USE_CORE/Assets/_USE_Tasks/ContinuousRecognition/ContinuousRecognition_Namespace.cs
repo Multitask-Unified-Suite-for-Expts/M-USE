@@ -156,10 +156,10 @@ namespace ContinuousRecognition_Namespace
                 trial.ContextName = ContextName;
                 trial.TokenRevealDuration = TokenRevealDuration;
                 trial.TokenUpdateDuration = TokenUpdateDuration;
-                trial.TotalTokensNum = TotalTokensNum;
                 trial.NumRewardPulses = NumRewardPulses;
                 trial.PulseSize = PulseSize;
                 trial.FindAllStim = FindAllStim;
+                trial.NumTokens = NumTokens;
 
                 TrialDefs.Add(trial);
                 numTrialStims++;
@@ -244,7 +244,7 @@ namespace ContinuousRecognition_Namespace
         public int MaxNumTrials;
         public int MaxNumStim;
 
-        public int? TotalTokensNum;
+        public int? NumTokens;
         public int NumRewardPulses;
         public int PulseSize;
 

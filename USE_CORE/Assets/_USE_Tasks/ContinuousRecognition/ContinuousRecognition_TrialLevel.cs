@@ -56,6 +56,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public string MaterialFilePath;
     private bool variablesLoaded;
 
+    public bool TrialComplete;
+
 
     public override void DefineControlLevel()
     {        
@@ -69,7 +71,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
         TokenFBController.enabled = false;
-        Starfield.SetActive(false);
+        //Starfield.SetActive(false);
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
@@ -77,7 +79,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + currentTrial.ContextName + ".png");
             ContextActive = true;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
-            Starfield.SetActive(true);
+            //if(!Starfield.activeSelf)
+            //{
+            //    Starfield.SetActive(true);
+            //}
             CreateStartButton();
             if (!variablesLoaded) LoadConfigUIVariables();
 
@@ -98,6 +103,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
+            CompletedAllTrials = false;
+            TrialComplete = false;
             currentTrial.IsNewStim = false;
             EndBlock = false;
             stimIsChosen = false;
@@ -227,10 +234,17 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.Destroy();
             if (GotCorrect)
             {
-                TokenFBController.AddTokens(chosenStimObj, 1); //will put "currentTrial.StimTrialRewardMag" here !
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
-                TokenCount++;
+                if(TrialCount_InBlock == currentTrial.MaxNumTrials-1 || currentTrial.PNC_Stim.Count == 0) //If they get the last trial right, fill up bar!
+                {
+                    currentTrial.NumRewardPulses++;
+                    int numToFillBar = (int) currentTrial.NumTokens - TokenCount;
+                    TokenFBController.AddTokens(chosenStimObj, numToFillBar);
+                }
+                else   TokenFBController.AddTokens(chosenStimObj, 1); //will put "currentTrial.StimTrialRewardMag" here !
+                
                 HandleTokenUpdate();
+                TokenCount++;
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
             }
             else
             {
@@ -241,7 +255,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 HandleTokenUpdate();
             }
         });
-        TokenUpdate.AddTimer(() => currentTrial.TokenUpdateDuration + currentTrial.TokenRevealDuration , DisplayResults);
+        TokenUpdate.SpecifyTermination(() => !TokenFBController.IsAnimating(), DisplayResults);
+        //TokenUpdate.AddTimer(() => currentTrial.TokenUpdateDuration + currentTrial.TokenRevealDuration, DisplayResults);
 
 
         DisplayResults.AddInitializationMethod(() =>
@@ -267,12 +282,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         ITI.AddInitializationMethod(() =>
         {
-            Starfield.SetActive(false);
             ContextActive = false;
         });
 
-        ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
+        ITI.AddTimer(() => itiDuration.min, FinishTrial, () =>
         {
+            TrialComplete = true;
             NumTrials_Block++;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]); //next trial starts next frame
         });
@@ -307,7 +322,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 FeedbackLocations[i] = currentTrial.TrialFeedbackLocations[i];
             }
             FeedbackLocations = CenterFeedbackLocations(FeedbackLocations);
-            Debug.Log("CHOSEN STIM INDICES COUNT = " + ChosenStimIndices.Count);
             rightGroup = new StimGroup("Right", ExternalStims, ChosenStimIndices);
             GenerateFeedbackStim(rightGroup, FeedbackLocations);
             GenerateFeedbackBorders(rightGroup);
@@ -368,7 +382,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private IEnumerator DestroyFeedbackBorders() //trying to match up the dissapearance of borders and stim.
     {
-        yield return new WaitForSeconds(.5f);
+        yield return new WaitForSeconds(.1f);
         foreach (GameObject border in BorderPrefabList)
         {
             if (border != null) border.SetActive(false);
@@ -510,7 +524,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void HandleTokenUpdate()
     {
-        if (TokenCount == currentTrial.TotalTokensNum && !EndBlock)
+        if (TokenCount == currentTrial.NumTokens && !EndBlock)
         {
             NumTbCompletions_Block++;
             NumRewards_Block += currentTrial.NumRewardPulses;

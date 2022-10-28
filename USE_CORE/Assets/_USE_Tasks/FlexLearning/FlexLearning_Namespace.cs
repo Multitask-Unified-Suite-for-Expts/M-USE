@@ -40,7 +40,7 @@ namespace FlexLearning_Namespace
         public string BlockName;
         public string ContextName;
         public int NumInitialTokens;
-        public TokenReward[] TrialStimTokenReward;
+        public TokenReward[][] TrialStimTokenReward;
         public string BlockEndType;
         public float BlockEndThreshold;
         public int BlockEndWindow;
@@ -104,7 +104,7 @@ namespace FlexLearning_Namespace
         public Vector3[] TrialStimLocations;
         public string BlockName;
         public string TrialID;
-        public TokenReward[] TrialStimTokenReward;
+        public TokenReward[][] TrialStimTokenReward;
         public bool RandomizedLocations;
         public string ContextName;
         public string BlockEndType;

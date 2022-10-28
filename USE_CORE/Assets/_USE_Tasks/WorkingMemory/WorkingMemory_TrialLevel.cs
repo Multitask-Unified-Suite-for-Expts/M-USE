@@ -183,8 +183,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         searchStims = new StimGroup("SearchStims", ExternalStims, CurrentTrialDef.SearchStimIndices);
         searchStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
         searchStims.SetLocations(CurrentTrialDef.SearchStimLocations);
-        targetStim = new StimGroup("TargetStim");
-        targetStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
+        
         for (int i = 0; i < CurrentTrialDef.SearchStimIndices.Length; i++)
         {
             WorkingMemory_StimDef sd = (WorkingMemory_StimDef)searchStims.stimDefs[i];
@@ -192,7 +191,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             if (sd.StimTrialRewardMag > 0)
             {
                 sd.IsTarget = true;//Holds true if the target stim receives non-zero reward
-                sd.AddToStimGroup(targetStim);
+                targetStim = new StimGroup("TargetStim", ExternalStims, new int[] {CurrentTrialDef.SearchStimIndices[i]});
+                targetStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
                 targetStim.SetLocations(CurrentTrialDef.TargetSampleLocation);
             } 
             else sd.IsTarget = false;

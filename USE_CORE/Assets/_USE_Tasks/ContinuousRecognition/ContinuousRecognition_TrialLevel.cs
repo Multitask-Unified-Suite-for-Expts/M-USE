@@ -239,11 +239,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     currentTrial.NumRewardPulses++;
                     int numToFillBar = (int) currentTrial.NumTokens - TokenCount;
                     TokenFBController.AddTokens(chosenStimObj, numToFillBar);
+                    TokenCount += numToFillBar;
                 }
-                else   TokenFBController.AddTokens(chosenStimObj, 1); //will put "currentTrial.StimTrialRewardMag" here !
-                
+                else
+                {
+                    TokenFBController.AddTokens(chosenStimObj, 1); //will put "currentTrial.StimTrialRewardMag" here !
+                    TokenCount++;
+                }
                 HandleTokenUpdate();
-                TokenCount++;
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
             }
             else
@@ -251,13 +254,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 TokenFBController.RemoveTokens(chosenStimObj, 1, Color.grey);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
                 TokenCount--;
-                EndBlock = true;
                 HandleTokenUpdate();
+                EndBlock = true;
             }
         });
         TokenUpdate.SpecifyTermination(() => !TokenFBController.IsAnimating(), DisplayResults);
-        //TokenUpdate.AddTimer(() => currentTrial.TokenUpdateDuration + currentTrial.TokenRevealDuration, DisplayResults);
-
 
         DisplayResults.AddInitializationMethod(() =>
         {
@@ -524,7 +525,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void HandleTokenUpdate()
     {
-        if (TokenCount == currentTrial.NumTokens && !EndBlock)
+        if (TokenCount == currentTrial.NumTokens)
         {
             NumTbCompletions_Block++;
             NumRewards_Block += currentTrial.NumRewardPulses;

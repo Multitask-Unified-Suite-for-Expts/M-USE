@@ -24,10 +24,10 @@ public class BlockInfoPanel : ExperimenterDisplayPanel
     {
         if (TrialLevel != null)
         {
-            if(!string.IsNullOrEmpty(TaskLevel.BlockSummaryString))
+            if(TaskLevel.BlockSummaryString.Length > 0)
             {
                 blockInfoPanelText.GetComponent<Text>().supportRichText = true;
-                blockInfoPanelText.GetComponent<Text>().text = "<size=17><color=#2d3436ff>" + TaskLevel.BlockSummaryString + "</color></size>";
+                blockInfoPanelText.GetComponent<Text>().text = "<size=17><color=#2d3436ff>" + TaskLevel.BlockSummaryString.ToString() + "</color></size>";
             }
         }
             

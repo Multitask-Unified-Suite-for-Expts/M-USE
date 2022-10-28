@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Collections.Generic;
 using ContinuousRecognition_Namespace;
 using UnityEngine;
@@ -29,12 +30,13 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     public string BlockAveragesString;
     public string CurrentBlockString;
-    public string PreviousBlocksString;
+    public StringBuilder PreviousBlocksString;
 
     public int TrialCount;
 
     public GameObject Starfield;
-    
+
+   
 
     ContinuousRecognition_BlockDef currentBlock => GetCurrentBlockDef<ContinuousRecognition_BlockDef>();
     public override void SpecifyTypes()
@@ -53,6 +55,11 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         string TaskName = "ContinuousRecognition";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+
+        BlockSummaryString = new StringBuilder();
+        BlockAveragesString = "";
+        CurrentBlockString = "";
+        PreviousBlocksString = new StringBuilder();
 
         //Clearing the list of picked stim indices at beginning of each block. 
         RunBlock.AddInitializationMethod(() =>
@@ -86,7 +93,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddInitializationMethod(() =>
         {
-            PreviousBlocksString = CurrentBlockString + "\n" + "\n" + PreviousBlocksString; //Add current block string to full list of previous blocks. 
+            PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
 
             NumCorrect_Task.Add(trialLevel.NumCorrect_Block); //at end of each block, add block's NumCorrect to task List;
             NumTbCompletions_Task.Add(trialLevel.NumTbCompletions_Block);
@@ -104,7 +111,9 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     private void CalculateBlockSummaryString(ContinuousRecognition_TrialLevel trialLevel)
     {
-        BlockAveragesString = "<size=19><b>Block Averages " + $"({BlockCount});" + "</b></size>" +
+        ClearStrings();
+
+        BlockAveragesString = "<size=18><b>Block Averages " + $"({BlockCount});" + "</b></size>" +
                           "\nAvg Correct: " + AvgNumCorrect.ToString("0.00") +
                           "\nAvg TbCompletions: " + AvgNumTbCompletions.ToString("0.00") +
                           "\nAvg TimeToPick: " + AvgTimeToChoice.ToString("0.00") + "s" +
@@ -121,7 +130,16 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
                         "\nRewards: " + trialLevel.NumRewards_Block +
                         "\n";
 
-        BlockSummaryString = BlockAveragesString + "\n" + CurrentBlockString + "\n" + PreviousBlocksString;
+        BlockSummaryString.AppendLine(BlockAveragesString.ToString());
+        BlockSummaryString.AppendLine(CurrentBlockString.ToString());
+        if(PreviousBlocksString.Length > 0) BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
+    }
+
+    private void ClearStrings()
+    {
+        BlockAveragesString = "";
+        CurrentBlockString = "";
+        BlockSummaryString.Clear();
     }
 
     private void CalculateStanDev()

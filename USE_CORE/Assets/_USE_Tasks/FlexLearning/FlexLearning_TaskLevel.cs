@@ -48,7 +48,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddUpdateMethod(() =>
         {
-            BlockSummaryString = "Block Num: " + (flTL.BlockCount) + "\nTrial Count: " + (flTL.TrialCount_InBlock);
+            BlockSummaryString.AppendLine("Block Num: " + (flTL.BlockCount) + "\nTrial Count: " + (flTL.TrialCount_InBlock));
             //  "\nTotal Errors: " + vsTL.totalErrors_InBlock + "\nError Type: " + vsTL.errorType_InBlockString + "\nPerformance: " + vsTL.accuracyLog_InBlock;
         });
         

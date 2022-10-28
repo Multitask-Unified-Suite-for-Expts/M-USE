@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -32,8 +33,9 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public SessionDataControllers SessionDataControllers;
 
         [HideInInspector] public bool StoreData, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
-        [HideInInspector] public string SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, BlockSummaryString, EyetrackerType, SelectionType;
+        [HideInInspector] public string SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
         [HideInInspector] public LocateFile LocateFile;
+        [HideInInspector] public StringBuilder BlockSummaryString;
 
         // public string TaskSceneName;
         public Camera TaskCam;

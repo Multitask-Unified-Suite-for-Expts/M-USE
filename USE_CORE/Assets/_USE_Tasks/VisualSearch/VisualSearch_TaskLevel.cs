@@ -23,9 +23,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
                 vsTL.buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
             else Debug.LogError("[ERROR] Start Button Scale settings not defined in the TaskDef");
-            
-            Debug.Log("button scale: " + vsTL.buttonScale);
-            Debug.Log("button position: " + vsTL.buttonPosition);
         }
         else
         {

@@ -43,6 +43,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     public string MaterialFilePath;
     public int NumTokenBar;
     public int NumInitialTokens;
+    public Vector3 buttonPosition, buttonScale;
     
     //Player View Variables
     private PlayerViewPanel playerView;
@@ -328,23 +329,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     }
     private GameObject CreateStartButton(Texture2D tex, Rect rect)
     {
-        Vector3 buttonPosition = Vector3.zero;
-        Vector3 buttonScale = Vector3.zero;
-        string TaskName = "FlexLearning";
-        if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
-        {
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-                buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-            else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-                buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-            else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
-        }
-        else
-        {
-            Debug.Log("[ERROR] TaskDef is not in config folder");
-        }
-
         GameObject startButton = new GameObject("StartButton");
         SpriteRenderer sr = startButton.AddComponent<SpriteRenderer>() as SpriteRenderer;
         sr.sprite = Sprite.Create(tex, new Rect(rect.x, rect.y, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);

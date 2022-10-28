@@ -339,9 +339,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         sr.sprite = Sprite.Create(tex, new Rect(rect.x, rect.y, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
         startButton.AddComponent<BoxCollider>();
         startButton.transform.localScale = buttonScale;
-        Debug.Log("button scale: " + buttonScale);
         startButton.transform.position = buttonPosition;
-        Debug.Log("button position: " + buttonPosition);
         return startButton;
     }
     private Vector2 playerViewPosition(Vector3 position, Transform playerViewParent)

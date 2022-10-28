@@ -18,6 +18,12 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
                 flTL.MaterialFilePath =
                     (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+                flTL.buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+            else Debug.LogError("[ERROR] Start Button Position settings not defined in the TaskDef");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+                flTL.buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+            else Debug.LogError("[ERROR] Start Button Scale settings not defined in the TaskDef");
         }
         else
         {

@@ -26,7 +26,25 @@ namespace WorkingMemory_Namespace
         //Already-existing fields (inherited from BlockDef)
         //public int BlockCount;
         //public TrialDef[] TrialDefs;
-        
+        public string BlockName;
+        public int NumInitialTokens;
+        public int NumTokenBar;
+        public int NumPulses;
+        public int PulseSize;
+
+        public override void AddToTrialDefsFromBlockDef()
+        {
+            for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
+            {
+                WorkingMemory_TrialDef td = (WorkingMemory_TrialDef)TrialDefs[iTrial];
+                td.BlockName = BlockName;
+                td.NumInitialTokens = NumInitialTokens;
+                td.NumPulses = NumPulses;
+                td.NumTokenBar = NumTokenBar;
+                td.PulseSize = PulseSize;
+                TrialDefs[iTrial] = td;
+            }
+        }
     }
 
     public class WorkingMemory_TrialDef : TrialDef
@@ -34,22 +52,17 @@ namespace WorkingMemory_Namespace
         //Already-existing fields (inherited from TrialDef)
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
-        public int[] TargetIndices, PostSampleDistractorIndices, TargetDistractorIndices;
-        public int[] TargetTokenUpdates, DistractorTokenUpdates;
-        public Vector3[] TargetSampleLocations, PostSampleDistractorLocations, TargetSearchLocations, TargetDistractorLocations;
-        public string ContextName;
+        public int[] SearchStimIndices, PostSampleDistractorIndices;
 
-        public float initTrialDuration,
-            baselineDuration,
-            displaySampleDuration,
-            postSampleDelayDuration,
-            displayPostSampleDistractorsDuration,
-            preTargetDelayDuration,
-            maxSearchDuration,
-            selectionFbDuration,
-            tokenRevealDuration,
-            tokenUpdateDuration,
-            trialEndDuration;
+        public TokenReward[][] SearchStimTokenReward;
+        //public int[] TargetTokenUpdates, DistractorTokenUpdates;
+        public Vector3[] SearchStimLocations, PostSampleDistractorLocations, TargetSampleLocation;
+        public string ContextName;
+        public string BlockName;
+        public int NumInitialTokens;
+        public int NumTokenBar;
+        public int NumPulses;
+        public int PulseSize;
     }
 
     public class WorkingMemory_StimDef : StimDef

@@ -49,9 +49,9 @@ namespace ContinuousRecognition_Namespace
         public float[] X_FbLocations;
         public float[] Y_FbLocations;
 
-        public int NumTokens; //BUT HOW DO WE LINK IT TO THE TOKENBAR?
+        public int NumTokenBar;
 
-        public int TrialCount, NumRewardPulses, PulseSize;
+        public int TrialCount, NumRewardPulses, PulseSize, RewardMag;
 
         public float DisplayStimsDuration, ChooseStimDuration, TouchFeedbackDuration, TrialEndDuration,
             DisplayResultDuration, TokenRevealDuration, TokenUpdateDuration;
@@ -157,9 +157,10 @@ namespace ContinuousRecognition_Namespace
                 trial.TokenRevealDuration = TokenRevealDuration;
                 trial.TokenUpdateDuration = TokenUpdateDuration;
                 trial.NumRewardPulses = NumRewardPulses;
+                trial.RewardMag = RewardMag;
                 trial.PulseSize = PulseSize;
                 trial.FindAllStim = FindAllStim;
-                trial.NumTokens = NumTokens;
+                trial.NumTokenBar = NumTokenBar;
 
                 TrialDefs.Add(trial);
                 numTrialStims++;
@@ -244,8 +245,9 @@ namespace ContinuousRecognition_Namespace
         public int MaxNumTrials;
         public int MaxNumStim;
 
-        public int? NumTokens;
+        public int NumTokenBar;
         public int NumRewardPulses;
+        public int RewardMag;
         public int PulseSize;
 
         public float DisplayStimsDuration, ChooseStimDuration, TrialEndDuration, TouchFeedbackDuration, 

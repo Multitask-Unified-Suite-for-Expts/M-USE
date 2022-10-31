@@ -118,6 +118,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 StartButton.SetActive(false);
                 TokenFBController.enabled = true;
+                TokenFBController.SetTotalTokensNum(currentTrial.NumTokenBar);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             });
@@ -237,13 +238,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 if(TrialCount_InBlock == currentTrial.MaxNumTrials-1 || currentTrial.PNC_Stim.Count == 0) //If they get the last trial right, fill up bar!
                 {
                     currentTrial.NumRewardPulses++;
-                    int numToFillBar = (int) currentTrial.NumTokens - TokenCount;
+                    int numToFillBar = (int) currentTrial.NumTokenBar - TokenCount;
                     TokenFBController.AddTokens(chosenStimObj, numToFillBar);
                     TokenCount += numToFillBar;
                 }
                 else
                 {
-                    TokenFBController.AddTokens(chosenStimObj, 1); //will put "currentTrial.StimTrialRewardMag" here !
+                    TokenFBController.AddTokens(chosenStimObj, currentTrial.RewardMag); //will put "currentTrial.StimTrialRewardMag" here !
                     TokenCount++;
                 }
                 HandleTokenUpdate();
@@ -394,19 +395,41 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private Vector3[] CenterFeedbackLocations(Vector3[] locations)
     {
         //----- CENTER HORIZONTALLY--------
-        float leftMargin = locations[0].x + 4f;
-        float rightMargin;
-        
-        //if length less than 7, use first and last. 
-        if (locations.Length < 7) rightMargin = 4f - locations[locations.Length - 1].x;
-        //if greater than 6, use first(0) and firstRowLast(5)!!
-        else rightMargin = 4f - locations[5].x;
+        int numLocations = locations.Length;
 
-        float leftMarginNeeded = (leftMargin + rightMargin) / 2;
-        float leftShiftAmount = leftMarginNeeded - leftMargin;
+        for (int i = 0; i < numLocations; i++)
+        {
+            float leftMargin = locations[0].x + 4f;
+            float rightMargin;
 
-        for (int i = 0; i < locations.Length; i++)  locations[i].x += leftShiftAmount;
-       
+            if (i < 5)
+            {
+                if (numLocations < 6)   rightMargin = 4f - locations[numLocations - 1].x;
+                else rightMargin = 4f - locations[4].x;                                 
+            }
+            else if(i > 4 && i < 10)
+            {
+                if (numLocations < 11) rightMargin = 4f - locations[numLocations - 1].x;
+                else rightMargin = 4f - locations[9].x;
+            }
+            else if (i > 9 && i < 15)
+            {
+                if (numLocations < 16) rightMargin = 4f - locations[numLocations - 1].x;
+                else rightMargin = 4f - locations[14].x;
+            }
+            else if (i > 14 && i < 20)
+            {
+                if (numLocations < 21) rightMargin = 4f - locations[numLocations - 1].x;
+                else rightMargin = 4f - locations[19].x;
+            }
+            else rightMargin = 4f - locations[numLocations - 1].x;
+            
+            float leftMarginNeeded = (leftMargin + rightMargin) / 2;
+            float leftShiftAmount = leftMarginNeeded - leftMargin;
+
+            locations[i].x += leftShiftAmount;
+        }
+
         //----- CENTER VERTICALLY----------
         float topMargin = 2.25f - locations[0].y;
         float bottomMargin = locations[locations.Length - 1].y + 2.25f;
@@ -525,7 +548,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void HandleTokenUpdate()
     {
-        if (TokenCount == currentTrial.NumTokens)
+        if (TokenCount == currentTrial.NumTokenBar)
         {
             NumTbCompletions_Block++;
             NumRewards_Block += currentTrial.NumRewardPulses;

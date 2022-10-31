@@ -93,6 +93,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddInitializationMethod(() =>
         {
+            if(BlockCount > 0) CurrentBlockString += "\n";
             PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
 
             NumCorrect_Task.Add(trialLevel.NumCorrect_Block); //at end of each block, add block's NumCorrect to task List;
@@ -127,8 +128,9 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
                         "\nTbCompletions: " + trialLevel.NumTbCompletions_Block +
                         "\nAvgTimeToChoice: " + trialLevel.AvgTimeToChoice_Block.ToString("0.00") + "s" +
                         "\nTimeToCompletion: " + trialLevel.TimeToCompletion_Block.ToString("0.00") + "s" +
-                        "\nRewards: " + trialLevel.NumRewards_Block +
-                        "\n";
+                        "\nRewards: " + trialLevel.NumRewards_Block;
+
+        if (BlockCount > 0) CurrentBlockString += "\n";
 
         BlockSummaryString.AppendLine(BlockAveragesString.ToString());
         BlockSummaryString.AppendLine(CurrentBlockString.ToString());

@@ -299,7 +299,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     }
 
 
-
     private void CalculateBlockAvgTimeToChoice()
     {
         if (TimeToChoice_Block.Count == 0) AvgTimeToChoice_Block = 0;
@@ -308,7 +307,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         foreach (float choice in TimeToChoice_Block) sum += choice;
         AvgTimeToChoice_Block = sum / TimeToChoice_Block.Count;
     }
-
 
     private void GenerateBlockFeedback()
     {
@@ -593,6 +591,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("PNC_Stim", () => currentTrial.PNC_Stim);
         TrialData.AddDatum("IsNewStim", () => currentTrial.IsNewStim);
         TrialData.AddDatum("CurrentTrialStims", () => currentTrial.TrialStimIndices);
+        TrialData.AddDatum("StimLocations", () => currentTrial.TrialStimLocations.ToString());
     }
 
     private void LogFrameData()
@@ -600,8 +599,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //LOT MORE TO ADD!!!!!
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
         FrameData.AddDatum("Context", () => currentTrial.ContextName);
-        FrameData.AddDatum("StartButton", () => StartButton);
         FrameData.AddDatum("ContextActive", () => ContextActive);
+        FrameData.AddDatum("StartButton", () => StartButton.activeSelf);
+        FrameData.AddDatum("GreenBorderPrefab", () => GreenBorderPrefab.activeSelf); //this could be inaccurate since there are multiple
+        FrameData.AddDatum("RedBorderPrefab", () => RedBorderPrefab.activeSelf);    //this could be inaccurate since there are multiple
+        FrameData.AddDatum("TrialStimShown", () => trialStims.IsActive);
+
+
     }
 
     private void ClearCurrentTrialStimLists()

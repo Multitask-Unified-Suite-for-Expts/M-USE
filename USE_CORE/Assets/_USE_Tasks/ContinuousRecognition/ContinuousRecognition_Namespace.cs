@@ -259,6 +259,11 @@ namespace ContinuousRecognition_Namespace
         //Data:
         public float TimeChosen;
         public float TimeToChoice;
+
+        public string Locations_String;
+        public string PC_String;
+        public string New_String;
+        public string PNC_String;
     }
 
     public class ContinuousRecognition_StimDef : StimDef

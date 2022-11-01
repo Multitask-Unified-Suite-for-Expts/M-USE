@@ -13,6 +13,7 @@ using System.Linq;
 using UnityEngine.UI;
 using USE_ExperimentTemplate_Block;
 using System.IO;
+using UnityEngine.Profiling;
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
@@ -112,6 +113,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = false;
             SetTokenFeedbackTimes();
             StartButton.SetActive(true);
+
+            SetStimStrings();
+
+            //MAKE EACH STIM GAME OBJECT FACE THE CAMERA WHILE SPAWNED
+            foreach (var stim in trialStims.stimDefs)   stim.StimGameObject.AddComponent<FaceCamera>();
+            
         });
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), 
             DisplayStims, () =>
@@ -121,6 +128,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 TokenFBController.SetTotalTokensNum(currentTrial.NumTokenBar);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
+
+                
             });
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------
@@ -263,7 +272,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         DisplayResults.AddInitializationMethod(() =>
         {
-            if (EndBlock) GenerateBlockFeedback();
+            if (EndBlock)   GenerateBlockFeedback();
         });
 
         DisplayResults.AddTimer(() => currentTrial.DisplayResultDuration, ITI, () =>
@@ -325,6 +334,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             rightGroup = new StimGroup("Right", ExternalStims, ChosenStimIndices);
             GenerateFeedbackStim(rightGroup, FeedbackLocations);
             GenerateFeedbackBorders(rightGroup);
+
+            //MAKE EACH STIM GAME OBJECT FACE THE CAMERA DURING THE ENTIRE DISPLAY STIM STATE
+            foreach (var stim in rightGroup.stimDefs)   stim.StimGameObject.AddComponent<FaceCamera>();
         }
         else
         {
@@ -343,14 +355,19 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             GenerateFeedbackStim(rightGroup, FeedbackLocations.Take(FeedbackLocations.Length - 1).ToArray());
             GenerateFeedbackBorders(rightGroup);
 
+            //MAKE EACH STIM GAME OBJECT FACE THE CAMERA DURING THE ENTIRE DISPLAY STIM STATE
+            foreach (var stim in rightGroup.stimDefs)   stim.StimGameObject.AddComponent<FaceCamera>();
+            
             StimGroup wrongGroup = new StimGroup("Wrong");
             StimDef wrongStim = ExternalStims.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(wrongGroup);
             wrongStim.StimGameObject = null;
 
             GenerateFeedbackStim(wrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length - 1).Take(1).ToArray());
             GenerateFeedbackBorders(wrongGroup);
-        }
 
+            //MAKE EACH STIM GAME OBJECT FACE THE CAMERA DURING THE ENTIRE DISPLAY STIM STATE
+            wrongStim.StimGameObject.AddComponent<FaceCamera>();
+        }
     }
 
     private void GenerateFeedbackStim(StimGroup group, Vector3[] locations)
@@ -593,30 +610,84 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         return EndBlock;
     }
 
+    private void SetStimStrings()
+    {
+        //Locations String;
+        string s = "";
+        if (currentTrial.TrialStimLocations.Length > 0)
+        {
+            s += "[";
+            foreach (var trial in currentTrial.TrialStimLocations)
+            {
+                s += trial + ", ";
+            }
+            s = s.Substring(0, s.Length - 2);
+            s += "]";
+            currentTrial.Locations_String = s;
+        }
+
+        //PC String
+        s = "";
+        if (currentTrial.PC_Stim.Count > 0)
+        {
+            s += "[";
+            foreach (var trial in currentTrial.PC_Stim)
+            {
+                s += trial + ", ";
+            }
+            s = s.Substring(0, s.Length - 2);
+            s += "]";
+            currentTrial.PC_String = s;
+        }
+
+        //New String
+        s = "";
+        if (currentTrial.PNC_Stim.Count > 0)
+        {
+            s += "[";
+            foreach (var trial in currentTrial.PNC_Stim)
+            {
+                s += trial + ", ";
+            }
+            s = s.Substring(0, s.Length - 2);
+            s += "]";
+            currentTrial.PNC_String = s;
+        }
+
+        //PNC String
+        s = "";
+        if (currentTrial.New_Stim.Count > 0)
+        {
+            s += "[";
+            foreach (var trial in currentTrial.New_Stim)
+            {
+                s += trial + ", ";
+            }
+            s = s.Substring(0, s.Length - 2);
+            s += "]";
+            currentTrial.New_String = s;
+        }
+    }
+
     private void LogTrialData()
     {
         TrialData.AddDatum("Context", () => currentTrial.ContextName);
-        TrialData.AddDatum("Unseen_Stim", () => currentTrial.Unseen_Stim);
-        TrialData.AddDatum("PC_Stim", () => currentTrial.PC_Stim);
-        TrialData.AddDatum("New_Stim", () => currentTrial.New_Stim);
-        TrialData.AddDatum("PNC_Stim", () => currentTrial.PNC_Stim);
-        TrialData.AddDatum("IsNewStim", () => currentTrial.IsNewStim);
+        TrialData.AddDatum("Num_UnseeenStim", () => currentTrial.Unseen_Stim.Count);
+        TrialData.AddDatum("PC_Stim", () => currentTrial.PC_String);
+        TrialData.AddDatum("New_Stim", () => currentTrial.New_String);
+        TrialData.AddDatum("PNC_Stim", () => currentTrial.PNC_String);
+        TrialData.AddDatum("StimLocations", () => currentTrial.Locations_String);
+        TrialData.AddDatum("GuessedCorrectly", () => currentTrial.IsNewStim);
         TrialData.AddDatum("CurrentTrialStims", () => currentTrial.TrialStimIndices);
-        TrialData.AddDatum("StimLocations", () => currentTrial.TrialStimLocations.ToString());
     }
 
     private void LogFrameData()
     {
-        //LOT MORE TO ADD!!!!!
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
         FrameData.AddDatum("Context", () => currentTrial.ContextName);
         FrameData.AddDatum("ContextActive", () => ContextActive);
         FrameData.AddDatum("StartButton", () => StartButton.activeSelf);
-        FrameData.AddDatum("GreenBorderPrefab", () => GreenBorderPrefab.activeSelf); //this could be inaccurate since there are multiple
-        FrameData.AddDatum("RedBorderPrefab", () => RedBorderPrefab.activeSelf);    //this could be inaccurate since there are multiple
         FrameData.AddDatum("TrialStimShown", () => trialStims.IsActive);
-
-
     }
 
     private void ClearCurrentTrialStimLists()

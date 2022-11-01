@@ -394,10 +394,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     {
         //----- CENTER HORIZONTALLY--------
         int numLocations = locations.Length;
-
+        float firstLoc_X = locations[0].x;
         for (int i = 0; i < numLocations; i++)
         {
-            float leftMargin = locations[0].x + 4f;
+            float leftMargin = Math.Abs(firstLoc_X);
             float rightMargin;
 
             if (i < 5)
@@ -446,6 +446,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     //The TrialStims group are auto loaded in the SetupTrial StateInitialization, and destroyed in the FinishTrial StateTermination
     protected override void DefineTrialStims()
     {
+        Debug.Log("TRIAL COUNT IN BLOCK = " + TrialCount_InBlock);
         if(TrialCount_InBlock == 0)
         {
             //clear stim lists in case it's NOT the first block!
@@ -510,6 +511,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 currentTrial.TrialStimIndices.Add(PNC_Copy[i]);
             }
+
+            Debug.Log("NUM LOCATIONS = " + currentTrial.TrialStimLocations.Length);
+            Debug.Log("NUM TRIAL STIM = " + currentTrial.TrialStimIndices.Count);
+
+            var s = "";
+            foreach( int yo in currentTrial.TrialStimIndices)
+            {
+                s += yo.ToString() + " ";
+            }
+            Debug.Log("CURRENT TRIAL STIM INDICES = " + s);
 
             trialStims = new StimGroup($"TrialStims", ExternalStims, currentTrial.TrialStimIndices);
             trialStims.SetLocations(currentTrial.TrialStimLocations);

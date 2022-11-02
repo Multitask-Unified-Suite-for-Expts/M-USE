@@ -29,6 +29,9 @@ namespace ContinuousRecognition_Namespace
         public List<int> Unseen_Stim;
         public List<int> TrialStimIndices;
 
+        public int MaxNumTrials;
+        public int MaxNumStim;
+
         public int NumRows;
         public int NumColumns;
         public float X_Start;
@@ -46,9 +49,9 @@ namespace ContinuousRecognition_Namespace
         public float[] X_FbLocations;
         public float[] Y_FbLocations;
 
-        public int NumTokens; //BUT HOW DO WE LINK IT TO THE TOKENBAR?
+        public int NumTokenBar;
 
-        public int TrialCount, NumRewardPulses;
+        public int TrialCount, NumRewardPulses, PulseSize, RewardMag;
 
         public float DisplayStimsDuration, ChooseStimDuration, TouchFeedbackDuration, TrialEndDuration,
             DisplayResultDuration, TokenRevealDuration, TokenUpdateDuration;
@@ -57,9 +60,17 @@ namespace ContinuousRecognition_Namespace
         public string ContextName;
 
         public int ManuallySpecifyLocation;
+        public int FindAllStim; //basically a bool used to determine whether they playing original ending or CappedStim/FindAll ending. 
+
+
 
         public override void GenerateTrialDefsFromBlockDef()
         {
+            MaxNumStim = NumObjectsMinMax[1];
+            if (FindAllStim == 1) MaxNumTrials = CalculateMaxNumTrials(MaxNumStim);
+            else MaxNumTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
+            Debug.Log("MAX NUM TRIALS = " + MaxNumTrials);
+
             PC_Stim = new List<int>();
             PNC_Stim = new List<int>();
             New_Stim = new List<int>();
@@ -78,7 +89,6 @@ namespace ContinuousRecognition_Namespace
                 {
                     float x = X_Locations[j];
                     StimLocations[index] = new Vector3(x, y, 0);
-                    Debug.Log(StimLocations[index]);
                     index++;
                 }
             }
@@ -99,17 +109,24 @@ namespace ContinuousRecognition_Namespace
             }
 
 
-            int maxNumTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
             TrialDefs = new List<ContinuousRecognition_TrialDef>().ConvertAll(x=>(TrialDef)x);
+
             int numTrialStims = NumObjectsMinMax[0]; //incremented at end
             bool theEnd = false;
 
-            for (int trialIndex = 0; trialIndex < maxNumTrials && !theEnd; trialIndex++)
+            for (int trialIndex = 0; trialIndex < MaxNumTrials && !theEnd; trialIndex++)
             {   
                 ContinuousRecognition_TrialDef trial = new ContinuousRecognition_TrialDef();
                 trial.BlockStimIndices = BlockStimIndices;
 
-                Vector3[] trialStimLocations = new Vector3[NumObjectsMinMax[0] + trialIndex];
+                Vector3[] trialStimLocations;
+                if (FindAllStim == 1 && trialIndex > MaxNumStim - 2)
+                {
+                    trialStimLocations = new Vector3[MaxNumStim];
+                    numTrialStims = MaxNumStim;
+                }
+                else trialStimLocations = new Vector3[NumObjectsMinMax[0] + trialIndex];
+
                 for(int i = 0; i < numTrialStims; i++)
                 {
                     int randomIndex = Random.Range(0, BlockStimLocations.Length);
@@ -129,7 +146,8 @@ namespace ContinuousRecognition_Namespace
                 trial.NumObjectsMinMax = NumObjectsMinMax;
                 trial.InitialStimRatio = InitialStimRatio;
                 trial.NumTrialStims = numTrialStims;
-                trial.MaxNumTrials = maxNumTrials;
+                trial.MaxNumTrials = MaxNumTrials;
+                trial.MaxNumStim = MaxNumStim;
                 trial.DisplayStimsDuration = DisplayStimsDuration;
                 trial.ChooseStimDuration = ChooseStimDuration;
                 trial.DisplayResultDuration = DisplayResultDuration;
@@ -138,18 +156,85 @@ namespace ContinuousRecognition_Namespace
                 trial.ContextName = ContextName;
                 trial.TokenRevealDuration = TokenRevealDuration;
                 trial.TokenUpdateDuration = TokenUpdateDuration;
-                trial.TotalTokensNum = TotalTokensNum;
                 trial.NumRewardPulses = NumRewardPulses;
+                trial.RewardMag = RewardMag;
+                trial.PulseSize = PulseSize;
+                trial.FindAllStim = FindAllStim;
+                trial.NumTokenBar = NumTokenBar;
+                trial.PC_Percentage_String = CalcPercentagePC();
 
                 TrialDefs.Add(trial);
                 numTrialStims++;
             }
         }
 
+        private string CalcPercentagePC()
+        {
+            float[] all = GetStimPercentages();
+            float multiplied = all[0] * 100;
+            return multiplied.ToString() + "%";
+        }
+
+        private int CalculateMaxNumTrials(int maxNumStim)
+        {
+            return maxNumStim + CalculateNumRemaining_EOT(maxNumStim);
+        }
+
+        private int CalculateNumRemaining_EOT(int totalTrialStim)
+        {
+            int NumRemaining_BEG = 0;
+            int NumRemaining_END = 0;
+            for(int i = 0; i <= totalTrialStim-2; i++)
+            {
+                int num_New = GetNumNewStim_Trial(i+2);
+               
+                NumRemaining_END = NumRemaining_BEG + num_New - 1;
+                NumRemaining_BEG = NumRemaining_END;
+            }
+            return NumRemaining_END;
+        }
+
+       
+        private int GetNumNewStim_Trial(int totalTrialStim)
+        {
+            float[] stimPercentages = GetStimPercentages();
+
+            int Num_PC = (int)Math.Floor((double)stimPercentages[0] * totalTrialStim);
+            int Num_New = (int)Math.Floor((double)stimPercentages[1] * totalTrialStim);
+            int Num_PNC = (int)Math.Floor((double)stimPercentages[2] * totalTrialStim);
+            if (Num_PC == 0) Num_PC = 1;
+            if (Num_New == 0) Num_New = 1;
+            if (Num_PNC == 0) Num_PNC = 1;
+
+            int temp = 0;
+            while ((Num_PC + Num_New + Num_PNC) < totalTrialStim)
+            {
+                if (temp % 3 == 0) Num_PC += 1;
+                else if (temp % 3 == 1) Num_New += 1;
+                else Num_PC += 1;
+                temp++;
+            }
+            return Num_New;
+        }
+
+        private float[] GetStimPercentages()
+        {
+            var ratio = InitialStimRatio;
+            float sum = 0;
+            float[] stimPercentages = new float[ratio.Length];
+
+            foreach (var num in ratio)  sum += num;
+            for (int i = 0; i < ratio.Length; i++)  stimPercentages[i] = ratio[i] / sum;
+            
+            return stimPercentages;
+        }
+
     }
 
     public class ContinuousRecognition_TrialDef : TrialDef
     {
+        public int FindAllStim; //basically a bool used to determine whether they playing original ending or CappedStim/FindAll ending. 
+
         public Vector3[] TrialStimLocations;
         public Vector3[] TrialFeedbackLocations;
 
@@ -166,9 +251,12 @@ namespace ContinuousRecognition_Namespace
         public int WrongStimIndex;
         public int NumTrialStims;
         public int MaxNumTrials;
+        public int MaxNumStim;
 
-        public int? TotalTokensNum;
+        public int NumTokenBar;
         public int NumRewardPulses;
+        public int RewardMag;
+        public int PulseSize;
 
         public float DisplayStimsDuration, ChooseStimDuration, TrialEndDuration, TouchFeedbackDuration, 
             DisplayResultDuration, TokenRevealDuration, TokenUpdateDuration;
@@ -179,6 +267,13 @@ namespace ContinuousRecognition_Namespace
         //Data:
         public float TimeChosen;
         public float TimeToChoice;
+
+        public string Locations_String;
+        public string PC_String;
+        public string New_String;
+        public string PNC_String;
+
+        public string PC_Percentage_String;
     }
 
     public class ContinuousRecognition_StimDef : StimDef

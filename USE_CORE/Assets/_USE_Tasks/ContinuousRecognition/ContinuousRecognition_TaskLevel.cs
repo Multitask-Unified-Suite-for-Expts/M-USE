@@ -108,6 +108,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
             LogBlockData(trialLevel);
         });
+        
     }
 
 

@@ -522,16 +522,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 currentTrial.TrialStimIndices.Add(PNC_Copy[i]);
             }
 
-            Debug.Log("NUM LOCATIONS = " + currentTrial.TrialStimLocations.Length);
-            Debug.Log("NUM TRIAL STIM = " + currentTrial.TrialStimIndices.Count);
-
-            var s = "";
-            foreach( int yo in currentTrial.TrialStimIndices)
-            {
-                s += yo.ToString() + " ";
-            }
-            Debug.Log("CURRENT TRIAL STIM INDICES = " + s);
-
             trialStims = new StimGroup($"TrialStims", ExternalStims, currentTrial.TrialStimIndices);
             trialStims.SetLocations(currentTrial.TrialStimLocations);
             trialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenUpdate")); //Visible when start DisplayStims, invisible when finish TokenUpdate.

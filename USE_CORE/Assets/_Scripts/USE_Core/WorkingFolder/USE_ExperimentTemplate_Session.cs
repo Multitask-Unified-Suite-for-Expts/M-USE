@@ -427,7 +427,11 @@ namespace USE_ExperimentTemplate_Session
                 taskCount++;
             });
 
-            finishSession.SpecifyTermination(() => true, () => null);
+            finishSession.SpecifyTermination(() => true, () => null, () =>
+            {
+                SessionData.AppendData();
+                SessionData.WriteData();
+            });
 
             SessionData = SessionDataControllers.InstantiateSessionData(StoreData, SessionDataPath);
             SessionData.fileName = FilePrefix + "__SessionData";

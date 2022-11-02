@@ -92,11 +92,13 @@ namespace USE_ExperimentTemplate_Task
             StimDefType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].StimDefType;
         }
 
-        public void DefineTaskLevel()
+        public void DefineTaskLevel(bool verifyOnly)
         {
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
             ReadSettingsFiles();
             FindStims();
+            if (verifyOnly) return;
+
 
             SetupTask = new State("SetupTask");
             RunBlock = new State("RunBlock");

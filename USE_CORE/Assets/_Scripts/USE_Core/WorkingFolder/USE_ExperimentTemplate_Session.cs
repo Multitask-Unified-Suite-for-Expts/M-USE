@@ -267,6 +267,9 @@ namespace USE_ExperimentTemplate_Session
                         // Unload it after memory because this loads the assets into memory but destroys the objects
                         loadScene.completed += (_) =>
                         {
+                            SessionSettings.Save();
+                            SceneLoaded(taskName, true);
+                            SessionSettings.Restore();
                             SceneManager.UnloadSceneAsync(taskName);
                             SceneLoading = false;
                             iTask++;
@@ -386,7 +389,7 @@ namespace USE_ExperimentTemplate_Session
                 loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
                 loadScene.completed += (_) =>
                 {
-                    SceneLoaded(selectedConfigName);
+                    SceneLoaded(selectedConfigName, false);
                     CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigName == selectedConfigName);
                 };
             });
@@ -470,7 +473,7 @@ namespace USE_ExperimentTemplate_Session
             }
         }
 
-        ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl)
+        ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
             tl.SessionDataControllers = SessionDataControllers;
             tl.LocateFile = LocateFile;
@@ -510,7 +513,7 @@ namespace USE_ExperimentTemplate_Session
             else
                 tl.SonicationActive = false;
 
-            tl.DefineTaskLevel();
+            tl.DefineTaskLevel(verifyOnly);
             // ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
             ActiveTaskLevels.Add(tl);
             if (tl.TaskCanvasses != null)
@@ -528,23 +531,23 @@ namespace USE_ExperimentTemplate_Session
         // 	SceneLoading = false;
         // }
 
-        void SceneLoaded(string configName)
+        void SceneLoaded(string configName, bool verifyOnly)
         {
             string taskName = (string)TaskMappings[configName];
             var methodInfo = GetType().GetMethod(nameof(this.PrepareTaskLevel));
             Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
             MethodInfo prepareTaskLevel = methodInfo.MakeGenericMethod(new Type[] { taskType });
-            prepareTaskLevel.Invoke(this, new object[] { configName });
+            prepareTaskLevel.Invoke(this, new object[] { configName, verifyOnly });
             // TaskSceneLoaded = true;
             SceneLoading = false;
         }
 
-        public void PrepareTaskLevel<T>(string configName) where T : ControlLevel_Task_Template
+        public void PrepareTaskLevel<T>(string configName, bool verifyOnly) where T : ControlLevel_Task_Template
         {
             string taskName = (string)TaskMappings[configName];
             ControlLevel_Task_Template tl = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
             tl.ConfigName = configName;
-            tl = PopulateTaskLevel(tl);
+            tl = PopulateTaskLevel(tl, verifyOnly);
             if (tl.TaskCam == null)
                 tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
             tl.TaskCam.gameObject.SetActive(false);

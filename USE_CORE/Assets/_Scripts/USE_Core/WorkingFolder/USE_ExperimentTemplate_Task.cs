@@ -111,6 +111,7 @@ namespace USE_ExperimentTemplate_Task
             AddInitializationMethod(() =>
             {
                 BlockCount = -1;
+                BlockSummaryString = new StringBuilder();
                 TaskCam.gameObject.SetActive(true);
                 if (TaskCanvasses != null)
                     foreach (GameObject go in TaskCanvasses)

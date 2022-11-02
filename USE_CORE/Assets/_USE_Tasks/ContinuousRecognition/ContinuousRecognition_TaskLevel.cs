@@ -56,7 +56,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
 
-        BlockSummaryString = new StringBuilder();
         BlockAveragesString = "";
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();

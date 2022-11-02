@@ -113,8 +113,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             SetStimStrings();
 
+            SetShadowType();
+
             //MAKE EACH STIM GAME OBJECT FACE THE CAMERA WHILE SPAWNED
-            foreach (var stim in trialStims.stimDefs)   stim.StimGameObject.AddComponent<FaceCamera>();
+            if(currentTrial.StimFacingCamera)
+            {
+                foreach (var stim in trialStims.stimDefs)   stim.StimGameObject.AddComponent<FaceCamera>();
+            }
             
         });
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), 
@@ -125,8 +130,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 TokenFBController.SetTotalTokensNum(currentTrial.NumTokenBar);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
-
-                
             });
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------
@@ -301,6 +304,29 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         LogFrameData();
     }
 
+    private void SetShadowType()
+    {
+        //User options are None, Soft, Hard
+        switch (currentTrial.ShadowType)
+        {
+            case "None":
+                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.None;
+                GameObject.Find("ContinuousRecognition_DirectionalLight").GetComponent<Light>().shadows = LightShadows.None;
+                break;
+            case "Soft":
+                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.Soft;
+                GameObject.Find("ContinuousRecognition_DirectionalLight").GetComponent<Light>().shadows = LightShadows.Soft;
+                break;
+            case "Hard":
+                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.Hard;
+                GameObject.Find("ContinuousRecognition_DirectionalLight").GetComponent<Light>().shadows = LightShadows.Hard;
+                break;
+            default:
+                Debug.Log("User did not Input one of None, Soft, or Hard for the Shadow Type");
+                break;
+        }
+    }
+
 
     private void CalculateBlockAvgTimeToChoice()
     {
@@ -330,7 +356,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             GenerateFeedbackBorders(rightGroup);
 
             //MAKE EACH STIM GAME OBJECT FACE THE CAMERA DURING THE ENTIRE DISPLAY STIM STATE
-            foreach (var stim in rightGroup.stimDefs)   stim.StimGameObject.AddComponent<FaceCamera>();
+            if(currentTrial.StimFacingCamera)
+            {
+                foreach (var stim in rightGroup.stimDefs)   stim.StimGameObject.AddComponent<FaceCamera>();
+            }
         }
         else
         {
@@ -350,7 +379,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             GenerateFeedbackBorders(rightGroup);
 
             //MAKE EACH STIM GAME OBJECT FACE THE CAMERA DURING THE ENTIRE DISPLAY STIM STATE
-            foreach (var stim in rightGroup.stimDefs)   stim.StimGameObject.AddComponent<FaceCamera>();
+            if(currentTrial.StimFacingCamera)
+            {
+                foreach (var stim in rightGroup.stimDefs)   stim.StimGameObject.AddComponent<FaceCamera>();
+            }
             
             StimGroup wrongGroup = new StimGroup("Wrong");
             StimDef wrongStim = ExternalStims.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(wrongGroup);
@@ -360,7 +392,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             GenerateFeedbackBorders(wrongGroup);
 
             //MAKE EACH STIM GAME OBJECT FACE THE CAMERA DURING THE ENTIRE DISPLAY STIM STATE
-            wrongStim.StimGameObject.AddComponent<FaceCamera>();
+            if(currentTrial.StimFacingCamera)   wrongStim.StimGameObject.AddComponent<FaceCamera>();
         }
     }
 
@@ -452,8 +484,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     }
 
 
-    //Generate the correct number of New, PC, and PNC stim for each trial. 
-    //Called when the trial is defined!
+    //Generate the correct number of New, PC, and PNC stim for each trial. Called when the trial is defined!
     //The TrialStims group are auto loaded in the SetupTrial StateInitialization, and destroyed in the FinishTrial StateTermination
     protected override void DefineTrialStims()
     {
@@ -487,7 +518,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             TrialStims.Add(trialStims);
 
         }
-        else if((TrialCount_InBlock > 0 && TrialCount_InBlock <= (currentTrial.MaxNumStim-2)) || TrialCount_InBlock > 0 && currentTrial.FindAllStim == 0)
+        else if((TrialCount_InBlock > 0 && TrialCount_InBlock <= (currentTrial.MaxNumStim-2)) || TrialCount_InBlock > 0 && !currentTrial.FindAllStim)
         {
             currentTrial.TrialStimIndices.Clear();
 
@@ -660,7 +691,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private void LogTrialData()
     {
         TrialData.AddDatum("Context", () => currentTrial.ContextName);
-        TrialData.AddDatum("Num_UnseeenStim", () => currentTrial.Unseen_Stim.Count);
+        TrialData.AddDatum("Num_UnseenStim", () => currentTrial.Unseen_Stim.Count);
         TrialData.AddDatum("PC_Stim", () => currentTrial.PC_String);
         TrialData.AddDatum("New_Stim", () => currentTrial.New_String);
         TrialData.AddDatum("PNC_Stim", () => currentTrial.PNC_String);

@@ -36,9 +36,11 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     public GameObject Starfield;
 
-   
 
     ContinuousRecognition_BlockDef currentBlock => GetCurrentBlockDef<ContinuousRecognition_BlockDef>();
+
+
+
     public override void SpecifyTypes()
     {
         TaskLevelType = typeof(ContinuousRecognition_TaskLevel);
@@ -49,7 +51,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         StimDefType = typeof(ContinuousRecognition_StimDef);
     } 
     public override void DefineControlLevel() //RUNS WHEN THE TASK IS DEFINED!
-    {           
+    {
         ContinuousRecognition_TrialLevel trialLevel = (ContinuousRecognition_TrialLevel)TrialLevel;
 
         string TaskName = "ContinuousRecognition";

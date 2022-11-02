@@ -4938,7 +4938,7 @@ GameObject:
   - component: {fileID: 374264270}
   - component: {fileID: 374264269}
   m_Layer: 0
-  m_Name: Directional Light
+  m_Name: ContinuousRecognition_DirectionalLight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5221,7 +5221,6 @@ MonoBehaviour:
   SubjectID: 
   SessionID: 
   FilePrefix: 
-  BlockSummaryString: 
   EyetrackerType: 
   SelectionType: 
   LocateFile: {fileID: 0}
@@ -5258,7 +5257,6 @@ MonoBehaviour:
   StanDev: 0
   BlockAveragesString: 
   CurrentBlockString: 
-  PreviousBlocksString: 
   TrialCount: 0
   Starfield: {fileID: 307568974}
 --- !u!114 &1101764165

@@ -61,10 +61,11 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
 
+
         //Clearing the list of picked stim indices at beginning of each block. 
         RunBlock.AddInitializationMethod(() =>
         {
-            //Starfield.SetActive(true);
+            if (!Starfield.activeSelf) Starfield.SetActive(true);
 
             trialLevel.ChosenStimIndices.Clear();
 
@@ -208,7 +209,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
 
     }
-
 
     private void LogBlockData(ContinuousRecognition_TrialLevel trialLevel)
     { 

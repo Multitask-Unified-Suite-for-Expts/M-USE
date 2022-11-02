@@ -72,7 +72,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
         TokenFBController.enabled = false;
-        //Starfield.SetActive(false);
+        //if (!Starfield.activeSelf) Starfield.SetActive(true);
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
@@ -80,10 +80,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + currentTrial.ContextName + ".png");
             ContextActive = true;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
-            //if(!Starfield.activeSelf)
-            //{
-            //    Starfield.SetActive(true);
-            //}
+            //if (!Starfield.activeSelf) Starfield.SetActive(true);
             CreateStartButton();
             if (!variablesLoaded) LoadConfigUIVariables();
 
@@ -190,9 +187,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     //SINCE THEY GOT IT RIGHT, CHECK IF LAST TRIAL IN BLOCK OR IF THEY FOUND ALL THE STIM. 
                     if(currentTrial.PNC_Stim.Count == 0 || TrialCount_InBlock == currentTrial.MaxNumTrials-1)
                     {
-                        if (currentTrial.PNC_Stim.Count == 0) Debug.Log("FOUND ALL STIM!");
-                        else Debug.Log("FINISHED ALL TRIALS IN BLOCK");
-
                         TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
                         CompletedAllTrials = true;
                         EndBlock = true;
@@ -463,7 +457,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     //The TrialStims group are auto loaded in the SetupTrial StateInitialization, and destroyed in the FinishTrial StateTermination
     protected override void DefineTrialStims()
     {
-        Debug.Log("TRIAL COUNT IN BLOCK = " + TrialCount_InBlock);
         if(TrialCount_InBlock == 0)
         {
             //clear stim lists in case it's NOT the first block!
@@ -625,6 +618,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             s += "]";
             currentTrial.Locations_String = s;
         }
+        if (currentTrial.Locations_String == null) currentTrial.PNC_String = "-";
 
         //PC String
         s = "";
@@ -639,6 +633,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             s += "]";
             currentTrial.PC_String = s;
         }
+        if (currentTrial.PC_String == null) currentTrial.PC_String = "-";
 
         //New String
         s = "";
@@ -653,6 +648,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             s += "]";
             currentTrial.PNC_String = s;
         }
+        if (currentTrial.PNC_String == null) currentTrial.PNC_String = "-";
 
         //PNC String
         s = "";
@@ -667,6 +663,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             s += "]";
             currentTrial.New_String = s;
         }
+        if (currentTrial.New_String == null) currentTrial.New_String = "-";
+
     }
 
     private void LogTrialData()
@@ -677,8 +675,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("New_Stim", () => currentTrial.New_String);
         TrialData.AddDatum("PNC_Stim", () => currentTrial.PNC_String);
         TrialData.AddDatum("StimLocations", () => currentTrial.Locations_String);
-        TrialData.AddDatum("GuessedCorrectly", () => currentTrial.IsNewStim);
+        TrialData.AddDatum("ChoseCorrectly", () => currentTrial.IsNewStim);
         TrialData.AddDatum("CurrentTrialStims", () => currentTrial.TrialStimIndices);
+        TrialData.AddDatum("PC_Percentage", () => currentTrial.PC_Percentage_String);
     }
 
     private void LogFrameData()

@@ -161,10 +161,18 @@ namespace ContinuousRecognition_Namespace
                 trial.PulseSize = PulseSize;
                 trial.FindAllStim = FindAllStim;
                 trial.NumTokenBar = NumTokenBar;
+                trial.PC_Percentage_String = CalcPercentagePC();
 
                 TrialDefs.Add(trial);
                 numTrialStims++;
             }
+        }
+
+        private string CalcPercentagePC()
+        {
+            float[] all = GetStimPercentages();
+            float multiplied = all[0] * 100;
+            return multiplied.ToString() + "%";
         }
 
         private int CalculateMaxNumTrials(int maxNumStim)
@@ -264,6 +272,8 @@ namespace ContinuousRecognition_Namespace
         public string PC_String;
         public string New_String;
         public string PNC_String;
+
+        public string PC_Percentage_String;
     }
 
     public class ContinuousRecognition_StimDef : StimDef

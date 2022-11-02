@@ -1,4 +1,3 @@
-using MazeGame_Namespace;
 using System.Collections.Generic;
 using UnityEngine;
 using USE_ExperimentTemplate_Block;
@@ -50,9 +49,8 @@ namespace VisualSearch_Namespace
             //pick # of trials from minmax
             System.Random rnd = new System.Random();
             int num = rnd.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
-            TrialDefs = new List<VisualSearch_TrialDef>().ConvertAll(x => (TrialDef)x);//actual correct # 
-
-            for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
+            TrialDefs = new List<VisualSearch_TrialDef>().ConvertAll(x => (TrialDef)x);
+            for (int iTrial = 0; iTrial < num; iTrial++)
             {
                 VisualSearch_TrialDef td = new VisualSearch_TrialDef();
                 td.ContextName = ContextName;
@@ -60,7 +58,7 @@ namespace VisualSearch_Namespace
                 td.NumInitialTokens = NumInitialTokens;
                 td.RandomizedLocations = RandomizedLocations;
                 td.BlockCount = BlockCount;
-                TrialDefs[iTrial] = td;
+                TrialDefs.Add(td);
             }
         }
         public override void AddToTrialDefsFromBlockDef()

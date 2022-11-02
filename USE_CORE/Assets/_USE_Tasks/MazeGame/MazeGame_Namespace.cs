@@ -56,7 +56,7 @@ namespace MazeGame_Namespace
             //pick # of trials from minmaxokay 
             // System.Random rnd = new System.Random();
             // int num = rnd.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
-            TrialDefs = new List<MazeGame_TrialDef>().ConvertAll(x=>(TrialDef)x);//actual correct # 
+            TrialDefs = new List<TrialDef>();//actual correct # 
             for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
             {
                 MazeGame_TrialDef td = new MazeGame_TrialDef();

@@ -1,9 +1,9 @@
+using System.Collections.Generic;
 using UnityEngine;
 using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
-using System.Collections.Generic;
 
 namespace FlexLearning_Namespace
 {
@@ -40,7 +40,7 @@ namespace FlexLearning_Namespace
         public string BlockName;
         public string ContextName;
         public int NumInitialTokens;
-        public TokenReward[] TrialStimTokenReward;
+        public TokenReward[][] TrialStimTokenReward;
         public string BlockEndType;
         public float BlockEndThreshold;
         public int BlockEndWindow;
@@ -54,9 +54,9 @@ namespace FlexLearning_Namespace
             //pick # of trials from minmax
             System.Random rnd = new System.Random();
             int num = rnd.Next(MinMaxTrials[0], MinMaxTrials[1]);
-            TrialDefs = new List<FlexLearning_TrialDef>().ConvertAll(x=>(TrialDef)x);//actual correct # 
+            TrialDefs = new List<FlexLearning_TrialDef>().ConvertAll(x => (TrialDef)x);
 
-            for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
+            for (int iTrial = 0; iTrial < num; iTrial++)
             {
                 FlexLearning_TrialDef td = new FlexLearning_TrialDef();
                 td.TrialID = TrialID;
@@ -73,7 +73,7 @@ namespace FlexLearning_Namespace
                 td.NumPulses = NumPulses;
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
-                TrialDefs[iTrial] = td;
+                TrialDefs.Add(td);
             }
         }
         public override void AddToTrialDefsFromBlockDef()
@@ -104,7 +104,7 @@ namespace FlexLearning_Namespace
         public Vector3[] TrialStimLocations;
         public string BlockName;
         public string TrialID;
-        public TokenReward[] TrialStimTokenReward;
+        public TokenReward[][] TrialStimTokenReward;
         public bool RandomizedLocations;
         public string ContextName;
         public string BlockEndType;

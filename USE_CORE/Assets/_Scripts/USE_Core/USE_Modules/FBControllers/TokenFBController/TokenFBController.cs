@@ -17,6 +17,7 @@ public class TokenFBController : MonoBehaviour
     // Token Counts
     private int totalTokensNum = 5;
     private int numCollected = 0;
+    private int numTokenBarFull = 0;
     // Rendering
     private Rect tokenBoxRect;
     private GUIStyle whiteStyle;
@@ -41,8 +42,9 @@ public class TokenFBController : MonoBehaviour
     public void Init(DataController trialData, DataController frameData, AudioFBController audioFBController)
     {
         trialData.AddDatum("TokenChange", () => tokensChange == 0 ? null : (float?)tokensChange);
+        trialData.AddDatum("NumTokenBarFull", () => numTokenBarFull);
         frameData.AddDatum("TokenAnimationPhase", () => animationPhase.ToString());
-        frameData.AddDatum("TokensCollected", () => numCollected);
+        frameData.AddDatum("TotalTokensCollected", () => numCollected);
 
         this.audioFBController = audioFBController;
         numCollected = 0;
@@ -80,7 +82,18 @@ public class TokenFBController : MonoBehaviour
     {
         AnimateTokens(color, gameObj, -numTokens);
     }
-
+    public void SetTokenBarValue(int value)
+    {
+        numCollected = value;
+    }
+    public int GetTokenBarValue()
+    {
+        return numCollected;
+    }
+    public int GetNumTokenBarFull()
+    {
+        return numTokenBarFull;
+    }
     public void OnGUI()
     {
         RenderTexture old = RenderTexture.active;
@@ -162,6 +175,7 @@ public class TokenFBController : MonoBehaviour
                     break;
                 case AnimationPhase.Flashing:
                     audioFBController.Play("Flashing");
+                    numTokenBarFull++;
                     numCollected = 0;
                     animationPhase = AnimationPhase.None;
                     break;
@@ -208,7 +222,7 @@ public class TokenFBController : MonoBehaviour
         this.flashingTime = flashingTime;
         return this;
     }
-
+    
     public TokenFBController SetPositiveShowAudioClip(AudioClip clip) {
         audioFBController.AddClip("PositiveShow", clip);
         return this;

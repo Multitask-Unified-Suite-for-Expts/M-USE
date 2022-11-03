@@ -282,6 +282,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             
         DisplayResults.SpecifyTermination(() => !EndBlock && !CompletedAllTrials, ITI, () =>
         {
+            TokenFBController.enabled = false;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
@@ -440,28 +441,28 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         float firstLoc_X = locations[0].x;
         for (int i = 0; i < numLocations; i++)
         {
-            float leftMargin = Math.Abs(firstLoc_X);
+            float leftMargin = 4 - Math.Abs(firstLoc_X);
             float rightMargin;
 
-            if (i < 5)
+            if (i < 6)
             {
                 if (numLocations < 6)   rightMargin = 4f - locations[numLocations - 1].x;
-                else rightMargin = 4f - locations[4].x;                                 
+                else rightMargin = 4f - locations[5].x;                                 
             }
-            else if(i > 4 && i < 10)
+            else if(i > 5 && i < 12)
             {
-                if (numLocations < 11) rightMargin = 4f - locations[numLocations - 1].x;
-                else rightMargin = 4f - locations[9].x;
+                if (numLocations < 12) rightMargin = 4f - locations[numLocations - 1].x;
+                else rightMargin = 4f - locations[11].x;
             }
-            else if (i > 9 && i < 15)
+            else if (i > 11 && i < 18)
             {
-                if (numLocations < 16) rightMargin = 4f - locations[numLocations - 1].x;
-                else rightMargin = 4f - locations[14].x;
+                if (numLocations < 18) rightMargin = 4f - locations[numLocations - 1].x;
+                else rightMargin = 4f - locations[17].x;
             }
-            else if (i > 14 && i < 20)
+            else if (i > 17 && i < 24)
             {
-                if (numLocations < 21) rightMargin = 4f - locations[numLocations - 1].x;
-                else rightMargin = 4f - locations[19].x;
+                if (numLocations < 24) rightMargin = 4f - locations[numLocations - 1].x;
+                else rightMargin = 4f - locations[23].x;
             }
             else rightMargin = 4f - locations[numLocations - 1].x;
             

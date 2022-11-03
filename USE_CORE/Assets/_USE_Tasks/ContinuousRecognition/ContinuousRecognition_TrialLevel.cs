@@ -305,183 +305,288 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         LogFrameData();
     }
 
-    private void SetShadowType()
-    {
-        //User options are None, Soft, Hard
-        switch (currentTrial.ShadowType)
-        {
-            case "None":
-                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.None;
-                GameObject.Find("ContinuousRecognition_DirectionalLight").GetComponent<Light>().shadows = LightShadows.None;
-                break;
-            case "Soft":
-                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.Soft;
-                GameObject.Find("ContinuousRecognition_DirectionalLight").GetComponent<Light>().shadows = LightShadows.Soft;
-                break;
-            case "Hard":
-                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.Hard;
-                GameObject.Find("ContinuousRecognition_DirectionalLight").GetComponent<Light>().shadows = LightShadows.Hard;
-                break;
-            default:
-                Debug.Log("User did not Input one of None, Soft, or Hard for the Shadow Type");
-                break;
-        }
-    }
 
-
-    private void CalculateBlockAvgTimeToChoice()
-    {
-        if (TimeToChoice_Block.Count == 0) AvgTimeToChoice_Block = 0;
-
-        float sum = 0;
-        foreach (float choice in TimeToChoice_Block) sum += choice;
-        AvgTimeToChoice_Block = sum / TimeToChoice_Block.Count;
-    }
-
-    private void GenerateBlockFeedback()
-    {
-        Starfield.SetActive(false);
-        TokenFBController.enabled = false;
-
-        if(CompletedAllTrials)
-        {
-            StimGroup rightGroup = new StimGroup("Right");
-            Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count];
-            for (int i = 0; i < ChosenStimIndices.Count; i++)
-            {
-                FeedbackLocations[i] = currentTrial.TrialFeedbackLocations[i];
-            }
-            FeedbackLocations = CenterFeedbackLocations(FeedbackLocations);
-            rightGroup = new StimGroup("Right", ExternalStims, ChosenStimIndices);
-            GenerateFeedbackStim(rightGroup, FeedbackLocations);
-            GenerateFeedbackBorders(rightGroup);
-
-            //MAKE EACH STIM GAME OBJECT FACE THE CAMERA DURING THE ENTIRE DISPLAY STIM STATE
-            if(currentTrial.StimFacingCamera)
-            {
-                foreach (var stim in rightGroup.stimDefs)   stim.StimGameObject.AddComponent<FaceCamera>();
-            }
-        }
-        else
-        {
-            StimGroup rightGroup = new StimGroup("Right");
-            Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count + 1];
-            int locCount = 0;
-            for (int i = 0; i < ChosenStimIndices.Count; i++)
-            {
-                FeedbackLocations[i] = currentTrial.TrialFeedbackLocations[i];
-                locCount++;
-            }
-            FeedbackLocations[locCount] = currentTrial.TrialFeedbackLocations[locCount];
-            FeedbackLocations = CenterFeedbackLocations(FeedbackLocations);
-
-            rightGroup = new StimGroup("Right", ExternalStims, ChosenStimIndices);
-            GenerateFeedbackStim(rightGroup, FeedbackLocations.Take(FeedbackLocations.Length - 1).ToArray());
-            GenerateFeedbackBorders(rightGroup);
-
-            //MAKE EACH STIM GAME OBJECT FACE THE CAMERA DURING THE ENTIRE DISPLAY STIM STATE
-            if(currentTrial.StimFacingCamera)
-            {
-                foreach (var stim in rightGroup.stimDefs)   stim.StimGameObject.AddComponent<FaceCamera>();
-            }
-            
-            StimGroup wrongGroup = new StimGroup("Wrong");
-            StimDef wrongStim = ExternalStims.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(wrongGroup);
-            wrongStim.StimGameObject = null;
-
-            GenerateFeedbackStim(wrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length - 1).Take(1).ToArray());
-            GenerateFeedbackBorders(wrongGroup);
-
-            //MAKE EACH STIM GAME OBJECT FACE THE CAMERA DURING THE ENTIRE DISPLAY STIM STATE
-            if(currentTrial.StimFacingCamera)   wrongStim.StimGameObject.AddComponent<FaceCamera>();
-        }
-    }
-
-    private void GenerateFeedbackStim(StimGroup group, Vector3[] locations)
-    {
-        TrialStims.Add(group);
-        group.SetLocations(locations);
-        group.LoadStims();
-        group.ToggleVisibility(true);
-    }
-
-    private void GenerateFeedbackBorders(StimGroup group)
-    {
-        if (BorderPrefabList.Count == 0) BorderPrefabList = new List<GameObject>();
-
-        foreach (var stim in group.stimDefs)
-        {
-            if (stim.StimCode - 1 == currentTrial.WrongStimIndex)
-            {
-                GameObject redBorder = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
-                BorderPrefabList.Add(redBorder); //Add each to list so I can destroy them together
-            }
-            else
-            {
-                GameObject greenBorder = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
-                BorderPrefabList.Add(greenBorder);
-            }
-        }
-    }
-
-    private IEnumerator DestroyFeedbackBorders() //trying to match up the dissapearance of borders and stim.
-    {
-        yield return new WaitForSeconds(.1f);
-        foreach (GameObject border in BorderPrefabList)
-        {
-            if (border != null) border.SetActive(false);
-        }
-        BorderPrefabList.Clear();
-    }
-
-    private Vector3[] CenterFeedbackLocations(Vector3[] locations)
+    private Vector3[] CenterFeedbackLocations(Vector3[] locations, int numLocations)
     {
         //----- CENTER HORIZONTALLY--------
-        int numLocations = locations.Length;
-        float firstLoc_X = locations[0].x;
-        for (int i = 0; i < numLocations; i++)
+        int MaxNumPerRow = 6;
+        int numRows = 1;
+
+        if (numLocations > 6) numRows++;
+        if (numLocations > 12) numRows++;
+        if (numLocations > 18) numRows++;
+        if (numLocations > 24) numRows++;
+
+        int R1_Length = 0;
+        int R2_Length = 0;
+        int R3_Length = 0;
+        int R4_Length = 0;
+        int R5_Length = 0;
+
+        switch (numRows)
         {
-            float leftMargin = 4 - Math.Abs(firstLoc_X);
-            float rightMargin;
+            case 1:
+                R1_Length = numLocations;
+                break;
+            case 2:
+                if(numLocations % 2 == 0)
+                {
+                    R1_Length = numLocations / 2;
+                    R2_Length = numLocations / 2;
+                }
+                else
+                {
+                    R1_Length = (int) Math.Floor((decimal)numLocations / 2); //round it down and increase next row by 1.
+                    R2_Length = (int)Math.Ceiling((decimal)numLocations / 2); //make last row have one more than first row. 
+                }
+                break;
+            case 3:
+                if (numLocations % 3 == 0)
+                {
+                    R1_Length = numLocations / 3;
+                    R2_Length = numLocations / 3;
+                    R3_Length = numLocations / 3;
+                }
+                else
+                {
+                    R1_Length = (int)Math.Floor((decimal)numLocations / 3);
+                    R2_Length = (int)Math.Floor((decimal)numLocations / 3);
+                    R3_Length = (int)Math.Ceiling((decimal)numLocations / 3);
 
-            if (i < 6)
-            {
-                if (numLocations < 6)   rightMargin = 4f - locations[numLocations - 1].x;
-                else rightMargin = 4f - locations[5].x;                                 
-            }
-            else if(i > 5 && i < 12)
-            {
-                if (numLocations < 12) rightMargin = 4f - locations[numLocations - 1].x;
-                else rightMargin = 4f - locations[11].x;
-            }
-            else if (i > 11 && i < 18)
-            {
-                if (numLocations < 18) rightMargin = 4f - locations[numLocations - 1].x;
-                else rightMargin = 4f - locations[17].x;
-            }
-            else if (i > 17 && i < 24)
-            {
-                if (numLocations < 24) rightMargin = 4f - locations[numLocations - 1].x;
-                else rightMargin = 4f - locations[23].x;
-            }
-            else rightMargin = 4f - locations[numLocations - 1].x;
-            
-            float leftMarginNeeded = (leftMargin + rightMargin) / 2;
-            float leftShiftAmount = leftMarginNeeded - leftMargin;
+                    int diff = numLocations - (R1_Length + R2_Length + R3_Length);
+                    if (diff == 1) R2_Length++;
+                }
+                break;
+            case 4:
+                if(numLocations % 4 == 0)
+                {
+                    R1_Length = numLocations / 4;
+                    R2_Length = numLocations / 4;
+                    R3_Length = numLocations / 4;
+                    R4_Length = numLocations / 4;
+                }
+                else
+                {
+                    R1_Length = (int)Math.Floor((decimal)numLocations / 4);
+                    R2_Length = (int)Math.Floor((decimal)numLocations / 4);
+                    R3_Length = (int)Math.Floor((decimal)numLocations / 4);
+                    R4_Length = (int)Math.Ceiling((decimal)numLocations / 4);
 
-            locations[i].x += leftShiftAmount;
+                    int diff = numLocations - (R1_Length + R2_Length + R3_Length + R4_Length);
+                    if (diff == 1) R3_Length++;
+                    else if (diff == 2)
+                    {
+                        if(R4_Length == MaxNumPerRow)
+                        {
+                            R2_Length++;
+                            R3_Length++;
+                        }
+                        else
+                        {
+                            R3_Length++;
+                            R4_Length++;
+                        }
+                    }
+                }
+                break;
+            case 5:
+                if (numLocations % 5 == 0)
+                {
+                    R1_Length = numLocations / 5;
+                    R2_Length = numLocations / 5;
+                    R3_Length = numLocations / 5;
+                    R4_Length = numLocations / 5;
+                    R5_Length = numLocations / 5;
+                }
+                else
+                {
+                    R1_Length = (int)Math.Floor((decimal)numLocations / 5);
+                    R2_Length = (int)Math.Floor((decimal)numLocations / 5);
+                    R3_Length = (int)Math.Floor((decimal)numLocations / 5);
+                    R4_Length = (int)Math.Floor((decimal)numLocations / 5);
+                    R5_Length = (int)Math.Ceiling((decimal)numLocations / 5);
+
+                    int diff = numLocations - (R1_Length + R2_Length + R3_Length + R4_Length + R5_Length);
+                    if (diff == 1) R4_Length++;
+                    else if (diff == 2)
+                    {
+                        R3_Length++;
+                        R4_Length++;
+                    }
+                    else if(diff == 3)
+                    {
+                        R2_Length++;
+                        R3_Length++;
+                        R4_Length++;
+                    }
+                }
+                break;
         }
 
+        float leftMargin;
+        float rightMargin;
+        float leftMarginNeeded;
+        float leftShiftAmount;
+
+        int index = 0;
+        int difference = 0;
+
+        List<int> LocToSkip = new List<int>();
+
+        //Center ROW 1:
+        if(R1_Length > 0)
+        {
+            leftMargin = 4 - Math.Abs(locations[0].x);
+            rightMargin = 4f - locations[R1_Length - 1].x;
+            for (int i = index; i < R1_Length; i++)
+            {
+                leftMarginNeeded = (leftMargin + rightMargin) / 2;
+                leftShiftAmount = leftMarginNeeded - leftMargin;
+                locations[i].x += leftShiftAmount;
+                index++;
+            }
+            if (R2_Length > 0)
+            {
+                difference = (MaxNumPerRow - R1_Length); //if this works go change index everywhere below
+                var currentDiff = difference;
+                var endIndex = index;
+                while (currentDiff > 0)
+                {
+                    LocToSkip.Add(endIndex);
+                    endIndex++;
+                    currentDiff--;
+                }
+            }
+        }
+
+        //Center ROW 2:
+        if (R2_Length > 0)
+        {
+            index += difference; //moved this ahead of left and right margin. will need to do for the rest if its right. 
+            leftMargin = 4 - Math.Abs(locations[index].x);
+            rightMargin = 4f - locations[index + R2_Length - 1].x;
+            int indy = index;
+            for (int i = index; i < (indy + R2_Length); i++)
+            {
+                leftMarginNeeded = (leftMargin + rightMargin) / 2;
+                leftShiftAmount = leftMarginNeeded - leftMargin;
+                locations[i].x += leftShiftAmount;
+                index++;
+            }
+            if(R3_Length > 0)
+            {
+                difference = (MaxNumPerRow - R2_Length);
+                var currentDiff = difference;
+                var endIndex = index;
+                while (currentDiff > 0)
+                {
+                    LocToSkip.Add(endIndex);
+                    endIndex++;
+                    currentDiff--;
+                }
+            }
+        }
+
+        //Center ROW 3:
+        if (R3_Length > 0)
+        {
+            index += difference;
+            leftMargin = 4 - Math.Abs(locations[index].x);
+            rightMargin = 4f - locations[index + R3_Length - 1].x;
+            int indy = index;
+            for (int i = index; i < (indy + R3_Length); i++)
+            {
+                leftMarginNeeded = (leftMargin + rightMargin) / 2;
+                leftShiftAmount = leftMarginNeeded - leftMargin;
+                locations[i].x += leftShiftAmount;
+                index++;
+            }
+            if(R4_Length > 0)
+            {
+                difference = (MaxNumPerRow - R3_Length);
+                var currentDiff = difference;
+                var endIndex = index;
+                while (currentDiff > 0)
+                {
+                    LocToSkip.Add(endIndex);
+                    endIndex++;
+                    currentDiff--;
+                }
+            }
+        }
+
+        //Center ROW 4:
+        if (R4_Length > 0)
+        {
+            index += difference;
+            leftMargin = 4 - Math.Abs(locations[index].x);
+            rightMargin = 4f - locations[index + R4_Length - 1].x;
+            int indy = index;
+            for (int i = index; i < (indy + R4_Length); i++)
+            {
+                leftMarginNeeded = (leftMargin + rightMargin) / 2;
+                leftShiftAmount = leftMarginNeeded - leftMargin;
+                locations[i].x += leftShiftAmount;
+                index++;
+            }
+            if(R5_Length > 0)
+            {
+                difference = (MaxNumPerRow - R4_Length);
+                var currentDiff = difference;
+                var endIndex = index;
+                while (currentDiff > 0)
+                {
+                    LocToSkip.Add(endIndex);
+                    endIndex++;
+                    currentDiff--;
+                }
+            }
+        }
+
+        //Center ROW 5:
+        if (R5_Length > 0)
+        {
+            index += difference;
+            leftMargin = 4 - Math.Abs(locations[index].x);
+            rightMargin = 4f - locations[index + R5_Length - 1].x;
+            int indy = index;
+            for (int i = index; i < (indy + R5_Length); i++)
+            {
+                leftMarginNeeded = (leftMargin + rightMargin) / 2;
+                leftShiftAmount = leftMarginNeeded - leftMargin;
+                locations[i].x += leftShiftAmount;
+                index++;
+            }
+        }
+
+        //for the rest of the locations above Index, add to SkipList!
+        if(index < locations.Length-1)
+        {
+            for (int i = index; i < locations.Length; i++) LocToSkip.Add(i);
+        }
+
+        //REMOVE THE LOCATIONS WE SKIPPED
+        List<Vector3> postSkip = new List<Vector3>();
+        for(int i = 0; i < locations.Length; i++)
+        {
+            if(!LocToSkip.Contains(i))
+            {
+                postSkip.Add(locations[i]);
+            }
+        }
+        Vector3[] FinalLocations = postSkip.ToArray();
+
+
         //----- CENTER VERTICALLY----------
-        float topMargin = 2.25f - locations[0].y;
-        float bottomMargin = locations[locations.Length - 1].y + 2.25f;
+        float topMargin = 2.25f - FinalLocations[0].y;
+        float bottomMargin = FinalLocations[FinalLocations.Length - 1].y + 2.25f;
 
         float shiftDownNeeded = (topMargin + bottomMargin) / 2;
         float shiftDownAmount = shiftDownNeeded - topMargin;
 
-        for(int i = 0; i < locations.Length; i++)   locations[i].y -= shiftDownAmount;
-        
-        return locations;
+        for (int i = 0; i < FinalLocations.Length; i++) FinalLocations[i].y -= shiftDownAmount;
+
+        return FinalLocations;
     }
 
 
@@ -586,6 +691,124 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         getLog(currentTrial.TrialStimIndices, "TrialStimIndices");
     }
 
+
+    private void SetShadowType()
+    {
+        //User options are None, Soft, Hard
+        switch (currentTrial.ShadowType)
+        {
+            case "None":
+                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.None;
+                GameObject.Find("ContinuousRecognition_DirectionalLight").GetComponent<Light>().shadows = LightShadows.None;
+                break;
+            case "Soft":
+                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.Soft;
+                GameObject.Find("ContinuousRecognition_DirectionalLight").GetComponent<Light>().shadows = LightShadows.Soft;
+                break;
+            case "Hard":
+                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.Hard;
+                GameObject.Find("ContinuousRecognition_DirectionalLight").GetComponent<Light>().shadows = LightShadows.Hard;
+                break;
+            default:
+                Debug.Log("User did not Input one of None, Soft, or Hard for the Shadow Type");
+                break;
+        }
+    }
+
+    private void CalculateBlockAvgTimeToChoice()
+    {
+        if (TimeToChoice_Block.Count == 0) AvgTimeToChoice_Block = 0;
+
+        float sum = 0;
+        foreach (float choice in TimeToChoice_Block) sum += choice;
+        AvgTimeToChoice_Block = sum / TimeToChoice_Block.Count;
+    }
+
+    private void GenerateBlockFeedback()
+    {
+        Starfield.SetActive(false);
+        TokenFBController.enabled = false;
+
+        if (CompletedAllTrials)
+        {
+            StimGroup rightGroup = new StimGroup("Right");
+            Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count];
+            FeedbackLocations = CenterFeedbackLocations(currentTrial.TrialFeedbackLocations, FeedbackLocations.Length);
+
+            rightGroup = new StimGroup("Right", ExternalStims, ChosenStimIndices);
+            GenerateFeedbackStim(rightGroup, FeedbackLocations);
+            GenerateFeedbackBorders(rightGroup);
+
+            //MAKE EACH STIM GAME OBJECT FACE THE CAMERA DURING THE ENTIRE DISPLAY STIM STATE
+            if (currentTrial.StimFacingCamera)
+            {
+                foreach (var stim in rightGroup.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
+            }
+        }
+        else
+        {
+            StimGroup rightGroup = new StimGroup("Right");
+            Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count + 1];
+            FeedbackLocations = CenterFeedbackLocations(currentTrial.TrialFeedbackLocations, FeedbackLocations.Length);
+
+            rightGroup = new StimGroup("Right", ExternalStims, ChosenStimIndices);
+            GenerateFeedbackStim(rightGroup, FeedbackLocations.Take(FeedbackLocations.Length - 1).ToArray());
+            GenerateFeedbackBorders(rightGroup);
+
+            //MAKE EACH STIM GAME OBJECT FACE THE CAMERA DURING THE ENTIRE DISPLAY STIM STATE
+            if (currentTrial.StimFacingCamera)
+            {
+                foreach (var stim in rightGroup.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
+            }
+
+            StimGroup wrongGroup = new StimGroup("Wrong");
+            StimDef wrongStim = ExternalStims.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(wrongGroup);
+            wrongStim.StimGameObject = null;
+
+            GenerateFeedbackStim(wrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length - 1).Take(1).ToArray());
+            GenerateFeedbackBorders(wrongGroup);
+
+            //MAKE EACH STIM GAME OBJECT FACE THE CAMERA DURING THE ENTIRE DISPLAY STIM STATE
+            if (currentTrial.StimFacingCamera) wrongStim.StimGameObject.AddComponent<FaceCamera>();
+        }
+    }
+
+    private void GenerateFeedbackStim(StimGroup group, Vector3[] locations)
+    {
+        TrialStims.Add(group);
+        group.SetLocations(locations);
+        group.LoadStims();
+        group.ToggleVisibility(true);
+    }
+
+    private void GenerateFeedbackBorders(StimGroup group)
+    {
+        if (BorderPrefabList.Count == 0) BorderPrefabList = new List<GameObject>();
+
+        foreach (var stim in group.stimDefs)
+        {
+            if (stim.StimCode - 1 == currentTrial.WrongStimIndex)
+            {
+                GameObject redBorder = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
+                BorderPrefabList.Add(redBorder); //Add each to list so I can destroy them together
+            }
+            else
+            {
+                GameObject greenBorder = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
+                BorderPrefabList.Add(greenBorder);
+            }
+        }
+    }
+
+    private IEnumerator DestroyFeedbackBorders() //trying to match up the dissapearance of borders and stim.
+    {
+        yield return new WaitForSeconds(.1f);
+        foreach (GameObject border in BorderPrefabList)
+        {
+            if (border != null) border.SetActive(false);
+        }
+        BorderPrefabList.Clear();
+    }
 
     private void HandleTokenUpdate()
     {

@@ -114,9 +114,8 @@ namespace ContinuousRecognition_Namespace
             TrialDefs = new List<ContinuousRecognition_TrialDef>().ConvertAll(x=>(TrialDef)x);
 
             int numTrialStims = NumObjectsMinMax[0]; //incremented at end
-            bool theEnd = false;
 
-            for (int trialIndex = 0; trialIndex < MaxNumTrials && !theEnd; trialIndex++)
+            for (int trialIndex = 0; trialIndex < MaxNumTrials; trialIndex++)
             {   
                 ContinuousRecognition_TrialDef trial = new ContinuousRecognition_TrialDef();
                 trial.BlockStimIndices = BlockStimIndices;

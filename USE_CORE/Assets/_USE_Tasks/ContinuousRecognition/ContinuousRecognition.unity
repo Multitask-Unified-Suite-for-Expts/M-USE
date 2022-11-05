@@ -5311,8 +5311,11 @@ MonoBehaviour:
   SelectionType: 
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
+  TrialComplete: 0
   CompletedAllTrials: 0
   EndBlock: 0
+  GotCorrect: 0
+  stimIsChosen: 0
   GreenBorderPrefab: {fileID: 692447127116707221, guid: 56d1b38cf705cfa458909624e6058ac2,
     type: 3}
   RedBorderPrefab: {fileID: 692447127116707221, guid: 6a4556600160f504593546f8cfa56286,
@@ -5381,4 +5384,3 @@ MonoBehaviour:
     min: 0
     precision: 0
   MaterialFilePath: 
-  TrialComplete: 0

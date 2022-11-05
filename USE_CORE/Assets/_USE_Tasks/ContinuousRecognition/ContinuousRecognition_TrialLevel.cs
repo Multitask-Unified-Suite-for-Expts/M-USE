@@ -19,10 +19,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
     public ContinuousRecognition_TrialDef currentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
 
+    public bool TrialComplete;
     public bool CompletedAllTrials;
     public bool EndBlock;
-    bool GotCorrect;
-    bool stimIsChosen;
+    public bool GotCorrect;
+    public bool stimIsChosen;
 
     private bool ContextActive;
 
@@ -57,7 +58,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public string MaterialFilePath;
     private bool variablesLoaded;
 
-    public bool TrialComplete;
 
 
     public override void DefineControlLevel()
@@ -72,7 +72,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
         TokenFBController.enabled = false;
-        //if (!Starfield.activeSelf) Starfield.SetActive(true);
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
@@ -80,7 +79,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + currentTrial.ContextName + ".png");
             ContextActive = true;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
-            //if (!Starfield.activeSelf) Starfield.SetActive(true);
             CreateStartButton();
             if (!variablesLoaded) LoadConfigUIVariables();
 
@@ -112,7 +110,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             StartButton.SetActive(true);
 
             SetStimStrings();
-
             SetShadowType();
 
             //MAKE EACH STIM GAME OBJECT FACE THE CAMERA WHILE SPAWNED
@@ -137,7 +134,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         DisplayStims.AddTimer(() => currentTrial.DisplayStimsDuration, ChooseStim);
 
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
-
         GameObject chosenStimObj = null;
         ContinuousRecognition_StimDef chosenStimDef = null;
         MouseTracker.AddSelectionHandler(mouseHandler, ChooseStim);
@@ -167,14 +163,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["CorrectResponse"]);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchTargetStart"]);
 
-                    //If chose a PNC Stim
+                    //If chose a PNC Stim, remove it from PNC list.
                     if (currentTrial.PNC_Stim.Contains(chosenStimDef.StimCode - 1)) currentTrial.PNC_Stim.Remove(chosenStimDef.StimCode - 1);
-                    //If Chose a New Stim
+                    //If Chose a New Stim, remove it from New list.
                     if (currentTrial.New_Stim.Contains(chosenStimDef.StimCode - 1)) currentTrial.New_Stim.Remove(chosenStimDef.StimCode - 1);
 
                     chosenStimDef.PreviouslyChosen = true;
                     currentTrial.PC_Stim.Add(chosenStimDef.StimCode - 1);
-                    ChosenStimIndices.Add(chosenStimDef.StimCode - 1); //also adding to chosenIndices so I can keep in order for display results. 
+                    ChosenStimIndices.Add(chosenStimDef.StimCode - 1); //also adding to chosenIndices so I can keep them in order for display results. 
 
                     //REMOVE ALL NEW STIM THAT WEREN'T CHOSEN, FROM NEW STIM AND INTO PNC STIM. 
                     List<int> newStimToRemove = currentTrial.New_Stim.ToList();
@@ -235,7 +231,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
         TouchFeedback.AddTimer(() => fbDuration.value, TokenUpdate, () => EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionVisualFbOff"]));
 
-        //TOKEN UPDATE state -------------------------------------------------------------------------------------------------------
+        //TOKEN UPDATE state ---------------------------------------------------------------------------------------------------------
         TokenUpdate.AddInitializationMethod(() =>
         {
             HaloFBController.Destroy();
@@ -250,13 +246,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    TokenFBController.AddTokens(chosenStimObj, currentTrial.RewardMag); //will put "currentTrial.StimTrialRewardMag" here !
+                    TokenFBController.AddTokens(chosenStimObj, currentTrial.RewardMag);
                     TokenCount++;
                 }
                 HandleTokenUpdate();
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
             }
-            else
+            else //Got wrong
             {
                 TokenFBController.RemoveTokens(chosenStimObj, 1, Color.grey);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
@@ -267,6 +263,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
         TokenUpdate.SpecifyTermination(() => !TokenFBController.IsAnimating(), DisplayResults);
 
+        //DISPLAY RESULTS state --------------------------------------------------------------------------------------------------------
         DisplayResults.AddInitializationMethod(() =>
         {
             if (EndBlock)   GenerateBlockFeedback();
@@ -288,6 +285,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
         });
 
+        //ITI State----------------------------------------------------------------------------------------------------------------------
 
         ITI.AddInitializationMethod(() =>
         {
@@ -306,9 +304,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     }
 
 
+    //HELPER FUNCTIONS --------------------------------------------------------------------------
     private Vector3[] CenterFeedbackLocations(Vector3[] locations, int numLocations)
     {
-        //----- CENTER HORIZONTALLY--------
         int MaxNumPerRow = 6;
         int numRows = 1;
 
@@ -323,6 +321,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         int R4_Length = 0;
         int R5_Length = 0;
 
+        //Calculate num stim in each row. 
         switch (numRows)
         {
             case 1:
@@ -430,11 +429,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         int index = 0;
         int difference = 0;
+        Vector3 current;
+        List<Vector3> locList = new List<Vector3>();
 
-        List<int> LocToSkip = new List<int>();
+        //----- CENTER HORIZONTALLY--------
 
         //Center ROW 1:
-        if(R1_Length > 0)
+        if (R1_Length > 0)
         {
             leftMargin = 4 - Math.Abs(locations[0].x);
             rightMargin = 4f - locations[R1_Length - 1].x;
@@ -442,27 +443,18 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 leftMarginNeeded = (leftMargin + rightMargin) / 2;
                 leftShiftAmount = leftMarginNeeded - leftMargin;
-                locations[i].x += leftShiftAmount;
+                current = locations[i];
+                current.x += leftShiftAmount;
+                locList.Add(current);
                 index++;
             }
-            if (R2_Length > 0)
-            {
-                difference = (MaxNumPerRow - R1_Length); //if this works go change index everywhere below
-                var currentDiff = difference;
-                var endIndex = index;
-                while (currentDiff > 0)
-                {
-                    LocToSkip.Add(endIndex);
-                    endIndex++;
-                    currentDiff--;
-                }
-            }
+            if (R2_Length > 0) difference = MaxNumPerRow - R1_Length;
         }
 
         //Center ROW 2:
         if (R2_Length > 0)
         {
-            index += difference; //moved this ahead of left and right margin. will need to do for the rest if its right. 
+            index += difference;
             leftMargin = 4 - Math.Abs(locations[index].x);
             rightMargin = 4f - locations[index + R2_Length - 1].x;
             int indy = index;
@@ -470,21 +462,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 leftMarginNeeded = (leftMargin + rightMargin) / 2;
                 leftShiftAmount = leftMarginNeeded - leftMargin;
-                locations[i].x += leftShiftAmount;
+                current = locations[i];
+                current.x += leftShiftAmount;
+                locList.Add(current);
                 index++;
             }
-            if(R3_Length > 0)
-            {
-                difference = (MaxNumPerRow - R2_Length);
-                var currentDiff = difference;
-                var endIndex = index;
-                while (currentDiff > 0)
-                {
-                    LocToSkip.Add(endIndex);
-                    endIndex++;
-                    currentDiff--;
-                }
-            }
+            if(R3_Length > 0)   difference = MaxNumPerRow - R2_Length;
         }
 
         //Center ROW 3:
@@ -498,21 +481,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 leftMarginNeeded = (leftMargin + rightMargin) / 2;
                 leftShiftAmount = leftMarginNeeded - leftMargin;
-                locations[i].x += leftShiftAmount;
+                current = locations[i];
+                current.x += leftShiftAmount;
+                locList.Add(current);
                 index++;
             }
-            if(R4_Length > 0)
-            {
-                difference = (MaxNumPerRow - R3_Length);
-                var currentDiff = difference;
-                var endIndex = index;
-                while (currentDiff > 0)
-                {
-                    LocToSkip.Add(endIndex);
-                    endIndex++;
-                    currentDiff--;
-                }
-            }
+            if (R4_Length > 0) difference = MaxNumPerRow - R3_Length;
         }
 
         //Center ROW 4:
@@ -526,21 +500,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 leftMarginNeeded = (leftMargin + rightMargin) / 2;
                 leftShiftAmount = leftMarginNeeded - leftMargin;
-                locations[i].x += leftShiftAmount;
+                current = locations[i];
+                current.x += leftShiftAmount;
+                locList.Add(current);
                 index++;
             }
-            if(R5_Length > 0)
-            {
-                difference = (MaxNumPerRow - R4_Length);
-                var currentDiff = difference;
-                var endIndex = index;
-                while (currentDiff > 0)
-                {
-                    LocToSkip.Add(endIndex);
-                    endIndex++;
-                    currentDiff--;
-                }
-            }
+            if (R5_Length > 0) difference = MaxNumPerRow - R4_Length;
         }
 
         //Center ROW 5:
@@ -554,28 +519,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 leftMarginNeeded = (leftMargin + rightMargin) / 2;
                 leftShiftAmount = leftMarginNeeded - leftMargin;
-                locations[i].x += leftShiftAmount;
+                current = locations[i];
+                current.x += leftShiftAmount;
+                locList.Add(current);
                 index++;
             }
         }
 
-        //for the rest of the locations above Index, add to SkipList!
-        if(index < locations.Length-1)
-        {
-            for (int i = index; i < locations.Length; i++) LocToSkip.Add(i);
-        }
-
-        //REMOVE THE LOCATIONS WE SKIPPED
-        List<Vector3> postSkip = new List<Vector3>();
-        for(int i = 0; i < locations.Length; i++)
-        {
-            if(!LocToSkip.Contains(i))
-            {
-                postSkip.Add(locations[i]);
-            }
-        }
-        Vector3[] FinalLocations = postSkip.ToArray();
-
+        Vector3[] FinalLocations = locList.ToArray();
 
         //----- CENTER VERTICALLY----------
         float topMargin = 2.25f - FinalLocations[0].y;
@@ -710,7 +661,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 GameObject.Find("ContinuousRecognition_DirectionalLight").GetComponent<Light>().shadows = LightShadows.Hard;
                 break;
             default:
-                Debug.Log("User did not Input one of None, Soft, or Hard for the Shadow Type");
+                Debug.Log("User did not Input None, Soft, or Hard for the Shadow Type");
                 break;
         }
     }

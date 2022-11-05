@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 using ContinuousRecognition_Namespace;
@@ -63,8 +62,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
 
+        SetupTask.AddInitializationMethod(() => SetupBlockData(trialLevel));
 
-        //Clearing the list of picked stim indices at beginning of each block. 
         RunBlock.AddInitializationMethod(() =>
         {
             if (!Starfield.activeSelf) Starfield.SetActive(true);
@@ -81,8 +80,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
             CalculateBlockSummaryString(trialLevel);
         });
-
-
 
         RunBlock.AddUpdateMethod(() =>
         {
@@ -107,8 +104,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
             CalculateBlockAverages();
             CalculateStanDev();
-
-            LogBlockData(trialLevel);
         });
         
     }
@@ -213,7 +208,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     }
 
-    private void LogBlockData(ContinuousRecognition_TrialLevel trialLevel)
+    private void SetupBlockData(ContinuousRecognition_TrialLevel trialLevel)
     { 
         BlockData.AddDatum("BlockName", () => currentBlock.BlockName);
         BlockData.AddDatum("NumTrials", () => trialLevel.NumTrials_Block);

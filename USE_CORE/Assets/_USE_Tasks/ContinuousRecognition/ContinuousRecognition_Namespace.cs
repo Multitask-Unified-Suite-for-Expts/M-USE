@@ -32,15 +32,6 @@ namespace ContinuousRecognition_Namespace
         public int MaxNumTrials;
         public int MaxNumStim;
 
-        public int NumRows;
-        public int NumColumns;
-        public float X_Start;
-        public float Y_Start;
-        public float X_Gap;
-        public float Y_Gap;
-        public float X_Gap_FB;
-        public float Y_Gap_FB;
-
         public Vector3[] BlockStimLocations; //from Config if user specifies!!!
         public Vector3[] StimLocations; //calculated below in case they don't specify locations!
         public Vector3[] BlockFeedbackLocations;

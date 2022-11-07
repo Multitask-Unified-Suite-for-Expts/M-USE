@@ -39,7 +39,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     ContinuousRecognition_BlockDef currentBlock => GetCurrentBlockDef<ContinuousRecognition_BlockDef>();
 
-
+    //try running it without 
 
     public override void SpecifyTypes()
     {

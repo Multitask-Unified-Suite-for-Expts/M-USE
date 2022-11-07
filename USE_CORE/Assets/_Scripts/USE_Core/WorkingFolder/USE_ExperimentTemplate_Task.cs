@@ -147,7 +147,11 @@ namespace USE_ExperimentTemplate_Task
                 Controllers.SetActive(true);
             });
 
-            SetupTask.SpecifyTermination(() => true, RunBlock);
+            SetupTask.SpecifyTermination(() => true, RunBlock, () =>
+            {
+                BlockData.CreateFile();
+                FrameData.CreateFile();
+            });
 
 
             RunBlock.AddUniversalInitializationMethod(() =>

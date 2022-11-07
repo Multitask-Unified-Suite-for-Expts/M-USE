@@ -540,7 +540,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         return FinalLocations;
     }
 
-
     //Generate the correct number of New, PC, and PNC stim for each trial. Called when the trial is defined!
     //The TrialStims group are auto loaded in the SetupTrial StateInitialization, and destroyed in the FinishTrial StateTermination
     protected override void DefineTrialStims()
@@ -641,7 +640,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         getLog(currentTrial.PNC_Stim, "PNC_Stims");
         getLog(currentTrial.TrialStimIndices, "TrialStimIndices");
     }
-
 
     private void SetShadowType()
     {
@@ -908,14 +906,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         float sum = 0;
         float[] stimPercentages = new float[ratioArray.Length];
 
-        foreach(var num in ratioArray)
-        {
-            sum += num;
-        }
-        for(int i = 0; i < ratioArray.Length; i++)
-        {
-            stimPercentages[i] = ratioArray[i] / sum;
-        }
+        foreach(var num in ratioArray)  sum += num;
+        for(int i = 0; i < ratioArray.Length; i++)  stimPercentages[i] = ratioArray[i] / sum;
+      
         return stimPercentages;
     }
 

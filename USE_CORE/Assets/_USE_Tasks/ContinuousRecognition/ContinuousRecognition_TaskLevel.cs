@@ -34,12 +34,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     public int TrialCount;
 
-    public GameObject Starfield;
-
-
     ContinuousRecognition_BlockDef currentBlock => GetCurrentBlockDef<ContinuousRecognition_BlockDef>();
 
-    //try running it without 
 
     public override void SpecifyTypes()
     {
@@ -66,8 +62,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
-            if (!Starfield.activeSelf) Starfield.SetActive(true);
-
             trialLevel.ChosenStimIndices.Clear();
 
             trialLevel.NumTrials_Block = 0;

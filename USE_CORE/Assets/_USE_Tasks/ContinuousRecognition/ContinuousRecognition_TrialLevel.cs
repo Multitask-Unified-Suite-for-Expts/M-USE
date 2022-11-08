@@ -79,17 +79,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + currentTrial.ContextName + ".png");
             ContextActive = true;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
-            CreateStartButton();
+
+            if(StartButton != null) StartButton.SetActive(true);
+            else   CreateStartButton();
+
             if (!variablesLoaded) LoadConfigUIVariables();
 
-            TrialSummaryString = "\n" +
-                                "Trial #" + (TrialCount_InBlock + 1) +
-                                "\n" +
-                                "\nPC_Stim: " + currentTrial.PC_Stim.Count +
-                                "\nNew_Stim: " + currentTrial.New_Stim.Count +
-                                "\nPNC_Stim: " + currentTrial.PNC_Stim.Count +
-                                "\n" +
-                                "\nTotal Stim: " + (currentTrial.New_Stim.Count + currentTrial.PC_Stim.Count + currentTrial.PNC_Stim.Count);
+            SetTrialSummaryString();
+
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial); //auto terminates after doing everything.
 
@@ -107,6 +104,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             GotCorrect = false;
             TokenFBController.enabled = false;
             SetTokenFeedbackTimes();
+            Starfield.SetActive(true);
             StartButton.SetActive(true);
 
             SetStimStrings();
@@ -280,6 +278,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         DisplayResults.SpecifyTermination(() => !EndBlock && !CompletedAllTrials, ITI, () =>
         {
             TokenFBController.enabled = false;
+            Starfield.SetActive(false);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
@@ -305,6 +304,18 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS --------------------------------------------------------------------------
+    private void SetTrialSummaryString()
+    {
+        TrialSummaryString = "\n" +
+                               "Trial #" + (TrialCount_InBlock + 1) +
+                               "\n" +
+                               "\nPC_Stim: " + currentTrial.PC_Stim.Count +
+                               "\nNew_Stim: " + currentTrial.New_Stim.Count +
+                               "\nPNC_Stim: " + currentTrial.PNC_Stim.Count +
+                               "\n" +
+                               "\nTotal Stim: " + (currentTrial.New_Stim.Count + currentTrial.PC_Stim.Count + currentTrial.PNC_Stim.Count);
+    }
+
     private Vector3[] CenterFeedbackLocations(Vector3[] locations, int numLocations)
     {
         int MaxNumPerRow = 6;
@@ -555,7 +566,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             
             //Pick 2 random New stim and add to TrialStimIndices and NewStim. Also remove from UnseenStim.
             int[] tempArray = new int[currentTrial.NumObjectsMinMax[0]];
-            for (int i = 0; i < currentTrial.NumObjectsMinMax[0]; i++) //Pick2 stim randomly from blockStimIndices. 
+            for (int i = 0; i < currentTrial.NumObjectsMinMax[0]; i++) 
             {
                 int ranNum = Random.Range(0, numBlockStims);
                 while (Array.IndexOf(tempArray, ranNum) != -1)
@@ -585,11 +596,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             int New_Num = stimNumbers[1];
             int PNC_Num = stimNumbers[2];
 
-            List<int> NewStim_Copy = ShuffleList(currentTrial.Unseen_Stim).ToList();
-            if (NewStim_Copy.Count > 1) NewStim_Copy = NewStim_Copy.GetRange(0, New_Num);
-            for (int i = 0; i < NewStim_Copy.Count; i++)
+            List<int> NewStim;
+            if (TrialCount_InBlock == 1) NewStim = ShuffleList(currentTrial.Unseen_Stim).ToList(); //shuffle unseen list during first (second overall) trial! (only needed once). 
+            else NewStim = currentTrial.Unseen_Stim.ToList();
+            if (NewStim.Count > 1) NewStim = NewStim.GetRange(0, New_Num);
+            for (int i = 0; i < NewStim.Count; i++)
             {
-                int current = NewStim_Copy[i];
+                int current = NewStim[i];
                 currentTrial.TrialStimIndices.Add(current);
                 currentTrial.Unseen_Stim.Remove(current);
                 currentTrial.New_Stim.Add(current);

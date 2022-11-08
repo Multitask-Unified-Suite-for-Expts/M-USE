@@ -303,6 +303,11 @@ namespace USE_ExperimentTemplate_Session
                 Camera.main.targetTexture = CameraMirrorTexture;
                 mainCameraCopy.texture = CameraMirrorTexture;
 
+                // Don't show the task buttons if if we encountered an error during setup
+                if (LogPanel.HasError()) {
+                    return;
+                }
+
                 SceneLoading = true;
                 if (taskCount >= TaskMappings.Count)
                 {
@@ -357,7 +362,8 @@ namespace USE_ExperimentTemplate_Session
                 }
             });
             selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask);
-            if (TaskSelectionTimeout >= 0)
+            // Don't have automatic task selection if we encountered an error during setup
+            if (TaskSelectionTimeout >= 0 && !LogPanel.HasError())
             {
                 selectTask.AddTimer(TaskSelectionTimeout, loadTask, () =>
                 {
@@ -515,6 +521,9 @@ namespace USE_ExperimentTemplate_Session
 
             tl.DefineTaskLevel(verifyOnly);
             // ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
+            // Don't add task to ActiveTaskLevels if we're just verifying
+            if (verifyOnly) return tl;
+
             ActiveTaskLevels.Add(tl);
             if (tl.TaskCanvasses != null)
                 foreach (GameObject go in tl.TaskCanvasses)

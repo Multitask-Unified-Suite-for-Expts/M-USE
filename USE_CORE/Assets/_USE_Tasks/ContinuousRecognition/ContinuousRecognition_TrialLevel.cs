@@ -26,6 +26,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public bool stimIsChosen;
 
     private bool ContextActive;
+    private bool StarfieldActive;
 
     public GameObject GreenBorderPrefab;
     public GameObject RedBorderPrefab;
@@ -103,10 +104,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             stimIsChosen = false;
             GotCorrect = false;
             TokenFBController.enabled = false;
-            SetTokenFeedbackTimes();
-            Starfield.SetActive(true);
             StartButton.SetActive(true);
 
+            if (currentTrial.UseStarfield)
+            {
+                Starfield.SetActive(true);
+                StarfieldActive = true;
+            }
+
+            SetTokenFeedbackTimes();
             SetStimStrings();
             SetShadowType();
 
@@ -278,7 +284,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         DisplayResults.SpecifyTermination(() => !EndBlock && !CompletedAllTrials, ITI, () =>
         {
             TokenFBController.enabled = false;
-            Starfield.SetActive(false);
+            if (currentTrial.UseStarfield)
+            {
+                Starfield.SetActive(false);
+                StarfieldActive = false;
+            }
+
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
@@ -877,6 +888,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private void LogTrialData()
     {
         TrialData.AddDatum("Context", () => currentTrial.ContextName);
+        TrialData.AddDatum("Starfield", () => currentTrial.UseStarfield);
         TrialData.AddDatum("Num_UnseenStim", () => currentTrial.Unseen_Stim.Count);
         TrialData.AddDatum("PC_Stim", () => currentTrial.PC_String);
         TrialData.AddDatum("New_Stim", () => currentTrial.New_String);
@@ -894,6 +906,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("ContextActive", () => ContextActive);
         FrameData.AddDatum("StartButton", () => StartButton.activeSelf);
         FrameData.AddDatum("TrialStimShown", () => trialStims.IsActive);
+        FrameData.AddDatum("StarfieldActive", () => StarfieldActive);
     }
 
     private void ClearCurrentTrialStimLists()

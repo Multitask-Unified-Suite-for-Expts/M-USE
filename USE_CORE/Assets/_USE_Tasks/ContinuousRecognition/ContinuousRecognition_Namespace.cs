@@ -51,6 +51,7 @@ namespace ContinuousRecognition_Namespace
         public string ContextName;
 
         public bool ManuallySpecifyLocation;
+        public bool UseStarfield;
         public bool FindAllStim;
         public bool StimFacingCamera;
 
@@ -156,6 +157,7 @@ namespace ContinuousRecognition_Namespace
                 trial.FindAllStim = FindAllStim;
                 trial.StimFacingCamera = StimFacingCamera;
                 trial.ShadowType = ShadowType;
+                trial.UseStarfield = UseStarfield;
 
                 TrialDefs.Add(trial);
                 numTrialStims++;
@@ -227,6 +229,7 @@ namespace ContinuousRecognition_Namespace
 
     public class ContinuousRecognition_TrialDef : TrialDef
     {
+        public bool UseStarfield;
         public bool FindAllStim;
         public bool StimFacingCamera;
 

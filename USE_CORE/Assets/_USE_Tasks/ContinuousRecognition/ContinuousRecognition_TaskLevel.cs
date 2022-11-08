@@ -36,7 +36,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     ContinuousRecognition_BlockDef currentBlock => GetCurrentBlockDef<ContinuousRecognition_BlockDef>();
 
-
     public override void SpecifyTypes()
     {
         TaskLevelType = typeof(ContinuousRecognition_TaskLevel);
@@ -116,7 +115,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
                           "\nStandard Deviation: " + StanDev.ToString("0.00") +
                           "\n";
 
-        CurrentBlockString = "<b>Block" + "(" + currentBlock.BlockName + "):" + "</b>" +
+        CurrentBlockString = "<b>Block " + "(" + currentBlock.BlockName + "):" + "</b>" +
                         "\nCorrect: " + trialLevel.NumCorrect_Block +
                         "\nTbCompletions: " + trialLevel.NumTbCompletions_Block +
                         "\nAvgTimeToChoice: " + trialLevel.AvgTimeToChoice_Block.ToString("0.00") + "s" +

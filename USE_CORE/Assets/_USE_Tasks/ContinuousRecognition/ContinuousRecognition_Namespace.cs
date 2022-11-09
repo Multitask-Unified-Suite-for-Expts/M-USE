@@ -58,7 +58,6 @@ namespace ContinuousRecognition_Namespace
         public string ShadowType;
 
 
-
         public override void GenerateTrialDefsFromBlockDef()
         {
             MaxNumStim = NumObjectsMinMax[1];
@@ -86,7 +85,8 @@ namespace ContinuousRecognition_Namespace
                     index++;
                 }
             }
-            if(!ManuallySpecifyLocation)    BlockStimLocations = StimLocations;
+            if(!ManuallySpecifyLocation)
+                BlockStimLocations = StimLocations;
 
             //Calculate FeedbackLocations;
             BlockFeedbackLocations = new Vector3[X_FbLocations.Length * Y_FbLocations.Length];
@@ -205,9 +205,12 @@ namespace ContinuousRecognition_Namespace
             int temp = 0;
             while ((Num_PC + Num_New + Num_PNC) < totalTrialStim)
             {
-                if (temp % 3 == 0) Num_PC += 1;
-                else if (temp % 3 == 1) Num_New += 1;
-                else Num_PC += 1;
+                if (temp % 3 == 0)
+                    Num_PC += 1;
+                else if (temp % 3 == 1)
+                    Num_New += 1;
+                else
+                    Num_PC += 1;
                 temp++;
             }
             return Num_New;
@@ -219,8 +222,10 @@ namespace ContinuousRecognition_Namespace
             float sum = 0;
             float[] stimPercentages = new float[ratio.Length];
 
-            foreach (var num in ratio)  sum += num;
-            for (int i = 0; i < ratio.Length; i++)  stimPercentages[i] = ratio[i] / sum;
+            foreach (var num in ratio)
+                sum += num;
+            for (int i = 0; i < ratio.Length; i++)
+                stimPercentages[i] = ratio[i] / sum;
             
             return stimPercentages;
         }

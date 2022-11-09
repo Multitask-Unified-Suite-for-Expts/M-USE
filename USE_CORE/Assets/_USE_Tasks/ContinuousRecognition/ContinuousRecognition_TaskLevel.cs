@@ -143,9 +143,11 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         {
             double Mean = (double)AvgNumCorrect;
             List<double> squaredDeviations = new List<double>();
-            foreach (var num in NumCorrect_Task) squaredDeviations.Add(Math.Pow(num - Mean, 2));
+            foreach (var num in NumCorrect_Task)
+                squaredDeviations.Add(Math.Pow(num - Mean, 2));
             double SumOfSquares = 0;
-            foreach (var num in squaredDeviations) SumOfSquares += num;
+            foreach (var num in squaredDeviations)
+                SumOfSquares += num;
             var variance = SumOfSquares / NumCorrect_Task.Count;
             StanDev = Math.Sqrt(variance);
         }
@@ -158,7 +160,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         else
         {
             float sum = 0;
-            foreach (int num in NumCorrect_Task) sum += num;
+            foreach (int num in NumCorrect_Task)
+                sum += num;
             AvgNumCorrect = (float)sum / NumCorrect_Task.Count;
         }
 
@@ -167,7 +170,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         else
         {
             float sum = 0;
-            foreach (int num in NumTbCompletions_Task) sum += num;
+            foreach (int num in NumTbCompletions_Task)
+                sum += num;
             AvgNumTbCompletions = (float)sum / NumTbCompletions_Task.Count;
         }
 
@@ -176,7 +180,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         else
         {
             float sum = 0;
-            foreach (float num in TimeToChoice_Task) sum += num;
+            foreach (float num in TimeToChoice_Task)
+                sum += num;
             AvgTimeToChoice = (float)sum / TimeToChoice_Task.Count;
         }
 
@@ -185,7 +190,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         else
         {
             float sum = 0;
-            foreach (float num in TimeToCompletion_Task) sum += num;
+            foreach (float num in TimeToCompletion_Task)
+                sum += num;
             AvgTimeToCompletion = (float)sum / TimeToCompletion_Task.Count;
         }
 
@@ -194,11 +200,10 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         else
         {
             float sum = 0;
-            foreach (float num in NumRewards_Task) sum += num;
+            foreach (float num in NumRewards_Task)
+                sum += num;
             AvgNumRewards = (float)sum / NumRewards_Task.Count;
         }
-
-
     }
 
     private void SetupBlockData(ContinuousRecognition_TrialLevel trialLevel)

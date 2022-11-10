@@ -13,12 +13,29 @@ namespace ContinuousRecognition_Namespace
 {
     public class ContinuousRecognition_TaskDef : TaskDef
     {
-
+        //--------------Inherited from TaskDef-----------------------------//
+        //public string TaskName;
+        //public string ExternalStimFolderPath;
+        //public string PrefabStimFolderPath;
+        //public string ExternalStimExtension;
+        //public List<string[]> FeatureNames;
+        //public string neutralPatternedColorName;
+        //public float? ExternalStimScale;
+        //public List<string[]> FeedbackControllers;
+        //public int? TotalTokensNum;
+        //public bool SerialPortActive, SyncBoxActive,
+        //            EventCodesActive, RewardPulsesActive, SonicationActive;
+        //public string SelectionType;
     }
 
     public class ContinuousRecognition_BlockDef : BlockDef
     {
-        // public int[] TrialDefs,
+        //----Inherited from BlockDef----//
+        //public List<TrialDef> TrialDefs;
+        //public int BlockCount;
+        //public int? TotalTokensNum;
+        //public int? MinTrials, MaxTrials;
+
         public int[] BlockStimIndices;
         public int[] NumObjectsMinMax;
         public int[] InitialStimRatio;
@@ -50,6 +67,7 @@ namespace ContinuousRecognition_Namespace
         public string BlockName;
         public string ContextName;
 
+        public bool IsHuman;
         public bool ManuallySpecifyLocation;
         public bool UseStarfield;
         public bool FindAllStim;
@@ -158,6 +176,7 @@ namespace ContinuousRecognition_Namespace
                 trial.StimFacingCamera = StimFacingCamera;
                 trial.ShadowType = ShadowType;
                 trial.UseStarfield = UseStarfield;
+                trial.IsHuman = IsHuman;
 
                 TrialDefs.Add(trial);
                 numTrialStims++;
@@ -234,6 +253,11 @@ namespace ContinuousRecognition_Namespace
 
     public class ContinuousRecognition_TrialDef : TrialDef
     {
+
+        //public int BlockCount, TrialCountInBlock, TrialCountInTask;
+        //public TrialStims TrialStims;
+
+        public bool IsHuman;
         public bool UseStarfield;
         public bool FindAllStim;
         public bool StimFacingCamera;

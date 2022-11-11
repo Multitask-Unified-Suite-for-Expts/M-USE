@@ -22,8 +22,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     public GameObject CR_CanvasGO;
     public GameObject TitleTextGO;
-    public GameObject CompletedAllTrialsTextGO;
-    public GameObject FoundAllStimTextGO;
+    public GameObject YouWinTextGO;
     public GameObject YouLoseTextGO;
     public GameObject ScoreTextGO;
     public GameObject NumTrialsTextGO;
@@ -44,8 +43,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public List<int> ChosenStimIndices;
     public string MaterialFilePath;
 
-    bool ContextActive;
-    bool variablesLoaded;
+    public bool ContextActive;
+    public bool variablesLoaded;
 
     //Display Data
     public int NumTrials_Block;
@@ -57,12 +56,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public float TimeToCompletion_StartTime;
     public int NumRewards_Block;
 
-    int TokenCount;
-    int NumFeedbackRows;
-    int ScoreAmountPerTrial;
+    public int TokenCount;
+    public int NumFeedbackRows;
+    public int ScoreAmountPerTrial;
 
-    Vector3 originalFbTextPosition;
-    Vector3 originalTitleTextPosition;
+    public Vector3 originalFbTextPosition;
+    public Vector3 originalTitleTextPosition;
+    public Vector3 originalStartButtonPosition;
 
     //Config Variables
     [HideInInspector]
@@ -86,7 +86,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         originalFbTextPosition = YouLoseTextGO.transform.position;
         originalTitleTextPosition = TitleTextGO.transform.position;
 
-
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
@@ -99,7 +98,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (StartButton == null)
                 CreateStartButton();
 
-            if (!variablesLoaded) LoadConfigUIVariables();
+            if (!variablesLoaded)
+                LoadConfigUIVariables();
 
             SetTrialSummaryString();
         });
@@ -111,21 +111,23 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
-            StartButton.SetActive(true);
-
             if (currentTrial.UseStarfield)
                 Starfield.SetActive(true);
 
-            if(TrialCount_InBlock == 0)
+            if(TrialCount_InBlock == 0 && currentTrial.IsHuman)
             {
-                if (currentTrial.IsHuman)
-                {
-                    Vector3 titlePos = TitleTextGO.transform.position;
-                    titlePos.y -= 1.1f;
-                    TitleTextGO.transform.position = titlePos;
-                }
+                Vector3 buttonPos = StartButton.transform.position;
+                buttonPos.y -= .1f; //changed from .25
+                StartButton.transform.position = buttonPos;
+
+                Vector3 titlePos = TitleTextGO.transform.position;
+                titlePos.y -= 1.1f;
+                TitleTextGO.transform.position = titlePos;
+
                 TitleTextGO.SetActive(true);
             }
+            StartButton.SetActive(true);
+            
 
             CompletedAllTrials = false;
             TrialComplete = false;
@@ -147,7 +149,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
             
         });
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), 
+        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), //IS THR IN THE NAME OF CONFIG FILE, IF SO ACTIVATE THR TASK. 
             DisplayStims, () =>
             {
                 if(TitleTextGO.activeSelf)
@@ -157,6 +159,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
 
                 StartButton.SetActive(false);
+                StartButton.transform.position = originalStartButtonPosition;
 
                 TokenFBController.enabled = true;
 
@@ -315,20 +318,18 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 GenerateBlockFeedback();
                 float Y_Offset = GetOffsetY();
+                int scoreTotal = TrialCount_InBlock * ScoreAmountPerTrial;
 
-                if (CompletedAllTrials && !currentTrial.FindAllStim)
+                if (CompletedAllTrials)
                 {
-                    CompletedAllTrialsTextGO.transform.localPosition = new Vector3(CompletedAllTrialsTextGO.transform.localPosition.x, CompletedAllTrialsTextGO.transform.localPosition.y - Y_Offset, CompletedAllTrialsTextGO.transform.localPosition.z);
-                    CompletedAllTrialsTextGO.SetActive(true);
+                    YouWinTextGO.transform.localPosition = new Vector3(YouWinTextGO.transform.localPosition.x, YouWinTextGO.transform.localPosition.y - Y_Offset, YouWinTextGO.transform.localPosition.z);
+                    YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"YOU WIN! \n HighScore: {scoreTotal}";
+                    YouWinTextGO.SetActive(true);
                 }
-                if (CompletedAllTrials && currentTrial.FindAllStim)
-                {
-                    FoundAllStimTextGO.transform.localPosition = new Vector3(FoundAllStimTextGO.transform.localPosition.x, FoundAllStimTextGO.transform.localPosition.y - Y_Offset, FoundAllStimTextGO.transform.localPosition.z);
-                    FoundAllStimTextGO.SetActive(true);
-                }
-                if (!CompletedAllTrials)
+                else
                 {
                     YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
+                    YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"YOU LOSE! \n HighScore: {scoreTotal}";
                     YouLoseTextGO.SetActive(true);
                 }
             }
@@ -338,22 +339,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             StartCoroutine(DestroyFeedbackBorders());
 
-            if (CompletedAllTrialsTextGO.activeSelf)
+            if (YouWinTextGO.activeSelf)
             {
-                CompletedAllTrialsTextGO.SetActive(false);
-                CompletedAllTrialsTextGO.transform.position = originalFbTextPosition; //Reset position for next Block; Currently all 3 start in same position. If that changes, add 2 variables. 
-            }
-            if(FoundAllStimTextGO.activeSelf)
-            {
-                FoundAllStimTextGO.SetActive(false);
-                FoundAllStimTextGO.transform.position = originalFbTextPosition;
-
+                YouWinTextGO.SetActive(false);
+                YouWinTextGO.transform.position = originalFbTextPosition; //Reset position for next Block;  
             }
             if (YouLoseTextGO.activeSelf)
             {
                 YouLoseTextGO.SetActive(false);
-                YouLoseTextGO.transform.position = originalFbTextPosition;
-
+                YouLoseTextGO.transform.position = originalFbTextPosition; //Reset position for next Block;
             }
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
@@ -400,13 +394,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         switch (NumFeedbackRows)
         {
             case 1:
-                yOffset = 65f; //good
+                yOffset = 75f; //good
                 break;
             case 2:
                 yOffset = 45f; //good
                 break;
             case 3:
-                yOffset = 5f; //not sure.
+                yOffset = 15f; //not sure.
                 break;
             case 4:
                 yOffset = -10f;
@@ -1093,19 +1087,54 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (New_Num == 0) New_Num = 1;
         if (PNC_Num == 0) PNC_Num = 1;
 
-        //MAYBE JUST CALCULATE CURRENT PC%, THEN SEE IF ADDING 1 TO PC MAKES IT CLOSER TO PERCENTAGE,
-        //OR ELSE, ADDING 1 TO NEW/PNC.
+        int PC_Available = currentTrial.PC_Stim.Count;
+        int New_Available = currentTrial.Unseen_Stim.Count;
+        int PNC_Available = currentTrial.PNC_Stim.Count;
 
-        int temp = 0;
-        while ((PC_Num + New_Num + PNC_Num) < currentTrial.NumTrialStims)
+        //Ensure a crazy stim ratio doesn't calculate more stim than available in that category.
+        while (PC_Num > PC_Available) PC_Num--;
+        while (New_Num > New_Available) New_Num--;
+        while (PNC_Num > PNC_Available) PNC_Num--;
+
+        float PC_TargetPerc = stimPercentages[0];
+        int temp = 2;
+        while((PC_Num + New_Num + PNC_Num) < currentTrial.NumTrialStims)
         {
-            if (temp % 3 == 0)
-                PC_Num += 1;
-            else if (temp % 3 == 1)
-                New_Num += 1;
-            else PNC_Num += 1;
-            temp++;
+            //calculate PC Percentage difference.
+            float currentPerc = PC_Num / (PC_Num + New_Num + PNC_Num);
+            float percDiff = currentPerc - PC_TargetPerc;
+
+            //determine whether 1)Adding to PC, or 2)Adding to New/PNC makes the PercDiff smaller.
+            float PC_AddPerc = (PC_Num + 1) / (PC_Num + 1 + New_Num + PNC_Num);
+            float PC_AddDiff = PC_AddPerc - PC_TargetPerc;
+
+            float NonPC_AddPerc = PC_Num / (PC_Num + 1 + New_Num + PNC_Num);
+            float NonPC_AddDiff = NonPC_AddPerc - PC_TargetPerc;
+
+            if(PC_AddDiff < NonPC_AddDiff)
+            {
+                PC_Num++;
+            }
+            else
+            {
+                if (temp % 2 == 0)
+                    New_Num++;
+                else
+                    PNC_Num++;
+            }
         }
+
+        //Old solution that always increments PC first, then new, then PNC. 
+        //int temp = 0;
+        //while ((PC_Num + New_Num + PNC_Num) < currentTrial.NumTrialStims)
+        //{
+        //    if (temp % 3 == 0)
+        //        PC_Num += 1;
+        //    else if (temp % 3 == 1)
+        //        New_Num += 1;
+        //    else PNC_Num += 1;
+        //    temp++;
+        //}
         return new[] { PC_Num, New_Num, PNC_Num };
     }
 
@@ -1123,8 +1152,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
             {
                 buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-                if (currentTrial.IsHuman)
-                    buttonPosition.y -= .25f;
+                originalStartButtonPosition = buttonPosition;
             }
             else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))

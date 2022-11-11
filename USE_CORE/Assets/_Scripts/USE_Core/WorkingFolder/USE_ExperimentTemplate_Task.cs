@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -32,8 +33,9 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public SessionDataControllers SessionDataControllers;
 
         [HideInInspector] public bool StoreData, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
-        [HideInInspector] public string SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, BlockSummaryString, EyetrackerType, SelectionType;
+        [HideInInspector] public string SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
         [HideInInspector] public LocateFile LocateFile;
+        [HideInInspector] public StringBuilder BlockSummaryString;
 
         // public string TaskSceneName;
         public Camera TaskCam;
@@ -90,11 +92,13 @@ namespace USE_ExperimentTemplate_Task
             StimDefType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].StimDefType;
         }
 
-        public void DefineTaskLevel()
+        public void DefineTaskLevel(bool verifyOnly)
         {
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
             ReadSettingsFiles();
             FindStims();
+            if (verifyOnly) return;
+
 
             SetupTask = new State("SetupTask");
             RunBlock = new State("RunBlock");
@@ -109,6 +113,7 @@ namespace USE_ExperimentTemplate_Task
             AddInitializationMethod(() =>
             {
                 BlockCount = -1;
+                BlockSummaryString = new StringBuilder();
                 TaskCam.gameObject.SetActive(true);
                 if (TaskCanvasses != null)
                     foreach (GameObject go in TaskCanvasses)

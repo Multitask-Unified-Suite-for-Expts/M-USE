@@ -140,7 +140,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &307568975
 Transform:
   m_ObjectHideFlags: 0
@@ -5245,6 +5245,22 @@ MonoBehaviour:
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
+  NumCorrect_Task: 
+  AvgNumCorrect: 0
+  NumTbCompletions_Task: 
+  AvgNumTbCompletions: 0
+  TimeToChoice_Task: []
+  AvgTimeToChoice: 0
+  TimeToCompletion_Task: []
+  AvgTimeToCompletion: 0
+  NumRewards_Task: []
+  AvgNumRewards: 0
+  StanDev: 0
+  BlockAveragesString: 
+  CurrentBlockString: 
+  PreviousBlocksString: 
+  TrialCount: 0
+  Starfield: {fileID: 307568974}
 --- !u!114 &1101764165
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5303,18 +5319,21 @@ MonoBehaviour:
     type: 3}
   RedBorderPrefab: {fileID: 692447127116707221, guid: 6a4556600160f504593546f8cfa56286,
     type: 3}
-  InsideGreyBorderPrefab: {fileID: 692447127116707221, guid: 49380914af0594dce93f784951ca8c51,
-    type: 3}
   Starfield: {fileID: 307568974}
   BorderPrefabList: []
   trialStims:
     stimGroupName: 
     IsActive: 0
   ChosenStimIndices: 
-  NumCorrect_Block: 0
-  NumTrials_Block: 0
-  TokenBarCompletions_Block: 0
   TokenCount: 0
+  TimeToCompletion_StartTime: 0
+  NumTrials_Block: 0
+  NumCorrect_Block: 0
+  NumTbCompletions_Block: 0
+  TimeToChoice_Block: []
+  AvgTimeToChoice_Block: 0
+  TimeToCompletion_Block: 0
+  NumRewards_Block: 0
   minObjectTouchDuration:
     name: 
     hidden: 0
@@ -5364,3 +5383,4 @@ MonoBehaviour:
     min: 0
     precision: 0
   MaterialFilePath: 
+  TrialComplete: 0

@@ -203,6 +203,7 @@ namespace USE_ExperimentTemplate_Session
             RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
 
             bool waitForSerialPort = false;
+            bool taskAutomaticallySelected = false;
             setupSession.AddDefaultInitializationMethod(() =>
             {
                 SessionData.CreateFile();
@@ -266,6 +267,9 @@ namespace USE_ExperimentTemplate_Session
                         // Unload it after memory because this loads the assets into memory but destroys the objects
                         loadScene.completed += (_) =>
                         {
+                            SessionSettings.Save();
+                            SceneLoaded(taskName, true);
+                            SessionSettings.Restore();
                             SceneManager.UnloadSceneAsync(taskName);
                             SceneLoading = false;
                             iTask++;
@@ -298,6 +302,11 @@ namespace USE_ExperimentTemplate_Session
                 CameraMirrorTexture.Create();
                 Camera.main.targetTexture = CameraMirrorTexture;
                 mainCameraCopy.texture = CameraMirrorTexture;
+
+                // Don't show the task buttons if if we encountered an error during setup
+                if (LogPanel.HasError()) {
+                    return;
+                }
 
                 SceneLoading = true;
                 if (taskCount >= TaskMappings.Count)
@@ -346,11 +355,15 @@ namespace USE_ExperimentTemplate_Session
                     buttonStart += buttonSize + buttonSpacing;
 
                     Button button = taskButton.AddComponent<Button>();
-                    button.onClick.AddListener(() => selectedConfigName = configName);
+                    button.onClick.AddListener(() => {
+                        taskAutomaticallySelected = false;
+                        selectedConfigName = configName;
+                    });
                 }
             });
             selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask);
-            if (TaskSelectionTimeout >= 0)
+            // Don't have automatic task selection if we encountered an error during setup
+            if (TaskSelectionTimeout >= 0 && !LogPanel.HasError())
             {
                 selectTask.AddTimer(TaskSelectionTimeout, loadTask, () =>
                 {
@@ -361,6 +374,7 @@ namespace USE_ExperimentTemplate_Session
                         GameObject taskButton = taskButtonsDict[configName];
 
                         if (taskButton.GetComponent<Button>() == null) continue;
+                        taskAutomaticallySelected = true;
                         selectedConfigName = configName;
                         break;
                     }
@@ -381,7 +395,7 @@ namespace USE_ExperimentTemplate_Session
                 loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
                 loadScene.completed += (_) =>
                 {
-                    SceneLoaded(selectedConfigName);
+                    SceneLoaded(selectedConfigName, false);
                     CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigName == selectedConfigName);
                 };
             });
@@ -425,12 +439,17 @@ namespace USE_ExperimentTemplate_Session
             finishSession.SpecifyTermination(() => true, () => null, () =>
             {
                 SessionData.AppendData();
+                SessionData.WriteData();
             });
 
             SessionData = SessionDataControllers.InstantiateSessionData(StoreData, SessionDataPath);
+            SessionData.fileName = FilePrefix + "__SessionData";
             SessionData.sessionLevel = this;
             SessionData.InitDataController();
             SessionData.ManuallyDefine();
+
+            SessionData.AddDatum("SelectedTaskConfigName", () => selectedConfigName);
+            SessionData.AddDatum("TaskAutomaticallySelected", () => taskAutomaticallySelected);
 
             void GetTaskLevelFromString<T>()
                 where T : ControlLevel_Task_Template
@@ -460,7 +479,7 @@ namespace USE_ExperimentTemplate_Session
             }
         }
 
-        ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl)
+        ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
             tl.SessionDataControllers = SessionDataControllers;
             tl.LocateFile = LocateFile;
@@ -500,8 +519,11 @@ namespace USE_ExperimentTemplate_Session
             else
                 tl.SonicationActive = false;
 
-            tl.DefineTaskLevel();
+            tl.DefineTaskLevel(verifyOnly);
             // ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
+            // Don't add task to ActiveTaskLevels if we're just verifying
+            if (verifyOnly) return tl;
+
             ActiveTaskLevels.Add(tl);
             if (tl.TaskCanvasses != null)
                 foreach (GameObject go in tl.TaskCanvasses)
@@ -518,23 +540,23 @@ namespace USE_ExperimentTemplate_Session
         // 	SceneLoading = false;
         // }
 
-        void SceneLoaded(string configName)
+        void SceneLoaded(string configName, bool verifyOnly)
         {
             string taskName = (string)TaskMappings[configName];
             var methodInfo = GetType().GetMethod(nameof(this.PrepareTaskLevel));
             Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
             MethodInfo prepareTaskLevel = methodInfo.MakeGenericMethod(new Type[] { taskType });
-            prepareTaskLevel.Invoke(this, new object[] { configName });
+            prepareTaskLevel.Invoke(this, new object[] { configName, verifyOnly });
             // TaskSceneLoaded = true;
             SceneLoading = false;
         }
 
-        public void PrepareTaskLevel<T>(string configName) where T : ControlLevel_Task_Template
+        public void PrepareTaskLevel<T>(string configName, bool verifyOnly) where T : ControlLevel_Task_Template
         {
             string taskName = (string)TaskMappings[configName];
             ControlLevel_Task_Template tl = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
             tl.ConfigName = configName;
-            tl = PopulateTaskLevel(tl);
+            tl = PopulateTaskLevel(tl, verifyOnly);
             if (tl.TaskCam == null)
                 tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
             tl.TaskCam.gameObject.SetActive(false);

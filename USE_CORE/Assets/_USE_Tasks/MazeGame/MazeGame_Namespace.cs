@@ -45,6 +45,7 @@ namespace MazeGame_Namespace
         public int mazeNumTurns;
         public int viewPath;
         public string ContextName;
+        public int[] MinMaxTrials;
      //   public string mazePath;
 
         //  public float MinTouchDuration;
@@ -54,10 +55,9 @@ namespace MazeGame_Namespace
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmaxokay 
-            // System.Random rnd = new System.Random();
-            // int num = rnd.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
-            TrialDefs = new List<TrialDef>();//actual correct # 
-            for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
+            System.Random rnd = new System.Random();
+            int num = rnd.Next(MinMaxTrials[0], MinMaxTrials[1]);
+            TrialDefs = new List<MazeGame_TrialDef>().ConvertAll(x => (TrialDef)x);
             {
                 MazeGame_TrialDef td = new MazeGame_TrialDef();
                 td.TrialCount = Trial;
@@ -80,7 +80,7 @@ namespace MazeGame_Namespace
                 // td.MinTouchDuration = MinTouchDuration;
                 //   td.MaxTouchDuration = MaxTouchDuration;
 
-                TrialDefs[iTrial] = td;
+                TrialDefs.Add(td);
             }
         }
 

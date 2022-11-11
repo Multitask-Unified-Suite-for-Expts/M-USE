@@ -63,6 +63,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     public int NumFeedbackRows;
 
+    private Vector3 originalFbTextPosition;
+    private Vector3 originalTitleTextPosition;
+
     //Config Variables
     [HideInInspector]
     public ConfigNumber minObjectTouchDuration, itiDuration, finalFbDuration, fbDuration, maxObjectTouchDuration, selectObjectDuration;
@@ -80,6 +83,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         TokenFBController.enabled = false;
         ScoreAmountPerTrial = 100;
+
+        originalFbTextPosition = YouLoseTextGO.transform.position;
+
+        originalTitleTextPosition = TitleTextGO.transform.position;
 
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
@@ -112,7 +119,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 Starfield.SetActive(true);
 
             if(TrialCount_InBlock == 0)
+            {
+                if (currentTrial.IsHuman)
+                {
+                    Vector3 titlePos = TitleTextGO.transform.position;
+                    titlePos.y -= 1.1f;
+                    TitleTextGO.transform.position = titlePos;
+                }
                 TitleTextGO.SetActive(true);
+            }
 
             CompletedAllTrials = false;
             TrialComplete = false;
@@ -138,7 +153,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             DisplayStims, () =>
             {
                 if(TitleTextGO.activeSelf)
+                {
                     TitleTextGO.SetActive(false);
+                    TitleTextGO.transform.position = originalTitleTextPosition; //Reset Title Position for next block (in case its not a human block). 
+                }
 
                 StartButton.SetActive(false);
 
@@ -262,7 +280,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.Destroy();
             if (GotCorrect)
             {
-                if(TrialCount_InBlock == currentTrial.MaxNumTrials-1 || currentTrial.PNC_Stim.Count == 0) //If they get the last trial right, fill up bar!
+                if(TrialCount_InBlock == currentTrial.MaxNumTrials-1 || currentTrial.PNC_Stim.Count == 0) //If they get the last trial right (or find all stim), fill up bar!
                 {
                     currentTrial.NumRewardPulses++;
                     int numToFillBar = currentTrial.NumTokenBar - TokenCount;
@@ -312,12 +330,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
                 if (!CompletedAllTrials)
                 {
-                    Debug.Log("Y LOC POS BEFORE = " + YouLoseTextGO.transform.localPosition.y);
-                    Debug.Log("Y OFFSET = " + Y_Offset);
-                    Debug.Log("LOC POS MINUS YOFFSET + " + (YouLoseTextGO.transform.localPosition.y - Y_Offset));
                     YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
-                    Debug.Log("Y POS AFTER = " + YouLoseTextGO.transform.position.y);
-                    Debug.Log("Y LOCAL POS AFTER + " + YouLoseTextGO.transform.localPosition.y);
                     YouLoseTextGO.SetActive(true);
                 }
             }
@@ -328,12 +341,22 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             StartCoroutine(DestroyFeedbackBorders());
 
             if (CompletedAllTrialsTextGO.activeSelf)
+            {
                 CompletedAllTrialsTextGO.SetActive(false);
+                CompletedAllTrialsTextGO.transform.position = originalFbTextPosition; //Reset position for next Block; Currently all 3 start in same position. If that changes, add 2 variables. 
+            }
             if(FoundAllStimTextGO.activeSelf)
+            {
                 FoundAllStimTextGO.SetActive(false);
-            if (YouLoseTextGO.activeSelf)
-                YouLoseTextGO.SetActive(false);
+                FoundAllStimTextGO.transform.position = originalFbTextPosition;
 
+            }
+            if (YouLoseTextGO.activeSelf)
+            {
+                YouLoseTextGO.SetActive(false);
+                YouLoseTextGO.transform.position = originalFbTextPosition;
+
+            }
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
@@ -379,19 +402,19 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         switch (NumFeedbackRows)
         {
             case 1:
-                yOffset = 60f; //good
+                yOffset = 65f; //good
                 break;
             case 2:
-                yOffset = 30f; //good
+                yOffset = 45f; //good
                 break;
             case 3:
-                yOffset = -10f;
+                yOffset = 5f; //not sure.
                 break;
             case 4:
                 yOffset = -10f;
                 break;
             case 5:
-                yOffset = -20f;
+                yOffset = -25f;
                 break;
         }
         return yOffset;
@@ -651,7 +674,17 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         float shiftDownNeeded = (topMargin + bottomMargin) / 2;
         float shiftDownAmount = shiftDownNeeded - topMargin;
 
-        for (int i = 0; i < FinalLocations.Length; i++) FinalLocations[i].y -= shiftDownAmount;
+        //Shift down more if Human playing cuz there's the text above the stim.
+        if(currentTrial.IsHuman && NumFeedbackRows > 1)
+        {
+            for (int i = 0; i < FinalLocations.Length; i++)
+                FinalLocations[i].y -= (shiftDownAmount + .25f); //maybe lower this. just trying it out
+        }
+        else
+        {
+            for (int i = 0; i < FinalLocations.Length; i++)
+                FinalLocations[i].y -= shiftDownAmount;
+        }
 
         return FinalLocations;
     }
@@ -1084,12 +1117,17 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         Rect rect = new Rect(new Vector2(0, 0), new Vector2(1, 1));
 
         Vector3 buttonPosition = Vector3.zero;
+
         Vector3 buttonScale = Vector3.zero;
         string TaskName = "ContinuousRecognition";
         if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
         {
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+            {
                 buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+                if (currentTrial.IsHuman)
+                    buttonPosition.y -= .25f;
+            }
             else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
                 buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");

@@ -11,26 +11,26 @@ using USE_ExperimentTemplate_Block;
 
 public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 {
-    List<int> NumCorrect_Task;
-    float AvgNumCorrect;
+    public List<int> NumCorrect_Task;
+    public float AvgNumCorrect;
 
-    List<int> NumTbCompletions_Task;
+    public List<int> NumTbCompletions_Task;
     float AvgNumTbCompletions;
 
-    List<float> TimeToChoice_Task;
-    float AvgTimeToChoice;
+    public List<float> TimeToChoice_Task;
+    public float AvgTimeToChoice;
 
-    List<float> TimeToCompletion_Task;
-    float AvgTimeToCompletion;
+    public List<float> TimeToCompletion_Task;
+    public float AvgTimeToCompletion;
 
-    List<float> NumRewards_Task;
-    float AvgNumRewards;
+    public List<float> NumRewards_Task;
+    public float AvgNumRewards;
 
-    double StanDev;
+    public double StanDev;
 
-    string BlockAveragesString;
-    string CurrentBlockString;
-    StringBuilder PreviousBlocksString;
+    public string BlockAveragesString;
+    public string CurrentBlockString;
+    public StringBuilder PreviousBlocksString;
 
 
     ContinuousRecognition_BlockDef currentBlock => GetCurrentBlockDef<ContinuousRecognition_BlockDef>();

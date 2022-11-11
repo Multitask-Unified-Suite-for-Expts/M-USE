@@ -5491,9 +5491,9 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4279700206
-  m_fontColor: {r: 0.93333334, g: 0.039215688, b: 0.09019608, a: 1}
-  m_enableVertexGradient: 1
+    rgba: 4284833494
+  m_fontColor: {r: 0.8396226, g: 0.368325, b: 0.39506543, a: 1}
+  m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
     topLeft: {r: 0.3490566, g: 0.22886258, b: 0.22886258, a: 1}
@@ -5629,8 +5629,8 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4282515258
-  m_fontColor: {r: 0.22745098, g: 1, b: 0.25490198, a: 1}
-  m_enableVertexGradient: 1
+  m_fontColor: {r: 0.57254905, g: 1, b: 0.58431375, a: 1}
+  m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
     topLeft: {r: 0.7372549, g: 0.7490196, b: 0.7647059, a: 1}
@@ -5837,20 +5837,6 @@ MonoBehaviour:
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
-  NumCorrect_Task: 
-  AvgNumCorrect: 0
-  NumTbCompletions_Task: 
-  AvgNumTbCompletions: 0
-  TimeToChoice_Task: []
-  AvgTimeToChoice: 0
-  TimeToCompletion_Task: []
-  AvgTimeToCompletion: 0
-  NumRewards_Task: []
-  AvgNumRewards: 0
-  StanDev: 0
-  BlockAveragesString: 
-  CurrentBlockString: 
-  TrialCount: 0
 --- !u!114 &1101764165
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5910,12 +5896,6 @@ MonoBehaviour:
   YouLoseTextGO: {fileID: 983582366}
   ScoreTextGO: {fileID: 208675865}
   NumTrialsTextGO: {fileID: 1932148019}
-  ScoreAmountPerTrial: 0
-  TrialComplete: 0
-  CompletedAllTrials: 0
-  EndBlock: 0
-  GotCorrect: 0
-  stimIsChosen: 0
   StartButton: {fileID: 0}
   GreenBorderPrefab: {fileID: 692447127116707221, guid: 56d1b38cf705cfa458909624e6058ac2,
     type: 3}
@@ -5923,12 +5903,16 @@ MonoBehaviour:
     type: 3}
   Starfield: {fileID: 307568974}
   BorderPrefabList: []
+  TrialComplete: 0
+  CompletedAllTrials: 0
+  EndBlock: 0
+  GotCorrect: 0
+  stimIsChosen: 0
   trialStims:
     stimGroupName: 
     IsActive: 0
   ChosenStimIndices: 
   MaterialFilePath: 
-  TokenCount: 0
   NumTrials_Block: 0
   NumCorrect_Block: 0
   NumTbCompletions_Block: 0
@@ -5937,7 +5921,6 @@ MonoBehaviour:
   TimeToCompletion_Block: 0
   TimeToCompletion_StartTime: 0
   NumRewards_Block: 0
-  NumFeedbackRows: 0
   minObjectTouchDuration:
     name: 
     hidden: 0
@@ -5997,6 +5980,7 @@ GameObject:
   - component: {fileID: 1124341761}
   - component: {fileID: 1124341763}
   - component: {fileID: 1124341762}
+  - component: {fileID: 1124341764}
   m_Layer: 5
   m_Name: TitleText
   m_TagString: Untagged
@@ -6055,13 +6039,13 @@ MonoBehaviour:
     serializedVersion: 2
     rgba: 4294375930
   m_fontColor: {r: 0.98039216, g: 0.9764706, b: 0.9647059, a: 1}
-  m_enableVertexGradient: 0
+  m_enableVertexGradient: 1
   m_colorMode: 3
   m_fontColorGradient:
-    topLeft: {r: 1, g: 1, b: 1, a: 1}
-    topRight: {r: 1, g: 1, b: 1, a: 1}
-    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
-    bottomRight: {r: 1, g: 1, b: 1, a: 1}
+    topLeft: {r: 0.8509804, g: 0.42745098, b: 0.7882353, a: 1}
+    topRight: {r: 0.39215687, g: 1, b: 0.9137255, a: 1}
+    bottomLeft: {r: 0.39215687, g: 1, b: 0.9137255, a: 1}
+    bottomRight: {r: 0.8509804, g: 0.42745098, b: 0.7882353, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
@@ -6121,6 +6105,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1124341760}
   m_CullTransparentMesh: 1
+--- !u!114 &1124341764
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1124341760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f16bbc8c297044889a29aebfe65e7e77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1268475002
 GameObject:
   m_ObjectHideFlags: 0
@@ -6190,9 +6186,9 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4282515258
-  m_fontColor: {r: 0.22895159, g: 1, b: 0.25647977, a: 1}
-  m_enableVertexGradient: 1
+    rgba: 4288020370
+  m_fontColor: {r: 0.5707547, g: 1, b: 0.58600706, a: 1}
+  m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
     topLeft: {r: 0.73891956, g: 0.74733007, b: 0.764151, a: 1}

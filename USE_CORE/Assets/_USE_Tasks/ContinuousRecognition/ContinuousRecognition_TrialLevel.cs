@@ -28,28 +28,24 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public GameObject ScoreTextGO;
     public GameObject NumTrialsTextGO;
 
-    public int ScoreAmountPerTrial;
-
-    public bool TrialComplete;
-    public bool CompletedAllTrials;
-    public bool EndBlock;
-    public bool GotCorrect;
-    public bool stimIsChosen;
-    private bool ContextActive;
-
     public GameObject StartButton;
     public GameObject GreenBorderPrefab;
     public GameObject RedBorderPrefab;
     public GameObject Starfield;
     public List<GameObject> BorderPrefabList;
 
+    public bool TrialComplete;
+    public bool CompletedAllTrials;
+    public bool EndBlock;
+    public bool GotCorrect;
+    public bool stimIsChosen;
+
     public StimGroup trialStims;
-
     public List<int> ChosenStimIndices;
-
     public string MaterialFilePath;
-    private bool variablesLoaded;
-    public int TokenCount;
+
+    bool ContextActive;
+    bool variablesLoaded;
 
     //Display Data
     public int NumTrials_Block;
@@ -61,14 +57,17 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public float TimeToCompletion_StartTime;
     public int NumRewards_Block;
 
-    public int NumFeedbackRows;
+    int TokenCount;
+    int NumFeedbackRows;
+    int ScoreAmountPerTrial;
 
-    private Vector3 originalFbTextPosition;
-    private Vector3 originalTitleTextPosition;
+    Vector3 originalFbTextPosition;
+    Vector3 originalTitleTextPosition;
 
     //Config Variables
     [HideInInspector]
     public ConfigNumber minObjectTouchDuration, itiDuration, finalFbDuration, fbDuration, maxObjectTouchDuration, selectObjectDuration;
+
 
     public override void DefineControlLevel()
     {        
@@ -85,7 +84,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         ScoreAmountPerTrial = 100;
 
         originalFbTextPosition = YouLoseTextGO.transform.position;
-
         originalTitleTextPosition = TitleTextGO.transform.position;
 
 

@@ -180,7 +180,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["IncorrectResponse"]);
             }
             string touchedObjectsNames = "";
-            if (selected != null) touchedObjectsNames = selected.name;
+            if (selected != null) touchedObjectsNames = selectedSD.StimName;
 
             TrialSummaryString = "Trial Num: " + TrialCount_InTask+1 
              + "\nTouched Object Names: " +
@@ -259,7 +259,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
         
         // trial data
-        TrialData.AddDatum("SelectedName", () => selected != null ? selected.name : null);
+        TrialData.AddDatum("SelectedName", () => selected != null ? selectedSD.StimName : null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
         TrialData.AddDatum("SelectionCorrect", () => correct ? 1 : 0);
         

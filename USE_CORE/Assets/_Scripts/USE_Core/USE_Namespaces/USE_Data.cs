@@ -86,7 +86,7 @@ namespace USE_Data
 					string returnString = "";
 					if (v == null)
 					{
-						Debug.LogWarning("Null value returned for Datum, name: " + this.name);
+						//Debug.LogWarning("Null value returned for Datum, name: " + this.name);
 						returnString = "null";
 					}
 					else if (typeof(T) == typeof(List<int>))

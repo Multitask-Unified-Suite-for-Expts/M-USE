@@ -49,11 +49,12 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             flTL.MaxTrials = rnd.Next(flBD.MinMaxTrials[0], flBD.MinMaxTrials[1]);
             flTL.NumTokenBar = flBD.NumTokenBar;
             TrialLevel.TokenFBController.SetTokenBarValue(flBD.NumInitialTokens); 
+            BlockSummaryString.AppendLine("Block Num: " + (flTL.BlockCount) + "\nTrial Count: " + (flTL.TrialCount_InBlock));
         });
 
         RunBlock.AddUpdateMethod(() =>
         {
-            BlockSummaryString.AppendLine("Block Num: " + (flTL.BlockCount) + "\nTrial Count: " + (flTL.TrialCount_InBlock));
+            
             //  "\nTotal Errors: " + vsTL.totalErrors_InBlock + "\nError Type: " + vsTL.errorType_InBlockString + "\nPerformance: " + vsTL.accuracyLog_InBlock;
         });
         

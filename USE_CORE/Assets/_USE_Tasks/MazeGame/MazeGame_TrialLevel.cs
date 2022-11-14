@@ -11,6 +11,7 @@ using System.Data;
 using ConfigDynamicUI;
 using USE_Settings;
 using USE_ExperimentTemplate_Trial;
+using System.IO;
 
 public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 {
@@ -93,7 +94,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public static int correctTouches = 0;
 
     public static Color tileColor;
-    public string MaterialFilePath;
+    public string MaterialFilePath, MazeFilePath;
     public GameObject mazeBackground;
     public Texture2D backgroundTex;
     private Image sr;
@@ -145,7 +146,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             tbl.Columns.Add(new DataColumn("mPath"));
 
 
-            string[] lines = System.IO.File.ReadAllLines("Assets/MazeGameTest/Resources/AllMazes.txt");
+            string[] lines = System.IO.File.ReadAllLines(MazeFilePath + Path.DirectorySeparatorChar + "AllMazes.txt");
 
             curMDim = CurrentTrialDef.mazeDim;
             curMNumSquares = CurrentTrialDef.mazeNumSquares;
@@ -217,9 +218,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (count == 0)
             {
                 count = 0;
+                /*
                 // Load maze from JSON
                 TextAsset[] textMazes = Resources.LoadAll<TextAsset>("Mazes");
-
+                Debug.Log("TextAssetSize: " + textMazes.Length);
                 foreach (TextAsset textMaze in textMazes)
                 {
                     string mazeJson = textMaze.text;
@@ -227,7 +229,15 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     Debug.Log(mazeObj);
                     mazeList.Add(mazeObj);
                 }
-
+                */
+                string[] textMazes = System.IO.File.ReadAllLines(MazeFilePath + Path.DirectorySeparatorChar + "Maze.txt");
+                Debug.Log("TextMazesSize: " + textMazes.Length);
+                foreach (string textMaze in textMazes)
+                {
+                    Maze mazeObj = new Maze(textMaze);
+                    Debug.Log("Maze Obj:" + mazeObj);
+                    mazeList.Add(mazeObj);
+                }
                 foreach (Maze maze in mazeList)
                 {
                     // TODO: Here is where the maze levels can be put in order
@@ -323,7 +333,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             response = -1;
             curRep = 0;
             initButton.SetActive(true);
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
         });
 
 
@@ -356,7 +366,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             slider.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
             sliderHalo.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
 
-            initButton.gameObject.SetActive(false);
+            initButton.SetActive(false);
         });
 
         MazeVis.AddInitializationMethod(() =>
@@ -440,6 +450,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         slider.gameObject.SetActive(true);
         
         Debug.Log("Count: " + count);
+        /*
         TextAsset[] textMazes = Resources.LoadAll<TextAsset>("output_mazes_json");
 
         foreach (TextAsset textMaze in textMazes)
@@ -449,21 +460,18 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             // Debug.Log(mazeObj);
             mazeList.Add(mazeObj);
         }
-
+        */
         currMaze = mazeList[ind];
         dim = currMaze.mConfigs.dim;
-
         sliderValueIncreaseAmount = (100f / (currMaze.mNumSquares)) / 100f;
-
-        //     tileRows = new TileRow[dim];
+        
         Debug.Log("DIM: " + dim);
-
-
+        
         GameObject mazeCenter = GameObject.FindWithTag("Center");
 
         float mazeWidth = dim * TILE_WIDTH;
         Vector3 bottomLeftMazePos = mazeCenter.transform.position - (new Vector3(mazeWidth / 2, mazeWidth / 2, 0));
-        backgroundTex = LoadPNG(MaterialFilePath + "\\MazeBackground.png");
+        backgroundTex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "MazeBackground.png");
         mazeBackground = CreateMazeBackground(backgroundTex, new Rect(new Vector2(0,0), new Vector2(1,1)));
         
         GameObject mazeContainer = new GameObject("MazeContainer");
@@ -476,13 +484,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         for (int x = 0; x < dim; ++x)
         {
+            Debug.Log("InLoop");
             for (int y = 0; y < dim; ++y)
             {
-                if (count != 0)
-                {
-                    tile.gameObject.SetActive(true);
-                    tile.gameObject.GetComponent<Tile>().enabled = true;
-                }
+                Debug.Log("InLoop2");
+                tile.gameObject.SetActive(true);
+                tile.gameObject.GetComponent<Tile>().enabled = true;
+                
                 float displaceX = x * TILE_WIDTH;
                 float displaceY = y * TILE_WIDTH;
                 Vector3 newTilePosition = bottomLeftMazePos + new Vector3(displaceX, displaceY, 0);

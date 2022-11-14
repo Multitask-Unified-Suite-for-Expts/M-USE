@@ -11,6 +11,9 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         string TaskName = "MazeGame";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             mgTL.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeExternalFilePath"))
+            mgTL.MazeFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "MazeExternalFilePath");
+
         RunBlock.AddInitializationMethod(() =>
         {
             

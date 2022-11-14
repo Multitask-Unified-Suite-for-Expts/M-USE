@@ -96,7 +96,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         initTrial.AddInitializationMethod(() =>
         {
             RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
-            Debug.Log("FilePath: " + MaterialFilePath);
             TokenFBController
                 .SetRevealTime(tokenRevealDuration.value)
                 .SetUpdateTime(tokenUpdateDuration.value);

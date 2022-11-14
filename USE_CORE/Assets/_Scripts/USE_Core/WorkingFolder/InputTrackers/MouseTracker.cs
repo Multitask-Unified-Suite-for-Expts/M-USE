@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEngine;
 using USE_Data;
 
 public class MouseTracker : InputTracker
 {
-    private GameObject HoverObject;
+    [CanBeNull] private GameObject HoverObject;
 
     public override void AddFieldsToFrameData(DataController frameData)
     {
@@ -22,6 +23,10 @@ public class MouseTracker : InputTracker
         {
             HoverObject = hit.transform.root.gameObject;
             if (InputBroker.GetMouseButton(0)) return HoverObject;
+        }
+        else
+        {
+            HoverObject = null;
         }
         return null;
     }

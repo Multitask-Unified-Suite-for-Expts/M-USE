@@ -215,8 +215,8 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 2
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 4
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -5750,6 +5750,12 @@ MonoBehaviour:
   SelectionType: 
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
+  CR_Canvas: {fileID: 0}
+  TitleText: {fileID: 0}
+  YouWinText: {fileID: 0}
+  YouLoseText: {fileID: 0}
+  ScoreText: {fileID: 0}
+  NumTrialsText: {fileID: 0}
   CR_CanvasGO: {fileID: 321374836}
   TitleTextGO: {fileID: 1124341760}
   YouWinTextGO: {fileID: 1268475002}
@@ -5773,6 +5779,7 @@ MonoBehaviour:
     IsActive: 0
   ChosenStimIndices: 
   MaterialFilePath: 
+  ContextPath: 
   ContextActive: 0
   variablesLoaded: 0
   NumTrials_Block: 0
@@ -5872,7 +5879,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -25}
+  m_AnchoredPosition: {x: 0, y: -40}
   m_SizeDelta: {x: 1200, y: 200}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1124341762
@@ -6214,8 +6221,8 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 2
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 1
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0

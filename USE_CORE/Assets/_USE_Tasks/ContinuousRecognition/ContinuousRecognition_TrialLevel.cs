@@ -20,6 +20,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
     public ContinuousRecognition_TrialDef currentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
 
+    //Text variables
+    //public Canvas CR_Canvas;
+    //public TextMeshPro TitleText;
+    //public TextMeshPro YouWinText;
+    //public TextMeshPro YouLoseText;
+    //public TextMeshPro ScoreText;
+    //public TextMeshPro NumTrialsText;
     public GameObject CR_CanvasGO;
     public GameObject TitleTextGO;
     public GameObject YouWinTextGO;
@@ -42,6 +49,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public StimGroup trialStims;
     public List<int> ChosenStimIndices;
     public string MaterialFilePath;
+    public string ContextPath;
 
     public bool ContextActive;
     public bool variablesLoaded;
@@ -83,13 +91,19 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.enabled = false;
         ScoreAmountPerTrial = 100;
 
+        //Currently still created in Editor.
+        //CreateCanvasAndText();
+
         originalFbTextPosition = YouLoseTextGO.transform.position;
         originalTitleTextPosition = TitleTextGO.transform.position;
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + currentTrial.ContextName + ".png");
+            ContextPath = GetContextNestedFilePath(currentTrial.ContextName);
+            RenderSettings.skybox = CreateSkybox(ContextPath);
+            //RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + currentTrial.ContextName + ".png");
+
             ContextActive = true;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
 
@@ -114,21 +128,18 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (currentTrial.UseStarfield)
                 Starfield.SetActive(true);
 
-            if(TrialCount_InBlock == 0 && currentTrial.IsHuman)
+            //Add title text above StartButton if first trial in block and Human is playing.
+            //Adjust startButton position (move down) to make room for Title text. 
+            if (TrialCount_InBlock == 0 && currentTrial.IsHuman)
             {
                 Vector3 buttonPos = StartButton.transform.position;
                 buttonPos.y -= .1f; //changed from .25
                 StartButton.transform.position = buttonPos;
 
-                Vector3 titlePos = TitleTextGO.transform.position;
-                titlePos.y -= 1.1f;
-                TitleTextGO.transform.position = titlePos;
-
                 TitleTextGO.SetActive(true);
             }
             StartButton.SetActive(true);
             
-
             CompletedAllTrials = false;
             TrialComplete = false;
             currentTrial.IsNewStim = false;
@@ -149,10 +160,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
             
         });
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), //IS THR IN THE NAME OF CONFIG FILE, IF SO ACTIVATE THR TASK. 
+        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), //THR NOTE: IS THR IN THE NAME OF CONFIG FILE? IF SO ACTIVATE THR TASK. 
             DisplayStims, () =>
             {
-                if(TitleTextGO.activeSelf)
+                if (TitleTextGO.activeSelf)
                 {
                     TitleTextGO.SetActive(false);
                     TitleTextGO.transform.position = originalTitleTextPosition; //Reset Title Position for next block (in case its not a human block). 
@@ -317,20 +328,24 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (EndBlock)
             {
                 GenerateBlockFeedback();
-                float Y_Offset = GetOffsetY();
-                int scoreTotal = TrialCount_InBlock * ScoreAmountPerTrial;
 
-                if (CompletedAllTrials)
+                if(currentTrial.IsHuman)
                 {
-                    YouWinTextGO.transform.localPosition = new Vector3(YouWinTextGO.transform.localPosition.x, YouWinTextGO.transform.localPosition.y - Y_Offset, YouWinTextGO.transform.localPosition.z);
-                    YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"YOU WIN! \n HighScore: {scoreTotal}";
-                    YouWinTextGO.SetActive(true);
-                }
-                else
-                {
-                    YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
-                    YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"YOU LOSE! \n HighScore: {scoreTotal}";
-                    YouLoseTextGO.SetActive(true);
+                    float Y_Offset = GetOffsetY();
+                    int scoreTotal = TrialCount_InBlock * ScoreAmountPerTrial;
+
+                    if (CompletedAllTrials)
+                    {
+                        YouWinTextGO.transform.localPosition = new Vector3(YouWinTextGO.transform.localPosition.x, YouWinTextGO.transform.localPosition.y - Y_Offset, YouWinTextGO.transform.localPosition.z);
+                        YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"YOU WIN! \n HighScore: {scoreTotal}";
+                        YouWinTextGO.SetActive(true);
+                    }
+                    else
+                    {
+                        YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
+                        YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Nice Try! \n HighScore: {scoreTotal}";
+                        YouLoseTextGO.SetActive(true);
+                    }
                 }
             }
         });
@@ -386,7 +401,102 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     }
 
 
-    //HELPER FUNCTIONS --------------------------------------------------------------------------
+    //HELPER FUNCTIONS -----------------------------------------------------------------------------------------
+
+    //Recursive Search the sub folders of the MaterialFilePath to get Context file path
+    private string GetContextNestedFilePath(string contextName)
+    {
+        string backupContextName = "LinearDark";
+        string contextPath = ""; 
+
+        string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
+
+        if (filePaths.Length >= 1)
+            contextPath = filePaths[0];
+        else
+        {
+            contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0]; //Use Default LinearDark if can't find file.
+            Debug.Log($"Context File Path Not Found. Defaulting to {backupContextName}.");
+        }
+
+        return contextPath;
+    }
+
+    //Function not being used. Currently CR Canvas and Text are created in Unity Editor. 
+    private void CreateCanvasAndText()
+    {
+        //TMP_FontAsset textFont;
+        //textFont = Resources.Load<TMP_FontAsset>("Bangers-Regular SDF"); //NOT WORKING
+
+        //Color textColor;
+        //ColorUtility.TryParseHtmlString("#FAF9F6", out textColor);
+
+        //CR_CanvasGO = new GameObject();
+        //CR_CanvasGO.name = "CR_Canvas";
+        //CR_CanvasGO.AddComponent<Canvas>();
+
+        //CR_Canvas = CR_CanvasGO.GetComponent<Canvas>();
+        //CR_Canvas.renderMode = RenderMode.ScreenSpaceCamera;
+        //CR_Canvas.worldCamera = GameObject.Find("ContinuousRecognition_Camera").GetComponent<Camera>();
+        //CR_CanvasGO.AddComponent<CanvasScaler>();
+        //CR_CanvasGO.AddComponent<GraphicRaycaster>();
+
+        //TitleTextGO = new GameObject();
+        //TitleTextGO.name = "TitleText";
+        //TitleTextGO.transform.parent = CR_CanvasGO.transform;
+        //TitleText = TitleTextGO.AddComponent<TextMeshPro>();
+        //TitleText.text = "DON'T Pick Twice!";
+        //TitleText.fontSize = 70;
+        //TitleText.color = textColor;
+        //TitleText.alignment = TextAlignmentOptions.Center;
+        //RectTransform titleRECT = TitleText.GetComponent<RectTransform>();
+        //titleRECT.localPosition = new Vector3(0, 200, 0);
+        //titleRECT.sizeDelta = new Vector2(1200, 200);
+
+        //YouWinTextGO = new GameObject();
+        //YouWinTextGO.name = "YouWinText";
+        //YouWinTextGO.transform.parent = CR_CanvasGO.transform;
+        //YouWinText = YouWinTextGO.AddComponent<TextMeshPro>();
+        //YouWinText.font = textFont;
+        //YouWinText.fontSize = 36;
+        //YouWinText.color = textColor;
+        ////RectTransform youWinRECT = YouWinText.GetComponent<RectTransform>();
+        ////youWinRECT.localPosition = new Vector3(0, 0, 0);
+        ////youWinRECT.sizeDelta = new Vector2(1920, 1080);
+
+        //YouLoseTextGO = new GameObject();
+        //YouLoseTextGO.name = "YouLoseText";
+        //YouLoseTextGO.transform.parent = CR_CanvasGO.transform;
+        //YouLoseText = YouLoseTextGO.AddComponent<TextMeshPro>();
+        //YouLoseText.font = textFont;
+        //YouLoseText.fontSize = 36;
+        //YouLoseText.color = textColor;
+        ////RectTransform youLoseRECT = YouWinText.GetComponent<RectTransform>();
+        ////youLoseRECT.localPosition = new Vector3(0, 0, 0);
+        ////youLoseRECT.sizeDelta = new Vector2(1920, 1080);
+
+        //ScoreTextGO = new GameObject();
+        //ScoreTextGO.name = "ScoreText";
+        //ScoreTextGO.transform.parent = CR_CanvasGO.transform;
+        //ScoreText = ScoreTextGO.AddComponent<TextMeshPro>();
+        //ScoreText.font = textFont;
+        //ScoreText.fontSize = 24;
+        //ScoreText.color = textColor;
+        ////RectTransform scoreRECT = YouWinText.GetComponent<RectTransform>();
+        ////scoreRECT.localPosition = new Vector3(0, 0, 0);
+        ////scoreRECT.sizeDelta = new Vector2(1920, 1080);
+
+        //NumTrialsTextGO = new GameObject();
+        //NumTrialsTextGO.name = "NumTrialsText";
+        //NumTrialsTextGO.transform.parent = CR_CanvasGO.transform;
+        //NumTrialsText = NumTrialsTextGO.AddComponent<TextMeshPro>();
+        //NumTrialsText.font = textFont;
+        //NumTrialsText.fontSize = 24;
+        //NumTrialsText.color = textColor;
+        ////RectTransform numTrialsRECT = NumTrialsText.GetComponent<RectTransform>();
+        ////numTrialsRECT.localPosition = new Vector3(0, 0, 0);
+        ////numTrialsRECT.sizeDelta = new Vector2(1920, 1080);
+    }
 
     private float GetOffsetY()
     {
@@ -394,16 +504,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         switch (NumFeedbackRows)
         {
             case 1:
-                yOffset = 75f; //good
+                yOffset = 75f;
                 break;
             case 2:
-                yOffset = 45f; //good
+                yOffset = 45f;
                 break;
             case 3:
-                yOffset = 15f; //not sure.
+                yOffset = 15f;
                 break;
             case 4:
-                yOffset = -10f;
+                yOffset = -20f;
                 break;
             case 5:
                 yOffset = -25f;
@@ -1140,7 +1250,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void CreateStartButton()
     {
-        Texture2D tex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
+        string contextPath = GetContextNestedFilePath("StartButtonImage.png");
+        Texture2D tex = LoadPNG(contextPath);
+        //Texture2D tex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
         Rect rect = new Rect(new Vector2(0, 0), new Vector2(1, 1));
 
         Vector3 buttonPosition = Vector3.zero;

@@ -133,7 +133,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InBlock == 0 && currentTrial.IsHuman)
             {
                 Vector3 buttonPos = StartButton.transform.position;
-                buttonPos.y -= .1f; //changed from .25
+                buttonPos.y -= .1f;
                 StartButton.transform.position = buttonPos;
 
                 TitleTextGO.SetActive(true);
@@ -160,7 +160,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
             
         });
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), //THR NOTE: IS THR IN THE NAME OF CONFIG FILE? IF SO ACTIVATE THR TASK. 
+        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
             DisplayStims, () =>
             {
                 if (TitleTextGO.activeSelf)
@@ -337,7 +337,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     if (CompletedAllTrials)
                     {
                         YouWinTextGO.transform.localPosition = new Vector3(YouWinTextGO.transform.localPosition.x, YouWinTextGO.transform.localPosition.y - Y_Offset, YouWinTextGO.transform.localPosition.z);
-                        YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"YOU WIN! \n HighScore: {scoreTotal}";
+                        YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"YOU WIN! \n New HighScore: {scoreTotal}";
                         YouWinTextGO.SetActive(true);
                     }
                     else
@@ -403,28 +403,29 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     //HELPER FUNCTIONS -----------------------------------------------------------------------------------------
 
-    //Recursive Search the sub folders of the MaterialFilePath to get Context file path
     private string GetContextNestedFilePath(string contextName)
     {
+        //Recursive search the sub folders of the MaterialFilePath to get Context File Path
         string backupContextName = "LinearDark";
         string contextPath = ""; 
 
         string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
 
-        if (filePaths.Length >= 1)
+        if (filePaths.Length == 1)
             contextPath = filePaths[0];
         else
         {
-            contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0]; //Use Default LinearDark if can't find file.
             Debug.Log($"Context File Path Not Found. Defaulting to {backupContextName}.");
+            contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0]; //Use Default LinearDark if can't find file.
         }
 
         return contextPath;
     }
 
-    //Function not being used. Currently CR Canvas and Text are created in Unity Editor. 
     private void CreateCanvasAndText()
     {
+        //Function not being used. Currently CR Canvas and Text are created in Unity Editor.
+
         //TMP_FontAsset textFont;
         //textFont = Resources.Load<TMP_FontAsset>("Bangers-Regular SDF"); //NOT WORKING
 
@@ -500,6 +501,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private float GetOffsetY()
     {
+        //function used to adjust the text positioning for the human version. 
         float yOffset = 0;
         switch (NumFeedbackRows)
         {
@@ -524,6 +526,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void SetScoreTextAndNumTrialsText()
     {
+        //function to set the score and NumTrials texts at the beginning of the trial. 
         int scoreTotal = TrialCount_InBlock * ScoreAmountPerTrial;
         ScoreTextGO.GetComponent<TextMeshProUGUI>().text = $"SCORE: {scoreTotal}";
         NumTrialsTextGO.GetComponent<TextMeshProUGUI>().text = $"TRIALS: {TrialCount_InBlock}";
@@ -554,7 +557,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (numLocations > 18) numRows++;
         if (numLocations > 24) numRows++;
 
-        NumFeedbackRows = numRows; //Setting Global variable for use centering the feedback text above the stim.
+        NumFeedbackRows = numRows; //Setting Global variable for use centering the feedback text above the stim (for human version)
 
         int R1_Length = 0;
         int R2_Length = 0;
@@ -897,10 +900,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             TrialStims.Add(trialStims);
         }
 
-        getLog(currentTrial.PC_Stim, "PC_Stims");
-        getLog(currentTrial.New_Stim, "New_Stims");
-        getLog(currentTrial.PNC_Stim, "PNC_Stims");
-        getLog(currentTrial.TrialStimIndices, "TrialStimIndices");
+        GetLog(currentTrial.PC_Stim, "PC_Stims");
+        GetLog(currentTrial.New_Stim, "New_Stims");
+        GetLog(currentTrial.PNC_Stim, "PNC_Stims");
+        GetLog(currentTrial.TrialStimIndices, "TrialStimIndices");
     }
 
     private void SetShadowType()
@@ -932,7 +935,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             AvgTimeToChoice_Block = 0;
 
         float sum = 0;
-        foreach (float choice in TimeToChoice_Block) sum += choice;
+        foreach (float choice in TimeToChoice_Block)
+            sum += choice;
         AvgTimeToChoice_Block = sum / TimeToChoice_Block.Count;
     }
 
@@ -1022,7 +1026,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         yield return new WaitForSeconds(.1f);
         foreach (GameObject border in BorderPrefabList)
         {
-            if (border != null) border.SetActive(false);
+            if (border != null)
+                border.SetActive(false);
         }
         BorderPrefabList.Clear();
     }
@@ -1165,7 +1170,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         currentTrial.Unseen_Stim.Clear();
     }
 
-    private void getLog(List<int> list, string name)
+    private void GetLog(List<int> list, string name)
     {
         string result = name + ": ";
         foreach (var item in list)
@@ -1177,6 +1182,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private float[] GetStimRatioPercentages(int[] ratioArray)
     {
+        //Takes the initial stim ratio (ex: 2PC, 1New, 2PNC), and
+        //outputs their percentages of the total 
         float sum = 0;
         float[] stimPercentages = new float[ratioArray.Length];
 
@@ -1190,6 +1197,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private int[] GetStimNumbers(float[] stimPercentages)
     {
+        //Function to calculate the correct num of stim for a trial.
+        //Starts by understating each num, then it makes sure there are enough available (some ratios could overstate the stim),
+        //then it adjusts the stim category that will make the PC% the closest to its supposed percentage. 
         int PC_Num = (int)Math.Floor(stimPercentages[0] * currentTrial.NumTrialStims);
         int New_Num = (int)Math.Floor(stimPercentages[1] * currentTrial.NumTrialStims);
         int PNC_Num = (int)Math.Floor(stimPercentages[2] * currentTrial.NumTrialStims);

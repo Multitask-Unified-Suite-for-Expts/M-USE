@@ -96,6 +96,7 @@ namespace USE_ExperimentTemplate_Task
         {
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
             ReadSettingsFiles();
+            ReadCustomSettingsFiles();
             FindStims();
             if (verifyOnly) return;
 
@@ -448,6 +449,11 @@ namespace USE_ExperimentTemplate_Task
                     }
                 }
             }
+        }
+
+        protected virtual void ReadCustomSettingsFiles()
+        {
+            
         }
 
         public void FindStims()

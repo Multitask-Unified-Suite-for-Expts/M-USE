@@ -1104,8 +1104,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8751568895090935926}
   m_HandleRect: {fileID: 845889637219264349}
   m_Direction: 0
-  m_Value: 0.0001427919
-  m_Size: 0.9043682
+  m_Value: 0.0028914965
+  m_Size: 0.9948051
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1230,7 +1230,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 5255294814578254210}
   m_HandleRect: {fileID: 9139728517175355362}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -2672,7 +2672,7 @@ RectTransform:
   m_GameObject: {fileID: 4762916287697258767}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.1, y: 1.2, z: 1}
+  m_LocalScale: {x: 1, y: 1.1, z: 1}
   m_Children:
   - {fileID: 8801720273365552824}
   m_Father: {fileID: 766217209739363356}
@@ -4031,7 +4031,7 @@ RectTransform:
   m_GameObject: {fileID: 8034519558754528159}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.13, y: 1.15, z: 1}
+  m_LocalScale: {x: 1.13, y: 1.17, z: 1}
   m_Children:
   - {fileID: 766217209739363356}
   - {fileID: 7355404006044560732}

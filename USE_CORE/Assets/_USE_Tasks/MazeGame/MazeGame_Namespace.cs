@@ -4,7 +4,7 @@ using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
-
+using HiddenMaze;
 namespace MazeGame_Namespace
 {
     public class MazeGame_TaskDef : TaskDef
@@ -22,9 +22,11 @@ namespace MazeGame_Namespace
         //public float? ExternalStimScale;
 
         public float[] TileColor;
+        public Maze[] MazeDefs;
         public Vector3 ButtonPosition;
         public Vector3 ButtonScale;
         public string ContextExternalFilePath, MazeExternalFilePath;
+        
     }
 
     public class MazeGame_BlockDef : BlockDef

@@ -3,9 +3,11 @@ using UnityEngine;
 using USE_ExperimentTemplate_Task;
 using USE_Settings;
 using MazeGame_Namespace;
+using HiddenMaze;
 
 public class MazeGame_TaskLevel : ControlLevel_Task_Template
 {
+    public Maze[] MazeDefs;
 
     public override void DefineControlLevel()
     {
@@ -40,6 +42,12 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         // if (CurrentBlockDef.TileColor == null && TaskDef.TileColor != null)
         //   CurrentBlockDef.TileColor = TaskDef.TileColor;
 
+    }
+    public override void ReadCustomSettingsFiles()
+    {
+        string mazeDefFile = LocateFile.FindFileInFolder(TaskConfigPath, "*" + TaskName + "*MazeDef*");
+        SessionSettings.ImportSettings_SingleTypeArray<Maze>(TaskName + "_MazeDefs", mazeDefFile);
+        MazeDefs = (Maze[])SessionSettings.Get(TaskName + "_MazeDefs");
     }
 
 

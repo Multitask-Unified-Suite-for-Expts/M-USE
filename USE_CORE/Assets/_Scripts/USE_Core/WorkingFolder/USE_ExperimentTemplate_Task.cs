@@ -451,7 +451,7 @@ namespace USE_ExperimentTemplate_Task
             }
         }
 
-        protected virtual void ReadCustomSettingsFiles()
+        public virtual void ReadCustomSettingsFiles()
         {
             
         }

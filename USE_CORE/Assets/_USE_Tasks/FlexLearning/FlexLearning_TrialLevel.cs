@@ -13,6 +13,7 @@ using ConfigDynamicUI;
 using UnityEngine.UI;
 using USE_ExperimentTemplate_Task;
 using System;
+using ConfigParsing;
 
 public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 {
@@ -116,6 +117,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             stateAfterDelay = SearchDisplay;
             TokenFBController.enabled = true;
             TokenFBController.SetTotalTokensNum(NumTokenBar);
+            Debug.Log("TokenBarValue: " + TokenFBController.GetTokenBarValue());
             EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]); //CHECK THIS TIMING MIGHT BE OFF
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);

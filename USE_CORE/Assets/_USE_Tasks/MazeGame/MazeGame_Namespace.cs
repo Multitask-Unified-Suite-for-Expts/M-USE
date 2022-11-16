@@ -22,8 +22,8 @@ namespace MazeGame_Namespace
         //public float? ExternalStimScale;
 
         public float[] TileColor;
-        private Vector3 ButtonPosition;
-        private Vector3 ButtonScale;
+        public Vector3 ButtonPosition;
+        public Vector3 ButtonScale;
         public string ContextExternalFilePath, MazeExternalFilePath;
     }
 
@@ -36,8 +36,7 @@ namespace MazeGame_Namespace
        // public string TrialID;
        // public int Context;
         public int Trial;
-
-        public int[] nRepetitionsMinMax;
+        public int[] MinMaxTrials;
       //  public Color TileColor;
         public float[] TileColor;
         public int Texture;
@@ -46,7 +45,6 @@ namespace MazeGame_Namespace
         public int mazeNumTurns;
         public int viewPath;
         public string ContextName;
-        public int[] MinMaxTrials;
      //   public string mazePath;
 
         //  public float MinTouchDuration;

@@ -36,7 +36,7 @@ namespace MazeGame_Namespace
        // public int Context;
         public int Trial;
 
-        public int[] nRepetitionsMinMax;
+        public int[] MinMaxTrials;
       //  public Color TileColor;
         public float[] TileColor;
         public int Texture;

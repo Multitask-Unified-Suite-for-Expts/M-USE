@@ -11,6 +11,7 @@ using System.Data;
 using ConfigDynamicUI;
 using USE_Settings;
 using USE_ExperimentTemplate_Trial;
+using System.IO;
 
 public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 {
@@ -65,7 +66,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     private static Slider slider;
     private static float sliderValueIncreaseAmount;
-    private GameObject initButton;
+    private GameObject startButton;
     [HideInInspector] public ConfigNumber minObjectTouchDuration,
         itiDuration,
         finalFbDuration,
@@ -124,8 +125,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, LoadMaze);
 
         SelectionHandler<MazeGame_StimDef> mouseHandler = new SelectionHandler<MazeGame_StimDef>();
-
-        // Define stimOn state
+        
         LoadMaze.AddInitializationMethod(() =>
         {
             if (CurrentTrialDef.viewPath == 1)
@@ -194,6 +194,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
              Debug.Log("ROWS");
              */
             DataRow[] rows = tbl.Select(search);
+            Debug.Log("TESTROWS" + rows);
             //WHY DOESNT THIS WORK FOR 3???
             foreach (DataRow row in rows)
             {
@@ -204,8 +205,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             }
 
-            Debug.Log("LENGTH");
-            Debug.Log(rows.Length);
+            Debug.Log("LENGTH" + rows.Length);
             trialIndex = CurrentTrialDef.TrialCount - 1;
             Debug.Log("INDEX: " + trialIndex);
             totalErrors = 0;
@@ -316,37 +316,21 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         GameConf.SpecifyTermination(() => true, StartButton);
 
-        MouseTracker.AddSelectionHandler(mouseHandler, StartButton);
         // define initScreen state
+        MouseTracker.AddSelectionHandler(mouseHandler, StartButton);
         StartButton.AddInitializationMethod(() =>
         {
-            response = -1;
             curRep = 0;
-            initButton.SetActive(true);
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
+            startButton.SetActive(true);
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
         });
 
 
-        StartButton.AddUpdateMethod(() =>
-        {
-
-            if (InputBroker.GetMouseButtonDown(0))
+        StartButton.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton),
+            MazeVis, () =>
             {
-                mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-                //initButton.OnClick
-                RaycastHit hit;
-                if (Physics.Raycast(mouseRay, out hit))
-                {
-                    if (hit.transform.name == "StartButton")
-                    {
-                        response = 0;
-                    }
-                }
-            }
-
-        });
-        //  StartButton.SpecifyTermination(() => mouseHandler.SelectionMatches(initButton), MazeVis);
-        StartButton.SpecifyTermination(() => response == 0, MazeVis);
+                startButton.SetActive(false);
+            });
 
         StartButton.AddDefaultTerminationMethod(() =>
         {
@@ -355,8 +339,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             sliderHalo.gameObject.transform.position = sliderInitPosition;
             slider.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
             sliderHalo.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
-
-            initButton.gameObject.SetActive(false);
+            startButton.SetActive(false);
         });
 
         MazeVis.AddInitializationMethod(() =>
@@ -368,7 +351,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             slider.value = 0;
             InstantiateCurrMaze();
         });
-        MazeVis.AddUpdateMethod(() => 
+        MazeVis.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, Feedback, () => {
+            chosenStim.GetComponent<Tile>().OnMouseDown();
+        });/*
         {
             if (InputBroker.GetMouseButtonDown(0))
             {
@@ -380,11 +365,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     //GameObject testStim = chosenStim.transform.root.gameObject;
                     if (chosenStim.GetComponent<Tile>() != null)
                     {
-                        chosenStim.GetComponent<Tile>().OnMouseDown();
+                        
                     }
                 }
             }
-        });
+        });*/
         MazeVis.SpecifyTermination(() => end == true, Feedback);
         // MazeVis.SpecifyTermination(() => end == true && count < mazeList.Count, MazeVis);
         //MazeVis.SpecifyTermination(() => end == true && count >= mazeList.Count, Feedback);
@@ -449,7 +434,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             // Debug.Log(mazeObj);
             mazeList.Add(mazeObj);
         }
-
+        Debug.Log("textMazes.Length " + textMazes.Length);
         currMaze = mazeList[ind];
         dim = currMaze.mConfigs.dim;
 
@@ -463,7 +448,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         float mazeWidth = dim * TILE_WIDTH;
         Vector3 bottomLeftMazePos = mazeCenter.transform.position - (new Vector3(mazeWidth / 2, mazeWidth / 2, 0));
-        backgroundTex = LoadPNG(MaterialFilePath + "\\MazeBackground.png");
+        backgroundTex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "MazeBackground.png");
         mazeBackground = CreateMazeBackground(backgroundTex, new Rect(new Vector2(0,0), new Vector2(1,1)));
         
         GameObject mazeContainer = new GameObject("MazeContainer");
@@ -714,7 +699,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         slider = GameObject.Find("Slider").GetComponent<Slider>();
         sliderInitPosition = slider.gameObject.transform.position;
         Texture2D buttonTex = LoadPNG(MaterialFilePath + "\\StartButtonImage.png");
-        initButton = CreateStartButton(buttonTex, new Rect(new Vector2(0,0), new Vector2(1,1)));
+        startButton = CreateStartButton(buttonTex, new Rect(new Vector2(0,0), new Vector2(1,1)));
         sliderHalo = GameObject.Find("SliderHalo");
         sr = sliderHalo.GetComponent<Image>();
         
@@ -733,7 +718,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private void disableVariables()
     {
         slider.gameObject.SetActive(false);
-        initButton.SetActive(false);
+        startButton.SetActive(false);
         sliderHalo.SetActive(false);
         sr.gameObject.SetActive(false);
     }

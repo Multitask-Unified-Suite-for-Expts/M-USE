@@ -68,6 +68,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public int NumFeedbackRows;
     public int ScoreAmountPerTrial;
 
+    public int Score
+    {
+        get
+        {
+            return ScoreAmountPerTrial * TrialCount_InBlock;
+        }
+    }
+
+
+
     public Vector3 originalFbTextPosition;
     public Vector3 originalTitleTextPosition;
     public Vector3 originalStartButtonPosition;
@@ -332,18 +342,17 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 if(currentTrial.IsHuman)
                 {
                     float Y_Offset = GetOffsetY();
-                    int scoreTotal = TrialCount_InBlock * ScoreAmountPerTrial;
 
                     if (CompletedAllTrials)
                     {
                         YouWinTextGO.transform.localPosition = new Vector3(YouWinTextGO.transform.localPosition.x, YouWinTextGO.transform.localPosition.y - Y_Offset, YouWinTextGO.transform.localPosition.z);
-                        YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"YOU WIN! \n New HighScore: {scoreTotal}";
+                        YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"YOU WIN! \n New HighScore: {Score}";
                         YouWinTextGO.SetActive(true);
                     }
                     else
                     {
                         YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
-                        YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Nice Try! \n HighScore: {scoreTotal}";
+                        YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Nice Try! \n HighScore: {Score}";
                         YouLoseTextGO.SetActive(true);
                     }
                 }
@@ -527,8 +536,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private void SetScoreTextAndNumTrialsText()
     {
         //function to set the score and NumTrials texts at the beginning of the trial. 
-        int scoreTotal = TrialCount_InBlock * ScoreAmountPerTrial;
-        ScoreTextGO.GetComponent<TextMeshProUGUI>().text = $"SCORE: {scoreTotal}";
+        ScoreTextGO.GetComponent<TextMeshProUGUI>().text = $"SCORE: {Score}";
         NumTrialsTextGO.GetComponent<TextMeshProUGUI>().text = $"TRIALS: {TrialCount_InBlock}";
         ScoreTextGO.SetActive(true);
         NumTrialsTextGO.SetActive(true);

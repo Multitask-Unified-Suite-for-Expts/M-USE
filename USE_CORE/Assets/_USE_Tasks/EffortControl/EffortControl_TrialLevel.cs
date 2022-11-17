@@ -1,12 +1,16 @@
 using UnityEngine;
+using System.Collections.Generic;
 using USE_States;
-// using USE_StimulusManagement;
+using USE_StimulusManagement;
 using EffortControl_Namespace;
 using UnityEngine.UI;
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.IO;
+using USE_Settings;
 using USE_ExperimentTemplate_Trial;
+using USE_ExperimentTemplate_Block;
+
 //testing
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
@@ -55,6 +59,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     private bool variablesLoaded;
     public string MaterialFilePath;
+    public string ContextPath;
 
     //data control variables
     //public bool storeData;
@@ -96,6 +101,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         // define initScreen state
         MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
         InitTrial.AddInitializationMethod(() => {
+
             trialCount++;
 
             avgClickTime = null;
@@ -112,7 +118,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             maxScale = new Vector3(50, 0, 50);
             scaleUpAmountLeft = maxScale / CurrentTrialDef.NumOfClicksLeft;
             scaleUpAmountRight = maxScale / CurrentTrialDef.NumOfClicksRight;
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + "\\" + CurrentTrialDef.ContextName + ".png");
+
+            //Temporarily hard coded
+            MaterialFilePath = "//Users//ntraczewski//Desktop//USE_Configs//USE_Configs//Resources//TextureImages";
+
+            ContextPath = GetContextNestedFilePath("LinearDark"); //Using this for now until MFP is stated in config. 
+            //ContextPath = GetContextNestedFilePath(CurrentTrialDef.ContextName);
+            RenderSettings.skybox = CreateSkybox(ContextPath);
         });
 
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(initButton), InitDelay);
@@ -314,6 +326,26 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
 
     }
+
+
+    private string GetContextNestedFilePath(string contextName)
+    {
+        string backupContextName = "LinearDark";
+        string contextPath = "";
+
+        string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
+
+        if (filePaths.Length >= 1)
+            contextPath = filePaths[0];
+        else
+        {
+            contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0]; //Use Default LinearDark if can't find file.
+            Debug.Log($"Context File Path Not Found. Defaulting to {backupContextName}.");
+        }
+
+        return contextPath;
+    }
+
 
     // set all gameobjects to setActive false
     void disableAllGameobjects()

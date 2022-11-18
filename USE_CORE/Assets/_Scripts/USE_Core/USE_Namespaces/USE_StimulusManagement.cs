@@ -299,7 +299,7 @@ namespace USE_StimulusManagement
 				
 				//this checking needs to be done during task setup - check each stim exists at start of session instead
 				//of at start of each trial
-				List<string> filenames = Directory.GetFiles(StimFolderPath, ExternalFilePath, SearchOption.AllDirectories).ToList();
+				List<string> filenames = RecursiveFileFinder.FindFile(StimFolderPath, ExternalFilePath, StimExtension);
 				if (filenames.Count == 1)
 					ExternalFilePath = filenames[0];
 				else if (filenames.Count == 0)

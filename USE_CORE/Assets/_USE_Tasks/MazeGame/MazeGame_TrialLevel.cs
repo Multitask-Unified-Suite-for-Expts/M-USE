@@ -425,15 +425,15 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         
         Debug.Log("Count: " + count);
 
-        //TextAsset[] textMazes = Resources.LoadAll<TextAsset>("output_mazes_json");
-
-        //foreach (TextAsset textMaze in textMazes)
-        //{
-        //    string mazeJson = textMaze.text;
-        //    Maze mazeObj = new Maze(mazeJson);
-        //    // Debug.Log(mazeObj);
-        //    mazeList.Add(mazeObj);
-        //}
+        // TextAsset[] textMazes = Resources.LoadAll<TextAsset>("output_mazes_json");
+        //
+        // foreach (TextAsset textMaze in textMazes)
+        // {
+        //     string mazeJson = textMaze.text;
+        //     Maze mazeObj = new Maze(mazeJson);
+        //     // Debug.Log(mazeObj);
+        //     mazeList.Add(mazeObj);
+        // }
 
         //string[] textMazes = System.IO.File.ReadAllLines(MazeFilePath + Path.DirectorySeparatorChar + "Maze.txt");
         //foreach (string textMaze in textMazes)
@@ -448,6 +448,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         //dim = currMaze.mConfigs.dim;
 
         //string textMaze = CurrentTrialDef.MazeInfo;
+        
+        
+        
+        //THIS WORKS
+        
         string[] textMazes = System.IO.File.ReadAllLines(MazeFilePath + Path.DirectorySeparatorChar + "Maze.txt");
         Debug.Log("textMazes.Length: " +textMazes.Length);
         foreach (string textMaze in textMazes)
@@ -455,9 +460,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Maze mazeObj = new Maze(textMaze);
             Debug.Log("Maze Obj:" + mazeObj);
             mazeList.Add(mazeObj);
-            currMaze = mazeObj;
+            
         };
+        currMaze = mazeList[CurrentTrialDef.TrialCount-1];
         Debug.Log("Maze Obj Num Squares:" + currMaze.mNumSquares);
+        
+        
         sliderValueIncreaseAmount = (100f / (currMaze.mNumSquares)) / 100f;
         
         GameObject mazeCenter = GameObject.FindWithTag("Center");

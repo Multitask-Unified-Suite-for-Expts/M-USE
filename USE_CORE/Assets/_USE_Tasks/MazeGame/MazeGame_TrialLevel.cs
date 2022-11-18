@@ -603,6 +603,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             currMaze.mNextStep = currMaze.mPath[currMaze.mPath.FindIndex(pathCoord => pathCoord == touchedCoord) + 1];
             return 1;
         }
+        
+        else if (currMaze.mNextStep == currMaze.mStart && touchedCoord != currMaze.mStart)
+        {
+            Debug.Log("**** not pressing start tile to start maze! ****"); 
+
+            return 2;
+        }
 
         // CORRECT and FINISH
         else if (touchedCoord == currMaze.mFinish && touchedCoord == currMaze.mNextStep)

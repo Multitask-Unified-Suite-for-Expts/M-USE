@@ -22,7 +22,6 @@ namespace MazeGame_Namespace
         //public float? ExternalStimScale;
 
         public float[] TileColor;
-        public Maze[] MazeDefs;
         public Vector3 ButtonPosition;
         public Vector3 ButtonScale;
         public string ContextExternalFilePath, MazeExternalFilePath;
@@ -39,6 +38,7 @@ namespace MazeGame_Namespace
        // public int Context;
         public int Trial;
         public int[] MinMaxTrials;
+        public string MazeInfo;
       //  public Color TileColor;
         public float[] TileColor;
         public int Texture;
@@ -59,16 +59,18 @@ namespace MazeGame_Namespace
             System.Random rnd = new System.Random();
             int num = rnd.Next(MinMaxTrials[0], MinMaxTrials[1]);
             TrialDefs = new List<MazeGame_TrialDef>().ConvertAll(x => (TrialDef)x);
+            for (int iTrial = 0; iTrial < num; iTrial++)
             {
                 MazeGame_TrialDef td = new MazeGame_TrialDef();
                 td.TrialCount = Trial;
                 td.TileColor = TileColor;
                 td.Texture = Texture;
-                td.mazeDim = mazeDim;
-                td.mazeNumSquares = mazeNumSquares;
-                td.mazeNumTurns = mazeNumTurns;
+                //////td.mazeDim = mazeDim;
+                //////td.mazeNumSquares = mazeNumSquares;
+                //////td.mazeNumTurns = mazeNumTurns;
                 td.viewPath = viewPath;
                 td.ContextName = ContextName;
+                td.MazeInfo = MazeInfo;
                // td.mazePath = mazePath;
                 if (td.TileColor == null && TileColor != null)
                     td.TileColor = TileColor;
@@ -96,12 +98,12 @@ namespace MazeGame_Namespace
         public int TrialCount;
         public float[] TileColor;
         public int Texture;
-        public int mazeDim;
-        public int mazeNumSquares;
-        public int mazeNumTurns;
+        //public int mazeDim;
+        //public int mazeNumSquares;
+        //public int mazeNumTurns;
         public int viewPath;
         public string ContextName;
-
+        public string MazeInfo;
         //   public string mazePath;
 
         // public int[] nRepetitionsMinMax;

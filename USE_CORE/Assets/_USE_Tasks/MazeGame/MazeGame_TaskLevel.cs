@@ -45,9 +45,9 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     }
     public override void ReadCustomSettingsFiles()
     {
-        string mazeDefFile = LocateFile.FindFileInFolder(TaskConfigPath, "*" + TaskName + "*MazeDef*");
-        SessionSettings.ImportSettings_SingleTypeArray<Maze>(TaskName + "_MazeDefs", mazeDefFile);
-        MazeDefs = (Maze[])SessionSettings.Get(TaskName + "_MazeDefs");
+        //string mazeDefFile = LocateFile.FindFileInFolder(TaskConfigPath, "*" + TaskName + "*MazeDef*");
+        //SessionSettings.ImportSettings_SingleTypeArray<Maze>(TaskName + "_MazeDefs", mazeDefFile);
+        //MazeDefs = (Maze[])SessionSettings.Get(TaskName + "_MazeDefs");
     }
 
 

@@ -34,6 +34,16 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
 
+        RunBlock.AddInitializationMethod(() =>
+        {
+            trialLevel.NumTrialsCompletedBlock = 0;
+            trialLevel.NumTrialsCorrectBlock = 0;
+            trialLevel.NumNonSquareTouches = 0;
+            trialLevel.NumTouchesBlueSquare = 0;
+            trialLevel.NumTouchesWhiteSquare = 0;
+        });
+
+  
     }
 
 

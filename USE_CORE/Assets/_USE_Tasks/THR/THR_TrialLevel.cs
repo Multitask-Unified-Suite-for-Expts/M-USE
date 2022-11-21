@@ -106,13 +106,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         {
             Cursor.visible = false;
 
-
             if (TrialCount_InBlock == 0)
-            {
-                ResetGlobalBlockVariables();
                 SetBlockDefaultValues();
-            }
-
+            
             if(!ColorsSet)
                 CreateColors();
 
@@ -198,9 +194,10 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 }
                 else if (MouseTracker.CurrentTargetGameObject == BackdropGO)
                 {
-                    if(!AudioFBController.IsPlaying())
-                        AudioFBController.Play("Negative");
-                    StartCoroutine(BackgroundColorFlash(LightRedColor));
+                    //REMOVED SO THAT EXPERIMENTER CLICKS DONT CHANGE GAME:
+                    //if(!AudioFBController.IsPlaying())
+                    //    AudioFBController.Play("Negative");
+                    //StartCoroutine(BackgroundColorFlash(LightRedColor));
                     NumNonSquareTouches++;
                 }
             }
@@ -401,15 +398,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         yield return new WaitForSeconds(1f);
         BackdropMaterial.color = InitialBackdropColor;
         Cursor.visible = true;
-    }
-
-    void ResetGlobalBlockVariables()
-    {
-        NumTrialsCompletedBlock = 0;
-        NumTrialsCorrectBlock = 0;
-        NumNonSquareTouches = 0;
-        NumTouchesBlueSquare = 0;
-        NumTouchesWhiteSquare = 0;
     }
 
     void ResetGlobalTrialVariables()

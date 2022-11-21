@@ -23,6 +23,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public string MaterialFilePath;
     public string ContextPath;
 
+    public GameObject BackdropPrefab;
+    public GameObject BackdropGO;
+    public Renderer BackdropRenderer;
     public GameObject SquarePrefab;
     public GameObject SquareGO;
     public Renderer SquareRenderer;
@@ -59,14 +62,10 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public int NumTouchesBlueSquare;
     public int NumTouchesWhiteSquare;
 
-
     //Set in Editor
     public Material SquareMaterial;
+    public Material BackdropMaterial;
 
-    public float CurrentSquareSize;
-    public float CurrentPositionX;
-    public float CurrentPositionY;
-        
     //misc
     public Ray mouseRay;
     public Camera THR_Cam;
@@ -77,14 +76,20 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public Color32 DarkBlueBackgroundColor;
     public Color32 LightRedColor;
     public Color32 LightBlueColor;
-    public Color32 LightGreyColor;
+    public Color32 InitialSquareColor;
+    public Color32 InitialBackdropColor;
 
-    //public Material GratingLeft;
-    //public Material GratingRight;
+    public bool ConfigValuesChanged;
 
-    [HideInInspector]
-    public ConfigNumber minTouchDuration, maxTouchDuration, squareSize, positionX, positionY, whiteSquareDuration, blueSquareDuration;
+    public float BlockDefaultSquareSize;
+    public float BlockDefaultPositionX;
+    public float BlockDefaultPositionY;
+    public float BlockDefaultMinTouchDuration;
+    public float BlockDefaultMaxTouchDuration;
+    public float BlockDefaultWhiteSquareDuration;
+    public float BlockDefaultBlueSquareDuration;
 
+    public bool IsLevelOne;
 
     public override void DefineControlLevel()
     {
@@ -99,138 +104,129 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state -------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
-            //if (GratingLeft == null || GratingRight == null)
-            //    LoadGratingMaterials();
+            Cursor.visible = false;
+
 
             if (TrialCount_InBlock == 0)
-                ResetGlobalBlockVariables();        
+            {
+                ResetGlobalBlockVariables();
+                SetBlockDefaultValues();
+            }
 
             if(!ColorsSet)
                 CreateColors();
 
-            if(THR_Cam == null)
-                THR_Cam = GameObject.Find("THR_Camera").GetComponent<Camera>();
+            if (BackdropGO == null)
+                CreateBackdrop();
 
-            THR_Cam.clearFlags = CameraClearFlags.SolidColor;
-            THR_Cam.backgroundColor = DarkBlueBackgroundColor;
+            if (SquareGO == null)
+                CreateSquare();
+            else
+                SquareMaterial.color = Color.white;
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT TRIAL state --------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
-            if (THR_CanvasGO == null)
-                CreateCanvas();
+            ResetGlobalTrialVariables();
 
-            if (SquareGO == null)
-                CreateSquare();
+            if (TrialCount_InBlock == 0)
+                SetSquareSizeAndPosition();
 
-            SetSquareSizeAndPosition();
-
-            if (!ConfigVariablesLoaded)
+            if (TrialCount_InBlock > 0)
             {
-                LoadConfigVariables();
-                ConfigVariablesLoaded = true;
+                ConfigValuesChanged = DidConfigValuesChange();
+                if (ConfigValuesChanged)
+                {
+                    LoadConfigVariables();
+                    UpdateSquare();
+                }
+                else
+                    SetSquareSizeAndPosition();
             }
 
-            ResetGlobalTrialVariables();
         });
         InitTrial.SpecifyTermination(() => true, WhiteSquare);
+
+        SelectionHandler<THR_StimDef> mouseHandler = new SelectionHandler<THR_StimDef>();
+        MouseTracker.AddSelectionHandler(mouseHandler, WhiteSquare);
 
         //WHITE SQUARE state ------------------------------------------------------------------------------------------------------------------------
         WhiteSquare.AddInitializationMethod(() =>
         {
-            THR_CanvasGO.SetActive(true);
-            SquareGO.SetActive(true);
+            Cursor.visible = false;
+            ActivateSquareAndBackdrop();
         });
 
         WhiteSquare.AddUpdateMethod(() =>
         {
-            if(Input.GetMouseButtonDown(0))
+            if(mouseHandler.SelectionMatches(SquareGO))
             {
-                mouseRay = THR_Cam.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-                if(Physics.Raycast(mouseRay, out hit))
-                {
-                    if(hit.transform.name == "SquareGO")
-                    {
-                        AudioFBController.Play("Negative");
-                        NumTouchesWhiteSquare++;
-                    }
-                }
+                if (!AudioFBController.IsPlaying())
+                    AudioFBController.Play("Negative");
+                NumTouchesWhiteSquare++;
             }
         });
-        WhiteSquare.AddTimer(() => whiteSquareDuration.value, BlueSquare, () => StartCoroutine(WhiteToBlueStatePause()));
+        WhiteSquare.SpecifyTermination(() => CurrentTrial.BlockName != "Level1", BlueSquare);
+        WhiteSquare.AddTimer(() => CurrentTrial.WhiteSquareDuration, BlueSquare, () => StartCoroutine(WhiteToBlueStatePause()));
+
+        MouseTracker.AddSelectionHandler(mouseHandler, BlueSquare);
 
         //BLUE SQUARE state -------------------------------------------------------------------------------------------------------------------------
         BlueSquare.AddInitializationMethod(() =>
         {
-            SquareMaterial.color = LightBlueColor;
+            Debug.Log("STARTED BLUE SQUARE STATE!!!");
+            SquareMaterial.color = Color.blue;
+            if (!SquareGO.activeSelf)
+                ActivateSquareAndBackdrop();
+            Cursor.visible = true;
             TrialStartTime = Time.time;
         });
         BlueSquare.AddUpdateMethod(() =>
         {
-            //LoadConfigVariables();
-
-            if (InputBroker.GetMouseButtonDown(0))
+            if (InputBroker.GetMouseButton(0))
             {
-                mouseRay = THR_Cam.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(mouseRay, out hit))
+                if (MouseTracker.CurrentTargetGameObject == SquareGO)
                 {
-                    if(hit.transform.name == "SquareGO")
-                    {
-                        TouchStartTime = Time.time;
-                        SquareMaterial.color = Color.blue;
-                        ClickedSquare = true;
-                        NumTouchesBlueSquare++;
-                        if (CurrentTrial.RewardTouch)
-                            GiveTouchReward = true;
-                    }
+                    TouchStartTime = Time.time;
+                    SquareMaterial.color = Color.green;
+                    ClickedSquare = true;
+                    NumTouchesBlueSquare++;
+                    if (CurrentTrial.RewardTouch)
+                        GiveTouchReward = true;
                 }
-                else
+                else if (MouseTracker.CurrentTargetGameObject == BackdropGO)
                 {
-                    AudioFBController.Play("Negative");
-                    StartCoroutine(BackgroundColorFlash(THR_Cam.backgroundColor, LightRedColor));
+                    if(!AudioFBController.IsPlaying())
+                        AudioFBController.Play("Negative");
+                    StartCoroutine(BackgroundColorFlash(LightRedColor));
                     NumNonSquareTouches++;
                 }
             }
 
-            if (InputBroker.GetMouseButtonUp(0))
+            if(InputBroker.GetMouseButtonUp(0))
             {
                 if(ClickedSquare)
                 {
-                    SquareMaterial.color = LightGreyColor;
-                    TouchReleaseTime = Time.time;
-                    HeldDuration = TouchReleaseTime - TouchStartTime;
+                    Cursor.visible = false;
+                    SquareMaterial.color = Color.grey;
+                    HeldDuration = mouseHandler.currentTargetDuration;
+                    TouchReleaseTime = HeldDuration - TouchStartTime;
 
-                    //if(HeldDuration > CurrentTrial.MinTouchDuration && HeldDuration < CurrentTrial.MaxTouchDuration)
-                    if (HeldDuration > minTouchDuration.value && HeldDuration < maxTouchDuration.value)
+                    if (HeldDuration > CurrentTrial.MinTouchDuration && HeldDuration < CurrentTrial.MaxTouchDuration)
                     {
                         if (CurrentTrial.RewardRelease)
                             GiveHoldReward = true;
                     }
-                    //else if(HeldDuration < CurrentTrial.MinTouchDuration)
-                    else if (HeldDuration < minTouchDuration.value)
-                    {
-                        Debug.Log("Didn't hold long enough!");
-                        //SquareRenderer.material = GratingLeft; //this doesn't work. turns it pink. 
-                        //SET SOURCE IMAGE OF THE SQUARE GAME OBJECT TO THE GRATED PATTERN.
-                    }
                     else
-                    {
-                        Debug.Log("Held too long!");
-                        //SquareRenderer.material = GratingRight; //this doesn't work. turns it pink. 
-                        //SET SOURCE IMAGE OF THE SQUARE GAME OBJECT TO THE GRATED PATTERN.
-                    }
+                        StartCoroutine(SquareColorFlash(LightRedColor));
+                    
                     ClickReleased = true;
                 }
             }
-            //if (Time.time - TrialStartTime > CurrentTrial.TimeToAutoEndTrialSec)
-            //    AutoEndTrial = true;
-            
         });
-        BlueSquare.AddTimer(() => blueSquareDuration.value *10, Feedback); //remove *20 eventually
+        BlueSquare.AddTimer(() => CurrentTrial.BlueSquareDuration, Feedback);
         BlueSquare.SpecifyTermination(() => ClickReleased, Feedback);
         //BlueSquare.SpecifyTermination(() => AutoEndTrial, ITI); //go to feedback if time elapsed. 
 
@@ -239,19 +235,19 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         {
             FeedbackStartTime = Time.time;
 
-            if((GiveTouchReward) || (GiveHoldReward))
+            if ((GiveTouchReward) || (GiveHoldReward))
             {
                 AudioFBController.Play("Positive");
                 if (SyncBoxController != null)
                 {
-                    if(GiveTouchReward)
+                    if (GiveTouchReward)
                         SyncBoxController.SendRewardPulses(CurrentTrial.NumTouchPulses, CurrentTrial.PulseSize); //Touch reward first
-                    if(GiveHoldReward)
+                    if (GiveHoldReward)
                         SyncBoxController.SendRewardPulses(CurrentTrial.NumReleasePulses, CurrentTrial.PulseSize); //Then hold reward if earned
                 }
             }
             else
-                AudioFBController.Play("Negative");
+                AudioFBController.Play("Negative");          
         });
         Feedback.SpecifyTermination(() => !AudioFBController.IsPlaying() && Time.time - FeedbackStartTime > CurrentTrial.FbDuration, ITI);
 
@@ -261,9 +257,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             SquareGO.SetActive(false);
             SquareMaterial.color = Color.white;
 
-            //ConfigVariablesLoaded = false;
+            ConfigVariablesLoaded = false;
 
-            if (GiveHoldReward)
+            if (GiveHoldReward || GiveTouchReward)
                 NumTrialsCorrectBlock++;
 
             CheckIfBlockShouldEnd(); //NOT DONE YET
@@ -272,131 +268,142 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     }
 
 
+    void SetBlockDefaultValues()
+    {
+        BlockDefaultSquareSize = CurrentTrial.SquareSize;
+        BlockDefaultPositionX = CurrentTrial.PositionX;
+        BlockDefaultPositionY = CurrentTrial.PositionY;
+        BlockDefaultMinTouchDuration = CurrentTrial.MinTouchDuration;
+        BlockDefaultMaxTouchDuration = CurrentTrial.MaxTouchDuration;
+        BlockDefaultWhiteSquareDuration = CurrentTrial.WhiteSquareDuration;
+        BlockDefaultBlueSquareDuration = CurrentTrial.BlueSquareDuration;
+    }
+
+    bool DidConfigValuesChange()
+    {
+        if (BlockDefaultSquareSize != ConfigUiVariables.get<ConfigNumber>("squareSize").value
+            || BlockDefaultPositionX != ConfigUiVariables.get<ConfigNumber>("positionX").value
+            || BlockDefaultPositionY != ConfigUiVariables.get<ConfigNumber>("positionY").value
+            || BlockDefaultMinTouchDuration != ConfigUiVariables.get<ConfigNumber>("minTouchDuration").value
+            || BlockDefaultMaxTouchDuration != ConfigUiVariables.get<ConfigNumber>("maxTouchDuration").value
+            || BlockDefaultWhiteSquareDuration != ConfigUiVariables.get<ConfigNumber>("whiteSquareDuration").value
+            || BlockDefaultBlueSquareDuration != ConfigUiVariables.get<ConfigNumber>("blueSquareDuration").value)
+        {
+            return true;
+        }
+        else
+            return false;
+    }
+
+    void UpdateSquare()
+    {
+        if(BlockDefaultSquareSize != ConfigUiVariables.get<ConfigNumber>("squareSize").value)
+            SquareGO.transform.localScale = new Vector3(CurrentTrial.SquareSize, CurrentTrial.SquareSize, 1);
+
+        if(BlockDefaultPositionX != ConfigUiVariables.get<ConfigNumber>("positionX").value || BlockDefaultPositionY != ConfigUiVariables.get<ConfigNumber>("positionY").value)
+            SquareGO.transform.localPosition = new Vector3(CurrentTrial.PositionX, CurrentTrial.PositionY, 0);
+    }
+
     void LoadConfigVariables()
     {
-        //Variables from the Config UI:
-        minTouchDuration = ConfigUiVariables.get<ConfigNumber>("minTouchDuration");
-        maxTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxTouchDuration");
-        squareSize = ConfigUiVariables.get<ConfigNumber>("squareSize");
-        positionX = ConfigUiVariables.get<ConfigNumber>("positionX");
-        positionY = ConfigUiVariables.get<ConfigNumber>("positionY");
-        whiteSquareDuration = ConfigUiVariables.get<ConfigNumber>("whiteSquareDuration");
-        blueSquareDuration = ConfigUiVariables.get<ConfigNumber>("blueSquareDuration");
-
-        if (squareSize.value != CurrentSquareSize)
-            ChangeSquareSize();
-        if (positionX.value != CurrentPositionX || positionY.value != CurrentPositionY)
-            ChangeSquarePosition();
+        CurrentTrial.MinTouchDuration = ConfigUiVariables.get<ConfigNumber>("minTouchDuration").value;
+        CurrentTrial.MaxTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxTouchDuration").value;
+        CurrentTrial.SquareSize = ConfigUiVariables.get<ConfigNumber>("squareSize").value;
+        CurrentTrial.PositionX = ConfigUiVariables.get<ConfigNumber>("positionX").value;
+        CurrentTrial.PositionY = ConfigUiVariables.get<ConfigNumber>("positionY").value;
+        CurrentTrial.WhiteSquareDuration = ConfigUiVariables.get<ConfigNumber>("whiteSquareDuration").value;
+        CurrentTrial.BlueSquareDuration = ConfigUiVariables.get<ConfigNumber>("blueSquareDuration").value;
     }
 
-    private void ChangeSquarePosition()
-    {
-        SquareGO.transform.localPosition = new Vector3(positionX.value, positionY.value, 0);
-        //set new current
-        CurrentPositionX = positionX.value;
-        CurrentPositionY = positionY.value;
-    }
-
-    private void ChangeSquareSize()
-    {
-        SquareGO.transform.localScale = new Vector3(squareSize.value, squareSize.value);
-        //set new current
-        CurrentSquareSize = squareSize.value;
-    }
-
-    private void CheckIfBlockShouldEnd()
+    void CheckIfBlockShouldEnd()
     {
         //ADD THIS FUNC
     }
 
-    private void CreateSquare()
+    void ActivateSquareAndBackdrop()
     {
-        SquareGO = Instantiate(SquarePrefab, THR_CanvasGO.transform);
+        //THR_CanvasGO.SetActive(true);
+        BackdropGO.SetActive(true);
+        SquareGO.SetActive(true);
+    }
+
+    void CreateBackdrop()
+    {
+        BackdropGO = Instantiate(BackdropPrefab, new Vector3(0, 0, 95), Quaternion.identity);
+        BackdropGO.transform.localScale = new Vector3(275, 150, .5f);
+        BackdropGO.AddComponent<BoxCollider>();
+        BackdropGO.name = "BackdropGO";
+        BackdropRenderer = BackdropGO.GetComponent<Renderer>();
+        BackdropMaterial = BackdropGO.GetComponent<Renderer>().material;
+        InitialBackdropColor = BackdropMaterial.color;
+    }
+
+    void CreateSquare()
+    {
+        SquareGO = Instantiate(SquarePrefab, new Vector3(0, 1, 90), Quaternion.identity);
+        SquareGO.AddComponent<BoxCollider>();
         SquareGO.name = "SquareGO";
         SquareRenderer = SquareGO.GetComponent<Renderer>();
         SquareMaterial = SquareGO.GetComponent<Renderer>().material;
-        SquareMaterial.color = Color.white;
+        InitialSquareColor = SquareMaterial.color;
+        //SquareMaterial.color = Color.white;
     }
 
-    private void SetSquareSizeAndPosition()
+    void SetSquareSizeAndPosition()
     {
         if (CurrentTrial.RandomSquareSize)
         {
-            //float randomSize = Random.Range(CurrentTrial.SquareSize, CurrentTrial.SquareSize);
-            float randomSize = Random.Range(squareSize.min, squareSize.max);
+            float randomSize = Random.Range(CurrentTrial.SquareSizeMin, CurrentTrial.SquareSizeMax);
             SquareGO.transform.localScale = new Vector3(randomSize, randomSize, 1);
-            CurrentSquareSize = randomSize;
         }
         else
-        {
-            //SquareGO.transform.localScale = new Vector3(CurrentTrial.SquareSize, CurrentTrial.SquareSize, 1);
-            //CurrentSquareSize = CurrentTrial.SquareSize;
-            SquareGO.transform.localScale = new Vector3(squareSize.value, squareSize.value, 1);
-            CurrentSquareSize = squareSize.value;
-        }
+            SquareGO.transform.localScale = new Vector3(CurrentTrial.SquareSize, CurrentTrial.SquareSize, 1);
+        
 
         if (CurrentTrial.RandomSquarePosition)
         {
-            //float x = Random.Range(CurrentTrial.PositionX_Min, CurrentTrial.PositionX_Max);
-            //float y = Random.Range(CurrentTrial.PositionY_Min, CurrentTrial.PositionY_Max);
-            float x = Random.Range(positionX.min, positionX.max);
-            float y = Random.Range(positionY.min, positionY.max);
-            SquareGO.transform.localPosition = new Vector3(x, y, 0);
-            CurrentPositionX = x;
-            CurrentPositionY = y;
+            float x = Random.Range(CurrentTrial.PositionX_Min, CurrentTrial.PositionX_Max);
+            float y = Random.Range(CurrentTrial.PositionY_Min, CurrentTrial.PositionY_Max);
+            SquareGO.transform.localPosition = new Vector3(x, y, 90);
         }
         else
-        {
-            //SquareGO.transform.localPosition = new Vector3(CurrentTrial.PositionX, CurrentTrial.PositionY, 0);
-            //CurrentPositionX = CurrentTrial.PositionX;
-            //CurrentPositionY = CurrentTrial.PositionY;
-            SquareGO.transform.localPosition = new Vector3(positionX.value, positionY.value, 0);
-            CurrentPositionX = positionX.value;
-            CurrentPositionY = positionY.value;
-        }
+            SquareGO.transform.localPosition = new Vector3(CurrentTrial.PositionX, CurrentTrial.PositionY, 90);
+        
     }
 
-    private void CreateCanvas()
-    {
-        THR_CanvasGO = new GameObject("THR_CanvasGO");
-        THR_CanvasGO.AddComponent<Canvas>();
-        THR_Canvas = THR_CanvasGO.GetComponent<Canvas>();
-        THR_Canvas.renderMode = RenderMode.ScreenSpaceCamera;
-        THR_Canvas.worldCamera = GameObject.Find("THR_Camera").GetComponent<Camera>();
-        THR_CanvasGO.AddComponent<CanvasScaler>();
-        THR_CanvasGO.AddComponent<GraphicRaycaster>();
-    }
-
-    private IEnumerator WhiteToBlueStatePause()
+    IEnumerator WhiteToBlueStatePause()
     {
         //Using this func to handle them clicking while its changing from WhiteSquare state to BlueSquare state
-        yield return new WaitForSeconds(.5f);
+        yield return new WaitForSeconds(1f);
     }
 
-    //private void LoadGratingMaterials()
-    //{
-    //    GratingLeft = Resources.Load<Material>("DiagLeftGrating");
-    //    GratingRight = Resources.Load<Material>("DiagRightGrating");
-    //}
-
-    private void CreateColors()
+    void CreateColors()
     {
         LightBlueColor = new Color32(12, 176, 255, 255);
         DarkBlueBackgroundColor = new Color32(2, 3, 39, 255);
         LightRedColor = new Color32(142, 6, 20, 255);
-        LightGreyColor = new Color32(211, 211, 211, 255);
+        //LightGreyColor = new Color32(211, 211, 211, 255);
     }
 
-    private IEnumerator BackgroundColorFlash(Color32 initialColor, Color32 newColor)
+    IEnumerator SquareColorFlash(Color32 newColor)
     {
         Cursor.visible = false;
-        THR_Cam.backgroundColor = newColor;
+        SquareMaterial.color = newColor;
         yield return new WaitForSeconds(1f);
-        THR_Cam.backgroundColor = initialColor;
+        SquareMaterial.color = InitialSquareColor;
+        //Cursor.visible = true;
+    }
+
+    IEnumerator BackgroundColorFlash(Color32 newColor)
+    {
+        Cursor.visible = false;
+        BackdropMaterial.color = newColor;
+        yield return new WaitForSeconds(1f);
+        BackdropMaterial.color = InitialBackdropColor;
         Cursor.visible = true;
     }
 
-    private void ResetGlobalBlockVariables()
+    void ResetGlobalBlockVariables()
     {
         NumTrialsCompletedBlock = 0;
         NumTrialsCorrectBlock = 0;
@@ -405,12 +412,14 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         NumTouchesWhiteSquare = 0;
     }
 
-    private void ResetGlobalTrialVariables()
+    void ResetGlobalTrialVariables()
     {
         ClickedSquare = false;
         ClickReleased = false;
         GiveHoldReward = false;
         GiveTouchReward = false;
+
+        ConfigValuesChanged = false;
     }
 
     //private string GetContextNestedFilePath(string contextName)
@@ -441,6 +450,120 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     }
     
 }
+
+
+
+
+//SETUP TRIAL INITILAITON:
+//if (THR_CanvasGO == null)
+//    CreateCanvas();
+
+//if(THR_Cam == null)
+//    THR_Cam = GameObject.Find("THR_Camera").GetComponent<Camera>();
+
+//THR_Cam.clearFlags = CameraClearFlags.SolidColor;
+//THR_Cam.backgroundColor = DarkBlueBackgroundColor;
+
+
+//FEEDBACK INITILAIZTION METHOD:
+//if ((GiveTouchReward) || (GiveHoldReward))
+//{
+//    AudioFBController.Play("Positive");
+//    if (SyncBoxController != null)
+//    {
+//        if (GiveTouchReward)
+//            SyncBoxController.SendRewardPulses(CurrentTrial.NumTouchPulses, CurrentTrial.PulseSize); //Touch reward first
+//        if (GiveHoldReward)
+//            SyncBoxController.SendRewardPulses(CurrentTrial.NumReleasePulses, CurrentTrial.PulseSize); //Then hold reward if earned
+//    }
+//}
+//else
+//    AudioFBController.Play("Negative");
+
+
+//private void CreateCanvas()
+//{
+//    THR_CanvasGO = new GameObject("THR_CanvasGO");
+//    THR_CanvasGO.AddComponent<Canvas>();
+//    THR_Canvas = THR_CanvasGO.GetComponent<Canvas>();
+//    THR_Canvas.renderMode = RenderMode.ScreenSpaceCamera;
+//    THR_Canvas.worldCamera = GameObject.Find("THR_Camera").GetComponent<Camera>();
+//    THR_CanvasGO.AddComponent<CanvasScaler>();
+//    THR_CanvasGO.AddComponent<GraphicRaycaster>();
+//}
+
+
+//BLUE SQUARE UPDATE METHOD:
+//if (InputBroker.GetMouseButtonDown(0))
+//{
+//    mouseRay = THR_Cam.ScreenPointToRay(Input.mousePosition);
+//    RaycastHit hit;
+//    if (Physics.Raycast(mouseRay, out hit))
+//    {
+//        if(hit.transform.name == "SquareGO")
+//        {
+//            TouchStartTime = Time.time;
+//            SquareMaterial.color = Color.green;
+//            ClickedSquare = true;
+//            NumTouchesBlueSquare++;
+//            if (CurrentTrial.RewardTouch)
+//                GiveTouchReward = true;
+//        }
+//    }
+//    else
+//    {
+//        AudioFBController.Play("Negative");
+//        StartCoroutine(BackgroundColorFlash(THR_Cam.backgroundColor, LightRedColor));
+//        NumNonSquareTouches++;
+//    }
+//}
+
+//if (InputBroker.GetMouseButtonUp(0))
+//{
+//    if(ClickedSquare)
+//    {
+//        Cursor.visible = false;
+//        SquareMaterial.color = Color.grey;
+//        TouchReleaseTime = Time.time;
+//        HeldDuration = TouchReleaseTime - TouchStartTime;
+
+//        if (HeldDuration > CurrentTrial.MinTouchDuration && HeldDuration < CurrentTrial.MaxTouchDuration)
+//        {
+//            if (CurrentTrial.RewardRelease)
+//                GiveHoldReward = true;
+//        }
+//        else if (HeldDuration < CurrentTrial.MinTouchDuration)
+//        {
+//            Debug.Log("Didn't hold long enough!");
+//            SquareMaterial.color = LightRedColor;
+//        }
+//        else
+//        {
+//            Debug.Log("Held too long!");
+//            SquareMaterial.color = LightRedColor;
+//        }
+//        ClickReleased = true;
+//    }
+//}
+//if (Time.time - TrialStartTime > CurrentTrial.TimeToAutoEndTrialSec)
+//    AutoEndTrial = true;
+
+
+//WHITE SQUARE UPDATE METHOD:
+//if(Input.GetMouseButtonDown(0))
+//{
+//    mouseRay = THR_Cam.ScreenPointToRay(Input.mousePosition);
+//    RaycastHit hit;
+//    if(Physics.Raycast(mouseRay, out hit))
+//    {
+//        if(hit.transform.name == "SquareGO")
+//        {
+//            AudioFBController.Play("Negative");
+//            NumTouchesWhiteSquare++;
+//        }
+//    }
+//}
+
 
 
 

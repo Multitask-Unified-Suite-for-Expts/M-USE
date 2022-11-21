@@ -13,7 +13,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 {
 
 
-    //THR_BlockDef currentBlock => GetCurrentBlockDef<THR_BlockDef>();
+    THR_BlockDef currentBlock => GetCurrentBlockDef<THR_BlockDef>();
 
     public override void SpecifyTypes()
     {
@@ -33,8 +33,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         string TaskName = "THR";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-
-
 
     }
 

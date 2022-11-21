@@ -288,10 +288,16 @@ MonoBehaviour:
   EventCodeManager: {fileID: 0}
   MaterialFilePath: 
   ContextPath: 
-  THR_CanvasGO: {fileID: 0}
-  THR_Canvas: {fileID: 0}
+  BackdropPrefab: {fileID: 6236812614538877600, guid: c361c637d41464c0bad1bf8ee2cc70d5,
+    type: 3}
+  BackdropGO: {fileID: 0}
+  BackdropRenderer: {fileID: 0}
+  SquarePrefab: {fileID: 2991565490583254512, guid: 67e7475931d034539aa5cc7cf4ddd4f5,
+    type: 3}
   SquareGO: {fileID: 0}
-  SquareImage: {fileID: 0}
+  SquareRenderer: {fileID: 0}
+  THR_Canvas: {fileID: 0}
+  THR_CanvasGO: {fileID: 0}
   FeedbackStartTime: 0
   TrialStartTime: 0
   TouchStartTime: 0
@@ -301,13 +307,36 @@ MonoBehaviour:
   GiveHoldReward: 0
   ClickedSquare: 0
   AutoEndTrial: 0
-  NumTrialsCompleted: 0
-  NumTrialsCorrect: 0
-  SquarePrefab: {fileID: 2991565490583254512, guid: 67e7475931d034539aa5cc7cf4ddd4f5,
-    type: 3}
-  GratingSprite: {fileID: 21300000, guid: 43827dfa6710147da94f8ead60cbd89e, type: 3}
+  ConfigVariablesLoaded: 0
+  NumTrialsCompletedBlock: 0
+  NumTrialsCorrectBlock: 0
+  NumNonSquareTouches: 0
+  NumTouchesBlueSquare: 0
+  NumTouchesWhiteSquare: 0
+  SquareMaterial: {fileID: 0}
+  BackdropMaterial: {fileID: 0}
   THR_Cam: {fileID: 0}
   ClickReleased: 0
+  ColorsSet: 0
+  RedWhiteStripeFilePath: 
+  DarkBlueBackgroundColor:
+    serializedVersion: 2
+    rgba: 0
+  LightRedColor:
+    serializedVersion: 2
+    rgba: 0
+  LightBlueColor:
+    serializedVersion: 2
+    rgba: 0
+  ConfigValuesChanged: 0
+  BlockDefaultSquareSize: 0
+  BlockDefaultPositionX: 0
+  BlockDefaultPositionY: 0
+  BlockDefaultMinTouchDuration: 0
+  BlockDefaultMaxTouchDuration: 0
+  BlockDefaultWhiteSquareDuration: 0
+  BlockDefaultBlueSquareDuration: 0
+  IsLevelOne: 0
 --- !u!114 &900455551
 MonoBehaviour:
   m_ObjectHideFlags: 0

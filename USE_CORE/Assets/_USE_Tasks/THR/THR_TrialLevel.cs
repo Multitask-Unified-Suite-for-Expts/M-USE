@@ -247,7 +247,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     }
                     else
                         StartCoroutine(SquareColorFlash(LightRedColor));
-                    
+                   
                     ClickReleased = true;
                 }
             }
@@ -427,7 +427,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     IEnumerator WhiteToBlueStatePause()
     {
-        //Using this func to handle them clicking while its changing from WhiteSquare state to BlueSquare state
+        //Using this func to handle the player clicking while its changing from WhiteSquare state to BlueSquare state
         yield return new WaitForSeconds(1f);
     }
 
@@ -515,6 +515,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
 
 
+
+
 //SETUP TRIAL INITILAITON:
 //if (THR_CanvasGO == null)
 //    CreateCanvas();
@@ -524,23 +526,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
 //THR_Cam.clearFlags = CameraClearFlags.SolidColor;
 //THR_Cam.backgroundColor = DarkBlueBackgroundColor;
-
-
-//FEEDBACK INITILAIZTION METHOD:
-//if ((GiveTouchReward) || (GiveHoldReward))
-//{
-//    AudioFBController.Play("Positive");
-//    if (SyncBoxController != null)
-//    {
-//        if (GiveTouchReward)
-//            SyncBoxController.SendRewardPulses(CurrentTrial.NumTouchPulses, CurrentTrial.PulseSize); //Touch reward first
-//        if (GiveHoldReward)
-//            SyncBoxController.SendRewardPulses(CurrentTrial.NumReleasePulses, CurrentTrial.PulseSize); //Then hold reward if earned
-//    }
-//}
-//else
-//    AudioFBController.Play("Negative");
-
 
 //private void CreateCanvas()
 //{
@@ -553,83 +538,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 //    THR_CanvasGO.AddComponent<GraphicRaycaster>();
 //}
 
-
-//BLUE SQUARE UPDATE METHOD:
-//if (InputBroker.GetMouseButtonDown(0))
-//{
-//    mouseRay = THR_Cam.ScreenPointToRay(Input.mousePosition);
-//    RaycastHit hit;
-//    if (Physics.Raycast(mouseRay, out hit))
-//    {
-//        if(hit.transform.name == "SquareGO")
-//        {
-//            TouchStartTime = Time.time;
-//            SquareMaterial.color = Color.green;
-//            ClickedSquare = true;
-//            NumTouchesBlueSquare++;
-//            if (CurrentTrial.RewardTouch)
-//                GiveTouchReward = true;
-//        }
-//    }
-//    else
-//    {
-//        AudioFBController.Play("Negative");
-//        StartCoroutine(BackgroundColorFlash(THR_Cam.backgroundColor, LightRedColor));
-//        NumNonSquareTouches++;
-//    }
-//}
-
-//if (InputBroker.GetMouseButtonUp(0))
-//{
-//    if(ClickedSquare)
-//    {
-//        Cursor.visible = false;
-//        SquareMaterial.color = Color.grey;
-//        TouchReleaseTime = Time.time;
-//        HeldDuration = TouchReleaseTime - TouchStartTime;
-
-//        if (HeldDuration > CurrentTrial.MinTouchDuration && HeldDuration < CurrentTrial.MaxTouchDuration)
-//        {
-//            if (CurrentTrial.RewardRelease)
-//                GiveHoldReward = true;
-//        }
-//        else if (HeldDuration < CurrentTrial.MinTouchDuration)
-//        {
-//            Debug.Log("Didn't hold long enough!");
-//            SquareMaterial.color = LightRedColor;
-//        }
-//        else
-//        {
-//            Debug.Log("Held too long!");
-//            SquareMaterial.color = LightRedColor;
-//        }
-//        ClickReleased = true;
-//    }
-//}
-
-
-
-//WHITE SQUARE UPDATE METHOD:
-//if(Input.GetMouseButtonDown(0))
-//{
-//    mouseRay = THR_Cam.ScreenPointToRay(Input.mousePosition);
-//    RaycastHit hit;
-//    if(Physics.Raycast(mouseRay, out hit))
-//    {
-//        if(hit.transform.name == "SquareGO")
-//        {
-//            AudioFBController.Play("Negative");
-//            NumTouchesWhiteSquare++;
-//        }
-//    }
-//}
-
-
-
-
 //had this in the blue square ELSE:
 //RenderSettings.skybox = CreateSkybox(RedWhiteStripeFilePath);
-
 
 //had this in setupTrial:
 //ContextPath = GetContextNestedFilePath(CurrentTrial.ContextName);

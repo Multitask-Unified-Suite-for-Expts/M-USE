@@ -150,11 +150,7 @@ namespace USE_ExperimentTemplate_Task
                 Controllers.SetActive(true);
             });
 
-            SetupTask.SpecifyTermination(() => true, RunBlock, () =>
-            {
-                BlockData.CreateFile();
-                FrameData.CreateFile();
-            });
+            SetupTask.SpecifyTermination(() => true, RunBlock);
 
 
             RunBlock.AddUniversalInitializationMethod(() =>
@@ -455,7 +451,7 @@ namespace USE_ExperimentTemplate_Task
             }
         }
 
-        protected virtual void ReadCustomSettingsFiles()
+        public virtual void ReadCustomSettingsFiles()
         {
             
         }

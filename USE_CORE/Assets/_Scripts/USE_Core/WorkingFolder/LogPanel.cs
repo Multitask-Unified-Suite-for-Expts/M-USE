@@ -8,6 +8,7 @@ public class LogPanel: ExperimenterDisplayPanel
 {
     private Text logPanelText;
     private string logText = "";
+    private static LogPanel singleton;
 
     private readonly LogType[] LOGGED_LOG_TYPES = {LogType.Error, LogType.Exception};
 
@@ -17,6 +18,7 @@ public class LogPanel: ExperimenterDisplayPanel
 
         logPanelText = GameObject.Find("LogPanelText").GetComponent<Text>();
         logPanelText.supportRichText = true;
+        singleton = this;
     }
 
     public override void CustomPanelUpdate()
@@ -28,5 +30,9 @@ public class LogPanel: ExperimenterDisplayPanel
         if (Array.IndexOf(LOGGED_LOG_TYPES, type) > -1) {
             logText += condition + "\n";
         }
+    }
+
+    public static bool HasError() {
+        return singleton.logText.Length > 0;
     }
 }

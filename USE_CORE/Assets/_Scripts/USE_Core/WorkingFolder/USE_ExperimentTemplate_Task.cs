@@ -92,11 +92,14 @@ namespace USE_ExperimentTemplate_Task
             StimDefType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].StimDefType;
         }
 
-        public void DefineTaskLevel()
+        public void DefineTaskLevel(bool verifyOnly)
         {
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
             ReadSettingsFiles();
+            ReadCustomSettingsFiles();
             FindStims();
+            if (verifyOnly) return;
+
 
             SetupTask = new State("SetupTask");
             RunBlock = new State("RunBlock");
@@ -450,6 +453,11 @@ namespace USE_ExperimentTemplate_Task
                     }
                 }
             }
+        }
+
+        protected virtual void ReadCustomSettingsFiles()
+        {
+            
         }
 
         public void FindStims()

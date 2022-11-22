@@ -11,7 +11,8 @@ using USE_ExperimentTemplate_Block;
 
 public class THR_TaskLevel : ControlLevel_Task_Template
 {
-
+    public string CurrentBlockString;
+    public StringBuilder PreviousBlocksString;
 
     THR_BlockDef currentBlock => GetCurrentBlockDef<THR_BlockDef>();
 
@@ -34,6 +35,11 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
 
+        CurrentBlockString = "";
+        PreviousBlocksString = new StringBuilder();
+
+        SetupTask.AddInitializationMethod(() => SetupBlockData(trialLevel));
+
         RunBlock.AddInitializationMethod(() =>
         {
             trialLevel.NumTrialsCompletedBlock = 0;
@@ -41,11 +47,62 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             trialLevel.NumNonSquareTouches = 0;
             trialLevel.NumTouchesBlueSquare = 0;
             trialLevel.NumTouchesWhiteSquare = 0;
+
+            SetBlockSummaryString(trialLevel);
+        });
+        RunBlock.AddUpdateMethod(() =>
+        {
+            if(trialLevel.TrialComplete)
+            {
+                SetBlockSummaryString(trialLevel);
+                trialLevel.TrialComplete = false;
+            }
+        });
+
+        BlockFeedback.AddInitializationMethod(() =>
+        {
+            if (BlockCount > 0)
+                CurrentBlockString += "\n";
+            PreviousBlocksString.Insert(0, CurrentBlockString);
         });
 
   
     }
 
+    void SetBlockSummaryString(THR_TrialLevel trialLevel)
+    {
+        ClearStrings();
+
+        CurrentBlockString = ("<b>Block " + "(" + currentBlock.BlockName + "):" + "</b>" +
+                        "\nTrial # In Block: " + trialLevel.TrialCount_InBlock+1 +
+                        "\nNumTrialsCompleted: " + trialLevel.NumTrialsCompletedBlock +
+                        "\nNumTrialsCorrect: " + trialLevel.NumTrialsCorrectBlock +
+                        "\nNumTouchesWhiteSquare: " + trialLevel.NumTouchesWhiteSquare +
+                        "\nNumTouchesBlueSquare: " + trialLevel.NumTouchesBlueSquare +
+                        "\nNumTouchesOutsideSquare: " + trialLevel.NumNonSquareTouches).ToString();
+
+        if (BlockCount > 0)
+            CurrentBlockString += "\n";
+
+        BlockSummaryString.AppendLine(CurrentBlockString).ToString();
+        if (PreviousBlocksString.Length > 0)
+            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
+    }
+
+    void ClearStrings()
+    {
+        CurrentBlockString = "";
+        BlockSummaryString.Clear();
+    }
+
+    void SetupBlockData(THR_TrialLevel trialLevel)
+    {
+        BlockData.AddDatum("NumTrialsCompleted", () => trialLevel.NumTrialsCompletedBlock);
+        BlockData.AddDatum("NumTrialsCorrect", () => trialLevel.NumTrialsCorrectBlock);
+        BlockData.AddDatum("NumTouchesWhiteSquare", () => trialLevel.NumTouchesWhiteSquare);
+        BlockData.AddDatum("NumTouchesBlueSquare", () => trialLevel.NumTouchesBlueSquare);
+        BlockData.AddDatum("NumTouchesOutsideSquare", () => trialLevel.NumNonSquareTouches);
+    }
 
     public T GetCurrentBlockDef<T>() where T : BlockDef
     {

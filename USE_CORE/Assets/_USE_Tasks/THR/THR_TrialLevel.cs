@@ -15,6 +15,7 @@ using USE_Settings;
 using USE_States;
 using USE_StimulusManagement;
 using THR_Namespace;
+using UnityEditor.UIElements;
 
 public class THR_TrialLevel : ControlLevel_Trial_Template
 {
@@ -37,6 +38,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public float TouchStartTime;
     public float TouchReleaseTime;
     public float HeldDuration;
+
+    public bool TrialComplete;
 
     public bool GiveTouchReward;
     public bool GiveHoldReward;
@@ -148,6 +151,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         SelectionHandler<THR_StimDef> mouseHandler = new SelectionHandler<THR_StimDef>();
         MouseTracker.AddSelectionHandler(mouseHandler, WhiteSquare);
 
+        int whiteTouches = 0;
+
         //WHITE SQUARE state ------------------------------------------------------------------------------------------------------------------------
         WhiteSquare.AddInitializationMethod(() =>
         {
@@ -161,18 +166,26 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             {
                 if (!AudioFBController.IsPlaying())
                     AudioFBController.Play("Negative");
-                NumTouchesWhiteSquare++;
+                if(whiteTouches == 0)
+                {
+                    NumTouchesWhiteSquare++;
+                    whiteTouches++;
+                }
             }
         });
         WhiteSquare.SpecifyTermination(() => CurrentTrial.BlockName != "Level1", BlueSquare);
         WhiteSquare.AddTimer(() => CurrentTrial.WhiteSquareDuration, BlueSquare, () => StartCoroutine(WhiteToBlueStatePause()));
 
+        NumTouchesWhiteSquare += whiteTouches;
+
         MouseTracker.AddSelectionHandler(mouseHandler, BlueSquare);
+
+        int blueTouches = 0;
+        int nonSquareTouches = 0;
 
         //BLUE SQUARE state -------------------------------------------------------------------------------------------------------------------------
         BlueSquare.AddInitializationMethod(() =>
         {
-            Debug.Log("STARTED BLUE SQUARE STATE!!!");
             SquareMaterial.color = Color.blue;
             if (!SquareGO.activeSelf)
                 ActivateSquareAndBackdrop();
@@ -188,7 +201,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     TouchStartTime = Time.time;
                     SquareMaterial.color = Color.green;
                     ClickedSquare = true;
-                    NumTouchesBlueSquare++;
+                    if (blueTouches == 0)
+                    {
+                        NumTouchesBlueSquare++;
+                        blueTouches++;
+                    }
                     if (CurrentTrial.RewardTouch)
                         GiveTouchReward = true;
                 }
@@ -198,7 +215,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     //if(!AudioFBController.IsPlaying())
                     //    AudioFBController.Play("Negative");
                     //StartCoroutine(BackgroundColorFlash(LightRedColor));
-                    NumNonSquareTouches++;
+                    if(nonSquareTouches == 0)
+                    {
+                        NumNonSquareTouches++;
+                        nonSquareTouches++;
+                    }
                 }
             }
 
@@ -225,7 +246,10 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         });
         BlueSquare.AddTimer(() => CurrentTrial.BlueSquareDuration, Feedback);
         BlueSquare.SpecifyTermination(() => ClickReleased, Feedback);
-        //BlueSquare.SpecifyTermination(() => AutoEndTrial, ITI); //go to feedback if time elapsed. 
+        //BlueSquare.SpecifyTermination(() => AutoEndTrial, ITI); //go to feedback if time elapsed.
+
+        NumTouchesBlueSquare += blueTouches;
+        NumNonSquareTouches += nonSquareTouches;
 
         //FEEDBACK state ------------------------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
@@ -261,7 +285,13 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             CheckIfBlockShouldEnd(); //NOT DONE YET
         });
-        ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial, () => NumTrialsCompletedBlock++);
+        ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial, () =>
+        {
+            NumTrialsCompletedBlock++;
+            TrialComplete = true;
+        });
+        LogTrialData();
+        LogFrameData();
     }
 
 
@@ -408,6 +438,23 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         GiveTouchReward = false;
 
         ConfigValuesChanged = false;
+    }
+
+    void LogTrialData()
+    {
+        TrialData.AddDatum("SquareSize", () => CurrentTrial.SquareSize);
+        TrialData.AddDatum("SquarePosX", () => CurrentTrial.PositionX);
+        TrialData.AddDatum("SquarePosY", () => CurrentTrial.PositionY);
+        TrialData.AddDatum("MinTouchDuration", () => CurrentTrial.MinTouchDuration);
+        TrialData.AddDatum("MaxTouchDuration", () => CurrentTrial.MaxTouchDuration);
+        TrialData.AddDatum("RewardTouch", () => CurrentTrial.RewardTouch);
+        TrialData.AddDatum("RewardRelease", () => CurrentTrial.RewardRelease);
+    }
+
+    void LogFrameData()
+    {
+        FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
+        FrameData.AddDatum("SquareGO", () => SquareGO.activeSelf);
     }
 
     //private string GetContextNestedFilePath(string contextName)

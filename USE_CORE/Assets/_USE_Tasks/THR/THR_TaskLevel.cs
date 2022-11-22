@@ -73,7 +73,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         ClearStrings();
 
         CurrentBlockString = ("<b>Block " + "(" + currentBlock.BlockName + "):" + "</b>" +
-                        "\nTrial # In Block: " + trialLevel.TrialCount_InBlock+1 +
                         "\nNumTrialsCompleted: " + trialLevel.NumTrialsCompletedBlock +
                         "\nNumTrialsCorrect: " + trialLevel.NumTrialsCorrectBlock +
                         "\nNumTouchesWhiteSquare: " + trialLevel.NumTouchesWhiteSquare +
@@ -96,7 +95,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
     void SetupBlockData(THR_TrialLevel trialLevel)
     {
-        BlockData.AddDatum("TrialNumInBlock", () => trialLevel.TrialCount_InBlock + 1);
         BlockData.AddDatum("NumTrialsCompleted", () => trialLevel.NumTrialsCompletedBlock);
         BlockData.AddDatum("NumTrialsCorrect", () => trialLevel.NumTrialsCorrectBlock);
         BlockData.AddDatum("NumTouchesWhiteSquare", () => trialLevel.NumTouchesWhiteSquare);

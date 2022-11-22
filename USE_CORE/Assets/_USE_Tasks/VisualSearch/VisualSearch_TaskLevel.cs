@@ -46,6 +46,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         
         RunBlock.AddUpdateMethod(() =>
         {
+            BlockSummaryString.Clear();
             BlockSummaryString.AppendLine("Block Num: " + (vsTL.BlockCount) + "\nTrial Count: " + (vsTL.TrialCount_InBlock));
           //  "\nTotal Errors: " + vsTL.totalErrors_InBlock + "\nError Type: " + vsTL.errorType_InBlockString + "\nPerformance: " + vsTL.accuracyLog_InBlock;
         });

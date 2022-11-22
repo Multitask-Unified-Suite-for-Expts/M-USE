@@ -7,7 +7,7 @@ using USE_Data;
 public class MouseTracker : InputTracker
 {
     [CanBeNull] private GameObject HoverObject;
-    private bool UsingSecondMonitor = false;
+    private bool UsingSecondMonitor = true;
 
     public override void AddFieldsToFrameData(DataController frameData)
     {

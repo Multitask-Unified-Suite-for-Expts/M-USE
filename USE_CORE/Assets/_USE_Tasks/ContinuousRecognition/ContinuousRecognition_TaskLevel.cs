@@ -128,14 +128,14 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         if(PreviousBlocksString.Length > 0) BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
     }
 
-    private void ClearStrings()
+    void ClearStrings()
     {
         BlockAveragesString = "";
         CurrentBlockString = "";
         BlockSummaryString.Clear();
     }
 
-    private void CalculateStanDev()
+    void CalculateStanDev()
     {
         if (NumCorrect_Task.Count == 0) StanDev = 0;
         else
@@ -152,7 +152,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         }
     }
 
-    private void CalculateBlockAverages()
+    void CalculateBlockAverages()
     {
         //Avg Num Correct
         if (NumCorrect_Task.Count == 0) AvgNumCorrect = 0;
@@ -205,7 +205,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         }
     }
 
-    private void SetupBlockData(ContinuousRecognition_TrialLevel trialLevel)
+    void SetupBlockData(ContinuousRecognition_TrialLevel trialLevel)
     { 
         BlockData.AddDatum("BlockName", () => currentBlock.BlockName);
         BlockData.AddDatum("NumTrials", () => trialLevel.NumTrials_Block);

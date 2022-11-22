@@ -22,7 +22,7 @@ public class VertexWobble : MonoBehaviour
 
         for (int i = 0; i < vertices.Length; i++)
         {
-            Vector3 offset = Wobble(Time.time + i);
+            Vector3 offset = Wobble(Time.time + i * 2);
 
             vertices[i] = vertices[i] + offset;
         }
@@ -33,6 +33,6 @@ public class VertexWobble : MonoBehaviour
 
     Vector2 Wobble(float time)
     {
-        return new Vector2(Mathf.Sin(time * 3.3f), Mathf.Cos(time * 2.5f));
+        return new Vector2(Mathf.Sin(time * 5f), Mathf.Cos(time * 4f));
     }
 }

@@ -1236,29 +1236,39 @@ namespace USE_States
 
 		public void RunControlLevelFixedUpdate()
 		{
-			CheckInitialization();
-			if (CurrentState != null)
+			if (!Paused)
 			{
-				CurrentState.RunStateFixedUpdate();
+				CheckInitialization();
+				if (CurrentState != null)
+				{
+					CurrentState.RunStateFixedUpdate();
+				}
 			}
 		}
 
 		public void RunControlLevelUpdate()
 		{
-			CheckInitialization(); /// add here because sometimes fixedupdate does not run in a frame
-			if (CurrentState != null)
+			if (!Paused)
 			{
-				CurrentState.RunStateUpdate();
+				CheckInitialization(); /// add here because sometimes fixedupdate does not run in a frame
+				if (CurrentState != null)
+				{
+					CurrentState.RunStateUpdate();
+				}
 			}
 		}
 
 		public void RunControlLevelLateUpdate()
 		{
-			if (CurrentState != null)
+			if (!Paused)
 			{
-				CurrentState.RunStateLateUpdate();
+				if (CurrentState != null)
+				{
+					CurrentState.RunStateLateUpdate();
+				}
+
+				CheckTermination();
 			}
-			CheckTermination();
 		}
 
 

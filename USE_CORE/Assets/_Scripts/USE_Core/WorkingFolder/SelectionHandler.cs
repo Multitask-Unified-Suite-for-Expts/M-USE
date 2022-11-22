@@ -12,8 +12,8 @@ public class SelectionHandler<T> where T : StimDef
     public GameObject SelectedGameObject = null;
     public T SelectedStimDef = null;
 
-    private GameObject targetedGameObject;
-    private float currentTargetDuration;
+    public GameObject targetedGameObject;
+    public float currentTargetDuration;
     private bool started;
 
     public void Start()

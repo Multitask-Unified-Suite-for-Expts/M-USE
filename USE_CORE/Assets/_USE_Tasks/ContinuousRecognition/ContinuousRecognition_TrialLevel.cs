@@ -20,6 +20,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
     public ContinuousRecognition_TrialDef currentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
 
+    //Text variables
+    //public Canvas CR_Canvas;
+    //public TextMeshPro TitleText;
+    //public TextMeshPro YouWinText;
+    //public TextMeshPro YouLoseText;
+    //public TextMeshPro ScoreText;
+    //public TextMeshPro NumTrialsText;
     public GameObject CR_CanvasGO;
     public GameObject TitleTextGO;
     public GameObject YouWinTextGO;
@@ -42,6 +49,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public StimGroup trialStims;
     public List<int> ChosenStimIndices;
     public string MaterialFilePath;
+    public string ContextPath;
 
     public bool ContextActive;
     public bool variablesLoaded;
@@ -59,6 +67,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public int TokenCount;
     public int NumFeedbackRows;
     public int ScoreAmountPerTrial;
+
+    public int Score
+    {
+        get
+        {
+            return ScoreAmountPerTrial * TrialCount_InBlock;
+        }
+    }
+
+
 
     public Vector3 originalFbTextPosition;
     public Vector3 originalTitleTextPosition;
@@ -83,13 +101,19 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.enabled = false;
         ScoreAmountPerTrial = 100;
 
+        //Currently still created in Editor.
+        //CreateCanvasAndText();
+
         originalFbTextPosition = YouLoseTextGO.transform.position;
         originalTitleTextPosition = TitleTextGO.transform.position;
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + currentTrial.ContextName + ".png");
+            ContextPath = GetContextNestedFilePath(currentTrial.ContextName);
+            RenderSettings.skybox = CreateSkybox(ContextPath);
+            //RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + currentTrial.ContextName + ".png");
+
             ContextActive = true;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
 
@@ -114,21 +138,18 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (currentTrial.UseStarfield)
                 Starfield.SetActive(true);
 
-            if(TrialCount_InBlock == 0 && currentTrial.IsHuman)
+            //Add title text above StartButton if first trial in block and Human is playing.
+            //Adjust startButton position (move down) to make room for Title text. 
+            if (TrialCount_InBlock == 0 && currentTrial.IsHuman)
             {
                 Vector3 buttonPos = StartButton.transform.position;
-                buttonPos.y -= .1f; //changed from .25
+                buttonPos.y -= .1f;
                 StartButton.transform.position = buttonPos;
-
-                Vector3 titlePos = TitleTextGO.transform.position;
-                titlePos.y -= 1.1f;
-                TitleTextGO.transform.position = titlePos;
 
                 TitleTextGO.SetActive(true);
             }
             StartButton.SetActive(true);
             
-
             CompletedAllTrials = false;
             TrialComplete = false;
             currentTrial.IsNewStim = false;
@@ -149,10 +170,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
             
         });
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), //IS THR IN THE NAME OF CONFIG FILE, IF SO ACTIVATE THR TASK. 
+        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
             DisplayStims, () =>
             {
-                if(TitleTextGO.activeSelf)
+                if (TitleTextGO.activeSelf)
                 {
                     TitleTextGO.SetActive(false);
                     TitleTextGO.transform.position = originalTitleTextPosition; //Reset Title Position for next block (in case its not a human block). 
@@ -317,20 +338,23 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (EndBlock)
             {
                 GenerateBlockFeedback();
-                float Y_Offset = GetOffsetY();
-                int scoreTotal = TrialCount_InBlock * ScoreAmountPerTrial;
 
-                if (CompletedAllTrials)
+                if(currentTrial.IsHuman)
                 {
-                    YouWinTextGO.transform.localPosition = new Vector3(YouWinTextGO.transform.localPosition.x, YouWinTextGO.transform.localPosition.y - Y_Offset, YouWinTextGO.transform.localPosition.z);
-                    YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"YOU WIN! \n HighScore: {scoreTotal}";
-                    YouWinTextGO.SetActive(true);
-                }
-                else
-                {
-                    YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
-                    YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"YOU LOSE! \n HighScore: {scoreTotal}";
-                    YouLoseTextGO.SetActive(true);
+                    float Y_Offset = GetOffsetY();
+
+                    if (CompletedAllTrials)
+                    {
+                        YouWinTextGO.transform.localPosition = new Vector3(YouWinTextGO.transform.localPosition.x, YouWinTextGO.transform.localPosition.y - Y_Offset, YouWinTextGO.transform.localPosition.z);
+                        YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"YOU WIN! \n New HighScore: {Score}";
+                        YouWinTextGO.SetActive(true);
+                    }
+                    else
+                    {
+                        YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
+                        YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Nice Try! \n HighScore: {Score}";
+                        YouLoseTextGO.SetActive(true);
+                    }
                 }
             }
         });
@@ -386,24 +410,121 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     }
 
 
-    //HELPER FUNCTIONS --------------------------------------------------------------------------
+    //HELPER FUNCTIONS -----------------------------------------------------------------------------------------
+
+    private string GetContextNestedFilePath(string contextName)
+    {
+        //Recursive search the sub folders of the MaterialFilePath to get Context File Path
+        string backupContextName = "LinearDark";
+        string contextPath = ""; 
+
+        string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
+
+        if (filePaths.Length == 1)
+            contextPath = filePaths[0];
+        else
+        {
+            Debug.Log($"Context File Path Not Found. Defaulting to {backupContextName}.");
+            contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0]; //Use Default LinearDark if can't find file.
+        }
+
+        return contextPath;
+    }
+
+    private void CreateCanvasAndText()
+    {
+        //Function not being used. Currently CR Canvas and Text are created in Unity Editor.
+
+        //TMP_FontAsset textFont;
+        //textFont = Resources.Load<TMP_FontAsset>("Bangers-Regular SDF"); //NOT WORKING
+
+        //Color textColor;
+        //ColorUtility.TryParseHtmlString("#FAF9F6", out textColor);
+
+        //CR_CanvasGO = new GameObject();
+        //CR_CanvasGO.name = "CR_Canvas";
+        //CR_CanvasGO.AddComponent<Canvas>();
+
+        //CR_Canvas = CR_CanvasGO.GetComponent<Canvas>();
+        //CR_Canvas.renderMode = RenderMode.ScreenSpaceCamera;
+        //CR_Canvas.worldCamera = GameObject.Find("ContinuousRecognition_Camera").GetComponent<Camera>();
+        //CR_CanvasGO.AddComponent<CanvasScaler>();
+        //CR_CanvasGO.AddComponent<GraphicRaycaster>();
+
+        //TitleTextGO = new GameObject();
+        //TitleTextGO.name = "TitleText";
+        //TitleTextGO.transform.parent = CR_CanvasGO.transform;
+        //TitleText = TitleTextGO.AddComponent<TextMeshPro>();
+        //TitleText.text = "DON'T Pick Twice!";
+        //TitleText.fontSize = 70;
+        //TitleText.color = textColor;
+        //TitleText.alignment = TextAlignmentOptions.Center;
+        //RectTransform titleRECT = TitleText.GetComponent<RectTransform>();
+        //titleRECT.localPosition = new Vector3(0, 200, 0);
+        //titleRECT.sizeDelta = new Vector2(1200, 200);
+
+        //YouWinTextGO = new GameObject();
+        //YouWinTextGO.name = "YouWinText";
+        //YouWinTextGO.transform.parent = CR_CanvasGO.transform;
+        //YouWinText = YouWinTextGO.AddComponent<TextMeshPro>();
+        //YouWinText.font = textFont;
+        //YouWinText.fontSize = 36;
+        //YouWinText.color = textColor;
+        ////RectTransform youWinRECT = YouWinText.GetComponent<RectTransform>();
+        ////youWinRECT.localPosition = new Vector3(0, 0, 0);
+        ////youWinRECT.sizeDelta = new Vector2(1920, 1080);
+
+        //YouLoseTextGO = new GameObject();
+        //YouLoseTextGO.name = "YouLoseText";
+        //YouLoseTextGO.transform.parent = CR_CanvasGO.transform;
+        //YouLoseText = YouLoseTextGO.AddComponent<TextMeshPro>();
+        //YouLoseText.font = textFont;
+        //YouLoseText.fontSize = 36;
+        //YouLoseText.color = textColor;
+        ////RectTransform youLoseRECT = YouWinText.GetComponent<RectTransform>();
+        ////youLoseRECT.localPosition = new Vector3(0, 0, 0);
+        ////youLoseRECT.sizeDelta = new Vector2(1920, 1080);
+
+        //ScoreTextGO = new GameObject();
+        //ScoreTextGO.name = "ScoreText";
+        //ScoreTextGO.transform.parent = CR_CanvasGO.transform;
+        //ScoreText = ScoreTextGO.AddComponent<TextMeshPro>();
+        //ScoreText.font = textFont;
+        //ScoreText.fontSize = 24;
+        //ScoreText.color = textColor;
+        ////RectTransform scoreRECT = YouWinText.GetComponent<RectTransform>();
+        ////scoreRECT.localPosition = new Vector3(0, 0, 0);
+        ////scoreRECT.sizeDelta = new Vector2(1920, 1080);
+
+        //NumTrialsTextGO = new GameObject();
+        //NumTrialsTextGO.name = "NumTrialsText";
+        //NumTrialsTextGO.transform.parent = CR_CanvasGO.transform;
+        //NumTrialsText = NumTrialsTextGO.AddComponent<TextMeshPro>();
+        //NumTrialsText.font = textFont;
+        //NumTrialsText.fontSize = 24;
+        //NumTrialsText.color = textColor;
+        ////RectTransform numTrialsRECT = NumTrialsText.GetComponent<RectTransform>();
+        ////numTrialsRECT.localPosition = new Vector3(0, 0, 0);
+        ////numTrialsRECT.sizeDelta = new Vector2(1920, 1080);
+    }
 
     private float GetOffsetY()
     {
+        //function used to adjust the text positioning for the human version. 
         float yOffset = 0;
         switch (NumFeedbackRows)
         {
             case 1:
-                yOffset = 75f; //good
+                yOffset = 75f;
                 break;
             case 2:
-                yOffset = 45f; //good
+                yOffset = 45f;
                 break;
             case 3:
-                yOffset = 15f; //not sure.
+                yOffset = 15f;
                 break;
             case 4:
-                yOffset = -10f;
+                yOffset = -20f;
                 break;
             case 5:
                 yOffset = -25f;
@@ -414,8 +535,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void SetScoreTextAndNumTrialsText()
     {
-        int scoreTotal = TrialCount_InBlock * ScoreAmountPerTrial;
-        ScoreTextGO.GetComponent<TextMeshProUGUI>().text = $"SCORE: {scoreTotal}";
+        //function to set the score and NumTrials texts at the beginning of the trial. 
+        ScoreTextGO.GetComponent<TextMeshProUGUI>().text = $"SCORE: {Score}";
         NumTrialsTextGO.GetComponent<TextMeshProUGUI>().text = $"TRIALS: {TrialCount_InBlock}";
         ScoreTextGO.SetActive(true);
         NumTrialsTextGO.SetActive(true);
@@ -444,7 +565,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (numLocations > 18) numRows++;
         if (numLocations > 24) numRows++;
 
-        NumFeedbackRows = numRows; //Setting Global variable for use centering the feedback text above the stim.
+        NumFeedbackRows = numRows; //Setting Global variable for use centering the feedback text above the stim (for human version)
 
         int R1_Length = 0;
         int R2_Length = 0;
@@ -787,10 +908,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             TrialStims.Add(trialStims);
         }
 
-        getLog(currentTrial.PC_Stim, "PC_Stims");
-        getLog(currentTrial.New_Stim, "New_Stims");
-        getLog(currentTrial.PNC_Stim, "PNC_Stims");
-        getLog(currentTrial.TrialStimIndices, "TrialStimIndices");
+        GetLog(currentTrial.PC_Stim, "PC_Stims");
+        GetLog(currentTrial.New_Stim, "New_Stims");
+        GetLog(currentTrial.PNC_Stim, "PNC_Stims");
+        GetLog(currentTrial.TrialStimIndices, "TrialStimIndices");
     }
 
     private void SetShadowType()
@@ -822,7 +943,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             AvgTimeToChoice_Block = 0;
 
         float sum = 0;
-        foreach (float choice in TimeToChoice_Block) sum += choice;
+        foreach (float choice in TimeToChoice_Block)
+            sum += choice;
         AvgTimeToChoice_Block = sum / TimeToChoice_Block.Count;
     }
 
@@ -912,7 +1034,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         yield return new WaitForSeconds(.1f);
         foreach (GameObject border in BorderPrefabList)
         {
-            if (border != null) border.SetActive(false);
+            if (border != null)
+                border.SetActive(false);
         }
         BorderPrefabList.Clear();
     }
@@ -1055,7 +1178,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         currentTrial.Unseen_Stim.Clear();
     }
 
-    private void getLog(List<int> list, string name)
+    private void GetLog(List<int> list, string name)
     {
         string result = name + ": ";
         foreach (var item in list)
@@ -1067,6 +1190,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private float[] GetStimRatioPercentages(int[] ratioArray)
     {
+        //Takes the initial stim ratio (ex: 2PC, 1New, 2PNC), and
+        //outputs their percentages of the total 
         float sum = 0;
         float[] stimPercentages = new float[ratioArray.Length];
 
@@ -1080,6 +1205,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private int[] GetStimNumbers(float[] stimPercentages)
     {
+        //Function to calculate the correct num of stim for a trial.
+        //Starts by understating each num, then it makes sure there are enough available (some ratios could overstate the stim),
+        //then it adjusts the stim category that will make the PC% the closest to its supposed percentage. 
         int PC_Num = (int)Math.Floor(stimPercentages[0] * currentTrial.NumTrialStims);
         int New_Num = (int)Math.Floor(stimPercentages[1] * currentTrial.NumTrialStims);
         int PNC_Num = (int)Math.Floor(stimPercentages[2] * currentTrial.NumTrialStims);
@@ -1140,7 +1268,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void CreateStartButton()
     {
-        Texture2D tex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
+        string contextPath = GetContextNestedFilePath("StartButtonImage.png");
+        Texture2D tex = LoadPNG(contextPath);
+        //Texture2D tex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
         Rect rect = new Rect(new Vector2(0, 0), new Vector2(1, 1));
 
         Vector3 buttonPosition = Vector3.zero;

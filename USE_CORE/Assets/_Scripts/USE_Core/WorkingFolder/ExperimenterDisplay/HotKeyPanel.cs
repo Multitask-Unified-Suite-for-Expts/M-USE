@@ -5,6 +5,7 @@ using System;
 using UnityEngine.UI;
 using Cursor = UnityEngine.Cursor;
 using ConfigDynamicUI;
+using Newtonsoft.Json.Serialization;
 using UnityEngine.EventSystems;
 using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Session;
@@ -213,10 +214,19 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.P),
                 hotKeyAction = () =>
                 {
-                    HkPanel.TaskLevel.Paused = HkPanel.TaskLevel.Paused == true ? HkPanel.TaskLevel.Paused = false : HkPanel.TaskLevel.Paused = true;
+                    if (!HkPanel.TaskLevel.Paused)
+                    {
+                        HkPanel.TaskLevel.Paused = true;
+                    }
+                    else
+                    {
+                        HkPanel.TaskLevel.Paused = false;
+                    }
                 }
             };
             HotKeyList.Add(pauseGame);
+            
+            
 
             return (HotKeyList);
         }

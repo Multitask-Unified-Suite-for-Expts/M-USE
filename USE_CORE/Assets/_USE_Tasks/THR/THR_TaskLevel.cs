@@ -23,7 +23,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         TaskDefType = typeof(THR_TaskDef);
         BlockDefType = typeof(THR_BlockDef);
         TrialDefType = typeof(THR_TrialDef);
-        //StimDefType = typeof(ContinuousRecognition_StimDef);
+        StimDefType = typeof(THR_StimDef);
     }
 
 
@@ -66,7 +66,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             PreviousBlocksString.Insert(0, CurrentBlockString);
         });
 
-  
     }
 
     void SetBlockSummaryString(THR_TrialLevel trialLevel)
@@ -102,6 +101,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("NumTouchesWhiteSquare", () => trialLevel.NumTouchesWhiteSquare);
         BlockData.AddDatum("NumTouchesBlueSquare", () => trialLevel.NumTouchesBlueSquare);
         BlockData.AddDatum("NumTouchesOutsideSquare", () => trialLevel.NumNonSquareTouches);
+        BlockData.AddDatum("DifficultyLevel", () => currentBlock.BlockName);
     }
 
     public T GetCurrentBlockDef<T>() where T : BlockDef

@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEngine;
 using USE_Data;
 
 public class MouseTracker : InputTracker
 {
-    private GameObject HoverObject;
+    [CanBeNull] private GameObject HoverObject;
+    private bool UsingSecondMonitor = false;
 
     public override void AddFieldsToFrameData(DataController frameData)
     {
@@ -18,7 +20,11 @@ public class MouseTracker : InputTracker
 
     public override GameObject FindCurrentTarget()
     {
-        if (Physics.Raycast(Camera.main.ScreenPointToRay(InputBroker.mousePosition), out RaycastHit hit, Mathf.Infinity))
+        Vector3 touchPos = InputBroker.mousePosition;
+        if (UsingSecondMonitor)
+            touchPos.x = touchPos.x + 1920;
+
+        if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out RaycastHit hit, Mathf.Infinity))
         {
             HoverObject = hit.transform.root.gameObject;
             if (InputBroker.GetMouseButton(0)) return HoverObject;

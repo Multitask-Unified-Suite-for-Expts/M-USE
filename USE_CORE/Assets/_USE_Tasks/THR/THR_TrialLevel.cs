@@ -47,6 +47,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public bool AutoEndTrial;
     public bool ConfigVariablesLoaded;
 
+    public List<int> TrialCompletionList;
     public int NumTrialsCompletedBlock;
     public int NumTrialsCorrectBlock;
     public float PerformancePercentage
@@ -83,6 +84,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public Color32 InitialBackdropColor;
 
     public bool ConfigValuesChanged;
+    public bool EndBlock;
 
     public float BlockDefaultSquareSize;
     public float BlockDefaultPositionX;
@@ -107,6 +109,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state -------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
+            if (TrialCount_InBlock == 0)
+                TrialCompletionList = new List<int>();
+
             Cursor.visible = false;
 
             if (TrialCount_InBlock == 0)
@@ -156,8 +161,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         //WHITE SQUARE state ------------------------------------------------------------------------------------------------------------------------
         WhiteSquare.AddInitializationMethod(() =>
         {
-            Cursor.visible = false;
-            ActivateSquareAndBackdrop();
+            if(CurrentTrial.BlockName == "Level1")
+            {
+                Cursor.visible = false;
+                ActivateSquareAndBackdrop();
+            }
         });
 
         WhiteSquare.AddUpdateMethod(() =>
@@ -166,7 +174,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             {
                 if (!AudioFBController.IsPlaying())
                     AudioFBController.Play("Negative");
-                if(whiteTouches == 0)
+                if (whiteTouches == 0)
                 {
                     NumTouchesWhiteSquare++;
                     whiteTouches++;
@@ -215,7 +223,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     //if(!AudioFBController.IsPlaying())
                     //    AudioFBController.Play("Negative");
                     //StartCoroutine(BackgroundColorFlash(LightRedColor));
-                    if(nonSquareTouches == 0)
+                    if (nonSquareTouches == 0)
                     {
                         NumNonSquareTouches++;
                         nonSquareTouches++;
@@ -243,10 +251,12 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     ClickReleased = true;
                 }
             }
+            if (Time.time - TrialStartTime > CurrentTrial.TimeToAutoEndTrialSec)
+                AutoEndTrial = true;
         });
         BlueSquare.AddTimer(() => CurrentTrial.BlueSquareDuration, Feedback);
         BlueSquare.SpecifyTermination(() => ClickReleased, Feedback);
-        //BlueSquare.SpecifyTermination(() => AutoEndTrial, ITI); //go to feedback if time elapsed.
+        BlueSquare.SpecifyTermination(() => AutoEndTrial, ITI); //go to feedback if time elapsed.
 
         NumTouchesBlueSquare += blueTouches;
         NumNonSquareTouches += nonSquareTouches;
@@ -262,9 +272,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 if (SyncBoxController != null)
                 {
                     if (GiveTouchReward)
-                        SyncBoxController.SendRewardPulses(CurrentTrial.NumTouchPulses, CurrentTrial.PulseSize); //Touch reward first
+                        SyncBoxController.SendRewardPulses(CurrentTrial.NumTouchPulses, CurrentTrial.PulseSize);
                     if (GiveHoldReward)
-                        SyncBoxController.SendRewardPulses(CurrentTrial.NumReleasePulses, CurrentTrial.PulseSize); //Then hold reward if earned
+                        SyncBoxController.SendRewardPulses(CurrentTrial.NumReleasePulses, CurrentTrial.PulseSize); 
                 }
             }
             else
@@ -283,7 +293,12 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             if (GiveHoldReward || GiveTouchReward)
                 NumTrialsCorrectBlock++;
 
-            CheckIfBlockShouldEnd(); //NOT DONE YET
+            if ((CurrentTrial.RewardTouch && GiveTouchReward) || (CurrentTrial.RewardRelease && GiveHoldReward))
+                TrialCompletionList.Add(1);
+            else
+                TrialCompletionList.Add(0);
+
+            //CheckIfBlockShouldEnd();
         });
         ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial, () =>
         {
@@ -294,6 +309,27 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         LogFrameData();
     }
 
+    protected override bool CheckBlockEnd()
+    {
+        return EndBlock;
+    }
+
+    void CheckIfBlockShouldEnd()
+    {
+        if (NumTrialsCompletedBlock > CurrentTrial.PerfWindowEndTrials)
+        {
+            TrialCompletionList.Reverse();
+
+            int sum = 0;
+            for(int i = 0; i < CurrentTrial.PerfWindowEndTrials; i++)
+            {
+                sum += TrialCompletionList[i];
+            }
+            float performancePerc = sum / CurrentTrial.PerfWindowEndTrials;
+            if (performancePerc >= CurrentTrial.PerfThresholdEndTrials)
+                EndBlock = true;
+        }
+    }
 
     void SetBlockDefaultValues()
     {
@@ -324,11 +360,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     void UpdateSquare()
     {
-        if(BlockDefaultSquareSize != ConfigUiVariables.get<ConfigNumber>("squareSize").value)
-            SquareGO.transform.localScale = new Vector3(CurrentTrial.SquareSize, CurrentTrial.SquareSize, 1);
-
-        if(BlockDefaultPositionX != ConfigUiVariables.get<ConfigNumber>("positionX").value || BlockDefaultPositionY != ConfigUiVariables.get<ConfigNumber>("positionY").value)
-            SquareGO.transform.localPosition = new Vector3(CurrentTrial.PositionX, CurrentTrial.PositionY, 0);
+        SquareGO.transform.localScale = new Vector3(CurrentTrial.SquareSize, CurrentTrial.SquareSize, 1);
+        SquareGO.transform.localPosition = new Vector3(CurrentTrial.PositionX, CurrentTrial.PositionY, 90);
     }
 
     void LoadConfigVariables()
@@ -342,14 +375,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         CurrentTrial.BlueSquareDuration = ConfigUiVariables.get<ConfigNumber>("blueSquareDuration").value;
     }
 
-    void CheckIfBlockShouldEnd()
-    {
-        //ADD THIS FUNC
-    }
-
     void ActivateSquareAndBackdrop()
     {
-        //THR_CanvasGO.SetActive(true);
         BackdropGO.SetActive(true);
         SquareGO.SetActive(true);
     }
@@ -409,7 +436,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         LightBlueColor = new Color32(12, 176, 255, 255);
         DarkBlueBackgroundColor = new Color32(2, 3, 39, 255);
         LightRedColor = new Color32(142, 6, 20, 255);
-        //LightGreyColor = new Color32(211, 211, 211, 255);
     }
 
     IEnumerator SquareColorFlash(Color32 newColor)
@@ -418,7 +444,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         SquareMaterial.color = newColor;
         yield return new WaitForSeconds(1f);
         SquareMaterial.color = InitialSquareColor;
-        //Cursor.visible = true;
     }
 
     IEnumerator BackgroundColorFlash(Color32 newColor)
@@ -436,8 +461,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         ClickReleased = false;
         GiveHoldReward = false;
         GiveTouchReward = false;
-
         ConfigValuesChanged = false;
+        EndBlock = false;
     }
 
     void LogTrialData()
@@ -449,6 +474,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("MaxTouchDuration", () => CurrentTrial.MaxTouchDuration);
         TrialData.AddDatum("RewardTouch", () => CurrentTrial.RewardTouch);
         TrialData.AddDatum("RewardRelease", () => CurrentTrial.RewardRelease);
+        TrialData.AddDatum("DifficultyLevel", () => CurrentTrial.BlockName);
     }
 
     void LogFrameData()
@@ -580,8 +606,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 //        ClickReleased = true;
 //    }
 //}
-//if (Time.time - TrialStartTime > CurrentTrial.TimeToAutoEndTrialSec)
-//    AutoEndTrial = true;
+
 
 
 //WHITE SQUARE UPDATE METHOD:

@@ -4,7 +4,7 @@ using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
-
+using HiddenMaze;
 namespace MazeGame_Namespace
 {
     public class MazeGame_TaskDef : TaskDef
@@ -22,8 +22,10 @@ namespace MazeGame_Namespace
         //public float? ExternalStimScale;
 
         public float[] TileColor;
-        private Vector3 ButtonPosition;
-        private Vector3 ButtonScale;
+        public Vector3 ButtonPosition;
+        public Vector3 ButtonScale;
+        public string ContextExternalFilePath, MazeExternalFilePath;
+        
     }
 
     public class MazeGame_BlockDef : BlockDef
@@ -35,8 +37,8 @@ namespace MazeGame_Namespace
        // public string TrialID;
        // public int Context;
         public int Trial;
-
-        public int[] nRepetitionsMinMax;
+        public int[] MinMaxTrials;
+        public string MazeInfo;
       //  public Color TileColor;
         public float[] TileColor;
         public int Texture;
@@ -54,20 +56,22 @@ namespace MazeGame_Namespace
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmaxokay 
-            // System.Random rnd = new System.Random();
-            // int num = rnd.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
-            TrialDefs = new List<TrialDef>();//actual correct # 
-            for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
+            System.Random rnd = new System.Random();
+            int num = rnd.Next(MinMaxTrials[0], MinMaxTrials[1]);
+            Debug.Log("NUMBER OF TRIALS SELECTED FOR BLOCK: "  + num);
+            TrialDefs = new List<MazeGame_TrialDef>().ConvertAll(x => (TrialDef)x);
+            for (int iTrial = 0; iTrial < num; iTrial++)
             {
                 MazeGame_TrialDef td = new MazeGame_TrialDef();
                 td.TrialCount = Trial;
                 td.TileColor = TileColor;
                 td.Texture = Texture;
-                td.mazeDim = mazeDim;
-                td.mazeNumSquares = mazeNumSquares;
-                td.mazeNumTurns = mazeNumTurns;
+                //////td.mazeDim = mazeDim;
+                //////td.mazeNumSquares = mazeNumSquares;
+                //////td.mazeNumTurns = mazeNumTurns;
                 td.viewPath = viewPath;
                 td.ContextName = ContextName;
+                td.MazeInfo = MazeInfo;
                // td.mazePath = mazePath;
                 if (td.TileColor == null && TileColor != null)
                     td.TileColor = TileColor;
@@ -80,7 +84,7 @@ namespace MazeGame_Namespace
                 // td.MinTouchDuration = MinTouchDuration;
                 //   td.MaxTouchDuration = MaxTouchDuration;
 
-                TrialDefs[iTrial] = td;
+                TrialDefs.Add(td);
             }
         }
 
@@ -95,12 +99,12 @@ namespace MazeGame_Namespace
         public int TrialCount;
         public float[] TileColor;
         public int Texture;
-        public int mazeDim;
-        public int mazeNumSquares;
-        public int mazeNumTurns;
+        //public int mazeDim;
+        //public int mazeNumSquares;
+        //public int mazeNumTurns;
         public int viewPath;
         public string ContextName;
-
+        public string MazeInfo;
         //   public string mazePath;
 
         // public int[] nRepetitionsMinMax;

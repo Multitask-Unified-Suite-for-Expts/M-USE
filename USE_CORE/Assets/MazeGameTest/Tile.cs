@@ -46,10 +46,7 @@ public class Tile : MonoBehaviour
         // gameObject.GetComponent<Renderer>().material.color = MazeGame_TrialLevel.tileColor;
 
         gameObject.GetComponent<Renderer>().material.color = baseColor;
-
-        Debug.Log("START TILE");
-
-        Debug.Log("START TILE");
+        
 
         //   gameObject.GetComponent<Renderer>().material("_BaseColor", gameConfigs.CORRECT_COLOR);
 

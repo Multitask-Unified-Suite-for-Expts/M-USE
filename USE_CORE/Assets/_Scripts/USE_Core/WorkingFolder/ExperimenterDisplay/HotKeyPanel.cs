@@ -5,8 +5,12 @@ using System;
 using UnityEngine.UI;
 using Cursor = UnityEngine.Cursor;
 using ConfigDynamicUI;
+using Newtonsoft.Json.Serialization;
 using UnityEngine.EventSystems;
 using USE_ExperimenterDisplay;
+using USE_ExperimentTemplate_Session;
+using USE_ExperimentTemplate_Task;
+using USE_ExperimentTemplate_Trial;
 
 public class HotKeyPanel : ExperimenterDisplayPanel
 {
@@ -22,7 +26,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
     public override void CustomPanelInitialization()
     {
         HKList = new HotKeyList();
-        HKList.Initialize();
+        HKList.Initialize(this);
 
         ConfigUIList = new HotKeyList();
         ConfigUIList.InitializeConfigUI();
@@ -63,8 +67,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
         List<HotKey> HotKeys = new List<HotKey>();
         List<Selectable> m_orderedSelectables = new List<Selectable>();
         List<HotKey> ConfigUIHotKeys = new List<HotKey>();
-
-
+        private HotKeyPanel HkPanel;
 
         public string GenerateHotKeyDescriptions()
         {
@@ -86,7 +89,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 completeString = completeString + hk.GenerateTextDescription() + "\n";
             }
 
-            Debug.Log("ConfigUIHotKeyDescriptions: " + completeString);
+            // Debug.Log("ConfigUIHotKeyDescriptions: " + completeString);
 
             return completeString;
         }
@@ -111,12 +114,12 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             }
         }
 
-        public void Initialize(Func<List<HotKey>> CustomHotKeyList = null)
+        public void Initialize(HotKeyPanel hkPanel, Func<List<HotKey>> CustomHotKeyList = null)
         {
+            HkPanel = hkPanel;
             if (CustomHotKeyList == null)
             {
                 HotKeys = DefaultHotKeyList(); //this is your default function
-
             }
 
             else
@@ -194,17 +197,11 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 keyDescription = "Esc",
                 actionName = "Quit",
-                hotKeyCondition = () => Input.GetKey("escape"),
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.Escape),
                 hotKeyAction = () =>
                 {
-#if UNITY_EDITOR
-                    {
-                        UnityEditor.EditorApplication.isPlaying = false;
-                    }
-#endif
-                    {
-                        Application.Quit();
-                    }
+                    HkPanel.TaskLevel.Terminated = true;
+                    HkPanel.SessionLevel.TasksFinished = true;
                 }
             };
             HotKeyList.Add(quitGame);
@@ -213,24 +210,23 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             HotKey pauseGame = new HotKey
             {
                 keyDescription = "P",
-                actionName = "Pause",
+                actionName = "Pause/Unpause Game",
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.P),
                 hotKeyAction = () =>
                 {
-#if UNITY_EDITOR
+                    if (!HkPanel.TaskLevel.Paused)
                     {
-                        if (!UnityEditor.EditorApplication.isPaused)
-                        {
-
-                        }
+                        HkPanel.TaskLevel.Paused = true;
                     }
-#endif
+                    else
                     {
-                        Application.Quit();
+                        HkPanel.TaskLevel.Paused = false;
                     }
                 }
             };
             HotKeyList.Add(pauseGame);
+            
+            
 
             return (HotKeyList);
         }
@@ -240,7 +236,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             List<HotKey> ConfigUIHotKeyList = new List<HotKey>();
             List<Selectable> m_orderedSelectables = new List<Selectable>();
             ConfigUI configUIPanelController = GameObject.Find("Config UI").GetComponent<ConfigUI>();// new ConfigUI();
-            
+
             //Scroll ConfigUI HotKey
             HotKey scrollConfig = new HotKey
             {

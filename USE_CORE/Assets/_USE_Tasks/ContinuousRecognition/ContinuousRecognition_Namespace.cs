@@ -13,12 +13,29 @@ namespace ContinuousRecognition_Namespace
 {
     public class ContinuousRecognition_TaskDef : TaskDef
     {
-
+        //--------------Inherited from TaskDef-----------------------------//
+        //public string TaskName;
+        //public string ExternalStimFolderPath;
+        //public string PrefabStimFolderPath;
+        //public string ExternalStimExtension;
+        //public List<string[]> FeatureNames;
+        //public string neutralPatternedColorName;
+        //public float? ExternalStimScale;
+        //public List<string[]> FeedbackControllers;
+        //public int? TotalTokensNum;
+        //public bool SerialPortActive, SyncBoxActive,
+        //            EventCodesActive, RewardPulsesActive, SonicationActive;
+        //public string SelectionType;
     }
 
     public class ContinuousRecognition_BlockDef : BlockDef
     {
-        // public int[] TrialDefs,
+        //----Inherited from BlockDef----//
+        //public List<TrialDef> TrialDefs;
+        //public int BlockCount;
+        //public int? TotalTokensNum;
+        //public int? MinTrials, MaxTrials;
+
         public int[] BlockStimIndices;
         public int[] NumObjectsMinMax;
         public int[] InitialStimRatio;
@@ -31,15 +48,6 @@ namespace ContinuousRecognition_Namespace
 
         public int MaxNumTrials;
         public int MaxNumStim;
-
-        public int NumRows;
-        public int NumColumns;
-        public float X_Start;
-        public float Y_Start;
-        public float X_Gap;
-        public float Y_Gap;
-        public float X_Gap_FB;
-        public float Y_Gap_FB;
 
         public Vector3[] BlockStimLocations; //from Config if user specifies!!!
         public Vector3[] StimLocations; //calculated below in case they don't specify locations!
@@ -59,17 +67,20 @@ namespace ContinuousRecognition_Namespace
         public string BlockName;
         public string ContextName;
 
-        public int ManuallySpecifyLocation;
-        public int FindAllStim; //basically a bool used to determine whether they playing original ending or CappedStim/FindAll ending. 
+        public bool IsHuman;
+        public bool ManuallySpecifyLocation;
+        public bool UseStarfield;
+        public bool FindAllStim;
+        public bool StimFacingCamera;
 
+        public string ShadowType;
 
 
         public override void GenerateTrialDefsFromBlockDef()
         {
             MaxNumStim = NumObjectsMinMax[1];
-            if (FindAllStim == 1) MaxNumTrials = CalculateMaxNumTrials(MaxNumStim);
+            if (FindAllStim) MaxNumTrials = CalculateMaxNumTrials(MaxNumStim);
             else MaxNumTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
-            Debug.Log("MAX NUM TRIALS = " + MaxNumTrials);
 
             PC_Stim = new List<int>();
             PNC_Stim = new List<int>();
@@ -92,7 +103,8 @@ namespace ContinuousRecognition_Namespace
                     index++;
                 }
             }
-            if(ManuallySpecifyLocation == 0)    BlockStimLocations = StimLocations;
+            if(!ManuallySpecifyLocation)
+                BlockStimLocations = StimLocations;
 
             //Calculate FeedbackLocations;
             BlockFeedbackLocations = new Vector3[X_FbLocations.Length * Y_FbLocations.Length];
@@ -112,15 +124,14 @@ namespace ContinuousRecognition_Namespace
             TrialDefs = new List<ContinuousRecognition_TrialDef>().ConvertAll(x=>(TrialDef)x);
 
             int numTrialStims = NumObjectsMinMax[0]; //incremented at end
-            bool theEnd = false;
 
-            for (int trialIndex = 0; trialIndex < MaxNumTrials && !theEnd; trialIndex++)
+            for (int trialIndex = 0; trialIndex < MaxNumTrials; trialIndex++)
             {   
                 ContinuousRecognition_TrialDef trial = new ContinuousRecognition_TrialDef();
                 trial.BlockStimIndices = BlockStimIndices;
 
                 Vector3[] trialStimLocations;
-                if (FindAllStim == 1 && trialIndex > MaxNumStim - 2)
+                if (FindAllStim && trialIndex > MaxNumStim - 2)
                 {
                     trialStimLocations = new Vector3[MaxNumStim];
                     numTrialStims = MaxNumStim;
@@ -159,9 +170,13 @@ namespace ContinuousRecognition_Namespace
                 trial.NumRewardPulses = NumRewardPulses;
                 trial.RewardMag = RewardMag;
                 trial.PulseSize = PulseSize;
-                trial.FindAllStim = FindAllStim;
                 trial.NumTokenBar = NumTokenBar;
                 trial.PC_Percentage_String = CalcPercentagePC();
+                trial.FindAllStim = FindAllStim;
+                trial.StimFacingCamera = StimFacingCamera;
+                trial.ShadowType = ShadowType;
+                trial.UseStarfield = UseStarfield;
+                trial.IsHuman = IsHuman;
 
                 TrialDefs.Add(trial);
                 numTrialStims++;
@@ -209,9 +224,12 @@ namespace ContinuousRecognition_Namespace
             int temp = 0;
             while ((Num_PC + Num_New + Num_PNC) < totalTrialStim)
             {
-                if (temp % 3 == 0) Num_PC += 1;
-                else if (temp % 3 == 1) Num_New += 1;
-                else Num_PC += 1;
+                if (temp % 3 == 0)
+                    Num_PC += 1;
+                else if (temp % 3 == 1)
+                    Num_New += 1;
+                else
+                    Num_PC += 1;
                 temp++;
             }
             return Num_New;
@@ -223,8 +241,10 @@ namespace ContinuousRecognition_Namespace
             float sum = 0;
             float[] stimPercentages = new float[ratio.Length];
 
-            foreach (var num in ratio)  sum += num;
-            for (int i = 0; i < ratio.Length; i++)  stimPercentages[i] = ratio[i] / sum;
+            foreach (var num in ratio)
+                sum += num;
+            for (int i = 0; i < ratio.Length; i++)
+                stimPercentages[i] = ratio[i] / sum;
             
             return stimPercentages;
         }
@@ -233,7 +253,16 @@ namespace ContinuousRecognition_Namespace
 
     public class ContinuousRecognition_TrialDef : TrialDef
     {
-        public int FindAllStim; //basically a bool used to determine whether they playing original ending or CappedStim/FindAll ending. 
+
+        //public int BlockCount, TrialCountInBlock, TrialCountInTask;
+        //public TrialStims TrialStims;
+
+        public bool IsHuman;
+        public bool UseStarfield;
+        public bool FindAllStim;
+        public bool StimFacingCamera;
+
+        public string ShadowType;
 
         public Vector3[] TrialStimLocations;
         public Vector3[] TrialFeedbackLocations;

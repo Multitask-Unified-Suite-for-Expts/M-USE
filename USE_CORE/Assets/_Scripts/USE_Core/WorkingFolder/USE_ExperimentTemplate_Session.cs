@@ -20,6 +20,8 @@ namespace USE_ExperimentTemplate_Session
 {
     public class ControlLevel_Session_Template : ControlLevel
     {
+        [HideInInspector] public bool TasksFinished;
+
         protected SessionData SessionData;
         private SessionDataControllers SessionDataControllers;
         private bool StoreData;
@@ -287,7 +289,7 @@ namespace USE_ExperimentTemplate_Session
                     SessionSettings.Save();
                 });
 
-            bool tasksFinished = false;
+            //bool tasksFinished = false;
             GameObject taskButtons = null;
             Dictionary<string, GameObject> taskButtonsDict = new Dictionary<string, GameObject>();
             string selectedConfigName = null;
@@ -311,7 +313,7 @@ namespace USE_ExperimentTemplate_Session
                 SceneLoading = true;
                 if (taskCount >= TaskMappings.Count)
                 {
-                    tasksFinished = true;
+                    TasksFinished = true;
                     return;
                 }
 
@@ -380,7 +382,7 @@ namespace USE_ExperimentTemplate_Session
                     }
                 });
             }
-            selectTask.SpecifyTermination(() => tasksFinished, finishSession);
+            selectTask.SpecifyTermination(() => TasksFinished, finishSession);
 
             loadTask.AddInitializationMethod(() =>
             {

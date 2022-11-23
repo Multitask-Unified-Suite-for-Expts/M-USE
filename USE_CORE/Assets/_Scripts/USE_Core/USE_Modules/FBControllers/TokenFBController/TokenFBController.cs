@@ -41,6 +41,7 @@ public class TokenFBController : MonoBehaviour
 
     public void Init(DataController trialData, DataController frameData, AudioFBController audioFBController)
     {
+        trialData.AddDatum("TotalTokensCollected", () => numCollected);
         trialData.AddDatum("TokenChange", () => tokensChange == 0 ? null : (float?)tokensChange);
         trialData.AddDatum("NumTokenBarFull", () => numTokenBarFull);
         frameData.AddDatum("TokenAnimationPhase", () => animationPhase.ToString());
@@ -122,6 +123,7 @@ public class TokenFBController : MonoBehaviour
         GUI.color = colorCollected;
         startPos = DrawTokens(startPos, numCollected);
         GUI.color = colorUncollected;
+        if (numCollected < 0) numCollected = 0;
         DrawTokens(startPos, totalTokensNum - numCollected);
 
         GUI.backgroundColor = oldBGColor;

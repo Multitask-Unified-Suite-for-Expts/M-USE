@@ -27,7 +27,11 @@ public class MouseTracker : InputTracker
         if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out RaycastHit hit, Mathf.Infinity))
         {
             HoverObject = hit.transform.root.gameObject;
-            if (InputBroker.GetMouseButton(0)) return HoverObject;
+            if (InputBroker.GetMouseButton(0))
+            {
+                return HoverObject;
+            }
+
         }
         return null;
     }

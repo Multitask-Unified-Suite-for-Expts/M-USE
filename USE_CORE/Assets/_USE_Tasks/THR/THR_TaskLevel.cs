@@ -73,11 +73,12 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         ClearStrings();
 
         CurrentBlockString = ("<b>Block " + "(" + currentBlock.BlockName + "):" + "</b>" +
+                        "\nTrialCountInBlock: " + (trialLevel.TrialCount_InBlock + 1) + 
                         "\nNumTrialsCompleted: " + trialLevel.NumTrialsCompletedBlock +
                         "\nNumTrialsCorrect: " + trialLevel.NumTrialsCorrectBlock +
                         "\nNumTouchesWhiteSquare: " + trialLevel.NumTouchesWhiteSquare +
                         "\nNumTouchesBlueSquare: " + trialLevel.NumTouchesBlueSquare +
-                        "\nNumTouchesOutsideSquare: " + trialLevel.NumNonSquareTouches).ToString();
+                        "\nNumTouchesOutsideSquare: " + trialLevel.NumNonSquareTouches);
 
         if (BlockCount > 0)
             CurrentBlockString += "\n";

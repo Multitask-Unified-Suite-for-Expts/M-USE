@@ -14,7 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_USE_Tasks/THR/THR.unity
     guid: 2d53a038a9e5b47229a70ba7f3d33112
-  - enabled: 0
+  - enabled: 1
     path: Assets/_USE_Tasks/ContinuousRecognition/ContinuousRecognition.unity
     guid: ed6c79a08bbf34d64924e0aee5ec787e
   - enabled: 0

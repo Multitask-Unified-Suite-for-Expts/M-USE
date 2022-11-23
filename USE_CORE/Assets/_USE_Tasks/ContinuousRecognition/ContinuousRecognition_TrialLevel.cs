@@ -34,6 +34,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public GameObject ScoreTextGO;
     public GameObject NumTrialsTextGO;
 
+    public GameObject TimerBackdropGO;
+    public GameObject TimerTextGO;
+    public TextMeshProUGUI TimerText;
+
     public GameObject StartButton;
     public GameObject GreenBorderPrefab;
     public GameObject RedBorderPrefab;
@@ -76,7 +80,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-
+    public float TimeRemaining;
 
     public Vector3 originalFbTextPosition;
     public Vector3 originalTitleTextPosition;
@@ -110,6 +114,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
+            Debug.Log(currentTrial.ContextName);
             ContextPath = GetContextNestedFilePath(currentTrial.ContextName);
             RenderSettings.skybox = CreateSkybox(ContextPath);
             //RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + currentTrial.ContextName + ".png");
@@ -158,6 +163,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             GotCorrect = false;
             TokenFBController.enabled = false;
 
+            TimerText = TimerTextGO.GetComponent<TextMeshProUGUI>();
+
             SetTokenFeedbackTimes();
             SetStimStrings();
             SetShadowType();
@@ -193,7 +200,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------
         //stim are turned on as soon as it enters DisplayStims state. no initialization method needed. 
-        DisplayStims.AddTimer(() => currentTrial.DisplayStimsDuration, ChooseStim);
+        DisplayStims.AddTimer(() => currentTrial.DisplayStimsDuration, ChooseStim, () => TimeRemaining = currentTrial.ChooseStimDuration);
 
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
         GameObject chosenStimObj = null;
@@ -204,10 +211,19 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             if (TrialCount_InBlock == 0)
                 TimeToCompletion_StartTime = Time.time;
+
+            TimerBackdropGO.SetActive(true);
         });
 
         ChooseStim.AddUpdateMethod(() =>
         {
+            if (TimeRemaining > 0)
+                TimeRemaining -= Time.deltaTime;
+            else
+                Debug.Log("Time ran out!");
+
+            TimerText.text = TimeRemaining.ToString("0");
+
             chosenStimObj = mouseHandler.SelectedGameObject;
             chosenStimDef = mouseHandler.SelectedStimDef;
 
@@ -274,9 +290,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
             currentTrial.IsNewStim = GotCorrect;
         });
-        ChooseStim.SpecifyTermination(() => stimIsChosen, TouchFeedback);
+        ChooseStim.SpecifyTermination(() => stimIsChosen, TouchFeedback, () => TimerBackdropGO.SetActive(false));
         ChooseStim.AddTimer(() => selectObjectDuration.value, ITI, () =>     //if no choice, skip touchFB/tokenFB and go to display results so the event codes can send.
         {
+            TimerBackdropGO.SetActive(false);
             EndBlock = true;
             EventCodeManager.SendCodeImmediate(TaskEventCodes["NoChoice"]); 
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
@@ -352,7 +369,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     else
                     {
                         YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
-                        YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Nice Try! \n HighScore: {Score}";
+                        YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Not bad! \n HighScore: {Score}";
                         YouLoseTextGO.SetActive(true);
                     }
                 }
@@ -420,92 +437,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
 
-        if (filePaths.Length == 1)
+        if (filePaths.Length > 0)
             contextPath = filePaths[0];
         else
         {
             Debug.Log($"Context File Path Not Found. Defaulting to {backupContextName}.");
             contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0]; //Use Default LinearDark if can't find file.
         }
-
         return contextPath;
-    }
-
-    private void CreateCanvasAndText()
-    {
-        //Function not being used. Currently CR Canvas and Text are created in Unity Editor.
-
-        //TMP_FontAsset textFont;
-        //textFont = Resources.Load<TMP_FontAsset>("Bangers-Regular SDF"); //NOT WORKING
-
-        //Color textColor;
-        //ColorUtility.TryParseHtmlString("#FAF9F6", out textColor);
-
-        //CR_CanvasGO = new GameObject();
-        //CR_CanvasGO.name = "CR_Canvas";
-        //CR_CanvasGO.AddComponent<Canvas>();
-
-        //CR_Canvas = CR_CanvasGO.GetComponent<Canvas>();
-        //CR_Canvas.renderMode = RenderMode.ScreenSpaceCamera;
-        //CR_Canvas.worldCamera = GameObject.Find("ContinuousRecognition_Camera").GetComponent<Camera>();
-        //CR_CanvasGO.AddComponent<CanvasScaler>();
-        //CR_CanvasGO.AddComponent<GraphicRaycaster>();
-
-        //TitleTextGO = new GameObject();
-        //TitleTextGO.name = "TitleText";
-        //TitleTextGO.transform.parent = CR_CanvasGO.transform;
-        //TitleText = TitleTextGO.AddComponent<TextMeshPro>();
-        //TitleText.text = "DON'T Pick Twice!";
-        //TitleText.fontSize = 70;
-        //TitleText.color = textColor;
-        //TitleText.alignment = TextAlignmentOptions.Center;
-        //RectTransform titleRECT = TitleText.GetComponent<RectTransform>();
-        //titleRECT.localPosition = new Vector3(0, 200, 0);
-        //titleRECT.sizeDelta = new Vector2(1200, 200);
-
-        //YouWinTextGO = new GameObject();
-        //YouWinTextGO.name = "YouWinText";
-        //YouWinTextGO.transform.parent = CR_CanvasGO.transform;
-        //YouWinText = YouWinTextGO.AddComponent<TextMeshPro>();
-        //YouWinText.font = textFont;
-        //YouWinText.fontSize = 36;
-        //YouWinText.color = textColor;
-        ////RectTransform youWinRECT = YouWinText.GetComponent<RectTransform>();
-        ////youWinRECT.localPosition = new Vector3(0, 0, 0);
-        ////youWinRECT.sizeDelta = new Vector2(1920, 1080);
-
-        //YouLoseTextGO = new GameObject();
-        //YouLoseTextGO.name = "YouLoseText";
-        //YouLoseTextGO.transform.parent = CR_CanvasGO.transform;
-        //YouLoseText = YouLoseTextGO.AddComponent<TextMeshPro>();
-        //YouLoseText.font = textFont;
-        //YouLoseText.fontSize = 36;
-        //YouLoseText.color = textColor;
-        ////RectTransform youLoseRECT = YouWinText.GetComponent<RectTransform>();
-        ////youLoseRECT.localPosition = new Vector3(0, 0, 0);
-        ////youLoseRECT.sizeDelta = new Vector2(1920, 1080);
-
-        //ScoreTextGO = new GameObject();
-        //ScoreTextGO.name = "ScoreText";
-        //ScoreTextGO.transform.parent = CR_CanvasGO.transform;
-        //ScoreText = ScoreTextGO.AddComponent<TextMeshPro>();
-        //ScoreText.font = textFont;
-        //ScoreText.fontSize = 24;
-        //ScoreText.color = textColor;
-        ////RectTransform scoreRECT = YouWinText.GetComponent<RectTransform>();
-        ////scoreRECT.localPosition = new Vector3(0, 0, 0);
-        ////scoreRECT.sizeDelta = new Vector2(1920, 1080);
-
-        //NumTrialsTextGO = new GameObject();
-        //NumTrialsTextGO.name = "NumTrialsText";
-        //NumTrialsTextGO.transform.parent = CR_CanvasGO.transform;
-        //NumTrialsText = NumTrialsTextGO.AddComponent<TextMeshPro>();
-        //NumTrialsText.font = textFont;
-        //NumTrialsText.fontSize = 24;
-        //NumTrialsText.color = textColor;
-        ////RectTransform numTrialsRECT = NumTrialsText.GetComponent<RectTransform>();
-        ////numTrialsRECT.localPosition = new Vector3(0, 0, 0);
-        ////numTrialsRECT.sizeDelta = new Vector2(1920, 1080);
     }
 
     private float GetOffsetY()

@@ -114,7 +114,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
-            Debug.Log(currentTrial.ContextName);
             ContextPath = GetContextNestedFilePath(currentTrial.ContextName);
             RenderSettings.skybox = CreateSkybox(ContextPath);
             //RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + currentTrial.ContextName + ".png");
@@ -132,7 +131,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             SetTrialSummaryString();
         });
-        SetupTrial.SpecifyTermination(() => true, InitTrial); //auto terminates after doing everything.
+        SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         SelectionHandler<ContinuousRecognition_StimDef> mouseHandler = new SelectionHandler<ContinuousRecognition_StimDef>();
         MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
@@ -155,13 +154,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
             StartButton.SetActive(true);
             
+            TokenFBController.enabled = false;
+
             CompletedAllTrials = false;
             TrialComplete = false;
             currentTrial.IsNewStim = false;
             EndBlock = false;
             stimIsChosen = false;
             GotCorrect = false;
-            TokenFBController.enabled = false;
 
             TimerText = TimerTextGO.GetComponent<TextMeshProUGUI>();
 
@@ -431,7 +431,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private string GetContextNestedFilePath(string contextName)
     {
-        //Recursive search the sub folders of the MaterialFilePath to get Context File Path
+        //Recursively search the sub folders of the MaterialFilePath to get Context File Path
         string backupContextName = "LinearDark";
         string contextPath = ""; 
 
@@ -449,7 +449,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private float GetOffsetY()
     {
-        //function used to adjust the text positioning for the human version. 
+        //Function used to adjust the text positioning for the human version. 
         float yOffset = 0;
         switch (NumFeedbackRows)
         {
@@ -504,7 +504,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (numLocations > 18) numRows++;
         if (numLocations > 24) numRows++;
 
-        NumFeedbackRows = numRows; //Setting Global variable for use centering the feedback text above the stim (for human version)
+        NumFeedbackRows = numRows; //Setting Global variable for use in centering the feedback text above the stim (for human version)
 
         int R1_Length = 0;
         int R2_Length = 0;
@@ -639,7 +639,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 locList.Add(current);
                 index++;
             }
-            if (R2_Length > 0) difference = MaxNumPerRow - R1_Length;
+            if (R2_Length > 0)
+                difference = MaxNumPerRow - R1_Length;
         }
 
         //Center ROW 2:
@@ -658,7 +659,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 locList.Add(current);
                 index++;
             }
-            if(R3_Length > 0)   difference = MaxNumPerRow - R2_Length;
+            if(R3_Length > 0)
+                difference = MaxNumPerRow - R2_Length;
         }
 
         //Center ROW 3:
@@ -677,7 +679,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 locList.Add(current);
                 index++;
             }
-            if (R4_Length > 0) difference = MaxNumPerRow - R3_Length;
+            if (R4_Length > 0)
+                difference = MaxNumPerRow - R3_Length;
         }
 
         //Center ROW 4:
@@ -696,7 +699,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 locList.Add(current);
                 index++;
             }
-            if (R5_Length > 0) difference = MaxNumPerRow - R4_Length;
+            if (R5_Length > 0)
+                difference = MaxNumPerRow - R4_Length;
         }
 
         //Center ROW 5:
@@ -806,20 +810,18 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
 
             List<int> PC_Copy = ShuffleList(currentTrial.PC_Stim).ToList();
-            Debug.Log("PC COPY COUNT = " + PC_Copy.Count);
-            Debug.Log("PC Num = " + PC_Num);
-            if (PC_Copy.Count > 1) PC_Copy = PC_Copy.GetRange(0, PC_Num); //BROKE HERE
+            if (PC_Copy.Count > 1)
+                PC_Copy = PC_Copy.GetRange(0, PC_Num); //BROKE HERE
             for (int i = 0; i < PC_Copy.Count; i++)
             {
                 currentTrial.TrialStimIndices.Add(PC_Copy[i]);
             }
 
             List<int> PNC_Copy = ShuffleList(currentTrial.PNC_Stim).ToList();
-            if (PNC_Copy.Count > 1) PNC_Copy = PNC_Copy.GetRange(0, PNC_Num);
+            if (PNC_Copy.Count > 1)
+                PNC_Copy = PNC_Copy.GetRange(0, PNC_Num);
             for (int i = 0; i < PNC_Copy.Count; i++)
-            {
                 currentTrial.TrialStimIndices.Add(PNC_Copy[i]);
-            }
 
             trialStims = new StimGroup($"TrialStims", ExternalStims, currentTrial.TrialStimIndices);
             trialStims.SetLocations(currentTrial.TrialStimLocations);
@@ -836,10 +838,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             var num_PC = totalNeeded - num_PNC;
 
             //Add PNC Stim to trialIndices
-            foreach (int num in currentTrial.PNC_Stim) currentTrial.TrialStimIndices.Add(num);
+            foreach (int num in currentTrial.PNC_Stim)
+                currentTrial.TrialStimIndices.Add(num);
 
             //Add PC Stim to trialIndices.
-            for(int i = 0; i < num_PC; i++) currentTrial.TrialStimIndices.Add(currentTrial.PC_Stim[i]);
+            for(int i = 0; i < num_PC; i++)
+                currentTrial.TrialStimIndices.Add(currentTrial.PC_Stim[i]);
             
             trialStims = new StimGroup($"TrialStims", ExternalStims, currentTrial.TrialStimIndices);
             trialStims.SetLocations(currentTrial.TrialStimLocations);
@@ -1190,18 +1194,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     PNC_Num++;
             }
         }
-
-        //Old solution that always increments PC first, then new, then PNC. 
-        //int temp = 0;
-        //while ((PC_Num + New_Num + PNC_Num) < currentTrial.NumTrialStims)
-        //{
-        //    if (temp % 3 == 0)
-        //        PC_Num += 1;
-        //    else if (temp % 3 == 1)
-        //        New_Num += 1;
-        //    else PNC_Num += 1;
-        //    temp++;
-        //}
         return new[] { PC_Num, New_Num, PNC_Num };
     }
 

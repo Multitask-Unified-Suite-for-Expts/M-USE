@@ -26,7 +26,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         StimDefType = typeof(THR_StimDef);
     }
 
-
     public override void DefineControlLevel()
     {
         THR_TrialLevel trialLevel = (THR_TrialLevel)TrialLevel;
@@ -47,6 +46,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             trialLevel.NumNonSquareTouches = 0;
             trialLevel.NumTouchesBlueSquare = 0;
             trialLevel.NumTouchesWhiteSquare = 0;
+            trialLevel.NumTouchRewards = 0;
+            trialLevel.NumReleaseRewards = 0;
 
             SetBlockSummaryString(trialLevel);
         });
@@ -73,12 +74,13 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         ClearStrings();
 
         CurrentBlockString = ("<b>Block " + "(" + currentBlock.BlockName + "):" + "</b>" +
-                        "\nTrialCountInBlock: " + (trialLevel.TrialCount_InBlock + 1) + 
+                        "\nTrialCountInBlock: " + (trialLevel.TrialCount_InBlock + 1) +
                         "\nNumTrialsCompleted: " + trialLevel.NumTrialsCompletedBlock +
                         "\nNumTrialsCorrect: " + trialLevel.NumTrialsCorrectBlock +
                         "\nNumTouchesWhiteSquare: " + trialLevel.NumTouchesWhiteSquare +
                         "\nNumTouchesBlueSquare: " + trialLevel.NumTouchesBlueSquare +
-                        "\nNumTouchesOutsideSquare: " + trialLevel.NumNonSquareTouches);
+                        "\nNumTouchesOutsideSquare: " + trialLevel.NumNonSquareTouches +
+                        "\nNumRewards: " + trialLevel.NumTotalRewards);
 
         if (BlockCount > 0)
             CurrentBlockString += "\n";
@@ -101,6 +103,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("NumTouchesWhiteSquare", () => trialLevel.NumTouchesWhiteSquare);
         BlockData.AddDatum("NumTouchesBlueSquare", () => trialLevel.NumTouchesBlueSquare);
         BlockData.AddDatum("NumTouchesOutsideSquare", () => trialLevel.NumNonSquareTouches);
+        BlockData.AddDatum("NumTouchRewards", () => trialLevel.NumTouchRewards);
+        BlockData.AddDatum("NumReleaseRewards", () => trialLevel.NumReleaseRewards);
         BlockData.AddDatum("DifficultyLevel", () => currentBlock.BlockName);
     }
 

@@ -81,7 +81,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
                         "\nNumTouchesWhiteSquare: " + trialLevel.NumTouchesWhiteSquare +
                         "\nNumTouchesBlueSquare: " + trialLevel.NumTouchesBlueSquare +
                         "\nNumTouchesOutsideSquare: " + trialLevel.NumNonSquareTouches +
-                        "\nNumRewards: " + trialLevel.NumTotalRewards);
+                        "\nNumRewards: " + (trialLevel.NumTouchRewards + trialLevel.NumReleaseRewards));
 
         if (BlockCount > 0)
             CurrentBlockString += "\n";

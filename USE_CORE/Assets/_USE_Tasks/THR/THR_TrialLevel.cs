@@ -96,13 +96,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     public int NumTouchRewards;
     public int NumReleaseRewards;
-    public int NumTotalRewards
-    {
-        get
-        {
-            return NumTouchRewards + NumReleaseRewards;
-        }
-    }
 
     public float ReactionTime
     {

@@ -123,7 +123,7 @@ namespace USE_ExperimentTemplate_Trial
 
         }
 
-        private bool CheckForcedBlockEnd()
+        public bool CheckForcedBlockEnd()
         {
             if (ForceBlockEnd)
             {

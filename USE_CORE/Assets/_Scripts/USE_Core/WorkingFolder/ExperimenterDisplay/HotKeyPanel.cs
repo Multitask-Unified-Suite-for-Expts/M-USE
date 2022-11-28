@@ -196,11 +196,12 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             HotKey endBlock = new HotKey
             {
                 keyDescription = "N",
-                actionName = "EndBlock",
+                actionName = "End Block",
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.N),
                 hotKeyAction = () =>
                 {
-                    HkPanel.TrialLevel.Terminated = true;
+                    HkPanel.TrialLevel.ForceBlockEnd = true;
+                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
                 }
             };
             HotKeyList.Add(endBlock);

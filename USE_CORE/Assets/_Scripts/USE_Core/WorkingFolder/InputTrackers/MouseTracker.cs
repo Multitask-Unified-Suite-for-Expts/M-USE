@@ -23,8 +23,8 @@ public class MouseTracker : InputTracker
         Vector3 touchPos = InputBroker.mousePosition;
         if (UsingSecondMonitor)
             touchPos.x = touchPos.x + 1920;
-
-        if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out RaycastHit hit, Mathf.Infinity))
+        
+        if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out RaycastHit hit, Mathf.Infinity, SelectionMask))
         {
             HoverObject = hit.transform.root.gameObject;
             if (InputBroker.GetMouseButton(0)) return HoverObject;

@@ -13,14 +13,17 @@ namespace USE_ExperimenterDisplay
         protected ControlLevel_Session_Template SessionLevel;
         protected ControlLevel_Task_Template TaskLevel;
         protected ControlLevel_Trial_Template TrialLevel;
+        protected GameObject ExperimenterDisplayGameObject;
         
         private List<ExperimenterDisplayPanel> TaskPanels;
         //any other fields necessary to control which display it is on, etc
 
-        public void InitializeExperimenterDisplay(ControlLevel_Session_Template sessionLevel, List<ExperimenterDisplayPanel> taskPanels = null)
+        public void InitializeExperimenterDisplay(ControlLevel_Session_Template sessionLevel, GameObject expDisplayObject, List<ExperimenterDisplayPanel> taskPanels = null)
         {
             //generate the main display, any housekeeping necessary to initialize it
             SessionLevel = sessionLevel;
+            ExperimenterDisplayGameObject = expDisplayObject;
+            
 
             if (taskPanels != null)
                 TaskPanels = taskPanels;
@@ -33,6 +36,9 @@ namespace USE_ExperimenterDisplay
                 panel.SessionLevel = SessionLevel;
                 //make sure panel is a child of the ExperimenterDisplay object, any other housekeeping necessary
             }
+            
+            MoveToLayer(ExperimenterDisplayGameObject.transform, SessionLevel.ExperimenterDisplayLayer);
+            
         }
 
         public void Update()
@@ -56,8 +62,13 @@ namespace USE_ExperimenterDisplay
             }
             
         }
-    }
 
+        private void MoveToLayer(Transform root, int layer) {
+            root.gameObject.layer = layer;
+            foreach(Transform child in root)
+                MoveToLayer(child, layer);
+        }
+    }
     public class ExperimenterDisplayPanel : MonoBehaviour
     {
     //     private Rect Position; // + any other fields necessary for all panels

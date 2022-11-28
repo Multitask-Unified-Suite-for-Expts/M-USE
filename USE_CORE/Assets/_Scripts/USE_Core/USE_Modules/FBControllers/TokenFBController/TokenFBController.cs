@@ -123,6 +123,7 @@ public class TokenFBController : MonoBehaviour
         GUI.color = colorCollected;
         startPos = DrawTokens(startPos, numCollected);
         GUI.color = colorUncollected;
+        if (numCollected < 0) numCollected = 0;
         DrawTokens(startPos, totalTokensNum - numCollected);
 
         GUI.backgroundColor = oldBGColor;

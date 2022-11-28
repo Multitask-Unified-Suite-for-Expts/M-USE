@@ -149,11 +149,7 @@ namespace USE_ExperimentTemplate_Task
                 Controllers.SetActive(true);
             });
 
-            SetupTask.SpecifyTermination(() => true, RunBlock, () =>
-            {
-                BlockData.CreateFile();
-                FrameData.CreateFile();
-            });
+            SetupTask.SpecifyTermination(() => true, RunBlock);
 
 
             RunBlock.AddUniversalInitializationMethod(() =>
@@ -454,7 +450,7 @@ namespace USE_ExperimentTemplate_Task
             }
         }
 
-        protected virtual void ReadCustomSettingsFiles()
+        public virtual void ReadCustomSettingsFiles()
         {
             
         }
@@ -568,10 +564,7 @@ namespace USE_ExperimentTemplate_Task
 
                     //this checking needs to be done during task setup - check each stim exists at start of session instead
                     //of at start of each trial
-                    List<string> filenames = Directory
-                        .GetFiles(sd.StimFolderPath, sd.ExternalFilePath, SearchOption.AllDirectories).ToList();
-                    
-                    filenames.RemoveAll(t => t.StartsWith("."));
+                    List<string> filenames = RecursiveFileFinder.FindFile(sd.StimFolderPath, sd.ExternalFilePath, sd.StimExtension);
 
                     if (filenames.Count > 1)
                     {

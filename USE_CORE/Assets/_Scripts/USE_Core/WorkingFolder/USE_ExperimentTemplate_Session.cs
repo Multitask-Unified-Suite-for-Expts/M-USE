@@ -20,6 +20,9 @@ namespace USE_ExperimentTemplate_Session
 {
     public class ControlLevel_Session_Template : ControlLevel
     {
+        public GameObject PauseCanvasGO;
+        public Canvas PauseCanvas;
+
         [HideInInspector] public bool TasksFinished;
 
         protected SessionData SessionData;
@@ -209,6 +212,12 @@ namespace USE_ExperimentTemplate_Session
             bool taskAutomaticallySelected = false;
             setupSession.AddDefaultInitializationMethod(() =>
             {
+                PauseCanvasGO = GameObject.Find("PauseCanvas");
+                PauseCanvasGO.SetActive(false);
+
+                PauseCanvas = PauseCanvasGO.GetComponent<Canvas>();
+
+
                 SessionData.CreateFile();
                 EventCodeManager = GameObject.Find("MiscScripts").GetComponent<EventCodeManager>(); //new EventCodeManager();
                 if (SerialPortActive)
@@ -422,6 +431,9 @@ namespace USE_ExperimentTemplate_Session
                 mainCameraCopy.texture = CameraMirrorTexture;
                 // mirrorCamera.CopyFrom(CurrentTask.TaskCam);
                 // mirrorCamera.cullingMask = 0;
+
+                PauseCanvas.renderMode = RenderMode.ScreenSpaceCamera;
+                PauseCanvas.worldCamera = CurrentTask.TaskCam;
             });
 
             if (EventCodesActive)

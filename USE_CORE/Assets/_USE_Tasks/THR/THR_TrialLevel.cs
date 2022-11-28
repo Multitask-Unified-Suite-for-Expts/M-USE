@@ -147,8 +147,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             if (TrialCount_InBlock == 0)
                 SetSquareSizeAndPosition();
-
-            if (TrialCount_InBlock > 0)
+            else
             {
                 ConfigValuesChanged = DidConfigValuesChange();
                 if (ConfigValuesChanged)
@@ -159,7 +158,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 else
                     SetSquareSizeAndPosition();
             }
-
         });
         InitTrial.SpecifyTermination(() => true, WhiteSquare);
 
@@ -218,7 +216,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 //If pointer is over a UI Element (EXPERIMENTER DISPLAY)
                 if (EventSystem.current.IsPointerOverGameObject())
                     return;
-                
+
                 if (MouseTracker.CurrentTargetGameObject == SquareGO)
                 {
                     TouchStartTime = Time.time;
@@ -269,8 +267,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 AutoEndTrial = true;
         });
         BlueSquare.AddTimer(() => CurrentTrial.BlueSquareDuration, Feedback);
-        BlueSquare.SpecifyTermination(() => ClickReleased, Feedback);
-        BlueSquare.SpecifyTermination(() => AutoEndTrial, ITI);
+        BlueSquare.SpecifyTermination(() => ClickReleased || AutoEndTrial, Feedback);
+        //BlueSquare.SpecifyTermination(() => AutoEndTrial, ITI);
 
         NumTouchesBlueSquare += blueTouches;
         NumNonSquareTouches += nonSquareTouches;
@@ -314,9 +312,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 NumTrialsCorrectBlock++;
 
             if ((CurrentTrial.RewardTouch && GiveTouchReward) || (CurrentTrial.RewardRelease && GiveHoldReward))
-                TrialCompletionList.Add(1);
+                TrialCompletionList.Insert(0, 1);
             else
-                TrialCompletionList.Add(0);
+                TrialCompletionList.Insert(0, 0);
 
             //CheckIfBlockShouldEnd();
         });
@@ -338,8 +336,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     {
         if (NumTrialsCompletedBlock > CurrentTrial.PerfWindowEndTrials)
         {
-            TrialCompletionList.Reverse();
-
             int sum = 0;
             for(int i = 0; i < CurrentTrial.PerfWindowEndTrials; i++)
             {

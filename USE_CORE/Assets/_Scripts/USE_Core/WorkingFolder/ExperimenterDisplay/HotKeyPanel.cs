@@ -231,12 +231,12 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     if (!HkPanel.TaskLevel.Paused)
                     {
                         HkPanel.TaskLevel.Paused = true;
-                        HkPanel.TaskLevel.PausePanel.SetActive(true);
+                        HkPanel.SessionLevel.PauseCanvasGO.SetActive(true);
                     }
                     else
                     {
                         HkPanel.TaskLevel.Paused = false;
-                        HkPanel.TaskLevel.PausePanel.SetActive(false);
+                        HkPanel.SessionLevel.PauseCanvasGO.SetActive(false);
                     }
                 }
             };

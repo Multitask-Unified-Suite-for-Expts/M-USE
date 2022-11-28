@@ -100,7 +100,6 @@ namespace USE_ExperimentTemplate_Task
             FindStims();
             if (verifyOnly) return;
 
-
             SetupTask = new State("SetupTask");
             RunBlock = new State("RunBlock");
             BlockFeedback = new State("BlockFeedback");

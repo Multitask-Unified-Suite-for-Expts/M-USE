@@ -191,6 +191,19 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             };
             HotKeyList.Add(toggleCursor);
 
+            //End Block Hot Key
+            HotKey endBlock = new HotKey
+            {
+                keyDescription = "N",
+                actionName = "EndBlock",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.N),
+                hotKeyAction = () =>
+                {
+                    HkPanel.TrialLevel.Terminated = true;
+                }
+            };
+            HotKeyList.Add(endBlock);
+
             // Quit Game Hot Key
             HotKey quitGame = new HotKey
             {

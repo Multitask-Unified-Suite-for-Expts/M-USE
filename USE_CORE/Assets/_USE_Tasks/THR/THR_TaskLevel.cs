@@ -16,6 +16,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
     THR_BlockDef currentBlock => GetCurrentBlockDef<THR_BlockDef>();
 
+
     public override void SpecifyTypes()
     {
         TaskLevelType = typeof(THR_TaskLevel);

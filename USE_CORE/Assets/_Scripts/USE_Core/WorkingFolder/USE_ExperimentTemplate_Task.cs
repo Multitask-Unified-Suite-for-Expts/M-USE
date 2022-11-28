@@ -147,6 +147,14 @@ namespace USE_ExperimentTemplate_Task
                 configUI.GenerateUI();
 
                 Controllers.SetActive(true);
+
+
+                PausePanel = GameObject.FindGameObjectWithTag("PausePanel");
+                if (PausePanel == null)
+                    Debug.Log("PAUSE PANEL STILL NULL!!!!");
+                else
+                    Debug.Log("MUST HAVE FOUND THE PAUSE PANEL GAME OBJECT!");
+                //PausePanel.SetActive(false);
             });
 
             SetupTask.SpecifyTermination(() => true, RunBlock);

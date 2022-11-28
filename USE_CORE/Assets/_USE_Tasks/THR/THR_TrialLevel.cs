@@ -105,8 +105,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-
-
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
@@ -116,6 +114,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
 
         AddActiveStates(new List<State> { InitTrial, WhiteSquare, BlueSquare, Feedback, ITI});
+
 
         //SETUP TRIAL state -------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>

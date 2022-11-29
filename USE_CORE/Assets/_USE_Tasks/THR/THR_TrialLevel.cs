@@ -79,11 +79,10 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public bool ClickReleased;
     public bool ColorsSet;
 
+    public Color32 LightRedColor;
     public Color32 GreyGreenColor;
     public Color32 GreenColor;
     public Color32 DarkBlueBackgroundColor;
-    public Color32 LightRedColor;
-    public Color32 LightBlueColor;
     public Color32 InitialSquareColor;
     public Color32 InitialBackdropColor;
 
@@ -222,7 +221,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         {
             if(InputBroker.GetMouseButton(0))
             {
-                Debug.Log("CLICKED!!!!!!!");
                 //If pointer is over a UI Element (EXPERIMENTER DISPLAY)
                 if (EventSystem.current.IsPointerOverGameObject())
                     return;
@@ -244,7 +242,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 {
                     if (!AudioFBController.IsPlaying())
                         AudioFBController.Play("Negative");
-                    StartCoroutine(BackgroundColorFlash(LightRedColor));
+
+                    StartCoroutine(FlashBothSquareAndBG(LightRedColor));
+
                     if (nonSquareTouches == 0)
                     {
                         NumNonSquareTouches++;
@@ -271,8 +271,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                         StartCoroutine(GratingSquareFlash(HeldTooShortTexture));
                     else
                         StartCoroutine(GratingSquareFlash(HeldTooLongTexture));
-                    //else
-                    //    StartCoroutine(SquareColorFlash(LightRedColor));
 
                     ClickReleased = true;
                 }
@@ -310,14 +308,16 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 }
             }
             else
-                AudioFBController.Play("Negative");          
+            {
+                if(!AudioFBController.IsPlaying())
+                    AudioFBController.Play("Negative");
+            }
         });
         Feedback.AddTimer(() => CurrentTrial.FbDuration, ITI);
 
         //ITI state -----------------------------------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>
         {
-            Debug.Log("ITI STARTED!");
             SquareGO.SetActive(false);
             SquareMaterial.color = InitialSquareColor;
 
@@ -470,9 +470,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     void CreateColors()
     {
-        LightBlueColor = new Color32(12, 176, 255, 255);
         DarkBlueBackgroundColor = new Color32(2, 3, 39, 255);
-        LightRedColor = new Color32(255, 174, 173, 255);
+        LightRedColor = new Color32(204, 78, 92, 255);
         GreenColor = new Color32(45, 175, 34, 255);
         GreyGreenColor = new Color32(90, 140, 100, 255);
     }
@@ -497,12 +496,14 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         Cursor.visible = true;
     }
 
-    IEnumerator BackgroundColorFlash(Color32 newColor)
+    IEnumerator FlashBothSquareAndBG(Color32 newBackdropColor)
     {
         Cursor.visible = false;
-        BackdropMaterial.color = newColor;
+        BackdropMaterial.color = newBackdropColor;
+        SquareMaterial.color = new Color32(255, 153, 153, 255);
         yield return new WaitForSeconds(1f);
         BackdropMaterial.color = InitialBackdropColor;
+        SquareMaterial.color = Color.blue;
         Cursor.visible = true;
     }
 
@@ -566,66 +567,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
 
 
-
-//RAYCAST VERSION OF BLUE SQUARE UPDATE METHOD. 
-//if (InputBroker.GetMouseButtonDown(0))
-//{
-//    RaycastHit rayHit;
-//    Ray ray = THR_Cam.ScreenPointToRay(InputBroker.mousePosition);
-//    if (Physics.Raycast(ray, out rayHit, 200f))
-//    {
-//        if (rayHit.transform != null)
-//        {
-//            Debug.Log("HIT GAME OBJECT " + rayHit.transform.gameObject.name);
-//            if (rayHit.transform.name == "SquareGO")
-//            {
-//                TouchStartTime = Time.time;
-//                SquareMaterial.color = Color.green;
-//                ClickedSquare = true;
-//                if (blueTouches == 0)
-//                {
-//                    NumTouchesBlueSquare++;
-//                    blueTouches++;
-//                }
-//                if (CurrentTrial.RewardTouch)
-//                    GiveTouchReward = true;
-//            }
-//            if (rayHit.transform.name == "BackdropGO")
-//            {
-//                if (!AudioFBController.IsPlaying())
-//                    AudioFBController.Play("Negative");
-//                StartCoroutine(BackgroundColorFlash(LightRedColor));
-//                if (nonSquareTouches == 0)
-//                {
-//                    NumNonSquareTouches++;
-//                    nonSquareTouches++;
-//                }
-//            }
-//        }
-//    }
-
-//}
-
-//if (InputBroker.GetMouseButtonUp(0))
-//{
-//    if (ClickedSquare)
-//    {
-//        Cursor.visible = false;
-//        SquareMaterial.color = Color.grey;
-//        HeldDuration = mouseHandler.currentTargetDuration;
-//        TouchReleaseTime = HeldDuration - TouchStartTime;
-
-//        if (HeldDuration > CurrentTrial.MinTouchDuration && HeldDuration < CurrentTrial.MaxTouchDuration)
-//        {
-//            if (CurrentTrial.RewardRelease)
-//                GiveHoldReward = true;
-//        }
-//        else
-//            StartCoroutine(SquareColorFlash(LightRedColor));
-
-//        ClickReleased = true;
-//    }
-//}
 
 
 

@@ -25,9 +25,12 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public string MaterialFilePath;
     public string ContextPath;
 
+    public Texture2D BackdropStripeTexture;
     public Texture2D HeldTooShortTexture;
     public Texture2D HeldTooLongTexture;
 
+    public Renderer BackdropRenderer;
+    public Texture BackdropTexture;
     public GameObject BackdropPrefab;
     public GameObject BackdropGO;
     public GameObject SquarePrefab;
@@ -243,7 +246,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     if (!AudioFBController.IsPlaying())
                         AudioFBController.Play("Negative");
 
-                    StartCoroutine(FlashBothSquareAndBG(LightRedColor));
+                    StartCoroutine(StripeBackgroundFlash(BackdropStripeTexture));
 
                     if (nonSquareTouches == 0)
                     {
@@ -345,8 +348,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     void LoadGratingMaterials()
     {
-        HeldTooShortTexture = Resources.Load<Texture2D>("DiagLeftGrating");
-        HeldTooLongTexture = Resources.Load<Texture2D>("DiagLeftGrating");
+        //HeldTooShortTexture = Resources.Load<Texture2D>("DiagLeftGrating");
+        //HeldTooLongTexture = Resources.Load<Texture2D>("DiagLeftGrating");
+        HeldTooShortTexture = Resources.Load<Texture2D>("VerticalStripes");
+        HeldTooLongTexture = Resources.Load<Texture2D>("HorizontalStripes");
+        BackdropStripeTexture = Resources.Load<Texture2D>("BackgroundStripes");
     }
 
     protected override bool CheckBlockEnd()
@@ -425,7 +431,10 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         BackdropGO.transform.localScale = new Vector3(275, 150, .5f);
         BackdropGO.AddComponent<BoxCollider>();
         BackdropGO.name = "BackdropGO";
-        BackdropMaterial = BackdropGO.GetComponent<Renderer>().material;
+
+        BackdropRenderer = BackdropGO.GetComponent<Renderer>();
+        BackdropMaterial = BackdropRenderer.material;
+        BackdropTexture = BackdropRenderer.material.mainTexture;
         InitialBackdropColor = BackdropMaterial.color;
     }
 
@@ -434,6 +443,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         SquareGO = Instantiate(SquarePrefab, new Vector3(0, 1, 90), Quaternion.identity);
         SquareGO.AddComponent<BoxCollider>();
         SquareGO.name = "SquareGO";
+
         SquareRenderer = SquareGO.GetComponent<Renderer>();
         SquareMaterial = SquareRenderer.material;
         SquareTexture = SquareRenderer.material.mainTexture;
@@ -471,7 +481,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     void CreateColors()
     {
         DarkBlueBackgroundColor = new Color32(2, 3, 39, 255);
-        LightRedColor = new Color32(204, 78, 92, 255);
+        LightRedColor = new Color32(224, 78, 92, 255);
         GreenColor = new Color32(45, 175, 34, 255);
         GreyGreenColor = new Color32(90, 140, 100, 255);
     }
@@ -496,12 +506,14 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         Cursor.visible = true;
     }
 
-    IEnumerator FlashBothSquareAndBG(Color32 newBackdropColor)
+    IEnumerator StripeBackgroundFlash(Texture2D newTexture)
     {
         Cursor.visible = false;
-        BackdropMaterial.color = newBackdropColor;
         SquareMaterial.color = new Color32(255, 153, 153, 255);
+        BackdropMaterial.color = LightRedColor;
+        BackdropRenderer.material.mainTexture = newTexture;
         yield return new WaitForSeconds(1f);
+        BackdropMaterial.mainTexture = BackdropTexture;
         BackdropMaterial.color = InitialBackdropColor;
         SquareMaterial.color = Color.blue;
         Cursor.visible = true;

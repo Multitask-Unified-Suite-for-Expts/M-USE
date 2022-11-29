@@ -25,11 +25,15 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public string MaterialFilePath;
     public string ContextPath;
 
+    public Texture2D HeldTooShortTexture;
+    public Texture2D HeldTooLongTexture;
+
     public GameObject BackdropPrefab;
     public GameObject BackdropGO;
     public GameObject SquarePrefab;
     public GameObject SquareGO;
     public Renderer SquareRenderer;
+    public Texture SquareTexture;
     public Canvas THR_Canvas;
     public GameObject THR_CanvasGO;
 
@@ -75,6 +79,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public bool ClickReleased;
     public bool ColorsSet;
 
+    public Color32 GreyGreenColor;
+    public Color32 GreenColor;
     public Color32 DarkBlueBackgroundColor;
     public Color32 LightRedColor;
     public Color32 LightBlueColor;
@@ -143,6 +149,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         //INIT TRIAL state --------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
+            if(HeldTooLongTexture == null || HeldTooShortTexture == null)
+                LoadGratingMaterials();
+
             ResetGlobalTrialVariables();
 
             if (TrialCount_InBlock == 0)
@@ -213,6 +222,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         {
             if(InputBroker.GetMouseButton(0))
             {
+                Debug.Log("CLICKED!!!!!!!");
                 //If pointer is over a UI Element (EXPERIMENTER DISPLAY)
                 if (EventSystem.current.IsPointerOverGameObject())
                     return;
@@ -220,7 +230,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 if (MouseTracker.CurrentTargetGameObject == SquareGO)
                 {
                     TouchStartTime = Time.time;
-                    SquareMaterial.color = Color.green;
+                    SquareMaterial.color = GreenColor;
                     ClickedSquare = true;
                     if (blueTouches == 0)
                     {
@@ -248,18 +258,22 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 if(ClickedSquare)
                 {
                     Cursor.visible = false;
-                    SquareMaterial.color = Color.grey;
+                    SquareMaterial.color = GreyGreenColor;
                     HeldDuration = mouseHandler.currentTargetDuration;
                     TouchReleaseTime = HeldDuration - TouchStartTime;
 
-                    if (HeldDuration > CurrentTrial.MinTouchDuration && HeldDuration < CurrentTrial.MaxTouchDuration)
+                    if (HeldDuration >= CurrentTrial.MinTouchDuration && HeldDuration <= CurrentTrial.MaxTouchDuration)
                     {
                         if (CurrentTrial.RewardRelease)
                             GiveHoldReward = true;
                     }
+                    else if (HeldDuration < CurrentTrial.MinTouchDuration)
+                        StartCoroutine(GratingSquareFlash(HeldTooShortTexture));
                     else
-                        StartCoroutine(SquareColorFlash(LightRedColor));
-                   
+                        StartCoroutine(GratingSquareFlash(HeldTooLongTexture));
+                    //else
+                    //    StartCoroutine(SquareColorFlash(LightRedColor));
+
                     ClickReleased = true;
                 }
             }
@@ -267,8 +281,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 AutoEndTrial = true;
         });
         BlueSquare.AddTimer(() => CurrentTrial.BlueSquareDuration, Feedback);
-        BlueSquare.SpecifyTermination(() => ClickReleased || AutoEndTrial, Feedback);
-        //BlueSquare.SpecifyTermination(() => AutoEndTrial, ITI);
+        BlueSquare.SpecifyTermination(() => ClickReleased, Feedback);
+        BlueSquare.SpecifyTermination(() => AutoEndTrial, ITI);
 
         NumTouchesBlueSquare += blueTouches;
         NumNonSquareTouches += nonSquareTouches;
@@ -298,13 +312,14 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             else
                 AudioFBController.Play("Negative");          
         });
-        Feedback.SpecifyTermination(() => !AudioFBController.IsPlaying() && Time.time - FeedbackStartTime > CurrentTrial.FbDuration, ITI);
+        Feedback.AddTimer(() => CurrentTrial.FbDuration, ITI);
 
         //ITI state -----------------------------------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>
         {
+            Debug.Log("ITI STARTED!");
             SquareGO.SetActive(false);
-            SquareMaterial.color = Color.white;
+            SquareMaterial.color = InitialSquareColor;
 
             ConfigVariablesLoaded = false;
 
@@ -325,6 +340,13 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         });
         LogTrialData();
         LogFrameData();
+    }
+
+
+    void LoadGratingMaterials()
+    {
+        HeldTooShortTexture = Resources.Load<Texture2D>("DiagLeftGrating");
+        HeldTooLongTexture = Resources.Load<Texture2D>("DiagLeftGrating");
     }
 
     protected override bool CheckBlockEnd()
@@ -413,7 +435,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         SquareGO.AddComponent<BoxCollider>();
         SquareGO.name = "SquareGO";
         SquareRenderer = SquareGO.GetComponent<Renderer>();
-        SquareMaterial = SquareGO.GetComponent<Renderer>().material;
+        SquareMaterial = SquareRenderer.material;
+        SquareTexture = SquareRenderer.material.mainTexture;
         InitialSquareColor = SquareMaterial.color;
     }
 
@@ -449,7 +472,20 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     {
         LightBlueColor = new Color32(12, 176, 255, 255);
         DarkBlueBackgroundColor = new Color32(2, 3, 39, 255);
-        LightRedColor = new Color32(142, 6, 20, 255);
+        LightRedColor = new Color32(255, 174, 173, 255);
+        GreenColor = new Color32(45, 175, 34, 255);
+        GreyGreenColor = new Color32(90, 140, 100, 255);
+    }
+
+    IEnumerator GratingSquareFlash(Texture2D newTexture)
+    {
+        Cursor.visible = false;
+        SquareMaterial.color = LightRedColor;
+        SquareRenderer.material.mainTexture = newTexture;
+        yield return new WaitForSeconds(1f);
+        SquareMaterial.mainTexture = SquareTexture;
+        SquareMaterial.color = Color.blue;
+        Cursor.visible = true;
     }
 
     IEnumerator SquareColorFlash(Color32 newColor)
@@ -458,6 +494,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         SquareMaterial.color = newColor;
         yield return new WaitForSeconds(1f);
         SquareMaterial.color = InitialSquareColor;
+        Cursor.visible = true;
     }
 
     IEnumerator BackgroundColorFlash(Color32 newColor)

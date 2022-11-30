@@ -195,49 +195,50 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         MouseTracker.AddSelectionHandler(mouseHandler, InflateBalloon);
         InflateBalloon.AddUpdateMethod(() => {
-            if (InputBroker.GetMouseButtonDown(0))
+            if (mouseHandler.SelectionMatches(trialStim))
             {
-                if (mouseHandler.SelectionMatches(trialStim))
-                {
-                    //add to clicktimings
-                    clickTimings.Add(Time.time - timeTracker);
-                    timeTracker = Time.time;
+                //add to clicktimings
+                clickTimings.Add(Time.time - timeTracker);
+                timeTracker = Time.time;
+                clickMarker.SetActive(true);
 
-                    clickMarker.transform.position = mouseHandler.SelectedGameObject.transform.position;
-                    clickMarker.SetActive(true);
+                clickMarker.transform.position = mouseHandler.SelectedGameObject.transform.position;
 
-                    if (clickCount == 0) {
-                        GameObject container = (leftRightChoice == "left") ? balloonContainerLeft : balloonContainerRight;
-                        Vector3 scale = container.transform.GetChild(0).transform.localScale;
-                        scale.y = trialStim.transform.localScale.y;
-                        trialStim.transform.localScale = scale;
-                    } else {
-                        trialStim.transform.localScale += scaleUpAmount;
-                    }
-                    clickCount++;
-                    Debug.Log("Clicked balloon " + clickCount + " times.");
+                if (clickCount == 0) {
+                    GameObject container = (leftRightChoice == "left") ? balloonContainerLeft : balloonContainerRight;
+                    Vector3 scale = container.transform.GetChild(0).transform.localScale;
+                    scale.y = trialStim.transform.localScale.y;
+                    trialStim.transform.localScale = scale;
+                } else {
+                    trialStim.transform.localScale += scaleUpAmount;
                 }
-                else
-                {
-                    Debug.Log("Clicked on something else");
-                    // cam.backgroundColor = Color.red;
-                }
+                clickCount++;
+                Debug.Log("Clicked balloon " + clickCount + " times.");
+                // Stop detecting presses until mouse is released
+                mouseHandler.Stop();
+            }
+            else
+            {
+                Debug.Log("Clicked on something else");
+                // cam.backgroundColor = Color.red;
+            }
 
-                // disable gameObject if the user clicks enough time
-                if (clickCount >= numOfClicks)
-                {
-                    Debug.Log("User clicked enough times, popping balloon");
-                    clickMarker.SetActive(false);
-                    response = 1;
+            // disable gameObject if the user clicks enough time
+            if (clickCount >= numOfClicks)
+            {
+                Debug.Log("User clicked enough times, popping balloon");
+                clickMarker.SetActive(false);
+                response = 1;
 
-                    //calculate average time
-                    avgClickTime = clickTimings.Average();
-                }
+                //calculate average time
+                avgClickTime = clickTimings.Average();
             }
 
             if (InputBroker.GetMouseButtonUp(0))
             {
                 clickMarker.SetActive(false);
+                // Start detecting presses again
+                mouseHandler.Start();
             }
         });
 

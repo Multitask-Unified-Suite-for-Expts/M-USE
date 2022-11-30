@@ -15,22 +15,27 @@ public class ChangeSceneToMaze : MonoBehaviour
     void Update()
     {
         // Handle screen touches.
+        
+        /*
         if (Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
             // TODO change this to actually change scene
             Debug.Log("TOUCH ON BUTTON FOUND");
-        }
+        }*/
     }
-
+/*
     IEnumerator OnMouseDown()
     {
         // TODO I think the seconds thing isn't working
+        
         Debug.Log("Changing scene to maze...");
         SceneManager.LoadSceneAsync("MazeScene");
         yield return new WaitForSeconds(1);
         SceneManager.UnloadSceneAsync("InitScene");
         yield return new WaitForSeconds(1);
-        SceneManager.SetActiveScene(SceneManager.GetSceneByName("MazeScene"));
-    }
+        SceneManager.SetActiveScene(SceneManager.GetSceneByName("MazeScene"));  
+        
+            
+    }*/
 }

@@ -89,9 +89,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public Color32 InitialSquareColor;
     public Color32 InitialBackdropColor;
 
-    public bool ConfigValuesChanged;
-    public bool EndBlock;
-
     public float BlockDefaultSquareSize;
     public float BlockDefaultPositionX;
     public float BlockDefaultPositionY;
@@ -166,8 +163,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             }
             else
             {
-                ConfigValuesChanged = DidConfigValuesChange();
-                if (ConfigValuesChanged)
+                if (ConfigValuesChanged())
                 {
                     SetTrialValuesToConfigValues();
                     UpdateSquare();
@@ -352,6 +348,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     }
 
 
+    //HELPER FUNCTIONS ------------------------------------------------------------------------------------------
 
     void SetTrialSummaryString()
     {
@@ -370,12 +367,12 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     protected override bool CheckBlockEnd()
     {
-        return EndBlock;
+        return PerfThresholdMet;
     }
 
     void CheckIfBlockShouldEnd()
     {
-        if (NumTrialsCompletedBlock >= CurrentTrial.PerfWindowEndTrials)
+        if(NumTrialsCompletedBlock >= CurrentTrial.PerfWindowEndTrials)
         {
             int sum = 0;
             for(int i = 0; i < CurrentTrial.PerfWindowEndTrials; i++)
@@ -383,12 +380,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 sum += TrialCompletionList[i];
             }
             float performancePerc = sum / CurrentTrial.PerfWindowEndTrials;
-            if (performancePerc >= CurrentTrial.PerfThresholdEndTrials)
-            {
-                EndBlock = true; //EndBlock being true will trigger CheckBlockEnd function to terminate block.
-                PerfThresholdMet = true;
-                Debug.Log("ENDING THE BLOCK BECAUSE THE PERFORMANCE THRESHOLD WAS REACHED!");
-            }
+            if(performancePerc >= CurrentTrial.PerfThresholdEndTrials)
+                PerfThresholdMet = true; //Will trigger CheckBlockEnd function to terminate block
         }
     }
 
@@ -403,7 +396,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         BlockDefaultBlueSquareDuration = CurrentTrial.BlueSquareDuration;
     }
 
-    bool DidConfigValuesChange()
+    bool ConfigValuesChanged()
     {
         if (BlockDefaultSquareSize != ConfigUiVariables.get<ConfigNumber>("squareSize").value
             || BlockDefaultPositionX != ConfigUiVariables.get<ConfigNumber>("positionX").value
@@ -543,8 +536,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         ClickReleased = false;
         GiveHoldReward = false;
         GiveTouchReward = false;
-        ConfigValuesChanged = false;
-        EndBlock = false;
     }
 
     void LogTrialData()

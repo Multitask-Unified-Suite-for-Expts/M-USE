@@ -82,7 +82,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
                         "\nNumTouchesBlueSquare: " + trialLevel.NumTouchesBlueSquare +
                         "\nNumTouchesOutsideSquare: " + trialLevel.NumNonSquareTouches +
                         "\nNumRewards: " + (trialLevel.NumTouchRewards + trialLevel.NumReleaseRewards) +
-                        "\nPerfThresholdMet? " + trialLevel.PerfThresholdMet);
+                        "\nPerfThresholdMet: " + trialLevel.PerfThresholdMet);
 
         if (BlockCount > 0)
             CurrentBlockString += "\n";

@@ -223,7 +223,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 if (MouseTracker.CurrentTargetGameObject == SquareGO)
                 {
                     TouchStartTime = Time.time;
-                    SquareMaterial.color = GreenColor;
+                    if(Time.time - TouchStartTime > .01) //stops the issue where if they just click, it goes green before split second before grating red/white.
+                        SquareMaterial.color = GreenColor;
                     ClickedSquare = true;
                     if (blueTouches == 0)
                     {
@@ -284,7 +285,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         {
             FeedbackStartTime = Time.time;
 
-            if ((GiveTouchReward) || (GiveHoldReward))
+            if((GiveTouchReward) || (GiveHoldReward))
             {
                 AudioFBController.Play("Positive");
                 if (SyncBoxController != null)

@@ -151,7 +151,6 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1517928208}
   m_RootOrder: 0
@@ -288,7 +287,6 @@ Transform:
   m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 4
@@ -503,7 +501,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2128323200}
   m_RootOrder: 1
@@ -577,7 +574,6 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1228068158}
   m_Father: {fileID: 1517928208}
@@ -614,7 +610,6 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1860445380}
   m_Father: {fileID: 1517928208}
@@ -654,7 +649,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
-  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1903701516}
   - {fileID: 623278600}
@@ -808,7 +802,6 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1, z: -16.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
@@ -841,7 +834,6 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 670861261}
   m_RootOrder: 0
@@ -1103,7 +1095,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 4, y: 4, z: 0.1}
-  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 119593514}
   - {fileID: 670861261}
@@ -1193,7 +1184,6 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1068624736}
   m_Father: {fileID: 0}
@@ -1227,7 +1217,6 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1, z: 40.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
@@ -1259,6 +1248,7 @@ MonoBehaviour:
   TrialCount_InBlock: 0
   AbortCode: 0
   StoreData: 0
+  ForceBlockEnd: 0
   TaskDataPath: 
   FilePrefix: 
   TrialSummaryString: 
@@ -1285,7 +1275,13 @@ MonoBehaviour:
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   stimCount: 0
-  runningAcc: 
+  slotErrorCount: 0
+  distractorSlotErrorCount: 0
+  touchDurationErrorCount: 0
+  irrelevantSelectionErrorCount: 0
+  repetitionErrorCount: 0
+  totalErrors_InSession: 0
+  noScreenTouchErrorCount: 0
   totalErrors_InBlock: 0
   errorType_InBlock: []
   errorType_InSession: []
@@ -1293,7 +1289,10 @@ MonoBehaviour:
   numTotal_InBlock: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   numTotal_InTrial: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   numErrors_InBlock: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  numErrors_InTrial: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   numCorrect_InBlock: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  numCorrect_InTrial: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  runningAcc: 
   minObjectTouchDuration:
     name: 
     hidden: 0
@@ -1358,10 +1357,27 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
+  startButtonDelay:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  timeoutDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
   accuracyLog_InSession: 
   accuracyLog_InBlock: 
   accuracyLog_InTrial: 
   MaterialFilePath: 
+  sliderCompleteQuantity: 0
   playerViewTextList: []
   playerViewText: {fileID: 0}
   MinTrials: 0
@@ -1385,6 +1401,7 @@ MonoBehaviour:
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
+  ConfigName: 
   TaskName: WhatWhenWhere
   TaskProjectFolder: 
   BlockCount: 0
@@ -1400,10 +1417,10 @@ MonoBehaviour:
   SubjectID: 
   SessionID: 
   FilePrefix: 
-  BlockSummaryString: 
   EyetrackerType: 
   SelectionType: 
   LocateFile: {fileID: 0}
+  ExperimenterDisplayLayer: 0
   TaskCam: {fileID: 0}
   TaskCanvasses:
   - {fileID: 2128323196}
@@ -1454,7 +1471,6 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 768249079}
   m_RootOrder: 0
@@ -1628,6 +1644,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: VerticalStripesImage
+      objectReference: {fileID: 0}
+    - target: {fileID: 432727599120094514, guid: f9168e6b5126a5349a9816b389e04f29,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 432727599120094543, guid: f9168e6b5126a5349a9816b389e04f29,
         type: 3}
@@ -2016,7 +2037,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
-  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1517928208}
   - {fileID: 633115964}

@@ -119,11 +119,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             scaleUpAmountLeft = maxScale / CurrentTrialDef.NumOfClicksLeft;
             scaleUpAmountRight = maxScale / CurrentTrialDef.NumOfClicksRight;
 
-            //Temporarily hard coded
-            MaterialFilePath = "//Users//ntraczewski//Desktop//USE_Configs//USE_Configs//Resources//TextureImages";
-
-            ContextPath = GetContextNestedFilePath("LinearDark"); //Using this for now until MFP is stated in config. 
-            //ContextPath = GetContextNestedFilePath(CurrentTrialDef.ContextName);
+            // ContextPath = GetContextNestedFilePath("LinearDark"); //Using this for now until MFP is stated in config. 
+            ContextPath = GetContextNestedFilePath(CurrentTrialDef.ContextName);
             RenderSettings.skybox = CreateSkybox(ContextPath);
         });
 

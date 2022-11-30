@@ -408,6 +408,7 @@ namespace USE_ExperimentTemplate_Session
                 CameraMirrorTexture.Release();
                 SessionCam.gameObject.SetActive(false);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
+                CurrentTask.TrialLevel.TaskLevel = CurrentTask;
                 ExperimenterDisplayController.ResetTask(CurrentTask, CurrentTask.TrialLevel);
             });
 

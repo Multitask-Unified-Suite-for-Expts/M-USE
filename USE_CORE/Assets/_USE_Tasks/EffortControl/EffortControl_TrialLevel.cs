@@ -16,6 +16,7 @@ using USE_ExperimentTemplate_Block;
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 {
     public EffortControl_TrialDef CurrentTrialDef => GetCurrentTrialDef<EffortControl_TrialDef>();
+    public EffortControl_TaskLevel CurrentTaskLevel => GetTaskLevel<EffortControl_TaskLevel>();
     //This variable is required for most tasks, and is defined as the output of the GetCurrentTrialDef function 
 
     // game object variables
@@ -138,6 +139,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             createBalloons(CurrentTrialDef.NumOfClicksRight, scaleUpAmountRight, CurrentTrialDef.ClicksPerOutline, stimRight.transform.position, balloonContainerRight);
             createRewards(CurrentTrialDef.NumOfCoinsLeft, rewardContainerLeft.transform.position, rewardContainerLeft);
             createRewards(CurrentTrialDef.NumOfCoinsRight, rewardContainerRight.transform.position, rewardContainerRight);
+            MouseTracker.ResetClickCount();
         });
 
         MouseTracker.AddSelectionHandler(mouseHandler, ChooseBalloon);
@@ -260,15 +262,19 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Feedback.AddInitializationMethod(() => {
             if (response == 1)
             {
+                ++CurrentTaskLevel.NumCompletions;
                 // set prize's position to the position of the balloon
                 prize.transform.position = trialStim.transform.position + new Vector3(0f, .5f, 0f);
                 prize.SetActive(true);
                 fb.GetComponent<RawImage>().color = Color.green;
                 if (SyncBoxController != null) {
-                    if (leftRightChoice == "left")
+                    if (leftRightChoice == "left") {
+                        CurrentTaskLevel.NumPulses += CurrentTrialDef.NumOfPulsesLeft;
                         SyncBoxController.SendRewardPulses(CurrentTrialDef.NumOfPulsesLeft, CurrentTrialDef.PulseSizeLeft);
-                    else
+                    } else {
+                        CurrentTaskLevel.NumPulses += CurrentTrialDef.NumOfPulsesRight;
                         SyncBoxController.SendRewardPulses(CurrentTrialDef.NumOfPulsesRight, CurrentTrialDef.PulseSizeRight);
+                    }
                 }
             }
             else
@@ -276,6 +282,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 fb.GetComponent<RawImage>().color = Color.red;
             }
             fb.SetActive(true);
+            CurrentTaskLevel.TotalTouches += MouseTracker.GetClickCount();
         });
 
         Feedback.AddTimer(1f, ITI, () => fb.SetActive(false));

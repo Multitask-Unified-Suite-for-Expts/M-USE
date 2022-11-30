@@ -456,6 +456,10 @@ namespace USE_ExperimentTemplate_Task
             
         }
 
+        public virtual Dictionary<string, object> SummarizeTask() {
+            return new Dictionary<string, object>();
+        }
+
         public void FindStims()
         {
             MethodInfo addTaskStimDefsToTaskStimGroup = GetType().GetMethod(nameof(this.AddTaskStimDefsToTaskStimGroup))

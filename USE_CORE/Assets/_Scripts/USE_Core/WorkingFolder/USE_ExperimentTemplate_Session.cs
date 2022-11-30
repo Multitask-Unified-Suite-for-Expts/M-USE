@@ -22,6 +22,7 @@ namespace USE_ExperimentTemplate_Session
     {
         [HideInInspector] public bool TasksFinished;
 
+        protected SummaryData SummaryData;
         protected SessionData SessionData;
         private SessionDataControllers SessionDataControllers;
         private bool StoreData;
@@ -429,6 +430,7 @@ namespace USE_ExperimentTemplate_Session
             }
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
             {
+                SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
                 SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
                 SessionData.AppendData();
@@ -452,6 +454,8 @@ namespace USE_ExperimentTemplate_Session
 
             SessionData.AddDatum("SelectedTaskConfigName", () => selectedConfigName);
             SessionData.AddDatum("TaskAutomaticallySelected", () => taskAutomaticallySelected);
+
+            SummaryData.Init(StoreData, SessionDataPath);
 
             void GetTaskLevelFromString<T>()
                 where T : ControlLevel_Task_Template

@@ -118,9 +118,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         State BlueSquare = new State("BlueSquare");
         State Feedback = new State("Feedback");
         State ITI = new State("ITI");
-
         AddActiveStates(new List<State> { InitTrial, WhiteSquare, BlueSquare, Feedback, ITI});
-
 
         //SETUP TRIAL state -------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
@@ -141,8 +139,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             if (SquareGO == null)
                 CreateSquare();
-            else
-                SquareMaterial.color = Color.white;
 
             SetTrialSummaryString();
         });
@@ -172,7 +168,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     SetSquareSizeAndPosition();
             }
         });
-        InitTrial.SpecifyTermination(() => true, WhiteSquare);
+        InitTrial.SpecifyTermination(() => true, WhiteSquare, () => TrialStartTime = Time.time);
 
         SelectionHandler<THR_StimDef> mouseHandler = new SelectionHandler<THR_StimDef>();
         MouseTracker.AddSelectionHandler(mouseHandler, WhiteSquare);
@@ -182,13 +178,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         //WHITE SQUARE state ------------------------------------------------------------------------------------------------------------------------
         WhiteSquare.AddInitializationMethod(() =>
         {
-            if(CurrentTrial.BlockName == "Level1")
-            {
-                Cursor.visible = false;
+            Cursor.visible = false;
+            SquareMaterial.color = Color.white;
+            if (!SquareGO.activeSelf || BackdropGO.activeSelf)
                 ActivateSquareAndBackdrop();
-            }
         });
-
         WhiteSquare.AddUpdateMethod(() =>
         {
             if(mouseHandler.SelectionMatches(SquareGO))
@@ -202,25 +196,21 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-        WhiteSquare.SpecifyTermination(() => CurrentTrial.BlockName != "Level1", BlueSquare);
         WhiteSquare.AddTimer(() => CurrentTrial.WhiteSquareDuration, BlueSquare, () => StartCoroutine(WhiteToBlueStatePause()));
 
         NumTouchesWhiteSquare += whiteTouches;
 
+        //BLUE SQUARE state -------------------------------------------------------------------------------------------------------------------------
         MouseTracker.AddSelectionHandler(mouseHandler, BlueSquare);
-
         int blueTouches = 0;
         int nonSquareTouches = 0;
 
-
-        //BLUE SQUARE state -------------------------------------------------------------------------------------------------------------------------
         BlueSquare.AddInitializationMethod(() =>
         {
             SquareMaterial.color = Color.blue;
             if (!SquareGO.activeSelf)
                 ActivateSquareAndBackdrop();
             Cursor.visible = true;
-            TrialStartTime = Time.time;
         });
         BlueSquare.AddUpdateMethod(() =>
         {
@@ -283,9 +273,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             if (Time.time - TrialStartTime > CurrentTrial.TimeToAutoEndTrialSec)
                 AutoEndTrial = true;
         });
-        BlueSquare.AddTimer(() => CurrentTrial.BlueSquareDuration, Feedback);
-        BlueSquare.SpecifyTermination(() => ClickReleased, Feedback);
-        BlueSquare.SpecifyTermination(() => AutoEndTrial, ITI);
+        BlueSquare.AddTimer(() => CurrentTrial.BlueSquareDuration, WhiteSquare); //Go back to White State if bluesquare time lapses. 
+        BlueSquare.SpecifyTermination(() => ClickReleased || AutoEndTrial, Feedback); //if they click the square and release, OR run out of time, go forward to feedback.
 
         NumTouchesBlueSquare += blueTouches;
         NumNonSquareTouches += nonSquareTouches;
@@ -536,6 +525,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         ClickReleased = false;
         GiveHoldReward = false;
         GiveTouchReward = false;
+        AutoEndTrial = false;
     }
 
     void LogTrialData()

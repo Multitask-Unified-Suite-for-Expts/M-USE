@@ -101,6 +101,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public float BlockDefaultBlueSquareDuration;
 
     public bool IsLevelOne;
+    public bool PerfThresholdMet;
 
     public int NumTouchRewards;
     public int NumReleaseRewards;
@@ -145,25 +146,30 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 CreateSquare();
             else
                 SquareMaterial.color = Color.white;
+
+            SetTrialSummaryString();
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT TRIAL state --------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
-            if(HeldTooLongTexture == null || HeldTooShortTexture == null)
+            if(HeldTooLongTexture == null || HeldTooShortTexture == null || BackdropTexture == null)
                 LoadGratingMaterials();
 
             ResetGlobalTrialVariables();
 
             if (TrialCount_InBlock == 0)
+            {
                 SetSquareSizeAndPosition();
+                SetConfigValuesToBlockDefaults();
+            }
             else
             {
                 ConfigValuesChanged = DidConfigValuesChange();
                 if (ConfigValuesChanged)
                 {
-                    LoadConfigVariables();
+                    SetTrialValuesToConfigValues();
                     UpdateSquare();
                 }
                 else
@@ -265,12 +271,12 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     HeldDuration = mouseHandler.currentTargetDuration;
                     TouchReleaseTime = HeldDuration - TouchStartTime;
 
-                    if (HeldDuration >= CurrentTrial.MinTouchDuration && HeldDuration <= CurrentTrial.MaxTouchDuration)
+                    if(HeldDuration >= CurrentTrial.MinTouchDuration && HeldDuration <= CurrentTrial.MaxTouchDuration)
                     {
-                        if (CurrentTrial.RewardRelease)
+                        if(CurrentTrial.RewardRelease)
                             GiveHoldReward = true;
                     }
-                    else if (HeldDuration < CurrentTrial.MinTouchDuration)
+                    else if(HeldDuration < CurrentTrial.MinTouchDuration)
                         StartCoroutine(GratingSquareFlash(HeldTooShortTexture));
                     else
                         StartCoroutine(GratingSquareFlash(HeldTooLongTexture));
@@ -334,22 +340,29 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             else
                 TrialCompletionList.Insert(0, 0);
 
-            //CheckIfBlockShouldEnd();
-        });
-        ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial, () =>
-        {
             NumTrialsCompletedBlock++;
             TrialComplete = true;
+
+            CheckIfBlockShouldEnd();
         });
+        ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial);
+
         LogTrialData();
         LogFrameData();
     }
 
 
+
+    void SetTrialSummaryString()
+    {
+        TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) +
+                              "\nRewarding: " + (CurrentTrial.RewardTouch ? "Touch" : "Release") +
+                              "\nRandomPosition: " + ((CurrentTrial.RandomSquarePosition ? "True" : "False")) +
+                              "\nRandomSize: " + ((CurrentTrial.RandomSquareSize ? "True" : "False"));
+    }
+
     void LoadGratingMaterials()
     {
-        //HeldTooShortTexture = Resources.Load<Texture2D>("DiagLeftGrating");
-        //HeldTooLongTexture = Resources.Load<Texture2D>("DiagLeftGrating");
         HeldTooShortTexture = Resources.Load<Texture2D>("VerticalStripes");
         HeldTooLongTexture = Resources.Load<Texture2D>("HorizontalStripes");
         BackdropStripeTexture = Resources.Load<Texture2D>("BackgroundStripes");
@@ -362,7 +375,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     void CheckIfBlockShouldEnd()
     {
-        if (NumTrialsCompletedBlock > CurrentTrial.PerfWindowEndTrials)
+        if (NumTrialsCompletedBlock >= CurrentTrial.PerfWindowEndTrials)
         {
             int sum = 0;
             for(int i = 0; i < CurrentTrial.PerfWindowEndTrials; i++)
@@ -371,7 +384,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             }
             float performancePerc = sum / CurrentTrial.PerfWindowEndTrials;
             if (performancePerc >= CurrentTrial.PerfThresholdEndTrials)
-                EndBlock = true; //EndBlock being true will trigger CheckBlockEnd function to terminate block. 
+            {
+                EndBlock = true; //EndBlock being true will trigger CheckBlockEnd function to terminate block.
+                PerfThresholdMet = true;
+                Debug.Log("ENDING THE BLOCK BECAUSE THE PERFORMANCE THRESHOLD WAS REACHED!");
+            }
         }
     }
 
@@ -404,11 +421,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     void UpdateSquare()
     {
-        SquareGO.transform.localScale = new Vector3(CurrentTrial.SquareSize, CurrentTrial.SquareSize, 1);
+        SquareGO.transform.localScale = new Vector3(CurrentTrial.SquareSize, CurrentTrial.SquareSize, .001f);
         SquareGO.transform.localPosition = new Vector3(CurrentTrial.PositionX, CurrentTrial.PositionY, 90);
     }
 
-    void LoadConfigVariables()
+    void SetTrialValuesToConfigValues()
     {
         CurrentTrial.MinTouchDuration = ConfigUiVariables.get<ConfigNumber>("minTouchDuration").value;
         CurrentTrial.MaxTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxTouchDuration").value;
@@ -452,16 +469,15 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     void SetSquareSizeAndPosition()
     {
-        if (CurrentTrial.RandomSquareSize)
+        if(CurrentTrial.RandomSquareSize)
         {
             float randomSize = Random.Range(CurrentTrial.SquareSizeMin, CurrentTrial.SquareSizeMax);
-            SquareGO.transform.localScale = new Vector3(randomSize, randomSize, 1);
+            SquareGO.transform.localScale = new Vector3(randomSize, randomSize, .001f);
         }
         else
-            SquareGO.transform.localScale = new Vector3(CurrentTrial.SquareSize, CurrentTrial.SquareSize, 1);
+            SquareGO.transform.localScale = new Vector3(CurrentTrial.SquareSize, CurrentTrial.SquareSize, .001f);
         
-
-        if (CurrentTrial.RandomSquarePosition)
+        if(CurrentTrial.RandomSquarePosition)
         {
             float x = Random.Range(CurrentTrial.PositionX_Min, CurrentTrial.PositionX_Max);
             float y = Random.Range(CurrentTrial.PositionY_Min, CurrentTrial.PositionY_Max);
@@ -470,6 +486,17 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         else
             SquareGO.transform.localPosition = new Vector3(CurrentTrial.PositionX, CurrentTrial.PositionY, 90);
         
+    }
+
+    void SetConfigValuesToBlockDefaults()
+    {
+        ConfigUiVariables.get<ConfigNumber>("minTouchDuration").SetValue(BlockDefaultMinTouchDuration);
+        ConfigUiVariables.get<ConfigNumber>("maxTouchDuration").SetValue(BlockDefaultMaxTouchDuration);
+        ConfigUiVariables.get<ConfigNumber>("squareSize").SetValue(BlockDefaultSquareSize);
+        ConfigUiVariables.get<ConfigNumber>("positionX").SetValue(BlockDefaultPositionX);
+        ConfigUiVariables.get<ConfigNumber>("positionY").SetValue(BlockDefaultPositionY);
+        ConfigUiVariables.get<ConfigNumber>("whiteSquareDuration").SetValue(BlockDefaultWhiteSquareDuration);
+        ConfigUiVariables.get<ConfigNumber>("blueSquareDuration").SetValue(BlockDefaultBlueSquareDuration);
     }
 
     IEnumerator WhiteToBlueStatePause()
@@ -494,15 +521,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         yield return new WaitForSeconds(1f);
         SquareMaterial.mainTexture = SquareTexture;
         SquareMaterial.color = Color.blue;
-        Cursor.visible = true;
-    }
-
-    IEnumerator SquareColorFlash(Color32 newColor)
-    {
-        Cursor.visible = false;
-        SquareMaterial.color = newColor;
-        yield return new WaitForSeconds(1f);
-        SquareMaterial.color = InitialSquareColor;
         Cursor.visible = true;
     }
 
@@ -566,33 +584,4 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     //    return contextPath;
     //}
-
-    protected override void DefineTrialStims()
-    {
-        //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
-        //destroyed at TrialLevel_Finish
-
-        //NO STIMS FOR THIS TASK. 
-    }
-    
 }
-
-
-
-
-
-
-
-
-
-
-//THR_Cam.clearFlags = CameraClearFlags.SolidColor;
-//THR_Cam.backgroundColor = DarkBlueBackgroundColor;
-
-//had this in the blue square ELSE:
-//RenderSettings.skybox = CreateSkybox(RedWhiteStripeFilePath);
-
-//had this in setupTrial:
-//ContextPath = GetContextNestedFilePath(CurrentTrial.ContextName);
-//RenderSettings.skybox = CreateSkybox(ContextPath);
-//RedWhiteStripeFilePath = GetContextNestedFilePath("RedStripe");

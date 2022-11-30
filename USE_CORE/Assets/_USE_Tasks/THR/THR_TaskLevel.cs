@@ -49,6 +49,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             trialLevel.NumTouchesWhiteSquare = 0;
             trialLevel.NumTouchRewards = 0;
             trialLevel.NumReleaseRewards = 0;
+            trialLevel.PerfThresholdMet = false;
 
             SetBlockSummaryString(trialLevel);
         });
@@ -75,13 +76,13 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         ClearStrings();
 
         CurrentBlockString = ("<b>Block " + "(" + currentBlock.BlockName + "):" + "</b>" +
-                        "\nTrialCountInBlock: " + (trialLevel.TrialCount_InBlock + 1) +
                         "\nNumTrialsCompleted: " + trialLevel.NumTrialsCompletedBlock +
                         "\nNumTrialsCorrect: " + trialLevel.NumTrialsCorrectBlock +
                         "\nNumTouchesWhiteSquare: " + trialLevel.NumTouchesWhiteSquare +
                         "\nNumTouchesBlueSquare: " + trialLevel.NumTouchesBlueSquare +
                         "\nNumTouchesOutsideSquare: " + trialLevel.NumNonSquareTouches +
-                        "\nNumRewards: " + (trialLevel.NumTouchRewards + trialLevel.NumReleaseRewards));
+                        "\nNumRewards: " + (trialLevel.NumTouchRewards + trialLevel.NumReleaseRewards) +
+                        "\nPerfThresholdMet? " + trialLevel.PerfThresholdMet);
 
         if (BlockCount > 0)
             CurrentBlockString += "\n";

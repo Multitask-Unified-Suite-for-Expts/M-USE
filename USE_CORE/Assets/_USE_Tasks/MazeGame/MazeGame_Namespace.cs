@@ -24,7 +24,7 @@ namespace MazeGame_Namespace
         public float[] TileColor;
         public Vector3 ButtonPosition;
         public Vector3 ButtonScale;
-        public string ContextExternalFilePath, MazeExternalFilePath;
+        public string ContextExternalFilePath, MazeExternalFilePath, MazeKeyFilePath;
         
     }
 
@@ -141,5 +141,14 @@ namespace MazeGame_Namespace
         //public State SetActiveOnInitialization;
         //public State SetInactiveOnTermination;
        // public int test;
+    }
+
+    public class MazeDef
+    {
+        
+        public int mNumSquares;
+        public int mNumTurns;
+        public int mTotalSquares;
+        public string fileName;
     }
 }

@@ -48,6 +48,7 @@ namespace FlexLearning_Namespace
         public int NumPulses;
         public int PulseSize;
         public bool RandomizedLocations;
+        public bool StimFacingCamera;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -72,6 +73,7 @@ namespace FlexLearning_Namespace
                 td.BlockEndWindow = BlockEndWindow;
                 td.NumPulses = NumPulses;
                 td.NumTokenBar = NumTokenBar;
+                td.StimFacingCamera = StimFacingCamera;
                 td.PulseSize = PulseSize;
                 TrialDefs.Add(td);
             }
@@ -90,6 +92,7 @@ namespace FlexLearning_Namespace
                 td.NumPulses = NumPulses;
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
+                td.StimFacingCamera = StimFacingCamera;
                 TrialDefs[iTrial] = td;
             }
         }
@@ -106,6 +109,7 @@ namespace FlexLearning_Namespace
         public string TrialID;
         public TokenReward[][] TrialStimTokenReward;
         public bool RandomizedLocations;
+        public bool StimFacingCamera;
         public string ContextName;
         public string BlockEndType;
         public float BlockEndThreshold;

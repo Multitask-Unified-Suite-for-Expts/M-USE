@@ -103,6 +103,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
             startButton.SetActive(true);
             TokenFBController.enabled = false;
+            
 
         });
         initTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton),
@@ -146,6 +147,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 playerViewTextList.Add(playerViewText);
                 playerViewLoaded = true;
                 */
+            }
+            //stim facing camera
+            if (CurrentTrialDef.StimFacingCamera)
+            {
+                foreach (var stim in tStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
             }
         });
 
@@ -279,11 +285,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.TrialStimTokenReward[i]);
             if (sd.StimTrialRewardMag > 0) sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!!
             else sd.IsTarget = false;
-
         }
-
         randomizedLocations = CurrentTrialDef.RandomizedLocations;
-
         if (randomizedLocations)
         {
             int[] positionIndexArray = Enumerable.Range(0, CurrentTrialDef.TrialStimIndices.Length).ToArray();
@@ -317,6 +320,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
         tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
+        
         variablesLoaded = true;
         //disableAllGameobjects();
     }

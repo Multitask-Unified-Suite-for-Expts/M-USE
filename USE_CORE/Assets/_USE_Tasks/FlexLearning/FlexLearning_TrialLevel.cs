@@ -151,7 +151,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             //stim facing camera
             if (CurrentTrialDef.StimFacingCamera)
             {
-                foreach (var stim in tStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
+                foreach (var stim in tStim.stimDefs)
+                {
+                    stim.StimGameObject.AddComponent<FaceCamera>();
+                   // stim.StimGameObject.transform.rotation = Quaternion.Euler(0,0,0);
+                }
             }
         });
 

@@ -496,10 +496,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-<<<<<<< HEAD
   field of view: 30
-=======
-  field of view: 50
 >>>>>>> 42b462548807df64a76f82668f1d72ba8937554e
   orthographic: 0
   orthographic size: 5

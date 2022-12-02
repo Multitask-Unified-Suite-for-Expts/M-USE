@@ -14,6 +14,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
     public string CurrentBlockString;
     public StringBuilder PreviousBlocksString;
 
+    public int BlockStringsAdded;
+
     THR_BlockDef currentBlock => GetCurrentBlockDef<THR_BlockDef>();
 
 
@@ -38,15 +40,18 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
 
-        SetupTask.AddInitializationMethod(() => SetupBlockData(trialLevel));
+        SetupTask.AddInitializationMethod(() => {
+            SetupBlockData(trialLevel);
+            BlockStringsAdded = 0;
+        });
 
         RunBlock.AddInitializationMethod(() =>
         {
             trialLevel.NumTrialsCompletedBlock = 0;
             trialLevel.NumTrialsCorrectBlock = 0;
-            trialLevel.NumTouchesOutsideSquare = 0;
-            trialLevel.NumTouchesBlueSquare = 0;
-            trialLevel.NumTouchesWhiteSquare = 0;
+            trialLevel.NonSquareTouches_Block = 0;
+            trialLevel.BlueSquareTouches_Block = 0;
+            trialLevel.WhiteSquareTouches_Block = 0;
             trialLevel.NumTouchRewards = 0;
             trialLevel.NumReleaseRewards = 0;
             trialLevel.PerfThresholdMet = false;
@@ -64,11 +69,11 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddInitializationMethod(() =>
         {
-            if (BlockCount > 0)
+            if(BlockStringsAdded > 0)
                 CurrentBlockString += "\n";
+            BlockStringsAdded++;
             PreviousBlocksString.Insert(0, CurrentBlockString);
         });
-
     }
 
     void SetBlockSummaryString(THR_TrialLevel trialLevel)
@@ -78,14 +83,13 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = ("<b>Block " + "(" + currentBlock.BlockName + "):" + "</b>" +
                         "\nNumTrialsCompleted: " + trialLevel.NumTrialsCompletedBlock +
                         "\nNumTrialsCorrect: " + trialLevel.NumTrialsCorrectBlock +
-                        "\nNumTouchesWhiteSquare: " + trialLevel.NumTouchesWhiteSquare +
-                        "\nNumTouchesBlueSquare: " + trialLevel.NumTouchesBlueSquare +
-                        "\nNumTouchesOutsideSquare: " + trialLevel.NumTouchesOutsideSquare +
+                        "\nPerformance: " + trialLevel.PerformancePercentage + "%" +
+                        "\nNumTouchesWhiteSquare: " + trialLevel.WhiteSquareTouches_Block +
+                        "\nNumTouchesBlueSquare: " + trialLevel.BlueSquareTouches_Block +
+                        "\nNumTouchesOutsideSquare: " + trialLevel.NonSquareTouches_Block +
                         "\nNumRewards: " + (trialLevel.NumTouchRewards + trialLevel.NumReleaseRewards) +
-                        "\nPerfThresholdMet: " + trialLevel.PerfThresholdMet);
-
-        if (BlockCount > 0)
-            CurrentBlockString += "\n";
+                        "\nPerfThresholdMet: " + trialLevel.PerfThresholdMet +
+                        "\n");
 
         BlockSummaryString.AppendLine(CurrentBlockString).ToString();
         if (PreviousBlocksString.Length > 0)
@@ -102,9 +106,9 @@ public class THR_TaskLevel : ControlLevel_Task_Template
     {
         BlockData.AddDatum("NumTrialsCompleted", () => trialLevel.NumTrialsCompletedBlock);
         BlockData.AddDatum("NumTrialsCorrect", () => trialLevel.NumTrialsCorrectBlock);
-        BlockData.AddDatum("NumTouchesWhiteSquare", () => trialLevel.NumTouchesWhiteSquare);
-        BlockData.AddDatum("NumTouchesBlueSquare", () => trialLevel.NumTouchesBlueSquare);
-        BlockData.AddDatum("NumTouchesOutsideSquare", () => trialLevel.NumTouchesOutsideSquare);
+        BlockData.AddDatum("WhiteSquareTouches_Block", () => trialLevel.WhiteSquareTouches_Block);
+        BlockData.AddDatum("BlueSquareTouches_Block", () => trialLevel.BlueSquareTouches_Block);
+        BlockData.AddDatum("NonSquareTouches_Block", () => trialLevel.NonSquareTouches_Block);
         BlockData.AddDatum("NumTouchRewards", () => trialLevel.NumTouchRewards);
         BlockData.AddDatum("NumReleaseRewards", () => trialLevel.NumReleaseRewards);
         BlockData.AddDatum("DifficultyLevel", () => currentBlock.BlockName);
@@ -114,6 +118,5 @@ public class THR_TaskLevel : ControlLevel_Task_Template
     {
         return (T)CurrentBlockDef;
     }
-
 
 }

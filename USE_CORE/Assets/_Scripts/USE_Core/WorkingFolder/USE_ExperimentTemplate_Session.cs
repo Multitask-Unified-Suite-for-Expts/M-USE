@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using UnityEngine;
@@ -276,11 +277,12 @@ namespace USE_ExperimentTemplate_Session
                         SceneLoading = true;
                         taskName = (string)TaskMappings[iTask];
                         loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
+                        string configName = TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
                         // Unload it after memory because this loads the assets into memory but destroys the objects
                         loadScene.completed += (_) =>
                         {
                             SessionSettings.Save();
-                            SceneLoaded(taskName, true);
+                            SceneLoaded(configName, true);
                             SessionSettings.Restore();
                             SceneManager.UnloadSceneAsync(taskName);
                             SceneLoading = false;
@@ -559,7 +561,10 @@ namespace USE_ExperimentTemplate_Session
         void SceneLoaded(string configName, bool verifyOnly)
         {
             string taskName = (string)TaskMappings[configName];
+            Debug.Log("configName: " + configName);
+            Debug.Log("taskName: " + taskName);
             var methodInfo = GetType().GetMethod(nameof(this.PrepareTaskLevel));
+            
             Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
             MethodInfo prepareTaskLevel = methodInfo.MakeGenericMethod(new Type[] { taskType });
             prepareTaskLevel.Invoke(this, new object[] { configName, verifyOnly });

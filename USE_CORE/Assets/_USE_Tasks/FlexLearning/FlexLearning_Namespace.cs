@@ -26,6 +26,9 @@ namespace FlexLearning_Namespace
         Vector3 ButtonColor;
         string ButtonText;
         string ContextExternalFilePath;
+        bool StimFacingCamera;
+        string ShadowType;
+        bool UsingRewardPump;
     }
 
     public class FlexLearning_BlockDef : BlockDef
@@ -48,7 +51,6 @@ namespace FlexLearning_Namespace
         public int NumPulses;
         public int PulseSize;
         public bool RandomizedLocations;
-        public bool StimFacingCamera;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -73,7 +75,6 @@ namespace FlexLearning_Namespace
                 td.BlockEndWindow = BlockEndWindow;
                 td.NumPulses = NumPulses;
                 td.NumTokenBar = NumTokenBar;
-                td.StimFacingCamera = StimFacingCamera;
                 td.PulseSize = PulseSize;
                 TrialDefs.Add(td);
             }
@@ -92,7 +93,6 @@ namespace FlexLearning_Namespace
                 td.NumPulses = NumPulses;
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
-                td.StimFacingCamera = StimFacingCamera;
                 TrialDefs[iTrial] = td;
             }
         }

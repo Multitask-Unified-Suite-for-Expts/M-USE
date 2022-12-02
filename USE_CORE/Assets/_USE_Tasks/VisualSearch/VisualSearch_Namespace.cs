@@ -24,9 +24,11 @@ namespace VisualSearch_Namespace
         Vector3 ButtonPosition;
         Vector3 ButtonScale;
         Vector3 ButtonColor;
-        //int NumTokens;
         string ButtonText;
         string ContextExternalFilePath;
+        bool StimFacingCamera;
+        string ShadowType;
+        bool UsingRewardPump;
     }
 
     public class VisualSearch_BlockDef : BlockDef

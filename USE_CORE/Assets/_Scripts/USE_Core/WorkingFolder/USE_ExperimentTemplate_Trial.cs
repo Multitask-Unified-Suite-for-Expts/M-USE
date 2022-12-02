@@ -21,7 +21,7 @@ namespace USE_ExperimentTemplate_Trial
         protected int NumTrialsInBlock;
         [HideInInspector] public SessionDataControllers SessionDataControllers;
 
-        [HideInInspector] public bool StoreData;
+        [HideInInspector] public bool StoreData, ForceBlockEnd;
         [HideInInspector] public string TaskDataPath, FilePrefix, TrialSummaryString;
 
         protected State SetupTrial, FinishTrial;
@@ -103,6 +103,7 @@ namespace USE_ExperimentTemplate_Trial
             });
 
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
+            FinishTrial.SpecifyTermination(() => CheckForcedBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Count - 1, SetupTrial);
             FinishTrial.SpecifyTermination(() => TrialCount_InBlock == TrialDefs.Count - 1, () => null);
 
@@ -126,6 +127,17 @@ namespace USE_ExperimentTemplate_Trial
             TrialData.CreateFile();
 
 
+        }
+
+        private bool CheckForcedBlockEnd()
+        {
+            if (ForceBlockEnd)
+            {
+                ForceBlockEnd = false;
+                return true;
+            }
+
+            return false;
         }
 
         protected virtual bool CheckBlockEnd()

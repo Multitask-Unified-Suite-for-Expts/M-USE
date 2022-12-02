@@ -36,8 +36,8 @@ public class MouseTracker : InputTracker
         // If the mouse button is up, that means they clicked and released. This is a good way to only count clicks and not holds
         if (InputBroker.GetMouseButtonUp(0))
             ClickCount++;
-
-        if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out RaycastHit hit, Mathf.Infinity))
+        
+        if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out RaycastHit hit, Mathf.Infinity, SelectionMask))
         {
             HoverObject = hit.transform.root.gameObject;
             if (InputBroker.GetMouseButton(0)) return HoverObject;

@@ -27,7 +27,6 @@ namespace USE_ExperimentTemplate_Session
         private SessionDataControllers SessionDataControllers;
         private bool StoreData;
         [HideInInspector] public string SubjectID, SessionID, SessionDataPath, FilePrefix;
-        [HideInInspector] public int ExperimenterDisplayLayer = 11;
         
         public string TaskSelectionSceneName;
 
@@ -401,7 +400,6 @@ namespace USE_ExperimentTemplate_Session
                 {
                     SceneLoaded(selectedConfigName, false);
                     CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigName == selectedConfigName);
-                    CurrentTask.ExperimenterDisplayLayer = ExperimenterDisplayLayer;
                 };
             });
             loadTask.SpecifyTermination(() => !SceneLoading, runTask, () =>

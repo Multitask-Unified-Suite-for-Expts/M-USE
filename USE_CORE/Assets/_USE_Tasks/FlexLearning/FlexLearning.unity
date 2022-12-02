@@ -497,7 +497,6 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 30
->>>>>>> 42b462548807df64a76f82668f1d72ba8937554e
   orthographic: 0
   orthographic size: 5
   m_Depth: -1

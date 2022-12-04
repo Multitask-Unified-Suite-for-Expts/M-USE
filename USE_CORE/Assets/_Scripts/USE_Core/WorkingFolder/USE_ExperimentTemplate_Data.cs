@@ -1,12 +1,52 @@
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Collections;
+using System.IO;
 using UnityEngine;
 using USE_Data;
+using USE_States;
 using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 
 namespace USE_ExperimentTemplate_Data
 {
+    public class SummaryData
+    {
+        private static string folderPath;
+        private static bool storeData;
+
+        public static void Init(bool storeData, string folderPath)
+        {
+            SummaryData.storeData = storeData;
+            SummaryData.folderPath = Path.Combine(folderPath, "SummaryData");
+            if (storeData)
+            {
+                System.IO.Directory.CreateDirectory(SummaryData.folderPath);
+            }
+        }
+
+        public static void AddTaskRunData(string ConfigName, ControlLevel state, OrderedDictionary data)
+        {
+            if (!storeData)
+            {
+                return;
+            }
+
+            data["Start Time"] = state.StartTimeAbsolute;
+            data["Duration"] = state.Duration;
+
+            string filePath = Path.Combine(folderPath, ConfigName + ".txt");
+            using (StreamWriter dataStream = File.AppendText(filePath))
+            {
+                foreach (DictionaryEntry entry in data)
+                {
+                    dataStream.Write($"{entry.Key}:\t{entry.Value}\n");
+                }
+            }
+        }
+    }
+
     public class SessionData : DataController
     {
         public ControlLevel_Session_Template sessionLevel;

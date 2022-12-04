@@ -25,11 +25,11 @@ namespace USE_ExperimentTemplate_Session
 
         [HideInInspector] public bool TasksFinished;
 
+        protected SummaryData SummaryData;
         protected SessionData SessionData;
         private SessionDataControllers SessionDataControllers;
         private bool StoreData;
         [HideInInspector] public string SubjectID, SessionID, SessionDataPath, FilePrefix;
-        [HideInInspector] public int ExperimenterDisplayLayer = 11;
         
         public string TaskSelectionSceneName;
 
@@ -409,7 +409,6 @@ namespace USE_ExperimentTemplate_Session
                 {
                     SceneLoaded(selectedConfigName, false);
                     CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigName == selectedConfigName);
-                    CurrentTask.ExperimenterDisplayLayer = ExperimenterDisplayLayer;
                 };
             });
             loadTask.SpecifyTermination(() => !SceneLoading, runTask, () =>
@@ -418,6 +417,7 @@ namespace USE_ExperimentTemplate_Session
                 CameraMirrorTexture.Release();
                 SessionCam.gameObject.SetActive(false);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
+                CurrentTask.TrialLevel.TaskLevel = CurrentTask;
                 ExperimenterDisplayController.ResetTask(CurrentTask, CurrentTask.TrialLevel);
             });
 
@@ -443,6 +443,7 @@ namespace USE_ExperimentTemplate_Session
             }
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
             {
+                SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
                 SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
                 SessionData.AppendData();
@@ -466,6 +467,8 @@ namespace USE_ExperimentTemplate_Session
 
             SessionData.AddDatum("SelectedTaskConfigName", () => selectedConfigName);
             SessionData.AddDatum("TaskAutomaticallySelected", () => taskAutomaticallySelected);
+
+            SummaryData.Init(StoreData, SessionDataPath);
 
             void GetTaskLevelFromString<T>()
                 where T : ControlLevel_Task_Template

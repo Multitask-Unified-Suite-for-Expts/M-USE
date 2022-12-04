@@ -36,7 +36,6 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public string SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
         [HideInInspector] public LocateFile LocateFile;
         [HideInInspector] public StringBuilder BlockSummaryString;
-        [HideInInspector] public int ExperimenterDisplayLayer;
 
         // public string TaskSceneName;
         public Camera TaskCam;
@@ -319,12 +318,12 @@ namespace USE_ExperimentTemplate_Task
             }
 
             TrialLevel.MouseTracker = inputTrackers.GetComponent<MouseTracker>();
-            TrialLevel.MouseTracker.Init(FrameData, ExperimenterDisplayLayer);
+            TrialLevel.MouseTracker.Init(FrameData, 0);
             TrialLevel.GazeTracker = inputTrackers.GetComponent<GazeTracker>();
             if (!string.IsNullOrEmpty(EyetrackerType) & EyetrackerType.ToLower() != "none" &
                 EyetrackerType.ToLower() != "null")
             {
-                TrialLevel.GazeTracker.Init(FrameData, ExperimenterDisplayLayer);
+                TrialLevel.GazeTracker.Init(FrameData, 0);
             }
 
             TrialLevel.SelectionType = SelectionType;
@@ -454,6 +453,10 @@ namespace USE_ExperimentTemplate_Task
         public virtual void ReadCustomSettingsFiles()
         {
             
+        }
+
+        public virtual Dictionary<string, object> SummarizeTask() {
+            return new Dictionary<string, object>();
         }
 
         public void FindStims()

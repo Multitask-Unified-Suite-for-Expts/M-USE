@@ -9,7 +9,7 @@ public abstract class InputTracker : MonoBehaviour
     private DataController FrameData;
     public GameObject CurrentTargetGameObject;
     public StimDef CurrentTargetStimDef;
-    protected LayerMask SelectionMask;
+    protected int AllowedDisplay = -1;
 
     private event EventHandler<EventArgs> TargetUpdated;
 
@@ -34,12 +34,11 @@ public abstract class InputTracker : MonoBehaviour
         };
     }
 
-    public void Init(DataController frameData, int? ignoreLayer = null)
+    public void Init(DataController frameData, int allowedDisplay)
     {
         AddFieldsToFrameData(frameData);
-        SelectionMask = ~(1 << 2);
-        if (ignoreLayer != null)
-            SelectionMask |= ~(1 << ignoreLayer.Value);
+        AllowedDisplay = allowedDisplay;
+
     }
 
     private void Update()

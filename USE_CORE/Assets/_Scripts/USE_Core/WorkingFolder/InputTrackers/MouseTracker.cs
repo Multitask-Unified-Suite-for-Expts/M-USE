@@ -8,6 +8,15 @@ public class MouseTracker : InputTracker
 {
     [CanBeNull] private GameObject HoverObject;
     private bool UsingSecondMonitor = false;
+    private int ClickCount = 0;
+
+    public void ResetClickCount() {
+        ClickCount = 0;
+    }
+
+    public int GetClickCount() {
+        return ClickCount;
+    }
 
     public override void AddFieldsToFrameData(DataController frameData)
     {
@@ -21,10 +30,18 @@ public class MouseTracker : InputTracker
     public override GameObject FindCurrentTarget()
     {
         Vector3 touchPos = InputBroker.mousePosition;
-        if (UsingSecondMonitor)
-            touchPos.x = touchPos.x + 1920;
+#if !UNITY_EDITOR
+        Vector3 screenCoords = Display.RelativeMouseAt(touchPos);
+        if (AllowedDisplay >= 0 && touchPos.z != AllowedDisplay) {
+            return null;
+        }
+#endif
+
+        // If the mouse button is up, that means they clicked and released. This is a good way to only count clicks and not holds
+        if (InputBroker.GetMouseButtonUp(0))
+            ClickCount++;
         
-        if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out RaycastHit hit, Mathf.Infinity, SelectionMask))
+        if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out RaycastHit hit, Mathf.Infinity))
         {
             HoverObject = hit.transform.root.gameObject;
             if (InputBroker.GetMouseButton(0))

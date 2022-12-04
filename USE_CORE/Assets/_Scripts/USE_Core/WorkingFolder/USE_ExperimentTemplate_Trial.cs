@@ -26,6 +26,7 @@ namespace USE_ExperimentTemplate_Trial
 
         protected State SetupTrial, FinishTrial;
 
+        public ControlLevel_Task_Template TaskLevel;
         public List<TrialDef> TrialDefs;
 
         [HideInInspector] public TaskStims TaskStims;
@@ -56,6 +57,11 @@ namespace USE_ExperimentTemplate_Trial
         public T GetCurrentTrialDef<T>() where T : TrialDef
         {
             return (T)TrialDefs[TrialCount_InBlock];
+        }
+
+        public T GetTaskLevel<T>() where T: ControlLevel_Task_Template
+        {
+            return (T)TaskLevel;
         }
 
         public Type TrialDefType, StimDefType;

@@ -8,6 +8,7 @@ using USE_Settings;
 using USE_StimulusManagement;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Block;
+using System.Collections.Specialized;
 
 public class THR_TaskLevel : ControlLevel_Task_Template
 {
@@ -17,6 +18,14 @@ public class THR_TaskLevel : ControlLevel_Task_Template
     public int BlockStringsAdded;
 
     THR_BlockDef currentBlock => GetCurrentBlockDef<THR_BlockDef>();
+
+    public int TrialsCompleted_Task = 0;
+    public int TrialsCorrect_Task = 0;
+    public int BlueSquareTouches_Task = 0;
+    public int WhiteSquareTouches_Task = 0;
+    public int NonSquareTouches_Task = 0;
+    public int TouchRewards_Task = 0;
+    public int ReleaseRewards_Task = 0;
 
 
     public override void SpecifyTypes()
@@ -52,8 +61,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             trialLevel.NonSquareTouches_Block = 0;
             trialLevel.BlueSquareTouches_Block = 0;
             trialLevel.WhiteSquareTouches_Block = 0;
-            trialLevel.NumTouchRewards = 0;
-            trialLevel.NumReleaseRewards = 0;
+            trialLevel.NumTouchRewards_Block = 0;
+            trialLevel.NumReleaseRewards_Block = 0;
             trialLevel.PerfThresholdMet = false;
 
             SetBlockSummaryString(trialLevel);
@@ -73,7 +82,30 @@ public class THR_TaskLevel : ControlLevel_Task_Template
                 CurrentBlockString += "\n";
             BlockStringsAdded++;
             PreviousBlocksString.Insert(0, CurrentBlockString);
+
+            TrialsCompleted_Task += trialLevel.NumTrialsCompletedBlock;
+            TrialsCorrect_Task += trialLevel.NumTrialsCorrectBlock;
+            BlueSquareTouches_Task += trialLevel.BlueSquareTouches_Block;
+            WhiteSquareTouches_Task += trialLevel.WhiteSquareTouches_Block;
+            NonSquareTouches_Task += trialLevel.NonSquareTouches_Block;
+            TouchRewards_Task += trialLevel.NumTouchRewards_Block;
+            ReleaseRewards_Task += trialLevel.NumReleaseRewards_Block;
         });
+    }
+
+    public override OrderedDictionary GetSummaryData()
+    {
+        OrderedDictionary data = new OrderedDictionary();
+
+        data["Trials Completed"] = TrialsCompleted_Task;
+        data["Trials Correct"] = TrialsCorrect_Task;
+        data["Blue Square Touches"] = BlueSquareTouches_Task;
+        data["White Square Touches"] = WhiteSquareTouches_Task;
+        data["Non Square Touches"] = NonSquareTouches_Task;
+        data["Touch Rewards"] = TouchRewards_Task;
+        data["Release Rewards"] = ReleaseRewards_Task;
+
+        return data;
     }
 
     void SetBlockSummaryString(THR_TrialLevel trialLevel)
@@ -87,7 +119,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
                         "\nNumTouchesWhiteSquare: " + trialLevel.WhiteSquareTouches_Block +
                         "\nNumTouchesBlueSquare: " + trialLevel.BlueSquareTouches_Block +
                         "\nNumTouchesOutsideSquare: " + trialLevel.NonSquareTouches_Block +
-                        "\nNumRewards: " + (trialLevel.NumTouchRewards + trialLevel.NumReleaseRewards) +
+                        "\nNumRewards: " + (trialLevel.NumTouchRewards_Block + trialLevel.NumReleaseRewards_Block) +
                         "\nPerfThresholdMet: " + trialLevel.PerfThresholdMet +
                         "\n");
 
@@ -109,8 +141,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("WhiteSquareTouches_Block", () => trialLevel.WhiteSquareTouches_Block);
         BlockData.AddDatum("BlueSquareTouches_Block", () => trialLevel.BlueSquareTouches_Block);
         BlockData.AddDatum("NonSquareTouches_Block", () => trialLevel.NonSquareTouches_Block);
-        BlockData.AddDatum("NumTouchRewards", () => trialLevel.NumTouchRewards);
-        BlockData.AddDatum("NumReleaseRewards", () => trialLevel.NumReleaseRewards);
+        BlockData.AddDatum("NumTouchRewards", () => trialLevel.NumTouchRewards_Block);
+        BlockData.AddDatum("NumReleaseRewards", () => trialLevel.NumReleaseRewards_Block);
         BlockData.AddDatum("DifficultyLevel", () => currentBlock.BlockName);
     }
 

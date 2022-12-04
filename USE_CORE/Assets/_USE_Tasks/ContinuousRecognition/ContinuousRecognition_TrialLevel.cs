@@ -105,9 +105,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.enabled = false;
         ScoreAmountPerTrial = 100;
 
-        //Currently still created in Editor.
-        //CreateCanvasAndText();
-
         originalFbTextPosition = YouLoseTextGO.transform.position;
         originalTitleTextPosition = TitleTextGO.transform.position;
 
@@ -294,6 +291,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         ChooseStim.AddTimer(() => selectObjectDuration.value, ITI, () =>     //if no choice, skip touchFB/tokenFB and go to display results so the event codes can send.
         {
             TimerBackdropGO.SetActive(false);
+            ScoreTextGO.SetActive(false);
+            NumTrialsTextGO.SetActive(false);
             EndBlock = true;
             EventCodeManager.SendCodeImmediate(TaskEventCodes["NoChoice"]); 
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);

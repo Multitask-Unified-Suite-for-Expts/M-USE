@@ -107,8 +107,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     public float BlueStartTime;
 
-    public int NumTouchRewards;
-    public int NumReleaseRewards;
+    public int NumTouchRewards_Block;
+    public int NumReleaseRewards_Block;
 
     public float ReactionTime
     {
@@ -222,7 +222,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             if (EventSystem.current.IsPointerOverGameObject())
                 return;
 
-            if(MouseTracker.CurrentTargetGameObject == SquareGO)
+            if (MouseTracker.CurrentTargetGameObject == SquareGO)
             {
                 TouchStartTime = Time.time;
                 SquareMaterial.color = GreenColor;
@@ -286,12 +286,12 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 if(GiveTouchReward && SyncBoxController != null)
                 {
                     SyncBoxController.SendRewardPulses(CurrentTrial.NumTouchPulses, CurrentTrial.PulseSize);
-                    NumTouchRewards += CurrentTrial.NumTouchPulses;
+                    NumTouchRewards_Block += CurrentTrial.NumTouchPulses;
                 }
                 if(GiveHoldReward && SyncBoxController != null)
                 {
                     SyncBoxController.SendRewardPulses(CurrentTrial.NumReleasePulses, CurrentTrial.PulseSize);
-                    NumReleaseRewards += CurrentTrial.NumReleasePulses;
+                    NumReleaseRewards_Block += CurrentTrial.NumReleasePulses;
                 }
             }
             else

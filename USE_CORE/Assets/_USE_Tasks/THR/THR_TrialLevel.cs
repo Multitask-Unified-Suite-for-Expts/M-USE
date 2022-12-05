@@ -218,10 +218,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         });
         BlueSquare.AddUpdateMethod(() =>
         {
-            //If pointer is over a UI Element (EXPERIMENTER DISPLAY)
-            if (EventSystem.current.IsPointerOverGameObject())
-                return;
-
             if (MouseTracker.CurrentTargetGameObject == SquareGO)
             {
                 TouchStartTime = Time.time;

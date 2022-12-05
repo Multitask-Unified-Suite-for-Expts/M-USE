@@ -83,6 +83,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.TimeToCompletion_Block = 0;
             trialLevel.NumRewards_Block = 0;
 
+            trialLevel.AdjustedPositionsForBuild = false;
+
             CalculateBlockSummaryString(trialLevel);
         });
 

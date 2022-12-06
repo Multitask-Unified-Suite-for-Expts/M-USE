@@ -56,8 +56,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
-            trialLevel.NumTrialsCompletedBlock = 0;
-            trialLevel.NumTrialsCorrectBlock = 0;
+            trialLevel.TrialsCompleted_Block = 0;
+            trialLevel.TrialsCorrect_Block = 0;
             trialLevel.NonSquareTouches_Block = 0;
             trialLevel.BlueSquareTouches_Block = 0;
             trialLevel.WhiteSquareTouches_Block = 0;
@@ -83,8 +83,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             BlockStringsAdded++;
             PreviousBlocksString.Insert(0, CurrentBlockString);
 
-            TrialsCompleted_Task += trialLevel.NumTrialsCompletedBlock;
-            TrialsCorrect_Task += trialLevel.NumTrialsCorrectBlock;
+            TrialsCompleted_Task += trialLevel.TrialsCompleted_Block;
+            TrialsCorrect_Task += trialLevel.TrialsCorrect_Block;
             BlueSquareTouches_Task += trialLevel.BlueSquareTouches_Block;
             WhiteSquareTouches_Task += trialLevel.WhiteSquareTouches_Block;
             NonSquareTouches_Task += trialLevel.NonSquareTouches_Block;
@@ -113,8 +113,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         ClearStrings();
 
         CurrentBlockString = ("<b>Block " + "(" + currentBlock.BlockName + "):" + "</b>" +
-                        "\nNumTrialsCompleted: " + trialLevel.NumTrialsCompletedBlock +
-                        "\nNumTrialsCorrect: " + trialLevel.NumTrialsCorrectBlock +
+                        "\nNumTrialsCompleted: " + trialLevel.TrialsCompleted_Block +
+                        "\nNumTrialsCorrect: " + trialLevel.TrialsCorrect_Block +
                         "\nPerformance: " + trialLevel.PerformancePercentage + "%" +
                         "\nNumTouchesWhiteSquare: " + trialLevel.WhiteSquareTouches_Block +
                         "\nNumTouchesBlueSquare: " + trialLevel.BlueSquareTouches_Block +
@@ -136,8 +136,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
     void SetupBlockData(THR_TrialLevel trialLevel)
     {
-        BlockData.AddDatum("NumTrialsCompleted", () => trialLevel.NumTrialsCompletedBlock);
-        BlockData.AddDatum("NumTrialsCorrect", () => trialLevel.NumTrialsCorrectBlock);
+        BlockData.AddDatum("NumTrialsCompleted", () => trialLevel.TrialsCompleted_Block);
+        BlockData.AddDatum("NumTrialsCorrect", () => trialLevel.TrialsCorrect_Block);
         BlockData.AddDatum("WhiteSquareTouches_Block", () => trialLevel.WhiteSquareTouches_Block);
         BlockData.AddDatum("BlueSquareTouches_Block", () => trialLevel.BlueSquareTouches_Block);
         BlockData.AddDatum("NonSquareTouches_Block", () => trialLevel.NonSquareTouches_Block);

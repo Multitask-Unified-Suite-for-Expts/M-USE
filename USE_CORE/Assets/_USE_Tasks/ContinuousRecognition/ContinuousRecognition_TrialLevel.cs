@@ -105,9 +105,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.enabled = false;
         ScoreAmountPerTrial = 100;
 
-        //Currently still created in Editor.
-        //CreateCanvasAndText();
-
         originalFbTextPosition = YouLoseTextGO.transform.position;
         originalTitleTextPosition = TitleTextGO.transform.position;
 
@@ -294,6 +291,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         ChooseStim.AddTimer(() => selectObjectDuration.value, ITI, () =>     //if no choice, skip touchFB/tokenFB and go to display results so the event codes can send.
         {
             TimerBackdropGO.SetActive(false);
+            ScoreTextGO.SetActive(false);
+            NumTrialsTextGO.SetActive(false);
             EndBlock = true;
             EventCodeManager.SendCodeImmediate(TaskEventCodes["NoChoice"]); 
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
@@ -369,7 +368,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     else
                     {
                         YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
-                        YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Not bad! \n HighScore: {Score}";
+                        YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Good Try! \n HighScore: {Score}";
                         YouLoseTextGO.SetActive(true);
                     }
                 }
@@ -399,10 +398,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             TokenFBController.enabled = false;
             if (currentTrial.UseStarfield)
-            {
                 Starfield.SetActive(false);
-            }
-
+            
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
@@ -410,11 +407,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         //ITI State----------------------------------------------------------------------------------------------------------------------
 
-        ITI.AddInitializationMethod(() =>
-        {
-            ContextActive = false;
-        });
-
+        ITI.AddInitializationMethod(() => ContextActive = false);
         ITI.AddTimer(() => itiDuration.min, FinishTrial, () =>
         {
             TrialComplete = true;
@@ -520,10 +513,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 break;
             case 2:
                 if(numLocations % 2 == 0)
-                {
-                    R1_Length = numLocations / 2;
-                    R2_Length = numLocations / 2;
-                }
+                    R1_Length = R2_Length = numLocations / 2;
                 else
                 {
                     R1_Length = (int) Math.Floor((decimal)numLocations / 2); //round it down and increase next row by 1.
@@ -532,15 +522,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 break;
             case 3:
                 if (numLocations % 3 == 0)
-                {
-                    R1_Length = numLocations / 3;
-                    R2_Length = numLocations / 3;
-                    R3_Length = numLocations / 3;
-                }
+                    R1_Length = R2_Length = R3_Length = numLocations / 3;
                 else
                 {
-                    R1_Length = (int)Math.Floor((decimal)numLocations / 3);
-                    R2_Length = (int)Math.Floor((decimal)numLocations / 3);
+                    R1_Length = R2_Length = (int)Math.Floor((decimal)numLocations / 3);
                     R3_Length = (int)Math.Ceiling((decimal)numLocations / 3);
 
                     int diff = numLocations - (R1_Length + R2_Length + R3_Length);
@@ -549,17 +534,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 break;
             case 4:
                 if(numLocations % 4 == 0)
-                {
-                    R1_Length = numLocations / 4;
-                    R2_Length = numLocations / 4;
-                    R3_Length = numLocations / 4;
-                    R4_Length = numLocations / 4;
-                }
+                    R1_Length = R2_Length = R3_Length = R4_Length = numLocations / 4;
                 else
                 {
-                    R1_Length = (int)Math.Floor((decimal)numLocations / 4);
-                    R2_Length = (int)Math.Floor((decimal)numLocations / 4);
-                    R3_Length = (int)Math.Floor((decimal)numLocations / 4);
+                    R1_Length = R2_Length = R3_Length = (int)Math.Floor((decimal)numLocations / 4);
                     R4_Length = (int)Math.Ceiling((decimal)numLocations / 4);
 
                     int diff = numLocations - (R1_Length + R2_Length + R3_Length + R4_Length);
@@ -581,19 +559,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 break;
             case 5:
                 if (numLocations % 5 == 0)
-                {
-                    R1_Length = numLocations / 5;
-                    R2_Length = numLocations / 5;
-                    R3_Length = numLocations / 5;
-                    R4_Length = numLocations / 5;
-                    R5_Length = numLocations / 5;
-                }
+                    R1_Length = R2_Length = R3_Length = R4_Length = R5_Length = numLocations / 5;
                 else
                 {
-                    R1_Length = (int)Math.Floor((decimal)numLocations / 5);
-                    R2_Length = (int)Math.Floor((decimal)numLocations / 5);
-                    R3_Length = (int)Math.Floor((decimal)numLocations / 5);
-                    R4_Length = (int)Math.Floor((decimal)numLocations / 5);
+                    R1_Length = R2_Length = R3_Length = R4_Length = (int)Math.Floor((decimal)numLocations / 5);
                     R5_Length = (int)Math.Ceiling((decimal)numLocations / 5);
 
                     int diff = numLocations - (R1_Length + R2_Length + R3_Length + R4_Length + R5_Length);

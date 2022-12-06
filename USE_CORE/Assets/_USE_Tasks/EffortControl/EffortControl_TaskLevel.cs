@@ -8,7 +8,7 @@ using USE_Settings;
 using USE_StimulusManagement;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Block;
-
+using System.Collections.Specialized;
 
 public class EffortControl_TaskLevel : ControlLevel_Task_Template
 {   
@@ -23,7 +23,11 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     //    TrialDefType = typeof(EffortControl_TrialDef);
     //    StimDefType = typeof(EffortControl_StimDef);
     //}
-    
+
+    public int NumCompletions = 0;
+    public int NumPulses = 0;
+    public int TotalTouches = 0;
+
     public override void DefineControlLevel()
     {
         EffortControl_TrialLevel wmTL = (EffortControl_TrialLevel)TrialLevel;
@@ -33,5 +37,15 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
     }
 
+    public override OrderedDictionary GetSummaryData()
+    {
+        OrderedDictionary data = new OrderedDictionary();
+
+        data["Num Completions"] = NumCompletions;
+        data["Num Pulses"] = NumPulses;
+        data["Total Touches"] = TotalTouches;
+
+        return data;
+    }
 
 }

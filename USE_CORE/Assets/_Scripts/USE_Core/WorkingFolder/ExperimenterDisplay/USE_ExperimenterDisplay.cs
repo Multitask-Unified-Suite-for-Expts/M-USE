@@ -36,9 +36,6 @@ namespace USE_ExperimenterDisplay
                 panel.SessionLevel = SessionLevel;
                 //make sure panel is a child of the ExperimenterDisplay object, any other housekeeping necessary
             }
-            
-            MoveToLayer(ExperimenterDisplayGameObject.transform, SessionLevel.ExperimenterDisplayLayer);
-            
         }
 
         public void Update()
@@ -61,12 +58,6 @@ namespace USE_ExperimenterDisplay
                 panel.TrialLevel = trialLevel;
             }
             
-        }
-
-        private void MoveToLayer(Transform root, int layer) {
-            root.gameObject.layer = layer;
-            foreach(Transform child in root)
-                MoveToLayer(child, layer);
         }
     }
     public class ExperimenterDisplayPanel : MonoBehaviour

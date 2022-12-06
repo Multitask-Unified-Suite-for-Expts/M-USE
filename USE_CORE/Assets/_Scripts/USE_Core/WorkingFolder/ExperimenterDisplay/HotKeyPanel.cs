@@ -192,6 +192,42 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             };
             HotKeyList.Add(toggleCursor);
 
+
+            //RestartBlock Hot Key
+            HotKey restartBlock = new HotKey
+            {
+                keyDescription = "R",
+                actionName = "Restart Block",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.R),
+                hotKeyAction = () =>
+                {
+                    HkPanel.TaskLevel.BlockCount--;
+                    HkPanel.TrialLevel.ForceBlockEnd = true;
+                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+                }
+            };
+            HotKeyList.Add(restartBlock);
+
+            //PreviousBlock Hot Key
+            HotKey previousBlock = new HotKey
+            {
+                keyDescription = "B",
+                actionName = "Previous Block",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.B),
+                hotKeyAction = () =>
+                {
+                    if (HkPanel.TrialLevel.BlockCount == 0)
+                        return;
+                    else
+                    {
+                        HkPanel.TaskLevel.BlockCount -= 2;
+                        HkPanel.TrialLevel.ForceBlockEnd = true;
+                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+                    }
+                }
+            };
+            HotKeyList.Add(previousBlock);
+
             //End Block Hot Key
             HotKey endBlock = new HotKey
             {

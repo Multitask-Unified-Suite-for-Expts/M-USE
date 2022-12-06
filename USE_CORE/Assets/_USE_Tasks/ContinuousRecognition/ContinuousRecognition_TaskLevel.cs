@@ -74,7 +74,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             trialLevel.ChosenStimIndices.Clear();
-
             trialLevel.NumTrials_Block = 0;
             trialLevel.NumCorrect_Block = 0;
             trialLevel.NumTbCompletions_Block = 0;
@@ -83,7 +82,12 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.TimeToCompletion_Block = 0;
             trialLevel.NumRewards_Block = 0;
 
-            trialLevel.AdjustedPositionsForBuild = false;
+            if (currentBlock.MacMainDisplayBuild)
+                trialLevel.MacMainDisplayBuild = true;
+            else
+                trialLevel.MacMainDisplayBuild = false;
+
+            trialLevel.AdjustedPositionsForMac = false;
 
             CalculateBlockSummaryString(trialLevel);
         });

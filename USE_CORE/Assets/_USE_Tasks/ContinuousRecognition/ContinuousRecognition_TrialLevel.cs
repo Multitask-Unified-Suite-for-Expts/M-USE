@@ -50,6 +50,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public bool GotCorrect;
     public bool stimIsChosen;
 
+    public bool MacMainDisplayBuild;
+
     public StimGroup trialStims;
     public List<int> ChosenStimIndices;
     public string MaterialFilePath;
@@ -58,7 +60,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public bool ContextActive;
     public bool variablesLoaded;
 
-    public bool AdjustedPositionsForBuild;
+    public bool AdjustedPositionsForMac;
 
     //Display Data
     public int NumTrials_Block;
@@ -140,10 +142,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
-            if (!Debug.isDebugBuild && !AdjustedPositionsForBuild) //build, not running in editor
+            if(MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac)
             {
-                AdjustTextPositions();
-                AdjustedPositionsForBuild = true;
+                AdjustTextPosForMac();
+                AdjustedPositionsForMac = true;
             }
 
             if (currentTrial.UseStarfield)
@@ -445,7 +447,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         StartButton.transform.position = buttonPos;
     }
 
-    private void AdjustTextPositions() //When running a build instead of hitting play in editor:
+    private void AdjustTextPosForMac() //When running a build instead of hitting play in editor:
     {
         //Increase size of TokenBar
         Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
@@ -488,31 +490,31 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         switch (NumFeedbackRows)
         {
             case 1:
-                if(Debug.isDebugBuild)
+                if(Debug.isDebugBuild && MacMainDisplayBuild)
                     yOffset = 55f; //good
                 else
                     yOffset = 85f; //good for build
                 break;
             case 2:
-                if (Debug.isDebugBuild)
+                if (Debug.isDebugBuild & MacMainDisplayBuild)
                     yOffset = 40f; //good
                 else
                     yOffset = 60f; //good for build
                 break;
             case 3:
-                if (Debug.isDebugBuild)
+                if (Debug.isDebugBuild & MacMainDisplayBuild)
                     yOffset = -5f; //good
                 else
                     yOffset = 15f; //good for build
                 break;
             case 4:
-                if (Debug.isDebugBuild)
+                if (Debug.isDebugBuild && MacMainDisplayBuild)
                     yOffset = 0f; //good
                 else
                     yOffset = -5f;
                 break;
             case 5:
-                if (Debug.isDebugBuild)
+                if (Debug.isDebugBuild && MacMainDisplayBuild)
                     yOffset = -30f;
                 else
                     yOffset = -10f;
@@ -543,9 +545,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private Vector3[] CenterFeedbackLocations(Vector3[] locations, int numLocations)
     {
         int MaxNumPerRow = 6;
-        int numRows = 1;
         float max = 2.25f;
-
+        
+        int numRows = 1;
         if (numLocations > 6) numRows++;
         if (numLocations > 12) numRows++;
         if (numLocations > 18) numRows++;

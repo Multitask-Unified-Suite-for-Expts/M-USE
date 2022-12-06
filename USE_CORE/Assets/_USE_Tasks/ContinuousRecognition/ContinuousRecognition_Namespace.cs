@@ -37,6 +37,8 @@ namespace ContinuousRecognition_Namespace
         //public int? TotalTokensNum;
         //public int? MinTrials, MaxTrials;
 
+        public bool MacMainDisplayBuild;
+
         public int[] BlockStimIndices;
         public int[] NumObjectsMinMax;
         public int[] InitialStimRatio;

@@ -56,16 +56,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public List<int> TrialCompletionList;
     public int TrialsCompleted_Block;
     public int TrialsCorrect_Block;
-    public float PerformancePercentage
-    {
-        get
-        {
-            if (TrialsCompleted_Block > 0)
-                return (TrialsCorrect_Block / TrialsCompleted_Block) * 100;
-            else
-                return 0;
-        }
-    }
 
     //Data variables:
     public int NonSquareTouches_Trial;
@@ -273,7 +263,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         //If they click the square and release, OR run out of time, go to feedback state. 
         BlueSquare.SpecifyTermination(() => BlueSquareReleased || TimeRanOut, Feedback);
 
-        //FEEDBACK state ------------------------------------------------------------------------------------------------------------------------
+        //FEEDBACK state ----------------------------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
         {
             if((GiveTouchReward) || (GiveHoldReward))
@@ -298,7 +288,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         });
         Feedback.AddTimer(() => CurrentTrial.FbDuration, ITI);
 
-        //ITI state -----------------------------------------------------------------------------------------------------------------------------
+        //ITI state ---------------------------------------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>
         {
             SquareGO.SetActive(false);

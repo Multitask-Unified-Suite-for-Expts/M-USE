@@ -26,6 +26,9 @@ namespace FlexLearning_Namespace
         Vector3 ButtonColor;
         string ButtonText;
         string ContextExternalFilePath;
+        bool StimFacingCamera;
+        string ShadowType;
+        bool UsingRewardPump;
     }
 
     public class FlexLearning_BlockDef : BlockDef
@@ -106,6 +109,7 @@ namespace FlexLearning_Namespace
         public string TrialID;
         public TokenReward[][] TrialStimTokenReward;
         public bool RandomizedLocations;
+        public bool StimFacingCamera;
         public string ContextName;
         public string BlockEndType;
         public float BlockEndThreshold;

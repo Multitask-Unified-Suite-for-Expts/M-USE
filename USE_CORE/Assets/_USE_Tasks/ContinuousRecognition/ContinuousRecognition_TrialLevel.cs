@@ -72,6 +72,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public float TimeToCompletion_StartTime;
     public int NumRewards_Block;
 
+    public float TokenUpdateStartTime;
+
     public int TokenCount;
     public int NumFeedbackRows;
     public int ScoreAmountPerTrial;
@@ -93,7 +95,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     //Config Variables
     [HideInInspector]
-    public ConfigNumber minObjectTouchDuration, itiDuration, finalFbDuration, fbDuration, maxObjectTouchDuration, selectObjectDuration;
+    public ConfigNumber displayStimDuration, chooseStimDuration, itiDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration;
 
 
     public override void DefineControlLevel()
@@ -212,7 +214,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------
         //stim are turned on as soon as it enters DisplayStims state. no initialization method needed. 
-        DisplayStims.AddTimer(() => currentTrial.DisplayStimsDuration, ChooseStim, () => TimeRemaining = currentTrial.ChooseStimDuration);
+        DisplayStims.AddTimer(() => displayStimDuration.value, ChooseStim, () => TimeRemaining = chooseStimDuration.value);
 
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
         GameObject chosenStimObj = null;
@@ -302,7 +304,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             currentTrial.IsNewStim = GotCorrect;
         });
         ChooseStim.SpecifyTermination(() => stimIsChosen, TouchFeedback);
-        ChooseStim.AddTimer(() => selectObjectDuration.value, ITI, () =>     //if no choice, skip touchFB/tokenFB and go to display results so the event codes can send.
+        ChooseStim.AddTimer(() => chooseStimDuration.value, ITI, () =>     //if no choice, skip touchFB/tokenFB and go to display results so the event codes can send.
         {
             if(currentTrial.IsHuman)
             {
@@ -321,17 +323,20 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TouchFeedback.AddInitializationMethod(() =>
         {
             if (!stimIsChosen) return;
-            if (GotCorrect) HaloFBController.ShowPositive(chosenStimObj);
-            else HaloFBController.ShowNegative(chosenStimObj);
-
+            if (GotCorrect)
+                HaloFBController.ShowPositive(chosenStimObj);
+            else
+                HaloFBController.ShowNegative(chosenStimObj);
+            
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
         });
-        TouchFeedback.AddTimer(() => fbDuration.value, TokenUpdate, () => EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionVisualFbOff"]));
+        TouchFeedback.AddTimer(() => touchFbDuration.value, TokenUpdate, () => EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionVisualFbOff"]));
 
         //TOKEN UPDATE state ---------------------------------------------------------------------------------------------------------
         TokenUpdate.AddInitializationMethod(() =>
         {
+            TokenUpdateStartTime = Time.time;
             HaloFBController.Destroy();
             if (GotCorrect)
             {
@@ -359,7 +364,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 EndBlock = true;
             }
         });
-        TokenUpdate.SpecifyTermination(() => !TokenFBController.IsAnimating(), DisplayResults, () =>
+        TokenUpdate.SpecifyTermination(() => (Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value)) && !TokenFBController.IsAnimating(), DisplayResults, () =>
         {
             TimerBackdropGO.SetActive(false);
             ScoreTextGO.SetActive(false);
@@ -379,34 +384,21 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     if (CompletedAllTrials)
                     {
                         YouWinTextGO.transform.localPosition = new Vector3(YouWinTextGO.transform.localPosition.x, YouWinTextGO.transform.localPosition.y - Y_Offset, YouWinTextGO.transform.localPosition.z);
-                        YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"YOU WIN! \n New HighScore: {Score}";
+                        YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"YOU WON! \n New HighScore: {Score}xp";
                         YouWinTextGO.SetActive(true);
                     }
                     else
                     {
                         YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
-                        YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Good Try! \n HighScore: {Score}";
+                        YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Not too shabby! \n Score: {Score}xp";
                         YouLoseTextGO.SetActive(true);
                     }
                 }
             }
         });
 
-        DisplayResults.AddTimer(() => currentTrial.DisplayResultDuration, ITI, () =>
+        DisplayResults.AddTimer(() => displayResultsDuration.value, ITI, () =>
         {
-            StartCoroutine(DestroyFeedbackBorders());
-
-            if(YouWinTextGO.activeSelf)
-            {
-                YouWinTextGO.SetActive(false);
-                YouWinTextGO.transform.position = originalFbTextPosition; //Reset position for next Block;  
-            }
-            if(YouLoseTextGO.activeSelf)
-            {
-                YouLoseTextGO.SetActive(false);
-                YouLoseTextGO.transform.position = originalFbTextPosition; //Reset position for next Block;
-            }
-
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
@@ -426,11 +418,23 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //ITI State----------------------------------------------------------------------------------------------------------------------
 
         ITI.AddInitializationMethod(() => ContextActive = false);
-        ITI.AddTimer(() => itiDuration.min, FinishTrial, () =>
+        ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
         {
             TrialComplete = true;
             NumTrials_Block++;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]); //next trial starts next frame
+
+            if (YouWinTextGO.activeSelf)
+            {
+                YouWinTextGO.SetActive(false);
+                YouWinTextGO.transform.position = originalFbTextPosition; //Reset position for next Block;  
+            }
+            if (YouLoseTextGO.activeSelf)
+            {
+                YouLoseTextGO.SetActive(false);
+                YouLoseTextGO.transform.position = originalFbTextPosition; //Reset position for next Block;
+            }
+            DestroyFeedbackBorders();
         });
         
         LogTrialData();
@@ -447,7 +451,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         StartButton.transform.position = buttonPos;
     }
 
-    private void AdjustTextPosForMac() //When running a build instead of hitting play in editor:
+    void AdjustTextPosForMac() //When running a build instead of hitting play in editor:
     {
         //Increase size of TokenBar
         Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
@@ -465,7 +469,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TitleTextGO.transform.position = Position;
     }
 
-    private string GetContextNestedFilePath(string contextName)
+    string GetContextNestedFilePath(string contextName)
     {
         //Recursively search the sub folders of the MaterialFilePath to get Context File Path
         string backupContextName = "LinearDark";
@@ -483,7 +487,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         return contextPath;
     }
 
-    private float GetOffsetY()
+    float GetOffsetY()
     {
         //Function used to adjust the YouWin/YouLost text positioning for the human version. 
         float yOffset = 0;
@@ -523,14 +527,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         return yOffset;
     }
 
-    private void SetScoreAndTrialsText()
+    void SetScoreAndTrialsText()
     {
         //function to set the score and NumTrials texts at the beginning of the trial. 
         ScoreTextGO.GetComponent<TextMeshProUGUI>().text = $"SCORE: {Score}";
         NumTrialsTextGO.GetComponent<TextMeshProUGUI>().text = $"TRIALS: {TrialCount_InBlock}";
     }
 
-    private void SetTrialSummaryString()
+    void SetTrialSummaryString()
     {
         TrialSummaryString = "\n" +
                                "Trial #" + (TrialCount_InBlock + 1) +
@@ -542,7 +546,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                                "\nTotal Stim: " + (currentTrial.New_Stim.Count + currentTrial.PC_Stim.Count + currentTrial.PNC_Stim.Count);
     }
 
-    private Vector3[] CenterFeedbackLocations(Vector3[] locations, int numLocations)
+    Vector3[] CenterFeedbackLocations(Vector3[] locations, int numLocations)
     {
         int MaxNumPerRow = 6;
         float max = 2.25f;
@@ -882,7 +886,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         GetLog(currentTrial.TrialStimIndices, "TrialStimIndices");
     }
 
-    private void SetShadowType()
+    void SetShadowType()
     {
         //User options are None, Soft, Hard
         switch (currentTrial.ShadowType)
@@ -905,7 +909,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    private void CalculateBlockAvgTimeToChoice()
+    void CalculateBlockAvgTimeToChoice()
     {
         if (TimeToChoice_Block.Count == 0)
             AvgTimeToChoice_Block = 0;
@@ -916,7 +920,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         AvgTimeToChoice_Block = sum / TimeToChoice_Block.Count;
     }
 
-    private void GenerateBlockFeedback()
+    void GenerateBlockFeedback()
     {
         Starfield.SetActive(false);
         TokenFBController.enabled = false;
@@ -968,7 +972,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    private void GenerateFeedbackStim(StimGroup group, Vector3[] locations)
+    void GenerateFeedbackStim(StimGroup group, Vector3[] locations)
     {
         TrialStims.Add(group);
         group.SetLocations(locations);
@@ -976,7 +980,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         group.ToggleVisibility(true);
     }
 
-    private void GenerateFeedbackBorders(StimGroup group)
+    void GenerateFeedbackBorders(StimGroup group)
     {
         if (BorderPrefabList.Count == 0)
             BorderPrefabList = new List<GameObject>();
@@ -997,9 +1001,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     }
 
-    private IEnumerator DestroyFeedbackBorders() //trying to match up the dissapearance of borders and stim.
+    void DestroyFeedbackBorders()
     {
-        yield return new WaitForSeconds(.1f);
         foreach (GameObject border in BorderPrefabList)
         {
             if (border != null)
@@ -1008,7 +1011,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         BorderPrefabList.Clear();
     }
 
-    private void HandleTokenUpdate()
+    void HandleTokenUpdate()
     {
         if (TokenCount == currentTrial.NumTokenBar)
         {
@@ -1024,7 +1027,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    private List<int> ShuffleList(List<int> list)
+    List<int> ShuffleList(List<int> list)
     {
         if (list.Count == 1) return list;
         
@@ -1046,7 +1049,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         return EndBlock;
     }
 
-    private void SetStimStrings()
+    void SetStimStrings()
     {
         //Locations String;
         string s = "";
@@ -1114,7 +1117,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     }
 
-    private void LogTrialData()
+    void LogTrialData()
     {
         TrialData.AddDatum("Context", () => currentTrial.ContextName);
         TrialData.AddDatum("Starfield", () => currentTrial.UseStarfield);
@@ -1128,7 +1131,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("PC_Percentage", () => currentTrial.PC_Percentage_String);
     }
 
-    private void LogFrameData()
+    void LogFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
         FrameData.AddDatum("Context", () => currentTrial.ContextName);
@@ -1138,7 +1141,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("StarfieldActive", () => Starfield.activeSelf);
     }
 
-    private void ClearCurrentTrialStimLists()
+    void ClearCurrentTrialStimLists()
     {
         currentTrial.New_Stim.Clear();
         currentTrial.PNC_Stim.Clear();
@@ -1146,7 +1149,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         currentTrial.Unseen_Stim.Clear();
     }
 
-    private void GetLog(List<int> list, string name)
+    void GetLog(List<int> list, string name)
     {
         string result = name + ": ";
         foreach (var item in list)
@@ -1156,7 +1159,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         Debug.Log(result);
     }
 
-    private float[] GetStimRatioPercentages(int[] ratioArray)
+    float[] GetStimRatioPercentages(int[] ratioArray)
     {
         //Takes the initial stim ratio (ex: 2PC, 1New, 2PNC), and
         //outputs their percentages of the total 
@@ -1171,7 +1174,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         return stimPercentages;
     }
 
-    private int[] GetStimNumbers(float[] stimPercentages)
+    int[] GetStimNumbers(float[] stimPercentages)
     {
         //Function to calculate the correct num of stim for a trial.
         //Starts by understating each num, then it makes sure there are enough available (some ratios could overstate the stim),
@@ -1222,7 +1225,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         return new[] { PC_Num, New_Num, PNC_Num };
     }
 
-    private void CreateStartButton()
+    void CreateStartButton()
     {
         string contextPath = GetContextNestedFilePath("StartButtonImage.png");
         Texture2D tex = LoadPNG(contextPath);
@@ -1256,21 +1259,22 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         StartButton = startButton;
     }
 
-    private void LoadConfigUIVariables()
+    void LoadConfigUIVariables()
     {
-        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
-        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
+        displayStimDuration = ConfigUiVariables.get<ConfigNumber>("displayStimDuration");
+        chooseStimDuration = ConfigUiVariables.get<ConfigNumber>("chooseStimDuration");
+        touchFbDuration = ConfigUiVariables.get<ConfigNumber>("touchFbDuration");
+        tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
+        tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");
+        displayResultsDuration = ConfigUiVariables.get<ConfigNumber>("displayResultsDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
-        selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
-        finalFbDuration = ConfigUiVariables.get<ConfigNumber>("finalFbDuration");
-        fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
         variablesLoaded = true;
     }
 
-    private void SetTokenFeedbackTimes()
+    void SetTokenFeedbackTimes()
     {
-        TokenFBController.SetRevealTime(currentTrial.TokenRevealDuration);
-        TokenFBController.SetUpdateTime(currentTrial.TokenUpdateDuration);
+        TokenFBController.SetRevealTime(tokenRevealDuration.value);
+        TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
     }
 
 }

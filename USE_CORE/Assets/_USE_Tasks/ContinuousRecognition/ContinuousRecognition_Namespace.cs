@@ -64,9 +64,6 @@ namespace ContinuousRecognition_Namespace
 
         public int TrialCount, NumRewardPulses, PulseSize, RewardMag;
 
-        public float DisplayStimsDuration, ChooseStimDuration, TouchFeedbackDuration, TrialEndDuration,
-            DisplayResultDuration, TokenRevealDuration, TokenUpdateDuration;
-
         public string BlockName;
         public string ContextName;
 
@@ -162,14 +159,7 @@ namespace ContinuousRecognition_Namespace
                 trial.NumTrialStims = numTrialStims;
                 trial.MaxNumTrials = MaxNumTrials;
                 trial.MaxNumStim = MaxNumStim;
-                trial.DisplayStimsDuration = DisplayStimsDuration;
-                trial.ChooseStimDuration = ChooseStimDuration;
-                trial.DisplayResultDuration = DisplayResultDuration;
-                trial.TrialEndDuration = TrialEndDuration;
-                trial.TouchFeedbackDuration = TouchFeedbackDuration;
                 trial.ContextName = ContextName;
-                trial.TokenRevealDuration = TokenRevealDuration;
-                trial.TokenUpdateDuration = TokenUpdateDuration;
                 trial.NumRewardPulses = NumRewardPulses;
                 trial.RewardMag = RewardMag;
                 trial.PulseSize = PulseSize;
@@ -186,19 +176,19 @@ namespace ContinuousRecognition_Namespace
             }
         }
 
-        private string CalcPercentagePC()
+        string CalcPercentagePC()
         {
             float[] all = GetStimPercentages();
             float multiplied = all[0] * 100;
             return multiplied.ToString() + "%";
         }
 
-        private int CalculateMaxNumTrials(int maxNumStim)
+        int CalculateMaxNumTrials(int maxNumStim)
         {
             return maxNumStim + CalculateNumRemaining_EOT(maxNumStim);
         }
 
-        private int CalculateNumRemaining_EOT(int totalTrialStim)
+        int CalculateNumRemaining_EOT(int totalTrialStim)
         {
             int NumRemaining_BEG = 0;
             int NumRemaining_END = 0;
@@ -212,8 +202,7 @@ namespace ContinuousRecognition_Namespace
             return NumRemaining_END;
         }
 
-       
-        private int GetNumNewStim_Trial(int totalTrialStim)
+        int GetNumNewStim_Trial(int totalTrialStim)
         {
             float[] stimPercentages = GetStimPercentages();
 
@@ -250,7 +239,7 @@ namespace ContinuousRecognition_Namespace
             return Num_New;
         }
 
-        private float[] GetStimPercentages()
+        float[] GetStimPercentages()
         {
             var ratio = InitialStimRatio;
             float sum = 0;
@@ -301,9 +290,6 @@ namespace ContinuousRecognition_Namespace
         public int NumRewardPulses;
         public int RewardMag;
         public int PulseSize;
-
-        public float DisplayStimsDuration, ChooseStimDuration, TrialEndDuration, TouchFeedbackDuration, 
-            DisplayResultDuration, TokenRevealDuration, TokenUpdateDuration;
 
         public bool IsNewStim;
         public string ContextName;

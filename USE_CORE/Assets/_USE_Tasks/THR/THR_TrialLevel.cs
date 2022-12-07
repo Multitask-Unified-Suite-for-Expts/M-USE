@@ -44,6 +44,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public float TouchStartTime;
     public float TouchReleaseTime;
     public float HeldDuration;
+    public float BackdropTouchTime;
+    public float BackdropTouches;
 
     public bool TrialComplete;
 
@@ -82,10 +84,10 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public bool IsLevelOne;
     public bool PerfThresholdMet;
     public bool ColorsSet;
+    public bool InTimeout;
 
+    public Color32 LightBlueColor;
     public Color32 LightRedColor;
-    public Color32 LightGreenColor;
-    public Color32 GreenColor;
     public Color32 DarkBlueBackgroundColor;
     public Color32 InitialSquareColor;
     public Color32 InitialBackdropColor;
@@ -117,9 +119,12 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, WhiteSquare, BlueSquare, Feedback, ITI});
 
+
         //SETUP TRIAL state -------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
+            InTimeout = false;
+
             if (TrialCount_InBlock == 0)
                 TrialCompletionList = new List<int>();
 
@@ -198,16 +203,25 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         BlueSquare.AddInitializationMethod(() =>
         {
-            SquareMaterial.color = Color.blue;
+            SquareMaterial.color = LightBlueColor;
             if (!SquareGO.activeSelf)
                 ActivateSquareAndBackdrop();
             BlueStartTime = Time.time;
             BlueSquareTouched = false;
             BlueSquareReleased = false;
+            BackdropTouchTime = 0;
+            BackdropTouches = 0;
             Cursor.visible = true;
         });
         BlueSquare.AddUpdateMethod(() =>
         {
+            //if they already clicked the backdrop once, and the timeoutduration has lapsed, reset the variables
+            if(BackdropTouchTime != 0 && (Time.time - BackdropTouchTime) > CurrentTrial.TimeoutDuration)
+            {
+                BackdropTouches = 0;
+                BackdropTouchTime = 0;
+            }
+
             if(MouseTracker.CurrentTargetGameObject == SquareGO)
             {
                 if(!BlueSquareTouched)
@@ -217,14 +231,20 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 }
                 HeldDuration = mouseHandler.currentTargetDuration;
                 if(HeldDuration >= .045f)
-                    SquareMaterial.color = GreenColor;
+                    SquareMaterial.color = Color.blue;
                 if(CurrentTrial.RewardTouch)
                     GiveTouchReward = true;
             }
             if(MouseTracker.CurrentTargetGameObject == BackdropGO)
             {
                 ClickedOutsideSquare = true;
-                StartCoroutine(GratedBackdropFlash(BackdropStripeTexture));
+                if(BackdropTouches == 0)
+                {
+                    BackdropTouchTime = Time.time;
+                    StartCoroutine(GratedBackdropFlash(BackdropStripeTexture));
+                    BackdropTouches++;
+                }
+
             }
 
             if(InputBroker.GetMouseButtonUp(0))
@@ -236,17 +256,21 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     BlueSquareTouches_Trial++;
 
                     HeldDuration = mouseHandler.currentTargetDuration;
-                    if(HeldDuration >= CurrentTrial.MinTouchDuration && HeldDuration <= CurrentTrial.MaxTouchDuration)
+                    if(CurrentTrial.RewardRelease)
                     {
-                        SquareMaterial.color = LightGreenColor;
-                        if(CurrentTrial.RewardRelease)
+                        if(HeldDuration >= CurrentTrial.MinTouchDuration && HeldDuration <= CurrentTrial.MaxTouchDuration)
+                        {
+                            SquareMaterial.color = Color.gray;
                             GiveHoldReward = true;
+                        }
+                        else if(HeldDuration < CurrentTrial.MinTouchDuration)
+                            StartCoroutine(GratedSquareFlash(HeldTooShortTexture));
+                        else
+                            StartCoroutine(GratedSquareFlash(HeldTooLongTexture));
                     }
-                    else if(HeldDuration < CurrentTrial.MinTouchDuration)
-                        StartCoroutine(GratedSquareFlash(HeldTooShortTexture));
                     else
-                        StartCoroutine(GratedSquareFlash(HeldTooLongTexture));
-                    
+                        SquareMaterial.color = Color.gray;
+
                     BlueSquareReleased = true;
                 }
                 if(ClickedOutsideSquare)
@@ -310,7 +334,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             CheckIfBlockShouldEnd();
         });
-        ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial);
+        ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial, () => Cursor.visible = true);
 
         LogTrialData();
         LogFrameData();
@@ -478,8 +502,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     {
         DarkBlueBackgroundColor = new Color32(2, 3, 39, 255);
         LightRedColor = new Color32(224, 78, 92, 255);
-        GreenColor = new Color32(45, 175, 34, 255);
-        LightGreenColor = new Color32(90, 140, 100, 255);
+        LightBlueColor = new Color32(137, 187, 240, 255);
     }
 
     IEnumerator GratedSquareFlash(Texture2D newTexture)
@@ -505,7 +528,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         yield return new WaitForSeconds(1f);
         BackdropRenderer.material.mainTexture = BackdropTexture;
         BackdropMaterial.color = InitialBackdropColor;
-        SquareMaterial.color = Color.blue;
+        SquareMaterial.color = LightBlueColor;
         Cursor.visible = true;
     }
 

@@ -64,6 +64,7 @@ namespace THR_Namespace
         public bool RandomSquareSize;
         public bool RandomSquarePosition;
         public int TimeToAutoEndTrialSec;
+        public float TimeoutDuration;
 
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -106,6 +107,7 @@ namespace THR_Namespace
                 trial.RandomSquareSize = RandomSquareSize;
                 trial.RandomSquarePosition = RandomSquarePosition;
                 trial.TimeToAutoEndTrialSec = TimeToAutoEndTrialSec;
+                trial.TimeoutDuration = TimeoutDuration;
 
                 TrialDefs.Add(trial);
             }
@@ -151,6 +153,7 @@ namespace THR_Namespace
         public bool RandomSquareSize;
         public bool RandomSquarePosition;
         public int TimeToAutoEndTrialSec;
+        public float TimeoutDuration;
     }
 
 

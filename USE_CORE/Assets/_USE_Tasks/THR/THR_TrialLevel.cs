@@ -77,6 +77,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public Material BackdropMaterial;
 
     //misc
+    public bool WhiteSquareTouched;
     public bool BlueSquareTouched;
     public bool BlueSquareReleased;
     public bool ClickedOutsideSquare;
@@ -84,7 +85,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public bool IsLevelOne;
     public bool PerfThresholdMet;
     public bool ColorsSet;
-    public bool InTimeout;
 
     public Color32 LightBlueColor;
     public Color32 LightRedColor;
@@ -100,6 +100,10 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public float BlockDefaultWhiteSquareDuration;
     public float BlockDefaultBlueSquareDuration;
 
+    public bool AudioPlayed;
+
+    public float WhiteTimeoutTime;
+    public float WhiteStartTime;
     public float BlueStartTime;
     public float ReactionTime
     {
@@ -109,6 +113,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
+    public float WhiteTimeoutDuration;
 
     public override void DefineControlLevel()
     {
@@ -123,8 +128,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state -------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
-            InTimeout = false;
-
             if (TrialCount_InBlock == 0)
                 TrialCompletionList = new List<int>();
 
@@ -178,25 +181,42 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         WhiteSquare.AddInitializationMethod(() =>
         {
-            Cursor.visible = false;
+            Cursor.visible = true;
             SquareMaterial.color = Color.white;
             if (!SquareGO.activeSelf) //don't have to check both square and backdrop since they're both activated at same time. 
                 ActivateSquareAndBackdrop();
+            WhiteStartTime = Time.time;
+            WhiteTimeoutTime = 0;
+            WhiteSquareTouched = false;
         });
         WhiteSquare.AddUpdateMethod(() =>
         {
-            if (MouseTracker.CurrentTargetGameObject == SquareGO)
-                ClickedWhiteSquare = true;
+            if(WhiteTimeoutTime != 0 && (Time.time - WhiteTimeoutTime) > CurrentTrial.TimeoutDuration)
+            {
+                WhiteTimeoutTime = 0;
+                Cursor.visible = true;
+            }
             
+            if(MouseTracker.CurrentTargetGameObject == SquareGO)
+            {
+                ClickedWhiteSquare = true;
+                if(WhiteTimeoutTime == 0)
+                {
+                    WhiteTimeoutTime = Time.time;
+                    WhiteStartTime = Time.time; //reset original WhiteStartTime so that normal duration resets.
+                    if(!AudioFBController.IsPlaying()) //will keep playing every timeout duration period if they still holding. Which is good to teach them not to!
+                        AudioFBController.Play("Negative");
+                    Cursor.visible = false;
+                }
+            }
+           
             if (InputBroker.GetMouseButtonUp(0) && ClickedWhiteSquare)
             {
                 WhiteSquareTouches_Trial++;
                 ClickedWhiteSquare = false;
-                if (!AudioFBController.IsPlaying())
-                    AudioFBController.Play("Negative");
             }
         });
-        WhiteSquare.AddTimer(() => CurrentTrial.WhiteSquareDuration, BlueSquare, () => StartCoroutine(WhiteToBlueStatePause()));
+        WhiteSquare.SpecifyTermination(() => ((Time.time - WhiteStartTime) > CurrentTrial.WhiteSquareDuration) && WhiteTimeoutTime == 0 && !InputBroker.GetMouseButton(0), BlueSquare);
 
         //BLUE SQUARE state -------------------------------------------------------------------------------------------------------------------------
         MouseTracker.AddSelectionHandler(mouseHandler, BlueSquare);
@@ -233,7 +253,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 if(HeldDuration >= .045f)
                     SquareMaterial.color = Color.blue;
                 if(CurrentTrial.RewardTouch)
+                {
+                    Cursor.visible = false;
+                    //StartCoroutine(TouchFlash(Color.grey));
                     GiveTouchReward = true;
+                }
             }
             if(MouseTracker.CurrentTargetGameObject == BackdropGO)
             {
@@ -244,7 +268,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     StartCoroutine(GratedBackdropFlash(BackdropStripeTexture));
                     BackdropTouches++;
                 }
-
             }
 
             if(InputBroker.GetMouseButtonUp(0))
@@ -284,15 +307,18 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         });
         //Go back to white square if bluesquare time lapses (and they aren't already holding down)
         BlueSquare.SpecifyTermination(() => Time.time - BlueStartTime > CurrentTrial.BlueSquareDuration && !InputBroker.GetMouseButton(0), WhiteSquare);
-        //If they click the square and release, OR run out of time, go to feedback state. 
-        BlueSquare.SpecifyTermination(() => BlueSquareReleased || TimeRanOut, Feedback);
+        BlueSquare.SpecifyTermination(() => BlueSquareReleased || TimeRanOut, Feedback); //If they click the square and release, OR run out of time, go to feedback state. 
+        BlueSquare.SpecifyTermination(() => CurrentTrial.RewardTouch && GiveTouchReward, Feedback); //If rewarding touch, Go to feedback as soon as they click!!!
 
         //FEEDBACK state ----------------------------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
         {
+            AudioPlayed = false;
+
             if((GiveTouchReward) || (GiveHoldReward))
             {
                 AudioFBController.Play("Positive");
+                AudioPlayed = true;
                 if(GiveTouchReward && SyncBoxController != null)
                 {
                     SyncBoxController.SendRewardPulses(CurrentTrial.NumTouchPulses, CurrentTrial.PulseSize);
@@ -306,10 +332,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             }
             if(TimeRanOut)
             {
-                if(!AudioFBController.IsPlaying())
-                    AudioFBController.Play("Negative");
+                AudioFBController.Play("Negative");
+                AudioPlayed = true;
             }
         });
+        Feedback.SpecifyTermination(() => CurrentTrial.RewardTouch && AudioPlayed && !AudioFBController.IsPlaying(), ITI);
         Feedback.AddTimer(() => CurrentTrial.FbDuration, ITI);
 
         //ITI state ---------------------------------------------------------------------------------------------------------------------------------
@@ -492,19 +519,21 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         ConfigUiVariables.get<ConfigNumber>("blueSquareDuration").SetValue(BlockDefaultBlueSquareDuration);
     }
 
-    IEnumerator WhiteToBlueStatePause()
-    {
-        //Using this func to handle the player clicking while its changing from WhiteSquare state to BlueSquare state
-        yield return new WaitForSeconds(1f);
-    }
-
     void CreateColors()
     {
         DarkBlueBackgroundColor = new Color32(2, 3, 39, 255);
         LightRedColor = new Color32(224, 78, 92, 255);
-        LightBlueColor = new Color32(137, 187, 240, 255);
+        LightBlueColor = new Color32(0, 150, 255, 255);
     }
 
+    IEnumerator TouchFlash(Color32 newColor)
+    {
+        Color32 initialColor = SquareMaterial.color;
+        SquareMaterial.color = newColor;
+        yield return new WaitForSeconds(.1f);
+        SquareMaterial.color = initialColor;
+        
+    }
     IEnumerator GratedSquareFlash(Texture2D newTexture)
     {
         Cursor.visible = false;
@@ -568,22 +597,4 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("SquareGO", () => SquareGO.activeSelf);
     }
 
-    //private string GetContextNestedFilePath(string contextName)
-    //{
-    //    //Recursive search the sub folders of the MaterialFilePath to get Context File Path
-    //    string backupContextName = "LinearDark";
-    //    string contextPath = "";
-
-    //    string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
-
-    //    if (filePaths.Length == 1)
-    //        contextPath = filePaths[0];
-    //    else
-    //    {
-    //        Debug.Log($"Context File Path Not Found. Defaulting to {backupContextName}.");
-    //        contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0]; //Use Default LinearDark if can't find file.
-    //    }
-
-    //    return contextPath;
-    //}
 }

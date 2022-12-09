@@ -45,8 +45,8 @@ namespace THR_Namespace
         public float ItiDuration;
         public float MinTouchDuration;
         public float MaxTouchDuration;
-        //public int TouchToRewardDelayMS;
-        //public int ReleaseToRewardDelayMS;
+        public float TouchToRewardDelay;
+        public float ReleaseToRewardDelay;
         public float SquareSize;
         public float SquareSizeMin;
         public float SquareSizeMax;
@@ -60,10 +60,11 @@ namespace THR_Namespace
         public int NumTouchPulses;
         public bool RewardRelease;
         public int NumReleasePulses;
-        //public bool RandomReward;
+        public bool RandomReward;
         public bool RandomSquareSize;
         public bool RandomSquarePosition;
         public int TimeToAutoEndTrialSec;
+        public float TimeoutDuration;
 
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -87,8 +88,8 @@ namespace THR_Namespace
                 trial.ItiDuration = ItiDuration;
                 trial.MinTouchDuration = MinTouchDuration;
                 trial.MaxTouchDuration = MaxTouchDuration;
-                //trial.TouchToRewardDelayMS = TouchToRewardDelayMS;
-                //trial.ReleaseToRewardDelayMS = ReleaseToRewardDelayMS;
+                trial.TouchToRewardDelay = TouchToRewardDelay;
+                trial.ReleaseToRewardDelay = ReleaseToRewardDelay;
                 trial.SquareSize = SquareSize;
                 trial.SquareSizeMin = SquareSizeMin;
                 trial.SquareSizeMax = SquareSizeMax;
@@ -102,10 +103,11 @@ namespace THR_Namespace
                 trial.NumTouchPulses = NumTouchPulses;
                 trial.RewardRelease = RewardRelease;
                 trial.NumReleasePulses = NumReleasePulses;
-                //trial.RandomReward = RandomReward;
+                trial.RandomReward = RandomReward;
                 trial.RandomSquareSize = RandomSquareSize;
                 trial.RandomSquarePosition = RandomSquarePosition;
                 trial.TimeToAutoEndTrialSec = TimeToAutoEndTrialSec;
+                trial.TimeoutDuration = TimeoutDuration;
 
                 TrialDefs.Add(trial);
             }
@@ -132,8 +134,8 @@ namespace THR_Namespace
         public float ItiDuration;
         public float MinTouchDuration;
         public float MaxTouchDuration;
-        //public int TouchToRewardDelayMS;
-        //public int ReleaseToRewardDelayMS;
+        public float TouchToRewardDelay;
+        public float ReleaseToRewardDelay;
         public float SquareSize;
         public float SquareSizeMin;
         public float SquareSizeMax;
@@ -147,10 +149,11 @@ namespace THR_Namespace
         public int NumTouchPulses;
         public bool RewardRelease;
         public int NumReleasePulses;
-        //public bool RandomReward;
+        public bool RandomReward;
         public bool RandomSquareSize;
         public bool RandomSquarePosition;
         public int TimeToAutoEndTrialSec;
+        public float TimeoutDuration;
     }
 
 

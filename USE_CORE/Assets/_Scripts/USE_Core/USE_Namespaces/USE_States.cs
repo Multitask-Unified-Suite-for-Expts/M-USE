@@ -34,6 +34,7 @@ SOFTWARE.
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using UnityEngine;
 using USE_StimulusManagement;
 
@@ -695,6 +696,11 @@ namespace USE_States
 		public virtual void LoadSettings()
 		{
 
+		}
+
+		public virtual OrderedDictionary GetSummaryData()
+		{
+			return new OrderedDictionary();
 		}
 
 		public void InitializeControlLevel()

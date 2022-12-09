@@ -38,7 +38,7 @@ namespace USE_ExperimenterDisplay
                 //make sure panel is a child of the ExperimenterDisplay object, any other housekeeping necessary
             }
 
-            MoveToLayer(ExperimenterDisplayGameObject.transform, SessionLevel.ExperimenterDisplayLayer);
+            //MoveToLayer(ExperimenterDisplayGameObject.transform, SessionLevel.ExperimenterDisplayLayer);
 
         }
 

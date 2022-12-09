@@ -243,7 +243,7 @@ public class TokenFBController : MonoBehaviour
     
     public TokenFBController SetPositiveShowAudioClip(AudioClip clip) {
         audioFBController.AddClip("PositiveShow", clip);
-        flashBeepInterval = clip.length * 1.15f;
+        flashBeepInterval = clip.length;
         return this;
     }
     

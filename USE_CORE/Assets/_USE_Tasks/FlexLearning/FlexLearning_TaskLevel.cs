@@ -54,8 +54,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             */
             flTL.runningAcc.Clear();
             flTL.MinTrials = flBD.MinMaxTrials[0];
-            System.Random rnd = new System.Random();
-            flTL.MaxTrials = rnd.Next(flBD.MinMaxTrials[0], flBD.MinMaxTrials[1]);
+            flTL.MaxTrials = flBD.MinMaxTrials[1];
             flTL.NumTokenBar = flBD.NumTokenBar;
             flTL.numTokenBarFull = 0;
             TrialLevel.TokenFBController.SetTokenBarValue(flBD.NumInitialTokens); 

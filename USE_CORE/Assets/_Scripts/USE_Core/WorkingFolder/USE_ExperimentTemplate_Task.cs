@@ -302,13 +302,23 @@ namespace USE_ExperimentTemplate_Task
                 switch (fbController)
                 {
                     case "Audio":
-                        if (!audioInited) TrialLevel.AudioFBController.Init(FrameData);
+                        if (!audioInited)
+                        {
+                            TrialLevel.AudioFBController.Init(FrameData);
+                            audioInited = true;
+                        }
+
                         break;
                     case "Halo":
                         TrialLevel.HaloFBController.Init(FrameData);
                         break;
                     case "Token":
-                        if (!audioInited) TrialLevel.AudioFBController.Init(FrameData);
+                        if (!audioInited)
+                        {
+                            TrialLevel.AudioFBController.Init(FrameData);
+                            audioInited = true;
+                        }
+
                         TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
                         TrialLevel.TokenFBController.SetTotalTokensNum(totalTokensNum);
                         break;

@@ -101,11 +101,58 @@ namespace USE_StimulusManagement
 		{
 			ToggleVisibility(false);
 		}
-		
 
+		public StimDef CopyStimDef()
+		{
+			StimDef sd = new StimDef();
+			if (StimName != null)
+				sd.StimName = StimName;
+			if (StimPath != null)
+				sd.StimPath = StimPath;
+			if (PrefabPath != null)
+				sd.PrefabPath = PrefabPath;
+			if (ExternalFilePath != null)
+				sd.ExternalFilePath = ExternalFilePath;
+			if (StimFolderPath != null)
+				sd.StimFolderPath = StimFolderPath;
+			if (StimExtension != null)
+				sd.StimExtension = StimExtension;
+			sd.StimCode = StimCode;
+			if (StimID != null)
+				sd.StimID = StimID;
+			if (StimDimVals != null)
+				sd.StimDimVals = StimDimVals;
+			// if (StimGameObject != null)
+			// 	sd.StimGameObject = StimGameObject; // this is bad, we should be copying this
+			sd.StimLocation = StimLocation;
+			sd.StimRotation = StimRotation;
+			sd.StimScreenLocation = StimScreenLocation;
+			sd.StimScale = StimScale;
+			sd.StimLocationSet = StimLocationSet;
+			sd.StimRotationSet = StimRotationSet;
+			sd.StimTrialPositiveFbProb = StimTrialPositiveFbProb;
+			sd.StimTrialRewardMag = StimTrialRewardMag;
+			if (TokenRewards != null)
+				sd.TokenRewards = TokenRewards;
+			if (BaseTokenGain != null)
+				sd.BaseTokenGain = BaseTokenGain;
+			if (BaseTokenLoss != null)
+				sd.BaseTokenLoss = BaseTokenLoss;
+			sd.TimesUsedInBlock = TimesUsedInBlock;
+			sd.isRelevant = isRelevant;
+			return sd;
+		}
+		
 		public StimDef CopyStimDef(StimGroup sg)
 		{
-			StimDef sd = new StimDef(sg);
+			StimDef sd = CopyStimDef();
+			sd.StimGroups.Add(sg.stimGroupName, sg);
+			return sd;
+		}
+
+		public StimDef CopyStimDef<T>() where T : StimDef, new()
+		{
+			T sd = new T();
 			if (StimName != null)
 				sd.StimName = StimName;
 			if (StimPath != null)

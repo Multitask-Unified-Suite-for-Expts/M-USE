@@ -2,6 +2,7 @@ using System;
 using ConfigDynamicUI;
 using System.Collections.Generic;
 using System.IO;
+using EffortControl_Namespace;
 using UnityEngine;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
@@ -89,6 +90,15 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
               stateAfterDelay = displaySample;
               delayDuration = baselineDuration.value;
           });
+        
+        // displaySample.AddInitializationMethod(() =>
+        // {
+        //     for (int iTarg = 0; iTarg < targetStim.stimDefs.Count; iTarg++)
+        //     {
+        //         targetStim.stimDefs[iTarg].StimLocation = CurrentTrialDef.TargetSampleLocation[iTarg];
+        //         targetStim.stimDefs[iTarg].ToggleVisibility(true);
+        //     }
+        // });
         
         // Show the target/sample by itself for some time
         displaySample.AddTimer(() => displaySampleDuration.value, delay, () =>
@@ -184,20 +194,31 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         searchStims = new StimGroup("SearchStims", ExternalStims, CurrentTrialDef.SearchStimIndices);
         searchStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
         searchStims.SetLocations(CurrentTrialDef.SearchStimLocations);
-        
-        for (int i = 0; i < CurrentTrialDef.SearchStimIndices.Length; i++)
+
+        List<StimDef> rewardedStimdefs = new List<StimDef>();
+
+        targetStim = new StimGroup("TargetStim", GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
+        for (int iStim = 0; iStim < CurrentTrialDef.SearchStimIndices.Length; iStim++)
         {
-            WorkingMemory_StimDef sd = (WorkingMemory_StimDef)searchStims.stimDefs[i];
-            sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.SearchStimTokenReward[i]);
+            WorkingMemory_StimDef sd = (WorkingMemory_StimDef)searchStims.stimDefs[iStim];
+            sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.SearchStimTokenReward[iStim]);
             if (sd.StimTrialRewardMag > 0)
             {
-                sd.IsTarget = true;//Holds true if the target stim receives non-zero reward
-                targetStim = new StimGroup("TargetStim", ExternalStims, new int[] {CurrentTrialDef.SearchStimIndices[i]});
-                targetStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
-                targetStim.SetLocations(CurrentTrialDef.TargetSampleLocation);
+                Debug.Log("askjdghaklsjhg");
+                // StimDef tempsd = sd.CopyStimDef();
+                WorkingMemory_StimDef newTarg = sd.CopyStimDef<WorkingMemory_StimDef>() as WorkingMemory_StimDef;
+                targetStim.AddStims(newTarg);
+                newTarg.IsTarget = true;//Holds true if the target stim receives non-zero reward
+                // targetStim = new StimGroup("TargetStim", ExternalStims, new int[] {CurrentTrialDef.SearchStimIndices[iStim]});
+                // targetStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
+                // targetStim.SetLocations(CurrentTrialDef.TargetSampleLocation);
             } 
             else sd.IsTarget = false;
         }
+        
+        // for (int iT)
+        targetStim.SetLocations(CurrentTrialDef.TargetSampleLocation);
+        targetStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
         TrialStims.Add(searchStims);
         TrialStims.Add(targetStim);
 

@@ -101,6 +101,7 @@ namespace WhatWhenWhere_Namespace
         string ContextExternalFilePath;
         Vector3 ButtonPosition;
         Vector3 ButtonScale;
+        private bool UsingRewardPump;
     }
     //Any other custom classes useful for the functioning of the task could be included in this namespace.
 }

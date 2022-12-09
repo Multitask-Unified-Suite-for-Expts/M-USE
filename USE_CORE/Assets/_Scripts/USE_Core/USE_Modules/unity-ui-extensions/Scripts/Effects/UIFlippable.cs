@@ -14,7 +14,7 @@ namespace UnityEngine.UI.Extensions
         [SerializeField] private bool m_Veritical = false;
      
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="UnityEngine.UI.UIFlippable"/> should be flipped horizontally.
+        /// Gets or sets a value indicating whether this <see cref="UIFlippable"/> should be flipped horizontally.
         /// </summary>
         /// <value><c>true</c> if horizontal; otherwise, <c>false</c>.</value>
         public bool horizontal
@@ -24,7 +24,7 @@ namespace UnityEngine.UI.Extensions
         }
      
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="UnityEngine.UI.UIFlippable"/> should be flipped vertically.
+        /// Gets or sets a value indicating whether this <see cref="UIFlippable"/> should be flipped vertically.
         /// </summary>
         /// <value><c>true</c> if vertical; otherwise, <c>false</c>.</value>
         public bool vertical

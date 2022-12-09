@@ -116,6 +116,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         originalTitleTextPosition = TitleTextGO.transform.position;
         originalTimerPosition = TimerBackdropGO.transform.position;
 
+        TokenFBController.SetFlashingTime(1f);
+
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
@@ -225,7 +227,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             if (TrialCount_InBlock == 0)
                 TimeToCompletion_StartTime = Time.time;
-
         });
 
         ChooseStim.AddUpdateMethod(() =>

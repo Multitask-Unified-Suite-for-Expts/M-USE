@@ -1,5 +1,6 @@
 using UnityEngine;
 using USE_Data;
+using System.Collections;
 
 public class TokenFBController : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class TokenFBController : MonoBehaviour
     public int tokenBoxPadding = 0;
     public int tokenBoxYOffset = 10;
     public Texture2D tokenTexture;
+
 
     // Color Constants
     private readonly Color colorCollected = Color.green;
@@ -36,6 +38,8 @@ public class TokenFBController : MonoBehaviour
     private float revealTime = 0.4f; // How long to show the tokens before animating
     private float updateTime = 0.3f; // How long each token update animation should take
     private float flashingTime = 0.5f; // How long the token bar should flash when it fills up
+    public int flashingNumBeeps = 3;
+    public float flashBeepInterval;
     // Audio
     AudioFBController audioFBController;
 
@@ -172,11 +176,12 @@ public class TokenFBController : MonoBehaviour
                     if (numCollected >= totalTokensNum)
                     {
                         animationPhase = AnimationPhase.Flashing;
+                        StartCoroutine(FlashingBeeps(flashingNumBeeps)); //NT: put here instead of flashPhase, for it to be immediate. 
                         animationEndTime += flashingTime;
                     }
                     break;
                 case AnimationPhase.Flashing:
-                    audioFBController.Play("Flashing");
+                    //audioFBController.Play("Flashing"); //flashing clip doesn't exist
                     numTokenBarFull++;
                     numCollected = 0;
                     animationPhase = AnimationPhase.None;
@@ -197,6 +202,17 @@ public class TokenFBController : MonoBehaviour
                 if (dt < flashingTime / 2) tokenBoxColor = colorFlashing1;
                 else tokenBoxColor = colorFlashing2;
                 break;
+        }
+    }
+
+    IEnumerator FlashingBeeps(int numBeeps)
+    {
+        while(numBeeps > 0)
+        {
+            audioFBController.Play("PositiveShow");
+            numBeeps--;
+            if(numBeeps > 0)
+                yield return new WaitForSeconds(flashBeepInterval);
         }
     }
 
@@ -227,6 +243,7 @@ public class TokenFBController : MonoBehaviour
     
     public TokenFBController SetPositiveShowAudioClip(AudioClip clip) {
         audioFBController.AddClip("PositiveShow", clip);
+        flashBeepInterval = clip.length * 1.15f;
         return this;
     }
     

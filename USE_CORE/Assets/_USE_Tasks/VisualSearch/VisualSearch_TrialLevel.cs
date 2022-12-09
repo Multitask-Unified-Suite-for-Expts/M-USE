@@ -61,7 +61,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private string context = "";
     public bool usingRewardPump;
     public int numReward, numTokenBarFull;
-    public int touchedObjectsCodes;
+    public List<int> touchedObjectsCodes;
     public int totalTokensCollected;
 
     public override void DefineControlLevel()
@@ -197,7 +197,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["TouchDistractorStart"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["IncorrectResponse"]);
             }
-            if (selected != null) touchedObjectsCodes = selectedSD.StimCode;
+            if (selected != null) touchedObjectsCodes.Add(selectedSD.StimCode);
             TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) +  "\nTouched Object Names: " +
                                  touchedObjectsCodes + "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
         });
@@ -272,17 +272,19 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeImmediate(TaskEventCodes["TrlEnd"]);
             context = "itiImage";
             RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + context + ".png");
-            
+            touchedObjectsCodes.Clear();
+
         });
         
         // trial data
         //TrialData.AddDatum("SelectedCode", () => selected != null ? selectedSD.StimCode : null);
-        TrialData.AddDatum("SelectedStimCode", ()=> selectedSD.StimCode);
+        TrialData.AddDatum("SelectedStimCode", () => touchedObjectsCodes);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
         TrialData.AddDatum("SelectionCorrect", () => correct ? 1 : 0);
         TrialData.AddDatum("TotalTokensCollected", ()=> totalTokensCollected);
-        // frame dat
+        // frame data
         FrameData.AddDatum("MousePosition", () => InputBroker.mousePosition);
+        if(selected!=null) FrameData.AddDatum("SelectedObject",  ()=> selected.name);
         FrameData.AddDatum("StartButton", () => startButton.activeSelf);
         FrameData.AddDatum("TrialStimuliShown", () => tStim.IsActive);
         FrameData.AddDatum("Context", () => context);

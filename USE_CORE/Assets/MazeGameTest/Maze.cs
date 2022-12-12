@@ -61,7 +61,7 @@ namespace HiddenMaze
         public Coords mNextStep;
         public int mNumSquares;
         public int mNumTurns;
-
+        public int mDims;
         public Maze(Configs configs, List<Coords> path, Coords start, Coords finish) 
         {
             this.mConfigs = configs;
@@ -106,6 +106,7 @@ namespace HiddenMaze
         // Copy constructor
         public Maze(Maze rhs) {
             this.mConfigs = rhs.mConfigs;
+            this.mDims = rhs.mDims;
             this.mPath = rhs.mPath;
             this.mStart = rhs.mStart;
             this.mFinish = rhs.mFinish;

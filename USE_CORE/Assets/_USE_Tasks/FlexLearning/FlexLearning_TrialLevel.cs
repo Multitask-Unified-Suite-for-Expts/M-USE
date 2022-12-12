@@ -39,7 +39,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     public int numReward = 0;
     private bool correct;
     FlexLearning_StimDef selectedSD = null;
-    int touchedObjectsCodes;
+    int touchedObjectsCodes = -1;
 
     // misc variables
     private bool variablesLoaded;
@@ -113,8 +113,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             startButton.SetActive(true);
             TokenFBController.enabled = false;
             numTokenBarFull = TokenFBController.GetNumTokenBarFull();
-            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) +  "\nTouched Object Names: " +
-                                 touchedObjectsCodes + "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
+            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nTouched Object Codes: " + touchedObjectsCodes + "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
         });
         initTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton),
             SearchDisplayDelay, () =>
@@ -203,7 +202,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (selected != null) touchedObjectsCodes = selectedSD.StimCode;
         });
 
-        SearchDisplay.AddTimer(() => selectObjectDuration.value, FinishTrial, () =>
+        SearchDisplay.AddTimer(() => selectObjectDuration.value, TrialEnd, () =>
         {
             if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
             {
@@ -257,10 +256,15 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
             }
-            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) +  "\nTouched Object Names: " +
-                                 touchedObjectsCodes + "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
+            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nTouched Object Codes: " + touchedObjectsCodes + "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
         });
         TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), TrialEnd, () =>
+        {
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]); //NOT SURE ABOUT THIS BUT TRIALEND IS THE ITI
+            context = "itiImage";
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + context + ".png");
+        });
+        TrialEnd.AddTimer(() => itiDuration.value, FinishTrial, () =>
         {
             foreach (GameObject txt in playerViewTextList)
             {
@@ -268,14 +272,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             }
             playerViewLoaded = false;
         });
-        TrialEnd.AddTimer(() => itiDuration.value, FinishTrial, () =>
-        {
-            EventCodeManager.SendCodeImmediate(TaskEventCodes["TrlEnd"]);
-            context = "itiImage";
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + context + ".png");
-        });
         // trial data
-        TrialData.AddDatum("SelectedStimCode", () => selectedSD.StimCode);
+        TrialData.AddDatum("SelectedStimCode", () => selectedSD?.StimCode ?? null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
         TrialData.AddDatum("SelectionCorrect", () => correct ? 1 : 0);
         TrialData.AddDatum("NumRewardGiven", () => numReward);

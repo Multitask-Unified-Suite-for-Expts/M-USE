@@ -61,7 +61,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private string context = "";
     public bool usingRewardPump;
     public int numReward, numTokenBarFull;
-    public int touchedObjectsCodes;
+    int touchedObjectsCodes = -1;
     public int totalTokensCollected;
 
     public override void DefineControlLevel()
@@ -115,8 +115,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             startButton.SetActive(true);
             numTokenBarFull = TokenFBController.GetNumTokenBarFull();
             TokenFBController.enabled = false;
-            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) +  "\nTouched Object Names: " +
-                                 touchedObjectsCodes + "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
+            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nTouched Object Codes: " + touchedObjectsCodes + "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
             totalTokensCollected = TokenFBController.GetTokenBarValue() +
                                    (TokenFBController.GetNumTokenBarFull() * CurrentTrialDef.NumTokenBar);
 
@@ -198,11 +197,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["IncorrectResponse"]);
             }
             if (selected != null) touchedObjectsCodes = selectedSD.StimCode;
-            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) +  "\nTouched Object Names: " +
-                                 touchedObjectsCodes + "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
+            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nTouched Object Codes: " + touchedObjectsCodes + "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
         });
 
-        SearchDisplay.AddTimer(() => selectObjectDuration.value, FinishTrial, ()=> 
+        SearchDisplay.AddTimer(() => selectObjectDuration.value, TrialEnd, ()=> 
         {
             if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
             {
@@ -261,28 +259,30 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), TrialEnd, () =>
         {
             tStim.ToggleVisibility(false);
+            
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
+            context = "itiImage";
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + context + ".png");
+        });
+        TrialEnd.AddTimer(()=> itiDuration.value, FinishTrial, ()=> 
+        {
             foreach (GameObject txt in playerViewTextList)
             {
                 txt.SetActive(false);
             }
-            playerViewLoaded = false;
-        });
-        TrialEnd.AddTimer(()=> itiDuration.value, FinishTrial, ()=> 
-        {
-            EventCodeManager.SendCodeImmediate(TaskEventCodes["TrlEnd"]);
-            context = "itiImage";
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + context + ".png");
             
+            playerViewLoaded = false;
+            touchedObjectsCodes = -1;
         });
         
         // trial data
-        //TrialData.AddDatum("SelectedCode", () => selected != null ? selectedSD.StimCode : null);
-        TrialData.AddDatum("SelectedStimCode", ()=> selectedSD.StimCode);
+        TrialData.AddDatum("SelectedStimCode", () => selectedSD?.StimCode ?? null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
         TrialData.AddDatum("SelectionCorrect", () => correct ? 1 : 0);
         TrialData.AddDatum("TotalTokensCollected", ()=> totalTokensCollected);
-        // frame dat
+        // frame data
         FrameData.AddDatum("MousePosition", () => InputBroker.mousePosition);
+        FrameData.AddDatum("SelectedStimCode", () => selectedSD?.StimCode ?? null);
         FrameData.AddDatum("StartButton", () => startButton.activeSelf);
         FrameData.AddDatum("TrialStimuliShown", () => tStim.IsActive);
         FrameData.AddDatum("Context", () => context);

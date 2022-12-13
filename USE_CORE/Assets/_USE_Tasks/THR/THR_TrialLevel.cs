@@ -50,7 +50,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public bool TrialComplete;
 
     public bool GiveTouchReward;
-    public bool GiveHoldReward;
+    public bool GiveReleaseReward;
     public bool ClickedSquare;
     public bool TimeRanOut;
     public bool ConfigVariablesLoaded;
@@ -268,7 +268,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     BlueSquareTouches_Trial++;
                     GiveTouchReward = true;
                     TouchRewardEarnedTime = Time.time;
-                    Debug.Log("TIME EARNED = " + TouchRewardEarnedTime);
                 }
             }
             if(MouseTracker.CurrentTargetGameObject == BackdropGO && !Grating)
@@ -296,7 +295,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                         if(HeldDuration >= CurrentTrial.MinTouchDuration && HeldDuration <= CurrentTrial.MaxTouchDuration)
                         {
                             SquareMaterial.color = Color.gray;
-                            GiveHoldReward = true;
+                            GiveReleaseReward = true;
+                            ReleaseRewardEarnedTime = Time.time;
                         }
                         else if(HeldDuration < CurrentTrial.MinTouchDuration)
                         {
@@ -333,20 +333,23 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         {
             AudioPlayed = false;
 
-            if((GiveTouchReward) || (GiveHoldReward))
+            if((GiveTouchReward) || (GiveReleaseReward))
             {
                 AudioFBController.Play("Positive");
                 AudioPlayed = true;
-                float waitTimeRemaining = 0;
-                if(GiveTouchReward && SyncBoxController != null)
+                float waitTime = 0;
+
+                if (GiveTouchReward && SyncBoxController != null)
                 {
-                    waitTimeRemaining = CurrentTrial.TouchToRewardDelay - (Time.time - TouchRewardEarnedTime);
-                    StartCoroutine(GiveReward(waitTimeRemaining));
+                    waitTime = CurrentTrial.TouchToRewardDelay - (Time.time - TouchRewardEarnedTime);
+                    StartCoroutine(GiveReward(Time.time, waitTime, CurrentTrial.NumTouchPulses));
+                    TouchRewards_Trial += CurrentTrial.NumTouchPulses;
                 }
-                if(GiveHoldReward && SyncBoxController != null)
+                if (GiveReleaseReward && SyncBoxController != null)
                 {
-                    waitTimeRemaining = CurrentTrial.ReleaseToRewardDelay - (Time.time - ReleaseRewardEarnedTime);
-                    StartCoroutine(GiveReward(waitTimeRemaining));
+                    waitTime = CurrentTrial.ReleaseToRewardDelay - (Time.time - ReleaseRewardEarnedTime);
+                    StartCoroutine(GiveReward(Time.time, waitTime, CurrentTrial.NumReleasePulses));
+                    ReleaseRewards_Trial += CurrentTrial.NumReleasePulses;
                 }
             }
             if(TimeRanOut)
@@ -365,10 +368,10 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             ConfigVariablesLoaded = false;
 
-            if (GiveHoldReward || GiveTouchReward)
+            if (GiveReleaseReward || GiveTouchReward)
                 TrialsCorrect_Block++;
 
-            if ((CurrentTrial.RewardTouch && GiveTouchReward) || (CurrentTrial.RewardRelease && GiveHoldReward))
+            if ((CurrentTrial.RewardTouch && GiveTouchReward) || (CurrentTrial.RewardRelease && GiveReleaseReward))
                 TrialCompletionList.Insert(0, 1);
             else
                 TrialCompletionList.Insert(0, 0);
@@ -388,27 +391,15 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     //HELPER FUNCTIONS ------------------------------------------------------------------------------------------
 
-    IEnumerator GiveReward(float waitTime)
+    IEnumerator GiveReward(float codeStartTime, float waitTime, int numPulses)
     {
         if (waitTime < 0)
             waitTime = 0;
+        else
+            waitTime -= Time.time - codeStartTime; //fine tuning by removing amout of time its taken for code to execute
 
         yield return new WaitForSeconds(waitTime);
-
-        if(GiveTouchReward)
-        {
-            Debug.Log("TOUCH REWARD GIVEN TIME = " + Time.time);
-            Debug.Log("IT TOOK " + (Time.time - TouchRewardEarnedTime));
-            //SyncBoxController.SendRewardPulses(CurrentTrial.NumTouchPulses, CurrentTrial.PulseSize);
-            //TouchRewards_Trial += CurrentTrial.NumTouchPulses;
-        }
-        if(GiveHoldReward)
-        {
-            Debug.Log("RELEASE REWARD GIVEN TIME = " + Time.time);
-            Debug.Log("IT TOOK " + (Time.time - ReleaseRewardEarnedTime));
-            //SyncBoxController.SendRewardPulses(CurrentTrial.NumReleasePulses, CurrentTrial.PulseSize);
-            //ReleaseRewards_Trial += CurrentTrial.NumReleasePulses;
-        }
+        SyncBoxController.SendRewardPulses(numPulses, CurrentTrial.PulseSize);
     }
 
     void AddTrialTouchNumsToBlock()
@@ -600,7 +591,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     void ResetGlobalTrialVariables()
     {
-        GiveHoldReward = false;
+        GiveReleaseReward = false;
         GiveTouchReward = false;
         TimeRanOut = false;
         NonSquareTouches_Trial = 0;

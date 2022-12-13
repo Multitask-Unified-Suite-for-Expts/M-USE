@@ -127,7 +127,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         BlockAveragesString = "<size=18><b>Block Averages " + $"({BlockCount});" + "</b></size>" +
                           "\nAvg Correct: " + AvgNumCorrect.ToString("0.00") +
                           "\nAvg TbCompletions: " + AvgNumTbCompletions.ToString("0.00") +
-                          "\nAvg TimeToPick: " + AvgTimeToChoice.ToString("0.00") + "s" +
+                          "\nAvg TimeToChoice: " + AvgTimeToChoice.ToString("0.00") + "s" +
                           "\nAvg TimeToCompletion: " + AvgTimeToCompletion.ToString("0.00") + "s" +
                           "\nAvg Rewards: " + AvgNumRewards.ToString("0.00") +
                           "\nStandard Deviation: " + StanDev.ToString("0.00") +

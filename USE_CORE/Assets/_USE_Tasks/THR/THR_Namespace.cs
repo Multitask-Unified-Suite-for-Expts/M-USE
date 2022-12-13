@@ -60,7 +60,6 @@ namespace THR_Namespace
         public int NumTouchPulses;
         public bool RewardRelease;
         public int NumReleasePulses;
-        public bool RandomReward;
         public bool RandomSquareSize;
         public bool RandomSquarePosition;
         public int TimeToAutoEndTrialSec;
@@ -103,7 +102,6 @@ namespace THR_Namespace
                 trial.NumTouchPulses = NumTouchPulses;
                 trial.RewardRelease = RewardRelease;
                 trial.NumReleasePulses = NumReleasePulses;
-                trial.RandomReward = RandomReward;
                 trial.RandomSquareSize = RandomSquareSize;
                 trial.RandomSquarePosition = RandomSquarePosition;
                 trial.TimeToAutoEndTrialSec = TimeToAutoEndTrialSec;
@@ -149,7 +147,6 @@ namespace THR_Namespace
         public int NumTouchPulses;
         public bool RewardRelease;
         public int NumReleasePulses;
-        public bool RandomReward;
         public bool RandomSquareSize;
         public bool RandomSquarePosition;
         public int TimeToAutoEndTrialSec;

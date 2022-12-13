@@ -25,6 +25,15 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
                 flTL.buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
             else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
+                flTL.stimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
+            else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))
+                flTL.shadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
+            else Debug.LogError("Shadow Type setting not defined in the TaskDef");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "UsingRewardPump"))
+                flTL.usingRewardPump = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "UsingRewardPump");
+            else Debug.LogError("Using Reward Pump setting not defined in the TaskDef");
         }
         else
         {
@@ -45,20 +54,19 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             */
             flTL.runningAcc.Clear();
             flTL.MinTrials = flBD.MinMaxTrials[0];
-            System.Random rnd = new System.Random();
-             
-            flTL.MaxTrials = rnd.Next(flBD.MinMaxTrials[0], flBD.MinMaxTrials[1]);
+            flTL.MaxTrials = flBD.MinMaxTrials[1];
             flTL.NumTokenBar = flBD.NumTokenBar;
+            flTL.numTokenBarFull = 0;
             TrialLevel.TokenFBController.SetTokenBarValue(flBD.NumInitialTokens); 
             
-            BlockSummaryString.Clear();
-            BlockSummaryString.AppendLine("Block Num: " + (flTL.BlockCount) + "\nTrial Count: " + (flTL.TrialCount_InBlock));
         });
 
         RunBlock.AddUpdateMethod(() =>
         {
-            
-            //  "\nTotal Errors: " + vsTL.totalErrors_InBlock + "\nError Type: " + vsTL.errorType_InBlockString + "\nPerformance: " + vsTL.accuracyLog_InBlock;
+            BlockSummaryString.Clear();
+            BlockSummaryString.AppendLine("Block Num: " + (flTL.BlockCount + 1) + "\nTrial Count: " + (flTL.TrialCount_InBlock + 1) + 
+                                          "\nNum Reward Given: " + flTL.numReward + "\nNum Token Bar Filled: " + 
+                                          flTL.numTokenBarFull + "\nTotalTokensCollected: " + flTL.totalTokensCollected);
         });
         
     }

@@ -26,6 +26,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
     public int NonSquareTouches_Task = 0;
     public int TouchRewards_Task = 0;
     public int ReleaseRewards_Task = 0;
+    public int ReleasedEarly_Task = 0;
+    public int ReleasedLate_Task = 0;
 
 
     public override void SpecifyTypes()
@@ -63,6 +65,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             trialLevel.WhiteSquareTouches_Block = 0;
             trialLevel.NumTouchRewards_Block = 0;
             trialLevel.NumReleaseRewards_Block = 0;
+            trialLevel.NumReleasedEarly_Block = 0;
+            trialLevel.NumReleasedLate_Block = 0;
             trialLevel.PerfThresholdMet = false;
 
             SetBlockSummaryString(trialLevel);
@@ -90,6 +94,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             NonSquareTouches_Task += trialLevel.NonSquareTouches_Block;
             TouchRewards_Task += trialLevel.NumTouchRewards_Block;
             ReleaseRewards_Task += trialLevel.NumReleaseRewards_Block;
+            ReleasedEarly_Task += trialLevel.NumReleasedEarly_Block;
+            ReleasedLate_Task += trialLevel.NumReleasedLate_Block;
         });
     }
 
@@ -104,7 +110,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         data["Non Square Touches"] = NonSquareTouches_Task;
         data["Touch Rewards"] = TouchRewards_Task;
         data["Release Rewards"] = ReleaseRewards_Task;
-
+        data["Released Early"] = ReleasedEarly_Task;
+        data["Released Late"] = ReleasedLate_Task;
         return data;
     }
 
@@ -113,12 +120,13 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         ClearStrings();
 
         CurrentBlockString = ("<b>Block " + "(" + currentBlock.BlockName + "):" + "</b>" +
-                        "\nTrialsCompleted: " + trialLevel.TrialsCompleted_Block +
-                        "\nTrialsCorrect: " + trialLevel.TrialsCorrect_Block +
+                        "\nTrialsCorrect: " + trialLevel.TrialsCorrect_Block + " (out of " + trialLevel.TrialsCompleted_Block + ")" +
+                        "\nReleasedEarly: " + trialLevel.NumReleasedEarly_Block +
+                        "\nReleasedLate: " + trialLevel.NumReleasedLate_Block +
                         "\nWhiteSquareTouches: " + trialLevel.WhiteSquareTouches_Block +
                         "\nBlueSquareTouches: " + trialLevel.BlueSquareTouches_Block +
                         "\nNonSquareTouches: " + trialLevel.NonSquareTouches_Block +
-                        "\nNumRewards: " + (trialLevel.NumTouchRewards_Block + trialLevel.NumReleaseRewards_Block) +
+                        "\nRewards: " + (trialLevel.NumTouchRewards_Block + trialLevel.NumReleaseRewards_Block) +
                         "\nPerfThresholdMet: " + trialLevel.PerfThresholdMet +
                         "\n");
 
@@ -143,6 +151,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("NumTouchRewards", () => trialLevel.NumTouchRewards_Block);
         BlockData.AddDatum("NumReleaseRewards", () => trialLevel.NumReleaseRewards_Block);
         BlockData.AddDatum("DifficultyLevel", () => currentBlock.BlockName);
+        BlockData.AddDatum("NumReleasedEarly", () => trialLevel.NumReleasedEarly_Block);
+        BlockData.AddDatum("NumReleasedLate", () => trialLevel.NumReleasedLate_Block);
     }
 
     public T GetCurrentBlockDef<T>() where T : BlockDef

@@ -94,7 +94,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     //Syncbox variables
     private bool usingSonication = false;
-
+    public bool usingRewardPump;
     public int MinTrials;
 
     public override void DefineControlLevel()
@@ -579,8 +579,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
             }
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderCompleteFbOn"]);
-           //SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize); //USE THIS LINE WHEN CONNECTED TO A SYNCBOX
-            //SyncBoxController.SendRewardPulses(3, 500);
+            if (usingRewardPump)
+            {
+                SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize); //USE THIS LINE WHEN CONNECTED TO A SYNCBOX
+                SyncBoxController.SendRewardPulses(3, 500);
+            }
+           
         });
 
         FinalFeedback.AddUpdateMethod(() =>
@@ -610,7 +614,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             distractorStims.ToggleVisibility(false);
             contextActive = false;
             contextName = "itiImage";
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + contextName + "png");
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + contextName + ".png");
             playerViewLoaded = false;
             //Destroy all created text objects on Player View of Experimenter Display
             foreach (GameObject txt in playerViewTextList)

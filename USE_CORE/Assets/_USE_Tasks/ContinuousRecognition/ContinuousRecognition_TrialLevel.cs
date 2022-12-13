@@ -146,7 +146,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
-            if(MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac)
+            if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac)
             {
                 AdjustTextPosForMac();
                 AdjustedPositionsForMac = true;
@@ -305,7 +305,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             currentTrial.IsNewStim = GotCorrect;
         });
         ChooseStim.SpecifyTermination(() => stimIsChosen, TouchFeedback);
-        ChooseStim.AddTimer(() => chooseStimDuration.value, ITI, () =>     //if no choice, skip touchFB/tokenFB and go to display results so the event codes can send.
+        ChooseStim.AddTimer(() => chooseStimDuration.value, ITI, () =>     //if no choice, skip touchFB/tokenFB and go to display results
         {
             if(currentTrial.IsHuman)
             {
@@ -323,8 +323,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------
         TouchFeedback.AddInitializationMethod(() =>
         {
-            if (!stimIsChosen) return;
-            if (GotCorrect)
+            if(!stimIsChosen) return;
+
+            if(GotCorrect)
                 HaloFBController.ShowPositive(chosenStimObj);
             else
                 HaloFBController.ShowNegative(chosenStimObj);
@@ -963,7 +964,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             StimGroup wrongGroup = new StimGroup("Wrong");
             StimDef wrongStim = ExternalStims.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(wrongGroup);
             wrongStim.StimGameObject = null;
-
             GenerateFeedbackStim(wrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length - 1).Take(1).ToArray());
             GenerateFeedbackBorders(wrongGroup);
 

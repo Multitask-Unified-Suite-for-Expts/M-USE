@@ -45,11 +45,10 @@ public class TokenFBController : MonoBehaviour
 
     public void Init(DataController trialData, DataController frameData, AudioFBController audioFBController)
     {
-        trialData.AddDatum("TotalTokensCollected", () => numCollected);
+        trialData.AddDatum("TokenBarValue", () => numCollected);
         trialData.AddDatum("TokenChange", () => tokensChange == 0 ? null : (float?)tokensChange);
         trialData.AddDatum("NumTokenBarFull", () => numTokenBarFull);
         frameData.AddDatum("TokenAnimationPhase", () => animationPhase.ToString());
-        frameData.AddDatum("TotalTokensCollected", () => numCollected);
 
         this.audioFBController = audioFBController;
         numCollected = 0;
@@ -167,9 +166,10 @@ public class TokenFBController : MonoBehaviour
                     break;
                 case AnimationPhase.Update:
                    if (tokensChange < 0) {
-                        audioFBController.Play("NegativeUpdate");
-                    } else {
-                        audioFBController.Play("PositiveUpdate");
+                        audioFBController.Play("NegativeUpdate"); //not added
+                    }
+                    else {
+                        audioFBController.Play("PositiveUpdate"); //not added
                     }
                     numCollected += tokensChange;
                     animationPhase = AnimationPhase.None;
@@ -283,7 +283,11 @@ public class TokenFBController : MonoBehaviour
         } else {
             numTokens = Mathf.Min(numTokens, totalTokensNum - numCollected);
         }
-        if (numTokens == 0) return;
+        if (numTokens == 0)
+        {
+            audioFBController.Play("NegativeShow"); //fixes issue where they choose wrong but no tokens in bar so doesn't make it down to play neg FB. 
+            return;
+        }
 
         animatedTokensStartPos = pos;
         // No need for horizontal padding since it does nothing
@@ -299,7 +303,8 @@ public class TokenFBController : MonoBehaviour
         // Start the animation phase state machine with the first state
         if (tokensChange < 0) {
             audioFBController.Play("NegativeShow");
-        } else {
+        }
+        else {
             audioFBController.Play("PositiveShow");
         }
         animationPhase = AnimationPhase.Show;

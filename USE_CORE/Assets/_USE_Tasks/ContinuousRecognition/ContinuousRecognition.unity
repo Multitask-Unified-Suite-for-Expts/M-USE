@@ -5816,6 +5816,8 @@ MonoBehaviour:
   tokenBoxPadding: 0
   tokenBoxYOffset: 20
   tokenTexture: {fileID: 2800000, guid: 5ab9409b99a52f740a325a411069f4fa, type: 3}
+  flashingNumBeeps: 3
+  flashBeepInterval: 0
 --- !u!114 &1101764159
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5828,9 +5830,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b9b0d55229496c40b881734b3d28261, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PositiveHaloPrefab: {fileID: 1546032763649933254, guid: caf1a4a4f95a86847a8d732d428239c9,
+  PositiveHaloPrefab: {fileID: 5037791256376228876, guid: 9131f84dfe1d38348b03e7605587f089,
     type: 3}
-  NegativeHaloPrefab: {fileID: 5037791256376228876, guid: 4d1787c513a9ec84bb22e6d541713428,
+  NegativeHaloPrefab: {fileID: 5037791256376228876, guid: a7149e72ef1b4e64daa6b939925d29fc,
+    type: 3}
+  GreenHaloPrefab: {fileID: 1546032763649933254, guid: caf1a4a4f95a86847a8d732d428239c9,
+    type: 3}
+  RedHaloPrefab: {fileID: 5037791256376228876, guid: 4d1787c513a9ec84bb22e6d541713428,
     type: 3}
 --- !u!114 &1101764160
 MonoBehaviour:
@@ -6006,6 +6012,7 @@ MonoBehaviour:
   EndBlock: 0
   GotCorrect: 0
   stimIsChosen: 0
+  MacMainDisplayBuild: 0
   trialStims:
     stimGroupName: 
     IsActive: 0
@@ -6014,7 +6021,7 @@ MonoBehaviour:
   ContextPath: 
   ContextActive: 0
   variablesLoaded: 0
-  AdjustedPositionsForBuild: 0
+  AdjustedPositionsForMac: 0
   NumTrials_Block: 0
   NumCorrect_Block: 0
   NumTbCompletions_Block: 0
@@ -6023,6 +6030,7 @@ MonoBehaviour:
   TimeToCompletion_Block: 0
   TimeToCompletion_StartTime: 0
   NumRewards_Block: 0
+  TokenUpdateStartTime: 0
   TokenCount: 0
   NumFeedbackRows: 0
   ScoreAmountPerTrial: 0
@@ -6030,7 +6038,16 @@ MonoBehaviour:
   originalFbTextPosition: {x: 0, y: 0, z: 0}
   originalTitleTextPosition: {x: 0, y: 0, z: 0}
   originalStartButtonPosition: {x: 0, y: 0, z: 0}
-  minObjectTouchDuration:
+  originalTimerPosition: {x: 0, y: 0, z: 0}
+  displayStimDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  chooseStimDuration:
     name: 
     hidden: 0
     value: 0
@@ -6046,7 +6063,7 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  finalFbDuration:
+  touchFbDuration:
     name: 
     hidden: 0
     value: 0
@@ -6054,7 +6071,7 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  fbDuration:
+  displayResultsDuration:
     name: 
     hidden: 0
     value: 0
@@ -6062,7 +6079,7 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  maxObjectTouchDuration:
+  tokenUpdateDuration:
     name: 
     hidden: 0
     value: 0
@@ -6070,7 +6087,7 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  selectObjectDuration:
+  tokenRevealDuration:
     name: 
     hidden: 0
     value: 0

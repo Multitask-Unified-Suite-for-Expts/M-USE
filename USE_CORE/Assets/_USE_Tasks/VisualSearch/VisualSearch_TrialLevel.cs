@@ -21,15 +21,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private GameObject startButton;
     //configui variables
     [HideInInspector]
-    public ConfigNumber minObjectTouchDuration, itiDuration, finalFbDuration, fbDuration, maxObjectTouchDuration, selectObjectDuration, tokenRevealDuration, tokenUpdateDuration, searchDisplayDelay;
-    /*
-        public float 
-            DisplayStimsDuration = 5f, 
-            TrialEndDuration = 5f;
-    */
+    public ConfigNumber minObjectTouchDuration, itiDuration, finalFbDuration, fbDuration, maxObjectTouchDuration, 
+        selectObjectDuration, tokenRevealDuration, tokenUpdateDuration, searchDisplayDelay;
+
     // game obeject variables
     private GameObject trialStim, clickMarker;
-    //private GameObject startButton, startText;
     private GameObject[] totalObjects;
     private GameObject[] currentObjects;
     //public Canvas canvas;
@@ -47,6 +43,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private bool variablesLoaded;
     public string MaterialFilePath;
     public Vector3 buttonPosition, buttonScale;
+    public bool stimFacingCamera;
+    public string shadowType; 
     [FormerlySerializedAs("TaskTokenNum")] public int NumTokenBar;
     public int NumInitialTokens;
 
@@ -60,6 +58,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     
     private GameObject sbSprite;
     private bool randomizedLocations = false;
+    private string context = "";
+    public bool usingRewardPump;
+    public int numReward, numTokenBarFull;
+    int touchedObjectsCodes = -1;
+    public int totalTokensCollected;
 
     public override void DefineControlLevel()
     {
@@ -102,14 +105,19 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         initTrial.AddInitializationMethod(() =>
         {
+            context = CurrentTrialDef.ContextName;
             RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar +  CurrentTrialDef.ContextName + ".png");
-            Debug.Log("FilePath: " + MaterialFilePath);
             TokenFBController
                 .SetRevealTime(tokenRevealDuration.value)
                 .SetUpdateTime(tokenUpdateDuration.value);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
+            
             startButton.SetActive(true);
+            numTokenBarFull = TokenFBController.GetNumTokenBarFull();
             TokenFBController.enabled = false;
+            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nTouched Object Codes: " + touchedObjectsCodes + "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
+            totalTokensCollected = TokenFBController.GetTokenBarValue() +
+                                   (TokenFBController.GetNumTokenBarFull() * CurrentTrialDef.NumTokenBar);
 
         });
         initTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton),
@@ -124,8 +132,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             stateAfterDelay = SearchDisplay;
             TokenFBController.enabled = true;
-            TokenFBController.SetTotalTokensNum(NumTokenBar); 
-            
+            TokenFBController.SetTotalTokensNum(NumTokenBar);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarReset"]);
@@ -160,10 +167,15 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 }
                 
             }
+            if (stimFacingCamera)
+            {
+                foreach (var stim in tStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
+            }
+            SetShadowType();
         });
         
         SearchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, SelectionFeedback, () => {
-            Debug.Log("SELECT: " + mouseHandler.SelectedStimDef.StimName);
+            
             //testButton.pressed = false;
             selected = mouseHandler.SelectedGameObject;
             selectedSD = mouseHandler.SelectedStimDef;
@@ -172,22 +184,23 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             {       
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["TouchTargetStart"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["CorrectResponse"]);
-                  
+                if (usingRewardPump)
+                {
+                    SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize); //USE THIS LINE WHEN CONNECTED TO A SYNCBOX
+                    SyncBoxController.SendRewardPulses(3, 500);
+                    numReward++;
+                }
             }
             else
             {
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["TouchDistractorStart"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["IncorrectResponse"]);
             }
-            string touchedObjectsNames = "";
-            if (selected != null) touchedObjectsNames = selectedSD.StimName;
-
-            TrialSummaryString = "Trial Num: " + TrialCount_InTask+1 
-             + "\nTouched Object Names: " +
-            touchedObjectsNames;
+            if (selected != null) touchedObjectsCodes = selectedSD.StimCode;
+            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nTouched Object Codes: " + touchedObjectsCodes + "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
         });
 
-        SearchDisplay.AddTimer(() => selectObjectDuration.value, FinishTrial, ()=> 
+        SearchDisplay.AddTimer(() => selectObjectDuration.value, TrialEnd, ()=> 
         {
             if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
             {
@@ -196,7 +209,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
-        GameObject halo = null;
+        //GameObject halo = null;
         SelectionFeedback.AddInitializationMethod(() =>
         {
             if (!selected) return;
@@ -246,35 +259,33 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), TrialEnd, () =>
         {
             tStim.ToggleVisibility(false);
+            
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
+            context = "itiImage";
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + context + ".png");
+        });
+        TrialEnd.AddTimer(()=> itiDuration.value, FinishTrial, ()=> 
+        {
             foreach (GameObject txt in playerViewTextList)
             {
                 txt.SetActive(false);
             }
-            playerViewLoaded = false;
-        });
-        TrialEnd.AddTimer(()=> itiDuration.value, FinishTrial, ()=> 
-        {
-            EventCodeManager.SendCodeImmediate(TaskEventCodes["TrlEnd"]);
             
+            playerViewLoaded = false;
+            touchedObjectsCodes = -1;
         });
         
         // trial data
-        TrialData.AddDatum("SelectedName", () => selected != null ? selectedSD.StimName : null);
+        TrialData.AddDatum("SelectedStimCode", () => selectedSD?.StimCode ?? null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
         TrialData.AddDatum("SelectionCorrect", () => correct ? 1 : 0);
-        
-        // frame date
-        FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
-        FrameData.AddDatum("Touch", () => response);
-        FrameData.AddDatum("StartButton", () => startButton.activeSelf);/*
-        FrameData.AddDatum("TimingErrorFeedback", () => imageTimingError.activeSelf);
-        FrameData.AddDatum("TokenBarFlashing", () => sliderHalo.activeSelf);
-        FrameData.AddDatum("Slider", () => slider.gameObject.activeSelf);*/
+        TrialData.AddDatum("TotalTokensCollected", ()=> totalTokensCollected);
+        // frame data
+        FrameData.AddDatum("MousePosition", () => InputBroker.mousePosition);
+        FrameData.AddDatum("SelectedStimCode", () => selectedSD?.StimCode ?? null);
+        FrameData.AddDatum("StartButton", () => startButton.activeSelf);
         FrameData.AddDatum("TrialStimuliShown", () => tStim.IsActive);
-        /*FrameData.AddDatum("TokenBarValue", () => slider.normalizedValue);
-        FrameData.AddDatum("Context", () => contextName);
-        FrameData.AddDatum("ContextActive", () => contextActive);*/
-        
+        FrameData.AddDatum("Context", () => context);
         
         //this.AddTerminationSpecification(() => trialCount > numTrials, ()=> Debug.Log(trialCount + " " + numTrials));
  
@@ -372,6 +383,28 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             }
         }
         return selectedReward.NumTokens;
+    }
+    private void SetShadowType()
+    {
+        //User options are None, Soft, Hard
+        switch (shadowType)
+        {
+            case "None":
+                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.None;
+                GameObject.Find("VisualSearch_DirectionalLight").GetComponent<Light>().shadows = LightShadows.None;
+                break;
+            case "Soft":
+                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.Soft;
+                GameObject.Find("VisualSearch_DirectionalLight").GetComponent<Light>().shadows = LightShadows.Soft;
+                break;
+            case "Hard":
+                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.Hard;
+                GameObject.Find("VisualSearch_DirectionalLight").GetComponent<Light>().shadows = LightShadows.Hard;
+                break;
+            default:
+                Debug.Log("User did not Input None, Soft, or Hard for the Shadow Type");
+                break;
+        }
     }
 
 }

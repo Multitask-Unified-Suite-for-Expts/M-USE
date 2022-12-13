@@ -50,6 +50,7 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 3057c6465634bff458dbb5fc86a5aab0, type: 3}
   - name: Negative
     clip: {fileID: 8300000, guid: b1ead77b8c99d9542827dd1ee3ef5124, type: 3}
+  audioSource: {fileID: 0}
 --- !u!114 &2603858045197797024
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -62,9 +63,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b9b0d55229496c40b881734b3d28261, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PositiveHaloPrefab: {fileID: 1546032763649933254, guid: caf1a4a4f95a86847a8d732d428239c9,
+  PositiveHaloPrefab: {fileID: 5037791256376228876, guid: 9131f84dfe1d38348b03e7605587f089,
     type: 3}
-  NegativeHaloPrefab: {fileID: 5037791256376228876, guid: 4d1787c513a9ec84bb22e6d541713428,
+  NegativeHaloPrefab: {fileID: 5037791256376228876, guid: a7149e72ef1b4e64daa6b939925d29fc,
     type: 3}
 --- !u!114 &3953842124438570051
 MonoBehaviour:

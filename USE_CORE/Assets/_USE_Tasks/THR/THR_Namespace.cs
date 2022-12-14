@@ -64,6 +64,8 @@ namespace THR_Namespace
         public bool RandomSquarePosition;
         public int TimeToAutoEndTrialSec;
         public float TimeoutDuration;
+        public float GreyOnReleaseDuration;
+        public float GratingSquareDuration;
 
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -106,6 +108,8 @@ namespace THR_Namespace
                 trial.RandomSquarePosition = RandomSquarePosition;
                 trial.TimeToAutoEndTrialSec = TimeToAutoEndTrialSec;
                 trial.TimeoutDuration = TimeoutDuration;
+                trial.GreyOnReleaseDuration = GreyOnReleaseDuration;
+                trial.GratingSquareDuration = GratingSquareDuration;
 
                 TrialDefs.Add(trial);
             }
@@ -151,6 +155,8 @@ namespace THR_Namespace
         public bool RandomSquarePosition;
         public int TimeToAutoEndTrialSec;
         public float TimeoutDuration;
+        public float GratingSquareDuration;
+        public float GreyOnReleaseDuration;
     }
 
 
@@ -188,72 +194,3 @@ namespace THR_Namespace
     }
 }
 
-
-
-
-
-
-//EXTRA CONFIG VARIABLES FROM PREV VERSION
-//public string ContextName;
-//public string BlockName;
-//public int MaxNumTrials;
-//public int PerfWindowEndTrials;
-//public float PerfThresholdEndTrials;
-//public float ItiDuration;
-//public float ItiDurationSecStartMax;
-//public float ItiDurationSecAbsMin;
-//public float ItiDurationSecAbsMax;
-//public float BlinkOnDurationStartMin;
-//public float BlinkOnDurationStartMax;
-//public float BlinkOnDurationAbsMin;
-//public float BlinkOnDurationAbsMax;
-//public float BlinkOffDurationStartMin;
-//public float BlinkOffDurationStartMax;
-//public float BlinkOffDurationAbsMin;
-//public float BlinkOffDurationAbsMax;
-//public float MinTouchDuration;
-//public float MinTouchDurationMin;
-//public float MinTouchDurationMax;
-//public float MaxTouchDuration;
-//public float MaxTouchDurationMin;
-//public float MaxTouchDurationMax;
-//public int TouchToRewardDelayMS;
-//public int TouchToRewardDelayMSMin;
-//public int TouchToRewardDelayMSMax;
-//public int ReleaseToRewardDelayMS;
-//public int ReleaseToRewardDelayMSMin;
-//public int ReleaseToRewardDelayMSMax;
-//public int SquareSizeStartMin;
-//public int SquareSizeStartMax;
-//public int SquareSizeAbsMin;
-//public int SquareSizeAbsMax;
-//public int SquareSizeWhite;
-//public int SquareSizeWhiteMin;
-//public int SquareSizeWhiteMax;
-//public int SquareLocationX;
-//public int SquareLocationXMin;
-//public int SquareLocationY;
-//public int SquareLocationYMin;
-//public int SquareLocationXforWhite;
-//public int SquareLocationYforWhite;
-//public int NumLocationX;
-//public int MinNumLocationX;
-//public int MaxNumLocationX;
-//public int NumLocationY;
-//public int MinNumLocationY;
-//public int MaxNumLocationY;
-//public float PadX;
-//public float PadXMin;
-//public float PadXMax;
-//public float PadY;
-//public float PadYMin;
-//public float PadYMax;
-//public bool RandomSquarePosition;
-//public int RewardCountStartMin;
-//public int RewardCountStartMax;
-//public int RewardCountAbsMin;
-//public int RewardCountAbsMax;
-//public bool RewardOnTouchDown;
-//public bool RewardOnEveryTouchRelease;
-//public int TimeToAutoEndTrialSec;
-//public float MinRT;

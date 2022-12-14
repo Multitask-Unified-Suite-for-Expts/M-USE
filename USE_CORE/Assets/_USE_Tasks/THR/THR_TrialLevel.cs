@@ -122,14 +122,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     public float WhiteTimeoutDuration;
 
-    public float GratingSquareFbDuration = .5f; //maybe move to block later
-    public float GreySquareFbDuration = .5f; //maybe move to block later
     public float GraySquareTimer;
     public float RewardEarnedTime;
     public float RewardGivenTime;
     public float RewardTimer;
     public bool RewardGiven;
-
 
 
     public override void DefineControlLevel()
@@ -367,7 +364,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         {
             if(GiveReleaseReward)
             {
-                if (GraySquareTimer < GreySquareFbDuration)
+                if (GraySquareTimer < CurrentTrial.GreyOnReleaseDuration)
                     GraySquareTimer += Time.deltaTime;
                 else
                     GraySquareTimer = -1;
@@ -597,10 +594,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         Cursor.visible = false;
         SquareMaterial.color = LightRedColor;
         SquareRenderer.material.mainTexture = newTexture;
-        //AudioFBController.Play("Negative");
-        yield return new WaitForSeconds(GratingSquareFbDuration);
+        yield return new WaitForSeconds(CurrentTrial.GratingSquareDuration);
         SquareRenderer.material.mainTexture = SquareTexture;
-        //need to change color back!
         Cursor.visible = true;
         Grating = false;
     }

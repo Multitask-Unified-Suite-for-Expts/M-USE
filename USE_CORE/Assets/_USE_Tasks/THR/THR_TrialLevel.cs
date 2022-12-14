@@ -163,6 +163,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 CreateSquare();
 
             SetTrialSummaryString();
+
+            Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
+
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -391,18 +394,13 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-        Feedback.SpecifyTermination(() => GiveReleaseReward && SyncBoxController == null && GraySquareTimer == -1, ITI); //to handle when syncbox is null!
-        Feedback.SpecifyTermination(() => (HeldTooShort || HeldTooLong) && AudioPlayed && !Grating, ITI); //If they got wrong
+        Feedback.SpecifyTermination(() => GiveReleaseReward && SyncBoxController == null && GraySquareTimer == -1, ITI); //to handle when syncbox is null and releaseReward so gotta wait for graytimer!
         Feedback.SpecifyTermination(() => GiveTouchReward && SyncBoxController == null, ITI); //earned touch reward but no syncbox
         Feedback.SpecifyTermination(() => GiveTouchReward && RewardGiven, ITI); //state ends when they receive reward!
         Feedback.SpecifyTermination(() => GiveReleaseReward && RewardGiven && GraySquareTimer == -1, ITI); //state ends when they receive reward!
+        Feedback.SpecifyTermination(() => (HeldTooShort || HeldTooLong) && AudioPlayed && !Grating, ITI); //If they got wrong
         Feedback.SpecifyTermination(() => (TimeRanOut) && AudioPlayed, ITI); //state ends after receiving neg FB (if didn't get correct).
         //Feedback.AddTimer(() => CurrentTrial.FbDuration, ITI);
-
-        //Feedback.SpecifyTermination(() => RewardGiven && AudioPlayed && !AudioFBController.IsPlaying(), ITI); //I think "AudioPlayed" is redundant here. 
-        //Feedback.SpecifyTermination(() => TimeRanOut && AudioPlayed && !AudioFBController.IsPlaying(), ITI);
-
-        //Feedback.SpecifyTermination(() => CurrentTrial.RewardTouch && AudioPlayed && !AudioFBController.IsPlaying(), ITI);
 
         //ITI state ---------------------------------------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>

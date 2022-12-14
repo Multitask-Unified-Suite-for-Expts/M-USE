@@ -65,6 +65,13 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
 
+        if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
+            trialLevel.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
+        else
+            trialLevel.MacMainDisplayBuild = false;
+
+        trialLevel.AdjustedPositionsForMac = false;
+
         BlockAveragesString = "";
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
@@ -81,13 +88,9 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.AvgTimeToChoice_Block = 0;
             trialLevel.TimeToCompletion_Block = 0;
             trialLevel.NumRewards_Block = 0;
+            trialLevel.Score = 0;
 
-            if (currentBlock.MacMainDisplayBuild)
-                trialLevel.MacMainDisplayBuild = true;
-            else
-                trialLevel.MacMainDisplayBuild = false;
-
-            trialLevel.AdjustedPositionsForMac = false;
+            trialLevel.TokenFBController.SetTokenBarValue(0);
 
             CalculateBlockSummaryString(trialLevel);
         });

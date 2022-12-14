@@ -30,6 +30,7 @@ namespace USE_ExperimentTemplate_Session
         protected SessionData SessionData;
         private SessionDataControllers SessionDataControllers;
         private bool StoreData;
+        private bool MacMainDisplayBuild;
         [HideInInspector] public string SubjectID, SessionID, SessionDataPath, FilePrefix;
         
         public string TaskSelectionSceneName;
@@ -163,6 +164,9 @@ namespace USE_ExperimentTemplate_Session
 
             if (SessionSettings.SettingExists("Session", "StoreData"))
                 StoreData = (bool)SessionSettings.Get("Session", "StoreData");
+
+            if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
+                MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
 
             if (SessionSettings.SettingExists("Session", "TaskSelectionTimeout"))
                 TaskSelectionTimeout = (float)SessionSettings.Get("Session", "TaskSelectionTimeout");

@@ -78,13 +78,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public int NumFeedbackRows;
     public int ScoreAmountPerTrial;
 
-    public int Score
-    {
-        get
-        {
-            return ScoreAmountPerTrial * TrialCount_InBlock;
-        }
-    }
+    public int Score;
 
     public float TimeRemaining;
 
@@ -137,6 +131,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 LoadConfigUIVariables();
 
             SetTrialSummaryString();
+
+            Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -146,7 +142,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
-            if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac)
+            if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //if running build with mac as main display
             {
                 AdjustTextPosForMac();
                 AdjustedPositionsForMac = true;
@@ -411,6 +407,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = false;
             if (currentTrial.UseStarfield)
                 Starfield.SetActive(false);
+
+            if (GotCorrect)
+                Score += ((TrialCount_InBlock + 1) * 100);
             
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
@@ -517,13 +516,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 if (Debug.isDebugBuild && MacMainDisplayBuild)
                     yOffset = 0f; //good
                 else
-                    yOffset = -5f;
+                    yOffset = -20f; //need to confirm 
                 break;
             case 5:
                 if (Debug.isDebugBuild && MacMainDisplayBuild)
                     yOffset = -30f;
                 else
-                    yOffset = -10f;
+                    yOffset = -25f;
                 break;
         }
         return yOffset;

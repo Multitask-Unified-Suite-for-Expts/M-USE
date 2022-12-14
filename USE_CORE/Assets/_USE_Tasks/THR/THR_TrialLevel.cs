@@ -106,6 +106,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     public bool AudioPlayed;
     public bool Grating;
+    public bool HeldTooShort;
+    public bool HeldTooLong;
 
     public float WhiteTimeoutTime;
     public float WhiteStartTime;
@@ -120,10 +122,15 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     public float WhiteTimeoutDuration;
 
-    public float TouchRewardEarnedTime;
-    public float TouchRewardGivenTime;
-    public float ReleaseRewardEarnedTime;
-    public float ReleaseRewardGivenTime;
+    public float GratingSquareFbDuration = .5f; //maybe move to block later
+    public float GreySquareFbDuration = .5f; //maybe move to block later
+    public float GraySquareTimer;
+    public float RewardEarnedTime;
+    public float RewardGivenTime;
+    public float RewardTimer;
+    public bool RewardGiven;
+
+
 
     public override void DefineControlLevel()
     {
@@ -267,7 +274,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     Cursor.visible = false;
                     BlueSquareTouches_Trial++;
                     GiveTouchReward = true;
-                    TouchRewardEarnedTime = Time.time;
+                    RewardEarnedTime = Time.time;
                 }
             }
             if(MouseTracker.CurrentTargetGameObject == BackdropGO && !Grating)
@@ -294,19 +301,18 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     {
                         if(HeldDuration >= CurrentTrial.MinTouchDuration && HeldDuration <= CurrentTrial.MaxTouchDuration)
                         {
-                            SquareMaterial.color = Color.gray;
                             GiveReleaseReward = true;
-                            ReleaseRewardEarnedTime = Time.time;
+                            RewardEarnedTime = Time.time;
                         }
                         else if(HeldDuration < CurrentTrial.MinTouchDuration)
                         {
-                            StartCoroutine(GratedSquareFlash(HeldTooShortTexture));
                             NumReleasedEarly_Block++;
+                            HeldTooShort = true;
                         }
                         else
                         {
-                            StartCoroutine(GratedSquareFlash(HeldTooLongTexture));
                             NumReleasedLate_Block++;
+                            HeldTooLong = true;
                         }
                     }
                     else
@@ -325,41 +331,78 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         });
         //Go back to white square if bluesquare time lapses (and they aren't already holding down)
         BlueSquare.SpecifyTermination(() => Time.time - BlueStartTime > CurrentTrial.BlueSquareDuration && !InputBroker.GetMouseButton(0) && !BlueSquareReleased && !Grating, WhiteSquare);
-        BlueSquare.SpecifyTermination(() => BlueSquareReleased || TimeRanOut, Feedback); //If they click the square and release, OR run out of time, go to feedback state. 
-        BlueSquare.SpecifyTermination(() => CurrentTrial.RewardTouch && GiveTouchReward, Feedback); //If rewarding touch, Go to feedback as soon as they click!!!
+        BlueSquare.SpecifyTermination(() => BlueSquareReleased && !Grating, Feedback); //If they click the square and release.
+        BlueSquare.SpecifyTermination(() => TimeRanOut, Feedback); //if run out of time
+        BlueSquare.SpecifyTermination(() => GiveTouchReward, Feedback); //If rewarding touch, Go to feedback as soon as they click!!!
 
         //FEEDBACK state ----------------------------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
         {
+            RewardTimer = Time.time - RewardEarnedTime; //start the timer at the difference between rewardtimeEarned and right now.
+            GraySquareTimer = 0;
             AudioPlayed = false;
 
-            if((GiveTouchReward) || (GiveReleaseReward))
+            if(GiveTouchReward || GiveReleaseReward)
             {
                 AudioFBController.Play("Positive");
-                AudioPlayed = true;
-                float waitTime = 0;
-
-                if (GiveTouchReward && SyncBoxController != null)
+                if(GiveReleaseReward)
                 {
-                    waitTime = CurrentTrial.TouchToRewardDelay - (Time.time - TouchRewardEarnedTime);
-                    StartCoroutine(GiveReward(Time.time, waitTime, CurrentTrial.NumTouchPulses));
-                    TouchRewards_Trial += CurrentTrial.NumTouchPulses;
-                }
-                if (GiveReleaseReward && SyncBoxController != null)
-                {
-                    waitTime = CurrentTrial.ReleaseToRewardDelay - (Time.time - ReleaseRewardEarnedTime);
-                    StartCoroutine(GiveReward(Time.time, waitTime, CurrentTrial.NumReleasePulses));
-                    ReleaseRewards_Trial += CurrentTrial.NumReleasePulses;
+                    SquareMaterial.color = Color.gray;
                 }
             }
-            if(TimeRanOut)
+            else //held too long, held too short, or timeRanOut
             {
                 AudioFBController.Play("Negative");
-                AudioPlayed = true;
+                if(HeldTooShort)
+                    StartCoroutine(GratedSquareFlash(HeldTooShortTexture));
+                if (HeldTooLong)
+                    StartCoroutine(GratedSquareFlash(HeldTooLongTexture));
+            }
+            AudioPlayed = true;
+        });
+        Feedback.AddUpdateMethod(() =>
+        {
+            if(GiveReleaseReward)
+            {
+                if (GraySquareTimer < GreySquareFbDuration)
+                    GraySquareTimer += Time.deltaTime;
+                else
+                    GraySquareTimer = -1;
+            }
+
+            if(GiveTouchReward && SyncBoxController != null)
+            {
+                if(RewardTimer < CurrentTrial.TouchToRewardDelay)
+                    RewardTimer += Time.deltaTime;
+                else
+                {
+                    SyncBoxController.SendRewardPulses(CurrentTrial.NumTouchPulses, CurrentTrial.PulseSize);
+                    RewardGiven = true;
+                }
+            }
+            if(GiveReleaseReward && SyncBoxController != null)
+            {
+                if(RewardTimer < CurrentTrial.ReleaseToRewardDelay)
+                    RewardTimer += Time.deltaTime;
+                else
+                {
+                    SyncBoxController.SendRewardPulses(CurrentTrial.NumReleasePulses, CurrentTrial.PulseSize);
+                    RewardGiven = true;
+                }
             }
         });
-        Feedback.SpecifyTermination(() => CurrentTrial.RewardTouch && AudioPlayed && !AudioFBController.IsPlaying(), ITI);
-        Feedback.AddTimer(() => CurrentTrial.FbDuration, ITI);
+        Feedback.SpecifyTermination(() => GiveReleaseReward && SyncBoxController == null && GraySquareTimer == -1, ITI); //to handle when syncbox is null!
+        Feedback.SpecifyTermination(() => (HeldTooShort || HeldTooLong) && AudioPlayed && !Grating, ITI); //If they got wrong
+        Feedback.SpecifyTermination(() => GiveTouchReward && SyncBoxController == null, ITI); //earned touch reward but no syncbox
+        Feedback.SpecifyTermination(() => GiveTouchReward && RewardGiven, ITI); //state ends when they receive reward!
+        Feedback.SpecifyTermination(() => GiveReleaseReward && RewardGiven && GraySquareTimer == -1, ITI); //state ends when they receive reward!
+        Feedback.SpecifyTermination(() => (TimeRanOut) && AudioPlayed, ITI); //state ends after receiving neg FB (if didn't get correct).
+        //Feedback.AddTimer(() => CurrentTrial.FbDuration, ITI);
+
+        //Feedback.SpecifyTermination(() => RewardGiven && AudioPlayed && !AudioFBController.IsPlaying(), ITI); //I think "AudioPlayed" is redundant here. 
+        //Feedback.SpecifyTermination(() => TimeRanOut && AudioPlayed && !AudioFBController.IsPlaying(), ITI);
+
+        //Feedback.SpecifyTermination(() => CurrentTrial.RewardTouch && AudioPlayed && !AudioFBController.IsPlaying(), ITI);
 
         //ITI state ---------------------------------------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>
@@ -390,17 +433,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS ------------------------------------------------------------------------------------------
-
-    IEnumerator GiveReward(float codeStartTime, float waitTime, int numPulses)
-    {
-        if (waitTime < 0)
-            waitTime = 0;
-        else
-            waitTime -= Time.time - codeStartTime; //fine tuning by removing amout of time its taken for code to execute
-
-        yield return new WaitForSeconds(waitTime);
-        SyncBoxController.SendRewardPulses(numPulses, CurrentTrial.PulseSize);
-    }
 
     void AddTrialTouchNumsToBlock()
     {
@@ -563,13 +595,16 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     IEnumerator GratedSquareFlash(Texture2D newTexture)
     {
+        Grating = true;
         Cursor.visible = false;
         SquareMaterial.color = LightRedColor;
         SquareRenderer.material.mainTexture = newTexture;
-        AudioFBController.Play("Negative");
-        yield return new WaitForSeconds(1f);
+        //AudioFBController.Play("Negative");
+        yield return new WaitForSeconds(GratingSquareFbDuration);
         SquareRenderer.material.mainTexture = SquareTexture;
+        //need to change color back!
         Cursor.visible = true;
+        Grating = false;
     }
 
     IEnumerator GratedBackdropFlash(Texture2D newTexture)
@@ -591,6 +626,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     void ResetGlobalTrialVariables()
     {
+        HeldTooLong = false;
+        HeldTooShort = false;
+        RewardGiven = false;
         GiveReleaseReward = false;
         GiveTouchReward = false;
         TimeRanOut = false;

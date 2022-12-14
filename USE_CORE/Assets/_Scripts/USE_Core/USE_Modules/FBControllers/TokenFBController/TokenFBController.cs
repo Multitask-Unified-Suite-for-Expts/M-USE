@@ -38,8 +38,8 @@ public class TokenFBController : MonoBehaviour
     private float revealTime = 0.4f; // How long to show the tokens before animating
     private float updateTime = 0.3f; // How long each token update animation should take
     private float flashingTime = 0.5f; // How long the token bar should flash when it fills up
-    public int flashingNumBeeps = 3;
-    public float flashBeepInterval;
+    private int flashingNumBeeps = 3; //Num beeps for tokenbar flashing audio
+    private float flashBeepInterval; //Length between beeps for tokenbar flashing audio
     // Audio
     AudioFBController audioFBController;
 

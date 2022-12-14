@@ -20,13 +20,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
     public ContinuousRecognition_TrialDef currentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
 
-    //Text variables
-    //public Canvas CR_Canvas;
-    //public TextMeshPro TitleText;
-    //public TextMeshPro YouWinText;
-    //public TextMeshPro YouLoseText;
-    //public TextMeshPro ScoreText;
-    //public TextMeshPro NumTrialsText;
     public GameObject CR_CanvasGO;
     public GameObject TitleTextGO;
     public GameObject YouWinTextGO;
@@ -495,31 +488,31 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         switch (NumFeedbackRows)
         {
             case 1:
-                if(Debug.isDebugBuild && MacMainDisplayBuild)
+                if(Debug.isDebugBuild && !MacMainDisplayBuild)
                     yOffset = 55f; //good
                 else
                     yOffset = 85f; //good for build
                 break;
             case 2:
-                if (Debug.isDebugBuild & MacMainDisplayBuild)
+                if (Debug.isDebugBuild & !MacMainDisplayBuild)
                     yOffset = 40f; //good
                 else
                     yOffset = 60f; //good for build
                 break;
             case 3:
-                if (Debug.isDebugBuild & MacMainDisplayBuild)
+                if (Debug.isDebugBuild & !MacMainDisplayBuild)
                     yOffset = -5f; //good
                 else
                     yOffset = 15f; //good for build
                 break;
             case 4:
-                if (Debug.isDebugBuild && MacMainDisplayBuild)
+                if (Debug.isDebugBuild && !MacMainDisplayBuild)
                     yOffset = 0f; //good
                 else
                     yOffset = -20f; //need to confirm 
                 break;
             case 5:
-                if (Debug.isDebugBuild && MacMainDisplayBuild)
+                if (Debug.isDebugBuild && !MacMainDisplayBuild)
                     yOffset = -30f;
                 else
                     yOffset = -25f;

@@ -392,9 +392,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             }
         });
         Feedback.SpecifyTermination(() => GiveReleaseReward && SyncBoxController == null && GraySquareTimer == -1, ITI); //to handle when syncbox is null and releaseReward so gotta wait for graytimer!
-        Feedback.SpecifyTermination(() => GiveTouchReward && SyncBoxController == null, ITI); //earned touch reward but no syncbox
-        Feedback.SpecifyTermination(() => GiveTouchReward && RewardGiven, ITI); //state ends when they receive reward!
-        Feedback.SpecifyTermination(() => GiveReleaseReward && RewardGiven && GraySquareTimer == -1, ITI); //state ends when they receive reward!
+        Feedback.SpecifyTermination(() => GiveTouchReward && SyncBoxController == null, ITI); //earned touch reward but no syncbox. don't need to wait for gray since touch is immediate.
+        Feedback.SpecifyTermination(() => GiveTouchReward && RewardGiven, ITI); //when they receive touch reward!
+        Feedback.SpecifyTermination(() => GiveReleaseReward && RewardGiven && GraySquareTimer == -1, ITI); //when they receive release reward and graytimer done!
         Feedback.SpecifyTermination(() => (HeldTooShort || HeldTooLong) && AudioPlayed && !Grating, ITI); //If they got wrong
         Feedback.SpecifyTermination(() => (TimeRanOut) && AudioPlayed, ITI); //state ends after receiving neg FB (if didn't get correct).
         //Feedback.AddTimer(() => CurrentTrial.FbDuration, ITI);

@@ -128,6 +128,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public float RewardTimer;
     public bool RewardGiven;
 
+    public float HoldSquareTime;
+
 
     public override void DefineControlLevel()
     {
@@ -249,6 +251,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             BackdropTouchTime = 0;
             BackdropTouches = 0;
             Cursor.visible = true;
+            HoldSquareTime = 0;
         });
         BlueSquare.AddUpdateMethod(() =>
         {
@@ -267,8 +270,10 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     BlueSquareTouched = true;
                 }
                 HeldDuration = mouseHandler.currentTargetDuration;
-                if(HeldDuration >= .045f)
+
+                if(HeldDuration >= .045f) //half mil sec delay to fix short touches from turning blue before changing. 
                     SquareMaterial.color = Color.blue;
+
                 if(CurrentTrial.RewardTouch)
                 {
                     Cursor.visible = false;
@@ -276,8 +281,16 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     GiveTouchReward = true;
                     RewardEarnedTime = Time.time;
                 }
+
+                if (mouseHandler.currentTargetDuration > CurrentTrial.MaxTouchDuration)
+                {
+                    Cursor.visible = false;
+                    NumReleasedLate_Block++;
+                    HeldTooLong = true;
+                    BlueSquareReleased = true; //force bluesquarereleased if they holding for max duration, so that it can go to neg FB. 
+                }
             }
-            if(MouseTracker.CurrentTargetGameObject == BackdropGO && !Grating)
+            if(MouseTracker.CurrentTargetGameObject == BackdropGO && !BlueSquareTouched && !Grating) //adding "!BlueSquareTouched" is partial fix. not full!!!!
             {
                 ClickedOutsideSquare = true;
                 if(BackdropTouches == 0)
@@ -332,12 +345,15 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         //Go back to white square if bluesquare time lapses (and they aren't already holding down)
         BlueSquare.SpecifyTermination(() => Time.time - BlueStartTime > CurrentTrial.BlueSquareDuration && !InputBroker.GetMouseButton(0) && !BlueSquareReleased && !Grating, WhiteSquare);
         BlueSquare.SpecifyTermination(() => BlueSquareReleased && !Grating, Feedback); //If they click the square and release.
+        //BlueSquare.SpecifyTermination(() => ); //NEED THIS ONE TO END IF THEY HOLDING DOWN BLUE SQUARE FOR LONGER THAN CurrentTrial Max Dur!
         BlueSquare.SpecifyTermination(() => TimeRanOut, Feedback); //if run out of time
         BlueSquare.SpecifyTermination(() => GiveTouchReward, Feedback); //If rewarding touch, Go to feedback as soon as they click!!!
 
         //FEEDBACK state ----------------------------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
         {
+            Cursor.visible = false;
+
             RewardTimer = Time.time - RewardEarnedTime; //start the timer at the difference between rewardtimeEarned and right now.
             GraySquareTimer = 0;
             AudioPlayed = false;
@@ -420,7 +436,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             CheckIfBlockShouldEnd();
         });
-        ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial, () => Cursor.visible = true);
+        ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial);
 
         LogTrialData();
         LogFrameData();
@@ -591,12 +607,10 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     IEnumerator GratedSquareFlash(Texture2D newTexture)
     {
         Grating = true;
-        Cursor.visible = false;
         SquareMaterial.color = LightRedColor;
         SquareRenderer.material.mainTexture = newTexture;
         yield return new WaitForSeconds(CurrentTrial.GratingSquareDuration);
         SquareRenderer.material.mainTexture = SquareTexture;
-        Cursor.visible = true;
         Grating = false;
     }
 

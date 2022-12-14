@@ -135,6 +135,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
+            if (!Debug.isDebugBuild)
+                SetTokenBarSize();
+
             if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //if running build with mac as main display
             {
                 AdjustTextPosForMac();
@@ -445,13 +448,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         StartButton.transform.position = buttonPos;
     }
 
-    void AdjustTextPosForMac() //When running a build instead of hitting play in editor:
+    void SetTokenBarSize()
     {
-        //Increase size of TokenBar
         Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
         TokenFBController.transform.localScale = biggerScale;
         TokenFBController.tokenSize = 200;
+    }
 
+    void AdjustTextPosForMac() //When running a build instead of hitting play in editor:
+    {
         //move Timer up
         Vector3 Pos = originalTimerPosition;
         Pos.y -= 1.5f;
@@ -488,35 +493,22 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         switch (NumFeedbackRows)
         {
             case 1:
-                if(Debug.isDebugBuild && !MacMainDisplayBuild)
-                    yOffset = 55f; //good
-                else
-                    yOffset = 85f; //good for build
+                yOffset = 55f;
                 break;
             case 2:
-                if (Debug.isDebugBuild & !MacMainDisplayBuild)
-                    yOffset = 40f; //good
-                else
-                    yOffset = 60f; //good for build
+                yOffset = 40f;
                 break;
             case 3:
-                if (Debug.isDebugBuild & !MacMainDisplayBuild)
-                    yOffset = -5f; //good
-                else
-                    yOffset = 15f; //good for build
+                yOffset = -5f;
                 break;
             case 4:
-                if (Debug.isDebugBuild && !MacMainDisplayBuild)
-                    yOffset = 0f; //good
-                else
-                    yOffset = -20f; //need to confirm 
+                yOffset = -20f;
                 break;
             case 5:
-                if (Debug.isDebugBuild && !MacMainDisplayBuild)
-                    yOffset = -30f;
-                else
-                    yOffset = -25f;
+                yOffset = -30f;
                 break;
+
+          //before was 55 85, 40 60, -5 15, 0 20, -30 -25
         }
         return yOffset;
     }

@@ -493,22 +493,35 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         switch (NumFeedbackRows)
         {
             case 1:
-                yOffset = 55f;
+                if (MacMainDisplayBuild)
+                    yOffset = 85f;
+                else
+                    yOffset = 55f;
                 break;
             case 2:
-                yOffset = 40f;
+                if (MacMainDisplayBuild)
+                    yOffset = 60f;
+                else
+                    yOffset = 40f;
                 break;
             case 3:
-                yOffset = -5f;
+                if (MacMainDisplayBuild)
+                    yOffset = 15f;
+                else
+                    yOffset = -5f;
                 break;
             case 4:
-                yOffset = -20f;
+                if (MacMainDisplayBuild)
+                    yOffset = -25f; //check this!!
+                else
+                    yOffset = -20f; //check
                 break;
             case 5:
-                yOffset = -30f;
+                if (MacMainDisplayBuild)
+                    yOffset = -30f; //check
+                else
+                    yOffset = -25f; //check
                 break;
-
-          //before was 55 85, 40 60, -5 15, 0 20, -30 -25
         }
         return yOffset;
     }

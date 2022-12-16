@@ -72,7 +72,7 @@ namespace USE_ExperimenterDisplay
         }
     }
 
-    public class ExperimenterDisplayPanel// : MonoBehaviour
+    public class ExperimenterDisplayPanel : MonoBehaviour
     {
         //     private Rect Position; // + any other fields necessary for all panels
         //     protected Action CustomInitializationMethods;

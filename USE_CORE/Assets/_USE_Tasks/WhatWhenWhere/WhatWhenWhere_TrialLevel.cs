@@ -83,6 +83,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public string MaterialFilePath;
     private int correctIndex;
     public int sliderCompleteQuantity = 0;
+    
+    private bool isSliderValueIncrease = false;
+    private bool isCorrectChoice = false;
 
     //Player View Variables
     private PlayerViewPanel playerView;
@@ -113,15 +116,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         State StimulusChosenSuccesorState = new State("StimulusChosenSuccesorState");
         State delay = new State("Delay");
+        State UpdateSlide = new State("UpdateSlide");
 
         AddActiveStates(new List<State>
         {
             StartButton, StartButtonDelay, ChooseStimulus, StimulusChosen, FinalFeedback, ITI, StimulusChosenSuccesorState,
-            ChooseStimulusDelay, delay
+            ChooseStimulusDelay, delay, UpdateSlide
         });
 
         string[] stateNames = new string[]
-            {"StartButton", "StartButtonDelay", "ChooseStimulus", "StimulusChosen", "FinalFeedback", "ITI", "Delay", "ChooseStimulusDelay"};
+            {"StartButton", "StartButtonDelay", "ChooseStimulus", "StimulusChosen", "FinalFeedback", "ITI", "Delay", "ChooseStimulusDelay", "UpdateSlide"};
 
         // A state that just waits for some time
         State stateAfterDelay = null;
@@ -220,6 +224,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             initButton.SetActive(false);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderReset"]);
+            
+            isSliderValueIncrease = false;
+            isCorrectChoice = false;
         });
         ChooseStimulusDelay.AddTimer(() => chooseStimOnsetDelay.value, delay,
             () => { stateAfterDelay = ChooseStimulus; });
@@ -253,7 +260,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             else
             {
                 trialComplete = true;
-                slider.value += sliderValueIncreaseAmount * (CurrentTrialDef.SliderGain[stimCount - 1]);
+                // slider.value += sliderValueIncreaseAmount * (CurrentTrialDef.SliderGain[stimCount - 1]);
             }
 
             if (!playerViewLoaded)
@@ -319,7 +326,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     irrelevantSelectionError = true;
                     totalErrors_InSession += 1;
                     totalErrors_InBlock += 1;
-                    slider.value -= sliderValueIncreaseAmount;
+                    // slider.value -= sliderValueIncreaseAmount;
 
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchIrrelevantStart"]);
                     EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
@@ -354,8 +361,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 {
                     Debug.Log("Clicked on the correct stimulus within the sequence");
                     CorrectSelectionProgressData();
-                    slider.value += sliderValueIncreaseAmount * (CurrentTrialDef.SliderGain[stimCount]);
-                    stimCount += 1;
+                    // slider.value += sliderValueIncreaseAmount * (CurrentTrialDef.SliderGain[stimCount]);
+                    // stimCount += 1;
+                    
+                    isSliderValueIncrease = true;
+                    
                     touchedObjects.Add(testStim.name);
                     if (CurrentTrialDef.LeaveFeedbackOn)
                     {
@@ -382,7 +392,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
                     IncorrectSelectionProgressData(correctIndex);
 
-                    slider.value -= sliderValueIncreaseAmount * (CurrentTrialDef.SliderGain[stimCount]);
+                    // slider.value -= sliderValueIncreaseAmount * (CurrentTrialDef.SliderGain[stimCount]);
+                    isSliderValueIncrease = false;
+                    
                     repetitionErrorCount += 1;
                     repetitionError = true;
 
@@ -402,7 +414,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         Debug.Log("Clicked on a distractor");
                         grayHalo.transform.position = testStim.transform.position;
                         touchedObjects.Add(testStim.name);
-                        slider.value -= sliderValueIncreaseAmount * (CurrentTrialDef.SliderGain[stimCount]);
+                        // slider.value -= sliderValueIncreaseAmount * (CurrentTrialDef.SliderGain[stimCount]);
+                        isSliderValueIncrease = false;
+                        
                         distractorSlotErrorCount += 1;
                         distractorSlotError = true;
 
@@ -422,7 +436,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         Debug.Log("Clicked on a stimulus, but not within the correct sequence");
                         grayHalo.transform.position = testStim.transform.position;
                         touchedObjects.Add(testStim.name);
-                        slider.value -= sliderValueIncreaseAmount * (CurrentTrialDef.SliderGain[stimCount]);
+                        // slider.value -= sliderValueIncreaseAmount * (CurrentTrialDef.SliderGain[stimCount]);
+                        isSliderValueIncrease = false;
+                        
                         slotErrorCount += 1;
                         slotError = true;
                         IncorrectSelectionProgressData(correctIndex);
@@ -440,12 +456,63 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
+        // ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI);
+        // ChooseStimulus.SpecifyTermination(() => response == 1,
+        //     StimulusChosen); // Response ==1 means "Clicked on a stimulus" and is evaluated for errors
+        // ChooseStimulus.SpecifyTermination(() => response == 2,
+        //     StimulusChosen); // Response == 2 means "Clicked within the scene, but not on a stimulus"
+        // ChooseStimulus.SpecifyTermination(() => trialComplete, FinalFeedback);
+        
+        
         ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI);
         ChooseStimulus.SpecifyTermination(() => response == 1,
-            StimulusChosen); // Response ==1 means "Clicked on a stimulus" and is evaluated for errors
+            UpdateSlide); // Response ==1 means "Clicked on a stimulus" and is evaluated for errors
         ChooseStimulus.SpecifyTermination(() => response == 2,
-            StimulusChosen); // Response == 2 means "Clicked within the scene, but not on a stimulus"
+            UpdateSlide); // Response == 2 means "Clicked within the scene, but not on a stimulus"
         ChooseStimulus.SpecifyTermination(() => trialComplete, FinalFeedback);
+
+        
+        //update slider in 50ms
+        float sliderupdatetime = 200f;
+        float endupdatetime = 0f;
+        float valueRemaining = 0f;
+        float valueToAdd = 0f;
+
+        UpdateSlide.AddInitializationMethod(()=>
+        {
+            endupdatetime = Time.time + sliderupdatetime;
+            if (response == 2){
+                valueToAdd = sliderValueIncreaseAmount;
+            }else if (touchDurationError == true){
+                valueToAdd = 0;
+                valueRemaining = 0;
+            }else{
+                valueToAdd = sliderValueIncreaseAmount * (CurrentTrialDef.SliderGain[stimCount]);
+                valueRemaining = valueToAdd;
+            }
+
+            
+            if (isSliderValueIncrease == true){
+                stimCount += 1;
+            }
+            
+        });
+        
+        UpdateSlide.AddUpdateMethod(() =>
+        {
+            float incrementalVal = valueToAdd/sliderupdatetime;
+            if (response == 2 || isSliderValueIncrease == false){
+                slider.value -= incrementalVal;
+                valueRemaining -= incrementalVal;
+            }else{
+                slider.value += incrementalVal;
+                valueRemaining -= incrementalVal;
+            }
+            
+        });
+
+        UpdateSlide.SpecifyTermination(() => valueRemaining <= 0, StimulusChosen);
+        
 
         StimulusChosen.AddInitializationMethod(() =>
         {

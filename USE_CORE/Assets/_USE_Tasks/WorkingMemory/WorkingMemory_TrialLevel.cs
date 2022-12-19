@@ -204,7 +204,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.SearchStimTokenReward[iStim]);
             if (sd.StimTrialRewardMag > 0)
             {
-                Debug.Log("askjdghaklsjhg");
                 // StimDef tempsd = sd.CopyStimDef();
                 WorkingMemory_StimDef newTarg = sd.CopyStimDef<WorkingMemory_StimDef>() as WorkingMemory_StimDef;
                 targetStim.AddStims(newTarg);

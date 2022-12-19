@@ -11,6 +11,7 @@ using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
+using UnityEditor;
 
 public class HotKeyPanel : ExperimenterDisplayPanel
 {
@@ -268,18 +269,36 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     {
                         HkPanel.TaskLevel.Paused = true;
                         HkPanel.SessionLevel.PauseCanvasGO.SetActive(true);
+                        //CR canvas, starfield and the active stim all still appear, so set them inactive:
+                        //This works but the timing off for the trial states, so commenting out.
+                        //GameObject CR = GameObject.Find("ContinuousRecognition_Canvas");
+                        //if (CR != null)
+                        //    CR.SetActive(false);
+                        //GameObject CR_Canvas = GameObject.Find("Starfield");
+                        //if (CR_Canvas != null)
+                        //    CR_Canvas.SetActive(false);
+                        //foreach (var stim in HkPanel.TrialLevel.TrialStims)
+                        //    stim.ToggleVisibility(false);
                     }
                     else
                     {
                         HkPanel.TaskLevel.Paused = false;
                         HkPanel.SessionLevel.PauseCanvasGO.SetActive(false);
+                        //Reactivate the CR objects:
+                        //This works but the timing off for the trial states, so commenting out.
+                        //foreach(GameObject go in Resources.FindObjectsOfTypeAll<GameObject>())
+                        //{
+                        //    Debug.Log("GO NAME = " + go.name);
+                        //    if (go.name == "ContinuousRecognition_Canvas" || go.name == "Starfield")
+                        //        go.SetActive(true);
+                        //}
+                        //foreach (var stim in HkPanel.TrialLevel.TrialStims)
+                        //    stim.ToggleVisibility(true);
                     }
                 }
             };
             HotKeyList.Add(pauseGame);
-            
-            
-
+      
             return (HotKeyList);
         }
 

@@ -303,7 +303,8 @@ namespace USE_ExperimentTemplate_Session
                             if (SessionSettings.SettingExists("SyncBoxConfig", "SyncBoxInitCommands"))
                                 SyncBoxController.SendCommand((List<string>)SessionSettings.Get("SyncBoxConfig", "syncBoxInitCommands"));
                     SessionSettings.Save();
-                    SessionCam.targetDisplay = 1;
+                    GameObject initCam = GameObject.Find("InitCamera");
+                    initCam.SetActive(false);
                 });
 
             //bool tasksFinished = false;

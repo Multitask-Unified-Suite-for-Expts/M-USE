@@ -70,7 +70,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         else
             trialLevel.MacMainDisplayBuild = false;
 
-        trialLevel.AdjustedPositionsForMac = false;
 
         BlockAveragesString = "";
         CurrentBlockString = "";
@@ -80,6 +79,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
+            trialLevel.AdjustedPositionsForMac = false;
+
             trialLevel.ChosenStimIndices.Clear();
             trialLevel.NumTrials_Block = 0;
             trialLevel.NumCorrect_Block = 0;

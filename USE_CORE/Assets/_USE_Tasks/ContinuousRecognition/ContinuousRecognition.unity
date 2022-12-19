@@ -5075,7 +5075,7 @@ GameObject:
   - component: {fileID: 321374838}
   - component: {fileID: 321374837}
   m_Layer: 5
-  m_Name: CR_Canvas
+  m_Name: ContinuousRecognition_Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5816,8 +5816,6 @@ MonoBehaviour:
   tokenBoxPadding: 0
   tokenBoxYOffset: 20
   tokenTexture: {fileID: 2800000, guid: 5ab9409b99a52f740a325a411069f4fa, type: 3}
-  flashingNumBeeps: 3
-  flashBeepInterval: 0
 --- !u!114 &1101764159
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5833,10 +5831,6 @@ MonoBehaviour:
   PositiveHaloPrefab: {fileID: 5037791256376228876, guid: 9131f84dfe1d38348b03e7605587f089,
     type: 3}
   NegativeHaloPrefab: {fileID: 5037791256376228876, guid: a7149e72ef1b4e64daa6b939925d29fc,
-    type: 3}
-  GreenHaloPrefab: {fileID: 1546032763649933254, guid: caf1a4a4f95a86847a8d732d428239c9,
-    type: 3}
-  RedHaloPrefab: {fileID: 5037791256376228876, guid: 4d1787c513a9ec84bb22e6d541713428,
     type: 3}
 --- !u!114 &1101764160
 MonoBehaviour:
@@ -6034,6 +6028,7 @@ MonoBehaviour:
   TokenCount: 0
   NumFeedbackRows: 0
   ScoreAmountPerTrial: 0
+  Score: 0
   TimeRemaining: 0
   originalFbTextPosition: {x: 0, y: 0, z: 0}
   originalTitleTextPosition: {x: 0, y: 0, z: 0}

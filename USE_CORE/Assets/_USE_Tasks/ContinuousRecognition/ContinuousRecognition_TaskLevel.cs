@@ -70,7 +70,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         else
             trialLevel.MacMainDisplayBuild = false;
 
-
         BlockAveragesString = "";
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();

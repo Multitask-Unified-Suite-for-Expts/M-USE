@@ -106,9 +106,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         TokenFBController.SetFlashingTime(1f);
 
+        Cursor.visible = false;
+
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
+            Cursor.visible = false;
+
             ContextPath = GetContextNestedFilePath(currentTrial.ContextName);
             RenderSettings.skybox = CreateSkybox(ContextPath);
             //RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + currentTrial.ContextName + ".png");
@@ -136,6 +140,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
+            if(currentTrial.IsHuman)
+                Cursor.visible = true;
+
             if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //if running build with mac as main display
             {
                 AdjustTextPosForMac();
@@ -211,6 +218,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         ChooseStim.AddInitializationMethod(() =>
         {
+            if (currentTrial.IsHuman && !Cursor.visible)
+                Cursor.visible = true;
+
             if (TrialCount_InBlock == 0)
                 TimeToCompletion_StartTime = Time.time;
         });
@@ -229,6 +239,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (chosenStimDef != null) //They Clicked a Stim
             {
+                if (currentTrial.IsHuman && Cursor.visible)
+                    Cursor.visible = false;
+
                 currentTrial.TimeChosen = Time.time;
                 currentTrial.TimeToChoice = currentTrial.TimeChosen - ChooseStim.TimingInfo.StartTimeAbsolute;
                 TimeToChoice_Block.Add(currentTrial.TimeToChoice);

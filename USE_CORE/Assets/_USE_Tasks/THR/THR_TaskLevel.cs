@@ -52,7 +52,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
 
-        SetupTask.AddInitializationMethod(() => {
+        SetupTask.AddInitializationMethod(() =>
+        {
             SetupBlockData(trialLevel);
             BlockStringsAdded = 0;
         });

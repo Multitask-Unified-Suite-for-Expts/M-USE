@@ -35,50 +35,50 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public GameObject GreenBorderPrefab;
     public GameObject RedBorderPrefab;
     public GameObject Starfield;
-    public List<GameObject> BorderPrefabList;
+    [HideInInspector] public List<GameObject> BorderPrefabList;
 
-    public bool TrialComplete;
-    public bool CompletedAllTrials;
-    public bool EndBlock;
-    public bool GotCorrect;
-    public bool stimIsChosen;
+    [HideInInspector] public bool TrialComplete;
+    [HideInInspector] public bool CompletedAllTrials;
+    [HideInInspector] public bool EndBlock;
+    [HideInInspector] public bool GotCorrect;
+    [HideInInspector] public bool stimIsChosen;
 
-    public bool MacMainDisplayBuild;
+    [HideInInspector] public bool MacMainDisplayBuild;
 
-    public StimGroup trialStims;
-    public List<int> ChosenStimIndices;
-    public string MaterialFilePath;
-    public string ContextPath;
+    [HideInInspector] public StimGroup trialStims;
+    [HideInInspector] public List<int> ChosenStimIndices;
+    [HideInInspector] public string MaterialFilePath;
+    [HideInInspector] public string ContextPath;
 
-    public bool ContextActive;
-    public bool variablesLoaded;
+    [HideInInspector] public bool ContextActive;
+    [HideInInspector] public bool variablesLoaded;
 
-    public bool AdjustedPositionsForMac;
+    [HideInInspector] public bool AdjustedPositionsForMac;
 
     //Display Data
-    public int NumTrials_Block;
-    public int NumCorrect_Block;
-    public int NumTbCompletions_Block;
-    public List <float> TimeToChoice_Block;
-    public float AvgTimeToChoice_Block;
-    public float TimeToCompletion_Block;
-    public float TimeToCompletion_StartTime;
-    public int NumRewards_Block;
+    [HideInInspector] public int NumTrials_Block;
+    [HideInInspector] public int NumCorrect_Block;
+    [HideInInspector] public int NumTbCompletions_Block;
+    [HideInInspector] public List <float> TimeToChoice_Block;
+    [HideInInspector] public float AvgTimeToChoice_Block;
+    [HideInInspector] public float TimeToCompletion_Block;
+    [HideInInspector] public float TimeToCompletion_StartTime;
+    [HideInInspector] public int NumRewards_Block;
 
-    public float TokenUpdateStartTime;
+    [HideInInspector] public float TokenUpdateStartTime;
 
-    public int TokenCount;
-    public int NumFeedbackRows;
-    public int ScoreAmountPerTrial;
+    [HideInInspector] public int TokenCount;
+    [HideInInspector] public int NumFeedbackRows;
+    [HideInInspector] public int ScoreAmountPerTrial;
 
-    public int Score;
+    [HideInInspector] public int Score;
 
-    public float TimeRemaining;
+    [HideInInspector] public float TimeRemaining;
 
-    public Vector3 originalFbTextPosition;
-    public Vector3 originalTitleTextPosition;
-    public Vector3 originalStartButtonPosition;
-    public Vector3 originalTimerPosition;
+    [HideInInspector] public Vector3 originalFbTextPosition;
+    [HideInInspector] public Vector3 originalTitleTextPosition;
+    [HideInInspector] public Vector3 originalStartButtonPosition;
+    [HideInInspector] public Vector3 originalTimerPosition;
 
     //Config Variables
     [HideInInspector]
@@ -156,12 +156,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             
             TokenFBController.enabled = false;
 
-            CompletedAllTrials = false;
-            TrialComplete = false;
             currentTrial.IsNewStim = false;
-            EndBlock = false;
-            stimIsChosen = false;
-            GotCorrect = false;
+            ResetGlobalTrialVariables();
 
             TimerText = TimerTextGO.GetComponent<TextMeshProUGUI>();
 
@@ -437,6 +433,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS -----------------------------------------------------------------------------------------
+    void ResetGlobalTrialVariables()
+    {
+        CompletedAllTrials = false;
+        TrialComplete = false;
+        EndBlock = false;
+        stimIsChosen = false;
+        GotCorrect = false;
+    }
 
     void AdjustStartButtonPos()
     {

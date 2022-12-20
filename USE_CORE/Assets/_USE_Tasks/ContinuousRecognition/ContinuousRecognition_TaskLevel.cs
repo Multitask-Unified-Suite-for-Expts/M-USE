@@ -11,40 +11,25 @@ using USE_ExperimentTemplate_Block;
 
 public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 {
-    [HideInInspector]
-    public List<int> NumCorrect_Task;
-    [HideInInspector]
-    public float AvgNumCorrect;
+    [HideInInspector] public List<int> NumCorrect_Task;
+    [HideInInspector] public float AvgNumCorrect;
 
-    [HideInInspector]
-    public List<int> NumTbCompletions_Task;
-    [HideInInspector]
-    float AvgNumTbCompletions;
+    [HideInInspector] public List<int> NumTbCompletions_Task;
+    [HideInInspector] float AvgNumTbCompletions;
 
-    [HideInInspector]
-    public List<float> TimeToChoice_Task;
-    [HideInInspector]
-    public float AvgTimeToChoice;
+    [HideInInspector] public List<float> TimeToChoice_Task;
+    [HideInInspector] public float AvgTimeToChoice;
 
-    [HideInInspector]
-    public List<float> TimeToCompletion_Task;
-    [HideInInspector]
-    public float AvgTimeToCompletion;
+    [HideInInspector] public List<float> TimeToCompletion_Task;
+    [HideInInspector] public float AvgTimeToCompletion;
 
-    [HideInInspector]
-    public List<float> NumRewards_Task;
-    [HideInInspector]
-    public float AvgNumRewards;
+    [HideInInspector] public List<float> NumRewards_Task;
+    [HideInInspector] public float AvgNumRewards;
 
-    [HideInInspector]
-    public double StanDev;
-    [HideInInspector]
-    public string BlockAveragesString;
-    [HideInInspector]
-    public string CurrentBlockString;
-    [HideInInspector]
-    public StringBuilder PreviousBlocksString;
-
+    [HideInInspector] public double StanDev;
+    [HideInInspector] public string BlockAveragesString;
+    [HideInInspector] public string CurrentBlockString;
+    [HideInInspector] public StringBuilder PreviousBlocksString;
 
     ContinuousRecognition_BlockDef currentBlock => GetCurrentBlockDef<ContinuousRecognition_BlockDef>();
 
@@ -147,7 +132,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         BlockSummaryString.AppendLine(BlockAveragesString.ToString());
         BlockSummaryString.AppendLine(CurrentBlockString.ToString());
-        if(PreviousBlocksString.Length > 0) BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
+        if(PreviousBlocksString.Length > 0)
+            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
     }
 
     void ClearStrings()

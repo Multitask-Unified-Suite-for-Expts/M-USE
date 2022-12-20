@@ -146,10 +146,10 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state -------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
+            Cursor.visible = false; //Set cursor to invisible and then User can click C hotkey to turn on if needed. 
+
             if (TrialCount_InBlock == 0)
                 TrialCompletionList = new List<int>();
-
-            Cursor.visible = false;
 
             if (TrialCount_InBlock == 0)
                 SetBlockDefaultValues();
@@ -200,7 +200,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         WhiteSquare.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they still touching!
-            Cursor.visible = true;
+            //Cursor.visible = true;
             SquareMaterial.color = Color.white;
             if (!SquareGO.activeSelf) //don't have to check both square and backdrop since they're both activated at same time. 
                 ActivateSquareAndBackdrop();
@@ -213,7 +213,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             if(WhiteTimeoutTime != 0 && (Time.time - WhiteTimeoutTime) > CurrentTrial.TimeoutDuration)
             {
                 WhiteTimeoutTime = 0;
-                Cursor.visible = true;
+                //Cursor.visible = true;
             }
             
             if(MouseTracker.CurrentTargetGameObject == SquareGO)
@@ -226,7 +226,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     WhiteStartTime = Time.time; //reset original WhiteStartTime so that normal duration resets.
                     if(!AudioFBController.IsPlaying()) //will keep playing every timeout duration period if they still holding. Which is good to teach them not to!
                         AudioFBController.Play("Negative");
-                    Cursor.visible = false;
+                    //Cursor.visible = false;
                 }
             }
            
@@ -252,17 +252,12 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             BlueSquareReleased = false;
             BackdropTouchTime = 0;
             BackdropTouches = 0;
-            Cursor.visible = true;
+            //Cursor.visible = true;
             MovedOutside = false;
         });
         BlueSquare.AddUpdateMethod(() =>
         {
-            ////if they already clicked the backdrop once, and the timeoutduration has lapsed, reset the variables
-            if (BackdropTouchTime != 0 && (Time.time - BackdropTouchTime) > CurrentTrial.TimeoutDuration)
-            {
-                BackdropTouches = 0;
-                BackdropTouchTime = 0;
-            }
+            //If they clicked the Square (and its not still grating from a previous error)
             if (MouseTracker.CurrentTargetGameObject == SquareGO && !Grating)
             {
                 if (!BlueSquareTouched)
@@ -270,46 +265,53 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     TouchStartTime = Time.time;
                     BlueSquareTouched = true;
                 }
-                HeldDuration = mouseHandler.currentTargetDuration;
 
-                if (HeldDuration >= .045f) //half ms delay to fix short touches from turning blue before changing. 
+                HeldDuration = mouseHandler.currentTargetDuration;
+                //Fix short touches from turning blue for split sec before changing. 
+                if (HeldDuration >= .045f) 
                     SquareMaterial.color = Color.blue;
 
                 if (CurrentTrial.RewardTouch)
                 {
-                    Cursor.visible = false;
+                    //Cursor.visible = false;
                     BlueSquareTouches_Trial++;
                     GiveTouchReward = true;
                     RewardEarnedTime = Time.time;
                 }
-                //auto stop them if holding for max duration
+                //Auto stop them if holding the square for max duration
                 if (mouseHandler.currentTargetDuration > CurrentTrial.MaxTouchDuration)
                 {
-                    Cursor.visible = false;
                     NumReleasedLate_Block++;
                     HeldTooLong = true;
                     BlueSquareReleased = true; //force bluesquarereleased if they holding for max duration, so that it can go to neg FB. 
                 }
             }
-            if (MouseTracker.CurrentTargetGameObject == BackdropGO && !BlueSquareTouched && !Grating) //adding "!BlueSquareTouched" is partial fix. not full!!!!
+            //If they clicked the Backdrop (and not after clicking and holding the square (handled down below))
+            if (MouseTracker.CurrentTargetGameObject == BackdropGO && !BlueSquareTouched && !Grating)
             {
                 ClickedOutsideSquare = true;
                 if (BackdropTouches == 0)
                 {
                     BackdropTouchTime = Time.time;
                     BlueStartTime += CurrentTrial.TimeoutDuration; //add extra second so it doesn't go straight to white after grating
-                    StartCoroutine(GratedBackdropFlash(BackdropStripeTexture));
+                    Input.ResetInputAxes(); //Reset input axis so they can't keep holding down on the backdrop.
+                    StartCoroutine(GratedBackdropFlash(BackdropStripeTexture)); //Turn the backdrop to grated texture
                     BackdropTouches++;
                 }
             }
-
-            //when they first touch blue square, and then move it over to backdrop.
-            if(MouseTracker.CurrentTargetGameObject == BackdropGO && BlueSquareTouched)
+            //If they already clicked the backdrop once, and the timeoutduration has lapsed, reset the variables
+            if (BackdropTouchTime != 0 && (Time.time - BackdropTouchTime) > CurrentTrial.TimeoutDuration)
             {
-                Input.ResetInputAxes(); //neccessary?
+                BackdropTouches = 0;
+                BackdropTouchTime = 0;
+            }
+
+            //When they first touch blue square, and then move it over to backdrop.
+            if (MouseTracker.CurrentTargetGameObject == BackdropGO && BlueSquareTouched)
+            {
                 MovedOutside = true;
-                //incrementing MovedOutsideTouches down in feedback instead of here in update.
                 BlueSquareReleased = true; // force the state to end. 
+                //incrementing MovedOutsideTouches down in feedback instead of here in update.
             }
 
             if (InputBroker.GetMouseButtonUp(0) && !Grating)
@@ -317,7 +319,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 if(BlueSquareTouched && !BlueSquareReleased)
                 {
                     TouchReleaseTime = Time.time;
-                    Cursor.visible = false;
+                    //Cursor.visible = false;
                     BlueSquareTouches_Trial++;
                     HeldDuration = mouseHandler.currentTargetDuration;
                     if(CurrentTrial.RewardRelease)
@@ -332,11 +334,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                             NumReleasedEarly_Block++;
                             HeldTooShort = true;
                         }
-                        else
-                        {
-                            NumReleasedLate_Block++;
-                            HeldTooLong = true;
-                        }
+                        //The Else (Greater than MaxDuration) is handled above where I auto stop them for holding for max dur. 
                     }
                     else
                         SquareMaterial.color = Color.gray;
@@ -353,13 +351,13 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 TimeRanOut = true;
         });
         //Go back to white square if bluesquare time lapses (and they aren't already holding down)
-        BlueSquare.SpecifyTermination(() => Time.time - BlueStartTime > CurrentTrial.BlueSquareDuration && !InputBroker.GetMouseButton(0) && !BlueSquareReleased && !Grating, WhiteSquare);
+        BlueSquare.SpecifyTermination(() => (Time.time - BlueStartTime > CurrentTrial.BlueSquareDuration) && !InputBroker.GetMouseButton(0) && !BlueSquareReleased && !Grating, WhiteSquare);
         BlueSquare.SpecifyTermination(() => (BlueSquareReleased && !Grating) || TimeRanOut || GiveTouchReward, Feedback); //If rewarding touch and they touched, or click the square and release, or run out of time. 
 
         //FEEDBACK state ----------------------------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
         {
-            Cursor.visible = false;
+            //Cursor.visible = false;
 
             RewardTimer = Time.time - RewardEarnedTime; //start the timer at the difference between rewardtimeEarned and right now.
             GraySquareTimer = 0;
@@ -629,9 +627,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     IEnumerator GratedBackdropFlash(Texture2D newTexture)
     {
+        //Cursor.visible = false;
         Grating = true;
-        Cursor.visible = false;
-        Input.ResetInputAxes(); //reset input so they can't just keep hitting grating sound. 
         Color32 currentSquareColor = SquareMaterial.color; 
         SquareMaterial.color = new Color32(255, 153, 153, 255); 
         BackdropMaterial.color = LightRedColor;
@@ -641,7 +638,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         BackdropRenderer.material.mainTexture = BackdropTexture;
         BackdropMaterial.color = InitialBackdropColor;
         SquareMaterial.color = currentSquareColor;
-        Cursor.visible = true;
+        //Cursor.visible = true;
         Grating = false;
     }
 

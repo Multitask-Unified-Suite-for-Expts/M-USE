@@ -35,50 +35,51 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public GameObject GreenBorderPrefab;
     public GameObject RedBorderPrefab;
     public GameObject Starfield;
-    public List<GameObject> BorderPrefabList;
+    [HideInInspector] public List<GameObject> BorderPrefabList;
 
-    public bool TrialComplete;
-    public bool CompletedAllTrials;
-    public bool EndBlock;
-    public bool GotCorrect;
-    public bool stimIsChosen;
+    [HideInInspector] public bool TrialComplete;
+    [HideInInspector] public bool CompletedAllTrials;
+    [HideInInspector] public bool EndBlock;
+    [HideInInspector] public bool GotCorrect;
+    [HideInInspector] public bool stimIsChosen;
 
-    public bool MacMainDisplayBuild;
+    [HideInInspector] public bool MacMainDisplayBuild;
 
-    public StimGroup trialStims;
-    public List<int> ChosenStimIndices;
-    public string MaterialFilePath;
-    public string ContextPath;
+    [HideInInspector] public StimGroup trialStims;
+    [HideInInspector] public List<int> ChosenStimIndices;
+    [HideInInspector] public string MaterialFilePath;
+    [HideInInspector] public string ContextPath;
 
-    public bool ContextActive;
-    public bool variablesLoaded;
+    [HideInInspector] public bool ContextActive;
+    [HideInInspector] public bool variablesLoaded;
 
-    public bool AdjustedPositionsForMac;
+    [HideInInspector] public bool AdjustedPositionsForMac;
 
     //Display Data
-    public int NumTrials_Block;
-    public int NumCorrect_Block;
-    public int NumTbCompletions_Block;
-    public List <float> TimeToChoice_Block;
-    public float AvgTimeToChoice_Block;
-    public float TimeToCompletion_Block;
-    public float TimeToCompletion_StartTime;
-    public int NumRewards_Block;
+    [HideInInspector] public int NumTrials_Block;
+    [HideInInspector] public int NumCorrect_Block;
+    [HideInInspector] public int NumTbCompletions_Block;
+    [HideInInspector] public List <float> TimeToChoice_Block;
+    [HideInInspector] public float AvgTimeToChoice_Block;
+    [HideInInspector] public float TimeToCompletion_Block;
+    [HideInInspector] public float TimeToCompletion_StartTime;
+    [HideInInspector] public int NumRewards_Block;
 
-    public float TokenUpdateStartTime;
+    [HideInInspector] public float TokenUpdateStartTime;
 
-    public int TokenCount;
-    public int NumFeedbackRows;
-    public int ScoreAmountPerTrial;
+    [HideInInspector] public int TokenCount;
+    [HideInInspector] public int NumFeedbackRows;
+    [HideInInspector] public int ScoreAmountPerTrial;
 
-    public int Score;
+    [HideInInspector] public int Score;
 
-    public float TimeRemaining;
+    [HideInInspector] public float TimeRemaining;
 
-    public Vector3 originalFbTextPosition;
-    public Vector3 originalTitleTextPosition;
-    public Vector3 originalStartButtonPosition;
-    public Vector3 originalTimerPosition;
+    [HideInInspector] public Vector3 originalFbTextPosition;
+    [HideInInspector] public Vector3 originalTitleTextPosition;
+    [HideInInspector] public Vector3 originalStartButtonPosition;
+    [HideInInspector] public Vector3 originalTimerPosition;
+
 
     //Config Variables
     [HideInInspector]
@@ -138,7 +139,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //if running build with mac as main display
             {
                 AdjustTextPosForMac();
-                Debug.Log("Adjusted");
                 AdjustedPositionsForMac = true;
             }
 
@@ -157,12 +157,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             
             TokenFBController.enabled = false;
 
-            CompletedAllTrials = false;
-            TrialComplete = false;
             currentTrial.IsNewStim = false;
-            EndBlock = false;
-            stimIsChosen = false;
-            GotCorrect = false;
+            ResetGlobalTrialVariables();
 
             TimerText = TimerTextGO.GetComponent<TextMeshProUGUI>();
 
@@ -365,6 +361,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //DISPLAY RESULTS state --------------------------------------------------------------------------------------------------------
         DisplayResults.AddInitializationMethod(() =>
         {
+            if (GotCorrect)
+                Score += ((TrialCount_InBlock + 1) * 100);
+
             if (EndBlock)
             {
                 GenerateBlockFeedback();
@@ -401,9 +400,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = false;
             if (currentTrial.UseStarfield)
                 Starfield.SetActive(false);
-
-            if (GotCorrect)
-                Score += ((TrialCount_InBlock + 1) * 100);
             
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
@@ -438,6 +434,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS -----------------------------------------------------------------------------------------
+    void ResetGlobalTrialVariables()
+    {
+        CompletedAllTrials = false;
+        TrialComplete = false;
+        EndBlock = false;
+        stimIsChosen = false;
+        GotCorrect = false;
+    }
 
     void AdjustStartButtonPos()
     {
@@ -511,12 +515,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 else
                     yOffset = -20f; //check
                 break;
-            case 5:
-                if (MacMainDisplayBuild && !Debug.isDebugBuild)
-                    yOffset = -30f; //check
-                else
-                    yOffset = -25f; //check
-                break;
+            //case 5:
+            //    if (MacMainDisplayBuild && !Debug.isDebugBuild)
+            //        yOffset = -30f; //check
+            //    else
+            //        yOffset = -25f; //check
+            //    break;
         }
         return yOffset;
     }
@@ -549,7 +553,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (numLocations > 6) numRows++;
         if (numLocations > 12) numRows++;
         if (numLocations > 18) numRows++;
-        if (numLocations > 24) numRows++;
+        //if (numLocations > 24) numRows++;
 
         NumFeedbackRows = numRows; //Setting Global variable for use in centering the feedback text above the stim (for human version)
 
@@ -557,7 +561,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         int R2_Length = 0;
         int R3_Length = 0;
         int R4_Length = 0;
-        int R5_Length = 0;
+        //int R5_Length = 0;
 
         //Calculate num stim in each row. 
         switch (numRows)
@@ -611,29 +615,29 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     }
                 }
                 break;
-            case 5:
-                if (numLocations % 5 == 0)
-                    R1_Length = R2_Length = R3_Length = R4_Length = R5_Length = numLocations / 5;
-                else
-                {
-                    R1_Length = R2_Length = R3_Length = R4_Length = (int)Math.Floor((decimal)numLocations / 5);
-                    R5_Length = (int)Math.Ceiling((decimal)numLocations / 5);
+            //case 5:
+            //    if (numLocations % 5 == 0)
+            //        R1_Length = R2_Length = R3_Length = R4_Length = R5_Length = numLocations / 5;
+            //    else
+            //    {
+            //        R1_Length = R2_Length = R3_Length = R4_Length = (int)Math.Floor((decimal)numLocations / 5);
+            //        R5_Length = (int)Math.Ceiling((decimal)numLocations / 5);
 
-                    int diff = numLocations - (R1_Length + R2_Length + R3_Length + R4_Length + R5_Length);
-                    if (diff == 1) R4_Length++;
-                    else if (diff == 2)
-                    {
-                        R3_Length++;
-                        R4_Length++;
-                    }
-                    else if(diff == 3)
-                    {
-                        R2_Length++;
-                        R3_Length++;
-                        R4_Length++;
-                    }
-                }
-                break;
+            //        int diff = numLocations - (R1_Length + R2_Length + R3_Length + R4_Length + R5_Length);
+            //        if (diff == 1) R4_Length++;
+            //        else if (diff == 2)
+            //        {
+            //            R3_Length++;
+            //            R4_Length++;
+            //        }
+            //        else if(diff == 3)
+            //        {
+            //            R2_Length++;
+            //            R3_Length++;
+            //            R4_Length++;
+            //        }
+            //    }
+            //    break;
         }
 
         float leftMargin;
@@ -722,27 +726,27 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 locList.Add(current);
                 index++;
             }
-            if (R5_Length > 0)
-                difference = MaxNumPerRow - R4_Length;
+            //if (R5_Length > 0)
+            //    difference = MaxNumPerRow - R4_Length;
         }
 
         //Center ROW 5:
-        if (R5_Length > 0)
-        {
-            index += difference;
-            leftMargin = 4 - Math.Abs(locations[index].x);
-            rightMargin = 4f - locations[index + R5_Length - 1].x;
-            int indy = index;
-            for (int i = index; i < (indy + R5_Length); i++)
-            {
-                leftMarginNeeded = (leftMargin + rightMargin) / 2;
-                leftShiftAmount = leftMarginNeeded - leftMargin;
-                current = locations[i];
-                current.x += leftShiftAmount;
-                locList.Add(current);
-                index++;
-            }
-        }
+        //if (R5_Length > 0)
+        //{
+        //    index += difference;
+        //    leftMargin = 4 - Math.Abs(locations[index].x);
+        //    rightMargin = 4f - locations[index + R5_Length - 1].x;
+        //    int indy = index;
+        //    for (int i = index; i < (indy + R5_Length); i++)
+        //    {
+        //        leftMarginNeeded = (leftMargin + rightMargin) / 2;
+        //        leftShiftAmount = leftMarginNeeded - leftMargin;
+        //        current = locations[i];
+        //        current.x += leftShiftAmount;
+        //        locList.Add(current);
+        //        index++;
+        //    }
+        //}
 
         Vector3[] FinalLocations = locList.ToArray();
 

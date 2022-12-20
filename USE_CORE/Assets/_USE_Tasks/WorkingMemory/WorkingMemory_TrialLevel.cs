@@ -237,11 +237,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     public void loadVariables()
     {
         Texture2D buttonTex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
-        if (buttonTex == null)
-            Debug.Log("BUTTON TEXT IS NULL BEFORE CREATING START BUTTON");
         startButton = CreateStartButton(buttonTex, new Rect(new Vector2(0, 0), new Vector2(1, 1)));
-        if(startButton == null)
-            Debug.Log("START BUTTON IS NULL AFTER CREATING IT!");
 
         playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
         //config UI variables
@@ -262,15 +258,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     }
     private GameObject CreateStartButton(Texture2D tex, Rect rect)
     {
-        if (tex == null)
-            Debug.Log("TEX IS NULL AS AN ARG FOR CREATESTARTBUTTON");
-        if (rect == null)
-            Debug.Log("RECT IS NULL AS AN ARG FOR CREATESTARTBUTTON");
         GameObject startButton = new GameObject("StartButton");
         SpriteRenderer sr = startButton.AddComponent<SpriteRenderer>() as SpriteRenderer;
         sr.sprite = Sprite.Create(tex, new Rect(rect.x, rect.y, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
-        if(sr.sprite == null)
-            Debug.Log("SPRITE RENDERER IS NULL AFTER CREATING IT");
         startButton.AddComponent<BoxCollider>();
         startButton.transform.localScale = buttonScale;
         startButton.transform.position = buttonPosition;

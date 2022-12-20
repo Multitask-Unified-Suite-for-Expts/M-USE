@@ -239,7 +239,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     }
 
     void SetupBlockData(ContinuousRecognition_TrialLevel trialLevel)
-    { 
+    {
         BlockData.AddDatum("BlockName", () => currentBlock.BlockName);
         BlockData.AddDatum("NumTrials", () => trialLevel.NumTrials_Block);
         BlockData.AddDatum("NumCorrect", () => trialLevel.NumCorrect_Block);

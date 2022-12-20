@@ -236,12 +236,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
     public void loadVariables()
     {
-        Debug.Log("Material File Path = " + MaterialFilePath);
-        Debug.Log("Directory separator Char = " + Path.DirectorySeparatorChar);
         Texture2D buttonTex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
-        Debug.Log("IS BUTTON TEXT NULL BEFORE CREATING START BUTTON? " + buttonTex == null);
+        if (buttonTex == null)
+            Debug.Log("BUTTON TEXT IS NULL BEFORE CREATING START BUTTON");
         startButton = CreateStartButton(buttonTex, new Rect(new Vector2(0, 0), new Vector2(1, 1)));
-        Debug.Log("IS START BUTTON NULL AFTER CREATING IT? " + startButton == null);
+        if(startButton == null)
+            Debug.Log("START BUTTON IS NULL AFTER CREATING IT!");
 
         playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
         //config UI variables
@@ -262,12 +262,15 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     }
     private GameObject CreateStartButton(Texture2D tex, Rect rect)
     {
-        Debug.Log("IS TEX NULL AS ARGUMENT FOR CREATESTARTBUTTON? " + tex == null);
-        Debug.Log("IS RECT NULL AS ARGUMENT FOR CREATESTARTBUTTON? " + tex == null);
+        if (tex == null)
+            Debug.Log("TEX IS NULL AS AN ARG FOR CREATESTARTBUTTON");
+        if (rect == null)
+            Debug.Log("RECT IS NULL AS AN ARG FOR CREATESTARTBUTTON");
         GameObject startButton = new GameObject("StartButton");
         SpriteRenderer sr = startButton.AddComponent<SpriteRenderer>() as SpriteRenderer;
         sr.sprite = Sprite.Create(tex, new Rect(rect.x, rect.y, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
-        Debug.Log("SPRITE RENDERER NULL AFTER CREATING IT? " + sr.sprite == null);
+        if(sr.sprite == null)
+            Debug.Log("SPRITE RENDERER IS NULL AFTER CREATING IT");
         startButton.AddComponent<BoxCollider>();
         startButton.transform.localScale = buttonScale;
         startButton.transform.position = buttonPosition;

@@ -8,14 +8,20 @@ using USE_Settings;
 using USE_StimulusManagement;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Block;
+using System.Collections.Specialized;
 
 public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 {
-    [HideInInspector] public List<int> NumCorrect_Task;
+    [HideInInspector] public List<int> TrialsCompleted_Task;
+
+    [HideInInspector] public List<int> TrialsCorrect_Task;
     [HideInInspector] public float AvgNumCorrect;
 
-    [HideInInspector] public List<int> NumTbCompletions_Task;
+    [HideInInspector] public List<int> TokenBarCompletions_Task;
     [HideInInspector] float AvgNumTbCompletions;
+
+    [HideInInspector] public List<int> TotalRewards_Task;
+    [HideInInspector] public float AvgNumRewards;
 
     [HideInInspector] public List<float> TimeToChoice_Task;
     [HideInInspector] public float AvgTimeToChoice;
@@ -23,8 +29,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public List<float> TimeToCompletion_Task;
     [HideInInspector] public float AvgTimeToCompletion;
 
-    [HideInInspector] public List<float> NumRewards_Task;
-    [HideInInspector] public float AvgNumRewards;
 
     [HideInInspector] public double StanDev;
     [HideInInspector] public string BlockAveragesString;
@@ -95,11 +99,12 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             if(BlockCount > 0) CurrentBlockString += "\n";
             PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
 
-            NumCorrect_Task.Add(trialLevel.NumCorrect_Block); //at end of each block, add block's NumCorrect to task List;
-            NumTbCompletions_Task.Add(trialLevel.NumTbCompletions_Block);
+            TrialsCompleted_Task.Add(trialLevel.NumTrials_Block);
+            TrialsCorrect_Task.Add(trialLevel.NumCorrect_Block); //at end of each block, add block's NumCorrect to task List;
+            TokenBarCompletions_Task.Add(trialLevel.NumTbCompletions_Block);
             TimeToChoice_Task.Add(trialLevel.AvgTimeToChoice_Block);
             TimeToCompletion_Task.Add(trialLevel.TimeToCompletion_Block);
-            NumRewards_Task.Add(trialLevel.NumRewards_Block);
+            TotalRewards_Task.Add(trialLevel.NumRewards_Block);
 
             CalculateBlockAverages();
             CalculateStanDev();
@@ -107,6 +112,26 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         
     }
 
+    int GetTotal(List<int> total)
+    {
+        int count = 0;
+        foreach(int num in total)
+        {
+            count += num;
+        }
+        return count;
+    }
+
+    public override OrderedDictionary GetSummaryData()
+    {
+        OrderedDictionary data = new OrderedDictionary();
+
+        data["Trials Completed"] = GetTotal(TrialsCompleted_Task);
+        data["Trials Correct"] = GetTotal(TrialsCorrect_Task);
+        data["TokenBar Completions"] = GetTotal(TokenBarCompletions_Task);
+        data["Total Rewards"] = GetTotal(TotalRewards_Task);
+        return data;
+    }
 
     private void CalculateBlockSummaryString(ContinuousRecognition_TrialLevel trialLevel)
     {
@@ -145,17 +170,17 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     void CalculateStanDev()
     {
-        if (NumCorrect_Task.Count == 0) StanDev = 0;
+        if (TrialsCorrect_Task.Count == 0) StanDev = 0;
         else
         {
             double Mean = (double)AvgNumCorrect;
             List<double> squaredDeviations = new List<double>();
-            foreach (var num in NumCorrect_Task)
+            foreach (var num in TrialsCorrect_Task)
                 squaredDeviations.Add(Math.Pow(num - Mean, 2));
             double SumOfSquares = 0;
             foreach (var num in squaredDeviations)
                 SumOfSquares += num;
-            var variance = SumOfSquares / NumCorrect_Task.Count;
+            var variance = SumOfSquares / TrialsCorrect_Task.Count;
             StanDev = Math.Sqrt(variance);
         }
     }
@@ -163,23 +188,23 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     void CalculateBlockAverages()
     {
         //Avg Num Correct
-        if (NumCorrect_Task.Count == 0) AvgNumCorrect = 0;
+        if (TrialsCorrect_Task.Count == 0) AvgNumCorrect = 0;
         else
         {
             float sum = 0;
-            foreach (int num in NumCorrect_Task)
+            foreach (int num in TrialsCorrect_Task)
                 sum += num;
-            AvgNumCorrect = (float)sum / NumCorrect_Task.Count;
+            AvgNumCorrect = (float)sum / TrialsCorrect_Task.Count;
         }
 
         //Avg Num TokenBar Completions
-        if (NumTbCompletions_Task.Count == 0) AvgNumTbCompletions = 0;
+        if (TokenBarCompletions_Task.Count == 0) AvgNumTbCompletions = 0;
         else
         {
             float sum = 0;
-            foreach (int num in NumTbCompletions_Task)
+            foreach (int num in TokenBarCompletions_Task)
                 sum += num;
-            AvgNumTbCompletions = (float)sum / NumTbCompletions_Task.Count;
+            AvgNumTbCompletions = (float)sum / TokenBarCompletions_Task.Count;
         }
 
         //Avg TimeToChoice
@@ -203,13 +228,13 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         }
 
         //Avg NumRewards
-        if (NumRewards_Task.Count == 0) AvgNumRewards = 0;
+        if (TotalRewards_Task.Count == 0) AvgNumRewards = 0;
         else
         {
             float sum = 0;
-            foreach (float num in NumRewards_Task)
+            foreach (float num in TotalRewards_Task)
                 sum += num;
-            AvgNumRewards = (float)sum / NumRewards_Task.Count;
+            AvgNumRewards = (float)sum / TotalRewards_Task.Count;
         }
     }
 

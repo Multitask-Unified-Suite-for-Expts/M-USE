@@ -80,6 +80,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public Vector3 originalStartButtonPosition;
     [HideInInspector] public Vector3 originalTimerPosition;
 
+
     //Config Variables
     [HideInInspector]
     public ConfigNumber displayStimDuration, chooseStimDuration, itiDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration;

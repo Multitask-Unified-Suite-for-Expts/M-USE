@@ -715,6 +715,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
         {
+            TaskLevel.BlockSummaryString.Clear();
+            TaskLevel.BlockSummaryString.AppendLine("Block Num: " + (BlockCount) + "\nTrial Count: " + (TrialCount_InBlock) +
+                                                   "\nTotal Errors: " + totalErrors_InBlock + "\nError Type: " + 
+                                                   errorType_InBlockString + "\nPerformance: " + accuracyLog_InBlock + 
+                                                   "\n# Slider Complete: " + sliderCompleteQuantity);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
             Debug.Log("Trial " + TrialCount_InTask + " completed");
         });
@@ -743,7 +748,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //-----------------------------------------------------------------METHODS FOR DATA HANDLING----------------------------------------------------------------------
     private void LogTrialData() //All ".AddDatum" commands for Trial Data
     {
-        TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
+        TrialData.AddDatum("TrialID", () => CurrentTrialDef.BlockName);
         TrialData.AddDatum("Context", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("SearchStimsLocations", () => searchStimsLocations);
         TrialData.AddDatum("DistractorStimsLocations", () => distractorStimsLocations);

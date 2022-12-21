@@ -745,6 +745,12 @@ namespace USE_ExperimentTemplate_Task
                 FrameData.WriteData();
             }
         }
+        
+        
+        public T GetCurrentBlockDef<T>() where T : BlockDef
+        {
+            return (T)CurrentBlockDef;
+        }
 
     }
 
@@ -951,4 +957,5 @@ namespace USE_ExperimentTemplate_Task
         public bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         public string SelectionType;
     }
+    
 }

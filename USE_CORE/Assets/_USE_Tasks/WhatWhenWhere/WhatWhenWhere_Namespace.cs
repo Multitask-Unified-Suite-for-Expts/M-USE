@@ -9,7 +9,7 @@ namespace WhatWhenWhere_Namespace
 {
     public class WhatWhenWhere_BlockDef : BlockDef
     {
-        public string TrialID;
+        public string BlockName;
         public string ContextName;
         public int[] CorrectObjectTouchOrder;
         public int[] nRepetitionsMinMax;
@@ -40,7 +40,7 @@ namespace WhatWhenWhere_Namespace
             for (int iTrial = 0; iTrial< num; iTrial++)
             {
                 WhatWhenWhere_TrialDef td = new WhatWhenWhere_TrialDef();
-                td.TrialID = TrialID;
+                td.BlockName = BlockName;
                 td.ContextName = ContextName;
                 td.CorrectObjectTouchOrder = CorrectObjectTouchOrder;
                 td.SearchStimsIndices = SearchStimsIndices;
@@ -65,7 +65,7 @@ namespace WhatWhenWhere_Namespace
 
     public class WhatWhenWhere_TrialDef : TrialDef
     {
-        public string TrialID;
+        public string BlockName;
         public string ContextName;
         //ObjectNums refers to items in a list of objects to be loaded from resources folder
         
@@ -91,14 +91,14 @@ namespace WhatWhenWhere_Namespace
 
     public class WhatWhenWhere_StimDef : StimDef
     {
-        //relates to varaibles to evaluate stimuli
+        //relates to variables to evaluate stimuli
         public bool IsCurrentTarget;
         public bool IsDistractor;
     }
 
     public class WhatWhenWhere_TaskDef : TaskDef
     {
-        string ContextExternalFilePath;
+        // string ContextExternalFilePath;
         Vector3 ButtonPosition;
         Vector3 ButtonScale;
         private bool UsingRewardPump;

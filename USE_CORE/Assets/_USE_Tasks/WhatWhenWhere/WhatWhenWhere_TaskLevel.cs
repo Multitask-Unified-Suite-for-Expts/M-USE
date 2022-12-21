@@ -26,12 +26,15 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         string TaskName = "WhatWhenWhere";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             wwwTL.MaterialFilePath = (String) SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else Debug.LogError("Context External File Path setting not defined in the TaskDef");
+        else if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
+            wwwTL.MaterialFilePath = (String) SessionSettings.Get("Session", "ContextExternalFilePath");
+        else Debug.LogError("Context External File Path setting not defined in the TaskDef or Session config files.");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "UsingRewardPump"))
             wwwTL.usingRewardPump = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "UsingRewardPump");
         else Debug.LogError("Using Reward Pump setting not defined in the TaskDef");
         RunBlock.AddInitializationMethod(() =>
         {
+            //comment each error type
            wwwTL.totalErrors_InBlock = 0 ;
            wwwTL.errorType_InBlockString = "";
            wwwTL.errorType_InBlock.Clear();
@@ -41,7 +44,8 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
            wwwTL.touchDurationErrorCount = 0;
            wwwTL.irrelevantSelectionErrorCount = 0;
            wwwTL.noScreenTouchErrorCount = 0;
-            Array.Clear(wwwTL.numTotal_InBlock, 0, wwwTL.numTotal_InBlock.Length);
+           //comment better here
+           Array.Clear(wwwTL.numTotal_InBlock, 0, wwwTL.numTotal_InBlock.Length);
            Array.Clear(wwwTL.numCorrect_InBlock, 0, wwwTL.numCorrect_InBlock.Length);
            Array.Clear(wwwTL.numErrors_InBlock, 0, wwwTL.numErrors_InBlock.Length);
            wwwTL.accuracyLog_InBlock = "";
@@ -49,20 +53,24 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
            wwwTL.MinTrials = bd.nRepetitionsMinMax[0];
         });
 
-        RunBlock.AddUpdateMethod(() =>
-        {
-            BlockSummaryString.Clear();
-            BlockSummaryString.AppendLine("Block Num: " + (wwwTL.BlockCount) + "\nTrial Count: " + (wwwTL.TrialCount_InBlock) +
-            "\nTotal Errors: " + wwwTL.totalErrors_InBlock + "\nError Type: " + wwwTL.errorType_InBlockString + "\nPerformance: " + wwwTL.accuracyLog_InBlock + "\n# Slider Complete: " + wwwTL.sliderCompleteQuantity);
-
-        });
-
-
-
+        // RunBlock.AddUpdateMethod(() =>
+        // {
+        //     BlockSummaryString.Clear();
+        //     BlockSummaryString.AppendLine("Block Num: " + (wwwTL.BlockCount) + "\nTrial Count: " + (wwwTL.TrialCount_InBlock) +
+        //     "\nTotal Errors: " + wwwTL.totalErrors_InBlock + "\nError Type: " + wwwTL.errorType_InBlockString + "\nPerformance: " + wwwTL.accuracyLog_InBlock + "\n# Slider Complete: " + wwwTL.sliderCompleteQuantity);
+        //
+        // });
     }
-    public T GetCurrentBlockDef<T>() where T : BlockDef
+
+    public void UpdateBlockSummary(WhatWhenWhere_TrialLevel wwwTL)
     {
-        return (T)CurrentBlockDef;
+        BlockSummaryString.Clear();
+        BlockSummaryString.AppendLine("Block Num: " + (wwwTL.BlockCount) + "\nTrial Count: " + (wwwTL.TrialCount_InBlock) +
+                                      "\nTotal Errors: " + wwwTL.totalErrors_InBlock + "\nError Type: " + wwwTL.errorType_InBlockString + "\nPerformance: " + wwwTL.accuracyLog_InBlock + "\n# Slider Complete: " + wwwTL.sliderCompleteQuantity);
     }
+    // public T GetCurrentBlockDef<T>() where T : BlockDef
+    // {
+    //     return (T)CurrentBlockDef;
+    // }
 
 }

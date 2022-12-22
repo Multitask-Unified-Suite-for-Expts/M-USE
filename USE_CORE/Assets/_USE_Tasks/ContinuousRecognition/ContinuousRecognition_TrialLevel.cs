@@ -350,8 +350,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 EndBlock = true;
             }
         });
-        TokenUpdate.SpecifyTermination(() => (!currentTrial.IsHuman && (Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value))) && !TokenFBController.IsAnimating(), ITI);
-        TokenUpdate.SpecifyTermination(() => (currentTrial.IsHuman && (Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value))) && !TokenFBController.IsAnimating(), DisplayResults, () =>
+        TokenUpdate.SpecifyTermination(() => (Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value)) && !TokenFBController.IsAnimating(), DisplayResults, () =>
         {
             TimerBackdropGO.SetActive(false);
             ScoreTextGO.SetActive(false);

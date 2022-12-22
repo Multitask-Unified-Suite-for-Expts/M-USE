@@ -20,17 +20,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
     public ContinuousRecognition_TrialDef currentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
 
+    public TextMeshProUGUI TimerText;
+    public GameObject TimerTextGO;
     public GameObject CR_CanvasGO;
     public GameObject TitleTextGO;
     public GameObject YouWinTextGO;
     public GameObject YouLoseTextGO;
     public GameObject ScoreTextGO;
     public GameObject NumTrialsTextGO;
-
     public GameObject TimerBackdropGO;
-    public GameObject TimerTextGO;
-    public TextMeshProUGUI TimerText;
-
     public GameObject StartButton;
     public GameObject GreenBorderPrefab;
     public GameObject RedBorderPrefab;
@@ -41,45 +39,37 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public bool CompletedAllTrials;
     [HideInInspector] public bool EndBlock;
     [HideInInspector] public bool GotCorrect;
-    [HideInInspector] public bool stimIsChosen;
-
+    [HideInInspector] public bool StimIsChosen;
     [HideInInspector] public bool MacMainDisplayBuild;
+    [HideInInspector] public bool AdjustedPositionsForMac;
+    [HideInInspector] public bool ContextActive;
+    [HideInInspector] public bool VariablesLoaded;
 
     [HideInInspector] public StimGroup trialStims;
     [HideInInspector] public List<int> ChosenStimIndices;
     [HideInInspector] public string MaterialFilePath;
-    [HideInInspector] public string ContextPath;
-
-    [HideInInspector] public bool ContextActive;
-    [HideInInspector] public bool variablesLoaded;
-
-    [HideInInspector] public bool AdjustedPositionsForMac;
 
     //Display Data
     [HideInInspector] public int NumTrials_Block;
     [HideInInspector] public int NumCorrect_Block;
     [HideInInspector] public int NumTbCompletions_Block;
-    [HideInInspector] public List <float> TimeToChoice_Block;
+    [HideInInspector] public int NumRewards_Block;
     [HideInInspector] public float AvgTimeToChoice_Block;
     [HideInInspector] public float TimeToCompletion_Block;
     [HideInInspector] public float TimeToCompletion_StartTime;
-    [HideInInspector] public int NumRewards_Block;
-
     [HideInInspector] public float TokenUpdateStartTime;
+    [HideInInspector] public float TimeRemaining;
+    [HideInInspector] public List <float> TimeToChoice_Block;
 
     [HideInInspector] public int TokenCount;
     [HideInInspector] public int NumFeedbackRows;
     [HideInInspector] public int ScoreAmountPerTrial;
-
     [HideInInspector] public int Score;
 
-    [HideInInspector] public float TimeRemaining;
-
-    [HideInInspector] public Vector3 originalFbTextPosition;
-    [HideInInspector] public Vector3 originalTitleTextPosition;
-    [HideInInspector] public Vector3 originalStartButtonPosition;
-    [HideInInspector] public Vector3 originalTimerPosition;
-
+    [HideInInspector] public Vector3 OriginalFbTextPosition;
+    [HideInInspector] public Vector3 OriginalTitleTextPosition;
+    [HideInInspector] public Vector3 OriginalStartButtonPosition;
+    [HideInInspector] public Vector3 OriginalTimerPosition;
 
     //Config Variables
     [HideInInspector]
@@ -100,9 +90,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.enabled = false;
         ScoreAmountPerTrial = 100;
 
-        originalFbTextPosition = YouLoseTextGO.transform.position;
-        originalTitleTextPosition = TitleTextGO.transform.position;
-        originalTimerPosition = TimerBackdropGO.transform.position;
+        OriginalFbTextPosition = YouLoseTextGO.transform.position;
+        OriginalTitleTextPosition = TitleTextGO.transform.position;
+        OriginalTimerPosition = TimerBackdropGO.transform.position;
 
         TokenFBController.SetFlashingTime(1f);
 
@@ -113,10 +103,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             Cursor.visible = false;
 
-            ContextPath = GetContextNestedFilePath(currentTrial.ContextName);
-            RenderSettings.skybox = CreateSkybox(ContextPath);
-            //RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + currentTrial.ContextName + ".png");
-
             ContextActive = true;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
 
@@ -125,7 +111,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (StartButton == null)
                 CreateStartButton();
 
-            if (!variablesLoaded)
+            if (!VariablesLoaded)
                 LoadConfigUIVariables();
 
             SetTrialSummaryString();
@@ -186,11 +172,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 if (TitleTextGO.activeSelf)
                 {
                     TitleTextGO.SetActive(false);
-                    TitleTextGO.transform.position = originalTitleTextPosition; //Reset Title Position for next block (in case its not a human block). 
+                    TitleTextGO.transform.position = OriginalTitleTextPosition; //Reset Title Position for next block (in case its not a human block). 
                 }
 
                 StartButton.SetActive(false);
-                StartButton.transform.position = originalStartButtonPosition;
+                StartButton.transform.position = OriginalStartButtonPosition;
 
                 TokenFBController.enabled = true;
 
@@ -299,11 +285,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 StimDefPointer pointer = chosenStimObj.GetComponent<StimDefPointer>();
                 if (!pointer) return;
-                else stimIsChosen = true;
+                else StimIsChosen = true;
             }
             currentTrial.IsNewStim = GotCorrect;
         });
-        ChooseStim.SpecifyTermination(() => stimIsChosen, TouchFeedback);
+        ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
         ChooseStim.AddTimer(() => chooseStimDuration.value, ITI, () =>     //if no choice, skip touchFB/tokenFB and go to display results
         {
             if(currentTrial.IsHuman)
@@ -322,7 +308,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------
         TouchFeedback.AddInitializationMethod(() =>
         {
-            if(!stimIsChosen) return;
+            if(!StimIsChosen) return;
 
             if(GotCorrect)
                 HaloFBController.ShowPositive(chosenStimObj);
@@ -431,12 +417,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (YouWinTextGO.activeSelf)
             {
                 YouWinTextGO.SetActive(false);
-                YouWinTextGO.transform.position = originalFbTextPosition; //Reset position for next Block;  
+                YouWinTextGO.transform.position = OriginalFbTextPosition; //Reset position for next Block;  
             }
             if (YouLoseTextGO.activeSelf)
             {
                 YouLoseTextGO.SetActive(false);
-                YouLoseTextGO.transform.position = originalFbTextPosition; //Reset position for next Block;
+                YouLoseTextGO.transform.position = OriginalFbTextPosition; //Reset position for next Block;
             }
             DestroyFeedbackBorders();
         });
@@ -452,7 +438,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         CompletedAllTrials = false;
         TrialComplete = false;
         EndBlock = false;
-        stimIsChosen = false;
+        StimIsChosen = false;
         GotCorrect = false;
     }
 
@@ -470,7 +456,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.tokenSize = 200;
 
         //move Timer up
-        Vector3 Pos = originalTimerPosition;
+        Vector3 Pos = OriginalTimerPosition;
         Pos.y -= 1.5f;
         TimerBackdropGO.transform.position = Pos;
 
@@ -1252,7 +1238,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
             {
                 buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-                originalStartButtonPosition = buttonPosition;
+                OriginalStartButtonPosition = buttonPosition;
             }
             else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
@@ -1279,7 +1265,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");
         displayResultsDuration = ConfigUiVariables.get<ConfigNumber>("displayResultsDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
-        variablesLoaded = true;
+        VariablesLoaded = true;
     }
 
     void SetTokenFeedbackTimes()

@@ -50,9 +50,12 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     {
         ContinuousRecognition_TrialLevel trialLevel = (ContinuousRecognition_TrialLevel)TrialLevel;
 
-        string TaskName = "ContinuousRecognition";
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
+        if(SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+        else if(SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
+            trialLevel.MaterialFilePath = (String)SessionSettings.Get("Session", "ContextExternalFilePath");
+        else
+            Debug.Log("ContextExternalFilePath NOT specified in the Session Config OR Task Config!");
 
         if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
             trialLevel.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
@@ -67,6 +70,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
+            RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(currentBlock.ContextName));
+
             trialLevel.AdjustedPositionsForMac = false;
 
             trialLevel.ChosenStimIndices.Clear();
@@ -135,14 +140,17 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     {
         ClearStrings();
 
-        BlockAveragesString = "<size=18><b>Block Averages " + $"({BlockCount});" + "</b></size>" +
-                          "\nAvg Correct: " + AvgNumCorrect.ToString("0.00") +
-                          "\nAvg TbCompletions: " + AvgNumTbCompletions.ToString("0.00") +
-                          "\nAvg TimeToChoice: " + AvgTimeToChoice.ToString("0.00") + "s" +
-                          "\nAvg TimeToCompletion: " + AvgTimeToCompletion.ToString("0.00") + "s" +
-                          "\nAvg Rewards: " + AvgNumRewards.ToString("0.00") +
-                          "\nStandard Deviation: " + StanDev.ToString("0.00") +
-                          "\n";
+        if (BlockCount > 0)
+        {
+            BlockAveragesString = "<size=18><b>Block Averages " + $"({BlockCount});" + "</b></size>" +
+                              "\nAvg Correct: " + AvgNumCorrect.ToString("0.00") +
+                              "\nAvg TbCompletions: " + AvgNumTbCompletions.ToString("0.00") +
+                              "\nAvg TimeToChoice: " + AvgTimeToChoice.ToString("0.00") + "s" +
+                              "\nAvg TimeToCompletion: " + AvgTimeToCompletion.ToString("0.00") + "s" +
+                              "\nAvg Rewards: " + AvgNumRewards.ToString("0.00") +
+                              "\nStandard Deviation: " + StanDev.ToString("0.00") +
+                              "\n";
+        }
 
         CurrentBlockString = "<b>Block " + "(" + currentBlock.BlockName + "):" + "</b>" +
                         "\nCorrect: " + trialLevel.NumCorrect_Block +
@@ -184,7 +192,53 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         }
     }
 
-    float GetListAverage(List<int> numList)
+    void CalculateBlockAverages()
+    {
+        //Avg Num Correct
+        if (TrialsCorrect_Task.Count == 0)
+            AvgNumCorrect = 0;
+        else
+            AvgNumCorrect = GetIntListAverage(TrialsCorrect_Task);
+
+        //Avg Num TokenBar Completions
+        if (TokenBarCompletions_Task.Count == 0)
+            AvgNumTbCompletions = 0;
+        else
+            AvgNumTbCompletions = GetIntListAverage(TokenBarCompletions_Task);
+        
+        //Avg TimeToChoice
+        if (TimeToChoice_Task.Count == 0)
+            AvgTimeToChoice = 0;
+        else
+            AvgTimeToChoice = GetFloatListAverage(TimeToChoice_Task);
+
+        //Avg TimeToCompletion
+        if (TimeToCompletion_Task.Count == 0)
+            AvgTimeToCompletion = 0;
+        else
+            AvgTimeToCompletion = GetFloatListAverage(TimeToCompletion_Task);
+
+        //Avg NumRewards
+        if (TotalRewards_Task.Count == 0)
+            AvgNumRewards = 0;
+        else
+            AvgNumRewards = GetIntListAverage(TotalRewards_Task);
+    }
+
+    float GetFloatListAverage(List<float> numList)
+    {
+        if (numList.Count == 0)
+            return 0;
+        else
+        {
+            float sum = 0;
+            foreach (float num in numList)
+                sum += num;
+            return sum / numList.Count;
+        }
+    }
+
+    float GetIntListAverage(List<int> numList)
     {
         if (numList.Count == 0)
             return 0;
@@ -195,39 +249,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
                 sum += num;
             return sum / numList.Count;
         }
-    }
-
-    void CalculateBlockAverages()
-    {
-        //Avg Num Correct
-        if (TrialsCorrect_Task.Count == 0)
-            AvgNumCorrect = 0;
-        else
-            AvgNumCorrect = GetListAverage(TrialsCorrect_Task);
-
-        //Avg Num TokenBar Completions
-        if (TokenBarCompletions_Task.Count == 0)
-            AvgNumTbCompletions = 0;
-        else
-            AvgNumTbCompletions = GetListAverage(TokenBarCompletions_Task);
-        
-        //Avg TimeToChoice
-        if (TimeToChoice_Task.Count == 0)
-            AvgTimeToChoice = 0;
-        else
-            AvgTimeToChoice = GetListAverage(TimeToChoice_Task.ConvertAll(x => (int)x));
-
-        //Avg TimeToCompletion
-        if (TimeToCompletion_Task.Count == 0)
-            AvgTimeToCompletion = 0;
-        else
-            AvgTimeToCompletion = GetListAverage(TimeToCompletion_Task.ConvertAll(x => (int)x));
-
-        //Avg NumRewards
-        if (TotalRewards_Task.Count == 0)
-            AvgNumRewards = 0;
-        else
-            AvgNumRewards = GetListAverage(TotalRewards_Task);
     }
 
     void SetupBlockData(ContinuousRecognition_TrialLevel trialLevel)

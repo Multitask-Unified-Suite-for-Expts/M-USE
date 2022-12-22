@@ -101,6 +101,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
+            //Make sure text and timer objects are inactive in case they used hotkey to end last block.
+            if(TrialCount_InBlock == 0 && currentTrial.IsHuman)
+                if(ScoreTextGO.activeSelf || NumTrialsTextGO.activeSelf || TimerBackdropGO.activeSelf)
+                    DeactivateGameObjects(new List<GameObject>() {ScoreTextGO, NumTrialsTextGO, TimerBackdropGO});
+
             Cursor.visible = false;
 
             ContextActive = true;
@@ -160,11 +165,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             SetShadowType();
 
             //MAKE EACH STIM GAME OBJECT FACE THE CAMERA WHILE SPAWNED
-            if(currentTrial.StimFacingCamera)
-            {
-                foreach (var stim in trialStims.stimDefs)
-                    stim.StimGameObject.AddComponent<FaceCamera>();
-            }            
+            if (currentTrial.StimFacingCamera)
+                MakeStimsFaceCamera(trialStims);     
         });
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
             DisplayStims, () =>
@@ -433,6 +435,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS -----------------------------------------------------------------------------------------
+    void DeactivateGameObjects(List<GameObject> gameObjects)
+    {
+        foreach (GameObject go in gameObjects)
+            go.SetActive(false);
+    }
+
     void ResetGlobalTrialVariables()
     {
         CompletedAllTrials = false;
@@ -933,12 +941,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             GenerateFeedbackStim(rightGroup, FeedbackLocations);
             GenerateFeedbackBorders(rightGroup);
 
-            //MAKE EACH STIM GAME OBJECT FACE THE CAMERA DURING THE ENTIRE DISPLAY STIM STATE
             if (currentTrial.StimFacingCamera)
-            {
-                foreach (var stim in rightGroup.stimDefs)
-                    stim.StimGameObject.AddComponent<FaceCamera>();
-            }
+                MakeStimsFaceCamera(rightGroup);
         }
         else
         {
@@ -950,12 +954,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             GenerateFeedbackStim(rightGroup, FeedbackLocations.Take(FeedbackLocations.Length - 1).ToArray());
             GenerateFeedbackBorders(rightGroup);
 
-            //MAKE EACH STIM GAME OBJECT FACE THE CAMERA DURING THE ENTIRE DISPLAY STIM STATE
             if (currentTrial.StimFacingCamera)
-            {
-                foreach (var stim in rightGroup.stimDefs)
-                    stim.StimGameObject.AddComponent<FaceCamera>();
-            }
+                MakeStimsFaceCamera(rightGroup);
 
             StimGroup wrongGroup = new StimGroup("Wrong");
             StimDef wrongStim = ExternalStims.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(wrongGroup);
@@ -963,10 +963,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             GenerateFeedbackStim(wrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length - 1).Take(1).ToArray());
             GenerateFeedbackBorders(wrongGroup);
 
-            //MAKE EACH STIM GAME OBJECT FACE THE CAMERA DURING THE ENTIRE DISPLAY STIM STATE
             if (currentTrial.StimFacingCamera)
                 wrongStim.StimGameObject.AddComponent<FaceCamera>();
         }
+    }
+
+    void MakeStimsFaceCamera(StimGroup stims)
+    {
+        foreach (var stim in stims.stimDefs)
+            stim.StimGameObject.AddComponent<FaceCamera>();
     }
 
     void GenerateFeedbackStim(StimGroup group, Vector3[] locations)

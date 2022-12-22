@@ -5919,15 +5919,16 @@ MonoBehaviour:
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
-  NumCorrect_Task: 
+  TrialsCompleted_Task: 
+  TrialsCorrect_Task: 
   AvgNumCorrect: 0
-  NumTbCompletions_Task: 
+  TokenBarCompletions_Task: 
+  TotalRewards_Task: 
+  AvgNumRewards: 0
   TimeToChoice_Task: []
   AvgTimeToChoice: 0
   TimeToCompletion_Task: []
   AvgTimeToCompletion: 0
-  NumRewards_Task: []
-  AvgNumRewards: 0
   StanDev: 0
   BlockAveragesString: 
   CurrentBlockString: 
@@ -5985,6 +5986,8 @@ MonoBehaviour:
   SelectionType: 
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
+  TimerText: {fileID: 0}
+  TimerTextGO: {fileID: 368680574}
   CR_CanvasGO: {fileID: 321374836}
   TitleTextGO: {fileID: 1124341760}
   YouWinTextGO: {fileID: 1268475002}
@@ -5992,8 +5995,6 @@ MonoBehaviour:
   ScoreTextGO: {fileID: 208675865}
   NumTrialsTextGO: {fileID: 1932148019}
   TimerBackdropGO: {fileID: 999783758}
-  TimerTextGO: {fileID: 368680574}
-  TimerText: {fileID: 0}
   StartButton: {fileID: 0}
   GreenBorderPrefab: {fileID: 692447127116707221, guid: 56d1b38cf705cfa458909624e6058ac2,
     type: 3}
@@ -6005,35 +6006,34 @@ MonoBehaviour:
   CompletedAllTrials: 0
   EndBlock: 0
   GotCorrect: 0
-  stimIsChosen: 0
+  StimIsChosen: 0
   MacMainDisplayBuild: 0
+  AdjustedPositionsForMac: 0
+  ContextActive: 0
+  VariablesLoaded: 0
   trialStims:
     stimGroupName: 
     IsActive: 0
   ChosenStimIndices: 
   MaterialFilePath: 
-  ContextPath: 
-  ContextActive: 0
-  variablesLoaded: 0
-  AdjustedPositionsForMac: 0
   NumTrials_Block: 0
   NumCorrect_Block: 0
   NumTbCompletions_Block: 0
-  TimeToChoice_Block: []
+  NumRewards_Block: 0
   AvgTimeToChoice_Block: 0
   TimeToCompletion_Block: 0
   TimeToCompletion_StartTime: 0
-  NumRewards_Block: 0
   TokenUpdateStartTime: 0
+  TimeRemaining: 0
+  TimeToChoice_Block: []
   TokenCount: 0
   NumFeedbackRows: 0
   ScoreAmountPerTrial: 0
   Score: 0
-  TimeRemaining: 0
-  originalFbTextPosition: {x: 0, y: 0, z: 0}
-  originalTitleTextPosition: {x: 0, y: 0, z: 0}
-  originalStartButtonPosition: {x: 0, y: 0, z: 0}
-  originalTimerPosition: {x: 0, y: 0, z: 0}
+  OriginalFbTextPosition: {x: 0, y: 0, z: 0}
+  OriginalTitleTextPosition: {x: 0, y: 0, z: 0}
+  OriginalStartButtonPosition: {x: 0, y: 0, z: 0}
+  OriginalTimerPosition: {x: 0, y: 0, z: 0}
   displayStimDuration:
     name: 
     hidden: 0

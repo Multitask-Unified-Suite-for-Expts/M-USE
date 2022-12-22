@@ -106,11 +106,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 if(ScoreTextGO.activeSelf || NumTrialsTextGO.activeSelf || TimerBackdropGO.activeSelf)
                     DeactivateGameObjects(new List<GameObject>() {ScoreTextGO, NumTrialsTextGO, TimerBackdropGO});
 
-            Cursor.visible = false;
-
-            ContextActive = true;
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
-
             NumFeedbackRows = 0;
 
             if (StartButton == null)
@@ -131,8 +126,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
-            if(currentTrial.IsHuman)
+            if (currentTrial.IsHuman)
                 Cursor.visible = true;
+            else
+                Cursor.visible = false;
 
             if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //if running build with mac as main display
             {
@@ -353,7 +350,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 EndBlock = true;
             }
         });
-        TokenUpdate.SpecifyTermination(() => (Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value)) && !TokenFBController.IsAnimating(), DisplayResults, () =>
+        TokenUpdate.SpecifyTermination(() => (!currentTrial.IsHuman && (Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value))) && !TokenFBController.IsAnimating(), ITI);
+        TokenUpdate.SpecifyTermination(() => (currentTrial.IsHuman && (Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value))) && !TokenFBController.IsAnimating(), DisplayResults, () =>
         {
             TimerBackdropGO.SetActive(false);
             ScoreTextGO.SetActive(false);

@@ -123,8 +123,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         initTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton),
             SearchDisplayDelay, () => 
             {
+                Input.ResetInputAxes();
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
-               startButton.SetActive(false);
+                startButton.SetActive(false);
             });
         
         // Show the target/sample with some other distractors

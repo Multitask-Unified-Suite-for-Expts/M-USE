@@ -118,6 +118,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         initTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton),
             SearchDisplayDelay, () =>
             {
+                Input.ResetInputAxes();
                 startButton.SetActive(false);
                 totalTokensCollected = TokenFBController.GetTokenBarValue() +
                                        (TokenFBController.GetNumTokenBarFull() * CurrentTrialDef.NumTokenBar);

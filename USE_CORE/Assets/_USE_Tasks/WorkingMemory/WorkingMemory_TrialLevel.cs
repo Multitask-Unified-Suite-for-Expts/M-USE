@@ -75,6 +75,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         });
         initTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton),
             displaySample, () => {
+                Input.ResetInputAxes();
                 startButton.SetActive(false);
                 TokenFBController.enabled = true;
                 RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");

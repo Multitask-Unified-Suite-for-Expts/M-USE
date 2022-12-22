@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using ContinuousRecognition_Namespace;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,7 +9,7 @@ using USE_Settings;
 using USE_StimulusManagement;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Block;
-using System.Collections.Specialized;
+
 
 public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 {
@@ -28,7 +29,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     [HideInInspector] public List<float> TimeToCompletion_Task;
     [HideInInspector] public float AvgTimeToCompletion;
-
 
     [HideInInspector] public double StanDev;
     [HideInInspector] public string BlockAveragesString;
@@ -116,9 +116,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     {
         int count = 0;
         foreach(int num in total)
-        {
             count += num;
-        }
         return count;
     }
 
@@ -170,13 +168,14 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     void CalculateStanDev()
     {
-        if (TrialsCorrect_Task.Count == 0) StanDev = 0;
+        if (TrialsCorrect_Task.Count == 0)
+            StanDev = 0;
         else
         {
-            double Mean = (double)AvgNumCorrect;
+            double mean = (double)AvgNumCorrect;
             List<double> squaredDeviations = new List<double>();
             foreach (var num in TrialsCorrect_Task)
-                squaredDeviations.Add(Math.Pow(num - Mean, 2));
+                squaredDeviations.Add(Math.Pow(num - mean, 2));
             double SumOfSquares = 0;
             foreach (var num in squaredDeviations)
                 SumOfSquares += num;
@@ -185,57 +184,50 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         }
     }
 
+    float GetListAverage(List<int> numList)
+    {
+        if (numList.Count == 0)
+            return 0;
+        else
+        {
+            float sum = 0;
+            foreach (var num in numList)
+                sum += num;
+            return sum / numList.Count;
+        }
+    }
+
     void CalculateBlockAverages()
     {
         //Avg Num Correct
-        if (TrialsCorrect_Task.Count == 0) AvgNumCorrect = 0;
+        if (TrialsCorrect_Task.Count == 0)
+            AvgNumCorrect = 0;
         else
-        {
-            float sum = 0;
-            foreach (int num in TrialsCorrect_Task)
-                sum += num;
-            AvgNumCorrect = (float)sum / TrialsCorrect_Task.Count;
-        }
+            AvgNumCorrect = GetListAverage(TrialsCorrect_Task);
 
         //Avg Num TokenBar Completions
-        if (TokenBarCompletions_Task.Count == 0) AvgNumTbCompletions = 0;
+        if (TokenBarCompletions_Task.Count == 0)
+            AvgNumTbCompletions = 0;
         else
-        {
-            float sum = 0;
-            foreach (int num in TokenBarCompletions_Task)
-                sum += num;
-            AvgNumTbCompletions = (float)sum / TokenBarCompletions_Task.Count;
-        }
-
+            AvgNumTbCompletions = GetListAverage(TokenBarCompletions_Task);
+        
         //Avg TimeToChoice
-        if (TimeToChoice_Task.Count == 0) AvgTimeToChoice = 0;
+        if (TimeToChoice_Task.Count == 0)
+            AvgTimeToChoice = 0;
         else
-        {
-            float sum = 0;
-            foreach (float num in TimeToChoice_Task)
-                sum += num;
-            AvgTimeToChoice = (float)sum / TimeToChoice_Task.Count;
-        }
+            AvgTimeToChoice = GetListAverage(TimeToChoice_Task.ConvertAll(x => (int)x));
 
         //Avg TimeToCompletion
-        if (TimeToCompletion_Task.Count == 0) AvgTimeToCompletion = 0;
+        if (TimeToCompletion_Task.Count == 0)
+            AvgTimeToCompletion = 0;
         else
-        {
-            float sum = 0;
-            foreach (float num in TimeToCompletion_Task)
-                sum += num;
-            AvgTimeToCompletion = (float)sum / TimeToCompletion_Task.Count;
-        }
+            AvgTimeToCompletion = GetListAverage(TimeToCompletion_Task.ConvertAll(x => (int)x));
 
         //Avg NumRewards
-        if (TotalRewards_Task.Count == 0) AvgNumRewards = 0;
+        if (TotalRewards_Task.Count == 0)
+            AvgNumRewards = 0;
         else
-        {
-            float sum = 0;
-            foreach (float num in TotalRewards_Task)
-                sum += num;
-            AvgNumRewards = (float)sum / TotalRewards_Task.Count;
-        }
+            AvgNumRewards = GetListAverage(TotalRewards_Task);
     }
 
     void SetupBlockData(ContinuousRecognition_TrialLevel trialLevel)
@@ -249,11 +241,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("NumRewards", () => trialLevel.NumRewards_Block);
         BlockData.AddDatum("MaxNumTrials", () => currentBlock.MaxNumTrials);
 
-    }
-
-    public T GetCurrentBlockDef<T>() where T : BlockDef
-    {
-        return (T)CurrentBlockDef;
     }
 
 }

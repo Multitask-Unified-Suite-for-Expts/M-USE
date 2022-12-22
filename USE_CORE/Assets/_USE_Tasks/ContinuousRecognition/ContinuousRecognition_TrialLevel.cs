@@ -480,9 +480,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TitleTextGO.transform.position = Position;
     }
 
-    string GetContextNestedFilePath(string contextName)
+    public string GetContextNestedFilePath(string contextName) //Recursively search the subfolders of the MaterialFilePath to get ContextFilePath
     {
-        //Recursively search the sub folders of the MaterialFilePath to get Context File Path
         string backupContextName = "LinearDark";
         string contextPath = ""; 
 
@@ -494,6 +493,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             Debug.Log($"Context File Path Not Found. Defaulting to {backupContextName}.");
             contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0]; //Use Default LinearDark if can't find file.
+            if(contextPath == null)
+                Debug.Log($"Backup Context ({contextPath}) NOT Found.");
         }
         return contextPath;
     }
@@ -540,7 +541,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     void SetScoreAndTrialsText()
     {
-        //function to set the score and NumTrials texts at the beginning of the trial. 
+        //Set the Score and NumTrials texts at the beginning of the trial. 
         ScoreTextGO.GetComponent<TextMeshProUGUI>().text = $"SCORE: {Score}";
         NumTrialsTextGO.GetComponent<TextMeshProUGUI>().text = $"TRIALS: {TrialCount_InBlock}";
     }

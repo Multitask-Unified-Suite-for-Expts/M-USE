@@ -128,8 +128,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             if (currentTrial.IsHuman)
                 Cursor.visible = true;
-            else
-                Cursor.visible = false;
 
             if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //if running build with mac as main display
             {

@@ -274,7 +274,7 @@ namespace ContinuousRecognition_Namespace
         public int RewardMag;
         public int PulseSize;
 
-        public bool IsNewStim;
+        public bool GotTrialCorrect;
         public string ShadowType;
         public string ContextName;
 

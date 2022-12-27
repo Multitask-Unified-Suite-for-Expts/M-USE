@@ -38,7 +38,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public bool TrialComplete;
     [HideInInspector] public bool CompletedAllTrials;
     [HideInInspector] public bool EndBlock;
-    [HideInInspector] public bool GotCorrect;
     [HideInInspector] public bool StimIsChosen;
     [HideInInspector] public bool MacMainDisplayBuild;
     [HideInInspector] public bool AdjustedPositionsForMac;
@@ -150,7 +149,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             
             TokenFBController.enabled = false;
 
-            currentTrial.IsNewStim = false;
+            currentTrial.GotTrialCorrect = false;
             ResetGlobalTrialVariables();
 
             TimerText = TimerTextGO.GetComponent<TextMeshProUGUI>();
@@ -166,16 +165,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
             DisplayStims, () =>
             {
-                if (TitleTextGO.activeSelf)
-                {
-                    TitleTextGO.SetActive(false);
-                    TitleTextGO.transform.position = OriginalTitleTextPosition; //Reset Title Position for next block (in case its not a human block). 
-                }
-
                 StartButton.SetActive(false);
                 StartButton.transform.position = OriginalStartButtonPosition;
 
                 TokenFBController.enabled = true;
+
+                if(TitleTextGO.activeSelf)
+                {
+                    TitleTextGO.SetActive(false);
+                    TitleTextGO.transform.position = OriginalTitleTextPosition; //Reset Title Position for next block (in case its not a human block). 
+                }
 
                 if(currentTrial.IsHuman)
                 {
@@ -191,7 +190,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             });
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------
-        //stim are turned on as soon as it enters DisplayStims state. no initialization method needed. 
+        //Stim are turned on as soon as it enters DisplayStims state. no initialization method needed. 
         DisplayStims.AddTimer(() => displayStimDuration.value, ChooseStim, () => TimeRemaining = chooseStimDuration.value);
 
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
@@ -232,7 +231,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
                 if (!ChosenStimIndices.Contains(chosenStimDef.StimCode - 1)) //THEY GUESSED RIGHT
                 {
-                    GotCorrect = true;
+                    currentTrial.GotTrialCorrect = true;
                     NumCorrect_Block++;
 
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["CorrectResponse"]);
@@ -271,10 +270,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
                 else //THEY GUESSED WRONG
                 {
+                    currentTrial.WrongStimIndex = chosenStimDef.StimCode - 1; //identifies the stim they got wrong for Block FB purposes. 
                     TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchDistractorStart"]);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["IncorrectResponse"]);
-                    currentTrial.WrongStimIndex = chosenStimDef.StimCode - 1; //identifies the stim they got wrong for Block FB purposes. 
                 }
             }
          
@@ -284,7 +283,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 if (!pointer) return;
                 else StimIsChosen = true;
             }
-            currentTrial.IsNewStim = GotCorrect;
         });
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
         ChooseStim.AddTimer(() => chooseStimDuration.value, ITI, () =>     //if no choice, skip touchFB/tokenFB and go to display results
@@ -307,7 +305,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             if(!StimIsChosen) return;
 
-            if(GotCorrect)
+            if(currentTrial.GotTrialCorrect)
                 HaloFBController.ShowPositive(chosenStimObj);
             else
                 HaloFBController.ShowNegative(chosenStimObj);
@@ -322,7 +320,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             TokenUpdateStartTime = Time.time;
             HaloFBController.Destroy();
-            if (GotCorrect)
+            if (currentTrial.GotTrialCorrect)
             {
                 if(TrialCount_InBlock == currentTrial.MaxNumTrials-1 || currentTrial.PNC_Stim.Count == 0) //If they get the last trial right (or find all stim), fill up bar!
                 {
@@ -357,7 +355,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //DISPLAY RESULTS state --------------------------------------------------------------------------------------------------------
         DisplayResults.AddInitializationMethod(() =>
         {
-            if (GotCorrect)
+            if (currentTrial.GotTrialCorrect)
                 Score += ((TrialCount_InBlock + 1) * 100);
 
             if (EndBlock)
@@ -371,13 +369,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     if (CompletedAllTrials)
                     {
                         YouWinTextGO.transform.localPosition = new Vector3(YouWinTextGO.transform.localPosition.x, YouWinTextGO.transform.localPosition.y - Y_Offset, YouWinTextGO.transform.localPosition.z);
-                        YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"You Won! \n New HighScore: {Score} xp";
+                        YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"WINNER! \n New HighScore: {Score} xp";
                         YouWinTextGO.SetActive(true);
                     }
                     else
                     {
                         YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
-                        YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Game Over! \n HighScore: {Score} xp";
+                        YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Game Over \n HighScore: {Score} xp";
                         YouLoseTextGO.SetActive(true);
                     }
                 }
@@ -442,7 +440,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TrialComplete = false;
         EndBlock = false;
         StimIsChosen = false;
-        GotCorrect = false;
+        currentTrial.GotTrialCorrect = false;
     }
 
     void AdjustStartButtonPos()
@@ -514,9 +512,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 break;
             case 4:
                 if (MacMainDisplayBuild && !Debug.isDebugBuild)
-                    yOffset = -25f; //check this!!
+                    yOffset = -40f; //check this!!
                 else
-                    yOffset = -20f; //check
+                    yOffset = -35f;
                 break;
             //case 5:
             //    if (MacMainDisplayBuild && !Debug.isDebugBuild)
@@ -532,7 +530,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     {
         //Set the Score and NumTrials texts at the beginning of the trial. 
         ScoreTextGO.GetComponent<TextMeshProUGUI>().text = $"SCORE: {Score}";
-        NumTrialsTextGO.GetComponent<TextMeshProUGUI>().text = $"TRIALS: {TrialCount_InBlock}";
+        NumTrialsTextGO.GetComponent<TextMeshProUGUI>().text = $"TRIAL: {TrialCount_InBlock}";
     }
 
     void SetTrialSummaryString()
@@ -1123,7 +1121,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("New_Stim", () => currentTrial.New_String);
         TrialData.AddDatum("PNC_Stim", () => currentTrial.PNC_String);
         TrialData.AddDatum("StimLocations", () => currentTrial.Locations_String);
-        TrialData.AddDatum("ChoseCorrectly", () => currentTrial.IsNewStim);
+        TrialData.AddDatum("ChoseCorrectly", () => currentTrial.GotTrialCorrect);
         TrialData.AddDatum("CurrentTrialStims", () => currentTrial.TrialStimIndices);
         TrialData.AddDatum("PC_Percentage", () => currentTrial.PC_Percentage_String);
     }

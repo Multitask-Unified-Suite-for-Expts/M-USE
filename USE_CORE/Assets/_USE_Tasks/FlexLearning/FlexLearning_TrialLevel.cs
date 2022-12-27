@@ -253,7 +253,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             else
             {
                 AudioFBController.Play("Negative");
-                TokenFBController.RemoveTokens(selected, -selectedSD.StimTrialRewardMag);
+                TokenFBController.RemoveTokens(selected, -selectedSD.StimTrialRewardMag, Color.grey);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
             }

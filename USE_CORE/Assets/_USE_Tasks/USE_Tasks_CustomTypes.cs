@@ -9,6 +9,7 @@ using EffortControl_Namespace;
 using MazeGame_Namespace;
 using FlexLearning_Namespace;
 using THR_Namespace;
+using FinderGame_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -115,6 +116,17 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(THR_BlockDef),
                 TrialDefType = typeof(THR_TrialDef),
                 StimDefType = typeof(THR_StimDef)
+            }
+        }
+        ,{
+            "FinderGame", new TaskTypes
+            {
+                TaskLevelType = typeof(FinderGame_TaskLevel),
+                TrialLevelType = typeof(FinderGame_TrialLevel),
+                TaskDefType = typeof(FinderGame_TaskDef),
+                BlockDefType = typeof(FinderGame_BlockDef),
+                TrialDefType = typeof(FinderGame_TrialDef),
+                StimDefType = typeof(FinderGame_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

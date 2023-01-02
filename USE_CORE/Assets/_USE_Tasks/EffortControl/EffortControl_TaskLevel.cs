@@ -9,6 +9,7 @@ using USE_StimulusManagement;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Block;
 using System.Collections.Specialized;
+using System.IO;
 
 public class EffortControl_TaskLevel : ControlLevel_Task_Template
 {   
@@ -30,10 +31,14 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
     public override void DefineControlLevel()
     {
-        EffortControl_TrialLevel wmTL = (EffortControl_TrialLevel)TrialLevel;
+        EffortControl_TrialLevel trialLevel = (EffortControl_TrialLevel)TrialLevel;
         string TaskName = "EffortControl";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            wmTL.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+            trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+        else if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
+            trialLevel.MaterialFilePath = (String)SessionSettings.Get("Session", "ContextExternalFilePath");
+        else
+            Debug.Log("ContextExternalFilePath NOT specified in the Session Config OR Task Config!");
 
     }
 

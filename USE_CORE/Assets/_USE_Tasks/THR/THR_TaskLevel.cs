@@ -24,6 +24,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
     public int BlueSquareTouches_Task = 0;
     public int WhiteSquareTouches_Task = 0;
     public int BackdropTouches_Task = 0;
+    public int ItiTouches_Task = 0;
     public int TouchRewards_Task = 0;
     public int ReleaseRewards_Task = 0;
     public int ReleasedEarly_Task = 0;
@@ -65,6 +66,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             trialLevel.BackdropTouches_Block = 0;
             trialLevel.BlueSquareTouches_Block = 0;
             trialLevel.WhiteSquareTouches_Block = 0;
+            trialLevel.NumItiTouches_Block = 0;
             trialLevel.NumTouchRewards_Block = 0;
             trialLevel.NumReleaseRewards_Block = 0;
             trialLevel.NumReleasedEarly_Block = 0;
@@ -95,6 +97,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             BlueSquareTouches_Task += trialLevel.BlueSquareTouches_Block;
             WhiteSquareTouches_Task += trialLevel.WhiteSquareTouches_Block;
             BackdropTouches_Task += trialLevel.BackdropTouches_Block;
+            ItiTouches_Task += trialLevel.NumItiTouches_Block;
             TouchRewards_Task += trialLevel.NumTouchRewards_Block;
             ReleaseRewards_Task += trialLevel.NumReleaseRewards_Block;
             ReleasedEarly_Task += trialLevel.NumReleasedEarly_Block;
@@ -112,6 +115,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         data["Blue Square Touches"] = BlueSquareTouches_Task;
         data["White Square Touches"] = WhiteSquareTouches_Task;
         data["Non Square Touches"] = BackdropTouches_Task;
+        data["ITI Touches"] = ItiTouches_Task;
         data["Touch Rewards"] = TouchRewards_Task;
         data["Release Rewards"] = ReleaseRewards_Task;
         data["Released Early"] = ReleasedEarly_Task;
@@ -154,17 +158,13 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("WhiteSquareTouches_Block", () => trialLevel.WhiteSquareTouches_Block);
         BlockData.AddDatum("BlueSquareTouches_Block", () => trialLevel.BlueSquareTouches_Block);
         BlockData.AddDatum("BackdropTouches_Block", () => trialLevel.BackdropTouches_Block);
+        BlockData.AddDatum("ItiTouches_Block", () => trialLevel.NumItiTouches_Block);
         BlockData.AddDatum("NumTouchRewards", () => trialLevel.NumTouchRewards_Block);
         BlockData.AddDatum("NumReleaseRewards", () => trialLevel.NumReleaseRewards_Block);
         BlockData.AddDatum("DifficultyLevel", () => currentBlock.BlockName);
         BlockData.AddDatum("NumReleasedEarly", () => trialLevel.NumReleasedEarly_Block);
         BlockData.AddDatum("NumReleasedLate", () => trialLevel.NumReleasedLate_Block);
         BlockData.AddDatum("NumTouchesMovedOutside", () => trialLevel.NumTouchesMovedOutside_Block);
-    }
-
-    public T GetCurrentBlockDef<T>() where T : BlockDef
-    {
-        return (T)CurrentBlockDef;
     }
 
 }

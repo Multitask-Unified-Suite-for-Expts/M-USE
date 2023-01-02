@@ -1,3 +1,4 @@
+using UnityEngine;
 using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
@@ -39,12 +40,12 @@ namespace EffortControl_Namespace
         // public int ContextNum;
         // public string ConditionName;
         public string ContextName;
-        public int NumOfClicksLeft;
-        public int NumOfClicksRight;
-        public int NumOfCoinsLeft;
-        public int NumOfCoinsRight;
-        public int NumOfPulsesLeft;
-        public int NumOfPulsesRight;
+        public int NumClicksLeft;
+        public int NumClicksRight;
+        public int NumCoinsLeft;
+        public int NumCoinsRight;
+        public int NumPulsesLeft;
+        public int NumPulsesRight;
         public int PulseSizeLeft;
         public int PulseSizeRight;
         public int ClicksPerOutline;

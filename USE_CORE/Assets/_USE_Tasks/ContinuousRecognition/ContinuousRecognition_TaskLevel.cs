@@ -66,14 +66,13 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
 
-        SetupTask.AddInitializationMethod(() => SetupBlockData(trialLevel));
-
         RunBlock.AddInitializationMethod(() =>
         {
             RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(currentBlock.ContextName));
             trialLevel.ContextActive = true;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
 
+            SetupBlockData(trialLevel); //PROBLEM: missing headers and duplicating columns in subsequent blocks 
 
             trialLevel.AdjustedPositionsForMac = false;
 

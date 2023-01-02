@@ -357,9 +357,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             {
                 AudioFBController.Play("Positive");
                 if(GiveReleaseReward)
-                {
                     SquareMaterial.color = Color.gray;
-                }
             }
             else //held too long, held too short, moved outside, or timeRanOut
             {
@@ -413,7 +411,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         Feedback.SpecifyTermination(() => GiveTouchReward && RewardGiven, ITI); //when they receive touch reward!
         Feedback.SpecifyTermination(() => (HeldTooShort || HeldTooLong || MovedOutside) && AudioPlayed && !Grating, ITI); //If they got wrong
         Feedback.SpecifyTermination(() => (TimeRanOut) && AudioPlayed, ITI); //state ends after receiving neg FB (if didn't get correct).
-        //Feedback.AddTimer(() => CurrentTrial.FbDuration, ITI);
+        Feedback.AddTimer(() => CurrentTrial.FbDuration, ITI);
 
         //ITI state ---------------------------------------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>
@@ -429,14 +427,20 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 TrialCompletionList.Insert(0, 1);
             else
                 TrialCompletionList.Insert(0, 0);
-
+        });
+        ITI.AddUpdateMethod(() =>
+        {
+            if(InputBroker.GetMouseButtonUp(0))
+                ItiTouches_Trial++;
+        });
+        ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial, () =>
+        {
             AddTrialTouchNumsToBlock();
             TrialsCompleted_Block++;
             TrialComplete = true;
 
             CheckIfBlockShouldEnd();
         });
-        ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial);
 
         LogTrialData();
         LogFrameData();

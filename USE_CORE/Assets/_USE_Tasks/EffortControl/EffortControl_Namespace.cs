@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
@@ -25,20 +27,10 @@ namespace EffortControl_Namespace
     public class EffortControl_BlockDef : BlockDef
     {
         //Already-existing fields (inherited from BlockDef)
-		//public int BlockCount;
-		//public TrialDef[] TrialDefs;
-    }
-
-    public class EffortControl_TrialDef : TrialDef
-    {
-        //Already-existing fields (inherited from TrialDef)
-        //public int BlockCount, TrialCountInBlock, TrialCountInTask;
-        //public TrialStims TrialStims;
-        // Commented out variables are not used so are commented out
-        // public string TrialName;
-        // public int TrialCode;
-        // public int ContextNum;
-        // public string ConditionName;
+        //public int BlockCount;
+        //public TrialDef[] TrialDefs;
+        public string BlockName;
+        public int NumTrials;
         public string ContextName;
         public int NumClicksLeft;
         public int NumClicksRight;
@@ -51,6 +43,48 @@ namespace EffortControl_Namespace
         public int ClicksPerOutline;
         public float CompleteToFeedbackDelay;
         public float InitToBalloonDelay;
+        public float InflateDuration;
+
+        public override void GenerateTrialDefsFromBlockDef()
+        {
+            TrialDefs = new List<EffortControl_TrialDef>().ConvertAll(x => (TrialDef)x);
+            for(int i = 0; i < NumTrials; i++)
+            {
+                EffortControl_TrialDef trial = new EffortControl_TrialDef();
+                trial.ContextName = ContextName;
+                trial.NumClicksLeft = NumClicksLeft;
+                trial.NumClicksRight = NumClicksRight;
+                trial.NumCoinsLeft = NumCoinsLeft;
+                trial.NumCoinsRight = NumCoinsRight;
+                trial.ClicksPerOutline = ClicksPerOutline;
+                trial.NumPulsesLeft = NumPulsesLeft;
+                trial.NumPulsesRight = NumPulsesRight;
+                trial.PulseSizeLeft = PulseSizeLeft;
+                trial.PulseSizeRight = PulseSizeRight;
+                trial.CompleteToFeedbackDelay = CompleteToFeedbackDelay;
+                trial.InitToBalloonDelay = InitToBalloonDelay;
+                trial.InflateDuration = InflateDuration;
+                TrialDefs.Add(trial);
+            }
+
+        }
+    }
+
+    public class EffortControl_TrialDef : TrialDef
+    {
+        public string ContextName;
+        public int NumClicksLeft;
+        public int NumClicksRight;
+        public int NumCoinsLeft;
+        public int NumCoinsRight;
+        public int NumPulsesLeft;
+        public int NumPulsesRight;
+        public int PulseSizeLeft;
+        public int PulseSizeRight;
+        public int ClicksPerOutline;
+        public float CompleteToFeedbackDelay;
+        public float InitToBalloonDelay;
+        public float InflateDuration;
         // public float[] TouchOnOffTimeRange;
         // public float InitialChoiceMinDuration;
         // public float StarttoTapDispDelay;

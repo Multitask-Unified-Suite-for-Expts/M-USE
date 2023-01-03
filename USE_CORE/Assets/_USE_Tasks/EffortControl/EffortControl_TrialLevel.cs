@@ -246,7 +246,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
-        InflateBalloon.AddTimer(45f, Feedback);
+        InflateBalloon.AddTimer(45f, Feedback); //fix here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         InflateBalloon.SpecifyTermination(() => clickCount >= NumClicks, FeedbackDelay);
         InflateBalloon.AddDefaultTerminationMethod(() => {
             goCue.SetActive(false);
@@ -259,7 +259,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //Feedback Delay state -------------------------------------------------------------------------------------------------------
         FeedbackDelay.AddTimer(() => CurrentTrial.CompleteToFeedbackDelay, Feedback);
         FeedbackDelay.AddDefaultTerminationMethod(() => {
-            if (response == 1) {
+            if (response == 1)
+            {
                 trialStim.SetActive(false);
                 trialStim.transform.localScale = trialStimInitLocalScale;
             }
@@ -562,21 +563,5 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         return contextPath;
     }
-
-
-    //public override void PopulateCurrentTrialVariables()
-    //{
-    //	//CurrentTrial = (EffortControl_TrialDef)TrialDefs[TrialCount_InBlock];
-    //	//CurrentTrial.NumClicksLeft = CurrentTrial.NumClicksLeft;
-    //	//CurrentTrial.NumClicksRight = CurrentTrial.NumClicksRight;
-    //	//CurrentTrial.NumCoinsLeft = CurrentTrial.NumCoinsLeft;
-    //	//CurrentTrial.NumCoinsRight = CurrentTrial.NumCoinsRight;
-    //	//CurrentTrial.ClicksPerOutline = CurrentTrial.ClicksPerOutline;
-    //}
-    //   protected override void DefineTrialStims()
-    // {
-    //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
-    //destroyed at TrialLevel_Finish
-    //}
 
 }

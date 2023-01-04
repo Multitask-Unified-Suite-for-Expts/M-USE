@@ -20,8 +20,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     public EffortControl_TaskLevel CurrentTaskLevel => GetTaskLevel<EffortControl_TaskLevel>(); //this needed?
 
     // game object variables
-    private GameObject StartButton, fb, goCue, stimLeft, stimRight, trialStim, clickMarker, balloonContainerLeft,
-    balloonContainerRight, balloonOutline, prize, rewardContainerLeft, rewardContainerRight, reward;
+    private GameObject StartButton, stimLeft, stimRight, trialStim, balloonContainerLeft,
+    balloonContainerRight, balloonOutline, prize, rewardContainerLeft, rewardContainerRight, reward, middleBorder;
     //private Camera cam;
 
     // trial config variables
@@ -73,6 +73,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     public bool AudioPlayed;
 
+    public Vector3 CenteredPos;
+    public GameObject Wrapper;
+    public bool Centered;
+    public int CenteringSpeed = 1;
+
+    public List<GameObject> RemoveParentList;
+
     public override void DefineControlLevel()
     {
         //define States within this Control Level
@@ -89,10 +96,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         SelectionHandler<EffortControl_StimDef> mouseHandler = new SelectionHandler<EffortControl_StimDef>();
 
         TokenFBController.enabled = false;
-        TokenFBController.SetFlashingTime(1.5f);
-        TokenFBController.tokenBoxYOffset = 17;
-        TokenFBController.tokenSize = 110;
-        TokenFBController.tokenSpacing = -15;
+        SetTokenControllerVariables();
 
         if(AudioFBController != null)
             AddAudioClips();
@@ -148,7 +152,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             CreateBalloons(CurrentTrial.NumClicksRight, scaleUpAmountRight, CurrentTrial.ClicksPerOutline, stimRight.transform.position, balloonContainerRight);
             CreateRewards(CurrentTrial.NumCoinsLeft, rewardContainerLeft.transform.position, rewardContainerLeft);
             CreateRewards(CurrentTrial.NumCoinsRight, rewardContainerRight.transform.position, rewardContainerRight);
-            MouseTracker.ResetClickCount(); //purpose?
+
+            MouseTracker.ResetClickCount();
         });
 
         MouseTracker.AddSelectionHandler(mouseHandler, ChooseBalloon);
@@ -186,30 +191,45 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 scaleUpAmount = scaleUpAmountRight;
             }
         });
-        ChooseBalloon.SpecifyTermination(() => trialStim != null, CenterSelection, () => ChooseDuration = ChooseBalloon.TimingInfo.Duration);
+        ChooseBalloon.SpecifyTermination(() => trialStim != null, CenterSelection, () =>
+        {
+            AudioFBController.Play("SelectionMade");
+            ChooseDuration = ChooseBalloon.TimingInfo.Duration;
+        });
 
         //Center Selection state -------------------------------------------------------------------------------------------------------
         CenterSelection.AddInitializationMethod(() =>
         {
+            Wrapper = new GameObject();
+            Wrapper.name = "Wrapper";
+            Centered = false;
+            CenteredPos = new Vector3((Choice == "left" ? 1f : -1f), 0, 0);
+
+            middleBorder.SetActive(false);
+
             if (Choice == "left")
             {
+                SetParents(Wrapper, new List<GameObject>() {balloonContainerLeft, stimLeft, rewardContainerLeft});
                 DestroyChildren(balloonContainerRight);
                 stimRight.SetActive(false);
-                CenterContainer(balloonContainerLeft, rewardContainerLeft, stimLeft);
             }
             else
             {
+                SetParents(Wrapper, new List<GameObject>() {balloonContainerRight, stimRight, rewardContainerRight});
                 DestroyChildren(balloonContainerLeft);
                 stimLeft.SetActive(false);
-                CenterContainer(balloonContainerRight, rewardContainerRight, stimRight);
             }
         });
         CenterSelection.AddUpdateMethod(() =>
         {
-
+            if(Wrapper.transform.position != CenteredPos)
+            {
+                Wrapper.transform.position = Vector3.MoveTowards(Wrapper.transform.position, CenteredPos, CenteringSpeed * Time.deltaTime);
+            }
+            if (Wrapper.transform.position == CenteredPos)
+                Centered = true;
         });
-        CenterSelection.SpecifyTermination(() => true, InflateBalloon); //edit this
-
+        CenterSelection.SpecifyTermination(() => Centered, InflateBalloon, () => RemoveParents(Wrapper, RemoveParentList));
 
         //Inflate Balloon state -------------------------------------------------------------------------------------------------------
         List<float> clickTimings = new List<float>();
@@ -225,8 +245,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetTotalTokensNum(Choice == "left" ? CurrentTrial.NumCoinsLeft : CurrentTrial.NumCoinsRight);
             TokenFBController.enabled = true;
             timeTracker = Time.time;
-            //goCue.SetActive(true); //Commented out for now!
-            AudioFBController.Play("SelectionMade");
         });
         MouseTracker.AddSelectionHandler(mouseHandler, InflateBalloon);
         InflateBalloon.AddUpdateMethod(() =>
@@ -236,12 +254,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 if (clickCount < NumClicks)
                     AudioFBController.Play("Inflate");
 
-                //add to clicktimings
                 clickTimings.Add(Time.time - timeTracker);
                 timeTracker = Time.time;
-                //clickMarker.SetActive(true); //Commenting out for now!!
-
-                //clickMarker.transform.position = mouseHandler.SelectedGameObject.transform.position;
 
                 if (clickCount == 0)
                 {
@@ -261,24 +275,20 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if (clickCount >= NumClicks)
             {
                 AudioFBController.Play("InflateThenPop");
-                //clickMarker.SetActive(false);
                 response = 1;
 
                 avgClickTime = clickTimings.Average(); //Calculate Avg Time
             }
 
             if (InputBroker.GetMouseButtonUp(0))
-            {
-                //clickMarker.SetActive(false);
                 mouseHandler.Start(); //Start detecting presses again
-            }
+            
         });
 
         InflateBalloon.AddTimer(45f, Feedback); //FIX HERE! CURRENTTRIAL.InflateDuration DOESN'T WORK. 
         InflateBalloon.SpecifyTermination(() => clickCount >= NumClicks, FeedbackDelay);
         InflateBalloon.AddDefaultTerminationMethod(() =>
         {
-            //goCue.SetActive(false);
             if (response == 1)
             {
                 if (Choice == "left")
@@ -308,16 +318,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 //prize.SetActive(true);
                 TokenFBController.AddTokens(prize, Choice == "left" ? CurrentTrial.NumCoinsLeft : CurrentTrial.NumCoinsRight);
 
-                //fb.GetComponent<RawImage>().color = Color.green;
                 if (SyncBoxController != null)
                     GiveReward();
                 
                 AudioPlayed = true;
             }
-            else
-                //fb.GetComponent<RawImage>().color = Color.red;
-            
-            //fb.SetActive(true); //Commented this out for now. not sure its purpose on top of Trophy being displayed. 
             CurrentTaskLevel.TotalTouches += MouseTracker.GetClickCount();
         });
         Feedback.SpecifyTermination(() => AudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI, () =>
@@ -349,15 +354,41 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     }
 
     //HELPER FUNCTIONS -------------------------------------------------------------------------------------------------------
-    void MoveContainerAnimation()
+    void SetTokenControllerVariables()
     {
-        GameObject container = new GameObject();
-        //set each parent to container.
-        //then depending on whether they chose left or right, shift the oppose way.
+        TokenFBController.SetFlashingTime(1.5f);
+        TokenFBController.tokenBoxYOffset = 17;
+        TokenFBController.tokenSize = 104;
+        TokenFBController.tokenSpacing = -18;
+    }
+
+    void SetParents(GameObject wrapper, List<GameObject> objects) // 1) Setting the parent of each GO, and 2) Adding to RemovalList (so can remove easily later)
+    {
+        RemoveParentList = new List<GameObject>();
+        foreach(GameObject go in objects)
+        {
+            go.transform.parent = wrapper.transform; //set parent
+            RemoveParentList.Add(go); //add to remove parent list for later
+        }
+    }
+
+    void RemoveParents(GameObject wrapper, List<GameObject> objects)
+    {
+        if (objects.Count < 1 || objects == null)
+            Debug.Log("There are no objects in the List!");
+        else
+        {
+            foreach (GameObject go in objects)
+                go.transform.parent = null;
+        }
+        Destroy(wrapper);
     }
 
     void ActivateStimAndRewards()
     {
+        if (!middleBorder.activeSelf)
+            middleBorder.SetActive(true);
+
         if(!stimRight.activeSelf)
             stimRight.SetActive(true);
 
@@ -369,17 +400,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         if (!rewardContainerRight.activeSelf)
             rewardContainerRight.SetActive(true);
-    }
 
-    void CenterContainer(GameObject balloonContainer, GameObject rewardContainer, GameObject balloon)
-    {
-        if(Choice == "left")
-            balloonContainer.transform.position = new Vector3(-.15f, .15f, .5f);
-        else
-            balloonContainer.transform.position = new Vector3(.15f, .15f, .5f); //this one left
-
-        rewardContainer.transform.position = new Vector3(0f, -.3f, 0);
-        balloon.transform.position = new Vector3(0f, -.015f, 0);
     }
 
     void ResetToOriginalPositions()
@@ -419,20 +440,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         stimRight.SetActive(false);
         balloonOutline.SetActive(false);
         prize.SetActive(false);
-        //clickMarker.SetActive(false);
-        //fb.SetActive(false);
-        //goCue.SetActive(false);
     }
 
-    // method for presetting variables
     void LoadVariables()
     {
         if (StartButton == null)
             CreateStartButton();
 
-        //fb = GameObject.Find("FB");
-        //goCue = GameObject.Find("ResponseCue");
-        //clickMarker = GameObject.Find("ClickMarker");
         prize = GameObject.Find("Prize");
         stimLeft = GameObject.Find("StimLeft");
         stimRight = GameObject.Find("StimRight");
@@ -442,15 +456,28 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         rewardContainerLeft = GameObject.Find("RewardContainerLeft");
         rewardContainerRight = GameObject.Find("RewardContainerRight");
         reward = GameObject.Find("Reward");
+        middleBorder = GameObject.Find("MiddleBorder");
+        
 
         red = stimLeft.GetComponent<Renderer>().material.color;
         gray = new Color(0.5f, 0.5f, 0.5f);
 
         Color currentColor = reward.GetComponent<Renderer>().material.color;
-        reward.GetComponent<Renderer>().material.color = gray;
+        reward.GetComponent<Renderer>().material.color = gray; //turn token color to grey so they dont look collected yet. 
 
-        //fbInitLocalScale = fb.transform.localScale;
         trialStimInitLocalScale = stimLeft.transform.localScale;
+
+        GameObject leftWrapper = new GameObject();
+        leftWrapper.name = "LeftWrapper";
+        List<GameObject> leftList = new List<GameObject>() { balloonContainerLeft, rewardContainerLeft, stimLeft };
+        SetParents(leftWrapper, leftList);
+        leftWrapper.transform.position = new Vector3(-.16f, 0, 0); //Centering on left half of screen. 
+
+        GameObject rightWrapper = new GameObject();
+        rightWrapper.name = "RightWrapper";
+        List<GameObject> rightList = new List<GameObject>() { balloonContainerRight, rewardContainerRight, stimRight };
+        SetParents(rightWrapper, rightList);
+        rightWrapper.transform.position = new Vector3(.16f, 0, 0); //Centering on right half of screen. 
 
         LeftContainerOriginalPosition = balloonContainerLeft.transform.position;
         RightContainerOriginalPosition = balloonContainerRight.transform.position;
@@ -459,13 +486,15 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         LeftStimOriginalPosition = stimLeft.transform.position;
         RightStimOriginalPosition = stimRight.transform.position;
 
+        //now that positions are set, remove parents so the balloon is clickable. 
+        RemoveParents(leftWrapper, leftList);
+        RemoveParents(rightWrapper, rightList);
+
+        middleBorder.SetActive(false);
         StartButton.SetActive(false);
         balloonOutline.SetActive(false);
         reward.SetActive(false);
         prize.SetActive(false);
-        //fb.SetActive(false);
-        //goCue.SetActive(false);
-        //clickMarker.SetActive(false);
 
         variablesLoaded = true;
     }
@@ -514,7 +543,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
     }
 
-    // // method to create NumRewards rewards
     void CreateRewards(int NumRewards, Vector3 pos, GameObject container)
     {
         //change the X from -.6 to -.575
@@ -529,6 +557,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             rewardClone.name = "Reward" + Choice + (i + 1);
             //rewardClone.transform.parent = container.transform;
             rewardClone.SetActive(true);
+            Debug.Log("REWARD CLONE POS = " + rewardClone.transform.position);
         }
     }
 
@@ -583,12 +612,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("stimLeft", () => stimLeft.activeSelf);
         FrameData.AddDatum("stimRight", () => stimRight.activeSelf);
         FrameData.AddDatum("balloonOutline", () => balloonOutline.activeSelf);
-        //FrameData.AddDatum("clickMarker", () => clickMarker.activeSelf);
-        //FrameData.AddDatum("goCue", () => goCue.activeSelf);
-        //FrameData.AddDatum("fb", () => fb.activeSelf);
         //FrameData.AddDatum("prize", () => prize.activeSelf);
     }
-
 
     void CreateStartButton()
     {
@@ -602,10 +627,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
         {
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-            {
                 buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-            }
             else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
+
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
                 buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
             else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
@@ -614,7 +638,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         GameObject startButton = new GameObject("StartButton");
         SpriteRenderer spriteRend = startButton.AddComponent<SpriteRenderer>();
-        spriteRend.sprite = Sprite.Create(tex, new Rect(rect.x / 2, rect.y / 2, tex.width / 2, tex.height / 2), new Vector2(.5f, .5f), 100f);
+        spriteRend.sprite = Sprite.Create(tex, new Rect(rect.x, rect.y, tex.width, tex.height), new Vector2(.5f, .5f), 100f);
         startButton.AddComponent<BoxCollider>();
         startButton.transform.localScale = buttonScale;
         startButton.transform.position = buttonPosition;

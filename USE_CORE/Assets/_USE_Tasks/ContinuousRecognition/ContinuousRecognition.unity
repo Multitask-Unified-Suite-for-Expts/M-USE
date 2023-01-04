@@ -6027,12 +6027,18 @@ MonoBehaviour:
   TimeToChoice_Block: []
   TokenCount: 0
   NumFeedbackRows: 0
-  ScoreAmountPerTrial: 0
   Score: 0
   OriginalFbTextPosition: {x: 0, y: 0, z: 0}
   OriginalTitleTextPosition: {x: 0, y: 0, z: 0}
   OriginalStartButtonPosition: {x: 0, y: 0, z: 0}
   OriginalTimerPosition: {x: 0, y: 0, z: 0}
+  RightGroup:
+    stimGroupName: 
+    IsActive: 0
+  WrongGroup:
+    stimGroupName: 
+    IsActive: 0
+  Success_Audio: {fileID: 8300000, guid: 38a5faffadbec441fa994ef9ef89362b, type: 3}
   displayStimDuration:
     name: 
     hidden: 0

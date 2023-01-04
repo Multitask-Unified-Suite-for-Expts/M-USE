@@ -72,6 +72,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public StimGroup RightGroup;
     [HideInInspector] public StimGroup WrongGroup;
 
+    public AudioClip Success_Audio;
+
     //Config Variables
     [HideInInspector]
     public ConfigNumber displayStimDuration, chooseStimDuration, itiDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration;
@@ -95,6 +97,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         OriginalFbTextPosition = YouLoseTextGO.transform.position;
         OriginalTitleTextPosition = TitleTextGO.transform.position;
         OriginalTimerPosition = TimerBackdropGO.transform.position;
+
+        AudioFBController.AddClip("Success", Success_Audio);
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
@@ -369,6 +373,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         YouWinTextGO.transform.localPosition = new Vector3(YouWinTextGO.transform.localPosition.x, YouWinTextGO.transform.localPosition.y - Y_Offset, YouWinTextGO.transform.localPosition.z);
                         YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"WINNER! \n New HighScore: {Score} xp";
                         YouWinTextGO.SetActive(true);
+                        AudioFBController.Play("Success");
                     }
                     else
                     {

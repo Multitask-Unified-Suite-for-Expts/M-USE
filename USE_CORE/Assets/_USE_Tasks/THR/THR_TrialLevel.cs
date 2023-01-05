@@ -391,7 +391,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     {
                         SyncBoxController.SendRewardPulses(CurrentTrial.NumReleasePulses, CurrentTrial.PulseSize);
                         RewardGiven = true;
-                        ReleaseRewards_Trial++;
+                        ReleaseRewards_Trial += CurrentTrial.NumReleasePulses;
                     }
                 }
             }
@@ -403,7 +403,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 {
                     SyncBoxController.SendRewardPulses(CurrentTrial.NumTouchPulses, CurrentTrial.PulseSize);
                     RewardGiven = true;
-                    TouchRewards_Trial++;
+                    TouchRewards_Trial += CurrentTrial.NumTouchPulses;
                 }
             }
         });

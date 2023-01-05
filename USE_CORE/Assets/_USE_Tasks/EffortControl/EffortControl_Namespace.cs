@@ -22,6 +22,7 @@ namespace EffortControl_Namespace
         //public List<string[]> FeatureNames;
         //public string neutralPatternedColorName;
         //public float? ExternalStimScale;
+        public string ContextName;
     }
 
     public class EffortControl_BlockDef : BlockDef
@@ -31,7 +32,6 @@ namespace EffortControl_Namespace
         //public TrialDef[] TrialDefs;
         public string BlockName;
         public int NumTrials;
-        public string ContextName;
         public int NumClicksLeft;
         public int NumClicksRight;
         public int NumCoinsLeft;
@@ -52,7 +52,6 @@ namespace EffortControl_Namespace
             for(int i = 0; i < NumTrials; i++)
             {
                 EffortControl_TrialDef trial = new EffortControl_TrialDef();
-                trial.ContextName = ContextName;
                 trial.NumClicksLeft = NumClicksLeft;
                 trial.NumClicksRight = NumClicksRight;
                 trial.NumCoinsLeft = NumCoinsLeft;
@@ -74,7 +73,6 @@ namespace EffortControl_Namespace
 
     public class EffortControl_TrialDef : TrialDef
     {
-        public string ContextName;
         public int NumClicksLeft;
         public int NumClicksRight;
         public int NumCoinsLeft;

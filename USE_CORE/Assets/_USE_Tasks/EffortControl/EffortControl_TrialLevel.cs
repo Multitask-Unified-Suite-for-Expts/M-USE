@@ -17,11 +17,10 @@ using UnityEngine.XR;
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 {
     public EffortControl_TrialDef CurrentTrial => GetCurrentTrialDef<EffortControl_TrialDef>();
-    public EffortControl_TaskLevel CurrentTaskLevel => GetTaskLevel<EffortControl_TaskLevel>(); //this needed?
 
     // game object variables
     private GameObject StartButton, stimLeft, stimRight, trialStim, balloonContainerLeft,
-    balloonContainerRight, balloonOutline, prize, rewardContainerLeft, rewardContainerRight, reward, middleBorder;
+    balloonContainerRight, balloonOutline, rewardContainerLeft, rewardContainerRight, reward, middleBorder;
     //private Camera cam;
 
     // trial config variables
@@ -37,7 +36,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     private int NumClicks, clickCount;
 
     // trial count variables
-    private int numChosenLeft, numChosenRight;
+    private int numChosenLeft, numChosenRight; //he's not doing anything with these currently
     [HideInInspector]
     public String Choice;
     [System.NonSerialized] public int response = -1;
@@ -80,6 +79,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     public List<GameObject> RemoveParentList;
 
+    //Data variables:
+    public int RewardPulses_Block;
+    public int Touches_Block;
+    public int Completions_Block;
+
     public override void DefineControlLevel()
     {
         //define States within this Control Level
@@ -104,8 +108,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
-            RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(CurrentTrial.ContextName));
-
             if (!variablesLoaded)
                 LoadVariables();
 
@@ -118,18 +120,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         InitTrial.AddInitializationMethod(() =>
         {
             TokenFBController.enabled = false;
-
             avgClickTime = null;
-
             ResetRelativeStartTime(); 
             DisableAllGameobjects();
             StartButton.SetActive(true);
             ChangeColor(stimRight, red);
             ChangeColor(stimLeft, red);
-
             clickCount = 0;
             response = -1;
-
             ChooseDuration = 0; //reset how long it took them to choose each trial. 
         });
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), InitDelay, () => StartButton.SetActive(false));
@@ -140,9 +138,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //Choose Balloon state -------------------------------------------------------------------------------------------------------
         ChooseBalloon.AddInitializationMethod(() =>
         {
+            Input.ResetInputAxes(); //reset input in case they holding down
             ActivateStimAndRewards();
-
             trialStim = null;
+            MouseTracker.ResetClickCount();
 
             maxScale = new Vector3(60, 0, 60);
             scaleUpAmountLeft = maxScale / CurrentTrial.NumClicksLeft;
@@ -152,14 +151,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             CreateBalloons(CurrentTrial.NumClicksRight, scaleUpAmountRight, CurrentTrial.ClicksPerOutline, stimRight.transform.position, balloonContainerRight);
             CreateRewards(CurrentTrial.NumCoinsLeft, rewardContainerLeft.transform.position, rewardContainerLeft);
             CreateRewards(CurrentTrial.NumCoinsRight, rewardContainerRight.transform.position, rewardContainerRight);
-
-            MouseTracker.ResetClickCount();
         });
 
         MouseTracker.AddSelectionHandler(mouseHandler, ChooseBalloon);
         ChooseBalloon.AddUpdateMethod(() =>
         {
-            // check if user clicks on left or right
             GameObject hit = mouseHandler.SelectedGameObject;
             if (hit == null)
                 return;
@@ -237,7 +233,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         InflateBalloon.AddInitializationMethod(() =>
         {
-            if (Choice == "left")
+            if (Choice == "left") //set reward tokens to inactive since they are replaced by tokenbar tokens. 
                 rewardContainerLeft.SetActive(false);
             else
                 rewardContainerRight.SetActive(false);
@@ -260,23 +256,21 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 if (clickCount == 0)
                 {
                     GameObject container = (Choice == "left") ? balloonContainerLeft : balloonContainerRight;
-                    Vector3 scale = container.transform.GetChild(0).transform.localScale;
-                    scale.y = trialStim.transform.localScale.y;
-                    trialStim.transform.localScale = scale;
+                    Vector3 scale = container.transform.GetChild(0).transform.localScale; //get scale of first outlline
+                    scale.y = trialStim.transform.localScale.y; //set scale to new Y
+                    trialStim.transform.localScale = scale; //increase balloon size to first outline
                 }
                 else
-                    trialStim.transform.localScale += scaleUpAmount;
+                    trialStim.transform.localScale += scaleUpAmount; //increase balloon size
                 
                 clickCount++;
                 mouseHandler.Stop(); //Stop detecting presses until mouse is released. 
             }
 
-            // disable gameObject if the user clicks enough time
             if (clickCount >= NumClicks)
             {
                 AudioFBController.Play("InflateThenPop");
                 response = 1;
-
                 avgClickTime = clickTimings.Average(); //Calculate Avg Time
             }
 
@@ -310,15 +304,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
 
         //Feedback state -------------------------------------------------------------------------------------------------------
-        Feedback.AddInitializationMethod(() => {
+        Feedback.AddInitializationMethod(() =>
+        {
             if (response == 1)
             {
-                ++CurrentTaskLevel.NumCompletions;
-                prize.transform.position = trialStim.transform.position + new Vector3(0f, .5f, 0f); //Set Prize pos to Balloon
-                //prize.SetActive(true);
+                Completions_Block++;
                 GameObject centeredGO = new GameObject();
                 centeredGO.transform.position = Vector3.zero;
-                Debug.Log("CENTERED GO POS = " + centeredGO.transform.position);
                 TokenFBController.AddTokens(centeredGO, Choice == "left" ? CurrentTrial.NumCoinsLeft : CurrentTrial.NumCoinsRight);
 
                 if (SyncBoxController != null)
@@ -326,7 +318,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 
                 AudioPlayed = true;
             }
-            CurrentTaskLevel.TotalTouches += MouseTracker.GetClickCount();
+            Touches_Block += MouseTracker.GetClickCount();
         });
         Feedback.SpecifyTermination(() => AudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI, () =>
         {
@@ -387,16 +379,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Destroy(wrapper);
     }
 
-    void ActivateStimAndRewards()
-    {
-        middleBorder.SetActive(true);
-        stimRight.SetActive(true);
-        stimLeft.SetActive(true);
-        rewardContainerLeft.SetActive(true);
-        rewardContainerRight.SetActive(true);
-
-    }
-
     void ResetToOriginalPositions()
     {
         if(Choice == "left")
@@ -417,14 +399,24 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     {
         if (Choice == "left")
         {
-            CurrentTaskLevel.NumPulses += CurrentTrial.NumPulsesLeft;
             SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesLeft, CurrentTrial.PulseSizeLeft);
+            RewardPulses_Block += CurrentTrial.NumPulsesLeft;
         }
         else
         {
-            CurrentTaskLevel.NumPulses += CurrentTrial.NumPulsesRight;
             SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesRight, CurrentTrial.PulseSizeRight);
+            RewardPulses_Block += CurrentTrial.NumPulsesRight;
         }
+    }
+
+    void ActivateStimAndRewards()
+    {
+        middleBorder.SetActive(true);
+        stimRight.SetActive(true);
+        stimLeft.SetActive(true);
+        rewardContainerLeft.SetActive(true);
+        rewardContainerRight.SetActive(true);
+
     }
 
     void DisableAllGameobjects()
@@ -433,7 +425,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         stimLeft.SetActive(false);
         stimRight.SetActive(false);
         balloonOutline.SetActive(false);
-        prize.SetActive(false);
     }
 
     void LoadVariables()
@@ -441,7 +432,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if (StartButton == null)
             CreateStartButton();
 
-        prize = GameObject.Find("Prize");
         stimLeft = GameObject.Find("StimLeft");
         stimRight = GameObject.Find("StimRight");
         balloonContainerLeft = GameObject.Find("BalloonContainerLeft");
@@ -488,7 +478,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         StartButton.SetActive(false);
         balloonOutline.SetActive(false);
         reward.SetActive(false);
-        prize.SetActive(false);
 
         variablesLoaded = true;
     }
@@ -497,8 +486,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     {
         for (int i = clickPerOutline; i <= numBalloons; i += clickPerOutline)
         {
-            Vector3 vectorToPos = pos - Camera.main.transform.position; //get vector from camera to pos
-            Vector3 posInDist = vectorToPos.normalized; //pos in dist 10 from pos along VectorToPos
+            //Vector3 vectorToPos = pos - Camera.main.transform.position; //get vector from camera to pos
+            //Vector3 posInDist = vectorToPos.normalized; //pos in dist 10 from pos along VectorToPos
 
             GameObject balloonClone = Instantiate(balloonOutline, pos, balloonOutline.transform.rotation);
             balloonClone.transform.parent = container.transform;
@@ -537,17 +526,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void CreateRewards(int NumRewards, Vector3 pos, GameObject container)
     {
-        // get width of reward object
-        float width = reward.GetComponent<Renderer>().bounds.size.x - .035f; //-.35f cuz need to be closer together
+        float width = reward.GetComponent<Renderer>().bounds.size.x - .035f; //Get reward width! (-.35f cuz need to be closer together)
         pos -= new Vector3(((NumRewards - 1) * (width / 2)), 0, 0);
         for (int i = 0; i < NumRewards; i++)
         {
             GameObject rewardClone = Instantiate(reward, pos, reward.transform.rotation, container.transform);
             rewardClone.transform.Translate(new Vector3(i * width, 0, 0), Space.World);
             rewardClone.name = "Reward" + Choice + (i + 1);
-            //rewardClone.transform.parent = container.transform;
             rewardClone.SetActive(true);
-            Debug.Log("REWARD CLONE POS = " + rewardClone.transform.position);
         }
     }
 
@@ -597,12 +583,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     void LogFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
-        FrameData.AddDatum("Context", () => CurrentTrial.ContextName);
         FrameData.AddDatum("StartButton", () => StartButton.activeSelf);
         FrameData.AddDatum("stimLeft", () => stimLeft.activeSelf);
         FrameData.AddDatum("stimRight", () => stimRight.activeSelf);
         FrameData.AddDatum("balloonOutline", () => balloonOutline.activeSelf);
-        //FrameData.AddDatum("prize", () => prize.activeSelf);
     }
 
     void CreateStartButton()

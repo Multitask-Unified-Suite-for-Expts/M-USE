@@ -15,6 +15,8 @@ using WhatWhenWhere_Namespace;
 
 public class EffortControl_TaskLevel : ControlLevel_Task_Template
 {
+    public string ContextName;
+
     public override void SpecifyTypes()
     {
         TaskLevelType = typeof(EffortControl_TaskLevel);
@@ -25,9 +27,9 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         StimDefType = typeof(EffortControl_StimDef);
     }
 
-    public int NumCompletions = 0;
-    public int NumPulses = 0;
-    public int TotalTouches = 0;
+    public int Completions_Task = 0;
+    public int RewardPulses_Task = 0;
+    public int Touches_Task = 0;
 
     public override void DefineControlLevel()
     {
@@ -40,15 +42,41 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         else
             Debug.Log("ContextExternalFilePath NOT specified in the Session Config OR Task Config!");
 
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextName"))
+            ContextName = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextName");
+        else
+        {
+            ContextName = "Dark";
+            Debug.Log($"No ContextName specified in the {TaskName} Task Config. Defaulting to {ContextName}");
+        }
+
+        SetupTask.AddInitializationMethod(() =>
+        {
+            RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(ContextName));
+        });
+
+        RunBlock.AddInitializationMethod(() =>
+        {
+            trialLevel.RewardPulses_Block = 0;
+            trialLevel.Completions_Block = 0;
+            trialLevel.Touches_Block = 0;
+        });
+
+        BlockFeedback.AddInitializationMethod(() =>
+        {
+            RewardPulses_Task += trialLevel.RewardPulses_Block;
+            Completions_Task += trialLevel.Completions_Block;
+            Touches_Task += trialLevel.Touches_Block;
+        });
     }
 
     public override OrderedDictionary GetSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary();
 
-        data["Num Completions"] = NumCompletions;
-        data["Num Pulses"] = NumPulses;
-        data["Total Touches"] = TotalTouches;
+        data["Completions"] = Completions_Task;
+        data["Reward Pulses"] = RewardPulses_Task;
+        data["Touches"] = Touches_Task;
 
         return data;
     }

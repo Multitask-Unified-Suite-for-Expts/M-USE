@@ -220,7 +220,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 {
                     WhiteTimeoutTime = Time.time;
                     WhiteStartTime = Time.time; //reset original WhiteStartTime so that normal duration resets.
-                    if(!AudioFBController.IsPlaying()) //will keep playing every timeout duration period if they still holding. Which is good to teach them not to!
+                    if(!AudioFBController.IsPlaying()) //will keep playing every timeout duration period if they still holding. Which could be good to teach them not to!
                         AudioFBController.Play("Negative");
                 }
             }
@@ -382,8 +382,19 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     GraySquareTimer += Time.deltaTime;
                 else
                     GraySquareTimer = -1;
-            }
 
+                if(SyncBoxController != null)
+                {
+                    if (RewardTimer < CurrentTrial.ReleaseToRewardDelay)
+                        RewardTimer += Time.deltaTime;
+                    else
+                    {
+                        SyncBoxController.SendRewardPulses(CurrentTrial.NumReleasePulses, CurrentTrial.PulseSize);
+                        RewardGiven = true;
+                        ReleaseRewards_Trial++;
+                    }
+                }
+            }
             if(GiveTouchReward && SyncBoxController != null)
             {
                 if(RewardTimer < CurrentTrial.TouchToRewardDelay)
@@ -392,16 +403,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 {
                     SyncBoxController.SendRewardPulses(CurrentTrial.NumTouchPulses, CurrentTrial.PulseSize);
                     RewardGiven = true;
-                }
-            }
-            if(GiveReleaseReward && SyncBoxController != null)
-            {
-                if(RewardTimer < CurrentTrial.ReleaseToRewardDelay)
-                    RewardTimer += Time.deltaTime;
-                else
-                {
-                    SyncBoxController.SendRewardPulses(CurrentTrial.NumReleasePulses, CurrentTrial.PulseSize);
-                    RewardGiven = true;
+                    TouchRewards_Trial++;
                 }
             }
         });

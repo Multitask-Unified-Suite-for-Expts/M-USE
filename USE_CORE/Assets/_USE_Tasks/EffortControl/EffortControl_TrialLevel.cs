@@ -96,7 +96,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         SelectionHandler<EffortControl_StimDef> mouseHandler = new SelectionHandler<EffortControl_StimDef>();
 
         TokenFBController.enabled = false;
-        SetTokenControllerVariables();
+        SetTokenVariables();
 
         if(AudioFBController != null)
             AddAudioClips();
@@ -316,7 +316,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 ++CurrentTaskLevel.NumCompletions;
                 prize.transform.position = trialStim.transform.position + new Vector3(0f, .5f, 0f); //Set Prize pos to Balloon
                 //prize.SetActive(true);
-                TokenFBController.AddTokens(prize, Choice == "left" ? CurrentTrial.NumCoinsLeft : CurrentTrial.NumCoinsRight);
+                GameObject centeredGO = new GameObject();
+                centeredGO.transform.position = Vector3.zero;
+                Debug.Log("CENTERED GO POS = " + centeredGO.transform.position);
+                TokenFBController.AddTokens(centeredGO, Choice == "left" ? CurrentTrial.NumCoinsLeft : CurrentTrial.NumCoinsRight);
 
                 if (SyncBoxController != null)
                     GiveReward();
@@ -354,11 +357,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     }
 
     //HELPER FUNCTIONS -------------------------------------------------------------------------------------------------------
-    void SetTokenControllerVariables()
+    void SetTokenVariables()
     {
         TokenFBController.SetFlashingTime(1.5f);
-        TokenFBController.tokenBoxYOffset = 17;
-        TokenFBController.tokenSize = 104;
+        TokenFBController.tokenBoxYOffset = 20;
+        TokenFBController.tokenSize = 105;
         TokenFBController.tokenSpacing = -18;
     }
 
@@ -386,20 +389,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void ActivateStimAndRewards()
     {
-        if (!middleBorder.activeSelf)
-            middleBorder.SetActive(true);
-
-        if(!stimRight.activeSelf)
-            stimRight.SetActive(true);
-
-        if(!stimLeft.activeSelf)
-            stimLeft.SetActive(true);
-
-        if (!rewardContainerLeft.activeSelf)
-            rewardContainerLeft.SetActive(true);
-
-        if (!rewardContainerRight.activeSelf)
-            rewardContainerRight.SetActive(true);
+        middleBorder.SetActive(true);
+        stimRight.SetActive(true);
+        stimLeft.SetActive(true);
+        rewardContainerLeft.SetActive(true);
+        rewardContainerRight.SetActive(true);
 
     }
 
@@ -503,10 +497,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     {
         for (int i = clickPerOutline; i <= numBalloons; i += clickPerOutline)
         {
-            // get vector from camera to pos 
-            Vector3 vectorToPos = pos - Camera.main.transform.position;
-            // get position in distnce 10 from pos along vectorToPos
-            Vector3 posInDist = vectorToPos.normalized;
+            Vector3 vectorToPos = pos - Camera.main.transform.position; //get vector from camera to pos
+            Vector3 posInDist = vectorToPos.normalized; //pos in dist 10 from pos along VectorToPos
 
             GameObject balloonClone = Instantiate(balloonOutline, pos, balloonOutline.transform.rotation);
             balloonClone.transform.parent = container.transform;
@@ -545,10 +537,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void CreateRewards(int NumRewards, Vector3 pos, GameObject container)
     {
-        //change the X from -.6 to -.575
-
         // get width of reward object
-        float width = reward.GetComponent<Renderer>().bounds.size.x - .035f;
+        float width = reward.GetComponent<Renderer>().bounds.size.x - .035f; //-.35f cuz need to be closer together
         pos -= new Vector3(((NumRewards - 1) * (width / 2)), 0, 0);
         for (int i = 0; i < NumRewards; i++)
         {

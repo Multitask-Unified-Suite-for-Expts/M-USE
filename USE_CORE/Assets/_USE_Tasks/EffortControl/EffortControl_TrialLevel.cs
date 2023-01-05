@@ -58,6 +58,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     private Ray mouseRay;
     private Color red;
     private Color gray = new Color(0.5f, 0.5f, 0.5f);
+    public Color32 OffWhiteOutlineColor = new Color32(250, 249, 246, 0);
 
     private bool variablesLoaded;
     public string MaterialFilePath;
@@ -71,9 +72,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     public Vector3 LeftStimOriginalPosition;
     public Vector3 RightStimOriginalPosition;
 
-    public AudioClip SelectionMade_Audio;
-    public AudioClip InflateThenPop_Audio;
+    public AudioClip BalloonChosen_Audio;
     public AudioClip InflateBalloon_Audio;
+    public AudioClip InflateThenPop_Audio;
 
     public bool AudioPlayed;
 
@@ -88,6 +89,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     public int RewardPulses_Block;
     public int Touches_Block;
     public int Completions_Block;
+
 
     public override void DefineControlLevel()
     {
@@ -267,7 +269,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                     TrialStim.transform.localScale += scaleUpAmount; //increase balloon size
-                
+
                 clickCount++;
                 mouseHandler.Stop(); //Stop detecting presses until mouse is released. 
             }
@@ -281,7 +283,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if (InputBroker.GetMouseButtonUp(0))
                 mouseHandler.Start(); //Start detecting presses again
-            
+
         });
 
         InflateBalloon.AddTimer(45f, Feedback); //FIX HERE! CURRENTTRIAL.InflateDuration DOESN'T WORK. 
@@ -450,11 +452,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         BalloonOutline = Instantiate(OutlinePrefab, OutlinePrefab.transform.position, OutlinePrefab.transform.rotation);
         BalloonOutline.name = "Outline";
         BalloonOutline.transform.localScale = new Vector3(10, 0, 10);
+        BalloonOutline.GetComponent<Renderer>().material.color = OffWhiteOutlineColor;
 
         MiddleBarrier = GameObject.CreatePrimitive(PrimitiveType.Cube);
         MiddleBarrier.name = "MiddleBarrier";
-        MiddleBarrier.transform.position = Vector3.zero;
-        MiddleBarrier.transform.localScale = new Vector3(.0125f, 4, 0);
+        MiddleBarrier.transform.position = new Vector3(0, .6f, 0);
+        MiddleBarrier.transform.localScale = new Vector3(.0125f, 2.2385f, .001f);
+        Color borderColor = GameObject.Find("TopBorder").GetComponent<Renderer>().material.color;
+        MiddleBarrier.GetComponent<Renderer>().material.color = borderColor;
 
         BalloonContainerLeft = new GameObject("BalloonContainerLeft");
         BalloonContainerLeft.transform.position = new Vector3(-1, .15f, .5f);
@@ -562,7 +567,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     {
         AudioFBController.AddClip("InflateThenPop", InflateThenPop_Audio);
         AudioFBController.AddClip("Inflate", InflateBalloon_Audio);
-        AudioFBController.AddClip("SelectionMade", SelectionMade_Audio);
+        AudioFBController.AddClip("SelectionMade", BalloonChosen_Audio);
     }
 
     void SetTrialSummaryString()

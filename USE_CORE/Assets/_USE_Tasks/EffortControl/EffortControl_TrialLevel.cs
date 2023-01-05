@@ -445,7 +445,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         Reward = Instantiate(RewardPrefab, RewardPrefab.transform.position, RewardPrefab.transform.rotation);
         Reward.name = "Reward";
-        //Reward.GetComponent<Renderer>().material.color = gray; //turn token color to grey so they dont look collected yet. 
+        Reward.GetComponent<Renderer>().material.color = Color.green; //turn token color to grey so they dont look collected yet. 
 
         BalloonOutline = Instantiate(OutlinePrefab, OutlinePrefab.transform.position, OutlinePrefab.transform.rotation);
         BalloonOutline.name = "Outline";

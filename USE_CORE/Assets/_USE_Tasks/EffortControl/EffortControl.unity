@@ -592,8 +592,6 @@ MonoBehaviour:
     type: 3}
   RewardPrefab: {fileID: 118051509461520213, guid: 7c046dae910b14f518967e9e813c264c,
     type: 3}
-  MiddleBarrierPrefab: {fileID: 9195263850308035087, guid: a9bcdf96866054bcbb60bdbe93e8f165,
-    type: 3}
   OutlinePrefab: {fileID: -927199367670048503, guid: 79fedf5c0c0c9414cb56d8c2e9c25fcf,
     type: 3}
   Choice: 

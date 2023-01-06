@@ -48,7 +48,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public List<int> ChosenStimIndices;
     [HideInInspector] public string MaterialFilePath;
 
-    //Display Data
     [HideInInspector] public int NumTrials_Block;
     [HideInInspector] public int NumCorrect_Block;
     [HideInInspector] public int NumTbCompletions_Block;

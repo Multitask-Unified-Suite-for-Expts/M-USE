@@ -15,7 +15,14 @@ using WhatWhenWhere_Namespace;
 
 public class EffortControl_TaskLevel : ControlLevel_Task_Template
 {
-    public string ContextName;
+    [HideInInspector] public string ContextName;
+
+    [HideInInspector] public int Completions_Task = 0;
+    [HideInInspector] public int RewardPulses_Task = 0;
+    [HideInInspector] public int Touches_Task = 0;
+    [HideInInspector] public int NumChosenLeft_Task = 0;
+    [HideInInspector] public int NumChosenRight_Task = 0;
+
 
     public override void SpecifyTypes()
     {
@@ -27,9 +34,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         StimDefType = typeof(EffortControl_StimDef);
     }
 
-    public int Completions_Task = 0;
-    public int RewardPulses_Task = 0;
-    public int Touches_Task = 0;
 
     public override void DefineControlLevel()
     {
@@ -60,6 +64,8 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             trialLevel.RewardPulses_Block = 0;
             trialLevel.Completions_Block = 0;
             trialLevel.Touches_Block = 0;
+            trialLevel.NumChosenLeft_Block = 0;
+            trialLevel.NumChosenRight_Block = 0;
         });
 
         BlockFeedback.AddInitializationMethod(() =>
@@ -67,6 +73,8 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             RewardPulses_Task += trialLevel.RewardPulses_Block;
             Completions_Task += trialLevel.Completions_Block;
             Touches_Task += trialLevel.Touches_Block;
+            NumChosenLeft_Task += trialLevel.NumChosenLeft_Block;
+            NumChosenRight_Task += trialLevel.NumChosenRight_Block;
         });
     }
 
@@ -77,6 +85,8 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         data["Completions"] = Completions_Task;
         data["Reward Pulses"] = RewardPulses_Task;
         data["Touches"] = Touches_Task;
+        data["Chose Left"] = NumChosenLeft_Task;
+        data["Chose Right"] = NumChosenRight_Task;
 
         return data;
     }

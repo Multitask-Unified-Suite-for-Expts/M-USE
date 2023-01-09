@@ -28,6 +28,8 @@ namespace USE_ExperimentTemplate_Session
 
         protected SummaryData SummaryData;
         protected SessionData SessionData;
+        protected SerialSentData SerialSentData;
+        protected SerialRecvData SerialRecvData;
         private SessionDataControllers SessionDataControllers;
         private bool StoreData;
         private bool MacMainDisplayBuild;
@@ -467,7 +469,8 @@ namespace USE_ExperimentTemplate_Session
                 SessionData.WriteData();
             });
 
-            SessionData = SessionDataControllers.InstantiateSessionData(StoreData, SessionDataPath);
+            SessionData = (SessionData) SessionDataControllers.InstantiateDataController<SessionData>
+                ("SessionData", StoreData, SessionDataPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionDataPath);
             SessionData.fileName = FilePrefix + "__SessionData";
             SessionData.sessionLevel = this;
             SessionData.InitDataController();
@@ -475,6 +478,23 @@ namespace USE_ExperimentTemplate_Session
 
             SessionData.AddDatum("SelectedTaskConfigName", () => selectedConfigName);
             SessionData.AddDatum("TaskAutomaticallySelected", () => taskAutomaticallySelected);
+
+            if (SerialPortActive)
+            {
+                SerialSentData = (SerialSentData) SessionDataControllers.InstantiateDataController<SerialSentData>
+                    ("SerialSentData", StoreData, SessionDataPath);
+                SessionData.fileName = FilePrefix + "__SerialSentData";
+                SerialSentData.sessionLevel = this;
+                SerialSentData.InitDataController();
+                SerialSentData.ManuallyDefine();
+
+                SerialRecvData = (SerialRecvData) SessionDataControllers.InstantiateDataController<SerialRecvData>
+                    ("SerialRecvData", StoreData, SessionDataPath);
+                SessionData.fileName = FilePrefix + "__SerialRecvData";
+                SerialRecvData.sessionLevel = this;
+                SerialRecvData.InitDataController();
+                SerialRecvData.ManuallyDefine();
+            }
 
             SummaryData.Init(StoreData, SessionDataPath);
 

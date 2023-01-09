@@ -48,6 +48,8 @@ namespace MazeGame_Namespace
         public int Texture;
         public int viewPath;
         public string ContextName;
+
+        public MazeGame_TaskLevel TaskLevel;
      //   public string mazePath;
 
         //  public float MinTouchDuration;
@@ -61,18 +63,23 @@ namespace MazeGame_Namespace
             int num = rnd.Next(MinMaxTrials[0], MinMaxTrials[1]);
             Debug.Log("NUMBER OF TRIALS SELECTED FOR BLOCK: "  + num);
             TrialDefs = new List<MazeGame_TrialDef>().ConvertAll(x => (TrialDef)x);
+            
+            
+            //select the block's mazedef using intersect from TaskLevel.MazeDefs
+            
             for (int iTrial = 0; iTrial < num; iTrial++)
             {
                 MazeGame_TrialDef td = new MazeGame_TrialDef();
                 td.TrialCount = Trial;
                 td.TileColor = TileColor;
                 td.Texture = Texture;
-                td.MazeDims = MazeDims;
+               /* td.MazeDims = MazeDims;
                 td.MazeNumSquares = MazeNumSquares;
-                td.MazeNumTurns = MazeNumTurns;
+                td.MazeNumTurns = MazeNumTurns;*/
                 td.viewPath = viewPath;
                 td.ContextName = ContextName;
                 td.MazeInfo = MazeInfo;
+                //td.MazeDef = whatever
                // td.mazePath = mazePath;
                 if (td.TileColor == null && TileColor != null)
                     td.TileColor = TileColor;
@@ -106,6 +113,8 @@ namespace MazeGame_Namespace
         public int viewPath;
         public string ContextName;
         public string MazeInfo;
+
+        public MazeDef MazeDef;
         //   public string mazePath;
 
         // public int[] nRepetitionsMinMax;

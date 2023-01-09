@@ -7,11 +7,13 @@ using USE_Settings;
 using MazeGame_Namespace;
 using HiddenMaze;
 using USE_ExperimentTemplate_Block;
+using USE_Utilities;
 
 public class MazeGame_TaskLevel : ControlLevel_Task_Template
 {
     [HideInInspector] public MazeDef[] MazeDefs;
     [HideInInspector] public int[] MazeDims, MazeNumSquares, MazeNumTurns;
+    [HideInInspector] public string[] MazeName;
     MazeGame_BlockDef mgBD => GetCurrentBlockDef<MazeGame_BlockDef>();
 
 
@@ -42,19 +44,18 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         
         SetupTask.AddInitializationMethod(() =>
         {
-            SessionSettings.ImportSettings_SingleTypeArray<Maze>("MazeDefs", mazeKeyFilePath);
+            SessionSettings.ImportSettings_SingleTypeArray<MazeDef>("MazeDefs", mazeKeyFilePath);
             MazeDefs = (MazeDef[])SessionSettings.Get("MazeDefs");
-            Debug.Log("MAZE DEF LENGTH " + MazeDefs.Length);
-            
             MazeDims = new int[MazeDefs.Length];
             MazeNumSquares = new int[MazeDefs.Length];
             MazeNumTurns = new int[MazeDefs.Length];
-            Debug.Log("MAZE DEF LENGTH " + MazeDefs.Length);
+            MazeName = new string[MazeDefs.Length];
             for (int iMaze = 0; iMaze < MazeDefs.Length; iMaze++)
             {
-                MazeDims[iMaze] = MazeDefs[iMaze].mTotalSquares;
+                MazeDims[iMaze] = MazeDefs[iMaze].mDims;
                 MazeNumSquares[iMaze] = MazeDefs[iMaze].mNumSquares;
                 MazeNumTurns[iMaze] = MazeDefs[iMaze].mNumTurns;
+                MazeName[iMaze] = MazeDefs[iMaze].mName;
             }
         });
 
@@ -62,14 +63,26 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         {
             //for given block MazeDims, MazeNumSquares, MazeNumTurns, get all indices of that value, find intersect
             //then choose random member of intersect and assign to this block's trials
-            int[] mazeDimsIndices = MazeDefs.Select((b, i) => b.mTotalSquares == mgBD.MazeDims ? i : -1).Where(i => i != -1).ToArray();
-            Debug.Log("MAZE DIM INDICES: " + mazeDimsIndices);
-         //   if (CurrentBlockDef.TileColor == null && TaskDef.TileColor != null)
-           //     CurrentBlockDef.TileColor = TaskDef.TileColor;
+            
+            //make them all into lists and then remove at that index and they never duplicate
 
-         //   foreach (TrialDef td in CurrentBlockDef.TrialDefs)
-          //      if (td.TileColor == null && CurrentBlockDef.TileColor != null)
-             //       td.TileColor == CurrentBlockDef.TileColor
+            int [] mdIndices = MazeDims.FindAllIndexof(mgBD.MazeDims);
+            int[] mnsIndices = MazeNumSquares.FindAllIndexof(mgBD.MazeNumSquares);
+            int[] mntIndices = MazeNumTurns.FindAllIndexof(mgBD.MazeNumTurns);
+            int[] currMazeDef = (int[])mntIndices.Intersect(mdIndices.Intersect(mnsIndices));
+
+            Debug.Log("COUNT THE MAZE DEF"+ currMazeDef.Count()); // RANDOMLY SELECT THEN REMOVE 
+
+            /*int[] mazeDimsIndices = MazeDefs.Select((b, i) => b.mTotalSquares == mgBD.MazeDims ? i : -1).Where(i => i != -1).ToArray();
+            Debug.Log("MAZE DIM INDICES: " + mazeDimsIndices);*/
+
+
+            //   if (CurrentBlockDef.TileColor == null && TaskDef.TileColor != null)
+            //     CurrentBlockDef.TileColor = TaskDef.TileColor;
+
+            //   foreach (TrialDef td in CurrentBlockDef.TrialDefs)
+            //      if (td.TileColor == null && CurrentBlockDef.TileColor != null)
+            //       td.TileColor == CurrentBlockDef.TileColor
         });
         // if (CurrentBlockDef.TileColor == null && TaskDef.TileColor != null)
         //   CurrentBlockDef.TileColor = TaskDef.TileColor;

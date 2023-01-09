@@ -16,6 +16,7 @@ using System.IO;
 public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 {
     public MazeGame_TrialDef CurrentTrialDef => GetCurrentTrialDef<MazeGame_TrialDef>();
+    
     public List<Maze> mazeList = new List<Maze>();
     static bool end;
     private int dim;
@@ -463,7 +464,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             
         };*/
         
-        currMaze = mazeList[CurrentTrialDef.TrialCount-1];
+        //currMaze = mazeList[CurrentTrialDef.TrialCount-1];
+        
+        
         Debug.Log("Maze Obj Num Squares:" + currMaze.mNumSquares);
         
         

@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 using USE_Data;
 
@@ -39,6 +40,40 @@ public class HaloFBController : MonoBehaviour
         instantiated = Instantiate(haloPrefab, gameObj.transform);
     }
 
+    public void SetHaloParameter(string paramName, float floatArg){
+        switch(paramName.ToLower()) 
+        {
+            case "size":
+               // this.Find("YellowHalo").GetComponent<Halo>()
+                break;
+            default:
+                Debug.LogError("No appropriate parameter name given");
+                break;
+        }
+    }
+    public void SetHaloParameter(string paramName, Color colorArg){
+        switch(paramName.ToLower()) 
+        {
+            case "color":
+                //SerializedObject haloComponent = new SerializedObject(this.gameObject.GetComponent("Halo"));
+                //haloComponent.FindProperty("m_Color").colorValue = colorArg;
+                break;
+            default:
+                Debug.LogError("No appropriate parameter name given");
+                break;
+        }
+    }
+    //public void SetHaloSize(float size)
+    //{
+    //    SerializedObject haloComponent = new SerializedObject(this.gameObject.GetComponent("Halo"));
+    //    haloComponent.FindProperty("m_Size").floatValue = size;
+    //}
+    
+    //public void SetHaloColor(Color color)
+    //{
+    //    SerializedObject haloComponent = new SerializedObject(this.gameObject.GetComponent("Halo"));
+    //    haloComponent.FindProperty("m_Color").colorValue = color;
+    //}
     public void Destroy() {
         Destroy(instantiated);
         instantiated = null;

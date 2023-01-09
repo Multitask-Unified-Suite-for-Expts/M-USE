@@ -453,15 +453,16 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         
         //THIS WORKS
         
-        string[] textMazes = System.IO.File.ReadAllLines(MazeFilePath + Path.DirectorySeparatorChar + "Maze.txt");
-        Debug.Log("textMazes.Length: " +textMazes.Length);
-        foreach (string textMaze in textMazes)
+        //string[] textMazes = System.IO.File.ReadAllLines(MazeFilePath + Path.DirectorySeparatorChar + "Maze.txt");
+        //Debug.Log("textMazes.Length: " +textMazes.Length);
+        /*foreach (string textMaze in textMazes)
         {
             Maze mazeObj = new Maze(textMaze);
             Debug.Log("Maze Obj:" + mazeObj);
             mazeList.Add(mazeObj);
             
-        };
+        };*/
+        
         currMaze = mazeList[CurrentTrialDef.TrialCount-1];
         Debug.Log("Maze Obj Num Squares:" + currMaze.mNumSquares);
         
@@ -519,8 +520,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             }
         }
     }
-
-
     void DestroyCurrMaze()
     {
         Debug.Log("entered destroy");

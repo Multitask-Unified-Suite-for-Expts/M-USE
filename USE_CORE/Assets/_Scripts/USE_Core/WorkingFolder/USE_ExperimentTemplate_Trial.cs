@@ -26,6 +26,7 @@ namespace USE_ExperimentTemplate_Trial
 
         protected State SetupTrial, FinishTrial;
 
+        public ControlLevel_Task_Template TaskLevel;
         public List<TrialDef> TrialDefs;
 
         [HideInInspector] public TaskStims TaskStims;
@@ -58,6 +59,11 @@ namespace USE_ExperimentTemplate_Trial
             return (T)TrialDefs[TrialCount_InBlock];
         }
 
+        public T GetTaskLevel<T>() where T: ControlLevel_Task_Template
+        {
+            return (T)TaskLevel;
+        }
+
         public Type TrialDefType, StimDefType;
 
         public void DefineTrialLevel()
@@ -76,6 +82,8 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
+                Cursor.visible = false;
+
                 AbortCode = 0;
                 TrialCount_InTask++;
                 TrialCount_InBlock++;
@@ -123,7 +131,7 @@ namespace USE_ExperimentTemplate_Trial
 
         }
 
-        private bool CheckForcedBlockEnd()
+        public bool CheckForcedBlockEnd()
         {
             if (ForceBlockEnd)
             {
@@ -211,38 +219,6 @@ namespace USE_ExperimentTemplate_Trial
 
         }
 
-        public static Texture2D LoadPNG(string filePath)
-        {
-
-            Texture2D tex = null;
-            byte[] fileData;
-
-            if (File.Exists(filePath))
-            {
-                fileData = File.ReadAllBytes(filePath);
-                tex = new Texture2D(2, 2);
-                tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
-            }
-            return tex;
-        }
-
-        public static Material CreateSkybox(string filePath)
-        {
-            Texture2D tex = null;
-            Material materialSkybox = new Material(Shader.Find("Skybox/6 Sided"));
-
-            tex = LoadPNG(filePath); // load the texture from a PNG -> Texture2D
-
-            //Set the textures of the skybox to that of the PNG
-            materialSkybox.SetTexture("_FrontTex", tex);
-            materialSkybox.SetTexture("_BackTex", tex);
-            materialSkybox.SetTexture("_LeftTex", tex);
-            materialSkybox.SetTexture("_RightTex", tex);
-            materialSkybox.SetTexture("_UpTex", tex);
-            materialSkybox.SetTexture("_DownTex", tex);
-
-            return materialSkybox;
-        }
     }
 
     public class TrialStims : TaskStims

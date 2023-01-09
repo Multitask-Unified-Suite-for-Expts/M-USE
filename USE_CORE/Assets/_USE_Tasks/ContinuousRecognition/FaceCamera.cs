@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class FaceCamera : MonoBehaviour
 {
-
     public GameObject cam;
 
     void Start()

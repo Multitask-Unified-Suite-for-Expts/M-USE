@@ -8,13 +8,29 @@ using USE_Settings;
 using USE_StimulusManagement;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Block;
+using System.Collections.Specialized;
 
 public class THR_TaskLevel : ControlLevel_Task_Template
 {
     public string CurrentBlockString;
     public StringBuilder PreviousBlocksString;
 
+    public int BlockStringsAdded;
+
     THR_BlockDef currentBlock => GetCurrentBlockDef<THR_BlockDef>();
+
+    public int TrialsCompleted_Task = 0;
+    public int TrialsCorrect_Task = 0;
+    public int BlueSquareTouches_Task = 0;
+    public int WhiteSquareTouches_Task = 0;
+    public int BackdropTouches_Task = 0;
+    public int ItiTouches_Task = 0;
+    public int TouchRewards_Task = 0;
+    public int ReleaseRewards_Task = 0;
+    public int ReleasedEarly_Task = 0;
+    public int ReleasedLate_Task = 0;
+    public int TouchesMovedOutside_Task = 0;
+
 
     public override void SpecifyTypes()
     {
@@ -25,7 +41,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         TrialDefType = typeof(THR_TrialDef);
         StimDefType = typeof(THR_StimDef);
     }
-
 
     public override void DefineControlLevel()
     {
@@ -38,15 +53,26 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
 
-        SetupTask.AddInitializationMethod(() => SetupBlockData(trialLevel));
+        SetupTask.AddInitializationMethod(() =>
+        {
+            SetupBlockData(trialLevel);
+            BlockStringsAdded = 0;
+        });
 
         RunBlock.AddInitializationMethod(() =>
         {
-            trialLevel.NumTrialsCompletedBlock = 0;
-            trialLevel.NumTrialsCorrectBlock = 0;
-            trialLevel.NumNonSquareTouches = 0;
-            trialLevel.NumTouchesBlueSquare = 0;
-            trialLevel.NumTouchesWhiteSquare = 0;
+            trialLevel.TrialsCompleted_Block = 0;
+            trialLevel.TrialsCorrect_Block = 0;
+            trialLevel.BackdropTouches_Block = 0;
+            trialLevel.BlueSquareTouches_Block = 0;
+            trialLevel.WhiteSquareTouches_Block = 0;
+            trialLevel.NumItiTouches_Block = 0;
+            trialLevel.NumTouchRewards_Block = 0;
+            trialLevel.NumReleaseRewards_Block = 0;
+            trialLevel.NumReleasedEarly_Block = 0;
+            trialLevel.NumReleasedLate_Block = 0;
+            trialLevel.NumTouchesMovedOutside_Block = 0;
+            trialLevel.PerfThresholdMet = false;
 
             SetBlockSummaryString(trialLevel);
         });
@@ -61,11 +87,41 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddInitializationMethod(() =>
         {
-            if (BlockCount > 0)
+            if(BlockStringsAdded > 0)
                 CurrentBlockString += "\n";
+            BlockStringsAdded++;
             PreviousBlocksString.Insert(0, CurrentBlockString);
-        });
 
+            TrialsCompleted_Task += trialLevel.TrialsCompleted_Block;
+            TrialsCorrect_Task += trialLevel.TrialsCorrect_Block;
+            BlueSquareTouches_Task += trialLevel.BlueSquareTouches_Block;
+            WhiteSquareTouches_Task += trialLevel.WhiteSquareTouches_Block;
+            BackdropTouches_Task += trialLevel.BackdropTouches_Block;
+            ItiTouches_Task += trialLevel.NumItiTouches_Block;
+            TouchRewards_Task += trialLevel.NumTouchRewards_Block;
+            ReleaseRewards_Task += trialLevel.NumReleaseRewards_Block;
+            ReleasedEarly_Task += trialLevel.NumReleasedEarly_Block;
+            ReleasedLate_Task += trialLevel.NumReleasedLate_Block;
+            TouchesMovedOutside_Task += trialLevel.NumTouchesMovedOutside_Block;
+        });
+    }
+
+    public override OrderedDictionary GetSummaryData()
+    {
+        OrderedDictionary data = new OrderedDictionary();
+
+        data["Trials Completed"] = TrialsCompleted_Task;
+        data["Trials Correct"] = TrialsCorrect_Task;
+        data["Blue Square Touches"] = BlueSquareTouches_Task;
+        data["White Square Touches"] = WhiteSquareTouches_Task;
+        data["Non Square Touches"] = BackdropTouches_Task;
+        data["ITI Touches"] = ItiTouches_Task;
+        data["Touch Rewards"] = TouchRewards_Task;
+        data["Release Rewards"] = ReleaseRewards_Task;
+        data["Released Early"] = ReleasedEarly_Task;
+        data["Released Late"] = ReleasedLate_Task;
+        data["Touches Moved Outside"] = TouchesMovedOutside_Task;
+        return data;
     }
 
     void SetBlockSummaryString(THR_TrialLevel trialLevel)
@@ -73,14 +129,16 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         ClearStrings();
 
         CurrentBlockString = ("<b>Block " + "(" + currentBlock.BlockName + "):" + "</b>" +
-                        "\nNumTrialsCompleted: " + trialLevel.NumTrialsCompletedBlock +
-                        "\nNumTrialsCorrect: " + trialLevel.NumTrialsCorrectBlock +
-                        "\nNumTouchesWhiteSquare: " + trialLevel.NumTouchesWhiteSquare +
-                        "\nNumTouchesBlueSquare: " + trialLevel.NumTouchesBlueSquare +
-                        "\nNumTouchesOutsideSquare: " + trialLevel.NumNonSquareTouches).ToString();
-
-        if (BlockCount > 0)
-            CurrentBlockString += "\n";
+                        "\nTrialsCorrect: " + trialLevel.TrialsCorrect_Block + " (out of " + trialLevel.TrialsCompleted_Block + ")" +
+                        "\nReleasedEarly: " + trialLevel.NumReleasedEarly_Block +
+                        "\nReleasedLate: " + trialLevel.NumReleasedLate_Block +
+                        "\nMovedOutsideSquare: " + trialLevel.NumTouchesMovedOutside_Block +
+                        "\nWhiteSquareTouches: " + trialLevel.WhiteSquareTouches_Block +
+                        "\nBlueSquareTouches: " + trialLevel.BlueSquareTouches_Block +
+                        "\nNonSquareTouches: " + trialLevel.BackdropTouches_Block +
+                        "\nRewards: " + (trialLevel.NumTouchRewards_Block + trialLevel.NumReleaseRewards_Block) +
+                        "\nPerfThresholdMet: " + trialLevel.PerfThresholdMet +
+                        "\n");
 
         BlockSummaryString.AppendLine(CurrentBlockString).ToString();
         if (PreviousBlocksString.Length > 0)
@@ -95,18 +153,18 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
     void SetupBlockData(THR_TrialLevel trialLevel)
     {
-        BlockData.AddDatum("NumTrialsCompleted", () => trialLevel.NumTrialsCompletedBlock);
-        BlockData.AddDatum("NumTrialsCorrect", () => trialLevel.NumTrialsCorrectBlock);
-        BlockData.AddDatum("NumTouchesWhiteSquare", () => trialLevel.NumTouchesWhiteSquare);
-        BlockData.AddDatum("NumTouchesBlueSquare", () => trialLevel.NumTouchesBlueSquare);
-        BlockData.AddDatum("NumTouchesOutsideSquare", () => trialLevel.NumNonSquareTouches);
+        BlockData.AddDatum("NumTrialsCompleted", () => trialLevel.TrialsCompleted_Block);
+        BlockData.AddDatum("NumTrialsCorrect", () => trialLevel.TrialsCorrect_Block);
+        BlockData.AddDatum("WhiteSquareTouches_Block", () => trialLevel.WhiteSquareTouches_Block);
+        BlockData.AddDatum("BlueSquareTouches_Block", () => trialLevel.BlueSquareTouches_Block);
+        BlockData.AddDatum("BackdropTouches_Block", () => trialLevel.BackdropTouches_Block);
+        BlockData.AddDatum("ItiTouches_Block", () => trialLevel.NumItiTouches_Block);
+        BlockData.AddDatum("NumTouchRewards", () => trialLevel.NumTouchRewards_Block);
+        BlockData.AddDatum("NumReleaseRewards", () => trialLevel.NumReleaseRewards_Block);
         BlockData.AddDatum("DifficultyLevel", () => currentBlock.BlockName);
+        BlockData.AddDatum("NumReleasedEarly", () => trialLevel.NumReleasedEarly_Block);
+        BlockData.AddDatum("NumReleasedLate", () => trialLevel.NumReleasedLate_Block);
+        BlockData.AddDatum("NumTouchesMovedOutside", () => trialLevel.NumTouchesMovedOutside_Block);
     }
-
-    public T GetCurrentBlockDef<T>() where T : BlockDef
-    {
-        return (T)CurrentBlockDef;
-    }
-
 
 }

@@ -24,7 +24,7 @@ namespace MazeGame_Namespace
         public float[] TileColor;
         public Vector3 ButtonPosition;
         public Vector3 ButtonScale;
-        public string ContextExternalFilePath, MazeExternalFilePath;
+        public string ContextExternalFilePath, MazeExternalFilePath, MazeKeyFilePath;
         
     }
 
@@ -39,12 +39,13 @@ namespace MazeGame_Namespace
         public int Trial;
         public int[] MinMaxTrials;
         public string MazeInfo;
+
+        public int MazeDims;
+        public int MazeNumSquares;
+        public int MazeNumTurns;
       //  public Color TileColor;
         public float[] TileColor;
         public int Texture;
-        public int mazeDim;
-        public int mazeNumSquares;
-        public int mazeNumTurns;
         public int viewPath;
         public string ContextName;
      //   public string mazePath;
@@ -66,9 +67,9 @@ namespace MazeGame_Namespace
                 td.TrialCount = Trial;
                 td.TileColor = TileColor;
                 td.Texture = Texture;
-                //////td.mazeDim = mazeDim;
-                //////td.mazeNumSquares = mazeNumSquares;
-                //////td.mazeNumTurns = mazeNumTurns;
+                td.MazeDims = MazeDims;
+                td.MazeNumSquares = MazeNumSquares;
+                td.MazeNumTurns = MazeNumTurns;
                 td.viewPath = viewPath;
                 td.ContextName = ContextName;
                 td.MazeInfo = MazeInfo;
@@ -99,9 +100,9 @@ namespace MazeGame_Namespace
         public int TrialCount;
         public float[] TileColor;
         public int Texture;
-        //public int mazeDim;
-        //public int mazeNumSquares;
-        //public int mazeNumTurns;
+        public int MazeDims;
+        public int MazeNumSquares;
+        public int MazeNumTurns;
         public int viewPath;
         public string ContextName;
         public string MazeInfo;
@@ -141,5 +142,14 @@ namespace MazeGame_Namespace
         //public State SetActiveOnInitialization;
         //public State SetInactiveOnTermination;
        // public int test;
+    }
+
+    public class MazeDef
+    {
+        
+        public int mNumSquares;
+        public int mNumTurns;
+        public int mTotalSquares;
+        public string fileName;
     }
 }

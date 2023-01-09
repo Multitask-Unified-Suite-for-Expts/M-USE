@@ -11,6 +11,7 @@ using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
+using UnityEditor;
 
 public class HotKeyPanel : ExperimenterDisplayPanel
 {
@@ -192,6 +193,56 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             };
             HotKeyList.Add(toggleCursor);
 
+
+            //RestartBlock Hot Key
+            HotKey restartBlock = new HotKey
+            {
+                keyDescription = "R",
+                actionName = "Restart Block",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.R),
+                hotKeyAction = () =>
+                {
+                    HkPanel.TaskLevel.BlockCount--;
+                    HkPanel.TrialLevel.ForceBlockEnd = true;
+                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+                }
+            };
+            HotKeyList.Add(restartBlock);
+
+            //PreviousBlock Hot Key
+            HotKey previousBlock = new HotKey
+            {
+                keyDescription = "B",
+                actionName = "Previous Block",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.B),
+                hotKeyAction = () =>
+                {
+                    if (HkPanel.TrialLevel.BlockCount == 0)
+                        return;
+                    else
+                    {
+                        HkPanel.TaskLevel.BlockCount -= 2;
+                        HkPanel.TrialLevel.ForceBlockEnd = true;
+                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+                    }
+                }
+            };
+            HotKeyList.Add(previousBlock);
+
+            //End Block Hot Key
+            HotKey endBlock = new HotKey
+            {
+                keyDescription = "N",
+                actionName = "End Block",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.N),
+                hotKeyAction = () =>
+                {
+                    HkPanel.TrialLevel.ForceBlockEnd = true;
+                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+                }
+            };
+            HotKeyList.Add(endBlock);
+
             // Quit Game Hot Key
             HotKey quitGame = new HotKey
             {
@@ -217,17 +268,37 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     if (!HkPanel.TaskLevel.Paused)
                     {
                         HkPanel.TaskLevel.Paused = true;
+                        HkPanel.SessionLevel.PauseCanvasGO.SetActive(true);
+                        //CR canvas, starfield and the active stim all still appear, so set them inactive:
+                        //This works but the timing off for the trial states, so commenting out.
+                        //GameObject CR = GameObject.Find("ContinuousRecognition_Canvas");
+                        //if (CR != null)
+                        //    CR.SetActive(false);
+                        //GameObject CR_Canvas = GameObject.Find("Starfield");
+                        //if (CR_Canvas != null)
+                        //    CR_Canvas.SetActive(false);
+                        //foreach (var stim in HkPanel.TrialLevel.TrialStims)
+                        //    stim.ToggleVisibility(false);
                     }
                     else
                     {
                         HkPanel.TaskLevel.Paused = false;
+                        HkPanel.SessionLevel.PauseCanvasGO.SetActive(false);
+                        //Reactivate the CR objects:
+                        //This works but the timing off for the trial states, so commenting out.
+                        //foreach(GameObject go in Resources.FindObjectsOfTypeAll<GameObject>())
+                        //{
+                        //    Debug.Log("GO NAME = " + go.name);
+                        //    if (go.name == "ContinuousRecognition_Canvas" || go.name == "Starfield")
+                        //        go.SetActive(true);
+                        //}
+                        //foreach (var stim in HkPanel.TrialLevel.TrialStims)
+                        //    stim.ToggleVisibility(true);
                     }
                 }
             };
             HotKeyList.Add(pauseGame);
-            
-            
-
+      
             return (HotKeyList);
         }
 

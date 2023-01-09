@@ -31,6 +31,10 @@ namespace WorkingMemory_Namespace
         public int NumTokenBar;
         public int NumPulses;
         public int PulseSize;
+        public string BlockEndType;
+        public float BlockEndThreshold;
+        public int BlockEndWindow;
+        public bool StimFacingCamera;
 
         public override void AddToTrialDefsFromBlockDef()
         {
@@ -42,6 +46,10 @@ namespace WorkingMemory_Namespace
                 td.NumPulses = NumPulses;
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
+                td.BlockEndType = BlockEndType;
+                td.BlockEndThreshold = BlockEndThreshold;
+                td.BlockEndWindow = BlockEndWindow;
+                td.StimFacingCamera = td.StimFacingCamera;
                 TrialDefs[iTrial] = td;
             }
         }
@@ -63,6 +71,10 @@ namespace WorkingMemory_Namespace
         public int NumTokenBar;
         public int NumPulses;
         public int PulseSize;
+        public string BlockEndType;
+        public float BlockEndThreshold;
+        public int BlockEndWindow;
+        public bool StimFacingCamera;
     }
 
     public class WorkingMemory_StimDef : StimDef

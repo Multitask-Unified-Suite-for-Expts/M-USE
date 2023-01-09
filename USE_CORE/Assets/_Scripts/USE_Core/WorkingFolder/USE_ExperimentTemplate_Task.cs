@@ -36,7 +36,6 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public string SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
         [HideInInspector] public LocateFile LocateFile;
         [HideInInspector] public StringBuilder BlockSummaryString;
-        [HideInInspector] public int ExperimenterDisplayLayer;
 
         // public string TaskSceneName;
         public Camera TaskCam;
@@ -100,7 +99,6 @@ namespace USE_ExperimentTemplate_Task
             ReadCustomSettingsFiles();
             FindStims();
             if (verifyOnly) return;
-
 
             SetupTask = new State("SetupTask");
             RunBlock = new State("RunBlock");
@@ -303,13 +301,23 @@ namespace USE_ExperimentTemplate_Task
                 switch (fbController)
                 {
                     case "Audio":
-                        if (!audioInited) TrialLevel.AudioFBController.Init(FrameData);
+                        if (!audioInited)
+                        {
+                            TrialLevel.AudioFBController.Init(FrameData);
+                            audioInited = true;
+                        }
+
                         break;
                     case "Halo":
                         TrialLevel.HaloFBController.Init(FrameData);
                         break;
                     case "Token":
-                        if (!audioInited) TrialLevel.AudioFBController.Init(FrameData);
+                        if (!audioInited)
+                        {
+                            TrialLevel.AudioFBController.Init(FrameData);
+                            audioInited = true;
+                        }
+
                         TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
                         TrialLevel.TokenFBController.SetTotalTokensNum(totalTokensNum);
                         break;
@@ -320,12 +328,12 @@ namespace USE_ExperimentTemplate_Task
             }
 
             TrialLevel.MouseTracker = inputTrackers.GetComponent<MouseTracker>();
-            TrialLevel.MouseTracker.Init(FrameData, ExperimenterDisplayLayer);
+            TrialLevel.MouseTracker.Init(FrameData, 0);
             TrialLevel.GazeTracker = inputTrackers.GetComponent<GazeTracker>();
             if (!string.IsNullOrEmpty(EyetrackerType) & EyetrackerType.ToLower() != "none" &
                 EyetrackerType.ToLower() != "null")
             {
-                TrialLevel.GazeTracker.Init(FrameData, ExperimenterDisplayLayer);
+                TrialLevel.GazeTracker.Init(FrameData, 0);
             }
 
             TrialLevel.SelectionType = SelectionType;
@@ -455,6 +463,10 @@ namespace USE_ExperimentTemplate_Task
         public virtual void ReadCustomSettingsFiles()
         {
             
+        }
+
+        public virtual Dictionary<string, object> SummarizeTask() {
+            return new Dictionary<string, object>();
         }
 
         public void FindStims()
@@ -733,6 +745,12 @@ namespace USE_ExperimentTemplate_Task
                 FrameData.WriteData();
             }
         }
+        
+        
+        public T GetCurrentBlockDef<T>() where T : BlockDef
+        {
+            return (T)CurrentBlockDef;
+        }
 
     }
 
@@ -939,4 +957,5 @@ namespace USE_ExperimentTemplate_Task
         public bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         public string SelectionType;
     }
+    
 }

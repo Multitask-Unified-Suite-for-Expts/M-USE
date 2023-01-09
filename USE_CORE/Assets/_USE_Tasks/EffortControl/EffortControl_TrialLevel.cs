@@ -10,421 +10,576 @@ using System.IO;
 using USE_Settings;
 using USE_ExperimentTemplate_Trial;
 using USE_ExperimentTemplate_Block;
-
-//testing
+using Newtonsoft.Json.Linq;
+using UnityEngine.XR;
+using System.ComponentModel;
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 {
-    public EffortControl_TrialDef CurrentTrialDef => GetCurrentTrialDef<EffortControl_TrialDef>();
-    //This variable is required for most tasks, and is defined as the output of the GetCurrentTrialDef function 
+    public EffortControl_TrialDef CurrentTrial => GetCurrentTrialDef<EffortControl_TrialDef>();
 
-    // game object variables
-    private GameObject initButton, fb, goCue, stimLeft, stimRight, trialStim, clickMarker, balloonContainerLeft,
-    balloonContainerRight, balloonOutline, prize, rewardContainerLeft, rewardContainerRight, reward;
-    //private Camera cam;
+    //Prefabs to Instantiate:
+    public GameObject StimLeftPrefab;
+    public GameObject StimRightPrefab;
+    public GameObject RewardPrefab;
+    public GameObject OutlinePrefab;
 
-    // trial config variables
-    //public float InitialChoiceDuration;
-    // public float RewardDelay;
-    // public float StartDelay;
-    // public float StepsToProgressUpdate;
+    //Game Objects:
+    GameObject StartButton, StimLeft, StimRight, TrialStim, BalloonContainerLeft, BalloonContainerRight,
+               BalloonOutline, RewardContainerLeft, RewardContainerRight, Reward, MiddleBarrier;
 
-    // timing variable 
-    private float? avgClickTime;
+    //Audio Clips
+    public AudioClip BalloonChosen_Audio;
+    public AudioClip InflateBalloon_Audio;
+    public AudioClip InflateAndPop_Audio;
 
-    // effort reward variables
-    private int numOfClicks, clickCount;
+    //Colors:
+    Color Red;
+    Color Gray = new Color(0.5f, 0.5f, 0.5f);
+    Color32 OffWhiteOutlineColor = new Color32(250, 249, 246, 0);
 
-    //public EffortControl_TrialDef[] trialDefs;
-    //public EffortControl_TrialDef currentTrialDef;
+    Vector3 TrialStimInitLocalScale;
+    Vector3 fbInitLocalScale;
+    Vector3 LeftScaleUpAmount;
+    Vector3 RightScaleUpAmount;
+    Vector3 ScaleUpAmount;
+    Vector3 MaxScale;
+    Vector3 LeftContainerOriginalPosition;
+    Vector3 RightContainerOriginalPosition;
+    Vector3 LeftRewardContainerOriginalPosition;
+    Vector3 RightRewardContainerOriginalPosition;
+    Vector3 LeftStimOriginalPosition;
+    Vector3 RightStimOriginalPosition;
 
-    // trial count variables
-    private int numChosenLeft, numChosenRight;
-    [HideInInspector]
-    public String leftRightChoice;
-    [System.NonSerialized] public int response = -1, trialCount = -1;
+    [HideInInspector] public string MaterialFilePath; //set in task level
 
-    // vector3 variables
-    private Vector3 trialStimInitLocalScale;
-    private Vector3 fbInitLocalScale;
-    private Vector3 scaleUpAmountLeft;
-    private Vector3 scaleUpAmountRight;
-    private Vector3 scaleUpAmount;
-    public Vector3 maxScale;
+    //Misc Variables:
+    [System.NonSerialized] public int Response = -1;
+    int ClicksNeeded; //becomes left/right num clicks once they make selection. 
+    int ClickCount;
+    float PopStartTime;
+    string Choice;
+    bool AddTokenAudioPlayed;
+    bool StimDeactivated;
+    bool VariablesLoaded;
+    List<GameObject> RemoveParentList;
+    GameObject Wrapper;
 
-    // misc variables
-    private Ray mouseRay;
-    private Color red;
-    private Color gray;
+    float CenteringSpeed = 1.25f;
+    bool Centered;
+    Vector3 CenteredPos;
 
-    private bool variablesLoaded;
-    public string MaterialFilePath;
-    public string ContextPath;
+    //Variables to Inflate balloon at interval rate
+    bool Inflate;
+    int FramesToInflateOver = 100; //100 was perfect
+    float MaxInflation_Y = 25f;
+    float ScalePerInflation_Y;
+    Vector3 IncrementAmounts;
+    Vector3 NextScale;
 
-    //data control variables
-    //public bool storeData;
-    //public string dataPath;
-    //public string dataFileName;
+    //Data variables:
+    [HideInInspector] public float? AvgClickTime;
+    [HideInInspector] public float ChooseDuration;
+    [HideInInspector] public int RewardPulses_Block;
+    [HideInInspector] public int Touches_Block;
+    [HideInInspector] public int Completions_Block;
+    [HideInInspector] public int NumChosenLeft_Block;
+    [HideInInspector] public int NumChosenRight_Block;
+
 
     public override void DefineControlLevel()
     {
-
-        //EffortControl_TrialDataController trialData = GameObject.Find("DataControllers").GetComponent<EffortControl_TrialDataController>();
-        //trialData.storeData = storeData;
-        //trialData.folderPath = dataPath;
-        //trialData.fileName = dataFileName;
-
         //define States within this Control Level
         State InitTrial = new State("InitTrial");
         State InitDelay = new State("InitDelay");
         State ChooseBalloon = new State("ChooseBalloon");
+        State CenterSelection = new State("CenterSelection");
         State InflateBalloon = new State("InflateBalloon");
         State Feedback = new State("Feedback");
         State FeedbackDelay = new State("FeedbackDelay");
         State ITI = new State("ITI");
-        AddActiveStates(new List<State> { InitTrial, InitDelay, ChooseBalloon, InflateBalloon, Feedback, FeedbackDelay, ITI });
+        AddActiveStates(new List<State> { InitTrial, InitDelay, ChooseBalloon, CenterSelection, InflateBalloon, Feedback, FeedbackDelay, ITI });
 
         SelectionHandler<EffortControl_StimDef> mouseHandler = new SelectionHandler<EffortControl_StimDef>();
 
-        //AddInitializationMethod(() => { trialData.DefineDataController(); trialData.CreateFile(); });
+        TokenFBController.enabled = false;
+        SetTokenVariables();
 
-        AddInitializationMethod(() => {
-            if (!variablesLoaded)
-            {
-                variablesLoaded = true;
-                loadVariables();
-            }
+        if(AudioFBController != null)
+            AddAudioClips();
+
+        //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
+        SetupTrial.AddInitializationMethod(() =>
+        {
+            if (!VariablesLoaded)
+                LoadVariables();
+
+            SetTrialSummaryString();
         });
-
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        // define initScreen state
         MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
-        InitTrial.AddInitializationMethod(() => {
-
-            trialCount++;
-
-            avgClickTime = null;
-
-            ResetRelativeStartTime();
-            disableAllGameobjects();
-            initButton.SetActive(true);
-            ChangeColor(stimRight, red);
-            ChangeColor(stimLeft, red);
-
-            clickCount = 0;
-            response = -1;
-
-            maxScale = new Vector3(50, 0, 50);
-            scaleUpAmountLeft = maxScale / CurrentTrialDef.NumOfClicksLeft;
-            scaleUpAmountRight = maxScale / CurrentTrialDef.NumOfClicksRight;
-
-            //Temporarily hard coded
-            MaterialFilePath = "//Users//ntraczewski//Desktop//USE_Configs//USE_Configs//Resources//TextureImages";
-
-            ContextPath = GetContextNestedFilePath("LinearDark"); //Using this for now until MFP is stated in config. 
-            //ContextPath = GetContextNestedFilePath(CurrentTrialDef.ContextName);
-            RenderSettings.skybox = CreateSkybox(ContextPath);
+        //INIT Trial state -------------------------------------------------------------------------------------------------------
+        InitTrial.AddInitializationMethod(() =>
+        {
+            TokenFBController.enabled = false;
+            AvgClickTime = null;
+            ResetRelativeStartTime(); 
+            DisableAllGameobjects();
+            StartButton.SetActive(true);
+            ChangeColor(StimRight, Red);
+            ChangeColor(StimLeft, Red);
+            ClickCount = 0;
+            Response = -1;
+            ChooseDuration = 0; //reset how long it took them to choose each trial. 
         });
+        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), InitDelay, () => StartButton.SetActive(false));
 
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(initButton), InitDelay);
-        InitTrial.AddDefaultTerminationMethod(() => initButton.SetActive(false));
+        //INIT DELAY state -------------------------------------------------------------------------------------------------------
+        InitDelay.AddTimer(() => CurrentTrial.InitDelayDuration, ChooseBalloon);
 
-        InitDelay.AddTimer(() => CurrentTrialDef.InitToBalloonDelay, ChooseBalloon);
+        //Choose Balloon state -------------------------------------------------------------------------------------------------------
+        ChooseBalloon.AddInitializationMethod(() =>
+        {
+            Input.ResetInputAxes(); //reset input in case they holding down
+            ActivateStimAndRewards();
+            TrialStim = null;
+            MouseTracker.ResetClickCount();
 
-        // Define stimOn state
-        ChooseBalloon.AddInitializationMethod(() => {
-            stimRight.SetActive(true);
-            stimLeft.SetActive(true);
-            trialStim = null;
-            createBalloons(CurrentTrialDef.NumOfClicksLeft, scaleUpAmountLeft, CurrentTrialDef.ClicksPerOutline, stimLeft.transform.position, balloonContainerLeft);
-            createBalloons(CurrentTrialDef.NumOfClicksRight, scaleUpAmountRight, CurrentTrialDef.ClicksPerOutline, stimRight.transform.position, balloonContainerRight);
-            createRewards(CurrentTrialDef.NumOfCoinsLeft, rewardContainerLeft.transform.position, rewardContainerLeft);
-            createRewards(CurrentTrialDef.NumOfCoinsRight, rewardContainerRight.transform.position, rewardContainerRight);
+            MaxScale = new Vector3(60, 0, 60);
+            LeftScaleUpAmount = MaxScale / CurrentTrial.NumClicksLeft;
+            RightScaleUpAmount = MaxScale / CurrentTrial.NumClicksRight;
+
+            CreateBalloonOutlines(CurrentTrial.NumClicksLeft, LeftScaleUpAmount, CurrentTrial.ClicksPerOutline, StimLeft.transform.position, BalloonContainerLeft);
+            CreateBalloonOutlines(CurrentTrial.NumClicksRight, RightScaleUpAmount, CurrentTrial.ClicksPerOutline, StimRight.transform.position, BalloonContainerRight);
+            CreateRewards(CurrentTrial.NumCoinsLeft, RewardContainerLeft.transform.position, RewardContainerLeft);
+            CreateRewards(CurrentTrial.NumCoinsRight, RewardContainerRight.transform.position, RewardContainerRight);
         });
 
         MouseTracker.AddSelectionHandler(mouseHandler, ChooseBalloon);
-        ChooseBalloon.AddUpdateMethod(() => {
-            // check if user clicks on left or right
+        ChooseBalloon.AddUpdateMethod(() =>
+        {
             GameObject hit = mouseHandler.SelectedGameObject;
-            if (hit == null) return;
+            if (hit == null)
+                return;
+
             if (hit.transform.name == "StimLeft")
             {
-                numChosenLeft++;
-                leftRightChoice = "left";
+                NumChosenLeft_Block++;
+                Choice = "left";
 
-                ChangeColor(stimRight, gray);
-                ChangeContainerColor(balloonContainerRight, gray);
-                DestroyContainerChild(rewardContainerRight);
+                ChangeColor(StimRight, Gray);
+                ChangeContainerColor(BalloonContainerRight, Gray);
+                DestroyChildren(RewardContainerRight);
 
-                trialStim = hit.transform.gameObject;
-                numOfClicks = CurrentTrialDef.NumOfClicksLeft;
-                scaleUpAmount = scaleUpAmountLeft;
+                TrialStim = hit.transform.gameObject;
+                ClicksNeeded = CurrentTrial.NumClicksLeft;
+                ScaleUpAmount = LeftScaleUpAmount;
             }
             else if (hit.transform.name == "StimRight")
             {
-                numChosenRight++;
-                leftRightChoice = "right";
+                NumChosenRight_Block++;
+                Choice = "right";
 
-                ChangeColor(stimLeft, gray);
-                ChangeContainerColor(balloonContainerLeft, gray);
-                DestroyContainerChild(rewardContainerLeft);
+                ChangeColor(StimLeft, Gray);
+                ChangeContainerColor(BalloonContainerLeft, Gray);
+                DestroyChildren(RewardContainerLeft);
 
-                trialStim = hit.transform.gameObject;
-                numOfClicks = CurrentTrialDef.NumOfClicksRight;
-                scaleUpAmount = scaleUpAmountRight;
+                TrialStim = hit.transform.gameObject;
+                ClicksNeeded = CurrentTrial.NumClicksRight;
+                ScaleUpAmount = RightScaleUpAmount;
             }
         });
-        ChooseBalloon.SpecifyTermination(() => trialStim != null, InflateBalloon, () => {
-            if (leftRightChoice == "left") {
-                DestroyContainerChild(balloonContainerRight);
-                stimRight.SetActive(false);
-            } else {
-                DestroyContainerChild(balloonContainerLeft);
-                stimLeft.SetActive(false);
-            }
+        ChooseBalloon.SpecifyTermination(() => TrialStim != null, CenterSelection, () =>
+        {
+            AudioFBController.Play("SelectionMade");
+            ChooseDuration = ChooseBalloon.TimingInfo.Duration;
         });
 
-        // define collectResponse state
+        //Center Selection state -------------------------------------------------------------------------------------------------------
+        CenterSelection.AddInitializationMethod(() =>
+        {
+            Wrapper = new GameObject();
+            Wrapper.name = "Wrapper";
+            Centered = false;
+            CenteredPos = new Vector3((Choice == "left" ? 1f : -1f), 0, 0);
+
+            MiddleBarrier.SetActive(false);
+
+            if (Choice == "left")
+            {
+                SetParents(Wrapper, new List<GameObject>() {BalloonContainerLeft, StimLeft, RewardContainerLeft});
+                DestroyChildren(BalloonContainerRight);
+                StimRight.SetActive(false);
+            }
+            else
+            {
+                SetParents(Wrapper, new List<GameObject>() {BalloonContainerRight, StimRight, RewardContainerRight});
+                DestroyChildren(BalloonContainerLeft);
+                StimLeft.SetActive(false);
+            }
+        });
+        CenterSelection.AddUpdateMethod(() =>
+        {
+            if(Wrapper.transform.position != CenteredPos)
+            {
+                Wrapper.transform.position = Vector3.MoveTowards(Wrapper.transform.position, CenteredPos, CenteringSpeed * Time.deltaTime);
+            }
+            if (Wrapper.transform.position == CenteredPos)
+                Centered = true;
+        });
+        CenterSelection.SpecifyTermination(() => Centered, InflateBalloon, () => RemoveParents(Wrapper, RemoveParentList));
+
+        //Inflate Balloon state -------------------------------------------------------------------------------------------------------
         List<float> clickTimings = new List<float>();
         float timeTracker = 0;
 
-        InflateBalloon.AddInitializationMethod(() => {
-            goCue.SetActive(true);
-            clickTimings = new List<float>();
+        InflateBalloon.AddInitializationMethod(() =>
+        {
+            if (Choice == "left") //set Reward tokens to inactive since they are replaced by tokenbar tokens.
+            {
+                RewardContainerLeft.SetActive(false);
+                ScalePerInflation_Y = (MaxInflation_Y - TrialStim.transform.localScale.y) / CurrentTrial.NumClicksLeft;
+            }
+            else
+            {
+                RewardContainerRight.SetActive(false);
+                ScalePerInflation_Y = (MaxInflation_Y - TrialStim.transform.localScale.y) / CurrentTrial.NumClicksRight;
+            }
+            //DeactivateChildren(Choice == "left" ? BalloonContainerLeft : BalloonContainerRight); //Removes outlines if I want it!
+
+            TokenFBController.SetTotalTokensNum(Choice == "left" ? CurrentTrial.NumCoinsLeft : CurrentTrial.NumCoinsRight);
+            TokenFBController.enabled = true;
             timeTracker = Time.time;
+            IncrementAmounts = new Vector3();
         });
         MouseTracker.AddSelectionHandler(mouseHandler, InflateBalloon);
-        InflateBalloon.AddUpdateMethod(() => {
-            if (InputBroker.GetMouseButtonDown(0))
+        InflateBalloon.AddUpdateMethod(() =>
+        {
+            if(Inflate)
             {
-                if (mouseHandler.SelectionMatches(trialStim))
+                if (TrialStim.transform.localScale != NextScale)
                 {
-                    //add to clicktimings
-                    clickTimings.Add(Time.time - timeTracker);
-                    timeTracker = Time.time;
+                    if (TrialStim.transform.localScale.x + IncrementAmounts.x > NextScale.x) //if close and would go over target scale, recalculate smaller Increments.
+                        IncrementAmounts = new Vector3((NextScale.x - TrialStim.transform.localScale.x), (NextScale.y - TrialStim.transform.localScale.y), (NextScale.z - TrialStim.transform.localScale.z));
 
-                    clickMarker.transform.position = mouseHandler.SelectedGameObject.transform.position;
-                    clickMarker.SetActive(true);
-
-                    if (clickCount == 0) {
-                        GameObject container = (leftRightChoice == "left") ? balloonContainerLeft : balloonContainerRight;
-                        Vector3 scale = container.transform.GetChild(0).transform.localScale;
-                        scale.y = trialStim.transform.localScale.y;
-                        trialStim.transform.localScale = scale;
-                    } else {
-                        trialStim.transform.localScale += scaleUpAmount;
-                    }
-                    clickCount++;
-                    Debug.Log("Clicked balloon " + clickCount + " times.");
+                    TrialStim.transform.localScale = new Vector3(TrialStim.transform.localScale.x + IncrementAmounts.x, TrialStim.transform.localScale.y + IncrementAmounts.y, TrialStim.transform.localScale.z + IncrementAmounts.z);
                 }
                 else
                 {
-                    Debug.Log("Clicked on something else");
-                    // cam.backgroundColor = Color.red;
+                    Inflate = false;
+                    if(ClickCount >= ClicksNeeded)
+                    {
+                        Response = 1;
+                        AvgClickTime = clickTimings.Average();
+                    }
                 }
+            }
 
-                // disable gameObject if the user clicks enough time
-                if (clickCount >= numOfClicks)
+            if (mouseHandler.SelectionMatches(TrialStim))
+            {
+                ClickCount++;
+                clickTimings.Add(Time.time - timeTracker);
+                timeTracker = Time.time;
+                mouseHandler.Stop();
+
+                CalculateInflation();
+                Inflate = true;
+
+                if (ClickCount < ClicksNeeded)
+                    AudioFBController.Play("Inflate");
+                else
                 {
-                    Debug.Log("User clicked enough times, popping balloon");
-                    clickMarker.SetActive(false);
-                    response = 1;
-
-                    //calculate average time
-                    avgClickTime = clickTimings.Average();
+                    AudioFBController.Play("InflateAndPop");
+                    PopStartTime = Time.time;
                 }
             }
 
             if (InputBroker.GetMouseButtonUp(0))
             {
-                clickMarker.SetActive(false);
+                if(ClickCount < ClicksNeeded)
+                    mouseHandler.Start();
             }
         });
 
-        InflateBalloon.AddTimer(45f, Feedback);
-        InflateBalloon.SpecifyTermination(() => clickCount >= numOfClicks, FeedbackDelay);
-        InflateBalloon.AddDefaultTerminationMethod(() => {
-            goCue.SetActive(false);
-            if (response == 1) {
-                if (leftRightChoice == "left") DestroyContainerChild(balloonContainerLeft);
-                else DestroyContainerChild(balloonContainerRight);
-            }
+        InflateBalloon.AddTimer(45f, FeedbackDelay); //FIX HERE! CURRENTTRIAL.InflateDuration DOESN'T WORK. 
+        InflateBalloon.SpecifyTermination(() => Response == 1, FeedbackDelay);
+        InflateBalloon.AddDefaultTerminationMethod(() =>
+        {
+            if (Choice == "left")
+                DestroyChildren(BalloonContainerLeft);
+            else
+                DestroyChildren(BalloonContainerRight);   
         });
 
-        FeedbackDelay.AddTimer(() => CurrentTrialDef.CompleteToFeedbackDelay, Feedback);
-        FeedbackDelay.AddDefaultTerminationMethod(() => {
-            if (response == 1) {
-                trialStim.SetActive(false);
-                trialStim.transform.localScale = trialStimInitLocalScale;
-            }
-        });
-
-        Feedback.AddInitializationMethod(() => {
-            if (response == 1)
+        //Feedback Delay state -------------------------------------------------------------------------------------------------------
+        FeedbackDelay.AddInitializationMethod(() => StimDeactivated = false);
+        FeedbackDelay.AddUpdateMethod(() =>
+        {
+            if(Response == 1)
             {
-                // set prize's position to the position of the balloon
-                prize.transform.position = trialStim.transform.position + new Vector3(0f, .5f, 0f);
-                prize.SetActive(true);
-                fb.GetComponent<RawImage>().color = Color.green;
-                if (SyncBoxController != null) {
-                    if (leftRightChoice == "left")
-                        SyncBoxController.SendRewardPulses(CurrentTrialDef.NumOfPulsesLeft, CurrentTrialDef.PulseSizeLeft);
-                    else
-                        SyncBoxController.SendRewardPulses(CurrentTrialDef.NumOfPulsesRight, CurrentTrialDef.PulseSizeRight);
-                }
+                if (Time.time - PopStartTime > (AudioFBController.GetClip("InflateAndPop").length * .75f)) //want ballon to pop exactly when pop audio plays. 
+                    StimDeactivated = true;
             }
             else
+                StimDeactivated = true;
+        });
+        FeedbackDelay.SpecifyTermination(() => StimDeactivated, Feedback, () => TrialStim.SetActive(false));
+        //FeedbackDelay.AddTimer(() => CurrentTrial.FeedbackDelayDuration *2, Feedback);
+
+        //Feedback state -------------------------------------------------------------------------------------------------------
+        Feedback.AddInitializationMethod(() =>
+        {
+            if (Response == 1)
             {
-                fb.GetComponent<RawImage>().color = Color.red;
+                GameObject CenteredGO = new GameObject();
+                CenteredGO.transform.position = Vector3.zero;
+                TokenFBController.AddTokens(CenteredGO, Choice == "left" ? CurrentTrial.NumCoinsLeft : CurrentTrial.NumCoinsRight);
+                Destroy(CenteredGO);
+
+                if (SyncBoxController != null)
+                    GiveReward();
+                
+                Completions_Block++;
+                AddTokenAudioPlayed = true;
             }
-            fb.SetActive(true);
+            Touches_Block += MouseTracker.GetClickCount();
+        });
+        Feedback.SpecifyTermination(() => AddTokenAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI, () =>
+        {
+            TokenFBController.enabled = false;
+            AddTokenAudioPlayed = false;
         });
 
-        Feedback.AddTimer(1f, ITI, () => fb.SetActive(false));
-
-        //Define iti state
-        ITI.AddInitializationMethod(() => {
-            trialStim.SetActive(false);
-            DestroyContainerChild(balloonContainerLeft);
-            DestroyContainerChild(balloonContainerRight);
+        //ITI state -------------------------------------------------------------------------------------------------------
+        ITI.AddInitializationMethod(() =>
+        {
+            TrialStim.SetActive(false);
+            DestroyChildren(BalloonContainerLeft);
+            DestroyChildren(BalloonContainerRight);
         });
-        ITI.AddTimer(2f, FinishTrial, () => {
-            Debug.Log("Trial" + trialCount + " completed");
-            DestroyContainerChild(balloonContainerLeft);
-            DestroyContainerChild(balloonContainerRight);
-            DestroyContainerChild(rewardContainerLeft);
-            DestroyContainerChild(rewardContainerRight);
-            trialStim.transform.localScale = trialStimInitLocalScale;
-            //trialData.AppendData(); 
-            //trialData.WriteData();
+        ITI.AddTimer(.5f, FinishTrial, () =>   // HE HARD CODED THIS VALUE
+        { 
+            DestroyChildren(BalloonContainerLeft);
+            DestroyChildren(BalloonContainerRight);
+            DestroyChildren(RewardContainerLeft);
+            DestroyChildren(RewardContainerRight);
+            TrialStim.transform.localScale = TrialStimInitLocalScale;
+
+            ResetToOriginalPositions();
         });
-        TrialData.AddDatum("NumOfClicks", () => numOfClicks);
-        //AddTerminationSpecification(() => trialCount > numTrials);
 
-
-        // Additional recorded data 
-        // TrialData.AddDatum("TrialName", () => CurrentTrialDef.TrialName);
-        // TrialData.AddDatum("TrialCode", () => CurrentTrialDef.TrialCode);
-        // TrialData.AddDatum("ContextNum", () => CurrentTrialDef.ContextNum);
-        // TrialData.AddDatum("ConditionName", () => CurrentTrialDef.ConditionName);
-        // TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
-        TrialData.AddDatum("ClicksPerOutline", () => CurrentTrialDef.ClicksPerOutline);
-        // TrialData.AddDatum("InitialChoiceMinDuration", () => CurrentTrialDef.InitialChoiceMinDuration);
-        // TrialData.AddDatum("StarttoTapDispDelay", () => CurrentTrialDef.StarttoTapDispDelay);
-        // TrialData.AddDatum("FinalTouchToVisFeedbackDelay", () => CurrentTrialDef.FinalTouchToVisFeedbackDelay);
-        // TrialData.AddDatum("FinalTouchToRewardDelay", () => CurrentTrialDef.FinalTouchToRewardDelay);
-
-        TrialData.AddDatum("NumOfClicksLeft", () => CurrentTrialDef.NumOfClicksLeft);
-        TrialData.AddDatum("NumOfClicksRight", () => CurrentTrialDef.NumOfClicksRight);
-        TrialData.AddDatum("NumOfCoinsLeft", () => CurrentTrialDef.NumOfCoinsLeft);
-        TrialData.AddDatum("NumOfCoinsRight", () => CurrentTrialDef.NumOfCoinsRight);
-        TrialData.AddDatum("ChosenSide", () => leftRightChoice.ToUpper());
-        TrialData.AddDatum("TimeTakenToChoose", () => ChooseBalloon.TimingInfo.Duration);
-        TrialData.AddDatum("AverageClickTimes", () => avgClickTime);
-
-
-
+        LogTrialData();
+        LogFrameData();
     }
 
-
-    private string GetContextNestedFilePath(string contextName)
+    //HELPER FUNCTIONS -------------------------------------------------------------------------------------------------------
+    void DeactivateChildren(GameObject container)
     {
-        string backupContextName = "LinearDark";
-        string contextPath = "";
+        var children = new List<GameObject>();
+        foreach (Transform child in container.transform)
+            child.gameObject.SetActive(false);
+    }
 
-        string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
+    void CalculateInflation()
+    {
+        GameObject container = (Choice == "left") ? BalloonContainerLeft : BalloonContainerRight;
+        NextScale = container.transform.GetChild(ClickCount-1).transform.localScale;
+        NextScale.y = ScalePerInflation_Y + TrialStim.transform.localScale.y;
+        Vector3 difference = NextScale - TrialStim.transform.localScale;
+        IncrementAmounts = new Vector3((difference.x / FramesToInflateOver), (difference.y / FramesToInflateOver), (difference.z / FramesToInflateOver));
+    }
 
-        if (filePaths.Length >= 1)
-            contextPath = filePaths[0];
+    void SetTokenVariables()
+    {
+        TokenFBController.SetFlashingTime(1.5f);
+        TokenFBController.tokenBoxYOffset = 20;
+        TokenFBController.tokenSize = 105;
+        TokenFBController.tokenSpacing = -18;
+    }
+
+    void SetParents(GameObject wrapper, List<GameObject> objects) // 1) Setting the parent of each GO, and 2) Adding to RemovalList (so can remove easily later)
+    {
+        RemoveParentList = new List<GameObject>();
+        foreach(GameObject go in objects)
+        {
+            go.transform.parent = wrapper.transform; //set parent
+            RemoveParentList.Add(go); //add to remove parent list for later
+        }
+    }
+
+    void RemoveParents(GameObject wrapper, List<GameObject> objects)
+    {
+        if (objects.Count < 1 || objects == null)
+            Debug.Log("There are no objects in the List!");
         else
         {
-            contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0]; //Use Default LinearDark if can't find file.
-            Debug.Log($"Context File Path Not Found. Defaulting to {backupContextName}.");
+            foreach (GameObject go in objects)
+                go.transform.parent = null;
         }
-
-        return contextPath;
+        Destroy(wrapper);
     }
 
-
-    // set all gameobjects to setActive false
-    void disableAllGameobjects()
+    void ResetToOriginalPositions()
     {
-        initButton.SetActive(false);
-        fb.SetActive(false);
-        // goCue.SetActive(false);
-        stimLeft.SetActive(false);
-        stimRight.SetActive(false);
-        clickMarker.SetActive(false);
-        prize.SetActive(false);
-        balloonOutline.SetActive(false);
+        TrialStim.transform.localScale = TrialStimInitLocalScale;
+
+        if (Choice == "left")
+        {
+            BalloonContainerLeft.transform.position = LeftContainerOriginalPosition;
+            RewardContainerLeft.transform.position = LeftRewardContainerOriginalPosition;
+            StimLeft.transform.position = LeftStimOriginalPosition;
+        }
+        else
+        {
+            BalloonContainerRight.transform.position = RightContainerOriginalPosition;
+            RewardContainerRight.transform.position = RightRewardContainerOriginalPosition;
+            StimRight.transform.position = RightStimOriginalPosition;
+        }
     }
 
-    // method for presetting variables
-    void loadVariables()
+    void GiveReward()
     {
-        initButton = GameObject.Find("StartButton");
-        fb = GameObject.Find("FB");
-        goCue = GameObject.Find("ResponseCue");
-        stimLeft = GameObject.Find("StimLeft");
-        stimRight = GameObject.Find("StimRight");
-        clickMarker = GameObject.Find("ClickMarker");
-        balloonContainerLeft = GameObject.Find("BalloonContainerLeft");
-        balloonContainerRight = GameObject.Find("BalloonContainerRight");
-        balloonOutline = GameObject.Find("OutlineBest");
-        prize = GameObject.Find("Prize2");
-        rewardContainerLeft = GameObject.Find("RewardContainerLeft");
-        rewardContainerRight = GameObject.Find("RewardContainerRight");
-        red = stimLeft.GetComponent<Renderer>().material.color;
-        gray = new Color(0.5f, 0.5f, 0.5f);
-        reward = GameObject.Find("Reward");
-
-        fbInitLocalScale = fb.transform.localScale;
-        trialStimInitLocalScale = stimLeft.transform.localScale;
-
-        initButton.SetActive(false);
-        fb.SetActive(false);
-        goCue.SetActive(false);
-        clickMarker.SetActive(false);
-        balloonOutline.SetActive(false);
-        prize.SetActive(false);
-        reward.SetActive(false);
-
-        //cam = Camera.main.GetComponent<Camera>();
+        if (Choice == "left")
+        {
+            SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesLeft, CurrentTrial.PulseSizeLeft);
+            RewardPulses_Block += CurrentTrial.NumPulsesLeft;
+        }
+        else
+        {
+            SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesRight, CurrentTrial.PulseSizeRight);
+            RewardPulses_Block += CurrentTrial.NumPulsesRight;
+        }
     }
 
-    // method to place balloon 
-    void placeBalloon(GameObject balloon)
+    void ActivateStimAndRewards()
     {
-        // set the position of the balloon 1z in front of the camera
-        balloon.transform.position = new Vector3(balloon.transform.position.x, balloon.transform.position.y, 1f);
-
+        MiddleBarrier.SetActive(true);
+        StimRight.SetActive(true);
+        StimLeft.SetActive(true);
+        RewardContainerLeft.SetActive(true);
+        RewardContainerRight.SetActive(true);
     }
 
-    void createBalloons(int numBalloons, Vector3 scaleUpAmount, int clickPerOutline, Vector3 pos, GameObject container)
+    void DisableAllGameobjects()
+    {
+        StartButton.SetActive(false);
+        StimLeft.SetActive(false);
+        StimRight.SetActive(false);
+        BalloonOutline.SetActive(false);
+    }
+
+    void LoadVariables()
+    {
+        if (StartButton == null)
+            CreateStartButton();
+
+        StimLeft = Instantiate(StimLeftPrefab, StimLeftPrefab.transform.position, StimLeftPrefab.transform.rotation);
+        StimLeft.name = "StimLeft";
+
+        StimRight = Instantiate(StimRightPrefab, StimRightPrefab.transform.position, StimRightPrefab.transform.rotation);
+        StimRight.name = "StimRight";
+
+        Reward = Instantiate(RewardPrefab, RewardPrefab.transform.position, RewardPrefab.transform.rotation);
+        Reward.name = "Reward";
+        Reward.GetComponent<Renderer>().material.color = Color.green; //turn token color to grey so they dont look collected yet. 
+
+        BalloonOutline = Instantiate(OutlinePrefab, OutlinePrefab.transform.position, OutlinePrefab.transform.rotation);
+        BalloonOutline.name = "Outline";
+        BalloonOutline.transform.localScale = new Vector3(10, 0, 10);
+        BalloonOutline.GetComponent<Renderer>().material.color = OffWhiteOutlineColor;
+
+        MiddleBarrier = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        MiddleBarrier.name = "MiddleBarrier";
+        MiddleBarrier.transform.position = new Vector3(0, .6f, 0);
+        MiddleBarrier.transform.localScale = new Vector3(.0125f, 2.2385f, .001f);
+        Color borderColor = GameObject.Find("TopBorder").GetComponent<Renderer>().material.color;
+        MiddleBarrier.GetComponent<Renderer>().material.color = borderColor;
+
+        BalloonContainerLeft = new GameObject("BalloonContainerLeft");
+        BalloonContainerLeft.transform.position = new Vector3(-1, .15f, .5f);
+        BalloonContainerLeft.transform.localScale = new Vector3(1, 1, 1);
+
+        BalloonContainerRight = new GameObject("BalloonContainerRight");
+        BalloonContainerRight.transform.position = new Vector3(1, .15f, .5f);
+        BalloonContainerRight.transform.localScale = new Vector3(1, 1, 1);
+
+        RewardContainerLeft = new GameObject("RewardContainerLeft");
+        RewardContainerLeft.transform.position = new Vector3(-.85f, 1.6f, 0);
+        RewardContainerLeft.transform.localScale = new Vector3(1, 1, 1);
+
+        RewardContainerRight = new GameObject("RewardContainerRight");
+        RewardContainerRight.transform.position = new Vector3(.85f, 1.6f, 0);
+        RewardContainerRight.transform.localScale = new Vector3(1, 1, 1);
+        
+        Red = StimLeft.GetComponent<Renderer>().material.color;
+        TrialStimInitLocalScale = StimLeft.transform.localScale;
+
+        //Wrap Left side objects in container and Center to left side:
+        GameObject leftWrapper = new GameObject();
+        leftWrapper.name = "LeftWrapper";
+        List<GameObject> leftList = new List<GameObject>() { BalloonContainerLeft, RewardContainerLeft, StimLeft };
+        SetParents(leftWrapper, leftList);
+        leftWrapper.transform.position = new Vector3(-.16f, 0, 0); //Centering on left half of screen. 
+
+        //Wrap Right side objects in container and Center to right side:
+        GameObject rightWrapper = new GameObject();
+        rightWrapper.name = "RightWrapper";
+        List<GameObject> rightList = new List<GameObject>() { BalloonContainerRight, RewardContainerRight, StimRight };
+        SetParents(rightWrapper, rightList);
+        rightWrapper.transform.position = new Vector3(.16f, 0, 0); //Centering on right half of screen. 
+
+        LeftContainerOriginalPosition = BalloonContainerLeft.transform.position;
+        RightContainerOriginalPosition = BalloonContainerRight.transform.position;
+        LeftRewardContainerOriginalPosition = RewardContainerLeft.transform.position;
+        RightRewardContainerOriginalPosition = RewardContainerRight.transform.position;
+        LeftStimOriginalPosition = StimLeft.transform.position;
+        RightStimOriginalPosition = StimRight.transform.position;
+
+        //now that positions are set, remove parents so the balloon is clickable. 
+        RemoveParents(leftWrapper, leftList);
+        RemoveParents(rightWrapper, rightList);
+
+        MiddleBarrier.SetActive(false);
+        StartButton.SetActive(false);
+        BalloonOutline.SetActive(false);
+        Reward.SetActive(false);
+
+        VariablesLoaded = true;
+    }
+
+    void CreateBalloonOutlines(int numBalloons, Vector3 ScaleUpAmount, int clickPerOutline, Vector3 pos, GameObject container)
     {
         for (int i = clickPerOutline; i <= numBalloons; i += clickPerOutline)
         {
-            // get vector from camera to pos 
-            Vector3 vectorToPos = pos - Camera.main.transform.position;
-            // get position in distnce 10 from pos along vectorToPos
-            Vector3 posInDist = vectorToPos.normalized;
-
-            GameObject balloonClone = Instantiate(balloonOutline, pos, balloonOutline.transform.rotation);
-            balloonClone.transform.parent = container.transform;
-            balloonClone.name = "Clone" + (i + 1);
-            balloonClone.transform.localScale += (i) * scaleUpAmount;
-            balloonClone.GetComponent<Renderer>().material.color = red;
-
-            balloonClone.SetActive(true);
+            GameObject outline = Instantiate(BalloonOutline, pos, BalloonOutline.transform.rotation);
+            outline.transform.parent = container.transform;
+            outline.name = "Outline" + (i + 1);
+            outline.transform.localScale += (i) * ScaleUpAmount;
+            outline.SetActive(true);
         }
     }
 
-    void DestroyContainerChild(GameObject container)
+    void CreateRewards(int NumRewards, Vector3 pos, GameObject container)
+    {
+        float width = Reward.GetComponent<Renderer>().bounds.size.x - .035f; //Get Reward width! (-.35f cuz need to be closer together)
+        pos -= new Vector3(((NumRewards - 1) * (width / 2)), 0, 0);
+        for (int i = 0; i < NumRewards; i++)
+        {
+            GameObject RewardClone = Instantiate(Reward, pos, Reward.transform.rotation, container.transform);
+            RewardClone.transform.Translate(new Vector3(i * width, 0, 0), Space.World);
+            RewardClone.name = "Reward" + Choice + (i + 1);
+            RewardClone.SetActive(true);
+        }
+    }
+
+    void DestroyChildren(GameObject container)
     {
         var children = new List<GameObject>();
-        foreach (Transform child in container.transform) children.Add(child.gameObject);
-        children.ForEach(child => Destroy(child));
+        foreach (Transform child in container.transform)
+            children.Add(child.gameObject);
+        foreach (GameObject child in children)
+            Destroy(child);
     }
 
     void ChangeColor(GameObject obj, Color color)
@@ -443,36 +598,92 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
     }
 
-    // // method to create numOfRewards rewards
-    void createRewards(int numOfRewards, Vector3 pos, GameObject container)
+    void AddAudioClips()
     {
-        // get width of reward object
-        float width = reward.GetComponent<Renderer>().bounds.size.x;
-        pos -= new Vector3(((numOfRewards - 1) * (width / 2)), 0, 0);
-        for (int i = 0; i < numOfRewards; i++)
-        {
-            GameObject rewardClone = Instantiate(reward, pos, reward.transform.rotation, container.transform);
-            rewardClone.transform.Translate(new Vector3(i * width, 0, 0), Space.World);
-            rewardClone.name = "Reward" + leftRightChoice + (i + 1);
-            //rewardClone.transform.parent = container.transform;
-            rewardClone.SetActive(true);
-        }
+        AudioFBController.AddClip("SelectionMade", BalloonChosen_Audio);
+        AudioFBController.AddClip("Inflate", InflateBalloon_Audio);
+        AudioFBController.AddClip("InflateAndPop", InflateAndPop_Audio);
     }
 
+    void SetTrialSummaryString()
+    {
+        TrialSummaryString = "\n" +
+                               "Trial #" + (TrialCount_InBlock + 1) +
+                               "\n" +
+                               "\nClicksNeededLeft: " + CurrentTrial.NumClicksLeft +
+                               "\nClicksNeededRight: " + CurrentTrial.NumClicksRight +
+                               "\nNumCoinsLeft: " + CurrentTrial.NumCoinsLeft +
+                               "\nNumCoinsRight: " + CurrentTrial.NumCoinsRight +
+                               "\nClicksPerOutline: " + CurrentTrial.ClicksPerOutline;
+    }
 
-    //public override void PopulateCurrentTrialVariables()
-    //{
-    //	//CurrentTrialDef = (EffortControl_TrialDef)TrialDefs[TrialCount_InBlock];
-    //	//CurrentTrialDef.NumOfClicksLeft = CurrentTrialDef.NumOfClicksLeft;
-    //	//CurrentTrialDef.NumOfClicksRight = CurrentTrialDef.NumOfClicksRight;
-    //	//CurrentTrialDef.NumOfCoinsLeft = CurrentTrialDef.NumOfCoinsLeft;
-    //	//CurrentTrialDef.NumOfCoinsRight = CurrentTrialDef.NumOfCoinsRight;
-    //	//CurrentTrialDef.ClicksPerOutline = CurrentTrialDef.ClicksPerOutline;
-    //}
- //   protected override void DefineTrialStims()
-   // {
-        //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
-        //destroyed at TrialLevel_Finish
-    //}
-    
+    void LogTrialData()
+    {
+        TrialData.AddDatum("ClicksNeeded", () => ClicksNeeded);
+        TrialData.AddDatum("ClicksNeededLeft", () => CurrentTrial.NumClicksLeft);
+        TrialData.AddDatum("ClicksNeededRight", () => CurrentTrial.NumClicksRight);
+        TrialData.AddDatum("NumCoinsLeft", () => CurrentTrial.NumCoinsLeft);
+        TrialData.AddDatum("NumCoinsRight", () => CurrentTrial.NumCoinsRight);
+        TrialData.AddDatum("ChosenSide", () => Choice.ToUpper());
+        TrialData.AddDatum("TimeTakenToChoose", () => ChooseDuration);
+        TrialData.AddDatum("AverageClickTimes", () => AvgClickTime);
+        TrialData.AddDatum("ClicksPerOutline", () => CurrentTrial.ClicksPerOutline);
+    }
+
+    void LogFrameData()
+    {
+        FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
+        FrameData.AddDatum("StartButton", () => StartButton.activeSelf);
+        FrameData.AddDatum("StimLeft", () => StimLeft.activeSelf);
+        FrameData.AddDatum("StimRight", () => StimRight.activeSelf);
+    }
+
+    void CreateStartButton()
+    {
+        string contextPath = GetContextNestedFilePath("StartButtonImage.png");
+        Texture2D tex = LoadPNG(contextPath);
+        Rect rect = new Rect(new Vector2(0, 0), new Vector2(1, 1));
+
+        Vector3 buttonPosition = Vector3.zero;
+        Vector3 buttonScale = Vector3.zero;
+        string TaskName = "EffortControl";
+        if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
+        {
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+                buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+            else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
+
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+                buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+            else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
+        }
+        else Debug.Log("[ERROR] TaskDef is not in config folder");
+
+        GameObject startButton = new GameObject("StartButton");
+        SpriteRenderer spriteRend = startButton.AddComponent<SpriteRenderer>();
+        spriteRend.sprite = Sprite.Create(tex, new Rect(rect.x, rect.y, tex.width, tex.height), new Vector2(.5f, .5f), 100f);
+        startButton.AddComponent<BoxCollider>();
+        startButton.transform.localScale = buttonScale;
+        startButton.transform.position = buttonPosition;
+        StartButton = startButton;
+    }
+
+    public string GetContextNestedFilePath(string contextName)
+    {
+        string backupContextName = "LinearDark";
+        string contextPath = "";
+
+        string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
+
+        if (filePaths.Length >= 1)
+            contextPath = filePaths[0];
+        else
+        {
+            contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0]; //Use Default LinearDark if can't find file.
+            Debug.Log($"Context File Path Not Found. Defaulting to {backupContextName}.");
+        }
+
+        return contextPath;
+    }
+
 }

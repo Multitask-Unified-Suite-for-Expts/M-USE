@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -30,64 +31,49 @@ namespace ContinuousRecognition_Namespace
 
     public class ContinuousRecognition_BlockDef : BlockDef
     {
-        //----Inherited from BlockDef----//
+        //INHERITED FROM BLOCKDEF:
         //public List<TrialDef> TrialDefs;
         //public int BlockCount;
         //public int? TotalTokensNum;
         //public int? MinTrials, MaxTrials;
 
+        //FROM BLOCK CONFIG:
         public int[] BlockStimIndices;
         public int[] NumObjectsMinMax;
         public int[] InitialStimRatio;
+        public float[] X_Locations;
+        public float[] Y_Locations;
+        public float[] X_FbLocations;
+        public float[] Y_FbLocations;
+        public int NumTokenBar, TrialCount, NumRewardPulses, PulseSize, RewardMag;
+        public string BlockName, ContextName, ShadowType;
+        public bool IsHuman, FindAllStim, StimFacingCamera, UseStarfield, ManuallySpecifyLocation;
 
         public List<int> PC_Stim;
         public List<int> PNC_Stim;
         public List<int> New_Stim;
         public List<int> Unseen_Stim;
         public List<int> TrialStimIndices;
-
         public int MaxNumTrials;
         public int MaxNumStim;
-
-        public Vector3[] BlockStimLocations; //from Config if user specifies!!!
-        public Vector3[] StimLocations; //calculated below in case they don't specify locations!
+        public Vector3[] BlockStimLocations; //Value comes from Block Config if you specify. 
+        public Vector3[] StimLocations; //Value calculated below. Used if you don't specify locations.
         public Vector3[] BlockFeedbackLocations;
-        public float[] X_Locations;
-        public float[] Y_Locations;
-        public float[] X_FbLocations;
-        public float[] Y_FbLocations;
-
-        public int NumTokenBar;
-
-        public int TrialCount, NumRewardPulses, PulseSize, RewardMag;
-
-        public float DisplayStimsDuration, ChooseStimDuration, TouchFeedbackDuration, TrialEndDuration,
-            DisplayResultDuration, TokenRevealDuration, TokenUpdateDuration;
-
-        public string BlockName;
-        public string ContextName;
-
-        public bool IsHuman;
-        public bool ManuallySpecifyLocation;
-        public bool UseStarfield;
-        public bool FindAllStim;
-        public bool StimFacingCamera;
-
-        public string ShadowType;
 
 
         public override void GenerateTrialDefsFromBlockDef()
         {
             MaxNumStim = NumObjectsMinMax[1];
-            if (FindAllStim) MaxNumTrials = CalculateMaxNumTrials(MaxNumStim);
-            else MaxNumTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
+            if (FindAllStim)
+                MaxNumTrials = CalculateMaxNumTrials(MaxNumStim);
+            else
+                MaxNumTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
 
             PC_Stim = new List<int>();
             PNC_Stim = new List<int>();
             New_Stim = new List<int>();
             Unseen_Stim = new List<int>();
             TrialStimIndices = new List<int>();
-
 
             //Calculate BlockStimLocations:
             StimLocations = new Vector3[X_Locations.Length * Y_Locations.Length];
@@ -120,10 +106,9 @@ namespace ContinuousRecognition_Namespace
                 }
             }
 
-
             TrialDefs = new List<ContinuousRecognition_TrialDef>().ConvertAll(x=>(TrialDef)x);
 
-            int numTrialStims = NumObjectsMinMax[0]; //incremented at end
+            int numTrialStims = NumObjectsMinMax[0]; //Starts as first num in array and increments by at end of loop for each trial
 
             for (int trialIndex = 0; trialIndex < MaxNumTrials; trialIndex++)
             {   
@@ -159,14 +144,7 @@ namespace ContinuousRecognition_Namespace
                 trial.NumTrialStims = numTrialStims;
                 trial.MaxNumTrials = MaxNumTrials;
                 trial.MaxNumStim = MaxNumStim;
-                trial.DisplayStimsDuration = DisplayStimsDuration;
-                trial.ChooseStimDuration = ChooseStimDuration;
-                trial.DisplayResultDuration = DisplayResultDuration;
-                trial.TrialEndDuration = TrialEndDuration;
-                trial.TouchFeedbackDuration = TouchFeedbackDuration;
                 trial.ContextName = ContextName;
-                trial.TokenRevealDuration = TokenRevealDuration;
-                trial.TokenUpdateDuration = TokenUpdateDuration;
                 trial.NumRewardPulses = NumRewardPulses;
                 trial.RewardMag = RewardMag;
                 trial.PulseSize = PulseSize;
@@ -183,19 +161,19 @@ namespace ContinuousRecognition_Namespace
             }
         }
 
-        private string CalcPercentagePC()
+        string CalcPercentagePC()
         {
             float[] all = GetStimPercentages();
             float multiplied = all[0] * 100;
             return multiplied.ToString() + "%";
         }
 
-        private int CalculateMaxNumTrials(int maxNumStim)
+        int CalculateMaxNumTrials(int maxNumStim)
         {
             return maxNumStim + CalculateNumRemaining_EOT(maxNumStim);
         }
 
-        private int CalculateNumRemaining_EOT(int totalTrialStim)
+        int CalculateNumRemaining_EOT(int totalTrialStim)
         {
             int NumRemaining_BEG = 0;
             int NumRemaining_END = 0;
@@ -209,8 +187,7 @@ namespace ContinuousRecognition_Namespace
             return NumRemaining_END;
         }
 
-       
-        private int GetNumNewStim_Trial(int totalTrialStim)
+        int GetNumNewStim_Trial(int totalTrialStim)
         {
             float[] stimPercentages = GetStimPercentages();
 
@@ -221,21 +198,33 @@ namespace ContinuousRecognition_Namespace
             if (Num_New == 0) Num_New = 1;
             if (Num_PNC == 0) Num_PNC = 1;
 
-            int temp = 0;
+            float PC_TargetPerc = stimPercentages[0];
+            int temp = 2;
             while ((Num_PC + Num_New + Num_PNC) < totalTrialStim)
             {
-                if (temp % 3 == 0)
-                    Num_PC += 1;
-                else if (temp % 3 == 1)
-                    Num_New += 1;
+                float currentPerc = Num_PC / (Num_PC + Num_New + Num_PNC);
+                float percDiff = currentPerc - PC_TargetPerc;
+
+                float PC_AddPerc = (Num_PC + 1) / (Num_PC + 1 + Num_New + Num_PNC);
+                float PC_AddDiff = PC_AddPerc - PC_TargetPerc;
+
+                float NonPC_AddPerc = Num_PC / (Num_PC + 1 + Num_New + Num_PNC);
+                float NonPC_AddDiff = NonPC_AddPerc - PC_TargetPerc;
+
+                if (PC_AddDiff < NonPC_AddDiff)
+                    Num_PC++;
                 else
-                    Num_PC += 1;
-                temp++;
+                {
+                    if (temp % 2 == 0)
+                        Num_New++;
+                    else
+                        Num_PNC++;
+                }
             }
             return Num_New;
         }
 
-        private float[] GetStimPercentages()
+        float[] GetStimPercentages()
         {
             var ratio = InitialStimRatio;
             float sum = 0;
@@ -253,7 +242,7 @@ namespace ContinuousRecognition_Namespace
 
     public class ContinuousRecognition_TrialDef : TrialDef
     {
-
+        //INHERITED FROM TRIALDEF:
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
 
@@ -261,8 +250,6 @@ namespace ContinuousRecognition_Namespace
         public bool UseStarfield;
         public bool FindAllStim;
         public bool StimFacingCamera;
-
-        public string ShadowType;
 
         public Vector3[] TrialStimLocations;
         public Vector3[] TrialFeedbackLocations;
@@ -287,10 +274,8 @@ namespace ContinuousRecognition_Namespace
         public int RewardMag;
         public int PulseSize;
 
-        public float DisplayStimsDuration, ChooseStimDuration, TrialEndDuration, TouchFeedbackDuration, 
-            DisplayResultDuration, TokenRevealDuration, TokenUpdateDuration;
-
-        public bool IsNewStim;
+        public bool GotTrialCorrect;
+        public string ShadowType;
         public string ContextName;
 
         //Data:

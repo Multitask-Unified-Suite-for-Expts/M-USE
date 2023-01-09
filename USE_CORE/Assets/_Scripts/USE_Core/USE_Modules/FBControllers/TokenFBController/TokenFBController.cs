@@ -1,5 +1,6 @@
 using UnityEngine;
 using USE_Data;
+using System.Collections;
 
 public class TokenFBController : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class TokenFBController : MonoBehaviour
     public int tokenBoxPadding = 0;
     public int tokenBoxYOffset = 10;
     public Texture2D tokenTexture;
+
 
     // Color Constants
     private readonly Color colorCollected = Color.green;
@@ -36,16 +38,17 @@ public class TokenFBController : MonoBehaviour
     private float revealTime = 0.4f; // How long to show the tokens before animating
     private float updateTime = 0.3f; // How long each token update animation should take
     private float flashingTime = 0.5f; // How long the token bar should flash when it fills up
+    private int flashingNumBeeps = 3; //Num beeps for tokenbar flashing audio
+    private float flashBeepInterval; //Length between beeps for tokenbar flashing audio
     // Audio
     AudioFBController audioFBController;
 
     public void Init(DataController trialData, DataController frameData, AudioFBController audioFBController)
     {
-        trialData.AddDatum("TotalTokensCollected", () => numCollected);
+        trialData.AddDatum("TokenBarValue", () => numCollected);
         trialData.AddDatum("TokenChange", () => tokensChange == 0 ? null : (float?)tokensChange);
         trialData.AddDatum("NumTokenBarFull", () => numTokenBarFull);
         frameData.AddDatum("TokenAnimationPhase", () => animationPhase.ToString());
-        frameData.AddDatum("TotalTokensCollected", () => numCollected);
 
         this.audioFBController = audioFBController;
         numCollected = 0;
@@ -163,20 +166,22 @@ public class TokenFBController : MonoBehaviour
                     break;
                 case AnimationPhase.Update:
                    if (tokensChange < 0) {
-                        audioFBController.Play("NegativeUpdate");
-                    } else {
-                        audioFBController.Play("PositiveUpdate");
+                        audioFBController.Play("NegativeUpdate"); //not added
+                    }
+                    else {
+                        audioFBController.Play("PositiveUpdate"); //not added
                     }
                     numCollected += tokensChange;
                     animationPhase = AnimationPhase.None;
                     if (numCollected >= totalTokensNum)
                     {
                         animationPhase = AnimationPhase.Flashing;
+                        StartCoroutine(FlashingBeeps(flashingNumBeeps)); //NT: put here instead of flashPhase, for it to be immediate. 
                         animationEndTime += flashingTime;
                     }
                     break;
                 case AnimationPhase.Flashing:
-                    audioFBController.Play("Flashing");
+                    //audioFBController.Play("Flashing"); //flashing clip doesn't exist
                     numTokenBarFull++;
                     numCollected = 0;
                     animationPhase = AnimationPhase.None;
@@ -197,6 +202,17 @@ public class TokenFBController : MonoBehaviour
                 if (dt < flashingTime / 2) tokenBoxColor = colorFlashing1;
                 else tokenBoxColor = colorFlashing2;
                 break;
+        }
+    }
+
+    IEnumerator FlashingBeeps(int numBeeps)
+    {
+        while(numBeeps > 0)
+        {
+            audioFBController.Play("PositiveShow");
+            numBeeps--;
+            if(numBeeps > 0)
+                yield return new WaitForSeconds(flashBeepInterval);
         }
     }
 
@@ -227,6 +243,7 @@ public class TokenFBController : MonoBehaviour
     
     public TokenFBController SetPositiveShowAudioClip(AudioClip clip) {
         audioFBController.AddClip("PositiveShow", clip);
+        flashBeepInterval = clip.length;
         return this;
     }
     
@@ -266,7 +283,11 @@ public class TokenFBController : MonoBehaviour
         } else {
             numTokens = Mathf.Min(numTokens, totalTokensNum - numCollected);
         }
-        if (numTokens == 0) return;
+        if (numTokens == 0)
+        {
+            audioFBController.Play("NegativeShow"); //fixes issue where they choose wrong but no tokens in bar so doesn't make it down to play neg FB. 
+            return;
+        }
 
         animatedTokensStartPos = pos;
         // No need for horizontal padding since it does nothing
@@ -282,7 +303,8 @@ public class TokenFBController : MonoBehaviour
         // Start the animation phase state machine with the first state
         if (tokensChange < 0) {
             audioFBController.Play("NegativeShow");
-        } else {
+        }
+        else {
             audioFBController.Play("PositiveShow");
         }
         animationPhase = AnimationPhase.Show;

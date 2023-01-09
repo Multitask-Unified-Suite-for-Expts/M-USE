@@ -46,7 +46,7 @@ public class SyncBoxController
             Thread.Sleep(MsBetweenRewardPulses);
         }
         rewardFinished = true;
-        Thread.CurrentThread.Abort();
+        //Thread.CurrentThread.Abort();
     }
     void SendSonication()
     {

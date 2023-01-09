@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using UnityEngine;
@@ -20,13 +21,17 @@ namespace USE_ExperimentTemplate_Session
 {
     public class ControlLevel_Session_Template : ControlLevel
     {
+        public GameObject PauseCanvasGO;
+        public Canvas PauseCanvas;
+
         [HideInInspector] public bool TasksFinished;
 
+        protected SummaryData SummaryData;
         protected SessionData SessionData;
         private SessionDataControllers SessionDataControllers;
         private bool StoreData;
+        private bool MacMainDisplayBuild;
         [HideInInspector] public string SubjectID, SessionID, SessionDataPath, FilePrefix;
-        [HideInInspector] public int ExperimenterDisplayLayer = 11;
         
         public string TaskSelectionSceneName;
 
@@ -160,6 +165,9 @@ namespace USE_ExperimentTemplate_Session
             if (SessionSettings.SettingExists("Session", "StoreData"))
                 StoreData = (bool)SessionSettings.Get("Session", "StoreData");
 
+            if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
+                MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
+
             if (SessionSettings.SettingExists("Session", "TaskSelectionTimeout"))
                 TaskSelectionTimeout = (float)SessionSettings.Get("Session", "TaskSelectionTimeout");
 
@@ -209,6 +217,12 @@ namespace USE_ExperimentTemplate_Session
             bool taskAutomaticallySelected = false;
             setupSession.AddDefaultInitializationMethod(() =>
             {
+                PauseCanvasGO = GameObject.Find("PauseCanvas");
+                PauseCanvasGO.SetActive(false);
+
+                PauseCanvas = PauseCanvasGO.GetComponent<Canvas>();
+
+
                 SessionData.CreateFile();
                 EventCodeManager = GameObject.Find("MiscScripts").GetComponent<EventCodeManager>(); //new EventCodeManager();
                 if (SerialPortActive)
@@ -267,11 +281,12 @@ namespace USE_ExperimentTemplate_Session
                         SceneLoading = true;
                         taskName = (string)TaskMappings[iTask];
                         loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
+                        string configName = TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
                         // Unload it after memory because this loads the assets into memory but destroys the objects
                         loadScene.completed += (_) =>
                         {
                             SessionSettings.Save();
-                            SceneLoaded(taskName, true);
+                            SceneLoaded(configName, true);
                             SessionSettings.Restore();
                             SceneManager.UnloadSceneAsync(taskName);
                             SceneLoading = false;
@@ -288,6 +303,8 @@ namespace USE_ExperimentTemplate_Session
                             if (SessionSettings.SettingExists("SyncBoxConfig", "SyncBoxInitCommands"))
                                 SyncBoxController.SendCommand((List<string>)SessionSettings.Get("SyncBoxConfig", "syncBoxInitCommands"));
                     SessionSettings.Save();
+                    GameObject initCam = GameObject.Find("InitCamera");
+                    initCam.SetActive(false);
                 });
 
             //bool tasksFinished = false;
@@ -400,7 +417,6 @@ namespace USE_ExperimentTemplate_Session
                 {
                     SceneLoaded(selectedConfigName, false);
                     CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigName == selectedConfigName);
-                    CurrentTask.ExperimenterDisplayLayer = ExperimenterDisplayLayer;
                 };
             });
             loadTask.SpecifyTermination(() => !SceneLoading, runTask, () =>
@@ -409,6 +425,7 @@ namespace USE_ExperimentTemplate_Session
                 CameraMirrorTexture.Release();
                 SessionCam.gameObject.SetActive(false);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
+                CurrentTask.TrialLevel.TaskLevel = CurrentTask;
                 ExperimenterDisplayController.ResetTask(CurrentTask, CurrentTask.TrialLevel);
             });
 
@@ -422,6 +439,9 @@ namespace USE_ExperimentTemplate_Session
                 mainCameraCopy.texture = CameraMirrorTexture;
                 // mirrorCamera.CopyFrom(CurrentTask.TaskCam);
                 // mirrorCamera.cullingMask = 0;
+
+                PauseCanvas.renderMode = RenderMode.ScreenSpaceCamera;
+                PauseCanvas.worldCamera = CurrentTask.TaskCam;
             });
 
             if (EventCodesActive)
@@ -431,6 +451,7 @@ namespace USE_ExperimentTemplate_Session
             }
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
             {
+                SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
                 SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
                 SessionData.AppendData();
@@ -454,6 +475,8 @@ namespace USE_ExperimentTemplate_Session
 
             SessionData.AddDatum("SelectedTaskConfigName", () => selectedConfigName);
             SessionData.AddDatum("TaskAutomaticallySelected", () => taskAutomaticallySelected);
+
+            SummaryData.Init(StoreData, SessionDataPath);
 
             void GetTaskLevelFromString<T>()
                 where T : ControlLevel_Task_Template
@@ -547,7 +570,10 @@ namespace USE_ExperimentTemplate_Session
         void SceneLoaded(string configName, bool verifyOnly)
         {
             string taskName = (string)TaskMappings[configName];
+            Debug.Log("configName: " + configName);
+            Debug.Log("taskName: " + taskName);
             var methodInfo = GetType().GetMethod(nameof(this.PrepareTaskLevel));
+            
             Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
             MethodInfo prepareTaskLevel = methodInfo.MakeGenericMethod(new Type[] { taskType });
             prepareTaskLevel.Invoke(this, new object[] { configName, verifyOnly });

@@ -2,7 +2,9 @@ using System;
 using ConfigDynamicUI;
 using System.Collections.Generic;
 using System.IO;
+using EffortControl_Namespace;
 using UnityEngine;
+using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using USE_Settings;
 using USE_States;
@@ -20,6 +22,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     public Vector3 buttonPosition, buttonScale;
     private Transform playerViewParent; // Helps set things onto the player view in the experimenter display
 
+    //block end variables
+    public List<int> runningAcc;
+    public int MinTrials, MaxTrials;
+    
     //configui variables
     [HideInInspector]
     public ConfigNumber tokenRevealDuration, tokenUpdateDuration, trialEndDuration, initTrialDuration, baselineDuration, 
@@ -69,6 +75,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         });
         initTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton),
             displaySample, () => {
+                Input.ResetInputAxes();
                 startButton.SetActive(false);
                 TokenFBController.enabled = true;
                 RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
@@ -84,6 +91,15 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
               stateAfterDelay = displaySample;
               delayDuration = baselineDuration.value;
           });
+        
+        // displaySample.AddInitializationMethod(() =>
+        // {
+        //     for (int iTarg = 0; iTarg < targetStim.stimDefs.Count; iTarg++)
+        //     {
+        //         targetStim.stimDefs[iTarg].StimLocation = CurrentTrialDef.TargetSampleLocation[iTarg];
+        //         targetStim.stimDefs[iTarg].ToggleVisibility(true);
+        //     }
+        // });
         
         // Show the target/sample by itself for some time
         displaySample.AddTimer(() => displaySampleDuration.value, delay, () =>
@@ -124,10 +140,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             if (correct)
             {
                 HaloFBController.ShowPositive(selected);
+                runningAcc.Add(1);
             }
             else
             {
                 HaloFBController.ShowNegative(selected);
+                runningAcc.Add(0);
             };
         });
         selectionFeedback.AddTimer(() => selectionFbDuration.value, tokenFeedback, () => 
@@ -174,29 +192,33 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
 
-
-        /*sampleStims = new StimGroup("SampleStims", ExternalStims, CurrentTrialDef.TargetIndices);
-        sampleStims.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
-        sampleStims.SetLocations(CurrentTrialDef.TargetSampleLocations);
-        TrialStims.Add(sampleStims);*/
-
         searchStims = new StimGroup("SearchStims", ExternalStims, CurrentTrialDef.SearchStimIndices);
         searchStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
         searchStims.SetLocations(CurrentTrialDef.SearchStimLocations);
-        
-        for (int i = 0; i < CurrentTrialDef.SearchStimIndices.Length; i++)
+
+        List<StimDef> rewardedStimdefs = new List<StimDef>();
+
+        targetStim = new StimGroup("TargetStim", GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
+        for (int iStim = 0; iStim < CurrentTrialDef.SearchStimIndices.Length; iStim++)
         {
-            WorkingMemory_StimDef sd = (WorkingMemory_StimDef)searchStims.stimDefs[i];
-            sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.SearchStimTokenReward[i]);
+            WorkingMemory_StimDef sd = (WorkingMemory_StimDef)searchStims.stimDefs[iStim];
+            sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.SearchStimTokenReward[iStim]);
             if (sd.StimTrialRewardMag > 0)
             {
-                sd.IsTarget = true;//Holds true if the target stim receives non-zero reward
-                targetStim = new StimGroup("TargetStim", ExternalStims, new int[] {CurrentTrialDef.SearchStimIndices[i]});
-                targetStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
-                targetStim.SetLocations(CurrentTrialDef.TargetSampleLocation);
+                // StimDef tempsd = sd.CopyStimDef();
+                WorkingMemory_StimDef newTarg = sd.CopyStimDef<WorkingMemory_StimDef>() as WorkingMemory_StimDef;
+                targetStim.AddStims(newTarg);
+                newTarg.IsTarget = true;//Holds true if the target stim receives non-zero reward
+                // targetStim = new StimGroup("TargetStim", ExternalStims, new int[] {CurrentTrialDef.SearchStimIndices[iStim]});
+                // targetStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
+                // targetStim.SetLocations(CurrentTrialDef.TargetSampleLocation);
             } 
             else sd.IsTarget = false;
         }
+        
+        // for (int iT)
+        targetStim.SetLocations(CurrentTrialDef.TargetSampleLocation);
+        targetStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
         TrialStims.Add(searchStims);
         TrialStims.Add(targetStim);
 
@@ -204,6 +226,13 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         postSampleDistractorStims.SetVisibilityOnOffStates(GetStateFromName("DisplayPostSampleDistractors"), GetStateFromName("DisplayPostSampleDistractors"));
         postSampleDistractorStims.SetLocations(CurrentTrialDef.PostSampleDistractorLocations);
         TrialStims.Add(postSampleDistractorStims);
+    }
+    protected override bool CheckBlockEnd()
+    {
+        TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
+        return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
+            CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, MinTrials,
+            TrialDefs.Count);
     }
 
     public void loadVariables()

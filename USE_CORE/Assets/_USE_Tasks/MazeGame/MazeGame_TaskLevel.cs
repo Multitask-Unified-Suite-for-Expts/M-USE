@@ -45,17 +45,17 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             SessionSettings.ImportSettings_SingleTypeArray<Maze>("MazeDefs", mazeKeyFilePath);
             MazeDefs = (MazeDef[])SessionSettings.Get("MazeDefs");
             Debug.Log("MAZE DEF LENGTH " + MazeDefs.Length);
+            
             MazeDims = new int[MazeDefs.Length];
             MazeNumSquares = new int[MazeDefs.Length];
             MazeNumTurns = new int[MazeDefs.Length];
+            Debug.Log("MAZE DEF LENGTH " + MazeDefs.Length);
             for (int iMaze = 0; iMaze < MazeDefs.Length; iMaze++)
             {
                 MazeDims[iMaze] = MazeDefs[iMaze].mTotalSquares;
                 MazeNumSquares[iMaze] = MazeDefs[iMaze].mNumSquares;
                 MazeNumTurns[iMaze] = MazeDefs[iMaze].mNumTurns;
             }
-            
-            
         });
 
         RunBlock.AddInitializationMethod(() =>

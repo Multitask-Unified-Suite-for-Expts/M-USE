@@ -62,6 +62,7 @@ namespace HiddenMaze
         public int mNumSquares;
         public int mNumTurns;
         public int mDims;
+        public string mName;
         public Maze(Configs configs, List<Coords> path, Coords start, Coords finish) 
         {
             this.mConfigs = configs;

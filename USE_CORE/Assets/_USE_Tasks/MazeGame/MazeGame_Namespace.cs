@@ -150,6 +150,8 @@ namespace MazeGame_Namespace
         public int mNumSquares;
         public int mNumTurns;
         public int mTotalSquares;
+        public string mName;
+        public int mDims;
         public string fileName;
     }
 }

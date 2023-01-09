@@ -315,7 +315,7 @@ namespace USE_ExperimentTemplate_Session
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
-                RenderSettings.skybox = ControlLevel_Trial_Template.CreateSkybox(ContextExternalFilePath + "/" + ContextName + ".png");
+                RenderSettings.skybox = ControlLevel_Trial_Template.CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
                 SessionSettings.Restore();
                 selectedConfigName = null;
 

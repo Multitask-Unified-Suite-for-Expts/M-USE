@@ -238,22 +238,28 @@ namespace USE_ExperimentTemplate_Task
             //Setup data management
             TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
             FilePrefix = FilePrefix + "_" + ConfigName;
-            BlockData = SessionDataControllers.InstantiateBlockData(StoreData, ConfigName,
-                TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
+            BlockData = (BlockData) SessionDataControllers.InstantiateDataController<BlockData>("BlockData", ConfigName,
+                StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
+                //InstantiateBlockData(StoreData, ConfigName,
+                //TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
             BlockData.taskLevel = this;
             BlockData.fileName = FilePrefix + "__BlockData";
             BlockData.InitDataController();
 
-            TrialData = SessionDataControllers.InstantiateTrialData(StoreData, ConfigName,
-                TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
+            TrialData = (TrialData) SessionDataControllers.InstantiateDataController<TrialData>("TrialData", ConfigName,
+                StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
+                //SessionDataControllers.InstantiateTrialData(StoreData, ConfigName,
+                //TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
             TrialData.taskLevel = this;
             TrialData.trialLevel = TrialLevel;
             TrialLevel.TrialData = TrialData;
             TrialData.fileName = FilePrefix + "__TrialData";
             TrialData.InitDataController();
 
-            FrameData = SessionDataControllers.InstantiateFrameData(StoreData, ConfigName,
-                TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
+            FrameData = (FrameData) SessionDataControllers.InstantiateDataController<FrameData>("FrameData", ConfigName,
+                StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
+            //SessionDataControllers.InstantiateFrameData(StoreData, ConfigName,
+              //  TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
             FrameData.taskLevel = this;
             FrameData.trialLevel = TrialLevel;
             TrialLevel.FrameData = FrameData;

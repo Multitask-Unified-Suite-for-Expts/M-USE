@@ -59,6 +59,29 @@ namespace USE_ExperimentTemplate_Data
         }
     }
 
+    public class SerialSentData : DataController
+    {
+        public ControlLevel_Session_Template sessionLevel;
+        public SerialPortThreaded sc;
+
+        public override void DefineDataController()
+        {
+            AddDatum("FrameReceived\tFrameStart\tSystemTimestamp\tMsWait\tMessage",
+                () => sc.BufferToString("received"));
+        }
+    }
+    public class SerialRecvData : DataController
+    {
+        public ControlLevel_Session_Template sessionLevel;
+        public SerialPortThreaded sc;
+
+        public override void DefineDataController()
+        {
+            AddDatum("FrameSent\tFrameStart\tSystemTimestamp\tMsWait\tMessage", 
+                () => sc.BufferToString("sent"));
+        }
+    }
+
     public class BlockData : DataController
     {
         public ControlLevel_Task_Template taskLevel;
@@ -125,9 +148,15 @@ namespace USE_ExperimentTemplate_Data
             DataContainer = cont;
         }
 
-        public DataController InstantiateDataController(string str, bool storeData, string path)
+        public DataController InstantiateDataController<T>(string dataControllerName, bool storeData, string path) where T: DataController
         {
-            DataController dc = AddContainer(str).AddComponent<DataController>();
+            T dc = AddContainer(dataControllerName).AddComponent<T>();
+            SpecifyParameters(dc, storeData, path);
+            return dc;
+        }
+        public DataController InstantiateDataController<T>(string dataControllerName, string taskName, bool storeData, string path) where T: DataController
+        {
+            T dc = AddContainer(dataControllerName + "_" + taskName).AddComponent<T>();
             SpecifyParameters(dc, storeData, path);
             return dc;
         }
@@ -138,6 +167,10 @@ namespace USE_ExperimentTemplate_Data
             SpecifyParameters(dc, storeData, path);
             return dc;
         }
+
+        // public SerialSentData InstantiateSerialSentData(bool storeData, string path)
+        // {
+        // }
 
         public BlockData InstantiateBlockData(bool storeData, string taskName, string path)
         {

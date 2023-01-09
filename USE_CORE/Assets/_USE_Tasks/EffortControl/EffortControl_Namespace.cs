@@ -41,10 +41,6 @@ namespace EffortControl_Namespace
         public int PulseSizeLeft;
         public int PulseSizeRight;
         public int ClicksPerOutline;
-        public float InitDelayDuration;
-        public float InflateDuration;
-        public float ItiDuration;
-        public float FeedbackDelayDuration;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -61,13 +57,8 @@ namespace EffortControl_Namespace
                 trial.NumPulsesRight = NumPulsesRight;
                 trial.PulseSizeLeft = PulseSizeLeft;
                 trial.PulseSizeRight = PulseSizeRight;
-                trial.InitDelayDuration = InitDelayDuration;
-                trial.InflateDuration = InflateDuration;
-                trial.ItiDuration = ItiDuration;
-                trial.FeedbackDelayDuration = FeedbackDelayDuration;
                 TrialDefs.Add(trial);
             }
-
         }
     }
 
@@ -82,10 +73,6 @@ namespace EffortControl_Namespace
         public int PulseSizeLeft;
         public int PulseSizeRight;
         public int ClicksPerOutline;
-        public float InitDelayDuration;
-        public float InflateDuration;
-        public float ItiDuration;
-        public float FeedbackDelayDuration;
         // public float[] TouchOnOffTimeRange;
         // public float InitialChoiceMinDuration;
         // public float StarttoTapDispDelay;

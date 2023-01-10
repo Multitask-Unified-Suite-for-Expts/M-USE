@@ -59,6 +59,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     int ClicksNeeded; //becomes left/right num clicks once they make selection. 
     int ClickCount;
     float PopAudioStartTime;
+    float PopClipDuration;
     string Choice;
     bool AddTokenAudioPlayed;
     bool ObjectsCreated;
@@ -96,10 +97,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         State ChooseBalloon = new State("ChooseBalloon");
         State CenterSelection = new State("CenterSelection");
         State InflateBalloon = new State("InflateBalloon");
+        State PopBalloon = new State("PopBalloon");
         State Feedback = new State("Feedback");
-        State FeedbackDelay = new State("FeedbackDelay");
         State ITI = new State("ITI");
-        AddActiveStates(new List<State> { InitTrial, ChooseBalloon, CenterSelection, InflateBalloon, Feedback, FeedbackDelay, ITI });
+        AddActiveStates(new List<State> { InitTrial, ChooseBalloon, CenterSelection, InflateBalloon, PopBalloon, Feedback, ITI });
 
         SelectionHandler<EffortControl_StimDef> mouseHandler = new SelectionHandler<EffortControl_StimDef>();
 
@@ -230,7 +231,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 RewardContainerRight.SetActive(false);
             
             ScalePerInflation_Y = (MaxInflation_Y - TrialStim.transform.localScale.y) / (Choice == "left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
-            //DeactivateChildren(Choice == "left" ? BalloonContainerLeft : BalloonContainerRight); //Removes outlines if I want it!
+            //DeactivateChildren(Choice == "left" ? BalloonContainerLeft : BalloonContainerRight); //Removes outlines if I ever want it!
 
             TokenFBController.SetTotalTokensNum(Choice == "left" ? currentTrial.NumCoinsLeft : currentTrial.NumCoinsRight);
             TokenFBController.enabled = true;
@@ -285,21 +286,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     mouseHandler.Start();
             }
         });
-        InflateBalloon.AddTimer(() => inflateDuration.value, FeedbackDelay);
-        InflateBalloon.SpecifyTermination(() => Response == 1, FeedbackDelay);
-        InflateBalloon.AddDefaultTerminationMethod(() =>
-        {
-            if (Choice == "left")
-                DestroyChildren(BalloonContainerLeft);
-            else
-                DestroyChildren(BalloonContainerRight);
-        });
+        InflateBalloon.AddTimer(() => inflateDuration.value, PopBalloon);
+        InflateBalloon.SpecifyTermination(() => Response == 1, PopBalloon);
+        InflateBalloon.AddDefaultTerminationMethod(() => DestroyChildren(Choice == "left" ? BalloonContainerLeft : BalloonContainerRight));
 
-        //Feedback Delay state -------------------------------------------------------------------------------------------------------
-        FeedbackDelay.SpecifyTermination(() => Time.time - PopAudioStartTime >= (AudioFBController.GetClip("InflateAndPop").length *.75f), Feedback, () =>
-        {
-            TrialStim.SetActive(false);
-        });
+        //PopBalloon state -------------------------------------------------------------------------------------------------------
+        PopBalloon.AddTimer(() => PopClipDuration - PopAudioStartTime, Feedback, () => TrialStim.SetActive(false));
+
         //Feedback state -------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
         {
@@ -331,11 +324,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             DestroyChildren(BalloonContainerRight);
             DestroyChildren(RewardContainerLeft);
             DestroyChildren(RewardContainerRight);
-
             ResetToOriginalPositions();
-
             currentTask.CalculateBlockSummaryString();
-
         });
         ITI.AddTimer(itiDuration.value, FinishTrial);
 
@@ -547,6 +537,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         AudioFBController.AddClip("SelectionMade", BalloonChosen_Audio);
         AudioFBController.AddClip("Inflate", InflateBalloon_Audio);
         AudioFBController.AddClip("InflateAndPop", InflateAndPop_Audio);
+
+        PopClipDuration = AudioFBController.GetClip("InflateAndPop").length * .75f; //setting for use in PopBalloon state
+
     }
 
     void SetTrialSummaryString()

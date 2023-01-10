@@ -47,47 +47,84 @@ namespace USE_ExperimentTemplate_Data
         }
     }
 
-    public class SessionData : DataController
+    public abstract class USE_Template_DataController : DataController
     {
+        public string DataControllerName;
         public ControlLevel_Session_Template sessionLevel;
+        public ControlLevel_Task_Template taskLevel;
+        public ControlLevel_Trial_Template trialLevel;
 
         public override void DefineDataController()
         {
+            DefineUSETemplateDataController();
+        }
+
+        public abstract void DefineUSETemplateDataController();
+
+        public void CreateNewTrialIndexedFile(int trialCount, string filePrefix)
+        {
+            fileName = filePrefix + "__" + DataControllerName + "_Trial_" + GetNiceIntegers(4, trialCount);
+            CreateFile();
+        }
+
+        public void CreateNewTaskIndexedFolder(int taskCount, string sessionDataPath, string suffix)
+        {
+            folderPath = sessionDataPath + Path.DirectorySeparatorChar + GetNiceIntegers(4, taskCount) +
+                         suffix;
+        }
+        public string GetNiceIntegers(int numDigits, int desiredNum)
+        {
+
+            if (desiredNum >= 999)
+                return desiredNum.ToString();
+            else if (desiredNum >= 99)
+                return "0" + desiredNum;
+            else if (desiredNum >= 9)
+                return "00" + desiredNum;
+            else
+                return "000" + desiredNum;
+        }
+    }
+
+    public class SessionData : USE_Template_DataController
+    {
+        public override void DefineUSETemplateDataController()
+        {
+            DataControllerName = "SessionData";
             AddDatum("SubjectID", () => sessionLevel.SubjectID);
             AddDatum("SessionID", () => sessionLevel.SessionID);
             AddStateTimingData(sessionLevel);
         }
     }
 
-    public class SerialSentData : DataController
+    public class SerialSentData : USE_Template_DataController
     {
-        public ControlLevel_Session_Template sessionLevel;
         public SerialPortThreaded sc;
 
-        public override void DefineDataController()
+        public override void DefineUSETemplateDataController()
         {
-            AddDatum("FrameReceived\tFrameStart\tSystemTimestamp\tMsWait\tMessage",
+            DataControllerName = "SerialSentData";
+            AddDatum("FrameSent\tFrameStart\tSystemTimestamp\tMsWait\tMessage",
                 () => sc.BufferToString("received"));
         }
     }
-    public class SerialRecvData : DataController
+    public class SerialRecvData : USE_Template_DataController
     {
-        public ControlLevel_Session_Template sessionLevel;
         public SerialPortThreaded sc;
 
-        public override void DefineDataController()
+        public override void DefineUSETemplateDataController()
         {
-            AddDatum("FrameSent\tFrameStart\tSystemTimestamp\tMsWait\tMessage", 
+            DataControllerName = "SerialRecvData";
+            AddDatum("FrameRecv\tFrameStart\tSystemTimestamp\tMsWait\tMessage", 
                 () => sc.BufferToString("sent"));
         }
     }
 
-    public class BlockData : DataController
+    public class BlockData : USE_Template_DataController
     {
-        public ControlLevel_Task_Template taskLevel;
-
-        public override void DefineDataController()
+        public override void DefineUSETemplateDataController()
         {
+            DataControllerName = "BlockData";
             AddDatum("SubjectID", () => taskLevel.SubjectID);
             AddDatum("SessionID", () => taskLevel.SessionID);
             AddDatum("TaskName", () => taskLevel.TaskName);
@@ -95,13 +132,11 @@ namespace USE_ExperimentTemplate_Data
         }
     }
 
-    public class TrialData : DataController
+    public class TrialData : USE_Template_DataController
     {
-        public ControlLevel_Task_Template taskLevel;
-        public ControlLevel_Trial_Template trialLevel;
-
-        public override void DefineDataController()
+        public override void DefineUSETemplateDataController()
         {
+            DataControllerName = "TrialData";
             AddDatum("SubjectID", () => taskLevel.SubjectID);
             AddDatum("SessionID", () => taskLevel.SessionID);
             AddDatum("TaskName", () => taskLevel.TaskName);
@@ -112,13 +147,11 @@ namespace USE_ExperimentTemplate_Data
         }
     }
 
-    public class FrameData : DataController
+    public class FrameData : USE_Template_DataController
     {
-        public ControlLevel_Task_Template taskLevel;
-        public ControlLevel_Trial_Template trialLevel;
-
-        public override void DefineDataController()
+        public override void DefineUSETemplateDataController()
         {
+            DataControllerName = "FrameData";
             AddDatum("SubjectID", () => taskLevel.SubjectID);
             AddDatum("SessionID", () => taskLevel.SessionID);
             AddDatum("TaskName", () => taskLevel.TaskName);
@@ -227,5 +260,6 @@ namespace USE_ExperimentTemplate_Data
             else
                 Debug.LogWarning("Attempted to destroy data controller " + name + ", but this does not exist.");
         }
+
     }
 }

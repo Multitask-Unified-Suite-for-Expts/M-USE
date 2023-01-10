@@ -17,11 +17,13 @@ namespace USE_ExperimentTemplate_Trial
     {
         [HideInInspector] public TrialData TrialData;
         [HideInInspector] public FrameData FrameData;
+        [HideInInspector] public SerialSentData SerialSentData;
+        [HideInInspector] public SerialRecvData SerialRecvData;
         [HideInInspector] public int BlockCount, TrialCount_InTask, TrialCount_InBlock, AbortCode;
         protected int NumTrialsInBlock;
         [HideInInspector] public SessionDataControllers SessionDataControllers;
 
-        [HideInInspector] public bool StoreData, ForceBlockEnd;
+        [HideInInspector] public bool StoreData, ForceBlockEnd, SerialPortActive, EyetrackerActive;
         [HideInInspector] public string TaskDataPath, FilePrefix, TrialSummaryString;
 
         protected State SetupTrial, FinishTrial;
@@ -87,15 +89,16 @@ namespace USE_ExperimentTemplate_Trial
                 AbortCode = 0;
                 TrialCount_InTask++;
                 TrialCount_InBlock++;
-                if (TrialCount_InTask >= 999)
-                    FrameData.fileName = FilePrefix + "__FrameData_Trial_" + (TrialCount_InTask + 1) + ".txt";
-                else if (TrialCount_InTask >= 99)
-                    FrameData.fileName = FilePrefix + "__FrameData_Trial_0" + (TrialCount_InTask + 1) + ".txt";
-                else if (TrialCount_InTask >= 9)
-                    FrameData.fileName = FilePrefix + "__FrameData_Trial_00" + (TrialCount_InTask + 1) + ".txt";
-                else
-                    FrameData.fileName = FilePrefix + "__FrameData_Trial_000" + (TrialCount_InTask + 1) + ".txt";
-                FrameData.CreateFile();
+                FrameData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
+                if (TaskLevel.SerialPortActive)
+                {
+                    SerialRecvData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
+                    SerialSentData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
+                }
+
+                // FrameData.fileName =
+                //     FilePrefix + "__FrameData_Trial_" + FrameData.GetNiceIntegers(4, TrialCount_InTask + 1);
+                // FrameData.CreateFile();
                 DefineTrialStims();
                 ResetRelativeStartTime();
                 foreach (StimGroup sg in TrialStims)

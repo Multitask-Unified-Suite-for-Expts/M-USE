@@ -8,6 +8,7 @@ using MazeGame_Namespace;
 using HiddenMaze;
 using USE_ExperimentTemplate_Block;
 using USE_Utilities;
+using Random = UnityEngine.Random;
 
 public class MazeGame_TaskLevel : ControlLevel_Task_Template
 {
@@ -25,9 +26,9 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             mgTL.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
         else Debug.LogError("Context External File Path not defined in the TaskDef");
 
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeExternalFilePath"))
-            mgTL.MazeFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "MazeExternalFilePath");
-        else Debug.LogError("Maze External File Path not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeFilePath"))
+            mgTL.MazeFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "MazeFilePath");
+        else Debug.LogError("Maze File Path not defined in the TaskDef");
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
             mgTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
@@ -63,48 +64,28 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         {
             //for given block MazeDims, MazeNumSquares, MazeNumTurns, get all indices of that value, find intersect
             //then choose random member of intersect and assign to this block's trials
-            
-            //make them all into lists and then remove at that index and they never duplicate
 
             int [] mdIndices = MazeDims.FindAllIndexof(mgBD.MazeDims);
             int[] mnsIndices = MazeNumSquares.FindAllIndexof(mgBD.MazeNumSquares);
             int[] mntIndices = MazeNumTurns.FindAllIndexof(mgBD.MazeNumTurns);
-            int[] currMazeDef = (int[])mntIndices.Intersect(mdIndices.Intersect(mnsIndices));
+            int[] possibleMazeDefIndices = mntIndices.Intersect(mdIndices.Intersect(mnsIndices)).ToArray();
 
-            Debug.Log("COUNT THE MAZE DEF"+ currMazeDef.Count()); // RANDOMLY SELECT THEN REMOVE 
-
-            /*int[] mazeDimsIndices = MazeDefs.Select((b, i) => b.mTotalSquares == mgBD.MazeDims ? i : -1).Where(i => i != -1).ToArray();
-            Debug.Log("MAZE DIM INDICES: " + mazeDimsIndices);*/
-
-
-            //   if (CurrentBlockDef.TileColor == null && TaskDef.TileColor != null)
-            //     CurrentBlockDef.TileColor = TaskDef.TileColor;
-
-            //   foreach (TrialDef td in CurrentBlockDef.TrialDefs)
-            //      if (td.TileColor == null && CurrentBlockDef.TileColor != null)
-            //       td.TileColor == CurrentBlockDef.TileColor
+            int chosenIndex = possibleMazeDefIndices[Random.Range(0, possibleMazeDefIndices.Length)];
+            mgTL.mazeDefName = MazeName[chosenIndex];
+            
+            //remove the maze specifications from all of the arrays
+            MazeDefs = MazeDefs.Where((source, index) =>index != chosenIndex).ToArray();
+            MazeDims = MazeDims.Where((source, index) =>index != chosenIndex).ToArray();
+            MazeNumSquares = MazeNumSquares.Where((source, index) =>index != chosenIndex).ToArray();
+            MazeNumTurns = MazeNumTurns.Where((source, index) =>index != chosenIndex).ToArray();
+            MazeName = MazeName.Where((source, index) =>index != chosenIndex).ToArray();
         });
-        // if (CurrentBlockDef.TileColor == null && TaskDef.TileColor != null)
-        //   CurrentBlockDef.TileColor = TaskDef.TileColor;
-
-    }
-    public override void ReadCustomSettingsFiles()
-    {
-        //string mazeDefFile = LocateFile.FindFileInFolder(TaskConfigPath, "*" + TaskName + "*MazeDef*");
-        //SessionSettings.ImportSettings_SingleTypeArray<Maze>(TaskName + "_MazeDefs", mazeDefFile);
-        //MazeDefs = (Maze[])SessionSettings.Get(TaskName + "_MazeDefs");
     }
     public T GetCurrentBlockDef<T>() where T : BlockDef
     {
         return (T)CurrentBlockDef;
     }
-    public static class EM
-    {
-        public static int[] FindAllIndexof<T>(IEnumerable<T> values, T val)
-        {
-            return values.Select((b,i) => object.Equals(b, val) ? i : -1).Where(i => i != -1).ToArray();
-        }
-    }
+    
 
 
 }

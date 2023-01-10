@@ -74,6 +74,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private Image sr;
     private Vector3 sliderInitPosition;
     private bool variablesLoaded = false;
+    public string mazeDefName;
     
     public int curMDim, curMNumSquares, curMNumTurns;
     public string curMPath;
@@ -424,58 +425,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         slider.gameObject.SetActive(true);
         
-        Debug.Log("Count: " + count);
-
-        // TextAsset[] textMazes = Resources.LoadAll<TextAsset>("output_mazes_json");
-        //
-        // foreach (TextAsset textMaze in textMazes)
-        // {
-        //     string mazeJson = textMaze.text;
-        //     Maze mazeObj = new Maze(mazeJson);
-        //     // Debug.Log(mazeObj);
-        //     mazeList.Add(mazeObj);
-        // }
-
-        //string[] textMazes = System.IO.File.ReadAllLines(MazeFilePath + Path.DirectorySeparatorChar + "Maze.txt");
-        //foreach (string textMaze in textMazes)
-        //{
-        //    Maze mazeObj = new Maze(textMaze);
-        //    Debug.Log("Maze Obj:" + mazeObj);
-        //    mazeList.Add(mazeObj);
-        //}
-
-        //Debug.Log("textMazes.Length " + textMazes.Length);
-        //currMaze = mazeList[ind];
-        //dim = currMaze.mConfigs.dim;
-
-        //string textMaze = CurrentTrialDef.MazeInfo;
-        
-        
-        
-        //THIS WORKS
-        
-        //string[] textMazes = System.IO.File.ReadAllLines(MazeFilePath + Path.DirectorySeparatorChar + "Maze.txt");
-        //Debug.Log("textMazes.Length: " +textMazes.Length);
-        /*foreach (string textMaze in textMazes)
-        {
-            Maze mazeObj = new Maze(textMaze);
-            Debug.Log("Maze Obj:" + mazeObj);
-            mazeList.Add(mazeObj);
-            
-        };*/
-        
-        //currMaze = mazeList[CurrentTrialDef.TrialCount-1];
-        
-        
-        Debug.Log("Maze Obj Num Squares:" + currMaze.mNumSquares);
-        
-        
+        string[] textMaze = System.IO.File.ReadAllLines(MazeFilePath + Path.DirectorySeparatorChar + mazeDefName);
+        currMaze = new Maze(textMaze[0]);
         sliderValueIncreaseAmount = (100f / (currMaze.mNumSquares)) / 100f;
         
         GameObject mazeCenter = GameObject.FindWithTag("Center");
         dim = currMaze.mConfigs.dim;
         float mazeWidth = dim * TILE_WIDTH;
-        Debug.Log("MAZE WIDTH: " + mazeWidth);
         Vector3 bottomLeftMazePos = mazeCenter.transform.position - (new Vector3(mazeWidth / 2, mazeWidth / 2, 0));
         backgroundTex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "MazeBackground.png");
         mazeBackground = CreateMazeBackground(backgroundTex, new Rect(new Vector2(0,0), new Vector2(1,1)));
@@ -529,8 +485,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         Debug.Log("dim: " + dim);
         tile.gameObject.SetActive(false);
         tile.gameObject.GetComponent<Tile>().enabled = false;
-        //   slider.gameObject.SetActive(false);
-        //  Destroy(tile);
 
         for (int x = 0; x < dim; ++x)
         {
@@ -587,6 +541,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         Coords touchedCoord = tile.mCoord;
 
         // CORRECT DEFAULT
+        Debug.Log("TOUCHED COORD: " + touchedCoord);
+        Debug.Log("CURRMAZE NEXT STEP: " + currMaze.mNextStep);
+        Debug.Log("CURRMAZE START: " + currMaze.mStart);
+        Debug.Log("CURRMAZE FINISH: " + currMaze.mFinish);
+        
         if (touchedCoord == currMaze.mNextStep && touchedCoord != currMaze.mStart && touchedCoord != currMaze.mFinish)
         {
             Debug.Log("correct");

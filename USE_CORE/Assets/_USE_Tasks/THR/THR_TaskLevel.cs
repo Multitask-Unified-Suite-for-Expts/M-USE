@@ -15,9 +15,10 @@ public class THR_TaskLevel : ControlLevel_Task_Template
     public string CurrentBlockString;
     public StringBuilder PreviousBlocksString;
 
-    public int BlockStringsAdded;
+    public int BlockStringsAdded = 0;
 
     THR_BlockDef currentBlock => GetCurrentBlockDef<THR_BlockDef>();
+    THR_TrialLevel trialLevel;
 
     public int TrialsCompleted_Task = 0;
     public int TrialsCorrect_Task = 0;
@@ -44,7 +45,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
     public override void DefineControlLevel()
     {
-        THR_TrialLevel trialLevel = (THR_TrialLevel)TrialLevel;
+        trialLevel = (THR_TrialLevel)TrialLevel;
 
         string TaskName = "THR";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
@@ -53,11 +54,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
 
-        SetupTask.AddInitializationMethod(() =>
-        {
-            SetupBlockData(trialLevel);
-            BlockStringsAdded = 0;
-        });
+        SetupBlockData();
 
         RunBlock.AddInitializationMethod(() =>
         {
@@ -74,15 +71,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             trialLevel.NumTouchesMovedOutside_Block = 0;
             trialLevel.PerfThresholdMet = false;
 
-            SetBlockSummaryString(trialLevel);
-        });
-        RunBlock.AddUpdateMethod(() =>
-        {
-            if(trialLevel.TrialComplete)
-            {
-                SetBlockSummaryString(trialLevel);
-                trialLevel.TrialComplete = false;
-            }
+            CalculateBlockSummaryString();
         });
 
         BlockFeedback.AddInitializationMethod(() =>
@@ -124,7 +113,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         return data;
     }
 
-    void SetBlockSummaryString(THR_TrialLevel trialLevel)
+    public void CalculateBlockSummaryString()
     {
         ClearStrings();
 
@@ -145,13 +134,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
     }
 
-    void ClearStrings()
-    {
-        CurrentBlockString = "";
-        BlockSummaryString.Clear();
-    }
 
-    void SetupBlockData(THR_TrialLevel trialLevel)
+    void SetupBlockData()
     {
         BlockData.AddDatum("NumTrialsCompleted", () => trialLevel.TrialsCompleted_Block);
         BlockData.AddDatum("NumTrialsCorrect", () => trialLevel.TrialsCorrect_Block);
@@ -165,6 +149,12 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("NumReleasedEarly", () => trialLevel.NumReleasedEarly_Block);
         BlockData.AddDatum("NumReleasedLate", () => trialLevel.NumReleasedLate_Block);
         BlockData.AddDatum("NumTouchesMovedOutside", () => trialLevel.NumTouchesMovedOutside_Block);
+    }
+
+    void ClearStrings()
+    {
+        CurrentBlockString = "";
+        BlockSummaryString.Clear();
     }
 
 }

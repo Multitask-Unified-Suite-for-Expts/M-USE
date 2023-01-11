@@ -112,7 +112,7 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.TrialDefType = TrialDefType;
             TrialLevel.StimDefType = StimDefType;
 
-            AddInitializationMethod(() =>
+            Add_ControlLevel_InitializationMethod(() =>
             {
                 BlockCount = -1;
                 BlockSummaryString = new StringBuilder();

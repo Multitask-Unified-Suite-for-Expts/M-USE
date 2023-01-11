@@ -443,7 +443,7 @@ namespace USE_Data
 				string[] currentVals = new string[data.Count];
 				for (int i = 0; i < data.Count; i++)
 				{
-					currentVals[i] = data[i].ValueAsString;
+					currentVals[i] =  data[i].ValueAsString;
 				}
 				if (!updateDataNextFrame)
 				{

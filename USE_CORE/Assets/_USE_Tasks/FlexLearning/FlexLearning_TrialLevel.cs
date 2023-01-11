@@ -84,7 +84,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         SelectionHandler<FlexLearning_StimDef> mouseHandler = new SelectionHandler<FlexLearning_StimDef>();
 
-        AddInitializationMethod(() =>
+        Add_ControlLevel_InitializationMethod(() =>
         {
             playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
             playerViewText = new GameObject();

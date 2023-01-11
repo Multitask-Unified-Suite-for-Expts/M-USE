@@ -85,7 +85,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         SelectionHandler<VisualSearch_StimDef> mouseHandler = new SelectionHandler<VisualSearch_StimDef>();
         
-        AddInitializationMethod(() =>
+        Add_ControlLevel_InitializationMethod(() =>
         {
             playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
             playerViewText = new GameObject();

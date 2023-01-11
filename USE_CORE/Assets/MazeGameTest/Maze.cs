@@ -61,7 +61,7 @@ namespace HiddenMaze
         public Coords mNextStep;
         public int mNumSquares;
         public int mNumTurns;
-        public int mDims;
+        public Vector2 mDims;
         public string mName;
         public Maze(Configs configs, List<Coords> path, Coords start, Coords finish) 
         {
@@ -155,25 +155,25 @@ namespace HiddenMaze
         {
             Coords start = new Coords();
             Coords finish = new Coords();
-            int dim = mConfigs.dim;
+            Vector2 dim = mConfigs.dim;
             var rand = new System.Random();
 
             // If dim > 1, properly set start and finish
             //   else set start and finish at (0, 0)
-            if (dim > 1) {
-                start.X = rand.Next(0, dim);
-                finish.X = rand.Next(0, dim);
+            if (dim.x > 1) {
+                start.X = rand.Next(0, (int)dim.x);
+                finish.X = rand.Next(0, (int)dim.x);
 
                 // Limit start square to the bottom row of the maze
                 // and the finish square to the top row
                 if (mConfigs.sideRestricted) {
                     start.Y = 0;
-                    finish.Y = dim - 1;
+                    finish.Y = (int)dim.y - 1;
                 
                 } else { // Start and finish squares can be anywhere in the grid
                     do {
-                        start.Y = rand.Next(0, dim);
-                        finish.Y = rand.Next(0, dim);
+                        start.Y = rand.Next(0, (int)dim.y);
+                        finish.Y = rand.Next(0, (int)dim.y);
                     } while (start == finish);
                 }
             }
@@ -307,17 +307,17 @@ namespace HiddenMaze
         // Returns T if the parameter Coords obj is within maze bounds and F if not
         private Boolean validateSquare(Coords coord)
         {
-            return (coord.X < mConfigs.dim && coord.X >= 0 && coord.Y < mConfigs.dim && coord.Y >= 0);
+            return (coord.X < mConfigs.dim.x && coord.X >= 0 && coord.Y < mConfigs.dim.y && coord.Y >= 0);
         }
 
         // Returns a string graphical representation of maze
         private String prettyPrintMaze() {
-            int dim = mConfigs.dim;
+            Vector2 dim = mConfigs.dim;
             int squareCounter = 2;  // Starts at 2 because Start is the first square
             // To allow for enough space to include multiple places for numbered paths
             int placesPerSquare = (int)Math.Floor(Math.Log10(mPath.Count)) + 1;
 
-            if (dim <= 0) {
+            if (dim.x <= 0 || dim.y <= 0) {
                 String invalidMaze = String.Format("The maze is uninitialized or dimension was invalid (<=0).\nDebug Info:\nConfigs = {0}\nPath = {1}\nStart = {2}\nFinish = {3}\nNumSquares = {4}\nNumTurns = {5}", mConfigs, mPath, mStart, mFinish, mNumSquares, mNumTurns);
                 return(invalidMaze);
             }
@@ -329,8 +329,8 @@ namespace HiddenMaze
             sb.Append($"Number of Turns: {mNumTurns}\n");
             sb.Append("\n");
 
-            for (int y = dim - 1; y >= 0; --y) {
-                for (int x = 0; x < dim; ++x) {
+            for (int y = (int)dim.y - 1; y >= 0; --y) {
+                for (int x = 0; x < (int)dim.x; ++x) {
 
                     Coords testCoord = new Coords(x, y);
 

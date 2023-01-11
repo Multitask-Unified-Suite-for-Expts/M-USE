@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.IO;
 using HiddenMaze;
-using CognitiveMaze_Namespace;
+using MazeGame_Namespace;
 
 
 public class Tile : MonoBehaviour

@@ -40,7 +40,7 @@ namespace MazeGame_Namespace
         public int[] MinMaxTrials;
         public string MazeInfo;
 
-        public int MazeDims;
+        public Vector2 MazeDims;
         public int MazeNumSquares;
         public int MazeNumTurns;
       //  public Color TileColor;
@@ -107,7 +107,7 @@ namespace MazeGame_Namespace
         public int TrialCount;
         public float[] TileColor;
         public int Texture;
-        public int MazeDims;
+        public Vector2 MazeDims;
         public int MazeNumSquares;
         public int MazeNumTurns;
         public int viewPath;
@@ -160,7 +160,7 @@ namespace MazeGame_Namespace
         public int mNumTurns;
         public int mTotalSquares;
         public string mName;
-        public int mDims;
+        public Vector2 mDims;
         public string fileName;
     }
 }

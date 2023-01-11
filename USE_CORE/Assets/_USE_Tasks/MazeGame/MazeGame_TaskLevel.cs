@@ -13,7 +13,8 @@ using Random = UnityEngine.Random;
 public class MazeGame_TaskLevel : ControlLevel_Task_Template
 {
     [HideInInspector] public MazeDef[] MazeDefs;
-    [HideInInspector] public int[] MazeDims, MazeNumSquares, MazeNumTurns;
+    [HideInInspector] public int[] MazeNumSquares, MazeNumTurns;
+    public Vector2[] MazeDims;
     [HideInInspector] public string[] MazeName;
     MazeGame_BlockDef mgBD => GetCurrentBlockDef<MazeGame_BlockDef>();
 
@@ -47,7 +48,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         {
             SessionSettings.ImportSettings_SingleTypeArray<MazeDef>("MazeDefs", mazeKeyFilePath);
             MazeDefs = (MazeDef[])SessionSettings.Get("MazeDefs");
-            MazeDims = new int[MazeDefs.Length];
+            MazeDims = new Vector2[MazeDefs.Length];
             MazeNumSquares = new int[MazeDefs.Length];
             MazeNumTurns = new int[MazeDefs.Length];
             MazeName = new string[MazeDefs.Length];
@@ -69,10 +70,10 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             int[] mnsIndices = MazeNumSquares.FindAllIndexof(mgBD.MazeNumSquares);
             int[] mntIndices = MazeNumTurns.FindAllIndexof(mgBD.MazeNumTurns);
             int[] possibleMazeDefIndices = mntIndices.Intersect(mdIndices.Intersect(mnsIndices)).ToArray();
-
+            
             int chosenIndex = possibleMazeDefIndices[Random.Range(0, possibleMazeDefIndices.Length)];
             mgTL.mazeDefName = MazeName[chosenIndex];
-            
+            Debug.Log("MAZE DEF NAME: " + mgTL.mazeDefName);
             //remove the maze specifications from all of the arrays
             MazeDefs = MazeDefs.Where((source, index) =>index != chosenIndex).ToArray();
             MazeDims = MazeDims.Where((source, index) =>index != chosenIndex).ToArray();

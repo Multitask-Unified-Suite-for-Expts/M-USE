@@ -118,7 +118,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nTouched Object Codes: " + touchedObjectsCodes + "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
             totalTokensCollected = TokenFBController.GetTokenBarValue() +
                                    (TokenFBController.GetNumTokenBarFull() * CurrentTrialDef.NumTokenBar);
-
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
         });
         initTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton),
             SearchDisplayDelay, () => 
@@ -135,7 +135,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = true;
             TokenFBController.SetTotalTokensNum(NumTokenBar);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarReset"]);
         });
         // Wait for a click and provide feedback accordingly
@@ -284,9 +283,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         // frame data
         FrameData.AddDatum("MousePosition", () => InputBroker.mousePosition);
         FrameData.AddDatum("SelectedStimCode", () => selectedSD?.StimCode ?? null);
-        FrameData.AddDatum("StartButton", () => startButton.activeSelf);
-        FrameData.AddDatum("TrialStimuliShown", () => tStim.IsActive);
-        FrameData.AddDatum("Context", () => context);
+        FrameData.AddDatum("StartButtonVisibility", () => startButton.activeSelf);
+        FrameData.AddDatum("TrialStimuliVisibility", () => tStim.IsActive);
+        FrameData.AddDatum("ContextName", () => context);
         
         //this.AddTerminationSpecification(() => trialCount > numTrials, ()=> Debug.Log(trialCount + " " + numTrials));
  

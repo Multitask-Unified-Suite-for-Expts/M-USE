@@ -428,16 +428,17 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         slider.gameObject.SetActive(true);
         
         string[] textMaze = System.IO.File.ReadAllLines(MazeFilePath + Path.DirectorySeparatorChar + mazeDefName);
+        Debug.Log("TEXT MAZE: " + textMaze[0]);
         currMaze = new Maze(textMaze[0]);
+        Debug.Log("CURRENT MAZE NAME: " + mazeDefName);
+        Debug.Log("CURRENT MAZE DIMENSIONS: " + currMaze.mDims);
+        Debug.Log("CURRENT MAZE NUM TURNS: " + currMaze.mNumTurns);
+        Debug.Log("CURRENT MAZE NUM SQUARES: " + currMaze.mNumSquares);
         sliderValueIncreaseAmount = (100f / (currMaze.mNumSquares)) / 100f;
-        
-        GameObject mazeCenter = GameObject.FindWithTag("Center");
         dim = currMaze.mDims;
-        Debug.Log("NEW DIMENSIONS: " + dim);
-        mazeLengthDimensions = dim.x;
-        mazeLength = mazeLengthDimensions * TILE_WIDTH;
-        mazeHeightDimensions = dim.y;
-        mazeHeight = mazeHeightDimensions * TILE_WIDTH;
+        GameObject mazeCenter = GameObject.FindWithTag("Center");
+        mazeLength = dim.x * TILE_WIDTH;
+        mazeHeight = dim.y * TILE_WIDTH;
         Vector3 bottomLeftMazePos = mazeCenter.transform.position - (new Vector3(mazeLength / 2, mazeHeight / 2, 0));
         backgroundTex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "MazeBackground.png");
         mazeBackground = CreateMazeBackground(backgroundTex, new Rect(new Vector2(0,0), new Vector2(1,1)));
@@ -446,7 +447,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         mazeBackground.transform.SetParent(mazeContainer.transform);
         mazeBackground.transform.localPosition = new Vector3(1, 0.5f, 0);
         mazeBackground.transform.localScale = new Vector3(dim.x/9f, dim.y/9f, 0);
-        tile = Resources.Load<Tile>("Prefabs/Tile") as Tile;
+        tile = Resources.Load<Tile>("Tile") as Tile;
         tiles = new StimGroup("Tiles"); //in DefineTrialStims
         // tiles.DestroyStimGroup(); //when tiles should be destroyed
 

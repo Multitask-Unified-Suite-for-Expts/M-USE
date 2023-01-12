@@ -21,7 +21,7 @@ namespace MazeGame_Namespace
         //public string neutralPatternedColorName;
         //public float? ExternalStimScale;
 
-        public float[] TileColor;
+        public Color TileColor;
         public Vector3 ButtonPosition;
         public Vector3 ButtonScale;
         public string ContextExternalFilePath, MazeExternalFilePath, MazeKeyFilePath;
@@ -81,9 +81,6 @@ namespace MazeGame_Namespace
                 td.MazeInfo = MazeInfo;
                 //td.MazeDef = whatever
                // td.mazePath = mazePath;
-                if (td.TileColor == null && TileColor != null)
-                    td.TileColor = TileColor;
-
              //   if (td.Texture == null && Texture != null)
                  //   td.Texture = Texture;
                 //  Debug.Log("TRIAL: " + Trial);

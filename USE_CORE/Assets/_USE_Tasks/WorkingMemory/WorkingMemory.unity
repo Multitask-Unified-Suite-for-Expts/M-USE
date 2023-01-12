@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641275, b: 0.5748172, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -168,9 +168,11 @@ MonoBehaviour:
   TrialCount_InBlock: 0
   AbortCode: 0
   StoreData: 0
+  ForceBlockEnd: 0
   TaskDataPath: 
   FilePrefix: 
   TrialSummaryString: 
+  TaskLevel: {fileID: 0}
   PreloadedStims:
     stimGroupName: 
     IsActive: 0
@@ -194,7 +196,94 @@ MonoBehaviour:
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   MaterialFilePath: 
-  minObjectTouchDuration:
+  buttonPosition: {x: 0, y: 0, z: 0}
+  buttonScale: {x: 0, y: 0, z: 0}
+  shadowType: 
+  stimFacingCamera: 0
+  runningAcc: 
+  MinTrials: 0
+  MaxTrials: 0
+  tokenRevealDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  tokenUpdateDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  trialEndDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  initTrialDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  baselineDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  maxSearchDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  selectionFbDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  displaySampleDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  postSampleDelayDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  displayPostSampleDistractorsDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  preTargetDelayDuration:
     name: 
     hidden: 0
     value: 0
@@ -203,38 +292,6 @@ MonoBehaviour:
     min: 0
     precision: 0
   itiDuration:
-    name: 
-    hidden: 0
-    value: 0
-    isRange: 0
-    max: 0
-    min: 0
-    precision: 0
-  finalFbDuration:
-    name: 
-    hidden: 0
-    value: 0
-    isRange: 0
-    max: 0
-    min: 0
-    precision: 0
-  fbDuration:
-    name: 
-    hidden: 0
-    value: 0
-    isRange: 0
-    max: 0
-    min: 0
-    precision: 0
-  maxObjectTouchDuration:
-    name: 
-    hidden: 0
-    value: 0
-    isRange: 0
-    max: 0
-    min: 0
-    precision: 0
-  selectObjectDuration:
     name: 
     hidden: 0
     value: 0
@@ -262,6 +319,7 @@ MonoBehaviour:
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
+  ConfigName: 
   TaskName: WorkingMemory
   TaskProjectFolder: 
   BlockCount: 0
@@ -277,7 +335,6 @@ MonoBehaviour:
   SubjectID: 
   SessionID: 
   FilePrefix: 
-  BlockSummaryString: 
   EyetrackerType: 
   SelectionType: 
   LocateFile: {fileID: 0}
@@ -326,7 +383,7 @@ GameObject:
   - component: {fileID: 1249321958}
   - component: {fileID: 1249321957}
   m_Layer: 0
-  m_Name: Directional Light
+  m_Name: WorkingMemory_DirectionalLight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -459,7 +516,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 30
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -485,7 +542,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1812093639}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalPosition: {x: 0, y: 1, z: -60}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

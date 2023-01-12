@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using HiddenMaze;
 using MazeGame_Namespace;
+using USE_ExperimentTemplate_Trial;
 
 
 public class Tile : MonoBehaviour
@@ -32,14 +33,13 @@ public class Tile : MonoBehaviour
         eBeep = GameObject.Find("ErrorBeep");
         cAudio = cBeep.GetComponent<AudioSource>();
         eAudio = eBeep.GetComponent<AudioSource>();
-        Material newMat = Resources.Load("TestMat", typeof(Material)) as Material;
+        //Material newMat = Resources.Load("TestMat", typeof(Material)) as Material;
         //System.Random rnd = new System.Random();
         //int num = rnd.Next(0, 9);
-        gameObject.GetComponent<MeshRenderer>().material = newMat;
+        //gameObject.GetComponent<MeshRenderer>().material = newMat;
         //string textStr = "Textures/Picture" + num.ToString();
-        string textStr = "Textures/Picture5";
-        Texture newTxt = Resources.Load(textStr, typeof(Texture)) as Texture;
-        newMat.SetTexture("_MainTex", newTxt);
+        //Texture newTxt = Resources.Load(textStr, typeof(Texture)) as Texture;
+      //  newMat.SetTexture("_MainTex", newTxt);
 
 
 
@@ -93,7 +93,7 @@ public class Tile : MonoBehaviour
                 yield return new WaitForSeconds(gameConfigs.CORRECT_FEEDBACK_SECONDS);
                 if (!MazeGame_TrialLevel.viewPath)
                 {
-                    gameObject.GetComponent<Renderer>().material.color = MazeGame_TrialLevel.tileColor;
+                    gameObject.GetComponent<Renderer>().material.color = MazeGame_TrialLevel.TileColor;
                 }
 
 
@@ -127,7 +127,7 @@ public class Tile : MonoBehaviour
                 yield return new WaitForSeconds(gameConfigs.PREV_CORRECT_FEEDBACK_SECONDS);
                 if (!MazeGame_TrialLevel.viewPath)
                 {
-                    gameObject.GetComponent<Renderer>().material.color = MazeGame_TrialLevel.tileColor;
+                    gameObject.GetComponent<Renderer>().material.color = MazeGame_TrialLevel.TileColor;
                 }
                 break;
             case 31:
@@ -143,7 +143,7 @@ public class Tile : MonoBehaviour
                 // RULE-ABIDING INCORRECT DEFAULT
                 gameObject.GetComponent<Renderer>().material.color = gameConfigs.INCORRECT_RULEABIDING_COLOR;
                 yield return new WaitForSeconds(gameConfigs.INCORRECT_RULEABIDING_SECONDS);
-                gameObject.GetComponent<Renderer>().material.color = MazeGame_TrialLevel.tileColor;
+                gameObject.GetComponent<Renderer>().material.color = MazeGame_TrialLevel.TileColor;
                 break;
             case 11:
                 // RULE-ABIDING INCORRECT and START
@@ -161,7 +161,7 @@ public class Tile : MonoBehaviour
                 // RULE-BREAKING INCORRECT DEFAULT
                 gameObject.GetComponent<Renderer>().material.color = gameConfigs.INCORRECT_RULEBREAKING_COLOR;
                 yield return new WaitForSeconds(gameConfigs.INCORRECT_RULEBREAKING_SECONDS);
-                gameObject.GetComponent<Renderer>().material.color = MazeGame_TrialLevel.tileColor;
+                gameObject.GetComponent<Renderer>().material.color = MazeGame_TrialLevel.TileColor;
                 break;
             case 21:
                 // RULE-BREAKING INCORRECT and START

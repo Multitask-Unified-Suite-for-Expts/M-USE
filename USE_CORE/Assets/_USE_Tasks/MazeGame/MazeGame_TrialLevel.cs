@@ -68,8 +68,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public static int totalErrors = 0, ruleAbidingErrors = 0, ruleBreakingErrors = 0, 
         retouchCorrect = 0, correctTouches = 0;
 
-    public static Color tileColor;
-    public string MaterialFilePath, MazeFilePath;
+    public static Color TileColor;
+    public string ContextExternalFilePath, MazeFilePath;
     public Vector3 ButtonPosition, ButtonScale;
     public GameObject mazeBackground;
     public Texture2D backgroundTex;
@@ -111,122 +111,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             {
                 viewPath = false;
             }
-
-            //DataTable tbl = new DataTable();
-
-            //tbl.Columns.Add(new DataColumn("dim"));
-            //tbl.Columns.Add(new DataColumn("numSquares"));
-            //tbl.Columns.Add(new DataColumn("numTurns"));
-            //tbl.Columns.Add(new DataColumn("mPath"));
-
-
-            //string[] lines = System.IO.File.ReadAllLines(MazeFilePath + Path.DirectorySeparatorChar + "AllMazes.txt");
-
-            //curMDim = CurrentTrialDef.mazeDim;
-            //curMNumSquares = CurrentTrialDef.mazeNumSquares;
-            //curMNumTurns = CurrentTrialDef.mazeNumTurns;
-
-            //string search = "";
-            //string and = "";
-            //if (curMDim != null)
-            //{
-            //    search = search + "dim = " + curMDim.ToString();
-            //    and = " AND ";
-            //}
-
-            //if (curMNumSquares != null)
-            //{
-            //    search = search + and + "numSquares = " + curMNumSquares.ToString();
-            //    and = " AND ";
-            //}
-
-            //if (curMDim != null)
-            //{
-            //    search = search + and + "numTurns = " + curMDim.ToString();
-            //}
-
-            //foreach (string line in lines)
-            //{
-            //    var cols = line.Split('\t');
-
-            //    DataRow dr = tbl.NewRow();
-            //    for (int cIndex = 0; cIndex < 4; cIndex++)
-            //    {
-            //        dr[cIndex] = cols[cIndex];
-            //    }
-
-            //    tbl.Rows.Add(dr);
-            //}
-
-            //Debug.Log("TESTROWS");
-
-            ///* DataRow[] testRows = tbl.Select();
-            // foreach (DataRow row in testRows)
-            // {
-            //     Debug.Log(row[0].ToString() + "   " + row[1].ToString() + "   " + row[2].ToString() + "   " + row[3].ToString());
-            // }
-
-            // Debug.Log("ROWS");
-            // */
-            //DataRow[] rows = tbl.Select(search);
-            //Debug.Log("TESTROWS" + rows);
-            ////WHY DOESNT THIS WORK FOR 3???
-            //foreach (DataRow row in rows)
-            //{
-            //    Debug.Log(row[0].ToString() + "   " + row[1].ToString() + "   " + row[2].ToString() + "   " +
-            //              row[3].ToString());
-            //    curMPath = row[3].ToString();
-            //    ind = tbl.Rows.IndexOf(row);
-
-            //}
-
-            //Debug.Log("LENGTH" + rows.Length);
-            trialIndex = CurrentTrialDef.TrialCount - 1;
-            Debug.Log("INDEX: " + trialIndex);
             totalErrors = 0;
             ruleAbidingErrors = 0;
             ruleBreakingErrors = 0;
             retouchCorrect = 0;
             correctTouches = 0;
 
-            if (count == 0)
-            { //I DON'T THINK ANY OF THIS GETS CALLED TO GENERATE THE MAZE, IT ALL HAPPENS IN INSTANTIATECURRMAZE IN MAZEVIS
-                count = 0;
-                /*
-                // Load maze from JSON
-                TextAsset[] textMazes = Resources.LoadAll<TextAsset>("Mazes");
-                Debug.Log("TextAssetSize: " + textMazes.Length);
-                foreach (TextAsset textMaze in textMazes)
-                {
-                    string mazeJson = textMaze.text;
-                    Maze mazeObj = new Maze(mazeJson);
-                    Debug.Log(mazeObj);
-                    mazeList.Add(mazeObj);
-                }
-                */
-                //string[] textMazes = System.IO.File.ReadAllLines(MazeFilePath + Path.DirectorySeparatorChar + "Maze.txt");
-                //Debug.Log("TextMazesSize: " + textMazes.Length);
-                //Debug.Log("Text Maze 1: " + textMazes[0]);
-                //string textMaze = CurrentTrialDef.MazeDef;
-                //Maze mazeObj = new Maze(textMaze);
-                //Debug.Log("Maze Obj:" + mazeObj);
-                //mazeList.Add(mazeObj);
-
-                //foreach (string textMaze in textMazes)
-                //{
-                //    Maze mazeObj = new Maze(textMaze);
-                //    Debug.Log("Maze Obj:" + mazeObj);
-                //    mazeList.Add(mazeObj);
-                //}
-                foreach (Maze maze in mazeList)
-                {
-                    // TODO: Here is where the maze levels can be put in order
-                }
-            }
-            else
-            {
-                //RenderSettings.skybox = newMat;
-            }
         });
 
         LoadMaze.SpecifyTermination(() => true, GameConf);
@@ -276,8 +166,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
              //   CurrentTrialDef.TileColor[2]);
             //---------------------------------------------------------
 
-            DEFAULT_TILE_COLOR = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1],
-                CurrentTrialDef.TileColor[2]);
+            DEFAULT_TILE_COLOR = new Color(1, 1, 1); //MAKE CONFIGURABLE
             // FEEDBACK LENGTH IN SECONDS
 
             // Correct - 0.5 seconds
@@ -299,8 +188,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             TIMEOUT_SECONDS = 10.0f;
             // */
             //gameConfigs.DEFAULT_TILE_COLOR = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1], CurrentTrialDef.TileColor[2]);
-            tileColor = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1],
-                CurrentTrialDef.TileColor[2]);
+            TileColor = new Color(1, 1, 1); //MAKE MORE CONFIGURABLE
 
         });
 
@@ -312,7 +200,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             curRep = 0;
             startButton.SetActive(true);
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
+            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
         });
         StartButton.AddUpdateMethod(() =>
         {
@@ -440,7 +328,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         mazeLength = dim.x * TILE_WIDTH;
         mazeHeight = dim.y * TILE_WIDTH;
         Vector3 bottomLeftMazePos = mazeCenter.transform.position - (new Vector3(mazeLength / 2, mazeHeight / 2, 0));
-        backgroundTex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "MazeBackground.png");
+        backgroundTex = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "MazeBackground.png");
         mazeBackground = CreateMazeBackground(backgroundTex, new Rect(new Vector2(0,0), new Vector2(1,1)));
         
         GameObject mazeContainer = new GameObject("MazeContainer");
@@ -448,6 +336,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         mazeBackground.transform.localPosition = new Vector3(1, 0.5f, 0);
         mazeBackground.transform.localScale = new Vector3(dim.x/9f, dim.y/9f, 0);
         tile = Resources.Load<Tile>("Tile") as Tile;
+        Texture2D tileTex = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "Tile.png");
+        tile.gameObject.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = tileTex;
         tiles = new StimGroup("Tiles"); //in DefineTrialStims
         // tiles.DestroyStimGroup(); //when tiles should be destroyed
 
@@ -690,8 +580,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         slider = GameObject.Find("Slider").GetComponent<Slider>();
         sliderInitPosition = slider.gameObject.transform.position;
-        Texture2D buttonTex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
-        startButton = CreateStartButton(buttonTex, new Rect(new Vector2(0,0), new Vector2(1,1)));
+        Texture2D buttonTex = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
+        startButton = CreateStartButton(buttonTex, new Rect(new Vector2(0, 0), new Vector2(1, 1)));
+        
         sliderHalo = GameObject.Find("SliderHalo");
         sr = sliderHalo.GetComponent<Image>();
         

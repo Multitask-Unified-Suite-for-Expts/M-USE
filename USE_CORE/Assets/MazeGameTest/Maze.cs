@@ -54,7 +54,6 @@ namespace HiddenMaze
     [Serializable]
     public class Maze
     {
-        public Configs mConfigs;
         public List<Coords> mPath;
         public Coords mStart;
         public Coords mFinish;
@@ -63,9 +62,11 @@ namespace HiddenMaze
         public int mNumTurns;
         public Vector2 mDims;
         public string mName;
-        public Maze(Configs configs, List<Coords> path, Coords start, Coords finish) 
+        public bool sideRestricted;
+        public Maze(List<Coords> path, Coords start, Coords finish) 
         {
-            this.mConfigs = configs;
+            this.mDims = mDims;
+            this.sideRestricted = sideRestricted;
             this.mPath = path;
             this.mStart = start;
             this.mFinish = finish;
@@ -74,25 +75,11 @@ namespace HiddenMaze
             this.mNumTurns = countTurns();
         }
 
-        // Constructor w Configs obj
-        public Maze(Configs configs) 
-        {
-            this.mConfigs = configs;
-            this.mPath = new List<Coords>();
-            this.mStart = new Coords();
-            this.mFinish = new Coords();
-            initStartAndFinish();
-            findAndSetPath();
-
-            this.mNextStep = this.mStart;
-            this.mNumSquares = mPath.Count;
-            this.mNumTurns = countTurns();
-        }
-
         // Default constructor
         public Maze() 
         {
-            this.mConfigs = new Configs();
+            this.mDims = new Vector2();
+            this.sideRestricted = new bool();
             this.mPath = new List<Coords>();
             this.mStart = new Coords();
             this.mFinish = new Coords();
@@ -106,7 +93,6 @@ namespace HiddenMaze
 
         // Copy constructor
         public Maze(Maze rhs) {
-            this.mConfigs = rhs.mConfigs;
             this.mDims = rhs.mDims;
             this.mPath = rhs.mPath;
             this.mStart = rhs.mStart;
@@ -123,8 +109,8 @@ namespace HiddenMaze
 
             // Required because maze generator does not create a field for next step, but the game requires a next step
             jsonMaze.mNextStep = jsonMaze.mStart;
-
-            this.mConfigs = jsonMaze.mConfigs;
+            this.mDims = jsonMaze.mDims;
+            this.sideRestricted = jsonMaze.sideRestricted;
             this.mPath = jsonMaze.mPath;
             this.mStart = jsonMaze.mStart;
             this.mFinish = jsonMaze.mFinish;
@@ -155,7 +141,7 @@ namespace HiddenMaze
         {
             Coords start = new Coords();
             Coords finish = new Coords();
-            Vector2 dim = mConfigs.dim;
+            Vector2 dim = mDims;
             var rand = new System.Random();
 
             // If dim > 1, properly set start and finish
@@ -166,7 +152,7 @@ namespace HiddenMaze
 
                 // Limit start square to the bottom row of the maze
                 // and the finish square to the top row
-                if (mConfigs.sideRestricted) {
+                if (sideRestricted) {
                     start.Y = 0;
                     finish.Y = (int)dim.y - 1;
                 
@@ -307,18 +293,18 @@ namespace HiddenMaze
         // Returns T if the parameter Coords obj is within maze bounds and F if not
         private Boolean validateSquare(Coords coord)
         {
-            return (coord.X < mConfigs.dim.x && coord.X >= 0 && coord.Y < mConfigs.dim.y && coord.Y >= 0);
+            return (coord.X < mDims.x && coord.X >= 0 && coord.Y < mDims.y && coord.Y >= 0);
         }
 
         // Returns a string graphical representation of maze
         private String prettyPrintMaze() {
-            Vector2 dim = mConfigs.dim;
+            Vector2 dim = mDims;
             int squareCounter = 2;  // Starts at 2 because Start is the first square
             // To allow for enough space to include multiple places for numbered paths
             int placesPerSquare = (int)Math.Floor(Math.Log10(mPath.Count)) + 1;
 
             if (dim.x <= 0 || dim.y <= 0) {
-                String invalidMaze = String.Format("The maze is uninitialized or dimension was invalid (<=0).\nDebug Info:\nConfigs = {0}\nPath = {1}\nStart = {2}\nFinish = {3}\nNumSquares = {4}\nNumTurns = {5}", mConfigs, mPath, mStart, mFinish, mNumSquares, mNumTurns);
+                String invalidMaze = String.Format("The maze is uninitialized or dimension was invalid (<=0).\nDebug Info:\nDims = {0}\nSideRestricted = {1}\nPath = {2}\nStart = {3}\nFinish = {4}\nNumSquares = {5}\nNumTurns = {6}", mDims, sideRestricted, mStart, mFinish, mNumSquares, mNumTurns);
                 return(invalidMaze);
             }
 

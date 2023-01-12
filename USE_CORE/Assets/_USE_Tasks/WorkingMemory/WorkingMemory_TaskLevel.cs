@@ -20,6 +20,13 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
             wmTL.buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
         else Debug.LogError("[ERROR] Start Button Scale settings not defined in the TaskDef");
+        
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
+            wmTL.stimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
+        else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))
+            wmTL.shadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
+        else Debug.LogError("Shadow Type setting not defined in the TaskDef");
         }
         else
         {

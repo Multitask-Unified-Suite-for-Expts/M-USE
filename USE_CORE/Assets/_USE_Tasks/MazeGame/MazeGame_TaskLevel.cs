@@ -24,7 +24,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         MazeGame_TrialLevel mgTL = (MazeGame_TrialLevel)TrialLevel;
         string TaskName = "MazeGame";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            mgTL.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+            mgTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
         else Debug.LogError("Context External File Path not defined in the TaskDef");
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeFilePath"))
@@ -38,7 +38,11 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
             mgTL.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
         else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
-
+        /*
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TileColor"))
+            mgTL.TileColor = (Color)SessionSettings.Get(TaskName + "_TaskSettings", "TileColor");
+        else Debug.LogError("Tile Color settings not defined in the TaskDef");
+*/
         string mazeKeyFilePath = "";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeKeyFilePath"))
             mazeKeyFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeKeyFilePath");

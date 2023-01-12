@@ -21,7 +21,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     private bool variablesLoaded;
     public Vector3 buttonPosition, buttonScale;
     private Transform playerViewParent; // Helps set things onto the player view in the experimenter display
+    public string shadowType;
 
+    public bool stimFacingCamera;
     //block end variables
     public List<int> runningAcc;
     public int MinTrials, MaxTrials;
@@ -82,14 +84,20 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]); //CHECK THIS TIMING MIGHT BE OFF
                 //EventCodeManager.SendCodeNextFrame(TaskEventCodes["TargetStimOn"]); ADD THIS TO THE EVENT CODES
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarReset"]);
+                if (stimFacingCamera)
+                {
+                    Debug.Log("IN STIM FACING CAMERA LOOP");
+                    foreach (var stim in targetStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
+                    foreach (var stim in postSampleDistractorStims.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
+                }
+                SetShadowType();
             });
         
         // Show nothing for some time
-        initTrial.AddTimer(() => initTrialDuration.value, delay, () =>
+        initTrial.AddTimer(() => initTrialDuration.value, displaySample, () =>
           {
               startButton.SetActive(false);
-              stateAfterDelay = displaySample;
-              delayDuration = baselineDuration.value;
+              
           });
         
         // displaySample.AddInitializationMethod(() =>
@@ -113,7 +121,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
           {
               stateAfterDelay = searchDisplay;
               delayDuration = preTargetDelayDuration.value;
-              
           });
 
         // Show the target/sample with some other distractors
@@ -226,6 +233,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         postSampleDistractorStims.SetVisibilityOnOffStates(GetStateFromName("DisplayPostSampleDistractors"), GetStateFromName("DisplayPostSampleDistractors"));
         postSampleDistractorStims.SetLocations(CurrentTrialDef.PostSampleDistractorLocations);
         TrialStims.Add(postSampleDistractorStims);
+        
     }
     protected override bool CheckBlockEnd()
     {
@@ -292,5 +300,27 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             }
         }
         return selectedReward.NumTokens;
+    }
+    private void SetShadowType()
+    {
+        //User options are None, Soft, Hard
+        switch (shadowType)
+        {
+            case "None":
+                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.None;
+                GameObject.Find("WorkingMemory_DirectionalLight").GetComponent<Light>().shadows = LightShadows.None;
+                break;
+            case "Soft":
+                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.Soft;
+                GameObject.Find("WorkingMemory_DirectionalLight").GetComponent<Light>().shadows = LightShadows.Soft;
+                break;
+            case "Hard":
+                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.Hard;
+                GameObject.Find("WorkingMemory_DirectionalLight").GetComponent<Light>().shadows = LightShadows.Hard;
+                break;
+            default:
+                Debug.Log("User did not Input None, Soft, or Hard for the Shadow Type");
+                break;
+        }
     }
 }

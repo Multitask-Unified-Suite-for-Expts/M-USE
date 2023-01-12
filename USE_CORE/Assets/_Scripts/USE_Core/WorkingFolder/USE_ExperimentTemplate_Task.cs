@@ -230,8 +230,6 @@ namespace USE_ExperimentTemplate_Task
 
             });
 
-            //user-defined task control level 
-            DefineControlLevel();
 
 
 
@@ -244,7 +242,6 @@ namespace USE_ExperimentTemplate_Task
                 //TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
             BlockData.taskLevel = this;
             BlockData.fileName = FilePrefix + "__BlockData";
-            BlockData.InitDataController();
 
             TrialData = (TrialData) SessionDataControllers.InstantiateDataController<TrialData>("TrialData", ConfigName,
                 StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
@@ -254,7 +251,6 @@ namespace USE_ExperimentTemplate_Task
             TrialData.trialLevel = TrialLevel;
             TrialLevel.TrialData = TrialData;
             TrialData.fileName = FilePrefix + "__TrialData";
-            TrialData.InitDataController();
 
             FrameData = (FrameData) SessionDataControllers.InstantiateDataController<FrameData>("FrameData", ConfigName,
                 StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
@@ -264,6 +260,10 @@ namespace USE_ExperimentTemplate_Task
             FrameData.trialLevel = TrialLevel;
             TrialLevel.FrameData = FrameData;
             FrameData.fileName = FilePrefix + "__FrameData_PreTrial";
+
+
+            BlockData.InitDataController();
+            TrialData.InitDataController();
             FrameData.InitDataController();
 
             BlockData.ManuallyDefine();
@@ -271,6 +271,9 @@ namespace USE_ExperimentTemplate_Task
 
             if (EventCodesActive)
                 FrameData.AddEventCodeColumns();
+
+            //user-defined task control level 
+            DefineControlLevel();
 
             BlockData.AddStateTimingData(this);
             BlockData.CreateFile();

@@ -9,6 +9,7 @@ using USE_Settings;
 using USE_StimulusManagement;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Block;
+using System.Linq;
 
 
 public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
@@ -16,19 +17,19 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public List<int> TrialsCompleted_Task;
 
     [HideInInspector] public List<int> TrialsCorrect_Task;
-    [HideInInspector] public float AvgNumCorrect;
+    [HideInInspector] public float AvgNumCorrect = 0;
 
     [HideInInspector] public List<int> TokenBarCompletions_Task;
-    [HideInInspector] float AvgNumTbCompletions;
+    [HideInInspector] float AvgNumTbCompletions = 0;
 
     [HideInInspector] public List<int> TotalRewards_Task;
-    [HideInInspector] public float AvgNumRewards;
+    [HideInInspector] public float AvgNumRewards = 0;
 
     [HideInInspector] public List<float> TimeToChoice_Task;
-    [HideInInspector] public float AvgTimeToChoice;
+    [HideInInspector] public float AvgTimeToChoice = 0;
 
     [HideInInspector] public List<float> TimeToCompletion_Task;
-    [HideInInspector] public float AvgTimeToCompletion;
+    [HideInInspector] public float AvgTimeToCompletion = 0;
 
     [HideInInspector] public double StanDev;
     [HideInInspector] public string BlockAveragesString;
@@ -36,6 +37,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public StringBuilder PreviousBlocksString;
 
     ContinuousRecognition_BlockDef currentBlock => GetCurrentBlockDef<ContinuousRecognition_BlockDef>();
+    ContinuousRecognition_TrialLevel trialLevel;
 
     public override void SpecifyTypes()
     {
@@ -48,7 +50,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     } 
     public override void DefineControlLevel() //RUNS WHEN THE TASK IS DEFINED!
     {
-        ContinuousRecognition_TrialLevel trialLevel = (ContinuousRecognition_TrialLevel)TrialLevel;
+        trialLevel = (ContinuousRecognition_TrialLevel)TrialLevel;
 
         if(SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
@@ -66,13 +68,13 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
 
+        SetupBlockData();
+
         RunBlock.AddInitializationMethod(() =>
         {
             RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(currentBlock.ContextName));
             trialLevel.ContextActive = true;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
-
-            SetupBlockData(trialLevel); //PROBLEM: missing headers and duplicating columns in subsequent blocks 
 
             trialLevel.AdjustedPositionsForMac = false;
 
@@ -85,21 +87,10 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.TimeToCompletion_Block = 0;
             trialLevel.NumRewards_Block = 0;
             trialLevel.Score = 0;
-
             trialLevel.TokenFBController.SetTokenBarValue(0);
 
-            CalculateBlockSummaryString(trialLevel);
+            CalculateBlockSummaryString();
         });
-
-        RunBlock.AddUpdateMethod(() =>
-        {
-            if (trialLevel.TrialComplete)
-            {
-                CalculateBlockSummaryString(trialLevel); //Update string if they finish a trial 
-                trialLevel.TrialComplete = false;
-            }
-        });
-
 
         BlockFeedback.AddInitializationMethod(() =>
         {
@@ -119,32 +110,36 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         
     }
 
-    int GetTotal(List<int> total)
-    {
-        int count = 0;
-        foreach(int num in total)
-            count += num;
-        return count;
-    }
-
     public override OrderedDictionary GetSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary();
 
-        data["Trials Completed"] = GetTotal(TrialsCompleted_Task);
-        data["Trials Correct"] = GetTotal(TrialsCorrect_Task);
-        data["TokenBar Completions"] = GetTotal(TokenBarCompletions_Task);
-        data["Total Rewards"] = GetTotal(TotalRewards_Task);
+        data["Trials Completed"] = TrialsCompleted_Task.AsQueryable().Sum();
+        data["Trials Correct"] = TrialsCorrect_Task.AsQueryable().Sum();
+        data["TokenBar Completions"] = TokenBarCompletions_Task.AsQueryable().Sum();
+        data["Total Rewards"] = TotalRewards_Task.AsQueryable().Sum();
         return data;
     }
 
-    private void CalculateBlockSummaryString(ContinuousRecognition_TrialLevel trialLevel)
+    void SetupBlockData()
+    {
+        BlockData.AddDatum("BlockName", () => currentBlock.BlockName);
+        BlockData.AddDatum("NumTrials", () => trialLevel.NumTrials_Block);
+        BlockData.AddDatum("NumCorrect", () => trialLevel.NumCorrect_Block);
+        BlockData.AddDatum("TokenBarCompletions", () => trialLevel.NumTbCompletions_Block);
+        BlockData.AddDatum("TimeToChoice", () => trialLevel.AvgTimeToChoice_Block);
+        BlockData.AddDatum("TimeToCompletion", () => trialLevel.TimeToCompletion_Block);
+        BlockData.AddDatum("NumRewards", () => trialLevel.NumRewards_Block);
+        BlockData.AddDatum("MaxNumTrials", () => currentBlock.MaxNumTrials);
+    }
+
+    public void CalculateBlockSummaryString()
     {
         ClearStrings();
 
         if (BlockCount > 0)
         {
-            BlockAveragesString = "<size=18><b>Block Averages " + $"({BlockCount});" + "</b></size>" +
+            BlockAveragesString = "<b>Block Averages " + $"({BlockCount} block);" + "</b>" +
                               "\nAvg Correct: " + AvgNumCorrect.ToString("0.00") +
                               "\nAvg TbCompletions: " + AvgNumTbCompletions.ToString("0.00") +
                               "\nAvg TimeToChoice: " + AvgTimeToChoice.ToString("0.00") + "s" +
@@ -161,10 +156,14 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
                         "\nTimeToCompletion: " + trialLevel.TimeToCompletion_Block.ToString("0.00") + "s" +
                         "\nRewards: " + trialLevel.NumRewards_Block;
 
-        if (BlockCount > 0) CurrentBlockString += "\n";
+        if (BlockCount > 0)
+        {
+            CurrentBlockString += "\n";
+            BlockSummaryString.AppendLine(BlockAveragesString.ToString());
+        }
 
-        BlockSummaryString.AppendLine(BlockAveragesString.ToString());
         BlockSummaryString.AppendLine(CurrentBlockString.ToString());
+
         if(PreviousBlocksString.Length > 0)
             BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
     }
@@ -196,74 +195,20 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     void CalculateBlockAverages()
     {
-        //Avg Num Correct
-        if (TrialsCorrect_Task.Count == 0)
-            AvgNumCorrect = 0;
-        else
-            AvgNumCorrect = GetIntListAverage(TrialsCorrect_Task);
+        if (TrialsCorrect_Task.Count >= 1)
+            AvgNumCorrect = (float)TrialsCorrect_Task.AsQueryable().Average();
 
-        //Avg Num TokenBar Completions
-        if (TokenBarCompletions_Task.Count == 0)
-            AvgNumTbCompletions = 0;
-        else
-            AvgNumTbCompletions = GetIntListAverage(TokenBarCompletions_Task);
+        if (TokenBarCompletions_Task.Count >= 1)
+            AvgNumTbCompletions = (float)TokenBarCompletions_Task.AsQueryable().Average();
         
-        //Avg TimeToChoice
-        if (TimeToChoice_Task.Count == 0)
-            AvgTimeToChoice = 0;
-        else
-            AvgTimeToChoice = GetFloatListAverage(TimeToChoice_Task);
+        if (TimeToChoice_Task.Count >= 1)
+            AvgTimeToChoice = (float)TimeToChoice_Task.AsQueryable().Average();
 
-        //Avg TimeToCompletion
-        if (TimeToCompletion_Task.Count == 0)
-            AvgTimeToCompletion = 0;
-        else
-            AvgTimeToCompletion = GetFloatListAverage(TimeToCompletion_Task);
+        if (TimeToCompletion_Task.Count >= 1)
+            AvgTimeToCompletion = (float)TimeToCompletion_Task.AsQueryable().Average();
 
-        //Avg NumRewards
-        if (TotalRewards_Task.Count == 0)
-            AvgNumRewards = 0;
-        else
-            AvgNumRewards = GetIntListAverage(TotalRewards_Task);
-    }
-
-    float GetFloatListAverage(List<float> numList)
-    {
-        if (numList.Count == 0)
-            return 0;
-        else
-        {
-            float sum = 0;
-            foreach (float num in numList)
-                sum += num;
-            return sum / numList.Count;
-        }
-    }
-
-    float GetIntListAverage(List<int> numList)
-    {
-        if (numList.Count == 0)
-            return 0;
-        else
-        {
-            float sum = 0;
-            foreach (var num in numList)
-                sum += num;
-            return sum / numList.Count;
-        }
-    }
-
-    void SetupBlockData(ContinuousRecognition_TrialLevel trialLevel)
-    {
-        BlockData.AddDatum("BlockName", () => currentBlock.BlockName);
-        BlockData.AddDatum("NumTrials", () => trialLevel.NumTrials_Block);
-        BlockData.AddDatum("NumCorrect", () => trialLevel.NumCorrect_Block);
-        BlockData.AddDatum("TokenBarCompletions", () => trialLevel.NumTbCompletions_Block);
-        BlockData.AddDatum("TimeToChoice", () => trialLevel.AvgTimeToChoice_Block);
-        BlockData.AddDatum("TimeToCompletion", () => trialLevel.TimeToCompletion_Block);
-        BlockData.AddDatum("NumRewards", () => trialLevel.NumRewards_Block);
-        BlockData.AddDatum("MaxNumTrials", () => currentBlock.MaxNumTrials);
-
+        if (TotalRewards_Task.Count >= 1)
+            AvgNumRewards = (float)TotalRewards_Task.AsQueryable().Average();
     }
 
 }

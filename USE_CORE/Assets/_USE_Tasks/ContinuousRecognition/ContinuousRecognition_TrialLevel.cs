@@ -19,6 +19,7 @@ using TMPro;
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
     public ContinuousRecognition_TrialDef currentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
+    public ContinuousRecognition_TaskLevel currentTask => GetTaskLevel<ContinuousRecognition_TaskLevel>();
 
     public TextMeshProUGUI TimerText;
     public GameObject TimerTextGO;
@@ -35,7 +36,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public GameObject Starfield;
     [HideInInspector] public List<GameObject> BorderPrefabList;
 
-    [HideInInspector] public bool TrialComplete;
     [HideInInspector] public bool CompletedAllTrials;
     [HideInInspector] public bool EndBlock;
     [HideInInspector] public bool StimIsChosen;
@@ -190,7 +190,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             });
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------
-        //Stim are turned on as soon as it enters DisplayStims state. no initialization method needed. 
+        //Stim are turned on as soon as it enters DisplayStims state. no initialization method needed.
         DisplayStims.AddTimer(() => displayStimDuration.value, ChooseStim, () => TimeRemaining = chooseStimDuration.value);
 
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
@@ -407,8 +407,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         ITI.AddInitializationMethod(() => ContextActive = false);
         ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
         {
-            TrialComplete = true;
             NumTrials_Block++;
+            currentTask.CalculateBlockSummaryString();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]); //next trial starts next frame
 
             if (YouWinTextGO.activeSelf)
@@ -430,12 +430,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS -----------------------------------------------------------------------------------------
-
+    void CenterOnScreen(GameObject obj) //not yet used
+    {
+        Vector3 newPos = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2, Screen.height / 2, Camera.main.nearClipPlane));
+        obj.transform.position = new Vector3(newPos.x, newPos.y, obj.transform.position.z);
+    }
 
     void ResetGlobalTrialVariables()
     {
         CompletedAllTrials = false;
-        TrialComplete = false;
         EndBlock = false;
         StimIsChosen = false;
         currentTrial.GotTrialCorrect = false;

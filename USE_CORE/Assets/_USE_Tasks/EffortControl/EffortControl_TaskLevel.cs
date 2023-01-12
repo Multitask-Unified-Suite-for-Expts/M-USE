@@ -12,6 +12,7 @@ using System.Collections.Specialized;
 using System.IO;
 using FLU_Common_Namespace;
 using WhatWhenWhere_Namespace;
+using THR_Namespace;
 
 public class EffortControl_TaskLevel : ControlLevel_Task_Template
 {
@@ -23,6 +24,12 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int NumChosenLeft_Task = 0;
     [HideInInspector] public int NumChosenRight_Task = 0;
 
+    [HideInInspector] public string CurrentBlockString;
+    [HideInInspector] public StringBuilder PreviousBlocksString;
+    [HideInInspector] public int BlockStringsAdded = 0;
+
+    EffortControl_BlockDef currentBlock => GetCurrentBlockDef<EffortControl_BlockDef>();
+    EffortControl_TrialLevel trialLevel;
 
     public override void SpecifyTypes()
     {
@@ -34,10 +41,10 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         StimDefType = typeof(EffortControl_StimDef);
     }
 
-
     public override void DefineControlLevel()
     {
-        EffortControl_TrialLevel trialLevel = (EffortControl_TrialLevel)TrialLevel;
+        trialLevel = (EffortControl_TrialLevel)TrialLevel;
+
         string TaskName = "EffortControl";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
@@ -54,6 +61,11 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             Debug.Log($"No ContextName specified in the {TaskName} Task Config. Defaulting to {ContextName}");
         }
 
+        CurrentBlockString = "";
+        PreviousBlocksString = new StringBuilder();
+
+        SetupBlockData();
+
         SetupTask.AddInitializationMethod(() =>
         {
             RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(ContextName));
@@ -66,10 +78,17 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             trialLevel.Touches_Block = 0;
             trialLevel.NumChosenLeft_Block = 0;
             trialLevel.NumChosenRight_Block = 0;
+
+            CalculateBlockSummaryString();
         });
 
         BlockFeedback.AddInitializationMethod(() =>
         {
+            if (BlockStringsAdded > 0)
+                CurrentBlockString += "\n";
+            BlockStringsAdded++;
+            PreviousBlocksString.Insert(0, CurrentBlockString);
+
             RewardPulses_Task += trialLevel.RewardPulses_Block;
             Completions_Task += trialLevel.Completions_Block;
             Touches_Task += trialLevel.Touches_Block;
@@ -89,6 +108,38 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         data["Chose Right"] = NumChosenRight_Task;
 
         return data;
+    }
+
+    public void CalculateBlockSummaryString()
+    {
+        ClearStrings();
+
+        CurrentBlockString = ("<b>Block " + "(" + currentBlock.BlockName + "):" + "</b>" +
+                        "\nTrialsCompleted: " + trialLevel.Completions_Block +
+                        "\nChoseLeft: " + trialLevel.NumChosenLeft_Block +
+                        "\nChoseRight: " + trialLevel.NumChosenRight_Block +
+                        "\nTouches: " + trialLevel.Touches_Block +
+                        "\nRewardPulses: " + trialLevel.RewardPulses_Block +
+                        "\n");
+
+        BlockSummaryString.AppendLine(CurrentBlockString).ToString();
+        if (PreviousBlocksString.Length > 0)
+            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
+    }
+
+    void SetupBlockData()
+    {
+        BlockData.AddDatum("TrialsCompleted", () => trialLevel.Completions_Block);
+        BlockData.AddDatum("ChoseLeft", () => trialLevel.NumChosenLeft_Block);
+        BlockData.AddDatum("ChoseRight", () => trialLevel.NumChosenRight_Block);
+        BlockData.AddDatum("Touches", () => trialLevel.Touches_Block);
+        BlockData.AddDatum("RewardPulses", () => trialLevel.RewardPulses_Block);
+    }
+
+    void ClearStrings()
+    {
+        CurrentBlockString = "";
+        BlockSummaryString.Clear();
     }
 
 }

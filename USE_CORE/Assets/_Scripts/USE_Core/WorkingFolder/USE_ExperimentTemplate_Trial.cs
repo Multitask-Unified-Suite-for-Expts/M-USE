@@ -162,6 +162,39 @@ namespace USE_ExperimentTemplate_Trial
         }
 
 
+
+        //Added helper methods for trials. 
+        public void ActivateChildren(GameObject parent)
+        {
+            foreach (Transform child in parent.transform)
+                child.gameObject.SetActive(true);
+        }
+
+        public void DeactivateChildren(GameObject parent)
+        {
+            foreach (Transform child in parent.transform)
+                child.gameObject.SetActive(false);
+        }
+
+        public void DestroyChildren(GameObject container)
+        {
+            foreach (Transform child in container.transform)
+                Destroy(child.gameObject);
+        }
+
+        public void ChangeColor(GameObject go, Color color)
+        {
+            go.GetComponent<Renderer>().material.color = color;
+        }
+
+        public void ChangeColor(List<GameObject> objects, Color color)
+        {
+            foreach (GameObject go in objects)
+                go.GetComponent<Renderer>().material.color = color;
+        }
+
+
+
         public StimGroup CreateStimGroup(string groupName, State setActiveOnInit = null, State setInactiveOnTerm = null)
         {
             TaskStims.CreateStimGroup(groupName, setActiveOnInit, setInactiveOnTerm);

@@ -20,7 +20,8 @@ using UnityEngine.EventSystems;
 
 public class THR_TrialLevel : ControlLevel_Trial_Template
 {
-    public THR_TrialDef CurrentTrial => GetCurrentTrialDef<THR_TrialDef>();
+    public THR_TrialDef currentTrial => GetCurrentTrialDef<THR_TrialDef>();
+    public THR_TaskLevel currentTask => GetTaskLevel<THR_TaskLevel>();
 
     public string MaterialFilePath;
     public string ContextPath;
@@ -170,9 +171,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         //INIT TRIAL state --------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
-            if(HeldTooLongTexture == null) //don't have to check all 3 since they're both activated at same time. 
-                LoadGratingMaterials();
-
             ResetGlobalTrialVariables();
 
             if(TrialCount_InBlock == 0)
@@ -201,7 +199,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         {
             Input.ResetInputAxes(); //reset input in case they still touching!
             SquareMaterial.color = Color.white;
-            if (!SquareGO.activeSelf) //don't have to check both square and backdrop since they're both activated at same time. 
+            if (!SquareGO.activeSelf)
                 ActivateSquareAndBackdrop();
             WhiteStartTime = Time.time;
             WhiteTimeoutTime = 0;
@@ -209,14 +207,14 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         });
         WhiteSquare.AddUpdateMethod(() =>
         {
-            if(WhiteTimeoutTime != 0 && (Time.time - WhiteTimeoutTime) > CurrentTrial.TimeoutDuration)
+            if(WhiteTimeoutTime != 0 && (Time.time - WhiteTimeoutTime) > currentTrial.TimeoutDuration)
                 WhiteTimeoutTime = 0;
-            
-            if(MouseTracker.CurrentTargetGameObject == SquareGO)
+
+            if(mouseHandler.SelectionMatches(SquareGO))
             {
-                ClickedWhiteSquare = true;
-                Input.ResetInputAxes(); //to stop them from holding down white square. 
-                if(WhiteTimeoutTime == 0)
+                mouseHandler.Stop();
+                WhiteSquareTouches_Trial++;
+                if (WhiteTimeoutTime == 0)
                 {
                     WhiteTimeoutTime = Time.time;
                     WhiteStartTime = Time.time; //reset original WhiteStartTime so that normal duration resets.
@@ -224,14 +222,15 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                         AudioFBController.Play("Negative");
                 }
             }
-           
-            if (InputBroker.GetMouseButtonUp(0) && ClickedWhiteSquare)
+            if(mouseHandler.SelectionMatches(BackdropGO))
             {
-                WhiteSquareTouches_Trial++;
-                ClickedWhiteSquare = false;
+                mouseHandler.Stop();
+                BackdropTouches_Trial++;
             }
+            if(InputBroker.GetMouseButtonUp(0))
+                mouseHandler.Start();
         });
-        WhiteSquare.SpecifyTermination(() => ((Time.time - WhiteStartTime) > CurrentTrial.WhiteSquareDuration) && WhiteTimeoutTime == 0 && !InputBroker.GetMouseButton(0), BlueSquare);
+        WhiteSquare.SpecifyTermination(() => ((Time.time - WhiteStartTime) > currentTrial.WhiteSquareDuration) && WhiteTimeoutTime == 0, BlueSquare);
 
         //BLUE SQUARE state -------------------------------------------------------------------------------------------------------------------------
         MouseTracker.AddSelectionHandler(mouseHandler, BlueSquare);
@@ -248,6 +247,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             BackdropTouchTime = 0;
             BackdropTouches = 0;
             MovedOutside = false;
+            ClickedOutsideSquare = false;
         });
         BlueSquare.AddUpdateMethod(() =>
         {
@@ -265,18 +265,17 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 if (HeldDuration >= .045f) 
                     SquareMaterial.color = Color.blue;
 
-                if (CurrentTrial.RewardTouch)
+                if (currentTrial.RewardTouch)
                 {
                     BlueSquareTouches_Trial++;
                     GiveTouchReward = true;
                     RewardEarnedTime = Time.time;
                 }
                 //Auto stop them if holding the square for max duration
-                if (mouseHandler.currentTargetDuration > CurrentTrial.MaxTouchDuration)
+                if (mouseHandler.currentTargetDuration > currentTrial.MaxTouchDuration)
                 {
                     NumReleasedLate_Block++;
                     HeldTooLong = true;
-                    BlueSquareReleased = true; //force bluesquarereleased if they holding for max duration, so that it can go to neg FB. 
                 }
             }
             //If they clicked the Backdrop (and not after clicking and holding the square (handled down below))
@@ -286,14 +285,15 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 if (BackdropTouches == 0)
                 {
                     BackdropTouchTime = Time.time;
-                    BlueStartTime += CurrentTrial.TimeoutDuration; //add extra second so it doesn't go straight to white after grating
+                    BlueStartTime += currentTrial.TimeoutDuration; //add extra second so it doesn't go straight to white after grating
                     Input.ResetInputAxes(); //Reset input axis so they can't keep holding down on the backdrop.
                     StartCoroutine(GratedBackdropFlash(BackdropStripeTexture)); //Turn the backdrop to grated texture
                     BackdropTouches++;
+                    BackdropTouches_Trial++;
                 }
             }
             //If they already clicked the backdrop once, and the timeoutduration has lapsed, reset the variables
-            if (BackdropTouchTime != 0 && (Time.time - BackdropTouchTime) > CurrentTrial.TimeoutDuration)
+            if (BackdropTouchTime != 0 && (Time.time - BackdropTouchTime) > currentTrial.TimeoutDuration)
             {
                 BackdropTouches = 0;
                 BackdropTouchTime = 0;
@@ -302,26 +302,26 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             //When they first touch blue square, and then move it over to backdrop.
             if (MouseTracker.CurrentTargetGameObject == BackdropGO && BlueSquareTouched)
             {
+                Input.ResetInputAxes();
+                NumTouchesMovedOutside_Trial++;
                 MovedOutside = true;
-                BlueSquareReleased = true; // force the state to end. 
-                //incrementing MovedOutsideTouches down in feedback instead of here in update.
             }
 
-            if (InputBroker.GetMouseButtonUp(0) && !Grating)
+            if (InputBroker.GetMouseButtonUp(0))
             {
                 if(BlueSquareTouched && !BlueSquareReleased)
                 {
                     TouchReleaseTime = Time.time;
-                    BlueSquareTouches_Trial++;
                     HeldDuration = mouseHandler.currentTargetDuration;
-                    if(CurrentTrial.RewardRelease)
+                    if(currentTrial.RewardRelease)
                     {
-                        if(HeldDuration >= CurrentTrial.MinTouchDuration && HeldDuration <= CurrentTrial.MaxTouchDuration)
+                        if(HeldDuration >= currentTrial.MinTouchDuration && HeldDuration <= currentTrial.MaxTouchDuration)
                         {
+                            BlueSquareTouches_Trial++;
                             GiveReleaseReward = true;
                             RewardEarnedTime = Time.time;
                         }
-                        else if(HeldDuration < CurrentTrial.MinTouchDuration)
+                        else if(HeldDuration < currentTrial.MinTouchDuration)
                         {
                             NumReleasedEarly_Block++;
                             HeldTooShort = true;
@@ -333,18 +333,13 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
                     BlueSquareReleased = true;
                 }
-                if(ClickedOutsideSquare)
-                {
-                    BackdropTouches_Trial++;
-                    ClickedOutsideSquare = false;
-                }
             }
-            if(Time.time - TrialStartTime > CurrentTrial.TimeToAutoEndTrialSec)
+            if(Time.time - TrialStartTime > currentTrial.TimeToAutoEndTrialSec)
                 TimeRanOut = true;
         });
         //Go back to white square if bluesquare time lapses (and they aren't already holding down)
-        BlueSquare.SpecifyTermination(() => (Time.time - BlueStartTime > CurrentTrial.BlueSquareDuration) && !InputBroker.GetMouseButton(0) && !BlueSquareReleased && !Grating, WhiteSquare);
-        BlueSquare.SpecifyTermination(() => (BlueSquareReleased && !Grating) || TimeRanOut || GiveTouchReward, Feedback); //If rewarding touch and they touched, or click the square and release, or run out of time. 
+        BlueSquare.SpecifyTermination(() => (Time.time - BlueStartTime > currentTrial.BlueSquareDuration) && !InputBroker.GetMouseButton(0) && !BlueSquareReleased && !Grating, WhiteSquare);
+        BlueSquare.SpecifyTermination(() => (BlueSquareReleased && !Grating) || MovedOutside || HeldTooLong || HeldTooShort || TimeRanOut || GiveTouchReward, Feedback); //If rewarding touch and they touched, or click the square and release, or run out of time. 
 
         //FEEDBACK state ----------------------------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
@@ -367,10 +362,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 else if (HeldTooLong)
                     StartCoroutine(GratedSquareFlash(HeldTooLongTexture));
                 else if (MovedOutside)
-                {
                     StartCoroutine(GratedSquareFlash(BackdropStripeTexture));
-                    NumTouchesMovedOutside_Trial++;
-                }
             }
             AudioPlayed = true;
         });
@@ -378,32 +370,32 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         {
             if(GiveReleaseReward)
             {
-                if (GraySquareTimer < CurrentTrial.GreyOnReleaseDuration)
+                if (GraySquareTimer < currentTrial.GreyOnReleaseDuration)
                     GraySquareTimer += Time.deltaTime;
                 else
                     GraySquareTimer = -1;
 
                 if(SyncBoxController != null)
                 {
-                    if (RewardTimer < CurrentTrial.ReleaseToRewardDelay)
+                    if (RewardTimer < currentTrial.ReleaseToRewardDelay)
                         RewardTimer += Time.deltaTime;
                     else
                     {
-                        SyncBoxController.SendRewardPulses(CurrentTrial.NumReleasePulses, CurrentTrial.PulseSize);
+                        SyncBoxController.SendRewardPulses(currentTrial.NumReleasePulses, currentTrial.PulseSize);
                         RewardGiven = true;
-                        ReleaseRewards_Trial += CurrentTrial.NumReleasePulses;
+                        ReleaseRewards_Trial += currentTrial.NumReleasePulses;
                     }
                 }
             }
             if(GiveTouchReward && SyncBoxController != null)
             {
-                if(RewardTimer < CurrentTrial.TouchToRewardDelay)
+                if(RewardTimer < currentTrial.TouchToRewardDelay)
                     RewardTimer += Time.deltaTime;
                 else
                 {
-                    SyncBoxController.SendRewardPulses(CurrentTrial.NumTouchPulses, CurrentTrial.PulseSize);
+                    SyncBoxController.SendRewardPulses(currentTrial.NumTouchPulses, currentTrial.PulseSize);
                     RewardGiven = true;
-                    TouchRewards_Trial += CurrentTrial.NumTouchPulses;
+                    TouchRewards_Trial += currentTrial.NumTouchPulses;
                 }
             }
         });
@@ -413,7 +405,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         Feedback.SpecifyTermination(() => GiveTouchReward && RewardGiven, ITI); //when they receive touch reward!
         Feedback.SpecifyTermination(() => (HeldTooShort || HeldTooLong || MovedOutside) && AudioPlayed && !Grating, ITI); //If they got wrong
         Feedback.SpecifyTermination(() => (TimeRanOut) && AudioPlayed, ITI); //state ends after receiving neg FB (if didn't get correct).
-        Feedback.AddTimer(() => CurrentTrial.FbDuration, ITI);
+        Feedback.AddTimer(() => currentTrial.FbDuration, ITI);
 
         //ITI state ---------------------------------------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>
@@ -425,7 +417,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             if (GiveReleaseReward || GiveTouchReward)
                 TrialsCorrect_Block++;
 
-            if ((CurrentTrial.RewardTouch && GiveTouchReward) || (CurrentTrial.RewardRelease && GiveReleaseReward))
+            if ((currentTrial.RewardTouch && GiveTouchReward) || (currentTrial.RewardRelease && GiveReleaseReward))
                 TrialCompletionList.Insert(0, 1);
             else
                 TrialCompletionList.Insert(0, 0);
@@ -435,10 +427,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             if(InputBroker.GetMouseButtonUp(0))
                 ItiTouches_Trial++;
         });
-        ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial, () =>
+        ITI.AddTimer(() => currentTrial.ItiDuration, FinishTrial, () =>
         {
             AddTrialTouchNumsToBlock();
             TrialsCompleted_Block++;
+            currentTask.CalculateBlockSummaryString();
             TrialComplete = true;
 
             CheckIfBlockShouldEnd();
@@ -465,16 +458,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     void SetTrialSummaryString()
     {
         TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) +
-                              "\nRewarding: " + (CurrentTrial.RewardTouch ? "Touch" : "Release") +
-                              "\nRandomPosition: " + ((CurrentTrial.RandomSquarePosition ? "True" : "False")) +
-                              "\nRandomSize: " + ((CurrentTrial.RandomSquareSize ? "True" : "False"));
-    }
-
-    void LoadGratingMaterials()
-    {
-        HeldTooShortTexture = Resources.Load<Texture2D>("VerticalStripes");
-        HeldTooLongTexture = Resources.Load<Texture2D>("HorizontalStripes");
-        BackdropStripeTexture = Resources.Load<Texture2D>("BackgroundStripes");
+                              "\nRewarding: " + (currentTrial.RewardTouch ? "Touch" : "Release") +
+                              "\nRandomPosition: " + ((currentTrial.RandomSquarePosition ? "True" : "False")) +
+                              "\nRandomSize: " + ((currentTrial.RandomSquareSize ? "True" : "False"));
     }
 
     protected override bool CheckBlockEnd()
@@ -484,28 +470,28 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     void CheckIfBlockShouldEnd()
     {
-        if(TrialsCompleted_Block >= CurrentTrial.PerfWindowEndTrials)
+        if(TrialsCompleted_Block >= currentTrial.PerfWindowEndTrials)
         {
             int sum = 0;
-            for(int i = 0; i < CurrentTrial.PerfWindowEndTrials; i++)
+            for(int i = 0; i < currentTrial.PerfWindowEndTrials; i++)
             {
                 sum += TrialCompletionList[i];
             }
-            float performancePerc = sum / CurrentTrial.PerfWindowEndTrials;
-            if(performancePerc >= CurrentTrial.PerfThresholdEndTrials)
+            float performancePerc = sum / currentTrial.PerfWindowEndTrials;
+            if(performancePerc >= currentTrial.PerfThresholdEndTrials)
                 PerfThresholdMet = true; //Will trigger CheckBlockEnd function to terminate block
         }
     }
 
     void SetBlockDefaultValues()
     {
-        BlockDefaultSquareSize = CurrentTrial.SquareSize;
-        BlockDefaultPositionX = CurrentTrial.PositionX;
-        BlockDefaultPositionY = CurrentTrial.PositionY;
-        BlockDefaultMinTouchDuration = CurrentTrial.MinTouchDuration;
-        BlockDefaultMaxTouchDuration = CurrentTrial.MaxTouchDuration;
-        BlockDefaultWhiteSquareDuration = CurrentTrial.WhiteSquareDuration;
-        BlockDefaultBlueSquareDuration = CurrentTrial.BlueSquareDuration;
+        BlockDefaultSquareSize = currentTrial.SquareSize;
+        BlockDefaultPositionX = currentTrial.PositionX;
+        BlockDefaultPositionY = currentTrial.PositionY;
+        BlockDefaultMinTouchDuration = currentTrial.MinTouchDuration;
+        BlockDefaultMaxTouchDuration = currentTrial.MaxTouchDuration;
+        BlockDefaultWhiteSquareDuration = currentTrial.WhiteSquareDuration;
+        BlockDefaultBlueSquareDuration = currentTrial.BlueSquareDuration;
     }
 
     bool ConfigValuesChanged()
@@ -526,19 +512,19 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     void UpdateSquare()
     {
-        SquareGO.transform.localScale = new Vector3(CurrentTrial.SquareSize, CurrentTrial.SquareSize, .001f);
-        SquareGO.transform.localPosition = new Vector3(CurrentTrial.PositionX, CurrentTrial.PositionY, 90);
+        SquareGO.transform.localScale = new Vector3(currentTrial.SquareSize, currentTrial.SquareSize, .001f);
+        SquareGO.transform.localPosition = new Vector3(currentTrial.PositionX, currentTrial.PositionY, 90);
     }
 
     void SetTrialValuesToConfigValues()
     {
-        CurrentTrial.MinTouchDuration = ConfigUiVariables.get<ConfigNumber>("minTouchDuration").value;
-        CurrentTrial.MaxTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxTouchDuration").value;
-        CurrentTrial.SquareSize = ConfigUiVariables.get<ConfigNumber>("squareSize").value;
-        CurrentTrial.PositionX = ConfigUiVariables.get<ConfigNumber>("positionX").value;
-        CurrentTrial.PositionY = ConfigUiVariables.get<ConfigNumber>("positionY").value;
-        CurrentTrial.WhiteSquareDuration = ConfigUiVariables.get<ConfigNumber>("whiteSquareDuration").value;
-        CurrentTrial.BlueSquareDuration = ConfigUiVariables.get<ConfigNumber>("blueSquareDuration").value;
+        currentTrial.MinTouchDuration = ConfigUiVariables.get<ConfigNumber>("minTouchDuration").value;
+        currentTrial.MaxTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxTouchDuration").value;
+        currentTrial.SquareSize = ConfigUiVariables.get<ConfigNumber>("squareSize").value;
+        currentTrial.PositionX = ConfigUiVariables.get<ConfigNumber>("positionX").value;
+        currentTrial.PositionY = ConfigUiVariables.get<ConfigNumber>("positionY").value;
+        currentTrial.WhiteSquareDuration = ConfigUiVariables.get<ConfigNumber>("whiteSquareDuration").value;
+        currentTrial.BlueSquareDuration = ConfigUiVariables.get<ConfigNumber>("blueSquareDuration").value;
     }
 
     void ActivateSquareAndBackdrop()
@@ -574,22 +560,22 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     void SetSquareSizeAndPosition()
     {
-        if(CurrentTrial.RandomSquareSize)
+        if(currentTrial.RandomSquareSize)
         {
-            float randomSize = Random.Range(CurrentTrial.SquareSizeMin, CurrentTrial.SquareSizeMax);
+            float randomSize = Random.Range(currentTrial.SquareSizeMin, currentTrial.SquareSizeMax);
             SquareGO.transform.localScale = new Vector3(randomSize, randomSize, .001f);
         }
         else
-            SquareGO.transform.localScale = new Vector3(CurrentTrial.SquareSize, CurrentTrial.SquareSize, .001f);
+            SquareGO.transform.localScale = new Vector3(currentTrial.SquareSize, currentTrial.SquareSize, .001f);
         
-        if(CurrentTrial.RandomSquarePosition)
+        if(currentTrial.RandomSquarePosition)
         {
-            float x = Random.Range(CurrentTrial.PositionX_Min, CurrentTrial.PositionX_Max);
-            float y = Random.Range(CurrentTrial.PositionY_Min, CurrentTrial.PositionY_Max);
+            float x = Random.Range(currentTrial.PositionX_Min, currentTrial.PositionX_Max);
+            float y = Random.Range(currentTrial.PositionY_Min, currentTrial.PositionY_Max);
             SquareGO.transform.localPosition = new Vector3(x, y, 90);
         }
         else
-            SquareGO.transform.localPosition = new Vector3(CurrentTrial.PositionX, CurrentTrial.PositionY, 90);
+            SquareGO.transform.localPosition = new Vector3(currentTrial.PositionX, currentTrial.PositionY, 90);
         
     }
 
@@ -616,7 +602,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         Grating = true;
         SquareMaterial.color = LightRedColor;
         SquareRenderer.material.mainTexture = newTexture;
-        yield return new WaitForSeconds(CurrentTrial.GratingSquareDuration);
+        yield return new WaitForSeconds(currentTrial.GratingSquareDuration);
         SquareRenderer.material.mainTexture = SquareTexture;
         Grating = false;
     }
@@ -655,14 +641,14 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     void LogTrialData()
     {
-        TrialData.AddDatum("SquareSize", () => CurrentTrial.SquareSize);
-        TrialData.AddDatum("SquarePosX", () => CurrentTrial.PositionX);
-        TrialData.AddDatum("SquarePosY", () => CurrentTrial.PositionY);
-        TrialData.AddDatum("MinTouchDuration", () => CurrentTrial.MinTouchDuration);
-        TrialData.AddDatum("MaxTouchDuration", () => CurrentTrial.MaxTouchDuration);
-        TrialData.AddDatum("RewardTouch", () => CurrentTrial.RewardTouch);
-        TrialData.AddDatum("RewardRelease", () => CurrentTrial.RewardRelease);
-        TrialData.AddDatum("DifficultyLevel", () => CurrentTrial.BlockName);
+        TrialData.AddDatum("SquareSize", () => currentTrial.SquareSize);
+        TrialData.AddDatum("SquarePosX", () => currentTrial.PositionX);
+        TrialData.AddDatum("SquarePosY", () => currentTrial.PositionY);
+        TrialData.AddDatum("MinTouchDuration", () => currentTrial.MinTouchDuration);
+        TrialData.AddDatum("MaxTouchDuration", () => currentTrial.MaxTouchDuration);
+        TrialData.AddDatum("RewardTouch", () => currentTrial.RewardTouch);
+        TrialData.AddDatum("RewardRelease", () => currentTrial.RewardRelease);
+        TrialData.AddDatum("DifficultyLevel", () => currentTrial.BlockName);
         TrialData.AddDatum("BlueSquareTouches_Trial", () => BlueSquareTouches_Trial);
         TrialData.AddDatum("WhiteSquareTouches_Trial", () => WhiteSquareTouches_Trial);
         TrialData.AddDatum("BackdropTouches_Trial", () => BackdropTouches_Trial);

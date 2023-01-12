@@ -261,9 +261,11 @@ MonoBehaviour:
   TrialCount_InBlock: 0
   AbortCode: 0
   StoreData: 0
+  ForceBlockEnd: 0
   TaskDataPath: 
   FilePrefix: 
   TrialSummaryString: 
+  TaskLevel: {fileID: 0}
   PreloadedStims:
     stimGroupName: 
     IsActive: 0
@@ -288,47 +290,78 @@ MonoBehaviour:
   EventCodeManager: {fileID: 0}
   MaterialFilePath: 
   ContextPath: 
+  BackdropStripeTexture: {fileID: 2800000, guid: 5e3c55f5f31f54d108dd7dc199ff7a7b,
+    type: 3}
+  HeldTooShortTexture: {fileID: 2800000, guid: 0cde948f5b2fd4e70990f858c2cbd0bf, type: 3}
+  HeldTooLongTexture: {fileID: 2800000, guid: d4b535df45529408fb606aeb645a0ce2, type: 3}
+  BackdropRenderer: {fileID: 0}
+  BackdropTexture: {fileID: 0}
   BackdropPrefab: {fileID: 6236812614538877600, guid: c361c637d41464c0bad1bf8ee2cc70d5,
     type: 3}
   BackdropGO: {fileID: 0}
-  BackdropRenderer: {fileID: 0}
   SquarePrefab: {fileID: 2991565490583254512, guid: 67e7475931d034539aa5cc7cf4ddd4f5,
     type: 3}
   SquareGO: {fileID: 0}
   SquareRenderer: {fileID: 0}
+  SquareTexture: {fileID: 0}
   THR_Canvas: {fileID: 0}
   THR_CanvasGO: {fileID: 0}
-  FeedbackStartTime: 0
   TrialStartTime: 0
   TouchStartTime: 0
   TouchReleaseTime: 0
   HeldDuration: 0
+  BackdropTouchTime: 0
+  BackdropTouches: 0
+  TrialComplete: 0
   GiveTouchReward: 0
-  GiveHoldReward: 0
+  GiveReleaseReward: 0
   ClickedSquare: 0
-  AutoEndTrial: 0
+  TimeRanOut: 0
   ConfigVariablesLoaded: 0
-  NumTrialsCompletedBlock: 0
-  NumTrialsCorrectBlock: 0
-  NumNonSquareTouches: 0
-  NumTouchesBlueSquare: 0
-  NumTouchesWhiteSquare: 0
+  TrialCompletionList: 
+  TrialsCompleted_Block: 0
+  TrialsCorrect_Block: 0
+  BackdropTouches_Trial: 0
+  BlueSquareTouches_Trial: 0
+  WhiteSquareTouches_Trial: 0
+  ItiTouches_Trial: 0
+  TouchRewards_Trial: 0
+  ReleaseRewards_Trial: 0
+  NumTouchesMovedOutside_Trial: 0
+  BackdropTouches_Block: 0
+  BlueSquareTouches_Block: 0
+  WhiteSquareTouches_Block: 0
+  NumTouchRewards_Block: 0
+  NumReleaseRewards_Block: 0
+  NumItiTouches_Block: 0
+  NumReleasedEarly_Block: 0
+  NumReleasedLate_Block: 0
+  NumTouchesMovedOutside_Block: 0
   SquareMaterial: {fileID: 0}
   BackdropMaterial: {fileID: 0}
-  THR_Cam: {fileID: 0}
-  ClickReleased: 0
+  WhiteSquareTouched: 0
+  BlueSquareTouched: 0
+  BlueSquareReleased: 0
+  ClickedOutsideSquare: 0
+  ClickedWhiteSquare: 0
+  IsLevelOne: 0
+  PerfThresholdMet: 0
   ColorsSet: 0
-  RedWhiteStripeFilePath: 
-  DarkBlueBackgroundColor:
+  LightBlueColor:
     serializedVersion: 2
     rgba: 0
   LightRedColor:
     serializedVersion: 2
     rgba: 0
-  LightBlueColor:
+  DarkBlueBackgroundColor:
     serializedVersion: 2
     rgba: 0
-  ConfigValuesChanged: 0
+  InitialSquareColor:
+    serializedVersion: 2
+    rgba: 0
+  InitialBackdropColor:
+    serializedVersion: 2
+    rgba: 0
   BlockDefaultSquareSize: 0
   BlockDefaultPositionX: 0
   BlockDefaultPositionY: 0
@@ -336,7 +369,21 @@ MonoBehaviour:
   BlockDefaultMaxTouchDuration: 0
   BlockDefaultWhiteSquareDuration: 0
   BlockDefaultBlueSquareDuration: 0
-  IsLevelOne: 0
+  AudioPlayed: 0
+  Grating: 0
+  HeldTooShort: 0
+  HeldTooLong: 0
+  WhiteTimeoutTime: 0
+  WhiteStartTime: 0
+  BlueStartTime: 0
+  WhiteTimeoutDuration: 0
+  GraySquareTimer: 0
+  RewardEarnedTime: 0
+  RewardGivenTime: 0
+  RewardTimer: 0
+  RewardGiven: 0
+  HoldSquareTime: 0
+  MovedOutside: 0
 --- !u!114 &900455551
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -396,6 +443,19 @@ MonoBehaviour:
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
+  CurrentBlockString: 
+  BlockStringsAdded: 0
+  TrialsCompleted_Task: 0
+  TrialsCorrect_Task: 0
+  BlueSquareTouches_Task: 0
+  WhiteSquareTouches_Task: 0
+  BackdropTouches_Task: 0
+  ItiTouches_Task: 0
+  TouchRewards_Task: 0
+  ReleaseRewards_Task: 0
+  ReleasedEarly_Task: 0
+  ReleasedLate_Task: 0
+  TouchesMovedOutside_Task: 0
 --- !u!4 &900455552
 Transform:
   m_ObjectHideFlags: 0

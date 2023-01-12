@@ -82,7 +82,6 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
-                Cursor.visible = false;
 
                 AbortCode = 0;
                 TrialCount_InTask++;

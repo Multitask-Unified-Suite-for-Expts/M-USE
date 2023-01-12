@@ -200,7 +200,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             curRep = 0;
             startButton.SetActive(true);
-            // RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
+            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
         });
         StartButton.AddUpdateMethod(() =>
         {

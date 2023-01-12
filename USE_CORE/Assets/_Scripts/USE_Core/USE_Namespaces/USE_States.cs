@@ -763,7 +763,7 @@ namespace USE_States
 		/// Adds the control level initialization method.
 		/// </summary>
 		/// <param name="method">Method.</param>
-		public void AddInitializationMethod(VoidDelegate method)
+		public void Add_ControlLevel_InitializationMethod(VoidDelegate method)
 		{
 			controlLevelInitialization += method;
 		}

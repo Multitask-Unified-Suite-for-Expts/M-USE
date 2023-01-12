@@ -20,7 +20,7 @@ public class ControlLevel_TextSlides : ControlLevel {
         State blankSlide = new State("BlankSlide");
         AddActiveStates(new List<State> { textSlide, blankSlide });
 
-        this.AddInitializationMethod(() => { 
+        this.Add_ControlLevel_InitializationMethod(() => { 
             panelObj.SetActive(true);
         });
 

@@ -29,10 +29,12 @@ namespace USE_ExperimentTemplate_Task
         protected BlockData BlockData;
         protected FrameData FrameData;
         protected TrialData TrialData;
+        [HideInInspector] public SerialSentData SerialSentData;
+        [HideInInspector] public SerialRecvData SerialRecvData;
 
         [HideInInspector] public SessionDataControllers SessionDataControllers;
 
-        [HideInInspector] public bool StoreData, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
+        [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         [HideInInspector] public string SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
         [HideInInspector] public LocateFile LocateFile;
         [HideInInspector] public StringBuilder BlockSummaryString;
@@ -110,7 +112,7 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.TrialDefType = TrialDefType;
             TrialLevel.StimDefType = StimDefType;
 
-            AddInitializationMethod(() =>
+            Add_ControlLevel_InitializationMethod(() =>
             {
                 BlockCount = -1;
                 BlockSummaryString = new StringBuilder();
@@ -118,24 +120,6 @@ namespace USE_ExperimentTemplate_Task
                 if (TaskCanvasses != null)
                     foreach (GameObject go in TaskCanvasses)
                         go.SetActive(true);
-                //
-                // GameObject experimenterInfoPrefab = Resources.Load<GameObject>("ExperimenterInfo");
-                // GameObject experimenterInfo = Instantiate(experimenterInfoPrefab);
-                // experimenterInfo.name = "ExperimenterInfo";
-                //
-                // GameObject cameraObj = new GameObject("DrawCamera");
-                // cameraObj.transform.SetParent(experimenterInfo.transform);
-                // Camera newCamera = cameraObj.AddComponent<Camera>();
-                // newCamera.CopyFrom(Camera.main);
-                // newCamera.cullingMask = 0;
-                //
-                // DrawRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
-                // DrawRenderTexture.Create();
-                // Camera.main.targetTexture = DrawRenderTexture;
-                //
-                // RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
-                // mainCameraCopy.texture = DrawRenderTexture;
-                //mainCameraCopy.rectTransform.sizeDelta = new Vector2(Screen.width / 2, Screen.height / 2);
 
                 if (configUI == null)
                     configUI = FindObjectOfType<ConfigUI>();
@@ -299,6 +283,8 @@ namespace USE_ExperimentTemplate_Task
 
 
             TrialLevel.SerialPortController = SerialPortController;
+            TrialLevel.SerialRecvData = SerialRecvData;
+            TrialLevel.SerialSentData = SerialSentData;
             TrialLevel.SyncBoxController = SyncBoxController;
             TrialLevel.EventCodeManager = EventCodeManager;
             if (TaskEventCodes != null)

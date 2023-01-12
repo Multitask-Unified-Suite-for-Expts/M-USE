@@ -29,9 +29,9 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         else if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
             wwwTL.MaterialFilePath = (String) SessionSettings.Get("Session", "ContextExternalFilePath");
         else Debug.LogError("Context External File Path setting not defined in the TaskDef or Session config files.");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "UsingRewardPump"))
+        /*if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "UsingRewardPump"))
             wwwTL.usingRewardPump = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "UsingRewardPump");
-        else Debug.LogError("Using Reward Pump setting not defined in the TaskDef");
+        else Debug.LogError("Using Reward Pump setting not defined in the TaskDef");*/
         RunBlock.AddInitializationMethod(() =>
         {
             //comment each error type

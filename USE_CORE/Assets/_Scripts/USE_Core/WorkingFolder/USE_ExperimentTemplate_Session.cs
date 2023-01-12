@@ -334,12 +334,12 @@ namespace USE_ExperimentTemplate_Session
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
-                RenderSettings.skybox = ControlLevel_Trial_Template.CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+                RenderSettings.skybox = ControlLevel_Trial_Template.CreateSkybox(ContextExternalFilePath + "/" + ContextName + ".png");
                 SessionSettings.Restore();
                 selectedConfigName = null;
 
                 SessionCam.gameObject.SetActive(true);
-                //SessionCam.targetDisplay = 2;
+                // SessionCam.targetDisplay = 2;
                 CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
                 CameraMirrorTexture.Create();
                 Camera.main.targetTexture = CameraMirrorTexture;

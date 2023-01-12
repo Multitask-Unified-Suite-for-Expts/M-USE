@@ -8,6 +8,7 @@ using USE_States;
 using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
+using System.Data.SqlClient;
 
 namespace USE_ExperimentTemplate_Data
 {
@@ -53,6 +54,60 @@ namespace USE_ExperimentTemplate_Data
         public ControlLevel_Session_Template sessionLevel;
         public ControlLevel_Task_Template taskLevel;
         public ControlLevel_Trial_Template trialLevel;
+
+
+        public string ConnectionString = "connectionStringGoesHere";
+
+        public SqlConnection Connection
+        {
+            get
+            {
+                return new SqlConnection(ConnectionString);
+            }
+        }
+
+
+        public void CreateSQLDatabase()
+        {
+            using (var conn = Connection)
+            {
+                conn.Open();
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"CREATE DATABASE [IF NOT EXISTS] USE_Test";
+                    cmd.ExecuteNonQuery();
+                }
+                conn.Close();
+            }
+        }
+
+        public void CreateSQLTable()
+        {
+            //need to get task name, then need to get datacontroller name.
+            //string taskName = "CR";
+            //string name = (this.name + tasklevel);
+
+            using (var conn = Connection)
+            {
+                conn.Open();
+                using (var cmd = conn.CreateCommand())
+                {
+                    string commandString = "";
+                    //loop through each piece of data, for each
+                    foreach(var datum in this.)
+                    cmd.CommandText = $@"CREATE TABLE {name} (ID INT PRIMARY KEY, Name VARCHAR(255), Salary DECIMAL(18,2))";
+                    //cmd.CommandText = commandString;
+                    cmd.ExecuteNonQuery();
+                }
+                conn.Close();
+            }
+        }
+
+        public void CheckIfSQLTableExists()
+        {
+            //if table does not exists, CreateSQLTable();
+        }
+
 
         public override void DefineDataController()
         {

@@ -339,7 +339,7 @@ namespace USE_ExperimentTemplate_Session
                 selectedConfigName = null;
 
                 SessionCam.gameObject.SetActive(true);
-                SessionCam.targetDisplay = 2;
+                //SessionCam.targetDisplay = 2;
                 CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
                 CameraMirrorTexture.Create();
                 Camera.main.targetTexture = CameraMirrorTexture;

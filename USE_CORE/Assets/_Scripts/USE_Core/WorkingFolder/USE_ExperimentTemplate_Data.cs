@@ -56,8 +56,7 @@ namespace USE_ExperimentTemplate_Data
         public ControlLevel_Trial_Template trialLevel;
 
 
-        public string ConnectionString = "connectionStringGoesHere";
-
+        private readonly string ConnectionString = "Server=127.0.0.1;uid=root;pwd=12345;database=USE_Test;";
         public SqlConnection Connection
         {
             get
@@ -66,6 +65,13 @@ namespace USE_ExperimentTemplate_Data
             }
         }
 
+
+        public Dictionary<string, string> SQLType_Dict = new Dictionary<string, string>()
+        {
+            {"string", "VARCHAR(255)"},
+            {"integer", "INT"}, //check first one
+            {"decimal", "DECIMAL(18, 2)"}, //check first one, and also either make the 18-2 default or have a ton depending on size. 
+        };
 
         public void CreateSQLDatabase()
         {
@@ -83,29 +89,83 @@ namespace USE_ExperimentTemplate_Data
 
         public void CreateSQLTable()
         {
-            //need to get task name, then need to get datacontroller name.
-            //string taskName = "CR";
-            //string name = (this.name + tasklevel);
-
-            using (var conn = Connection)
+            //if creating session table, it doesn't have task name
+            string tableName = (taskLevel.name == "Session" ? (taskLevel.name) : (taskLevel.name + this.name));
+            if (DoesSQLTableExist(tableName))
+                AddDataToSQL();
+            else
             {
-                conn.Open();
-                using (var cmd = conn.CreateCommand())
+                using (var conn = Connection)
                 {
-                    string commandString = "";
-                    //loop through each piece of data, for each
-                    foreach(var datum in this.)
-                    cmd.CommandText = $@"CREATE TABLE {name} (ID INT PRIMARY KEY, Name VARCHAR(255), Salary DECIMAL(18,2))";
-                    //cmd.CommandText = commandString;
-                    cmd.ExecuteNonQuery();
+                    conn.Open();
+                    using (var cmd = conn.CreateCommand())
+                    {
+                        string sqlString = $@"CREATE TABLE {tableName} (Id INT PRIMARY KEY";
+                        //loop through each piece of data, for each
+                        foreach (var datum in this.data)
+                        {
+                            var sqlType = SQLType_Dict[datum.GetType().ToString()];
+                            sqlString += $", {datum.Name} {sqlType}";
+                        }
+                        sqlString += ");";
+                        cmd.CommandText = sqlString;
+                        cmd.ExecuteNonQuery();
+                    }
+                    conn.Close();
                 }
-                conn.Close();
             }
         }
 
-        public void CheckIfSQLTableExists()
+        public void AddSessionDataToSQL()
         {
-            //if table does not exists, CreateSQLTable();
+            //sql statement to add session data
+        }
+
+        //method will take in all different data controllers and decide which repository method to call
+        public void AddDataToSQL()
+        {
+            if (taskLevel.name == "Session")
+                AddSessionDataToSQL();
+            else
+            {
+                //switch statement that checks "t
+                switch (taskLevel.name + "_" + this.name)
+                {
+                    //need these 3 cases for every task:
+                    case "ContinuousRecognition_BlockData":
+                        //AddBlockData_CR();
+                        break;
+                    case "ContinuousRecognition_TrialData":
+                        //AddTrialData_CR();
+                        break;
+                    case "ContinuousRecognition_FrameData":
+                        //AddFrameData_CR();
+                        break;
+                    default:
+                        Debug.Log($"No SQL Table name matches {taskLevel.name + this.name}");
+                        break;
+                }
+            }
+        }
+
+        public bool DoesSQLTableExist(string tableName)
+        {
+            bool tableExists = new bool();
+
+            using(var conn = Connection)
+            {
+                conn.Open();
+                using(var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = $@"SELECT * FROM {tableName};";
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    tableExists = reader.Read();
+                    reader.Close();
+                }
+                conn.Close();
+
+                return tableExists;
+            }
         }
 
 

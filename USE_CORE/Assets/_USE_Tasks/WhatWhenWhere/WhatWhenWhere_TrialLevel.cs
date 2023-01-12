@@ -151,7 +151,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             // Set the background texture to that of specified context
             contextActive = true;
             contextName = CurrentTrialDef.ContextName;
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
+            //RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
             ResetRelativeStartTime();
             Debug.Log("Current Block Context: " + CurrentTrialDef.ContextName);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
@@ -683,7 +683,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             distractorStims.ToggleVisibility(false);
             contextActive = false;
             contextName = "itiImage";
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + contextName + ".png");
+            //RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + contextName + ".png");
             playerViewLoaded = false;
             //Destroy all created text objects on Player View of Experimenter Display
             foreach (GameObject txt in playerViewTextList)

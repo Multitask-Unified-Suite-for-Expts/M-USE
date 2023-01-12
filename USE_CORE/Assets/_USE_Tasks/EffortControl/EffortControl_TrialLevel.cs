@@ -616,6 +616,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             contextPath = filePaths[0];
         else
         {
+            Debug.Log("MFP = Null? " + MaterialFilePath);
             contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0]; //Use Default LinearDark if can't find file.
             Debug.Log($"Context File Path Not Found. Defaulting to {backupContextName}.");
         }

@@ -105,7 +105,7 @@ namespace USE_ExperimentTemplate_Data
         {
             DataControllerName = "SerialSentData";
             AddDatum("FrameSent\tFrameStart\tSystemTimestamp\tMsWait\tMessage",
-                () => sc.BufferToString("received"));
+                () => sc.BufferToString("sent"));
         }
     }
     public class SerialRecvData : USE_Template_DataController
@@ -116,7 +116,7 @@ namespace USE_ExperimentTemplate_Data
         {
             DataControllerName = "SerialRecvData";
             AddDatum("FrameRecv\tFrameStart\tSystemTimestamp\tMsWait\tMessage", 
-                () => sc.BufferToString("sent"));
+                () => sc.BufferToString("received"));
         }
     }
 

@@ -65,7 +65,7 @@ namespace USE_ExperimentTemplate_Data
             }
         }
 
-
+        //Dict to hold all the sql data types, so they will be correct for sql command
         public Dictionary<string, string> SQLType_Dict = new Dictionary<string, string>()
         {
             {"string", "VARCHAR(255)"},
@@ -118,7 +118,7 @@ namespace USE_ExperimentTemplate_Data
 
         public void AddSessionDataToSQL()
         {
-            //sql statement to add session data
+            //sql statement to add session data table
         }
 
         //method will take in all different data controllers and decide which repository method to call

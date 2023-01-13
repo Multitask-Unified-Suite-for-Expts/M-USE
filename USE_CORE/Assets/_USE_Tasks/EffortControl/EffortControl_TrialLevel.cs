@@ -252,11 +252,15 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    Inflate = false;
-                    if(ClickCount >= ClicksNeeded)
+                    if (ClickCount >= ClicksNeeded)
                     {
                         Response = 1;
                         AvgClickTime = clickTimings.Average();
+                    }
+                    else
+                    {
+                        Inflate = false;
+                        mouseHandler.Start();
                     }
                 }
             }
@@ -278,12 +282,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     AudioFBController.Play("InflateAndPop");
                     PopAudioStartTime = Time.time;
                 }
-            }
-
-            if (InputBroker.GetMouseButtonUp(0))
-            {
-                if(ClickCount < ClicksNeeded)
-                    mouseHandler.Start();
             }
         });
         InflateBalloon.AddTimer(() => inflateDuration.value, PopBalloon);

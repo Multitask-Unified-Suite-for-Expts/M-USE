@@ -471,7 +471,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public string GetContextNestedFilePath(string contextName) //Recursively search the subfolders of the MaterialFilePath to get ContextFilePath
     {
         string backupContextName = "LinearDark";
-        string contextPath = ""; 
+        string contextPath = "";
 
         string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
 

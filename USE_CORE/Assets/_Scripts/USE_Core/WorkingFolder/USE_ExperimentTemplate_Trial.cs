@@ -73,6 +73,9 @@ namespace USE_ExperimentTemplate_Trial
             SetupTrial = new State("SetupTrial");
             FinishTrial = new State("FinishTrial");
             AddActiveStates(new List<State> { SetupTrial, FinishTrial });
+
+            Cursor.visible = false;
+
             //DefineTrial();
             Add_ControlLevel_InitializationMethod(() =>
             {
@@ -84,8 +87,6 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
-                // Cursor.visible = false;
-
                 AbortCode = 0;
                 TrialCount_InTask++;
                 TrialCount_InBlock++;

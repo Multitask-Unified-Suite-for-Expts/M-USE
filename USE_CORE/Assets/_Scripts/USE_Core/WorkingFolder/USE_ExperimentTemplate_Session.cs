@@ -334,7 +334,7 @@ namespace USE_ExperimentTemplate_Session
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
-                RenderSettings.skybox = ControlLevel_Trial_Template.CreateSkybox(ContextExternalFilePath + "/" + ContextName + ".png");
+                RenderSettings.skybox = ControlLevel_Trial_Template.CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
                 SessionSettings.Restore();
                 selectedConfigName = null;
 
@@ -696,8 +696,6 @@ namespace USE_ExperimentTemplate_Session
         void SceneLoaded(string configName, bool verifyOnly)
         {
             string taskName = (string)TaskMappings[configName];
-            Debug.Log("configName: " + configName);
-            Debug.Log("taskName: " + taskName);
             var methodInfo = GetType().GetMethod(nameof(this.PrepareTaskLevel));
             
             Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;

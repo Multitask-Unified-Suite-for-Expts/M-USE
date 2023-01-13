@@ -72,8 +72,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     //Variables to Inflate balloon at interval rate
     bool Inflate;
-    readonly int FramesToInflateOver = 100;
-    readonly float MaxInflation_Y = 25f;
+    int FramesToInflateOver = 100;
+    float MaxInflation_Y = 25f;
     float ScalePerInflation_Y;
     Vector3 IncrementAmounts;
     Vector3 NextScale;
@@ -111,6 +111,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         if(AudioFBController != null)
             AddAudioClips();
+
+        if (!Debug.isDebugBuild)
+            FramesToInflateOver = 50;
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
@@ -577,6 +580,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     {
         string contextPath = GetContextNestedFilePath("StartButtonImage.png");
         Texture2D tex = LoadPNG(contextPath);
+        //Texture2D tex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
+        Debug.Log(tex.name);
+        Debug.Log(tex.ToString());
         Rect rect = new Rect(new Vector2(0, 0), new Vector2(1, 1));
 
         Vector3 buttonPosition = Vector3.zero;

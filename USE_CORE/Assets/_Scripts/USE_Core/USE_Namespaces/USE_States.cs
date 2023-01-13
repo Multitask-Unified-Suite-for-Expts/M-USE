@@ -38,7 +38,7 @@ using System.Collections.Specialized;
 using UnityEngine;
 using USE_StimulusManagement;
 using System.IO;
-
+using UnityEditor;
 
 namespace USE_States
 {
@@ -763,7 +763,7 @@ namespace USE_States
 		/// Adds the control level initialization method.
 		/// </summary>
 		/// <param name="method">Method.</param>
-		public void AddInitializationMethod(VoidDelegate method)
+		public void Add_ControlLevel_InitializationMethod(VoidDelegate method)
 		{
 			controlLevelInitialization += method;
 		}
@@ -1374,34 +1374,31 @@ namespace USE_States
 
         public static Texture2D LoadPNG(string filePath)
         {
-
             Texture2D tex = null;
             byte[] fileData;
 
-            if (File.Exists(filePath))
-            {
-                fileData = File.ReadAllBytes(filePath);
-                tex = new Texture2D(2, 2);
-                tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
-            }
+			if (File.Exists(filePath))
+			{
+				fileData = File.ReadAllBytes(filePath);
+				tex = new Texture2D(2, 2);
+				tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
+			}
             return tex;
         }
 
         public static Material CreateSkybox(string filePath)
         {
-            Texture2D tex = null;
-            Material materialSkybox = new Material(Shader.Find("Skybox/6 Sided"));
+			Material materialSkybox = new Material(Shader.Find("Skybox/6 Sided"));
+			Texture2D tex = null;
+			tex = LoadPNG(filePath); // load the texture from a PNG -> Texture2D
 
-            tex = LoadPNG(filePath); // load the texture from a PNG -> Texture2D
-
-            //Set the textures of the skybox to that of the PNG
-            materialSkybox.SetTexture("_FrontTex", tex);
+			//Set the textures of the skybox to that of the PNG
+			materialSkybox.SetTexture("_FrontTex", tex);
             materialSkybox.SetTexture("_BackTex", tex);
             materialSkybox.SetTexture("_LeftTex", tex);
             materialSkybox.SetTexture("_RightTex", tex);
             materialSkybox.SetTexture("_UpTex", tex);
             materialSkybox.SetTexture("_DownTex", tex);
-
             return materialSkybox;
         }
 

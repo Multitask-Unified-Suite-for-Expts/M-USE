@@ -5885,7 +5885,10 @@ MonoBehaviour:
   TaskProjectFolder: 
   BlockCount: 0
   TrialLevel: {fileID: 1101764165}
+  SerialSentData: {fileID: 0}
+  SerialRecvData: {fileID: 0}
   StoreData: 0
+  SerialPortActive: 0
   SyncBoxActive: 0
   EventCodesActive: 0
   RewardPulsesActive: 0
@@ -5954,12 +5957,16 @@ MonoBehaviour:
   Paused: 1
   TrialData: {fileID: 0}
   FrameData: {fileID: 0}
+  SerialSentData: {fileID: 0}
+  SerialRecvData: {fileID: 0}
   BlockCount: 0
   TrialCount_InTask: 0
   TrialCount_InBlock: 0
   AbortCode: 0
   StoreData: 0
   ForceBlockEnd: 0
+  SerialPortActive: 0
+  EyetrackerActive: 0
   TaskDataPath: 
   FilePrefix: 
   TrialSummaryString: 
@@ -6002,7 +6009,6 @@ MonoBehaviour:
     type: 3}
   Starfield: {fileID: 307568974}
   BorderPrefabList: []
-  TrialComplete: 0
   CompletedAllTrials: 0
   EndBlock: 0
   StimIsChosen: 0
@@ -6039,6 +6045,9 @@ MonoBehaviour:
     stimGroupName: 
     IsActive: 0
   Success_Audio: {fileID: 8300000, guid: 38a5faffadbec441fa994ef9ef89362b, type: 3}
+  Fail_SouthPark_Audio: {fileID: 8300000, guid: f3ebbe6eb75364aac9ae63ecaade92ee,
+    type: 3}
+  Fail_Audio: {fileID: 8300000, guid: 423d149ff34dc40598b1e18df2a9bfec, type: 3}
   displayStimDuration:
     name: 
     hidden: 0

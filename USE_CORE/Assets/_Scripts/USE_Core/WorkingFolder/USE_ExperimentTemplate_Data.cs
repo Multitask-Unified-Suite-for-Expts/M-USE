@@ -8,6 +8,7 @@ using USE_States;
 using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
+using System.Data.SqlClient;
 
 namespace USE_ExperimentTemplate_Data
 {
@@ -47,47 +48,198 @@ namespace USE_ExperimentTemplate_Data
         }
     }
 
-    public class SessionData : DataController
+    public abstract class USE_Template_DataController : DataController
     {
+        public string DataControllerName;
         public ControlLevel_Session_Template sessionLevel;
+        public ControlLevel_Task_Template taskLevel;
+        public ControlLevel_Trial_Template trialLevel;
+
+
+        private readonly string ConnectionString = "Server=127.0.0.1;uid=root;pwd=12345;database=USE_Test;";
+        public SqlConnection Connection
+        {
+            get
+            {
+                return new SqlConnection(ConnectionString);
+            }
+        }
+
+        //Dict to hold all the sql data types, so they will be correct for sql command
+        public Dictionary<string, string> SQLType_Dict = new Dictionary<string, string>()
+        {
+            {"string", "VARCHAR(255)"},
+            {"integer", "INT"}, //check first one
+            {"decimal", "DECIMAL(18, 2)"}, //check first one, and also either make the 18-2 default or have a ton depending on size. 
+        };
+
+        public void CreateSQLDatabase()
+        {
+            using (var conn = Connection)
+            {
+                conn.Open();
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"CREATE DATABASE [IF NOT EXISTS] USE_Test";
+                    cmd.ExecuteNonQuery();
+                }
+                conn.Close();
+            }
+        }
+
+        public void CreateSQLTable()
+        {
+            //if creating session table, it doesn't have task name
+            string tableName = (taskLevel.name == "Session" ? (taskLevel.name) : (taskLevel.name + this.name));
+            if (DoesSQLTableExist(tableName))
+                AddDataToSQL();
+            else
+            {
+                using (var conn = Connection)
+                {
+                    conn.Open();
+                    using (var cmd = conn.CreateCommand())
+                    {
+                        string sqlString = $@"CREATE TABLE {tableName} (Id INT PRIMARY KEY";
+                        //loop through each piece of data, for each
+                        foreach (var datum in this.data)
+                        {
+                            var sqlType = SQLType_Dict[datum.GetType().ToString()];
+                            sqlString += $", {datum.Name} {sqlType}";
+                        }
+                        sqlString += ");";
+                        cmd.CommandText = sqlString;
+                        cmd.ExecuteNonQuery();
+                    }
+                    conn.Close();
+                }
+            }
+        }
+
+        public void AddSessionDataToSQL()
+        {
+            //sql statement to add session data table
+        }
+
+        //method will take in all different data controllers and decide which repository method to call
+        public void AddDataToSQL()
+        {
+            if (taskLevel.name == "Session")
+                AddSessionDataToSQL();
+            else
+            {
+                //switch statement that checks "t
+                switch (taskLevel.name + "_" + this.name)
+                {
+                    //need these 3 cases for every task:
+                    case "ContinuousRecognition_BlockData":
+                        //AddBlockData_CR();
+                        break;
+                    case "ContinuousRecognition_TrialData":
+                        //AddTrialData_CR();
+                        break;
+                    case "ContinuousRecognition_FrameData":
+                        //AddFrameData_CR();
+                        break;
+                    default:
+                        Debug.Log($"No SQL Table name matches {taskLevel.name + this.name}");
+                        break;
+                }
+            }
+        }
+
+        public bool DoesSQLTableExist(string tableName)
+        {
+            bool tableExists = new bool();
+
+            using(var conn = Connection)
+            {
+                conn.Open();
+                using(var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = $@"SELECT * FROM {tableName};";
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    tableExists = reader.Read();
+                    reader.Close();
+                }
+                conn.Close();
+
+                return tableExists;
+            }
+        }
+
 
         public override void DefineDataController()
         {
+            DefineUSETemplateDataController();
+        }
+
+        public abstract void DefineUSETemplateDataController();
+
+        public void CreateNewTrialIndexedFile(int trialCount, string filePrefix)
+        {
+            fileName = filePrefix + "__" + DataControllerName + "_Trial_" + GetNiceIntegers(4, trialCount);
+            CreateFile();
+        }
+
+        public void CreateNewTaskIndexedFolder(int taskCount, string sessionDataPath, string suffix)
+        {
+            folderPath = sessionDataPath + Path.DirectorySeparatorChar + GetNiceIntegers(4, taskCount) +
+                         suffix;
+        }
+        public string GetNiceIntegers(int numDigits, int desiredNum)
+        {
+
+            if (desiredNum >= 999)
+                return desiredNum.ToString();
+            else if (desiredNum >= 99)
+                return "0" + desiredNum;
+            else if (desiredNum >= 9)
+                return "00" + desiredNum;
+            else
+                return "000" + desiredNum;
+        }
+    }
+
+    public class SessionData : USE_Template_DataController
+    {
+        public override void DefineUSETemplateDataController()
+        {
+            DataControllerName = "SessionData";
             AddDatum("SubjectID", () => sessionLevel.SubjectID);
             AddDatum("SessionID", () => sessionLevel.SessionID);
             AddStateTimingData(sessionLevel);
         }
     }
 
-    public class SerialSentData : DataController
+    public class SerialSentData : USE_Template_DataController
     {
-        public ControlLevel_Session_Template sessionLevel;
         public SerialPortThreaded sc;
 
-        public override void DefineDataController()
+        public override void DefineUSETemplateDataController()
         {
-            AddDatum("FrameReceived\tFrameStart\tSystemTimestamp\tMsWait\tMessage",
-                () => sc.BufferToString("received"));
-        }
-    }
-    public class SerialRecvData : DataController
-    {
-        public ControlLevel_Session_Template sessionLevel;
-        public SerialPortThreaded sc;
-
-        public override void DefineDataController()
-        {
-            AddDatum("FrameSent\tFrameStart\tSystemTimestamp\tMsWait\tMessage", 
+            DataControllerName = "SerialSentData";
+            AddDatum("FrameSent\tFrameStart\tSystemTimestamp\tMsWait\tMessage",
                 () => sc.BufferToString("sent"));
         }
     }
-
-    public class BlockData : DataController
+    public class SerialRecvData : USE_Template_DataController
     {
-        public ControlLevel_Task_Template taskLevel;
+        public SerialPortThreaded sc;
 
-        public override void DefineDataController()
+        public override void DefineUSETemplateDataController()
         {
+            DataControllerName = "SerialRecvData";
+            AddDatum("FrameRecv\tFrameStart\tSystemTimestamp\tMsWait\tMessage", 
+                () => sc.BufferToString("received"));
+        }
+    }
+
+    public class BlockData : USE_Template_DataController
+    {
+        public override void DefineUSETemplateDataController()
+        {
+            DataControllerName = "BlockData";
             AddDatum("SubjectID", () => taskLevel.SubjectID);
             AddDatum("SessionID", () => taskLevel.SessionID);
             AddDatum("TaskName", () => taskLevel.TaskName);
@@ -95,13 +247,11 @@ namespace USE_ExperimentTemplate_Data
         }
     }
 
-    public class TrialData : DataController
+    public class TrialData : USE_Template_DataController
     {
-        public ControlLevel_Task_Template taskLevel;
-        public ControlLevel_Trial_Template trialLevel;
-
-        public override void DefineDataController()
+        public override void DefineUSETemplateDataController()
         {
+            DataControllerName = "TrialData";
             AddDatum("SubjectID", () => taskLevel.SubjectID);
             AddDatum("SessionID", () => taskLevel.SessionID);
             AddDatum("TaskName", () => taskLevel.TaskName);
@@ -112,13 +262,11 @@ namespace USE_ExperimentTemplate_Data
         }
     }
 
-    public class FrameData : DataController
+    public class FrameData : USE_Template_DataController
     {
-        public ControlLevel_Task_Template taskLevel;
-        public ControlLevel_Trial_Template trialLevel;
-
-        public override void DefineDataController()
+        public override void DefineUSETemplateDataController()
         {
+            DataControllerName = "FrameData";
             AddDatum("SubjectID", () => taskLevel.SubjectID);
             AddDatum("SessionID", () => taskLevel.SessionID);
             AddDatum("TaskName", () => taskLevel.TaskName);
@@ -227,5 +375,6 @@ namespace USE_ExperimentTemplate_Data
             else
                 Debug.LogWarning("Attempted to destroy data controller " + name + ", but this does not exist.");
         }
+
     }
 }

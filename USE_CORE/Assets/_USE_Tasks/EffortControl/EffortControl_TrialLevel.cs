@@ -72,8 +72,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     //Variables to Inflate balloon at interval rate
     bool Inflate;
-    readonly int FramesToInflateOver = 100;
-    readonly float MaxInflation_Y = 25f;
+    int FramesToInflateOver = 100;
+    float MaxInflation_Y = 25f;
     float ScalePerInflation_Y;
     Vector3 IncrementAmounts;
     Vector3 NextScale;
@@ -111,6 +111,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         if(AudioFBController != null)
             AddAudioClips();
+
+        if (!Debug.isDebugBuild)
+            FramesToInflateOver = 50;
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
@@ -252,11 +255,15 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    Inflate = false;
-                    if(ClickCount >= ClicksNeeded)
+                    if (ClickCount >= ClicksNeeded)
                     {
                         Response = 1;
                         AvgClickTime = clickTimings.Average();
+                    }
+                    else
+                    {
+                        Inflate = false;
+                        mouseHandler.Start();
                     }
                 }
             }
@@ -278,12 +285,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     AudioFBController.Play("InflateAndPop");
                     PopAudioStartTime = Time.time;
                 }
-            }
-
-            if (InputBroker.GetMouseButtonUp(0))
-            {
-                if(ClickCount < ClicksNeeded)
-                    mouseHandler.Start();
             }
         });
         InflateBalloon.AddTimer(() => inflateDuration.value, PopBalloon);
@@ -579,6 +580,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     {
         string contextPath = GetContextNestedFilePath("StartButtonImage.png");
         Texture2D tex = LoadPNG(contextPath);
+        //Texture2D tex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
+        Debug.Log(tex.name);
+        Debug.Log(tex.ToString());
         Rect rect = new Rect(new Vector2(0, 0), new Vector2(1, 1));
 
         Vector3 buttonPosition = Vector3.zero;

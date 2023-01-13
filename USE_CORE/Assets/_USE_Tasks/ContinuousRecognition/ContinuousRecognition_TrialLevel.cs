@@ -72,6 +72,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public StimGroup WrongGroup;
 
     public AudioClip Success_Audio;
+    public AudioClip Fail_SouthPark_Audio;
+    public AudioClip Fail_Audio;
 
     //Config Variables
     [HideInInspector]
@@ -89,7 +91,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
-        Cursor.visible = false;
         TokenFBController.enabled = false;
         TokenFBController.SetFlashingTime(1f);
 
@@ -97,7 +98,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         OriginalTitleTextPosition = TitleTextGO.transform.position;
         OriginalTimerPosition = TimerBackdropGO.transform.position;
 
-        AudioFBController.AddClip("Success", Success_Audio);
+        AddAudioClips();
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
@@ -127,9 +128,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
-            if (currentTrial.IsHuman)
-                Cursor.visible = true;
-
             if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
             {
                 AdjustTextPosForMac();
@@ -200,9 +198,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         ChooseStim.AddInitializationMethod(() =>
         {
-            if (currentTrial.IsHuman && !Cursor.visible)
-                Cursor.visible = true;
-
             if (TrialCount_InBlock == 0)
                 TimeToCompletion_StartTime = Time.time;
         });
@@ -211,8 +206,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             if (TimeRemaining > 0)
                 TimeRemaining -= Time.deltaTime;
-            else
-                Debug.Log("Time ran out!");
 
             TimerText.text = TimeRemaining.ToString("0");
 
@@ -221,9 +214,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (chosenStimDef != null) //They Clicked a Stim
             {
-                if (currentTrial.IsHuman && Cursor.visible)
-                    Cursor.visible = false;
-
                 currentTrial.TimeChosen = Time.time;
                 currentTrial.TimeToChoice = currentTrial.TimeChosen - ChooseStim.TimingInfo.StartTimeAbsolute;
                 TimeToChoice_Block.Add(currentTrial.TimeToChoice);
@@ -285,28 +275,20 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
         });
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
-        ChooseStim.AddTimer(() => chooseStimDuration.value, ITI, () =>     //if no choice, skip touchFB/tokenFB and go to display results
+        ChooseStim.AddTimer(() => chooseStimDuration.value, TokenUpdate, () =>     //if time runs out
         {
-            if(currentTrial.IsHuman)
-            {
-                TimerBackdropGO.SetActive(false);
-                ScoreTextGO.SetActive(false);
-                NumTrialsTextGO.SetActive(false);
-            }
+            AudioFBController.Play("Negative");
             EndBlock = true;
             EventCodeManager.SendCodeImmediate(TaskEventCodes["NoChoice"]); 
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
         });
 
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------
         TouchFeedback.AddInitializationMethod(() =>
         {
-            if(!StimIsChosen)
+            if (!StimIsChosen)
                 return;
 
-            if(currentTrial.GotTrialCorrect)
+            if (currentTrial.GotTrialCorrect)
                 HaloFBController.ShowPositive(chosenStimObj);
             else
                 HaloFBController.ShowNegative(chosenStimObj);
@@ -314,13 +296,23 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
         });
-        TouchFeedback.AddTimer(() => touchFbDuration.value, TokenUpdate, () => EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionVisualFbOff"]));
+        TouchFeedback.AddTimer(() => touchFbDuration.value, TokenUpdate);
+        TouchFeedback.SpecifyTermination(() => !StimIsChosen, TokenUpdate);
+        TouchFeedback.AddDefaultTerminationMethod(() =>
+        {
+            EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionVisualFbOff"]);
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
+        });
 
         //TOKEN UPDATE state ---------------------------------------------------------------------------------------------------------
         TokenUpdate.AddInitializationMethod(() =>
         {
             TokenUpdateStartTime = Time.time;
             HaloFBController.Destroy();
+
+            if (!StimIsChosen)
+                return;
+
             if (currentTrial.GotTrialCorrect)
             {
                 if(TrialCount_InBlock == currentTrial.MaxNumTrials-1 || currentTrial.PNC_Stim.Count == 0) //If they get the last trial right (or find all stim), fill up bar!
@@ -347,11 +339,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 EndBlock = true;
             }
         });
-        TokenUpdate.SpecifyTermination(() => (Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value)) && !TokenFBController.IsAnimating(), DisplayResults, () =>
+        TokenUpdate.SpecifyTermination(() => (Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value)) && !TokenFBController.IsAnimating(), DisplayResults);
+        TokenUpdate.SpecifyTermination(() => !StimIsChosen, DisplayResults);
+        TokenUpdate.AddDefaultTerminationMethod(() =>
         {
-            TimerBackdropGO.SetActive(false);
-            ScoreTextGO.SetActive(false);
-            NumTrialsTextGO.SetActive(false);
+            if (currentTrial.IsHuman)
+            {
+                TimerBackdropGO.SetActive(false);
+                ScoreTextGO.SetActive(false);
+                NumTrialsTextGO.SetActive(false);
+            }
         });
         //DISPLAY RESULTS state --------------------------------------------------------------------------------------------------------
         DisplayResults.AddInitializationMethod(() =>
@@ -379,6 +376,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
                         YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Game Over \n HighScore: {Score} xp";
                         YouLoseTextGO.SetActive(true);
+                        AudioFBController.Play("Fail");
                     }
                 }
             }
@@ -430,10 +428,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS -----------------------------------------------------------------------------------------
-    void CenterOnScreen(GameObject obj) //not yet used
+    void AddAudioClips()
     {
-        Vector3 newPos = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2, Screen.height / 2, Camera.main.nearClipPlane));
-        obj.transform.position = new Vector3(newPos.x, newPos.y, obj.transform.position.z);
+        AudioFBController.AddClip("Success", Success_Audio);
+        AudioFBController.AddClip("Fail_SouthPark", Fail_SouthPark_Audio);
+        AudioFBController.AddClip("Fail", Fail_Audio);
     }
 
     void ResetGlobalTrialVariables()
@@ -468,25 +467,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TitleTextGO.transform.position = Position;
     }
 
-    public string GetContextNestedFilePath(string contextName) //Recursively search the subfolders of the MaterialFilePath to get ContextFilePath
-    {
-        string backupContextName = "LinearDark";
-        string contextPath = ""; 
-
-        string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
-
-        if (filePaths.Length > 0)
-            contextPath = filePaths[0];
-        else
-        {
-            Debug.Log($"Context File Path Not Found. Defaulting to {backupContextName}.");
-            contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0]; //Use Default LinearDark if can't find file.
-            if(contextPath == null)
-                Debug.Log($"Backup Context ({contextPath}) NOT Found.");
-        }
-        return contextPath;
-    }
-
     float GetOffsetY()
     {
         //Function used to adjust the YouWin/YouLost text positioning for the human version. 
@@ -495,33 +475,33 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             case 1:
                 if (MacMainDisplayBuild && !Debug.isDebugBuild)
-                    yOffset = 95f; //CHECKED
+                    yOffset = 95f;
                 else
-                    yOffset = 65f; //CHECKED
+                    yOffset = 65f;
                 break;
             case 2:
                 if (MacMainDisplayBuild && !Debug.isDebugBuild)
-                    yOffset = 80f; //CHECKED
+                    yOffset = 80f;
                 else
-                    yOffset = 55f; //CHECKED
+                    yOffset = 55f;
                 break;
             case 3:
                 if (MacMainDisplayBuild && !Debug.isDebugBuild)
-                    yOffset = 30f; //CHECKED
+                    yOffset = 30f;
                 else
-                    yOffset = 15f; //CHECKED
+                    yOffset = 15f;
                 break;
             case 4:
                 if (MacMainDisplayBuild && !Debug.isDebugBuild)
-                    yOffset = 10f; //def broken!!!!
+                    yOffset = 10f; //Check!
                 else
                     yOffset = -25f; //CHECKED
                 break;
             case 5:
                 if (MacMainDisplayBuild && !Debug.isDebugBuild)
-                    yOffset = -30f; //check
+                    yOffset = -30f; //Check!
                 else
-                    yOffset = -35f; //check (not checked but could be close)
+                    yOffset = -35f; //Check! (not checked but could be close)
                 break;
         }
         return yOffset;
@@ -808,7 +788,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             foreach (ContinuousRecognition_StimDef stim in trialStims.stimDefs)
                 stim.PreviouslyChosen = false;
             trialStims.SetLocations(currentTrial.TrialStimLocations);
-            trialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenUpdate")); //Visible when start DisplayStims, invisible when finish TokenUpdate.
             TrialStims.Add(trialStims);
 
         }
@@ -842,11 +821,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             List<int> PC_Copy = ShuffleList(currentTrial.PC_Stim).ToList();
             if (PC_Copy.Count > 1)
-                PC_Copy = PC_Copy.GetRange(0, PC_Num); //BROKE HERE
+                PC_Copy = PC_Copy.GetRange(0, PC_Num);
             for (int i = 0; i < PC_Copy.Count; i++)
-            {
                 currentTrial.TrialStimIndices.Add(PC_Copy[i]);
-            }
+            
 
             List<int> PNC_Copy = ShuffleList(currentTrial.PNC_Stim).ToList();
             if (PNC_Copy.Count > 1)
@@ -856,7 +834,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             trialStims = new StimGroup($"TrialStims", ExternalStims, currentTrial.TrialStimIndices);
             trialStims.SetLocations(currentTrial.TrialStimLocations);
-            trialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenUpdate")); //Visible when start DisplayStims, invisible when finish TokenUpdate.
             TrialStims.Add(trialStims);
         }
 
@@ -878,14 +855,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             
             trialStims = new StimGroup($"TrialStims", ExternalStims, currentTrial.TrialStimIndices);
             trialStims.SetLocations(currentTrial.TrialStimLocations);
-            trialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenUpdate")); //Visible when start DisplayStims, invisible when finish TokenUpdate.
             TrialStims.Add(trialStims);
         }
 
-        GetLog(currentTrial.PC_Stim, "PC_Stims");
-        GetLog(currentTrial.New_Stim, "New_Stims");
-        GetLog(currentTrial.PNC_Stim, "PNC_Stims");
-        GetLog(currentTrial.TrialStimIndices, "TrialStimIndices");
+        trialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenUpdate"));
     }
 
     void SetShadowType()
@@ -927,7 +900,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         Starfield.SetActive(false);
         TokenFBController.enabled = false;
 
-        if (CompletedAllTrials)
+        if (!StimIsChosen && ChosenStimIndices.Count < 1)
+            return;
+
+        if (CompletedAllTrials || !StimIsChosen) //!stimchosen means time ran out. 
         {
             RightGroup = new StimGroup("Right");
             Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count];
@@ -1147,16 +1123,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         currentTrial.Unseen_Stim.Clear();
     }
 
-    void GetLog(List<int> list, string name)
-    {
-        string result = name + ": ";
-        foreach (var item in list)
-        {
-            result += item.ToString() + ", ";
-        }
-        Debug.Log(result);
-    }
-
     float[] GetStimRatioPercentages(int[] ratioArray)
     {
         //Takes the initial stim ratio (ex: 2PC, 1New, 2PNC), and
@@ -1171,8 +1137,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
       
         return stimPercentages;
     }
-
-
 
     int[] GetStimNumbers(float[] stimPercentages)
     {
@@ -1223,6 +1187,25 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
         }
         return new[] { PC_Num, New_Num, PNC_Num };
+    }
+
+    public string GetContextNestedFilePath(string contextName) //Recursively search the subfolders of the MaterialFilePath to get ContextFilePath
+    {
+        string backupContextName = "LinearDark";
+        string contextPath = "";
+
+        string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
+
+        if (filePaths.Length > 0)
+            contextPath = filePaths[0];
+        else
+        {
+            Debug.Log($"Context File Path Not Found. Defaulting to {backupContextName}.");
+            contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0]; //Use Default LinearDark if can't find file.
+            if (contextPath == null)
+                Debug.Log($"Backup Context ({contextPath}) NOT Found.");
+        }
+        return contextPath;
     }
 
     void CreateStartButton()

@@ -229,6 +229,9 @@ namespace USE_ExperimentTemplate_Session
                 EventCodeManager = GameObject.Find("MiscScripts").GetComponent<EventCodeManager>(); //new EventCodeManager();
                 if (SerialPortActive)
                 {
+                    SerialSentData.CreateFile();
+                    SerialRecvData.CreateFile();
+                    
                     SerialPortController = new SerialPortThreaded();
                     if (SyncBoxActive)
                     {
@@ -297,6 +300,22 @@ namespace USE_ExperimentTemplate_Session
                     }
                 }
             });
+            setupSession.AddLateUpdateMethod(() =>
+            {
+                if (SerialPortActive)
+                {
+                    if (SerialPortController.BufferCount("sent") > 0)
+                    {
+                        SerialSentData.AppendData();
+                    }
+
+                    if (SerialPortController.BufferCount("received") > 0)
+                    {
+                        SerialRecvData.AppendData();
+                    }
+                }
+            });
+            
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort, selectTask,
                 () =>
                 {
@@ -320,6 +339,7 @@ namespace USE_ExperimentTemplate_Session
                 selectedConfigName = null;
 
                 SessionCam.gameObject.SetActive(true);
+                // SessionCam.targetDisplay = 2;
                 CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
                 CameraMirrorTexture.Create();
                 Camera.main.targetTexture = CameraMirrorTexture;
@@ -383,6 +403,24 @@ namespace USE_ExperimentTemplate_Session
                     });
                 }
             });
+            
+            
+            selectTask.AddLateUpdateMethod(() =>
+            {
+                if (SerialPortActive)
+                {
+                    if (SerialPortController.BufferCount("sent") > 0)
+                    {
+                        SerialSentData.AppendData();
+                    }
+
+                    if (SerialPortController.BufferCount("received") > 0)
+                    {
+                        SerialRecvData.AppendData();
+                    }
+                }
+            });
+            
             selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask);
             // Don't have automatic task selection if we encountered an error during setup
             if (TaskSelectionTimeout >= 0 && !LogPanel.HasError())
@@ -421,6 +459,24 @@ namespace USE_ExperimentTemplate_Session
                     CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigName == selectedConfigName);
                 };
             });
+            
+            
+            loadTask.AddLateUpdateMethod(() =>
+            {
+                if (SerialPortActive)
+                {
+                    if (SerialPortController.BufferCount("sent") > 0)
+                    {
+                        SerialSentData.AppendData();
+                    }
+
+                    if (SerialPortController.BufferCount("received") > 0)
+                    {
+                        SerialRecvData.AppendData();
+                    }
+                }
+            });
+            
             loadTask.SpecifyTermination(() => !SceneLoading, runTask, () =>
             {
                 runTask.AddChildLevel(CurrentTask);
@@ -429,6 +485,11 @@ namespace USE_ExperimentTemplate_Session
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
                 CurrentTask.TrialLevel.TaskLevel = CurrentTask;
                 ExperimenterDisplayController.ResetTask(CurrentTask, CurrentTask.TrialLevel);
+                if (SerialPortActive)
+                {
+                    SerialRecvData.CreateNewTaskIndexedFolder(taskCount + 1 * 2, SessionDataPath, CurrentTask.TaskName);
+                    SerialSentData.CreateNewTaskIndexedFolder(taskCount + 1 * 2, SessionDataPath, CurrentTask.TaskName);
+                }
             });
 
             //automatically finish tasks after running one - placeholder for proper selection
@@ -451,6 +512,24 @@ namespace USE_ExperimentTemplate_Session
                 runTask.AddFixedUpdateMethod(() => EventCodeManager.EventCodeFixedUpdate());
                 // runTask.AddLateUpdateMethod(() => EventCodeManager.EventCodeLateUpdate());
             }
+            
+            
+            runTask.AddLateUpdateMethod(() =>
+            {
+                if (SerialPortActive)
+                {
+                    if (SerialPortController.BufferCount("sent") > 0)
+                    {
+                        SerialSentData.AppendData();
+                    }
+
+                    if (SerialPortController.BufferCount("received") > 0)
+                    {
+                        SerialRecvData.AppendData();
+                    }
+                }
+            });
+            
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
             {
                 SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
@@ -461,12 +540,36 @@ namespace USE_ExperimentTemplate_Session
                 CameraMirrorTexture.Release();
                 ExperimenterDisplayController.ResetTask(null, null);
                 taskCount++;
+                if (SerialPortActive)
+                {
+                    SerialRecvData.CreateNewTaskIndexedFolder(taskCount + 1 * 2 - 1, SessionDataPath, "_TaskSelection");
+                    SerialSentData.CreateNewTaskIndexedFolder(taskCount + 1 * 2 - 1, SessionDataPath, "_TaskSelection");
+                }
+                //     SessionDataPath + Path.DirectorySeparatorChar +
+                //                             SerialRecvData.GetNiceIntegers(4, taskCount + 1 * 2 - 1) + "_TaskSelection";
+                // SerialSentData.folderPath = SessionDataPath + Path.DirectorySeparatorChar +
+                //                             SerialSentData.GetNiceIntegers(4, taskCount + 1 * 2 - 1) + "_TaskSelection";
             });
 
             finishSession.SpecifyTermination(() => true, () => null, () =>
             {
                 SessionData.AppendData();
                 SessionData.WriteData();
+           
+                if (SerialPortActive)
+                {
+                    if (SerialPortController.BufferCount("sent") > 0)
+                    {
+                        SerialSentData.AppendData();
+                    }
+
+                    if (SerialPortController.BufferCount("received") > 0)
+                    {
+                        SerialRecvData.AppendData();
+                    }
+                    SerialSentData.WriteData();
+                    SerialRecvData.WriteData();
+                }
             });
 
             SessionData = (SessionData) SessionDataControllers.InstantiateDataController<SessionData>
@@ -482,15 +585,15 @@ namespace USE_ExperimentTemplate_Session
             if (SerialPortActive)
             {
                 SerialSentData = (SerialSentData) SessionDataControllers.InstantiateDataController<SerialSentData>
-                    ("SerialSentData", StoreData, SessionDataPath);
-                SessionData.fileName = FilePrefix + "__SerialSentData";
+                    ("SerialSentData", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "001_TaskSelection");
+                SessionData.fileName = FilePrefix + "__SerialSentData_001_TaskSelection";
                 SerialSentData.sessionLevel = this;
                 SerialSentData.InitDataController();
                 SerialSentData.ManuallyDefine();
 
                 SerialRecvData = (SerialRecvData) SessionDataControllers.InstantiateDataController<SerialRecvData>
-                    ("SerialRecvData", StoreData, SessionDataPath);
-                SessionData.fileName = FilePrefix + "__SerialRecvData";
+                    ("SerialRecvData", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "001_TaskSelection");
+                SessionData.fileName = FilePrefix + "__SerialRecvData_001_TaskSelection";
                 SerialRecvData.sessionLevel = this;
                 SerialRecvData.InitDataController();
                 SerialRecvData.ManuallyDefine();
@@ -537,6 +640,8 @@ namespace USE_ExperimentTemplate_Session
             tl.StoreData = StoreData;
             tl.SubjectID = SubjectID;
             tl.SessionID = SessionID;
+            tl.SerialRecvData = SerialRecvData;
+            tl.SerialSentData = SerialSentData;
             if (SessionSettings.SettingExists("Session", "EyetrackerType"))
                 tl.EyetrackerType = (string)SessionSettings.Get("Session", "EyetrackerType");
             else
@@ -547,6 +652,7 @@ namespace USE_ExperimentTemplate_Session
             else
                 tl.SelectionType = "";
 
+            tl.SerialPortActive = SerialPortActive;
             tl.SyncBoxActive = SyncBoxActive;
             tl.EventCodesActive = EventCodesActive;
             if (SerialPortActive)
@@ -590,8 +696,6 @@ namespace USE_ExperimentTemplate_Session
         void SceneLoaded(string configName, bool verifyOnly)
         {
             string taskName = (string)TaskMappings[configName];
-            Debug.Log("configName: " + configName);
-            Debug.Log("taskName: " + taskName);
             var methodInfo = GetType().GetMethod(nameof(this.PrepareTaskLevel));
             
             Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;

@@ -168,7 +168,7 @@ namespace USE_Data
 		public int capacity { get; set; }
 
 		//list of data to store
-		private List<IDatum> data;
+		protected List<IDatum> data;
 		//string to write to file
 		private List<string> dataBuffer;
 		//records frame when data is appended (to prevent double-writing)
@@ -443,7 +443,7 @@ namespace USE_Data
 				string[] currentVals = new string[data.Count];
 				for (int i = 0; i < data.Count; i++)
 				{
-					currentVals[i] = data[i].ValueAsString;
+					currentVals[i] =  data[i].ValueAsString;
 				}
 				if (!updateDataNextFrame)
 				{
@@ -488,6 +488,19 @@ namespace USE_Data
 					dataStream.Write(titleString);
 				}
 			}
+		}
+
+		public void CreateSQLTable(string databaseAddress)
+		{
+			//connect to database
+			//create empty table with DataController name
+			//loop through DataController.Data, add column to table for each datum
+		}
+
+		public void CreateSQLTableIfNecessary(string databaseAddess)
+		{
+			//check if table exists in database
+			//if not, CreateSQLTable()
 		}
 
 		/// <summary>

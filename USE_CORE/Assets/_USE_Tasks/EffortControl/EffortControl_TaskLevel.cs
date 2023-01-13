@@ -68,7 +68,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
         SetupTask.AddInitializationMethod(() =>
         {
-            //RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(ContextName));
+            RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(ContextName));
         });
 
         RunBlock.AddInitializationMethod(() =>

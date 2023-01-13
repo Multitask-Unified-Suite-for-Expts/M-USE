@@ -113,7 +113,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             AddAudioClips();
 
         if (!Debug.isDebugBuild)
-            FramesToInflateOver = 50;
+            FramesToInflateOver = 40;
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>

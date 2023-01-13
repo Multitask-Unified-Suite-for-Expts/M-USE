@@ -67,7 +67,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         MouseTracker.AddSelectionHandler(mouseHandler, initTrial);
         initTrial.AddInitializationMethod(() =>
         {
-            //RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
             TokenFBController
             .SetRevealTime(tokenRevealDuration.value)
             .SetUpdateTime(tokenUpdateDuration.value);
@@ -80,7 +80,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 Input.ResetInputAxes();
                 startButton.SetActive(false);
                 TokenFBController.enabled = true;
-                //RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
+                RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]); //CHECK THIS TIMING MIGHT BE OFF
                 //EventCodeManager.SendCodeNextFrame(TaskEventCodes["TargetStimOn"]); ADD THIS TO THE EVENT CODES
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarReset"]);

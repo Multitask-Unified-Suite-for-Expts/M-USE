@@ -302,18 +302,7 @@ namespace USE_ExperimentTemplate_Session
             });
             setupSession.AddLateUpdateMethod(() =>
             {
-                if (SerialPortActive)
-                {
-                    if (SerialPortController.BufferCount("sent") > 0)
-                    {
-                        SerialSentData.AppendData();
-                    }
-
-                    if (SerialPortController.BufferCount("received") > 0)
-                    {
-                        SerialRecvData.AppendData();
-                    }
-                }
+                AppendSerialData();
             });
             
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort, selectTask,
@@ -407,18 +396,7 @@ namespace USE_ExperimentTemplate_Session
             
             selectTask.AddLateUpdateMethod(() =>
             {
-                if (SerialPortActive)
-                {
-                    if (SerialPortController.BufferCount("sent") > 0)
-                    {
-                        SerialSentData.AppendData();
-                    }
-
-                    if (SerialPortController.BufferCount("received") > 0)
-                    {
-                        SerialRecvData.AppendData();
-                    }
-                }
+                AppendSerialData();
             });
             
             selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask);
@@ -463,18 +441,7 @@ namespace USE_ExperimentTemplate_Session
             
             loadTask.AddLateUpdateMethod(() =>
             {
-                if (SerialPortActive)
-                {
-                    if (SerialPortController.BufferCount("sent") > 0)
-                    {
-                        SerialSentData.AppendData();
-                    }
-
-                    if (SerialPortController.BufferCount("received") > 0)
-                    {
-                        SerialRecvData.AppendData();
-                    }
-                }
+                AppendSerialData();
             });
             
             loadTask.SpecifyTermination(() => !SceneLoading, runTask, () =>
@@ -516,18 +483,7 @@ namespace USE_ExperimentTemplate_Session
             
             runTask.AddLateUpdateMethod(() =>
             {
-                if (SerialPortActive)
-                {
-                    if (SerialPortController.BufferCount("sent") > 0)
-                    {
-                        SerialSentData.AppendData();
-                    }
-
-                    if (SerialPortController.BufferCount("received") > 0)
-                    {
-                        SerialRecvData.AppendData();
-                    }
-                }
+                AppendSerialData();
             });
             
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
@@ -556,17 +512,8 @@ namespace USE_ExperimentTemplate_Session
                 SessionData.AppendData();
                 SessionData.WriteData();
            
-                if (SerialPortActive)
-                {
-                    if (SerialPortController.BufferCount("sent") > 0)
-                    {
-                        SerialSentData.AppendData();
-                    }
-
-                    if (SerialPortController.BufferCount("received") > 0)
-                    {
-                        SerialRecvData.AppendData();
-                    }
+                AppendSerialData();
+                if(SerialPortActive){
                     SerialSentData.WriteData();
                     SerialRecvData.WriteData();
                 }
@@ -611,6 +558,22 @@ namespace USE_ExperimentTemplate_Session
             }
         }
 
+        private void AppendSerialData()
+        {
+            if (SerialPortActive)
+            {
+                if (SerialPortController.BufferCount("sent") > 0)
+                {
+                    SerialSentData.AppendData();
+                }
+
+                if (SerialPortController.BufferCount("received") > 0)
+                {
+                    SerialRecvData.AppendData();
+                }
+            }
+        }
+        
         string GetConfigFolderPath(string configName)
         {
             if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))

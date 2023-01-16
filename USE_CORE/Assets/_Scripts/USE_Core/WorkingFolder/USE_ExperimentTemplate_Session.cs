@@ -46,6 +46,7 @@ namespace USE_ExperimentTemplate_Session
         private string ContextName;
         private string ContextExternalFilePath;
         private string TaskIconsFolderPath;
+        [HideInInspector]public Vector3[] TaskIconLocations;
         private Dictionary<string, string> TaskIcons;
         protected int taskCount;
         private float TaskSelectionTimeout;

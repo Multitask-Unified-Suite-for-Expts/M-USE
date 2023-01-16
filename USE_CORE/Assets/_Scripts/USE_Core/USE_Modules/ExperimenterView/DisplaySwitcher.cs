@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using USE_Settings;
 
-public class DisplaySwitcher : MonoBehaviour {
+public class DisplaySwitcher : MonoBehaviour
+{
 	public void ToggleDisplay()
 	{
 		var cams = GameObject.FindObjectsOfType<Camera>();
@@ -20,8 +21,10 @@ public class DisplaySwitcher : MonoBehaviour {
 
 	}
 
-	void Update(){
-		if(InputBroker.GetKeyUp(KeyCode.W)){
+	void Update()
+	{
+		if (InputBroker.GetKeyUp(KeyCode.W))
+		{
 			ToggleDisplay();
 		}
 	}

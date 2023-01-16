@@ -23,6 +23,10 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int Touches_Task = 0;
     [HideInInspector] public int NumChosenLeft_Task = 0;
     [HideInInspector] public int NumChosenRight_Task = 0;
+    [HideInInspector] public int NumChosenHigherReward_Task = 0;
+    [HideInInspector] public int NumChosenLowerReward_Task = 0;
+    [HideInInspector] public int NumChosenHigherEffort_Task = 0;
+    [HideInInspector] public int NumChosenLowerEffort_Task = 0;
 
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;
@@ -78,6 +82,10 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             trialLevel.Touches_Block = 0;
             trialLevel.NumChosenLeft_Block = 0;
             trialLevel.NumChosenRight_Block = 0;
+            trialLevel.NumHigherEffortChosen_Block = 0;
+            trialLevel.NumLowerEffortChosen_Block = 0;
+            trialLevel.NumHigherRewardChosen_Block = 0;
+            trialLevel.NumLowerRewardChosen_Block = 0;
 
             CalculateBlockSummaryString();
         });
@@ -94,6 +102,10 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             Touches_Task += trialLevel.Touches_Block;
             NumChosenLeft_Task += trialLevel.NumChosenLeft_Block;
             NumChosenRight_Task += trialLevel.NumChosenRight_Block;
+            NumChosenHigherEffort_Task += trialLevel.NumHigherEffortChosen_Block;
+            NumChosenLowerEffort_Task += trialLevel.NumLowerEffortChosen_Block;
+            NumChosenHigherReward_Task += trialLevel.NumHigherRewardChosen_Block;
+            NumChosenLowerReward_Task += trialLevel.NumLowerRewardChosen_Block;
         });
     }
 
@@ -106,6 +118,10 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         data["Touches"] = Touches_Task;
         data["Chose Left"] = NumChosenLeft_Task;
         data["Chose Right"] = NumChosenRight_Task;
+        data["Chose Higher Reward"] = NumChosenHigherReward_Task;
+        data["Chose Lower Reward"] = NumChosenLowerReward_Task;
+        data["Chose Higher Effort"] = NumChosenHigherEffort_Task;
+        data["Chose Lower Effort"] = NumChosenLowerEffort_Task;
 
         return data;
     }
@@ -116,10 +132,14 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
         CurrentBlockString = ("<b>Block " + "(" + currentBlock.BlockName + "):" + "</b>" +
                         "\nTrialsCompleted: " + trialLevel.Completions_Block +
-                        "\nChoseLeft: " + trialLevel.NumChosenLeft_Block +
-                        "\nChoseRight: " + trialLevel.NumChosenRight_Block +
                         "\nTouches: " + trialLevel.Touches_Block +
                         "\nRewardPulses: " + trialLevel.RewardPulses_Block +
+                        "\nChoseLeft: " + trialLevel.NumChosenLeft_Block +
+                        "\nChoseRight: " + trialLevel.NumChosenRight_Block +
+                        "\nChoseHigherReward: " + trialLevel.NumHigherRewardChosen_Block +
+                        "\nChoseLowerReward: " + trialLevel.NumLowerRewardChosen_Block +
+                        "\nChoseHigherEffort: " + trialLevel.NumHigherEffortChosen_Block +
+                        "\nChoseLowerEffort: " + trialLevel.NumLowerEffortChosen_Block +
                         "\n");
 
         BlockSummaryString.AppendLine(CurrentBlockString).ToString();
@@ -132,6 +152,10 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("TrialsCompleted", () => trialLevel.Completions_Block);
         BlockData.AddDatum("ChoseLeft", () => trialLevel.NumChosenLeft_Block);
         BlockData.AddDatum("ChoseRight", () => trialLevel.NumChosenRight_Block);
+        BlockData.AddDatum("ChoseHigherReward", () => trialLevel.NumHigherRewardChosen_Block);
+        BlockData.AddDatum("ChoseLowerReward", () => trialLevel.NumLowerRewardChosen_Block);
+        BlockData.AddDatum("ChoseHigherEffort", () => trialLevel.NumHigherEffortChosen_Block);
+        BlockData.AddDatum("ChoseLowerEffort", () => trialLevel.NumLowerEffortChosen_Block);
         BlockData.AddDatum("Touches", () => trialLevel.Touches_Block);
         BlockData.AddDatum("RewardPulses", () => trialLevel.RewardPulses_Block);
     }

@@ -554,12 +554,16 @@ MonoBehaviour:
   Paused: 1
   TrialData: {fileID: 0}
   FrameData: {fileID: 0}
+  SerialSentData: {fileID: 0}
+  SerialRecvData: {fileID: 0}
   BlockCount: 0
   TrialCount_InTask: 0
   TrialCount_InBlock: 0
   AbortCode: 0
   StoreData: 0
   ForceBlockEnd: 0
+  SerialPortActive: 0
+  EyetrackerActive: 0
   TaskDataPath: 
   FilePrefix: 
   TrialSummaryString: 
@@ -598,26 +602,37 @@ MonoBehaviour:
   InflateBalloon_Audio: {fileID: 8300000, guid: a0bec86fbd56740f3967199e2c210833,
     type: 3}
   InflateAndPop_Audio: {fileID: 8300000, guid: 22ebba9a128034ca28b2413be3c13083, type: 3}
-  OffWhiteOutlineColor:
-    serializedVersion: 2
-    rgba: 16185850
+  SeeThroughRed_Material: {fileID: 2100000, guid: 64bfec7a8cb7c4de0b9905567885c762,
+    type: 2}
   MaterialFilePath: 
-  PopStartTime: 0
-  Choice: 
   ChooseDuration: 0
   RewardPulses_Block: 0
   Touches_Block: 0
   Completions_Block: 0
   NumChosenLeft_Block: 0
   NumChosenRight_Block: 0
-  Inflate: 0
-  NumFrames: 100
-  MaxInflation_Y: 15
-  ScalePerInflation_Y: 0
-  Increment_X: 0
-  Increment_Y: 0
-  Increment_Z: 0
-  NextScale: {x: 0, y: 0, z: 0}
+  NumHigherEffortChosen_Block: 0
+  NumLowerEffortChosen_Block: 0
+  NumHigherRewardChosen_Block: 0
+  NumLowerRewardChosen_Block: 0
+  inflateDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  itiDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  MaxOutline_Left: {fileID: 0}
+  MaxOutline_Right: {fileID: 0}
 --- !u!114 &1719984668
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -643,7 +658,10 @@ MonoBehaviour:
   TaskProjectFolder: 
   BlockCount: 0
   TrialLevel: {fileID: 1719984667}
+  SerialSentData: {fileID: 0}
+  SerialRecvData: {fileID: 0}
   StoreData: 0
+  SerialPortActive: 0
   SyncBoxActive: 0
   EventCodesActive: 0
   RewardPulsesActive: 0
@@ -683,6 +701,12 @@ MonoBehaviour:
   Touches_Task: 0
   NumChosenLeft_Task: 0
   NumChosenRight_Task: 0
+  NumChosenHigherReward_Task: 0
+  NumChosenLowerReward_Task: 0
+  NumChosenHigherEffort_Task: 0
+  NumChosenLowerEffort_Task: 0
+  CurrentBlockString: 
+  BlockStringsAdded: 0
 --- !u!4 &1719984669
 Transform:
   m_ObjectHideFlags: 0

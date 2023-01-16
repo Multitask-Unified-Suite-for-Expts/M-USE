@@ -10,6 +10,7 @@ using MazeGame_Namespace;
 using FlexLearning_Namespace;
 using THR_Namespace;
 //using FinderGame_Namespace;
+using Kia_Task_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -129,6 +130,17 @@ static public class USE_Tasks_CustomTypes
         //        StimDefType = typeof(FinderGame_StimDef)
         //    }
         //}
+        ,{
+            "Kia_Task", new TaskTypes
+            {
+                TaskLevelType = typeof(Kia_Task_TaskLevel),
+                TrialLevelType = typeof(Kia_Task_TrialLevel),
+                TaskDefType = typeof(Kia_Task_TaskDef),
+                BlockDefType = typeof(Kia_Task_BlockDef),
+                TrialDefType = typeof(Kia_Task_TrialDef),
+                StimDefType = typeof(Kia_Task_StimDef)
+            }
+        }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#
     };
 

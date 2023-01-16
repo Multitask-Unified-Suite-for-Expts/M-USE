@@ -255,7 +255,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
             }
-            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nBlock Accuracy: " + (runningAcc.Sum(x => Convert.ToSingle(x))/(TrialCount_InBlock+1)) + "\nTouched Object Codes: " + touchedObjectsCodes + "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
+            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nBlock Accuracy: " + 
+                                 (runningAcc.Sum(x => Convert.ToSingle(x))/(TrialCount_InBlock+1)) + "\nTouched Object Codes: " 
+                                 + touchedObjectsCodes + "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
         });
         TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), TrialEnd, () =>
         {

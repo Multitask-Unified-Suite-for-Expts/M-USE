@@ -2,6 +2,7 @@ using System;
 using ConfigDynamicUI;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using EffortControl_Namespace;
 using UnityEngine;
 using USE_ExperimentTemplate_Task;
@@ -59,6 +60,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 variablesLoaded = true;
                 loadVariables();
             }          
+            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nBlock Accuracy: " + 
+                                 (runningAcc.Sum(x => Convert.ToSingle(x))/(TrialCount_InBlock+1)) +
+                                 "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
         });
 
         SetupTrial.SpecifyTermination(() => true, initTrial);
@@ -159,6 +163,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         {
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOff"]);
+            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nBlock Accuracy: " + 
+                                 (runningAcc.Sum(x => Convert.ToSingle(x))/(TrialCount_InBlock+1)) +
+                                 "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
         });
 
 

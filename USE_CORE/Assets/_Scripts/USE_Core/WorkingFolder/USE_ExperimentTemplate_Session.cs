@@ -564,12 +564,26 @@ namespace USE_ExperimentTemplate_Session
             {
                 if (SerialPortController.BufferCount("sent") > 0)
                 {
-                    SerialSentData.AppendData();
+                    try
+                    {
+                        SerialSentData.AppendData();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
                 }
 
                 if (SerialPortController.BufferCount("received") > 0)
                 {
-                    SerialRecvData.AppendData();
+                    try
+                    {
+                        SerialRecvData.AppendData();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
                 }
             }
         }

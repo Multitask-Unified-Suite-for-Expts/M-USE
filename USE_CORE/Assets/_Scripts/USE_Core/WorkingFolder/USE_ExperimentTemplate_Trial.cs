@@ -82,6 +82,8 @@ namespace USE_ExperimentTemplate_Trial
                 TrialCount_InBlock = -1;
                 TrialStims = new List<StimGroup>();
                 AudioFBController.UpdateAudioSource();
+                TokenFBController.Init(TrialData, FrameData, AudioFBController);
+                TokenFBController.enabled = false;
                 //DetermineNumTrialsInBlock();
             });
 

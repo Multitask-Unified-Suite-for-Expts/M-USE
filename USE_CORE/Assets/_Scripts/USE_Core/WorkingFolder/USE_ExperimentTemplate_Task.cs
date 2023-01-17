@@ -313,7 +313,7 @@ namespace USE_ExperimentTemplate_Task
                             audioInited = true;
                         }
 
-                        TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
+                        //TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
                         //TrialLevel.TokenFBController.SetTotalTokensNum(totalTokensNum);
                         break;
                     default:

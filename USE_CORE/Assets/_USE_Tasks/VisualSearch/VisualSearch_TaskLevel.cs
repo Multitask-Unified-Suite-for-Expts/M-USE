@@ -49,8 +49,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             Array.Clear(vsTL.numCorrect_InBlock, 0, vsTL.numCorrect_InBlock.Length);
             Array.Clear(vsTL.numErrors_InBlock, 0, vsTL.numErrors_InBlock.Length);
             vsTL.accuracyLog_InBlock = "";*/
-            vsTL.numReward = 0;
-            //vsTL.NumTokenBar = vsBD.NumTokenBar;
             vsTL.TokenFBController.SetTotalTokensNum(vsBD.NumTokenBar);
             vsTL.TokenFBController.SetTokenBarValue(vsBD.NumInitialTokens);
 //            vsTL.TokenFBController.enabled = false;
@@ -60,7 +58,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         {
             BlockSummaryString.Clear();
             BlockSummaryString.AppendLine("Block Num: " + (vsTL.BlockCount + 1) + "\nTrial Count: " + (vsTL.TrialCount_InBlock + 1) + 
-                                          "\nNum Reward Given: " + vsTL.numReward + "\nNum Token Bar Filled: " + vsTL.NumTokenBarFull + 
+                                          "\nNum Reward Given: " + vsTL.NumRewardGiven + "\nNum Token Bar Filled: " + vsTL.NumTokenBarFull + 
                                           "\nTotalTokensCollected: " + vsTL.TotalTokensCollected);
           //  "\nTotal Errors: " + vsTL.totalErrors_InBlock + "\nError Type: " + vsTL.errorType_InBlockString + "\nPerformance: " + vsTL.accuracyLog_InBlock;
         });

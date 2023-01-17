@@ -78,7 +78,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     //Variables to Inflate balloon at interval rate
     bool Inflate;
-    int FramesToInflateOver = 100;
+    int ScalingInterval;
     float MaxInflation_Y = 25f;
     float ScalePerInflation_Y;
     Vector3 IncrementAmounts;
@@ -104,6 +104,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     public bool Flashing;
 
+    public float ScaleTimer;
+
 
     public override void DefineControlLevel()
     {
@@ -119,9 +121,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         SelectionHandler<EffortControl_StimDef> mouseHandler = new SelectionHandler<EffortControl_StimDef>();
 
-        //Application.targetFrameRate = 300;
-        //if (!Debug.isDebugBuild)
-        //    FramesToInflateOver = 40;
+        ScalingInterval = 100;
+
+        //if (Debug.isDebugBuild)
+        //    ScalingInterval = 100;
+        //else
+        //    ScalingInterval = 25;
+
 
         TokenFBController.enabled = false;
 
@@ -130,6 +136,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         if(AudioFBController != null)
             AddAudioClips();
+
 
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
@@ -277,6 +284,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             timeTracker = Time.time;
             IncrementAmounts = new Vector3();
             Flashing = false;
+            ScaleTimer = 0;
         });
         InflateBalloon.AddUpdateMethod(() =>
         {
@@ -285,21 +293,21 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if (Inflate)
             {
-                if (TrialStim.transform.localScale != NextScale)
+                ScaleTimer += Time.deltaTime;
+                if((ScaleTimer >= (PopClipDuration / ScalingInterval)))
                 {
-                    if (TrialStim.transform.localScale.x + IncrementAmounts.x > NextScale.x) //if close and would go over target scale, recalculate smaller Increments.
-                        IncrementAmounts = new Vector3((NextScale.x - TrialStim.transform.localScale.x), (NextScale.y - TrialStim.transform.localScale.y), (NextScale.z - TrialStim.transform.localScale.z));
-
-                    TrialStim.transform.localScale = new Vector3(TrialStim.transform.localScale.x + IncrementAmounts.x, TrialStim.transform.localScale.y + IncrementAmounts.y, TrialStim.transform.localScale.z + IncrementAmounts.z);
-                }
-                else
-                {
-                    Inflate = false;
-                    mouseHandler.Start();
-                    if (ClickCount >= ClicksNeeded)
+                    if (TrialStim.transform.localScale != NextScale)
+                        Scale();
+                    else
                     {
-                        Response = 1;
-                        AvgClickTime = clickTimings.Average();
+                        ScaleTimer = 0; //Reset Timer;
+                        Inflate = false;
+                        mouseHandler.Start();
+                        if (ClickCount >= ClicksNeeded)
+                        {
+                            Response = 1;
+                            AvgClickTime = clickTimings.Average();
+                        }
                     }
                 }
             }
@@ -379,6 +387,25 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     }
 
     //HELPER FUNCTIONS -------------------------------------------------------------------------------------------------------
+    void Scale()
+    {
+        if (TrialStim.transform.localScale.x + IncrementAmounts.x > NextScale.x) //if close and would go over target scale, recalculate smaller Increments.
+            IncrementAmounts = new Vector3((NextScale.x - TrialStim.transform.localScale.x), (NextScale.y - TrialStim.transform.localScale.y), (NextScale.z - TrialStim.transform.localScale.z));
+
+        TrialStim.transform.localScale = new Vector3(TrialStim.transform.localScale.x + IncrementAmounts.x, TrialStim.transform.localScale.y + IncrementAmounts.y, TrialStim.transform.localScale.z + IncrementAmounts.z);
+    }
+
+    void CalculateInflation()
+    {      
+        GameObject container = (SideChoice == "left") ? BalloonContainerLeft : BalloonContainerRight;
+        NextScale = container.transform.GetChild(ClickCount-1).transform.localScale;
+        NextScale.y = ScalePerInflation_Y + TrialStim.transform.localScale.y;
+        Vector3 difference = NextScale - TrialStim.transform.localScale;
+        IncrementAmounts = new Vector3((difference.x / ScalingInterval), (difference.y / ScalingInterval), (difference.z / ScalingInterval));
+
+        Inflate = true;
+    }
+
     IEnumerator FlashOutline()
     {
         Flashing = true;
@@ -424,16 +451,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             NumLowerRewardChosen_Block++;
     }
 
-    void CalculateInflation()
-    {      
-        GameObject container = (SideChoice == "left") ? BalloonContainerLeft : BalloonContainerRight;
-        NextScale = container.transform.GetChild(ClickCount-1).transform.localScale;
-        NextScale.y = ScalePerInflation_Y + TrialStim.transform.localScale.y;
-        Vector3 difference = NextScale - TrialStim.transform.localScale;
-        IncrementAmounts = new Vector3((difference.x / FramesToInflateOver), (difference.y / FramesToInflateOver), (difference.z / FramesToInflateOver));
-
-        Inflate = true;
-    }
 
     void SetTokenVariables()
     {

@@ -188,7 +188,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 if (usingRewardPump)
                 {
                     SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize); //USE THIS LINE WHEN CONNECTED TO A SYNCBOX
-                    Debug.Log("NUM PULSES: " + CurrentTrialDef.NumPulses);
                     numReward++;
                 }
             }

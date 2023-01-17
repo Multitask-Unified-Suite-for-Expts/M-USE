@@ -1,6 +1,7 @@
 using UnityEngine;
 using USE_Data;
 using System.Collections;
+using ConfigParsing;
 
 public class TokenFBController : MonoBehaviour
 {
@@ -147,6 +148,11 @@ public class TokenFBController : MonoBehaviour
     public bool IsAnimating()
     {
         return animationPhase != AnimationPhase.None || audioFBController.IsPlaying();
+    }
+
+    public string GetAnimationPhase()
+    {
+        return animationPhase.ToString();
     }
 
     public void Update()

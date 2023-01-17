@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 using USE_States;
 using USE_StimulusManagement;
@@ -14,6 +15,7 @@ using Newtonsoft.Json.Linq;
 using UnityEngine.XR;
 using System.ComponentModel;
 using ConfigDynamicUI;
+using System.Xml.Linq;
 
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
@@ -22,6 +24,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     public EffortControl_TaskLevel currentTask => GetTaskLevel<EffortControl_TaskLevel>();
 
     //Prefabs to Instantiate:
+    public GameObject StimNoMaterialPrefab;
     public GameObject StimLeftPrefab;
     public GameObject StimRightPrefab;
     public GameObject RewardPrefab;
@@ -60,11 +63,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     int ClickCount;
     float PopAudioStartTime;
     float PopClipDuration;
-    string Choice;
     bool AddTokenAudioPlayed;
     bool ObjectsCreated;
     List<GameObject> RemoveParentList;
     GameObject Wrapper;
+
+    string SideChoice; //left or right
+    string RewardChoice; //higher or lower
+    string EffortChoice; //higher or lower
 
     float CenteringSpeed = 1.5f;
     bool Centered;
@@ -86,8 +92,17 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int Completions_Block;
     [HideInInspector] public int NumChosenLeft_Block;
     [HideInInspector] public int NumChosenRight_Block;
+    [HideInInspector] public int NumHigherEffortChosen_Block;
+    [HideInInspector] public int NumLowerEffortChosen_Block;
+    [HideInInspector] public int NumHigherRewardChosen_Block;
+    [HideInInspector] public int NumLowerRewardChosen_Block;
 
     [HideInInspector] public ConfigNumber inflateDuration, itiDuration;
+
+    [HideInInspector] public GameObject MaxOutline_Left;
+    [HideInInspector] public GameObject MaxOutline_Right;
+
+    public bool Flashing;
 
 
     public override void DefineControlLevel()
@@ -104,6 +119,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         SelectionHandler<EffortControl_StimDef> mouseHandler = new SelectionHandler<EffortControl_StimDef>();
 
+        //Application.targetFrameRate = 300;
+        //if (!Debug.isDebugBuild)
+        //    FramesToInflateOver = 40;
+
         TokenFBController.enabled = false;
 
         if(TokenFBController != null)
@@ -112,12 +131,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if(AudioFBController != null)
             AddAudioClips();
 
-        if (!Debug.isDebugBuild)
-            FramesToInflateOver = 40;
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
+            MaxOutline_Left = new GameObject();
+            MaxOutline_Right = new GameObject();
+
             if (!ObjectsCreated)
                 CreateObjects();
 
@@ -143,6 +163,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), ChooseBalloon, () => StartButton.SetActive(false));
 
         //Choose Balloon state -------------------------------------------------------------------------------------------------------
+        MouseTracker.AddSelectionHandler(mouseHandler, ChooseBalloon);
         ChooseBalloon.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they holding down
@@ -158,35 +179,39 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             CreateBalloonOutlines(currentTrial.NumClicksRight, RightScaleUpAmount, currentTrial.ClicksPerOutline, StimRight.transform.position, BalloonContainerRight);
             CreateRewards(currentTrial.NumCoinsLeft, RewardContainerLeft.transform.position, RewardContainerLeft);
             CreateRewards(currentTrial.NumCoinsRight, RewardContainerRight.transform.position, RewardContainerRight);
+
+            CreateTransparentBalloons();
         });
 
-        MouseTracker.AddSelectionHandler(mouseHandler, ChooseBalloon);
         ChooseBalloon.AddUpdateMethod(() =>
         {
             GameObject hit = mouseHandler.SelectedGameObject;
             if (hit == null)
                 return;
-
-            if (hit.transform.name == "StimLeft")
+            else
             {
-                Choice = "left";
-                DestroyChildren(RewardContainerRight);
-                TrialStim = hit.transform.gameObject;
-                NumChosenLeft_Block++;
+                mouseHandler.Stop();
+                if (hit.transform.name.Contains("Left"))
+                {
+                    SideChoice = "left";
+                    TrialStim = StimLeft;
+                }
+                else if(hit.transform.name.Contains("Right"))
+                {
+                    SideChoice = "right";
+                    TrialStim = StimRight;
+                }
             }
-            else if (hit.transform.name == "StimRight")
-            {
-                Choice = "right";
-                DestroyChildren(RewardContainerLeft);
-                TrialStim = hit.transform.gameObject;
-                NumChosenRight_Block++;
-            }
-            ClicksNeeded = (Choice == "left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
         });
         ChooseBalloon.SpecifyTermination(() => TrialStim != null, CenterSelection, () =>
         {
+            DestroyChildren(SideChoice == "left" ? RewardContainerRight : RewardContainerLeft);
+            ClicksNeeded = (SideChoice == "left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
+
             AudioFBController.Play("SelectionMade");
             ChooseDuration = ChooseBalloon.TimingInfo.Duration;
+
+            SetChoices();
         });
 
         //Center Selection state -------------------------------------------------------------------------------------------------------
@@ -195,11 +220,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             Wrapper = new GameObject();
             Wrapper.name = "Wrapper";
             Centered = false;
-            CenteredPos = new Vector3((Choice == "left" ? 1f : -1f), 0, 0);
+            CenteredPos = new Vector3((SideChoice == "left" ? 1f : -1f), 0, 0);
 
             MiddleBarrier.SetActive(false);
 
-            if (Choice == "left")
+            if (SideChoice == "left")
             {
                 SetParents(Wrapper, new List<GameObject>() {BalloonContainerLeft, StimLeft, RewardContainerLeft});
                 DestroyChildren(BalloonContainerRight);
@@ -220,31 +245,45 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if (Wrapper.transform.position == CenteredPos)
                 Centered = true;
         });
-        CenterSelection.SpecifyTermination(() => Centered, InflateBalloon, () => RemoveParents(Wrapper, RemoveParentList));
+        CenterSelection.SpecifyTermination(() => Centered, InflateBalloon);
+        CenterSelection.AddDefaultTerminationMethod(() =>
+        {
+            RemoveParents(Wrapper, RemoveParentList);
+
+            if (SideChoice == "left")
+            {
+                RewardContainerLeft.SetActive(false); //set Reward tokens to inactive since they are replaced by tokenbar tokens.
+                MaxOutline_Left.transform.parent = null; //remove parent of transparent balloon outline. 
+            }
+            else
+            {
+                RewardContainerRight.SetActive(false);
+                MaxOutline_Right.transform.parent = null;
+            }
+
+            ScalePerInflation_Y = (MaxInflation_Y - TrialStim.transform.localScale.y) / (SideChoice == "left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
+            //DeactivateChildren(SideChoice == "left" ? BalloonContainerLeft : BalloonContainerRight); //Removes outlines if I ever want it!  
+        });
 
         //Inflate Balloon state -------------------------------------------------------------------------------------------------------
         List<float> clickTimings = new List<float>();
         float timeTracker = 0;
+        MouseTracker.AddSelectionHandler(mouseHandler, InflateBalloon);
 
         InflateBalloon.AddInitializationMethod(() =>
         {
-            if (Choice == "left") //set Reward tokens to inactive since they are replaced by tokenbar tokens.
-                RewardContainerLeft.SetActive(false);
-            else
-                RewardContainerRight.SetActive(false);
-            
-            ScalePerInflation_Y = (MaxInflation_Y - TrialStim.transform.localScale.y) / (Choice == "left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
-            //DeactivateChildren(Choice == "left" ? BalloonContainerLeft : BalloonContainerRight); //Removes outlines if I ever want it!
-
-            TokenFBController.SetTotalTokensNum(Choice == "left" ? currentTrial.NumCoinsLeft : currentTrial.NumCoinsRight);
+            TokenFBController.SetTotalTokensNum(SideChoice == "left" ? currentTrial.NumCoinsLeft : currentTrial.NumCoinsRight);
             TokenFBController.enabled = true;
             timeTracker = Time.time;
             IncrementAmounts = new Vector3();
+            Flashing = false;
         });
-        MouseTracker.AddSelectionHandler(mouseHandler, InflateBalloon);
         InflateBalloon.AddUpdateMethod(() =>
         {
-            if(Inflate)
+            //if(!Flashing && Response != 1 && !Inflate) //Can use for human version
+            //    StartCoroutine(FlashOutline());
+
+            if (Inflate)
             {
                 if (TrialStim.transform.localScale != NextScale)
                 {
@@ -255,28 +294,25 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
+                    Inflate = false;
+                    mouseHandler.Start();
                     if (ClickCount >= ClicksNeeded)
                     {
                         Response = 1;
                         AvgClickTime = clickTimings.Average();
                     }
-                    else
-                    {
-                        Inflate = false;
-                        mouseHandler.Start();
-                    }
                 }
             }
 
-            if (mouseHandler.SelectionMatches(TrialStim))
+            if (mouseHandler.SelectionMatches(TrialStim) || mouseHandler.SelectionMatches(MaxOutline_Left) || mouseHandler.SelectionMatches(MaxOutline_Right))
             {
+                Input.ResetInputAxes();
                 ClickCount++;
                 clickTimings.Add(Time.time - timeTracker);
                 timeTracker = Time.time;
                 mouseHandler.Stop();
 
-                CalculateInflation();
-                Inflate = true;
+                CalculateInflation(); //Sets Inflate to TRUE at end of function
 
                 if (ClickCount < ClicksNeeded)
                     AudioFBController.Play("Inflate");
@@ -289,7 +325,15 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         InflateBalloon.AddTimer(() => inflateDuration.value, PopBalloon);
         InflateBalloon.SpecifyTermination(() => Response == 1, PopBalloon);
-        InflateBalloon.AddDefaultTerminationMethod(() => DestroyChildren(Choice == "left" ? BalloonContainerLeft : BalloonContainerRight));
+        InflateBalloon.AddDefaultTerminationMethod(() =>
+        {
+            if (SideChoice == "left")
+                MaxOutline_Left.transform.parent = BalloonContainerLeft.transform;
+            else
+                MaxOutline_Right.transform.parent = BalloonContainerRight.transform;
+
+            DestroyChildren(SideChoice == "left" ? BalloonContainerLeft : BalloonContainerRight);
+        });
 
         //PopBalloon state -------------------------------------------------------------------------------------------------------
         PopBalloon.AddTimer(() => PopClipDuration - PopAudioStartTime, Feedback, () => TrialStim.SetActive(false));
@@ -301,7 +345,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             {
                 GameObject CenteredGO = new GameObject();
                 CenteredGO.transform.position = Vector3.zero;
-                TokenFBController.AddTokens(CenteredGO, Choice == "left" ? currentTrial.NumCoinsLeft : currentTrial.NumCoinsRight);
+                TokenFBController.AddTokens(CenteredGO, SideChoice == "left" ? currentTrial.NumCoinsLeft : currentTrial.NumCoinsRight);
                 Destroy(CenteredGO);
 
                 if (SyncBoxController != null)
@@ -335,13 +379,60 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     }
 
     //HELPER FUNCTIONS -------------------------------------------------------------------------------------------------------
-    void CalculateInflation()
+    IEnumerator FlashOutline()
     {
-        GameObject container = (Choice == "left") ? BalloonContainerLeft : BalloonContainerRight;
+        Flashing = true;
+        GameObject container = (SideChoice == "left") ? BalloonContainerLeft : BalloonContainerRight;
+
+        GameObject child = container.transform.GetChild(ClickCount).transform.gameObject;
+        if (child != null && Response != 1 && !Inflate)
+        {
+            child.transform.GetComponent<Renderer>().material.color = Color.red;
+            yield return new WaitForSeconds(.5f);
+            if(child != null)
+            {
+                child.transform.GetComponent<Renderer>().material.color = OffWhiteOutlineColor;
+                yield return new WaitForSeconds(.5f);
+            }
+        }
+        Flashing = false;
+    } //can use for human version
+
+    void SetChoices()
+    {
+        if(SideChoice == "left")
+        {
+            NumChosenLeft_Block++;
+            EffortChoice = (currentTrial.NumClicksLeft > currentTrial.NumClicksRight ? "higher" : "lower");
+            RewardChoice = (currentTrial.NumCoinsLeft > currentTrial.NumCoinsRight ? "higher" : "lower");
+        }
+        else
+        {
+            NumChosenRight_Block++;
+            EffortChoice = (currentTrial.NumClicksLeft > currentTrial.NumClicksRight ? "lower" : "higher");
+            RewardChoice = (currentTrial.NumCoinsLeft > currentTrial.NumCoinsRight ? "lower" : "higher");
+        }
+
+        if (EffortChoice == "higher")
+            NumHigherEffortChosen_Block++;
+        else
+            NumLowerEffortChosen_Block++;
+
+        if (RewardChoice == "higher")
+            NumHigherRewardChosen_Block++;
+        else
+            NumLowerRewardChosen_Block++;
+    }
+
+    void CalculateInflation()
+    {      
+        GameObject container = (SideChoice == "left") ? BalloonContainerLeft : BalloonContainerRight;
         NextScale = container.transform.GetChild(ClickCount-1).transform.localScale;
         NextScale.y = ScalePerInflation_Y + TrialStim.transform.localScale.y;
         Vector3 difference = NextScale - TrialStim.transform.localScale;
         IncrementAmounts = new Vector3((difference.x / FramesToInflateOver), (difference.y / FramesToInflateOver), (difference.z / FramesToInflateOver));
+
+        Inflate = true;
     }
 
     void SetTokenVariables()
@@ -378,7 +469,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     {
         TrialStim.transform.localScale = TrialStimInitLocalScale;
 
-        if (Choice == "left")
+        if (SideChoice == "left")
         {
             BalloonContainerLeft.transform.position = LeftContainerOriginalPosition;
             RewardContainerLeft.transform.position = LeftRewardContainerOriginalPosition;
@@ -394,7 +485,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void GiveReward()
     {
-        if (Choice == "left")
+        if (SideChoice == "left")
         {
             SyncBoxController.SendRewardPulses(currentTrial.NumPulsesLeft, currentTrial.PulseSizeLeft);
             RewardPulses_Block += currentTrial.NumPulsesLeft;
@@ -436,9 +527,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         StimLeft = Instantiate(StimLeftPrefab, StimLeftPrefab.transform.position, StimLeftPrefab.transform.rotation);
         StimLeft.name = "StimLeft";
+        Red = StimLeft.GetComponent<Renderer>().material.color; //set red color. 
+        StimLeft.GetComponent<Renderer>().material.color = Red;
 
         StimRight = Instantiate(StimRightPrefab, StimRightPrefab.transform.position, StimRightPrefab.transform.rotation);
         StimRight.name = "StimRight";
+        StimRight.GetComponent<Renderer>().material.color = Red;
+
 
         Reward = Instantiate(RewardPrefab, RewardPrefab.transform.position, RewardPrefab.transform.rotation);
         Reward.name = "Reward";
@@ -472,7 +567,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         RewardContainerRight.transform.position = new Vector3(.85f, 1.6f, 0);
         RewardContainerRight.transform.localScale = new Vector3(1, 1, 1);
         
-        Red = StimLeft.GetComponent<Renderer>().material.color;
         TrialStimInitLocalScale = StimLeft.transform.localScale;
 
         //Wrap Left side objects in container and Center to left side:
@@ -508,13 +602,32 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         ObjectsCreated = true;
     }
 
+    void CreateTransparentBalloons()
+    {
+        MaxOutline_Left = Instantiate(StimNoMaterialPrefab, StimLeft.transform.position, StimLeftPrefab.transform.rotation);
+        MaxOutline_Left.name = "MaxOutline_Left";
+        MaxOutline_Left.transform.localScale = new Vector3(70f, .1f, 70f);
+        MaxOutline_Left.transform.SetParent(BalloonContainerLeft.transform);
+
+        MaxOutline_Right = Instantiate(StimNoMaterialPrefab, StimRight.transform.position, StimRightPrefab.transform.rotation);
+        MaxOutline_Right.name = "MaxOutline_Right";
+        MaxOutline_Right.transform.localScale = new Vector3(70f, .1f, 70f);
+        MaxOutline_Right.transform.SetParent(BalloonContainerRight.transform);
+        
+        MaxOutline_Left.SetActive(true);
+        MaxOutline_Right.SetActive(true);
+    }
+
     void CreateBalloonOutlines(int numBalloons, Vector3 ScaleUpAmount, int clickPerOutline, Vector3 pos, GameObject container)
     {
+        string containerName = (container.name == "BalloonContainerLeft" ? "Left" : "Right");
+
         for (int i = clickPerOutline; i <= numBalloons; i += clickPerOutline)
         {
             GameObject outline = Instantiate(BalloonOutline, pos, BalloonOutline.transform.rotation);
+            outline.GetComponent<Renderer>().material.color = OffWhiteOutlineColor;
             outline.transform.parent = container.transform;
-            outline.name = "Outline" + (i + 1);
+            outline.name = "Outline" + containerName + (i);
             outline.transform.localScale += (i) * ScaleUpAmount;
             outline.SetActive(true);
         }
@@ -528,7 +641,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             GameObject RewardClone = Instantiate(Reward, pos, Reward.transform.rotation, container.transform);
             RewardClone.transform.Translate(new Vector3(i * width, 0, 0), Space.World);
-            RewardClone.name = "Reward" + Choice + (i + 1);
+            RewardClone.name = "Reward" + SideChoice + (i + 1);
             RewardClone.SetActive(true);
         }
     }
@@ -546,7 +659,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     void SetTrialSummaryString()
     {
         TrialSummaryString = "\n" +
-                               "Trial #" + (TrialCount_InBlock + 1) +
+                               "Trial #" + (TrialCount_InBlock + 1) + "In Block" +
                                "\n" +
                                "\nClicksNeededLeft: " + currentTrial.NumClicksLeft +
                                "\nClicksNeededRight: " + currentTrial.NumClicksRight +
@@ -562,7 +675,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("ClicksNeededRight", () => currentTrial.NumClicksRight);
         TrialData.AddDatum("NumCoinsLeft", () => currentTrial.NumCoinsLeft);
         TrialData.AddDatum("NumCoinsRight", () => currentTrial.NumCoinsRight);
-        TrialData.AddDatum("ChosenSide", () => Choice.ToUpper());
+        TrialData.AddDatum("ChosenSide", () => SideChoice.ToUpper());
+        TrialData.AddDatum("ChosenEffort", () => EffortChoice.ToUpper());
+        TrialData.AddDatum("ChosenReward", () => RewardChoice.ToUpper());
         TrialData.AddDatum("TimeTakenToChoose", () => ChooseDuration);
         TrialData.AddDatum("AverageClickTimes", () => AvgClickTime);
         TrialData.AddDatum("ClicksPerOutline", () => currentTrial.ClicksPerOutline);
@@ -581,8 +696,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         string contextPath = GetContextNestedFilePath("StartButtonImage.png");
         Texture2D tex = LoadPNG(contextPath);
         //Texture2D tex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
-        Debug.Log(tex.name);
-        Debug.Log(tex.ToString());
         Rect rect = new Rect(new Vector2(0, 0), new Vector2(1, 1));
 
         Vector3 buttonPosition = Vector3.zero;

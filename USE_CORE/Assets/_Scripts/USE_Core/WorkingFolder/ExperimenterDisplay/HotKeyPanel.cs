@@ -163,24 +163,19 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.W),
                 hotKeyAction = () =>
                 {
-                    //print out names of things its flipping
-                    //go into 1 and see if camea before flips what targets display is.
-                    //and after it flips
-
-                    //do it for the old code
-
                     var cams = GameObject.FindObjectsOfType<Camera>();
                     foreach (Camera c in cams)
                     {
-                        Debug.Log("BEFORE CHANGING, " + c.name + " has a target display of " + c.targetDisplay);
+                        Debug.Log(c.name + " before:" + c.targetDisplay);
                         c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-                        Debug.Log("AFTER CHANGING, " + c.name + " has a target display of " + c.targetDisplay);
+                        Debug.Log(c.name + " after:" + c.targetDisplay);
                     }
                     var canvases = GameObject.FindObjectsOfType<Canvas>();
                     foreach (Canvas c in canvases)
                     {
+                        Debug.Log(c.name + " before:" + c.targetDisplay);
                         c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-                        Debug.Log("AFTER CHANGING, " + c.name + " has a target display of " + c.targetDisplay);
+                        Debug.Log(c.name + " after:" + c.targetDisplay);
                     }
                     //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
                 }

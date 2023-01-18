@@ -77,7 +77,7 @@ namespace USE_ExperimentTemplate_Data
         };
 
 
-        public void SeeIfWorks()
+        public void SeeIfConnectionWorks()
         {
             using(var conn = Connection)
             {

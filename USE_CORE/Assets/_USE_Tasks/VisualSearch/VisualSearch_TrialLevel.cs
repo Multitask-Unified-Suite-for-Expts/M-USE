@@ -57,6 +57,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     public int NumRewardGiven_InBlock;
     public int NumTokenBarFull_InBlock;
     public int TotalTokensCollected_InBlock;
+    public decimal Accuracy_InBlock;
+    public decimal AverageSearchDuration_InBlock;
     
     // Trial Data Values
     private int? SelectedStimCode = null;
@@ -98,8 +100,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddInitializationMethod(() =>
         {
             if (!configUIVariablesLoaded) LoadConfigUIVariables();
-            mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
-            mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
             
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
@@ -114,7 +114,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             ContextName = CurrentTrialDef.ContextName;
             RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar +  ContextName + ".png");
             StartButton.SetActive(true);
-            
+            mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
+            mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
             
@@ -180,9 +181,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             {
                 SelectedStimCode = selectedSD.StimCode;
                 SelectedStimLocation = selectedSD.StimLocation;
-                Debug.Log("CURRENT TOUCH DURATION: " + mouseHandler.GetTargetTouchDuration());
+                Debug.Log("CURRENT TOUCH DURATION: " + mouseHandler.currentTargetDuration);
             }
             SetTrialSummaryString();
+            Accuracy_InBlock = decimal.Round(decimal.Divide(NumCorrect_InBlock, (TrialCount_InBlock + 1)), 6);
         });
 
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, ()=> 
@@ -198,6 +200,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             SearchDuration = SearchDisplay.TimingInfo.Duration;
             SearchDurationsList.Add(SearchDuration);
+            AverageSearchDuration_InBlock = decimal.Round((decimal)SearchDurationsList.Average(), 6);
             SetTrialSummaryString();
             if (!selected) return;
             else

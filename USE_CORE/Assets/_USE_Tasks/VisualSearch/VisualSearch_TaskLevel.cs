@@ -48,12 +48,12 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             vsTL.TokenFBController.SetTokenBarValue(vsBD.NumInitialTokens);
             SetBlockSummaryString();
         });
-        
+        /*
         BlockFeedback.AddInitializationMethod(() =>
         {
             SetBlockSummaryString();
             
-        });
+        });*/
     }
     public T GetCurrentBlockDef<T>() where T : BlockDef
     {
@@ -76,9 +76,9 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         BlockSummaryString.AppendLine("\nBlock Num: " + (vsTL.BlockCount + 1) +
                                       "\nTrial Num: " + (vsTL.TrialCount_InBlock + 1) +
                                       "\n" + 
-                                      "\nAccuracy: " + decimal.Round(decimal.Divide(vsTL.NumCorrect_InBlock,(vsTL.TrialCount_InBlock + 1)),3) +
+                                      "\nAccuracy: " + vsTL.Accuracy_InBlock +  
                                       "\n" + 
-                                      "\nAvg Search Duration: " + vsTL.SearchDurationsList.Average() +
+                                      "\nAvg Search Duration: " + vsTL.AverageSearchDuration_InBlock +
                                       "\n" + 
                                       "\nNum Reward Given: " + vsTL.NumRewardGiven_InBlock + 
                                       "\nNum Token Bar Filled: " + vsTL.NumTokenBarFull_InBlock +

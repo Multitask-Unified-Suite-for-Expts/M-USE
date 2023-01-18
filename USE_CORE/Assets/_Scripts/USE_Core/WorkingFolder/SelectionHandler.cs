@@ -67,34 +67,31 @@ public class SelectionHandler<T> where T : StimDef
     public void UpdateTarget(GameObject go)
     {
         if (!started) return;
-        if (go == null)
+        if (go == null) // Evaluates when the player is not selecting anything
         {
-            if (targetedGameObject != null)
+            if (targetedGameObject != null) // Evaluates when the player releases the selected object
             {
-                // Released the selected object
-                bool withinDuration = currentTargetDuration >= MinDuration && (currentTargetDuration <= (MaxDuration ?? float.PositiveInfinity));
-                if (withinDuration) SelectedGameObject = targetedGameObject;
+                bool withinDuration = currentTargetDuration >= MinDuration && currentTargetDuration <= MaxDuration;
+                if (withinDuration)
+                {
+                    SelectedGameObject = targetedGameObject;
+                    SelectedStimDef = null;
+                    if (SelectedGameObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer)) SelectedStimDef = (sdPointer as StimDefPointer).GetStimDef<T>();
+                }
+                else
+                {
+                    Debug.Log("NOT LONG ENOUGH!!"); //ADD FURTHER ERROR FEEDBACK HERE
+                }
             }
             targetedGameObject = null;
             currentTargetDuration = 0;
         }
         else
         {
-            // Do we allow them to change their selection?
-            if (go != targetedGameObject)
-                currentTargetDuration = 0;
-            else
-                currentTargetDuration += Time.deltaTime;
-
+            // Continuously checking the Selected GameObject and resets the currentTargetDuration when the selection changes
+            if (go != targetedGameObject) currentTargetDuration = 0;
+            else currentTargetDuration += Time.deltaTime;
             targetedGameObject = go;
-            //if (MaxDuration == null && currentTargetDuration >= MinDuration) {
-            if (currentTargetDuration <= MaxDuration && currentTargetDuration >= MinDuration) {
-                SelectedGameObject = go;
-                SelectedStimDef = null;
-                if (SelectedGameObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer)) {
-                    SelectedStimDef = (sdPointer as StimDefPointer).GetStimDef<T>();
-                }
-            }
         }
     }
 }

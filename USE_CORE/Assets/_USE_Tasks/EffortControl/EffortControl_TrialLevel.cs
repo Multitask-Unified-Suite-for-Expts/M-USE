@@ -669,11 +669,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TrialSummaryString = "\n" +
                                "Trial #" + (TrialCount_InBlock + 1) + "In Block" +
                                "\n" +
-                               "\nClicksNeededLeft: " + currentTrial.NumClicksLeft +
-                               "\nClicksNeededRight: " + currentTrial.NumClicksRight +
-                               "\nNumCoinsLeft: " + currentTrial.NumCoinsLeft +
-                               "\nNumCoinsRight: " + currentTrial.NumCoinsRight +
-                               "\nClicksPerOutline: " + currentTrial.ClicksPerOutline;
+                               "\nLeft Balloon: " + currentTrial.NumClicksLeft + " Clicks, " + currentTrial.NumCoinsLeft + " Tokens" +
+                                "\n" +
+                               "\nRight Balloon: " + currentTrial.NumClicksRight + " Clicks, " + currentTrial.NumCoinsRight + " Tokens";
     }
 
     void LogTrialData()

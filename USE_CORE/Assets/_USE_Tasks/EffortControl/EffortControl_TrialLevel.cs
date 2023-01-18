@@ -72,7 +72,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     string EffortChoice; //higher or lower
 
     //To center the balloon they selected:
-    float CenteringSpeed = 1.5f;
+    public float CenteringSpeed = 1.5f;
     [HideInInspector] bool Centered;
     [HideInInspector] Vector3 CenteredPos;
     [HideInInspector] public bool Flashing;
@@ -256,9 +256,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 RewardContainerRight.SetActive(false);
                 MaxOutline_Right.transform.parent = null;
             }
-
-            ScalePerInflation_Y = (MaxInflation_Y - TrialStim.transform.localScale.y) / (SideChoice == "left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
-            //DeactivateChildren(SideChoice == "left" ? BalloonContainerLeft : BalloonContainerRight); //Removes outlines if I ever want it!  
+            TokenFBController.SetTotalTokensNum(SideChoice == "left" ? currentTrial.NumCoinsLeft : currentTrial.NumCoinsRight);
+            TokenFBController.enabled = true;
         });
 
         //Inflate Balloon state -------------------------------------------------------------------------------------------------------
@@ -268,8 +267,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         InflateBalloon.AddInitializationMethod(() =>
         {
-            TokenFBController.SetTotalTokensNum(SideChoice == "left" ? currentTrial.NumCoinsLeft : currentTrial.NumCoinsRight);
-            TokenFBController.enabled = true; //NEED THIS TO HAPPEN ON SAME FRAME AS WHEN THEY ARE CENTERED
+            ScalePerInflation_Y = (MaxInflation_Y - TrialStim.transform.localScale.y) / (SideChoice == "left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
+            //TokenFBController.enabled = true; //NEED THIS TO HAPPEN ON SAME FRAME AS WHEN THEY ARE CENTERED
             timeTracker = Time.time;
             IncrementAmounts = new Vector3();
             Flashing = false;
@@ -314,11 +313,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 timeTracker = Time.time;
                 mouseHandler.Stop();
 
-                CalculateInflation(); //Sets Inflate to TRUE
+                CalculateInflation(); //Sets Inflate to TRUE at end of func
                 InflateAudioPlayed = false;
             }
         });
-        InflateBalloon.AddTimer(() => 2f, PopBalloon); //change back to inflateduration.value
+        InflateBalloon.AddTimer(() => inflateDuration.value, PopBalloon);
         InflateBalloon.SpecifyTermination(() => Response == 1, PopBalloon);
         InflateBalloon.AddDefaultTerminationMethod(() =>
         {

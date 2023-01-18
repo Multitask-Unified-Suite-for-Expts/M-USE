@@ -63,6 +63,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     int ClickCount;
     float PopAudioStartTime;
     float PopClipDuration;
+    float InflateClipDuration;
     bool AddTokenAudioPlayed;
     bool ObjectsCreated;
     List<GameObject> RemoveParentList;
@@ -75,12 +76,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     float CenteringSpeed = 1.5f;
     bool Centered;
     Vector3 CenteredPos;
+    public bool Flashing;
 
     //Variables to Inflate balloon at interval rate
     bool Inflate;
     int ScalingInterval;
     float MaxInflation_Y = 25f;
     float ScalePerInflation_Y;
+    public float ScaleTimer;
     Vector3 IncrementAmounts;
     Vector3 NextScale;
 
@@ -102,9 +105,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public GameObject MaxOutline_Left;
     [HideInInspector] public GameObject MaxOutline_Right;
 
-    public bool Flashing;
-
-    public float ScaleTimer;
 
 
     public override void DefineControlLevel()
@@ -120,13 +120,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         AddActiveStates(new List<State> { InitTrial, ChooseBalloon, CenterSelection, InflateBalloon, PopBalloon, Feedback, ITI });
 
         SelectionHandler<EffortControl_StimDef> mouseHandler = new SelectionHandler<EffortControl_StimDef>();
+   
 
-        ScalingInterval = 100;
-
-        //if (Debug.isDebugBuild)
-        //    ScalingInterval = 100;
-        //else
-        //    ScalingInterval = 25;
+        ScalingInterval = 25;
 
 
         TokenFBController.enabled = false;
@@ -136,8 +132,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         if(AudioFBController != null)
             AddAudioClips();
-
-
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
@@ -286,21 +280,18 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             Flashing = false;
             ScaleTimer = 0;
         });
+
         InflateBalloon.AddUpdateMethod(() =>
         {
-            //if(!Flashing && Response != 1 && !Inflate) //Can use for human version
-            //    StartCoroutine(FlashOutline());
-
             if (Inflate)
             {
                 ScaleTimer += Time.deltaTime;
-                if((ScaleTimer >= (PopClipDuration / ScalingInterval)))
+                if(ScaleTimer >= (InflateClipDuration / ScalingInterval)) //When timer hits for next inflation
                 {
                     if (TrialStim.transform.localScale != NextScale)
                         Scale();
                     else
                     {
-                        ScaleTimer = 0; //Reset Timer;
                         Inflate = false;
                         mouseHandler.Start();
                         if (ClickCount >= ClicksNeeded)
@@ -309,6 +300,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                             AvgClickTime = clickTimings.Average();
                         }
                     }
+                    ScaleTimer = 0; //Reset Timer for next inflation increment;
                 }
             }
 
@@ -320,15 +312,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 timeTracker = Time.time;
                 mouseHandler.Stop();
 
+                //if(!Inflate)
                 CalculateInflation(); //Sets Inflate to TRUE at end of function
-
-                if (ClickCount < ClicksNeeded)
-                    AudioFBController.Play("Inflate");
-                else
-                {
-                    AudioFBController.Play("InflateAndPop");
-                    PopAudioStartTime = Time.time;
-                }
             }
         });
         InflateBalloon.AddTimer(() => inflateDuration.value, PopBalloon);
@@ -404,6 +389,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         IncrementAmounts = new Vector3((difference.x / ScalingInterval), (difference.y / ScalingInterval), (difference.z / ScalingInterval));
 
         Inflate = true;
+
+        if (ClickCount < ClicksNeeded)
+            AudioFBController.Play("Inflate");
+        else
+        {
+            AudioFBController.Play("InflateAndPop");
+            PopAudioStartTime = Time.time;
+        }
     }
 
     IEnumerator FlashOutline()
@@ -669,6 +662,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         AudioFBController.AddClip("Inflate", InflateBalloon_Audio);
         AudioFBController.AddClip("InflateAndPop", InflateAndPop_Audio);
 
+        InflateClipDuration = AudioFBController.GetClip("Inflate").length;
         PopClipDuration = AudioFBController.GetClip("InflateAndPop").length * .75f; //setting for use in PopBalloon state
 
     }

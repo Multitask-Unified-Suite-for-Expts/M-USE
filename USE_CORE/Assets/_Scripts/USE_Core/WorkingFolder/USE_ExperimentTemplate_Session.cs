@@ -227,6 +227,8 @@ namespace USE_ExperimentTemplate_Session
 
 
                 SessionData.CreateFile();
+                //SessionData.SeeIfConnectionWorks(); //using to test MySql database connection
+
                 EventCodeManager = GameObject.Find("MiscScripts").GetComponent<EventCodeManager>(); //new EventCodeManager();
                 if (SerialPortActive)
                 {

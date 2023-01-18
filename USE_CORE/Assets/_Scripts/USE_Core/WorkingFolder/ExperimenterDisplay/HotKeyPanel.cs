@@ -12,6 +12,7 @@ using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using UnityEditor;
+using UnityEngine.SceneManagement;
 
 public class HotKeyPanel : ExperimenterDisplayPanel
 {
@@ -165,13 +166,18 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     var cams = GameObject.FindObjectsOfType<Camera>();
                     foreach (Camera c in cams)
                     {
+                        Debug.Log(c.name + " before:" + c.targetDisplay);
                         c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
+                        Debug.Log(c.name + " after:" + c.targetDisplay);
                     }
                     var canvases = GameObject.FindObjectsOfType<Canvas>();
                     foreach (Canvas c in canvases)
                     {
+                        Debug.Log(c.name + " before:" + c.targetDisplay);
                         c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
+                        Debug.Log(c.name + " after:" + c.targetDisplay);
                     }
+                    //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
                 }
             };
             HotKeyList.Add(toggleDisplays);

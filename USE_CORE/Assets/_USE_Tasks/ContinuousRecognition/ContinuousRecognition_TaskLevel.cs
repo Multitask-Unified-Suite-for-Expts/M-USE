@@ -31,6 +31,9 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public List<float> TimeToCompletion_Task;
     [HideInInspector] public float AvgTimeToCompletion = 0;
 
+    [HideInInspector] public List<float> NonStimTouches_Task;
+    [HideInInspector] public float AvgNonStimTouches_Task = 0;
+
     [HideInInspector] public double StanDev;
     [HideInInspector] public string BlockAveragesString;
     [HideInInspector] public string CurrentBlockString;
@@ -79,6 +82,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.AdjustedPositionsForMac = false;
 
             trialLevel.ChosenStimIndices.Clear();
+            trialLevel.NonStimTouches_Block = 0;
             trialLevel.NumTrials_Block = 0;
             trialLevel.NumCorrect_Block = 0;
             trialLevel.NumTbCompletions_Block = 0;
@@ -97,6 +101,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             if(BlockCount > 0) CurrentBlockString += "\n";
             PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
 
+            NonStimTouches_Task.Add(trialLevel.NonStimTouches_Block);
             TrialsCompleted_Task.Add(trialLevel.NumTrials_Block);
             TrialsCorrect_Task.Add(trialLevel.NumCorrect_Block); //at end of each block, add block's NumCorrect to task List;
             TokenBarCompletions_Task.Add(trialLevel.NumTbCompletions_Block);
@@ -114,6 +119,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary();
 
+        data["Non Stim Touches"] = NonStimTouches_Task.AsQueryable().Sum();
         data["Trials Completed"] = TrialsCompleted_Task.AsQueryable().Sum();
         data["Trials Correct"] = TrialsCorrect_Task.AsQueryable().Sum();
         data["TokenBar Completions"] = TokenBarCompletions_Task.AsQueryable().Sum();
@@ -124,6 +130,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     void SetupBlockData()
     {
         BlockData.AddDatum("BlockName", () => currentBlock.BlockName);
+        BlockData.AddDatum("NonStimTouches", () => trialLevel.NonStimTouches_Block);
         BlockData.AddDatum("NumTrials", () => trialLevel.NumTrials_Block);
         BlockData.AddDatum("NumCorrect", () => trialLevel.NumCorrect_Block);
         BlockData.AddDatum("TokenBarCompletions", () => trialLevel.NumTbCompletions_Block);
@@ -139,12 +146,13 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         if (BlockCount > 0)
         {
-            BlockAveragesString = "<b>Block Averages " + $"({BlockCount} block);" + "</b>" +
+            BlockAveragesString = "<b>Block Averages " + $"({BlockCount} block completed);" + "</b>" +
                               "\nAvg Correct: " + AvgNumCorrect.ToString("0.00") +
                               "\nAvg TbCompletions: " + AvgNumTbCompletions.ToString("0.00") +
                               "\nAvg TimeToChoice: " + AvgTimeToChoice.ToString("0.00") + "s" +
                               "\nAvg TimeToCompletion: " + AvgTimeToCompletion.ToString("0.00") + "s" +
                               "\nAvg Rewards: " + AvgNumRewards.ToString("0.00") +
+                              "\nAvg NonStimTouches: " + AvgNonStimTouches_Task.ToString("0.00") +
                               "\nStandard Deviation: " + StanDev.ToString("0.00") +
                               "\n";
         }
@@ -154,7 +162,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
                         "\nTbCompletions: " + trialLevel.NumTbCompletions_Block +
                         "\nAvgTimeToChoice: " + trialLevel.AvgTimeToChoice_Block.ToString("0.00") + "s" +
                         "\nTimeToCompletion: " + trialLevel.TimeToCompletion_Block.ToString("0.00") + "s" +
-                        "\nRewards: " + trialLevel.NumRewards_Block;
+                        "\nRewards: " + trialLevel.NumRewards_Block +
+                        "\nNonStimTouches: " + trialLevel.NonStimTouches_Block;
 
         if (BlockCount > 0)
         {
@@ -209,6 +218,9 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         if (TotalRewards_Task.Count >= 1)
             AvgNumRewards = (float)TotalRewards_Task.AsQueryable().Average();
+
+        if (NonStimTouches_Task.Count >= 1)
+            AvgNonStimTouches_Task = (float)NonStimTouches_Task.AsQueryable().Average();
     }
 
 }

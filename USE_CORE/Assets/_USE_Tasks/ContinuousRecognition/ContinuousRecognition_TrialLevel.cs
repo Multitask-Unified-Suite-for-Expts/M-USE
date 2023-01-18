@@ -48,6 +48,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public List<int> ChosenStimIndices;
     [HideInInspector] public string MaterialFilePath;
 
+    [HideInInspector] public int NonStimTouches_Block;
     [HideInInspector] public int NumTrials_Block;
     [HideInInspector] public int NumCorrect_Block;
     [HideInInspector] public int NumTbCompletions_Block;
@@ -74,6 +75,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public AudioClip Success_Audio;
     public AudioClip Fail_SouthPark_Audio;
     public AudioClip Fail_Audio;
+
+    public bool ClickedNonStim;
 
     //Config Variables
     [HideInInspector]
@@ -200,6 +203,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             if (TrialCount_InBlock == 0)
                 TimeToCompletion_StartTime = Time.time;
+
+            ClickedNonStim = false;
         });
 
         ChooseStim.AddUpdateMethod(() =>
@@ -210,6 +215,24 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             TimerText.text = TimeRemaining.ToString("0");
 
             chosenStimObj = mouseHandler.SelectedGameObject;
+            if(chosenStimObj != null)
+                Debug.Log(chosenStimObj.name);
+
+            if(InputBroker.GetMouseButtonDown(0))
+            {
+                if (chosenStimObj == null)
+                    ClickedNonStim = true;
+            }
+            if(InputBroker.GetMouseButtonUp(0))
+            {
+                if (ClickedNonStim)
+                {
+                    Debug.Log("CLICK RELEASED!");
+                    NonStimTouches_Block++;
+                    ClickedNonStim = false;
+                }
+            }
+
             chosenStimDef = mouseHandler.SelectedStimDef;
 
             if (chosenStimDef != null) //They Clicked a Stim
@@ -285,6 +308,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------
         TouchFeedback.AddInitializationMethod(() =>
         {
+            Debug.Log("NON STIM TOUCHES Block: " + NonStimTouches_Block);
+
             if (!StimIsChosen)
                 return;
 
@@ -1108,6 +1133,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     void LogFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
+        FrameData.AddDatum("TouchedNonStim", () => ClickedNonStim);
         FrameData.AddDatum("Context", () => currentTrial.ContextName);
         FrameData.AddDatum("ContextActive", () => ContextActive);
         FrameData.AddDatum("StartButton", () => StartButton.activeSelf);

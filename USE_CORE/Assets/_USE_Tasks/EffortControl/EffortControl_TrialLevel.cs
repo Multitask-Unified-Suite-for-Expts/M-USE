@@ -416,7 +416,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
         }
         Flashing = false;
-    } //can use for human version
+    }
 
     void SetChoices()
     {

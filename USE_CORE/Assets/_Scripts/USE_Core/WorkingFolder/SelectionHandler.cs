@@ -71,7 +71,8 @@ public class SelectionHandler<T> where T : StimDef
         {
             if (targetedGameObject != null) // Evaluates when the player releases the selected object
             {
-                bool withinDuration = currentTargetDuration >= MinDuration && currentTargetDuration <= MaxDuration;
+                bool withinDuration = currentTargetDuration >= MinDuration && 
+                                      ((currentTargetDuration <= MaxDuration) || MaxDuration == null);
                 if (withinDuration)
                 {
                     SelectedGameObject = targetedGameObject;
@@ -91,6 +92,7 @@ public class SelectionHandler<T> where T : StimDef
             // Continuously checking the Selected GameObject and resets the currentTargetDuration when the selection changes
             if (go != targetedGameObject) currentTargetDuration = 0;
             else currentTargetDuration += Time.deltaTime;
+            Debug.Log("CURRENT TARGET DURATION: " + currentTargetDuration);
             targetedGameObject = go;
         }
     }

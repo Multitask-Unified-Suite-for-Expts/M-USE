@@ -79,7 +79,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     //Variables to Inflate balloon at interval rate
     [HideInInspector] float InflateClipDuration;
     [HideInInspector] bool Inflate;
-    [HideInInspector] private readonly int ScalingInterval = 25;
     [HideInInspector] private readonly float MaxInflation_Y = 25f;
     [HideInInspector] float ScalePerInflation_Y;
     [HideInInspector] public float ScaleTimer;
@@ -99,7 +98,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int NumHigherRewardChosen_Block;
     [HideInInspector] public int NumLowerRewardChosen_Block;
 
-    [HideInInspector] public ConfigNumber inflateDuration, itiDuration;
+    [HideInInspector] public ConfigNumber scalingInterval, inflateDuration, itiDuration; //ScalingInterval is used for balloonInflation!
 
     [HideInInspector] public GameObject MaxOutline_Left;
     [HideInInspector] public GameObject MaxOutline_Right;
@@ -273,8 +272,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             timeTracker = Time.time;
             IncrementAmounts = new Vector3();
             Flashing = false;
-            ScaleTimer = 0;
             InflateAudioPlayed = false;
+            ScaleTimer = 0;
         });
 
         InflateBalloon.AddUpdateMethod(() =>
@@ -288,10 +287,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 }
 
                 ScaleTimer += Time.deltaTime;
-                if(ScaleTimer >= (InflateClipDuration / ScalingInterval)) //When timer hits for next inflation
+                if(ScaleTimer >= (InflateClipDuration / scalingInterval.value)) //When timer hits for next inflation
                 {
                     if (TrialStim.transform.localScale != NextScale)
-                        Scale();
+                        ScaleToNextInterval();
                     else
                     {
                         Inflate = false;
@@ -379,7 +378,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     }
 
     //HELPER FUNCTIONS -------------------------------------------------------------------------------------------------------
-    void Scale()
+    void ScaleToNextInterval()
     {
         if (TrialStim.transform.localScale.x + IncrementAmounts.x > NextScale.x) //if close and would go over target scale, recalculate smaller Increments.
             IncrementAmounts = new Vector3((NextScale.x - TrialStim.transform.localScale.x), (NextScale.y - TrialStim.transform.localScale.y), (NextScale.z - TrialStim.transform.localScale.z));
@@ -393,7 +392,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         NextScale = container.transform.GetChild(ClickCount-1).transform.localScale;
         NextScale.y = ScalePerInflation_Y + TrialStim.transform.localScale.y;
         Vector3 difference = NextScale - TrialStim.transform.localScale;
-        IncrementAmounts = new Vector3((difference.x / ScalingInterval), (difference.y / ScalingInterval), (difference.z / ScalingInterval));
+        IncrementAmounts = new Vector3((difference.x / scalingInterval.value), (difference.y / scalingInterval.value), (difference.z / scalingInterval.value));
 
         Inflate = true;
     }
@@ -525,6 +524,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void LoadConfigUIVariables()
     {
+        scalingInterval = ConfigUiVariables.get<ConfigNumber>("scalingInterval");
         inflateDuration = ConfigUiVariables.get<ConfigNumber>("inflateDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
     }

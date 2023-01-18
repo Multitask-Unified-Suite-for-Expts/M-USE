@@ -1,3 +1,4 @@
+using MazeGame_Namespace;
 using UnityEngine;
 using USE_StimulusManagement;
 
@@ -34,6 +35,31 @@ public class SelectionHandler<T> where T : StimDef
         return ReferenceEquals(SelectedGameObject, gameObj);
     }
 
+    public void SetMinTouchDuration(float minDuration)
+    {
+        MinDuration = minDuration;
+    }
+
+    public float GetMinTouchDuration()
+    {
+        return MinDuration;
+    }
+
+    public void SetMaxTouchDuration(float maxDuration)
+    {
+        MaxDuration = maxDuration;
+    }
+
+    public float? GetMaxTouchDuration()
+    {
+        return MaxDuration;
+    }
+
+    public float GetTargetTouchDuration()
+    {
+        return currentTargetDuration;
+    }
+
     public bool SelectionMatches(T stimDef) {
         return ReferenceEquals(SelectedStimDef, stimDef);
     }
@@ -61,7 +87,8 @@ public class SelectionHandler<T> where T : StimDef
                 currentTargetDuration += Time.deltaTime;
 
             targetedGameObject = go;
-            if (MaxDuration == null && currentTargetDuration >= MinDuration) {
+            //if (MaxDuration == null && currentTargetDuration >= MinDuration) {
+            if (currentTargetDuration <= MaxDuration && currentTargetDuration >= MinDuration) {
                 SelectedGameObject = go;
                 SelectedStimDef = null;
                 if (SelectedGameObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer)) {

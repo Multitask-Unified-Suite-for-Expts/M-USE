@@ -12,6 +12,7 @@ using ConfigDynamicUI;
 using USE_ExperimentTemplate_Trial;
 using System.IO;
 using ConfigParsing;
+using TMPro.SpriteAssetUtilities;
 using UnityEngine.Serialization;
 
 public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
@@ -70,16 +71,16 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         State SearchDisplay = new State("SearchDisplay");
         State SelectionFeedback = new State("SelectionFeedback");
         State TokenFeedback = new State("TokenFeedback");
-        State TrialEnd = new State("TrialEnd");
+        State ITI = new State("TrialEnd");
         State SearchDisplayDelay = new State("SearchDisplayDelay");
-        State delay = new State("Delay");
+        State Delay = new State("Delay");
         
-        AddActiveStates(new List<State> {InitTrial, SearchDisplay, SelectionFeedback, TokenFeedback, TrialEnd, delay, SearchDisplayDelay});
+        AddActiveStates(new List<State> {InitTrial, SearchDisplay, SelectionFeedback, TokenFeedback, ITI, Delay, SearchDisplayDelay});
         
         // A state that just waits for some time
         State stateAfterDelay = null;
         float delayDuration = 0;
-        delay.AddTimer(() => delayDuration, () => stateAfterDelay);
+        Delay.AddTimer(() => delayDuration, () => stateAfterDelay);
         
         Text commandText = null;
         
@@ -96,12 +97,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         SetupTrial.AddInitializationMethod(() =>
         {
-            if (!configUIVariablesLoaded)
-            {
-                configUIVariablesLoaded = true;
-                LoadConfigUIVariables();
-            }          
+            if (TrialCount_InBlock == 0) TokenFBController.SetTokenBarValue(CurrentTrialDef.NumInitialTokens); // NOT GREAT BUT THE TOKENFBCONTROLLER ISN'T SET UP UNTIL AFTER ADD_CONTROLLEVEL
+            if (!configUIVariablesLoaded) LoadConfigUIVariables();
+            mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
+            mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
+            
             SetTrialSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
         });
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -126,7 +128,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 TokenFBController
                     .SetRevealTime(tokenRevealDuration.value)
                     .SetUpdateTime(tokenUpdateDuration.value);
-                TokenFBController.SetTokenBarValue(NumInitialTokens);
                 NumTokenBarFull_InBlock = TokenFBController.GetNumTokenBarFull();
                 TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
                                        (TokenFBController.GetNumTokenBarFull() * CurrentTrialDef.NumTokenBar);
@@ -180,11 +181,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             {
                 SelectedStimCode = selectedSD.StimCode;
                 SelectedStimLocation = selectedSD.StimLocation;
+                Debug.Log("CURRENT TOUCH DURATION: " + mouseHandler.GetTargetTouchDuration());
             }
             SetTrialSummaryString();
         });
 
-        SearchDisplay.AddTimer(() => selectObjectDuration.value, TrialEnd, ()=> 
+        SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, ()=> 
         {
             if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
             {
@@ -237,14 +239,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             }
             
         });
-        TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), TrialEnd, () =>
+        TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), ITI, () =>
         {
-            // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
-            DestroyTextOnExperimenterDisplay();
-            tStim.ToggleVisibility(false);
-            TokenFBController.enabled = false;
-            ContextName = "itiImage";
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
             if (TokenFBController.GetAnimationPhase() == "Flashing")
             {
                 NumTokenBarFull_InBlock++;
@@ -258,10 +254,22 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             }
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
+            TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
+                                           (TokenFBController.GetNumTokenBarFull() * CurrentTrialDef.NumTokenBar);
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
         });
-        TrialEnd.AddTimer(() => itiDuration.value, FinishTrial, () =>
+        ITI.AddInitializationMethod(() =>
+        {
+            ContextName = "itiImage";
+            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+            // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
+            DestroyTextOnExperimenterDisplay();
+            tStim.ToggleVisibility(false);
+            TokenFBController.enabled = false;
+        });
+    
+        ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
         {
             ResetDataTrackingVariables();
         });
@@ -269,6 +277,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             //Remove any remaining items on player view
             DestroyTextOnExperimenterDisplay();
+            TokenFBController.enabled = false;
+            ResetDataTrackingVariables();
         });
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
         AssignTrialData();
@@ -318,7 +328,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         finalFbDuration = ConfigUiVariables.get<ConfigNumber>("finalFbDuration");
         fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
         tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
-        tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
+        tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");
         configUIVariablesLoaded = true;
     }
     private GameObject CreateStartButton(Texture2D tex, Rect rect)
@@ -446,6 +456,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private void AssignTrialData()
     {
         // All AddDatum commands for the Trial Data
+        TrialData.AddDatum("Context", ()=> CurrentTrialDef.ContextName);
         TrialData.AddDatum("SelectedStimCode", () => selectedSD?.StimCode ?? null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
         TrialData.AddDatum("CorrectSelection", () => CorrectSelection ? 1 : 0);
@@ -456,10 +467,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private void AssignFrameData()
     {
         // All AddDatum commmands from the Frame Data
-        FrameData.AddDatum("MousePosition", () => InputBroker.mousePosition);
+        FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("StartButtonVisibility", () => StartButton.activeSelf);
         FrameData.AddDatum("TrialStimVisibility", () => tStim.IsActive);
-        FrameData.AddDatum("ContextName", () => ContextName);
-        FrameData.AddDatum("TokenBarValue", ()=> TokenFBController.GetTokenBarValue());
+        FrameData.AddDatum("TokenBarVisibility", ()=> TokenFBController.isActiveAndEnabled);
     }
 }

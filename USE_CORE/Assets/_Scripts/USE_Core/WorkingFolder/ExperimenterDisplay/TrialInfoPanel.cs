@@ -22,7 +22,6 @@ public class TrialInfoPanel: ExperimenterDisplayPanel
         
         trialInfoPanel = GameObject.Find("TrialInfoPanel");
         trialInfoText = GameObject.Find("TrialInfoPanelText");
-        trialInfoText.transform.SetParent(trialInfoPanel.GetComponent<Transform>());
         
     }
     public override void CustomPanelUpdate()

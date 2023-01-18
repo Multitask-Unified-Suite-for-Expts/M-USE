@@ -97,7 +97,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         SetupTrial.AddInitializationMethod(() =>
         {
-            if (TrialCount_InBlock == 0) TokenFBController.SetTokenBarValue(CurrentTrialDef.NumInitialTokens); // NOT GREAT BUT THE TOKENFBCONTROLLER ISN'T SET UP UNTIL AFTER ADD_CONTROLLEVEL
             if (!configUIVariablesLoaded) LoadConfigUIVariables();
             mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
             mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);

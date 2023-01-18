@@ -75,6 +75,7 @@ namespace USE_ExperimentTemplate_Trial
             AddActiveStates(new List<State> { SetupTrial, FinishTrial });
 
             Cursor.visible = false;
+            TokenFBController.enabled = false;
 
             //DefineTrial();
             Add_ControlLevel_InitializationMethod(() =>
@@ -82,8 +83,6 @@ namespace USE_ExperimentTemplate_Trial
                 TrialCount_InBlock = -1;
                 TrialStims = new List<StimGroup>();
                 AudioFBController.UpdateAudioSource();
-                TokenFBController.Init(TrialData, FrameData, AudioFBController);
-                TokenFBController.enabled = false;
                 //DetermineNumTrialsInBlock();
             });
 

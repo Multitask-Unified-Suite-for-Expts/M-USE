@@ -49,7 +49,7 @@ namespace WorkingMemory_Namespace
                 td.BlockEndType = BlockEndType;
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
-                td.StimFacingCamera = td.StimFacingCamera;
+                td.StimFacingCamera = StimFacingCamera;
                 TrialDefs[iTrial] = td;
             }
         }

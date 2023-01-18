@@ -38,6 +38,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     public AudioClip BalloonChosen_Audio;
     public AudioClip InflateBalloon_Audio;
     public AudioClip PopBalloon_Audio;
+    public AudioClip TimeRanOut_Audio;
 
     //Colors:
     [HideInInspector] Color Red;
@@ -268,7 +269,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         InflateBalloon.AddInitializationMethod(() =>
         {
             TokenFBController.SetTotalTokensNum(SideChoice == "left" ? currentTrial.NumCoinsLeft : currentTrial.NumCoinsRight);
-            TokenFBController.enabled = true;
+            TokenFBController.enabled = true; //NEED THIS TO HAPPEN ON SAME FRAME AS WHEN THEY ARE CENTERED
             timeTracker = Time.time;
             IncrementAmounts = new Vector3();
             Flashing = false;
@@ -317,7 +318,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 InflateAudioPlayed = false;
             }
         });
-        InflateBalloon.AddTimer(() => inflateDuration.value, PopBalloon);
+        InflateBalloon.AddTimer(() => 2f, PopBalloon); //change back to inflateduration.value
         InflateBalloon.SpecifyTermination(() => Response == 1, PopBalloon);
         InflateBalloon.AddDefaultTerminationMethod(() =>
         {
@@ -332,7 +333,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //PopBalloon state -------------------------------------------------------------------------------------------------------
         PopBalloon.AddDefaultInitializationMethod(() =>
         {
-            AudioFBController.Play("Pop");
+            if (Response == 1)
+                AudioFBController.Play("Pop");
+            else
+            {
+                AudioFBController.Play("TimeRanOut");
+                TokenFBController.enabled = false;
+            }
             TrialStim.SetActive(false);
         });
         PopBalloon.SpecifyTermination(() => !TrialStim.activeSelf && !AudioFBController.IsPlaying(), Feedback);
@@ -360,6 +367,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = false;
             AddTokenInflateAudioPlayed = false;
         });
+        Feedback.SpecifyTermination(() => true && Response != 1, ITI);
 
         //ITI state -------------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>
@@ -380,9 +388,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     //HELPER FUNCTIONS -------------------------------------------------------------------------------------------------------
     void ScaleToNextInterval()
     {
-        if (TrialStim.transform.localScale.x + IncrementAmounts.x > NextScale.x) //if close and would go over target scale, recalculate smaller Increments.
+        //If close and next increment would go over target scale, recalculate the exact amount:
+        if (TrialStim.transform.localScale.x + IncrementAmounts.x > NextScale.x) 
             IncrementAmounts = new Vector3((NextScale.x - TrialStim.transform.localScale.x), (NextScale.y - TrialStim.transform.localScale.y), (NextScale.z - TrialStim.transform.localScale.z));
 
+        //Scale:
         TrialStim.transform.localScale = new Vector3(TrialStim.transform.localScale.x + IncrementAmounts.x, TrialStim.transform.localScale.y + IncrementAmounts.y, TrialStim.transform.localScale.z + IncrementAmounts.z);
     }
 
@@ -660,6 +670,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         AudioFBController.AddClip("SelectionMade", BalloonChosen_Audio);
         AudioFBController.AddClip("Inflate", InflateBalloon_Audio);
         AudioFBController.AddClip("Pop", PopBalloon_Audio);
+        AudioFBController.AddClip("TimeRanOut", TimeRanOut_Audio);
 
         InflateClipDuration = AudioFBController.GetClip("Inflate").length;
     }

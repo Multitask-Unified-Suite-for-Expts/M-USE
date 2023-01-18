@@ -5932,6 +5932,8 @@ MonoBehaviour:
   AvgTimeToChoice: 0
   TimeToCompletion_Task: []
   AvgTimeToCompletion: 0
+  NonStimTouches_Task: []
+  AvgNonStimTouches_Task: 0
   StanDev: 0
   BlockAveragesString: 
   CurrentBlockString: 
@@ -6021,6 +6023,7 @@ MonoBehaviour:
     IsActive: 0
   ChosenStimIndices: 
   MaterialFilePath: 
+  NonStimTouches_Block: 0
   NumTrials_Block: 0
   NumCorrect_Block: 0
   NumTbCompletions_Block: 0
@@ -6048,6 +6051,8 @@ MonoBehaviour:
   Fail_SouthPark_Audio: {fileID: 8300000, guid: f3ebbe6eb75364aac9ae63ecaade92ee,
     type: 3}
   Fail_Audio: {fileID: 8300000, guid: 423d149ff34dc40598b1e18df2a9bfec, type: 3}
+  TimeRanOut_Audio: {fileID: 8300000, guid: 9bda41667c36249e7a4b99d77f24dc62, type: 3}
+  ClickedNonStim: 0
   displayStimDuration:
     name: 
     hidden: 0

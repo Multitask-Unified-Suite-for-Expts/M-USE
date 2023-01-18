@@ -82,7 +82,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector]
     public ConfigNumber displayStimDuration, chooseStimDuration, itiDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration;
 
-
     public override void DefineControlLevel()
     {        
         State InitTrial = new State("InitTrial");
@@ -94,7 +93,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
-        TokenFBController.enabled = false;
+        TokenFBController.enabled = false; //can remove once seema updates template. 
         TokenFBController.SetFlashingTime(1f);
 
         OriginalFbTextPosition = YouLoseTextGO.transform.position;
@@ -308,8 +307,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------
         TouchFeedback.AddInitializationMethod(() =>
         {
-            Debug.Log("NON STIM TOUCHES Block: " + NonStimTouches_Block);
-
             if (!StimIsChosen)
                 return;
 

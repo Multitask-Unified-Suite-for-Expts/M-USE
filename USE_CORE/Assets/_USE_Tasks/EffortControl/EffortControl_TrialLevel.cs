@@ -451,7 +451,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             NumLowerRewardChosen_Block++;
     }
 
-
     void SetTokenVariables()
     {
         TokenFBController.SetFlashingTime(1.5f);
@@ -552,14 +551,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         StimRight.name = "StimRight";
         StimRight.GetComponent<Renderer>().material.color = Red;
 
-
         Reward = Instantiate(RewardPrefab, RewardPrefab.transform.position, RewardPrefab.transform.rotation);
         Reward.name = "Reward";
         Reward.GetComponent<Renderer>().material.color = Color.gray; //turn token color to grey so they dont look collected yet. 
 
         BalloonOutline = Instantiate(OutlinePrefab, OutlinePrefab.transform.position, OutlinePrefab.transform.rotation);
         BalloonOutline.name = "Outline";
-        BalloonOutline.transform.localScale = new Vector3(10, 0, 10);
+        BalloonOutline.transform.localScale = new Vector3(10, 0.01f, 10);
         BalloonOutline.GetComponent<Renderer>().material.color = OffWhiteOutlineColor;
 
         MiddleBarrier = GameObject.CreatePrimitive(PrimitiveType.Cube);

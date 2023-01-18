@@ -226,6 +226,8 @@ namespace USE_ExperimentTemplate_Session
 
 
                 SessionData.CreateFile();
+                //SessionData.SeeIfWorks(); //TESTING!
+
                 EventCodeManager = GameObject.Find("MiscScripts").GetComponent<EventCodeManager>(); //new EventCodeManager();
                 if (SerialPortActive)
                 {

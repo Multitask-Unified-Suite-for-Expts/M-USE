@@ -12,6 +12,7 @@ using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using UnityEditor;
+using UnityEngine.SceneManagement;
 
 public class HotKeyPanel : ExperimenterDisplayPanel
 {
@@ -162,16 +163,26 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.W),
                 hotKeyAction = () =>
                 {
+                    //print out names of things its flipping
+                    //go into 1 and see if camea before flips what targets display is.
+                    //and after it flips
+
+                    //do it for the old code
+
                     var cams = GameObject.FindObjectsOfType<Camera>();
                     foreach (Camera c in cams)
                     {
+                        Debug.Log("BEFORE CHANGING, " + c.name + " has a target display of " + c.targetDisplay);
                         c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
+                        Debug.Log("AFTER CHANGING, " + c.name + " has a target display of " + c.targetDisplay);
                     }
                     var canvases = GameObject.FindObjectsOfType<Canvas>();
                     foreach (Canvas c in canvases)
                     {
                         c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
+                        Debug.Log("AFTER CHANGING, " + c.name + " has a target display of " + c.targetDisplay);
                     }
+                    //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
                 }
             };
             HotKeyList.Add(toggleDisplays);

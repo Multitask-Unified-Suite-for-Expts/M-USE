@@ -9,6 +9,8 @@ using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using System.Data.SqlClient;
+//using MySql.Data.MySqlClient;
+
 
 namespace USE_ExperimentTemplate_Data
 {
@@ -55,8 +57,9 @@ namespace USE_ExperimentTemplate_Data
         public ControlLevel_Task_Template taskLevel;
         public ControlLevel_Trial_Template trialLevel;
 
-
-        private readonly string ConnectionString = "Server=127.0.0.1;uid=root;pwd=12345;database=USE_Test;";
+        
+        //private readonly string ConnectionString = "Server=127.0.0.1;uid=root;pwd=Use_Core;database=USE_Test;";
+        private readonly string ConnectionString = "Server=localhost;uid=Experimenter;pwd=Use_Core;database=USE_Test;";
         public SqlConnection Connection
         {
             get
@@ -73,17 +76,25 @@ namespace USE_ExperimentTemplate_Data
             {"decimal", "DECIMAL(18, 2)"}, //check first one, and also either make the 18-2 default or have a ton depending on size. 
         };
 
-        public void CreateSQLDatabase()
+
+        public void SeeIfWorks()
         {
-            using (var conn = Connection)
+            using(var conn = Connection)
             {
                 conn.Open();
-                using (var cmd = conn.CreateCommand())
+                Debug.Log("OPENED!");
+                using(var cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"CREATE DATABASE [IF NOT EXISTS] USE_Test";
-                    cmd.ExecuteNonQuery();
+                    cmd.CommandText = @"SELECT * FROM Task;";
+
+                    using(SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while(reader.Read())
+                        {
+                            Debug.Log((reader.GetString(reader.GetOrdinal("Name"))));
+                        }
+                    }
                 }
-                conn.Close();
             }
         }
 
@@ -113,6 +124,26 @@ namespace USE_ExperimentTemplate_Data
                     }
                     conn.Close();
                 }
+            }
+        }
+
+        public bool DoesSQLTableExist(string tableName)
+        {
+            bool tableExists = new bool();
+
+            using(var conn = Connection)
+            {
+                conn.Open();
+                using(var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = $@"SELECT * FROM {tableName};";
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    tableExists = reader.Read();
+                    reader.Close();
+                }
+                conn.Close();
+
+                return tableExists;
             }
         }
 
@@ -148,25 +179,10 @@ namespace USE_ExperimentTemplate_Data
             }
         }
 
-        public bool DoesSQLTableExist(string tableName)
-        {
-            bool tableExists = new bool();
 
-            using(var conn = Connection)
-            {
-                conn.Open();
-                using(var cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = $@"SELECT * FROM {tableName};";
-                    SqlDataReader reader = cmd.ExecuteReader();
-                    tableExists = reader.Read();
-                    reader.Close();
-                }
-                conn.Close();
 
-                return tableExists;
-            }
-        }
+
+
 
 
         public override void DefineDataController()

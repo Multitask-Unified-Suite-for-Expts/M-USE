@@ -16,7 +16,8 @@ using UnityEngine.Serialization;
 
 public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 {
-    public VisualSearch_TrialDef CurrentTrialDef => GetCurrentTrialDef<VisualSearch_TrialDef>();
+    public VisualSearch_TrialDef CurrentTrialDef => GetCurrentTrialDef<VisualSearch_TrialDef>(); 
+    public VisualSearch_TaskLevel CurrentTaskLevel => GetTaskLevel<VisualSearch_TaskLevel>();
     private StimGroup tStim;
     private GameObject StartButton;
     //configui variables
@@ -37,6 +38,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     public bool StimFacingCamera;
     public string ShadowType;
     private bool RandomizedLocations = false;
+    public int NumInitialTokens;
     
     //Player View Variables
     private PlayerViewPanel playerView;
@@ -46,15 +48,21 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private Vector2 textLocation;
     private bool playerViewLoaded;
     
-    //Data Values
+    // Block Data Values
     private string ContextName = "";
-    private bool RewardGiven = false;
-    public int NumRewardGiven, NumTokenBarFull = 0;
+    public int NumCorrect_InBlock;
+    public List<float?> SearchDurationsList = new List<float?>();
+    public int NumErrors_InBlock;
+    public int NumRewardGiven_InBlock;
+    public int NumTokenBarFull_InBlock;
+    public int TotalTokensCollected_InBlock;
+    
+    // Trial Data Values
     private int? SelectedStimCode = null;
     private string selectedStimName = null;
     private Vector3? SelectedStimLocation = null;
     private float? SearchDuration = null;
-    public int TotalTokensCollected = 0;
+    private bool RewardGiven = false;
 
     public override void DefineControlLevel()
     {
@@ -83,7 +91,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             playerViewText = new GameObject();
             Texture2D buttonTex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
             StartButton = CreateStartButton(buttonTex, new Rect(new Vector2(0,0), new Vector2(1,1)));
-            SetTrialSummaryString();
+            StartButton.SetActive(false);
         });
         
         SetupTrial.AddInitializationMethod(() =>
@@ -93,6 +101,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 configUIVariablesLoaded = true;
                 LoadConfigUIVariables();
             }          
+            SetTrialSummaryString();
         });
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -117,11 +126,15 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 TokenFBController
                     .SetRevealTime(tokenRevealDuration.value)
                     .SetUpdateTime(tokenUpdateDuration.value);
-                NumTokenBarFull = TokenFBController.GetNumTokenBarFull();
-                TotalTokensCollected = TokenFBController.GetTokenBarValue() +
+                TokenFBController.SetTokenBarValue(NumInitialTokens);
+                NumTokenBarFull_InBlock = TokenFBController.GetNumTokenBarFull();
+                TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
                                        (TokenFBController.GetNumTokenBarFull() * CurrentTrialDef.NumTokenBar);
                 
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
+                
+                // Set Experimenter Display Data Summary Strings
+                CurrentTaskLevel.SetBlockSummaryString();
                 SetTrialSummaryString();
             });
         
@@ -154,9 +167,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             {       
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["TouchTargetStart"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["CorrectResponse"]);
+                NumCorrect_InBlock++;
             }
             else
             {
+                NumErrors_InBlock++;
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["TouchDistractorStart"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["IncorrectResponse"]);
             }
@@ -181,6 +196,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         SelectionFeedback.AddInitializationMethod(() =>
         {
             SearchDuration = SearchDisplay.TimingInfo.Duration;
+            SearchDurationsList.Add(SearchDuration);
             SetTrialSummaryString();
             if (!selected) return;
             else
@@ -231,18 +247,19 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
             if (TokenFBController.GetAnimationPhase() == "Flashing")
             {
-                NumTokenBarFull++;
+                NumTokenBarFull_InBlock++;
                 if (SyncBoxController != null)
                 {
                     SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["Fluid1Onset"]);
-                    NumRewardGiven++;
+                    NumRewardGiven_InBlock++;
                     RewardGiven = true;
                 }
             }
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             SetTrialSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
         });
         TrialEnd.AddTimer(() => itiDuration.value, FinishTrial, () =>
         {

@@ -37,6 +37,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     //Audio Clips
     public AudioClip BalloonChosen_Audio;
     public AudioClip InflateBalloon_Audio;
+    public AudioClip PopBalloon_Audio;
     public AudioClip InflateAndPop_Audio;
 
     //Colors:
@@ -312,8 +313,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 timeTracker = Time.time;
                 mouseHandler.Stop();
 
-                //if(!Inflate)
-                CalculateInflation(); //Sets Inflate to TRUE at end of function
+                CalculateInflation(); //Sets Inflate to TRUE
+                AudioFBController.Play("Inflate");
             }
         });
         InflateBalloon.AddTimer(() => inflateDuration.value, PopBalloon);
@@ -329,7 +330,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
 
         //PopBalloon state -------------------------------------------------------------------------------------------------------
-        PopBalloon.AddTimer(() => PopClipDuration - PopAudioStartTime, Feedback, () => TrialStim.SetActive(false));
+        PopBalloon.AddDefaultInitializationMethod(() =>
+        {
+            AudioFBController.Play("Pop");
+            TrialStim.SetActive(false);
+        });
+        PopBalloon.SpecifyTermination(() => !TrialStim.activeSelf, Feedback);
+        //PopBalloon.AddTimer(() => PopClipDuration - PopAudioStartTime, Feedback, () => TrialStim.SetActive(false));
 
         //Feedback state -------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
@@ -390,13 +397,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         Inflate = true;
 
-        if (ClickCount < ClicksNeeded)
-            AudioFBController.Play("Inflate");
-        else
-        {
-            AudioFBController.Play("InflateAndPop");
-            PopAudioStartTime = Time.time;
-        }
+        //if (ClickCount < ClicksNeeded)
+        //    AudioFBController.Play("Inflate");
+        //else
+        //{
+        //    AudioFBController.Play("InflateAndPop");
+        //    PopAudioStartTime = Time.time;
+        //}
     }
 
     IEnumerator FlashOutline()
@@ -661,9 +668,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         AudioFBController.AddClip("SelectionMade", BalloonChosen_Audio);
         AudioFBController.AddClip("Inflate", InflateBalloon_Audio);
         AudioFBController.AddClip("InflateAndPop", InflateAndPop_Audio);
+        AudioFBController.AddClip("Pop", PopBalloon_Audio);
 
         InflateClipDuration = AudioFBController.GetClip("Inflate").length;
-        PopClipDuration = AudioFBController.GetClip("InflateAndPop").length * .75f; //setting for use in PopBalloon state
+        PopClipDuration = AudioFBController.GetClip("Pop").length * .75f; //setting for use in PopBalloon state
 
     }
 

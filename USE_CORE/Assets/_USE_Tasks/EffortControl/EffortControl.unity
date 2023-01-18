@@ -531,10 +531,11 @@ MonoBehaviour:
   BalloonChosen_Audio: {fileID: 8300000, guid: e627cb9c0640e4b61a4d74a6c71379c9, type: 3}
   InflateBalloon_Audio: {fileID: 8300000, guid: a0bec86fbd56740f3967199e2c210833,
     type: 3}
+  PopBalloon_Audio: {fileID: 8300000, guid: 99fd449a5afd24c8da82884185dd9d58, type: 3}
   InflateAndPop_Audio: {fileID: 8300000, guid: 22ebba9a128034ca28b2413be3c13083, type: 3}
-  SeeThroughRed_Material: {fileID: 2100000, guid: 64bfec7a8cb7c4de0b9905567885c762,
-    type: 2}
   MaterialFilePath: 
+  Flashing: 0
+  ScaleTimer: 0
   ChooseDuration: 0
   RewardPulses_Block: 0
   Touches_Block: 0
@@ -563,7 +564,6 @@ MonoBehaviour:
     precision: 0
   MaxOutline_Left: {fileID: 0}
   MaxOutline_Right: {fileID: 0}
-  Matches: 0
 --- !u!114 &1719984668
 MonoBehaviour:
   m_ObjectHideFlags: 0

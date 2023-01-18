@@ -38,54 +38,52 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     public AudioClip BalloonChosen_Audio;
     public AudioClip InflateBalloon_Audio;
     public AudioClip PopBalloon_Audio;
-    public AudioClip InflateAndPop_Audio;
 
     //Colors:
-    Color Red;
-    Color Gray = new Color(0.5f, 0.5f, 0.5f);
-    Color32 OffWhiteOutlineColor = new Color32(250, 249, 246, 0);
+    [HideInInspector] Color Red;
+    [HideInInspector] Color Gray = new Color(0.5f, 0.5f, 0.5f);
+    [HideInInspector] Color32 OffWhiteOutlineColor = new Color32(250, 249, 246, 0);
 
-    Vector3 LeftScaleUpAmount;
-    Vector3 RightScaleUpAmount;
-    Vector3 MaxScale;
-    Vector3 TrialStimInitLocalScale;
-    Vector3 LeftContainerOriginalPosition;
-    Vector3 RightContainerOriginalPosition;
-    Vector3 LeftRewardContainerOriginalPosition;
-    Vector3 RightRewardContainerOriginalPosition;
-    Vector3 LeftStimOriginalPosition;
-    Vector3 RightStimOriginalPosition;
+    [HideInInspector] Vector3 LeftScaleUpAmount;
+    [HideInInspector] Vector3 RightScaleUpAmount;
+    [HideInInspector] Vector3 MaxScale;
+    [HideInInspector] Vector3 TrialStimInitLocalScale;
+    [HideInInspector] Vector3 LeftContainerOriginalPosition;
+    [HideInInspector] Vector3 RightContainerOriginalPosition;
+    [HideInInspector] Vector3 LeftRewardContainerOriginalPosition;
+    [HideInInspector] Vector3 RightRewardContainerOriginalPosition;
+    [HideInInspector] Vector3 LeftStimOriginalPosition;
+    [HideInInspector] Vector3 RightStimOriginalPosition;
 
     [HideInInspector] public string MaterialFilePath; //set in task level
 
     //Misc Variables:
     [System.NonSerialized] public int Response = -1;
-    int ClicksNeeded; //becomes left/right num clicks once they make selection. 
-    int ClickCount;
-    float PopAudioStartTime;
-    float PopClipDuration;
-    float InflateClipDuration;
-    bool AddTokenAudioPlayed;
-    bool ObjectsCreated;
-    List<GameObject> RemoveParentList;
-    GameObject Wrapper;
+    [HideInInspector] int ClicksNeeded; //becomes left/right num clicks once they make selection. 
+    [HideInInspector] int ClickCount;
+    [HideInInspector] bool AddTokenInflateAudioPlayed;
+    [HideInInspector] bool ObjectsCreated;
+    [HideInInspector] List<GameObject> RemoveParentList;
+    [HideInInspector] GameObject Wrapper;
 
     string SideChoice; //left or right
     string RewardChoice; //higher or lower
     string EffortChoice; //higher or lower
 
+    //To center the balloon they selected:
     float CenteringSpeed = 1.5f;
-    bool Centered;
-    Vector3 CenteredPos;
-    public bool Flashing;
+    [HideInInspector] bool Centered;
+    [HideInInspector] Vector3 CenteredPos;
+    [HideInInspector] public bool Flashing;
 
     //Variables to Inflate balloon at interval rate
-    bool Inflate;
-    int ScalingInterval;
-    float MaxInflation_Y = 25f;
-    float ScalePerInflation_Y;
-    public float ScaleTimer;
-    Vector3 IncrementAmounts;
+    [HideInInspector] float InflateClipDuration;
+    [HideInInspector] bool Inflate;
+    [HideInInspector] private readonly int ScalingInterval = 25;
+    [HideInInspector] private readonly float MaxInflation_Y = 25f;
+    [HideInInspector] float ScalePerInflation_Y;
+    [HideInInspector] public float ScaleTimer;
+    [HideInInspector] Vector3 IncrementAmounts;
     Vector3 NextScale;
 
     //Data variables:
@@ -106,7 +104,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public GameObject MaxOutline_Left;
     [HideInInspector] public GameObject MaxOutline_Right;
 
-
+    [HideInInspector] public bool InflateAudioPlayed;
 
     public override void DefineControlLevel()
     {
@@ -121,11 +119,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         AddActiveStates(new List<State> { InitTrial, ChooseBalloon, CenterSelection, InflateBalloon, PopBalloon, Feedback, ITI });
 
         SelectionHandler<EffortControl_StimDef> mouseHandler = new SelectionHandler<EffortControl_StimDef>();
-   
-
-        ScalingInterval = 25;
-
-
+  
         TokenFBController.enabled = false;
 
         if(TokenFBController != null)
@@ -280,12 +274,19 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             IncrementAmounts = new Vector3();
             Flashing = false;
             ScaleTimer = 0;
+            InflateAudioPlayed = false;
         });
 
         InflateBalloon.AddUpdateMethod(() =>
         {
             if (Inflate)
             {
+                if (!InflateAudioPlayed)
+                {
+                    AudioFBController.Play("Inflate");
+                    InflateAudioPlayed = true;
+                }
+
                 ScaleTimer += Time.deltaTime;
                 if(ScaleTimer >= (InflateClipDuration / ScalingInterval)) //When timer hits for next inflation
                 {
@@ -314,7 +315,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 mouseHandler.Stop();
 
                 CalculateInflation(); //Sets Inflate to TRUE
-                AudioFBController.Play("Inflate");
+                InflateAudioPlayed = false;
             }
         });
         InflateBalloon.AddTimer(() => inflateDuration.value, PopBalloon);
@@ -335,8 +336,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             AudioFBController.Play("Pop");
             TrialStim.SetActive(false);
         });
-        PopBalloon.SpecifyTermination(() => !TrialStim.activeSelf, Feedback);
-        //PopBalloon.AddTimer(() => PopClipDuration - PopAudioStartTime, Feedback, () => TrialStim.SetActive(false));
+        PopBalloon.SpecifyTermination(() => !TrialStim.activeSelf && !AudioFBController.IsPlaying(), Feedback);
 
         //Feedback state -------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
@@ -344,7 +344,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if (Response == 1)
             {
                 GameObject CenteredGO = new GameObject();
-                CenteredGO.transform.position = Vector3.zero;
+                CenteredGO.transform.position = new Vector3(0, .5f, 0);
                 TokenFBController.AddTokens(CenteredGO, SideChoice == "left" ? currentTrial.NumCoinsLeft : currentTrial.NumCoinsRight);
                 Destroy(CenteredGO);
 
@@ -352,14 +352,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     GiveReward();
                 
                 Completions_Block++;
-                AddTokenAudioPlayed = true;
+                AddTokenInflateAudioPlayed = true;
             }
             Touches_Block += MouseTracker.GetClickCount();
         });
-        Feedback.SpecifyTermination(() => AddTokenAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI, () =>
+        Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI, () =>
         {
             TokenFBController.enabled = false;
-            AddTokenAudioPlayed = false;
+            AddTokenInflateAudioPlayed = false;
         });
 
         //ITI state -------------------------------------------------------------------------------------------------------
@@ -396,14 +396,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         IncrementAmounts = new Vector3((difference.x / ScalingInterval), (difference.y / ScalingInterval), (difference.z / ScalingInterval));
 
         Inflate = true;
-
-        //if (ClickCount < ClicksNeeded)
-        //    AudioFBController.Play("Inflate");
-        //else
-        //{
-        //    AudioFBController.Play("InflateAndPop");
-        //    PopAudioStartTime = Time.time;
-        //}
     }
 
     IEnumerator FlashOutline()
@@ -667,12 +659,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     {
         AudioFBController.AddClip("SelectionMade", BalloonChosen_Audio);
         AudioFBController.AddClip("Inflate", InflateBalloon_Audio);
-        AudioFBController.AddClip("InflateAndPop", InflateAndPop_Audio);
         AudioFBController.AddClip("Pop", PopBalloon_Audio);
 
         InflateClipDuration = AudioFBController.GetClip("Inflate").length;
-        PopClipDuration = AudioFBController.GetClip("Pop").length * .75f; //setting for use in PopBalloon state
-
     }
 
     void SetTrialSummaryString()

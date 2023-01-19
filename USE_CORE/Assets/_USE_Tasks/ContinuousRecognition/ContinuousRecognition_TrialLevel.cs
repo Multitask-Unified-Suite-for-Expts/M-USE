@@ -72,10 +72,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public StimGroup RightGroup;
     [HideInInspector] public StimGroup WrongGroup;
 
-    public AudioClip Success_Audio;
-    public AudioClip Fail_SouthPark_Audio;
-    public AudioClip Fail_Audio;
-
     public bool ClickedNonStim;
 
     //Config Variables
@@ -98,8 +94,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         OriginalFbTextPosition = YouLoseTextGO.transform.position;
         OriginalTitleTextPosition = TitleTextGO.transform.position;
         OriginalTimerPosition = TimerBackdropGO.transform.position;
-
-        AddAudioClips();
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
@@ -389,14 +383,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         YouWinTextGO.transform.localPosition = new Vector3(YouWinTextGO.transform.localPosition.x, YouWinTextGO.transform.localPosition.y - Y_Offset, YouWinTextGO.transform.localPosition.z);
                         YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"WINNER! \n New HighScore: {Score} xp";
                         YouWinTextGO.SetActive(true);
-                        AudioFBController.Play("Success");
+                        AudioFBController.Play("CR_BlockCompleted");
                     }
                     else
                     {
                         YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
                         YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Game Over \n HighScore: {Score} xp";
                         YouLoseTextGO.SetActive(true);
-                        AudioFBController.Play("Fail_SouthPark");
+                        AudioFBController.Play("CR_SouthParkFail");
+                        //AudioFBController.Play("CR_BlockFailed"); //Non-southPark fail audio if need it
                     }
                 }
             }
@@ -457,12 +452,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
     } //can use to make game easier if need to debug. 
 
-    void AddAudioClips()
-    {
-        AudioFBController.AddClip("Success", Success_Audio);
-        AudioFBController.AddClip("Fail_SouthPark", Fail_SouthPark_Audio);
-        AudioFBController.AddClip("Fail", Fail_Audio);
-    }
 
     void ResetGlobalTrialVariables()
     {

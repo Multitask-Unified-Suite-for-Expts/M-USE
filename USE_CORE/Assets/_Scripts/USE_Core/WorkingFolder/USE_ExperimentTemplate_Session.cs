@@ -60,7 +60,6 @@ namespace USE_ExperimentTemplate_Session
         private EventCodeManager EventCodeManager;
 
         private Camera SessionCam;
-        public DisplaySwitcher DisplaySwitcher;
         private ExperimenterDisplayController ExperimenterDisplayController;
         [HideInInspector] public RenderTexture CameraMirrorTexture;
 
@@ -180,9 +179,6 @@ namespace USE_ExperimentTemplate_Session
 
             SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
 
-            if (SessionSettings.SettingExists("Session", "ToggleDisplay"))
-                if ((bool)SessionSettings.Get("Session", "ToggleDisplay"))
-                    DisplaySwitcher.ToggleDisplay();
         }
 
         public override void DefineControlLevel()

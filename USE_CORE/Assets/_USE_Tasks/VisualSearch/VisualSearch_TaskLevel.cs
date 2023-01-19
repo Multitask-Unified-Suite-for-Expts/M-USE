@@ -48,12 +48,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             vsTL.TokenFBController.SetTokenBarValue(vsBD.NumInitialTokens);
             SetBlockSummaryString();
         });
-        /*
-        BlockFeedback.AddInitializationMethod(() =>
-        {
-            SetBlockSummaryString();
-            
-        });*/
     }
     public T GetCurrentBlockDef<T>() where T : BlockDef
     {
@@ -67,6 +61,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         vsTL.NumCorrect_InBlock = 0;
         vsTL.NumRewardGiven_InBlock = 0;
         vsTL.NumTokenBarFull_InBlock = 0;
+        vsTL.TouchDurationError_InBlock = 0;
     }
 
     public void SetBlockSummaryString()
@@ -80,6 +75,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
                                       "\n" + 
                                       "\nAvg Search Duration: " + vsTL.AverageSearchDuration_InBlock +
                                       "\n" + 
+                                      "\nNum Touch Duration Error: " + vsTL.TouchDurationError_InBlock + 
                                       "\nNum Reward Given: " + vsTL.NumRewardGiven_InBlock + 
                                       "\nNum Token Bar Filled: " + vsTL.NumTokenBarFull_InBlock +
                                       "\nTotal Tokens Collected: " + vsTL.TotalTokensCollected_InBlock);

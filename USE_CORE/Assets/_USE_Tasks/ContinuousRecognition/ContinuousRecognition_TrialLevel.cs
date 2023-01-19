@@ -93,7 +93,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
-        TokenFBController.enabled = false;
         TokenFBController.SetFlashingTime(1f);
 
         OriginalFbTextPosition = YouLoseTextGO.transform.position;

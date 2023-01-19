@@ -106,6 +106,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public bool InflateAudioPlayed;
 
+
     public override void DefineControlLevel()
     {
         //define States within this Control Level
@@ -120,8 +121,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         SelectionHandler<EffortControl_StimDef> mouseHandler = new SelectionHandler<EffortControl_StimDef>();
   
-        TokenFBController.enabled = false;
-
         if(TokenFBController != null)
             SetTokenVariables();
 
@@ -268,7 +267,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         InflateBalloon.AddInitializationMethod(() =>
         {
             ScalePerInflation_Y = (MaxInflation_Y - TrialStim.transform.localScale.y) / (SideChoice == "left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
-            //TokenFBController.enabled = true; //NEED THIS TO HAPPEN ON SAME FRAME AS WHEN THEY ARE CENTERED
             timeTracker = Time.time;
             IncrementAmounts = new Vector3();
             Flashing = false;
@@ -287,6 +285,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 }
 
                 ScaleTimer += Time.deltaTime;
+
                 if(ScaleTimer >= (InflateClipDuration / scalingInterval.value)) //When timer hits for next inflation
                 {
                     if (TrialStim.transform.localScale != NextScale)
@@ -314,7 +313,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 mouseHandler.Stop();
 
                 CalculateInflation(); //Sets Inflate to TRUE at end of func
-                InflateAudioPlayed = false;
             }
         });
         InflateBalloon.AddTimer(() => inflateDuration.value, PopBalloon);
@@ -327,6 +325,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 MaxOutline_Right.transform.parent = BalloonContainerRight.transform;
 
             DestroyChildren(SideChoice == "left" ? BalloonContainerLeft : BalloonContainerRight);
+            InflateAudioPlayed = false;
         });
 
         //PopBalloon state -------------------------------------------------------------------------------------------------------

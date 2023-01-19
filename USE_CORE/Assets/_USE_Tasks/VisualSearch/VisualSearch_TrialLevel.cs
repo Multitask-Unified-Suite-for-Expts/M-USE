@@ -1,25 +1,21 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using USE_States;
-using UnityEngine.UI;
-using USE_StimulusManagement;
-using VisualSearch_Namespace;
-using USE_UI;
-using USE_Settings;
 using System.Linq;
-using ConfigDynamicUI;
-using USE_ExperimentTemplate_Trial;
 using System.IO;
-using ConfigParsing;
-using TMPro.SpriteAssetUtilities;
-using UnityEngine.Serialization;
+using UnityEngine;
+using UnityEngine.UI;
+using ConfigDynamicUI;
+using USE_States;
+using USE_StimulusManagement;
+using USE_ExperimentTemplate_Trial;
+using VisualSearch_Namespace;
 
 public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 {
     public VisualSearch_TrialDef CurrentTrialDef => GetCurrentTrialDef<VisualSearch_TrialDef>(); 
     public VisualSearch_TaskLevel CurrentTaskLevel => GetTaskLevel<VisualSearch_TaskLevel>();
+    
     // Stimuli Variables
     private StimGroup tStim;
     private GameObject StartButton;
@@ -139,7 +135,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 TouchDurationErrorFeedback(mouseHandler, StartButton);
                 CurrentTaskLevel.SetBlockSummaryString();
             }
-            
         });
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
             SearchDisplayDelay, () => 
@@ -487,7 +482,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("TrialStimVisibility", () => tStim.IsActive);
         FrameData.AddDatum("TokenBarVisibility", ()=> TokenFBController.isActiveAndEnabled);
     }
-
     private void TouchDurationErrorFeedback(SelectionHandler<VisualSearch_StimDef> MouseHandler, GameObject go)
     {
         AudioFBController.Play("Negative");
@@ -534,7 +528,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         StartButton.transform.position = ButtonPosition;
         StartButton.SetActive(false);
     }
-
     private void CreateFBSquare()
     {
         FBSquare = CreateSquare("FBSquare");

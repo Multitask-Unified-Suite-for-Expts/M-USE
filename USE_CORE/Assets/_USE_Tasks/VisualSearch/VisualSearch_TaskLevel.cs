@@ -1,5 +1,6 @@
 using VisualSearch_Namespace;
 using System;
+using System.Linq;
 using UnityEngine;
 using USE_Settings;
 using USE_ExperimentTemplate_Task;
@@ -8,64 +9,79 @@ using USE_ExperimentTemplate_Block;
 public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 {
     VisualSearch_BlockDef vsBD => GetCurrentBlockDef<VisualSearch_BlockDef>();
+    
+    VisualSearch_TrialLevel vsTL;
     public override void DefineControlLevel()
     {
-        VisualSearch_TrialLevel vsTL = (VisualSearch_TrialLevel)TrialLevel;
+        vsTL = (VisualSearch_TrialLevel)TrialLevel;
         string TaskName = "VisualSearch";
         if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
         {
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-                vsTL.MaterialFilePath =
-                    (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+            if(SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
+                         vsTL.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+            else if(SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
+                         vsTL.MaterialFilePath = (String)SessionSettings.Get("Session", "ContextExternalFilePath");
+            else Debug.Log("ContextExternalFilePath NOT specified in the Session Config OR Task Config!");
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-                vsTL.buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-            else Debug.LogError("[ERROR] Start Button Position settings not defined in the TaskDef");
+                vsTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+            else Debug.LogError("Start Button Position settings not defined in the TaskDef");
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-                vsTL.buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-            else Debug.LogError("[ERROR] Start Button Scale settings not defined in the TaskDef");
+                vsTL.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+            else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
-                vsTL.stimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
+                vsTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
             else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))
-                vsTL.shadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
+                vsTL.ShadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
             else Debug.LogError("Shadow Type setting not defined in the TaskDef");
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "UsingRewardPump"))
-                vsTL.usingRewardPump = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "UsingRewardPump");
-            else Debug.LogError("Using Reward Pump setting not defined in the TaskDef");
         }
         else
         {
-            Debug.Log("[ERROR] TaskDef is not in config folder");
+            Debug.LogError("TaskDef is not in config folder");
         }
         
 
         RunBlock.AddInitializationMethod(() =>
         {
-            /*
-            vsTL.totalErrors_InBlock = 0;
-            vsTL.errorType_InBlockString = "";
-            vsTL.errorType_InBlock.Clear();
-            Array.Clear(vsTL.numTotal_InBlock, 0, vsTL.numTotal_InBlock.Length);
-            Array.Clear(vsTL.numCorrect_InBlock, 0, vsTL.numCorrect_InBlock.Length);
-            Array.Clear(vsTL.numErrors_InBlock, 0, vsTL.numErrors_InBlock.Length);
-            vsTL.accuracyLog_InBlock = "";*/
-            vsTL.numReward = 0;
-            vsTL.NumTokenBar = vsBD.NumTokenBar;
-            TrialLevel.TokenFBController.SetTokenBarValue(vsBD.NumInitialTokens); 
+            ResetBlockVariables();
+            vsTL.TokenFBController.SetTotalTokensNum(vsBD.NumTokenBar);
+            vsTL.TokenFBController.SetTokenBarValue(vsBD.NumInitialTokens);
+            SetBlockSummaryString();
         });
-        
-        RunBlock.AddUpdateMethod(() =>
+        /*
+        BlockFeedback.AddInitializationMethod(() =>
         {
-            BlockSummaryString.Clear();
-            BlockSummaryString.AppendLine("Block Num: " + (vsTL.BlockCount + 1) + "\nTrial Count: " + (vsTL.TrialCount_InBlock + 1) + 
-                                          "\nNum Reward Given: " + vsTL.numReward + "\nNum Token Bar Filled: " + vsTL.numTokenBarFull + 
-                                          "\nTotalTokensCollected: " + vsTL.totalTokensCollected);
-          //  "\nTotal Errors: " + vsTL.totalErrors_InBlock + "\nError Type: " + vsTL.errorType_InBlockString + "\nPerformance: " + vsTL.accuracyLog_InBlock;
-        });
+            SetBlockSummaryString();
+            
+        });*/
     }
     public T GetCurrentBlockDef<T>() where T : BlockDef
     {
         return (T)CurrentBlockDef;
     }
 
+    private void ResetBlockVariables()
+    {
+        vsTL.SearchDurationsList.Clear();
+        vsTL.NumErrors_InBlock = 0;
+        vsTL.NumCorrect_InBlock = 0;
+        vsTL.NumRewardGiven_InBlock = 0;
+        vsTL.NumTokenBarFull_InBlock = 0;
+    }
+
+    public void SetBlockSummaryString()
+    {
+        BlockSummaryString.Clear();
+        
+        BlockSummaryString.AppendLine("\nBlock Num: " + (vsTL.BlockCount + 1) +
+                                      "\nTrial Num: " + (vsTL.TrialCount_InBlock + 1) +
+                                      "\n" + 
+                                      "\nAccuracy: " + vsTL.Accuracy_InBlock +  
+                                      "\n" + 
+                                      "\nAvg Search Duration: " + vsTL.AverageSearchDuration_InBlock +
+                                      "\n" + 
+                                      "\nNum Reward Given: " + vsTL.NumRewardGiven_InBlock + 
+                                      "\nNum Token Bar Filled: " + vsTL.NumTokenBarFull_InBlock +
+                                      "\nTotal Tokens Collected: " + vsTL.TotalTokensCollected_InBlock);
+    }
 }

@@ -1,6 +1,7 @@
 using UnityEngine;
 using USE_Data;
 using System.Collections;
+using ConfigParsing;
 
 public class TokenFBController : MonoBehaviour
 {
@@ -47,9 +48,9 @@ public class TokenFBController : MonoBehaviour
     {
         trialData.AddDatum("TokenBarValue", () => numCollected);
         trialData.AddDatum("TokenChange", () => tokensChange == 0 ? null : (float?)tokensChange);
-        trialData.AddDatum("NumTokenBarFull", () => numTokenBarFull);
+        //trialData.AddDatum("NumTokenBarFull", () => numTokenBarFull);
+        frameData.AddDatum("TokenBarValue", () => numCollected);
         frameData.AddDatum("TokenAnimationPhase", () => animationPhase.ToString());
-
         this.audioFBController = audioFBController;
         numCollected = 0;
 
@@ -147,6 +148,11 @@ public class TokenFBController : MonoBehaviour
     public bool IsAnimating()
     {
         return animationPhase != AnimationPhase.None || audioFBController.IsPlaying();
+    }
+
+    public string GetAnimationPhase()
+    {
+        return animationPhase.ToString();
     }
 
     public void Update()

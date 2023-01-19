@@ -113,15 +113,13 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             startButton.SetActive(true);
             TokenFBController.enabled = false;
             numTokenBarFull = TokenFBController.GetNumTokenBarFull();
-            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nTouched Object Codes: " + touchedObjectsCodes + "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
+            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nBlock Accuracy: " + (runningAcc.Sum(x => Convert.ToSingle(x))/(TrialCount_InBlock+1)) + "\nTouched Object Codes: " + touchedObjectsCodes + "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
         });
         initTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton),
             SearchDisplayDelay, () =>
             {
                 Input.ResetInputAxes();
                 startButton.SetActive(false);
-                totalTokensCollected = TokenFBController.GetTokenBarValue() +
-                                       (TokenFBController.GetNumTokenBarFull() * CurrentTrialDef.NumTokenBar);
             });
 
         // Show the target/sample with some other distractors
@@ -190,7 +188,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 if (usingRewardPump)
                 {
                     SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize); //USE THIS LINE WHEN CONNECTED TO A SYNCBOX
-                    SyncBoxController.SendRewardPulses(3, 500);
                     numReward++;
                 }
             }
@@ -257,10 +254,14 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
             }
-            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nTouched Object Codes: " + touchedObjectsCodes + "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
+            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nBlock Accuracy: " + 
+                                 (runningAcc.Sum(x => Convert.ToSingle(x))/(TrialCount_InBlock+1)) + "\nTouched Object Codes: " 
+                                 + touchedObjectsCodes + "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
         });
         TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), TrialEnd, () =>
         {
+            totalTokensCollected = TokenFBController.GetTokenBarValue() +
+                                   (TokenFBController.GetNumTokenBarFull() * CurrentTrialDef.NumTokenBar);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]); //NOT SURE ABOUT THIS BUT TRIALEND IS THE ITI
             context = "itiImage";
             RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + context + ".png");

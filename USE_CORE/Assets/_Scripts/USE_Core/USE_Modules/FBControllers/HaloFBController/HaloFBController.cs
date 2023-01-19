@@ -8,12 +8,17 @@ public class HaloFBController : MonoBehaviour
     public GameObject NegativeHaloPrefab;
 
     private GameObject instantiated;
+
+    public SerializedObject PositiveHaloComponent;
+    public SerializedObject NegativeHaloComponent;
     
     // Logging
     private enum State { None, Positive, Negative };
     private State state;
 
     public void Init(DataController frameData) {
+        PositiveHaloComponent = new SerializedObject(this.PositiveHaloPrefab.GetComponent("Halo"));
+        NegativeHaloComponent = new SerializedObject(this.NegativeHaloPrefab.GetComponent("Halo"));
         frameData.AddDatum("HaloType", () => state.ToString());
         if (instantiated != null) {
             Debug.LogWarning("Initializing HaloFB Controller with an already visible halo");
@@ -40,40 +45,33 @@ public class HaloFBController : MonoBehaviour
         instantiated = Instantiate(haloPrefab, gameObj.transform);
     }
 
-    public void SetHaloParameter(string paramName, float floatArg){
-        switch(paramName.ToLower()) 
-        {
-            case "size":
-               // this.Find("YellowHalo").GetComponent<Halo>()
-                break;
-            default:
-                Debug.LogError("No appropriate parameter name given");
-                break;
-        }
+
+    public HaloFBController SetHaloSize(float size)
+    {
+        PositiveHaloComponent.FindProperty("m_Size").floatValue = size;
+        PositiveHaloComponent.ApplyModifiedProperties();
+
+        NegativeHaloComponent.FindProperty("m_Size").floatValue = size;
+        NegativeHaloComponent.ApplyModifiedProperties();
+
+        return this;
     }
-    public void SetHaloParameter(string paramName, Color colorArg){
-        switch(paramName.ToLower()) 
-        {
-            case "color":
-                //SerializedObject haloComponent = new SerializedObject(this.gameObject.GetComponent("Halo"));
-                //haloComponent.FindProperty("m_Color").colorValue = colorArg;
-                break;
-            default:
-                Debug.LogError("No appropriate parameter name given");
-                break;
-        }
+
+    public HaloFBController SetPositiveHaloColor(Color color)
+    {
+        PositiveHaloComponent.FindProperty("m_Color").colorValue = color;
+        PositiveHaloComponent.ApplyModifiedProperties();
+        return this;
     }
-    //public void SetHaloSize(float size)
-    //{
-    //    SerializedObject haloComponent = new SerializedObject(this.gameObject.GetComponent("Halo"));
-    //    haloComponent.FindProperty("m_Size").floatValue = size;
-    //}
-    
-    //public void SetHaloColor(Color color)
-    //{
-    //    SerializedObject haloComponent = new SerializedObject(this.gameObject.GetComponent("Halo"));
-    //    haloComponent.FindProperty("m_Color").colorValue = color;
-    //}
+
+    public HaloFBController SetNegativeHaloColor(Color color)
+    {
+        NegativeHaloComponent.FindProperty("m_Color").colorValue = color;
+        NegativeHaloComponent.ApplyModifiedProperties();
+        return this;
+    }
+
+
     public void Destroy() {
         Destroy(instantiated);
         instantiated = null;

@@ -314,7 +314,6 @@ namespace USE_ExperimentTemplate_Task
                         }
 
                         TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
-                        TrialLevel.TokenFBController.SetTotalTokensNum(totalTokensNum);
                         break;
                     default:
                         Debug.LogWarning(fbController + " is not a valid feedback controller.");

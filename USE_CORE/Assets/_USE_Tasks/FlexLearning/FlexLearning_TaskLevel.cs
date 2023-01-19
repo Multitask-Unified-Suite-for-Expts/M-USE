@@ -31,10 +31,11 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))
                 flTL.shadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
             else Debug.LogError("Shadow Type setting not defined in the TaskDef");
+            /*
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "UsingRewardPump"))
                 flTL.usingRewardPump = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "UsingRewardPump");
             else Debug.LogError("Using Reward Pump setting not defined in the TaskDef");
-        }
+        */}
         else
         {
             Debug.Log("[ERROR] TaskDef is not in config folder");

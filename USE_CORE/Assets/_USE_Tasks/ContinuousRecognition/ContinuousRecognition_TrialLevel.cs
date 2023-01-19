@@ -121,6 +121,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
 
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
+
+            if (HaloFBController != null)
+                HaloFBController.SetHaloSize(.55f);
+            
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 

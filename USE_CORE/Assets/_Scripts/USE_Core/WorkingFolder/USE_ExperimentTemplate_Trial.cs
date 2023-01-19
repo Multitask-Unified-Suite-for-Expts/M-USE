@@ -75,6 +75,7 @@ namespace USE_ExperimentTemplate_Trial
             AddActiveStates(new List<State> { SetupTrial, FinishTrial });
 
             Cursor.visible = false;
+            TokenFBController.enabled = false;
 
             //DefineTrial();
             Add_ControlLevel_InitializationMethod(() =>

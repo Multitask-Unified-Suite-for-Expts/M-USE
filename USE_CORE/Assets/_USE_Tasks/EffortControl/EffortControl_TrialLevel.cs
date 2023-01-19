@@ -34,12 +34,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     GameObject StartButton, StimLeft, StimRight, TrialStim, BalloonContainerLeft, BalloonContainerRight,
                BalloonOutline, RewardContainerLeft, RewardContainerRight, Reward, MiddleBarrier;
 
-    //Audio Clips
-    public AudioClip BalloonChosen_Audio;
-    public AudioClip InflateBalloon_Audio;
-    public AudioClip PopBalloon_Audio;
-    public AudioClip TimeRanOut_Audio;
-
     //Colors:
     [HideInInspector] Color Red;
     [HideInInspector] Color Gray = new Color(0.5f, 0.5f, 0.5f);
@@ -106,6 +100,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public bool InflateAudioPlayed;
 
+
     public override void DefineControlLevel()
     {
         //define States within this Control Level
@@ -120,13 +115,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         SelectionHandler<EffortControl_StimDef> mouseHandler = new SelectionHandler<EffortControl_StimDef>();
   
-        TokenFBController.enabled = false;
-
         if(TokenFBController != null)
             SetTokenVariables();
 
         if(AudioFBController != null)
-            AddAudioClips();
+            InflateClipDuration = AudioFBController.GetClip("EC_Inflate").length;
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
@@ -138,7 +131,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 CreateObjects();
 
             LoadConfigUIVariables();
-
             SetTrialSummaryString();
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -204,7 +196,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             DestroyChildren(SideChoice == "left" ? RewardContainerRight : RewardContainerLeft);
             ClicksNeeded = (SideChoice == "left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
 
-            AudioFBController.Play("SelectionMade");
+            AudioFBController.Play("EC_BalloonChosen");
             ChooseDuration = ChooseBalloon.TimingInfo.Duration;
 
             SetChoices();
@@ -268,7 +260,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         InflateBalloon.AddInitializationMethod(() =>
         {
             ScalePerInflation_Y = (MaxInflation_Y - TrialStim.transform.localScale.y) / (SideChoice == "left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
-            //TokenFBController.enabled = true; //NEED THIS TO HAPPEN ON SAME FRAME AS WHEN THEY ARE CENTERED
             timeTracker = Time.time;
             IncrementAmounts = new Vector3();
             Flashing = false;
@@ -282,11 +273,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             {
                 if (!InflateAudioPlayed)
                 {
-                    AudioFBController.Play("Inflate");
+                    AudioFBController.Play("EC_Inflate");
                     InflateAudioPlayed = true;
                 }
 
                 ScaleTimer += Time.deltaTime;
+
                 if(ScaleTimer >= (InflateClipDuration / scalingInterval.value)) //When timer hits for next inflation
                 {
                     if (TrialStim.transform.localScale != NextScale)
@@ -327,13 +319,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 MaxOutline_Right.transform.parent = BalloonContainerRight.transform;
 
             DestroyChildren(SideChoice == "left" ? BalloonContainerLeft : BalloonContainerRight);
+            InflateAudioPlayed = false;
         });
 
         //PopBalloon state -------------------------------------------------------------------------------------------------------
         PopBalloon.AddDefaultInitializationMethod(() =>
         {
             if (Response == 1)
-                AudioFBController.Play("Pop");
+                AudioFBController.Play("EC_Pop");
             else
             {
                 AudioFBController.Play("TimeRanOut");
@@ -662,16 +655,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    void AddAudioClips()
-    {
-        AudioFBController.AddClip("SelectionMade", BalloonChosen_Audio);
-        AudioFBController.AddClip("Inflate", InflateBalloon_Audio);
-        AudioFBController.AddClip("Pop", PopBalloon_Audio);
-        AudioFBController.AddClip("TimeRanOut", TimeRanOut_Audio);
-
-        InflateClipDuration = AudioFBController.GetClip("Inflate").length;
-    }
-
     void SetTrialSummaryString()
     {
         TrialSummaryString = "\n" +
@@ -747,7 +730,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             contextPath = filePaths[0];
         else
         {
-            Debug.Log("MFP = Null? " + MaterialFilePath);
             contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0]; //Use Default LinearDark if can't find file.
             Debug.Log($"Context File Path Not Found. Defaulting to {backupContextName}.");
         }

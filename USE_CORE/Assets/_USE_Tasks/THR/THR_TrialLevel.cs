@@ -147,8 +147,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state -------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
-            Cursor.visible = false; //Set cursor to invisible and then User can click C hotkey to turn on if needed. 
-
             if (TrialCount_InBlock == 0)
                 TrialCompletionList = new List<int>();
 

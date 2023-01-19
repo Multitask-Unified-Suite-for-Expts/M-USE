@@ -93,7 +93,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
-        TokenFBController.enabled = false; //can remove once seema updates template. 
+        TokenFBController.enabled = false;
         TokenFBController.SetFlashingTime(1f);
 
         OriginalFbTextPosition = YouLoseTextGO.transform.position;
@@ -162,32 +162,32 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (currentTrial.StimFacingCamera)
                 MakeStimsFaceCamera(trialStims);     
         });
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
-            DisplayStims, () =>
+        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), DisplayStims);
+        InitTrial.AddDefaultTerminationMethod(() =>
+        {
+            StartButton.SetActive(false);
+            StartButton.transform.position = OriginalStartButtonPosition;
+
+            TokenFBController.enabled = true;
+
+            if (TitleTextGO.activeSelf)
             {
-                StartButton.SetActive(false);
-                StartButton.transform.position = OriginalStartButtonPosition;
+                TitleTextGO.SetActive(false);
+                TitleTextGO.transform.position = OriginalTitleTextPosition; //Reset Title Position for next block (in case its not a human block). 
+            }
 
-                TokenFBController.enabled = true;
+            if (currentTrial.IsHuman)
+            {
+                SetScoreAndTrialsText();
+                ScoreTextGO.SetActive(true);
+                NumTrialsTextGO.SetActive(true);
+                TimerBackdropGO.SetActive(true);
+            }
 
-                if(TitleTextGO.activeSelf)
-                {
-                    TitleTextGO.SetActive(false);
-                    TitleTextGO.transform.position = OriginalTitleTextPosition; //Reset Title Position for next block (in case its not a human block). 
-                }
-
-                if(currentTrial.IsHuman)
-                {
-                    SetScoreAndTrialsText();
-                    ScoreTextGO.SetActive(true);
-                    NumTrialsTextGO.SetActive(true);
-                    TimerBackdropGO.SetActive(true);
-                }
-
-                TokenFBController.SetTotalTokensNum(currentTrial.NumTokenBar);
-                EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
-            });
+            TokenFBController.SetTotalTokensNum(currentTrial.NumTokenBar);
+            EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
+        });
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------
         //Stim are turned on as soon as it enters DisplayStims state. no initialization method needed.
@@ -214,9 +214,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             TimerText.text = TimeRemaining.ToString("0");
 
             chosenStimObj = mouseHandler.SelectedGameObject;
-            if(chosenStimObj != null)
-                Debug.Log(chosenStimObj.name);
-
             if(InputBroker.GetMouseButtonDown(0))
             {
                 if (chosenStimObj == null)
@@ -226,14 +223,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 if (ClickedNonStim)
                 {
-                    Debug.Log("CLICK RELEASED!");
                     NonStimTouches_Block++;
                     ClickedNonStim = false;
                 }
             }
 
             chosenStimDef = mouseHandler.SelectedStimDef;
-
             if (chosenStimDef != null) //They Clicked a Stim
             {
                 currentTrial.TimeChosen = Time.time;
@@ -450,6 +445,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS -----------------------------------------------------------------------------------------
+    void MakeStimPopOut()
+    {
+        foreach(ContinuousRecognition_StimDef stim in trialStims.stimDefs)
+        {
+            if (!stim.PreviouslyChosen)
+                stim.StimGameObject.transform.localScale *= 1.35f;
+        }
+    } //can use to make game easier if need to debug. 
+
     void AddAudioClips()
     {
         AudioFBController.AddClip("Success", Success_Audio);
@@ -515,16 +519,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 break;
             case 4:
                 if (MacMainDisplayBuild && !Debug.isDebugBuild)
-                    yOffset = 10f; //Check!
+                    yOffset = 0f;
                 else
-                    yOffset = -25f; //CHECKED
+                    yOffset = -25f;
                 break;
-            case 5:
-                if (MacMainDisplayBuild && !Debug.isDebugBuild)
-                    yOffset = -30f; //Check!
-                else
-                    yOffset = -35f; //Check! (not checked but could be close)
-                break;
+            //case 5:
+            //    if (MacMainDisplayBuild && !Debug.isDebugBuild)
+            //        yOffset = -30f; //Check!
+            //    else
+            //        yOffset = -35f; //Check! (not checked but could be close)
+            //    break;
         }
         return yOffset;
     }
@@ -557,7 +561,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (numLocations > 6) numRows++;
         if (numLocations > 12) numRows++;
         if (numLocations > 18) numRows++;
-        if (numLocations > 24) numRows++;
+        //if (numLocations > 24) numRows++;
 
         NumFeedbackRows = numRows; //Setting Global variable for use in centering the feedback text above the stim (for human version)
 
@@ -565,7 +569,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         int R2_Length = 0;
         int R3_Length = 0;
         int R4_Length = 0;
-        int R5_Length = 0;
+        //int R5_Length = 0;
 
         //Calculate num stim in each row. 
         switch (numRows)
@@ -619,29 +623,29 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     }
                 }
                 break;
-            case 5:
-                if (numLocations % 5 == 0)
-                    R1_Length = R2_Length = R3_Length = R4_Length = R5_Length = numLocations / 5;
-                else
-                {
-                    R1_Length = R2_Length = R3_Length = R4_Length = (int)Math.Floor((decimal)numLocations / 5);
-                    R5_Length = (int)Math.Ceiling((decimal)numLocations / 5);
+            //case 5:
+            //    if (numLocations % 5 == 0)
+            //        R1_Length = R2_Length = R3_Length = R4_Length = R5_Length = numLocations / 5;
+            //    else
+            //    {
+            //        R1_Length = R2_Length = R3_Length = R4_Length = (int)Math.Floor((decimal)numLocations / 5);
+            //        R5_Length = (int)Math.Ceiling((decimal)numLocations / 5);
 
-                    int diff = numLocations - (R1_Length + R2_Length + R3_Length + R4_Length + R5_Length);
-                    if (diff == 1) R4_Length++;
-                    else if (diff == 2)
-                    {
-                        R3_Length++;
-                        R4_Length++;
-                    }
-                    else if (diff == 3)
-                    {
-                        R2_Length++;
-                        R3_Length++;
-                        R4_Length++;
-                    }
-                }
-                break;
+            //        int diff = numLocations - (R1_Length + R2_Length + R3_Length + R4_Length + R5_Length);
+            //        if (diff == 1) R4_Length++;
+            //        else if (diff == 2)
+            //        {
+            //            R3_Length++;
+            //            R4_Length++;
+            //        }
+            //        else if (diff == 3)
+            //        {
+            //            R2_Length++;
+            //            R3_Length++;
+            //            R4_Length++;
+            //        }
+            //    }
+            //    break;
         }
 
         float leftMargin;
@@ -655,7 +659,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         List<Vector3> locList = new List<Vector3>();
 
         //----- CENTER HORIZONTALLY--------------------------------
-
         //Center ROW 1:
         if (R1_Length > 0)
         {
@@ -730,27 +733,27 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 locList.Add(current);
                 index++;
             }
-            if (R5_Length > 0)
-                difference = MaxNumPerRow - R4_Length;
+            //if (R5_Length > 0)
+            //    difference = MaxNumPerRow - R4_Length;
         }
 
         //Center ROW 5:
-        if (R5_Length > 0)
-        {
-            index += difference;
-            leftMargin = 4 - Math.Abs(locations[index].x);
-            rightMargin = 4f - locations[index + R5_Length - 1].x;
-            int indy = index;
-            for (int i = index; i < (indy + R5_Length); i++)
-            {
-                leftMarginNeeded = (leftMargin + rightMargin) / 2;
-                leftShiftAmount = leftMarginNeeded - leftMargin;
-                current = locations[i];
-                current.x += leftShiftAmount;
-                locList.Add(current);
-                index++;
-            }
-        }
+        //if (R5_Length > 0)
+        //{
+        //    index += difference;
+        //    leftMargin = 4 - Math.Abs(locations[index].x);
+        //    rightMargin = 4f - locations[index + R5_Length - 1].x;
+        //    int indy = index;
+        //    for (int i = index; i < (indy + R5_Length); i++)
+        //    {
+        //        leftMarginNeeded = (leftMargin + rightMargin) / 2;
+        //        leftShiftAmount = leftMarginNeeded - leftMargin;
+        //        current = locations[i];
+        //        current.x += leftShiftAmount;
+        //        locList.Add(current);
+        //        index++;
+        //    }
+        //}
 
         Vector3[] FinalLocations = locList.ToArray();
 
@@ -767,7 +770,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (currentTrial.IsHuman && NumFeedbackRows > 1) //shift down more if human playing cuz text above stim 
         {
             for (int i = 0; i < FinalLocations.Length; i++)
-                FinalLocations[i].y -= (shiftDownAmount + .25f); //maybe lower this. just trying it out
+                FinalLocations[i].y -= (shiftDownAmount + .25f);
         }
         else
         {

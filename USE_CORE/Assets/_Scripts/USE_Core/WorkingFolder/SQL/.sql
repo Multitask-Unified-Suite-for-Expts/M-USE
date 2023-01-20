@@ -8,7 +8,7 @@ GO
 
 DROP TABLE IF EXISTS Subject;
 DROP TABLE IF EXISTS Task;
-DROP TABLE IF EXISTS SessionData;
+DROP TABLE IF EXISTS Session;
 GO
 
 CREATE TABLE Subject (
@@ -23,7 +23,7 @@ CREATE TABLE Task (
 );
 GO
 
-CREATE TABLE SessionData (
+CREATE TABLE Session (
 	Id INTEGER NOT NULL PRIMARY KEY IDENTITY(1, 1),
 	SubjectId INTEGER NOT NULL,
 	Date DATETIME NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE SessionData (
 );
 GO
 
-ALTER TABLE [SessionData] ADD FOREIGN KEY ([SubjectId]) REFERENCES [Subject] ([Id])
+ALTER TABLE [Session] ADD FOREIGN KEY ([SubjectId]) REFERENCES [Subject] ([Id])
 GO
 
 

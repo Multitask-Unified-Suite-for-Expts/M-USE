@@ -2,20 +2,13 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using USE_States;
-using USE_StimulusManagement;
 using EffortControl_Namespace;
-using UnityEngine.UI;
 using System;
 using System.Linq;
 using System.IO;
 using USE_Settings;
 using USE_ExperimentTemplate_Trial;
-using USE_ExperimentTemplate_Block;
-using Newtonsoft.Json.Linq;
-using UnityEngine.XR;
-using System.ComponentModel;
 using ConfigDynamicUI;
-using System.Xml.Linq;
 
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
@@ -36,7 +29,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     //Colors:
     [HideInInspector] Color Red;
-    [HideInInspector] Color Gray = new Color(0.5f, 0.5f, 0.5f);
     [HideInInspector] Color32 OffWhiteOutlineColor = new Color32(250, 249, 246, 0);
 
     [HideInInspector] Vector3 LeftScaleUpAmount;
@@ -657,12 +649,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void SetTrialSummaryString()
     {
-        TrialSummaryString = "\n" +
-                               "Trial #" + (TrialCount_InBlock + 1) + "In Block" +
-                               "\n" +
-                               "\nLeft Balloon: " + currentTrial.NumClicksLeft + " Clicks, " + currentTrial.NumCoinsLeft + " Tokens" +
-                                "\n" +
-                               "\nRight Balloon: " + currentTrial.NumClicksRight + " Clicks, " + currentTrial.NumCoinsRight + " Tokens";
+        TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) + "In Block" +
+                             "\n" +
+                             "\nLeft Balloon: " + currentTrial.NumClicksLeft + " Clicks, " + currentTrial.NumCoinsLeft + " Tokens" +
+                             "\n" +
+                             "\nRight Balloon: " + currentTrial.NumClicksRight + " Clicks, " + currentTrial.NumCoinsRight + " Tokens";
     }
 
     void LogTrialData()

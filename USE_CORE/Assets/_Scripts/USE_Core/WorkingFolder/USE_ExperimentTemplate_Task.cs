@@ -261,7 +261,9 @@ namespace USE_ExperimentTemplate_Task
 
             BlockData.AddStateTimingData(this);
             BlockData.CreateFile();
+            //BlockData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
             FrameData.CreateFile();
+            //FrameData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
 
             //AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
             GameObject fbControllersPrefab = Resources.Load<GameObject>("FeedbackControllers");

@@ -9,6 +9,9 @@ using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using System.Data.SqlClient;
+using System.Data;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 
 namespace USE_ExperimentTemplate_Data
@@ -57,8 +60,6 @@ namespace USE_ExperimentTemplate_Data
         public ControlLevel_Trial_Template trialLevel;
 
 
-        //private readonly string ConnectionString = "Server=127.0.0.1;uid=root;pwd=Use_Core;database=USE_Test;";
-        //private readonly string ConnectionString = "Server=localhost;uid=Experimenter;pwd=Use_Core;database=USE_Test;";
         private readonly string ConnectionString = "server=localhost\\SQLExpress;database=USE_Test;integrated security=true;TrustServerCertificate=true;";
         public SqlConnection Connection
         {
@@ -69,15 +70,46 @@ namespace USE_ExperimentTemplate_Data
         }
 
         //Dict to hold all the sql data types, so they will be correct for sql command
-        public Dictionary<string, string> SQLType_Dict = new Dictionary<string, string>()
+        Dictionary<string, string> TypeDict_SQL = new Dictionary<string, string>()
         {
-            {"string", "VARCHAR(255)"},
-            {"integer", "INT"}, //check first one
-            {"decimal", "DECIMAL(18, 2)"}, //check first one, and also either make the 18-2 default or have a ton depending on size. 
+            { "Boolean", "BIT" },
+            { "Byte", "TINYINT" },
+            { "Short", "SMALLINT" },
+            { "Int32", "INT" },
+            { "Int", "INT" },
+            { "Long", "BIGINT" },
+            { "Float", "REAL" },
+            { "Double", "FLOAT" },
+            { "Decimal", "DECIMAL" },
+            { "Single", "REAL" },
+            { "DateTime", "DATETIME" },
+            { "String", "NVARCHAR(MAX)" }
         };
 
+        public string GetSQLType(IDatum datum)
+        {
+            var full = datum.GetType().ToString();
+            string[] split = Regex.Split(full, @"\b" + "System." + @"\b");
+            string dataType = new string(split[split.Length - 1].Where(c => c != ']').ToArray());
+            return TypeDict_SQL[dataType];
+        }
+        public string GetSQLType(string typeName) //Overload for if already have the 1 word sys type string:
+        {
+            return TypeDict_SQL[typeName];
+        }
 
-        public void SeeIfConnectionWorks()
+        public void LogDataController()
+        {
+            Debug.Log("DATA CONTROLLER NAME: " + name);
+            Debug.Log("---------------------------");
+            foreach (var datum in data)
+            {
+                Debug.Log("Name: " + datum.Name + " | Type: " + GetSQLType(datum));
+                Debug.Log("---------------------------");
+            }
+        }
+
+        public void TestConnectionToDB()
         {
             using(var conn = Connection)
             {
@@ -98,27 +130,43 @@ namespace USE_ExperimentTemplate_Data
             }
         }
 
-        public void CreateSQLTable()
+        public bool DoesSQLTableExist()
         {
-            //if creating session table, it doesn't have task name
-            string tableName = (taskLevel.name == "Session" ? (taskLevel.name) : (taskLevel.name + this.name));
-            if (DoesSQLTableExist(tableName))
-                AddDataToSQL();
-            else
+            bool tableExists = new bool();
+            using(SqlConnection conn = Connection)
             {
-                using (var conn = Connection)
+                conn.Open();
+                using(SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = $@"SELECT * FROM {name};";
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    tableExists = reader.Read();
+                    reader.Close();
+                }
+                conn.Close();
+                return tableExists;
+            }
+        }
+
+        public void CreateTable_SQL() //currently using the datacontrollers name as the TableName
+        {
+            if (!DoesSQLTableExist())
+            {
+                using (SqlConnection conn = Connection)
                 {
                     conn.Open();
-                    using (var cmd = conn.CreateCommand())
+                    using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        string sqlString = $@"CREATE TABLE {tableName} (Id INT PRIMARY KEY";
-                        //loop through each piece of data, for each
-                        foreach (var datum in this.data)
+                        string sqlString = $"CREATE TABLE {name} (Id INT PRIMARY KEY";
+                        foreach (IDatum datum in data)
                         {
-                            var sqlType = SQLType_Dict[datum.GetType().ToString()];
-                            sqlString += $", {datum.Name} {sqlType}";
+                            var sqlType = GetSQLType(datum);
+                            if (sqlType == null)
+                                Debug.Log(datum.Name + " Does not have a matching SQL Type in the dictionary");
+                            else
+                                sqlString += $", {datum.Name} {sqlType}";
                         }
-                        sqlString += ");";
+                        sqlString += ")";
                         cmd.CommandText = sqlString;
                         cmd.ExecuteNonQuery();
                     }
@@ -127,61 +175,37 @@ namespace USE_ExperimentTemplate_Data
             }
         }
 
-        public bool DoesSQLTableExist(string tableName)
+        public void AddData_SQL()
         {
-            bool tableExists = new bool();
-
-            using(var conn = Connection)
+            //First check if table exists in DB:
+            if (!DoesSQLTableExist())
             {
-                conn.Open();
-                using(var cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = $@"SELECT * FROM {tableName};";
-                    SqlDataReader reader = cmd.ExecuteReader();
-                    tableExists = reader.Read();
-                    reader.Close();
-                }
-                conn.Close();
-
-                return tableExists;
+                CreateTable_SQL();
+                AddData_SQL(); //calls itself again after creating table. 
             }
-        }
-
-        public void AddSessionDataToSQL()
-        {
-            //sql statement to add session data table
-        }
-
-        //method will take in all different data controllers and decide which repository method to call
-        public void AddDataToSQL()
-        {
-            if (taskLevel.name == "Session")
-                AddSessionDataToSQL();
-            else
+            else //If table exists, add the data:
             {
-                //switch statement that checks "t
-                switch (taskLevel.name + "_" + this.name)
+                using (SqlConnection conn = Connection)
                 {
-                    //need these 3 cases for every task:
-                    case "ContinuousRecognition_BlockData":
-                        //AddBlockData_CR();
-                        break;
-                    case "ContinuousRecognition_TrialData":
-                        //AddTrialData_CR();
-                        break;
-                    case "ContinuousRecognition_FrameData":
-                        //AddFrameData_CR();
-                        break;
-                    default:
-                        Debug.Log($"No SQL Table name matches {taskLevel.name + this.name}");
-                        break;
+                    conn.Open();
+                    DataTable dataTable = new DataTable();
+
+                    //Add all columns first:
+                    foreach (var datum in data)
+                        dataTable.Columns.Add(datum.Name);
+
+                    //Then add all rows:
+                    foreach (var datum in data)
+                        dataTable.Rows.Add(datum.ValueAsString);
+
+                    using (SqlBulkCopy bulkCopy = new SqlBulkCopy(conn))
+                    {
+                        bulkCopy.DestinationTableName = name;
+                        bulkCopy.WriteToServer(dataTable);
+                    }
                 }
             }
         }
-
-
-
-
 
 
 

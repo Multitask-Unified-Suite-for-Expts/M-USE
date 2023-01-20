@@ -618,6 +618,7 @@ namespace USE_ExperimentTemplate_Session
             tl.SessionID = SessionID;
             tl.SerialRecvData = SerialRecvData;
             tl.SerialSentData = SerialSentData;
+            
             if (SessionSettings.SettingExists("Session", "EyetrackerType"))
                 tl.EyetrackerType = (string)SessionSettings.Get("Session", "EyetrackerType");
             else
@@ -627,7 +628,7 @@ namespace USE_ExperimentTemplate_Session
                 tl.SelectionType = (string)SessionSettings.Get("Session", "SelectionType");
             else
                 tl.SelectionType = "";
-
+            tl.ContextExternalFilePath = ContextExternalFilePath;
             tl.SerialPortActive = SerialPortActive;
             tl.SyncBoxActive = SyncBoxActive;
             tl.EventCodesActive = EventCodesActive;

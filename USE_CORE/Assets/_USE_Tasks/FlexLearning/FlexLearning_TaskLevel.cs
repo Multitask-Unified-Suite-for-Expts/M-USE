@@ -1,41 +1,43 @@
-using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Block;
 using FlexLearning_Namespace;
 using System;
 using UnityEngine;
 using USE_Settings;
+using USE_ExperimentTemplate_Task;
+using USE_ExperimentTemplate_Block;
 
 public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 {
- 
     FlexLearning_BlockDef flBD => GetCurrentBlockDef<FlexLearning_BlockDef>();
+    FlexLearning_TrialLevel flTL;
     public override void DefineControlLevel()
     {
-        FlexLearning_TrialLevel flTL = (FlexLearning_TrialLevel)TrialLevel;
+        flTL = (FlexLearning_TrialLevel)TrialLevel;
         string TaskName = "FlexLearning";
         if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
         {
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-                flTL.MaterialFilePath =
-                    (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-            else Debug.LogError("Context External File Path not defined in the TaskDef");
+             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
+                 flTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+            else flTL.ContextExternalFilePath = ContextExternalFilePath;
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-                flTL.buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+                flTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
             else Debug.LogError("Start Button Position settings not defined in the TaskDef");
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-                flTL.buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+                flTL.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
             else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquarePosition"))
+                flTL.FBSquarePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquarePosition");
+            else Debug.LogError("FB Square Position settings not defined in the TaskDef");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquareScale"))
+                flTL.FBSquareScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquareScale");
+            else Debug.LogError("FB Square Scale settings not defined in the TaskDef");
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
-                flTL.stimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
+                flTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
             else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))
-                flTL.shadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
+                flTL.ShadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
             else Debug.LogError("Shadow Type setting not defined in the TaskDef");
-            /*
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "UsingRewardPump"))
-                flTL.usingRewardPump = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "UsingRewardPump");
-            else Debug.LogError("Using Reward Pump setting not defined in the TaskDef");
-        */}
+            
+        }
         else
         {
             Debug.Log("[ERROR] TaskDef is not in config folder");
@@ -44,36 +46,59 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         
         RunBlock.AddInitializationMethod(() =>
         {
-            /*
-            flTL.totalErrors_InBlock = 0;
-            flTL.errorType_InBlockString = "";
-            flTL.errorType_InBlock.Clear();
-            Array.Clear(flTL.numTotal_InBlock, 0, flTL.numTotal_InBlock.Length);
-            Array.Clear(flTL.numCorrect_InBlock, 0, flTL.numCorrect_InBlock.Length);
-            Array.Clear(flTL.numErrors_InBlock, 0, flTL.numErrors_InBlock.Length);
-            flTL.accuracyLog_InBlock = "";
-            */
-            flTL.runningAcc.Clear();
+            System.Random rnd = new System.Random();
+            int RandomMaxTrials = rnd.Next(flBD.MinMaxTrials[0], flBD.MinMaxTrials[1]);
+            flTL.MaxTrials = RandomMaxTrials;
             flTL.MinTrials = flBD.MinMaxTrials[0];
-            flTL.MaxTrials = flBD.MinMaxTrials[1];
-            flTL.NumTokenBar = flBD.NumTokenBar;
-            flTL.numTokenBarFull = 0;
-            TrialLevel.TokenFBController.SetTokenBarValue(flBD.NumInitialTokens); 
+            ResetBlockVariables();
+            flTL.TokenFBController.SetTotalTokensNum(flBD.NumTokenBar);
+            flTL.TokenFBController.SetTokenBarValue(flBD.NumInitialTokens);
+            SetBlockSummaryString();
+            flTL.runningAcc.Clear();
             
         });
-
-        RunBlock.AddUpdateMethod(() =>
-        {
-            BlockSummaryString.Clear();
-            BlockSummaryString.AppendLine("Block Num: " + (flTL.BlockCount + 1) + "\nTrial Count: " + (flTL.TrialCount_InBlock + 1) + 
-                                          "\nNum Reward Given: " + flTL.numReward + "\nNum Token Bar Filled: " + 
-                                          flTL.numTokenBarFull + "\nTotalTokensCollected: " + flTL.totalTokensCollected);
-        });
-        
+        AssignBlockData();
     }
     public T GetCurrentBlockDef<T>() where T : BlockDef
     {
         return (T)CurrentBlockDef;
     }
 
+    private void ResetBlockVariables()
+    {
+        flTL.SearchDurationsList.Clear();
+        flTL.AverageSearchDuration_InBlock = 0;
+        flTL.NumErrors_InBlock = 0;
+        flTL.NumCorrect_InBlock = 0;
+        flTL.NumRewardGiven_InBlock = 0;
+        flTL.NumTokenBarFull_InBlock = 0;
+        flTL.TouchDurationError_InBlock = 0;
+    }
+
+    public void SetBlockSummaryString()
+    {
+        BlockSummaryString.Clear();
+        
+        BlockSummaryString.AppendLine("\nBlock Num: " + (flTL.BlockCount + 1) +
+                                      "\nTrial Num: " + (flTL.TrialCount_InBlock + 1) +
+                                      "\n" + 
+                                      "\nAccuracy: " + String.Format("{0:0.000}", flTL.Accuracy_InBlock) +  
+                                      "\n" + 
+                                      "\nAvg Search Duration: " + String.Format("{0:0.000}", flTL.AverageSearchDuration_InBlock) +
+                                      "\n" + 
+                                      "\nNum Touch Duration Error: " + flTL.TouchDurationError_InBlock + 
+                                      "\nNum Reward Given: " + flTL.NumRewardGiven_InBlock + 
+                                      "\nNum Token Bar Filled: " + flTL.NumTokenBarFull_InBlock +
+                                      "\nTotal Tokens Collected: " + flTL.TotalTokensCollected_InBlock);
+    }
+
+    public void AssignBlockData()
+    {
+        BlockData.AddDatum("Block Accuracy", ()=> (float)flTL.Accuracy_InBlock);
+        BlockData.AddDatum("Avg Search Duration", ()=> flTL.AverageSearchDuration_InBlock);
+        BlockData.AddDatum("Num Touch Duration Error", ()=> flTL.TouchDurationError_InBlock);
+        BlockData.AddDatum("Num Reward Given", ()=> flTL.NumRewardGiven_InBlock);
+        BlockData.AddDatum("Num Token Bar Filled", ()=> flTL.NumTokenBarFull_InBlock);
+        BlockData.AddDatum("Total Tokens Collected", ()=> flTL.TotalTokensCollected_InBlock);
+    }
 }

@@ -48,7 +48,6 @@ public class TokenFBController : MonoBehaviour
     {
         trialData.AddDatum("TokenBarValue", () => numCollected);
         trialData.AddDatum("TokenChange", () => tokensChange == 0 ? null : (float?)tokensChange);
-        //trialData.AddDatum("NumTokenBarFull", () => numTokenBarFull);
         frameData.AddDatum("TokenBarValue", () => numCollected);
         frameData.AddDatum("TokenAnimationPhase", () => animationPhase.ToString());
         this.audioFBController = audioFBController;
@@ -178,6 +177,7 @@ public class TokenFBController : MonoBehaviour
                         audioFBController.Play("PositiveUpdate"); //not added
                     }
                     numCollected += tokensChange;
+                    if (numCollected < 0) numCollected = 0; //set number to 0 if you lose more than you have, avoids neg tokens
                     animationPhase = AnimationPhase.None;
                     if (numCollected >= totalTokensNum)
                     {

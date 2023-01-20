@@ -22,11 +22,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private GameObject FBSquare;
     public Texture2D HeldTooShortTexture;
     public Texture2D HeldTooLongTexture;
-    private Texture2D StartButtonTexture, FBSquareTexture;
+    private Texture2D StartButtonTexture;
+    private Texture2D FBSquareTexture;
     private bool Grating = false;
-    private Sprite StartButtonSprite, HeldTooShortSprite, HeldTooLongSprite;
-    private GameObject SquareGO;
-    public float FBSquareDuration;
+    private TaskHelperFunctions taskHelper;
     
     // ConfigUI variables
     [HideInInspector]
@@ -35,18 +34,17 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     
     // Stim Evaluation Variables
     private GameObject trialStim;
-    private bool CorrectSelection = false;
     private GameObject selected = null;
+    private bool CorrectSelection = false;
     VisualSearch_StimDef selectedSD = null;
 
     // Config Loading Variables
     private bool configUIVariablesLoaded;
-    public string MaterialFilePath;
+    public string ContextExternalFilePath;
     public Vector3 ButtonPosition, ButtonScale;
+    public Vector3 FBSquarePosition, FBSquareScale;
     public bool StimFacingCamera;
     public string ShadowType;
-    private bool RandomizedLocations = false;
-    public int NumInitialTokens;
     
     //Player View Variables
     private PlayerViewPanel playerView;
@@ -56,22 +54,23 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private Vector2 textLocation;
     private bool playerViewLoaded;
     
-    // Block Data Values
+    // Block Data Variables
     private string ContextName = "";
     public int NumCorrect_InBlock;
-    public List<float?> SearchDurationsList = new List<float?>();
+    public List<float> SearchDurationsList = new List<float>();
     public int NumErrors_InBlock;
     public int NumRewardGiven_InBlock;
     public int NumTokenBarFull_InBlock;
     public int TotalTokensCollected_InBlock;
-    public decimal Accuracy_InBlock;
-    public decimal AverageSearchDuration_InBlock;
+    public float Accuracy_InBlock;
+    public float AverageSearchDuration_InBlock;
     public int TouchDurationError_InBlock;
-    // Trial Data Values
+   
+    // Trial Data Variables
     private int? SelectedStimCode = null;
     private string selectedStimName = null;
     private Vector3? SelectedStimLocation = null;
-    private float? SearchDuration = null;
+    private float SearchDuration = 0;
     private bool RewardGiven = false;
     private bool TouchDurationError = false;
 
@@ -93,15 +92,17 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         Delay.AddTimer(() => delayDuration, () => stateAfterDelay);
         
         Text commandText = null;
-        
+        playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
+        playerViewText = new GameObject();
+        taskHelper = new TaskHelperFunctions();
         SelectionHandler<VisualSearch_StimDef> mouseHandler = new SelectionHandler<VisualSearch_StimDef>();
         
         Add_ControlLevel_InitializationMethod(() =>
         {
-            playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
-            playerViewText = new GameObject();
-            CreateStartButton();
-            CreateFBSquare();
+            LoadTextures();
+            HaloFBController.SetHaloSize(3);
+            StartButton = taskHelper.CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
+            FBSquare = taskHelper.CreateFBSquare(FBSquareTexture, FBSquarePosition, FBSquareScale);
         });
         
         SetupTrial.AddInitializationMethod(() =>
@@ -118,7 +119,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             //Set the context for the upcoming trial with the Start Button visible
             ContextName = CurrentTrialDef.ContextName;
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar +  ContextName + ".png");
+            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +  ContextName + ".png");
             StartButton.SetActive(true);
             mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
             mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
@@ -171,7 +172,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             {
                 foreach (var stim in tStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
             }
-            SetShadowType();
+            taskHelper.SetShadowType(ShadowType, "VisualSearch_DirectionalLight");
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
@@ -208,7 +209,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 SelectedStimLocation = selectedSD.StimLocation;
             }
             SetTrialSummaryString();
-            Accuracy_InBlock = decimal.Round(decimal.Divide(NumCorrect_InBlock, (TrialCount_InBlock + 1)), 6);
+            Accuracy_InBlock = NumCorrect_InBlock/(TrialCount_InBlock + 1);
         });
 
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, ()=> 
@@ -224,7 +225,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             SearchDuration = SearchDisplay.TimingInfo.Duration;
             SearchDurationsList.Add(SearchDuration);
-            AverageSearchDuration_InBlock = decimal.Round((decimal)SearchDurationsList.Average(), 6);
+            AverageSearchDuration_InBlock = SearchDurationsList.Average();
             SetTrialSummaryString();
             if (!selected) return;
             else EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
@@ -255,7 +256,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 TokenFBController.RemoveTokens(selected, -selectedSD.StimTrialRewardMag);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
             }
-            
         });
         TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), ITI, () =>
         {
@@ -280,7 +280,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         ITI.AddInitializationMethod(() =>
         {
             ContextName = "itiImage";
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
             // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
             DestroyTextOnExperimenterDisplay();
             tStim.ToggleVisibility(false);
@@ -312,14 +312,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
             VisualSearch_StimDef sd = (VisualSearch_StimDef)tStim.stimDefs[i];
-            sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.TrialStimTokenReward[i]);
+            sd.StimTrialRewardMag = taskHelper.ChooseTokenReward(CurrentTrialDef.TrialStimTokenReward[i]);
             if (sd.StimTrialRewardMag > 0) sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!!
             else sd.IsTarget = false;
         }
-        
-        RandomizedLocations = CurrentTrialDef.RandomizedLocations; 
 
-        if (RandomizedLocations)
+        if (CurrentTrialDef.RandomizedLocations)
         {   
             int[] positionIndexArray = Enumerable.Range(0, CurrentTrialDef.TrialStimIndices.Length).ToArray();
             System.Random random = new System.Random();
@@ -346,63 +344,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
         tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");
-        gratingSquareDuration = ConfigUiVariables.get<ConfigNumber>("buttonGratingDuration");
+        gratingSquareDuration = ConfigUiVariables.get<ConfigNumber>("gratingSquareDuration");
         //finalFbDuration = ConfigUiVariables.get<ConfigNumber>("finalFbDuration");
         configUIVariablesLoaded = true;
-    }
-
-    private Vector2 playerViewPosition(Vector3 position, Transform playerViewParent)
-    {
-        Vector2 pvPosition = new Vector2((position[0] / Screen.width) * playerViewParent.GetComponent<RectTransform>().sizeDelta.x, (position[1] / Screen.height) * playerViewParent.GetComponent<RectTransform>().sizeDelta.y);
-        return pvPosition;
-    }
-    public int ChooseTokenReward(TokenReward[] tokenRewards)
-    {
-        float totalProbability = 0;
-        for (int i = 0; i < tokenRewards.Length; i++)
-        {
-            totalProbability += tokenRewards[i].Probability;
-        }
-
-        if (Math.Abs(totalProbability - 1) > 0.001)
-            Debug.LogError("Sum of token reward probabilities on this trial is " + totalProbability + ", probabilities will be scaled to sum to 1.");
-
-        float randomNumber = UnityEngine.Random.Range(0, totalProbability);
-
-        TokenReward selectedReward = tokenRewards[0];
-        float curProbSum = 0;
-        foreach (TokenReward tr in tokenRewards)
-        {
-            curProbSum += tr.Probability;
-            if (curProbSum >= randomNumber)
-            {
-                selectedReward = tr;
-                break;
-            }
-        }
-        return selectedReward.NumTokens;
-    }
-    private void SetShadowType()
-    {
-        //User options are None, Soft, Hard
-        switch (ShadowType)
-        {
-            case "None":
-                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.None;
-                GameObject.Find("VisualSearch_DirectionalLight").GetComponent<Light>().shadows = LightShadows.None;
-                break;
-            case "Soft":
-                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.Soft;
-                GameObject.Find("VisualSearch_DirectionalLight").GetComponent<Light>().shadows = LightShadows.Soft;
-                break;
-            case "Hard":
-                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.Hard;
-                GameObject.Find("VisualSearch_DirectionalLight").GetComponent<Light>().shadows = LightShadows.Hard;
-                break;
-            default:
-                Debug.Log("User did not Input None, Soft, or Hard for the Shadow Type");
-                break;
-        }
     }
     void SetTrialSummaryString()
     {
@@ -418,42 +362,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                              "\nSearch Duration: " + SearchDuration +
                              "\n" + 
                              "\nToken Bar Value: " + TokenFBController.GetTokenBarValue();
-    }
-    private void CreateTextOnExperimenterDisplay()
-    {
-        playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
-        if (!playerViewLoaded)
-        {
-            //Create corresponding text on player view of experimenter display
-            foreach (VisualSearch_StimDef stim in tStim.stimDefs)
-            {
-                if (stim.IsTarget)
-                {
-                    textLocation =
-                        playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation),
-                            playerViewParent);
-                    textLocation.y += 50;
-                    Vector2 textSize = new Vector2(200, 200);
-                    playerViewText = playerView.writeText("TARGET",
-                        Color.red, textLocation, textSize, playerViewParent);
-                    playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
-                    playerViewTextList.Add(playerViewText);
-                    playerViewLoaded = true;
-                }
-            }
-                
-        }
-    }
-    private void DestroyTextOnExperimenterDisplay()
-    {
-        if (playerViewLoaded)
-        {
-            foreach (GameObject txt in playerViewTextList)
-            {
-                txt.SetActive(false);
-            }
-        }
-        playerViewLoaded = false;
     }
     private void ResetDataTrackingVariables()
     {
@@ -482,58 +390,58 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("TrialStimVisibility", () => tStim.IsActive);
         FrameData.AddDatum("TokenBarVisibility", ()=> TokenFBController.isActiveAndEnabled);
     }
+    private void CreateTextOnExperimenterDisplay()
+    {
+        playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
+        if (!playerViewLoaded)
+        {
+            //Create corresponding text on player view of experimenter display
+            foreach (VisualSearch_StimDef stim in tStim.stimDefs)
+            {
+                if (stim.IsTarget)
+                {
+                    textLocation =
+                        taskHelper.playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation),
+                            playerViewParent);
+                    textLocation.y += 50;
+                    Vector2 textSize = new Vector2(200, 200);
+                    playerViewText = playerView.writeText("TARGET",
+                        Color.red, textLocation, textSize, playerViewParent);
+                    playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
+                    playerViewTextList.Add(playerViewText);
+                    playerViewLoaded = true;
+                }
+            }
+        }
+    }
+    private void DestroyTextOnExperimenterDisplay()
+    {
+        if (playerViewLoaded)
+        {
+            foreach (GameObject txt in playerViewTextList)
+            {
+                txt.SetActive(false);
+            }
+        }
+        playerViewLoaded = false;
+    }
     private void TouchDurationErrorFeedback(SelectionHandler<VisualSearch_StimDef> MouseHandler, GameObject go)
     {
         AudioFBController.Play("Negative");
         if (MouseHandler.GetHeldTooShort())
-            StartCoroutine(GratedSquareFlash(HeldTooShortTexture, go));
+            StartCoroutine(taskHelper.GratedSquareFlash(HeldTooShortTexture, go, gratingSquareDuration.value));
         else if (MouseHandler.GetHeldTooLong())
-            StartCoroutine(GratedSquareFlash(HeldTooLongTexture, go));
-        
+            StartCoroutine(taskHelper.GratedSquareFlash(HeldTooLongTexture, go, gratingSquareDuration.value));
         MouseHandler.SetHeldTooLong(false);
         MouseHandler.SetHeldTooShort(false);
         TouchDurationError = false;
         TouchDurationError_InBlock++;
     }
-    IEnumerator GratedSquareFlash(Texture2D newTexture, GameObject square)
+    private void LoadTextures()
     {
-        Grating = true;
-        Color32 originalColor = square.GetComponent<Renderer>().material.color;
-        Texture originalTexture = square.GetComponent<Renderer>().material.mainTexture;
-        square.GetComponent<Renderer>().material.color = new Color32(224, 78, 92, 255);
-        square.GetComponent<Renderer>().material.mainTexture = newTexture;
-        yield return new WaitForSeconds(gratingSquareDuration.value);
-        square.GetComponent<Renderer>().material.mainTexture = originalTexture;
-        square.GetComponent<Renderer>().material.color = originalColor;
-        Grating = false;
-        if (square.name == "FBSquare") square.SetActive(false);
-    }
-    private GameObject CreateSquare(string name)
-    {
-        SquareGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        SquareGO.name = name;
-        SquareGO.AddComponent<MeshRenderer>();
-        SquareGO.AddComponent<Renderer>();
-        SquareGO.GetComponent<Renderer>().material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
-        SquareGO.GetComponent<Renderer>().material.SetFloat("_SpecularHighlights",0f);
-        return SquareGO;
-    }
-    
-    private void CreateStartButton()
-    {
-        StartButtonTexture = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
-        StartButton = CreateSquare("StartButton");
-        StartButton.GetComponent<Renderer>().material.mainTexture = StartButtonTexture;
-        StartButton.transform.localScale = ButtonScale;
-        StartButton.transform.position = ButtonPosition;
-        StartButton.SetActive(false);
-    }
-    private void CreateFBSquare()
-    {
-        FBSquare = CreateSquare("FBSquare");
-        FBSquare.GetComponent<Renderer>().material.mainTexture = FBSquareTexture;
-        FBSquare.transform.localScale = new Vector3(10,10,10);
-        FBSquare.transform.position = new Vector3(0,0,0);
-        FBSquare.SetActive(false);
+        StartButtonTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
+        FBSquareTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "Grey.png");
+        HeldTooLongTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "HorizontalStripes.png");
+        HeldTooShortTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "VerticalStripes.png");
     }
 }

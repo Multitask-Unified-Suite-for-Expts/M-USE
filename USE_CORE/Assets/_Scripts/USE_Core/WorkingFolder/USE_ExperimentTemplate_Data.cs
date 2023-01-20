@@ -9,7 +9,6 @@ using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using System.Data.SqlClient;
-//using MySql.Data.MySqlClient;
 
 
 namespace USE_ExperimentTemplate_Data
@@ -57,9 +56,10 @@ namespace USE_ExperimentTemplate_Data
         public ControlLevel_Task_Template taskLevel;
         public ControlLevel_Trial_Template trialLevel;
 
-        
+
         //private readonly string ConnectionString = "Server=127.0.0.1;uid=root;pwd=Use_Core;database=USE_Test;";
-        private readonly string ConnectionString = "Server=localhost;uid=Experimenter;pwd=Use_Core;database=USE_Test;";
+        //private readonly string ConnectionString = "Server=localhost;uid=Experimenter;pwd=Use_Core;database=USE_Test;";
+        private readonly string ConnectionString = "server=localhost\\SQLExpress;database=USE_Test;integrated security=true;TrustServerCertificate=true;";
         public SqlConnection Connection
         {
             get
@@ -82,7 +82,6 @@ namespace USE_ExperimentTemplate_Data
             using(var conn = Connection)
             {
                 conn.Open();
-                Debug.Log("OPENED!");
                 using(var cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"SELECT * FROM Task;";
@@ -91,6 +90,7 @@ namespace USE_ExperimentTemplate_Data
                     {
                         while(reader.Read())
                         {
+                            Debug.Log((int)reader["Id"]);
                             Debug.Log((reader.GetString(reader.GetOrdinal("Name"))));
                         }
                     }

@@ -200,7 +200,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
             ClearDataLogging();
             SetTrialSummaryString();
-            CurrentTaskLevel.SetBlockSummaryString();
+            //CurrentTaskLevel.SetBlockSummaryString();
             if (slotErrorCount >= CurrentTrialDef.ErrorThreshold || distractorSlotErrorCount > CurrentTrialDef.ErrorThreshold || touchDurationErrorCount > CurrentTrialDef.ErrorThreshold || irrelevantSelectionErrorCount > CurrentTrialDef.ErrorThreshold || repetitionErrorCount > CurrentTrialDef.ErrorThreshold || noScreenTouchErrorCount > CurrentTrialDef.ErrorThreshold)
             {
                 sbDelay = timeoutDuration.value;
@@ -227,7 +227,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 touchDurationError = true;
                 SetTrialSummaryString();
                 TouchDurationErrorFeedback(mouseHandler, startButton);
-                TaskLevel.BlockSummaryString = CurrentTaskLevel.SetBlockSummaryString();
+                //TaskLevel.BlockSummaryString = CurrentTaskLevel.SetBlockSummaryString();
             }
         });
 
@@ -267,7 +267,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 FBSquare.SetActive(true);
                 SetTrialSummaryString();
                 TouchDurationErrorFeedback(mouseHandler, FBSquare);
-                CurrentTaskLevel.SetBlockSummaryString();
+                //CurrentTaskLevel.SetBlockSummaryString();
             }
         });
         ChooseStimulus.SpecifyTermination(()=> mouseHandler.SelectedStimDef != null, SelectionFeedback, ()=>
@@ -382,7 +382,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             delayDuration = 0;
             sliderHaloGO.SetActive(false);
-            CurrentTaskLevel.SetBlockSummaryString();
+           // CurrentTaskLevel.SetBlockSummaryString();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOff"]);
             if (correctChoice)
             {
@@ -476,7 +476,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
         {
-            CurrentTaskLevel.SetBlockSummaryString();
+           // CurrentTaskLevel.SetBlockSummaryString();
             DestroyTextOnExperimenterDisplay();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
             

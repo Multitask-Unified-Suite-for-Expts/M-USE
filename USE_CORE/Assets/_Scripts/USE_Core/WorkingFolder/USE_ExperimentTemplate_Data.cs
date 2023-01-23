@@ -178,13 +178,13 @@ namespace USE_ExperimentTemplate_Data
 
         public void CreateNewTrialIndexedFile(int trialCount, string filePrefix)
         {
-            fileName = filePrefix + "__" + DataControllerName + "_Trial_" + GetNiceIntegers(4, trialCount);
+            fileName = filePrefix + "__" + DataControllerName + "_Trial_" + GetNiceIntegers(4, trialCount) + ".txt";
             CreateFile();
         }
 
-        public void CreateNewTaskIndexedFolder(int taskCount, string sessionDataPath, string suffix)
+        public void CreateNewTaskIndexedFolder(int taskCount, string sessionDataPath, string parentFolder, string suffix)
         {
-            folderPath = sessionDataPath + Path.DirectorySeparatorChar + GetNiceIntegers(4, taskCount) +
+            folderPath = sessionDataPath + Path.DirectorySeparatorChar + parentFolder + Path.DirectorySeparatorChar + GetNiceIntegers(4, taskCount) +
                          suffix;
         }
         public string GetNiceIntegers(int numDigits, int desiredNum)
@@ -273,6 +273,7 @@ namespace USE_ExperimentTemplate_Data
             AddDatum("BlockCount", () => taskLevel.BlockCount + 1);
             AddDatum("TrialCount_InTask", () => trialLevel.TrialCount_InTask + 1);
             AddDatum("TrialCount_InBlock", () => trialLevel.TrialCount_InBlock + 1);
+            AddDatum("CurrentTrialState", ()=> trialLevel.CurrentState.StateName);
             AddDatum("Frame", () => Time.frameCount);
             AddDatum("FrameStartUnity", () => Time.time);
         }

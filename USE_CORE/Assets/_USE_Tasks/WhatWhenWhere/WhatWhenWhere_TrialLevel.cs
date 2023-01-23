@@ -10,6 +10,7 @@ using USE_Settings;
 using USE_DisplayManagement;
 using System.Linq;
 using System.IO;
+using UnityEngine.AI;
 using USE_ExperimentTemplate_Trial;
 using USE_ExperimentTemplate_Task;
 
@@ -51,7 +52,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public string errorType_InBlockString = "";
     private string errorType_InSessionString = "";
     private float startTime;
-    private int TouchDurationError_InBlock;
+    public int TouchDurationError_InBlock;
     private int[] numTotal_InSession = new int[numObjMax];
     private int[] numErrors_InSession = new int[numObjMax];
     private int[] numCorrect_InSession = new int[numObjMax];
@@ -133,6 +134,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     float endupdatetime = 0f;
     float valueRemaining = 0f;
     float valueToAdd = 0f;
+    float incrementalVal = 0f;
     public override void DefineControlLevel()
     {
         // --------------------------------------ADDING PLAYER VIEW STUFF------------------------------------------------------------------------------------
@@ -200,7 +202,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
             ClearDataLogging();
             SetTrialSummaryString();
-            //CurrentTaskLevel.SetBlockSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
             if (slotErrorCount >= CurrentTrialDef.ErrorThreshold || distractorSlotErrorCount > CurrentTrialDef.ErrorThreshold || touchDurationErrorCount > CurrentTrialDef.ErrorThreshold || irrelevantSelectionErrorCount > CurrentTrialDef.ErrorThreshold || repetitionErrorCount > CurrentTrialDef.ErrorThreshold || noScreenTouchErrorCount > CurrentTrialDef.ErrorThreshold)
             {
                 sbDelay = timeoutDuration.value;
@@ -334,7 +336,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             endupdatetime = Time.time + fbDuration.value;
             valueToAdd = sliderValueIncreaseAmount * (CurrentTrialDef.SliderGain[stimCount]);
+            incrementalVal = valueToAdd/(fbDuration.value*60);
             valueRemaining = valueToAdd;
+            
+            Debug.Log("valueToAdd: " + valueToAdd);
+            Debug.Log("incrementalVal: " + incrementalVal);
             if (isSliderValueIncrease) stimCount += 1;
             //Chose Incorrect
             if (incorrectChoice)
@@ -363,7 +369,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         SelectionFeedback.AddUpdateMethod(() =>
         {
-            float incrementalVal = valueToAdd/fbDuration.value;
+            Debug.Log("VALUE REMAINING: " + valueRemaining);
             if (valueRemaining >= 0)
             {
                 if (isSliderValueIncrease == false)
@@ -380,8 +386,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         SelectionFeedback.AddTimer(()=>fbDuration.value, delay, () =>
         {
+            Debug.Log("FEEDBACK OVER");
             delayDuration = 0;
             sliderHaloGO.SetActive(false);
+            HaloFBController.Destroy();
+            DestroyTextOnExperimenterDisplay();
            // CurrentTaskLevel.SetBlockSummaryString();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOff"]);
             if (correctChoice)
@@ -407,6 +416,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             distractorStims.ToggleVisibility(false);
             response = -1;
             
+            //Destroy all created text objects on Player View of Experimenter Display
+            DestroyTextOnExperimenterDisplay();
             runningAcc.Add(1);
             sliderCompleteQuantity += 1;/*
             if (CurrentTrialDef.LeaveFeedbackOn)
@@ -455,8 +466,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             contextName = "itiImage";
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + contextName + ".png");
 
-            //Destroy all created text objects on Player View of Experimenter Display
-            DestroyTextOnExperimenterDisplay();
             sliderGO.SetActive(false);
 /*
             if (response == 0)
@@ -481,8 +490,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
             
         });
-    
-
+        FinishTrial.AddInitializationMethod(() =>
+        {
+            //Remove any remaining items on player view
+            DestroyTextOnExperimenterDisplay();
+        });
     // FinishTrial.SpecifyTermination(
         //     () => TaskLevel_Methods.CheckBlockEnd("SimpleThreshold", runningAcc, 1, 5, MinTrials, TrialDefs.Length),
         //     () => null);

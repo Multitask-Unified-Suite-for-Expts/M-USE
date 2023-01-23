@@ -8,20 +8,8 @@ using USE_ExperimentTemplate_Block;
 
 public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 {
-    WhatWhenWhere_BlockDef bd => GetCurrentBlockDef<WhatWhenWhere_BlockDef>();
+    WhatWhenWhere_BlockDef wwwBD => GetCurrentBlockDef<WhatWhenWhere_BlockDef>();
     WhatWhenWhere_TrialLevel wwwTL;
-    public override void SpecifyTypes()
-    {
-        //note that since EffortControl_TaskDef and EffortControl_BlockDef do not add any fields or methods to their parent types, 
-        //they do not actually need to be specified here, but they are included to make this script more useful for later copying.
-        TaskLevelType = typeof(WhatWhenWhere_TaskLevel);
-        TrialLevelType = typeof(WhatWhenWhere_TrialLevel);
-        TaskDefType = typeof(WhatWhenWhere_TaskDef);
-        BlockDefType = typeof(WhatWhenWhere_BlockDef);
-        TrialDefType = typeof(WhatWhenWhere_TrialDef);
-        StimDefType = typeof(WhatWhenWhere_StimDef);
-    }
-
     public override void DefineControlLevel()
     {
         WhatWhenWhere_TrialLevel wwwTL = (WhatWhenWhere_TrialLevel)TrialLevel;
@@ -61,7 +49,8 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
            Array.Clear(wwwTL.numErrors_InBlock, 0, wwwTL.numErrors_InBlock.Length);
            wwwTL.accuracyLog_InBlock = "";
            wwwTL.runningAcc.Clear();
-           wwwTL.MinTrials = bd.nRepetitionsMinMax[0];
+           wwwTL.MinTrials = wwwBD.nRepetitionsMinMax[0];
+           SetBlockSummaryString();
         });
 
         // RunBlock.AddUpdateMethod(() =>
@@ -72,9 +61,15 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         //
         // });
     }
-    public StringBuilder SetBlockSummaryString()
+    public void SetBlockSummaryString()
     {
         BlockSummaryString.Clear();
+        BlockSummaryString.AppendLine("aDD TO BLOCK STRING");
+        Debug.Log("BLOCK SUMMARY STRING: " +
+                  BlockSummaryString);
+        //Debug.Log("BLOCK NUM: " + (wwwTL.BlockCount + 1));
+        //        Debug.Log("TRIAL NUM: " + (wwwTL.TrialCount_InBlock + 1));
+        Debug.Log("aCCURACY: " + wwwTL.accuracyLog_InBlock);
         BlockSummaryString.AppendLine("\nBlock Num: " + (wwwTL.BlockCount + 1) +
                                       "\nTrial Num: " + (wwwTL.TrialCount_InBlock + 1) +
                                       "\n" + 
@@ -84,9 +79,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
                                       "\nNon-Distractor Slot Error Count: " + wwwTL.slotErrorCount + 
                                       "\nRepetition Error Count: "  + wwwTL.repetitionErrorCount +
                                       "\nTouch Duration Error Count: " + wwwTL.touchDurationErrorCount + 
-                                      "\nNo Screen Touch Error Count: " + wwwTL.noScreenTouchErrorCount
-                                      );
-        return BlockSummaryString;
+                                      "\nNo Screen Touch Error Count: " + wwwTL.noScreenTouchErrorCount);
     }
   
     // public T GetCurrentBlockDef<T>() where T : BlockDef

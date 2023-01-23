@@ -132,7 +132,7 @@ namespace USE_ExperimentTemplate_Trial
             TrialData.ManuallyDefine();
             TrialData.AddStateTimingData(this);
             TrialData.CreateFile();
-            TrialData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
+           // TrialData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
 
 
         }

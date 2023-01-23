@@ -9,16 +9,16 @@ public class HaloFBController : MonoBehaviour
 
     private GameObject instantiated;
 
-    public SerializedObject PositiveHaloComponent;
-    public SerializedObject NegativeHaloComponent;
+    //public SerializedObject PositiveHaloComponent;
+    //public SerializedObject NegativeHaloComponent;
     
     // Logging
     private enum State { None, Positive, Negative };
     private State state;
 
     public void Init(DataController frameData) {
-        PositiveHaloComponent = new SerializedObject(this.PositiveHaloPrefab.GetComponent("Halo"));
-        NegativeHaloComponent = new SerializedObject(this.NegativeHaloPrefab.GetComponent("Halo"));
+        //PositiveHaloComponent = new SerializedObject(this.PositiveHaloPrefab.GetComponent("Halo"));
+        //NegativeHaloComponent = new SerializedObject(this.NegativeHaloPrefab.GetComponent("Halo"));
         frameData.AddDatum("HaloType", () => state.ToString());
         if (instantiated != null) {
             Debug.LogWarning("Initializing HaloFB Controller with an already visible halo");
@@ -46,7 +46,7 @@ public class HaloFBController : MonoBehaviour
     }
 
 
-    public HaloFBController SetHaloSize(float size)
+    /*public HaloFBController SetHaloSize(float size)
     {
         PositiveHaloComponent.FindProperty("m_Size").floatValue = size;
         PositiveHaloComponent.ApplyModifiedProperties();
@@ -69,7 +69,7 @@ public class HaloFBController : MonoBehaviour
         NegativeHaloComponent.FindProperty("m_Color").colorValue = color;
         NegativeHaloComponent.ApplyModifiedProperties();
         return this;
-    }
+    }*/
 
 
     public void Destroy() {

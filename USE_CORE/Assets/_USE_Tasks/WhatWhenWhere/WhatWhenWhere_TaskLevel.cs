@@ -1,5 +1,6 @@
 ﻿using WhatWhenWhere_Namespace;
 using System;
+using System.Text;
 using UnityEngine;
 using USE_Settings;
 using USE_ExperimentTemplate_Task;
@@ -8,7 +9,7 @@ using USE_ExperimentTemplate_Block;
 public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 {
     WhatWhenWhere_BlockDef bd => GetCurrentBlockDef<WhatWhenWhere_BlockDef>();
-    private WhatWhenWhere_TrialLevel wwwTL;
+    WhatWhenWhere_TrialLevel wwwTL;
     public override void SpecifyTypes()
     {
         //note that since EffortControl_TaskDef and EffortControl_BlockDef do not add any fields or methods to their parent types, 
@@ -71,16 +72,23 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         //
         // });
     }
-
-    public void UpdateBlockSummary()
+    public StringBuilder SetBlockSummaryString()
     {
         BlockSummaryString.Clear();
-        BlockSummaryString.AppendLine("Block Num: " + (wwwTL.BlockCount) + 
-                                      "\nTrial Count: " + (wwwTL.TrialCount_InBlock) +
-                                      "\nTotal Errors: " + wwwTL.totalErrors_InBlock + 
-                                      "\nPerformance: " + wwwTL.accuracyLog_InBlock + 
-                                      "\n# Slider Complete: " + wwwTL.sliderCompleteQuantity);
+        BlockSummaryString.AppendLine("\nBlock Num: " + (wwwTL.BlockCount + 1) +
+                                      "\nTrial Num: " + (wwwTL.TrialCount_InBlock + 1) +
+                                      "\n" + 
+                                      "\nAccuracy: " + wwwTL.accuracyLog_InBlock + 
+                                      "\n" +
+                                      "\nDistractor Slot Error Count: " + wwwTL.distractorSlotErrorCount+
+                                      "\nNon-Distractor Slot Error Count: " + wwwTL.slotErrorCount + 
+                                      "\nRepetition Error Count: "  + wwwTL.repetitionErrorCount +
+                                      "\nTouch Duration Error Count: " + wwwTL.touchDurationErrorCount + 
+                                      "\nNo Screen Touch Error Count: " + wwwTL.noScreenTouchErrorCount
+                                      );
+        return BlockSummaryString;
     }
+  
     // public T GetCurrentBlockDef<T>() where T : BlockDef
     // {
     //     return (T)CurrentBlockDef;

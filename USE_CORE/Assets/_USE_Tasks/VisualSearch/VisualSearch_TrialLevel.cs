@@ -100,7 +100,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         Add_ControlLevel_InitializationMethod(() =>
         {
             LoadTextures();
-            HaloFBController.SetHaloSize(3);
+            //HaloFBController.SetHaloSize(3);
             StartButton = taskHelper.CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
             FBSquare = taskHelper.CreateFBSquare(FBSquareTexture, FBSquarePosition, FBSquareScale);
         });

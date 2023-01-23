@@ -229,7 +229,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 touchDurationError = true;
                 SetTrialSummaryString();
                 TouchDurationErrorFeedback(mouseHandler, startButton);
-                //TaskLevel.BlockSummaryString = CurrentTaskLevel.SetBlockSummaryString();
+                CurrentTaskLevel.SetBlockSummaryString();
             }
         });
 
@@ -269,7 +269,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 FBSquare.SetActive(true);
                 SetTrialSummaryString();
                 TouchDurationErrorFeedback(mouseHandler, FBSquare);
-                //CurrentTaskLevel.SetBlockSummaryString();
+                CurrentTaskLevel.SetBlockSummaryString();
             }
         });
         ChooseStimulus.SpecifyTermination(()=> mouseHandler.SelectedStimDef != null, SelectionFeedback, ()=>
@@ -338,9 +338,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             valueToAdd = sliderValueIncreaseAmount * (CurrentTrialDef.SliderGain[stimCount]);
             incrementalVal = valueToAdd/(fbDuration.value*60);
             valueRemaining = valueToAdd;
-            
-            Debug.Log("valueToAdd: " + valueToAdd);
-            Debug.Log("incrementalVal: " + incrementalVal);
             if (isSliderValueIncrease) stimCount += 1;
             //Chose Incorrect
             if (incorrectChoice)
@@ -369,7 +366,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         SelectionFeedback.AddUpdateMethod(() =>
         {
-            Debug.Log("VALUE REMAINING: " + valueRemaining);
             if (valueRemaining >= 0)
             {
                 if (isSliderValueIncrease == false)
@@ -386,12 +382,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         SelectionFeedback.AddTimer(()=>fbDuration.value, delay, () =>
         {
-            Debug.Log("FEEDBACK OVER");
             delayDuration = 0;
             sliderHaloGO.SetActive(false);
             HaloFBController.Destroy();
             DestroyTextOnExperimenterDisplay();
-           // CurrentTaskLevel.SetBlockSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOff"]);
             if (correctChoice)
             {
@@ -485,7 +480,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
         {
-           // CurrentTaskLevel.SetBlockSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
             DestroyTextOnExperimenterDisplay();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
             
@@ -600,7 +595,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
         }
         searchStimsLocations = searchStimsLocations + "]";
-        Debug.Log("SEARCH STIMS LOCATIONS FOR DATA LOGGING" + searchStimsLocations);
         
         //distractors stims locations
         distractorStimsLocations = "[";
@@ -699,7 +693,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
             }
             errorType_InSessionString = errorType_InSessionString + "]";
-            Debug.Log("ErrorTypes_InSession " + errorType_InSessionString);
             // generate error type data for the block
             for (int i = 0; i < errorType_InBlock.Count; ++i)
             {
@@ -713,8 +706,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
             }
             errorType_InBlockString = errorType_InBlockString + "]";
-            Debug.Log("ErrorType" + errorTypeString);
-            Debug.Log("ErrorTypes_InBlock " + errorType_InBlockString);
     } 
     private void ClearDataLogging() //Sets data collecting variables to 0
     {

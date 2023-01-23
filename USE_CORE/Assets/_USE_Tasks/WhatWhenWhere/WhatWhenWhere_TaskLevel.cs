@@ -12,7 +12,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     WhatWhenWhere_TrialLevel wwwTL;
     public override void DefineControlLevel()
     {
-        WhatWhenWhere_TrialLevel wwwTL = (WhatWhenWhere_TrialLevel)TrialLevel;
+        wwwTL = (WhatWhenWhere_TrialLevel)TrialLevel;
         string TaskName = "WhatWhenWhere";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             wwwTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
@@ -64,12 +64,6 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         BlockSummaryString.Clear();
-        BlockSummaryString.AppendLine("aDD TO BLOCK STRING");
-        Debug.Log("BLOCK SUMMARY STRING: " +
-                  BlockSummaryString);
-        //Debug.Log("BLOCK NUM: " + (wwwTL.BlockCount + 1));
-        //        Debug.Log("TRIAL NUM: " + (wwwTL.TrialCount_InBlock + 1));
-        Debug.Log("aCCURACY: " + wwwTL.accuracyLog_InBlock);
         BlockSummaryString.AppendLine("\nBlock Num: " + (wwwTL.BlockCount + 1) +
                                       "\nTrial Num: " + (wwwTL.TrialCount_InBlock + 1) +
                                       "\n" + 

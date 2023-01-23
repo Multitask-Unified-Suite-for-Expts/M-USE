@@ -8,6 +8,7 @@ using USE_ExperimentTemplate_Block;
 public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 {
     WhatWhenWhere_BlockDef bd => GetCurrentBlockDef<WhatWhenWhere_BlockDef>();
+    private WhatWhenWhere_TrialLevel wwwTL;
     public override void SpecifyTypes()
     {
         //note that since EffortControl_TaskDef and EffortControl_BlockDef do not add any fields or methods to their parent types, 
@@ -25,13 +26,22 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         WhatWhenWhere_TrialLevel wwwTL = (WhatWhenWhere_TrialLevel)TrialLevel;
         string TaskName = "WhatWhenWhere";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            wwwTL.MaterialFilePath = (String) SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
-            wwwTL.MaterialFilePath = (String) SessionSettings.Get("Session", "ContextExternalFilePath");
-        else Debug.LogError("Context External File Path setting not defined in the TaskDef or Session config files.");
-        /*if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "UsingRewardPump"))
-            wwwTL.usingRewardPump = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "UsingRewardPump");
-        else Debug.LogError("Using Reward Pump setting not defined in the TaskDef");*/
+            wwwTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+        else wwwTL.ContextExternalFilePath = ContextExternalFilePath;
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+            wwwTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+        else Debug.LogError("Start Button Position settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+            wwwTL.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+        else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquarePosition"))
+            wwwTL.FBSquarePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquarePosition");
+        else Debug.LogError("FB Square Position settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquareScale"))
+            wwwTL.FBSquareScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquareScale");
+        else Debug.LogError("FB Square Scale settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
+            wwwTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
         RunBlock.AddInitializationMethod(() =>
         {
             //comment each error type
@@ -62,11 +72,14 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         // });
     }
 
-    public void UpdateBlockSummary(WhatWhenWhere_TrialLevel wwwTL)
+    public void UpdateBlockSummary()
     {
         BlockSummaryString.Clear();
-        BlockSummaryString.AppendLine("Block Num: " + (wwwTL.BlockCount) + "\nTrial Count: " + (wwwTL.TrialCount_InBlock) +
-                                      "\nTotal Errors: " + wwwTL.totalErrors_InBlock + "\nError Type: " + wwwTL.errorType_InBlockString + "\nPerformance: " + wwwTL.accuracyLog_InBlock + "\n# Slider Complete: " + wwwTL.sliderCompleteQuantity);
+        BlockSummaryString.AppendLine("Block Num: " + (wwwTL.BlockCount) + 
+                                      "\nTrial Count: " + (wwwTL.TrialCount_InBlock) +
+                                      "\nTotal Errors: " + wwwTL.totalErrors_InBlock + 
+                                      "\nPerformance: " + wwwTL.accuracyLog_InBlock + 
+                                      "\n# Slider Complete: " + wwwTL.sliderCompleteQuantity);
     }
     // public T GetCurrentBlockDef<T>() where T : BlockDef
     // {

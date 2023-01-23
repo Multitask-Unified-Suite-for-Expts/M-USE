@@ -28,7 +28,6 @@ namespace FlexLearning_Namespace
         string ContextExternalFilePath;
         bool StimFacingCamera;
         string ShadowType;
-        bool UsingRewardPump;
     }
 
     public class FlexLearning_BlockDef : BlockDef

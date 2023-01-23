@@ -146,7 +146,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         if (BlockCount > 0)
         {
-            BlockAveragesString = "<b>Block Averages " + $"({BlockCount} block completed);" + "</b>" +
+            BlockAveragesString = "<b>Block Averages " + $"({BlockCount} block);" + "</b>" +
                               "\nAvg Correct: " + AvgNumCorrect.ToString("0.00") +
                               "\nAvg TbCompletions: " + AvgNumTbCompletions.ToString("0.00") +
                               "\nAvg TimeToChoice: " + AvgTimeToChoice.ToString("0.00") + "s" +
@@ -157,7 +157,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
                               "\n";
         }
 
-        CurrentBlockString = "<b>Block " + "(" + currentBlock.BlockName + "):" + "</b>" +
+        CurrentBlockString = "Block " + "#" + (BlockCount + 1) +
                         "\nCorrect: " + trialLevel.NumCorrect_Block +
                         "\nTbCompletions: " + trialLevel.NumTbCompletions_Block +
                         "\nAvgTimeToChoice: " + trialLevel.AvgTimeToChoice_Block.ToString("0.00") + "s" +

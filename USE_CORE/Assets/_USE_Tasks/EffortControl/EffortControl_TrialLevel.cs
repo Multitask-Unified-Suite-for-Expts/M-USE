@@ -95,7 +95,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     public override void DefineControlLevel()
     {
-        //define States within this Control Level
         State InitTrial = new State("InitTrial");
         State ChooseBalloon = new State("ChooseBalloon");
         State CenterSelection = new State("CenterSelection");
@@ -187,16 +186,15 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             DestroyChildren(SideChoice == "left" ? RewardContainerRight : RewardContainerLeft);
             ClicksNeeded = (SideChoice == "left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
-
             AudioFBController.Play("EC_BalloonChosen");
-            ChooseDuration = ChooseBalloon.TimingInfo.Duration;
-
             SetChoices();
         });
 
         //Center Selection state -------------------------------------------------------------------------------------------------------
         CenterSelection.AddInitializationMethod(() =>
         {
+            ChooseDuration = ChooseBalloon.TimingInfo.Duration;
+
             Wrapper = new GameObject();
             Wrapper.name = "Wrapper";
             Centered = false;

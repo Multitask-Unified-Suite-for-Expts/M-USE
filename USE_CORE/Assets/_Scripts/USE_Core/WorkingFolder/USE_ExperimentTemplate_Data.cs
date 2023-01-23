@@ -178,12 +178,7 @@ namespace USE_ExperimentTemplate_Data
         public void AddData_SQL()
         {
             //First check if table exists in DB:
-            if (!DoesSQLTableExist())
-            {
-                CreateTable_SQL();
-                AddData_SQL(); //calls itself again after creating table. 
-            }
-            else //If table exists, add the data:
+            if (DoesSQLTableExist())
             {
                 using (SqlConnection conn = Connection)
                 {
@@ -205,6 +200,8 @@ namespace USE_ExperimentTemplate_Data
                     }
                 }
             }
+            else
+                Debug.Log($"There is no SQL table in the database with the name {name}");
         }
 
 

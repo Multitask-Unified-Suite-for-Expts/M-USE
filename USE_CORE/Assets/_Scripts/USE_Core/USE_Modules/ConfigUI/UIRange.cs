@@ -87,7 +87,6 @@ public class UIRange : MonoBehaviour {
 		this.slider.value = value;
 		this.input.text = "" + value;
         this.slider.gameObject.SetActive(true);
-        Debug.Log("SLIDER ACTIVE: " + this.slider.gameObject.activeSelf);
 	}
 	
 }

@@ -216,7 +216,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 {
                     WhiteTimeoutTime = Time.time;
                     WhiteStartTime = Time.time; //reset original WhiteStartTime so that normal duration resets.
-                    if(!AudioFBController.IsPlaying()) //will keep playing every timeout duration period if they still holding. Which could be good to teach them not to!
+                    if(!AudioFBController.IsPlaying()) //will keep playing every timeout duration period if they still holding!
                         AudioFBController.Play("Negative");
                 }
             }

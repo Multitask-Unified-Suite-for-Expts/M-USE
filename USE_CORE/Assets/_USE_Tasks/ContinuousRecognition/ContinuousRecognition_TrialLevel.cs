@@ -72,8 +72,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public StimGroup RightGroup;
     [HideInInspector] public StimGroup WrongGroup;
 
-    public bool ClickedNonStim;
-
     //Config Variables
     [HideInInspector]
     public ConfigNumber displayStimDuration, chooseStimDuration, itiDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration;
@@ -199,8 +197,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             if (TrialCount_InBlock == 0)
                 TimeToCompletion_StartTime = Time.time;
-
-            ClickedNonStim = false;
         });
 
         ChooseStim.AddUpdateMethod(() =>
@@ -211,21 +207,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             TimerText.text = TimeRemaining.ToString("0");
 
             chosenStimObj = mouseHandler.SelectedGameObject;
-            if(InputBroker.GetMouseButtonDown(0))
-            {
-                if (chosenStimObj == null)
-                    ClickedNonStim = true;
-            }
-            if(InputBroker.GetMouseButtonUp(0))
-            {
-                if (ClickedNonStim)
-                {
-                    NonStimTouches_Block++;
-                    ClickedNonStim = false;
-                }
-            }
-
             chosenStimDef = mouseHandler.SelectedStimDef;
+
             if (chosenStimDef != null) //They Clicked a Stim
             {
                 currentTrial.TimeChosen = Time.time;
@@ -280,16 +263,27 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["IncorrectResponse"]);
                 }
             }
-         
+
             if (chosenStimObj != null) //if they chose a stimObj and it has a pointer to the actual stimDef.  
             {
                 StimDefPointer pointer = chosenStimObj.GetComponent<StimDefPointer>();
                 if (!pointer) return;
                 else StimIsChosen = true;
             }
+
+            //Count NonStim Clicks:
+            if (InputBroker.GetMouseButtonDown(0))
+            {
+                Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
+                RaycastHit hit;
+                if (!Physics.Raycast(ray, out hit))
+                    NonStimTouches_Block++;
+            }
+
+
         });
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
-        ChooseStim.AddTimer(() => chooseStimDuration.value, TokenUpdate, () =>     //if time runs out
+        ChooseStim.AddTimer(() => chooseStimDuration.value, TokenUpdate, () =>  //if time runs out
         {
             AudioFBController.Play("Negative");
             EndBlock = true;
@@ -390,8 +384,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
                         YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Game Over \n HighScore: {Score} xp";
                         YouLoseTextGO.SetActive(true);
-                        AudioFBController.Play("CR_SouthParkFail");
-                        //AudioFBController.Play("CR_BlockFailed"); //Non-southPark fail audio if need it
+                        AudioFBController.Play("CR_BlockFailed");
+                        //AudioFBController.Play("CR_SouthParkFail");
                     }
                 }
             }
@@ -534,14 +528,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     void SetTrialSummaryString()
     {
-        TrialSummaryString = "\n" +
-                               "Trial #" + (TrialCount_InBlock + 1) +
-                               "\n" +
-                               "\nPC_Stim: " + currentTrial.PC_Stim.Count +
-                               "\nNew_Stim: " + currentTrial.New_Stim.Count +
-                               "\nPNC_Stim: " + currentTrial.PNC_Stim.Count +
-                               "\n" +
-                               "\nTotal Stim: " + (currentTrial.New_Stim.Count + currentTrial.PC_Stim.Count + currentTrial.PNC_Stim.Count);
+        TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) +
+                             "\nPC_Stim: " + currentTrial.PC_Stim.Count +
+                             "\nNew_Stim: " + currentTrial.New_Stim.Count +
+                             "\nPNC_Stim: " + currentTrial.PNC_Stim.Count +
+                             "\n" +
+                             "\nTotal Stim: " + (currentTrial.New_Stim.Count + currentTrial.PC_Stim.Count + currentTrial.PNC_Stim.Count);
     }
 
     Vector3[] CenterFeedbackLocations(Vector3[] locations, int numLocations)
@@ -1125,7 +1117,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     void LogFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
-        FrameData.AddDatum("TouchedNonStim", () => ClickedNonStim);
         FrameData.AddDatum("Context", () => currentTrial.ContextName);
         FrameData.AddDatum("ContextActive", () => ContextActive);
         FrameData.AddDatum("StartButton", () => StartButton.activeSelf);

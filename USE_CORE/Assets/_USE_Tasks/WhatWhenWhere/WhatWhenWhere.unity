@@ -389,9 +389,9 @@ MonoBehaviour:
   SelectionType: 
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
-  SliderPrefab: {fileID: 2122826529044376720, guid: a95b2512db57a0c4b996286261eee8fc,
+  SliderPrefab: {fileID: 2122826529044376720, guid: 4edf39309c5fdfe4786b98a260c324e0,
     type: 3}
-  SliderHaloPrefab: {fileID: 4317252536729789219, guid: 34a1251ba437da343a9fede637fcddbf,
+  SliderHaloPrefab: {fileID: 4317252536729789219, guid: f372d073062e1954ba552b4c8bbb2d93,
     type: 3}
   ContextExternalFilePath: 
   ButtonPosition: {x: 0, y: 0, z: 0}

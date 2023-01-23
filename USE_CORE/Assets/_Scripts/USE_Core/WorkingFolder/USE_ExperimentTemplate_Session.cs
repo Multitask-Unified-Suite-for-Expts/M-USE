@@ -21,6 +21,8 @@ namespace USE_ExperimentTemplate_Session
 {
     public class ControlLevel_Session_Template : ControlLevel
     {
+        [HideInInspector] public int SessionId_SQL;
+
         public GameObject PauseCanvasGO;
         public Canvas PauseCanvas;
 
@@ -223,7 +225,8 @@ namespace USE_ExperimentTemplate_Session
 
 
                 SessionData.CreateFile();
-                //SessionData.SeeIfConnectionWorks(); //using to test MySql database connection
+                //SessionData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
+                //SessionData.TestConnectionToDB(); //Using to test database connection
 
                 EventCodeManager = GameObject.Find("MiscScripts").GetComponent<EventCodeManager>(); //new EventCodeManager();
                 if (SerialPortActive)

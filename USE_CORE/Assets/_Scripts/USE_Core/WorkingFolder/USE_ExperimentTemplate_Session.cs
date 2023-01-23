@@ -453,8 +453,8 @@ namespace USE_ExperimentTemplate_Session
                 ExperimenterDisplayController.ResetTask(CurrentTask, CurrentTask.TrialLevel);
                 if (SerialPortActive)
                 {
-                    SerialRecvData.CreateNewTaskIndexedFolder(taskCount + 1 * 2, SessionDataPath, CurrentTask.TaskName);
-                    SerialSentData.CreateNewTaskIndexedFolder(taskCount + 1 * 2, SessionDataPath, CurrentTask.TaskName);
+                    SerialRecvData.CreateNewTaskIndexedFolder(taskCount + 1 * 2, SessionDataPath, "SerialRecvData", CurrentTask.TaskName);
+                    SerialSentData.CreateNewTaskIndexedFolder(taskCount + 1 * 2, SessionDataPath, "SerialSentData", CurrentTask.TaskName);
                 }
             });
 
@@ -497,8 +497,8 @@ namespace USE_ExperimentTemplate_Session
                 taskCount++;
                 if (SerialPortActive)
                 {
-                    SerialRecvData.CreateNewTaskIndexedFolder(taskCount + 1 * 2 - 1, SessionDataPath, "_TaskSelection");
-                    SerialSentData.CreateNewTaskIndexedFolder(taskCount + 1 * 2 - 1, SessionDataPath, "_TaskSelection");
+                    SerialRecvData.CreateNewTaskIndexedFolder(taskCount + 1 * 2 - 1, SessionDataPath, "SerialRecvData", "_TaskSelection");
+                    SerialSentData.CreateNewTaskIndexedFolder(taskCount + 1 * 2 - 1, SessionDataPath, "SerialSentData", "_TaskSelection");
                 }
                 //     SessionDataPath + Path.DirectorySeparatorChar +
                 //                             SerialRecvData.GetNiceIntegers(4, taskCount + 1 * 2 - 1) + "_TaskSelection";
@@ -520,7 +520,7 @@ namespace USE_ExperimentTemplate_Session
 
             SessionData = (SessionData) SessionDataControllers.InstantiateDataController<SessionData>
                 ("SessionData", StoreData, SessionDataPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionDataPath);
-            SessionData.fileName = FilePrefix + "__SessionData";
+            SessionData.fileName = FilePrefix + "__SessionData.txt";
             SessionData.sessionLevel = this;
             SessionData.InitDataController();
             SessionData.ManuallyDefine();
@@ -531,15 +531,15 @@ namespace USE_ExperimentTemplate_Session
             if (SerialPortActive)
             {
                 SerialSentData = (SerialSentData) SessionDataControllers.InstantiateDataController<SerialSentData>
-                    ("SerialSentData", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "001_TaskSelection");
-                SessionData.fileName = FilePrefix + "__SerialSentData_001_TaskSelection";
+                    ("SerialSentData", StoreData, SessionDataPath + Path.DirectorySeparatorChar +  "SerialSentData"+ Path.DirectorySeparatorChar + "001_TaskSelection");
+                SessionData.fileName = FilePrefix + "__SerialSentData_001_TaskSelection.txt";
                 SerialSentData.sessionLevel = this;
                 SerialSentData.InitDataController();
                 SerialSentData.ManuallyDefine();
 
                 SerialRecvData = (SerialRecvData) SessionDataControllers.InstantiateDataController<SerialRecvData>
-                    ("SerialRecvData", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "001_TaskSelection");
-                SessionData.fileName = FilePrefix + "__SerialRecvData_001_TaskSelection";
+                    ("SerialRecvData", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "serialRecvData" + Path.DirectorySeparatorChar + "001_TaskSelection");
+                SessionData.fileName = FilePrefix + "__SerialRecvData_001_TaskSelection.txt";
                 SerialRecvData.sessionLevel = this;
                 SerialRecvData.InitDataController();
                 SerialRecvData.ManuallyDefine();

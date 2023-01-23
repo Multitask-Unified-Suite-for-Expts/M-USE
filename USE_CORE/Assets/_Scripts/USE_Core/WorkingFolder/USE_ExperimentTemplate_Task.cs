@@ -225,7 +225,7 @@ namespace USE_ExperimentTemplate_Task
                 //InstantiateBlockData(StoreData, ConfigName,
                 //TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
             BlockData.taskLevel = this;
-            BlockData.fileName = FilePrefix + "__BlockData";
+            BlockData.fileName = FilePrefix + "__BlockData.txt";
 
             TrialData = (TrialData) SessionDataControllers.InstantiateDataController<TrialData>("TrialData", ConfigName,
                 StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
@@ -234,7 +234,7 @@ namespace USE_ExperimentTemplate_Task
             TrialData.taskLevel = this;
             TrialData.trialLevel = TrialLevel;
             TrialLevel.TrialData = TrialData;
-            TrialData.fileName = FilePrefix + "__TrialData";
+            TrialData.fileName = FilePrefix + "__TrialData.txt";
 
             FrameData = (FrameData) SessionDataControllers.InstantiateDataController<FrameData>("FrameData", ConfigName,
                 StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
@@ -243,7 +243,7 @@ namespace USE_ExperimentTemplate_Task
             FrameData.taskLevel = this;
             FrameData.trialLevel = TrialLevel;
             TrialLevel.FrameData = FrameData;
-            FrameData.fileName = FilePrefix + "__FrameData_PreTrial";
+            FrameData.fileName = FilePrefix + "__FrameData_PreTrial.txt";
 
 
             BlockData.InitDataController();

@@ -181,7 +181,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
             playerViewText = new GameObject();
             LoadTextures();
-            //HaloFBController.SetHaloSize(2);
+            HaloFBController.SetHaloSize(5);
             startButton = taskHelper.CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
             FBSquare = taskHelper.CreateFBSquare(FBSquareTexture, FBSquarePosition, FBSquareScale);
             playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
@@ -200,7 +200,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 variablesLoaded = true;
                 LoadTrialVariables();
             }
-            ClearDataLogging();
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
             if (slotErrorCount >= CurrentTrialDef.ErrorThreshold || distractorSlotErrorCount > CurrentTrialDef.ErrorThreshold || touchDurationErrorCount > CurrentTrialDef.ErrorThreshold || irrelevantSelectionErrorCount > CurrentTrialDef.ErrorThreshold || repetitionErrorCount > CurrentTrialDef.ErrorThreshold || noScreenTouchErrorCount > CurrentTrialDef.ErrorThreshold)
@@ -218,6 +217,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         StartButton.AddInitializationMethod(() =>
         {
             InitializeSlider();
+            ClearDataLogging();
             mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
             mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
             startButton.SetActive(true);
@@ -259,6 +259,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             chosenStim = null;
             initialTouch = false;
             choiceMade = false;
+            if (CurrentTrialDef.LeaveFeedbackOn) HaloFBController.SetLeaveFeedbackOn();
         });
         ChooseStimulus.AddUpdateMethod(() =>
         { 
@@ -384,8 +385,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             delayDuration = 0;
             sliderHaloGO.SetActive(false);
-            HaloFBController.Destroy();
             DestroyTextOnExperimenterDisplay();
+            
+            if (!CurrentTrialDef.LeaveFeedbackOn) HaloFBController.Destroy();
             CurrentTaskLevel.SetBlockSummaryString();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOff"]);
             if (correctChoice)
@@ -398,7 +400,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 stateAfterDelay = ITI;
                 incorrectChoice = false;
             }
-            
         });
         FinalFeedback.AddInitializationMethod(() =>
         {
@@ -410,6 +411,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             searchStims.ToggleVisibility(false);
             distractorStims.ToggleVisibility(false);
             response = -1;
+            
             
             //Destroy all created text objects on Player View of Experimenter Display
             DestroyTextOnExperimenterDisplay();

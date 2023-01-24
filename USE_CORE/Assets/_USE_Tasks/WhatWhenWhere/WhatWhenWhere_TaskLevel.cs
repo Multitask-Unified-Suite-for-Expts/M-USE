@@ -43,6 +43,8 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
            wwwTL.touchDurationErrorCount = 0;
            wwwTL.irrelevantSelectionErrorCount = 0;
            wwwTL.noScreenTouchErrorCount = 0;
+           wwwTL.TouchDurationError_InBlock = 0;
+           wwwTL.NumNonStimSelections_InBlock = 0;
            //comment better here
            Array.Clear(wwwTL.numTotal_InBlock, 0, wwwTL.numTotal_InBlock.Length);
            Array.Clear(wwwTL.numCorrect_InBlock, 0, wwwTL.numCorrect_InBlock.Length);

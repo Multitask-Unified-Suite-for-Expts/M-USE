@@ -44,7 +44,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     
     
     // error data variables
-    public int slotErrorCount, distractorSlotErrorCount, touchDurationErrorCount, irrelevantSelectionErrorCount, repetitionErrorCount, totalErrors_InSession, noScreenTouchErrorCount = 0;
+    public int slotErrorCount, distractorSlotErrorCount, touchDurationErrorCount, irrelevantSelectionErrorCount, 
+        repetitionErrorCount, nonStimTouchErrorCount, totalErrors_InSession, noScreenTouchErrorCount = 0;
     public int totalErrors_InBlock = 0;
     private string errorTypeString = "";
     public List<String> errorType_InBlock = new List<String> { };
@@ -53,6 +54,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private string errorType_InSessionString = "";
     private float startTime;
     public int TouchDurationError_InBlock;
+    public int NumNonStimSelections_InBlock;
     private int[] numTotal_InSession = new int[numObjMax];
     private int[] numErrors_InSession = new int[numObjMax];
     private int[] numCorrect_InSession = new int[numObjMax];
@@ -239,7 +241,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             startButton.SetActive(false);
             
             isCorrectChoice = false;
-            
+            NumNonStimSelections_InBlock += mouseHandler.GetNumNonStimSelection();
+            Debug.Log("NUM NON STIM SELECTION: " + NumNonStimSelections_InBlock);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderReset"]);
         });

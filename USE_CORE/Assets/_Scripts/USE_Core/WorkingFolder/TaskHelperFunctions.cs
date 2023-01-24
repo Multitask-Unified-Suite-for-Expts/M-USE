@@ -11,6 +11,7 @@ public class TaskHelperFunctions
     private Texture2D HeldTooShortTexture;
     private Texture2D HeldTooLongTexture;
     private Texture2D StartButtonTexture;
+    private Texture2D FBSquareTexture;
     private GameObject StartButton;
     private GameObject FBSquare;
 
@@ -114,6 +115,13 @@ public class TaskHelperFunctions
                 Debug.Log("User did not Input None, Soft, or Hard for the Shadow Type");
                 break;
         }
+    }
+    public void LoadTextures(String ContextExternalFilePath)
+    {
+        StartButtonTexture = ControlLevel_Trial_Template.LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
+        FBSquareTexture = ControlLevel_Trial_Template.LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "Grey.png");
+        HeldTooLongTexture = ControlLevel_Trial_Template.LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "HorizontalStripes.png");
+        HeldTooShortTexture = ControlLevel_Trial_Template.LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "VerticalStripes.png");
     }
     /*
     private void TouchDurationErrorFeedback(SelectionHandler<StimDef> MouseHandler, GameObject go, 

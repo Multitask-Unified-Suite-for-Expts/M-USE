@@ -120,6 +120,7 @@ public class SelectionHandler<T> where T : StimDef
         NumNonStimSelection = val;
     }
     
+    //---------------------------------------------UPDATING SELECTION MANAGEMENT-----------------------------------------
     public void UpdateTarget(GameObject go)
     {
         if (!started) return;

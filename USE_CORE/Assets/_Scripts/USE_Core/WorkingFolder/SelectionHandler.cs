@@ -34,15 +34,16 @@ public class SelectionHandler<T> where T : StimDef
 
     public void Stop()
     {
+        // Resets all values at the end of the state, store counter values at the trial level 
         started = false;
         SelectedGameObject = null;
         SelectedStimDef = null;
         targetedGameObject = null;
         currentTargetDuration = 0;
-        Debug.Log("NONSTIM TOUCH: " + NumNonStimSelection);
-        Debug.Log("NUM TOUCH DURATION ERROR: " + NumTouchDurationError);
+        NumNonStimSelection = 0; 
+        NumTouchDurationError = 0; 
     }
-
+// -------------------------------------Evaluate the identity of the selection -------------------------------------
     public bool SelectionMatches(GameObject gameObj) {
         return ReferenceEquals(SelectedGameObject, gameObj);
     }
@@ -50,6 +51,7 @@ public class SelectionHandler<T> where T : StimDef
     public bool SelectionMatches(T stimDef) {
         return ReferenceEquals(SelectedStimDef, stimDef);
     }
+    //-------------------------------------- Get/Set touch duration variables ------------------------------------------
     public void SetMinTouchDuration(float minDuration)
     {
         MinDuration = minDuration;
@@ -91,6 +93,7 @@ public class SelectionHandler<T> where T : StimDef
     {
         HeldTooShort = heldTooShort;
     }
+    //-------------------------------------- Get/Set Data tracking variables------------------------------------------
     public int GetNumTouchDurationError()
     {
         return NumTouchDurationError;
@@ -102,6 +105,13 @@ public class SelectionHandler<T> where T : StimDef
     }
     public int GetNumNonStimSelection()
     {
+        if (InputBroker.GetMouseButtonDown(0))
+        {
+            Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
+            RaycastHit hit;
+            if (!Physics.Raycast(ray, out hit))
+                NumNonStimSelection++;
+        }
         return NumNonStimSelection;
     }
 
@@ -115,6 +125,7 @@ public class SelectionHandler<T> where T : StimDef
         if (!started) return;
         if (go == null) // Evaluates when the player is not selecting anything
         {
+            GetNumNonStimSelection();
             if (targetedGameObject != null) // Evaluates when the player releases the selected object
             {
                 bool withinDuration = currentTargetDuration >= MinDuration && 
@@ -125,10 +136,10 @@ public class SelectionHandler<T> where T : StimDef
                     SelectedStimDef = null;
                     if (SelectedGameObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer))
                         SelectedStimDef = (sdPointer as StimDefPointer).GetStimDef<T>();
-                    else NumNonStimSelection++;
                 }
                 else
                 {
+                    NumTouchDurationError++;
                     if (currentTargetDuration <= MinDuration) HeldTooShort = true;
                     else if (currentTargetDuration >= MaxDuration) HeldTooLong = true;
                     Debug.Log("Did not select for the appropriate duration"); //ADD FURTHER ERROR FEEDBACK HERE

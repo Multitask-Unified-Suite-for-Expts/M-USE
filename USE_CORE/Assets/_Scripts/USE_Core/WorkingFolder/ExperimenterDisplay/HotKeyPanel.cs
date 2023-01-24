@@ -156,31 +156,31 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             List<HotKey> HotKeyList = new List<HotKey>();
 
             // Toggle Displays HotKey
-            HotKey toggleDisplays = new HotKey
-            {
-                keyDescription = "W",
-                actionName = "Toggle Displays",
-                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.W),
-                hotKeyAction = () =>
-                {
-                    var cams = GameObject.FindObjectsOfType<Camera>();
-                    foreach (Camera c in cams)
-                    {
-                        Debug.Log(c.name + " before:" + c.targetDisplay);
-                        c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-                        Debug.Log(c.name + " after:" + c.targetDisplay);
-                    }
-                    var canvases = GameObject.FindObjectsOfType<Canvas>();
-                    foreach (Canvas c in canvases)
-                    {
-                        Debug.Log(c.name + " before:" + c.targetDisplay);
-                        c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-                        Debug.Log(c.name + " after:" + c.targetDisplay);
-                    }
-                    //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-                }
-            };
-            HotKeyList.Add(toggleDisplays);
+            //HotKey toggleDisplays = new HotKey
+            //{
+            //    keyDescription = "W",
+            //    actionName = "Toggle Displays",
+            //    hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.W),
+            //    hotKeyAction = () =>
+            //    {
+            //        var cams = GameObject.FindObjectsOfType<Camera>();
+            //        foreach (Camera c in cams) //MirrorCam:0, BackgroundCamera:1, CR_Cam: 0, MainCameraCopy:1 (DC)
+            //        {
+            //            Debug.Log(c.name + " before:" + c.targetDisplay);
+            //            c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
+            //            Debug.Log(c.name + " after:" + c.targetDisplay);
+            //        }
+            //        var canvases = GameObject.FindObjectsOfType<Canvas>();
+            //        foreach (Canvas c in canvases) //ExperimenterCanvas: 1, TaskSelectionCanvas:0 (DC), InitScreenCanvas:1, CR_Canvas:0 (DC)
+            //        {
+            //            Debug.Log(c.name + " before:" + c.targetDisplay);
+            //            c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
+            //            Debug.Log(c.name + " after:" + c.targetDisplay);
+            //        }
+            //        //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            //    }
+            //};
+            //HotKeyList.Add(toggleDisplays);
 
             // Remove Cursor Hot Key
             HotKey toggleCursor = new HotKey
@@ -249,6 +249,22 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             };
             HotKeyList.Add(endBlock);
 
+            //EndTask Hot Key
+            HotKey endTask = new HotKey
+            {
+                keyDescription = "E",
+                actionName = "End Task",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.E),
+                hotKeyAction = () =>
+                {
+                    HkPanel.TrialLevel.ForceBlockEnd = true; //End trial
+                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial")); 
+                    HkPanel.TaskLevel.Terminated = true; //End Task
+                    Destroy(GameObject.Find("Controllers")); //Delete current Controllers GO, since Task Selection creates new one
+                }
+            };
+            HotKeyList.Add(endTask);
+
             // Quit Game Hot Key
             HotKey quitGame = new HotKey
             {
@@ -275,31 +291,11 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     {
                         HkPanel.TaskLevel.Paused = true;
                         HkPanel.SessionLevel.PauseCanvasGO.SetActive(true);
-                        //CR canvas, starfield and the active stim all still appear, so set them inactive:
-                        //This works but the timing off for the trial states, so commenting out.
-                        //GameObject CR = GameObject.Find("ContinuousRecognition_Canvas");
-                        //if (CR != null)
-                        //    CR.SetActive(false);
-                        //GameObject CR_Canvas = GameObject.Find("Starfield");
-                        //if (CR_Canvas != null)
-                        //    CR_Canvas.SetActive(false);
-                        //foreach (var stim in HkPanel.TrialLevel.TrialStims)
-                        //    stim.ToggleVisibility(false);
                     }
                     else
                     {
                         HkPanel.TaskLevel.Paused = false;
                         HkPanel.SessionLevel.PauseCanvasGO.SetActive(false);
-                        //Reactivate the CR objects:
-                        //This works but the timing off for the trial states, so commenting out.
-                        //foreach(GameObject go in Resources.FindObjectsOfTypeAll<GameObject>())
-                        //{
-                        //    Debug.Log("GO NAME = " + go.name);
-                        //    if (go.name == "ContinuousRecognition_Canvas" || go.name == "Starfield")
-                        //        go.SetActive(true);
-                        //}
-                        //foreach (var stim in HkPanel.TrialLevel.TrialStims)
-                        //    stim.ToggleVisibility(true);
                     }
                 }
             };

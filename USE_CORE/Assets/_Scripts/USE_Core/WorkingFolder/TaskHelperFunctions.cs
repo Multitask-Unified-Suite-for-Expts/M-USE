@@ -21,15 +21,7 @@ public class TaskHelperFunctions
     private StimDef StimDef;
     private GameObject SquareGO;
 
-    public int GetNumTouchDurationError()
-    {
-        return NumTouchDurationError;
-    }
 
-    public void SetNumTouchDurationError(int val)
-    {
-        NumTouchDurationError = val;
-    }
     public Vector2 playerViewPosition(Vector3 position, Transform playerViewParent)
     {
         Vector2 pvPosition = new Vector2((position[0] / Screen.width) * playerViewParent.GetComponent<RectTransform>().sizeDelta.x, (position[1] / Screen.height) * playerViewParent.GetComponent<RectTransform>().sizeDelta.y);
@@ -52,8 +44,6 @@ public class TaskHelperFunctions
     {
         SquareGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
         SquareGO.name = name;
-       // SquareGO.AddComponent<MeshRenderer>();
-        //SquareGO.AddComponent<Renderer>();
         SquareGO.GetComponent<Renderer>().material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
         SquareGO.GetComponent<Renderer>().material.SetFloat("_SpecularHighlights",0f);
         return SquareGO;

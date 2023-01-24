@@ -416,15 +416,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             //Destroy all created text objects on Player View of Experimenter Display
             DestroyTextOnExperimenterDisplay();
             runningAcc.Add(1);
-            sliderCompleteQuantity += 1;/*
-            if (CurrentTrialDef.LeaveFeedbackOn)
-            {
-                foreach (Transform child in GameObject.Find("HaloContainer").transform)
-                {
-                    GameObject.Destroy(child.gameObject);
-                    halosDestroyed = true;
-                }
-            }*/
+            sliderCompleteQuantity += 1;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderCompleteFbOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             

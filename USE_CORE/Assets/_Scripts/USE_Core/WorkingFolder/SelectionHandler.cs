@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using MazeGame_Namespace;
 using UnityEngine;
 using USE_StimulusManagement;
@@ -6,11 +8,15 @@ using USE_StimulusManagement;
 // Both min and max duration means that selection is finished once its let go
 public class SelectionHandler<T> where T : StimDef
 {
+
     private float MinDuration = 0;
     private float? MaxDuration = null;
 
     private bool HeldTooShort = false;
     private bool HeldTooLong = false;
+
+    private int NumNonStimSelection = 0;
+    private int NumTouchDurationError = 0;
     
     // When a selection has been finalized and meets all the constraints, these will be populated
     public GameObject SelectedGameObject = null;
@@ -33,12 +39,17 @@ public class SelectionHandler<T> where T : StimDef
         SelectedStimDef = null;
         targetedGameObject = null;
         currentTargetDuration = 0;
+        Debug.Log("NONSTIM TOUCH: " + NumNonStimSelection);
+        Debug.Log("NUM TOUCH DURATION ERROR: " + NumTouchDurationError);
     }
 
     public bool SelectionMatches(GameObject gameObj) {
         return ReferenceEquals(SelectedGameObject, gameObj);
     }
 
+    public bool SelectionMatches(T stimDef) {
+        return ReferenceEquals(SelectedStimDef, stimDef);
+    }
     public void SetMinTouchDuration(float minDuration)
     {
         MinDuration = minDuration;
@@ -80,10 +91,25 @@ public class SelectionHandler<T> where T : StimDef
     {
         HeldTooShort = heldTooShort;
     }
-    public bool SelectionMatches(T stimDef) {
-        return ReferenceEquals(SelectedStimDef, stimDef);
+    public int GetNumTouchDurationError()
+    {
+        return NumTouchDurationError;
     }
 
+    public void SetNumTouchDurationError(int val)
+    {
+        NumTouchDurationError = val;
+    }
+    public int GetNumNonStimSelection()
+    {
+        return NumNonStimSelection;
+    }
+
+    public void SetNumNonStimSelection(int val)
+    {
+        NumNonStimSelection = val;
+    }
+    
     public void UpdateTarget(GameObject go)
     {
         if (!started) return;
@@ -97,7 +123,9 @@ public class SelectionHandler<T> where T : StimDef
                 {
                     SelectedGameObject = targetedGameObject;
                     SelectedStimDef = null;
-                    if (SelectedGameObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer)) SelectedStimDef = (sdPointer as StimDefPointer).GetStimDef<T>();
+                    if (SelectedGameObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer))
+                        SelectedStimDef = (sdPointer as StimDefPointer).GetStimDef<T>();
+                    else NumNonStimSelection++;
                 }
                 else
                 {

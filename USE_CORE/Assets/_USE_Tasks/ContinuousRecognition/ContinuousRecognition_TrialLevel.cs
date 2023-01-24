@@ -90,6 +90,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.SetFlashingTime(1f);
 
         HaloFBController.SetHaloIntensity(2);
+        HaloFBController.SetHaloSize(1);
 
         OriginalFbTextPosition = YouLoseTextGO.transform.position;
         OriginalTitleTextPosition = TitleTextGO.transform.position;

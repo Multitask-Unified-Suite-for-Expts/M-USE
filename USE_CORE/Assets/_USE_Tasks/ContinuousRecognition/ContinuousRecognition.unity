@@ -5830,7 +5830,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PositiveHaloPrefab: {fileID: 5037791256376228876, guid: c298de6b03e0a4aa39453b09991fa51a,
     type: 3}
-  NegativeHaloPrefab: {fileID: 5037791256376228876, guid: a7149e72ef1b4e64daa6b939925d29fc,
+  NegativeHaloPrefab: {fileID: 5037791256376228876, guid: 16e45646239064935a4dd461a06a784b,
     type: 3}
 --- !u!114 &1101764160
 MonoBehaviour:

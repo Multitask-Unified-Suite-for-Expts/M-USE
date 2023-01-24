@@ -35,7 +35,7 @@ namespace USE_UI{
 			ButtonColor = new Color(0.28f, 0.56f, 0.88f);
 			ButtonText = "";
 
-			var newButton = DefaultControls.CreateButton(new DefaultControls.Resources());
+			GameObject newButton = DefaultControls.CreateButton(new DefaultControls.Resources());
 			newButton.transform.SetParent(canvas.transform, false);
 			button = newButton.GetComponent<Button>();
 
@@ -48,7 +48,7 @@ namespace USE_UI{
 			ButtonColor = new Color(0.28f, 0.56f, 0.88f);
 			ButtonText = "";
 
-			var newButton = DefaultControls.CreateButton(new DefaultControls.Resources());
+            GameObject newButton = DefaultControls.CreateButton(new DefaultControls.Resources());
 			newButton.transform.SetParent(canvas.transform, false);
 			button = newButton.GetComponent<Button>();
 
@@ -61,7 +61,7 @@ namespace USE_UI{
 			ButtonColor = color;
 			ButtonText = "";
 
-			var newButton = DefaultControls.CreateButton(new DefaultControls.Resources());
+            GameObject newButton = DefaultControls.CreateButton(new DefaultControls.Resources());
 			newButton.transform.SetParent(canvas.transform, false);
 			button = newButton.GetComponent<Button>();
 
@@ -74,7 +74,7 @@ namespace USE_UI{
 			ButtonColor = color;
 			ButtonText = text;
 
-			var newButton = DefaultControls.CreateButton(new DefaultControls.Resources());
+			GameObject newButton = DefaultControls.CreateButton(new DefaultControls.Resources());
 			newButton.transform.SetParent(canvas.transform, false);
 			button = newButton.GetComponent<Button>();
 

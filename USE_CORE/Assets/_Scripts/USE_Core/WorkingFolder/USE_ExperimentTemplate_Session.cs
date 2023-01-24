@@ -162,6 +162,8 @@ namespace USE_ExperimentTemplate_Session
 
             if (SessionSettings.SettingExists("Session", "ContextName"))
                 ContextName = (string)SessionSettings.Get("Session", "ContextName");
+            else
+                ContextName = "NeuralNet6";
 
             if (SessionSettings.SettingExists("Session", "TaskIcons"))
                 TaskIcons = (Dictionary<string, string>)SessionSettings.Get("Session", "TaskIcons");
@@ -198,7 +200,6 @@ namespace USE_ExperimentTemplate_Session
 
             SessionCam = Camera.main;
 
-
             GameObject experimenterDisplay = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
             experimenterDisplay.name = "ExperimenterDisplay";
             ExperimenterDisplayController = experimenterDisplay.AddComponent<ExperimenterDisplayController>();
@@ -214,15 +215,15 @@ namespace USE_ExperimentTemplate_Session
 
             RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
 
+            RenderSettings.skybox = ControlLevel_Trial_Template.CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+
             bool waitForSerialPort = false;
             bool taskAutomaticallySelected = false;
             setupSession.AddDefaultInitializationMethod(() =>
             {
                 PauseCanvasGO = GameObject.Find("PauseCanvas");
                 PauseCanvasGO.SetActive(false);
-
                 PauseCanvas = PauseCanvasGO.GetComponent<Canvas>();
-
 
                 SessionData.CreateFile();
                 //SessionData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
@@ -325,7 +326,6 @@ namespace USE_ExperimentTemplate_Session
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
-                RenderSettings.skybox = ControlLevel_Trial_Template.CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
                 SessionSettings.Restore();
                 selectedConfigName = null;
 

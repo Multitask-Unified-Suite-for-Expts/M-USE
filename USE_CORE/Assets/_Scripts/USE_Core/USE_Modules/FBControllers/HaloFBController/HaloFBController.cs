@@ -9,16 +9,12 @@ public class HaloFBController : MonoBehaviour
 
     private GameObject instantiated;
 
-    //public SerializedObject PositiveHaloComponent;
-    //public SerializedObject NegativeHaloComponent;
     
     // Logging
     private enum State { None, Positive, Negative };
     private State state;
 
     public void Init(DataController frameData) {
-        //PositiveHaloComponent = new SerializedObject(this.PositiveHaloPrefab.GetComponent("Halo"));
-        //NegativeHaloComponent = new SerializedObject(this.NegativeHaloPrefab.GetComponent("Halo"));
         frameData.AddDatum("HaloType", () => state.ToString());
         if (instantiated != null) {
             Debug.LogWarning("Initializing HaloFB Controller with an already visible halo");
@@ -45,36 +41,42 @@ public class HaloFBController : MonoBehaviour
         instantiated = Instantiate(haloPrefab, gameObj.transform);
     }
 
-
-    /*public HaloFBController SetHaloSize(float size)
-    {
-        PositiveHaloComponent.FindProperty("m_Size").floatValue = size;
-        PositiveHaloComponent.ApplyModifiedProperties();
-
-        NegativeHaloComponent.FindProperty("m_Size").floatValue = size;
-        NegativeHaloComponent.ApplyModifiedProperties();
-
-        return this;
-    }
-
-    public HaloFBController SetPositiveHaloColor(Color color)
-    {
-        PositiveHaloComponent.FindProperty("m_Color").colorValue = color;
-        PositiveHaloComponent.ApplyModifiedProperties();
-        return this;
-    }
-
-    public HaloFBController SetNegativeHaloColor(Color color)
-    {
-        NegativeHaloComponent.FindProperty("m_Color").colorValue = color;
-        NegativeHaloComponent.ApplyModifiedProperties();
-        return this;
-    }*/
-
-
     public void Destroy() {
         Destroy(instantiated);
         instantiated = null;
         state = State.None;
     }
+
+
+
+    public HaloFBController SetHaloSize(float size)
+    {
+        Light light = PositiveHaloPrefab.GetComponent<Light>();
+        light.range = size;
+        light = NegativeHaloPrefab.GetComponent<Light>();
+        light.range = size;
+        return this;
+    }
+
+    public HaloFBController SetPositiveHaloColor(Color color)
+    {
+        PositiveHaloPrefab.GetComponent<Light>().color = color;
+        return this;
+    }
+
+    public HaloFBController SetNegativeHaloColor(Color color)
+    {
+        NegativeHaloPrefab.GetComponent<Light>().color = color;
+        return this;
+    }
+
+    public HaloFBController SetHaloIntensity(float intensity)
+    {
+        Light light = PositiveHaloPrefab.GetComponent<Light>();
+        light.intensity = intensity;
+        light = NegativeHaloPrefab.GetComponent<Light>();
+        light.intensity = intensity;
+        return this;
+    }
+
 }

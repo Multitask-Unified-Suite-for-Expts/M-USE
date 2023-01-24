@@ -4,9 +4,9 @@ MonoImporter:
   externalObjects: {}
   serializedVersion: 2
   defaultReferences:
-  - PositiveHaloPrefab: {fileID: 1546032763649933254, guid: caf1a4a4f95a86847a8d732d428239c9,
+  - PositiveHaloPrefab: {fileID: 5037791256376228876, guid: c298de6b03e0a4aa39453b09991fa51a,
       type: 3}
-  - NegativeHaloPrefab: {fileID: 5037791256376228876, guid: 4d1787c513a9ec84bb22e6d541713428,
+  - NegativeHaloPrefab: {fileID: 5037791256376228876, guid: 16e45646239064935a4dd461a06a784b,
       type: 3}
   executionOrder: 0
   icon: {instanceID: 0}

@@ -5828,7 +5828,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b9b0d55229496c40b881734b3d28261, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PositiveHaloPrefab: {fileID: 5037791256376228876, guid: 9131f84dfe1d38348b03e7605587f089,
+  PositiveHaloPrefab: {fileID: 5037791256376228876, guid: c298de6b03e0a4aa39453b09991fa51a,
     type: 3}
   NegativeHaloPrefab: {fileID: 5037791256376228876, guid: a7149e72ef1b4e64daa6b939925d29fc,
     type: 3}
@@ -5893,6 +5893,7 @@ MonoBehaviour:
   EventCodesActive: 0
   RewardPulsesActive: 0
   SonicationActive: 0
+  ContextExternalFilePath: 
   SessionDataPath: 
   TaskConfigPath: 
   TaskDataPath: 
@@ -6047,12 +6048,6 @@ MonoBehaviour:
   WrongGroup:
     stimGroupName: 
     IsActive: 0
-  Success_Audio: {fileID: 8300000, guid: 38a5faffadbec441fa994ef9ef89362b, type: 3}
-  Fail_SouthPark_Audio: {fileID: 8300000, guid: f3ebbe6eb75364aac9ae63ecaade92ee,
-    type: 3}
-  Fail_Audio: {fileID: 8300000, guid: 423d149ff34dc40598b1e18df2a9bfec, type: 3}
-  TimeRanOut_Audio: {fileID: 8300000, guid: 9bda41667c36249e7a4b99d77f24dc62, type: 3}
-  ClickedNonStim: 0
   displayStimDuration:
     name: 
     hidden: 0

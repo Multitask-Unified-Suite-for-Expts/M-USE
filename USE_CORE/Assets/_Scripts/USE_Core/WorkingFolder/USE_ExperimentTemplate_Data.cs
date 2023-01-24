@@ -310,7 +310,7 @@ namespace USE_ExperimentTemplate_Data
             AddDatum("BlockCount", () => taskLevel.BlockCount + 1);
             AddDatum("TrialCount_InTask", () => trialLevel.TrialCount_InTask + 1);
             AddDatum("TrialCount_InBlock", () => trialLevel.TrialCount_InBlock + 1);
-            AddDatum("CurrentTrialState", ()=> trialLevel.CurrentState.StateName);
+            //AddDatum("CurrentTrialState", () => trialLevel.CurrentState.StateName); //THIS IS THROWING ERROR!!!!!!!!!!
             AddDatum("Frame", () => Time.frameCount);
             AddDatum("FrameStartUnity", () => Time.time);
         }

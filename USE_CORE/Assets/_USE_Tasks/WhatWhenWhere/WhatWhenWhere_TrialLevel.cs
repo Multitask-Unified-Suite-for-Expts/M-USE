@@ -746,7 +746,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     private void InitializeSlider()
     {
-        //NOT GOOD BUT I NEED THE SLIDER TO APPEAR AFTER THE CONTEXT APPEARS
         Transform sliderCanvas = GameObject.Find("SliderCanvas").transform;
         sliderGO = Instantiate(SliderPrefab, sliderCanvas);
         sliderHaloGO = Instantiate(SliderHaloPrefab, sliderCanvas);
@@ -824,7 +823,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                 playerViewTextList.Add(playerViewText);
             }
-
             playerViewLoaded = true;
         }
     }
@@ -840,13 +838,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     }
     void LoadTrialVariables()
     {
-        /*
-        if (CurrentTrialDef.LeaveFeedbackOn)
-        {
-            haloContainer = new GameObject("HaloContainer");
-            haloContainer.transform.parent = GameObject.Find("Canvas").transform;
-        }
-        */
         //config UI variables
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
@@ -859,8 +850,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         chooseStimOnsetDelay = ConfigUiVariables.get<ConfigNumber>("chooseStimOnsetDelay");
         timeoutDuration = ConfigUiVariables.get<ConfigNumber>("timeoutDuration");
         startButtonDelay = ConfigUiVariables.get<ConfigNumber>("startButtonDelay");
-        //sliderUpdateTime = ConfigUiVariables.get<ConfigNumber>("sliderUpdateTime");
-
         disableAllGameobjects();
         Debug.Log("Done Loading Variables");
     }
@@ -902,60 +891,35 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private void AssignCorrectStim()
     {
         //if we haven't finished touching all stims
-                    if (stimCount < CurrentTrialDef.CorrectObjectTouchOrder.Length)
-                    {
-                        //find which stimulus is currently target
-                        correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[stimCount] - 1;
+        if (stimCount < CurrentTrialDef.CorrectObjectTouchOrder.Length)
+        {
+            //find which stimulus is currently target
+            correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[stimCount] - 1;
         
-                        for (int i = 0; i < CurrentTrialDef.CorrectObjectTouchOrder.Length; i++)
-                        {
-                            WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef) searchStims.stimDefs[i];
+            for (int i = 0; i < CurrentTrialDef.CorrectObjectTouchOrder.Length; i++)
+            {
+                WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef) searchStims.stimDefs[i];
         
-                            if (i == correctIndex) sd.IsCurrentTarget = true;
-                            else sd.IsCurrentTarget = false;
-                        }
+                if (i == correctIndex) sd.IsCurrentTarget = true;
+                else sd.IsCurrentTarget = false;
+            }
         
-                        for (int i = 0; i < CurrentTrialDef.DistractorStimsIndices.Length; ++i)
-                        {
-                            WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef) distractorStims.stimDefs[i];
-                            sd.IsDistractor = true;
-                        }
-                    }
-                    else
-                    {
-                        trialComplete = true;
-                    }
+            for (int i = 0; i < CurrentTrialDef.DistractorStimsIndices.Length; ++i)
+            {
+                WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef) distractorStims.stimDefs[i];
+                sd.IsDistractor = true;
+            }
+        }
+        else
+        {
+            trialComplete = true;
+        }
     }
     private Vector2 playerViewPosition(Vector3 position, Transform playerViewParent)
     {
         Vector2 pvPosition = new Vector2((position[0] / Screen.width) * playerViewParent.GetComponent<RectTransform>().sizeDelta.x, (position[1] / Screen.height) * playerViewParent.GetComponent<RectTransform>().sizeDelta.y);
         return pvPosition;
     }
-   /* private GameObject CreateStartButton(Texture2D tex, Rect rect) //creates start button as a sprite
-    {
-        Vector3 buttonPosition = Vector3.zero;
-        Vector3 buttonScale = Vector3.zero;
-        string TaskName = "WhatWhenWhere";
-        if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
-        {
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-                buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-                buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-        }
-        else
-        {
-            Debug.Log("[ERROR] Start Button Image settings not defined in the TaskDef");
-        }
-
-        GameObject startButton = new GameObject("StartButton");
-        SpriteRenderer sr = startButton.AddComponent<SpriteRenderer>() as SpriteRenderer;
-        sr.sprite = Sprite.Create(tex, new Rect(rect.x, rect.y, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
-        startButton.AddComponent<BoxCollider>();
-        startButton.transform.localScale = buttonScale;
-        startButton.transform.position = buttonPosition;
-        return startButton;
-    }*/
     private void TouchDurationErrorFeedback(SelectionHandler<WhatWhenWhere_StimDef> MouseHandler, GameObject go)
     {
         EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchDurationError"]);

@@ -413,12 +413,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private void DestroyTextOnExperimenterDisplay()
     {
         if (playerViewLoaded)
-        {
-            foreach (GameObject txt in playerViewTextList)
-            {
-                txt.SetActive(false);
-            }
-        }
+            foreach (GameObject txt in playerViewTextList) txt.SetActive(false);
         playerViewLoaded = false;
     }
     private void TouchDurationErrorFeedback(SelectionHandler<VisualSearch_StimDef> MouseHandler, GameObject go)

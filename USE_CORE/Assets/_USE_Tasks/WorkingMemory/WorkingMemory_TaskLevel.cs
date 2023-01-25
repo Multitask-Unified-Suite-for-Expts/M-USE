@@ -1,12 +1,13 @@
 using System;
 using UnityEngine;
+using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
 using USE_Settings;
 using WorkingMemory_Namespace;
 
 public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
 {
-    WorkingMemory_BlockDef flBD => GetCurrentBlockDef<WorkingMemory_BlockDef>();
+    WorkingMemory_BlockDef wmBD => GetCurrentBlockDef<WorkingMemory_BlockDef>();
     WorkingMemory_TrialLevel wmTL;
     public override void DefineControlLevel()
     {
@@ -41,6 +42,28 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
         {
             Debug.Log("[ERROR] TaskDef is not in config folder");
         }
+        RunBlock.AddInitializationMethod(() =>
+        {
+            ResetBlockVariables();
+            wmTL.TokenFBController.SetTotalTokensNum(wmBD.NumTokenBar);
+            wmTL.TokenFBController.SetTokenBarValue(wmBD.NumInitialTokens);
+            SetBlockSummaryString();
+        });
+        AssignBlockData();
+    }
+    public T GetCurrentBlockDef<T>() where T : BlockDef
+    {
+        return (T)CurrentBlockDef;
+    }
+    private void ResetBlockVariables()
+    {
+        wmTL.SearchDurationsList.Clear();
+        wmTL.AverageSearchDuration_InBlock = 0;
+        wmTL.NumErrors_InBlock = 0;
+        wmTL.NumCorrect_InBlock = 0;
+        wmTL.NumRewardGiven_InBlock = 0;
+        wmTL.NumTokenBarFull_InBlock = 0;
+        wmTL.TouchDurationError_InBlock = 0;
     }
     public void SetBlockSummaryString()
     {
@@ -48,8 +71,8 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
         
         BlockSummaryString.AppendLine("\nBlock Num: " + (wmTL.BlockCount + 1) +
                                       "\nTrial Num: " + (wmTL.TrialCount_InBlock + 1) +
-                                      "\n" /*+ 
-                                      "\nAccuracy: " + String.Format("{0:0.000}", wmTL.Accuracy_InBlock) +  
+                                      "\n" + 
+                                      "\n Accuracy: " + String.Format("{0:0.000}", wmTL.Accuracy_InBlock) +  
                                       "\n" + 
                                       "\nAvg Search Duration: " + String.Format("{0:0.000}", wmTL.AverageSearchDuration_InBlock) +
                                       "\n" + 
@@ -57,7 +80,15 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
                                       "\n" +
                                       "\nNum Reward Given: " + wmTL.NumRewardGiven_InBlock + 
                                       "\nNum Token Bar Filled: " + wmTL.NumTokenBarFull_InBlock +
-                                      "\nTotal Tokens Collected: " + wmTL.TotalTokensCollected_InBlock*/);
+                                      "\nTotal Tokens Collected: " + wmTL.TotalTokensCollected_InBlock);
     }
-
+    public void AssignBlockData()
+    {
+        BlockData.AddDatum("Block Accuracy", ()=> wmTL.Accuracy_InBlock);
+        BlockData.AddDatum("Avg Search Duration", ()=> wmTL.AverageSearchDuration_InBlock);
+        BlockData.AddDatum("Num Touch Duration Error", ()=> wmTL.TouchDurationError_InBlock);
+        BlockData.AddDatum("Num Reward Given", ()=> wmTL.NumRewardGiven_InBlock);
+        BlockData.AddDatum("Num Token Bar Filled", ()=> wmTL.NumTokenBarFull_InBlock);
+        BlockData.AddDatum("Total Tokens Collected", ()=> wmTL.TotalTokensCollected_InBlock);
+    }
 }

@@ -108,7 +108,6 @@ public class TokenFBController : MonoBehaviour
     public void OnGUI()
     {
         RenderTexture old = RenderTexture.active;
-        Debug.Log("RENDERTEXTURE.ACTIVE: " + RenderTexture.active);
         if (Camera.main != null) {
             RenderTexture.active = Camera.main.targetTexture;
         }

@@ -242,6 +242,8 @@ namespace USE_ExperimentTemplate_Session
                     {
                         SyncBoxController = new SyncBoxController();
                         SyncBoxController.serialPortController = SerialPortController;
+                        SerialSentData.sc = SerialPortController;
+                        SerialRecvData.sc = SerialPortController;
                     }
 
                     if (EventCodesActive)
@@ -554,7 +556,6 @@ namespace USE_ExperimentTemplate_Session
                 SerialSentData.sessionLevel = this;
                 SerialSentData.InitDataController();
                 SerialSentData.ManuallyDefine();
-                SerialSentData.sc = SerialPortController;
 
                 SerialRecvData = (SerialRecvData) SessionDataControllers.InstantiateDataController<SerialRecvData>
                     ("SerialRecvData", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "serialRecvData" + Path.DirectorySeparatorChar + "001_TaskSelection");
@@ -562,7 +563,6 @@ namespace USE_ExperimentTemplate_Session
                 SerialRecvData.sessionLevel = this;
                 SerialRecvData.InitDataController();
                 SerialRecvData.ManuallyDefine();
-                SerialRecvData.sc = SerialPortController;
             }
 
             SummaryData.Init(StoreData, SessionDataPath);
@@ -587,7 +587,7 @@ namespace USE_ExperimentTemplate_Session
                     {
                         Debug.Log("sentdata: " + SerialSentData);
                         Debug.Log("sentdata.sc: " + SerialSentData.sc);
-                        Debug.Log("sentdata.sc: " + SerialSentData.sc.BufferCount());
+                        Debug.Log("sentdata.sc: " + SerialSentData.sc.BufferCount("sent"));
                         Debug.Log("sentdata.sc: " + SerialSentData.sc.BufferToString("sent"));
                         SerialSentData.AppendData();
                     }
@@ -595,7 +595,7 @@ namespace USE_ExperimentTemplate_Session
                     {
                         Debug.Log("recvdata: " + SerialRecvData);
                         Debug.Log("recvdata.sc: " + SerialRecvData.sc);
-                        Debug.Log("recvdata.sc: " + SerialRecvData.sc.BufferCount());
+                        Debug.Log("recvdata.sc: " + SerialRecvData.sc.BufferCount("recv"));
                         Debug.Log("recvdata.sc: " + SerialRecvData.sc.BufferToString("sent"));
                         Console.WriteLine(e);
                     }

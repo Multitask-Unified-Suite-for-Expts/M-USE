@@ -585,10 +585,18 @@ namespace USE_ExperimentTemplate_Session
                 {
                     try
                     {
+                        Debug.Log("sentdata: " + SerialSentData);
+                        Debug.Log("sentdata.sc: " + SerialSentData.sc);
+                        Debug.Log("sentdata.sc: " + SerialSentData.sc.BufferCount());
+                        Debug.Log("sentdata.sc: " + SerialSentData.sc.BufferToString("sent"));
                         SerialSentData.AppendData();
                     }
                     catch (Exception e)
                     {
+                        Debug.Log("recvdata: " + SerialRecvData);
+                        Debug.Log("recvdata.sc: " + SerialRecvData.sc);
+                        Debug.Log("recvdata.sc: " + SerialRecvData.sc.BufferCount());
+                        Debug.Log("recvdata.sc: " + SerialRecvData.sc.BufferToString("sent"));
                         Console.WriteLine(e);
                     }
                 }

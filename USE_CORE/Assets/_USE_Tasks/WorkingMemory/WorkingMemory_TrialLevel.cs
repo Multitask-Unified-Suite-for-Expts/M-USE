@@ -167,7 +167,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay);
         SearchDisplay.AddInitializationMethod(() =>
         {
-            Debug.Log("token enabled?: " + TokenFBController.isActiveAndEnabled);
             CreateTextOnExperimenterDisplay();
             if (StimFacingCamera)
             {
@@ -249,7 +248,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         // The state that will handle the token feedback and wait for any animations
         TokenFeedback.AddInitializationMethod(() =>
         {
-            if (selectedSD.StimTrialRewardMag > 0)
+            if (selectedSD.IsTarget)
             {
                 AudioFBController.Play("Positive");
                 TokenFBController.AddTokens(selected, selectedSD.StimTrialRewardMag);
@@ -317,13 +316,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.SearchStimTokenReward[iStim]);
             if (sd.StimTrialRewardMag > 0)
             {
-                // StimDef tempsd = sd.CopyStimDef();
                 WorkingMemory_StimDef newTarg = sd.CopyStimDef<WorkingMemory_StimDef>() as WorkingMemory_StimDef;
                 targetStim.AddStims(newTarg);
                 newTarg.IsTarget = true;//Holds true if the target stim receives non-zero reward
-                // targetStim = new StimGroup("TargetStim", ExternalStims, new int[] {CurrentTrialDef.SearchStimIndices[iStim]});
-                // targetStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
-                // targetStim.SetLocations(CurrentTrialDef.TargetSampleLocation);
+                sd.IsTarget = true; //sets the isTarget value to true in the SearchStim Group
             } 
             else sd.IsTarget = false;
         }

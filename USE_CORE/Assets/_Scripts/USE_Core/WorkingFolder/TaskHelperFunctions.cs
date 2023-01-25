@@ -8,10 +8,10 @@ using USE_StimulusManagement;
 
 public class TaskHelperFunctions
 {
-    private Texture2D HeldTooShortTexture;
-    private Texture2D HeldTooLongTexture;
-    private Texture2D StartButtonTexture;
-    private Texture2D FBSquareTexture;
+    public Texture2D HeldTooShortTexture;
+    public Texture2D HeldTooLongTexture;
+    public Texture2D StartButtonTexture;
+    public Texture2D FBSquareTexture;
     private GameObject StartButton;
     private GameObject FBSquare;
 

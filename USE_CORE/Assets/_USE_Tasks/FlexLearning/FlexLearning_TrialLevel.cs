@@ -108,13 +108,14 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             taskHelper.LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
-            StartButton = taskHelper.CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
-            FBSquare = taskHelper.CreateFBSquare(FBSquareTexture, FBSquarePosition, FBSquareScale);
+            StartButton = taskHelper.CreateStartButton(taskHelper.StartButtonTexture, ButtonPosition, ButtonScale);
+            FBSquare = taskHelper.CreateFBSquare(taskHelper.FBSquareTexture, FBSquarePosition, FBSquareScale);
         });
 
         SetupTrial.AddInitializationMethod(() =>
         {
             if (!configUIVariablesLoaded) LoadConfigUIVariables();
+            TokenFBController.SetTokenBarFull(false);
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
         });
@@ -150,9 +151,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 TokenFBController
                     .SetRevealTime(tokenRevealDuration.value)
                     .SetUpdateTime(tokenUpdateDuration.value);
-                NumTokenBarFull_InBlock = TokenFBController.GetNumTokenBarFull();
-                TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
-                                               (TokenFBController.GetNumTokenBarFull() * CurrentTrialDef.NumTokenBar);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
                 
                 // Set Experimenter Display Data Summary Strings
@@ -264,7 +262,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         });
         TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), ITI, () =>
         {
-            if (TokenFBController.GetAnimationPhase() == "Flashing")
+            if (TokenFBController.isTokenBarFull())
             {
                 NumTokenBarFull_InBlock++;
                 if (SyncBoxController != null)
@@ -278,7 +276,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
-                                           (TokenFBController.GetNumTokenBarFull() * CurrentTrialDef.NumTokenBar);
+                                           (NumTokenBarFull_InBlock* CurrentTrialDef.NumTokenBar);
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
         });
@@ -301,7 +299,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             //Remove any remaining items on player view
             DestroyTextOnExperimenterDisplay();
-            TokenFBController.enabled = false;
             ResetDataTrackingVariables();
         });
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
@@ -357,7 +354,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("StartButtonVisibility", () => StartButton.activeSelf);
         FrameData.AddDatum("TrialStimVisibility", () => tStim.IsActive);
-        FrameData.AddDatum("TokenBarVisibility", ()=> TokenFBController.isActiveAndEnabled);
     }
     private void ResetDataTrackingVariables()
     {

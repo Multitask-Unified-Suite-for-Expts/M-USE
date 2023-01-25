@@ -113,14 +113,15 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         {
             taskHelper.LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
-            StartButton = taskHelper.CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
-            FBSquare = taskHelper.CreateFBSquare(FBSquareTexture, FBSquarePosition, FBSquareScale);
+            StartButton = taskHelper.CreateStartButton(taskHelper.StartButtonTexture, ButtonPosition, ButtonScale);
+            FBSquare = taskHelper.CreateFBSquare(taskHelper.FBSquareTexture, FBSquarePosition, FBSquareScale);
         });
         SetupTrial.AddInitializationMethod(() =>
         {
             if (!configUIVariablesLoaded) LoadConfigUIVariables();
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
+            TokenFBController.SetTokenBarFull(false);
         });
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -135,16 +136,15 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
         });
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton),
+        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
             DisplaySample, () => {
                 // Turn off start button and set the token bar settings
                 StartButton.SetActive(false);
                 TokenFBController
                     .SetRevealTime(tokenRevealDuration.value)
                     .SetUpdateTime(tokenUpdateDuration.value);
-                NumTokenBarFull_InBlock = TokenFBController.GetNumTokenBarFull();
                 TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
-                                               (TokenFBController.GetNumTokenBarFull() * CurrentTrialDef.NumTokenBar);
+                                               (NumTokenBarFull_InBlock * CurrentTrialDef.NumTokenBar);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
                 
                 // Set Experimenter Display Data Summary Strings
@@ -152,12 +152,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 SetTrialSummaryString();
             });
         
-        // Show nothing for some time
-        InitTrial.AddTimer(() => initTrialDuration.value, DisplaySample, () =>
-          {
-              startButton.SetActive(false);
-              
-          });
         // Show the target/sample by itself for some time
         DisplaySample.AddTimer(() => displaySampleDuration.value, Delay, () =>
           {

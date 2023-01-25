@@ -175,17 +175,19 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         taskHelper = new TaskHelperFunctions();
         GazeTracker.SpoofGazeWithMouse = true;
 
+        //player view variables
+        
+        playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
+        playerViewText = new GameObject();
         //EventCodeManager.SendCodeImmediate(3);
         //Trial Completion Feedback Variables
         
         Add_ControlLevel_InitializationMethod(() =>
         {
-            playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
-            playerViewText = new GameObject();
-            LoadTextures();
+            taskHelper.LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
-            startButton = taskHelper.CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
-            FBSquare = taskHelper.CreateFBSquare(FBSquareTexture, FBSquarePosition, FBSquareScale);
+            startButton = taskHelper.CreateStartButton(taskHelper.StartButtonTexture, ButtonPosition, ButtonScale);
+            FBSquare = taskHelper.CreateFBSquare(taskHelper.FBSquareTexture, FBSquarePosition, FBSquareScale);
             playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
 
         });
@@ -197,6 +199,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             contextName = CurrentTrialDef.ContextName;
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
+            
             if (!variablesLoaded)
             {
                 variablesLoaded = true;
@@ -940,13 +943,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         TouchDurationError_InBlock++;
         totalErrors_InBlock++;
         totalErrors_InSession++;
-    }
-    private void LoadTextures()
-    {
-        StartButtonTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
-        FBSquareTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "Grey.png");
-        HeldTooLongTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "HorizontalStripes.png");
-        HeldTooShortTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "VerticalStripes.png");
     }
 
 }

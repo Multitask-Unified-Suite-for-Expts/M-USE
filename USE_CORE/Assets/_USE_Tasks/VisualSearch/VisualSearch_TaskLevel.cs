@@ -80,6 +80,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
                                       "\nAvg Search Duration: " + String.Format("{0:0.00}", vsTL.AverageSearchDuration_InBlock) +
                                       "\n" + 
                                       "\nNum Touch Duration Error: " + vsTL.TouchDurationError_InBlock + 
+                                      "\n" +
                                       "\nNum Reward Given: " + vsTL.NumRewardGiven_InBlock + 
                                       "\nNum Token Bar Filled: " + vsTL.NumTokenBarFull_InBlock +
                                       "\nTotal Tokens Collected: " + vsTL.TotalTokensCollected_InBlock);

@@ -54,6 +54,7 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
                                       "\nAvg Search Duration: " + String.Format("{0:0.000}", wmTL.AverageSearchDuration_InBlock) +
                                       "\n" + 
                                       "\nNum Touch Duration Error: " + wmTL.TouchDurationError_InBlock + 
+                                      "\n" +
                                       "\nNum Reward Given: " + wmTL.NumRewardGiven_InBlock + 
                                       "\nNum Token Bar Filled: " + wmTL.NumTokenBarFull_InBlock +
                                       "\nTotal Tokens Collected: " + wmTL.TotalTokensCollected_InBlock*/);

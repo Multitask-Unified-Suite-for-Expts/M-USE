@@ -21,6 +21,7 @@ public class TokenFBController : MonoBehaviour
     private int totalTokensNum = 5;
     private int numCollected = 0;
     private int numTokenBarFull = 0;
+    private bool tokenBarFull = false;
     // Rendering
     private Rect tokenBoxRect;
     private GUIStyle whiteStyle;
@@ -48,8 +49,10 @@ public class TokenFBController : MonoBehaviour
     {
         trialData.AddDatum("TokenBarValue", () => numCollected);
         trialData.AddDatum("TokenChange", () => tokensChange == 0 ? null : (float?)tokensChange);
+        trialData.AddDatum("TokenBarCompletedThisTrial", ()=> tokenBarFull);
         frameData.AddDatum("TokenBarValue", () => numCollected);
         frameData.AddDatum("TokenAnimationPhase", () => animationPhase.ToString());
+        frameData.AddDatum("TokenBarVisibility", ()=> enabled);
         this.audioFBController = audioFBController;
         numCollected = 0;
 
@@ -94,13 +97,18 @@ public class TokenFBController : MonoBehaviour
     {
         return numCollected;
     }
-    public int GetNumTokenBarFull()
+    public void SetTokenBarFull(bool value)
     {
-        return numTokenBarFull;
+        tokenBarFull = value;
+    }
+    public bool isTokenBarFull()
+    {
+        return tokenBarFull;
     }
     public void OnGUI()
     {
         RenderTexture old = RenderTexture.active;
+        Debug.Log("RENDERTEXTURE.ACTIVE: " + RenderTexture.active);
         if (Camera.main != null) {
             RenderTexture.active = Camera.main.targetTexture;
         }
@@ -188,7 +196,7 @@ public class TokenFBController : MonoBehaviour
                     break;
                 case AnimationPhase.Flashing:
                     //audioFBController.Play("Flashing"); //flashing clip doesn't exist
-                    numTokenBarFull++;
+                    tokenBarFull = true;
                     numCollected = 0;
                     animationPhase = AnimationPhase.None;
                     break;

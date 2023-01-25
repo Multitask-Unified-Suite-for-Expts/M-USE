@@ -132,6 +132,16 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
         });
+        InitTrial.AddUpdateMethod(() =>
+        {
+            if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
+            {
+                TouchDurationError = true;
+                SetTrialSummaryString();
+                TouchDurationErrorFeedback(mouseHandler, StartButton);
+                CurrentTaskLevel.SetBlockSummaryString();
+            }
+        });
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
             DisplaySample, () => {
                 // Turn off start button and set the token bar settings
@@ -433,7 +443,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         if (!playerViewLoaded)
         {
             //Create corresponding text on player view of experimenter display
-            foreach (WorkingMemory_StimDef stim in targetStim.stimDefs)
+            foreach (WorkingMemory_StimDef stim in searchStims.stimDefs)
             {
                 if (stim.IsTarget)
                 {
@@ -461,9 +471,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     {
         AudioFBController.Play("Negative");
         if (MouseHandler.GetHeldTooShort())
-            StartCoroutine(taskHelper.GratedSquareFlash(HeldTooShortTexture, go, gratingSquareDuration.value));
+            StartCoroutine(taskHelper.GratedSquareFlash(taskHelper.HeldTooShortTexture, go, gratingSquareDuration.value));
         else if (MouseHandler.GetHeldTooLong())
-            StartCoroutine(taskHelper.GratedSquareFlash(HeldTooLongTexture, go, gratingSquareDuration.value));
+            StartCoroutine(taskHelper.GratedSquareFlash(taskHelper.HeldTooLongTexture, go, gratingSquareDuration.value));
         MouseHandler.SetHeldTooLong(false);
         MouseHandler.SetHeldTooShort(false);
         TouchDurationError = false;

@@ -34,22 +34,22 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             //comment each error type
-           wwwTL.totalErrors_InBlock = 0 ;
+          // wwwTL.totalErrors_InBlock = 0 ;
            wwwTL.errorType_InBlockString = "";
            wwwTL.errorType_InBlock.Clear();
-           wwwTL.slotErrorCount = 0;
-           wwwTL.distractorSlotErrorCount = 0;
-           wwwTL.repetitionErrorCount = 0;
-           wwwTL.touchDurationErrorCount = 0;
-           wwwTL.irrelevantSelectionErrorCount = 0;
-           wwwTL.noScreenTouchErrorCount = 0;
-           wwwTL.TouchDurationError_InBlock = 0;
-           wwwTL.NumNonStimSelections_InBlock = 0;
+           wwwTL.slotErrorCount_InBlock = 0;
+           wwwTL.distractorSlotErrorCount_InBlock = 0;
+           wwwTL.repetitionErrorCount_InBlock = 0;
+           wwwTL.noSelectionErrorCount_InBlock = 0;
+           wwwTL.touchDurationErrorCount_InBlock = 0;
+           wwwTL.numNonStimSelections_InBlock = 0;
+           wwwTL.numRewardGiven_InBlock = 0;
            //comment better here
            Array.Clear(wwwTL.numTotal_InBlock, 0, wwwTL.numTotal_InBlock.Length);
            Array.Clear(wwwTL.numCorrect_InBlock, 0, wwwTL.numCorrect_InBlock.Length);
            Array.Clear(wwwTL.numErrors_InBlock, 0, wwwTL.numErrors_InBlock.Length);
            wwwTL.accuracyLog_InBlock = "";
+           wwwTL.averageSearchDuration_InBlock = 0;
            wwwTL.runningAcc.Clear();
            wwwTL.MinTrials = wwwBD.nRepetitionsMinMax[0];
            SetBlockSummaryString();
@@ -69,15 +69,29 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         BlockSummaryString.AppendLine("\nBlock Num: " + (wwwTL.BlockCount + 1) +
                                       "\nTrial Num: " + (wwwTL.TrialCount_InBlock + 1) +
                                       "\n" + 
+                                      "\nAverage Search Duration: " + wwwTL.averageSearchDuration_InBlock+
                                       "\nAccuracy: " + wwwTL.accuracyLog_InBlock + 
                                       "\n" +
-                                      "\nDistractor Slot Error Count: " + wwwTL.distractorSlotErrorCount+
-                                      "\nNon-Distractor Slot Error Count: " + wwwTL.slotErrorCount + 
-                                      "\nRepetition Error Count: "  + wwwTL.repetitionErrorCount +
-                                      "\nTouch Duration Error Count: " + wwwTL.touchDurationErrorCount + 
-                                      "\nNo Screen Touch Error Count: " + wwwTL.noScreenTouchErrorCount);
+                                      "\nDistractor Slot Error Count: " + wwwTL.distractorSlotErrorCount_InBlock+
+                                      "\nNon-Distractor Slot Error Count: " + wwwTL.slotErrorCount_InBlock + 
+                                      "\nRepetition Error Count: "  + wwwTL.repetitionErrorCount_InBlock +
+                                      "\nTouch Duration Error Count: " + wwwTL.touchDurationErrorCount_InBlock + 
+                                      "\nNon-Stim Touch Error Count: " + wwwTL.numNonStimSelections_InBlock+
+                                      "\nNo Selection Error Count: " + wwwTL.noSelectionErrorCount_InBlock);
     }
-  
+
+    private void AssignBlockDatum()
+    {
+        BlockData.AddDatum("Block Accuracy", ()=> wwwTL.accuracyLog_InBlock);
+        BlockData.AddDatum("Avg Search Duration", ()=> wwwTL.averageSearchDuration_InBlock);
+        BlockData.AddDatum("Num Touch Duration Error", ()=> wwwTL.distractorSlotErrorCount_InBlock);
+        BlockData.AddDatum("Num Touch Duration Error", ()=> wwwTL.slotErrorCount_InBlock);
+        BlockData.AddDatum("Num Touch Duration Error", ()=> wwwTL.repetitionErrorCount_InBlock);
+        BlockData.AddDatum("Num Touch Duration Error", ()=> wwwTL.touchDurationErrorCount_InBlock);
+        BlockData.AddDatum("Num Touch Duration Error", ()=> wwwTL.numNonStimSelections_InBlock);
+        BlockData.AddDatum("Num Touch Duration Error", ()=> wwwTL.noSelectionErrorCount_InBlock);
+        BlockData.AddDatum("Num Reward Given", ()=> wwwTL.numRewardGiven_InBlock);
+    }
     // public T GetCurrentBlockDef<T>() where T : BlockDef
     // {
     //     return (T)CurrentBlockDef;

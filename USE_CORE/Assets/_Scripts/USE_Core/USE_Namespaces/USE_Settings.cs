@@ -111,7 +111,11 @@ namespace USE_Settings
 				{
 					// Remove the parentheses
 					if (stringValue.StartsWith("(", StringComparison.Ordinal) &&
-					    stringValue.EndsWith(")", StringComparison.Ordinal))
+					    stringValue.EndsWith(")", StringComparison.Ordinal) ||
+					    stringValue.StartsWith("{", StringComparison.Ordinal) &&
+					    stringValue.EndsWith("}", StringComparison.Ordinal) ||
+					    stringValue.StartsWith("[", StringComparison.Ordinal) &&
+					    stringValue.EndsWith("]", StringComparison.Ordinal))
 					{
 						stringValue = stringValue.Substring(1, stringValue.Length - 2);
 					}
@@ -137,7 +141,11 @@ namespace USE_Settings
 				{
 					// Remove the parentheses
 					if (stringValue.StartsWith("(", StringComparison.Ordinal) &&
-					    stringValue.EndsWith(")", StringComparison.Ordinal))
+					    stringValue.EndsWith(")", StringComparison.Ordinal) ||
+						stringValue.StartsWith("{", StringComparison.Ordinal) &&
+						stringValue.EndsWith("}", StringComparison.Ordinal) ||
+						stringValue.StartsWith("[", StringComparison.Ordinal) &&
+						stringValue.EndsWith("]", StringComparison.Ordinal))
 					{
 						stringValue = stringValue.Substring(1, stringValue.Length - 2);
 					}
@@ -154,6 +162,10 @@ namespace USE_Settings
 
 					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
 				}
+			}
+			else if (typeString.ToLower() == "vector3[]")
+			{
+				AddSetting(key, (Vector3[]) SessionSettings.ConvertStringToType<Vector3[]>(stringValue));
 			}
 			else if (typeString.ToLower() == "float[]")
 			{
@@ -368,6 +380,10 @@ namespace USE_Settings
 			{ "BlockDef[]", typeof(FLU_Common_Namespace.BlockDef[]) },
 			{ "Vector3", typeof(Vector3) },
 			{ "Vector2", typeof(Vector2) },
+			{ "Vector3[]", typeof(Vector3[]) },
+			{ "Vector2[]", typeof(Vector2[]) },
+			{ "List<Vector3>", typeof(List<Vector3>) },
+			{ "List<Vector2>", typeof(List<Vector2>) },
 			{"MazeDef[]", typeof(MazeGame_Namespace.MazeDef[])}
 		};
 };

@@ -238,6 +238,8 @@ namespace USE_ExperimentTemplate_Session
                     {
                         SyncBoxController = new SyncBoxController();
                         SyncBoxController.serialPortController = SerialPortController;
+                        SerialSentData.sc = SerialPortController;
+                        SerialRecvData.sc = SerialPortController;
                     }
 
                     if (EventCodesActive)
@@ -363,7 +365,7 @@ namespace USE_ExperimentTemplate_Session
                 float buttonsWidth = numTasks * buttonSize + (numTasks - 1) * buttonSpacing;
                 float buttonStartX = (buttonSize - buttonsWidth) / 2;
 
-                if(TaskIconLocations.Count() == 0) //If user didn't specify in config, Generate default locations:
+                if(TaskIconLocations.Count() != numTasks) //If user didn't specify in config, Generate default locations:
                 {
                     TaskIconLocations = new Vector3[numTasks];
                     for(int i = 0; i < numTasks; i++)
@@ -579,6 +581,10 @@ namespace USE_ExperimentTemplate_Session
                 {
                     try
                     {
+                        // Debug.Log("sentdata: " + SerialSentData);
+                        // Debug.Log("sentdata.sc: " + SerialSentData.sc);
+                        // Debug.Log("sentdata.sc: " + SerialSentData.sc.BufferCount("sent"));
+                        // Debug.Log("sentdata.sc: " + SerialSentData.sc.BufferToString("sent"));
                         SerialSentData.AppendData();
                     }
                     catch (Exception e)
@@ -591,6 +597,10 @@ namespace USE_ExperimentTemplate_Session
                 {
                     try
                     {
+                        // Debug.Log("recvdata: " + SerialRecvData);
+                        // Debug.Log("recvdata.sc: " + SerialRecvData.sc);
+                        // Debug.Log("recvdata.sc: " + SerialRecvData.sc.BufferCount("received"));
+                        // Debug.Log("recvdata.sc: " + SerialRecvData.sc.BufferToString("received"));
                         SerialRecvData.AppendData();
                     }
                     catch (Exception e)

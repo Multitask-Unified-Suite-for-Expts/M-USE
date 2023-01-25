@@ -47,7 +47,7 @@ namespace USE_ExperimentTemplate_Session
         private ControlLevel_Task_Template CurrentTask;
         // public List<ControlLevel_Task_Template> AvailableTaskLevels;
         private OrderedDictionary TaskMappings;
-        private string ContextName;
+        private string ContextName = "SolidGREY"; //Hardcoding so that Init Screen and Task Selection background both always this. 
         private string ContextExternalFilePath;
         private string TaskIconsFolderPath;
         [HideInInspector]public Vector3[] TaskIconLocations;
@@ -156,16 +156,14 @@ namespace USE_ExperimentTemplate_Session
                 Debug.LogError("No task names or task mappings specified in Session config file or by other means.");
             }
 
+            if (SessionSettings.SettingExists("Session", "TaskIconLocations"))
+                TaskIconLocations = (Vector3[])SessionSettings.Get("Session", "TaskIconLocations");
+
             if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
                 ContextExternalFilePath = (string)SessionSettings.Get("Session", "ContextExternalFilePath");
 
             if (SessionSettings.SettingExists("Session", "TaskIconsFolderPath"))
                 TaskIconsFolderPath = (string)SessionSettings.Get("Session", "TaskIconsFolderPath");
-
-            if (SessionSettings.SettingExists("Session", "ContextName"))
-                ContextName = (string)SessionSettings.Get("Session", "ContextName");
-            else
-                ContextName = "NeuralNet6";
 
             if (SessionSettings.SettingExists("Session", "TaskIcons"))
                 TaskIcons = (Dictionary<string, string>)SessionSettings.Get("Session", "TaskIcons");
@@ -216,8 +214,6 @@ namespace USE_ExperimentTemplate_Session
             // mirrorCamera.targetDisplay = 2;
 
             RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
-
-            RenderSettings.skybox = ControlLevel_Trial_Template.CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
 
             bool waitForSerialPort = false;
             bool taskAutomaticallySelected = false;
@@ -363,19 +359,21 @@ namespace USE_ExperimentTemplate_Session
                 // We'll use height for the calculations because it is generally smaller than the width
                 int numTasks = TaskMappings.Count;
                 float buttonSize = 200;
-                float buttonSpacing = 25;
+                float buttonSpacing = 20;
                 float buttonsWidth = numTasks * buttonSize + (numTasks - 1) * buttonSpacing;
-                float buttonStart = (buttonSize - buttonsWidth) / 2;
-                float yMax = 300;
-                float yMin = -300;
+                float buttonStartX = (buttonSize - buttonsWidth) / 2;
 
-                List<Vector3> Locations = new List<Vector3>();
-                for(int i = 0; i < TaskMappings.Count; i++)
+                if(TaskIconLocations.Count() == 0) //If user didn't specify in config, Generate default locations:
                 {
-                    Locations.Add(new Vector3(buttonStart, Random.Range(yMin, yMax), 0));
-                    buttonStart += buttonSize + buttonSpacing;
+                    TaskIconLocations = new Vector3[numTasks];
+                    for(int i = 0; i < numTasks; i++)
+                    {
+                        TaskIconLocations[i] = new Vector3(buttonStartX, 0, 0);
+                        buttonStartX += buttonSize + buttonSpacing;
+                    }
                 }
 
+                int count = 0;
                 foreach (DictionaryEntry task in TaskMappings)
                 {
                     string configName = (string)task.Key;
@@ -396,9 +394,7 @@ namespace USE_ExperimentTemplate_Session
                     string taskIcon = TaskIcons[configName];
                     image.texture = ControlLevel_Trial_Template.LoadPNG(TaskIconsFolderPath + "/" + taskIcon + ".png");
 
-                    Vector3 randomPos = Locations[Random.Range(0, Locations.Count)];
-                    image.rectTransform.localPosition = randomPos;
-                    Locations.Remove(randomPos); //remove for next iteration
+                    image.rectTransform.localPosition = TaskIconLocations[count];
                     image.rectTransform.localScale = Vector3.one;
                     image.rectTransform.sizeDelta = buttonSize * Vector3.one;
 
@@ -407,9 +403,9 @@ namespace USE_ExperimentTemplate_Session
                         taskAutomaticallySelected = false;
                         selectedConfigName = configName;
                     });
+                    count++;
                 }
             });
-            
             
             selectTask.AddLateUpdateMethod(() =>
             {

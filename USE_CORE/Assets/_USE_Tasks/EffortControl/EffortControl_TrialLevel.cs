@@ -650,7 +650,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void SetTrialSummaryString()
     {
-        TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) + "In Block" +
+        TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) + " In Block" +
                              "\n" +
                              "\nLeft Balloon: " + currentTrial.NumClicksLeft + " Clicks, " + currentTrial.NumCoinsLeft + " Tokens" +
                              "\n" +

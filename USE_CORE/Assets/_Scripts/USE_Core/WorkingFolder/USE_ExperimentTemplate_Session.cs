@@ -538,6 +538,7 @@ namespace USE_ExperimentTemplate_Session
                 SerialSentData.sessionLevel = this;
                 SerialSentData.InitDataController();
                 SerialSentData.ManuallyDefine();
+                SerialSentData.sc = SerialPortController;
 
                 SerialRecvData = (SerialRecvData) SessionDataControllers.InstantiateDataController<SerialRecvData>
                     ("SerialRecvData", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "serialRecvData" + Path.DirectorySeparatorChar + "001_TaskSelection");
@@ -545,6 +546,7 @@ namespace USE_ExperimentTemplate_Session
                 SerialRecvData.sessionLevel = this;
                 SerialRecvData.InitDataController();
                 SerialRecvData.ManuallyDefine();
+                SerialRecvData.sc = SerialPortController;
             }
 
             SummaryData.Init(StoreData, SessionDataPath);

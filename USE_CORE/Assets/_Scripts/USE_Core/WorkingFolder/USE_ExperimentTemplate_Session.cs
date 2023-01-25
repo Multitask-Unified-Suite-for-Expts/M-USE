@@ -16,6 +16,8 @@ using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
+using Random = UnityEngine.Random;
+
 
 namespace USE_ExperimentTemplate_Session
 {
@@ -162,6 +164,8 @@ namespace USE_ExperimentTemplate_Session
 
             if (SessionSettings.SettingExists("Session", "ContextName"))
                 ContextName = (string)SessionSettings.Get("Session", "ContextName");
+            else
+                ContextName = "NeuralNet6";
 
             if (SessionSettings.SettingExists("Session", "TaskIcons"))
                 TaskIcons = (Dictionary<string, string>)SessionSettings.Get("Session", "TaskIcons");
@@ -198,7 +202,6 @@ namespace USE_ExperimentTemplate_Session
 
             SessionCam = Camera.main;
 
-
             GameObject experimenterDisplay = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
             experimenterDisplay.name = "ExperimenterDisplay";
             ExperimenterDisplayController = experimenterDisplay.AddComponent<ExperimenterDisplayController>();
@@ -214,15 +217,15 @@ namespace USE_ExperimentTemplate_Session
 
             RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
 
+            RenderSettings.skybox = ControlLevel_Trial_Template.CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+
             bool waitForSerialPort = false;
             bool taskAutomaticallySelected = false;
             setupSession.AddDefaultInitializationMethod(() =>
             {
                 PauseCanvasGO = GameObject.Find("PauseCanvas");
                 PauseCanvasGO.SetActive(false);
-
                 PauseCanvas = PauseCanvasGO.GetComponent<Canvas>();
-
 
                 SessionData.CreateFile();
                 //SessionData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
@@ -325,7 +328,6 @@ namespace USE_ExperimentTemplate_Session
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
-                RenderSettings.skybox = ControlLevel_Trial_Template.CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
                 SessionSettings.Restore();
                 selectedConfigName = null;
 
@@ -353,6 +355,7 @@ namespace USE_ExperimentTemplate_Session
                     taskButtons.SetActive(true);
                     return;
                 }
+
                 taskButtons = new GameObject("TaskButtons");
                 taskButtons.transform.parent = GameObject.Find("TaskSelectionCanvas").transform;
                 taskButtons.transform.localPosition = Vector3.zero;
@@ -360,9 +363,19 @@ namespace USE_ExperimentTemplate_Session
                 // We'll use height for the calculations because it is generally smaller than the width
                 int numTasks = TaskMappings.Count;
                 float buttonSize = 200;
-                float buttonSpacing = 20;
+                float buttonSpacing = 25;
                 float buttonsWidth = numTasks * buttonSize + (numTasks - 1) * buttonSpacing;
                 float buttonStart = (buttonSize - buttonsWidth) / 2;
+                float yMax = 300;
+                float yMin = -300;
+
+                List<Vector3> Locations = new List<Vector3>();
+                for(int i = 0; i < TaskMappings.Count; i++)
+                {
+                    Locations.Add(new Vector3(buttonStart, Random.Range(yMin, yMax), 0));
+                    buttonStart += buttonSize + buttonSpacing;
+                }
+
                 foreach (DictionaryEntry task in TaskMappings)
                 {
                     string configName = (string)task.Key;
@@ -382,10 +395,12 @@ namespace USE_ExperimentTemplate_Session
                     RawImage image = taskButton.AddComponent<RawImage>();
                     string taskIcon = TaskIcons[configName];
                     image.texture = ControlLevel_Trial_Template.LoadPNG(TaskIconsFolderPath + "/" + taskIcon + ".png");
-                    image.rectTransform.localPosition = new Vector3(buttonStart, 0.0f, 0.0f);
+
+                    Vector3 randomPos = Locations[Random.Range(0, Locations.Count)];
+                    image.rectTransform.localPosition = randomPos;
+                    Locations.Remove(randomPos); //remove for next iteration
                     image.rectTransform.localScale = Vector3.one;
                     image.rectTransform.sizeDelta = buttonSize * Vector3.one;
-                    buttonStart += buttonSize + buttonSpacing;
 
                     Button button = taskButton.AddComponent<Button>();
                     button.onClick.AddListener(() => {

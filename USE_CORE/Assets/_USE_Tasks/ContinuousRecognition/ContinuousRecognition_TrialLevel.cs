@@ -15,6 +15,8 @@ using USE_ExperimentTemplate_Block;
 using System.IO;
 using UnityEngine.Profiling;
 using TMPro;
+using USE_UI;
+
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
@@ -71,6 +73,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public StimGroup RightGroup;
     [HideInInspector] public StimGroup WrongGroup;
+
 
     //Config Variables
     [HideInInspector]
@@ -437,6 +440,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS -----------------------------------------------------------------------------------------
+    public void ButtonFunc()
+    {
+        Debug.Log("BUTTON FUNC!!!");
+    }
+
     void MakeStimPopOut()
     {
         foreach(ContinuousRecognition_StimDef stim in trialStims.stimDefs)

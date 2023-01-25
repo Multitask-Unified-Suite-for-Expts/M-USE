@@ -307,6 +307,7 @@ GameObject:
   - component: {fileID: 1213845839}
   - component: {fileID: 1213845838}
   - component: {fileID: 1213845837}
+  - component: {fileID: 1213845840}
   m_Layer: 0
   m_Name: InitCamera
   m_TagString: Untagged
@@ -332,7 +333,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.10980392, g: 0.11764706, b: 0.12156863, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -347,7 +348,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 54
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
@@ -379,6 +380,15 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!45 &1213845840
+Skybox:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1213845836}
+  m_Enabled: 1
+  m_CustomSkybox: {fileID: 2100000, guid: c3d89abb5ea46468e849125cc9ee7c57, type: 2}
 --- !u!1 &1375570694
 GameObject:
   m_ObjectHideFlags: 0
@@ -416,6 +426,7 @@ MonoBehaviour:
   quitApplicationAtEnd: 1
   DebugActive: 1
   Paused: 1
+  SessionId_SQL: 0
   PauseCanvasGO: {fileID: 0}
   PauseCanvas: {fileID: 0}
   TasksFinished: 0
@@ -424,9 +435,9 @@ MonoBehaviour:
   SessionDataPath: 
   FilePrefix: 
   TaskSelectionSceneName: _TaskSelection
+  TaskIconLocations: []
   SessionDetails: {fileID: 2102576459}
   LocateFile: {fileID: 2102576458}
-  DisplaySwitcher: {fileID: 1017469089}
   CameraMirrorTexture: {fileID: 0}
 --- !u!4 &1375570696
 Transform:
@@ -454,6 +465,7 @@ GameObject:
   - component: {fileID: 1396040248}
   - component: {fileID: 1396040247}
   - component: {fileID: 1396040250}
+  - component: {fileID: 1396040251}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -479,7 +491,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.10980392, g: 0.11764706, b: 0.12156863, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -494,7 +506,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 54
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -538,6 +550,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7522bbf6ac3b4764a5be0fb78844f73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!45 &1396040251
+Skybox:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1396040246}
+  m_Enabled: 1
+  m_CustomSkybox: {fileID: 2100000, guid: c3d89abb5ea46468e849125cc9ee7c57, type: 2}
 --- !u!1 &1530207056
 GameObject:
   m_ObjectHideFlags: 0
@@ -788,6 +809,7 @@ GameObject:
   - component: {fileID: 2008034529}
   - component: {fileID: 2008034528}
   - component: {fileID: 2008034527}
+  - component: {fileID: 2008034531}
   m_Layer: 5
   m_Name: InitScreenCanvas
   m_TagString: Untagged
@@ -876,6 +898,14 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!222 &2008034531
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2008034526}
+  m_CullTransparentMesh: 1
 --- !u!1001 &2102576455
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -883,9 +913,17 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2008034530}
     m_Modifications:
+    - target: {fileID: 1096754000575590, guid: c85f9d40cb89745fe8ca96530c144cee, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1485786349302762, guid: c85f9d40cb89745fe8ca96530c144cee, type: 3}
       propertyPath: m_Name
       value: InitializationScreen
+      objectReference: {fileID: 0}
+    - target: {fileID: 1770613988205180, guid: c85f9d40cb89745fe8ca96530c144cee, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 114443967513355164, guid: c85f9d40cb89745fe8ca96530c144cee,
         type: 3}

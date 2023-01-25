@@ -316,7 +316,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         PopBalloon.AddDefaultInitializationMethod(() =>
         {
             if (Response == 1)
-                AudioFBController.Play("EC_Pop");
+            {
+                AudioFBController.Play("EC_NicePop"); //better for monkeys
+                //AudioFBController.Play("EC_HarshPop"); //better for humans
+            }
             else
             {
                 AudioFBController.Play("TimeRanOut");

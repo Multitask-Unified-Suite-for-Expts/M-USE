@@ -52,7 +52,7 @@ public class TokenFBController : MonoBehaviour
         trialData.AddDatum("TokenBarCompletedThisTrial", ()=> tokenBarFull);
         frameData.AddDatum("TokenBarValue", () => numCollected);
         frameData.AddDatum("TokenAnimationPhase", () => animationPhase.ToString());
-        frameData.AddDatum("TokenBarVisibility", ()=> enabled);
+        //frameData.AddDatum("TokenBarVisibility", ()=> enabled); WON'T WORK IF TOKENFBCONTROLLED DELETED DURING TASK END
         this.audioFBController = audioFBController;
         numCollected = 0;
 

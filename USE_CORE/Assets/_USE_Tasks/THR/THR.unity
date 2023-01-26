@@ -256,12 +256,16 @@ MonoBehaviour:
   Paused: 1
   TrialData: {fileID: 0}
   FrameData: {fileID: 0}
+  SerialSentData: {fileID: 0}
+  SerialRecvData: {fileID: 0}
   BlockCount: 0
   TrialCount_InTask: 0
   TrialCount_InBlock: 0
   AbortCode: 0
   StoreData: 0
   ForceBlockEnd: 0
+  SerialPortActive: 0
+  EyetrackerActive: 0
   TaskDataPath: 
   FilePrefix: 
   TrialSummaryString: 
@@ -290,12 +294,8 @@ MonoBehaviour:
   EventCodeManager: {fileID: 0}
   MaterialFilePath: 
   ContextPath: 
-  BackdropStripeTexture: {fileID: 2800000, guid: 5e3c55f5f31f54d108dd7dc199ff7a7b,
-    type: 3}
-  HeldTooShortTexture: {fileID: 2800000, guid: 0cde948f5b2fd4e70990f858c2cbd0bf, type: 3}
-  HeldTooLongTexture: {fileID: 2800000, guid: d4b535df45529408fb606aeb645a0ce2, type: 3}
-  BackdropRenderer: {fileID: 0}
   BackdropTexture: {fileID: 0}
+  BackdropRenderer: {fileID: 0}
   BackdropPrefab: {fileID: 6236812614538877600, guid: c361c637d41464c0bad1bf8ee2cc70d5,
     type: 3}
   BackdropGO: {fileID: 0}
@@ -337,8 +337,8 @@ MonoBehaviour:
   NumReleasedEarly_Block: 0
   NumReleasedLate_Block: 0
   NumTouchesMovedOutside_Block: 0
+  BackdropMaterial: {fileID: 2100000, guid: 7927397d01ee34bd2932b8d28e0ff97a, type: 2}
   SquareMaterial: {fileID: 0}
-  BackdropMaterial: {fileID: 0}
   WhiteSquareTouched: 0
   BlueSquareTouched: 0
   BlueSquareReleased: 0
@@ -409,11 +409,15 @@ MonoBehaviour:
   TaskProjectFolder: 
   BlockCount: 0
   TrialLevel: {fileID: 900455550}
+  SerialSentData: {fileID: 0}
+  SerialRecvData: {fileID: 0}
   StoreData: 0
+  SerialPortActive: 0
   SyncBoxActive: 0
   EventCodesActive: 0
   RewardPulsesActive: 0
   SonicationActive: 0
+  ContextExternalFilePath: 
   SessionDataPath: 
   TaskConfigPath: 
   TaskDataPath: 

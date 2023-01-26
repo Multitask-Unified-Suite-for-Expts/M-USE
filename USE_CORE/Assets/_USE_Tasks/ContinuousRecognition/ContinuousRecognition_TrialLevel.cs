@@ -74,6 +74,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public StimGroup RightGroup;
     [HideInInspector] public StimGroup WrongGroup;
 
+    public Vector3 ButtonScale;
+    public Vector3 ButtonPosition;
+
 
     //Config Variables
     [HideInInspector]
@@ -110,7 +113,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             NumFeedbackRows = 0;
 
             if (StartButton == null)
-                CreateStartButton();
+                //CreateStartButton();
 
             if (!VariablesLoaded)
                 LoadConfigUIVariables();
@@ -1220,39 +1223,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         return contextPath;
     }
 
-    void CreateStartButton()
-    {
-        string contextPath = GetContextNestedFilePath("StartButtonImage.png");
-        Texture2D tex = LoadPNG(contextPath);
-        //Texture2D tex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
-        Rect rect = new Rect(new Vector2(0, 0), new Vector2(1, 1));
-
-        Vector3 buttonPosition = Vector3.zero;
-
-        Vector3 buttonScale = Vector3.zero;
-        string TaskName = "ContinuousRecognition";
-        if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
-        {
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-            {
-                buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-                OriginalStartButtonPosition = buttonPosition;
-            }
-            else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-                buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-            else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
-        }
-        else Debug.Log("[ERROR] TaskDef is not in config folder");
-
-        GameObject startButton = new GameObject("StartButton");
-        SpriteRenderer spriteRend = startButton.AddComponent<SpriteRenderer>();
-        spriteRend.sprite = Sprite.Create(tex, new Rect(rect.x / 2, rect.y / 2, tex.width / 2, tex.height / 2 ), new Vector2(.5f, .5f), 100f);
-        startButton.AddComponent<BoxCollider>();
-        startButton.transform.localScale = buttonScale;
-        startButton.transform.position = buttonPosition;
-        StartButton = startButton;
-    }
 
     void LoadConfigUIVariables()
     {

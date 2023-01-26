@@ -83,7 +83,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public static bool viewPath = false;
     public static bool c;
     private GameObject chosenStim;
-
+    private Tile TilePrefab;
     public override void DefineControlLevel()
     {
         //define States within this Control Level
@@ -335,8 +335,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         mazeBackground.transform.SetParent(mazeContainer.transform);
         mazeBackground.transform.localPosition = new Vector3(1, 0.5f, 0);
         mazeBackground.transform.localScale = new Vector3(dim.x/9f, dim.y/9f, 0);
-        tile = Resources.Load<Tile>("Tile") as Tile;
+        tile = Instantiate(TilePrefab, mazeContainer.transform);
         Texture2D tileTex = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "Tile.png");
+        Debug.Log("TILE GAME OBJECT TEX: " + tileTex);
         tile.gameObject.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = tileTex;
         tiles = new StimGroup("Tiles"); //in DefineTrialStims
         // tiles.DestroyStimGroup(); //when tiles should be destroyed

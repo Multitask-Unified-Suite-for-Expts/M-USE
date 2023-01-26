@@ -57,8 +57,6 @@ namespace USE_ExperimentTemplate_Trial
         // Texture Variables
         [HideInInspector] public Texture2D StartButtonTexture, FBSquareTexture, HeldTooLongTexture, HeldTooShortTexture, BackdropStripesTexture, BackdropTexture;
         //[HideInInspector] public bool Grating;
-        //Create Trial GameObject Variables
-        [HideInInspector] public GameObject StartButton, FBSquare;
         
         //protected TrialDef CurrentTrialDef;
         public T GetCurrentTrialDef<T>() where T : TrialDef
@@ -295,21 +293,21 @@ namespace USE_ExperimentTemplate_Trial
         
         public GameObject CreateStartButton(Texture2D StartButtonTexture, Vector3 StartButtonPosition, Vector3 StartButtonScale)
         {
-            StartButton = CreateSquare("StartButton");
-            StartButton.GetComponent<Renderer>().material.mainTexture = StartButtonTexture;
-            StartButton.transform.position = StartButtonPosition;
-            StartButton.transform.localScale = StartButtonScale;
-            StartButton.SetActive(false);
-            return StartButton;
+            GameObject startButton = CreateSquare("StartButton");
+            startButton.GetComponent<Renderer>().material.mainTexture = StartButtonTexture;
+            startButton.transform.position = StartButtonPosition;
+            startButton.transform.localScale = StartButtonScale;
+            startButton.SetActive(false);
+            return startButton;
         }
         public GameObject CreateFBSquare(Texture2D FBSquareTexture, Vector3 FBSquarePosition, Vector3 FBSquareScale)
         {
-            FBSquare = CreateSquare("FBSquare");
-            FBSquare.GetComponent<Renderer>().material.mainTexture = FBSquareTexture;
-            FBSquare.transform.localScale = FBSquareScale;
-            FBSquare.transform.position = FBSquarePosition;
-            FBSquare.SetActive(false);
-            return FBSquare;
+            GameObject fBSquare = CreateSquare("FBSquare");
+            fBSquare.GetComponent<Renderer>().material.mainTexture = FBSquareTexture;
+            fBSquare.transform.localScale = FBSquareScale;
+            fBSquare.transform.position = FBSquarePosition;
+            fBSquare.SetActive(false);
+            return fBSquare;
         }
         public int ChooseTokenReward(TokenReward[] tokenRewards)
         {

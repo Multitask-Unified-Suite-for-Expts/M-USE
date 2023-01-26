@@ -75,7 +75,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public int NumTouchesMovedOutside_Block;
 
     //Set in Editor
-    public Material BackdropMaterial;
+    //public Material BackdropMaterial;
 
     public Material SquareMaterial;
 
@@ -145,6 +145,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state -------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
+            if (BackdropTexture == null)
+                Debug.Log("BACKDROP TEXTURE IS NULL!");
 
             if (TrialCount_InBlock == 0)
                 TrialCompletionList = new List<int>();
@@ -540,8 +542,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         BackdropRenderer = BackdropGO.GetComponent<Renderer>();
         BackdropRenderer.material.mainTexture = BackdropTexture;
-        BackdropRenderer.material = BackdropMaterial;
+        //BackdropMaterial = BackdropRenderer.material;
         InitialBackdropColor = BackdropRenderer.material.color;
+
+        BackdropGO.GetComponent<Renderer>().material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
+        BackdropGO.GetComponent<Renderer>().material.SetFloat("_SpecularHighlights", 0f);
     }
 
     void CreateSquare()
@@ -553,6 +558,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         SquareMaterial = SquareRenderer.material;
         SquareTexture = SquareRenderer.material.mainTexture;
         InitialSquareColor = SquareMaterial.color;
+        SquareGO.GetComponent<Renderer>().material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
+        SquareGO.GetComponent<Renderer>().material.SetFloat("_SpecularHighlights", 0f);
     }
 
     void SetSquareSizeAndPosition()
@@ -607,14 +614,14 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     IEnumerator GratedBackdropFlash(Texture2D newTexture)
     {
         Grating = true;
-        Color32 currentSquareColor = SquareMaterial.color; 
-        SquareMaterial.color = new Color32(255, 153, 153, 255); 
-        BackdropMaterial.color = LightRedColor;
+        Color32 currentSquareColor = SquareMaterial.color;
+        SquareMaterial.color = new Color32(255, 153, 153, 255);
+        BackdropRenderer.material.color = LightRedColor;
         BackdropRenderer.material.mainTexture = newTexture;
         AudioFBController.Play("Negative");
         yield return new WaitForSeconds(1f);
         BackdropRenderer.material.mainTexture = BackdropTexture;
-        BackdropMaterial.color = InitialBackdropColor;
+        BackdropRenderer.material.color = InitialBackdropColor;
         SquareMaterial.color = currentSquareColor;
         Grating = false;
     }

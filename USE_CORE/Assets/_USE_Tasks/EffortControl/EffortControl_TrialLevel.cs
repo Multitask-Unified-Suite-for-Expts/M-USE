@@ -23,6 +23,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     public GameObject RewardPrefab;
     public GameObject OutlinePrefab;
 
+    public Vector3 ButtonPosition;
+    public Vector3 ButtonScale;
+    public Vector3 OriginalStartButtonPosition;
+
     //Game Objects:
     GameObject StartButton, StimLeft, StimRight, TrialStim, BalloonContainerLeft, BalloonContainerRight,
                BalloonOutline, RewardContainerLeft, RewardContainerRight, Reward, MiddleBarrier;
@@ -105,6 +109,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         AddActiveStates(new List<State> { InitTrial, ChooseBalloon, CenterSelection, InflateBalloon, PopBalloon, Feedback, ITI });
 
         SelectionHandler<EffortControl_StimDef> mouseHandler = new SelectionHandler<EffortControl_StimDef>();
+
+        LoadTextures(MaterialFilePath);
   
         if(TokenFBController != null)
             SetTokenVariables();
@@ -117,6 +123,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             MaxOutline_Left = new GameObject();
             MaxOutline_Right = new GameObject();
+
+            StartButton = CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
 
             if (!ObjectsCreated)
                 CreateObjects();
@@ -525,9 +533,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void CreateObjects()
     {
-        if (StartButton == null)
-            CreateStartButton();
-
         StimLeft = Instantiate(StimLeftPrefab, StimLeftPrefab.transform.position, StimLeftPrefab.transform.rotation);
         StimLeft.name = "StimLeft";
         Red = StimLeft.GetComponent<Renderer>().material.color; //set red color. 
@@ -680,36 +685,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("StimRight", () => StimRight.activeSelf);
     }
 
-    void CreateStartButton()
-    {
-        string contextPath = GetContextNestedFilePath("StartButtonImage.png");
-        Texture2D tex = LoadPNG(contextPath);
-        //Texture2D tex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
-        Rect rect = new Rect(new Vector2(0, 0), new Vector2(1, 1));
-
-        Vector3 buttonPosition = Vector3.zero;
-        Vector3 buttonScale = Vector3.zero;
-        string TaskName = "EffortControl";
-        if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
-        {
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-                buttonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-            else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
-
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-                buttonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-            else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
-        }
-        else Debug.Log("[ERROR] TaskDef is not in config folder");
-
-        GameObject startButton = new GameObject("StartButton");
-        SpriteRenderer spriteRend = startButton.AddComponent<SpriteRenderer>();
-        spriteRend.sprite = Sprite.Create(tex, new Rect(rect.x, rect.y, tex.width, tex.height), new Vector2(.5f, .5f), 100f);
-        startButton.AddComponent<BoxCollider>();
-        startButton.transform.localScale = buttonScale;
-        startButton.transform.position = buttonPosition;
-        StartButton = startButton;
-    }
 
     public string GetContextNestedFilePath(string contextName)
     {

@@ -65,6 +65,17 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             Debug.Log($"No ContextName specified in the {TaskName} Task Config. Defaulting to {ContextName}");
         }
 
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+        {
+            trialLevel.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+            trialLevel.OriginalStartButtonPosition = trialLevel.ButtonPosition;
+        }
+        else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+            trialLevel.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+        else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
+
+
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
 

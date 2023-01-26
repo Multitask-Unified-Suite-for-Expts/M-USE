@@ -364,7 +364,7 @@ namespace USE_ExperimentTemplate_Trial
             HeldTooLongTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "HorizontalStripes.png");
             HeldTooShortTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "VerticalStripes.png");
             BackdropStripesTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "bg.png");
-            BackdropTexture = ControlLevel_Trial_Template.LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "BackdropGrey.png");
+            BackdropTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "BackdropGrey.png");
         }
     }
 

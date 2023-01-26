@@ -24,7 +24,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public THR_TaskLevel currentTask => GetTaskLevel<THR_TaskLevel>();
 
     public string MaterialFilePath;
-    public string ContextPath;
 
     public Renderer BackdropRenderer;
     public GameObject BackdropPrefab;
@@ -145,9 +144,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state -------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
-            if (BackdropTexture == null)
-                Debug.Log("BACKDROP TEXTURE IS NULL!");
-
             if (TrialCount_InBlock == 0)
                 TrialCompletionList = new List<int>();
 

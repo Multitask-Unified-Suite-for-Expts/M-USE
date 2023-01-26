@@ -19,11 +19,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     // Stimuli Variables
     private StimGroup tStim;
     private GameObject StartButton;
-    private GameObject FBSquare;
+    private GameObject FBSquare;/*
     public Texture2D HeldTooShortTexture;
     public Texture2D HeldTooLongTexture;
     private Texture2D StartButtonTexture;
-    private Texture2D FBSquareTexture;
+    private Texture2D FBSquareTexture;*/
     private bool Grating = false;
     private TaskHelperFunctions taskHelper;
     

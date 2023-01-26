@@ -81,8 +81,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public int NumTouchesMovedOutside_Block;
 
     //Set in Editor
-    public Material SquareMaterial;
     public Material BackdropMaterial;
+
+    public Material SquareMaterial;
 
     //misc
     public bool WhiteSquareTouched;
@@ -452,14 +453,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     void LoadTextures()
     {
         HeldTooLongTexture = ControlLevel_Trial_Template.LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "HorizontalStripes.png");
-        if (HeldTooLongTexture == null)
-            Debug.Log("HELD TOO LONG TEXTURE");
         HeldTooShortTexture = ControlLevel_Trial_Template.LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "VerticalStripes.png");
-        if (HeldTooShortTexture == null)
-            Debug.Log("HELD TOO LONG TEXTURE");
         BackdropStripeTexture = ControlLevel_Trial_Template.LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "bg.png");
-        if (BackdropStripeTexture == null)
-            Debug.Log("HELD TOO LONG TEXTURE");
     }
 
 
@@ -554,38 +549,26 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     void CreateBackdrop()
     {
-        BackdropGO = Instantiate(BackdropPrefab, new Vector3(0, 0, 95), Quaternion.identity);
-        BackdropGO.transform.localScale = new Vector3(275, 150, .5f);
-        BackdropGO.AddComponent<BoxCollider>();
+        BackdropGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
         BackdropGO.name = "BackdropGO";
-
+        BackdropGO.transform.position = new Vector3(0, 0, 95);
+        BackdropGO.transform.localScale = new Vector3(275, 150, .5f);
+        BackdropGO.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         BackdropRenderer = BackdropGO.GetComponent<Renderer>();
-        BackdropMaterial = BackdropRenderer.material;
-        //BackdropTexture = BackdropRenderer.material.mainTexture;
-        InitialBackdropColor = BackdropMaterial.color;
+        BackdropRenderer.material = BackdropMaterial;
+        BackdropTexture = BackdropRenderer.material.mainTexture;
+        InitialBackdropColor = BackdropRenderer.material.color;
     }
 
     void CreateSquare()
     {
         SquareGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        SquareGO.AddComponent<BoxCollider>();
         SquareGO.name = "SquareGO";
-
         SquareGO.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-
         SquareRenderer = SquareGO.GetComponent<Renderer>();
         SquareMaterial = SquareRenderer.material;
         SquareTexture = SquareRenderer.material.mainTexture;
         InitialSquareColor = SquareMaterial.color;
-
-        //SquareGO = Instantiate(SquarePrefab, new Vector3(0, 1, 90), Quaternion.identity);
-        //SquareGO.AddComponent<BoxCollider>();
-        //SquareGO.name = "SquareGO";
-
-        //SquareRenderer = SquareGO.GetComponent<Renderer>();
-        //SquareMaterial = SquareRenderer.material;
-        //SquareTexture = SquareRenderer.material.mainTexture;
-        //InitialSquareColor = SquareMaterial.color;
     }
 
     void SetSquareSizeAndPosition()

@@ -107,6 +107,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         SetupTrial.AddInitializationMethod(() =>
         {
+            //Set the context for the upcoming trial with the Start Button visible
+            ContextName = CurrentTrialDef.ContextName;
+            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+
             if (!configUIVariablesLoaded) LoadConfigUIVariables();
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
@@ -118,9 +122,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         InitTrial.AddInitializationMethod(() =>
         {
-            //Set the context for the upcoming trial with the Start Button visible
-            ContextName = CurrentTrialDef.ContextName;
-            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +  ContextName + ".png");
             StartButton.SetActive(true);
             mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
             mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);

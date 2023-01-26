@@ -9,6 +9,7 @@ using USE_StimulusManagement;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Block;
 using System.Collections.Specialized;
+using System.IO;
 
 public class THR_TaskLevel : ControlLevel_Task_Template
 {

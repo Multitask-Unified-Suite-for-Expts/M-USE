@@ -24,7 +24,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public THR_TaskLevel currentTask => GetTaskLevel<THR_TaskLevel>();
 
     public string MaterialFilePath;
-    public string ContextPath;
 
     public Renderer BackdropRenderer;
     public GameObject BackdropPrefab;
@@ -142,28 +141,25 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         LoadTextures(MaterialFilePath);
 
+        if (!ColorsSet)
+            CreateColors();
+
+        if (BackdropGO == null)
+            CreateBackdrop();
+
+        if (SquareGO == null)
+            CreateSquare();
+
+
         //SETUP TRIAL state -------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
-            if (BackdropTexture == null)
-                Debug.Log("BACKDROP TEXTURE IS NULL!");
-
             if (TrialCount_InBlock == 0)
                 TrialCompletionList = new List<int>();
 
             if (TrialCount_InBlock == 0)
                 SetBlockDefaultValues();
             
-            if(!ColorsSet)
-                CreateColors();
-
-            if (BackdropGO == null)
-                CreateBackdrop();
-
-            if (SquareGO == null)
-                CreateSquare();
-            
-
             SetTrialSummaryString();
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);

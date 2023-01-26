@@ -348,7 +348,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
             else //Got wrong
             {
-                TokenFBController.RemoveTokens(chosenStimObj, 1, Color.grey);
+                TokenFBController.RemoveTokens(chosenStimObj, 1);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
                 TokenCount--;
                 HandleTokenUpdate();

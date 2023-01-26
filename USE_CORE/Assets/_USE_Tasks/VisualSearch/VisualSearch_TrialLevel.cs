@@ -99,10 +99,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         Add_ControlLevel_InitializationMethod(() =>
         {
-            taskHelper.LoadTextures(ContextExternalFilePath);
+            LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
-            StartButton = taskHelper.CreateStartButton(taskHelper.StartButtonTexture, ButtonPosition, ButtonScale);
-            FBSquare = taskHelper.CreateFBSquare(taskHelper.FBSquareTexture, FBSquarePosition, FBSquareScale);
+            StartButton = CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
+            FBSquare = CreateFBSquare(FBSquareTexture, FBSquarePosition, FBSquareScale);
         });
         
         SetupTrial.AddInitializationMethod(() =>
@@ -308,7 +308,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
             VisualSearch_StimDef sd = (VisualSearch_StimDef)tStim.stimDefs[i];
-            sd.StimTrialRewardMag = taskHelper.ChooseTokenReward(CurrentTrialDef.TrialStimTokenReward[i]);
+            sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.TrialStimTokenReward[i]);
             if (sd.StimTrialRewardMag > 0) sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!!
             else sd.IsTarget = false;
         }
@@ -397,7 +397,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 if (stim.IsTarget)
                 {
                     textLocation =
-                        taskHelper.playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation),
+                        playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation),
                             playerViewParent);
                     textLocation.y += 50;
                     Vector2 textSize = new Vector2(200, 200);
@@ -417,7 +417,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         playerViewLoaded = false;
     }
     private void TouchDurationErrorFeedback(SelectionHandler<VisualSearch_StimDef> MouseHandler, GameObject go)
-    {
+    {///CANT FIGURE OUT WHY I CANT USE TEMPLATE, ANYWAYS MAKE A SEPARATE FEEDBACK SCRIPT
         AudioFBController.Play("Negative");
         if (MouseHandler.GetHeldTooShort())
             StartCoroutine(taskHelper.GratedSquareFlash(HeldTooShortTexture, go, gratingSquareDuration.value));

@@ -192,7 +192,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         Add_ControlLevel_InitializationMethod(() =>
         {
             InitializeSlider();
-            taskHelper.LoadTextures(ContextExternalFilePath);
+            LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
             startButton = taskHelper.CreateStartButton(taskHelper.StartButtonTexture, ButtonPosition, ButtonScale);
             FBSquare = taskHelper.CreateFBSquare(taskHelper.FBSquareTexture, FBSquarePosition, FBSquareScale);

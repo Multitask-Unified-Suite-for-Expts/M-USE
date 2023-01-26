@@ -87,13 +87,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public override void DefineControlLevel()
     {
         //define States within this Control Level
-        State StartButton = new State("StartButton");
+        State InitTrial = new State("InitTrial");
         State LoadMaze = new State("LoadMaze");
         State GameConf = new State("GameConf");
         State MazeVis = new State("MazeVis");
         State Feedback = new State("Feedback");
         State ITI = new State("ITI");
-        AddActiveStates(new List<State> {StartButton, LoadMaze, GameConf, MazeVis, Feedback, ITI});
+        AddActiveStates(new List<State> {InitTrial, LoadMaze, GameConf, MazeVis, Feedback, ITI});
 
         string[] stateNames = new string[] {"StartButton", "LoadMaze", "GameConf", "MazeVis", "Feedback", "ITI"};
 
@@ -192,17 +192,17 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         });
 
-        GameConf.SpecifyTermination(() => true, StartButton);
+        GameConf.SpecifyTermination(() => true, InitTrial);
 
         // define initScreen state
-        MouseTracker.AddSelectionHandler(mouseHandler, StartButton);
-        StartButton.AddInitializationMethod(() =>
+        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
+        InitTrial.AddInitializationMethod(() =>
         {
             curRep = 0;
             startButton.SetActive(true);
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
         });
-        StartButton.AddUpdateMethod(() =>
+        InitTrial.AddUpdateMethod(() =>
         {
 
             if (InputBroker.GetMouseButtonDown(0))
@@ -221,9 +221,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         });
         //  StartButton.SpecifyTermination(() => mouseHandler.SelectionMatches(initButton), MazeVis);
-        StartButton.SpecifyTermination(() => response == 0, MazeVis);
+        InitTrial.SpecifyTermination(() => response == 0, MazeVis);
 
-        StartButton.AddDefaultTerminationMethod(() =>
+        InitTrial.AddDefaultTerminationMethod(() =>
         {
             slider.value = 0;
             slider.gameObject.transform.position = sliderInitPosition;

@@ -168,6 +168,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             if (SquareGO == null)
                 CreateSquare();
+            
 
             SetTrialSummaryString();
         });
@@ -451,8 +452,14 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     void LoadTextures()
     {
         HeldTooLongTexture = ControlLevel_Trial_Template.LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "HorizontalStripes.png");
+        if (HeldTooLongTexture == null)
+            Debug.Log("HELD TOO LONG TEXTURE");
         HeldTooShortTexture = ControlLevel_Trial_Template.LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "VerticalStripes.png");
+        if (HeldTooShortTexture == null)
+            Debug.Log("HELD TOO LONG TEXTURE");
         BackdropStripeTexture = ControlLevel_Trial_Template.LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "bg.png");
+        if (BackdropStripeTexture == null)
+            Debug.Log("HELD TOO LONG TEXTURE");
     }
 
 
@@ -560,14 +567,25 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     void CreateSquare()
     {
-        SquareGO = Instantiate(SquarePrefab, new Vector3(0, 1, 90), Quaternion.identity);
+        SquareGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
         SquareGO.AddComponent<BoxCollider>();
         SquareGO.name = "SquareGO";
+
+        SquareGO.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 
         SquareRenderer = SquareGO.GetComponent<Renderer>();
         SquareMaterial = SquareRenderer.material;
         SquareTexture = SquareRenderer.material.mainTexture;
         InitialSquareColor = SquareMaterial.color;
+
+        //SquareGO = Instantiate(SquarePrefab, new Vector3(0, 1, 90), Quaternion.identity);
+        //SquareGO.AddComponent<BoxCollider>();
+        //SquareGO.name = "SquareGO";
+
+        //SquareRenderer = SquareGO.GetComponent<Renderer>();
+        //SquareMaterial = SquareRenderer.material;
+        //SquareTexture = SquareRenderer.material.mainTexture;
+        //InitialSquareColor = SquareMaterial.color;
     }
 
     void SetSquareSizeAndPosition()

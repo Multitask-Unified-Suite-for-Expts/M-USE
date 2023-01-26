@@ -114,6 +114,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.AddInitializationMethod(() =>
         {
+            ContextName = CurrentTrialDef.ContextName;
+            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
             if (!configUIVariablesLoaded) LoadConfigUIVariables();
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
@@ -124,8 +126,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
         InitTrial.AddInitializationMethod(() =>
         {
-            ContextName = CurrentTrialDef.ContextName;
-            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +  ContextName + ".png");
             StartButton.SetActive(true);
             mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
             mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);

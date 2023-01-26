@@ -3,6 +3,7 @@ using USE_Data;
 using System.Collections;
 using ConfigParsing;
 
+
 public class TokenFBController : MonoBehaviour
 {
     public int tokenSize = 100;
@@ -82,13 +83,9 @@ public class TokenFBController : MonoBehaviour
 
     public void RemoveTokens(GameObject gameObj, int numTokens)
     {
-        AnimateTokens(Color.red, gameObj, -numTokens);
+        AnimateTokens(Color.grey, gameObj, -numTokens);
     }
 
-    public void RemoveTokens(GameObject gameObj, int numTokens, Color color)
-    {
-        AnimateTokens(color, gameObj, -numTokens);
-    }
     public void SetTokenBarValue(int value)
     {
         numCollected = value;

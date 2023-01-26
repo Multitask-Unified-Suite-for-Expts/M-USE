@@ -87,6 +87,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
                                       "\nAvg Search Duration: " + String.Format("{0:0.000}", flTL.AverageSearchDuration_InBlock) +
                                       "\n" + 
                                       "\nNum Touch Duration Error: " + flTL.TouchDurationError_InBlock + 
+                                      "\n" +
                                       "\nNum Reward Given: " + flTL.NumRewardGiven_InBlock + 
                                       "\nNum Token Bar Filled: " + flTL.NumTokenBarFull_InBlock +
                                       "\nTotal Tokens Collected: " + flTL.TotalTokensCollected_InBlock);

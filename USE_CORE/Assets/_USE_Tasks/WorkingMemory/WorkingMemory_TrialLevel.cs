@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using EffortControl_Namespace;
 using UnityEngine;
+using UnityEngine.UI;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using USE_Settings;
@@ -15,190 +16,296 @@ using WorkingMemory_Namespace;
 public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 {
     public WorkingMemory_TrialDef CurrentTrialDef => GetCurrentTrialDef<WorkingMemory_TrialDef>();
-
-    private StimGroup searchStims, targetStim, postSampleDistractorStims; // targetDistractorStims, sampleStims;
-    public string MaterialFilePath;
-    private GameObject startButton;
-    private bool variablesLoaded;
-    public Vector3 buttonPosition, buttonScale;
-    private Transform playerViewParent; // Helps set things onto the player view in the experimenter display
-    public string shadowType;
-
-    public bool stimFacingCamera;
-    //block end variables
+    public WorkingMemory_TaskLevel CurrentTaskLevel => GetTaskLevel<WorkingMemory_TaskLevel>();
+    // Block End Variables
     public List<int> runningAcc;
     public int MinTrials, MaxTrials;
+       
+    // Stim Evaluation Variables
+    private GameObject trialStim;
+    private GameObject selected = null;
+    private bool CorrectSelection;
+    WorkingMemory_StimDef selectedSD = null;
     
-    //configui variables
+    // Stimuli Variables
+    private StimGroup searchStims, targetStim, postSampleDistractorStims;
+    private GameObject StartButton;
+    private GameObject FBSquare;
+    private GameObject SquareGO;
+    public Texture2D HeldTooShortTexture;
+    public Texture2D HeldTooLongTexture;
+    private Texture2D StartButtonTexture;
+    private Texture2D FBSquareTexture;
+    private bool Grating = false;
+    private TaskHelperFunctions taskHelper;
+
+    
+    //configUI variables
     [HideInInspector]
-    public ConfigNumber tokenRevealDuration, tokenUpdateDuration, trialEndDuration, initTrialDuration, baselineDuration, 
-        maxSearchDuration, selectionFbDuration, displaySampleDuration, postSampleDelayDuration, 
+    public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, gratingSquareDuration, tokenRevealDuration, tokenUpdateDuration, trialEndDuration, initTrialDuration, baselineDuration, 
+        selectObjectDuration, selectionFbDuration, displaySampleDuration, postSampleDelayDuration, 
         displayPostSampleDistractorsDuration, preTargetDelayDuration, itiDuration;
+    
+    // Config Loading Variables
+    private bool configUIVariablesLoaded = false;
+    public string ContextExternalFilePath;
+    public Vector3 ButtonPosition, ButtonScale;
+    public Vector3 FBSquarePosition, FBSquareScale;
+    public bool StimFacingCamera;
+    public string ShadowType;
+    
+    //Player View Variables
+    private PlayerViewPanel playerView;
+    private Transform playerViewParent; // Helps set things onto the player view in the experimenter display
+    public List<GameObject> playerViewTextList = new List<GameObject>();
+    public GameObject playerViewText;
+    private Vector2 textLocation;
+    private bool playerViewLoaded;
+    
+    // Block Data Variables
+    private string ContextName = "";
+    public int NumCorrect_InBlock;
+    public List<float> SearchDurationsList = new List<float>();
+    public int NumErrors_InBlock;
+    public int NumRewardGiven_InBlock;
+    public int NumTokenBarFull_InBlock;
+    public int TotalTokensCollected_InBlock;
+    public float Accuracy_InBlock;
+    public float AverageSearchDuration_InBlock;
+    public int TouchDurationError_InBlock;
+   
+    // Trial Data Variables
+    private int? SelectedStimCode = null;
+    private string selectedStimName = null;
+    private Vector3? SelectedStimLocation = null;
+    private float SearchDuration = 0;
+    private bool RewardGiven = false;
+    private bool TouchDurationError = false;
     public override void DefineControlLevel()
     {
-        State initTrial = new State("InitTrial");
-        State delay = new State("Delay");
-        State displaySample = new State("DisplaySample");
-        State displayPostSampleDistractors = new State("DisplayPostSampleDistractors");
-        State searchDisplay = new State("SearchDisplay");
-        State selectionFeedback = new State("SelectionFeedback");
-        State tokenFeedback = new State("TokenFeedback");
-        State trialEnd = new State("TrialEnd");
+        State InitTrial = new State("InitTrial");
+        State DisplaySample = new State("DisplaySample");
+        State DisplayPostSampleDistractors = new State("DisplayPostSampleDistractors");
+        State SearchDisplay = new State("SearchDisplay");
+        State SelectionFeedback = new State("SelectionFeedback");
+        State TokenFeedback = new State("TokenFeedback");
+        State ITI = new State("ITI");
+        State Delay = new State("Delay");
 
-        SelectionHandler<WorkingMemory_StimDef> mouseHandler = new SelectionHandler<WorkingMemory_StimDef>();
-
-        AddActiveStates(new List<State> { initTrial, delay, displaySample, displayPostSampleDistractors, searchDisplay, selectionFeedback, tokenFeedback, trialEnd });
+        AddActiveStates(new List<State> { InitTrial, Delay, DisplaySample, DisplayPostSampleDistractors, SearchDisplay, SelectionFeedback, TokenFeedback, ITI });
 
         // A state that just waits for some time
         State stateAfterDelay = null;
         float delayDuration = 0;
-        delay.AddTimer(() => delayDuration, () => stateAfterDelay);
+        Delay.AddTimer(() => delayDuration, () => stateAfterDelay);
+        
+        Text commandText = null;
+        playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
+        playerViewText = new GameObject();
+        taskHelper = new TaskHelperFunctions();
+        SelectionHandler<WorkingMemory_StimDef> mouseHandler = new SelectionHandler<WorkingMemory_StimDef>();
+
+        Add_ControlLevel_InitializationMethod(() =>
+        {
+            taskHelper.LoadTextures(ContextExternalFilePath);
+            HaloFBController.SetHaloSize(5);
+            StartButton = taskHelper.CreateStartButton(taskHelper.StartButtonTexture, ButtonPosition, ButtonScale);
+            FBSquare = taskHelper.CreateFBSquare(taskHelper.FBSquareTexture, FBSquarePosition, FBSquareScale);
+        });
         SetupTrial.AddInitializationMethod(() =>
         {
-            if (!variablesLoaded)
-            {
-                variablesLoaded = true;
-                loadVariables();
-            }          
-            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nBlock Accuracy: " + 
-                                 (runningAcc.Sum(x => Convert.ToSingle(x))/(TrialCount_InBlock+1)) +
-                                 "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
+            if (!configUIVariablesLoaded) LoadConfigUIVariables();
+            SetTrialSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
+            TokenFBController.SetTokenBarFull(false);
         });
 
-        SetupTrial.SpecifyTermination(() => true, initTrial);
-
-        // Show blue start button and wait for click
-        MouseTracker.AddSelectionHandler(mouseHandler, initTrial);
-        initTrial.AddInitializationMethod(() =>
+        SetupTrial.SpecifyTermination(() => true, InitTrial);
+        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
+        InitTrial.AddInitializationMethod(() =>
         {
-            RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
-            TokenFBController
-            .SetRevealTime(tokenRevealDuration.value)
-            .SetUpdateTime(tokenUpdateDuration.value);
-
-            startButton.SetActive(true);
-            TokenFBController.enabled = false;
+            ContextName = CurrentTrialDef.ContextName;
+            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +  ContextName + ".png");
+            StartButton.SetActive(true);
+            mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
+            mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
         });
-        initTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton),
-            displaySample, () => {
-                Input.ResetInputAxes();
-                startButton.SetActive(false);
+        InitTrial.AddUpdateMethod(() =>
+        {
+            if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
+            {
+                TouchDurationError = true;
+                SetTrialSummaryString();
+                TouchDurationErrorFeedback(mouseHandler, StartButton);
+                CurrentTaskLevel.SetBlockSummaryString();
+            }
+        });
+        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
+            DisplaySample, () => {
+                // Turn off start button and set the token bar settings
+                StartButton.SetActive(false);
                 TokenFBController.enabled = true;
-                RenderSettings.skybox = CreateSkybox(MaterialFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
-                EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]); //CHECK THIS TIMING MIGHT BE OFF
-                //EventCodeManager.SendCodeNextFrame(TaskEventCodes["TargetStimOn"]); ADD THIS TO THE EVENT CODES
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarReset"]);
-                if (stimFacingCamera)
-                {
-                    Debug.Log("IN STIM FACING CAMERA LOOP");
-                    foreach (var stim in targetStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
-                    foreach (var stim in postSampleDistractorStims.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
-                }
-                SetShadowType();
+                TokenFBController
+                    .SetRevealTime(tokenRevealDuration.value)
+                    .SetUpdateTime(tokenUpdateDuration.value);
+                TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
+                                               (NumTokenBarFull_InBlock * CurrentTrialDef.NumTokenBar);
+                EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
+                
+                // Set Experimenter Display Data Summary Strings
+                CurrentTaskLevel.SetBlockSummaryString();
+                SetTrialSummaryString();
             });
         
-        // Show nothing for some time
-        initTrial.AddTimer(() => initTrialDuration.value, displaySample, () =>
-          {
-              startButton.SetActive(false);
-              
-          });
-        
-        // displaySample.AddInitializationMethod(() =>
-        // {
-        //     for (int iTarg = 0; iTarg < targetStim.stimDefs.Count; iTarg++)
-        //     {
-        //         targetStim.stimDefs[iTarg].StimLocation = CurrentTrialDef.TargetSampleLocation[iTarg];
-        //         targetStim.stimDefs[iTarg].ToggleVisibility(true);
-        //     }
-        // });
-        
         // Show the target/sample by itself for some time
-        displaySample.AddTimer(() => displaySampleDuration.value, delay, () =>
+        DisplaySample.AddTimer(() => displaySampleDuration.value, Delay, () =>
           {
-              stateAfterDelay = displayPostSampleDistractors;
+              stateAfterDelay = DisplayPostSampleDistractors;
               delayDuration = postSampleDelayDuration.value;
           });
-
         // Show some distractors without the target/sample
-        displayPostSampleDistractors.AddTimer(() => displayPostSampleDistractorsDuration.value, delay, () =>
+        DisplayPostSampleDistractors.AddTimer(() => displayPostSampleDistractorsDuration.value, Delay, () =>
           {
-              stateAfterDelay = searchDisplay;
+              stateAfterDelay = SearchDisplay;
               delayDuration = preTargetDelayDuration.value;
           });
 
         // Show the target/sample with some other distractors
         // Wait for a click and provide feedback accordingly
-        bool correct = false;
-        GameObject selected = null;
-        WorkingMemory_StimDef selectedSD = null;
-        MouseTracker.AddSelectionHandler(mouseHandler, searchDisplay);
-        searchDisplay.AddInitializationMethod(() => selected = null);
-        searchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, selectionFeedback, () => {
+        MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay);
+        SearchDisplay.AddInitializationMethod(() =>
+        {
+            CreateTextOnExperimenterDisplay();
+            if (StimFacingCamera)
+            {
+                foreach (var stim in searchStims.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
+                foreach (var stim in targetStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
+                foreach (var stim in postSampleDistractorStims.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
+            }
+            taskHelper.SetShadowType(ShadowType, "WorkingMemory_DirectionalLight");
+            
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);
+        
+        });
+        SearchDisplay.AddUpdateMethod(() =>
+        {
+            if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
+            {
+                TouchDurationError = true;
+                FBSquare.SetActive(true);
+                SetTrialSummaryString();
+                TouchDurationErrorFeedback(mouseHandler, FBSquare);
+                CurrentTaskLevel.SetBlockSummaryString();
+            }
+        });
+        SearchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, SelectionFeedback, () => {
             selected = mouseHandler.SelectedGameObject;
             selectedSD = mouseHandler.SelectedStimDef;
-            correct = selectedSD.IsTarget;
-        });
-        searchDisplay.AddTimer(() => maxSearchDuration.value, FinishTrial);
+            CorrectSelection = selectedSD.IsTarget;
+            if (CorrectSelection)
+            {       
+                NumCorrect_InBlock++;
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["TouchTargetStart"]);
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["CorrectResponse"]);
+            }
+            else
+            {
+                NumErrors_InBlock++;
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["TouchDistractorStart"]);
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["IncorrectResponse"]);
+            }
 
-        selectionFeedback.AddInitializationMethod(() =>
-        {
-            if (!selected) return;
-            else
-            {//CHECK THIS
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
-            }
-            if (correct)
+            if (selected != null)
             {
-                HaloFBController.ShowPositive(selected);
-                runningAcc.Add(1);
+                SelectedStimCode = selectedSD.StimCode;
+                SelectedStimLocation = selectedSD.StimLocation;
             }
-            else
-            {
-                HaloFBController.ShowNegative(selected);
-                runningAcc.Add(0);
-            };
+            SetTrialSummaryString();
+            Accuracy_InBlock = NumCorrect_InBlock/(TrialCount_InBlock + 1);
         });
-        selectionFeedback.AddTimer(() => selectionFbDuration.value, tokenFeedback, () => 
+        SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, ()=>
         {
+            if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
+            {
+                Debug.Log("Timed out of selection state before making a choice");
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
+            }
+        });
+
+        SelectionFeedback.AddInitializationMethod(() =>
+        {
+            SearchDuration = SearchDisplay.TimingInfo.Duration;
+            SearchDurationsList.Add(SearchDuration);
+            AverageSearchDuration_InBlock = SearchDurationsList.Average();
+            SetTrialSummaryString();
+            if (!selected) return;
+            else EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
+            
+            if (CorrectSelection) HaloFBController.ShowPositive(selected);
+            else HaloFBController.ShowNegative(selected);
+        });
+        SelectionFeedback.AddTimer(() => selectionFbDuration.value, TokenFeedback, () => 
+        {
+            HaloFBController.Destroy();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOff"]);
-            TrialSummaryString = "Trial Num: " + (TrialCount_InTask + 1) + "\nBlock Accuracy: " + 
-                                 (runningAcc.Sum(x => Convert.ToSingle(x))/(TrialCount_InBlock+1)) +
-                                 "\nToken Bar Value: " +  TokenFBController.GetTokenBarValue();
         });
 
 
         // The state that will handle the token feedback and wait for any animations
-        tokenFeedback.AddInitializationMethod(() =>
+        TokenFeedback.AddInitializationMethod(() =>
         {
-            HaloFBController.Destroy();
-            if (selectedSD.StimTrialRewardMag == 0)
+            if (selectedSD.IsTarget)
             {
-                if (correct) AudioFBController.Play("Positive");
-                else AudioFBController.Play("Negative");
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
-                return;
-            }
-            if (selectedSD.StimTrialRewardMag > 0)
-            {
+                AudioFBController.Play("Positive");
                 TokenFBController.AddTokens(selected, selectedSD.StimTrialRewardMag);
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
+                
             }
             else
             {
+                AudioFBController.Play("Negative");
                 TokenFBController.RemoveTokens(selected, -selectedSD.StimTrialRewardMag);
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
             }
         });
-        tokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), trialEnd);
-
+        TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), ITI, () =>
+        {
+            if (TokenFBController.isTokenBarFull())
+            {
+                NumTokenBarFull_InBlock++;
+                if (SyncBoxController != null)
+                {
+                    SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+                    EventCodeManager.SendCodeImmediate(TaskEventCodes["Fluid1Onset"]);
+                    NumRewardGiven_InBlock++;
+                    RewardGiven = true;
+                }
+            }
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
+            TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
+                                           (NumTokenBarFull_InBlock * CurrentTrialDef.NumTokenBar);
+            SetTrialSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
+        });
+        ITI.AddInitializationMethod(() =>
+        {
+            ContextName = "itiImage";
+            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+            // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
+            DestroyTextOnExperimenterDisplay();
+            TokenFBController.enabled = false;
+        });
         // Wait for some time at the end
-        trialEnd.AddTimer(() => itiDuration.value, FinishTrial);
+        ITI.AddTimer(() => itiDuration.value, FinishTrial);
 
         TrialData.AddDatum("SelectedName", () => selected != null ? selected.name : null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
-        TrialData.AddDatum("SelectionCorrect", () => correct ? 1 : 0);
+        //TrialData.AddDatum("SelectionCorrect", () => correct ? 1 : 0);
     }
 
     protected override void DefineTrialStims()
@@ -219,13 +326,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.SearchStimTokenReward[iStim]);
             if (sd.StimTrialRewardMag > 0)
             {
-                // StimDef tempsd = sd.CopyStimDef();
                 WorkingMemory_StimDef newTarg = sd.CopyStimDef<WorkingMemory_StimDef>() as WorkingMemory_StimDef;
                 targetStim.AddStims(newTarg);
                 newTarg.IsTarget = true;//Holds true if the target stim receives non-zero reward
-                // targetStim = new StimGroup("TargetStim", ExternalStims, new int[] {CurrentTrialDef.SearchStimIndices[iStim]});
-                // targetStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
-                // targetStim.SetLocations(CurrentTrialDef.TargetSampleLocation);
+                sd.IsTarget = true; //sets the isTarget value to true in the SearchStim Group
             } 
             else sd.IsTarget = false;
         }
@@ -250,37 +354,25 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             TrialDefs.Count);
     }
 
-    public void loadVariables()
-    {
-        Texture2D buttonTex = LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
-        startButton = CreateStartButton(buttonTex, new Rect(new Vector2(0, 0), new Vector2(1, 1)));
-
-        playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
+    public void LoadConfigUIVariables()
+    {   
         //config UI variables
+        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
+        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration"); 
         tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration"); 
         trialEndDuration = ConfigUiVariables.get<ConfigNumber>("trialEndDuration"); 
         initTrialDuration = ConfigUiVariables.get<ConfigNumber>("initTrialDuration");
         baselineDuration = ConfigUiVariables.get<ConfigNumber>("baselineDuration"); 
-        maxSearchDuration = ConfigUiVariables.get<ConfigNumber>("maxSearchDuration");
+        selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
         selectionFbDuration = ConfigUiVariables.get<ConfigNumber>("selectionFbDuration");
         displaySampleDuration = ConfigUiVariables.get<ConfigNumber>("displaySampleDuration");
         postSampleDelayDuration = ConfigUiVariables.get<ConfigNumber>("postSampleDelayDuration");
         displayPostSampleDistractorsDuration = ConfigUiVariables.get<ConfigNumber>("displayPostSampleDistractorsDuration");
         preTargetDelayDuration = ConfigUiVariables.get<ConfigNumber>("preTargetDelayDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
-        
-        variablesLoaded = true;
-    }
-    private GameObject CreateStartButton(Texture2D tex, Rect rect)
-    {
-        GameObject startButton = new GameObject("StartButton");
-        SpriteRenderer sr = startButton.AddComponent<SpriteRenderer>() as SpriteRenderer;
-        sr.sprite = Sprite.Create(tex, new Rect(rect.x, rect.y, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
-        startButton.AddComponent<BoxCollider>();
-        startButton.transform.localScale = buttonScale;
-        startButton.transform.position = buttonPosition;
-        return startButton;
+        gratingSquareDuration = ConfigUiVariables.get<ConfigNumber>("gratingSquareDuration");
+        configUIVariablesLoaded = true;
     }
     public int ChooseTokenReward(TokenReward[] tokenRewards)
     {
@@ -311,7 +403,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     private void SetShadowType()
     {
         //User options are None, Soft, Hard
-        switch (shadowType)
+        switch (ShadowType)
         {
             case "None":
                 GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.None;
@@ -330,5 +422,61 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 break;
         }
     }
-    
+    void SetTrialSummaryString()
+    {
+        TrialSummaryString = "\n" +
+                             "Trial Count in Block: " + (TrialCount_InBlock + 1) +
+                             "\nTrial Count in Task: " + (TrialCount_InTask + 1) +
+                             "\n" +
+                             "\nSelected Object Code: " + SelectedStimCode +
+                             "\nSelected Object Location: " + SelectedStimLocation +
+                             "\nCorrect Selection?: " + CorrectSelection +
+                             "\nTouch Duration Error?: " + TouchDurationError +
+                             "\n" +
+                             "\nSearch Duration: " + SearchDuration +
+                             "\n" + 
+                             "\nToken Bar Value: " + TokenFBController.GetTokenBarValue();
+    }
+    private void CreateTextOnExperimenterDisplay()
+    {
+        playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
+        if (!playerViewLoaded)
+        {
+            //Create corresponding text on player view of experimenter display
+            foreach (WorkingMemory_StimDef stim in searchStims.stimDefs)
+            {
+                if (stim.IsTarget)
+                {
+                    textLocation =
+                        taskHelper.playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation),
+                            playerViewParent);
+                    textLocation.y += 50;
+                    Vector2 textSize = new Vector2(200, 200);
+                    playerViewText = playerView.writeText("TARGET",
+                        Color.red, textLocation, textSize, playerViewParent);
+                    playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
+                    playerViewTextList.Add(playerViewText);
+                    playerViewLoaded = true;
+                }
+            }
+        }
+    }
+    private void DestroyTextOnExperimenterDisplay()
+    {
+        if (playerViewLoaded)
+            foreach (GameObject txt in playerViewTextList) txt.SetActive(false);
+        playerViewLoaded = false;
+    }
+    private void TouchDurationErrorFeedback(SelectionHandler<WorkingMemory_StimDef> MouseHandler, GameObject go)
+    {
+        AudioFBController.Play("Negative");
+        if (MouseHandler.GetHeldTooShort())
+            StartCoroutine(taskHelper.GratedSquareFlash(taskHelper.HeldTooShortTexture, go, gratingSquareDuration.value));
+        else if (MouseHandler.GetHeldTooLong())
+            StartCoroutine(taskHelper.GratedSquareFlash(taskHelper.HeldTooLongTexture, go, gratingSquareDuration.value));
+        MouseHandler.SetHeldTooLong(false);
+        MouseHandler.SetHeldTooShort(false);
+        TouchDurationError = false;
+        TouchDurationError_InBlock++;
+    }
 }

@@ -26,12 +26,13 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public string MaterialFilePath;
     public string ContextPath;
 
-    public Texture2D BackdropStripeTexture;
-    public Texture2D HeldTooShortTexture;
-    public Texture2D HeldTooLongTexture;
+    Texture2D BackdropStripeTexture;
+    Texture2D HeldTooShortTexture;
+    Texture2D HeldTooLongTexture;
+
+    public Texture BackdropTexture;
 
     public Renderer BackdropRenderer;
-    public Texture BackdropTexture;
     public GameObject BackdropPrefab;
     public GameObject BackdropGO;
     public GameObject SquarePrefab;
@@ -134,6 +135,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public float HoldSquareTime;
     public bool MovedOutside;
 
+    private TaskHelperFunctions taskHelper;
+
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
@@ -143,10 +146,14 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, WhiteSquare, BlueSquare, Feedback, ITI});
 
+        taskHelper = new TaskHelperFunctions();
+
+        LoadTextures();
 
         //SETUP TRIAL state -------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
+
             if (TrialCount_InBlock == 0)
                 TrialCompletionList = new List<int>();
 
@@ -441,6 +448,13 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS ------------------------------------------------------------------------------------------
+    void LoadTextures()
+    {
+        HeldTooLongTexture = ControlLevel_Trial_Template.LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "HorizontalStripes.png");
+        HeldTooShortTexture = ControlLevel_Trial_Template.LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "VerticalStripes.png");
+        BackdropStripeTexture = ControlLevel_Trial_Template.LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "bg.png");
+    }
+
 
     void AddTrialTouchNumsToBlock()
     {
@@ -540,7 +554,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         BackdropRenderer = BackdropGO.GetComponent<Renderer>();
         BackdropMaterial = BackdropRenderer.material;
-        BackdropTexture = BackdropRenderer.material.mainTexture;
+        //BackdropTexture = BackdropRenderer.material.mainTexture;
         InitialBackdropColor = BackdropMaterial.color;
     }
 

@@ -8,6 +8,7 @@ public class HaloFBController : MonoBehaviour
     public GameObject NegativeHaloPrefab;
 
     private GameObject instantiated;
+    private bool LeaveFBOn = false;
 
     
     // Logging
@@ -23,6 +24,10 @@ public class HaloFBController : MonoBehaviour
         instantiated = null;
     }
 
+    public void SetLeaveFeedbackOn()
+    {
+        LeaveFBOn = true;
+    }
     public void ShowPositive(GameObject gameObj) {
         state = State.Positive;
         Show(PositiveHaloPrefab, gameObj);
@@ -35,19 +40,20 @@ public class HaloFBController : MonoBehaviour
 
     private void Show(GameObject haloPrefab, GameObject gameObj) {
         if (instantiated != null) {
-            Debug.LogWarning("Trying to show HaloFB but one is already being shown");
-            Destroy(instantiated);
+            if (!LeaveFBOn) {
+                Debug.LogWarning("Trying to show HaloFB but one is already being shown");
+                Destroy(instantiated);
+            }
         }
         instantiated = Instantiate(haloPrefab, gameObj.transform);
     }
+    
 
     public void Destroy() {
         Destroy(instantiated);
         instantiated = null;
         state = State.None;
     }
-
-
 
     public HaloFBController SetHaloSize(float size)
     {

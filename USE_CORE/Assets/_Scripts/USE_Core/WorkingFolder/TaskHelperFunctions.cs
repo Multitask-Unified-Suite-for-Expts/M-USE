@@ -8,9 +8,11 @@ using USE_StimulusManagement;
 
 public class TaskHelperFunctions
 {
-    private Texture2D HeldTooShortTexture;
-    private Texture2D HeldTooLongTexture;
-    private Texture2D StartButtonTexture;
+    public Texture2D HeldTooShortTexture;
+    public Texture2D HeldTooLongTexture;
+    public Texture2D StartButtonTexture;
+    public Texture2D BackgroundStripesTexture;
+    public Texture2D FBSquareTexture;
     private GameObject StartButton;
     private GameObject FBSquare;
 
@@ -21,15 +23,7 @@ public class TaskHelperFunctions
     private StimDef StimDef;
     private GameObject SquareGO;
 
-    public int GetNumTouchDurationError()
-    {
-        return NumTouchDurationError;
-    }
 
-    public void SetNumTouchDurationError(int val)
-    {
-        NumTouchDurationError = val;
-    }
     public Vector2 playerViewPosition(Vector3 position, Transform playerViewParent)
     {
         Vector2 pvPosition = new Vector2((position[0] / Screen.width) * playerViewParent.GetComponent<RectTransform>().sizeDelta.x, (position[1] / Screen.height) * playerViewParent.GetComponent<RectTransform>().sizeDelta.y);
@@ -52,8 +46,6 @@ public class TaskHelperFunctions
     {
         SquareGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
         SquareGO.name = name;
-       // SquareGO.AddComponent<MeshRenderer>();
-        //SquareGO.AddComponent<Renderer>();
         SquareGO.GetComponent<Renderer>().material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
         SquareGO.GetComponent<Renderer>().material.SetFloat("_SpecularHighlights",0f);
         return SquareGO;
@@ -124,6 +116,14 @@ public class TaskHelperFunctions
                 Debug.Log("User did not Input None, Soft, or Hard for the Shadow Type");
                 break;
         }
+    }
+    public void LoadTextures(String ContextExternalFilePath)
+    {
+        StartButtonTexture = ControlLevel_Trial_Template.LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
+        FBSquareTexture = ControlLevel_Trial_Template.LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "Grey.png");
+        HeldTooLongTexture = ControlLevel_Trial_Template.LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "HorizontalStripes.png");
+        HeldTooShortTexture = ControlLevel_Trial_Template.LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "VerticalStripes.png");
+        BackgroundStripesTexture = ControlLevel_Trial_Template.LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "bg.png");
     }
     /*
     private void TouchDurationErrorFeedback(SelectionHandler<StimDef> MouseHandler, GameObject go, 

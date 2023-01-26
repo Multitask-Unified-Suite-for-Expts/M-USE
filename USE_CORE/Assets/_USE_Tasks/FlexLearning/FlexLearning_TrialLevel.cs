@@ -87,7 +87,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         State SearchDisplay = new State("SearchDisplay");
         State SelectionFeedback = new State("SelectionFeedback");
         State TokenFeedback = new State("TokenFeedback");
-        State ITI = new State("TrialEnd");
+        State ITI = new State("ITI");
         State SearchDisplayDelay = new State("SearchDisplayDelay");
         State Delay = new State("Delay");
 
@@ -106,15 +106,16 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            LoadTextures();
-            //HaloFBController.SetHaloSize(3);
-            StartButton = taskHelper.CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
-            FBSquare = taskHelper.CreateFBSquare(FBSquareTexture, FBSquarePosition, FBSquareScale);
+            taskHelper.LoadTextures(ContextExternalFilePath);
+            HaloFBController.SetHaloSize(5);
+            StartButton = taskHelper.CreateStartButton(taskHelper.StartButtonTexture, ButtonPosition, ButtonScale);
+            FBSquare = taskHelper.CreateFBSquare(taskHelper.FBSquareTexture, FBSquarePosition, FBSquareScale);
         });
 
         SetupTrial.AddInitializationMethod(() =>
         {
             if (!configUIVariablesLoaded) LoadConfigUIVariables();
+            TokenFBController.SetTokenBarFull(false);
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
         });
@@ -150,9 +151,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 TokenFBController
                     .SetRevealTime(tokenRevealDuration.value)
                     .SetUpdateTime(tokenUpdateDuration.value);
-                NumTokenBarFull_InBlock = TokenFBController.GetNumTokenBarFull();
-                TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
-                                               (TokenFBController.GetNumTokenBarFull() * CurrentTrialDef.NumTokenBar);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
                 
                 // Set Experimenter Display Data Summary Strings
@@ -161,16 +159,12 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             });
 
         // Show the target/sample with some other distractors
-        SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay, () =>
-        {
-            TokenFBController.enabled = true;
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);
-        });
+        SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay);
         // Wait for a click and provide feedback accordingly
         MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay);
         SearchDisplay.AddInitializationMethod(() =>
         {
+            TokenFBController.enabled = true;
             tStim.ToggleVisibility(true);
             CreateTextOnExperimenterDisplay();
             if (StimFacingCamera)
@@ -178,6 +172,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 foreach (var stim in tStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
             }
             taskHelper.SetShadowType(ShadowType, "FlexLearning_DirectionalLight");
+            
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
@@ -265,7 +262,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         });
         TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), ITI, () =>
         {
-            if (TokenFBController.GetAnimationPhase() == "Flashing")
+            if (TokenFBController.isTokenBarFull())
             {
                 NumTokenBarFull_InBlock++;
                 if (SyncBoxController != null)
@@ -279,7 +276,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
-                                           (TokenFBController.GetNumTokenBarFull() * CurrentTrialDef.NumTokenBar);
+                                           (NumTokenBarFull_InBlock* CurrentTrialDef.NumTokenBar);
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
         });
@@ -302,7 +299,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             //Remove any remaining items on player view
             DestroyTextOnExperimenterDisplay();
-            TokenFBController.enabled = false;
             ResetDataTrackingVariables();
         });
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
@@ -358,7 +354,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("StartButtonVisibility", () => StartButton.activeSelf);
         FrameData.AddDatum("TrialStimVisibility", () => tStim.IsActive);
-        FrameData.AddDatum("TokenBarVisibility", ()=> TokenFBController.isActiveAndEnabled);
     }
     private void ResetDataTrackingVariables()
     {
@@ -453,12 +448,5 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         MouseHandler.SetHeldTooShort(false);
         TouchDurationError = false;
         TouchDurationError_InBlock++;
-    }
-    private void LoadTextures()
-    {
-        StartButtonTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
-        FBSquareTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "Grey.png");
-        HeldTooLongTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "HorizontalStripes.png");
-        HeldTooShortTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "VerticalStripes.png");
     }
 }

@@ -99,10 +99,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         Add_ControlLevel_InitializationMethod(() =>
         {
-            LoadTextures();
-            //HaloFBController.SetHaloSize(3);
-            StartButton = taskHelper.CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
-            FBSquare = taskHelper.CreateFBSquare(FBSquareTexture, FBSquarePosition, FBSquareScale);
+            taskHelper.LoadTextures(ContextExternalFilePath);
+            HaloFBController.SetHaloSize(5);
+            StartButton = taskHelper.CreateStartButton(taskHelper.StartButtonTexture, ButtonPosition, ButtonScale);
+            FBSquare = taskHelper.CreateFBSquare(taskHelper.FBSquareTexture, FBSquarePosition, FBSquareScale);
         });
         
         SetupTrial.AddInitializationMethod(() =>
@@ -110,6 +110,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (!configUIVariablesLoaded) LoadConfigUIVariables();
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
+            TokenFBController.SetTokenBarFull(false);
         });
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -145,9 +146,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 TokenFBController
                     .SetRevealTime(tokenRevealDuration.value)
                     .SetUpdateTime(tokenUpdateDuration.value);
-                NumTokenBarFull_InBlock = TokenFBController.GetNumTokenBarFull();
-                TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
-                                       (TokenFBController.GetNumTokenBarFull() * CurrentTrialDef.NumTokenBar);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
                 
                 // Set Experimenter Display Data Summary Strings
@@ -156,16 +154,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             });
         
         // Show the target/sample with some other distractors
-        SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay, () =>
-        {
-            TokenFBController.enabled = true;
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);
-        });
+        SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay);
         // Wait for a click and provide feedback accordingly
         MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay);
         SearchDisplay.AddInitializationMethod(() =>
         {
+            TokenFBController.enabled = true;
             tStim.ToggleVisibility(true);
             CreateTextOnExperimenterDisplay();
             if (StimFacingCamera)
@@ -173,6 +167,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 foreach (var stim in tStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
             }
             taskHelper.SetShadowType(ShadowType, "VisualSearch_DirectionalLight");
+            
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
@@ -259,7 +256,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
         TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), ITI, () =>
         {
-            if (TokenFBController.GetAnimationPhase() == "Flashing")
+            if (TokenFBController.isTokenBarFull())
             {
                 NumTokenBarFull_InBlock++;
                 if (SyncBoxController != null)
@@ -273,7 +270,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
-                                           (TokenFBController.GetNumTokenBarFull() * CurrentTrialDef.NumTokenBar);
+                                           (NumTokenBarFull_InBlock * CurrentTrialDef.NumTokenBar);
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
         });
@@ -295,7 +292,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             //Remove any remaining items on player view
             DestroyTextOnExperimenterDisplay();
-            TokenFBController.enabled = false;
             ResetDataTrackingVariables();
         });
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
@@ -356,6 +352,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                              "\n" +
                              "\nSelected Object Code: " + SelectedStimCode +
                              "\nSelected Object Location: " + SelectedStimLocation +
+                             "\n" + 
                              "\nCorrect Selection?: " + CorrectSelection +
                              "\nTouch Duration Error?: " + TouchDurationError +
                              "\n" +
@@ -388,7 +385,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("StartButtonVisibility", () => StartButton.activeSelf);
         FrameData.AddDatum("TrialStimVisibility", () => tStim.IsActive);
-        FrameData.AddDatum("TokenBarVisibility", ()=> TokenFBController.isActiveAndEnabled);
     }
     private void CreateTextOnExperimenterDisplay()
     {
@@ -417,12 +413,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private void DestroyTextOnExperimenterDisplay()
     {
         if (playerViewLoaded)
-        {
-            foreach (GameObject txt in playerViewTextList)
-            {
-                txt.SetActive(false);
-            }
-        }
+            foreach (GameObject txt in playerViewTextList) txt.SetActive(false);
         playerViewLoaded = false;
     }
     private void TouchDurationErrorFeedback(SelectionHandler<VisualSearch_StimDef> MouseHandler, GameObject go)
@@ -437,11 +428,5 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         TouchDurationError = false;
         TouchDurationError_InBlock++;
     }
-    private void LoadTextures()
-    {
-        StartButtonTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
-        FBSquareTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "Grey.png");
-        HeldTooLongTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "HorizontalStripes.png");
-        HeldTooShortTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "VerticalStripes.png");
-    }
+
 }

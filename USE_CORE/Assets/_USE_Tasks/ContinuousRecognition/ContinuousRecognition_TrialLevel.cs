@@ -102,6 +102,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         OriginalTitleTextPosition = TitleTextGO.transform.position;
         OriginalTimerPosition = TimerBackdropGO.transform.position;
 
+        LoadTextures(MaterialFilePath);
+
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
@@ -113,7 +115,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             NumFeedbackRows = 0;
 
             if (StartButton == null)
-                //CreateStartButton();
+                StartButton = CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
 
             if (!VariablesLoaded)
                 LoadConfigUIVariables();

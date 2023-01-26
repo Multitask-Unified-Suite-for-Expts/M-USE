@@ -26,11 +26,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public string MaterialFilePath;
     public string ContextPath;
 
-    Texture2D BackdropStripeTexture;
-    Texture2D HeldTooShortTexture;
-    Texture2D HeldTooLongTexture;
-    Texture2D BackdropTexture;
-
     public Renderer BackdropRenderer;
     public GameObject BackdropPrefab;
     public GameObject BackdropGO;
@@ -135,7 +130,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public float HoldSquareTime;
     public bool MovedOutside;
 
-    private TaskHelperFunctions taskHelper;
 
     public override void DefineControlLevel()
     {
@@ -146,9 +140,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, WhiteSquare, BlueSquare, Feedback, ITI});
 
-        taskHelper = new TaskHelperFunctions();
-
-        LoadTextures();
+        LoadTextures(MaterialFilePath);
 
         //SETUP TRIAL state -------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
@@ -293,7 +285,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     BackdropTouchTime = Time.time;
                     BlueStartTime += currentTrial.TimeoutDuration; //add extra second so it doesn't go straight to white after grating
                     Input.ResetInputAxes(); //Reset input axis so they can't keep holding down on the backdrop.
-                    StartCoroutine(GratedBackdropFlash(BackdropStripeTexture)); //Turn the backdrop to grated texture
+                    StartCoroutine(GratedBackdropFlash(BackdropStripesTexture)); //Turn the backdrop to grated texture
                     BackdropTouches++;
                     BackdropTouches_Trial++;
                 }
@@ -368,7 +360,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 else if (HeldTooLong)
                     StartCoroutine(GratedSquareFlash(HeldTooLongTexture));
                 else if (MovedOutside)
-                    StartCoroutine(GratedSquareFlash(BackdropStripeTexture));
+                    StartCoroutine(GratedSquareFlash(BackdropStripesTexture));
             }
             AudioPlayed = true;
         });
@@ -449,15 +441,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS ------------------------------------------------------------------------------------------
-    void LoadTextures()
-    {
-        HeldTooLongTexture = ControlLevel_Trial_Template.LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "HorizontalStripes.png");
-        HeldTooShortTexture = ControlLevel_Trial_Template.LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "VerticalStripes.png");
-        BackdropStripeTexture = ControlLevel_Trial_Template.LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "bg.png");
-        BackdropTexture = ControlLevel_Trial_Template.LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "BackdropGrey.png");
-    }
-
-
     void AddTrialTouchNumsToBlock()
     {
         BlueSquareTouches_Block += BlueSquareTouches_Trial;
@@ -557,6 +540,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         BackdropRenderer = BackdropGO.GetComponent<Renderer>();
         BackdropRenderer.material.mainTexture = BackdropTexture;
+        BackdropRenderer.material = BackdropMaterial;
         InitialBackdropColor = BackdropRenderer.material.color;
     }
 
@@ -565,7 +549,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         SquareGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
         SquareGO.name = "SquareGO";
         SquareGO.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-
         SquareRenderer = SquareGO.GetComponent<Renderer>();
         SquareMaterial = SquareRenderer.material;
         SquareTexture = SquareRenderer.material.mainTexture;

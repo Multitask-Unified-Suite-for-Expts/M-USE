@@ -8,13 +8,13 @@ using USE_StimulusManagement;
 
 public class TaskHelperFunctions
 {
-    public Texture2D HeldTooShortTexture;
-    public Texture2D HeldTooLongTexture;
-    public Texture2D StartButtonTexture;
-    public Texture2D BackgroundStripesTexture;
-    public Texture2D FBSquareTexture;
-    private GameObject StartButton;
-    private GameObject FBSquare;
+    //public Texture2D HeldTooShortTexture;
+    //public Texture2D HeldTooLongTexture;
+    //public Texture2D StartButtonTexture;
+    //public Texture2D BackgroundStripesTexture;
+    //public Texture2D FBSquareTexture;
+    //private GameObject StartButton;
+    //private GameObject FBSquare;
 
     private bool Grating = false; 
     //Error Tracking Variables
@@ -51,6 +51,7 @@ public class TaskHelperFunctions
         return SquareGO;
     }
     
+    /*
     public GameObject CreateStartButton(Texture2D StartButtonTexture, Vector3 StartButtonPosition, Vector3 StartButtonScale)
     {
         StartButton = CreateSquare("StartButton");
@@ -68,7 +69,7 @@ public class TaskHelperFunctions
         FBSquare.transform.position = FBSquarePosition;
         FBSquare.SetActive(false);
         return FBSquare;
-    }
+    }*/
     public int ChooseTokenReward(TokenReward[] tokenRewards)
     {
         float totalProbability = 0;
@@ -117,14 +118,14 @@ public class TaskHelperFunctions
                 break;
         }
     }
-    public void LoadTextures(String ContextExternalFilePath)
+    /*public void LoadTextures(String ContextExternalFilePath)
     {
         StartButtonTexture = ControlLevel_Trial_Template.LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
         FBSquareTexture = ControlLevel_Trial_Template.LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "Grey.png");
         HeldTooLongTexture = ControlLevel_Trial_Template.LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "HorizontalStripes.png");
         HeldTooShortTexture = ControlLevel_Trial_Template.LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "VerticalStripes.png");
         BackgroundStripesTexture = ControlLevel_Trial_Template.LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "bg.png");
-    }
+    }*/
     /*
     private void TouchDurationErrorFeedback(SelectionHandler<StimDef> MouseHandler, GameObject go, 
            Texture2D HeldTooShortTexture, Texture2D HeldTooLongTexture, float gratingSquareDuration)

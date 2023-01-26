@@ -440,11 +440,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS -----------------------------------------------------------------------------------------
-    public void ButtonFunc()
-    {
-        Debug.Log("BUTTON FUNC!!!");
-    }
-
     void MakeStimPopOut()
     {
         foreach(ContinuousRecognition_StimDef stim in trialStims.stimDefs)

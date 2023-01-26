@@ -127,10 +127,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     // Stimuli Variables
     private GameObject startButton;
     private GameObject FBSquare;
-    public Texture2D HeldTooShortTexture;
-    public Texture2D HeldTooLongTexture;
-    private Texture2D StartButtonTexture;
-    private Texture2D FBSquareTexture;
+    // public Texture2D HeldTooShortTexture;
+    // public Texture2D HeldTooLongTexture;
+    // private Texture2D StartButtonTexture;
+    // private Texture2D FBSquareTexture;
     private bool Grating = false;
     private TaskHelperFunctions taskHelper;
     

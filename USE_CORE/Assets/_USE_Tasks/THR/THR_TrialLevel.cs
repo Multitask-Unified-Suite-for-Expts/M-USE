@@ -29,8 +29,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     Texture2D BackdropStripeTexture;
     Texture2D HeldTooShortTexture;
     Texture2D HeldTooLongTexture;
-
-    public Texture BackdropTexture;
+    Texture2D BackdropTexture;
 
     public Renderer BackdropRenderer;
     public GameObject BackdropPrefab;
@@ -455,6 +454,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         HeldTooLongTexture = ControlLevel_Trial_Template.LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "HorizontalStripes.png");
         HeldTooShortTexture = ControlLevel_Trial_Template.LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "VerticalStripes.png");
         BackdropStripeTexture = ControlLevel_Trial_Template.LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "bg.png");
+        BackdropTexture = ControlLevel_Trial_Template.LoadPNG(MaterialFilePath + Path.DirectorySeparatorChar + "BackdropGrey.png");
     }
 
 
@@ -554,9 +554,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         BackdropGO.transform.position = new Vector3(0, 0, 95);
         BackdropGO.transform.localScale = new Vector3(275, 150, .5f);
         BackdropGO.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
         BackdropRenderer = BackdropGO.GetComponent<Renderer>();
-        BackdropRenderer.material = BackdropMaterial;
-        BackdropTexture = BackdropRenderer.material.mainTexture;
+        BackdropRenderer.material.mainTexture = BackdropTexture;
         InitialBackdropColor = BackdropRenderer.material.color;
     }
 
@@ -565,6 +565,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         SquareGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
         SquareGO.name = "SquareGO";
         SquareGO.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
         SquareRenderer = SquareGO.GetComponent<Renderer>();
         SquareMaterial = SquareRenderer.material;
         SquareTexture = SquareRenderer.material.mainTexture;

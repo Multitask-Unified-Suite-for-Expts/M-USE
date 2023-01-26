@@ -194,8 +194,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             InitializeSlider();
             LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
-            startButton = taskHelper.CreateStartButton(taskHelper.StartButtonTexture, ButtonPosition, ButtonScale);
-            FBSquare = taskHelper.CreateFBSquare(taskHelper.FBSquareTexture, FBSquarePosition, FBSquareScale);
+            startButton = CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
+            FBSquare = CreateFBSquare(FBSquareTexture, FBSquarePosition, FBSquareScale);
             playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
 
         });
@@ -913,9 +913,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         errorTypeString = "TouchDurationError";
         AudioFBController.Play("Negative");
         if (MouseHandler.GetHeldTooShort())
-            StartCoroutine(taskHelper.GratedSquareFlash(taskHelper.HeldTooShortTexture, go, gratingSquareDuration.value));
+            StartCoroutine(taskHelper.GratedSquareFlash(HeldTooShortTexture, go, gratingSquareDuration.value));
         else if (MouseHandler.GetHeldTooLong())
-            StartCoroutine(taskHelper.GratedSquareFlash(taskHelper.HeldTooLongTexture, go, gratingSquareDuration.value));
+            StartCoroutine(taskHelper.GratedSquareFlash(HeldTooLongTexture, go, gratingSquareDuration.value));
         MouseHandler.SetHeldTooLong(false);
         MouseHandler.SetHeldTooShort(false);
         touchDurationError = false;

@@ -106,10 +106,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            taskHelper.LoadTextures(ContextExternalFilePath);
+            LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
-            StartButton = taskHelper.CreateStartButton(taskHelper.StartButtonTexture, ButtonPosition, ButtonScale);
-            FBSquare = taskHelper.CreateFBSquare(taskHelper.FBSquareTexture, FBSquarePosition, FBSquareScale);
+            StartButton = CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
+            FBSquare = CreateFBSquare(FBSquareTexture, FBSquarePosition, FBSquareScale);
         });
 
         SetupTrial.AddInitializationMethod(() =>
@@ -171,7 +171,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             {
                 foreach (var stim in tStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
             }
-            taskHelper.SetShadowType(ShadowType, "FlexLearning_DirectionalLight");
+            SetShadowType(ShadowType, "FlexLearning_DirectionalLight");
             
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);

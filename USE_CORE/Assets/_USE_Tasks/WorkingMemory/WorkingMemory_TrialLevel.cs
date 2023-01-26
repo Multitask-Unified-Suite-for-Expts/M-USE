@@ -107,10 +107,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            taskHelper.LoadTextures(ContextExternalFilePath);
+            LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
-            StartButton = taskHelper.CreateStartButton(taskHelper.StartButtonTexture, ButtonPosition, ButtonScale);
-            FBSquare = taskHelper.CreateFBSquare(taskHelper.FBSquareTexture, FBSquarePosition, FBSquareScale);
+            StartButton = CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
+            FBSquare = CreateFBSquare(FBSquareTexture, FBSquarePosition, FBSquareScale);
         });
         SetupTrial.AddInitializationMethod(() =>
         {
@@ -471,9 +471,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     {
         AudioFBController.Play("Negative");
         if (MouseHandler.GetHeldTooShort())
-            StartCoroutine(taskHelper.GratedSquareFlash(taskHelper.HeldTooShortTexture, go, gratingSquareDuration.value));
+            StartCoroutine(taskHelper.GratedSquareFlash(HeldTooShortTexture, go, gratingSquareDuration.value));
         else if (MouseHandler.GetHeldTooLong())
-            StartCoroutine(taskHelper.GratedSquareFlash(taskHelper.HeldTooLongTexture, go, gratingSquareDuration.value));
+            StartCoroutine(taskHelper.GratedSquareFlash(HeldTooLongTexture, go, gratingSquareDuration.value));
         MouseHandler.SetHeldTooLong(false);
         MouseHandler.SetHeldTooShort(false);
         TouchDurationError = false;

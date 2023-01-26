@@ -56,8 +56,8 @@ namespace USE_ExperimentTemplate_Trial
 
         // Texture Variables
         [HideInInspector] public Texture2D StartButtonTexture, FBSquareTexture, HeldTooLongTexture, HeldTooShortTexture, BackgroundStripesTexture;
-        [HideInInspector] public bool Grating;
-        // Create Trial GameObject Variables
+        //[HideInInspector] public bool Grating;
+        //Create Trial GameObject Variables
         [HideInInspector] public GameObject StartButton, FBSquare;
         
         //protected TrialDef CurrentTrialDef;
@@ -270,9 +270,9 @@ namespace USE_ExperimentTemplate_Trial
             return pvPosition;
         }
         
-        public IEnumerable GratedSquareFlash(Texture2D newTexture, GameObject square, float gratingSquareDuration)
+        /*public IEnumerable GratedSquareFlash(Texture2D newTexture, GameObject square, float gratingSquareDuration)
         {
-            Grating = true;
+            //Grating = true;
             Color32 originalColor = square.GetComponent<Renderer>().material.color;
             Texture originalTexture = square.GetComponent<Renderer>().material.mainTexture;
             square.GetComponent<Renderer>().material.color = new Color32(224, 78, 92, 255);
@@ -280,9 +280,9 @@ namespace USE_ExperimentTemplate_Trial
             yield return new WaitForSeconds(gratingSquareDuration);
             square.GetComponent<Renderer>().material.mainTexture = originalTexture;
             square.GetComponent<Renderer>().material.color = originalColor;
-            Grating = false;
+            //Grating = false;
             if (square.name == "FBSquare") square.SetActive(false);
-        }
+        }*/
         public GameObject CreateSquare(string name)
         {
             GameObject SquareGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -292,6 +292,7 @@ namespace USE_ExperimentTemplate_Trial
             return SquareGO;
         }
     
+        
         public GameObject CreateStartButton(Texture2D StartButtonTexture, Vector3 StartButtonPosition, Vector3 StartButtonScale)
         {
             StartButton = CreateSquare("StartButton");

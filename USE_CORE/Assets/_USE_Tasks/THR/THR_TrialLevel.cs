@@ -141,19 +141,18 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         LoadTextures(MaterialFilePath);
 
-        if (!ColorsSet)
-            CreateColors();
-
-        if (BackdropGO == null)
-            CreateBackdrop();
-
-        if (SquareGO == null)
-            CreateSquare();
-
-
         //SETUP TRIAL state -------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
+            if (!ColorsSet)
+                CreateColors();
+
+            if (BackdropGO == null)
+                CreateBackdrop();
+
+            if (SquareGO == null)
+                CreateSquare();
+
             if (TrialCount_InBlock == 0)
                 TrialCompletionList = new List<int>();
 

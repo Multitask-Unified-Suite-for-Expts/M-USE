@@ -89,12 +89,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int NumHigherRewardChosen_Block;
     [HideInInspector] public int NumLowerRewardChosen_Block;
 
-    [HideInInspector] public ConfigNumber scalingInterval, inflateDuration, itiDuration; //ScalingInterval is used for balloonInflation!
+    [HideInInspector] public ConfigNumber scalingInterval, inflateDuration, itiDuration, popToFeedbackDelay; //ScalingInterval is used for balloonInflation!
 
     [HideInInspector] public GameObject MaxOutline_Left;
     [HideInInspector] public GameObject MaxOutline_Right;
 
     [HideInInspector] public bool InflateAudioPlayed;
+    [HideInInspector] public bool IsHuman;
+
 
 
     public override void DefineControlLevel()
@@ -121,13 +123,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
-            MaxOutline_Left = new GameObject();
-            MaxOutline_Right = new GameObject();
-
-            StartButton = CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
-
             if (!ObjectsCreated)
+            {
+                StartButton = CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
                 CreateObjects();
+            }
 
             LoadConfigUIVariables();
             SetTrialSummaryString();
@@ -321,12 +321,16 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
 
         //PopBalloon state -------------------------------------------------------------------------------------------------------
+        float delayStartTime = 0;
+
         PopBalloon.AddDefaultInitializationMethod(() =>
         {
             if (Response == 1)
             {
-                AudioFBController.Play("EC_NicePop"); //better for monkeys
-                //AudioFBController.Play("EC_HarshPop"); //better for humans
+                if(IsHuman)
+                    AudioFBController.Play("EC_HarshPop"); //better for humans
+                else
+                    AudioFBController.Play("EC_NicePop"); //better for monkeys
             }
             else
             {
@@ -335,7 +339,16 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
             TrialStim.SetActive(false);
         });
-        PopBalloon.SpecifyTermination(() => !TrialStim.activeSelf && !AudioFBController.IsPlaying(), Feedback);
+        PopBalloon.AddUpdateMethod(() =>
+        {
+            if(!TrialStim.activeSelf && !AudioFBController.IsPlaying())
+            {
+                delayStartTime += Time.deltaTime;
+            }
+        });
+        //PopBalloon.SpecifyTermination(() => !TrialStim.activeSelf && !AudioFBController.IsPlaying(), Feedback);
+        PopBalloon.SpecifyTermination(() => !TrialStim.activeSelf && delayStartTime > popToFeedbackDelay.value, Feedback, () => delayStartTime = 0);
+
 
         //Feedback state -------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
@@ -529,6 +542,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         scalingInterval = ConfigUiVariables.get<ConfigNumber>("scalingInterval");
         inflateDuration = ConfigUiVariables.get<ConfigNumber>("inflateDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
+        popToFeedbackDelay = ConfigUiVariables.get<ConfigNumber>("popToFeedbackDelay");
     }
 
     void CreateObjects()

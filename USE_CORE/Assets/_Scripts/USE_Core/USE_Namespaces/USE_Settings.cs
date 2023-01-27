@@ -167,34 +167,22 @@ namespace USE_Settings
 			{
 				AddSetting(key, (Vector3[]) SessionSettings.ConvertStringToType<Vector3[]>(stringValue));
 			}
-			else if (typeString.ToLower() == "float[]")
-			{
-				try
-				{
-					// Remove the parentheses
-					if (stringValue.StartsWith("(", StringComparison.Ordinal) &&
-					    stringValue.EndsWith(")", StringComparison.Ordinal) ||
-					    stringValue.StartsWith("{", StringComparison.Ordinal) &&
-					    stringValue.EndsWith("}", StringComparison.Ordinal) ||
-					    stringValue.StartsWith("[", StringComparison.Ordinal) &&
-					    stringValue.EndsWith("]", StringComparison.Ordinal))
-					{
-						stringValue = stringValue.Substring(1, stringValue.Length - 2);
-					}
-
-					// split the items
-					string[] sArray = stringValue.Split(',');
-					AddSetting(key, Array.ConvertAll(stringValue.Split(','), float.Parse));
-				}
-				catch (Exception e)
-				{
-					Debug.Log("Tried to convert string \"" + stringValue + "\" to type \""
-					          + typeString + "\" to add to Setting " + key + " in Settings List " + Name +
-					          " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
+            else if (typeString.ToLower() == "vector2[]")
+            {
+                AddSetting(key, (Vector2[])SessionSettings.ConvertStringToType<Vector2[]>(stringValue));
+            }
+            else if (typeString.ToLower() == "list<vector3>")
+            {
+                AddSetting(key, (List<Vector3>)SessionSettings.ConvertStringToType<List<Vector3>>(stringValue));
+            }
+            else if (typeString.ToLower() == "list<vector2>")
+            {
+                AddSetting(key, (List<Vector2>)SessionSettings.ConvertStringToType<List<Vector2>>(stringValue));
+            }
+            else if (typeString.ToLower() == "float[]")
+            {
+                AddSetting(key, (float[])SessionSettings.ConvertStringToType<float[]>(stringValue));
+            }
 			else if (typeString.ToLower() == "list<string>")
 			{
 				try

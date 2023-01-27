@@ -201,6 +201,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
 
 
             //RestartBlock Hot Key
+            //NOT WORKING. CR starts over but it thinks its TrialCountInBlock1 cuz incremented in setupTrial. Also tokenbar not resetting. 
             HotKey restartBlock = new HotKey
             {
                 keyDescription = "R",
@@ -208,9 +209,10 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.R),
                 hotKeyAction = () =>
                 {
-                    HkPanel.TaskLevel.BlockCount--;
-                    HkPanel.TrialLevel.ForceBlockEnd = true;
+                    //HkPanel.TrialLevel.ForceBlockEnd = true;
                     HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+                    HkPanel.TaskLevel.BlockCount--;
+                    HkPanel.TrialLevel.TrialCount_InBlock = 0;
                 }
             };
             HotKeyList.Add(restartBlock);
@@ -227,15 +229,17 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         return;
                     else
                     {
-                        HkPanel.TaskLevel.BlockCount -= 2;
-                        HkPanel.TrialLevel.ForceBlockEnd = true;
+                        //HkPanel.TrialLevel.ForceBlockEnd = true;
                         HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+                        HkPanel.TaskLevel.BlockCount -= 2;
+                        HkPanel.TrialLevel.TrialCount_InBlock = 0;
                     }
                 }
             };
             HotKeyList.Add(previousBlock);
 
             //End Block Hot Key
+            //APPEARS TO BE WORKING
             HotKey endBlock = new HotKey
             {
                 keyDescription = "N",
@@ -243,13 +247,14 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.N),
                 hotKeyAction = () =>
                 {
+                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI"));
                     HkPanel.TrialLevel.ForceBlockEnd = true;
-                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
                 }
             };
             HotKeyList.Add(endBlock);
 
             //EndTask Hot Key
+            //APPEARS TO BE WORKING
             HotKey endTask = new HotKey
             {
                 keyDescription = "E",
@@ -257,9 +262,15 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.E),
                 hotKeyAction = () =>
                 {
+<<<<<<< HEAD
                     HkPanel.TrialLevel.ForceBlockEnd = true; //End trial
                     HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI")); 
                     HkPanel.TaskLevel.Terminated = true; //End Task
+=======
+                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI")); 
+                    HkPanel.TrialLevel.ForceBlockEnd = true;
+                    HkPanel.TaskLevel.Terminated = true; 
+>>>>>>> Nathan_Main
                     Destroy(GameObject.Find("Controllers")); //Delete current Controllers GO, since Task Selection creates new one
                 }
             };
@@ -273,8 +284,10 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.Escape),
                 hotKeyAction = () =>
                 {
+                    HkPanel.TrialLevel.ForceBlockEnd = true;
                     HkPanel.TaskLevel.Terminated = true;
                     HkPanel.SessionLevel.TasksFinished = true;
+                    HkPanel.SessionLevel.SpecifyCurrentState(HkPanel.SessionLevel.GetStateFromName("FinishSession"));
                 }
             };
             HotKeyList.Add(quitGame);

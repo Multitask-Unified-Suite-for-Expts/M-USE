@@ -29,7 +29,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     //Game Objects:
     GameObject StartButton, StimLeft, StimRight, TrialStim, BalloonContainerLeft, BalloonContainerRight,
-               BalloonOutline, RewardContainerLeft, RewardContainerRight, Reward, MiddleBarrier;
+               BalloonOutline, RewardContainerLeft, RewardContainerRight, Reward, MiddleBarrier, Borders;
 
     //Colors:
     [HideInInspector] Color Red;
@@ -70,7 +70,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     //Variables to Inflate balloon at interval rate
     [HideInInspector] float InflateClipDuration;
     [HideInInspector] bool Inflate;
-    [HideInInspector] private readonly float MaxInflation_Y = 25f;
+    [HideInInspector] private readonly float MaxInflation_Y = 35f;
     [HideInInspector] float ScalePerInflation_Y;
     [HideInInspector] public float ScaleTimer;
     [HideInInspector] Vector3 IncrementAmounts;
@@ -89,12 +89,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int NumHigherRewardChosen_Block;
     [HideInInspector] public int NumLowerRewardChosen_Block;
 
-    [HideInInspector] public ConfigNumber scalingInterval, inflateDuration, itiDuration; //ScalingInterval is used for balloonInflation!
+    [HideInInspector] public ConfigNumber scalingInterval, inflateDuration, itiDuration, popToFeedbackDelay; //ScalingInterval is used for balloonInflation!
 
     [HideInInspector] public GameObject MaxOutline_Left;
     [HideInInspector] public GameObject MaxOutline_Right;
 
     [HideInInspector] public bool InflateAudioPlayed;
+    [HideInInspector] public bool IsHuman;
 
 
     public override void DefineControlLevel()
@@ -121,11 +122,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
+<<<<<<< HEAD
             MaxOutline_Left = new GameObject();
             MaxOutline_Right = new GameObject();
 
             StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
 
+=======
+>>>>>>> Nathan_Main
             if (!ObjectsCreated)
                 CreateObjects();
 
@@ -321,12 +325,16 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
 
         //PopBalloon state -------------------------------------------------------------------------------------------------------
+        float delayStartTime = 0;
+
         PopBalloon.AddDefaultInitializationMethod(() =>
         {
             if (Response == 1)
             {
-                AudioFBController.Play("EC_NicePop"); //better for monkeys
-                //AudioFBController.Play("EC_HarshPop"); //better for humans
+                if(IsHuman)
+                    AudioFBController.Play("EC_HarshPop"); //better for humans
+                else
+                    AudioFBController.Play("EC_NicePop"); //better for monkeys
             }
             else
             {
@@ -335,7 +343,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
             TrialStim.SetActive(false);
         });
-        PopBalloon.SpecifyTermination(() => !TrialStim.activeSelf && !AudioFBController.IsPlaying(), Feedback);
+        PopBalloon.AddUpdateMethod(() =>
+        {
+            if (!TrialStim.activeSelf)
+                delayStartTime += Time.deltaTime;
+        });
+        PopBalloon.SpecifyTermination(() => !TrialStim.activeSelf && delayStartTime > popToFeedbackDelay.value, Feedback, () => delayStartTime = 0);
 
         //Feedback state -------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
@@ -509,6 +522,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void ActivateStimAndRewards()
     {
+        Borders.SetActive(true);
         MiddleBarrier.SetActive(true);
         StimRight.SetActive(true);
         StimLeft.SetActive(true);
@@ -518,7 +532,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void DisableAllGameobjects()
     {
-        StartButton.SetActive(false);
         StimLeft.SetActive(false);
         StimRight.SetActive(false);
         BalloonOutline.SetActive(false);
@@ -529,14 +542,18 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         scalingInterval = ConfigUiVariables.get<ConfigNumber>("scalingInterval");
         inflateDuration = ConfigUiVariables.get<ConfigNumber>("inflateDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
+        popToFeedbackDelay = ConfigUiVariables.get<ConfigNumber>("popToFeedbackDelay");
     }
 
     void CreateObjects()
     {
+        StartButton = CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
+
         StimLeft = Instantiate(StimLeftPrefab, StimLeftPrefab.transform.position, StimLeftPrefab.transform.rotation);
         StimLeft.name = "StimLeft";
         Red = StimLeft.GetComponent<Renderer>().material.color; //set red color. 
         StimLeft.GetComponent<Renderer>().material.color = Red;
+        TrialStimInitLocalScale = StimLeft.transform.localScale;
 
         StimRight = Instantiate(StimRightPrefab, StimRightPrefab.transform.position, StimRightPrefab.transform.rotation);
         StimRight.name = "StimRight";
@@ -551,12 +568,57 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         BalloonOutline.transform.localScale = new Vector3(10, 0.01f, 10);
         BalloonOutline.GetComponent<Renderer>().material.color = OffWhiteOutlineColor;
 
+        List<GameObject> borderList = new List<GameObject>();
+
+        Borders = new GameObject("Borders");
+
+        GameObject topBorder = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        topBorder.name = "TopBorder";
+        topBorder.transform.parent = Borders.transform;
+        topBorder.transform.position = new Vector3(0, -.005f, 0);
+        topBorder.transform.eulerAngles = new Vector3(0, 0, 90f);
+        topBorder.transform.localScale = new Vector3(.05f, 4.018f, .001f);
+        borderList.Add(topBorder);
+
+        GameObject rightBorder = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        rightBorder.name = "RightBorder";
+        rightBorder.transform.parent = Borders.transform;
+        rightBorder.transform.position = new Vector3(2.035f, -1.157f, 0);
+        rightBorder.transform.eulerAngles = Vector3.zero;
+        rightBorder.transform.localScale = new Vector3(.05f, 2.35f, .001f);
+        borderList.Add(rightBorder);
+
+        GameObject leftBorder = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        leftBorder.name = "LeftBorder";
+        leftBorder.transform.parent = Borders.transform;
+        leftBorder.transform.position = new Vector3(-2.035f, -1.159f, 0);
+        leftBorder.transform.eulerAngles = Vector3.zero;
+        leftBorder.transform.localScale = new Vector3(.05f, 2.35f, .001f);
+        borderList.Add(leftBorder);
+
+        GameObject bottomBorder = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        bottomBorder.name = "BottomBorder";
+        bottomBorder.transform.parent = Borders.transform;
+        bottomBorder.transform.position = new Vector3(0, -2.3f, 0);
+        bottomBorder.transform.eulerAngles = new Vector3(0, 0, 90f);
+        bottomBorder.transform.localScale = new Vector3(.05f, 4.018f, .001f);
+        borderList.Add(bottomBorder);
+
+        Borders.transform.position = new Vector3(0, 1.755f, 0);
+
         MiddleBarrier = GameObject.CreatePrimitive(PrimitiveType.Cube);
         MiddleBarrier.name = "MiddleBarrier";
-        MiddleBarrier.transform.position = new Vector3(0, .6f, 0);
-        MiddleBarrier.transform.localScale = new Vector3(.0125f, 2.2385f, .001f);
-        Color borderColor = GameObject.Find("TopBorder").GetComponent<Renderer>().material.color;
-        MiddleBarrier.GetComponent<Renderer>().material.color = borderColor;
+        MiddleBarrier.transform.position = new Vector3(0, .602f, 0);
+        MiddleBarrier.transform.localScale = new Vector3(.0125f, 2.245f, .001f);
+        borderList.Add(MiddleBarrier);
+
+        foreach (GameObject border in borderList)
+        {
+            Material mat = border.GetComponent<Renderer>().material;
+            mat.color = OffWhiteOutlineColor;
+            mat.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
+            mat.SetFloat("_SpecularHighlights", 0f);
+        }
 
         BalloonContainerLeft = new GameObject("BalloonContainerLeft");
         BalloonContainerLeft.transform.position = new Vector3(-1, .15f, .5f);
@@ -573,8 +635,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         RewardContainerRight = new GameObject("RewardContainerRight");
         RewardContainerRight.transform.position = new Vector3(.85f, 1.6f, 0);
         RewardContainerRight.transform.localScale = new Vector3(1, 1, 1);
-        
-        TrialStimInitLocalScale = StimLeft.transform.localScale;
+
 
         //Wrap Left side objects in container and Center to left side:
         GameObject leftWrapper = new GameObject();
@@ -605,6 +666,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         StartButton.SetActive(false);
         BalloonOutline.SetActive(false);
         Reward.SetActive(false);
+        Borders.SetActive(false);
 
         ObjectsCreated = true;
     }
@@ -628,11 +690,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     void CreateBalloonOutlines(int numBalloons, Vector3 ScaleUpAmount, int clickPerOutline, Vector3 pos, GameObject container)
     {
         string containerName = (container.name == "BalloonContainerLeft" ? "Left" : "Right");
-
         for (int i = clickPerOutline; i <= numBalloons; i += clickPerOutline)
         {
             GameObject outline = Instantiate(BalloonOutline, pos, BalloonOutline.transform.rotation);
-            outline.GetComponent<Renderer>().material.color = OffWhiteOutlineColor;
             outline.transform.parent = container.transform;
             outline.name = "Outline" + containerName + (i);
             outline.transform.localScale += (i) * ScaleUpAmount;

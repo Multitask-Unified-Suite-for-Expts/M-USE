@@ -45,297 +45,132 @@ namespace USE_Settings
 			}
 
 			Type type = TypeDict[typeString];
-			if (typeString.ToLower() == "monitordetails")
+			try
 			{
-				try
+				if (typeString.ToLower() == "monitordetails")
 				{
 					AddSetting(key, JsonConvert.DeserializeObject<USE_DisplayManagement.MonitorDetails>(stringValue));
 				}
-				catch (Exception e)
-				{
-					Debug.Log("Tried to convert string \"" + stringValue + "\" to type \""
-					          + typeString + "\" to add to Setting " + key + " in Settings List " + Name +
-					          " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			else if (typeString.ToLower() == "exptparameters")
-			{
-				try
+				else if (typeString.ToLower() == "exptparameters")
 				{
 					AddSetting(key, JsonConvert.DeserializeObject<FLU_Common_Namespace.ExptParameters>(stringValue));
 				}
-				catch (Exception e)
-				{
-					Debug.Log("Tried to convert string \"" + stringValue + "\" to type \""
-					          + typeString + "\" to add to Setting " + key + " in Settings List " + Name +
-					          " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			else if (typeString.ToLower() == "string")
-			{
-				try
+				else if (typeString.ToLower() == "string")
 				{
 					AddSetting(key, stringValue);
 				}
-				catch (Exception e)
-				{
-					Debug.Log("Tried to convert string \"" + stringValue + "\" to type \""
-					          + typeString + "\" to add to Setting " + key + " in Settings List " + Name +
-					          " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			else if (typeString.ToLower() == "blockdef[]")
-			{
-				try
+				else if (typeString.ToLower() == "blockdef[]")
 				{
 					AddSetting(key, JsonConvert.DeserializeObject<FLU_Common_Namespace.BlockDef[]>(stringValue));
 				}
-				catch (Exception e)
+				else if (typeString.ToLower() == "vector3")
 				{
-					Debug.Log("Tried to convert string \"" + stringValue + "\" to type \""
-					          + typeString + "\" to add to Setting " + key + " in Settings List " + Name +
-					          " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			else if (typeString.ToLower() == "vector3")
-			{
-				try
-				{
-					// Remove the parentheses
-					if (stringValue.StartsWith("(", StringComparison.Ordinal) &&
-					    stringValue.EndsWith(")", StringComparison.Ordinal) ||
-					    stringValue.StartsWith("{", StringComparison.Ordinal) &&
-					    stringValue.EndsWith("}", StringComparison.Ordinal) ||
-					    stringValue.StartsWith("[", StringComparison.Ordinal) &&
-					    stringValue.EndsWith("]", StringComparison.Ordinal))
-					{
+					if (StartsOrEndsWithBrackets(stringValue))
 						stringValue = stringValue.Substring(1, stringValue.Length - 2);
-					}
-
-					// split the items
 					string[] sArray = stringValue.Split(',');
-					AddSetting(key,
-						new Vector3(float.Parse(sArray[0].Trim()), float.Parse(sArray[1].Trim()),
-							float.Parse(sArray[2].Trim())));
+					AddSetting(key,new Vector3(float.Parse(sArray[0].Trim()), float.Parse(sArray[1].Trim()), float.Parse(sArray[2].Trim())));
 				}
-				catch (Exception e)
+				else if (typeString.ToLower() == "vector2")
 				{
-					Debug.Log("Tried to convert string \"" + stringValue + "\" to type \""
-					          + typeString + "\" to add to Setting " + key + " in Settings List " + Name +
-					          " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			else if (typeString.ToLower() == "vector2")
-			{
-				try
-				{
-					// Remove the parentheses
-					if (stringValue.StartsWith("(", StringComparison.Ordinal) &&
-					    stringValue.EndsWith(")", StringComparison.Ordinal) ||
-						stringValue.StartsWith("{", StringComparison.Ordinal) &&
-						stringValue.EndsWith("}", StringComparison.Ordinal) ||
-						stringValue.StartsWith("[", StringComparison.Ordinal) &&
-						stringValue.EndsWith("]", StringComparison.Ordinal))
-					{
+					if (StartsOrEndsWithBrackets(stringValue))
 						stringValue = stringValue.Substring(1, stringValue.Length - 2);
-					}
-
-					// split the items
 					string[] sArray = stringValue.Split(',');
 					AddSetting(key, new Vector2(float.Parse(sArray[0].Trim()), float.Parse(sArray[1].Trim())));
 				}
-				catch (Exception e)
+				else if (typeString.ToLower() == "vector3[]")
 				{
-					Debug.Log("Tried to convert string \"" + stringValue + "\" to type \""
-					          + typeString + "\" to add to Setting " + key + " in Settings List " + Name +
-					          " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+					AddSetting(key, (Vector3[]) SessionSettings.ConvertStringToType<Vector3[]>(stringValue));
 				}
-			}
-			else if (typeString.ToLower() == "vector3[]")
-			{
-				AddSetting(key, (Vector3[]) SessionSettings.ConvertStringToType<Vector3[]>(stringValue));
-			}
-			else if (typeString.ToLower() == "float[]")
-			{
-				try
+				else if (typeString.ToLower() == "vector2[]")
 				{
-					// Remove the parentheses
-					if (stringValue.StartsWith("(", StringComparison.Ordinal) &&
-					    stringValue.EndsWith(")", StringComparison.Ordinal) ||
-					    stringValue.StartsWith("{", StringComparison.Ordinal) &&
-					    stringValue.EndsWith("}", StringComparison.Ordinal) ||
-					    stringValue.StartsWith("[", StringComparison.Ordinal) &&
-					    stringValue.EndsWith("]", StringComparison.Ordinal))
-					{
-						stringValue = stringValue.Substring(1, stringValue.Length - 2);
-					}
-
-					// split the items
-					string[] sArray = stringValue.Split(',');
-					AddSetting(key, Array.ConvertAll(stringValue.Split(','), float.Parse));
+					AddSetting(key, (Vector2[])SessionSettings.ConvertStringToType<Vector2[]>(stringValue));
 				}
-				catch (Exception e)
+				else if (typeString.ToLower() == "list<vector3>")
 				{
-					Debug.Log("Tried to convert string \"" + stringValue + "\" to type \""
-					          + typeString + "\" to add to Setting " + key + " in Settings List " + Name +
-					          " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+					AddSetting(key, (List<Vector3>)SessionSettings.ConvertStringToType<List<Vector3>>(stringValue));
 				}
-			}
-			else if (typeString.ToLower() == "list<string>")
-			{
-				try
+				else if (typeString.ToLower() == "list<vector2>")
 				{
-					// Remove the parentheses
-					if (stringValue.StartsWith("(", StringComparison.Ordinal) &&
-					    stringValue.EndsWith(")", StringComparison.Ordinal) ||
-					    stringValue.StartsWith("{", StringComparison.Ordinal) &&
-					    stringValue.EndsWith("}", StringComparison.Ordinal) ||
-					    stringValue.StartsWith("[", StringComparison.Ordinal) &&
-					    stringValue.EndsWith("]", StringComparison.Ordinal))
-					{
-						stringValue = stringValue.Substring(1, stringValue.Length - 2);
-					}
-
-					// split the items
+					AddSetting(key, (List<Vector2>)SessionSettings.ConvertStringToType<List<Vector2>>(stringValue));
+				}
+				else if (typeString.ToLower() == "float[]")
+				{
+					AddSetting(key, (float[])SessionSettings.ConvertStringToType<float[]>(stringValue));
+				}
+				else if (typeString.ToLower() == "list<string>")
+				{
+					if(StartsOrEndsWithBrackets(stringValue))
+                        stringValue = stringValue.Substring(1, stringValue.Length - 2);
 					string[] sArray = stringValue.Split(',');
 					for (int sCount = 0; sCount < sArray.Length; sCount++)
 					{
 						sArray[sCount] = sArray[sCount].Replace("\"", "");
 						sArray[sCount] = sArray[sCount].Trim();
 					}
-
 					AddSetting(key, sArray.ToList());
 				}
-				catch (Exception e)
+				else if (typeString.ToLower() == "dictionary<string,string>")
 				{
-					Debug.Log("Tried to convert string \"" + stringValue + "\" to type \""
-					          + typeString + "\" to add to Setting " + key + " in Settings List " + Name +
-					          " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			else if (typeString.ToLower() == "dictionary<string,string>")
-			{
-				try
-				{
-					// Remove the parentheses
-					if (stringValue.StartsWith("(", StringComparison.Ordinal) &&
-					    stringValue.EndsWith(")", StringComparison.Ordinal) ||
-					    stringValue.StartsWith("{", StringComparison.Ordinal) &&
-					    stringValue.EndsWith("}", StringComparison.Ordinal) ||
-					    stringValue.StartsWith("[", StringComparison.Ordinal) &&
-					    stringValue.EndsWith("]", StringComparison.Ordinal))
-					{
-						stringValue = stringValue.Substring(1, stringValue.Length - 2);
-					}
-
-					// split the items
-					string[] sArray = stringValue.Split(',');
-					Dictionary<string, string> pairs = new Dictionary<string, string>();
+                    if (StartsOrEndsWithBrackets(stringValue))
+                        stringValue = stringValue.Substring(1, stringValue.Length - 2);
+                    string[] sArray = stringValue.Split(',');
+                    Dictionary<string, string> pairs = new Dictionary<string, string>();
 					for (int sCount = 0; sCount < sArray.Length; sCount++)
 					{
 						sArray[sCount] = sArray[sCount].Replace("\"", "");
 						sArray[sCount] = sArray[sCount].Trim();
 						string[] sArray2 = sArray[sCount].Split(':');
-						if (sArray2.Length != 2)
-						{
-							throw new Exception("Each pair should have exactly a single colon");
-						}
-
 						pairs.Add(sArray2[0].Trim(), sArray2[1].Trim());
 					}
-
 					AddSetting(key, pairs);
 				}
-				catch (Exception e)
+				else if (typeString.ToLower() == "ordereddictionary<string,string>")
 				{
-					Debug.Log("Tried to convert string \"" + stringValue + "\" to type \""
-					          + typeString + "\" to add to Setting " + key + " in Settings List " + Name +
-					          " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			else if (typeString.ToLower() == "ordereddictionary<string,string>")
-			{
-				try
-				{
-					// Remove the parentheses
-					if (stringValue.StartsWith("(", StringComparison.Ordinal) &&
-					    stringValue.EndsWith(")", StringComparison.Ordinal) ||
-					    stringValue.StartsWith("{", StringComparison.Ordinal) &&
-					    stringValue.EndsWith("}", StringComparison.Ordinal) ||
-					    stringValue.StartsWith("[", StringComparison.Ordinal) &&
-					    stringValue.EndsWith("]", StringComparison.Ordinal))
-					{
-						stringValue = stringValue.Substring(1, stringValue.Length - 2);
-					}
-
-					// split the items
-					string[] sArray = stringValue.Split(',');
-					OrderedDictionary pairs = new OrderedDictionary();
+                    if (StartsOrEndsWithBrackets(stringValue))
+                        stringValue = stringValue.Substring(1, stringValue.Length - 2);
+                    string[] sArray = stringValue.Split(',');
+                    OrderedDictionary pairs = new OrderedDictionary();
 					for (int sCount = 0; sCount < sArray.Length; sCount++)
 					{
 						sArray[sCount] = sArray[sCount].Replace("\"", "");
 						sArray[sCount] = sArray[sCount].Trim();
 						string[] sArray2 = sArray[sCount].Split(':');
-						if (sArray2.Length != 2)
-						{
-							throw new Exception("Each pair should have exactly a single colon");
-						}
-
 						pairs.Add(sArray2[0].Trim(), sArray2[1].Trim());
 					}
-
 					AddSetting(key, pairs);
 				}
-				catch (Exception e)
-				{
-					Debug.Log("Tried to convert string \"" + stringValue + "\" to type \""
-					          + typeString + "\" to add to Setting " + key + " in Settings List " + Name +
-					          " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			else if (type != null)
-			{
-				try
-				{
-					//can add custom conversion instructions for particular typeStrings if needed
+				else if (type != null)
 					AddSetting(key, Convert.ChangeType(stringValue, type));
-				}
-				catch (Exception e)
-				{
-					Debug.Log("Tried to convert string \"" + stringValue + "\" to type \""
-					          + typeString + "\" to add to Setting " + key + " in Settings List " + Name +
-					          " but the conversion failed.");
+				else
+					throw new Exception("Attempted to add setting of type \"" + typeString + "\" " +
+										"to Setting " + key + "in Settings list " + Name +
+										" but this type is not recognized.");
+			}
+			catch (Exception e)
+			{
+                Debug.Log("Tried to convert string \"" + stringValue + "\" to type \""
+							+ typeString + "\" to add to Setting " + key + " in Settings List " + Name +
+							" but the conversion failed.");
 
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
+                throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+            }
+
+        }
+
+		public bool StartsOrEndsWithBrackets(string s)
+		{
+			if (s.StartsWith("(", StringComparison.Ordinal) &&
+				s.EndsWith(")", StringComparison.Ordinal) ||
+				s.StartsWith("{", StringComparison.Ordinal) &&
+				s.EndsWith("}", StringComparison.Ordinal) ||
+				s.StartsWith("[", StringComparison.Ordinal) &&
+				s.EndsWith("]", StringComparison.Ordinal))
+			{
+				return true;
 			}
 			else
-			{
-				throw new Exception("Attempted to add setting of type \"" + typeString + "\" " +
-				                    "to Setting " + key + "in Settings list " + Name +
-				                    " but this type is not recognized.");
-			}
-		}
+				return false;
+        }
 
 		public bool SettingExists(string key)
 		{

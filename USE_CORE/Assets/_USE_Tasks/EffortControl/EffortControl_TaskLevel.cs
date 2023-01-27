@@ -75,6 +75,11 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             trialLevel.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
         else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
 
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "IsHuman"))
+            trialLevel.IsHuman = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "IsHuman");
+        else
+            trialLevel.IsHuman = false;
+
 
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();

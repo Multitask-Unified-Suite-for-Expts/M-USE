@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657815, g: 0.49641192, b: 0.57481617, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657642, g: 0.4964097, b: 0.5748155, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -423,7 +423,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1221092947
 Transform:
   m_ObjectHideFlags: 0
@@ -518,6 +518,12 @@ MonoBehaviour:
   SelectionType: 
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
+  StartButtonTexture: {fileID: 0}
+  FBSquareTexture: {fileID: 0}
+  HeldTooLongTexture: {fileID: 0}
+  HeldTooShortTexture: {fileID: 0}
+  BackdropStripesTexture: {fileID: 0}
+  BackdropTexture: {fileID: 0}
   StimNoMaterialPrefab: {fileID: 3971733981247237095, guid: 48399b3e51fb047ff80a4c57704fcf7f,
     type: 3}
   StimLeftPrefab: {fileID: 7975343082115934864, guid: 807cad8d28a2e48ecb294f7b4351c79d,
@@ -528,12 +534,11 @@ MonoBehaviour:
     type: 3}
   OutlinePrefab: {fileID: -927199367670048503, guid: 79fedf5c0c0c9414cb56d8c2e9c25fcf,
     type: 3}
-  BalloonChosen_Audio: {fileID: 8300000, guid: e627cb9c0640e4b61a4d74a6c71379c9, type: 3}
-  InflateBalloon_Audio: {fileID: 8300000, guid: a0bec86fbd56740f3967199e2c210833,
-    type: 3}
-  PopBalloon_Audio: {fileID: 8300000, guid: 99fd449a5afd24c8da82884185dd9d58, type: 3}
-  TimeRanOut_Audio: {fileID: 8300000, guid: 9bda41667c36249e7a4b99d77f24dc62, type: 3}
+  ButtonPosition: {x: 0, y: 0, z: 0}
+  ButtonScale: {x: 0, y: 0, z: 0}
+  OriginalStartButtonPosition: {x: 0, y: 0, z: 0}
   MaterialFilePath: 
+  CenteringSpeed: 1.5
   Flashing: 0
   ScaleTimer: 0
   ChooseDuration: 0
@@ -570,9 +575,18 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
+  popToFeedbackDelay:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
   MaxOutline_Left: {fileID: 0}
   MaxOutline_Right: {fileID: 0}
   InflateAudioPlayed: 0
+  IsHuman: 0
 --- !u!114 &1719984668
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -606,6 +620,7 @@ MonoBehaviour:
   EventCodesActive: 0
   RewardPulsesActive: 0
   SonicationActive: 0
+  ContextExternalFilePath: 
   SessionDataPath: 
   TaskConfigPath: 
   TaskDataPath: 
@@ -696,7 +711,7 @@ Light:
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 2
+    m_Type: 0
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -747,13 +762,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1767832968}
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
+  m_LocalRotation: {x: 0.42182997, y: 0.055328738, z: -0.025800213, w: 0.90461737}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: 50, y: 7, z: 0}
 --- !u!1 &1780667515
 GameObject:
   m_ObjectHideFlags: 0

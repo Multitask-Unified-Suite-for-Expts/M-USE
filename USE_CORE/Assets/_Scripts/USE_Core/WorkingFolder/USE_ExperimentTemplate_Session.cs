@@ -394,7 +394,7 @@ namespace USE_ExperimentTemplate_Session
 
                     RawImage image = taskButton.AddComponent<RawImage>();
                     string taskIcon = TaskIcons[configName];
-                    image.texture = ControlLevel_Trial_Template.LoadPNG(TaskIconsFolderPath + "/" + taskIcon + ".png");
+                    image.texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + taskIcon + ".png");
 
                     image.rectTransform.localPosition = TaskIconLocations[count];
                     image.rectTransform.localScale = Vector3.one;

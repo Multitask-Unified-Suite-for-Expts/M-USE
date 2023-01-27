@@ -14,6 +14,7 @@ using USE_ExperimentTemplate_Trial;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using Screen = UnityEngine.Screen;
 
 public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 {
@@ -62,7 +63,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     //private Button initButton;
     private Ray mouseRay;
     private int response;
-
+    private RaycastHit hit;
     
     private float startTime;
     private int max, min;
@@ -83,7 +84,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private GameObject chosenStim;
     
     // Touch Evaluation Variables
-    private GameObject selected = null;
+    private GameObject selectedGO = null;
     private bool CorrectSelection;
     private MazeGame_StimDef selectedSD = null;
     private bool choiceMade = false;
@@ -181,20 +182,18 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             InstantiateCurrMaze();
         });
         MazeVis.AddUpdateMethod(()=>
-        {
-            Debug.Log("mousehandler.selectedgameobject: " + mouseHandler.SelectedGameObject);
-            if (mouseHandler.SelectedGameObject != null)
+        { //SELECTION HANDLER ISN'T WORKING, GIVES THE MAZE CONTAINER AS .SELECTEDGAMEOBJECT & CHILDREN ARE ALL TILES
+            if (InputBroker.GetMouseButtonDown(0))
             {
-                selected = mouseHandler.SelectedGameObject;
-                //selectedSD = mouseHandler.SelectedStimDef;
-                //CorrectSelection = selectedSD.IsCurrentTarget;
-                choiceMade = true;
-                if (selected.GetComponentInChildren<Tile>() != null)
+                Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
+                if (Physics.Raycast(ray, out hit))
                 {
-                    Debug.Log("IN IF STATEMENT");
-                    selected.GetComponent<Tile>().OnMouseDown();
-                }  
+                    choiceMade = true;
+                    selectedGO = hit.transform.gameObject;
+                    if (selectedGO.GetComponent<Tile>() != null) selectedGO.GetComponent<Tile>().OnMouseDown();
+                }
             }
+            
         });
         MazeVis.SpecifyTermination(() => end == true, Feedback);
 
@@ -257,16 +256,21 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         Debug.Log("CURRENT MAZE NUM SQUARES: " + currMaze.mNumSquares);
         sliderValueIncreaseAmount = (100f / (currMaze.mNumSquares)) / 100f;
         dim = currMaze.mDims;
-        GameObject mazeCenter = GameObject.FindWithTag("Center");
-        mazeLength = dim.x * TILE_WIDTH;
-        mazeHeight = dim.y * TILE_WIDTH;
-        Vector3 bottomLeftMazePos = mazeCenter.transform.position - (new Vector3(mazeLength / 2, mazeHeight / 2, 0));
+       // GameObject mazeCenter = GameObject.FindWithTag("Center");
+       Vector3 mazeCenter = new Vector3(0, 0, 0);
+        mazeLength = (TILE_WIDTH*tileSize.value) * ((3*dim.x + 1)/2);
+        Debug.Log("MAZE LENGTH: " + mazeLength);
+        Debug.Log("TILE WIDTH: " + TILE_WIDTH);
+        
+        mazeHeight = (TILE_WIDTH*tileSize.value) * ((3*dim.y + 1)/2);
+        Debug.Log("MAZE HEIGHT: " + mazeHeight);
+        Vector3 bottomLeftMazePos = mazeCenter - (new Vector3(mazeLength / 2, mazeHeight / 2, 0));
         backgroundTex = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "MazeBackground.png");
         mazeBackground = CreateMazeBackground(backgroundTex, new Rect(new Vector2(0,0), new Vector2(1,1)));
-        
+
         GameObject mazeContainer = new GameObject("MazeContainer");
         mazeBackground.transform.SetParent(mazeContainer.transform);
-        mazeBackground.transform.localPosition = new Vector3(1, 0.5f, 0);
+        mazeBackground.transform.localPosition = new Vector3(0, 0, 0);
         mazeBackground.transform.localScale = new Vector3(dim.x/9f, dim.y/9f, 0);
         tile = Instantiate(TilePrefab, mazeContainer.transform);
         Texture2D tileTex = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "Tile.png");
@@ -520,7 +524,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         SliderHaloImage = SliderHaloGo.GetComponent<Image>();
         Slider = SliderGo.GetComponent<Slider>();
-        
+        Debug.Log("SLIDER Y: " + SliderGo.transform.position.y);
+        //SliderGo.GetComponent<RectTransform>().
+        SliderGo.transform.localPosition = new Vector3(0, 450, 0);
+        Debug.Log("SLIDER Y AFTER?: " + SliderGo.transform.position.y);
         SliderInitPosition = SliderGo.transform.position;
         //consider making slider stuff into USE level class
         Slider.value = 0;

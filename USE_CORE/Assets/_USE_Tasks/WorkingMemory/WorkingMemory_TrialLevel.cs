@@ -154,6 +154,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                                                (NumTokenBarFull_InBlock * CurrentTrialDef.NumTokenBar);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
                 
+                SetShadowType(ShadowType, "WorkingMemory_DirectionalLight");
                 // Set Experimenter Display Data Summary Strings
                 CurrentTaskLevel.SetBlockSummaryString();
                 SetTrialSummaryString();
@@ -171,7 +172,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
               stateAfterDelay = SearchDisplay;
               delayDuration = preTargetDelayDuration.value;
               
-              SetShadowType(ShadowType, "WorkingMemory_DirectionalLight");
           });
 
         // Show the target/sample with some other distractors

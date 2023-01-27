@@ -63,6 +63,7 @@ public class Tile : MonoBehaviour
     public void OnMouseDown()
     {
 
+        Debug.Log("IN ON MOUSEDOWN");
         int correctnessCode;
         correctnessCode = MazeGame_TrialLevel.ManageTileTouch(this);
  
@@ -73,7 +74,7 @@ public class Tile : MonoBehaviour
    public void setColor(Color c)
     {
         // baseColor = MazeGame_TrialLevel.tileColor;
-        Debug.Log("Change Color");
+//        Debug.Log("Change Color");
         //  c = gameConfigs.CORRECT_COLOR;
         //gameObject.GetComponent<Renderer>().sharedMaterial.color = new Color(5f, 1f, 1f);
         baseColor = c;

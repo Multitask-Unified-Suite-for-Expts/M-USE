@@ -102,7 +102,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     // misc variables
     private Ray mouseRay;
     private Slider slider;
-    private float sliderValueIncreaseAmount;
+    private float sliderValueChange;
     private Camera cam;
     private bool variablesLoaded;
     private int correctIndex;
@@ -346,7 +346,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             searchDurations.Add(searchDuration);
             averageSearchDuration_InBlock = searchDurations.Average();
             endupdatetime = Time.time + fbDuration.value;
-            valueToAdd = sliderValueIncreaseAmount * (CurrentTrialDef.SliderGain[stimCount]);
+            
+            if (CorrectSelection) valueToAdd = sliderValueChange * (CurrentTrialDef.SliderGain[stimCount]);
+            else valueToAdd = sliderValueChange * CurrentTrialDef.SliderLoss[stimCount];
+            
             incrementalVal = valueToAdd/(fbDuration.value*60);
             valueRemaining = valueToAdd;
             if (isSliderValueIncrease) stimCount += 1;
@@ -742,13 +745,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         slider.value = 0;
         sliderHaloGO.transform.position = sliderInitPosition;
         int numSliderSteps = CurrentTrialDef.SliderGain.Sum() + CurrentTrialDef.SliderInitial;
-        sliderValueIncreaseAmount = (100f / numSliderSteps) / 100f;
+        sliderValueChange = (100f / numSliderSteps) / 100f;
         slider.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
         sliderHaloGO.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
 
         if (CurrentTrialDef.SliderInitial != 0)
         {
-            slider.value += sliderValueIncreaseAmount * (CurrentTrialDef.SliderInitial);
+            slider.value += sliderValueChange * (CurrentTrialDef.SliderInitial);
         }
         isSliderValueIncrease = false;
     }

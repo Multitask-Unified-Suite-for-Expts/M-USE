@@ -43,9 +43,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private bool mazeLoaded = false;
     private static int count;
     private Tile tile;
-
+    private GameObject tileGO;
     StimGroup tiles; // top of triallevel with other variable defs
-    
+    public Tile TilePrefab;
     [HideInInspector] public ConfigNumber minObjectTouchDuration,
         itiDuration,
         finalFbDuration,
@@ -81,7 +81,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public string mazeDefName;
     public static bool viewPath = false;
     private GameObject chosenStim;
-    private Tile TilePrefab;
+    
     // Touch Evaluation Variables
     private GameObject selected = null;
     private bool CorrectSelection;
@@ -131,26 +131,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         
         playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
         playerViewText = new GameObject(); 
-        SetupTrial.SpecifyTermination(() => true, LoadMaze);
 
         SelectionHandler<MazeGame_StimDef> mouseHandler = new SelectionHandler<MazeGame_StimDef>();
         
-        /*
-        LoadMaze.AddInitializationMethod(() =>
-        {
-            if (CurrentTrialDef.viewPath == 1)
-            {
-                viewPath = true;
-            }
-            else
-            {
-                viewPath = false;
-            }
-            
-
-        });
-
-        LoadMaze.SpecifyTermination(() => true, GameConf);
         // define initScreen state*/
         Add_ControlLevel_InitializationMethod(() =>
         {
@@ -165,15 +148,23 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             isContextActive = true;
             contextName = CurrentTrialDef.ContextName;
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
-            
             if (!variablesLoaded) loadVariables();
+            if (CurrentTrialDef.viewPath == 1)
+            {
+                viewPath = true;
+            }
+            else
+            {
+                viewPath = false;
+            }
+            Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
+        SetupTrial.SpecifyTermination(() => true, InitTrial);
         MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
         InitTrial.AddInitializationMethod(() =>
         {
             SetGameConfigs();
             StartButton.SetActive(true);
-            
         });
         //  StartButton.SpecifyTermination(() => mouseHandler.SelectionMatches(initButton), MazeVis);
         InitTrial.SpecifyTermination(()=> mouseHandler.SelectionMatches(StartButton), MazeVis, () =>
@@ -182,22 +173,28 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             StartButton.SetActive(false);
             ConfigureSlider();
             numNonStimSelections_InBlock += mouseHandler.GetNumNonStimSelection();
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderReset"]);
+//            EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderReset"]);
         });
         MouseTracker.AddSelectionHandler(mouseHandler, MazeVis);
         MazeVis.AddInitializationMethod(() =>
         {
             InstantiateCurrMaze();
         });
-        MazeVis.AddUpdateMethod(() =>
+        MazeVis.AddUpdateMethod(()=>
         {
-            selected = mouseHandler.SelectedGameObject;
-            selectedSD = mouseHandler.SelectedStimDef;
-            //CorrectSelection = selectedSD.IsCurrentTarget;
-            choiceMade = true;
-            if (selected.GetComponent<Tile>() != null) selected.GetComponent<Tile>().OnMouseDown();
-
+            Debug.Log("mousehandler.selectedgameobject: " + mouseHandler.SelectedGameObject);
+            if (mouseHandler.SelectedGameObject != null)
+            {
+                selected = mouseHandler.SelectedGameObject;
+                //selectedSD = mouseHandler.SelectedStimDef;
+                //CorrectSelection = selectedSD.IsCurrentTarget;
+                choiceMade = true;
+                if (selected.GetComponentInChildren<Tile>() != null)
+                {
+                    Debug.Log("IN IF STATEMENT");
+                    selected.GetComponent<Tile>().OnMouseDown();
+                }  
+            }
         });
         MazeVis.SpecifyTermination(() => end == true, Feedback);
 
@@ -250,7 +247,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     void InstantiateCurrMaze()
     {
         Slider.gameObject.SetActive(true);
-        
+        // This will Load all text 
         string[] textMaze = System.IO.File.ReadAllLines(MazeFilePath + Path.DirectorySeparatorChar + mazeDefName);
         Debug.Log("TEXT MAZE: " + textMaze[0]);
         currMaze = new Maze(textMaze[0]);
@@ -296,7 +293,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
                 if (x == currMaze.mStart.X && y == currMaze.mStart.Y)
                 {
-                    Debug.Log("STARTING MAZE COLOR");
                     tile.gameObject.GetComponent<Tile>().setColor(START_COLOR);
                 }
                 else if (x == currMaze.mFinish.X && y == currMaze.mFinish.Y)
@@ -524,20 +520,21 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         SliderHaloImage = SliderHaloGo.GetComponent<Image>();
         Slider = SliderGo.GetComponent<Slider>();
+        
         SliderInitPosition = SliderGo.transform.position;
         //consider making slider stuff into USE level class
         Slider.value = 0;
         SliderHaloGo.transform.position = SliderInitPosition;
-        int numSliderSteps = CurrentTrialDef.SliderGain.Sum() + CurrentTrialDef.SliderInitial;
-        sliderValueIncreaseAmount = (100f / numSliderSteps) / 100f;
+//        int numSliderSteps = CurrentTrialDef.SliderGain.Sum() + CurrentTrialDef.SliderInitial;
+        sliderValueIncreaseAmount = (100f / CurrentTrialDef.MazeNumSquares) / 100f;
         Slider.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
         SliderHaloGo.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
 
-        if (CurrentTrialDef.SliderInitial != 0)
-        {
-            Slider.value += sliderValueIncreaseAmount * (CurrentTrialDef.SliderInitial);
-        }
-        isSliderValueIncrease = false;
+        // if (CurrentTrialDef.SliderInitial != 0)  REIMPLEMENT LATER, HAVE TO DEFINE PATH BETTER WITH ACCESS 
+        // {                                                TO ALL TILES IN PATH
+        //     Slider.value += sliderValueIncreaseAmount * (CurrentTrialDef.SliderInitial);
+        // }
+        // isSliderValueIncrease = false;
     }
     private void loadVariables()
     {
@@ -555,7 +552,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         incorrectRuleAbidingFbDuration = ConfigUiVariables.get<ConfigNumber>("incorrectRuleAbidingFbDuration");
         incorrectRuleBreakingFbDuration = ConfigUiVariables.get<ConfigNumber>("incorrectRuleBreakingFbDuration");
         variablesLoaded = true;
-        disableVariables();
+        //disableVariables();
     }
 
     private void SetGameConfigs()
@@ -626,7 +623,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     }
     private void disableVariables()
     {
-        Slider.gameObject.SetActive(false);
+        SliderGo.SetActive(false);
         StartButton.SetActive(false);
         SliderHalo.SetActive(false);
         SliderHaloImage.gameObject.SetActive(false);

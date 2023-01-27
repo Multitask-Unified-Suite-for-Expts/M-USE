@@ -69,8 +69,9 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         {
             //for given block MazeDims, MazeNumSquares, MazeNumTurns, get all indices of that value, find intersect
             //then choose random member of intersect and assign to this block's trials
-
-            int [] mdIndices = MazeDims.FindAllIndexof(mgBD.MazeDims);
+            
+            int[] mdIndices = MazeDims.FindAllIndexof(mgBD.MazeDims);
+            Debug.Log("INDEX OF mgBD.MazeDims: " + mdIndices.ToString());
             int[] mnsIndices = MazeNumSquares.FindAllIndexof(mgBD.MazeNumSquares);
             int[] mntIndices = MazeNumTurns.FindAllIndexof(mgBD.MazeNumTurns);
             int[] possibleMazeDefIndices = mntIndices.Intersect(mdIndices.Intersect(mnsIndices)).ToArray();

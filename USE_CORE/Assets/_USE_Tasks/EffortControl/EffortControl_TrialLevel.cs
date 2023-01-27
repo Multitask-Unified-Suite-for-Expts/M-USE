@@ -341,7 +341,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         PopBalloon.AddUpdateMethod(() =>
         {
-            if(!TrialStim.activeSelf && !AudioFBController.IsPlaying())
+            //if(!TrialStim.activeSelf && !AudioFBController.IsPlaying())
+            if (!TrialStim.activeSelf)
             {
                 delayStartTime += Time.deltaTime;
             }

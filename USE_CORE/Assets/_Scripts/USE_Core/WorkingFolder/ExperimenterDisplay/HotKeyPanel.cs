@@ -258,7 +258,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyAction = () =>
                 {
                     HkPanel.TrialLevel.ForceBlockEnd = true; //End trial
-                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial")); 
+                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI")); 
                     HkPanel.TaskLevel.Terminated = true; //End Task
                     Destroy(GameObject.Find("Controllers")); //Delete current Controllers GO, since Task Selection creates new one
                 }

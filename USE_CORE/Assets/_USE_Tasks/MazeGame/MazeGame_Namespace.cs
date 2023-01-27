@@ -48,7 +48,8 @@ namespace MazeGame_Namespace
         public int Texture;
         public int viewPath;
         public string ContextName;
-
+        public int[] SliderGain;
+        public int SliderInitial;
         public MazeGame_TaskLevel TaskLevel;
      //   public string mazePath;
 
@@ -78,15 +79,8 @@ namespace MazeGame_Namespace
                 td.viewPath = viewPath;
                 td.ContextName = ContextName;
                 td.MazeInfo = MazeInfo;
-                //td.MazeDef = whatever
-               // td.mazePath = mazePath;
-             //   if (td.Texture == null && Texture != null)
-                 //   td.Texture = Texture;
-                //  Debug.Log("TRIAL: " + Trial);
-                //   td.TrialID = TrialID;
-                //   td.Context = Context;
-                // td.MinTouchDuration = MinTouchDuration;
-                //   td.MaxTouchDuration = MaxTouchDuration;
+                td.SliderGain = SliderGain;
+                td.SliderInitial = SliderInitial;
 
                 TrialDefs.Add(td);
             }
@@ -109,7 +103,8 @@ namespace MazeGame_Namespace
         public int viewPath;
         public string ContextName;
         public string MazeInfo;
-
+        public int[] SliderGain;
+        public int SliderInitial;
         public MazeDef MazeDef;
         //   public string mazePath;
 

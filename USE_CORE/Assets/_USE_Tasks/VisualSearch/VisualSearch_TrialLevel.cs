@@ -80,7 +80,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         State SearchDisplay = new State("SearchDisplay");
         State SelectionFeedback = new State("SelectionFeedback");
         State TokenFeedback = new State("TokenFeedback");
-        State ITI = new State("TrialEnd");
+        State ITI = new State("ITI");
         State SearchDisplayDelay = new State("SearchDisplayDelay");
         State Delay = new State("Delay");
         
@@ -101,8 +101,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
-            StartButton = CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
-            FBSquare = CreateFBSquare(FBSquareTexture, FBSquarePosition, FBSquareScale);
+            StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
+            FBSquare = CreateSquare("FBSquare", FBSquareTexture, FBSquarePosition, FBSquareScale);
         });
         
         SetupTrial.AddInitializationMethod(() =>
@@ -167,7 +167,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             {
                 foreach (var stim in tStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
             }
-            taskHelper.SetShadowType(ShadowType, "VisualSearch_DirectionalLight");
+            SetShadowType(ShadowType, "VisualSearch_DirectionalLight");
             
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);
@@ -277,24 +277,17 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
         ITI.AddInitializationMethod(() =>
         {
+            Debug.Log("PLAYER VIEW LOADEED? : " + playerViewLoaded);
             ContextName = "itiImage";
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
             // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
             DestroyTextOnExperimenterDisplay();
+            ResetDataTrackingVariables();
             tStim.ToggleVisibility(false);
             TokenFBController.enabled = false;
         });
     
-        ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
-        {
-            ResetDataTrackingVariables();
-        });
-        FinishTrial.AddInitializationMethod(() =>
-        {
-            //Remove any remaining items on player view
-            DestroyTextOnExperimenterDisplay();
-            ResetDataTrackingVariables();
-        });
+        ITI.AddTimer(() => itiDuration.value, FinishTrial);
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
         AssignTrialData();
         AssignFrameData();
@@ -414,7 +407,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private void DestroyTextOnExperimenterDisplay()
     {
         if (playerViewLoaded)
-            foreach (GameObject txt in playerViewTextList) txt.SetActive(false);
+            foreach (GameObject txt in playerViewTextList) Destroy(txt);
         playerViewLoaded = false;
     }
     private void TouchDurationErrorFeedback(SelectionHandler<VisualSearch_StimDef> MouseHandler, GameObject go)

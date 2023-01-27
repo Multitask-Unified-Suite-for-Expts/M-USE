@@ -89,7 +89,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public string accuracyLog_InSession, accuracyLog_InBlock, accuracyLog_InTrial = "";
     
     private float touchDuration, searchDuration, sbDelay = 0;
-    private bool choiceMade, contextActive,halosDestroyed, slotError, distractorSlotError, touchDurationError, repetitionError, noSelectionError = false;
+    private bool choiceMade, isContextActive,halosDestroyed, slotError, distractorSlotError, touchDurationError, repetitionError, noSelectionError = false;
     private String contextName = "";
    // private List<int> trialPerformance = new List<int>();
     private int timeoutCondition = 3;
@@ -194,16 +194,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             InitializeSlider();
             LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
-            startButton = CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
-            FBSquare = CreateFBSquare(FBSquareTexture, FBSquarePosition, FBSquareScale);
+            startButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
+            FBSquare = CreateSquare("FBSquare", FBSquareTexture, FBSquarePosition, FBSquareScale);
             playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
-
         });
 
         SetupTrial.AddInitializationMethod(() =>
         {
             // Set the background texture to that of specified context
-            contextActive = true;
+            isContextActive = true;
             contextName = CurrentTrialDef.ContextName;
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
@@ -473,22 +472,18 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             distractorStims.ToggleVisibility(false);
             contextName = "itiImage";
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + contextName + ".png");
-
+            DestroyTextOnExperimenterDisplay();
+            GenerateFinalTrialData();
+            searchStims.ToggleVisibility(false);
             sliderGO.SetActive(false);
             CurrentTaskLevel.SetBlockSummaryString();
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
         {
             CurrentTaskLevel.SetBlockSummaryString();
-            GenerateFinalTrialData();
-            DestroyTextOnExperimenterDisplay();
+            ClearDataLogging();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
             
-        });
-        FinishTrial.AddInitializationMethod(() =>
-        {
-            //Remove any remaining items on player view
-            DestroyTextOnExperimenterDisplay();
         });
         //------------------------------------------------------------------------ADDING VALUES TO DATA FILE--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -536,7 +531,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("SearchStimuliShown", () => searchStims.IsActive);
         FrameData.AddDatum("DistractorStimuliShown", () => distractorStims.IsActive);
         FrameData.AddDatum("Context", () => contextName);
-        FrameData.AddDatum("ContextActive", () => contextActive);
+        FrameData.AddDatum("ContextActive", () => isContextActive);
         
     }
 
@@ -702,7 +697,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         touchDurationError = false;
         noSelectionError = false;
         choiceMade = false;
-        contextActive = false;
+        isContextActive = false;
         stimCount = 0;
         
         touchedObjects.Clear();

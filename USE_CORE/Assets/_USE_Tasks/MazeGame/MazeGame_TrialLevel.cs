@@ -12,6 +12,8 @@ using ConfigDynamicUI;
 using USE_Settings;
 using USE_ExperimentTemplate_Trial;
 using System.IO;
+using System.Linq;
+using System.Windows.Forms;
 
 public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 {
@@ -43,10 +45,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private Tile tile;
 
     StimGroup tiles; // top of triallevel with other variable defs
-
-    private static Slider slider;
-    private static float sliderValueIncreaseAmount;
-    private GameObject startButton;
+    
     [HideInInspector] public ConfigNumber minObjectTouchDuration,
         itiDuration,
         finalFbDuration,
@@ -54,16 +53,19 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         maxObjectTouchDuration,
         selectObjectDuration,
         sliderSize,
-        mazeOnsetDelay, tileSize;
+        mazeOnsetDelay, 
+        tileSize,
+        correctFbDuration,
+        previousCorrectFbDuration,
+        incorrectRuleAbidingFbDuration,
+        incorrectRuleBreakingFbDuration;
     //private Button initButton;
     private Ray mouseRay;
     private int response;
 
-    private GameObject sliderHalo;
-    //private SpriteRenderer sr;
+    
     private float startTime;
     private int max, min;
-    private static int numReps, curRep;
     private int trialIndex;
     public static int totalErrors = 0, ruleAbidingErrors = 0, ruleBreakingErrors = 0, 
         retouchCorrect = 0, correctTouches = 0;
@@ -73,17 +75,46 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public Vector3 ButtonPosition, ButtonScale;
     public GameObject mazeBackground;
     public Texture2D backgroundTex;
-    private Image sr;
-    private Vector3 sliderInitPosition;
+    
+    
     private bool variablesLoaded = false;
     public string mazeDefName;
-    
-    public int curMDim, curMNumSquares, curMNumTurns;
-    public string curMPath;
     public static bool viewPath = false;
-    public static bool c;
     private GameObject chosenStim;
     private Tile TilePrefab;
+    // Touch Evaluation Variables
+    private GameObject selected = null;
+    private bool CorrectSelection;
+    private MazeGame_StimDef selectedSD = null;
+    private bool choiceMade = false;
+    
+    //Block Data Variables
+    private int numNonStimSelections_InBlock = 0;
+    
+    // Data Tracking Variables
+    private string contextName = "";
+    private bool isContextActive = false;
+    
+    // Nonstim Scene Elements
+    private GameObject StartButton;
+    
+    // Slider Variables
+    private bool isSliderValueIncrease = false;
+    private Vector3 SliderInitPosition;
+    private GameObject SliderHalo;
+    private Image SliderHaloImage;
+    private Slider Slider;
+    private GameObject SliderGo, SliderHaloGo;
+    public GameObject SliderPrefab, SliderHaloPrefab;
+    private float sliderValueIncreaseAmount;
+    
+    //Player View Variables
+    private PlayerViewPanel playerView;
+    private Transform playerViewParent; // Helps set things onto the player view in the experimenter display
+    public List<GameObject> playerViewTextList;
+    public GameObject playerViewText;
+    private Vector2 textLocation;
+    private bool playerViewLoaded;
     public override void DefineControlLevel()
     {
         //define States within this Control Level
@@ -96,11 +127,15 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         AddActiveStates(new List<State> {InitTrial, LoadMaze, GameConf, MazeVis, Feedback, ITI});
 
         string[] stateNames = new string[] {"StartButton", "LoadMaze", "GameConf", "MazeVis", "Feedback", "ITI"};
-
+        //player view variables
+        
+        playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
+        playerViewText = new GameObject(); 
         SetupTrial.SpecifyTermination(() => true, LoadMaze);
 
         SelectionHandler<MazeGame_StimDef> mouseHandler = new SelectionHandler<MazeGame_StimDef>();
         
+        /*
         LoadMaze.AddInitializationMethod(() =>
         {
             if (CurrentTrialDef.viewPath == 1)
@@ -111,157 +146,59 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             {
                 viewPath = false;
             }
-            totalErrors = 0;
-            ruleAbidingErrors = 0;
-            ruleBreakingErrors = 0;
-            retouchCorrect = 0;
-            correctTouches = 0;
+            
 
         });
 
         LoadMaze.SpecifyTermination(() => true, GameConf);
-
-
-        GameConf.AddInitializationMethod(() =>
+        // define initScreen state*/
+        Add_ControlLevel_InitializationMethod(() =>
         {
-            if (!variablesLoaded)
-            {
-                variablesLoaded = true;
-                loadVariables();
-            }
-
-            // MAZE GAME WIDTHS
-            ///*
-            // TODO: Not implemented, but this should be the maximum screen width that tiles can take up without overfilling the screen
-            SCREEN_WIDTH = 4;
-
-            // Default tile width
-            TILE_WIDTH = 3f;
-
-            //---------------------------------------------------------
-
-            // TILE COLORS
-
-            // Start - Light yellow
-            START_COLOR = new Color(0.94f, 0.93f, 0.48f);
-
-            // Finish - Light blue
-            FINISH_COLOR = new Color(0.37f, 0.59f, 0.94f);
-
-            // Correct - Light green
-            CORRECT_COLOR = new Color(0.62f, 1f, 0.5f);
-
-            // Prev correct - Darker green
-            LAST_CORRECT_COLOR = new Color(0.2f, 0.7f, 0.5f);
-
-            // Incorrect rule-abiding - Orange
-            INCORRECT_RULEABIDING_COLOR = new Color(1f, 0.5f, 0.25f);
-
-            // Incorrect rule-breaking - Black
-            INCORRECT_RULEBREAKING_COLOR = new Color(0f, 0f, 0f);
-
-            // Default - Off-white
-            // DEFAULT_TILE_COLOR = new Color(0.95f, 0.95f, 0.95f);
-            //DEFAULT_TILE_COLOR = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1],
-             //   CurrentTrialDef.TileColor[2]);
-            //---------------------------------------------------------
-
-            DEFAULT_TILE_COLOR = new Color(1, 1, 1); //MAKE CONFIGURABLE
-            // FEEDBACK LENGTH IN SECONDS
-
-            // Correct - 0.5 seconds
-            CORRECT_FEEDBACK_SECONDS = 0.5f;
-
-            // Prev correct - 0.5 seconds
-            PREV_CORRECT_FEEDBACK_SECONDS = 0.5f;
-
-            // Incorrect rule-abiding - 0.5 seconds
-            INCORRECT_RULEABIDING_SECONDS = 0.5f;
-
-            // Incorrect rule-breaking - 1.0 seconds
-            INCORRECT_RULEBREAKING_SECONDS = 1.0f;
-
-            //---------------------------------------------------------
-
-            // TIMEOUT
-
-            TIMEOUT_SECONDS = 10.0f;
-            // */
-            //gameConfigs.DEFAULT_TILE_COLOR = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1], CurrentTrialDef.TileColor[2]);
-            TileColor = new Color(1, 1, 1); //MAKE MORE CONFIGURABLE
-
+            InitializeSlider();
+            LoadTextures(ContextExternalFilePath);
+            HaloFBController.SetHaloSize(5);
+            StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
+            playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
         });
-
-        GameConf.SpecifyTermination(() => true, InitTrial);
-
-        // define initScreen state
+        SetupTrial.AddInitializationMethod(() =>
+        {
+            isContextActive = true;
+            contextName = CurrentTrialDef.ContextName;
+            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
+            
+            if (!variablesLoaded) loadVariables();
+        });
         MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
         InitTrial.AddInitializationMethod(() =>
         {
-            curRep = 0;
-            startButton.SetActive(true);
-            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
-        });
-        InitTrial.AddUpdateMethod(() =>
-        {
-
-            if (InputBroker.GetMouseButtonDown(0))
-            {
-                mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-                //initButton.OnClick
-                RaycastHit hit;
-                if (Physics.Raycast(mouseRay, out hit))
-                {
-                    if (hit.transform.name == "StartButton")
-                    {
-                        response = 0;
-                    }
-                }
-            }
-
+            SetGameConfigs();
+            StartButton.SetActive(true);
+            
         });
         //  StartButton.SpecifyTermination(() => mouseHandler.SelectionMatches(initButton), MazeVis);
-        InitTrial.SpecifyTermination(() => response == 0, MazeVis);
-
-        InitTrial.AddDefaultTerminationMethod(() =>
+        InitTrial.SpecifyTermination(()=> mouseHandler.SelectionMatches(StartButton), MazeVis, () =>
         {
-            slider.value = 0;
-            slider.gameObject.transform.position = sliderInitPosition;
-            sliderHalo.gameObject.transform.position = sliderInitPosition;
-            slider.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
-            sliderHalo.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
-
-            startButton.SetActive(false);
+            SliderGo.SetActive(true);
+            StartButton.SetActive(false);
+            ConfigureSlider();
+            numNonStimSelections_InBlock += mouseHandler.GetNumNonStimSelection();
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderReset"]);
         });
-
+        MouseTracker.AddSelectionHandler(mouseHandler, MazeVis);
         MazeVis.AddInitializationMethod(() =>
         {
-            Debug.Log(count);
-
-            end = false;
-            Debug.Log("entered inst");
-            slider.value = 0;
             InstantiateCurrMaze();
         });
         MazeVis.AddUpdateMethod(() =>
         {
-            if (InputBroker.GetMouseButtonDown(0))
-            {
-                mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(mouseRay, out hit))
-                {
-                    chosenStim = hit.transform.gameObject;
-                    //GameObject testStim = chosenStim.transform.root.gameObject;
-                    if (chosenStim.GetComponent<Tile>() != null)
-                    {
-                        chosenStim.GetComponent<Tile>().OnMouseDown();
-                    }
-                }
-            }
+            selected = mouseHandler.SelectedGameObject;
+            selectedSD = mouseHandler.SelectedStimDef;
+            //CorrectSelection = selectedSD.IsCurrentTarget;
+            choiceMade = true;
+            if (selected.GetComponent<Tile>() != null) selected.GetComponent<Tile>().OnMouseDown();
+
         });
-        // MazeVis.SpecifyTermination(() => end == true && count < mazeList.Count, MazeVis);
-        //MazeVis.SpecifyTermination(() => end == true && count >= mazeList.Count, Feedback);
         MazeVis.SpecifyTermination(() => end == true, Feedback);
 
         MazeVis.AddDefaultTerminationMethod(() =>
@@ -274,34 +211,33 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         Feedback.AddInitializationMethod(() =>
         {
             Debug.Log("the end");
-            sliderHalo.SetActive(true);
+            SliderHalo.SetActive(true);
             // sphereCount = 0;
-            sr.color = new Color(1, 1, 1, 0.2f);
-
+            SliderHaloImage.color = new Color(1, 1, 1, 0.2f);
             startTime = Time.time;
-
         });
 
         Feedback.AddUpdateMethod(() =>
         {
             if ((int) (10 * (Time.time - startTime)) % 4 == 0)
             {
-                sr.color = new Color(1, 1, 1, 0.2f);
+                SliderHaloImage.color = new Color(1, 1, 1, 0.2f);
             }
             else if ((int) (10 * (Time.time - startTime)) % 2 == 0)
             {
-                sr.color = new Color(1, 0, 0, 0.2f);
+                SliderHaloImage.color = new Color(1, 0, 0, 0.2f);
             }
         });
         Feedback.AddTimer(()=>finalFbDuration.value, ITI, () =>
         {
-            sliderHalo.SetActive(false);
-            slider.gameObject.SetActive(false);
-
+            SliderHalo.SetActive(false);
+            Slider.gameObject.SetActive(false);
         });
         //Define iti state
-        ITI.AddInitializationMethod(() => { });
-        ITI.SpecifyTermination(() => true, FinishTrial, () => Debug.Log("Trial" + " completed"));
+        ITI.SpecifyTermination(() => true, FinishTrial, () =>
+        {
+            ResetDataTrackingVariables();
+        });
         
         Debug.Log("ERRORS: " + totalErrors);
         TrialData.AddDatum("TrialNum", () => CurrentTrialDef.TrialCount);
@@ -313,7 +249,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     void InstantiateCurrMaze()
     {
-        slider.gameObject.SetActive(true);
+        Slider.gameObject.SetActive(true);
         
         string[] textMaze = System.IO.File.ReadAllLines(MazeFilePath + Path.DirectorySeparatorChar + mazeDefName);
         Debug.Log("TEXT MAZE: " + textMaze[0]);
@@ -400,12 +336,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         if (i == 0 || i == 1)
         {
-            slider.value += sliderValueIncreaseAmount;
+           // slider.value += sliderValueIncreaseAmount;
         }
 
         if (i == 99)
         {
-            slider.value += sliderValueIncreaseAmount;
+            //slider.value += sliderValueIncreaseAmount;
             ++count;
             end = true;
         }
@@ -576,17 +512,35 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             return 22;
         }
     }
+    private void InitializeSlider()
+    {
+        Transform sliderCanvas = GameObject.Find("SliderCanvas").transform;
+        SliderGo = Instantiate(SliderPrefab, sliderCanvas);
+        SliderHaloGo = Instantiate(SliderHaloPrefab, sliderCanvas);
+        SliderGo.SetActive(false);
+        SliderHaloGo.SetActive(false);
+    }
+    private void ConfigureSlider()
+    {
+        SliderHaloImage = SliderHaloGo.GetComponent<Image>();
+        Slider = SliderGo.GetComponent<Slider>();
+        SliderInitPosition = SliderGo.transform.position;
+        //consider making slider stuff into USE level class
+        Slider.value = 0;
+        SliderHaloGo.transform.position = SliderInitPosition;
+        int numSliderSteps = CurrentTrialDef.SliderGain.Sum() + CurrentTrialDef.SliderInitial;
+        sliderValueIncreaseAmount = (100f / numSliderSteps) / 100f;
+        Slider.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
+        SliderHaloGo.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
 
+        if (CurrentTrialDef.SliderInitial != 0)
+        {
+            Slider.value += sliderValueIncreaseAmount * (CurrentTrialDef.SliderInitial);
+        }
+        isSliderValueIncrease = false;
+    }
     private void loadVariables()
     {
-        slider = GameObject.Find("Slider").GetComponent<Slider>();
-        sliderInitPosition = slider.gameObject.transform.position;
-        Texture2D buttonTex = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
-        startButton = CreateStartButton(buttonTex, new Rect(new Vector2(0, 0), new Vector2(1, 1)));
-        
-        sliderHalo = GameObject.Find("SliderHalo");
-        sr = sliderHalo.GetComponent<Image>();
-        
         //config UI variables
         //minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         //maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
@@ -596,25 +550,86 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         finalFbDuration = ConfigUiVariables.get<ConfigNumber>("finalFbDuration");
         selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
         mazeOnsetDelay = ConfigUiVariables.get<ConfigNumber>("mazeOnsetDelay");
+        correctFbDuration = ConfigUiVariables.get<ConfigNumber>("correctFbDuration");
+        previousCorrectFbDuration = ConfigUiVariables.get<ConfigNumber>("previousCorrectFbDuration");
+        incorrectRuleAbidingFbDuration = ConfigUiVariables.get<ConfigNumber>("incorrectRuleAbidingFbDuration");
+        incorrectRuleBreakingFbDuration = ConfigUiVariables.get<ConfigNumber>("incorrectRuleBreakingFbDuration");
+        variablesLoaded = true;
         disableVariables();
     }
 
+    private void SetGameConfigs()
+    {
+// MAZE GAME WIDTHS
+        ///*
+        // TODO: Not implemented, but this should be the maximum screen width that tiles can take up without overfilling the screen
+        SCREEN_WIDTH = 4;
+
+        // Default tile width
+        TILE_WIDTH = 3f;
+
+        //---------------------------------------------------------
+
+        // TILE COLORS
+
+        // Start - Light yellow
+        START_COLOR = new Color(0.94f, 0.93f, 0.48f);
+
+        // Finish - Light blue
+        FINISH_COLOR = new Color(0.37f, 0.59f, 0.94f);
+
+        // Correct - Light green
+        CORRECT_COLOR = new Color(0.62f, 1f, 0.5f);
+
+        // Prev correct - Darker green
+        LAST_CORRECT_COLOR = new Color(0.2f, 0.7f, 0.5f);
+
+        // Incorrect rule-abiding - Orange
+        INCORRECT_RULEABIDING_COLOR = new Color(1f, 0.5f, 0.25f);
+
+        // Incorrect rule-breaking - Black
+        INCORRECT_RULEBREAKING_COLOR = new Color(0f, 0f, 0f);
+
+        DEFAULT_TILE_COLOR = new Color(1, 1, 1); //MAKE CONFIGURABLE
+
+        // FEEDBACK LENGTH IN SECONDS
+
+        // Correct - 0.5 seconds
+        CORRECT_FEEDBACK_SECONDS = correctFbDuration.value;
+
+        // Prev correct - 0.5 seconds
+        PREV_CORRECT_FEEDBACK_SECONDS = previousCorrectFbDuration.value;
+
+        // Incorrect rule-abiding - 0.5 seconds
+        INCORRECT_RULEABIDING_SECONDS = incorrectRuleAbidingFbDuration.value;
+
+        // Incorrect rule-breaking - 1.0 seconds
+        INCORRECT_RULEBREAKING_SECONDS = incorrectRuleBreakingFbDuration.value;
+
+        //---------------------------------------------------------
+
+        // TIMEOUT
+
+        TIMEOUT_SECONDS = 10.0f;
+        // */
+        //gameConfigs.DEFAULT_TILE_COLOR = new Color(CurrentTrialDef.TileColor[0], CurrentTrialDef.TileColor[1], CurrentTrialDef.TileColor[2]);
+        TileColor = new Color(1, 1, 1); //MAKE MORE CONFIGURABLE    }
+    }
+
+    private void ResetDataTrackingVariables()
+    {
+        totalErrors = 0;
+        ruleAbidingErrors = 0;
+        ruleBreakingErrors = 0;
+        retouchCorrect = 0;
+        correctTouches = 0;
+    }
     private void disableVariables()
     {
-        slider.gameObject.SetActive(false);
-        startButton.SetActive(false);
-        sliderHalo.SetActive(false);
-        sr.gameObject.SetActive(false);
-    }
-    private GameObject CreateStartButton(Texture2D tex, Rect rect) //creates start button as a sprite
-    {
-        GameObject startButton = new GameObject("StartButton");
-        SpriteRenderer sbSprite = startButton.AddComponent<SpriteRenderer>() as SpriteRenderer;
-        sbSprite.sprite = Sprite.Create(tex, new Rect(rect.x, rect.y, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
-        startButton.AddComponent<BoxCollider>();
-        startButton.transform.localScale = ButtonScale;
-        startButton.transform.position = ButtonPosition;
-        return startButton;
+        Slider.gameObject.SetActive(false);
+        StartButton.SetActive(false);
+        SliderHalo.SetActive(false);
+        SliderHaloImage.gameObject.SetActive(false);
     }
     private GameObject CreateMazeBackground(Texture2D tex, Rect rect)
     {

@@ -115,7 +115,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             NumFeedbackRows = 0;
 
             if (StartButton == null)
-                StartButton = CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
+                StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
 
             if (!VariablesLoaded)
                 LoadConfigUIVariables();

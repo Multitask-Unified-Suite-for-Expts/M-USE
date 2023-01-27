@@ -18,7 +18,6 @@ namespace WhatWhenWhere_Namespace
         public Vector3[] SearchStimsLocations;
         public Vector3[] DistractorStimsLocations;
         public int[] SliderGain;
-        public int[] SliderLoss;
         public int SliderInitial;
         public bool RandomizedLocations;
         public string BlockEndType;
@@ -49,7 +48,6 @@ namespace WhatWhenWhere_Namespace
                 td.DistractorStimsLocations = DistractorStimsLocations;
                 td.RandomizedLocations = RandomizedLocations;
                 td.SliderGain = SliderGain;
-                td.SliderLoss = SliderLoss;
                 td.SliderInitial = SliderInitial;
                 td.BlockEndType = BlockEndType;
                 td.BlockEndThreshold = BlockEndThreshold;
@@ -78,7 +76,6 @@ namespace WhatWhenWhere_Namespace
         public Vector3[] DistractorStimsLocations;
         public bool RandomizedLocations;
         public int[] SliderGain;
-        public int[] SliderLoss;
         public int SliderInitial;
         public string BlockEndType;
         public float BlockEndThreshold;
@@ -101,6 +98,8 @@ namespace WhatWhenWhere_Namespace
         // string ContextExternalFilePath;
         Vector3 ButtonPosition;
         Vector3 ButtonScale;
+        Vector3 FBSquarePosition;
+        Vector3 FBSquareScale;
         Vector3 ButtonColor;
         string ButtonText;
         string ContextExternalFilePath;

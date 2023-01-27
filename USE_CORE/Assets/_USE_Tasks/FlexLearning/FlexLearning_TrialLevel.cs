@@ -108,8 +108,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
-            StartButton = CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
-            FBSquare = CreateFBSquare(FBSquareTexture, FBSquarePosition, FBSquareScale);
+            StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
+            FBSquare = CreateSquare("FBSquare", FBSquareTexture, FBSquarePosition, FBSquareScale);
         });
 
         SetupTrial.AddInitializationMethod(() =>
@@ -286,21 +286,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
             // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
             DestroyTextOnExperimenterDisplay();
+            ResetDataTrackingVariables();
             tStim.ToggleVisibility(false);
             TokenFBController.enabled = false;
         });
-        ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
-        {
-            ResetDataTrackingVariables();
-            Debug.Log("TRIAL COUNT_IN BLOCK: "+ TrialCount_InBlock + " TRIALDEFS.COUNT - 1: " + (TrialDefs.Count - 1));
-            Debug.Log("CHECK BLOCK END: " + CheckBlockEnd());
-        });
-        FinishTrial.AddInitializationMethod(() =>
-        {
-            //Remove any remaining items on player view
-            DestroyTextOnExperimenterDisplay();
-            ResetDataTrackingVariables();
-        });
+        ITI.AddTimer(() => itiDuration.value, FinishTrial);
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
         AssignTrialData();
         AssignFrameData();
@@ -317,7 +307,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
             FlexLearning_StimDef sd = (FlexLearning_StimDef)tStim.stimDefs[i];
-            sd.StimTrialRewardMag = taskHelper.ChooseTokenReward(CurrentTrialDef.TrialStimTokenReward[i]);
+            sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.TrialStimTokenReward[i]);
             if (sd.StimTrialRewardMag > 0) sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!! only works if the target stim has a non-zero, positive reward
             else sd.IsTarget = false;
         }
@@ -375,7 +365,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 if (stim.IsTarget)
                 {
                     textLocation =
-                        taskHelper.playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation),
+                        playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation),
                             playerViewParent);
                     textLocation.y += 50;
                     Vector2 textSize = new Vector2(200, 200);

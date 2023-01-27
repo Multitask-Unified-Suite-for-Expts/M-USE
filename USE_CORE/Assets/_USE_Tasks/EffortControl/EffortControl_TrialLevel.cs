@@ -124,7 +124,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             MaxOutline_Left = new GameObject();
             MaxOutline_Right = new GameObject();
 
-            StartButton = CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
+            StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
 
             if (!ObjectsCreated)
                 CreateObjects();

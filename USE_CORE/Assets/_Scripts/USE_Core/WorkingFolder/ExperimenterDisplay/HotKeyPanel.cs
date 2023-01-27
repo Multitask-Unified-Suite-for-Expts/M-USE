@@ -247,8 +247,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.N),
                 hotKeyAction = () =>
                 {
-                    HkPanel.TrialLevel.ForceBlockEnd = true;
                     HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI"));
+                    HkPanel.TrialLevel.ForceBlockEnd = true;
                 }
             };
             HotKeyList.Add(endBlock);
@@ -262,9 +262,9 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.E),
                 hotKeyAction = () =>
                 {
+                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI")); 
                     HkPanel.TrialLevel.ForceBlockEnd = true;
                     HkPanel.TaskLevel.Terminated = true; 
-                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI")); 
                     Destroy(GameObject.Find("Controllers")); //Delete current Controllers GO, since Task Selection creates new one
                 }
             };

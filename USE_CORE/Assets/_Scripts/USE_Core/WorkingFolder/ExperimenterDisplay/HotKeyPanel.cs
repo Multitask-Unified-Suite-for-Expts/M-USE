@@ -202,41 +202,41 @@ public class HotKeyPanel : ExperimenterDisplayPanel
 
             //RestartBlock Hot Key
             //NOT WORKING. CR starts over but it thinks its TrialCountInBlock1 cuz incremented in setupTrial. Also tokenbar not resetting. 
-            HotKey restartBlock = new HotKey
-            {
-                keyDescription = "R",
-                actionName = "Restart Block",
-                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.R),
-                hotKeyAction = () =>
-                {
-                    //HkPanel.TrialLevel.ForceBlockEnd = true;
-                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
-                    HkPanel.TaskLevel.BlockCount--;
-                    HkPanel.TrialLevel.TrialCount_InBlock = 0;
-                }
-            };
-            HotKeyList.Add(restartBlock);
+            //HotKey restartBlock = new HotKey
+            //{
+            //    keyDescription = "R",
+            //    actionName = "Restart Block",
+            //    hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.R),
+            //    hotKeyAction = () =>
+            //    {
+            //        //HkPanel.TrialLevel.ForceBlockEnd = true;
+            //        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+            //        HkPanel.TaskLevel.BlockCount--;
+            //        HkPanel.TrialLevel.TrialCount_InBlock = 0;
+            //    }
+            //};
+            //HotKeyList.Add(restartBlock);
 
-            //PreviousBlock Hot Key
-            HotKey previousBlock = new HotKey
-            {
-                keyDescription = "B",
-                actionName = "Previous Block",
-                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.B),
-                hotKeyAction = () =>
-                {
-                    if (HkPanel.TrialLevel.BlockCount == 0)
-                        return;
-                    else
-                    {
-                        //HkPanel.TrialLevel.ForceBlockEnd = true;
-                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
-                        HkPanel.TaskLevel.BlockCount -= 2;
-                        HkPanel.TrialLevel.TrialCount_InBlock = 0;
-                    }
-                }
-            };
-            HotKeyList.Add(previousBlock);
+            ////PreviousBlock Hot Key
+            //HotKey previousBlock = new HotKey
+            //{
+            //    keyDescription = "B",
+            //    actionName = "Previous Block",
+            //    hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.B),
+            //    hotKeyAction = () =>
+            //    {
+            //        if (HkPanel.TrialLevel.BlockCount == 0)
+            //            return;
+            //        else
+            //        {
+            //            //HkPanel.TrialLevel.ForceBlockEnd = true;
+            //            HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+            //            HkPanel.TaskLevel.BlockCount -= 2;
+            //            HkPanel.TrialLevel.TrialCount_InBlock = 0;
+            //        }
+            //    }
+            //};
+            //HotKeyList.Add(previousBlock);
 
             //End Block Hot Key
             //APPEARS TO BE WORKING

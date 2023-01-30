@@ -134,6 +134,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
+            ResetToOriginalPositions();
             TokenFBController.enabled = false;
             AvgClickTime = null;
             ResetRelativeStartTime(); 
@@ -141,7 +142,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             StartButton.SetActive(true);
             ClickCount = 0;
             Response = -1;
-            ChooseDuration = 0; //reset how long it took them to choose each trial. 
+            ChooseDuration = 0; //reset how long it took them to choose each trial.
+            SideChoice = "";
+            EffortChoice = "";
+            RewardChoice = "";
         });
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), ChooseBalloon, () => StartButton.SetActive(false));
 
@@ -370,11 +374,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //ITI state -------------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>
         {
+            if (MiddleBarrier.activeSelf)
+                MiddleBarrier.SetActive(false);
             DestroyChildren(BalloonContainerLeft);
             DestroyChildren(BalloonContainerRight);
             DestroyChildren(RewardContainerLeft);
             DestroyChildren(RewardContainerRight);
-            ResetToOriginalPositions();
             currentTask.CalculateBlockSummaryString();
         });
         ITI.AddTimer(itiDuration.value, FinishTrial);
@@ -482,7 +487,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void ResetToOriginalPositions()
     {
-        TrialStim.transform.localScale = TrialStimInitLocalScale;
+        //TrialStim.transform.localScale = TrialStimInitLocalScale;
 
         if (SideChoice == "left")
         {

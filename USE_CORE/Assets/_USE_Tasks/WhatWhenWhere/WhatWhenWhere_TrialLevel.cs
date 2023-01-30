@@ -23,7 +23,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     // game object variables
     private GameObject sliderGO, sliderHaloGO;
     public GameObject SliderPrefab, SliderHaloPrefab;
-    private Image sr;
+    private Image sliderHaloImage;
     private Texture2D texture;
     private static int numObjMax = 100;// need to change if stimulus exceeds this amount, not great
     
@@ -101,8 +101,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     // misc variables
     private Ray mouseRay;
-    private Slider slider;
-    private float sliderValueChange;
     private Camera cam;
     private bool variablesLoaded;
     private int correctIndex;
@@ -139,11 +137,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private GameObject selected = null;
     private bool CorrectSelection;
     private WhatWhenWhere_StimDef selectedSD = null;
+    
     //update slider variables
-    float endupdatetime = 0f;
-    float valueRemaining = 0f;
-    float valueToAdd = 0f;
-    float incrementalVal = 0f;
+    private float endupdatetime = 0f;
+    private float valueRemaining = 0f;
+    private float valueToAdd = 0f;
+    private float incrementalVal = 0f;
+    private Slider slider;
+    private float sliderValueChange;
     public override void DefineControlLevel()
     {
         // --------------------------------------ADDING PLAYER VIEW STUFF------------------------------------------------------------------------------------
@@ -358,7 +359,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 HaloFBController.ShowNegative(selected);
                 AudioFBController.Play("Negative");
-                sr.color = new Color(0.6627f, 0.6627f, 0.6627f, 0.2f);
+                sliderHaloImage.color = new Color(0.6627f, 0.6627f, 0.6627f, 0.2f);
                 if (slotError)
                     errorTypeString = "SlotError";
                 else if (distractorSlotError)
@@ -372,7 +373,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 HaloFBController.ShowPositive(selected);
                 AudioFBController.Play("Positive");
                 sliderHaloGO.SetActive(true);
-                sr.color = new Color(1, 0.8431f, 0, 0.2f);
+                sliderHaloImage.color = new Color(1, 0.8431f, 0, 0.2f);
                 errorTypeString = "None";
             }
             SetTrialSummaryString();
@@ -419,7 +420,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             choiceMade = true;
             trialComplete = false;
             sliderHaloGO.SetActive(true);
-            sr.color = new Color(1, 1, 1, 0.2f);
+            sliderHaloImage.color = new Color(1, 1, 1, 0.2f);
             startTime = Time.time;
             errorTypeString = "None";
             searchStims.ToggleVisibility(false);
@@ -446,11 +447,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             if ((int) (10 * (Time.time - startTime)) % 4 == 0)
             {
-                sr.color = new Color(1, 1, 1, 0.2f);
+                sliderHaloImage.color = new Color(1, 1, 1, 0.2f);
             }
             else if ((int) (10 * (Time.time - startTime)) % 2 == 0)
             {
-                sr.color = new Color(0, 0, 0, 0.2f);
+                sliderHaloImage.color = new Color(0, 0, 0, 0.2f);
             }
         });
         FinalFeedback.AddTimer(() => finalFbDuration.value, ITI, () =>
@@ -738,7 +739,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     }
     private void ConfigureSlider()
     {
-        sr = sliderHaloGO.GetComponent<Image>();
+        sliderHaloImage = sliderHaloGO.GetComponent<Image>();
         slider = sliderGO.GetComponent<Slider>();
         sliderInitPosition = sliderGO.transform.position;
         //consider making slider stuff into USE level class

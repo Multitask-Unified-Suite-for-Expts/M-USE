@@ -24,8 +24,17 @@ namespace MazeGame_Namespace
         public Color TileColor;
         public Vector3 ButtonPosition;
         public Vector3 ButtonScale;
-        public string ContextExternalFilePath, MazeExternalFilePath, MazeKeyFilePath;
-        
+        public string MazeExternalFilePath;
+        public string MazeKeyFilePath;
+        public float[] StartColor;
+        public float[] FinishColor;
+        public float[] CorrectColor;
+        public float[] LastCorrectColor;
+        public float[] IncorrectRuleAbidingColor;
+        public float[] IncorrectRuleBreakingColor;
+        public float[] DefaultTileColor;
+
+
     }
 
     public class MazeGame_BlockDef : BlockDef
@@ -45,8 +54,12 @@ namespace MazeGame_Namespace
         public int MazeNumTurns;
       //  public Color TileColor;
         public float[] TileColor;
+        public float TileSize;
+        
+        public int PulseSize;
+        public int NumPulses;
         public int Texture;
-        public int viewPath;
+        public bool ViewPath;
         public string ContextName;
         public int[] SliderGain;
         public int SliderInitial;
@@ -72,11 +85,14 @@ namespace MazeGame_Namespace
                 MazeGame_TrialDef td = new MazeGame_TrialDef();
                 td.TrialCount = Trial;
                 td.TileColor = TileColor;
+                td.TileSize = TileSize;
                 td.Texture = Texture;
+                td.NumPulses = NumPulses;
+                td.PulseSize = PulseSize;
                /* td.MazeDims = MazeDims;
                 td.MazeNumSquares = MazeNumSquares;
                 td.MazeNumTurns = MazeNumTurns;*/
-                td.viewPath = viewPath;
+                td.ViewPath = ViewPath;
                 td.ContextName = ContextName;
                 td.MazeInfo = MazeInfo;
                 td.SliderGain = SliderGain;
@@ -96,11 +112,14 @@ namespace MazeGame_Namespace
         //public TrialStims TrialStims;
         public int TrialCount;
         public float[] TileColor;
+        public float TileSize;
+        public int PulseSize;
+        public int NumPulses;
         public int Texture;
         public Vector2 MazeDims;
         public int MazeNumSquares;
         public int MazeNumTurns;
-        public int viewPath;
+        public bool ViewPath;
         public string ContextName;
         public string MazeInfo;
         public int[] SliderGain;

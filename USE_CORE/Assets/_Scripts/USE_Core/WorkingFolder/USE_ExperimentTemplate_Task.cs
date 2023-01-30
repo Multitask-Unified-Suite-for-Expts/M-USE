@@ -211,7 +211,11 @@ namespace USE_ExperimentTemplate_Task
                     foreach (GameObject go in TaskCanvasses)
                         go.SetActive(false);
                 Controllers.SetActive(false);
-
+                foreach(Transform child in GameObject.Find("MainCameraCopy").transform)
+                {
+                    Debug.Log("CHILD NAME: " + child.gameObject.name);
+                    child.gameObject.SetActive(false);
+                }
             });
 
 

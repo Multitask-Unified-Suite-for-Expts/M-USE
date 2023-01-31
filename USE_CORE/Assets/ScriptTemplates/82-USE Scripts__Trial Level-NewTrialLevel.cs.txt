@@ -1,6 +1,9 @@
 using UnityEngine;
-using USE_ExperimentTemplate;
+using System.Collections;
+using System.Collections.Generic;
 using USE_States;
+using USE_Settings;
+using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
 using #TASKNAME#_Namespace;
 

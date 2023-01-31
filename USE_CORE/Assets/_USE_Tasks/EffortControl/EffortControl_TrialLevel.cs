@@ -147,7 +147,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             RewardChoice = "";
             TrialStim = null;
         });
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), ChooseBalloon, () => StartButton.SetActive(false));
+        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), ChooseBalloon, () =>
+        {
+            StartButton.SetActive(false);
+            EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
+        });
 
         //Choose Balloon state -------------------------------------------------------------------------------------------------------
         MouseTracker.AddSelectionHandler(mouseHandler, ChooseBalloon);
@@ -189,6 +193,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
+
         ChooseBalloon.SpecifyTermination(() => TrialStim != null, CenterSelection, () =>
         {
             DestroyChildren(SideChoice == "left" ? RewardContainerRight : RewardContainerLeft);
@@ -320,7 +325,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
 
         //PopBalloon state -------------------------------------------------------------------------------------------------------
-        float delayStartTime = 0;
+        float delayTimer = 0;
 
         PopBalloon.AddDefaultInitializationMethod(() =>
         {
@@ -335,15 +340,18 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             {
                 AudioFBController.Play("TimeRanOut");
                 TokenFBController.enabled = false;
+                EventCodeManager.SendCodeImmediate(TaskEventCodes["NoChoice"]);
             }
             TrialStim.SetActive(false);
         });
+
         PopBalloon.AddUpdateMethod(() =>
         {
             if (!TrialStim.activeSelf)
-                delayStartTime += Time.deltaTime;
+                delayTimer += Time.deltaTime;
         });
-        PopBalloon.SpecifyTermination(() => !TrialStim.activeSelf && delayStartTime > popToFeedbackDelay.value, Feedback, () => delayStartTime = 0);
+
+        PopBalloon.SpecifyTermination(() => !TrialStim.activeSelf && delayTimer > popToFeedbackDelay.value, Feedback, () => delayTimer = 0);
 
         //Feedback state -------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
@@ -356,11 +364,17 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 Destroy(CenteredGO);
 
                 if (SyncBoxController != null)
+                {
                     GiveReward();
-                
+                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
+                }
+
                 Completions_Block++;
                 AddTokenInflateAudioPlayed = true;
             }
+            else
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
+
             Touches_Block += MouseTracker.GetClickCount();
         });
         Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI, () =>
@@ -369,6 +383,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             AddTokenInflateAudioPlayed = false;
         });
         Feedback.SpecifyTermination(() => true && Response != 1, ITI);
+        Feedback.AddDefaultTerminationMethod(() =>
+        {
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
+        });
 
         //ITI state -------------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>
@@ -388,7 +406,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             DestroyChildren(RewardContainerRight);
             currentTask.CalculateBlockSummaryString();
         });
-        ITI.AddTimer(itiDuration.value, FinishTrial);
+        ITI.AddTimer(itiDuration.value, FinishTrial, () =>
+        {
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]); //next trial starts next frame
+        });
 
         LogTrialData();
         LogFrameData();

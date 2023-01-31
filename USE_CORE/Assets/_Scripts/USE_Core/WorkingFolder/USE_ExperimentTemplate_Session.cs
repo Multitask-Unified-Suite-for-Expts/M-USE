@@ -222,6 +222,7 @@ namespace USE_ExperimentTemplate_Session
                 PauseCanvasGO = GameObject.Find("PauseCanvas");
                 PauseCanvasGO.SetActive(false);
                 PauseCanvas = PauseCanvasGO.GetComponent<Canvas>();
+                PauseCanvas.planeDistance = 1;
 
                 SessionData.CreateFile();
                 //SessionData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
@@ -360,8 +361,8 @@ namespace USE_ExperimentTemplate_Session
                 taskButtons.transform.localScale = Vector3.one;
                 // We'll use height for the calculations because it is generally smaller than the width
                 int numTasks = TaskMappings.Count;
-                float buttonSize = 200;
-                float buttonSpacing = 20;
+                float buttonSize = numTasks > 7 ? 175 : 200;
+                float buttonSpacing = numTasks > 7 ? 15 : 20;
                 float buttonsWidth = numTasks * buttonSize + (numTasks - 1) * buttonSpacing;
                 float buttonStartX = (buttonSize - buttonsWidth) / 2;
 
@@ -441,7 +442,8 @@ namespace USE_ExperimentTemplate_Session
                 GameObject taskButton = taskButtonsDict[selectedConfigName];
                 RawImage image = taskButton.GetComponent<RawImage>();
                 Button button = taskButton.GetComponent<Button>();
-                image.color = Color.gray;
+                Color darkGrey = new Color(.5f, .5f, .5f, .25f);
+                image.color = darkGrey;
                 Destroy(button);
 
                 string taskName = (string)TaskMappings[selectedConfigName];

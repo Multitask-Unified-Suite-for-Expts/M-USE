@@ -15,7 +15,6 @@ namespace USE_StimulusManagement
 {
 	public class StimDef
 	{
-
 		public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)
 		public string StimName;
 		public string StimPath;
@@ -275,7 +274,6 @@ namespace USE_StimulusManagement
 			if (!string.IsNullOrEmpty(ExternalFilePath))
 			{
 				StimGameObject = LoadExternalStimFromFile();
-				//Debug.Log(StimGameObject.name);
 			}
 			else if (StimDimVals != null)
 			{
@@ -313,9 +311,7 @@ namespace USE_StimulusManagement
 		}
 
 		public GameObject LoadExternalStimFromFile(string stimFilePath = "")
-		{
-			
-			
+		{			
 			//add StimExtesion to file path if it doesn't already contain it
 			if (!string.IsNullOrEmpty(StimExtension) && !ExternalFilePath.EndsWith(StimExtension))
 			{
@@ -348,7 +344,9 @@ namespace USE_StimulusManagement
 				//of at start of each trial
 				List<string> filenames = RecursiveFileFinder.FindFile(StimFolderPath, ExternalFilePath, StimExtension);
 				if (filenames.Count == 1)
+				{
 					ExternalFilePath = filenames[0];
+				}
 				else if (filenames.Count == 0)
 					Debug.LogError("Attempted to load stimulus " + ExternalFilePath + " in folder " + 
 					               StimFolderPath + "but no file matching this pattern was found in this folder or subdirectories.");

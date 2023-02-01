@@ -124,7 +124,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             if (!ObjectsCreated)
                 CreateObjects();
-
             LoadConfigUIVariables();
             SetTrialSummaryString();
         });
@@ -134,6 +133,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
+            if (!Borders.activeSelf)
+                Borders.SetActive(true);
+
             TokenFBController.enabled = false;
             AvgClickTime = null;
             ResetRelativeStartTime(); 
@@ -193,7 +195,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-
         ChooseBalloon.SpecifyTermination(() => TrialStim != null, CenterSelection, () =>
         {
             DestroyChildren(SideChoice == "left" ? RewardContainerRight : RewardContainerLeft);
@@ -231,7 +232,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             if(Wrapper.transform.position != CenteredPos)
                 Wrapper.transform.position = Vector3.MoveTowards(Wrapper.transform.position, CenteredPos, CenteringSpeed * Time.deltaTime);
-            
+
             if (Wrapper.transform.position == CenteredPos)
                 Centered = true;
         });
@@ -268,7 +269,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             InflateAudioPlayed = false;
             ScaleTimer = 0;
         });
-
         InflateBalloon.AddUpdateMethod(() =>
         {
             if (Inflate)
@@ -344,13 +344,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
             TrialStim.SetActive(false);
         });
-
         PopBalloon.AddUpdateMethod(() =>
         {
             if (!TrialStim.activeSelf)
                 delayTimer += Time.deltaTime;
         });
-
         PopBalloon.SpecifyTermination(() => !TrialStim.activeSelf && delayTimer > popToFeedbackDelay.value, Feedback, () => delayTimer = 0);
 
         //Feedback state -------------------------------------------------------------------------------------------------------

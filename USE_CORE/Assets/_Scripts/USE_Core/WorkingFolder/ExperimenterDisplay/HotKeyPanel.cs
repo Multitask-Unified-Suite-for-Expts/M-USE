@@ -279,7 +279,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             HotKey pauseGame = new HotKey
             {
                 keyDescription = "P",
-                actionName = "Pause/Unpause Game",
+                actionName = "Pause/Unpause (ends trial)",
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.P),
                 hotKeyAction = () =>
                 {

@@ -17,6 +17,15 @@ namespace USE_StimulusManagement
 	{
 		public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)
 		public string StimName;
+		public string Name
+		{
+			get
+			{
+				string[] strings = ExternalFilePath.Split('/');
+				string split = strings[strings.Length - 1];
+				return split.Split('.')[0];
+			}
+		}
 		public string StimPath;
 		public string PrefabPath;
 		public string ExternalFilePath;

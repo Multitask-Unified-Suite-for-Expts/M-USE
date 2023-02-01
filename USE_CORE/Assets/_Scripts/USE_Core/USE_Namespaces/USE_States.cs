@@ -1402,6 +1402,18 @@ namespace USE_States
             return materialSkybox;
         }
 
+        public GameObject FindInactiveGameObjectByName(string name)
+        {
+            Transform[] objs = Resources.FindObjectsOfTypeAll<Transform>() as Transform[];
+            foreach (Transform obj in objs)
+            {
+                if (obj.hideFlags == HideFlags.None && obj.name == name)
+                {
+                    return obj.gameObject;
+                }
+            }
+            return null;
+        }
     }
 
 

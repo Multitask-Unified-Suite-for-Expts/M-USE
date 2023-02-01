@@ -1,17 +1,10 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
 using UnityEngine.UI;
 using Cursor = UnityEngine.Cursor;
 using ConfigDynamicUI;
-using Newtonsoft.Json.Serialization;
-using UnityEngine.EventSystems;
 using USE_ExperimenterDisplay;
-using USE_ExperimentTemplate_Session;
-using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Trial;
-using UnityEditor;
 using UnityEngine.SceneManagement;
 
 public class HotKeyPanel : ExperimenterDisplayPanel
@@ -155,6 +148,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
         {
             List<HotKey> HotKeyList = new List<HotKey>();
 
+            List<GameObject> pauseObjects = new List<GameObject>();
+
             // Toggle Displays HotKey
             //HotKey toggleDisplays = new HotKey
             //{
@@ -190,10 +185,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.C),
                 hotKeyAction = () =>
                 {
-                    if (Cursor.visible)
-                        Cursor.visible = false;
-                    else
-                        Cursor.visible = true;
+                    Cursor.visible = !Cursor.visible;
                 }
 
             };
@@ -283,6 +275,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             HotKeyList.Add(quitGame);
 
             // Pause Game Hot Key
+            //WORKING EXCEPT FOR THE TRIAL'S STATE TIMERS AREN'T PAUSING.
             HotKey pauseGame = new HotKey
             {
                 keyDescription = "P",
@@ -290,15 +283,42 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.P),
                 hotKeyAction = () =>
                 {
-                    if (!HkPanel.TaskLevel.Paused)
+                    USE_States.State currentState = HkPanel.TrialLevel.CurrentState;
+                    float pauseStartTime = Time.time;
+                    float pauseDuration;
+
+                    if (!HkPanel.TrialLevel.Paused)
                     {
-                        HkPanel.TaskLevel.Paused = true;
+                        string taskName = HkPanel.TaskLevel.TaskName;
+                        GameObject[] sceneKids = SceneManager.GetSceneByName(taskName).GetRootGameObjects();
+                        foreach(var kid in sceneKids)
+                        {
+                            if(kid.name != taskName + "_Camera" && kid.activeSelf)
+                            {
+                                pauseObjects.Add(kid);
+                                kid.SetActive(false);
+                            }
+                        }
+                        GameObject controllers = GameObject.Find("Controllers");
+                        if(controllers != null)
+                        {
+                            pauseObjects.Add(controllers);
+                            controllers.SetActive(false);
+                        }
+                        HkPanel.TrialLevel.Paused = true;
                         HkPanel.SessionLevel.PauseCanvasGO.SetActive(true);
                     }
                     else
                     {
-                        HkPanel.TaskLevel.Paused = false;
+                        HkPanel.TrialLevel.Paused = false;
+                        foreach (GameObject kid in pauseObjects)
+                            kid.SetActive(true);
+
+                        pauseDuration = Time.time - pauseStartTime;
+                        //NOW JUST NEED A WAY TO ADD PAUSE DURATION TO THE CURRENT TIMER OF CURRENT TRIAL STATE:
+
                         HkPanel.SessionLevel.PauseCanvasGO.SetActive(false);
+                        pauseObjects.Clear();
                     }
                 }
             };
@@ -344,8 +364,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
         }
         
     }
-    
-        
 
 }
 

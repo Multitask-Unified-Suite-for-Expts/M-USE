@@ -442,7 +442,7 @@ namespace USE_ExperimentTemplate_Session
                 GameObject taskButton = taskButtonsDict[selectedConfigName];
                 RawImage image = taskButton.GetComponent<RawImage>();
                 Button button = taskButton.GetComponent<Button>();
-                Color darkGrey = new Color(.5f, .5f, .5f, .25f);
+                Color darkGrey = new Color(.5f, .5f, .5f, .35f);
                 image.color = darkGrey;
                 Destroy(button);
 

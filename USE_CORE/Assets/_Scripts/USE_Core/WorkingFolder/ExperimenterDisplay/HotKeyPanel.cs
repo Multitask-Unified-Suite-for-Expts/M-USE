@@ -148,7 +148,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
         {
             List<HotKey> HotKeyList = new List<HotKey>();
 
-            List<GameObject> pauseObjects = new List<GameObject>();
+            bool paused = false;
 
             // Toggle Displays HotKey
             //HotKey toggleDisplays = new HotKey
@@ -283,42 +283,34 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.P),
                 hotKeyAction = () =>
                 {
-                    USE_States.State currentState = HkPanel.TrialLevel.CurrentState;
-                    float pauseStartTime = Time.time;
-                    float pauseDuration;
-
-                    if (!HkPanel.TrialLevel.Paused)
+                    if (!paused) //Note: using paused variable and not hkpanel.trialLevel.paused, because I want it to fast forward to next trial while paused. 
                     {
-                        string taskName = HkPanel.TaskLevel.TaskName;
-                        GameObject[] sceneKids = SceneManager.GetSceneByName(taskName).GetRootGameObjects();
-                        foreach(var kid in sceneKids)
-                        {
-                            if(kid.name != taskName + "_Camera" && kid.activeSelf)
-                            {
-                                pauseObjects.Add(kid);
-                                kid.SetActive(false);
-                            }
-                        }
+                        //Fast forward to end of trial:
+                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI"));
+
+                        //If more trials in current block, end the block:
+                        int trialsInBlock = HkPanel.TaskLevel.currentBlockDef.TrialDefs.Count;
+                        int trialCountInBlock = HkPanel.TrialLevel.TrialCount_InBlock;
+                        if (trialsInBlock > 1 && trialCountInBlock+1 < trialsInBlock)
+                            HkPanel.TrialLevel.ForceBlockEnd = true;
+
+                        //Deactivate Controllers (so that tokenbar not still on screen):
                         GameObject controllers = GameObject.Find("Controllers");
-                        if(controllers != null)
-                        {
-                            pauseObjects.Add(controllers);
+                        if (controllers != null)
                             controllers.SetActive(false);
-                        }
-                        HkPanel.TrialLevel.Paused = true;
+
+                        //Turn gray pause screen on:
                         HkPanel.SessionLevel.PauseCanvasGO.SetActive(true);
+
+                        paused = true;
                     }
                     else
                     {
-                        HkPanel.TrialLevel.Paused = false;
-                        foreach (GameObject kid in pauseObjects)
-                            kid.SetActive(true);
-
-                        pauseDuration = Time.time - pauseStartTime;
-                        //NOW JUST NEED A WAY TO ADD PAUSE DURATION TO THE CURRENT TIMER OF CURRENT TRIAL STATE:
-
                         HkPanel.SessionLevel.PauseCanvasGO.SetActive(false);
-                        pauseObjects.Clear();
+                        GameObject controllers = GameObject.Find("Controllers");
+                        if(controllers == null)
+                            HkPanel.SessionLevel.FindInactiveGameObjectByName("Controllers").SetActive(true);
+                        paused = false;
                     }
                 }
             };

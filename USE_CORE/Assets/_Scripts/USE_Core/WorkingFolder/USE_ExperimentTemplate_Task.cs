@@ -50,6 +50,14 @@ namespace USE_ExperimentTemplate_Task
         protected BlockDef CurrentBlockDef;
         protected TrialDef[] AllTrialDefs;
 
+        public BlockDef currentBlockDef
+        {
+            get
+            {
+                return CurrentBlockDef;
+            }
+        }
+
         //
         // private StimGroup AllTaskStims;
         // public Dictionary<string, StimGroup> AllTaskStimGroups;
@@ -207,7 +215,7 @@ namespace USE_ExperimentTemplate_Task
                     foreach (GameObject go in TaskCanvasses)
                         go.SetActive(false);
 
-                Controllers.SetActive(false);
+                Destroy(Controllers);
 
                 //Destroy Text on Experimenter Display:
                 foreach(Transform child in GameObject.Find("MainCameraCopy").transform)
@@ -272,7 +280,9 @@ namespace USE_ExperimentTemplate_Task
             //AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
             GameObject fbControllersPrefab = Resources.Load<GameObject>("FeedbackControllers");
             GameObject inputTrackersPrefab = Resources.Load<GameObject>("InputTrackers");
+
             Controllers = new GameObject("Controllers");
+
             GameObject fbControllers = Instantiate(fbControllersPrefab, Controllers.transform);
             GameObject inputTrackers = Instantiate(inputTrackersPrefab, Controllers.transform);
 

@@ -148,8 +148,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
         {
             List<HotKey> HotKeyList = new List<HotKey>();
 
-            bool paused = false;
-
             // Toggle Displays HotKey
             //HotKey toggleDisplays = new HotKey
             //{
@@ -275,7 +273,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             HotKeyList.Add(quitGame);
 
             // Pause Game Hot Key
-            //WORKING EXCEPT FOR THE TRIAL'S STATE TIMERS AREN'T PAUSING.
             HotKey pauseGame = new HotKey
             {
                 keyDescription = "P",
@@ -283,14 +280,14 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.P),
                 hotKeyAction = () =>
                 {
-                    if (!paused) //Note: using paused variable and not hkpanel.trialLevel.paused, because I want it to fast forward to next trial while paused. 
+                    if (!HkPanel.TrialLevel.Paused) //Note: using paused variable and not hkpanel.trialLevel.paused, because I want it to fast forward to next trial while paused. 
                     {
                         //Fast forward to end of trial:
                         HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI"));
 
-                        //If more trials in current block, end the block:
                         int trialsInBlock = HkPanel.TaskLevel.currentBlockDef.TrialDefs.Count;
                         int trialCountInBlock = HkPanel.TrialLevel.TrialCount_InBlock;
+                        //If more trials in current block, end the block:
                         if (trialsInBlock > 1 && trialCountInBlock+1 < trialsInBlock)
                             HkPanel.TrialLevel.ForceBlockEnd = true;
 
@@ -301,11 +298,10 @@ public class HotKeyPanel : ExperimenterDisplayPanel
 
                         //Turn gray pause screen on:
                         HkPanel.SessionLevel.PauseCanvasGO.SetActive(true);
-
-                        //send abort code: 
+                        //Send abort code: 
                         HkPanel.TrialLevel.AbortCode = 1;
-
-                        paused = true;
+                        //Pause Trial Level
+                        HkPanel.TrialLevel.Paused = true;
                     }
                     else
                     {
@@ -313,7 +309,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         GameObject controllers = GameObject.Find("Controllers");
                         if(controllers == null)
                             HkPanel.SessionLevel.FindInactiveGameObjectByName("Controllers").SetActive(true);
-                        paused = false;
+                        HkPanel.TrialLevel.Paused = false;
                     }
                 }
             };

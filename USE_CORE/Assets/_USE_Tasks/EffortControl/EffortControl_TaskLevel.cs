@@ -94,6 +94,11 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
     public void SetSettings()
     {
+        if (SessionSettings.SettingExists("Session", "IsHuman"))
+            trialLevel.IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");
+        else
+            trialLevel.IsHuman = false;
+
         string TaskName = "EffortControl";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
@@ -119,11 +124,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
             trialLevel.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
         else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "IsHuman"))
-            trialLevel.IsHuman = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "IsHuman");
-        else
-            trialLevel.IsHuman = false;
     }
 
     public override OrderedDictionary GetSummaryData()

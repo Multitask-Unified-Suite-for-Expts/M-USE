@@ -28,6 +28,8 @@ namespace USE_ExperimentTemplate_Session
         public GameObject PauseCanvasGO;
         public Canvas PauseCanvas;
 
+        private bool IsHuman;
+
         [HideInInspector] public bool TasksFinished;
 
         protected SummaryData SummaryData;
@@ -155,6 +157,9 @@ namespace USE_ExperimentTemplate_Session
             {
                 Debug.LogError("No task names or task mappings specified in Session config file or by other means.");
             }
+
+            if (SessionSettings.SettingExists("Session", "IsHuman"))
+                IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");
 
             if (SessionSettings.SettingExists("Session", "TaskIconLocations"))
                 TaskIconLocations = (Vector3[])SessionSettings.Get("Session", "TaskIconLocations");

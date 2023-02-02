@@ -56,29 +56,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     {
         trialLevel = (ContinuousRecognition_TrialLevel)TrialLevel;
 
-        if(SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else if(SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
-            trialLevel.MaterialFilePath = (String)SessionSettings.Get("Session", "ContextExternalFilePath");
-        else
-            Debug.Log("ContextExternalFilePath NOT specified in the Session Config OR Task Config!");
-
-        if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
-            trialLevel.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
-        else
-            trialLevel.MacMainDisplayBuild = false;
-
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-        {
-            trialLevel.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-            trialLevel.OriginalStartButtonPosition = trialLevel.ButtonPosition;
-        }
-        else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-            trialLevel.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-        else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
-
+        SetSettings();
 
         BlockAveragesString = "";
         CurrentBlockString = "";
@@ -126,6 +104,35 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             CalculateStanDev();
         });
         
+    }
+
+    public void SetSettings()
+    {
+        if (SessionSettings.SettingExists("Session", "IsHuman"))
+            trialLevel.IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
+            trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+        else if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
+            trialLevel.MaterialFilePath = (String)SessionSettings.Get("Session", "ContextExternalFilePath");
+        else
+            Debug.Log("ContextExternalFilePath NOT specified in the Session Config OR Task Config!");
+
+        if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
+            trialLevel.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
+        else
+            trialLevel.MacMainDisplayBuild = false;
+
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+        {
+            trialLevel.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+            trialLevel.OriginalStartButtonPosition = trialLevel.ButtonPosition;
+        }
+        else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+            trialLevel.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+        else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
     }
 
     public override OrderedDictionary GetSummaryData()

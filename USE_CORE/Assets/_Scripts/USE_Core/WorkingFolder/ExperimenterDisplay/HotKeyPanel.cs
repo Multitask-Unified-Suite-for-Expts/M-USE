@@ -276,19 +276,19 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             HotKey pauseGame = new HotKey
             {
                 keyDescription = "P",
-                actionName = "Pause/Unpause (ends trial)",
+                actionName = "Pause (ends trial)",
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.P),
                 hotKeyAction = () =>
                 {
-                    if (!HkPanel.TrialLevel.Paused) //Note: using paused variable and not hkpanel.trialLevel.paused, because I want it to fast forward to next trial while paused. 
+                    if (!HkPanel.TrialLevel.Paused) 
                     {
-                        //Fast forward to end of trial:
+                        //Go to end of trial:
                         HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI"));
 
                         int trialsInBlock = HkPanel.TaskLevel.currentBlockDef.TrialDefs.Count;
                         int trialCountInBlock = HkPanel.TrialLevel.TrialCount_InBlock;
                         //If more trials in current block, end the block:
-                        if (trialsInBlock > 1 && trialCountInBlock+1 < trialsInBlock)
+                        if (trialsInBlock > 1 && trialCountInBlock + 1 < trialsInBlock)
                             HkPanel.TrialLevel.ForceBlockEnd = true;
 
                         //Deactivate Controllers (so that tokenbar not still on screen):
@@ -305,11 +305,11 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     }
                     else
                     {
-                        HkPanel.SessionLevel.PauseCanvasGO.SetActive(false);
-                        GameObject controllers = GameObject.Find("Controllers");
-                        if(controllers == null)
-                            HkPanel.SessionLevel.FindInactiveGameObjectByName("Controllers").SetActive(true);
                         HkPanel.TrialLevel.Paused = false;
+                        GameObject controllers = GameObject.Find("Controllers");
+                        if (controllers == null)
+                            HkPanel.SessionLevel.FindInactiveGameObjectByName("Controllers").SetActive(true);
+                        HkPanel.SessionLevel.PauseCanvasGO.SetActive(false);
                     }
                 }
             };

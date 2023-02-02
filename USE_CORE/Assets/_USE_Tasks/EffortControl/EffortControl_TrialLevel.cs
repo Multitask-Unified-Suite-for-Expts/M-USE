@@ -46,7 +46,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] Vector3 LeftStimOriginalPosition;
     [HideInInspector] Vector3 RightStimOriginalPosition;
 
-    [HideInInspector] public string MaterialFilePath; //set in task level
+    //Set in task level:
+    [HideInInspector] public bool IsHuman;
+    [HideInInspector] public string MaterialFilePath;
 
     //Misc Variables:
     [System.NonSerialized] public int Response = -1;
@@ -95,7 +97,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public GameObject MaxOutline_Right;
 
     [HideInInspector] public bool InflateAudioPlayed;
-    [HideInInspector] public bool IsHuman;
 
 
     public override void DefineControlLevel()
@@ -147,6 +148,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             SideChoice = "";
             EffortChoice = "";
             RewardChoice = "";
+            ClicksNeeded = 0;
             TrialStim = null;
         });
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), ChooseBalloon, () =>

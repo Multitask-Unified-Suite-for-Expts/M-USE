@@ -302,6 +302,9 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         //Turn gray pause screen on:
                         HkPanel.SessionLevel.PauseCanvasGO.SetActive(true);
 
+                        //send abort code: 
+                        HkPanel.TrialLevel.AbortCode = 1;
+
                         paused = true;
                     }
                     else

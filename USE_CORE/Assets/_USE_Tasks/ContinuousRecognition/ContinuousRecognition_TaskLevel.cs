@@ -70,20 +70,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.ContextActive = true;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
 
-            trialLevel.AdjustedPositionsForMac = false;
-
-            trialLevel.ChosenStimIndices.Clear();
-            trialLevel.NonStimTouches_Block = 0;
-            trialLevel.NumTrials_Block = 0;
-            trialLevel.NumCorrect_Block = 0;
-            trialLevel.NumTbCompletions_Block = 0;
-            trialLevel.TimeToChoice_Block.Clear();
-            trialLevel.AvgTimeToChoice_Block = 0;
-            trialLevel.TimeToCompletion_Block = 0;
-            trialLevel.NumRewards_Block = 0;
-            trialLevel.Score = 0;
-            trialLevel.TokenFBController.SetTokenBarValue(0);
-
             CalculateBlockSummaryString();
         });
 
@@ -163,6 +149,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     public void CalculateBlockSummaryString()
     {
         ClearStrings();
+
+        Debug.Log("BLOCK COUNT = " + BlockCount);
 
         if (BlockCount > 0)
         {

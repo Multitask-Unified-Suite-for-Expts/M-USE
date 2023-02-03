@@ -46,6 +46,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     public bool StimFacingCamera;
     public string ShadowType;
     public bool NeutralITI;
+    public int InitialTokens_InBlock;
     
     //Player View Variables
     private PlayerViewPanel playerView;
@@ -103,8 +104,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             ResetTrialVariables();
             LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
-            StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
-            FBSquare = CreateSquare("FBSquare", FBSquareTexture, FBSquarePosition, FBSquareScale);
+            if(playerViewText==null)
+                CreateTextOnExperimenterDisplay();
+            if(StartButton == null)
+                StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
+            if(FBSquare == null)
+                FBSquare = CreateSquare("FBSquare", FBSquareTexture, FBSquarePosition, FBSquareScale);
         });
         
         SetupTrial.AddInitializationMethod(() =>
@@ -113,6 +118,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             ContextName = CurrentTrialDef.ContextName;
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
 
+
+            if (TrialCount_InBlock == 0)
+            {
+                playerViewText.SetActive(false);
+            }
+                
+            
             if (!configUIVariablesLoaded) LoadConfigUIVariables();
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();

@@ -152,7 +152,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             EffortChoice = "";
             RewardChoice = "";
             ClicksNeeded = 0;
-            TrialStim = null;
+
+            ResetToOriginalPositions();
+
+            if(TrialStim != null)
+            {
+                TrialStim.transform.localScale = TrialStimInitLocalScale;
+                TrialStim = null;
+            }
         });
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), ChooseBalloon, () =>
         {
@@ -171,6 +178,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             MaxScale = new Vector3(60, 0, 60);
             LeftScaleUpAmount = MaxScale / currentTrial.NumClicksLeft;
             RightScaleUpAmount = MaxScale / currentTrial.NumClicksRight;
+
+            if (!BalloonContainerLeft.activeSelf)
+                BalloonContainerLeft.SetActive(true);
+            if (!BalloonContainerRight.activeSelf)
+                BalloonContainerRight.SetActive(true);
 
             CreateBalloonOutlines(currentTrial.NumClicksLeft, LeftScaleUpAmount, currentTrial.ClicksPerOutline, StimLeft.transform.position, BalloonContainerLeft);
             CreateBalloonOutlines(currentTrial.NumClicksRight, RightScaleUpAmount, currentTrial.ClicksPerOutline, StimRight.transform.position, BalloonContainerRight);
@@ -394,15 +406,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //ITI state -------------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>
         {
-            ResetToOriginalPositions();
-            if (TrialStim != null)
-            {
-                if (TrialStim.activeSelf)
-                    TrialStim.SetActive(false);
-                TrialStim.transform.localScale = TrialStimInitLocalScale;
-            }
+            if (TrialStim != null && TrialStim.activeSelf)
+                TrialStim.SetActive(false);
+           
             if (MiddleBarrier.activeSelf)
                 MiddleBarrier.SetActive(false);
+
             DestroyChildren(BalloonContainerLeft);
             DestroyChildren(BalloonContainerRight);
             DestroyChildren(RewardContainerLeft);
@@ -517,18 +526,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void ResetToOriginalPositions()
     {
-        if (SideChoice == "left")
-        {
-            BalloonContainerLeft.transform.position = LeftContainerOriginalPosition;
-            RewardContainerLeft.transform.position = LeftRewardContainerOriginalPosition;
-            StimLeft.transform.position = LeftStimOriginalPosition;
-        }
-        else
-        {
-            BalloonContainerRight.transform.position = RightContainerOriginalPosition;
-            RewardContainerRight.transform.position = RightRewardContainerOriginalPosition;
-            StimRight.transform.position = RightStimOriginalPosition;
-        }
+        BalloonContainerLeft.transform.position = LeftContainerOriginalPosition;
+        RewardContainerLeft.transform.position = LeftRewardContainerOriginalPosition;
+        StimLeft.transform.position = LeftStimOriginalPosition;
+
+        BalloonContainerRight.transform.position = RightContainerOriginalPosition;
+        RewardContainerRight.transform.position = RightRewardContainerOriginalPosition;
+        StimRight.transform.position = RightStimOriginalPosition;
     }
 
     void GiveReward()

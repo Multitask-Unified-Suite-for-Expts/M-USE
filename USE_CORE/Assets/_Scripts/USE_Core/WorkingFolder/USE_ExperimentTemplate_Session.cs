@@ -524,8 +524,8 @@ namespace USE_ExperimentTemplate_Session
                 {
                     SerialRecvData.folderPath = SessionDataPath + Path.DirectorySeparatorChar + "SerialRecvData";
                     SerialSentData.folderPath = SessionDataPath + Path.DirectorySeparatorChar + "SerialSentData";
-                    SerialRecvData.fileName = FilePrefix + "__SerialRecvData" + SerialRecvData.GetNiceIntegers(taskCount + 1 * 2 - 1) + "TaskSelection.txt";  
-                    SerialSentData.fileName = FilePrefix + "__SerialSentData" + SerialRecvData.GetNiceIntegers(taskCount + 1 * 2 - 1) + "TaskSelection.txt";
+                    SerialRecvData.fileName = FilePrefix + "__SerialRecvData" + SerialRecvData.GetNiceIntegers(4, taskCount + 1 * 2 - 1) + "TaskSelection.txt";  
+                    SerialSentData.fileName = FilePrefix + "__SerialSentData" + SerialRecvData.GetNiceIntegers(4, taskCount + 1 * 2 - 1) + "TaskSelection.txt";
                 }
                 //     SessionDataPath + Path.DirectorySeparatorChar +
                 //                             SerialRecvData.GetNiceIntegers(4, taskCount + 1 * 2 - 1) + "_TaskSelection";

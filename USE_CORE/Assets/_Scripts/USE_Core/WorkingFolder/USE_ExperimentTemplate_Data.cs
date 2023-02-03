@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Collections;
+using System;
 using System.IO;
 using UnityEngine;
 using USE_Data;
@@ -310,7 +311,7 @@ namespace USE_ExperimentTemplate_Data
             AddDatum("BlockCount", () => taskLevel.BlockCount + 1);
             AddDatum("TrialCount_InTask", () => trialLevel.TrialCount_InTask + 1);
             AddDatum("TrialCount_InBlock", () => trialLevel.TrialCount_InBlock + 1);
-            //AddDatum("CurrentTrialState", () => trialLevel.CurrentState.StateName); //THIS IS THROWING ERROR!!!!!!!!!!
+            AddDatum("CurrentTrialState", () => trialLevel.CurrentState.StateName);
             AddDatum("Frame", () => Time.frameCount);
             AddDatum("FrameStartUnity", () => Time.time);
         }

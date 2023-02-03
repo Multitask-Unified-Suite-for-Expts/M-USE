@@ -47,7 +47,7 @@ namespace ContinuousRecognition_Namespace
         public float[] Y_FbLocations;
         public int NumTokenBar, TrialCount, NumRewardPulses, PulseSize, RewardMag;
         public string BlockName, ContextName, ShadowType;
-        public bool IsHuman, FindAllStim, StimFacingCamera, UseStarfield, ManuallySpecifyLocation;
+        public bool FindAllStim, StimFacingCamera, UseStarfield, ManuallySpecifyLocation;
 
         public List<int> PC_Stim;
         public List<int> PNC_Stim;
@@ -154,7 +154,6 @@ namespace ContinuousRecognition_Namespace
                 trial.StimFacingCamera = StimFacingCamera;
                 trial.ShadowType = ShadowType;
                 trial.UseStarfield = UseStarfield;
-                trial.IsHuman = IsHuman;
 
                 TrialDefs.Add(trial);
                 numTrialStims++;
@@ -246,7 +245,6 @@ namespace ContinuousRecognition_Namespace
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
 
-        public bool IsHuman;
         public bool UseStarfield;
         public bool FindAllStim;
         public bool StimFacingCamera;

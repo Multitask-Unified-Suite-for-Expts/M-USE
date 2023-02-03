@@ -22,14 +22,10 @@ namespace EffortControl_Namespace
         //public List<string[]> FeatureNames;
         //public string neutralPatternedColorName;
         //public float? ExternalStimScale;
-        public string ContextName;
     }
 
     public class EffortControl_BlockDef : BlockDef
     {
-        //Already-existing fields (inherited from BlockDef)
-        //public int BlockCount;
-        //public TrialDef[] TrialDefs;
         public string BlockName;
         public int NumTrials;
         public int NumClicksLeft;
@@ -73,10 +69,6 @@ namespace EffortControl_Namespace
         public int PulseSizeLeft;
         public int PulseSizeRight;
         public int ClicksPerOutline;
-        // public float[] TouchOnOffTimeRange;
-        // public float InitialChoiceMinDuration;
-        // public float StarttoTapDispDelay;
-        // public float FinalTouchToRewardDelay;
     }
 
     public class EffortControl_StimDef : StimDef

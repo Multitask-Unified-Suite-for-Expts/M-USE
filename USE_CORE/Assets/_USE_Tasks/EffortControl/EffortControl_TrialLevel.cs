@@ -46,7 +46,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] Vector3 LeftStimOriginalPosition;
     [HideInInspector] Vector3 RightStimOriginalPosition;
 
-    [HideInInspector] public string MaterialFilePath; //set in task level
+    //Set in task level:
+    [HideInInspector] public bool IsHuman;
+    [HideInInspector] public string MaterialFilePath;
 
     //Misc Variables:
     [System.NonSerialized] public int Response = -1;
@@ -95,7 +97,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public GameObject MaxOutline_Right;
 
     [HideInInspector] public bool InflateAudioPlayed;
-    [HideInInspector] public bool IsHuman;
 
 
     public override void DefineControlLevel()
@@ -127,7 +128,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if (!ObjectsCreated)
                 CreateObjects();
-
             LoadConfigUIVariables();
             SetTrialSummaryString();
         });
@@ -137,6 +137,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
+            if (!Borders.activeSelf)
+                Borders.SetActive(true);
+
             TokenFBController.enabled = false;
             AvgClickTime = null;
             ResetRelativeStartTime(); 
@@ -148,9 +151,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             SideChoice = "";
             EffortChoice = "";
             RewardChoice = "";
+            ClicksNeeded = 0;
             TrialStim = null;
         });
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), ChooseBalloon, () => StartButton.SetActive(false));
+        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), ChooseBalloon, () =>
+        {
+            StartButton.SetActive(false);
+            EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
+        });
 
         //Choose Balloon state -------------------------------------------------------------------------------------------------------
         MouseTracker.AddSelectionHandler(mouseHandler, ChooseBalloon);
@@ -229,7 +237,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             if(Wrapper.transform.position != CenteredPos)
                 Wrapper.transform.position = Vector3.MoveTowards(Wrapper.transform.position, CenteredPos, CenteringSpeed * Time.deltaTime);
-            
+
             if (Wrapper.transform.position == CenteredPos)
                 Centered = true;
         });
@@ -266,7 +274,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             InflateAudioPlayed = false;
             ScaleTimer = 0;
         });
-
         InflateBalloon.AddUpdateMethod(() =>
         {
             if (Inflate)
@@ -323,7 +330,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
 
         //PopBalloon state -------------------------------------------------------------------------------------------------------
-        float delayStartTime = 0;
+        float delayTimer = 0;
 
         PopBalloon.AddDefaultInitializationMethod(() =>
         {
@@ -338,15 +345,16 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             {
                 AudioFBController.Play("TimeRanOut");
                 TokenFBController.enabled = false;
+                EventCodeManager.SendCodeImmediate(TaskEventCodes["NoChoice"]);
             }
             TrialStim.SetActive(false);
         });
         PopBalloon.AddUpdateMethod(() =>
         {
             if (!TrialStim.activeSelf)
-                delayStartTime += Time.deltaTime;
+                delayTimer += Time.deltaTime;
         });
-        PopBalloon.SpecifyTermination(() => !TrialStim.activeSelf && delayStartTime > popToFeedbackDelay.value, Feedback, () => delayStartTime = 0);
+        PopBalloon.SpecifyTermination(() => !TrialStim.activeSelf && delayTimer > popToFeedbackDelay.value, Feedback, () => delayTimer = 0);
 
         //Feedback state -------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
@@ -359,11 +367,17 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 Destroy(CenteredGO);
 
                 if (SyncBoxController != null)
+                {
                     GiveReward();
-                
+                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
+                }
+
                 Completions_Block++;
                 AddTokenInflateAudioPlayed = true;
             }
+            else
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
+
             Touches_Block += MouseTracker.GetClickCount();
         });
         Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI, () =>
@@ -372,6 +386,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             AddTokenInflateAudioPlayed = false;
         });
         Feedback.SpecifyTermination(() => true && Response != 1, ITI);
+        Feedback.AddDefaultTerminationMethod(() =>
+        {
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
+        });
 
         //ITI state -------------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>
@@ -391,7 +409,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             DestroyChildren(RewardContainerRight);
             currentTask.CalculateBlockSummaryString();
         });
-        ITI.AddTimer(itiDuration.value, FinishTrial);
+        ITI.AddTimer(itiDuration.value, FinishTrial, () =>
+        {
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]); //next trial starts next frame
+        });
 
         LogTrialData();
         LogFrameData();
@@ -581,7 +602,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         topBorder.transform.parent = Borders.transform;
         topBorder.transform.position = new Vector3(0, -.005f, 0);
         topBorder.transform.eulerAngles = new Vector3(0, 0, 90f);
-        topBorder.transform.localScale = new Vector3(.05f, 4.018f, .001f);
+        topBorder.transform.localScale = new Vector3(.075f, 3.995f, .001f);
         borderList.Add(topBorder);
 
         GameObject rightBorder = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -589,7 +610,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         rightBorder.transform.parent = Borders.transform;
         rightBorder.transform.position = new Vector3(2.035f, -1.157f, 0);
         rightBorder.transform.eulerAngles = Vector3.zero;
-        rightBorder.transform.localScale = new Vector3(.05f, 2.35f, .001f);
+        rightBorder.transform.localScale = new Vector3(.075f, 2.35f, .001f);
         borderList.Add(rightBorder);
 
         GameObject leftBorder = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -597,7 +618,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         leftBorder.transform.parent = Borders.transform;
         leftBorder.transform.position = new Vector3(-2.035f, -1.159f, 0);
         leftBorder.transform.eulerAngles = Vector3.zero;
-        leftBorder.transform.localScale = new Vector3(.05f, 2.35f, .001f);
+        leftBorder.transform.localScale = new Vector3(.075f, 2.35f, .001f);
         borderList.Add(leftBorder);
 
         GameObject bottomBorder = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -605,7 +626,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         bottomBorder.transform.parent = Borders.transform;
         bottomBorder.transform.position = new Vector3(0, -2.3f, 0);
         bottomBorder.transform.eulerAngles = new Vector3(0, 0, 90f);
-        bottomBorder.transform.localScale = new Vector3(.05f, 4.018f, .001f);
+        bottomBorder.transform.localScale = new Vector3(.075f, 3.995f, .001f);
         borderList.Add(bottomBorder);
 
         Borders.transform.position = new Vector3(0, 1.755f, 0);
@@ -613,7 +634,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         MiddleBarrier = GameObject.CreatePrimitive(PrimitiveType.Cube);
         MiddleBarrier.name = "MiddleBarrier";
         MiddleBarrier.transform.position = new Vector3(0, .602f, 0);
-        MiddleBarrier.transform.localScale = new Vector3(.0125f, 2.245f, .001f);
+        MiddleBarrier.transform.localScale = new Vector3(.0125f, 2.22f, .001f);
         borderList.Add(MiddleBarrier);
 
         foreach (GameObject border in borderList)

@@ -1,7 +1,6 @@
 using System;
 using System.Text;
 using System.Collections.Generic;
-using EffortControl_Namespace;
 using UnityEngine;
 using UnityEngine.UI;
 using USE_Settings;
@@ -10,9 +9,7 @@ using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Block;
 using System.Collections.Specialized;
 using System.IO;
-using FLU_Common_Namespace;
-using WhatWhenWhere_Namespace;
-using THR_Namespace;
+using EffortControl_Namespace;
 
 public class EffortControl_TaskLevel : ControlLevel_Task_Template
 {
@@ -49,37 +46,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     {
         trialLevel = (EffortControl_TrialLevel)TrialLevel;
 
-        string TaskName = "EffortControl";
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
-            trialLevel.MaterialFilePath = (String)SessionSettings.Get("Session", "ContextExternalFilePath");
-        else
-            Debug.Log("ContextExternalFilePath NOT specified in the Session Config OR Task Config!");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextName"))
-            ContextName = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextName");
-        else
-        {
-            ContextName = "Dark";
-            Debug.Log($"No ContextName specified in the {TaskName} Task Config. Defaulting to {ContextName}");
-        }
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-        {
-            trialLevel.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-            trialLevel.OriginalStartButtonPosition = trialLevel.ButtonPosition;
-        }
-        else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-            trialLevel.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-        else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "IsHuman"))
-            trialLevel.IsHuman = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "IsHuman");
-        else
-            trialLevel.IsHuman = false;
-
+        SetSettings();
 
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
@@ -123,6 +90,40 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             NumChosenHigherReward_Task += trialLevel.NumHigherRewardChosen_Block;
             NumChosenLowerReward_Task += trialLevel.NumLowerRewardChosen_Block;
         });
+    }
+
+    public void SetSettings()
+    {
+        if (SessionSettings.SettingExists("Session", "IsHuman"))
+            trialLevel.IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");
+        else
+            trialLevel.IsHuman = false;
+
+        string TaskName = "EffortControl";
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
+            trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+        else if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
+            trialLevel.MaterialFilePath = (String)SessionSettings.Get("Session", "ContextExternalFilePath");
+        else
+            Debug.Log("ContextExternalFilePath NOT specified in the Session Config OR Task Config!");
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextName"))
+            ContextName = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextName");
+        else
+        {
+            ContextName = "Dark";
+            Debug.Log($"No ContextName specified in the {TaskName} Task Config. Defaulting to {ContextName}");
+        }
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+        {
+            trialLevel.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+            trialLevel.OriginalStartButtonPosition = trialLevel.ButtonPosition;
+        }
+        else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+            trialLevel.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+        else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
     }
 
     public override OrderedDictionary GetSummaryData()

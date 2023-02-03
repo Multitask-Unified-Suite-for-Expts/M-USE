@@ -1,17 +1,10 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
 using UnityEngine.UI;
 using Cursor = UnityEngine.Cursor;
 using ConfigDynamicUI;
-using Newtonsoft.Json.Serialization;
-using UnityEngine.EventSystems;
 using USE_ExperimenterDisplay;
-using USE_ExperimentTemplate_Session;
-using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Trial;
-using UnityEditor;
 using UnityEngine.SceneManagement;
 
 public class HotKeyPanel : ExperimenterDisplayPanel
@@ -190,10 +183,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.C),
                 hotKeyAction = () =>
                 {
-                    if (Cursor.visible)
-                        Cursor.visible = false;
-                    else
-                        Cursor.visible = true;
+                    Cursor.visible = !Cursor.visible;
                 }
 
             };
@@ -290,18 +280,39 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             HotKey pauseGame = new HotKey
             {
                 keyDescription = "P",
-                actionName = "Pause/Unpause Game",
+                actionName = "Pause (ends trial)",
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.P),
                 hotKeyAction = () =>
                 {
-                    if (!HkPanel.TaskLevel.Paused)
+                    if (!HkPanel.TrialLevel.Paused) 
                     {
-                        HkPanel.TaskLevel.Paused = true;
+                        //Go to end of trial:
+                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI"));
+
+                        int trialsInBlock = HkPanel.TaskLevel.currentBlockDef.TrialDefs.Count;
+                        int trialCountInBlock = HkPanel.TrialLevel.TrialCount_InBlock;
+                        //If more trials in current block, end the block:
+                        if (trialsInBlock > 1 && trialCountInBlock + 1 < trialsInBlock)
+                            HkPanel.TrialLevel.ForceBlockEnd = true;
+
+                        //Deactivate Controllers (so that tokenbar not still on screen):
+                        GameObject controllers = GameObject.Find("Controllers");
+                        if (controllers != null)
+                            controllers.SetActive(false);
+
+                        //Turn gray pause screen on:
                         HkPanel.SessionLevel.PauseCanvasGO.SetActive(true);
+                        //Send abort code: 
+                        HkPanel.TrialLevel.AbortCode = 1;
+                        //Pause Trial Level
+                        HkPanel.TrialLevel.Paused = true;
                     }
                     else
                     {
-                        HkPanel.TaskLevel.Paused = false;
+                        HkPanel.TrialLevel.Paused = false;
+                        GameObject controllers = GameObject.Find("Controllers");
+                        if (controllers == null)
+                            HkPanel.SessionLevel.FindInactiveGameObjectByName("Controllers").SetActive(true);
                         HkPanel.SessionLevel.PauseCanvasGO.SetActive(false);
                     }
                 }
@@ -348,8 +359,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
         }
         
     }
-    
-        
 
 }
 

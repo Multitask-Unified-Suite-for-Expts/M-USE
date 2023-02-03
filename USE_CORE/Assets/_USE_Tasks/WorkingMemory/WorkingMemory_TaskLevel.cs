@@ -12,6 +12,23 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
     public override void DefineControlLevel()
     {
         wmTL = (WorkingMemory_TrialLevel)TrialLevel;
+
+        SetSettings();
+
+        RunBlock.AddInitializationMethod(() =>
+        {
+            ResetBlockVariables();
+            wmTL.TokenFBController.SetTotalTokensNum(wmBD.NumTokenBar);
+            wmTL.TokenFBController.SetTokenBarValue(wmBD.NumInitialTokens);
+            wmTL.InitialTokenAmount = wmBD.NumInitialTokens;
+
+            SetBlockSummaryString();
+        });
+        AssignBlockData();
+    }
+
+    public void SetSettings()
+    {
         string TaskName = "WorkingMemory";
         if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
         {
@@ -36,25 +53,15 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))
                 wmTL.ShadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
             else Debug.LogError("Shadow Type setting not defined in the TaskDef");
-           
+
         }
         else
         {
             Debug.Log("[ERROR] TaskDef is not in config folder");
         }
-        RunBlock.AddInitializationMethod(() =>
-        {
-            ResetBlockVariables();
-            wmTL.TokenFBController.SetTotalTokensNum(wmBD.NumTokenBar);
-            wmTL.TokenFBController.SetTokenBarValue(wmBD.NumInitialTokens);
-            SetBlockSummaryString();
-        });
-        AssignBlockData();
     }
-    public T GetCurrentBlockDef<T>() where T : BlockDef
-    {
-        return (T)CurrentBlockDef;
-    }
+    
+
     private void ResetBlockVariables()
     {
         wmTL.SearchDurationsList.Clear();

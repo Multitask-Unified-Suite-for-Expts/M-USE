@@ -119,10 +119,6 @@ namespace USE_ExperimentTemplate_Trial
 
             FinishTrial.AddUniversalTerminationMethod(() =>
             {
-                TrialData.AppendData();
-                TrialData.WriteData();
-                FrameData.AppendData();
-                FrameData.WriteData();
                 int nStimGroups = TrialStims.Count;
                 for (int iG = 0; iG < nStimGroups; iG++)
                 {
@@ -140,6 +136,19 @@ namespace USE_ExperimentTemplate_Trial
 
         }
 
+        public void WriteDataFiles()
+        {
+            TrialData.AppendData();
+            TrialData.WriteData();
+            FrameData.AppendData();
+            FrameData.WriteData();
+            if (SerialPortActive)
+            {
+                SerialRecvData.WriteData();
+                SerialSentData.WriteData();
+            }
+        }
+        
         public bool CheckForcedBlockEnd()
         {
             if (ForceBlockEnd)

@@ -191,10 +191,6 @@ namespace USE_ExperimentTemplate_Task
                     StimGroup[] taskSgs = new StimGroup[TaskStims.AllTaskStimGroups.Count];
                     TaskStims.AllTaskStimGroups.Values.CopyTo(taskSgs, 0);
                     StimGroup sg = taskSgs[0];
-                    //WHY DOESN'T THIS WORK - it doesn't seem to matter that it doesn't
-                    // string[] keys = new string[TaskStims.AllTaskStimGroups.Count];
-                    // TaskStims.AllTaskStimGroups.Keys.CopyTo(keys, 0);
-                    // TaskStims.AllTaskStimGroups.Remove(keys[0]);
                     while (sg.stimDefs.Count > 0)
                     {
                         sg.stimDefs[0].Destroy();
@@ -210,10 +206,12 @@ namespace USE_ExperimentTemplate_Task
                 if (TaskCanvasses != null)
                     foreach (GameObject go in TaskCanvasses)
                         go.SetActive(false);
+
                 Controllers.SetActive(false);
+
+                //Destroy Text on Experimenter Display:
                 foreach(Transform child in GameObject.Find("MainCameraCopy").transform)
                 {
-                    Debug.Log("CHILD NAME: " + child.gameObject.name);
                     child.gameObject.SetActive(false);
                 }
             });

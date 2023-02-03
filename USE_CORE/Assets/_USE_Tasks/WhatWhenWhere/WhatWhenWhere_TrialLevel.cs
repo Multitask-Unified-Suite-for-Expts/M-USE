@@ -33,6 +33,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public Vector3 FBSquarePosition, FBSquareScale;
     public bool StimFacingCamera;
     public string ShadowType;
+    public bool NeutralITI;
     //stim group
     private StimGroup searchStims, distractorStims;
     private List<int> touchedObjects = new List<int>();
@@ -90,7 +91,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     
     private float touchDuration, searchDuration, sbDelay = 0;
     private bool choiceMade, isContextActive,halosDestroyed, slotError, distractorSlotError, touchDurationError, repetitionError, noSelectionError = false;
-    private String contextName = "";
+    private String ContextName = "";
    // private List<int> trialPerformance = new List<int>();
     private int timeoutCondition = 3;
 
@@ -204,7 +205,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             // Set the background texture to that of specified context
             isContextActive = true;
-            contextName = CurrentTrialDef.ContextName;
+            ContextName = CurrentTrialDef.ContextName;
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
             
@@ -474,8 +475,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
             searchStims.ToggleVisibility(false);
             distractorStims.ToggleVisibility(false);
-            contextName = "itiImage";
-            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + contextName + ".png");
+            if (NeutralITI)
+            {
+                ContextName = "itiImage";
+                RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+            }
             DestroyTextOnExperimenterDisplay();
             GenerateFinalTrialData();
             searchStims.ToggleVisibility(false);
@@ -534,7 +538,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("SliderValue", () => slider.normalizedValue);*/ 
         FrameData.AddDatum("SearchStimuliShown", () => searchStims.IsActive);
         FrameData.AddDatum("DistractorStimuliShown", () => distractorStims.IsActive);
-        FrameData.AddDatum("Context", () => contextName);
+        FrameData.AddDatum("Context", () => ContextName);
         FrameData.AddDatum("ContextActive", () => isContextActive);
         
     }

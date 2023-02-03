@@ -221,7 +221,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 isSliderValueIncrease = true;
                 valueToAdd = sliderValueChange;
                 //ADD ANYTHING ELSE THAT OCCURS DURING CORRECT SELECTION FEEDBACK
-                AudioFBController.Play("Positive"); //IDK WHY I GET A NULL REFERENCE FOR THIS, CREATED AT TRIAL LEVEL
+                AudioFBController.Play("Positive");
             }
             else
             {
@@ -291,13 +291,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             ResetDataTrackingVariables();
         });
-        
-        Debug.Log("ERRORS: " + totalErrors);
-        TrialData.AddDatum("TrialNum", () => CurrentTrialDef.TrialCount);
-        TrialData.AddDatum("TotalErrors", () => totalErrors);
-        TrialData.AddDatum("Rule-Abiding Errors", () => ruleAbidingErrors);
-        TrialData.AddDatum("Rule-Breaking Errors", () => ruleBreakingErrors);
-        TrialData.AddDatum("RetouchCorrect", () => retouchCorrect);
+        AssignTrialData();
     }
 
     void InstantiateCurrMaze()
@@ -675,6 +669,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         tile.TIMEOUT_SECONDS = 10.0f;
     }
 
+    private void AssignTrialData()
+    {
+        TrialData.AddDatum("Rule-Abiding Errors", () => ruleAbidingErrors);
+        TrialData.AddDatum("Rule-Breaking Errors", () => ruleBreakingErrors);
+        TrialData.AddDatum("RetouchCorrect", () => retouchCorrect);
+        TrialData.AddDatum("Maze", ()=> mazeDefName);
+    }
     private void ResetDataTrackingVariables()
     {
         totalErrors = 0;

@@ -163,12 +163,16 @@ MonoBehaviour:
   Paused: 1
   TrialData: {fileID: 0}
   FrameData: {fileID: 0}
+  SerialSentData: {fileID: 0}
+  SerialRecvData: {fileID: 0}
   BlockCount: 0
   TrialCount_InTask: 0
   TrialCount_InBlock: 0
   AbortCode: 0
   StoreData: 0
   ForceBlockEnd: 0
+  SerialPortActive: 0
+  EyetrackerActive: 0
   TaskDataPath: 
   FilePrefix: 
   TrialSummaryString: 
@@ -195,14 +199,39 @@ MonoBehaviour:
   SelectionType: 
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
-  MaterialFilePath: 
-  buttonPosition: {x: 0, y: 0, z: 0}
-  buttonScale: {x: 0, y: 0, z: 0}
-  shadowType: 
-  stimFacingCamera: 0
+  StartButtonTexture: {fileID: 0}
+  FBSquareTexture: {fileID: 0}
+  HeldTooLongTexture: {fileID: 0}
+  HeldTooShortTexture: {fileID: 0}
+  BackdropStripesTexture: {fileID: 0}
+  BackdropTexture: {fileID: 0}
   runningAcc: 
   MinTrials: 0
   MaxTrials: 0
+  minObjectTouchDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  maxObjectTouchDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  gratingSquareDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
   tokenRevealDuration:
     name: 
     hidden: 0
@@ -243,7 +272,7 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  maxSearchDuration:
+  selectObjectDuration:
     name: 
     hidden: 0
     value: 0
@@ -299,6 +328,24 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
+  ContextExternalFilePath: 
+  ButtonPosition: {x: 0, y: 0, z: 0}
+  ButtonScale: {x: 0, y: 0, z: 0}
+  FBSquarePosition: {x: 0, y: 0, z: 0}
+  FBSquareScale: {x: 0, y: 0, z: 0}
+  StimFacingCamera: 0
+  ShadowType: 
+  playerViewTextList: []
+  playerViewText: {fileID: 0}
+  NumCorrect_InBlock: 0
+  SearchDurationsList: []
+  NumErrors_InBlock: 0
+  NumRewardGiven_InBlock: 0
+  NumTokenBarFull_InBlock: 0
+  TotalTokensCollected_InBlock: 0
+  Accuracy_InBlock: 0
+  AverageSearchDuration_InBlock: 0
+  TouchDurationError_InBlock: 0
 --- !u!114 &108587574
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -324,11 +371,15 @@ MonoBehaviour:
   TaskProjectFolder: 
   BlockCount: 0
   TrialLevel: {fileID: 108587573}
+  SerialSentData: {fileID: 0}
+  SerialRecvData: {fileID: 0}
   StoreData: 0
+  SerialPortActive: 0
   SyncBoxActive: 0
   EventCodesActive: 0
   RewardPulsesActive: 0
   SonicationActive: 0
+  ContextExternalFilePath: 
   SessionDataPath: 
   TaskConfigPath: 
   TaskDataPath: 
@@ -501,7 +552,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
+  m_BackGroundColor: {r: 0.6037736, g: 0.6037736, b: 0.6037736, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0

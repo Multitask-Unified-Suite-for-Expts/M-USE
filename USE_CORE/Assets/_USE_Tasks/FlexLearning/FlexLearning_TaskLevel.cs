@@ -1,18 +1,21 @@
 using FlexLearning_Namespace;
 using System;
+using System.IO;
 using UnityEngine;
 using USE_Settings;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Block;
+using USE_ExperimentTemplate_Trial;
 
 public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 {
     FlexLearning_BlockDef flBD => GetCurrentBlockDef<FlexLearning_BlockDef>();
     FlexLearning_TrialLevel flTL;
     public override void DefineControlLevel()
-    {
+    {   
         flTL = (FlexLearning_TrialLevel)TrialLevel;
         string TaskName = "FlexLearning";
+        
         if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
         {
              if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
@@ -36,6 +39,9 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))
                 flTL.ShadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
             else Debug.LogError("Shadow Type setting not defined in the TaskDef");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))
+                flTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");
+            else Debug.LogError("Neutral ITI setting not defined in the TaskDef");
             
         }
         else
@@ -43,7 +49,11 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             Debug.Log("[ERROR] TaskDef is not in config folder");
         }
 
-        
+        SetupTask.AddInitializationMethod(() =>
+        {
+            //HARD CODED TO MINIMIZE EMPTY SKYBOX DURATION, CAN'T ACCESS TRIAL DEF YET & CONTEXT NOT IN BLOCK DEF
+            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +  "Tile.png");
+        });
         RunBlock.AddInitializationMethod(() =>
         {
             System.Random rnd = new System.Random();
@@ -55,7 +65,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             flTL.TokenFBController.SetTokenBarValue(flBD.NumInitialTokens);
             SetBlockSummaryString();
             flTL.runningAcc.Clear();
-            
         });
         AssignBlockData();
     }

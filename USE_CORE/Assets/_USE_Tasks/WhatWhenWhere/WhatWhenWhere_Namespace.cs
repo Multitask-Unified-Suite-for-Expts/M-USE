@@ -108,6 +108,7 @@ namespace WhatWhenWhere_Namespace
         string ContextExternalFilePath;
         bool StimFacingCamera;
         string ShadowType;
+        bool NeutralITI;
     }
     //Any other custom classes useful for the functioning of the task could be included in this namespace.
 }

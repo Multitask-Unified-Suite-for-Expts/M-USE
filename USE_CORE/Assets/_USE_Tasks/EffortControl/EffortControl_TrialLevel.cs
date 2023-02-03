@@ -144,7 +144,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             StartButton.SetActive(true);
             ClickCount = 0;
             Response = -1;
-            ChooseDuration = 0; //reset how long it took them to choose each trial. 
+            ChooseDuration = 0; //reset how long it took them to choose each trial.
+            SideChoice = "";
+            EffortChoice = "";
+            RewardChoice = "";
+            TrialStim = null;
         });
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), ChooseBalloon, () => StartButton.SetActive(false));
 
@@ -154,7 +158,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             Input.ResetInputAxes(); //reset input in case they holding down
             ActivateStimAndRewards();
-            TrialStim = null;
             MouseTracker.ResetClickCount();
 
             MaxScale = new Vector3(60, 0, 60);
@@ -373,11 +376,19 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //ITI state -------------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>
         {
+            ResetToOriginalPositions();
+            if (TrialStim != null)
+            {
+                if (TrialStim.activeSelf)
+                    TrialStim.SetActive(false);
+                TrialStim.transform.localScale = TrialStimInitLocalScale;
+            }
+            if (MiddleBarrier.activeSelf)
+                MiddleBarrier.SetActive(false);
             DestroyChildren(BalloonContainerLeft);
             DestroyChildren(BalloonContainerRight);
             DestroyChildren(RewardContainerLeft);
             DestroyChildren(RewardContainerRight);
-            ResetToOriginalPositions();
             currentTask.CalculateBlockSummaryString();
         });
         ITI.AddTimer(itiDuration.value, FinishTrial);
@@ -485,8 +496,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void ResetToOriginalPositions()
     {
-        TrialStim.transform.localScale = TrialStimInitLocalScale;
-
         if (SideChoice == "left")
         {
             BalloonContainerLeft.transform.position = LeftContainerOriginalPosition;
@@ -546,7 +555,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         StimLeft = Instantiate(StimLeftPrefab, StimLeftPrefab.transform.position, StimLeftPrefab.transform.rotation);
         StimLeft.name = "StimLeft";
-        Red = StimLeft.GetComponent<Renderer>().material.color; //set red color. 
+        Red = StimLeft.GetComponent<Renderer>().material.color;
         StimLeft.GetComponent<Renderer>().material.color = Red;
         TrialStimInitLocalScale = StimLeft.transform.localScale;
 

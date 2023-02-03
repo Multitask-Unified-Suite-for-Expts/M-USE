@@ -1,5 +1,6 @@
 using VisualSearch_Namespace;
 using System;
+using System.IO;
 using UnityEngine;
 using USE_Settings;
 using USE_ExperimentTemplate_Task;
@@ -13,36 +14,36 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     {
         vsTL = (VisualSearch_TrialLevel)TrialLevel;
         string TaskName = "VisualSearch";
-        if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
-        {
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-                vsTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-            else vsTL.ContextExternalFilePath = ContextExternalFilePath;
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-                vsTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-            else Debug.LogError("Start Button Position settings not defined in the TaskDef");
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-                vsTL.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-            else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquarePosition"))
-                vsTL.FBSquarePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquarePosition");
-            else Debug.LogError("FB Square Position settings not defined in the TaskDef");
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquareScale"))
-                vsTL.FBSquareScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquareScale");
-            else Debug.LogError("FB Square Scale settings not defined in the TaskDef");
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
-                vsTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
-            else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))
-                vsTL.ShadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
-            else Debug.LogError("Shadow Type setting not defined in the TaskDef");
-        }
-        else
-        {
-            Debug.LogError("TaskDef is not in config folder");
-        }
         
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
+            vsTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+        else vsTL.ContextExternalFilePath = ContextExternalFilePath;
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+            vsTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+        else Debug.LogError("Start Button Position settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+            vsTL.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+        else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquarePosition"))
+            vsTL.FBSquarePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquarePosition");
+        else Debug.LogError("FB Square Position settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquareScale"))
+            vsTL.FBSquareScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquareScale");
+        else Debug.LogError("FB Square Scale settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
+            vsTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
+        else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))
+            vsTL.ShadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
+        else Debug.LogError("Shadow Type setting not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))
+            vsTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");
+        else Debug.LogError("Neutral ITI setting not defined in the TaskDef");
 
+        SetupTask.AddInitializationMethod(() =>
+        {
+            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +  "Grass.png");
+        });
         RunBlock.AddInitializationMethod(() =>
         {
             ResetBlockVariables();

@@ -14,6 +14,7 @@ using UnityEngine.UI;
 using USE_ExperimentTemplate_Task;
 using System;
 using ConfigParsing;
+using UnityEngine.InputSystem;
 
 public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 {
@@ -38,7 +39,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     // ConfigUI variables
     [HideInInspector]
     public ConfigNumber minObjectTouchDuration, itiDuration, 
-        fbDuration, gratingSquareDuration, maxObjectTouchDuration, selectObjectDuration, tokenRevealDuration, tokenUpdateDuration, searchDisplayDelay;
+        fbDuration, gratingSquareDuration, maxObjectTouchDuration, selectObjectDuration, tokenRevealDuration, tokenUpdateDuration, 
+        searchDisplayDelay, tokenFbDuration;
 
     // Stim Evaluation Variables
     private GameObject trialStim;
@@ -53,6 +55,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     public Vector3 FBSquarePosition, FBSquareScale;
     public bool StimFacingCamera;
     public string ShadowType;
+    public bool NeutralITI;
     
     //Player View Variables
     private PlayerViewPanel playerView;
@@ -63,7 +66,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     private bool playerViewLoaded;
    
     // Block Data Variables
-    private string ContextName = "";
+    public string ContextName = "";
     public int NumCorrect_InBlock;
     public List<float> SearchDurationsList = new List<float>();
     public int NumErrors_InBlock;
@@ -106,6 +109,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
+            ResetTrialVariables();
             LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
             StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
@@ -260,7 +264,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
             }
         });
-        TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), ITI, () =>
+        TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), Delay, () =>
         {
             if (TokenFBController.isTokenBarFull())
             {
@@ -279,14 +283,20 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                                            (NumTokenBarFull_InBlock* CurrentTrialDef.NumTokenBar);
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
+            
+            delayDuration = tokenFbDuration.value;
+            stateAfterDelay = ITI;
         });
         ITI.AddInitializationMethod(() =>
         {
-            ContextName = "itiImage";
-            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+            if (NeutralITI)
+            {
+                ContextName = "itiImage";
+                RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+            }
+            
             // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
             DestroyTextOnExperimenterDisplay();
-            ResetDataTrackingVariables();
             tStim.ToggleVisibility(false);
             TokenFBController.enabled = false;
         });
@@ -336,7 +346,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
         TrialData.AddDatum("CorrectSelection", () => CorrectSelection ? 1 : 0);
         TrialData.AddDatum("SearchDuration", ()=> SearchDuration);
-        TrialData.AddDatum("RewardGiven", ()=> RewardGiven);
+        TrialData.AddDatum("RewardGiven", ()=> RewardGiven? 1 : 0);
+        TrialData.AddDatum("TotalClicks", ()=> MouseTracker.GetClickCount());
     }
     private void AssignFrameData()
     {
@@ -345,7 +356,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("StartButtonVisibility", () => StartButton.activeSelf);
         FrameData.AddDatum("TrialStimVisibility", () => tStim.IsActive);
     }
-    private void ResetDataTrackingVariables()
+    private void ResetTrialVariables()
     {
         SelectedStimCode = null;
         SelectedStimLocation = null;
@@ -353,6 +364,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         CorrectSelection = false;
         RewardGiven = false;
         TouchDurationError = false;
+        MouseTracker.ResetClickCount();
     }
     private void CreateTextOnExperimenterDisplay()
     {
@@ -401,6 +413,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");
         gratingSquareDuration = ConfigUiVariables.get<ConfigNumber>("gratingSquareDuration");
+        tokenFbDuration = ConfigUiVariables.get<ConfigNumber>("tokenFbDuration");
         //finalFbDuration = ConfigUiVariables.get<ConfigNumber>("finalFbDuration");
         configUIVariablesLoaded = true;
     }

@@ -44,7 +44,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector]
     public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, gratingSquareDuration, tokenRevealDuration, tokenUpdateDuration, trialEndDuration, initTrialDuration, baselineDuration, 
         selectObjectDuration, selectionFbDuration, displaySampleDuration, postSampleDelayDuration, 
-        displayPostSampleDistractorsDuration, preTargetDelayDuration, itiDuration;
+        displayPostSampleDistractorsDuration, preTargetDelayDuration, itiDuration, tokenFbDuration;
     
     // Config Loading Variables
     private bool configUIVariablesLoaded = false;
@@ -53,6 +53,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     public Vector3 FBSquarePosition, FBSquareScale;
     public bool StimFacingCamera;
     public string ShadowType;
+    public bool NeutralITI;
     
     //Player View Variables
     private PlayerViewPanel playerView;
@@ -273,7 +274,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
             }
         });
-        TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), ITI, () =>
+        TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), Delay, () =>
         {
             if (TokenFBController.isTokenBarFull())
             {
@@ -292,11 +293,17 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                                            (NumTokenBarFull_InBlock * CurrentTrialDef.NumTokenBar);
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
+
+            delayDuration = tokenFbDuration.value;
+            stateAfterDelay = ITI;
         });
         ITI.AddInitializationMethod(() =>
         {
-            ContextName = "itiImage";
-            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+            if (NeutralITI)
+            {
+                ContextName = "itiImage";
+                RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+            }
             // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
             DestroyTextOnExperimenterDisplay();
             ResetDataTrackingVariables();
@@ -374,6 +381,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         preTargetDelayDuration = ConfigUiVariables.get<ConfigNumber>("preTargetDelayDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
         gratingSquareDuration = ConfigUiVariables.get<ConfigNumber>("gratingSquareDuration");
+        tokenFbDuration = ConfigUiVariables.get<ConfigNumber>("tokenFbDuration");
         configUIVariablesLoaded = true;
     }
     private void ResetDataTrackingVariables()

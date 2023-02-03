@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 using USE_ExperimentTemplate_Task;
@@ -65,7 +66,11 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         else Debug.LogError("Default Tile Color settings not defined in the TaskDef");
         
         SetupTask.AddInitializationMethod(() =>
-        {
+        { 
+            //HARD CODED TO MINIMIZE EMPTY SKYBOX DURATION, CAN'T ACCESS TRIAL DEF YET & CONTEXT NOT IN BLOCK DEF
+            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +  "Concrete.png");
+                
+                
             SessionSettings.ImportSettings_SingleTypeArray<MazeDef>("MazeDefs", mazeKeyFilePath);
             MazeDefs = (MazeDef[])SessionSettings.Get("MazeDefs");
             MazeDims = new Vector2[MazeDefs.Length];

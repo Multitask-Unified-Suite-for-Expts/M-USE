@@ -1,5 +1,6 @@
 ﻿using WhatWhenWhere_Namespace;
 using System;
+using System.IO;
 using System.Text;
 using UnityEngine;
 using USE_Settings;
@@ -31,10 +32,17 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         else Debug.LogError("FB Square Scale settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
             wwwTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))
+            wwwTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");
+        else Debug.LogError("Neutral ITI setting not defined in the TaskDef");
+        
+        SetupTask.AddInitializationMethod(() =>
+        {
+            //HARD CODED TO MINIMIZE EMPTY SKYBOX DURATION, CAN'T ACCESS TRIAL DEF YET & CONTEXT NOT IN BLOCK DEF
+            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +  "Desert.png");
+        });
         RunBlock.AddInitializationMethod(() =>
         {
-            //comment each error type
-          // wwwTL.totalErrors_InBlock = 0 ;
            wwwTL.errorType_InBlockString = "";
            wwwTL.errorType_InBlock.Clear();
            wwwTL.slotErrorCount_InBlock = 0;

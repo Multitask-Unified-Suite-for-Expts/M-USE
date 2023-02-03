@@ -599,7 +599,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         topBorder.transform.parent = Borders.transform;
         topBorder.transform.position = new Vector3(0, -.005f, 0);
         topBorder.transform.eulerAngles = new Vector3(0, 0, 90f);
-        topBorder.transform.localScale = new Vector3(.05f, 4.018f, .001f);
+        topBorder.transform.localScale = new Vector3(.075f, 3.995f, .001f);
         borderList.Add(topBorder);
 
         GameObject rightBorder = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -607,7 +607,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         rightBorder.transform.parent = Borders.transform;
         rightBorder.transform.position = new Vector3(2.035f, -1.157f, 0);
         rightBorder.transform.eulerAngles = Vector3.zero;
-        rightBorder.transform.localScale = new Vector3(.05f, 2.35f, .001f);
+        rightBorder.transform.localScale = new Vector3(.075f, 2.35f, .001f);
         borderList.Add(rightBorder);
 
         GameObject leftBorder = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -615,7 +615,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         leftBorder.transform.parent = Borders.transform;
         leftBorder.transform.position = new Vector3(-2.035f, -1.159f, 0);
         leftBorder.transform.eulerAngles = Vector3.zero;
-        leftBorder.transform.localScale = new Vector3(.05f, 2.35f, .001f);
+        leftBorder.transform.localScale = new Vector3(.075f, 2.35f, .001f);
         borderList.Add(leftBorder);
 
         GameObject bottomBorder = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -623,7 +623,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         bottomBorder.transform.parent = Borders.transform;
         bottomBorder.transform.position = new Vector3(0, -2.3f, 0);
         bottomBorder.transform.eulerAngles = new Vector3(0, 0, 90f);
-        bottomBorder.transform.localScale = new Vector3(.05f, 4.018f, .001f);
+        bottomBorder.transform.localScale = new Vector3(.075f, 3.995f, .001f);
         borderList.Add(bottomBorder);
 
         Borders.transform.position = new Vector3(0, 1.755f, 0);

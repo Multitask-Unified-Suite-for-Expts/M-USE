@@ -49,6 +49,8 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             ResetBlockVariables();
             vsTL.TokenFBController.SetTotalTokensNum(vsBD.NumTokenBar);
             vsTL.InitialTokens_InBlock = vsBD.NumInitialTokens;
+            vsTL.TokenFBController.SetTokenBarValue(vsBD.NumInitialTokens);
+            vsTL.InitialTokenAmount = vsBD.NumInitialTokens;
             SetBlockSummaryString();
         });
         AssignBlockData();

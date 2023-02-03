@@ -13,6 +13,23 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
     public override void DefineControlLevel()
     {
         wmTL = (WorkingMemory_TrialLevel)TrialLevel;
+
+        SetSettings();
+
+        RunBlock.AddInitializationMethod(() =>
+        {
+            ResetBlockVariables();
+            wmTL.TokenFBController.SetTotalTokensNum(wmBD.NumTokenBar);
+            wmTL.TokenFBController.SetTokenBarValue(wmBD.NumInitialTokens);
+            wmTL.InitialTokenAmount = wmBD.NumInitialTokens;
+
+            SetBlockSummaryString();
+        });
+        AssignBlockData();
+    }
+
+    public void SetSettings()
+    {
         string TaskName = "WorkingMemory";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             wmTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
@@ -58,7 +75,32 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
     public T GetCurrentBlockDef<T>() where T : BlockDef
     {
         return (T)CurrentBlockDef;
-    }
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
+                wmTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+            else wmTL.ContextExternalFilePath = ContextExternalFilePath;
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+                wmTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+            else Debug.LogError("Start Button Position settings not defined in the TaskDef");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+                wmTL.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+            else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquarePosition"))
+                wmTL.FBSquarePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquarePosition");
+            else Debug.LogError("FB Square Position settings not defined in the TaskDef");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquareScale"))
+                wmTL.FBSquareScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquareScale");
+            else Debug.LogError("FB Square Scale settings not defined in the TaskDef");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
+                wmTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
+            else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))
+                wmTL.ShadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
+            else Debug.LogError("Shadow Type setting not defined in the TaskDef");
+
+        }
+    
+    
+
     private void ResetBlockVariables()
     {
         wmTL.SearchDurationsList.Clear();

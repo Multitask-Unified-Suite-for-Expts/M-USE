@@ -63,6 +63,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             ResetBlockVariables();
             flTL.TokenFBController.SetTotalTokensNum(flBD.NumTokenBar);
             flTL.TokenFBController.SetTokenBarValue(flBD.NumInitialTokens);
+            flTL.InitialTokenAmount = flBD.NumInitialTokens;
             SetBlockSummaryString();
             flTL.runningAcc.Clear();
         });

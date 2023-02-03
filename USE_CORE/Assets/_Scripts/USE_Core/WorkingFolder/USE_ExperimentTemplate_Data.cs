@@ -222,7 +222,7 @@ namespace USE_ExperimentTemplate_Data
 
         public void CreateNewTaskIndexedFolder(int taskCount, string sessionDataPath, string parentFolder, string suffix)
         {
-            folderPath = sessionDataPath + Path.DirectorySeparatorChar + parentFolder + Path.DirectorySeparatorChar + GetNiceIntegers(4, taskCount) +
+            folderPath = sessionDataPath + Path.DirectorySeparatorChar + parentFolder + Path.DirectorySeparatorChar + GetNiceIntegers(4, taskCount) + "_" +
                          suffix;
         }
         public string GetNiceIntegers(int numDigits, int desiredNum)

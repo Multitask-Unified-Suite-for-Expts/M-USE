@@ -122,10 +122,6 @@ namespace USE_ExperimentTemplate_Trial
 
             FinishTrial.AddUniversalTerminationMethod(() =>
             {
-                TrialData.AppendData();
-                TrialData.WriteData();
-                FrameData.AppendData();
-                FrameData.WriteData();
                 int nStimGroups = TrialStims.Count;
                 for (int iG = 0; iG < nStimGroups; iG++)
                 {
@@ -143,6 +139,19 @@ namespace USE_ExperimentTemplate_Trial
 
         }
 
+        public void WriteDataFiles()
+        {
+            TrialData.AppendData();
+            TrialData.WriteData();
+            FrameData.AppendData();
+            FrameData.WriteData();
+            if (SerialPortActive)
+            {
+                SerialRecvData.WriteData();
+                SerialSentData.WriteData();
+            }
+        }
+        
         public bool CheckForcedBlockEnd()
         {
             if (ForceBlockEnd)
@@ -284,33 +293,18 @@ namespace USE_ExperimentTemplate_Trial
             //Grating = false;
             if (square.name == "FBSquare") square.SetActive(false);
         }*/
-        public GameObject CreateSquare(string name)
+        public GameObject CreateSquare(string name, Texture2D tex, Vector3 pos, Vector3 scale)
         {
             GameObject SquareGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            Renderer SquareRenderer = SquareGO.GetComponent<Renderer>();
             SquareGO.name = name;
-            SquareGO.GetComponent<Renderer>().material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
-            SquareGO.GetComponent<Renderer>().material.SetFloat("_SpecularHighlights",0f);
+            SquareRenderer.material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
+            SquareRenderer.material.SetFloat("_SpecularHighlights",0f);
+            SquareRenderer.material.mainTexture = tex;
+            SquareGO.transform.position = pos;
+            SquareGO.transform.localScale = scale;
+            SquareGO.SetActive(false);
             return SquareGO;
-        }
-    
-        
-        public GameObject CreateStartButton(Texture2D StartButtonTexture, Vector3 StartButtonPosition, Vector3 StartButtonScale)
-        {
-            GameObject startButton = CreateSquare("StartButton");
-            startButton.GetComponent<Renderer>().material.mainTexture = StartButtonTexture;
-            startButton.transform.position = StartButtonPosition;
-            startButton.transform.localScale = StartButtonScale;
-            startButton.SetActive(false);
-            return startButton;
-        }
-        public GameObject CreateFBSquare(Texture2D FBSquareTexture, Vector3 FBSquarePosition, Vector3 FBSquareScale)
-        {
-            GameObject fBSquare = CreateSquare("FBSquare");
-            fBSquare.GetComponent<Renderer>().material.mainTexture = FBSquareTexture;
-            fBSquare.transform.localScale = FBSquareScale;
-            fBSquare.transform.position = FBSquarePosition;
-            fBSquare.SetActive(false);
-            return fBSquare;
         }
         public int ChooseTokenReward(TokenReward[] tokenRewards)
         {

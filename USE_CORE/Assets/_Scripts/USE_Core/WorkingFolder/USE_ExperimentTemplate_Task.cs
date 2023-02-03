@@ -222,8 +222,6 @@ namespace USE_ExperimentTemplate_Task
                 {
                     child.gameObject.SetActive(false);
                 }
-
-
             });
 
 

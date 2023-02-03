@@ -123,6 +123,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
+            MaxOutline_Left = new GameObject();
+            MaxOutline_Right = new GameObject();
+
             if (!ObjectsCreated)
                 CreateObjects();
             LoadConfigUIVariables();
@@ -573,7 +576,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void CreateObjects()
     {
-        StartButton = CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
+        StartButton = CreateSquare("Start Button", StartButtonTexture, ButtonPosition, ButtonScale);
 
         StimLeft = Instantiate(StimLeftPrefab, StimLeftPrefab.transform.position, StimLeftPrefab.transform.rotation);
         StimLeft.name = "StimLeft";

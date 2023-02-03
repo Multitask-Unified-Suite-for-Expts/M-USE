@@ -23,7 +23,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     // game object variables
     private GameObject sliderGO, sliderHaloGO;
     public GameObject SliderPrefab, SliderHaloPrefab;
-    private Image sr;
+    private Image sliderHaloImage;
     private Texture2D texture;
     private static int numObjMax = 100;// need to change if stimulus exceeds this amount, not great
     
@@ -33,6 +33,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public Vector3 FBSquarePosition, FBSquareScale;
     public bool StimFacingCamera;
     public string ShadowType;
+    public bool NeutralITI;
     //stim group
     private StimGroup searchStims, distractorStims;
     private List<int> touchedObjects = new List<int>();
@@ -89,8 +90,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public string accuracyLog_InSession, accuracyLog_InBlock, accuracyLog_InTrial = "";
     
     private float touchDuration, searchDuration, sbDelay = 0;
-    private bool choiceMade, contextActive,halosDestroyed, slotError, distractorSlotError, touchDurationError, repetitionError, noSelectionError = false;
-    private String contextName = "";
+    private bool choiceMade, isContextActive,halosDestroyed, slotError, distractorSlotError, touchDurationError, repetitionError, noSelectionError = false;
+    private String ContextName = "";
    // private List<int> trialPerformance = new List<int>();
     private int timeoutCondition = 3;
 
@@ -101,8 +102,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     // misc variables
     private Ray mouseRay;
-    private Slider slider;
-    private float sliderValueIncreaseAmount;
     private Camera cam;
     private bool variablesLoaded;
     private int correctIndex;
@@ -139,11 +138,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private GameObject selected = null;
     private bool CorrectSelection;
     private WhatWhenWhere_StimDef selectedSD = null;
+    
     //update slider variables
-    float endupdatetime = 0f;
-    float valueRemaining = 0f;
-    float valueToAdd = 0f;
-    float incrementalVal = 0f;
+    private float endupdatetime = 0f;
+    private float valueRemaining = 0f;
+    private float valueToAdd = 0f;
+    private float incrementalVal = 0f;
+    private Slider slider;
+    private float sliderValueChange;
     public override void DefineControlLevel()
     {
         // --------------------------------------ADDING PLAYER VIEW STUFF------------------------------------------------------------------------------------
@@ -194,17 +196,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             InitializeSlider();
             LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
-            startButton = CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
-            FBSquare = CreateFBSquare(FBSquareTexture, FBSquarePosition, FBSquareScale);
+            startButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
+            FBSquare = CreateSquare("FBSquare", FBSquareTexture, FBSquarePosition, FBSquareScale);
             playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
-
         });
 
         SetupTrial.AddInitializationMethod(() =>
         {
             // Set the background texture to that of specified context
-            contextActive = true;
-            contextName = CurrentTrialDef.ContextName;
+            isContextActive = true;
+            ContextName = CurrentTrialDef.ContextName;
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
             
@@ -347,7 +348,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             searchDurations.Add(searchDuration);
             averageSearchDuration_InBlock = searchDurations.Average();
             endupdatetime = Time.time + fbDuration.value;
-            valueToAdd = sliderValueIncreaseAmount * (CurrentTrialDef.SliderGain[stimCount]);
+            
+            if (CorrectSelection) valueToAdd = sliderValueChange * (CurrentTrialDef.SliderGain[stimCount]);
+            else valueToAdd = sliderValueChange * CurrentTrialDef.SliderLoss[stimCount];
+            
             incrementalVal = valueToAdd/(fbDuration.value*60);
             valueRemaining = valueToAdd;
             if (isSliderValueIncrease) stimCount += 1;
@@ -356,7 +360,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 HaloFBController.ShowNegative(selected);
                 AudioFBController.Play("Negative");
-                sr.color = new Color(0.6627f, 0.6627f, 0.6627f, 0.2f);
+                sliderHaloImage.color = new Color(0.6627f, 0.6627f, 0.6627f, 0.2f);
                 if (slotError)
                     errorTypeString = "SlotError";
                 else if (distractorSlotError)
@@ -370,7 +374,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 HaloFBController.ShowPositive(selected);
                 AudioFBController.Play("Positive");
                 sliderHaloGO.SetActive(true);
-                sr.color = new Color(1, 0.8431f, 0, 0.2f);
+                sliderHaloImage.color = new Color(1, 0.8431f, 0, 0.2f);
                 errorTypeString = "None";
             }
             SetTrialSummaryString();
@@ -417,7 +421,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             choiceMade = true;
             trialComplete = false;
             sliderHaloGO.SetActive(true);
-            sr.color = new Color(1, 1, 1, 0.2f);
+            sliderHaloImage.color = new Color(1, 1, 1, 0.2f);
             startTime = Time.time;
             errorTypeString = "None";
             searchStims.ToggleVisibility(false);
@@ -444,11 +448,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             if ((int) (10 * (Time.time - startTime)) % 4 == 0)
             {
-                sr.color = new Color(1, 1, 1, 0.2f);
+                sliderHaloImage.color = new Color(1, 1, 1, 0.2f);
             }
             else if ((int) (10 * (Time.time - startTime)) % 2 == 0)
             {
-                sr.color = new Color(0, 0, 0, 0.2f);
+                sliderHaloImage.color = new Color(0, 0, 0, 0.2f);
             }
         });
         FinalFeedback.AddTimer(() => finalFbDuration.value, ITI, () =>
@@ -471,24 +475,23 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
             searchStims.ToggleVisibility(false);
             distractorStims.ToggleVisibility(false);
-            contextName = "itiImage";
-            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + contextName + ".png");
-
+            if (NeutralITI)
+            {
+                ContextName = "itiImage";
+                RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+            }
+            DestroyTextOnExperimenterDisplay();
+            GenerateFinalTrialData();
+            searchStims.ToggleVisibility(false);
             sliderGO.SetActive(false);
             CurrentTaskLevel.SetBlockSummaryString();
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
         {
             CurrentTaskLevel.SetBlockSummaryString();
-            GenerateFinalTrialData();
-            DestroyTextOnExperimenterDisplay();
+            ClearDataLogging();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
             
-        });
-        FinishTrial.AddInitializationMethod(() =>
-        {
-            //Remove any remaining items on player view
-            DestroyTextOnExperimenterDisplay();
         });
         //------------------------------------------------------------------------ADDING VALUES TO DATA FILE--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -535,8 +538,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("SliderValue", () => slider.normalizedValue);*/ 
         FrameData.AddDatum("SearchStimuliShown", () => searchStims.IsActive);
         FrameData.AddDatum("DistractorStimuliShown", () => distractorStims.IsActive);
-        FrameData.AddDatum("Context", () => contextName);
-        FrameData.AddDatum("ContextActive", () => contextActive);
+        FrameData.AddDatum("Context", () => ContextName);
+        FrameData.AddDatum("ContextActive", () => isContextActive);
         
     }
 
@@ -702,7 +705,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         touchDurationError = false;
         noSelectionError = false;
         choiceMade = false;
-        contextActive = false;
+        isContextActive = false;
         stimCount = 0;
         
         touchedObjects.Clear();
@@ -740,20 +743,20 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     }
     private void ConfigureSlider()
     {
-        sr = sliderHaloGO.GetComponent<Image>();
+        sliderHaloImage = sliderHaloGO.GetComponent<Image>();
         slider = sliderGO.GetComponent<Slider>();
         sliderInitPosition = sliderGO.transform.position;
         //consider making slider stuff into USE level class
         slider.value = 0;
         sliderHaloGO.transform.position = sliderInitPosition;
         int numSliderSteps = CurrentTrialDef.SliderGain.Sum() + CurrentTrialDef.SliderInitial;
-        sliderValueIncreaseAmount = (100f / numSliderSteps) / 100f;
+        sliderValueChange = (100f / numSliderSteps) / 100f;
         slider.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
         sliderHaloGO.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
 
         if (CurrentTrialDef.SliderInitial != 0)
         {
-            slider.value += sliderValueIncreaseAmount * (CurrentTrialDef.SliderInitial);
+            slider.value += sliderValueChange * (CurrentTrialDef.SliderInitial);
         }
         isSliderValueIncrease = false;
     }

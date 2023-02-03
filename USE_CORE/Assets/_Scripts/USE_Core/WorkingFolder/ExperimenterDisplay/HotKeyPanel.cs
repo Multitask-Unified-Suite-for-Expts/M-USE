@@ -274,6 +274,10 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.E),
                 hotKeyAction = () =>
                 {
+                    /*HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI")); 
+                    HkPanel.TrialLevel.ForceBlockEnd = true;
+                    HkPanel.TaskLevel.Terminated = true; 
+                    Destroy(GameObject.Find("Controllers")); //Delete current Controllers GO, since Task Selection creates new one*/
                     HkPanel.TrialLevel.ForceBlockEnd = true; 
                     HkPanel.TaskLevel.SpecifyCurrentState(HkPanel.TaskLevel.GetStateFromName("FinishTask"));
                 }

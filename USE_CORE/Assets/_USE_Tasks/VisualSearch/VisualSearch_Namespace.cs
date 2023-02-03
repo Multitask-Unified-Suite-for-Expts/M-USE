@@ -28,7 +28,7 @@ namespace VisualSearch_Namespace
         string ContextExternalFilePath;
         bool StimFacingCamera;
         string ShadowType;
-        bool UsingRewardPump;
+        bool NeutralITI;
     }
 
     public class VisualSearch_BlockDef : BlockDef

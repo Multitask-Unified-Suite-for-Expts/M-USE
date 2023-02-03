@@ -101,11 +101,14 @@ namespace WhatWhenWhere_Namespace
         // string ContextExternalFilePath;
         Vector3 ButtonPosition;
         Vector3 ButtonScale;
+        Vector3 FBSquarePosition;
+        Vector3 FBSquareScale;
         Vector3 ButtonColor;
         string ButtonText;
         string ContextExternalFilePath;
         bool StimFacingCamera;
         string ShadowType;
+        bool NeutralITI;
     }
     //Any other custom classes useful for the functioning of the task could be included in this namespace.
 }

@@ -28,7 +28,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     WorkingMemory_StimDef selectedSD = null;
     
     // Stimuli Variables
-    private StimGroup searchStims, targetStim, postSampleDistractorStims;
+    private StimGroup searchStims, sampleStim, postSampleDistractorStims;
     private GameObject StartButton;
     private GameObject FBSquare;
     private GameObject SquareGO;
@@ -44,7 +44,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector]
     public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, gratingSquareDuration, tokenRevealDuration, tokenUpdateDuration, trialEndDuration, initTrialDuration, baselineDuration, 
         selectObjectDuration, selectionFbDuration, displaySampleDuration, postSampleDelayDuration, 
-        displayPostSampleDistractorsDuration, preTargetDelayDuration, itiDuration;
+        displayPostSampleDistractorsDuration, preTargetDelayDuration, itiDuration, tokenFbDuration;
     
     // Config Loading Variables
     private bool configUIVariablesLoaded = false;
@@ -53,6 +53,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     public Vector3 FBSquarePosition, FBSquareScale;
     public bool StimFacingCamera;
     public string ShadowType;
+    public bool NeutralITI;
     
     //Player View Variables
     private PlayerViewPanel playerView;
@@ -109,8 +110,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         {
             LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
-            StartButton = CreateStartButton(StartButtonTexture, ButtonPosition, ButtonScale);
-            FBSquare = CreateFBSquare(FBSquareTexture, FBSquarePosition, FBSquareScale);
+            StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
+            FBSquare = CreateSquare("FBSquare", FBSquareTexture, FBSquarePosition, FBSquareScale);
         });
         SetupTrial.AddInitializationMethod(() =>
         {
@@ -154,6 +155,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                                                (NumTokenBarFull_InBlock * CurrentTrialDef.NumTokenBar);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
                 
+                SetShadowType(ShadowType, "WorkingMemory_DirectionalLight");
                 // Set Experimenter Display Data Summary Strings
                 CurrentTaskLevel.SetBlockSummaryString();
                 SetTrialSummaryString();
@@ -170,6 +172,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
           {
               stateAfterDelay = SearchDisplay;
               delayDuration = preTargetDelayDuration.value;
+              
           });
 
         // Show the target/sample with some other distractors
@@ -181,10 +184,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             if (StimFacingCamera)
             {
                 foreach (var stim in searchStims.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
-                foreach (var stim in targetStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
+                foreach (var stim in sampleStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
                 foreach (var stim in postSampleDistractorStims.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
             }
-            taskHelper.SetShadowType(ShadowType, "WorkingMemory_DirectionalLight");
             
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);
@@ -272,7 +274,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
             }
         });
-        TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), ITI, () =>
+        TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), Delay, () =>
         {
             if (TokenFBController.isTokenBarFull())
             {
@@ -291,21 +293,28 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                                            (NumTokenBarFull_InBlock * CurrentTrialDef.NumTokenBar);
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
+
+            delayDuration = tokenFbDuration.value;
+            stateAfterDelay = ITI;
         });
         ITI.AddInitializationMethod(() =>
         {
-            ContextName = "itiImage";
-            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+            if (NeutralITI)
+            {
+                ContextName = "itiImage";
+                RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+            }
             // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
             DestroyTextOnExperimenterDisplay();
+            ResetDataTrackingVariables();
             TokenFBController.enabled = false;
         });
         // Wait for some time at the end
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
+        //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
 
-        TrialData.AddDatum("SelectedName", () => selected != null ? selected.name : null);
-        TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
-        //TrialData.AddDatum("SelectionCorrect", () => correct ? 1 : 0);
+        AssignFrameData();
+        AssignTrialData();
     }
 
     protected override void DefineTrialStims()
@@ -319,7 +328,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         List<StimDef> rewardedStimdefs = new List<StimDef>();
 
-        targetStim = new StimGroup("TargetStim", GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
+        sampleStim = new StimGroup("TargetStim", GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
         for (int iStim = 0; iStim < CurrentTrialDef.SearchStimIndices.Length; iStim++)
         {
             WorkingMemory_StimDef sd = (WorkingMemory_StimDef)searchStims.stimDefs[iStim];
@@ -327,7 +336,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             if (sd.StimTrialRewardMag > 0)
             {
                 WorkingMemory_StimDef newTarg = sd.CopyStimDef<WorkingMemory_StimDef>() as WorkingMemory_StimDef;
-                targetStim.AddStims(newTarg);
+                sampleStim.AddStims(newTarg);
                 newTarg.IsTarget = true;//Holds true if the target stim receives non-zero reward
                 sd.IsTarget = true; //sets the isTarget value to true in the SearchStim Group
             } 
@@ -335,10 +344,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         }
         
         // for (int iT)
-        targetStim.SetLocations(CurrentTrialDef.TargetSampleLocation);
-        targetStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
+        sampleStim.SetLocations(CurrentTrialDef.TargetSampleLocation);
+        sampleStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
         TrialStims.Add(searchStims);
-        TrialStims.Add(targetStim);
+        TrialStims.Add(sampleStim);
 
         postSampleDistractorStims = new StimGroup("PostSampleDistractor", ExternalStims, CurrentTrialDef.PostSampleDistractorIndices);
         postSampleDistractorStims.SetVisibilityOnOffStates(GetStateFromName("DisplayPostSampleDistractors"), GetStateFromName("DisplayPostSampleDistractors"));
@@ -372,7 +381,36 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         preTargetDelayDuration = ConfigUiVariables.get<ConfigNumber>("preTargetDelayDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
         gratingSquareDuration = ConfigUiVariables.get<ConfigNumber>("gratingSquareDuration");
+        tokenFbDuration = ConfigUiVariables.get<ConfigNumber>("tokenFbDuration");
         configUIVariablesLoaded = true;
+    }
+    private void ResetDataTrackingVariables()
+    {
+        SelectedStimCode = null;
+        SelectedStimLocation = null;
+        SearchDuration = 0;
+        CorrectSelection = false;
+        RewardGiven = false;
+        TouchDurationError = false;
+    }
+    private void AssignTrialData()
+    {
+        // All AddDatum commands for the Trial Data
+        TrialData.AddDatum("Context", ()=> CurrentTrialDef.ContextName);
+        TrialData.AddDatum("SelectedStimCode", () => selectedSD?.StimCode ?? null);
+        TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
+        TrialData.AddDatum("CorrectSelection", () => CorrectSelection ? 1 : 0);
+        TrialData.AddDatum("SearchDuration", ()=> SearchDuration);
+        TrialData.AddDatum("RewardGiven", ()=> RewardGiven);
+    }
+    private void AssignFrameData()
+    {
+        // All AddDatum commmands from the Frame Data
+        FrameData.AddDatum("ContextName", () => ContextName);
+        FrameData.AddDatum("StartButtonVisibility", () => StartButton.activeSelf);
+        FrameData.AddDatum("DistractorStimVisibility", () => postSampleDistractorStims.IsActive);
+        FrameData.AddDatum("SearchStimVisibility", ()=> searchStims.IsActive );
+        FrameData.AddDatum("SampleStimVisibility", ()=> sampleStim.IsActive );
     }
     public int ChooseTokenReward(TokenReward[] tokenRewards)
     {
@@ -447,9 +485,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             {
                 if (stim.IsTarget)
                 {
-                    textLocation =
-                        taskHelper.playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation),
-                            playerViewParent);
+                    textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent);
                     textLocation.y += 50;
                     Vector2 textSize = new Vector2(200, 200);
                     playerViewText = playerView.writeText("TARGET",

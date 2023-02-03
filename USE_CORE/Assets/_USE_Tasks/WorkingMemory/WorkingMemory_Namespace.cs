@@ -19,6 +19,16 @@ namespace WorkingMemory_Namespace
         //public List<string[]> FeatureNames;
         //public string neutralPatternedColorName;
         //public float? ExternalStimScale;
+        Vector3 ButtonPosition;
+        Vector3 ButtonScale;
+        Vector3 FBSquarePosition;
+        Vector3 FBSquareScale;
+        Vector3 ButtonColor;
+        string ButtonText;
+        string ContextExternalFilePath;
+        bool StimFacingCamera;
+        string ShadowType;
+        bool NeutralITI;
     }
 
     public class WorkingMemory_BlockDef : BlockDef
@@ -108,6 +118,5 @@ namespace WorkingMemory_Namespace
         //public State SetActiveOnInitialization;
         //public State SetInactiveOnTermination;
         public bool IsTarget;
-        public int TokenUpdate;
     }
 }

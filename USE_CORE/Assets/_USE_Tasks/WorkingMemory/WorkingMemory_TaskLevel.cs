@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using UnityEngine;
 using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
@@ -30,8 +31,50 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
     public void SetSettings()
     {
         string TaskName = "WorkingMemory";
-        if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
+            wmTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+        else wmTL.ContextExternalFilePath = ContextExternalFilePath;
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+            wmTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+        else Debug.LogError("Start Button Position settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+            wmTL.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+        else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquarePosition"))
+            wmTL.FBSquarePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquarePosition");
+        else Debug.LogError("FB Square Position settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquareScale"))
+            wmTL.FBSquareScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquareScale");
+        else Debug.LogError("FB Square Scale settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
+            wmTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
+        else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))
+            wmTL.ShadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
+        else Debug.LogError("Shadow Type setting not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))
+            wmTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");
+        else Debug.LogError("Neutral ITI setting not defined in the TaskDef");
+       
+        SetupTask.AddInitializationMethod(() =>
         {
+            //HARD CODED TO MINIMIZE EMPTY SKYBOX DURATION, CAN'T ACCESS TRIAL DEF YET & CONTEXT NOT IN BLOCK DEF
+            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +  "Ice.png");
+        });
+        
+        RunBlock.AddInitializationMethod(() =>
+        {
+            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +  "Ice.png");
+            ResetBlockVariables();
+            wmTL.TokenFBController.SetTotalTokensNum(wmBD.NumTokenBar);
+            wmTL.TokenFBController.SetTokenBarValue(wmBD.NumInitialTokens);
+            SetBlockSummaryString();
+        });
+        AssignBlockData();
+    }
+    public T GetCurrentBlockDef<T>() where T : BlockDef
+    {
+        return (T)CurrentBlockDef;
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
                 wmTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
             else wmTL.ContextExternalFilePath = ContextExternalFilePath;
@@ -55,11 +98,7 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
             else Debug.LogError("Shadow Type setting not defined in the TaskDef");
 
         }
-        else
-        {
-            Debug.Log("[ERROR] TaskDef is not in config folder");
-        }
-    }
+    
     
 
     private void ResetBlockVariables()

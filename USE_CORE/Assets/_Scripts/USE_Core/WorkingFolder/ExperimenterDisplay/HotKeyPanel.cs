@@ -215,11 +215,14 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         HkPanel.TrialLevel.TrialStims.RemoveAt(0);
                     }
 
-                    if(HkPanel.TrialLevel.TokenFBController.isActiveAndEnabled)
+                    if (HkPanel.TrialLevel.TokenFBController.isActiveAndEnabled)
                         HkPanel.TrialLevel.TokenFBController.enabled = false;
 
                     if(HkPanel.TrialLevel.TokenFBController != null)
-                        HkPanel.TrialLevel.TokenFBController.SetTokenBarValue(HkPanel.TrialLevel.InitialTokenAmount); 
+                        HkPanel.TrialLevel.TokenFBController.SetTokenBarValue(HkPanel.TrialLevel.InitialTokenAmount);
+
+                    if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
+                        HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
 
                     HkPanel.TrialLevel.TrialCount_InBlock = -1;
                     HkPanel.TrialLevel.TrialCount_InTask--;
@@ -259,9 +262,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 {
                     HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI"));
                     HkPanel.TrialLevel.ForceBlockEnd = true;
-
-                    //end task if on last block!!!!!
-                    //add it here:
                 }
             };
             HotKeyList.Add(endBlock);

@@ -98,7 +98,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
-        InitialTokenAmount = 0;
+        InitialTokenAmount = 1; //setting for restart block hotkey
         TokenFBController.SetTokenBarValue(InitialTokenAmount);
         TokenFBController.SetFlashingTime(1f);
 
@@ -120,6 +120,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             //Make sure text and timer objects are inactive in case they used hotkey to end last block.
             if (TrialCount_InBlock == 0 && IsHuman)
                 DeactivateTextObjects();
+
+            //In case restart block hot key was pressed. 
+            if(TrialCount_InBlock == 0 && BorderPrefabList.Count > 0)
+                DestroyFeedbackBorders();
 
             NumFeedbackRows = 0;
 
@@ -445,16 +449,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             currentTask.CalculateBlockSummaryString();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]); //next trial starts next frame
 
-            if (YouWinTextGO.activeSelf)
-            {
-                YouWinTextGO.SetActive(false);
-                YouWinTextGO.transform.position = OriginalFbTextPosition; //Reset position for next Block;  
-            }
-            if (YouLoseTextGO.activeSelf)
-            {
-                YouLoseTextGO.SetActive(false);
-                YouLoseTextGO.transform.position = OriginalFbTextPosition; //Reset position for next Block;
-            }
             DestroyFeedbackBorders();
         });
         
@@ -474,6 +468,17 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         if (TimerBackdropGO.activeSelf)
             TimerBackdropGO.SetActive(false);
+
+        if (YouWinTextGO.activeSelf)
+        {
+            YouWinTextGO.SetActive(false);
+            YouWinTextGO.transform.position = OriginalFbTextPosition; //Reset position for next Block;  
+        }
+        if (YouLoseTextGO.activeSelf)
+        {
+            YouLoseTextGO.SetActive(false);
+            YouLoseTextGO.transform.position = OriginalFbTextPosition; //Reset position for next Block;
+        }
     }
 
     void MakeStimPopOut()
@@ -500,7 +505,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TimeToCompletion_Block = 0;
         NumRewards_Block = 0;
         Score = 0;
-        //TokenFBController.SetTokenBarValue(0);
 
         CompletedAllTrials = false;
         EndBlock = false;
@@ -1041,7 +1045,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         foreach (GameObject border in BorderPrefabList)
         {
             if (border != null)
-                border.SetActive(false);
+                Destroy(border);
         }
         BorderPrefabList.Clear();
     }

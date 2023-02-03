@@ -225,7 +225,7 @@ GameObject:
   - component: {fileID: 240399283}
   - component: {fileID: 240399282}
   m_Layer: 0
-  m_Name: 'Directional Light '
+  m_Name: 'MazeGame_DirectionalLight '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2032,14 +2032,20 @@ MonoBehaviour:
   Paused: 1
   TrialData: {fileID: 0}
   FrameData: {fileID: 0}
+  SerialSentData: {fileID: 0}
+  SerialRecvData: {fileID: 0}
   BlockCount: 0
   TrialCount_InTask: 0
   TrialCount_InBlock: 0
   AbortCode: 0
   StoreData: 0
+  ForceBlockEnd: 0
+  SerialPortActive: 0
+  EyetrackerActive: 0
   TaskDataPath: 
   FilePrefix: 
   TrialSummaryString: 
+  TaskLevel: {fileID: 0}
   PreloadedStims:
     stimGroupName: 
     IsActive: 0
@@ -2062,6 +2068,12 @@ MonoBehaviour:
   SelectionType: 
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
+  StartButtonTexture: {fileID: 0}
+  FBSquareTexture: {fileID: 0}
+  HeldTooLongTexture: {fileID: 0}
+  HeldTooShortTexture: {fileID: 0}
+  BackdropStripesTexture: {fileID: 0}
+  BackdropTexture: {fileID: 0}
   mazeList: []
   ind: 0
   SCREEN_WIDTH: 0
@@ -2078,7 +2090,6 @@ MonoBehaviour:
   INCORRECT_RULEABIDING_SECONDS: 0
   INCORRECT_RULEBREAKING_SECONDS: 0
   TIMEOUT_SECONDS: 0
-  mazeListScript: {fileID: 0}
   minObjectTouchDuration:
     name: 
     hidden: 0
@@ -2151,9 +2162,13 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  MaterialFilePath: 
+  ContextExternalFilePath: 
+  MazeFilePath: 
+  ButtonPosition: {x: 0, y: 0, z: 0}
+  ButtonScale: {x: 0, y: 0, z: 0}
   mazeBackground: {fileID: 0}
   backgroundTex: {fileID: 0}
+  mazeDefName: 
   curMDim: 0
   curMNumSquares: 0
   curMNumTurns: 0
@@ -2178,22 +2193,26 @@ MonoBehaviour:
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
+  ConfigName: 
   TaskName: MazeGame
   TaskProjectFolder: 
   BlockCount: 0
   TrialLevel: {fileID: 1860654110}
+  SerialSentData: {fileID: 0}
+  SerialRecvData: {fileID: 0}
   StoreData: 0
+  SerialPortActive: 0
   SyncBoxActive: 0
   EventCodesActive: 0
   RewardPulsesActive: 0
   SonicationActive: 0
+  ContextExternalFilePath: 
   SessionDataPath: 
   TaskConfigPath: 
   TaskDataPath: 
   SubjectID: 
   SessionID: 
   FilePrefix: 
-  BlockSummaryString: 
   EyetrackerType: 
   SelectionType: 
   LocateFile: {fileID: 0}
@@ -2217,6 +2236,10 @@ MonoBehaviour:
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
+  MazeNumSquares: 
+  MazeNumTurns: 
+  MazeDims: []
+  MazeName: []
 --- !u!4 &1860654112
 Transform:
   m_ObjectHideFlags: 0

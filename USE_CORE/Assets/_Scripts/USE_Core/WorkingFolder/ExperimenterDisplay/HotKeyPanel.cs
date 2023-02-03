@@ -6,6 +6,7 @@ using Cursor = UnityEngine.Cursor;
 using ConfigDynamicUI;
 using USE_ExperimenterDisplay;
 using UnityEngine.SceneManagement;
+using USE_ExperimentTemplate_Trial;
 
 public class HotKeyPanel : ExperimenterDisplayPanel
 {
@@ -191,21 +192,41 @@ public class HotKeyPanel : ExperimenterDisplayPanel
 
 
             //RestartBlock Hot Key
-            //NOT WORKING. CR starts over but it thinks its TrialCountInBlock1 cuz incremented in setupTrial. Also tokenbar not resetting. 
-            //HotKey restartBlock = new HotKey
-            //{
-            //    keyDescription = "R",
-            //    actionName = "Restart Block",
-            //    hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.R),
-            //    hotKeyAction = () =>
-            //    {
-            //        //HkPanel.TrialLevel.ForceBlockEnd = true;
-            //        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
-            //        HkPanel.TaskLevel.BlockCount--;
-            //        HkPanel.TrialLevel.TrialCount_InBlock = 0;
-            //    }
-            //};
-            //HotKeyList.Add(restartBlock);
+            HotKey restartBlock = new HotKey
+            {
+                keyDescription = "R",
+                actionName = "Restart Block",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.R),
+                hotKeyAction = () =>
+                {
+                    string taskName = HkPanel.TaskLevel.TaskName;
+                    List<string> dontDisable = new List<string>() { taskName + "_Camera", taskName + "_Scripts", taskName + "_DirectionalLight" };
+
+                    GameObject[] sceneKids = SceneManager.GetSceneByName(taskName).GetRootGameObjects();
+                    foreach (var kid in sceneKids)
+                        if (!dontDisable.Contains(kid.name) && kid.activeSelf)
+                            kid.SetActive(false);
+                   
+                    //If using stims, destroy them since not gonna hit finish trial state!!
+                    int nStimGroups = HkPanel.TrialLevel.TrialStims.Count;
+                    for (int iG = 0; iG < nStimGroups; iG++)
+                    {
+                        HkPanel.TrialLevel.TrialStims[0].DestroyStimGroup();
+                        HkPanel.TrialLevel.TrialStims.RemoveAt(0);
+                    }
+
+                    if(HkPanel.TrialLevel.TokenFBController.isActiveAndEnabled)
+                        HkPanel.TrialLevel.TokenFBController.enabled = false;
+
+                    if(HkPanel.TrialLevel.TokenFBController != null)
+                        HkPanel.TrialLevel.TokenFBController.SetTokenBarValue(HkPanel.TrialLevel.InitialTokenAmount); 
+
+                    HkPanel.TrialLevel.TrialCount_InBlock = -1;
+                    HkPanel.TrialLevel.TrialCount_InTask--;
+                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("SetupTrial")); 
+                }
+            };
+            HotKeyList.Add(restartBlock);
 
             ////PreviousBlock Hot Key
             //HotKey previousBlock = new HotKey
@@ -238,6 +259,9 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 {
                     HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI"));
                     HkPanel.TrialLevel.ForceBlockEnd = true;
+
+                    //end task if on last block!!!!!
+                    //add it here:
                 }
             };
             HotKeyList.Add(endBlock);

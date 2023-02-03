@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 222994815}
   - component: {fileID: 222994814}
   m_Layer: 0
-  m_Name: Directional Light
+  m_Name: THR_DirectionalLight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -292,9 +292,13 @@ MonoBehaviour:
   SelectionType: 
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
-  MaterialFilePath: 
-  ContextPath: 
+  StartButtonTexture: {fileID: 0}
+  FBSquareTexture: {fileID: 0}
+  HeldTooLongTexture: {fileID: 0}
+  HeldTooShortTexture: {fileID: 0}
+  BackdropStripesTexture: {fileID: 0}
   BackdropTexture: {fileID: 0}
+  MaterialFilePath: 
   BackdropRenderer: {fileID: 0}
   BackdropPrefab: {fileID: 6236812614538877600, guid: c361c637d41464c0bad1bf8ee2cc70d5,
     type: 3}
@@ -337,7 +341,6 @@ MonoBehaviour:
   NumReleasedEarly_Block: 0
   NumReleasedLate_Block: 0
   NumTouchesMovedOutside_Block: 0
-  BackdropMaterial: {fileID: 2100000, guid: 7927397d01ee34bd2932b8d28e0ff97a, type: 2}
   SquareMaterial: {fileID: 0}
   WhiteSquareTouched: 0
   BlueSquareTouched: 0

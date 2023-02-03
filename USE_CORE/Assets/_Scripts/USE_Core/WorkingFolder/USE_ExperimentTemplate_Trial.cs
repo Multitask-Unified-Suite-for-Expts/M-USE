@@ -54,6 +54,9 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public EventCodeManager EventCodeManager;
         [HideInInspector] public Dictionary<string, EventCode> TaskEventCodes;
 
+        [HideInInspector] public int InitialTokenAmount;
+
+
         // Texture Variables
         [HideInInspector] public Texture2D StartButtonTexture, FBSquareTexture, HeldTooLongTexture, HeldTooShortTexture, BackdropStripesTexture, BackdropTexture;
         //[HideInInspector] public bool Grating;

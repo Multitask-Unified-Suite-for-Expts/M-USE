@@ -631,7 +631,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         MiddleBarrier = GameObject.CreatePrimitive(PrimitiveType.Cube);
         MiddleBarrier.name = "MiddleBarrier";
         MiddleBarrier.transform.position = new Vector3(0, .602f, 0);
-        MiddleBarrier.transform.localScale = new Vector3(.0125f, 2.245f, .001f);
+        MiddleBarrier.transform.localScale = new Vector3(.0125f, 2.22f, .001f);
         borderList.Add(MiddleBarrier);
 
         foreach (GameObject border in borderList)

@@ -67,6 +67,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(currentBlock.ContextName));
+            trialLevel.TokenFBController.SetTokenBarValue(0);
+            trialLevel.InitialTokenAmount = 0; //setting for the restartBlock hotkey.
             trialLevel.ContextActive = true;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
 
@@ -149,8 +151,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     public void CalculateBlockSummaryString()
     {
         ClearStrings();
-
-        Debug.Log("BLOCK COUNT = " + BlockCount);
 
         if (BlockCount > 0)
         {

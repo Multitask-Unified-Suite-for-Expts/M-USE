@@ -98,6 +98,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
+        InitialTokenAmount = 0;
+        TokenFBController.SetTokenBarValue(InitialTokenAmount);
         TokenFBController.SetFlashingTime(1f);
 
         HaloFBController.SetHaloIntensity(2);
@@ -142,6 +144,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             if (TrialCount_InBlock == 0)
             {
+                //TokenFBController.SetTokenBarValue(0);
                 ResetGlobalTrialVariables();
                 currentTask.CalculateBlockSummaryString(); //setting again just in case they used RestartBlock hotkey.
             }
@@ -183,8 +186,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             StartButton.SetActive(false);
             StartButton.transform.position = OriginalStartButtonPosition;
 
-            TokenFBController.enabled = true;
-
             if (TitleTextGO.activeSelf)
             {
                 TitleTextGO.SetActive(false);
@@ -201,6 +202,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
 
             TokenFBController.SetTotalTokensNum(currentTrial.NumTokenBar);
+            TokenFBController.enabled = true;
+
             EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
         });
@@ -465,8 +468,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     {
         if (ScoreTextGO.activeSelf)
             ScoreTextGO.SetActive(false);
+
         if (NumTrialsTextGO.activeSelf)
             NumTrialsTextGO.SetActive(false);
+
         if (TimerBackdropGO.activeSelf)
             TimerBackdropGO.SetActive(false);
     }
@@ -495,7 +500,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TimeToCompletion_Block = 0;
         NumRewards_Block = 0;
         Score = 0;
-        TokenFBController.SetTokenBarValue(0);
+        //TokenFBController.SetTokenBarValue(0);
 
         CompletedAllTrials = false;
         EndBlock = false;

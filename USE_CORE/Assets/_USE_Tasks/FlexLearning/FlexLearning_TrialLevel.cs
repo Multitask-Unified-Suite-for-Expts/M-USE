@@ -79,7 +79,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int TouchDurationError_InBlock;
    
     // Trial Data Variables
-    private int? SelectedStimCode = null;
+    private int? SelectedStimIndex = null;
     private string selectedStimName = null;
     private Vector3? SelectedStimLocation = null;
     private float SearchDuration = 0;
@@ -101,10 +101,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         
         // Initialize FB Controller Values
         HaloFBController.SetHaloSize(5);
-        mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
-        mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
-        TokenFBController.SetRevealTime(tokenRevealDuration.value);
-        TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
         
         // A state that just waits for some time
         State stateAfterDelay = null;
@@ -119,9 +115,20 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         
         SetupTrial.AddInitializationMethod(() =>
         {
-            ContextName = CurrentTrialDef.ContextName;
+            ResetTrialVariables();
             TokenFBController.SetTokenBarFull(false);
+            //Set the context for the upcoming trial
+            ContextName = CurrentTrialDef.ContextName;
+            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+
+            //Set the Stimuli Light/Shadow settings
+            if (StimFacingCamera)
+            {
+                foreach (var stim in tStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
+            }
+            SetShadowType(ShadowType, "FlexLearning_DirectionalLight");
             
+            //Create and Load variables needed at the start of the trial
             if (!ObjectsCreated)
                 CreateObjects();
             if (!configUIVariablesLoaded) 
@@ -142,12 +149,12 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
         InitTrial.AddInitializationMethod(() =>
         {
-            if (StimFacingCamera)
-            {
-                foreach (var stim in tStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
-            }
-            SetShadowType(ShadowType, "FlexLearning_DirectionalLight");
-            ResetTrialVariables();
+            //Initialize FB Controller Variables
+            mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
+            mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
+            TokenFBController.SetRevealTime(tokenRevealDuration.value);
+            TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
+
             StartButton.SetActive(true);
         });
         InitTrial.AddUpdateMethod(() =>
@@ -163,7 +170,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
             SearchDisplayDelay, () =>
             {
-                // Turn off start button and set the token bar settings
+                // Turn off start button
                 StartButton.SetActive(false);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
             });
@@ -214,7 +221,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             if (selected != null)
             {
-                SelectedStimCode = selectedSD.StimCode;
+                SelectedStimIndex = selectedSD.StimIndex;
                 SelectedStimLocation = selectedSD.StimLocation;
             }
             SetTrialSummaryString();
@@ -230,6 +237,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
             }
         });
+        
         // SELECTION FEEDBACK STATE ---------------------------------------------------------------------------------------   
         SelectionFeedback.AddInitializationMethod(() =>
         {
@@ -248,7 +256,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOff"]);
         });
-// TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
+       
+        // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddInitializationMethod(() =>
         {
             if (selectedSD.StimTrialRewardMag > 0)
@@ -342,7 +351,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     {
         // All AddDatum commands for the Trial Data
         TrialData.AddDatum("Context", ()=> CurrentTrialDef.ContextName);
-        TrialData.AddDatum("SelectedStimCode", () => selectedSD?.StimCode ?? null);
+        TrialData.AddDatum("SelectedStimIndex", () => selectedSD?.StimIndex ?? null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
         TrialData.AddDatum("CorrectSelection", () => CorrectSelection ? 1 : 0);
         TrialData.AddDatum("SearchDuration", ()=> SearchDuration);
@@ -358,7 +367,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     }
     private void ResetTrialVariables()
     {
-        SelectedStimCode = null;
+        SelectedStimIndex = null;
         SelectedStimLocation = null;
         SearchDuration = 0;
         CorrectSelection = false;
@@ -426,10 +435,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     }
     void SetTrialSummaryString()
     {
-        TrialSummaryString = "<b>Trial Count in Block: " + (TrialCount_InBlock + 1) + "<\b>" +
+        TrialSummaryString = "<b>Trial Count in Block: " + (TrialCount_InBlock + 1) + "</b>" +
                              "\nTrial Count in Task: " + (TrialCount_InTask + 1) +
                              "\n" +
-                             "\nSelected Object Code: " + SelectedStimCode +
+                             "\nSelected Object Index: " + SelectedStimIndex +
                              "\nSelected Object Location: " + SelectedStimLocation +
                              "\nCorrect Selection?: " + CorrectSelection +
                              "\nTouch Duration Error?: " + TouchDurationError +

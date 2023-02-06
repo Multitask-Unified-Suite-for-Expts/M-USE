@@ -686,7 +686,10 @@ namespace USE_ExperimentTemplate_Task
             if (!string.IsNullOrEmpty(stimDefFile))
             {
                 if (stimDefFile.ToLower().Contains("tdf"))
+                {
                     SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_ExternalStimDefs", stimDefFile);
+                }
+                    
                 else
                     SessionSettings.ImportSettings_SingleTypeJSON<T[]>(TaskName + "_ExternalStimDefs", stimDefFile);
 

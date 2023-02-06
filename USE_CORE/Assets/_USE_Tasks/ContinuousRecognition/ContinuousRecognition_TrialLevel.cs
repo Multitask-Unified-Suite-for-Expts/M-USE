@@ -179,7 +179,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             SetTokenFeedbackTimes();
             SetStimStrings();
-            SetShadowType();
+            SetShadowType(currentTrial.ShadowType, "ContinuousRecognition_DirectionalLight");
 
             //MAKE EACH STIM GAME OBJECT FACE THE CAMERA WHILE SPAWNED
             if (currentTrial.StimFacingCamera)
@@ -393,9 +393,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //DISPLAY RESULTS state --------------------------------------------------------------------------------------------------------
         DisplayResults.AddInitializationMethod(() =>
         {
-            Debug.Log("END BLOCK? " + EndBlock);
-            Debug.Log("COMPLETED ALL TRIALS ? " + CompletedAllTrials);
-
             if (currentTrial.GotTrialCorrect)
                 Score += ((TrialCount_InBlock + 1) * 100);
 
@@ -927,26 +924,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
 
         trialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenUpdate"));
-    }
-
-    void SetShadowType()
-    {
-        //User options are None, Soft, Hard
-        switch (currentTrial.ShadowType)
-        {
-            case "None":
-                GameObject.Find("ContinuousRecognition_DirectionalLight").GetComponent<Light>().shadows = LightShadows.None;
-                break;
-            case "Soft":
-                GameObject.Find("ContinuousRecognition_DirectionalLight").GetComponent<Light>().shadows = LightShadows.Soft;
-                break;
-            case "Hard":
-                GameObject.Find("ContinuousRecognition_DirectionalLight").GetComponent<Light>().shadows = LightShadows.Hard;
-                break;
-            default:
-                Debug.Log("User did not Input None, Soft, or Hard for the Shadow Type");
-                break;
-        }
     }
 
     void CalculateBlockAvgTimeToChoice()

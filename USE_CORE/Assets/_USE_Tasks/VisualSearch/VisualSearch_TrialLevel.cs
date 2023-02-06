@@ -104,8 +104,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             ResetTrialVariables();
             LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
-            if(playerViewText==null)
-                CreateTextOnExperimenterDisplay();
             if(StartButton == null)
                 StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
             if(FBSquare == null)
@@ -118,7 +116,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             ContextName = CurrentTrialDef.ContextName;
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
 
-
+            if (playerViewText == null)
+                CreateTextOnExperimenterDisplay();
             if (TrialCount_InBlock == 0)
             {
                 playerViewText.SetActive(false);
@@ -176,7 +175,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             TokenFBController.enabled = true;
             tStim.ToggleVisibility(true);
-            CreateTextOnExperimenterDisplay();
+            
             if (StimFacingCamera)
             {
                 foreach (var stim in tStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();

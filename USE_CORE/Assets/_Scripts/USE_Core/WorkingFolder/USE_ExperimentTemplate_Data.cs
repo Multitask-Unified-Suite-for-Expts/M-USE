@@ -257,7 +257,7 @@ namespace USE_ExperimentTemplate_Data
         public override void DefineUSETemplateDataController()
         {
             DataControllerName = "SerialSentData";
-            AddDatum("FrameSent\tFrameStart\tSystemTimestamp\tMsWait\tMessage",
+            AddDatum("FrameSent\tFrameStart\tSystemTimestamp\tMessage",
                 () => sc.BufferToString("sent"));
         }
     }
@@ -268,7 +268,7 @@ namespace USE_ExperimentTemplate_Data
         public override void DefineUSETemplateDataController()
         {
             DataControllerName = "SerialRecvData";
-            AddDatum("FrameRecv\tFrameStart\tSystemTimestamp\tMsWait\tMessage", 
+            AddDatum("FrameRecv\tFrameStart\tSystemTimestamp\tMessage", 
                 () => sc.BufferToString("received"));
         }
     }

@@ -625,6 +625,8 @@ namespace USE_StimulusManagement
 			foreach (int index in stimSubsetIndices)
 			{
 				sgOrig.stimDefs[index].AddToStimGroup(this);
+				if (sgOrig.stimDefs[index].StimIndex != index)
+					Debug.LogError("Stim at StimDef index " + index + " does not correspond to the listed StimIndex: " + sgOrig.stimDefs[index].StimIndex);
 			}
 		}
 

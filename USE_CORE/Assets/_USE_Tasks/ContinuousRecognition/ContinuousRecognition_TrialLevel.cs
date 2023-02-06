@@ -98,7 +98,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
-        InitialTokenAmount = 1; //setting for restart block hotkey
+        InitialTokenAmount = 0; //setting for restart block hotkey
         TokenFBController.SetTokenBarValue(InitialTokenAmount);
         TokenFBController.SetFlashingTime(1f);
 

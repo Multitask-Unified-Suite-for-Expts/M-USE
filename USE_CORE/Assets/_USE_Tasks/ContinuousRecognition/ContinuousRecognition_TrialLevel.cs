@@ -146,13 +146,21 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
+            CompletedAllTrials = false;
+            EndBlock = false;
+            StimIsChosen = false;
+            currentTrial.GotTrialCorrect = false;
+
             if (TrialCount_InBlock == 0)
             {
-                ResetGlobalTrialVariables();
+                TokenFBController.SetTokenBarValue(InitialTokenAmount);
                 currentTask.CalculateBlockSummaryString(); //setting again just in case they used RestartBlock hotkey.
+                if(IsHuman)
+                {
+                    AdjustStartButtonPos(); //Adjust startButton position (move down) to make room for Title text. 
+                    TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
+                }
             }
-
-            currentTrial.GotTrialCorrect = false;
 
             if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
             {
@@ -162,12 +170,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (currentTrial.UseStarfield)
                 Starfield.SetActive(true);
-
-            if (TrialCount_InBlock == 0 && IsHuman)
-            {
-                AdjustStartButtonPos(); //Adjust startButton position (move down) to make room for Title text. 
-                TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
-            }
 
             StartButton.SetActive(true);
             
@@ -221,6 +223,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         ChooseStim.AddInitializationMethod(() =>
         {
+            Debug.Log("NUM CORRECT: " + NumCorrect_Block);
+
             chosenStimObj = null;
             chosenStimDef = null;
             StimIsChosen = false;
@@ -391,6 +395,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //DISPLAY RESULTS state --------------------------------------------------------------------------------------------------------
         DisplayResults.AddInitializationMethod(() =>
         {
+            Debug.Log("END BLOCK? " + EndBlock);
+            Debug.Log("COMPLETED ALL TRIALS ? " + CompletedAllTrials);
+
             if (currentTrial.GotTrialCorrect)
                 Score += ((TrialCount_InBlock + 1) * 100);
 
@@ -490,7 +497,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     } //can use to make game easier if need to debug. 
 
 
-    void ResetGlobalTrialVariables()
+    public override void ResetGlobalTrialLevelVariables()
     {
         AdjustedPositionsForMac = false;
 
@@ -504,10 +511,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TimeToCompletion_Block = 0;
         NumRewards_Block = 0;
         Score = 0;
-
-        CompletedAllTrials = false;
-        EndBlock = false;
-        StimIsChosen = false;
     }
 
     void AdjustStartButtonPos()

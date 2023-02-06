@@ -182,6 +182,11 @@ namespace USE_ExperimentTemplate_Trial
             }
         }
 
+        public virtual void ResetGlobalTrialLevelVariables()
+        {
+
+        }
+
 
 
         //Added helper methods for trials. 

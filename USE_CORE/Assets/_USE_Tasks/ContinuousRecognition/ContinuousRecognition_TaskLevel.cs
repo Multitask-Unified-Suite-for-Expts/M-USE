@@ -43,6 +43,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     ContinuousRecognition_BlockDef currentBlock => GetCurrentBlockDef<ContinuousRecognition_BlockDef>();
     ContinuousRecognition_TrialLevel trialLevel;
 
+
     public override void SpecifyTypes()
     {
         TaskLevelType = typeof(ContinuousRecognition_TaskLevel);

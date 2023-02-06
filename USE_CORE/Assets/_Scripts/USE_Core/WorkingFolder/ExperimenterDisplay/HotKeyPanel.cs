@@ -150,31 +150,31 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             List<HotKey> HotKeyList = new List<HotKey>();
 
             // Toggle Displays HotKey
-            //HotKey toggleDisplays = new HotKey
-            //{
-            //    keyDescription = "W",
-            //    actionName = "Toggle Displays",
-            //    hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.W),
-            //    hotKeyAction = () =>
-            //    {
-            //        var cams = GameObject.FindObjectsOfType<Camera>();
-            //        foreach (Camera c in cams) //MirrorCam:0, BackgroundCamera:1, CR_Cam: 0, MainCameraCopy:1 (DC)
-            //        {
-            //            Debug.Log(c.name + " before:" + c.targetDisplay);
-            //            c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-            //            Debug.Log(c.name + " after:" + c.targetDisplay);
-            //        }
-            //        var canvases = GameObject.FindObjectsOfType<Canvas>();
-            //        foreach (Canvas c in canvases) //ExperimenterCanvas: 1, TaskSelectionCanvas:0 (DC), InitScreenCanvas:1, CR_Canvas:0 (DC)
-            //        {
-            //            Debug.Log(c.name + " before:" + c.targetDisplay);
-            //            c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-            //            Debug.Log(c.name + " after:" + c.targetDisplay);
-            //        }
-            //        //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-            //    }
-            //};
-            //HotKeyList.Add(toggleDisplays);
+            HotKey toggleDisplays = new HotKey
+            {
+                keyDescription = "W",
+                actionName = "Toggle Displays",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.W),
+                hotKeyAction = () =>
+                {
+                    var cams = GameObject.FindObjectsOfType<Camera>();
+                    foreach (Camera c in cams) //MirrorCam:0, BackgroundCamera:1, CR_Cam: 0, MainCameraCopy:1 (DC)
+                    {
+                        Debug.Log(c.name + " before: " + c.targetDisplay);
+                        c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
+                        Debug.Log(c.name + " after: " + c.targetDisplay);
+                    }
+                    var canvases = GameObject.FindObjectsOfType<Canvas>();
+                    foreach (Canvas c in canvases) //ExperimenterCanvas: 1, TaskSelectionCanvas:0 (DC), InitScreenCanvas:1, CR_Canvas:0 (DC)
+                    {
+                        Debug.Log(c.name + " before: " + c.targetDisplay);
+                        c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
+                        Debug.Log(c.name + " after: " + c.targetDisplay);
+                    }
+                    SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+                }
+            };
+            HotKeyList.Add(toggleDisplays);
 
             // Remove Cursor Hot Key
             HotKey toggleCursor = new HotKey
@@ -203,11 +203,10 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     List<string> dontDisable = new List<string>() { taskName + "_Camera", taskName + "_Scripts", taskName + "_DirectionalLight" };
 
                     GameObject[] sceneKids = SceneManager.GetSceneByName(taskName).GetRootGameObjects();
-                    foreach (var kid in sceneKids)
+                    foreach (GameObject kid in sceneKids)
                         if (!dontDisable.Contains(kid.name) && kid.activeSelf)
                             kid.SetActive(false);
-                   
-                    //If using stims, destroy them since not gonna hit finish trial state!!
+                        
                     int nStimGroups = HkPanel.TrialLevel.TrialStims.Count;
                     for (int iG = 0; iG < nStimGroups; iG++)
                     {
@@ -218,14 +217,15 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     if (HkPanel.TrialLevel.TokenFBController.isActiveAndEnabled)
                         HkPanel.TrialLevel.TokenFBController.enabled = false;
 
-                    if(HkPanel.TrialLevel.TokenFBController != null)
+                    if (HkPanel.TrialLevel.TokenFBController != null)
                         HkPanel.TrialLevel.TokenFBController.SetTokenBarValue(HkPanel.TrialLevel.InitialTokenAmount);
 
                     if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
                         HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
 
                     HkPanel.TrialLevel.TrialCount_InBlock = -1;
-                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("SetupTrial")); 
+                    HkPanel.TrialLevel.ResetGlobalTrialLevelVariables();
+                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("SetupTrial"));
                 }
             };
             HotKeyList.Add(restartBlock);
@@ -261,6 +261,9 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 {
                     HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI"));
                     HkPanel.TrialLevel.ForceBlockEnd = true;
+                    if (HkPanel.TrialLevel.TokenFBController != null)
+                        HkPanel.TrialLevel.TokenFBController.SetTokenBarValue(HkPanel.TrialLevel.InitialTokenAmount);
+                    HkPanel.TrialLevel.ResetGlobalTrialLevelVariables();
                 }
             };
             HotKeyList.Add(endBlock);
@@ -273,10 +276,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.E),
                 hotKeyAction = () =>
                 {
-                    /*HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI")); 
-                    HkPanel.TrialLevel.ForceBlockEnd = true;
-                    HkPanel.TaskLevel.Terminated = true; 
-                    Destroy(GameObject.Find("Controllers")); //Delete current Controllers GO, since Task Selection creates new one*/
                     HkPanel.TrialLevel.ForceBlockEnd = true; 
                     HkPanel.TaskLevel.SpecifyCurrentState(HkPanel.TaskLevel.GetStateFromName("FinishTask"));
                 }

@@ -93,6 +93,7 @@ namespace FlexLearning_Namespace
                 td.NumPulses = NumPulses;
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
+                td.ContextName = ContextName;
                 TrialDefs[iTrial] = td;
             }
         }

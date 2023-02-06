@@ -1257,7 +1257,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         return new[] { PC_Num, New_Num, PNC_Num };
     }
 
-    public string GetContextNestedFilePath(string contextName) //Recursively search the subfolders of the MaterialFilePath to get ContextFilePath
+    /*public string GetContextNestedFilePath(string contextName) //Recursively search the subfolders of the MaterialFilePath to get ContextFilePath
     {
         string backupContextName = "LinearDark";
         string contextPath = "";
@@ -1274,7 +1274,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 Debug.Log($"Backup Context ({contextPath}) NOT Found.");
         }
         return contextPath;
-    }
+    }*/
 
 
     void LoadConfigUIVariables()

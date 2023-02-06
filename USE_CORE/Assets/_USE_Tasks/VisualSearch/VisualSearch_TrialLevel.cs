@@ -6,6 +6,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using ConfigDynamicUI;
+using UnityEngine.Serialization;
 using USE_States;
 using USE_StimulusManagement;
 using USE_ExperimentTemplate_Trial;
@@ -19,34 +20,29 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     // Stimuli Variables
     private StimGroup tStim;
     private GameObject StartButton;
-    private GameObject FBSquare;/*
-    public Texture2D HeldTooShortTexture;
-    public Texture2D HeldTooLongTexture;
-    private Texture2D StartButtonTexture;
-    private Texture2D FBSquareTexture;*/
+    private GameObject FBSquare;
     private bool Grating = false;
     private TaskHelperFunctions taskHelper;
     
     // ConfigUI variables
+    private bool configUIVariablesLoaded;
     [HideInInspector]
     public ConfigNumber minObjectTouchDuration, itiDuration, fbDuration, maxObjectTouchDuration, 
         selectObjectDuration, tokenRevealDuration, tokenUpdateDuration, searchDisplayDelay, gratingSquareDuration, tokenFbDuration;
+    
+    // Set in the Task Level
+    [HideInInspector] public string ContextExternalFilePath;
+    [HideInInspector] public Vector3 ButtonPosition, ButtonScale;
+    [HideInInspector] public Vector3 FBSquarePosition, FBSquareScale;
+    [HideInInspector] public bool StimFacingCamera;
+    [HideInInspector] public string ShadowType;
+    [HideInInspector] public bool NeutralITI;
     
     // Stim Evaluation Variables
     private GameObject trialStim;
     private GameObject selected = null;
     private bool CorrectSelection = false;
     VisualSearch_StimDef selectedSD = null;
-
-    // Config Loading Variables
-    private bool configUIVariablesLoaded;
-    public string ContextExternalFilePath;
-    public Vector3 ButtonPosition, ButtonScale;
-    public Vector3 FBSquarePosition, FBSquareScale;
-    public bool StimFacingCamera;
-    public string ShadowType;
-    public bool NeutralITI;
-    public int InitialTokens_InBlock;
     
     //Player View Variables
     private PlayerViewPanel playerView;
@@ -61,7 +57,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     public int NumCorrect_InBlock;
     public List<float> SearchDurationsList = new List<float>();
     public int NumErrors_InBlock;
-    public int NumRewardGiven_InBlock;
+    [FormerlySerializedAs("NumRewardGiven_InBlock")] public int NumRewardPulses_InBlock;
     public int NumTokenBarFull_InBlock;
     public int TotalTokensCollected_InBlock;
     public float Accuracy_InBlock;
@@ -277,7 +273,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 {
                     SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["Fluid1Onset"]);
-                    NumRewardGiven_InBlock++;
+                    NumRewardPulses_InBlock++;
                     RewardGiven = true;
                 }
             }

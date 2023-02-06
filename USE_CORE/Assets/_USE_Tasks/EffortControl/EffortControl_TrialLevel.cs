@@ -775,7 +775,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     }
 
 
-    public string GetContextNestedFilePath(string contextName)
+    /*public string GetContextNestedFilePath(string contextName)
     {
         string backupContextName = "LinearDark";
         string contextPath = "";
@@ -791,6 +791,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         }
 
         return contextPath;
-    }
+    }*/
 
 }

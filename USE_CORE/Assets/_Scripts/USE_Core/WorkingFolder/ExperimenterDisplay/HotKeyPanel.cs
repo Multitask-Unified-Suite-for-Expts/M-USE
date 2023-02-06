@@ -259,11 +259,12 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.N),
                 hotKeyAction = () =>
                 {
-                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI"));
                     HkPanel.TrialLevel.ForceBlockEnd = true;
-                    if (HkPanel.TrialLevel.TokenFBController != null)
-                        HkPanel.TrialLevel.TokenFBController.SetTokenBarValue(HkPanel.TrialLevel.InitialTokenAmount);
-                    HkPanel.TrialLevel.ResetGlobalTrialLevelVariables();
+                    //HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI"));
+                    //HkPanel.TrialLevel.ForceBlockEnd = true;
+                    //if (HkPanel.TrialLevel.TokenFBController != null)
+                    //    HkPanel.TrialLevel.TokenFBController.SetTokenBarValue(HkPanel.TrialLevel.InitialTokenAmount);
+                    //HkPanel.TrialLevel.ResetGlobalTrialLevelVariables();
                 }
             };
             HotKeyList.Add(endBlock);

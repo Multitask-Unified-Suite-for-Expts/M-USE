@@ -223,8 +223,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         ChooseStim.AddInitializationMethod(() =>
         {
-            Debug.Log("NUM CORRECT: " + NumCorrect_Block);
-
             chosenStimObj = null;
             chosenStimDef = null;
             StimIsChosen = false;

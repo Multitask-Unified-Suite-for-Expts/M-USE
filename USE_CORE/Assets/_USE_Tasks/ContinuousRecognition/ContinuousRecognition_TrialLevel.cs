@@ -148,7 +148,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             if (TrialCount_InBlock == 0)
             {
-                //TokenFBController.SetTokenBarValue(0);
                 ResetGlobalTrialVariables();
                 currentTask.CalculateBlockSummaryString(); //setting again just in case they used RestartBlock hotkey.
             }

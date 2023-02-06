@@ -317,9 +317,12 @@ namespace USE_ExperimentTemplate_Session
                 () =>
                 {
                     if (SyncBoxActive)
-                        if (SessionSettings.SettingClassExists("SyncBoxConfig"))
-                            if (SessionSettings.SettingExists("SyncBoxConfig", "SyncBoxInitCommands"))
-                                SyncBoxController.SendCommand((List<string>)SessionSettings.Get("SyncBoxConfig", "syncBoxInitCommands"));
+                        if (SessionSettings.SettingExists("Session", "SyncBoxInitCommands"))
+                        {
+                            SyncBoxController.SendCommand((List<string>)SessionSettings.Get("Session", "SyncBoxInitCommands"));
+                        }
+                            
+                                
                     SessionSettings.Save();
                     GameObject initCam = GameObject.Find("InitCamera");
                     initCam.SetActive(false);

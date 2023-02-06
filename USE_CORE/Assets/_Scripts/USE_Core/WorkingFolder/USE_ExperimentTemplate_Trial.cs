@@ -7,6 +7,7 @@ using UnityEngine;
 using USE_States;
 using USE_StimulusManagement;
 using ConfigDynamicUI;
+using JetBrains.Annotations;
 using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
@@ -128,7 +129,7 @@ namespace USE_ExperimentTemplate_Trial
                     TrialStims[0].DestroyStimGroup();
                     TrialStims.RemoveAt(0);
                 }
-                //WriteDataFiles();
+                WriteDataFiles();
             });
             DefineControlLevel();
             TrialData.ManuallyDefine();
@@ -358,6 +359,22 @@ namespace USE_ExperimentTemplate_Trial
                     Debug.Log("User did not Input None, Soft, or Hard for the Shadow Type");
                     break;
             }
+        }
+        public string GetContextNestedFilePath(string MaterialFilePath, string contextName, [CanBeNull] string backupContextName = null)
+        {
+            string contextPath = "";
+
+            string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
+
+            if (filePaths.Length >= 1)
+                contextPath = filePaths[0];
+            else
+            {
+                contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0]; //Use Default LinearDark if can't find file.
+                Debug.Log($"Context File Path Not Found. Defaulting to {backupContextName}.");
+            }
+
+            return contextPath;
         }
         public void LoadTextures(String ContextExternalFilePath)
         {

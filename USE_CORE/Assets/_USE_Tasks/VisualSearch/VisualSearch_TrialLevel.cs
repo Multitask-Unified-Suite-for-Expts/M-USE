@@ -6,6 +6,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using ConfigDynamicUI;
+using UnityEngine.Serialization;
 using USE_States;
 using USE_StimulusManagement;
 using USE_ExperimentTemplate_Trial;
@@ -19,34 +20,29 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     // Stimuli Variables
     private StimGroup tStim;
     private GameObject StartButton;
-    private GameObject FBSquare;/*
-    public Texture2D HeldTooShortTexture;
-    public Texture2D HeldTooLongTexture;
-    private Texture2D StartButtonTexture;
-    private Texture2D FBSquareTexture;*/
+    private GameObject FBSquare;
     private bool Grating = false;
     private TaskHelperFunctions taskHelper;
     
     // ConfigUI variables
+    private bool configUIVariablesLoaded;
     [HideInInspector]
     public ConfigNumber minObjectTouchDuration, itiDuration, fbDuration, maxObjectTouchDuration, 
         selectObjectDuration, tokenRevealDuration, tokenUpdateDuration, searchDisplayDelay, gratingSquareDuration, tokenFbDuration;
+    
+    // Set in the Task Level
+    [HideInInspector] public string ContextExternalFilePath;
+    [HideInInspector] public Vector3 ButtonPosition, ButtonScale;
+    [HideInInspector] public Vector3 FBSquarePosition, FBSquareScale;
+    [HideInInspector] public bool StimFacingCamera;
+    [HideInInspector] public string ShadowType;
+    [HideInInspector] public bool NeutralITI;
     
     // Stim Evaluation Variables
     private GameObject trialStim;
     private GameObject selected = null;
     private bool CorrectSelection = false;
     VisualSearch_StimDef selectedSD = null;
-
-    // Config Loading Variables
-    private bool configUIVariablesLoaded;
-    public string ContextExternalFilePath;
-    public Vector3 ButtonPosition, ButtonScale;
-    public Vector3 FBSquarePosition, FBSquareScale;
-    public bool StimFacingCamera;
-    public string ShadowType;
-    public bool NeutralITI;
-    public int InitialTokens_InBlock;
     
     //Player View Variables
     private PlayerViewPanel playerView;
@@ -57,16 +53,16 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private bool playerViewLoaded;
     
     // Block Data Variables
-    private string ContextName = "";
-    public int NumCorrect_InBlock;
-    public List<float> SearchDurationsList = new List<float>();
-    public int NumErrors_InBlock;
-    public int NumRewardGiven_InBlock;
-    public int NumTokenBarFull_InBlock;
-    public int TotalTokensCollected_InBlock;
-    public float Accuracy_InBlock;
-    public float AverageSearchDuration_InBlock;
-    public int TouchDurationError_InBlock;
+    [HideInInspector] public string ContextName = "";
+    [HideInInspector] public int NumCorrect_InBlock;
+    [HideInInspector] public List<float> SearchDurationsList = new List<float>();
+    [HideInInspector] public int NumErrors_InBlock;
+    [HideInInspector] public int NumRewardPulses_InBlock;
+    [HideInInspector] public int NumTokenBarFull_InBlock;
+    [HideInInspector] public int TotalTokensCollected_InBlock;
+    [HideInInspector] public float Accuracy_InBlock;
+    [HideInInspector] public float AverageSearchDuration_InBlock;
+    [HideInInspector] public int TouchDurationError_InBlock;
    
     // Trial Data Variables
     private int? SelectedStimCode = null;
@@ -104,8 +100,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             ResetTrialVariables();
             LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
-            if(playerViewText==null)
-                CreateTextOnExperimenterDisplay();
             if(StartButton == null)
                 StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
             if(FBSquare == null)
@@ -118,7 +112,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             ContextName = CurrentTrialDef.ContextName;
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
 
-
+            if (playerViewText == null)
+                CreateTextOnExperimenterDisplay();
             if (TrialCount_InBlock == 0)
             {
                 playerViewText.SetActive(false);
@@ -176,7 +171,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             TokenFBController.enabled = true;
             tStim.ToggleVisibility(true);
-            CreateTextOnExperimenterDisplay();
+            
             if (StimFacingCamera)
             {
                 foreach (var stim in tStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
@@ -278,7 +273,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 {
                     SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["Fluid1Onset"]);
-                    NumRewardGiven_InBlock++;
+                    NumRewardPulses_InBlock++;
                     RewardGiven = true;
                 }
             }

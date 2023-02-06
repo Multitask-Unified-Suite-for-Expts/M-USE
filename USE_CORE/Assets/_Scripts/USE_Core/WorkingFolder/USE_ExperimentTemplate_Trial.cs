@@ -129,7 +129,7 @@ namespace USE_ExperimentTemplate_Trial
                     TrialStims[0].DestroyStimGroup();
                     TrialStims.RemoveAt(0);
                 }
-                //WriteDataFiles();
+                WriteDataFiles();
             });
             DefineControlLevel();
             TrialData.ManuallyDefine();

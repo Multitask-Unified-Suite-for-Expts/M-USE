@@ -53,16 +53,16 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private bool playerViewLoaded;
     
     // Block Data Variables
-    private string ContextName = "";
-    public int NumCorrect_InBlock;
-    public List<float> SearchDurationsList = new List<float>();
-    public int NumErrors_InBlock;
-    [FormerlySerializedAs("NumRewardGiven_InBlock")] public int NumRewardPulses_InBlock;
-    public int NumTokenBarFull_InBlock;
-    public int TotalTokensCollected_InBlock;
-    public float Accuracy_InBlock;
-    public float AverageSearchDuration_InBlock;
-    public int TouchDurationError_InBlock;
+    [HideInInspector] public string ContextName = "";
+    [HideInInspector] public int NumCorrect_InBlock;
+    [HideInInspector] public List<float> SearchDurationsList = new List<float>();
+    [HideInInspector] public int NumErrors_InBlock;
+    [HideInInspector] public int NumRewardPulses_InBlock;
+    [HideInInspector] public int NumTokenBarFull_InBlock;
+    [HideInInspector] public int TotalTokensCollected_InBlock;
+    [HideInInspector] public float Accuracy_InBlock;
+    [HideInInspector] public float AverageSearchDuration_InBlock;
+    [HideInInspector] public int TouchDurationError_InBlock;
    
     // Trial Data Variables
     private int? SelectedStimCode = null;

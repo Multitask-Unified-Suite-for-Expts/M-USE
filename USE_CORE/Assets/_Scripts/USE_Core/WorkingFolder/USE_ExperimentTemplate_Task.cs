@@ -297,6 +297,7 @@ namespace USE_ExperimentTemplate_Task
 
 
             TrialLevel.SerialPortController = SerialPortController;
+            TrialLevel.SerialPortActive = SerialPortActive;
             TrialLevel.SerialRecvData = SerialRecvData;
             TrialLevel.SerialSentData = SerialSentData;
             TrialLevel.SyncBoxController = SyncBoxController;

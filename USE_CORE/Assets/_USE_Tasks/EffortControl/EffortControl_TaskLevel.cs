@@ -55,22 +55,9 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(trialLevel.MaterialFilePath, ContextName, "LinearDark"));
         });
 
-        RunBlock.AddInitializationMethod(() =>
-        {
-            ResetTrialLevelVariables();
-        });
-
         BlockFeedback.AddInitializationMethod(() =>
         {
-            RewardPulses_Task += trialLevel.RewardPulses;
-            Completions_Task += trialLevel.Completions;
-            Touches_Task += trialLevel.TotalTouches;
-            NumChosenLeft_Task += trialLevel.NumChosenLeft;
-            NumChosenRight_Task += trialLevel.NumChosenRight;
-            NumChosenHigherEffort_Task += trialLevel.NumHigherEffortChosen;
-            NumChosenLowerEffort_Task += trialLevel.NumLowerEffortChosen;
-            NumChosenHigherReward_Task += trialLevel.NumHigherRewardChosen;
-            NumChosenLowerReward_Task += trialLevel.NumLowerRewardChosen;
+            AddTrialValuesToTaskValues();
         });
     }
 
@@ -108,17 +95,17 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
     }
 
-    public void ResetTrialLevelVariables()
+    public void AddTrialValuesToTaskValues()
     {
-        trialLevel.RewardPulses = 0;
-        trialLevel.Completions = 0;
-        trialLevel.TotalTouches = 0;
-        trialLevel.NumChosenLeft = 0;
-        trialLevel.NumChosenRight = 0;
-        trialLevel.NumHigherEffortChosen = 0;
-        trialLevel.NumLowerEffortChosen = 0;
-        trialLevel.NumHigherRewardChosen = 0;
-        trialLevel.NumLowerRewardChosen = 0;
+        RewardPulses_Task += trialLevel.RewardPulses;
+        Completions_Task += trialLevel.Completions;
+        Touches_Task += trialLevel.TotalTouches;
+        NumChosenLeft_Task += trialLevel.NumChosenLeft;
+        NumChosenRight_Task += trialLevel.NumChosenRight;
+        NumChosenHigherEffort_Task += trialLevel.NumHigherEffortChosen;
+        NumChosenLowerEffort_Task += trialLevel.NumLowerEffortChosen;
+        NumChosenHigherReward_Task += trialLevel.NumHigherRewardChosen;
+        NumChosenLowerReward_Task += trialLevel.NumLowerRewardChosen;
     }
 
     public override OrderedDictionary GetSummaryData()
@@ -153,9 +140,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
                         "\nChoseLowerEffort: " + trialLevel.NumLowerEffortChosen +
                         "\n");
         BlockSummaryString.AppendLine(CurrentBlockString).ToString();
-
-        //if (PreviousBlocksString.Length > 0)
-        //    BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
     }
 
     void SetupBlockData()

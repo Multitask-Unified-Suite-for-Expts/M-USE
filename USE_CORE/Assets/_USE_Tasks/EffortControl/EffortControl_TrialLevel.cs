@@ -79,7 +79,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     Vector3 NextScale;
 
     //Data variables:
-    [HideInInspector] public float? AvgClickTime;
+    [HideInInspector] public float AvgClickTime;
     [HideInInspector] public float ChooseDuration;
     [HideInInspector] public int RewardPulses;
     [HideInInspector] public int TotalTouches;
@@ -97,6 +97,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public GameObject MaxOutline_Right;
 
     [HideInInspector] public bool InflateAudioPlayed;
+
+    [HideInInspector] public List<float> clickTimings;
+    [HideInInspector] public float timeTracker;
+    [HideInInspector] public int mouseClicks;
 
 
     public override void DefineControlLevel()
@@ -141,17 +145,17 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 Borders.SetActive(true);
 
             TokenFBController.enabled = false;
-            AvgClickTime = null;
             ResetRelativeStartTime(); 
             DisableAllGameobjects();
             StartButton.SetActive(true);
             ClickCount = 0;
             Response = -1;
             ChooseDuration = 0; //reset how long it took them to choose each trial.
+            ClicksNeeded = 0;
+            AvgClickTime = 0;
             SideChoice = "";
             EffortChoice = "";
             RewardChoice = "";
-            ClicksNeeded = 0;
 
             ResetToOriginalPositions();
 
@@ -273,9 +277,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
 
         //Inflate Balloon state -------------------------------------------------------------------------------------------------------
-        List<float> clickTimings = new List<float>();
-        float timeTracker = 0;
-        int mouseClicks = 0;
         MouseTracker.AddSelectionHandler(mouseHandler, InflateBalloon);
 
         InflateBalloon.AddInitializationMethod(() =>
@@ -287,6 +288,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             InflateAudioPlayed = false;
             ScaleTimer = 0;
             MouseTracker.ResetClickCount();
+            clickTimings = new List<float>();
+            timeTracker = 0;
             mouseClicks = 0;
         });
         InflateBalloon.AddUpdateMethod(() =>
@@ -385,6 +388,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //Feedback state -------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
         {
+            Debug.Log("RESPONSE = " + Response);
+
             if (Response == 1)
             {
                 GameObject CenteredGO = new GameObject();
@@ -403,8 +408,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
             else
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
-
-            //Touches += MouseTracker.GetClickCount();
         });
         Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI, () =>
         {

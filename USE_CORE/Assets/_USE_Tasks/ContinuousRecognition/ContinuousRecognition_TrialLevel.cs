@@ -98,7 +98,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
-        InitialTokenAmount = 0; //setting for restart block hotkey
         TokenFBController.SetTokenBarValue(InitialTokenAmount);
         TokenFBController.SetFlashingTime(1f);
 
@@ -114,7 +113,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
-            if (!CR_CanvasGO.activeSelf)
+            if (!CR_CanvasGO.activeInHierarchy)
                 CR_CanvasGO.SetActive(true);
 
             //Make sure text and timer objects are inactive in case they used hotkey to end last block.
@@ -155,7 +154,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 TokenFBController.SetTokenBarValue(InitialTokenAmount);
                 currentTask.CalculateBlockSummaryString(); //setting again just in case they used RestartBlock hotkey.
-                if(IsHuman)
+                if (IsHuman)
                 {
                     AdjustStartButtonPos(); //Adjust startButton position (move down) to make room for Title text. 
                     TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
@@ -191,7 +190,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             StartButton.SetActive(false);
             StartButton.transform.position = OriginalStartButtonPosition;
 
-            if (TitleTextGO.activeSelf)
+            if (TitleTextGO.activeInHierarchy)
             {
                 TitleTextGO.SetActive(false);
                 TitleTextGO.transform.position = OriginalTitleTextPosition; //Reset Title Position for next block (in case its not a human block). 
@@ -211,6 +210,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
+
+            if(currentTrial.ShakeStim)
+                AddShakeStimScript();
         });
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------
@@ -379,10 +381,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 EndBlock = true;
             }
         });
-        TokenUpdate.AddTimer(() => (tokenRevealDuration.value + tokenUpdateDuration.value + .05f), DisplayResults);
+        TokenUpdate.SpecifyTermination(() => (Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value + .05f) && !AudioFBController.IsPlaying()), DisplayResults);
         TokenUpdate.SpecifyTermination(() => !StimIsChosen, DisplayResults);
         TokenUpdate.AddDefaultTerminationMethod(() =>
         {
+            if (currentTrial.ShakeStim)
+                RemoveShakeStimScript();
+
             if (IsHuman)
             {
                 TimerBackdropGO.SetActive(false);
@@ -400,7 +405,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 GenerateBlockFeedback();
 
-                if(IsHuman)
+                if (IsHuman)
                 {
                     float Y_Offset = GetOffsetY();
 
@@ -422,24 +427,21 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-
         DisplayResults.AddTimer(() => displayResultsDuration.value, ITI, () =>
         {
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
         });
-            
-        DisplayResults.SpecifyTermination(() => !EndBlock && !CompletedAllTrials, ITI, () =>
+        DisplayResults.SpecifyTermination(() => !EndBlock && !CompletedAllTrials, ITI);
+        DisplayResults.AddDefaultTerminationMethod(() =>
         {
             TokenFBController.enabled = false;
-            if (currentTrial.UseStarfield)
-                Starfield.SetActive(false);
-            
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
         });
+            
 
         //ITI State----------------------------------------------------------------------------------------------------------------------
 
@@ -450,6 +452,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             currentTask.CalculateBlockSummaryString();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]); //next trial starts next frame
 
+            DeactivateTextObjects();
             DestroyFeedbackBorders();
         });
         
@@ -459,23 +462,35 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS -----------------------------------------------------------------------------------------
+    void RemoveShakeStimScript()
+    {
+        foreach (var stim in trialStims.stimDefs)
+            Destroy(stim.StimGameObject.GetComponent<ShakeStim>());
+    }
+
+    void AddShakeStimScript()
+    {
+        foreach (var stim in trialStims.stimDefs)
+            stim.StimGameObject.AddComponent<ShakeStim>();
+    }
+
     void DeactivateTextObjects()
     {
-        if (ScoreTextGO.activeSelf)
+        if (ScoreTextGO.activeInHierarchy)
             ScoreTextGO.SetActive(false);
 
-        if (NumTrialsTextGO.activeSelf)
+        if (NumTrialsTextGO.activeInHierarchy)
             NumTrialsTextGO.SetActive(false);
 
-        if (TimerBackdropGO.activeSelf)
+        if (TimerBackdropGO.activeInHierarchy)
             TimerBackdropGO.SetActive(false);
 
-        if (YouWinTextGO.activeSelf)
+        if (YouWinTextGO.activeInHierarchy)
         {
             YouWinTextGO.SetActive(false);
             YouWinTextGO.transform.position = OriginalFbTextPosition; //Reset position for next Block;  
         }
-        if (YouLoseTextGO.activeSelf)
+        if (YouLoseTextGO.activeInHierarchy)
         {
             YouLoseTextGO.SetActive(false);
             YouLoseTextGO.transform.position = OriginalFbTextPosition; //Reset position for next Block;
@@ -979,6 +994,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (currentTrial.StimFacingCamera)
                 wrongStim.StimGameObject.AddComponent<FaceCamera>();
+
         }
     }
 
@@ -1152,9 +1168,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
         FrameData.AddDatum("Context", () => currentTrial.ContextName);
         FrameData.AddDatum("ContextActive", () => ContextActive);
-        FrameData.AddDatum("StartButton", () => StartButton.activeSelf);
+        FrameData.AddDatum("StartButton", () => StartButton.activeInHierarchy);
         FrameData.AddDatum("TrialStimShown", () => trialStims.IsActive);
-        FrameData.AddDatum("StarfieldActive", () => Starfield.activeSelf);
+        FrameData.AddDatum("StarfieldActive", () => Starfield.activeInHierarchy);
     }
 
     void ClearCurrentTrialStimLists()

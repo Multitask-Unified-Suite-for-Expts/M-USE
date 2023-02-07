@@ -71,6 +71,10 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.ContextActive = true;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
 
+            trialLevel.InitialTokenAmount = currentBlock.InitialTokenAmount;
+
+            trialLevel.ResetGlobalTrialLevelVariables();
+
             CalculateBlockSummaryString();
         });
 
@@ -153,7 +157,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         if (BlockCount > 0)
         {
-            BlockAveragesString = "<b>Block Averages " + $"({BlockCount} block);" + "</b>" +
+            BlockAveragesString = "<b>Block Averages " + $"({BlockCount});" + "</b>" +
                               "\nAvg Correct: " + AvgNumCorrect.ToString("0.00") +
                               "\nAvg TbCompletions: " + AvgNumTbCompletions.ToString("0.00") +
                               "\nAvg TimeToChoice: " + AvgTimeToChoice.ToString("0.00") + "s" +

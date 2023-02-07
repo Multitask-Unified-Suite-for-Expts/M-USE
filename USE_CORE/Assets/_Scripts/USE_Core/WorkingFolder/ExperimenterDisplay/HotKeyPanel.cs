@@ -34,11 +34,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
         hotKeyText.GetComponent<Text>().alignment = TextAnchor.UpperCenter;
         hotKeyText.GetComponent<Text>().text = "<size=25><b><color=#2d3436ff>Hot Keys</color></b></size>" + "\n\n<size=20>" + HKList.GenerateHotKeyDescriptions() + "</size>" + "\n-----------------------------------" +
             "\n\n<size=25><b><color=#2d3436ff>ConfigUI Control</color></b></size>" + "\n\n<size=20>" + ConfigUIList.GenerateConfigUIHotKeyDescriptions() + "</size>";
-
-        
     }
     public override void CustomPanelUpdate()
-
     {
         HKList.CheckAllHotKeyConditions();
         ConfigUIList.CheckAllHotKeyConditions();

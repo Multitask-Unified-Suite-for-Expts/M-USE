@@ -28,7 +28,7 @@ public class BlockInfoPanel : ExperimenterDisplayPanel
             {
                 blockInfoPanelText.GetComponent<Text>().supportRichText = true;
                 blockInfoPanelText.GetComponent<Text>().text = "<size=18><b><color=#2d3436ff>Block Info: </color></b></size>" + "\n<size=17><color=#2d3436ff>" + TaskLevel.BlockSummaryString + "</color></size>";
-        }
+            }
         }
             
     }

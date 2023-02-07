@@ -194,7 +194,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         {
             Input.ResetInputAxes(); //reset input in case they still touching!
             SquareMaterial.color = Color.white;
-            if (!SquareGO.activeSelf)
+            if (!SquareGO.activeInHierarchy)
                 ActivateSquareAndBackdrop();
             WhiteStartTime = Time.time;
             WhiteTimeoutTime = 0;
@@ -234,7 +234,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         {
             Input.ResetInputAxes(); //reset input in case they still touching!
             SquareMaterial.color = LightBlueColor;
-            if (!SquareGO.activeSelf)
+            if (!SquareGO.activeInHierarchy)
                 ActivateSquareAndBackdrop();
             BlueStartTime = Time.time;
             BlueSquareTouched = false;
@@ -661,7 +661,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     void LogFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
-        FrameData.AddDatum("SquareGO", () => SquareGO.activeSelf);
+        FrameData.AddDatum("SquareGO", () => SquareGO.activeInHierarchy);
     }
 
 }

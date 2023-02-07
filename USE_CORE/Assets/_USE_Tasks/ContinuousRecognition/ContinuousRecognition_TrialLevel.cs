@@ -145,6 +145,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
+            StartButton.transform.position = OriginalStartButtonPosition;
+
             CompletedAllTrials = false;
             EndBlock = false;
             StimIsChosen = false;
@@ -156,6 +158,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 currentTask.CalculateBlockSummaryString(); //setting again just in case they used RestartBlock hotkey.
                 if (IsHuman)
                 {
+
                     AdjustStartButtonPos(); //Adjust startButton position (move down) to make room for Title text. 
                     TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
                 }
@@ -188,7 +191,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         InitTrial.AddDefaultTerminationMethod(() =>
         {
             StartButton.SetActive(false);
-            StartButton.transform.position = OriginalStartButtonPosition;
 
             if (TitleTextGO.activeInHierarchy)
             {
@@ -212,7 +214,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
 
             if(currentTrial.ShakeStim)
-                AddShakeStimScript();
+                AddShakeStimScript(trialStims);
         });
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------
@@ -386,7 +388,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenUpdate.AddDefaultTerminationMethod(() =>
         {
             if (currentTrial.ShakeStim)
-                RemoveShakeStimScript();
+                RemoveShakeStimScript(trialStims);
 
             if (IsHuman)
             {
@@ -436,6 +438,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         DisplayResults.SpecifyTermination(() => !EndBlock && !CompletedAllTrials, ITI);
         DisplayResults.AddDefaultTerminationMethod(() =>
         {
+            if(currentTrial.ShakeStim)
+                RemoveShakeStimScript(trialStims);
+
             TokenFBController.enabled = false;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
@@ -462,15 +467,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS -----------------------------------------------------------------------------------------
-    void RemoveShakeStimScript()
+    void RemoveShakeStimScript(StimGroup stimGroup)
     {
-        foreach (var stim in trialStims.stimDefs)
+        foreach (var stim in stimGroup.stimDefs)
             Destroy(stim.StimGameObject.GetComponent<ShakeStim>());
     }
 
-    void AddShakeStimScript()
+    void AddShakeStimScript(StimGroup stimGroup)
     {
-        foreach (var stim in trialStims.stimDefs)
+        foreach (var stim in stimGroup.stimDefs)
             stim.StimGameObject.AddComponent<ShakeStim>();
     }
 
@@ -994,7 +999,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (currentTrial.StimFacingCamera)
                 wrongStim.StimGameObject.AddComponent<FaceCamera>();
-
         }
     }
 
@@ -1166,7 +1170,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     void LogFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
-        FrameData.AddDatum("Context", () => currentTrial.ContextName);
         FrameData.AddDatum("ContextActive", () => ContextActive);
         FrameData.AddDatum("StartButton", () => StartButton.activeInHierarchy);
         FrameData.AddDatum("TrialStimShown", () => trialStims.IsActive);
@@ -1249,26 +1252,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
         return new[] { PC_Num, New_Num, PNC_Num };
     }
-
-    /*public string GetContextNestedFilePath(string contextName) //Recursively search the subfolders of the MaterialFilePath to get ContextFilePath
-    {
-        string backupContextName = "LinearDark";
-        string contextPath = "";
-
-        string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
-
-        if (filePaths.Length > 0)
-            contextPath = filePaths[0];
-        else
-        {
-            Debug.Log($"Context File Path Not Found. Defaulting to {backupContextName}.");
-            contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0]; //Use Default LinearDark if can't find file.
-            if (contextPath == null)
-                Debug.Log($"Backup Context ({contextPath}) NOT Found.");
-        }
-        return contextPath;
-    }*/
-
 
     void LoadConfigUIVariables()
     {

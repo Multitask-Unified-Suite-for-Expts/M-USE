@@ -137,7 +137,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
-            if (!Borders.activeSelf)
+            if (!Borders.activeInHierarchy)
                 Borders.SetActive(true);
 
             TokenFBController.enabled = false;
@@ -179,9 +179,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             LeftScaleUpAmount = MaxScale / currentTrial.NumClicksLeft;
             RightScaleUpAmount = MaxScale / currentTrial.NumClicksRight;
 
-            if (!BalloonContainerLeft.activeSelf)
+            if (!BalloonContainerLeft.activeInHierarchy)
                 BalloonContainerLeft.SetActive(true);
-            if (!BalloonContainerRight.activeSelf)
+            if (!BalloonContainerRight.activeInHierarchy)
                 BalloonContainerRight.SetActive(true);
 
             CreateBalloonOutlines(currentTrial.NumClicksLeft, LeftScaleUpAmount, currentTrial.ClicksPerOutline, StimLeft.transform.position, BalloonContainerLeft);
@@ -363,10 +363,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         PopBalloon.AddUpdateMethod(() =>
         {
-            if (!TrialStim.activeSelf)
+            if (!TrialStim.activeInHierarchy)
                 delayTimer += Time.deltaTime;
         });
-        PopBalloon.SpecifyTermination(() => !TrialStim.activeSelf && delayTimer > popToFeedbackDelay.value, Feedback, () => delayTimer = 0);
+        PopBalloon.SpecifyTermination(() => !TrialStim.activeInHierarchy && delayTimer > popToFeedbackDelay.value, Feedback, () => delayTimer = 0);
 
         //Feedback state -------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
@@ -406,10 +406,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //ITI state -------------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>
         {
-            if (TrialStim != null && TrialStim.activeSelf)
+            if (TrialStim != null && TrialStim.activeInHierarchy)
                 TrialStim.SetActive(false);
            
-            if (MiddleBarrier.activeSelf)
+            if (MiddleBarrier.activeInHierarchy)
                 MiddleBarrier.SetActive(false);
 
             DestroyChildren(BalloonContainerLeft);
@@ -769,9 +769,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     void LogFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
-        FrameData.AddDatum("StartButton", () => StartButton.activeSelf);
-        FrameData.AddDatum("StimLeft", () => StimLeft.activeSelf);
-        FrameData.AddDatum("StimRight", () => StimRight.activeSelf);
+        FrameData.AddDatum("StartButton", () => StartButton.activeInHierarchy);
+        FrameData.AddDatum("StimLeft", () => StimLeft.activeInHierarchy);
+        FrameData.AddDatum("StimRight", () => StimRight.activeInHierarchy);
     }
 
 

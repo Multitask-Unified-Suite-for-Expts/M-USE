@@ -75,6 +75,27 @@ public class Tile : MonoBehaviour
                 }
 
                 break;
+            case 2:
+                // RULE-BREAKING BACKTRACK
+                gameObject.GetComponent<Renderer>().material.color = INCORRECT_RULEBREAKING_COLOR;
+                yield return new WaitForSeconds(INCORRECT_RULEBREAKING_SECONDS);
+                if (!MazeGame_TrialLevel.viewPath)
+                {
+                    gameObject.GetComponent<Renderer>().material.color = DEFAULT_TILE_COLOR;
+                }
+                else
+                {
+                    gameObject.GetComponent<Renderer>().material.color = CORRECT_COLOR;
+                }
+                
+                break;
+            case 3:
+                // RULE-BREAKING INCORRECT DEFAULT or NOT START
+                gameObject.GetComponent<Renderer>().material.color = INCORRECT_RULEBREAKING_COLOR;
+                yield return new WaitForSeconds(INCORRECT_RULEBREAKING_SECONDS);
+                gameObject.GetComponent<Renderer>().material.color = DEFAULT_TILE_COLOR;
+                break;
+            
             case 99:
                 // CORRECT and FINISH
                 //  cAudio.Play(0);
@@ -131,12 +152,6 @@ public class Tile : MonoBehaviour
                 gameObject.GetComponent<Renderer>().material.color = INCORRECT_RULEABIDING_COLOR;
                 yield return new WaitForSeconds(INCORRECT_RULEABIDING_SECONDS);
                 gameObject.GetComponent<Renderer>().material.color = FINISH_COLOR;
-                break;
-            case 20:
-                // RULE-BREAKING INCORRECT DEFAULT
-                gameObject.GetComponent<Renderer>().material.color = INCORRECT_RULEBREAKING_COLOR;
-                yield return new WaitForSeconds(INCORRECT_RULEBREAKING_SECONDS);
-                gameObject.GetComponent<Renderer>().material.color = DEFAULT_TILE_COLOR;
                 break;
             case 21:
                 // RULE-BREAKING INCORRECT and START

@@ -221,9 +221,9 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
                         HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
 
-                    HkPanel.TrialLevel.TrialCount_InBlock = -1;
-                    HkPanel.TrialLevel.ResetGlobalTrialLevelVariables();
                     HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("SetupTrial"));
+                    HkPanel.TrialLevel.ResetGlobalTrialLevelVariables();
+                    HkPanel.TrialLevel.TrialCount_InBlock = -1;
                 }
             };
             HotKeyList.Add(restartBlock);

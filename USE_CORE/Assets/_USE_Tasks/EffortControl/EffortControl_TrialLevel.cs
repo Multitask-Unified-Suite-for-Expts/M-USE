@@ -124,16 +124,16 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if(AudioFBController != null)
             InflateClipDuration = AudioFBController.GetClip("EC_Inflate").length;
 
+        MaxOutline_Left = new GameObject();
+        MaxOutline_Right = new GameObject();
+
+
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
-            MaxOutline_Left = new GameObject();
-            MaxOutline_Right = new GameObject();
-
             if (!ObjectsCreated)
                 CreateObjects();
             LoadConfigUIVariables();
-            //SetTrialSummaryString();
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -156,6 +156,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             SideChoice = "";
             EffortChoice = "";
             RewardChoice = "";
+            currentTrial.Touches = 0;
 
             ResetToOriginalPositions();
 
@@ -191,7 +192,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             CreateBalloonOutlines(currentTrial.NumClicksRight, RightScaleUpAmount, currentTrial.ClicksPerOutline, StimRight.transform.position, BalloonContainerRight);
             CreateRewards(currentTrial.NumCoinsLeft, RewardContainerLeft.transform.position, RewardContainerLeft);
             CreateRewards(currentTrial.NumCoinsRight, RewardContainerRight.transform.position, RewardContainerRight);
-
             CreateTransparentBalloons();
         });
 
@@ -388,8 +388,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //Feedback state -------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
         {
-            Debug.Log("RESPONSE = " + Response);
-
             if (Response == 1)
             {
                 GameObject CenteredGO = new GameObject();
@@ -447,6 +445,28 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     }
 
     //HELPER FUNCTIONS -------------------------------------------------------------------------------------------------------
+    public override void ResetGlobalTrialLevelVariables() //for reset block hotkey
+    {
+        //Clear trial summary string and block summary string:
+        ClearTrialSummaryString();
+        currentTask.ClearStrings();
+        currentTask.BlockSummaryString.AppendLine("");
+
+        //Reset Trial level variables:
+        Completions = 0;
+        NumChosenLeft = 0;
+        NumChosenRight = 0;
+        NumHigherRewardChosen = 0;
+        NumLowerRewardChosen = 0;
+        NumHigherEffortChosen = 0;
+        NumLowerEffortChosen = 0;
+        TotalTouches = 0;
+        RewardPulses = 0;
+
+        DestroyChildren(BalloonContainerLeft);
+        DestroyChildren(BalloonContainerRight);
+    }
+
     void ScaleToNextInterval()
     {
         //If close and next increment would go over target scale, recalculate the exact amount:

@@ -155,7 +155,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("RewardPulses", () => trialLevel.RewardPulses);
     }
 
-    void ClearStrings()
+    public void ClearStrings()
     {
         CurrentBlockString = "";
         BlockSummaryString.Clear();

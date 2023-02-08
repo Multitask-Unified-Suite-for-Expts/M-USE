@@ -41,7 +41,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
             mgTL.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
         else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
-       
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TileSize"))
+            mgTL.TileSize = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TileSize");
+        else
+        {
+            mgTL.TileSize = 0.5f; // default value in the case it isn't specified
+            Debug.Log("Tile Size settings not defined in the TaskDef. Default setting of " + mgTL.TileSize + "is used instead.");
+        }
         
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartColor"))
             mgTL.startColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "StartColor");

@@ -22,6 +22,7 @@ namespace MazeGame_Namespace
         //public float? ExternalStimScale;
 
         public Color TileColor;
+        public float TileSize;
         public Vector3 ButtonPosition;
         public Vector3 ButtonScale;
         public string MazeExternalFilePath;
@@ -54,7 +55,6 @@ namespace MazeGame_Namespace
         public int MazeNumTurns;
         //  public Color TileColor;
         public float[] TileColor;
-        public float TileSize;
         
         public int PulseSize;
         public int NumPulses;

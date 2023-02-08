@@ -59,7 +59,8 @@ namespace USE_ExperimentTemplate_Trial
 
 
         // Texture Variables
-        [HideInInspector] public Texture2D StartButtonTexture, FBSquareTexture, HeldTooLongTexture, HeldTooShortTexture, BackdropStripesTexture, BackdropTexture;
+        [HideInInspector] public Texture2D StartButtonTexture, FBSquareTexture, HeldTooLongTexture, HeldTooShortTexture, 
+            BackdropStripesTexture, BackdropTexture, MazeBackgroundTexture;
         //[HideInInspector] public bool Grating;
         
         //protected TrialDef CurrentTrialDef;
@@ -379,6 +380,7 @@ namespace USE_ExperimentTemplate_Trial
             HeldTooShortTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "VerticalStripes.png");
             BackdropStripesTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "bg.png");
             BackdropTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "BackdropGrey.png");
+            MazeBackgroundTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "MazeBackground.png");
         }
     }
 

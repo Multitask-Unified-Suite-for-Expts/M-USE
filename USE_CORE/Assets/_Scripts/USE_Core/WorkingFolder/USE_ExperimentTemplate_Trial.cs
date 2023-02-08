@@ -123,6 +123,8 @@ namespace USE_ExperimentTemplate_Trial
 
             FinishTrial.AddUniversalTerminationMethod(() =>
             {
+                FinishTrialCleanup();
+
                 int nStimGroups = TrialStims.Count;
                 for (int iG = 0; iG < nStimGroups; iG++)
                 {
@@ -137,6 +139,11 @@ namespace USE_ExperimentTemplate_Trial
             TrialData.CreateFile();
            // TrialData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
 
+
+        }
+
+        public virtual void FinishTrialCleanup()
+        {
 
         }
 
@@ -181,11 +188,6 @@ namespace USE_ExperimentTemplate_Trial
                 TrialData.AppendData();
                 TrialData.WriteData();
             }
-        }
-
-        public virtual void ResetGlobalTrialLevelVariables()
-        {
-
         }
 
 

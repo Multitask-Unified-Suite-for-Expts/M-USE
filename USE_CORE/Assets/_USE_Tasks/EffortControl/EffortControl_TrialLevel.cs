@@ -78,18 +78,19 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] Vector3 IncrementAmounts;
     Vector3 NextScale;
 
-    //Data variables:
+    //Trial specific Data variables:
     [HideInInspector] public float AvgClickTime;
     [HideInInspector] public float ChooseDuration;
-    [HideInInspector] public int RewardPulses;
-    [HideInInspector] public int TotalTouches;
-    [HideInInspector] public int Completions;
-    [HideInInspector] public int NumChosenLeft;
-    [HideInInspector] public int NumChosenRight;
-    [HideInInspector] public int NumHigherEffortChosen;
-    [HideInInspector] public int NumLowerEffortChosen;
-    [HideInInspector] public int NumHigherRewardChosen;
-    [HideInInspector] public int NumLowerRewardChosen;
+    //Block specific Data variables:
+    [HideInInspector] public int RewardPulses_Block;
+    [HideInInspector] public int TotalTouches_Block;
+    [HideInInspector] public int Completions_Block;
+    [HideInInspector] public int NumChosenLeft_Block;
+    [HideInInspector] public int NumChosenRight_Block;
+    [HideInInspector] public int NumHigherEffortChosen_Block;
+    [HideInInspector] public int NumLowerEffortChosen_Block;
+    [HideInInspector] public int NumHigherRewardChosen_Block;
+    [HideInInspector] public int NumLowerRewardChosen_Block;
 
     [HideInInspector] public ConfigNumber scalingInterval, inflateDuration, itiDuration, popToFeedbackDelay; //ScalingInterval is used for balloonInflation!
 
@@ -123,10 +124,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         if(AudioFBController != null)
             InflateClipDuration = AudioFBController.GetClip("EC_Inflate").length;
-
-        MaxOutline_Left = new GameObject();
-        MaxOutline_Right = new GameObject();
-
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
@@ -192,6 +189,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             CreateBalloonOutlines(currentTrial.NumClicksRight, RightScaleUpAmount, currentTrial.ClicksPerOutline, StimRight.transform.position, BalloonContainerRight);
             CreateRewards(currentTrial.NumCoinsLeft, RewardContainerLeft.transform.position, RewardContainerLeft);
             CreateRewards(currentTrial.NumCoinsRight, RewardContainerRight.transform.position, RewardContainerRight);
+
             CreateTransparentBalloons();
         });
 
@@ -347,7 +345,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         InflateBalloon.AddDefaultTerminationMethod(() =>
         {
             //add trial touches to total touches:
-            TotalTouches += currentTrial.Touches;
+            TotalTouches_Block += currentTrial.Touches;
 
             if (SideChoice == "Left")
                 MaxOutline_Left.transform.parent = BalloonContainerLeft.transform;
@@ -401,7 +399,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
                 }
 
-                Completions++;
+                Completions_Block++;
                 AddTokenInflateAudioPlayed = true;
             }
             else
@@ -419,52 +417,56 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
 
         //ITI state -------------------------------------------------------------------------------------------------------
-        ITI.AddInitializationMethod(() =>
-        {
-            if (TrialStim != null && TrialStim.activeInHierarchy)
-                TrialStim.SetActive(false);
-           
-            if (MiddleBarrier.activeInHierarchy)
-                MiddleBarrier.SetActive(false);
-
-            DestroyChildren(BalloonContainerLeft);
-            DestroyChildren(BalloonContainerRight);
-            DestroyChildren(RewardContainerLeft);
-            DestroyChildren(RewardContainerRight);
-
-            currentTask.CalculateBlockSummaryString();
-            ClearTrialSummaryString();
-        });
-        ITI.AddTimer(itiDuration.value, FinishTrial, () =>
-        {
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]); //next trial starts next frame
-        });
-
+        ITI.AddTimer(itiDuration.value, FinishTrial, () => EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]));
+        
         LogTrialData();
         LogFrameData();
     }
 
     //HELPER FUNCTIONS -------------------------------------------------------------------------------------------------------
-    public override void ResetGlobalTrialLevelVariables() //for reset block hotkey
+    public override void FinishTrialCleanup() //called automatically at start of FinishTrial state
     {
-        //Clear trial summary string and block summary string:
+        if (TrialStim != null && TrialStim.activeInHierarchy)
+            TrialStim.SetActive(false);
+
+        if (MiddleBarrier.activeInHierarchy)
+            MiddleBarrier.SetActive(false);
+
+        if (BalloonContainerLeft != null)
+            DestroyChildren(BalloonContainerLeft);
+        if (BalloonContainerRight != null)
+            DestroyChildren(BalloonContainerRight);
+        if (RewardContainerLeft != null)
+            DestroyChildren(RewardContainerLeft);
+        if (RewardContainerRight != null)
+            DestroyChildren(RewardContainerRight);
+
+        Destroy(MaxOutline_Right);
+        Destroy(MaxOutline_Left);
+
+        if(AbortCode == 0) //Normal
+            currentTask.CalculateBlockSummaryString();
+
+        if (AbortCode == 2) //If Restarted Block
+        {
+            currentTask.ClearStrings();
+            currentTask.BlockSummaryString.AppendLine("");
+        }
+
         ClearTrialSummaryString();
-        currentTask.ClearStrings();
-        currentTask.BlockSummaryString.AppendLine("");
+    }
 
-        //Reset Trial level variables:
-        Completions = 0;
-        NumChosenLeft = 0;
-        NumChosenRight = 0;
-        NumHigherRewardChosen = 0;
-        NumLowerRewardChosen = 0;
-        NumHigherEffortChosen = 0;
-        NumLowerEffortChosen = 0;
-        TotalTouches = 0;
-        RewardPulses = 0;
-
-        DestroyChildren(BalloonContainerLeft);
-        DestroyChildren(BalloonContainerRight);
+    public void ResetBlockVariables()
+    {
+        Completions_Block = 0;
+        NumChosenLeft_Block = 0;
+        NumChosenRight_Block = 0;
+        NumHigherRewardChosen_Block = 0;
+        NumLowerRewardChosen_Block = 0;
+        NumHigherEffortChosen_Block = 0;
+        NumLowerEffortChosen_Block = 0;
+        TotalTouches_Block = 0;
+        RewardPulses_Block = 0;
     }
 
     void ScaleToNextInterval()
@@ -511,26 +513,26 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     {
         if(SideChoice == "Left")
         {
-            NumChosenLeft++;
+            NumChosenLeft_Block++;
             EffortChoice = (currentTrial.NumClicksLeft > currentTrial.NumClicksRight ? "Higher" : "Lower");
             RewardChoice = (currentTrial.NumCoinsLeft > currentTrial.NumCoinsRight ? "Higher" : "Lower");
         }
         else
         {
-            NumChosenRight++;
+            NumChosenRight_Block++;
             EffortChoice = (currentTrial.NumClicksLeft > currentTrial.NumClicksRight ? "Lower" : "Higher");
             RewardChoice = (currentTrial.NumCoinsLeft > currentTrial.NumCoinsRight ? "Lower" : "Higher");
         }
 
         if (EffortChoice == "Higher")
-            NumHigherEffortChosen++;
+            NumHigherEffortChosen_Block++;
         else
-            NumLowerEffortChosen++;
+            NumLowerEffortChosen_Block++;
 
         if (RewardChoice == "Higher")
-            NumHigherRewardChosen++;
+            NumHigherRewardChosen_Block++;
         else
-            NumLowerRewardChosen++;
+            NumLowerRewardChosen_Block++;
     }
 
     void SetTokenVariables()
@@ -579,12 +581,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if (SideChoice == "Left")
         {
             SyncBoxController.SendRewardPulses(currentTrial.NumPulsesLeft, currentTrial.PulseSizeLeft);
-            RewardPulses += currentTrial.NumPulsesLeft;
+            RewardPulses_Block += currentTrial.NumPulsesLeft;
         }
         else
         {
             SyncBoxController.SendRewardPulses(currentTrial.NumPulsesRight, currentTrial.PulseSizeRight);
-            RewardPulses += currentTrial.NumPulsesRight;
+            RewardPulses_Block += currentTrial.NumPulsesRight;
         }
     }
 

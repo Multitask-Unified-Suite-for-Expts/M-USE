@@ -403,10 +403,17 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         Feedback.AddTimer(() => currentTrial.FbDuration, ITI);
 
         //ITI state ---------------------------------------------------------------------------------------------------------------------------------
-        ITI.AddInitializationMethod(() =>
+        ITI.AddUpdateMethod(() =>
+        {
+            if(InputBroker.GetMouseButtonUp(0))
+                ItiTouches_Trial++;
+        });
+        ITI.AddTimer(() => currentTrial.ItiDuration, FinishTrial);
+
+        //FinishTrial State (default state) ---------------------------------------------------------------------------------------------------------------------------------
+        FinishTrial.AddInitializationMethod(() =>
         {
             SquareGO.SetActive(false);
-
             ConfigVariablesLoaded = false;
 
             if (GiveReleaseReward || GiveTouchReward)
@@ -417,12 +424,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             else
                 TrialCompletionList.Insert(0, 0);
         });
-        ITI.AddUpdateMethod(() =>
-        {
-            if(InputBroker.GetMouseButtonUp(0))
-                ItiTouches_Trial++;
-        });
-        ITI.AddTimer(() => currentTrial.ItiDuration, FinishTrial, () =>
+        FinishTrial.AddUniversalTerminationMethod(() =>
         {
             AddTrialTouchNumsToBlock();
             TrialsCompleted_Block++;
@@ -431,7 +433,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             CheckIfBlockShouldEnd();
         });
-
         LogTrialData();
         LogFrameData();
     }

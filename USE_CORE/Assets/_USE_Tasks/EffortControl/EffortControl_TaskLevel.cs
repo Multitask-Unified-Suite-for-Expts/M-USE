@@ -15,6 +15,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 {
     [HideInInspector] public string ContextName;
 
+    //Task Values used for SummaryData file
     [HideInInspector] public int Completions_Task = 0;
     [HideInInspector] public int RewardPulses_Task = 0;
     [HideInInspector] public int Touches_Task = 0;
@@ -26,8 +27,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int NumChosenLowerEffort_Task = 0;
 
     [HideInInspector] public string CurrentBlockString;
-    //[HideInInspector] public StringBuilder PreviousBlocksString;
-    //[HideInInspector] public int BlockStringsAdded = 0;
 
     EffortControl_BlockDef currentBlock => GetCurrentBlockDef<EffortControl_BlockDef>();
     EffortControl_TrialLevel trialLevel;
@@ -55,9 +54,14 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(trialLevel.MaterialFilePath, ContextName, "LinearDark"));
         });
 
+        RunBlock.AddInitializationMethod(() =>
+        {
+            trialLevel.ResetBlockVariables();
+        });
+
         BlockFeedback.AddInitializationMethod(() =>
         {
-            AddTrialValuesToTaskValues();
+            AddBlockValuesToTaskValues();
         });
     }
 
@@ -95,17 +99,17 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
     }
 
-    public void AddTrialValuesToTaskValues()
+    public void AddBlockValuesToTaskValues()
     {
-        RewardPulses_Task += trialLevel.RewardPulses;
-        Completions_Task += trialLevel.Completions;
-        Touches_Task += trialLevel.TotalTouches;
-        NumChosenLeft_Task += trialLevel.NumChosenLeft;
-        NumChosenRight_Task += trialLevel.NumChosenRight;
-        NumChosenHigherEffort_Task += trialLevel.NumHigherEffortChosen;
-        NumChosenLowerEffort_Task += trialLevel.NumLowerEffortChosen;
-        NumChosenHigherReward_Task += trialLevel.NumHigherRewardChosen;
-        NumChosenLowerReward_Task += trialLevel.NumLowerRewardChosen;
+        RewardPulses_Task += trialLevel.RewardPulses_Block;
+        Completions_Task += trialLevel.Completions_Block;
+        Touches_Task += trialLevel.TotalTouches_Block;
+        NumChosenLeft_Task += trialLevel.NumChosenLeft_Block;
+        NumChosenRight_Task += trialLevel.NumChosenRight_Block;
+        NumChosenHigherEffort_Task += trialLevel.NumHigherEffortChosen_Block;
+        NumChosenLowerEffort_Task += trialLevel.NumLowerEffortChosen_Block;
+        NumChosenHigherReward_Task += trialLevel.NumHigherRewardChosen_Block;
+        NumChosenLowerReward_Task += trialLevel.NumLowerRewardChosen_Block;
     }
 
     public override OrderedDictionary GetSummaryData()
@@ -129,30 +133,30 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     {
         ClearStrings();
 
-        CurrentBlockString = ("\nTrialsCompleted: " + trialLevel.Completions +
-                        "\nTouches: " + trialLevel.TotalTouches +
-                        "\nRewardPulses: " + trialLevel.RewardPulses +
-                        "\nChoseLeft: " + trialLevel.NumChosenLeft +
-                        "\nChoseRight: " + trialLevel.NumChosenRight +
-                        "\nChoseHigherReward: " + trialLevel.NumHigherRewardChosen +
-                        "\nChoseLowerReward: " + trialLevel.NumLowerRewardChosen +
-                        "\nChoseHigherEffort: " + trialLevel.NumHigherEffortChosen +
-                        "\nChoseLowerEffort: " + trialLevel.NumLowerEffortChosen +
+        CurrentBlockString = ("\nTrialsCompleted: " + trialLevel.Completions_Block +
+                        "\nTouches: " + trialLevel.TotalTouches_Block +
+                        "\nRewardPulses: " + trialLevel.RewardPulses_Block +
+                        "\nChoseLeft: " + trialLevel.NumChosenLeft_Block +
+                        "\nChoseRight: " + trialLevel.NumChosenRight_Block +
+                        "\nChoseHigherReward: " + trialLevel.NumHigherRewardChosen_Block +
+                        "\nChoseLowerReward: " + trialLevel.NumLowerRewardChosen_Block +
+                        "\nChoseHigherEffort: " + trialLevel.NumHigherEffortChosen_Block +
+                        "\nChoseLowerEffort: " + trialLevel.NumLowerEffortChosen_Block +
                         "\n");
         BlockSummaryString.AppendLine(CurrentBlockString).ToString();
     }
 
     void SetupBlockData()
     {
-        BlockData.AddDatum("TrialsCompleted", () => trialLevel.Completions);
-        BlockData.AddDatum("ChoseLeft", () => trialLevel.NumChosenLeft);
-        BlockData.AddDatum("ChoseRight", () => trialLevel.NumChosenRight);
-        BlockData.AddDatum("ChoseHigherReward", () => trialLevel.NumHigherRewardChosen);
-        BlockData.AddDatum("ChoseLowerReward", () => trialLevel.NumLowerRewardChosen);
-        BlockData.AddDatum("ChoseHigherEffort", () => trialLevel.NumHigherEffortChosen);
-        BlockData.AddDatum("ChoseLowerEffort", () => trialLevel.NumLowerEffortChosen);
-        BlockData.AddDatum("TotalTouches", () => trialLevel.TotalTouches);
-        BlockData.AddDatum("RewardPulses", () => trialLevel.RewardPulses);
+        BlockData.AddDatum("TrialsCompleted", () => trialLevel.Completions_Block);
+        BlockData.AddDatum("ChoseLeft", () => trialLevel.NumChosenLeft_Block);
+        BlockData.AddDatum("ChoseRight", () => trialLevel.NumChosenRight_Block);
+        BlockData.AddDatum("ChoseHigherReward", () => trialLevel.NumHigherRewardChosen_Block);
+        BlockData.AddDatum("ChoseLowerReward", () => trialLevel.NumLowerRewardChosen_Block);
+        BlockData.AddDatum("ChoseHigherEffort", () => trialLevel.NumHigherEffortChosen_Block);
+        BlockData.AddDatum("ChoseLowerEffort", () => trialLevel.NumLowerEffortChosen_Block);
+        BlockData.AddDatum("TotalTouches", () => trialLevel.TotalTouches_Block);
+        BlockData.AddDatum("RewardPulses", () => trialLevel.RewardPulses_Block);
     }
 
     public void ClearStrings()

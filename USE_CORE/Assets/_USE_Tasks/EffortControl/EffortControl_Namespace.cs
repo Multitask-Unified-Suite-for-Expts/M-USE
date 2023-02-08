@@ -11,51 +11,10 @@ namespace EffortControl_Namespace
 {
     public class EffortControl_TaskDef : TaskDef
     {
-        //Already-existing fields (inherited from TaskDef)      
-        //public DateTime TaskStart_DateTime;
-        //public int TaskStart_Frame;
-        //public float TaskStart_UnityTime;
-        //public string TaskName;
-        //public string ExternalStimFolderPath;
-        //public string PrefabStimFolderPath;
-        //public string ExternalStimExtension;
-        //public List<string[]> FeatureNames;
-        //public string neutralPatternedColorName;
-        //public float? ExternalStimScale;
     }
 
     public class EffortControl_BlockDef : BlockDef
     {
-        //public string BlockName;
-        //public int NumTrials;
-        //public int NumClicksLeft;
-        //public int NumClicksRight;
-        //public int NumCoinsLeft;
-        //public int NumCoinsRight;
-        //public int NumPulsesLeft;
-        //public int NumPulsesRight;
-        //public int PulseSizeLeft;
-        //public int PulseSizeRight;
-        //public int ClicksPerOutline;
-
-        //public override void GenerateTrialDefsFromBlockDef()
-        //{
-        //    TrialDefs = new List<EffortControl_TrialDef>().ConvertAll(x => (TrialDef)x);
-        //    for(int i = 0; i < NumTrials; i++)
-        //    {
-        //        EffortControl_TrialDef trial = new EffortControl_TrialDef();
-        //        trial.NumClicksLeft = NumClicksLeft;
-        //        trial.NumClicksRight = NumClicksRight;
-        //        trial.NumCoinsLeft = NumCoinsLeft;
-        //        trial.NumCoinsRight = NumCoinsRight;
-        //        trial.ClicksPerOutline = ClicksPerOutline;
-        //        trial.NumPulsesLeft = NumPulsesLeft;
-        //        trial.NumPulsesRight = NumPulsesRight;
-        //        trial.PulseSizeLeft = PulseSizeLeft;
-        //        trial.PulseSizeRight = PulseSizeRight;
-        //        TrialDefs.Add(trial);
-        //    }
-        //}
     }
 
     public class EffortControl_TrialDef : TrialDef

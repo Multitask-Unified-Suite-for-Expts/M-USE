@@ -196,34 +196,10 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.R),
                 hotKeyAction = () =>
                 {
-                    string taskName = HkPanel.TaskLevel.TaskName;
-                    List<string> dontDisable = new List<string>() { taskName + "_Camera", taskName + "_Scripts", taskName + "_DirectionalLight" };
-
-                    GameObject[] sceneKids = SceneManager.GetSceneByName(taskName).GetRootGameObjects();
-                    foreach (GameObject kid in sceneKids)
-                        if (!dontDisable.Contains(kid.name) && kid.activeSelf)
-                            kid.SetActive(false);
-                        
-                    int nStimGroups = HkPanel.TrialLevel.TrialStims.Count;
-                    if(nStimGroups > 0)
-                        for (int iG = 0; iG < nStimGroups; iG++)
-                        {
-                            HkPanel.TrialLevel.TrialStims[0].DestroyStimGroup();
-                            HkPanel.TrialLevel.TrialStims.RemoveAt(0);
-                        }
-
-                    if (HkPanel.TrialLevel.TokenFBController.isActiveAndEnabled)
-                        HkPanel.TrialLevel.TokenFBController.enabled = false;
-
-                    if (HkPanel.TrialLevel.TokenFBController != null)
-                        HkPanel.TrialLevel.TokenFBController.SetTokenBarValue(HkPanel.TrialLevel.InitialTokenAmount);
-
-                    if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
-                        HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
-
-                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("SetupTrial"));
-                    HkPanel.TrialLevel.ResetGlobalTrialLevelVariables();
-                    HkPanel.TrialLevel.TrialCount_InBlock = -1;
+                    HkPanel.TrialLevel.AbortCode = 2;
+                    HkPanel.TrialLevel.ForceBlockEnd = true;
+                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+                    HkPanel.TaskLevel.BlockCount--;
                 }
             };
             HotKeyList.Add(restartBlock);
@@ -243,9 +219,10 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             //        }
             //        else
             //        {
+            //            HkPanel.TrialLevel.AbortCode = 4;
+            //            HkPanel.TrialLevel.ForceBlockEnd = true;
             //            HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
             //            HkPanel.TaskLevel.BlockCount -= 2;
-            //            HkPanel.TrialLevel.TrialCount_InBlock = 0;
             //        }
             //    }
             //};
@@ -259,11 +236,12 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.N),
                 hotKeyAction = () =>
                 {
+                    HkPanel.TrialLevel.AbortCode = 3;
                     HkPanel.TrialLevel.ForceBlockEnd = true;
-                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI"));
+                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
                     if (HkPanel.TrialLevel.TokenFBController != null)
-                        HkPanel.TrialLevel.TokenFBController.SetTokenBarValue(HkPanel.TrialLevel.InitialTokenAmount);
-                    HkPanel.TrialLevel.ResetGlobalTrialLevelVariables();
+                        HkPanel.TrialLevel.TokenFBController.SetTokenBarValue(HkPanel.TrialLevel.InitialTokenAmount); //may not need anymore
+                    //HkPanel.TrialLevel.ResetGlobalTrialLevelVariables(); //change to FinishTrialCleanup (may not need anymore)
                 }
             };
             HotKeyList.Add(endBlock);
@@ -308,25 +286,17 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 {
                     if (!HkPanel.TrialLevel.Paused) 
                     {
-                        //Go to end of trial:
-                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI"));
+                        HkPanel.SessionLevel.PauseCanvasGO.SetActive(true);
+                        HkPanel.TrialLevel.AbortCode = 1;
 
-                        int trialsInBlock = HkPanel.TaskLevel.currentBlockDef.TrialDefs.Count;
-                        int trialCountInBlock = HkPanel.TrialLevel.TrialCount_InBlock;
-                        //If more trials in current block, end the block:
-                        if (trialsInBlock > 1 && trialCountInBlock + 1 < trialsInBlock)
-                            HkPanel.TrialLevel.ForceBlockEnd = true;
+                        //Go to end of trial:
+                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial")); //Finish Trial change to
 
                         //Deactivate Controllers (so that tokenbar not still on screen):
                         GameObject controllers = GameObject.Find("Controllers");
                         if (controllers != null)
                             controllers.SetActive(false);
 
-                        //Turn gray pause screen on:
-                        HkPanel.SessionLevel.PauseCanvasGO.SetActive(true);
-                        //Send abort code: 
-                        HkPanel.TrialLevel.AbortCode = 1;
-                        //Pause Trial Level
                         HkPanel.TrialLevel.Paused = true;
                     }
                     else

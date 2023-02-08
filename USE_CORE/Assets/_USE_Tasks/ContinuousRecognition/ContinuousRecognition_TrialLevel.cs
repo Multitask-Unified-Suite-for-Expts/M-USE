@@ -222,7 +222,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         DisplayStims.AddTimer(() => displayStimDuration.value, ChooseStim, () => TimeRemaining = chooseStimDuration.value);
 
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
-
         MouseTracker.AddSelectionHandler(mouseHandler, ChooseStim);
 
         ChooseStim.AddInitializationMethod(() =>
@@ -446,27 +445,50 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
         });
-            
 
         //ITI State----------------------------------------------------------------------------------------------------------------------
+        ITI.AddTimer(() => itiDuration.value, FinishTrial);
 
-        ITI.AddInitializationMethod(() => ContextActive = false);
-        ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
+        //FinishTrial State (default state) ----------------------------------------------------------------------------------------------------------------------
+        FinishTrial.AddInitializationMethod(() =>
         {
-            NumTrials_Block++;
-            currentTask.CalculateBlockSummaryString();
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]); //next trial starts next frame
-
-            DeactivateTextObjects();
-            DestroyFeedbackBorders();
+            if(AbortCode == 0)
+            {
+                NumTrials_Block++;
+                currentTask.CalculateBlockSummaryString();
+            }
+            else if (AbortCode == 1)
+                EndBlock = true;
         });
-        
         LogTrialData();
         LogFrameData();
     }
 
 
     //HELPER FUNCTIONS -----------------------------------------------------------------------------------------
+    public override void FinishTrialCleanup()
+    {
+        DeactivateTextObjects();
+        DestroyFeedbackBorders();
+        ContextActive = false;
+        EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]); //next trial starts next frame
+    }
+
+    public void ResetBlockVariables()
+    {
+        AdjustedPositionsForMac = false;
+        ChosenStimIndices.Clear();
+        NonStimTouches_Block = 0;
+        NumTrials_Block = 0;
+        NumCorrect_Block = 0;
+        NumTbCompletions_Block = 0;
+        TimeToChoice_Block.Clear();
+        AvgTimeToChoice_Block = 0;
+        TimeToCompletion_Block = 0;
+        NumRewards_Block = 0;
+        Score = 0;
+    }
+
     void RemoveShakeStimScript(StimGroup stimGroup)
     {
         foreach (var stim in stimGroup.stimDefs)
@@ -510,23 +532,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 stim.StimGameObject.transform.localScale *= 1.35f;
         }
     } //can use to make game easier if need to debug. 
-
-
-    public override void ResetGlobalTrialLevelVariables()
-    {
-        AdjustedPositionsForMac = false;
-
-        ChosenStimIndices.Clear();
-        NonStimTouches_Block = 0;
-        NumTrials_Block = 0;
-        NumCorrect_Block = 0;
-        NumTbCompletions_Block = 0;
-        TimeToChoice_Block.Clear();
-        AvgTimeToChoice_Block = 0;
-        TimeToCompletion_Block = 0;
-        NumRewards_Block = 0;
-        Score = 0;
-    }
 
     void AdjustStartButtonPos()
     {
@@ -601,7 +606,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     void SetTrialSummaryString()
     {
-        TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) +
+        TrialSummaryString = "\nTrial #" + (TrialCount_InBlock + 1) +
                              "\nPC_Stim: " + currentTrial.PC_Stim.Count +
                              "\nNew_Stim: " + currentTrial.New_Stim.Count +
                              "\nPNC_Stim: " + currentTrial.PNC_Stim.Count +

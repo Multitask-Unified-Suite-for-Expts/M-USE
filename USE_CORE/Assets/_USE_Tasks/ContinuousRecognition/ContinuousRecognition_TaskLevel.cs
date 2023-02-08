@@ -71,30 +71,37 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.ContextActive = true;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
 
-            trialLevel.InitialTokenAmount = currentBlock.InitialTokenAmount;
+            trialLevel.InitialTokenAmount = currentBlock.InitialTokenAmount; //maybe geet riud of?
 
-            trialLevel.ResetGlobalTrialLevelVariables();
+            trialLevel.ResetBlockVariables(); //prob wont need once change restart block hotkey
 
             CalculateBlockSummaryString();
         });
 
         BlockFeedback.AddInitializationMethod(() =>
         {
-            if(BlockCount > 0) CurrentBlockString += "\n";
-            PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
+            CurrentBlockString += "\n";
 
-            NonStimTouches_Task.Add(trialLevel.NonStimTouches_Block);
-            TrialsCompleted_Task.Add(trialLevel.NumTrials_Block);
-            TrialsCorrect_Task.Add(trialLevel.NumCorrect_Block); //at end of each block, add block's NumCorrect to task List;
-            TokenBarCompletions_Task.Add(trialLevel.NumTbCompletions_Block);
-            TimeToChoice_Task.Add(trialLevel.AvgTimeToChoice_Block);
-            TimeToCompletion_Task.Add(trialLevel.TimeToCompletion_Block);
-            TotalRewards_Task.Add(trialLevel.NumRewards_Block);
+            if(trialLevel.AbortCode == 0)
+                PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
+            
+            AddBlockValuesToTaskValues();
 
             CalculateBlockAverages();
             CalculateStanDev();
         });
         
+    }
+
+    public void AddBlockValuesToTaskValues()
+    {
+        NonStimTouches_Task.Add(trialLevel.NonStimTouches_Block);
+        TrialsCompleted_Task.Add(trialLevel.NumTrials_Block);
+        TrialsCorrect_Task.Add(trialLevel.NumCorrect_Block); //at end of each block, add block's NumCorrect to task List;
+        TokenBarCompletions_Task.Add(trialLevel.NumTbCompletions_Block);
+        TimeToChoice_Task.Add(trialLevel.AvgTimeToChoice_Block);
+        TimeToCompletion_Task.Add(trialLevel.TimeToCompletion_Block);
+        TotalRewards_Task.Add(trialLevel.NumRewards_Block);
     }
 
     public void SetSettings()
@@ -155,20 +162,21 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     {
         ClearStrings();
 
-        if (BlockCount > 0)
+        if (BlockCount > 1)
         {
-            BlockAveragesString = "<b>Block Averages " + $"({BlockCount});" + "</b>" +
+            BlockAveragesString = "<b>Block Averages " + $"({BlockCount} blocks);" + "</b>" +
                               "\nAvg Correct: " + AvgNumCorrect.ToString("0.00") +
                               "\nAvg TbCompletions: " + AvgNumTbCompletions.ToString("0.00") +
                               "\nAvg TimeToChoice: " + AvgTimeToChoice.ToString("0.00") + "s" +
                               "\nAvg TimeToCompletion: " + AvgTimeToCompletion.ToString("0.00") + "s" +
                               "\nAvg Rewards: " + AvgNumRewards.ToString("0.00") +
                               "\nAvg NonStimTouches: " + AvgNonStimTouches_Task.ToString("0.00") +
-                              "\nStandard Deviation: " + StanDev.ToString("0.00") +
-                              "\n";
+                              "\nStandard Deviation: " + StanDev.ToString("0.00");
+
+            BlockSummaryString.AppendLine(BlockAveragesString.ToString());
         }
 
-        CurrentBlockString = "Block " + "#" + (BlockCount + 1) +
+        CurrentBlockString = "\nBlock " + "#" + (BlockCount + 1) +
                         "\nCorrect: " + trialLevel.NumCorrect_Block +
                         "\nTbCompletions: " + trialLevel.NumTbCompletions_Block +
                         "\nAvgTimeToChoice: " + trialLevel.AvgTimeToChoice_Block.ToString("0.00") + "s" +
@@ -176,13 +184,9 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
                         "\nRewards: " + trialLevel.NumRewards_Block +
                         "\nNonStimTouches: " + trialLevel.NonStimTouches_Block;
 
-        if (BlockCount > 0)
-        {
-            CurrentBlockString += "\n";
-            BlockSummaryString.AppendLine(BlockAveragesString.ToString());
-        }
+        if(trialLevel.AbortCode == 0)
+            BlockSummaryString.AppendLine(CurrentBlockString.ToString());
 
-        BlockSummaryString.AppendLine(CurrentBlockString.ToString());
 
         if(PreviousBlocksString.Length > 0)
             BlockSummaryString.AppendLine(PreviousBlocksString.ToString());

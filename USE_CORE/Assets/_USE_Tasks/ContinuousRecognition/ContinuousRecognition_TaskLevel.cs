@@ -71,9 +71,9 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.ContextActive = true;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
 
-            trialLevel.InitialTokenAmount = currentBlock.InitialTokenAmount; //maybe geet riud of?
+            trialLevel.InitialTokenAmount = currentBlock.InitialTokenAmount;
 
-            trialLevel.ResetBlockVariables(); //prob wont need once change restart block hotkey
+            trialLevel.ResetBlockVariables();
 
             CalculateBlockSummaryString();
         });
@@ -162,7 +162,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     {
         ClearStrings();
 
-        if (BlockCount > 1)
+        if (BlockCount > 1) //If atleast 2 blocks to average, set Averages string and add to BlockSummaryString:
         {
             BlockAveragesString = "<b>Block Averages " + $"({BlockCount} blocks);" + "</b>" +
                               "\nAvg Correct: " + AvgNumCorrect.ToString("0.00") +
@@ -184,10 +184,11 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
                         "\nRewards: " + trialLevel.NumRewards_Block +
                         "\nNonStimTouches: " + trialLevel.NonStimTouches_Block;
 
+        //Add CurrentBlockString if block wasn't aborted:
         if(trialLevel.AbortCode == 0)
             BlockSummaryString.AppendLine(CurrentBlockString.ToString());
 
-
+        //Add Previous blocks string:
         if(PreviousBlocksString.Length > 0)
             BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
     }

@@ -165,12 +165,12 @@ namespace MazeGame_Namespace
 
     public class MazeDef
     {
-        
-        public int mNumSquares;
-        public int mNumTurns;
-        public int mTotalSquares;
-        public string mName;
         public Vector2 mDims;
-        public string fileName;
+        public int mNumTurns;
+        public int mNumSquares;
+        public Vector2 mStart;
+        public Vector2 mEnd;
+        public string mName;
+        
     }
 }

@@ -54,17 +54,15 @@ public class Tile : MonoBehaviour
         switch (code)
         {
             case 0:
-                // CORRECT DEFAULT
-                //gameObject.GetComponent<Renderer>().material.color = gameConfigs.CORRECT_COLOR);
+                // CORRECT AND FINISH
                 gameObject.GetComponent<Renderer>().material.color = CORRECT_COLOR;
                 yield return new WaitForSeconds(CORRECT_FEEDBACK_SECONDS);
                 if (!MazeGame_TrialLevel.viewPath)
                 {
-                    gameObject.GetComponent<Renderer>().material.color = DEFAULT_TILE_COLOR;
+                    gameObject.GetComponent<Renderer>().material.color = FINISH_COLOR;
                 }
-
-
                 break;
+            
             case 1:
                 // CORRECT and START
                 gameObject.GetComponent<Renderer>().material.color = CORRECT_COLOR;
@@ -73,9 +71,19 @@ public class Tile : MonoBehaviour
                 {
                     gameObject.GetComponent<Renderer>().material.color = START_COLOR;
                 }
-
                 break;
+            
             case 2:
+                // DEFAULT CORRECT
+                gameObject.GetComponent<Renderer>().material.color = CORRECT_COLOR;
+                yield return new WaitForSeconds(CORRECT_FEEDBACK_SECONDS);
+                if (!MazeGame_TrialLevel.viewPath)
+                {
+                    gameObject.GetComponent<Renderer>().material.color = DEFAULT_TILE_COLOR;
+                }
+                break;
+            
+            case 3:
                 // RULE-BREAKING BACKTRACK
                 gameObject.GetComponent<Renderer>().material.color = INCORRECT_RULEBREAKING_COLOR;
                 yield return new WaitForSeconds(INCORRECT_RULEBREAKING_SECONDS);
@@ -89,7 +97,7 @@ public class Tile : MonoBehaviour
                 }
                 
                 break;
-            case 3:
+            case 4:
                 // RULE-BREAKING INCORRECT DEFAULT or NOT START
                 gameObject.GetComponent<Renderer>().material.color = INCORRECT_RULEBREAKING_COLOR;
                 yield return new WaitForSeconds(INCORRECT_RULEBREAKING_SECONDS);

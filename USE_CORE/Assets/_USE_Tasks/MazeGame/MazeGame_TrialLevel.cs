@@ -305,7 +305,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         Debug.Log("TEXT MAZE: " + textMaze[0]);
         currMaze = new Maze(textMaze[0]);
         Debug.Log("CURRENT MAZE NAME: " + mazeDefName);
+        Debug.Log("CURRENT MAZE PATH: " + currMaze.mPath);
         Debug.Log("CURRENT MAZE DIMENSIONS: " + currMaze.mDims);
+        Debug.Log("MAZE X: " + currMaze.mDims.x);
+        Debug.Log("CURRENT MAZE START: " + currMaze.mStart);
+        Debug.Log("CURRENT MAZE END: " + currMaze.mFinish);
         Debug.Log("CURRENT MAZE NUM TURNS: " + currMaze.mNumTurns);
         Debug.Log("CURRENT MAZE NUM SQUARES: " + currMaze.mNumSquares);
         sliderValueChange = (100f / (currMaze.mNumSquares))/100f ;
@@ -404,22 +408,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     }
 
 
-    // ManageTileTouch - Returns correctness code
-    // Return values:
-    // 0 - correct and regular tile
-    // 1 - correct and start tile
-    // 2 - rule-breaking incorrect
-    // 3 - rule-breaking backtrack
-    // 99 - correct and finish (maze is complete)
 
-    // 30 - previous correct tile
-    // 31 - previous correct tile and start
-
-    // 10 - rule-abiding incorrect
-    // 12 - rule-abiding incorrect and finish
-    
-    // 21 - rule-breaking incorrect and start
-    // 22 - rule-breaking incorrect and finish
     public static int ManageTileTouch(Tile tile)
     {
         Coords touchedCoord = tile.mCoord;
@@ -428,6 +417,47 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         Debug.Log("CURRMAZE START: " + currMaze.mStart);
         Debug.Log("CURRMAZE FINISH: " + currMaze.mFinish);
         Debug.Log("CURRMAZE FINISH: " + currMaze.mPath);*/
+        
+        // CORRECT TILE TOUCH (then narrow down if its is start, finish, or other)
+        if (touchedCoord == currMaze.mNextStep)
+        {
+            Debug.Log("correct");
+            correctTouches++;
+            CorrectSelection = true;
+            fbDuration = tile.CORRECT_FEEDBACK_SECONDS;
+            
+            if (touchedCoord == currMaze.mFinish) return 0; // Finished the Maze
+            
+            // Sets the NextStep if the maze isn't finished
+            currMaze.mNextStep = currMaze.mPath[currMaze.mPath.FindIndex(pathCoord => pathCoord == touchedCoord) + 1];
+            if (touchedCoord == currMaze.mStart) return 1; // Started the Maze
+            return 2; // Regular correct choice along path
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        // ManageTileTouch - Returns correctness code
+        // Return values:
+        // 0 - correct and regular tile
+        // 1 - correct and start tile
+        // 2 - rule-breaking incorrect
+        // 3 - rule-breaking backtrack
+        // 99 - correct and finish (maze is complete)
+
+        // 30 - previous correct tile
+        // 31 - previous correct tile and start
+
+        // 10 - rule-abiding incorrect
+        // 12 - rule-abiding incorrect and finish
+    
+        // 21 - rule-breaking incorrect and start
+        // 22 - rule-breaking incorrect and finish
+        
         // CORRECT DEFAULT
         if (touchedCoord == currMaze.mNextStep && touchedCoord != currMaze.mStart && touchedCoord != currMaze.mFinish)
         {

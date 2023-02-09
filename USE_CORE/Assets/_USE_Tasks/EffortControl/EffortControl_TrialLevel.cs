@@ -785,7 +785,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void SetTrialSummaryString()
     {
-        TrialSummaryString = ("\nTouches: " + currentTrial.Touches +
+        TrialSummaryString = ("<b>Trial Info:</b>" +
+                            "\nTouches: " + currentTrial.Touches +
                             "\nSide Chosen: " + SideChoice +
                             "\nReward Chosen: " + RewardChoice +
                             "\nEffort Chosen: " + EffortChoice);

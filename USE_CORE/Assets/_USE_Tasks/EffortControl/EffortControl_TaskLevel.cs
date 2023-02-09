@@ -54,15 +54,9 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(trialLevel.MaterialFilePath, ContextName, "LinearDark"));
         });
 
-        RunBlock.AddInitializationMethod(() =>
-        {
-            trialLevel.ResetBlockVariables();
-        });
+        RunBlock.AddInitializationMethod(() => trialLevel.ResetBlockVariables());
 
-        BlockFeedback.AddInitializationMethod(() =>
-        {
-            AddBlockValuesToTaskValues();
-        });
+        BlockFeedback.AddInitializationMethod(() => AddBlockValuesToTaskValues());
     }
 
     public void SetSettings()
@@ -133,7 +127,8 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     {
         ClearStrings();
 
-        CurrentBlockString = ("\nTrialsCompleted: " + trialLevel.Completions_Block +
+        CurrentBlockString = ("<b>Block Info:</b>" +
+                        "\nTrialsCompleted: " + trialLevel.Completions_Block +
                         "\nTouches: " + trialLevel.TotalTouches_Block +
                         "\nRewardPulses: " + trialLevel.RewardPulses_Block +
                         "\nChoseLeft: " + trialLevel.NumChosenLeft_Block +

@@ -78,9 +78,9 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddInitializationMethod(() =>
         {
-            CurrentBlockString += "\n";
+            CurrentBlockString += "\n" + "\n";
 
-            if(trialLevel.AbortCode == 0)
+            if (trialLevel.AbortCode == 0)
                 PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
             
             AddBlockValuesToTaskValues();
@@ -169,12 +169,13 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
                               "\nAvg TimeToCompletion: " + AvgTimeToCompletion.ToString("0.00") + "s" +
                               "\nAvg Rewards: " + AvgNumRewards.ToString("0.00") +
                               "\nAvg NonStimTouches: " + AvgNonStimTouches_Task.ToString("0.00") +
-                              "\nStandard Deviation: " + StanDev.ToString("0.00");
+                              "\nStandard Deviation: " + StanDev.ToString("0.00") +
+                              "\n";
 
             BlockSummaryString.AppendLine(BlockAveragesString.ToString());
         }
 
-        CurrentBlockString = "\nBlock " + "#" + (BlockCount + 1) +
+        CurrentBlockString = "<b>Block " + "#" + (BlockCount + 1) + "</b>" +
                         "\nCorrect: " + trialLevel.NumCorrect_Block +
                         "\nTbCompletions: " + trialLevel.NumTbCompletions_Block +
                         "\nAvgTimeToChoice: " + trialLevel.AvgTimeToChoice_Block.ToString("0.00") + "s" +
@@ -188,7 +189,9 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         //Add Previous blocks string:
         if(PreviousBlocksString.Length > 0)
-            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
+        {
+            BlockSummaryString.AppendLine("\n" + PreviousBlocksString.ToString());
+        }
     }
 
     void ClearStrings()

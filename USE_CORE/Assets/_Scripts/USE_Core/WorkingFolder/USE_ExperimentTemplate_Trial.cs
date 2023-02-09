@@ -57,6 +57,8 @@ namespace USE_ExperimentTemplate_Trial
 
         [HideInInspector] public int InitialTokenAmount;
 
+        public Dictionary<string, int> AbortCodeDict;
+
 
         // Texture Variables
         [HideInInspector] public Texture2D StartButtonTexture, FBSquareTexture, HeldTooLongTexture, HeldTooShortTexture, 
@@ -84,6 +86,8 @@ namespace USE_ExperimentTemplate_Trial
 
             Cursor.visible = false;
             TokenFBController.enabled = false;
+
+            AddAbortCodeKeys();
 
             //DefineTrial();
             Add_ControlLevel_InitializationMethod(() =>
@@ -189,6 +193,26 @@ namespace USE_ExperimentTemplate_Trial
                 TrialData.AppendData();
                 TrialData.WriteData();
             }
+        }
+
+        private void AddAbortCodeKeys()
+        {
+            AbortCodeDict = new Dictionary<string, int>();
+
+            if (!AbortCodeDict.ContainsKey("Pause"))
+                AbortCodeDict.Add("Pause", 1);
+
+            if (!AbortCodeDict.ContainsKey("RestartBlock"))
+                AbortCodeDict.Add("RestartBlock", 2);
+
+            if (!AbortCodeDict.ContainsKey("EndBlock"))
+                AbortCodeDict.Add("EndBlock", 3);
+
+            if (!AbortCodeDict.ContainsKey("PreviousBlock"))
+                AbortCodeDict.Add("PreviousBlock", 4);
+
+            if (!AbortCodeDict.ContainsKey("EndTask"))
+                AbortCodeDict.Add("EndTask", 5);
         }
 
 

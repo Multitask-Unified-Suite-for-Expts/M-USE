@@ -447,7 +447,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
 
         //ITI State----------------------------------------------------------------------------------------------------------------------
-        ITI.AddTimer(() => itiDuration.value, FinishTrial);
+        ITI.AddTimer(() => itiDuration.value / 2, FinishTrial);
 
         //FinishTrial State (default state) ----------------------------------------------------------------------------------------------------------------------
         FinishTrial.AddInitializationMethod(() =>
@@ -606,12 +606,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     void SetTrialSummaryString()
     {
-        TrialSummaryString = "\nTrial #" + (TrialCount_InBlock + 1) +
+        TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + "</b>" +
                              "\nPC_Stim: " + currentTrial.PC_Stim.Count +
                              "\nNew_Stim: " + currentTrial.New_Stim.Count +
-                             "\nPNC_Stim: " + currentTrial.PNC_Stim.Count +
-                             "\n" +
-                             "\nTotal Stim: " + (currentTrial.New_Stim.Count + currentTrial.PC_Stim.Count + currentTrial.PNC_Stim.Count);
+                             "\nPNC_Stim: " + currentTrial.PNC_Stim.Count;
     }
 
     Vector3[] CenterFeedbackLocations(Vector3[] locations, int numLocations)

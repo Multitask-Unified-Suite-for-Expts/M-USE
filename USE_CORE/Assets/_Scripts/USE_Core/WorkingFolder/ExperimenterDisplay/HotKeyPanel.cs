@@ -69,7 +69,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 completeString = completeString + hk.GenerateTextDescription() + "\n";
             }
-
             Debug.Log("HotKeyDescriptions: " + completeString);
 
             return completeString;
@@ -81,7 +80,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 completeString = completeString + hk.GenerateTextDescription() + "\n";
             }
-
             // Debug.Log("ConfigUIHotKeyDescriptions: " + completeString);
 
             return completeString;
@@ -120,8 +118,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 HotKeys = CustomHotKeyList(); //allows users to specify task-specific lists - this will end up looking something like the various task-specific classes like WWW_TaskDef or whatever
                 //ConfigUIHotKeys = CustomConfigUIHotKeyList();
             }
-
-
             //GenerateTextForPanel(); //method that loops through each hotkey and creates the string to show the hotkey options, using the GenerateTextDescription function of each on
         }
 
@@ -137,8 +133,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 ConfigUIHotKeys = CustomConfigUIHotKeyList(); //allows users to specify task-specific lists - this will end up looking something like the various task-specific classes like WWW_TaskDef or whatever
 
             }
-
-
             //GenerateTextForPanel(); //method that loops through each hotkey and creates the string to show the hotkey options, using the GenerateTextDescription function of each on
         }
 
@@ -147,31 +141,31 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             List<HotKey> HotKeyList = new List<HotKey>();
 
             // Toggle Displays HotKey
-            //HotKey toggleDisplays = new HotKey
-            //{
-            //    keyDescription = "W",
-            //    actionName = "Toggle Displays",
-            //    hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.W),
-            //    hotKeyAction = () =>
-            //    {
-            //        var cams = GameObject.FindObjectsOfType<Camera>();
-            //        foreach (Camera c in cams) //MirrorCam:0, BackgroundCamera:1, CR_Cam: 0, MainCameraCopy:1 (DC)
-            //        {
-            //            Debug.Log(c.name + " before: " + c.targetDisplay);
-            //            c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-            //            Debug.Log(c.name + " after: " + c.targetDisplay);
-            //        }
-            //        var canvases = GameObject.FindObjectsOfType<Canvas>();
-            //        foreach (Canvas c in canvases) //ExperimenterCanvas: 1, TaskSelectionCanvas:0 (DC), InitScreenCanvas:1, CR_Canvas:0 (DC)
-            //        {
-            //            Debug.Log(c.name + " before: " + c.targetDisplay);
-            //            c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-            //            Debug.Log(c.name + " after: " + c.targetDisplay);
-            //        }
-            //        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-            //    }
-            //};
-            //HotKeyList.Add(toggleDisplays);
+            HotKey toggleDisplays = new HotKey
+            {
+                keyDescription = "W",
+                actionName = "Toggle Displays",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.W),
+                hotKeyAction = () =>
+                {
+                    var cams = GameObject.FindObjectsOfType<Camera>();
+                    foreach (Camera c in cams) //MirrorCam:0, BackgroundCamera:1, CR_Cam: 0, MainCameraCopy:1 (DC)
+                    {
+                        Debug.Log(c.name + " before: " + c.targetDisplay);
+                        c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
+                        Debug.Log(c.name + " after: " + c.targetDisplay);
+                    }
+                    var canvases = GameObject.FindObjectsOfType<Canvas>();
+                    foreach (Canvas c in canvases) //ExperimenterCanvas: 1, TaskSelectionCanvas:0 (DC), InitScreenCanvas:1, CR_Canvas:0 (DC)
+                    {
+                        Debug.Log(c.name + " before: " + c.targetDisplay);
+                        c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
+                        Debug.Log(c.name + " after: " + c.targetDisplay);
+                    }
+                    SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+                }
+            };
+            HotKeyList.Add(toggleDisplays);
 
             // Remove Cursor Hot Key
             HotKey toggleCursor = new HotKey
@@ -254,7 +248,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.E),
                 hotKeyAction = () =>
                 {
-                    HkPanel.TrialLevel.ForceBlockEnd = true; 
+                    HkPanel.TrialLevel.AbortCode = 5;
+                    HkPanel.TrialLevel.ForceBlockEnd = true;
                     HkPanel.TaskLevel.SpecifyCurrentState(HkPanel.TaskLevel.GetStateFromName("FinishTask"));
                 }
             };

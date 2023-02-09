@@ -14,29 +14,10 @@ namespace ContinuousRecognition_Namespace
 {
     public class ContinuousRecognition_TaskDef : TaskDef
     {
-        //--------------Inherited from TaskDef-----------------------------//
-        //public string TaskName;
-        //public string ExternalStimFolderPath;
-        //public string PrefabStimFolderPath;
-        //public string ExternalStimExtension;
-        //public List<string[]> FeatureNames;
-        //public string neutralPatternedColorName;
-        //public float? ExternalStimScale;
-        //public List<string[]> FeedbackControllers;
-        //public int? TotalTokensNum;
-        //public bool SerialPortActive, SyncBoxActive,
-        //            EventCodesActive, RewardPulsesActive, SonicationActive;
-        //public string SelectionType;
     }
 
     public class ContinuousRecognition_BlockDef : BlockDef
     {
-        //INHERITED FROM BLOCKDEF:
-        //public List<TrialDef> TrialDefs;
-        //public int BlockCount;
-        //public int? TotalTokensNum;
-        //public int? MinTrials, MaxTrials;
-
         //FROM BLOCK CONFIG:
         public int[] BlockStimIndices;
         public int[] NumObjectsMinMax;
@@ -155,7 +136,6 @@ namespace ContinuousRecognition_Namespace
                 trial.ShadowType = ShadowType;
                 trial.UseStarfield = UseStarfield;
                 trial.ShakeStim = ShakeStim;
-                trial.InitialTokenAmount = InitialTokenAmount;
 
                 TrialDefs.Add(trial);
                 numTrialStims++;
@@ -243,12 +223,6 @@ namespace ContinuousRecognition_Namespace
 
     public class ContinuousRecognition_TrialDef : TrialDef
     {
-        //INHERITED FROM TRIALDEF:
-        //public int BlockCount, TrialCountInBlock, TrialCountInTask;
-        //public TrialStims TrialStims;
-
-        public int InitialTokenAmount;
-
         public bool ShakeStim;
         public bool UseStarfield;
         public bool FindAllStim;

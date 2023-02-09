@@ -147,8 +147,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             StartButton.transform.position = OriginalStartButtonPosition;
 
-            TokenFBController.SetTokenBarValue(currentTrial.InitialTokenAmount);
-
             CompletedAllTrials = false;
             EndBlock = false;
             StimIsChosen = false;
@@ -160,7 +158,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 currentTask.CalculateBlockSummaryString(); //setting again just in case they used RestartBlock hotkey.
                 if (IsHuman)
                 {
-
                     AdjustStartButtonPos(); //Adjust startButton position (move down) to make room for Title text. 
                     TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
                 }
@@ -253,30 +250,29 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 TimeToChoice_Block.Add(currentTrial.TimeToChoice);
                 CalculateBlockAvgTimeToChoice();
 
-                if (!ChosenStimIndices.Contains(chosenStimDef.StimCode - 1)) //THEY GUESSED RIGHT
+                if (!ChosenStimIndices.Contains(chosenStimDef.StimIndex)) //THEY GUESSED RIGHT
                 {
                     currentTrial.GotTrialCorrect = true;
-                    NumCorrect_Block++;
 
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["CorrectResponse"]);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchTargetStart"]);
 
                     //If chose a PNC Stim, remove it from PNC list.
-                    if (currentTrial.PNC_Stim.Contains(chosenStimDef.StimCode - 1))
-                        currentTrial.PNC_Stim.Remove(chosenStimDef.StimCode - 1);
+                    if (currentTrial.PNC_Stim.Contains(chosenStimDef.StimIndex))
+                        currentTrial.PNC_Stim.Remove(chosenStimDef.StimIndex);
                     //If Chose a New Stim, remove it from New list.
-                    if (currentTrial.New_Stim.Contains(chosenStimDef.StimCode - 1))
-                        currentTrial.New_Stim.Remove(chosenStimDef.StimCode - 1);
+                    if (currentTrial.New_Stim.Contains(chosenStimDef.StimIndex))
+                        currentTrial.New_Stim.Remove(chosenStimDef.StimIndex);
 
                     chosenStimDef.PreviouslyChosen = true;
-                    currentTrial.PC_Stim.Add(chosenStimDef.StimCode - 1);
-                    ChosenStimIndices.Add(chosenStimDef.StimCode - 1); //also adding to chosenIndices so I can keep them in order for display results. 
+                    currentTrial.PC_Stim.Add(chosenStimDef.StimIndex);
+                    ChosenStimIndices.Add(chosenStimDef.StimIndex); //also adding to chosenIndices so I can keep them in order for display results. 
 
                     //REMOVE ALL NEW STIM THAT WEREN'T CHOSEN, FROM NEW STIM AND INTO PNC STIM. 
                     List<int> newStimToRemove = currentTrial.New_Stim.ToList();
                     foreach (var stim in newStimToRemove)
                     {
-                        if (currentTrial.New_Stim.Contains(stim) && stim != chosenStimDef.StimCode - 1)
+                        if (currentTrial.New_Stim.Contains(stim) && stim != chosenStimDef.StimIndex)
                         {
                             currentTrial.New_Stim.Remove(stim);
                             currentTrial.PNC_Stim.Add(stim);
@@ -294,7 +290,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
                 else //THEY GUESSED WRONG
                 {
-                    currentTrial.WrongStimIndex = chosenStimDef.StimCode - 1; //identifies the stim they got wrong for Block FB purposes. 
+                    currentTrial.WrongStimIndex = chosenStimDef.StimIndex; //identifies the stim they got wrong for Block FB purposes. 
                     TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchDistractorStart"]);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["IncorrectResponse"]);
@@ -382,7 +378,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 EndBlock = true;
             }
         });
-        TokenUpdate.SpecifyTermination(() => (Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value + .05f) && !AudioFBController.IsPlaying()), DisplayResults);
+        TokenUpdate.SpecifyTermination(() => (Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value + .05f) && !TokenFBController.IsAnimating()), DisplayResults);
         TokenUpdate.SpecifyTermination(() => !StimIsChosen, DisplayResults);
         TokenUpdate.AddDefaultTerminationMethod(() =>
         {
@@ -428,7 +424,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-        DisplayResults.AddTimer(() => displayResultsDuration.value, ITI, () =>
+        DisplayResults.AddTimer(() => itiDuration.value, ITI, () =>
         {
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
@@ -447,17 +443,20 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
 
         //ITI State----------------------------------------------------------------------------------------------------------------------
-        ITI.AddTimer(() => itiDuration.value / 2, FinishTrial);
+        ITI.AddTimer(() => itiDuration.value, FinishTrial);
 
         //FinishTrial State (default state) ----------------------------------------------------------------------------------------------------------------------
         FinishTrial.AddInitializationMethod(() =>
         {
-            if(AbortCode == 0)
+            if(AbortCode == 0) //Normal
             {
                 NumTrials_Block++;
+                if(currentTrial.GotTrialCorrect)
+                    NumCorrect_Block++;
+
                 currentTask.CalculateBlockSummaryString();
             }
-            else if (AbortCode == 1)
+            else if (AbortCode == 1) //If used Pause hotkey to end trial, end entire Block
                 EndBlock = true;
         });
         LogTrialData();
@@ -606,7 +605,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     void SetTrialSummaryString()
     {
-        TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + "</b>" +
+        TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
                              "\nPC_Stim: " + currentTrial.PC_Stim.Count +
                              "\nNew_Stim: " + currentTrial.New_Stim.Count +
                              "\nPNC_Stim: " + currentTrial.PNC_Stim.Count;
@@ -1026,7 +1025,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         foreach (var stim in group.stimDefs)
         {
-            if (stim.StimCode - 1 == currentTrial.WrongStimIndex)
+            if (stim.StimIndex == currentTrial.WrongStimIndex)
             {
                 GameObject redBorder = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
                 BorderPrefabList.Add(redBorder); //Add each to list so I can destroy them together

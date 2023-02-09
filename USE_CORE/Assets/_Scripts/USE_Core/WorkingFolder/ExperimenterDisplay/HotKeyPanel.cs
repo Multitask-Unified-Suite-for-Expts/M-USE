@@ -141,31 +141,31 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             List<HotKey> HotKeyList = new List<HotKey>();
 
             // Toggle Displays HotKey
-            HotKey toggleDisplays = new HotKey
-            {
-                keyDescription = "W",
-                actionName = "Toggle Displays",
-                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.W),
-                hotKeyAction = () =>
-                {
-                    var cams = GameObject.FindObjectsOfType<Camera>();
-                    foreach (Camera c in cams) //MirrorCam:0, BackgroundCamera:1, CR_Cam: 0, MainCameraCopy:1 (DC)
-                    {
-                        Debug.Log(c.name + " before: " + c.targetDisplay);
-                        c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-                        Debug.Log(c.name + " after: " + c.targetDisplay);
-                    }
-                    var canvases = GameObject.FindObjectsOfType<Canvas>();
-                    foreach (Canvas c in canvases) //ExperimenterCanvas: 1, TaskSelectionCanvas:0 (DC), InitScreenCanvas:1, CR_Canvas:0 (DC)
-                    {
-                        Debug.Log(c.name + " before: " + c.targetDisplay);
-                        c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-                        Debug.Log(c.name + " after: " + c.targetDisplay);
-                    }
-                    SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-                }
-            };
-            HotKeyList.Add(toggleDisplays);
+            //HotKey toggleDisplays = new HotKey
+            //{
+            //    keyDescription = "W",
+            //    actionName = "Toggle Displays",
+            //    hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.W),
+            //    hotKeyAction = () =>
+            //    {
+            //        var cams = GameObject.FindObjectsOfType<Camera>();
+            //        foreach (Camera c in cams) //MirrorCam:0, BackgroundCamera:1, CR_Cam: 0, MainCameraCopy:1 (DC)
+            //        {
+            //            Debug.Log(c.name + " before: " + c.targetDisplay);
+            //            c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
+            //            Debug.Log(c.name + " after: " + c.targetDisplay);
+            //        }
+            //        var canvases = GameObject.FindObjectsOfType<Canvas>();
+            //        foreach (Canvas c in canvases) //ExperimenterCanvas: 1, TaskSelectionCanvas:0 (DC), InitScreenCanvas:1, CR_Canvas:0 (DC)
+            //        {
+            //            Debug.Log(c.name + " before: " + c.targetDisplay);
+            //            c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
+            //            Debug.Log(c.name + " after: " + c.targetDisplay);
+            //        }
+            //        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            //    }
+            //};
+            //HotKeyList.Add(toggleDisplays);
 
             // Remove Cursor Hot Key
             HotKey toggleCursor = new HotKey
@@ -233,9 +233,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     HkPanel.TrialLevel.AbortCode = 3;
                     HkPanel.TrialLevel.ForceBlockEnd = true;
                     HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
-                    if (HkPanel.TrialLevel.TokenFBController != null)
-                        HkPanel.TrialLevel.TokenFBController.SetTokenBarValue(HkPanel.TrialLevel.InitialTokenAmount); //may not need anymore
-                    //HkPanel.TrialLevel.ResetGlobalTrialLevelVariables(); //change to FinishTrialCleanup (may not need anymore)
                 }
             };
             HotKeyList.Add(endBlock);

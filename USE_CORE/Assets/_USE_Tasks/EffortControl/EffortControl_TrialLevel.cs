@@ -447,7 +447,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if(AbortCode == 0) //Normal
             currentTask.CalculateBlockSummaryString();
 
-        if (AbortCode == 2) //If Restarted Block
+        if (AbortCode == AbortCodeDict["RestartBlock"]) //If Restarted Block
         {
             currentTask.ClearStrings();
             currentTask.BlockSummaryString.AppendLine("");

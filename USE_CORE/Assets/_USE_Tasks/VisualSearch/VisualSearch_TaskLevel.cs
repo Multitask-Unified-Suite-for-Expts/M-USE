@@ -40,7 +40,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             //Set the Initial Token Values for the Block
             vsTL.TokenFBController.SetTotalTokensNum(vsBD.NumTokenBar);
             vsTL.TokenFBController.SetTokenBarValue(vsBD.NumInitialTokens);
-            vsTL.InitialTokenAmount = vsBD.NumInitialTokens;
             SetBlockSummaryString();
         });
         BlockFeedback.AddInitializationMethod(() =>
@@ -138,7 +137,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("Num Token Bar Filled", ()=> vsTL.NumTokenBarFull_InBlock);
         BlockData.AddDatum("Total Tokens Collected", ()=> vsTL.TotalTokensCollected_InBlock);
     }
-    void ClearStrings()
+    public void ClearStrings()
     {
         CurrentBlockString = "";
         BlockSummaryString.Clear();

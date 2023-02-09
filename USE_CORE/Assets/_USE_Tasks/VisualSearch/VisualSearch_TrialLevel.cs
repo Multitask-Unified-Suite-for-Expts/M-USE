@@ -138,6 +138,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         InitTrial.AddInitializationMethod(() =>
         {
+            CurrentTaskLevel.SetBlockSummaryString();
+
             //Initialize FB Controller Variables
             mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
             mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
@@ -251,14 +253,14 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             if (selectedSD.StimTrialRewardMag > 0)
             {
-                AudioFBController.Play("Positive");
+                //AudioFBController.Play("Positive");
                 TokenFBController.AddTokens(selected, selectedSD.StimTrialRewardMag);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
                 
             }
             else
             {
-                AudioFBController.Play("Negative");
+                //AudioFBController.Play("Negative");
                 TokenFBController.RemoveTokens(selected, -selectedSD.StimTrialRewardMag);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
             }
@@ -281,7 +283,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
                                            (NumTokenBarFull_InBlock * CurrentTrialDef.NumTokenBar);
             SetTrialSummaryString();
-            CurrentTaskLevel.SetBlockSummaryString();
+            //CurrentTaskLevel.SetBlockSummaryString();
             stateAfterDelay = ITI;
             delayDuration = tokenFbDuration.value;
         });
@@ -293,16 +295,31 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 ContextName = "itiImage";
                 RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
             }
-            // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
-            DestroyTextOnExperimenterDisplay();
-            tStim.ToggleVisibility(false);
-            TokenFBController.enabled = false;
         });
     
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
         AssignTrialData();
         AssignFrameData();
+    }
+
+    public override void FinishTrialCleanup()
+    {
+        DestroyTextOnExperimenterDisplay();
+
+        tStim.ToggleVisibility(false);
+
+        if (TokenFBController.isActiveAndEnabled)
+            TokenFBController.enabled = false;
+
+        CurrentTaskLevel.SetBlockSummaryString();
+
+        if(AbortCode == AbortCodeDict["RestartBlock"])
+        {
+            CurrentTaskLevel.ClearStrings();
+            CurrentTaskLevel.BlockSummaryString.AppendLine("");
+        }
+
     }
 
     protected override void DefineTrialStims()

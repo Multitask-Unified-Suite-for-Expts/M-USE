@@ -58,9 +58,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     public override void DefineControlLevel() //RUNS WHEN THE TASK IS DEFINED!
     {
         trialLevel = (ContinuousRecognition_TrialLevel)TrialLevel;
-
-        blocksAdded = 0;
-
+        
         SetSettings();
 
         BlockAveragesString = "";
@@ -69,13 +67,15 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         SetupBlockData();
 
+        blocksAdded = 0;
+
         RunBlock.AddInitializationMethod(() =>
         {
             RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(trialLevel.MaterialFilePath, currentBlock.ContextName, "LinearDark"));
             trialLevel.ContextActive = true;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
 
-            trialLevel.InitialTokenAmount = currentBlock.InitialTokenAmount;
+            trialLevel.TokenFBController.SetTokenBarValue(currentBlock.InitialTokenAmount);
             trialLevel.ResetBlockVariables();
             CalculateBlockSummaryString();
         });

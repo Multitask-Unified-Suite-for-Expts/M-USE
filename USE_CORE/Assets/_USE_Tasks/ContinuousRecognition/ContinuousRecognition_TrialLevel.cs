@@ -147,6 +147,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             StartButton.transform.position = OriginalStartButtonPosition;
 
+            TokenFBController.SetTokenBarValue(currentTrial.InitialTokenAmount);
+
             CompletedAllTrials = false;
             EndBlock = false;
             StimIsChosen = false;
@@ -314,15 +316,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 if (!Physics.Raycast(ray, out hit))
                     NonStimTouches_Block++;
             }
-
-
         });
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
         ChooseStim.AddTimer(() => chooseStimDuration.value, TokenUpdate, () =>  //if time runs out
         {
             AudioFBController.Play("Negative");
             EndBlock = true;
-            EventCodeManager.SendCodeImmediate(TaskEventCodes["NoChoice"]); 
+            EventCodeManager.SendCodeImmediate(TaskEventCodes["NoChoice"]);
         });
 
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------

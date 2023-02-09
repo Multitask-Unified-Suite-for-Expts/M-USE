@@ -155,6 +155,7 @@ namespace ContinuousRecognition_Namespace
                 trial.ShadowType = ShadowType;
                 trial.UseStarfield = UseStarfield;
                 trial.ShakeStim = ShakeStim;
+                trial.InitialTokenAmount = InitialTokenAmount;
 
                 TrialDefs.Add(trial);
                 numTrialStims++;
@@ -245,6 +246,8 @@ namespace ContinuousRecognition_Namespace
         //INHERITED FROM TRIALDEF:
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
+
+        public int InitialTokenAmount;
 
         public bool ShakeStim;
         public bool UseStarfield;

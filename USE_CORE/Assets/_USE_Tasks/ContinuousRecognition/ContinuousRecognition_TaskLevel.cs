@@ -71,8 +71,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.ContextActive = true;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
 
-            trialLevel.InitialTokenAmount = currentBlock.InitialTokenAmount;
-
             trialLevel.ResetBlockVariables();
 
             CalculateBlockSummaryString();

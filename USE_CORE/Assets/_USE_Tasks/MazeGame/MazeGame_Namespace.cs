@@ -20,7 +20,7 @@ namespace MazeGame_Namespace
         //public List<string[]> FeatureNames;
         //public string neutralPatternedColorName;
         //public float? ExternalStimScale;
-
+        public int NumBlinks;
         public Color TileColor;
         public float TileSize;
         public Vector3 ButtonPosition;
@@ -47,6 +47,7 @@ namespace MazeGame_Namespace
        // public string TrialID;
        // public int Context;
         public int Trial;
+        public string TrialID;
         public int[] MinMaxTrials;
         public string MazeInfo;
 
@@ -83,7 +84,7 @@ namespace MazeGame_Namespace
             for (int iTrial = 0; iTrial < num; iTrial++)
             {
                 MazeGame_TrialDef td = new MazeGame_TrialDef();
-                td.TrialCount = Trial;
+                td.TrialID = TrialID;
                 /*td.TileColor = TileColor;
                 td.TileSize = TileSize;*/
                 //td.Texture = Texture;
@@ -110,7 +111,7 @@ namespace MazeGame_Namespace
         //Already-existing fields (inherited from TrialDef)
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
-        public int TrialCount;
+        public string TrialID;
         public float[] TileColor;
         public float TileSize;
         public int PulseSize;

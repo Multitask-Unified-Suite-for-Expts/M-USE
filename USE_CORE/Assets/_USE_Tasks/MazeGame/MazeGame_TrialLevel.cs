@@ -23,7 +23,7 @@ using Screen = UnityEngine.Screen;
 public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 {
     public MazeGame_TrialDef CurrentTrialDef => GetCurrentTrialDef<MazeGame_TrialDef>();
-    
+    public MazeGame_TaskLevel CurrentTaskLevel => GetTaskLevel<MazeGame_TaskLevel>();
     public List<Maze> mazeList = new List<Maze>();
     static bool end;
     
@@ -100,6 +100,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         correctTouches = 0,
         backtrackErrors = 0;
     public static int consecutiveErrors = 0, perseverativeErrors = 0;
+    
         
 
     // Data Tracking Variables
@@ -118,7 +119,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         correctTouches_InBlock = 0,
         backtrackErrors_InBlock = 0,
         perseverativeErrors_InBlock = 0;
-    public IDictionary<string, int> BlockDataDictionary = new Dictionary<string,int>();
+
+    
 
     public string ContextExternalFilePath, MazeFilePath;
     public Vector3 ButtonPosition, ButtonScale;
@@ -212,9 +214,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
             if (!variablesLoaded) loadVariables();
             viewPath = CurrentTrialDef.ViewPath;
+           // if(TrialCount_InBlock == 0) TaskLevel.ResetBlockVariables();
             
-            if(TrialCount_InBlock == 0) ResetBlockVariables();
-            if(TrialCount_InBlock == 0) ResetBlockVariables();
+            ResetTrialTrackingVariables();
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -240,7 +242,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         MouseTracker.AddSelectionHandler(mouseHandler, ChooseTile);
         ChooseTile.AddUpdateMethod(()=>
         { //SELECTION HANDLER ISN'T WORKING, GIVES THE MAZE CONTAINER AS .SELECTEDGAMEOBJECT & CHILDREN ARE ALL TILES
-            Input.ResetInputAxes(); //reset input in case they holding down
+            //Input.ResetInputAxes(); //reset input in case they holding down
             if (InputBroker.GetMouseButtonDown(0))
             {
                 Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
@@ -345,8 +347,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         ITI.SpecifyTermination(() => true, FinishTrial, () =>
         {
             AssignTrialData();
-            BlockDataDictionary = CreateBlockDataDictionary();
-            ResetDataTrackingVariables();
+        });
+        FinishTrial.AddInitializationMethod(() =>
+        {
+            UpdateBlockDictionary(CurrentTaskLevel.BlockDataDictionary);
         });
         
     }
@@ -828,21 +832,16 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("RetouchCorrect", () => retouchCorrect);
     }
 
-    private void ResetBlockVariables()
-    {
-        totalErrors_InBlock = 0;
-        perseverativeErrors_InBlock = 0;
-        backtrackErrors_InBlock = 0;
-        ruleAbidingErrors_InBlock = 0;
-        ruleBreakingErrors_InBlock = 0;
-    }
-    private void ResetDataTrackingVariables()
+
+    private void ResetTrialTrackingVariables()
     {
         totalErrors = 0;
         ruleAbidingErrors = 0;
         ruleBreakingErrors = 0;
         retouchCorrect = 0;
         correctTouches = 0;
+        pathProgress.Clear();
+        pathProgressGO.Clear();
         end = false;
         choiceMade = false;
         valueToAdd = 0;
@@ -863,17 +862,14 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         return mazeBackground;
     }*/
 
-    private IDictionary<string, int> CreateBlockDataDictionary()
+    public void UpdateBlockDictionary(IDictionary<string,int> dataDict)
     {
-        // All my variables are used as statics, so I need to store them somwhere so I can move them to the task levle
-        var dataDict = new Dictionary<string, int>();
-        dataDict.Add("Total Errors in Block", totalErrors_InBlock);
-        dataDict.Add("Perseverative Errors in Block", perseverativeErrors_InBlock);
-        dataDict.Add("Backtracking Errors in Block", backtrackErrors_InBlock);
-        dataDict.Add("Rule-Abiding Errors in Block", ruleAbidingErrors_InBlock);
-        dataDict.Add("Rule-Breaking Errors in Block", ruleBreakingErrors_InBlock);
-        
-        return dataDict;
+        // All my variables are used as statics, so I need to store them somwhere so I can move them to the task level
+        dataDict["Total Errors in Block"] = totalErrors_InBlock;
+        dataDict["Perseverative Errors in Block"] = perseverativeErrors_InBlock;
+        dataDict["Backtracking Errors in Block"] =  backtrackErrors_InBlock;
+        dataDict["Rule-Abiding Errors in Block"] =  ruleAbidingErrors_InBlock;
+        dataDict["Rule-Breaking Errors in Block"] = ruleBreakingErrors_InBlock;
     }
 
 }

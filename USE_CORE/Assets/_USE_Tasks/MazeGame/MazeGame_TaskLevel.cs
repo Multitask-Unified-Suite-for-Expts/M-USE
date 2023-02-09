@@ -18,6 +18,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int[] MazeNumSquares, MazeNumTurns;
     public Vector2[] MazeDims, MazeStart, MazeFinish;
     [HideInInspector] public string[] MazeName;
+    [HideInInspector]public IDictionary<string, int> BlockDataDictionary = new Dictionary<string, int>();
     MazeGame_BlockDef mgBD => GetCurrentBlockDef<MazeGame_BlockDef>();
     MazeGame_TrialLevel mgTL;
     private string mazeKeyFilePath;
@@ -26,16 +27,24 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     {
         mgTL = (MazeGame_TrialLevel)TrialLevel;
         SetSettings();
+        AssignBlockData();
         
         SetupTask.AddInitializationMethod(() =>
         { 
             //HARD CODED TO MINIMIZE EMPTY SKYBOX DURATION, CAN'T ACCESS TRIAL DEF YET & CONTEXT NOT IN BLOCK DEF
-            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +  "Concrete2.png");
+            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +  "Concrete3.png");
+            
             LoadMazeDef();
         });
 
         RunBlock.AddInitializationMethod(() =>
-        {
+        {/*
+            BlockDataDictionary["Total Errors in Block"] = 0;
+            BlockDataDictionary["Perseverative Errors in Block"] = 0;
+            BlockDataDictionary["Backtracking Errors in Block"] =  0;
+            BlockDataDictionary["Rule-Abiding Errors in Block"] =  0;
+            BlockDataDictionary["Rule-Breaking Errors in Block"] = 0;*/
+            mgTL.
             ResetBlockDataTrackingVariables();
             //for given block MazeDims, MazeNumSquares, MazeNumTurns, get all indices of that value, find intersect
             //then choose random member of intersect and assign to this block's trials
@@ -58,21 +67,28 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             MazeNumTurns = MazeNumTurns.Where((source, index) =>index != chosenIndex).ToArray();
             MazeStart = MazeStart.Where((source, index) =>index != chosenIndex).ToArray();
             MazeFinish = MazeFinish.Where((source, index) =>index != chosenIndex).ToArray();
-            MazeName = MazeName.Where((source, index) =>index != chosenIndex).ToArray();
+            MazeName = MazeName.Where((source, index) =>index != chosenIndex).ToArray(); 
         });
-       // BlockFeedback.AddInitializationMethod(() =>
-       // {
-            AssignBlockData();
-       // });
+        
+        
     }
 
     public void AssignBlockData()
     {
-        foreach (KeyValuePair<string, int> datum in mgTL.BlockDataDictionary)
+        foreach (KeyValuePair<string, int> datum in BlockDataDictionary)
+        {
             BlockData.AddDatum(datum.Key, ()=> datum.Value);
+            Debug.Log("KEY:" + datum.Key + "VALUE: " + datum.Value);
+        }
+            
     }
-    public void ResetBlockDataTrackingVariables()
+    private void ResetBlockVariables()
     {
+        mgTL.totalErrors_InBlock = 0;
+        mgTL.perseverativeErrors_InBlock = 0;
+        mgTL.backtrackErrors_InBlock = 0;
+        mgTL.ruleAbidingErrors_InBlock = 0;
+        mgTL.ruleBreakingErrors_InBlock = 0;
         mgTL.NumRewardPulses_InBlock = 0;
     }
 

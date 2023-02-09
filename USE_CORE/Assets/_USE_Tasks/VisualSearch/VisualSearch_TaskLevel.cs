@@ -65,6 +65,8 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         vsTL.NumRewardPulses_InBlock = 0;
         vsTL.NumTokenBarFull_InBlock = 0;
         vsTL.TouchDurationError_InBlock = 0;
+        vsTL.TotalTokensCollected_InBlock = 0;
+        vsTL.Accuracy_InBlock = 0;
     }
     public override OrderedDictionary GetSummaryData()
     {

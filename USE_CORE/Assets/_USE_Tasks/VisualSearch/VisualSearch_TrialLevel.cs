@@ -157,7 +157,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 TouchDurationError = true;
                 SetTrialSummaryString();
                 TouchDurationErrorFeedback(mouseHandler, StartButton);
-                CurrentTaskLevel.SetBlockSummaryString();
+                CurrentTaskLevel.SetBlockSummaryString(); //TCIB is incremented during setuptrial, so "trialNum" in blocksummarystring is wrong unless you update it here. I would say change the variable in the summary string. 
             }
         });
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
@@ -306,16 +306,17 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     public override void FinishTrialCleanup()
     {
         DestroyTextOnExperimenterDisplay();
-
         tStim.ToggleVisibility(false);
 
         if (TokenFBController.isActiveAndEnabled)
             TokenFBController.enabled = false;
 
-        CurrentTaskLevel.SetBlockSummaryString();
+        if(AbortCode == 0)
+            CurrentTaskLevel.SetBlockSummaryString();
 
         if(AbortCode == AbortCodeDict["RestartBlock"])
         {
+            Debug.Log("GOING TO CLEAR STRINGS!");
             CurrentTaskLevel.ClearStrings();
             CurrentTaskLevel.BlockSummaryString.AppendLine("");
         }

@@ -422,7 +422,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-        DisplayResults.AddTimer(() => itiDuration.value, ITI, () =>
+        DisplayResults.AddTimer(() => displayResultsDuration.value, ITI, () =>
         {
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);

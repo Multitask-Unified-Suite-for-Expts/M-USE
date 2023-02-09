@@ -297,6 +297,7 @@ namespace USE_ExperimentTemplate_Task
 
 
             TrialLevel.SerialPortController = SerialPortController;
+            TrialLevel.SerialPortActive = SerialPortActive;
             TrialLevel.SerialRecvData = SerialRecvData;
             TrialLevel.SerialSentData = SerialSentData;
             TrialLevel.SyncBoxController = SyncBoxController;
@@ -686,7 +687,10 @@ namespace USE_ExperimentTemplate_Task
             if (!string.IsNullOrEmpty(stimDefFile))
             {
                 if (stimDefFile.ToLower().Contains("tdf"))
+                {
                     SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_ExternalStimDefs", stimDefFile);
+                }
+                    
                 else
                     SessionSettings.ImportSettings_SingleTypeJSON<T[]>(TaskName + "_ExternalStimDefs", stimDefFile);
 

@@ -32,6 +32,7 @@ namespace USE_StimulusManagement
 		public string StimFolderPath;
 		public string StimExtension;
 		public int StimCode; //optional, for analysis purposes
+		public int StimIndex;
 		public string StimID;
 		public int[] StimDimVals; //only if this is parametrically-defined stim
 		[System.NonSerialized] public GameObject StimGameObject; //not in config, generated at runtime
@@ -125,7 +126,8 @@ namespace USE_StimulusManagement
 				sd.StimFolderPath = StimFolderPath;
 			if (StimExtension != null)
 				sd.StimExtension = StimExtension;
-			sd.StimCode = StimCode;
+			if (StimCode != null)
+				sd.StimCode = StimCode;
 			if (StimID != null)
 				sd.StimID = StimID;
 			if (StimDimVals != null)
@@ -140,6 +142,7 @@ namespace USE_StimulusManagement
 			sd.StimRotationSet = StimRotationSet;
 			sd.StimTrialPositiveFbProb = StimTrialPositiveFbProb;
 			sd.StimTrialRewardMag = StimTrialRewardMag;
+			sd.StimIndex = StimIndex;
 			if (TokenRewards != null)
 				sd.TokenRewards = TokenRewards;
 			if (BaseTokenGain != null)
@@ -173,7 +176,8 @@ namespace USE_StimulusManagement
 				sd.StimFolderPath = StimFolderPath;
 			if (StimExtension != null)
 				sd.StimExtension = StimExtension;
-			sd.StimCode = StimCode;
+			if (StimCode != null)
+				sd.StimCode = StimCode;
 			if (StimID != null)
 				sd.StimID = StimID;
 			if (StimDimVals != null)
@@ -188,6 +192,7 @@ namespace USE_StimulusManagement
 			sd.StimRotationSet = StimRotationSet;
 			sd.StimTrialPositiveFbProb = StimTrialPositiveFbProb;
 			sd.StimTrialRewardMag = StimTrialRewardMag;
+			sd.StimIndex = StimIndex;
 			if (TokenRewards != null)
 				sd.TokenRewards = TokenRewards;
 			if (BaseTokenGain != null)
@@ -620,6 +625,8 @@ namespace USE_StimulusManagement
 			foreach (int index in stimSubsetIndices)
 			{
 				sgOrig.stimDefs[index].AddToStimGroup(this);
+				if (sgOrig.stimDefs[index].StimIndex != index)
+					Debug.LogError("Stim at StimDef index " + index + " does not correspond to the listed StimIndex: " + sgOrig.stimDefs[index].StimIndex);
 			}
 		}
 

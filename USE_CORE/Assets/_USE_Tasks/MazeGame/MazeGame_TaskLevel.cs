@@ -15,7 +15,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 {
     [HideInInspector] public MazeDef[] MazeDefs;
     [HideInInspector] public int[] MazeNumSquares, MazeNumTurns;
-    public Vector2[] MazeDims;
+    public Vector2[] MazeDims, MazeStart, MazeFinish;
     [HideInInspector] public string[] MazeName;
     MazeGame_BlockDef mgBD => GetCurrentBlockDef<MazeGame_BlockDef>();
     MazeGame_TrialLevel mgTL;
@@ -41,7 +41,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
             mgTL.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
         else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
-       
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TileSize"))
+            mgTL.TileSize = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TileSize");
+        else
+        {
+            mgTL.TileSize = 0.5f; // default value in the case it isn't specified
+            Debug.Log("Tile Size settings not defined in the TaskDef. Default setting of " + mgTL.TileSize + "is used instead.");
+        }
         
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartColor"))
             mgTL.startColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "StartColor");
@@ -76,12 +82,16 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             MazeDims = new Vector2[MazeDefs.Length];
             MazeNumSquares = new int[MazeDefs.Length];
             MazeNumTurns = new int[MazeDefs.Length];
+            MazeStart = new Vector2[MazeDefs.Length];
+            MazeFinish = new Vector2[MazeDefs.Length];
             MazeName = new string[MazeDefs.Length];
             for (int iMaze = 0; iMaze < MazeDefs.Length; iMaze++)
             {
                 MazeDims[iMaze] = MazeDefs[iMaze].mDims;
                 MazeNumSquares[iMaze] = MazeDefs[iMaze].mNumSquares;
                 MazeNumTurns[iMaze] = MazeDefs[iMaze].mNumTurns;
+                MazeStart[iMaze] = MazeDefs[iMaze].mStart;
+                MazeFinish[iMaze] = MazeDefs[iMaze].mFinish;
                 MazeName[iMaze] = MazeDefs[iMaze].mName;
             }
         });
@@ -93,10 +103,12 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             //then choose random member of intersect and assign to this block's trials
             
             int[] mdIndices = MazeDims.FindAllIndexof(mgBD.MazeDims);
-            Debug.Log("INDEX OF mgBD.MazeDims: " + mdIndices.ToString());
             int[] mnsIndices = MazeNumSquares.FindAllIndexof(mgBD.MazeNumSquares);
             int[] mntIndices = MazeNumTurns.FindAllIndexof(mgBD.MazeNumTurns);
-            int[] possibleMazeDefIndices = mntIndices.Intersect(mdIndices.Intersect(mnsIndices)).ToArray();
+            int[] msIndices = MazeStart.FindAllIndexof(mgBD.MazeStart);
+            int[] mfIndices = MazeFinish.FindAllIndexof(mgBD.MazeFinish);
+            int[] possibleMazeDefIndices = mfIndices.Intersect(msIndices.Intersect(mntIndices.Intersect(mdIndices.Intersect(mnsIndices)))).ToArray();
+            
             
             int chosenIndex = possibleMazeDefIndices[Random.Range(0, possibleMazeDefIndices.Length)];
             mgTL.mazeDefName = MazeName[chosenIndex];
@@ -106,6 +118,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             MazeDims = MazeDims.Where((source, index) =>index != chosenIndex).ToArray();
             MazeNumSquares = MazeNumSquares.Where((source, index) =>index != chosenIndex).ToArray();
             MazeNumTurns = MazeNumTurns.Where((source, index) =>index != chosenIndex).ToArray();
+            MazeStart = MazeStart.Where((source, index) =>index != chosenIndex).ToArray();
+            MazeFinish = MazeFinish.Where((source, index) =>index != chosenIndex).ToArray();
             MazeName = MazeName.Where((source, index) =>index != chosenIndex).ToArray();
         });
     }

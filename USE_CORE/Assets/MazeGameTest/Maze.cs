@@ -3,37 +3,38 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace HiddenMaze
 {
     [Serializable]
     public struct Coords
     {
-        public int X;
-        public int Y;
+        public int x;
+        public int y;
 
         public Coords (int x, int y)
         {
-            X = x;
-            Y = y;
+            this.x = x;
+            this.y = y;
         }
 
-        public override string ToString() => $"({X}, {Y})";
+        public override string ToString() => $"({x}, {y})";
         public static bool operator ==(Coords a, Coords b) 
         {
-            return (a.X == b.X && a.Y == b.Y);
+            return (a.x == b.x && a.y == b.y);
         }
 
         public static bool operator !=(Coords a, Coords b) 
         {
-            return (a.X != b.X || a.Y != b.Y);
+            return (a.x != b.x || a.y != b.y);
         }
 
         public override bool Equals(object rhs) 
         {
             if (rhs is Coords) {
                 Coords c = (Coords) rhs;
-                return X == c.X && Y == c.Y;
+                return x == c.x && y == c.y;
             }
 
             return false;
@@ -41,13 +42,13 @@ namespace HiddenMaze
 
         public override int GetHashCode() 
         {
-            return X * Y + X + Y;
+            return x * y + x + y;
         }
 
         public bool isAdjacentTo(Coords rhs) 
         {
-            return ((this.X == rhs.X + 1 && this.Y == rhs.Y) || (this.X == rhs.X - 1 && this.Y == rhs.Y)
-            || (this.X == rhs.X && this.Y == rhs.Y + 1) || (this.X == rhs.X && this.Y == rhs.Y - 1));
+            return ((this.x == rhs.x + 1 && this.y == rhs.y) || (this.x == rhs.x - 1 && this.y == rhs.y)
+            || (this.x == rhs.x && this.y == rhs.y + 1) || (this.x == rhs.x && this.y == rhs.y - 1));
         }
     }
 
@@ -147,19 +148,19 @@ namespace HiddenMaze
             // If dim > 1, properly set start and finish
             //   else set start and finish at (0, 0)
             if (dim.x > 1) {
-                start.X = rand.Next(0, (int)dim.x);
-                finish.X = rand.Next(0, (int)dim.x);
+                start.x = rand.Next(0, (int)dim.x);
+                finish.x = rand.Next(0, (int)dim.x);
 
                 // Limit start square to the bottom row of the maze
                 // and the finish square to the top row
                 if (sideRestricted) {
-                    start.Y = 0;
-                    finish.Y = (int)dim.y - 1;
+                    start.y = 0;
+                    finish.y = (int)dim.y - 1;
                 
                 } else { // Start and finish squares can be anywhere in the grid
                     do {
-                        start.Y = rand.Next(0, (int)dim.y);
-                        finish.Y = rand.Next(0, (int)dim.y);
+                        start.y = rand.Next(0, (int)dim.y);
+                        finish.y = rand.Next(0, (int)dim.y);
                     } while (start == finish);
                 }
             }
@@ -233,10 +234,10 @@ namespace HiddenMaze
 
                 visited.Add(check);
 
-                Coords N = new Coords(check.X, check.Y + 1);
-                Coords W = new Coords(check.X - 1, check.Y);
-                Coords S = new Coords(check.X, check.Y - 1);
-                Coords E = new Coords(check.X + 1, check.Y);
+                Coords N = new Coords(check.x, check.y + 1);
+                Coords W = new Coords(check.x - 1, check.y);
+                Coords S = new Coords(check.x, check.y - 1);
+                Coords E = new Coords(check.x + 1, check.y);
         
                 if (dfsCheck(N, path)) { stack.Push(N); }
                 if (dfsCheck(W, path)) { stack.Push(W); }
@@ -268,16 +269,16 @@ namespace HiddenMaze
                 switch (direction)
                 {
                     case 0:
-                        next.X++;
+                        next.x++;
                         break;
                     case 1:
-                        next.X--;
+                        next.x--;
                         break;
                     case 2:
-                        next.Y++;
+                        next.y++;
                         break;
                     case 3:
-                        next.Y--;
+                        next.y--;
                         break;
                     default:
                         Console.WriteLine("Invalid direction!");
@@ -293,7 +294,7 @@ namespace HiddenMaze
         // Returns T if the parameter Coords obj is within maze bounds and F if not
         private Boolean validateSquare(Coords coord)
         {
-            return (coord.X < mDims.x && coord.X >= 0 && coord.Y < mDims.y && coord.Y >= 0);
+            return (coord.x < mDims.x && coord.x >= 0 && coord.y < mDims.y && coord.y >= 0);
         }
 
         // Returns a string graphical representation of maze
@@ -356,16 +357,16 @@ namespace HiddenMaze
 
             int numTurns = 0;
 
-            watchingForY = (mPath[0].X != mPath[1].X);
+            watchingForY = (mPath[0].x != mPath[1].x);
 
             for (int i = 1; i < mPath.Count - 1; ++i)
             {
-                if (watchingForY && (mPath[i].Y != mPath[i + 1].Y)) {
+                if (watchingForY && (mPath[i].y != mPath[i + 1].y)) {
                     watchingForY = false; // switch to looking for X changes
                     numTurns++;
                 }
 
-                if (!watchingForY && (mPath[i].X != mPath[i + 1].X)) {
+                if (!watchingForY && (mPath[i].x != mPath[i + 1].x)) {
                     watchingForY = true; // switch to looking for Y changes
                     numTurns++;
                 }

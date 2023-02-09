@@ -22,6 +22,7 @@ namespace MazeGame_Namespace
         //public float? ExternalStimScale;
 
         public Color TileColor;
+        public float TileSize;
         public Vector3 ButtonPosition;
         public Vector3 ButtonScale;
         public string MazeExternalFilePath;
@@ -49,12 +50,11 @@ namespace MazeGame_Namespace
         public int[] MinMaxTrials;
         public string MazeInfo;
 
-        public Vector2 MazeDims;
+        public Vector2 MazeDims, MazeStart, MazeFinish;
         public int MazeNumSquares;
         public int MazeNumTurns;
-      //  public Color TileColor;
+        //  public Color TileColor;
         public float[] TileColor;
-        public float TileSize;
         
         public int PulseSize;
         public int NumPulses;
@@ -84,9 +84,9 @@ namespace MazeGame_Namespace
             {
                 MazeGame_TrialDef td = new MazeGame_TrialDef();
                 td.TrialCount = Trial;
-                td.TileColor = TileColor;
-                td.TileSize = TileSize;
-                td.Texture = Texture;
+                /*td.TileColor = TileColor;
+                td.TileSize = TileSize;*/
+                //td.Texture = Texture;
                 td.NumPulses = NumPulses;
                 td.PulseSize = PulseSize;
                /* td.MazeDims = MazeDims;
@@ -115,10 +115,12 @@ namespace MazeGame_Namespace
         public float TileSize;
         public int PulseSize;
         public int NumPulses;
-        public int Texture;
+        /*public int Texture;
         public Vector2 MazeDims;
+        public Vector2 MazeStart;
+        public Vector2 MazeFinish;
         public int MazeNumSquares;
-        public int MazeNumTurns;
+        public int MazeNumTurns;*/
         public bool ViewPath;
         public string ContextName;
         public string MazeInfo;
@@ -165,12 +167,12 @@ namespace MazeGame_Namespace
 
     public class MazeDef
     {
-        
-        public int mNumSquares;
-        public int mNumTurns;
-        public int mTotalSquares;
-        public string mName;
         public Vector2 mDims;
-        public string fileName;
+        public int mNumTurns;
+        public int mNumSquares;
+        public Vector2 mStart;
+        public Vector2 mFinish;
+        public string mName;
+        
     }
 }

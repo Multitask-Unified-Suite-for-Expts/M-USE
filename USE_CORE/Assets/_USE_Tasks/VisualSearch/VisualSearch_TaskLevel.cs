@@ -34,7 +34,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         {
             //Hard coded because trial level variable isn't available yet
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +  "Grass");
-            ResetBlockVariables();
+            vsTL.ResetBlockVariables();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
             
             //Set the Initial Token Values for the Block
@@ -56,18 +56,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         });
         AssignBlockData();
     }
-    private void ResetBlockVariables()
-    {
-        vsTL.SearchDurationsList.Clear();
-        vsTL.AverageSearchDuration_InBlock = 0;
-        vsTL.NumErrors_InBlock = 0;
-        vsTL.NumCorrect_InBlock = 0;
-        vsTL.NumRewardPulses_InBlock = 0;
-        vsTL.NumTokenBarFull_InBlock = 0;
-        vsTL.TouchDurationError_InBlock = 0;
-        vsTL.TotalTokensCollected_InBlock = 0;
-        vsTL.Accuracy_InBlock = 0;
-    }
+
     public override OrderedDictionary GetSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary();

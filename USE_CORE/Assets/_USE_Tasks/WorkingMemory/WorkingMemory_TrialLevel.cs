@@ -292,8 +292,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
                                            (NumTokenBarFull_InBlock * CurrentTrialDef.NumTokenBar);
             SetTrialSummaryString();
-            CurrentTaskLevel.SetBlockSummaryString();
-
             delayDuration = tokenFbDuration.value;
             stateAfterDelay = ITI;
         });
@@ -304,17 +302,43 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 ContextName = "itiImage";
                 RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
             }
-            // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
-            DestroyTextOnExperimenterDisplay();
-            ResetDataTrackingVariables();
-            TokenFBController.enabled = false;
         });
         // Wait for some time at the end
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
-        //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
 
+        //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
         AssignFrameData();
         AssignTrialData();
+    }
+
+    public override void FinishTrialCleanup()
+    {
+        // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
+        DestroyTextOnExperimenterDisplay();
+        ResetDataTrackingVariables();
+        TokenFBController.enabled = false;
+
+        if (AbortCode == 0)
+            CurrentTaskLevel.SetBlockSummaryString();
+
+        if (AbortCode == AbortCodeDict["RestartBlock"])
+        {
+            CurrentTaskLevel.BlockSummaryString.Clear();
+            CurrentTaskLevel.BlockSummaryString.AppendLine("");
+        }
+    }
+
+    public void ResetBlockVariables()
+    {
+        SearchDurationsList.Clear();
+        AverageSearchDuration_InBlock = 0;
+        NumErrors_InBlock = 0;
+        NumCorrect_InBlock = 0;
+        NumRewardGiven_InBlock = 0;
+        NumTokenBarFull_InBlock = 0;
+        TouchDurationError_InBlock = 0;
+        Accuracy_InBlock = 0;
+        TotalTokensCollected_InBlock = 0;
     }
 
     protected override void DefineTrialStims()

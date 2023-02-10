@@ -321,6 +321,19 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
     }
 
+    public void ResetBlockVariables()
+    {
+        SearchDurationsList.Clear();
+        AverageSearchDuration_InBlock = 0;
+        NumErrors_InBlock = 0;
+        NumCorrect_InBlock = 0;
+        NumRewardPulses_InBlock = 0;
+        NumTokenBarFull_InBlock = 0;
+        TouchDurationError_InBlock = 0;
+        TotalTokensCollected_InBlock = 0;
+        Accuracy_InBlock = 0;
+    }
+
     protected override void DefineTrialStims()
     {
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 

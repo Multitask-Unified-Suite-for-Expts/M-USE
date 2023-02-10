@@ -454,7 +454,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
                 currentTask.CalculateBlockSummaryString();
             }
-            else if (AbortCode == 1) //If used Pause hotkey to end trial, end entire Block
+            else if (AbortCode == AbortCodeDict["Pause"]) //If used Pause hotkey to end trial, end entire Block
                 EndBlock = true;
         });
         LogTrialData();

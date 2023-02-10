@@ -215,6 +215,13 @@ namespace USE_ExperimentTemplate_Trial
                 AbortCodeDict.Add("EndTask", 5);
         }
 
+        public void AddRigidBody(GameObject go)
+        {
+            Rigidbody rb = go.AddComponent<Rigidbody>();
+            rb.useGravity = false;
+            rb.isKinematic = true;
+        }
+
 
 
         //Added helper methods for trials. 

@@ -24,52 +24,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     public override void DefineControlLevel()
     {
         mgTL = (MazeGame_TrialLevel)TrialLevel;
-        string TaskName = "MazeGame";
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            mgTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else mgTL.ContextExternalFilePath = ContextExternalFilePath;
-        
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeKeyFilePath"))
-            mazeKeyFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeKeyFilePath");
-        else Debug.LogError("Maze key file path settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeFilePath"))
-            mgTL.MazeFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "MazeFilePath");
-        else Debug.LogError("Maze File Path not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-            mgTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-        else Debug.LogError("Start Button Position settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-            mgTL.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-        else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TileSize"))
-            mgTL.TileSize = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TileSize");
-        else
-        {
-            mgTL.TileSize = 0.5f; // default value in the case it isn't specified
-            Debug.Log("Tile Size settings not defined in the TaskDef. Default setting of " + mgTL.TileSize + "is used instead.");
-        }
-        
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartColor"))
-            mgTL.startColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "StartColor");
-        else Debug.LogError("Start Color settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FinishColor"))
-            mgTL.finishColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "FinishColor");
-        else Debug.LogError("Finish Color settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "CorrectColor"))
-            mgTL.correctColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "CorrectColor");
-        else Debug.LogError("Correct Color settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "LastCorrectColor"))
-            mgTL.lastCorrectColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "LastCorrectColor");
-        else Debug.LogError("Last Correct Color settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "IncorrectRuleAbidingColor"))
-            mgTL.incorrectRuleAbidingColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "IncorrectRuleAbidingColor");
-        else Debug.LogError("Incorrect Rule Abiding Color settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "IncorrectRuleBreakingColor"))
-            mgTL.incorrectRuleBreakingColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "IncorrectRuleBreakingColor");
-        else Debug.LogError("Incorrect Rule Breaking Color settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "DefaultTileColor"))
-            mgTL.defaultTileColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "DefaultTileColor");
-        else Debug.LogError("Default Tile Color settings not defined in the TaskDef");
+
+        SetSettings();
         
         SetupTask.AddInitializationMethod(() =>
         { 
@@ -123,6 +79,57 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             MazeName = MazeName.Where((source, index) =>index != chosenIndex).ToArray();
         });
     }
+
+    private void SetSettings()
+    {
+        string TaskName = "MazeGame";
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
+            mgTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+        else mgTL.ContextExternalFilePath = ContextExternalFilePath;
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeKeyFilePath"))
+            mazeKeyFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeKeyFilePath");
+        else Debug.LogError("Maze key file path settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeFilePath"))
+            mgTL.MazeFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "MazeFilePath");
+        else Debug.LogError("Maze File Path not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+            mgTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+        else Debug.LogError("Start Button Position settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+            mgTL.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+        else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TileSize"))
+            mgTL.TileSize = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TileSize");
+        else
+        {
+            mgTL.TileSize = 0.5f; // default value in the case it isn't specified
+            Debug.Log("Tile Size settings not defined in the TaskDef. Default setting of " + mgTL.TileSize + "is used instead.");
+        }
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartColor"))
+            mgTL.startColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "StartColor");
+        else Debug.LogError("Start Color settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FinishColor"))
+            mgTL.finishColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "FinishColor");
+        else Debug.LogError("Finish Color settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "CorrectColor"))
+            mgTL.correctColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "CorrectColor");
+        else Debug.LogError("Correct Color settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "LastCorrectColor"))
+            mgTL.lastCorrectColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "LastCorrectColor");
+        else Debug.LogError("Last Correct Color settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "IncorrectRuleAbidingColor"))
+            mgTL.incorrectRuleAbidingColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "IncorrectRuleAbidingColor");
+        else Debug.LogError("Incorrect Rule Abiding Color settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "IncorrectRuleBreakingColor"))
+            mgTL.incorrectRuleBreakingColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "IncorrectRuleBreakingColor");
+        else Debug.LogError("Incorrect Rule Breaking Color settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "DefaultTileColor"))
+            mgTL.defaultTileColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "DefaultTileColor");
+        else Debug.LogError("Default Tile Color settings not defined in the TaskDef");
+    }
+
     public T GetCurrentBlockDef<T>() where T : BlockDef
     {
         return (T)CurrentBlockDef;

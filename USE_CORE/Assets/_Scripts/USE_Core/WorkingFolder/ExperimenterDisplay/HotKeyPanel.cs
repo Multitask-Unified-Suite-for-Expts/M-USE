@@ -34,11 +34,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
         hotKeyText.GetComponent<Text>().alignment = TextAnchor.UpperCenter;
         hotKeyText.GetComponent<Text>().text = "<size=25><b><color=#2d3436ff>Hot Keys</color></b></size>" + "\n\n<size=20>" + HKList.GenerateHotKeyDescriptions() + "</size>" + "\n-----------------------------------" +
             "\n\n<size=25><b><color=#2d3436ff>ConfigUI Control</color></b></size>" + "\n\n<size=20>" + ConfigUIList.GenerateConfigUIHotKeyDescriptions() + "</size>";
-
-        
     }
     public override void CustomPanelUpdate()
-
     {
         HKList.CheckAllHotKeyConditions();
         ConfigUIList.CheckAllHotKeyConditions();
@@ -72,7 +69,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 completeString = completeString + hk.GenerateTextDescription() + "\n";
             }
-
             Debug.Log("HotKeyDescriptions: " + completeString);
 
             return completeString;
@@ -84,7 +80,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 completeString = completeString + hk.GenerateTextDescription() + "\n";
             }
-
             // Debug.Log("ConfigUIHotKeyDescriptions: " + completeString);
 
             return completeString;
@@ -123,8 +118,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 HotKeys = CustomHotKeyList(); //allows users to specify task-specific lists - this will end up looking something like the various task-specific classes like WWW_TaskDef or whatever
                 //ConfigUIHotKeys = CustomConfigUIHotKeyList();
             }
-
-
             //GenerateTextForPanel(); //method that loops through each hotkey and creates the string to show the hotkey options, using the GenerateTextDescription function of each on
         }
 
@@ -140,8 +133,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 ConfigUIHotKeys = CustomConfigUIHotKeyList(); //allows users to specify task-specific lists - this will end up looking something like the various task-specific classes like WWW_TaskDef or whatever
 
             }
-
-
             //GenerateTextForPanel(); //method that loops through each hotkey and creates the string to show the hotkey options, using the GenerateTextDescription function of each on
         }
 
@@ -160,18 +151,18 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             //        var cams = GameObject.FindObjectsOfType<Camera>();
             //        foreach (Camera c in cams) //MirrorCam:0, BackgroundCamera:1, CR_Cam: 0, MainCameraCopy:1 (DC)
             //        {
-            //            Debug.Log(c.name + " before:" + c.targetDisplay);
+            //            Debug.Log(c.name + " before: " + c.targetDisplay);
             //            c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-            //            Debug.Log(c.name + " after:" + c.targetDisplay);
+            //            Debug.Log(c.name + " after: " + c.targetDisplay);
             //        }
             //        var canvases = GameObject.FindObjectsOfType<Canvas>();
             //        foreach (Canvas c in canvases) //ExperimenterCanvas: 1, TaskSelectionCanvas:0 (DC), InitScreenCanvas:1, CR_Canvas:0 (DC)
             //        {
-            //            Debug.Log(c.name + " before:" + c.targetDisplay);
+            //            Debug.Log(c.name + " before: " + c.targetDisplay);
             //            c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-            //            Debug.Log(c.name + " after:" + c.targetDisplay);
+            //            Debug.Log(c.name + " after: " + c.targetDisplay);
             //        }
-            //        //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            //        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             //    }
             //};
             //HotKeyList.Add(toggleDisplays);
@@ -199,39 +190,15 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.R),
                 hotKeyAction = () =>
                 {
-                    string taskName = HkPanel.TaskLevel.TaskName;
-                    List<string> dontDisable = new List<string>() { taskName + "_Camera", taskName + "_Scripts", taskName + "_DirectionalLight" };
-
-                    GameObject[] sceneKids = SceneManager.GetSceneByName(taskName).GetRootGameObjects();
-                    foreach (var kid in sceneKids)
-                        if (!dontDisable.Contains(kid.name) && kid.activeSelf)
-                            kid.SetActive(false);
-                   
-                    //If using stims, destroy them since not gonna hit finish trial state!!
-                    int nStimGroups = HkPanel.TrialLevel.TrialStims.Count;
-                    for (int iG = 0; iG < nStimGroups; iG++)
-                    {
-                        HkPanel.TrialLevel.TrialStims[0].DestroyStimGroup();
-                        HkPanel.TrialLevel.TrialStims.RemoveAt(0);
-                    }
-
-                    if (HkPanel.TrialLevel.TokenFBController.isActiveAndEnabled)
-                        HkPanel.TrialLevel.TokenFBController.enabled = false;
-
-                    if(HkPanel.TrialLevel.TokenFBController != null)
-                        HkPanel.TrialLevel.TokenFBController.SetTokenBarValue(HkPanel.TrialLevel.InitialTokenAmount);
-
-                    if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
-                        HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
-
-                    HkPanel.TrialLevel.TrialCount_InBlock = -1;
-                    HkPanel.TrialLevel.TrialCount_InTask--;
-                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("SetupTrial")); 
+                    HkPanel.TrialLevel.AbortCode = 2;
+                    HkPanel.TrialLevel.ForceBlockEnd = true;
+                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+                    HkPanel.TaskLevel.BlockCount--;
                 }
             };
             HotKeyList.Add(restartBlock);
 
-            ////PreviousBlock Hot Key
+            //PreviousBlock Hot Key
             //HotKey previousBlock = new HotKey
             //{
             //    keyDescription = "B",
@@ -240,13 +207,16 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             //    hotKeyAction = () =>
             //    {
             //        if (HkPanel.TrialLevel.BlockCount == 0)
+            //        {
+            //            Debug.Log("Can't go to previous block, because this is the first block!");
             //            return;
+            //        }
             //        else
             //        {
-            //            //HkPanel.TrialLevel.ForceBlockEnd = true;
+            //            HkPanel.TrialLevel.AbortCode = 4;
+            //            HkPanel.TrialLevel.ForceBlockEnd = true;
             //            HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
             //            HkPanel.TaskLevel.BlockCount -= 2;
-            //            HkPanel.TrialLevel.TrialCount_InBlock = 0;
             //        }
             //    }
             //};
@@ -260,8 +230,9 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.N),
                 hotKeyAction = () =>
                 {
-                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI"));
+                    HkPanel.TrialLevel.AbortCode = 3;
                     HkPanel.TrialLevel.ForceBlockEnd = true;
+                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
                 }
             };
             HotKeyList.Add(endBlock);
@@ -274,11 +245,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.E),
                 hotKeyAction = () =>
                 {
-                    /*HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI")); 
+                    HkPanel.TrialLevel.AbortCode = 5;
                     HkPanel.TrialLevel.ForceBlockEnd = true;
-                    HkPanel.TaskLevel.Terminated = true; 
-                    Destroy(GameObject.Find("Controllers")); //Delete current Controllers GO, since Task Selection creates new one*/
-                    HkPanel.TrialLevel.ForceBlockEnd = true; 
                     HkPanel.TaskLevel.SpecifyCurrentState(HkPanel.TaskLevel.GetStateFromName("FinishTask"));
                 }
             };
@@ -310,25 +278,17 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 {
                     if (!HkPanel.TrialLevel.Paused) 
                     {
-                        //Go to end of trial:
-                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("ITI"));
+                        HkPanel.SessionLevel.PauseCanvasGO.SetActive(true);
+                        HkPanel.TrialLevel.AbortCode = 1;
 
-                        int trialsInBlock = HkPanel.TaskLevel.currentBlockDef.TrialDefs.Count;
-                        int trialCountInBlock = HkPanel.TrialLevel.TrialCount_InBlock;
-                        //If more trials in current block, end the block:
-                        if (trialsInBlock > 1 && trialCountInBlock + 1 < trialsInBlock)
-                            HkPanel.TrialLevel.ForceBlockEnd = true;
+                        //Go to end of trial:
+                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial")); //Finish Trial change to
 
                         //Deactivate Controllers (so that tokenbar not still on screen):
                         GameObject controllers = GameObject.Find("Controllers");
                         if (controllers != null)
                             controllers.SetActive(false);
 
-                        //Turn gray pause screen on:
-                        HkPanel.SessionLevel.PauseCanvasGO.SetActive(true);
-                        //Send abort code: 
-                        HkPanel.TrialLevel.AbortCode = 1;
-                        //Pause Trial Level
                         HkPanel.TrialLevel.Paused = true;
                     }
                     else

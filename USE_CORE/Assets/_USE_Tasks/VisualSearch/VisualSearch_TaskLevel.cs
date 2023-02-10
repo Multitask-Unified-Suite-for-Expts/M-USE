@@ -40,7 +40,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             //Set the Initial Token Values for the Block
             vsTL.TokenFBController.SetTotalTokensNum(vsBD.NumTokenBar);
             vsTL.TokenFBController.SetTokenBarValue(vsBD.NumInitialTokens);
-            vsTL.InitialTokenAmount = vsBD.NumInitialTokens;
             SetBlockSummaryString();
         });
         BlockFeedback.AddInitializationMethod(() =>
@@ -66,6 +65,8 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         vsTL.NumRewardPulses_InBlock = 0;
         vsTL.NumTokenBarFull_InBlock = 0;
         vsTL.TouchDurationError_InBlock = 0;
+        vsTL.TotalTokensCollected_InBlock = 0;
+        vsTL.Accuracy_InBlock = 0;
     }
     public override OrderedDictionary GetSummaryData()
     {
@@ -138,7 +139,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("Num Token Bar Filled", ()=> vsTL.NumTokenBarFull_InBlock);
         BlockData.AddDatum("Total Tokens Collected", ()=> vsTL.TotalTokensCollected_InBlock);
     }
-    void ClearStrings()
+    public void ClearStrings()
     {
         CurrentBlockString = "";
         BlockSummaryString.Clear();

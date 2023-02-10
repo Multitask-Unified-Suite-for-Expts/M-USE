@@ -194,7 +194,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         {
             Input.ResetInputAxes(); //reset input in case they still touching!
             SquareMaterial.color = Color.white;
-            if (!SquareGO.activeSelf)
+            if (!SquareGO.activeInHierarchy)
                 ActivateSquareAndBackdrop();
             WhiteStartTime = Time.time;
             WhiteTimeoutTime = 0;
@@ -234,7 +234,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         {
             Input.ResetInputAxes(); //reset input in case they still touching!
             SquareMaterial.color = LightBlueColor;
-            if (!SquareGO.activeSelf)
+            if (!SquareGO.activeInHierarchy)
                 ActivateSquareAndBackdrop();
             BlueStartTime = Time.time;
             BlueSquareTouched = false;
@@ -403,10 +403,17 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         Feedback.AddTimer(() => currentTrial.FbDuration, ITI);
 
         //ITI state ---------------------------------------------------------------------------------------------------------------------------------
-        ITI.AddInitializationMethod(() =>
+        ITI.AddUpdateMethod(() =>
+        {
+            if(InputBroker.GetMouseButtonUp(0))
+                ItiTouches_Trial++;
+        });
+        ITI.AddTimer(() => currentTrial.ItiDuration, FinishTrial);
+
+        //FinishTrial State (default state) ---------------------------------------------------------------------------------------------------------------------------------
+        FinishTrial.AddInitializationMethod(() =>
         {
             SquareGO.SetActive(false);
-
             ConfigVariablesLoaded = false;
 
             if (GiveReleaseReward || GiveTouchReward)
@@ -417,12 +424,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             else
                 TrialCompletionList.Insert(0, 0);
         });
-        ITI.AddUpdateMethod(() =>
-        {
-            if(InputBroker.GetMouseButtonUp(0))
-                ItiTouches_Trial++;
-        });
-        ITI.AddTimer(() => currentTrial.ItiDuration, FinishTrial, () =>
+        FinishTrial.AddUniversalTerminationMethod(() =>
         {
             AddTrialTouchNumsToBlock();
             TrialsCompleted_Block++;
@@ -431,7 +433,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             CheckIfBlockShouldEnd();
         });
-
         LogTrialData();
         LogFrameData();
     }
@@ -661,7 +662,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     void LogFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
-        FrameData.AddDatum("SquareGO", () => SquareGO.activeSelf);
+        FrameData.AddDatum("SquareGO", () => SquareGO.activeInHierarchy);
     }
 
 }

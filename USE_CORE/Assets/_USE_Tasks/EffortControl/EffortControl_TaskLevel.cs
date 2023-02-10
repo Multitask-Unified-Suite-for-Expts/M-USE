@@ -15,6 +15,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 {
     [HideInInspector] public string ContextName;
 
+    //Task Values used for SummaryData file
     [HideInInspector] public int Completions_Task = 0;
     [HideInInspector] public int RewardPulses_Task = 0;
     [HideInInspector] public int Touches_Task = 0;
@@ -26,8 +27,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int NumChosenLowerEffort_Task = 0;
 
     [HideInInspector] public string CurrentBlockString;
-    [HideInInspector] public StringBuilder PreviousBlocksString;
-    [HideInInspector] public int BlockStringsAdded = 0;
 
     EffortControl_BlockDef currentBlock => GetCurrentBlockDef<EffortControl_BlockDef>();
     EffortControl_TrialLevel trialLevel;
@@ -46,11 +45,8 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     {
         trialLevel = (EffortControl_TrialLevel)TrialLevel;
 
-        SetSettings();
-
         CurrentBlockString = "";
-        PreviousBlocksString = new StringBuilder();
-
+        SetSettings();
         SetupBlockData();
 
         SetupTask.AddInitializationMethod(() =>
@@ -58,38 +54,9 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(trialLevel.MaterialFilePath, ContextName, "LinearDark"));
         });
 
-        RunBlock.AddInitializationMethod(() =>
-        {
-            trialLevel.RewardPulses_Block = 0;
-            trialLevel.Completions_Block = 0;
-            trialLevel.Touches_Block = 0;
-            trialLevel.NumChosenLeft_Block = 0;
-            trialLevel.NumChosenRight_Block = 0;
-            trialLevel.NumHigherEffortChosen_Block = 0;
-            trialLevel.NumLowerEffortChosen_Block = 0;
-            trialLevel.NumHigherRewardChosen_Block = 0;
-            trialLevel.NumLowerRewardChosen_Block = 0;
+        RunBlock.AddInitializationMethod(() => trialLevel.ResetBlockVariables());
 
-            CalculateBlockSummaryString();
-        });
-
-        BlockFeedback.AddInitializationMethod(() =>
-        {
-            if (BlockStringsAdded > 0)
-                CurrentBlockString += "\n";
-            BlockStringsAdded++;
-            PreviousBlocksString.Insert(0, CurrentBlockString);
-
-            RewardPulses_Task += trialLevel.RewardPulses_Block;
-            Completions_Task += trialLevel.Completions_Block;
-            Touches_Task += trialLevel.Touches_Block;
-            NumChosenLeft_Task += trialLevel.NumChosenLeft_Block;
-            NumChosenRight_Task += trialLevel.NumChosenRight_Block;
-            NumChosenHigherEffort_Task += trialLevel.NumHigherEffortChosen_Block;
-            NumChosenLowerEffort_Task += trialLevel.NumLowerEffortChosen_Block;
-            NumChosenHigherReward_Task += trialLevel.NumHigherRewardChosen_Block;
-            NumChosenLowerReward_Task += trialLevel.NumLowerRewardChosen_Block;
-        });
+        BlockFeedback.AddInitializationMethod(() => AddBlockValuesToTaskValues());
     }
 
     public void SetSettings()
@@ -126,6 +93,19 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
     }
 
+    public void AddBlockValuesToTaskValues()
+    {
+        RewardPulses_Task += trialLevel.RewardPulses_Block;
+        Completions_Task += trialLevel.Completions_Block;
+        Touches_Task += trialLevel.TotalTouches_Block;
+        NumChosenLeft_Task += trialLevel.NumChosenLeft_Block;
+        NumChosenRight_Task += trialLevel.NumChosenRight_Block;
+        NumChosenHigherEffort_Task += trialLevel.NumHigherEffortChosen_Block;
+        NumChosenLowerEffort_Task += trialLevel.NumLowerEffortChosen_Block;
+        NumChosenHigherReward_Task += trialLevel.NumHigherRewardChosen_Block;
+        NumChosenLowerReward_Task += trialLevel.NumLowerRewardChosen_Block;
+    }
+
     public override OrderedDictionary GetSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary();
@@ -147,9 +127,9 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     {
         ClearStrings();
 
-        CurrentBlockString = ("<b>Block " + "(" + currentBlock.BlockName + "):" + "</b>" +
+        CurrentBlockString = ("<b>Block Info:</b>" +
                         "\nTrialsCompleted: " + trialLevel.Completions_Block +
-                        "\nTouches: " + trialLevel.Touches_Block +
+                        "\nTouches: " + trialLevel.TotalTouches_Block +
                         "\nRewardPulses: " + trialLevel.RewardPulses_Block +
                         "\nChoseLeft: " + trialLevel.NumChosenLeft_Block +
                         "\nChoseRight: " + trialLevel.NumChosenRight_Block +
@@ -158,10 +138,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
                         "\nChoseHigherEffort: " + trialLevel.NumHigherEffortChosen_Block +
                         "\nChoseLowerEffort: " + trialLevel.NumLowerEffortChosen_Block +
                         "\n");
-
         BlockSummaryString.AppendLine(CurrentBlockString).ToString();
-        if (PreviousBlocksString.Length > 0)
-            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
     }
 
     void SetupBlockData()
@@ -173,11 +150,11 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("ChoseLowerReward", () => trialLevel.NumLowerRewardChosen_Block);
         BlockData.AddDatum("ChoseHigherEffort", () => trialLevel.NumHigherEffortChosen_Block);
         BlockData.AddDatum("ChoseLowerEffort", () => trialLevel.NumLowerEffortChosen_Block);
-        BlockData.AddDatum("Touches", () => trialLevel.Touches_Block);
+        BlockData.AddDatum("TotalTouches", () => trialLevel.TotalTouches_Block);
         BlockData.AddDatum("RewardPulses", () => trialLevel.RewardPulses_Block);
     }
 
-    void ClearStrings()
+    public void ClearStrings()
     {
         CurrentBlockString = "";
         BlockSummaryString.Clear();

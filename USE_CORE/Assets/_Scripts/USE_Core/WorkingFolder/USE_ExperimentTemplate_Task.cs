@@ -186,6 +186,14 @@ namespace USE_ExperimentTemplate_Task
                 BlockData.WriteData();
             });
 
+            FinishTask.AddDefaultInitializationMethod(() =>
+            {
+                //Clear trialsummarystring and Blocksummarystring at end of task:
+                TrialLevel.TrialSummaryString = "";
+                BlockSummaryString.Clear();
+                BlockSummaryString.AppendLine("");
+            });
+
             FinishTask.SpecifyTermination(() => true, () => null);
 
             AddDefaultTerminationMethod(() =>

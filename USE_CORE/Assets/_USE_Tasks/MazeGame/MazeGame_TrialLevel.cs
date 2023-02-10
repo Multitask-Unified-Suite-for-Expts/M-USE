@@ -666,15 +666,16 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
         if (!playerViewLoaded)
         {
-            foreach (MazeGame_StimDef sd in tiles.stimDefs)
+            foreach (StimDef sd in tiles.stimDefs)
             {
-                Tile tileComponent = sd.StimGameObject.GetComponent<Tile>();
+                MazeGame_StimDef stim = (MazeGame_StimDef)sd;
+                Tile tileComponent = stim.StimGameObject.GetComponent<Tile>();
                 Vector2 textSize = new Vector2(200, 200);
                 for (int i = 0; i < currMaze.mPath.Count; i++)
                 {
                     if(tileComponent.mCoord == currMaze.mPath[i])
                     {
-                        textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(sd.StimLocation), playerViewParent);
+                        textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent);
                         playerViewText = playerView.writeText(i.ToString(),
                             Color.red, textLocation, textSize, playerViewParent);
                     }

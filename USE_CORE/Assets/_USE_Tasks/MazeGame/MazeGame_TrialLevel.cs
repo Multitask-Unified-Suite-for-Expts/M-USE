@@ -87,7 +87,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         incorrectRuleBreakingFbDuration;
 
     //Block Data Variables
-    public int NumRewardPulses_InBlock, NumNonStimSelections_InBlock;
+    //public int NumRewardPulses_InBlock, NonStimTouches_InBlock = 0;
 
 
     public string ContextExternalFilePath, MazeFilePath;
@@ -151,6 +151,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private float valueRemaining;
     private float valueToAdd;
 
+    public bool ContextActive;
 
     private bool variablesLoaded;
     public MazeGame_TrialDef CurrentTrialDef => GetCurrentTrialDef<MazeGame_TrialDef>();
@@ -207,6 +208,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             var textMaze = File.ReadAllLines(MazeFilePath + Path.DirectorySeparatorChar + mazeDefName);
             currMaze = new Maze(textMaze[0]);
             ResetTrialTrackingVariables();
+            AssignBlockVariables();
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -222,7 +224,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             ConfigureSlider();
 
-            NumNonStimSelections_InBlock += mouseHandler.GetNumNonStimSelection();
+            //NonStimTouches_InBlock += mouseHandler.GetNumNonStimSelection(); COUNT ALL TOUCHES BETTER OR CHANGE NAME
             InstantiateCurrMaze();
             if(!playerViewLoaded) CreateTextOnExperimenterDisplay();
 //            EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderReset"]);
@@ -304,7 +306,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (SyncBoxController != null)
             {
                 SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
-                NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
+                CurrentTaskLevel.numRewardPulses_InBlock += CurrentTrialDef.NumPulses;
             }
         });
 
@@ -347,7 +349,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         for (var x = 1; x <= dim.x; x++)
         for (var y = 1; y <= dim.y; y++)
         {
-            Debug.Log("X " + x + "Y" + y);
             tile = Instantiate(TilePrefab, MazeContainer.transform);
             SetGameConfigs();
             tile.transform.localScale = new Vector3(TileSize, TileSize, 0.5f);
@@ -360,7 +361,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             tile.transform.position = newTilePosition;
             tile.mCoord = new Coords(x, y);
-            Debug.Log("TILE.MCOORD ASSIGNMENT: " + tile.mCoord);
 
             if (x == currMaze.mStart.x && y == currMaze.mStart.y)
                 tile.gameObject.GetComponent<Tile>().setColor(tile.START_COLOR);
@@ -637,7 +637,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         ruleAbidingErrors_InTrial = 0;
         ruleBreakingErrors_InTrial = 0;
 
-        playerViewLoaded = false;
+        //playerViewLoaded = false;
         pathProgress.Clear();
         pathProgressGO.Clear();
         end = false;
@@ -671,24 +671,45 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             
             for (int i = 0; i < currMaze.mPath.Count; i++)
             {
-                Debug.Log("CURRMAZE.MPATH[I] " + currMaze.mPath[i]);
                 foreach (StimDef sd in tiles.stimDefs)
                 {
                     Tile tileComponent = sd.StimGameObject.GetComponent<Tile>();
                     Vector2 textSize = new Vector2(200, 200);
-                    Debug.Log("SD COORD: " + tileComponent.mCoord);
                     if(tileComponent.mCoord == currMaze.mPath[i])
                     {
-                        textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(tile.transform.position), playerViewParent);
+                        textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(tileComponent.transform.position), playerViewParent);
                         playerViewText = playerView.writeText((i+1).ToString(),
                             Color.red, textLocation, textSize, playerViewParent);
+                        playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                     }
                 }
             }
-            playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
-            playerViewTextList.Add(playerViewText);
             
+            playerViewTextList.Add(playerViewText);
             playerViewLoaded = true;
         }
+    }
+    private void DestroyTextOnExperimenterDisplay()
+    {
+        GameObject cam = GameObject.Find("MainCameraCopy");
+        DestroyChildren(cam);
+    }
+    public override void FinishTrialCleanup()
+    {
+        DestroyTextOnExperimenterDisplay();
+        tiles.DestroyStimGroup();
+
+        if (TokenFBController.isActiveAndEnabled)
+            TokenFBController.enabled = false;
+
+        if(AbortCode == 0)
+            CurrentTaskLevel.CalculateBlockSummaryString();
+
+        if(AbortCode == AbortCodeDict["RestartBlock"])
+        {
+            CurrentTaskLevel.ClearStrings();
+            CurrentTaskLevel.BlockSummaryString.AppendLine("");
+        }
+
     }
 }

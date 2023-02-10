@@ -10,8 +10,8 @@ using USE_ExperimentTemplate_Trial;
 public class Tile : MonoBehaviour
 {
 
-    // Tiles are distiguished by their (x, y) coordinate using standard C1 coordinate system, zero-indexed
-    // This means the bottom-left-most tile is (0, 0).
+    // Tiles are distiguished by their (x, y) coordinate 
+    // This means the bottom-left-most tile is (1, 1).
     public Coords mCoord;
    
     // DEFAULT MAZE CONFIGS - CONFIGURABLE IN TASK DEF/ TRIAL LEVEL

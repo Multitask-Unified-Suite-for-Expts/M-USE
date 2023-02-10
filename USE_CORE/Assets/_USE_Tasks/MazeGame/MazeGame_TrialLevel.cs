@@ -224,6 +224,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             NumNonStimSelections_InBlock += mouseHandler.GetNumNonStimSelection();
             InstantiateCurrMaze();
+            if(!playerViewLoaded) CreateTextOnExperimenterDisplay();
 //            EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderReset"]);
         });
         MouseTracker.AddSelectionHandler(mouseHandler, ChooseTile);
@@ -346,6 +347,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         for (var x = 1; x <= dim.x; x++)
         for (var y = 1; y <= dim.y; y++)
         {
+            Debug.Log("X " + x + "Y" + y);
             tile = Instantiate(TilePrefab, MazeContainer.transform);
             SetGameConfigs();
             tile.transform.localScale = new Vector3(TileSize, TileSize, 0.5f);
@@ -358,6 +360,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             tile.transform.position = newTilePosition;
             tile.mCoord = new Coords(x, y);
+            Debug.Log("TILE.MCOORD ASSIGNMENT: " + tile.mCoord);
 
             if (x == currMaze.mStart.x && y == currMaze.mStart.y)
                 tile.gameObject.GetComponent<Tile>().setColor(tile.START_COLOR);
@@ -367,7 +370,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 tile.gameObject.GetComponent<Tile>().setColor(tile.DEFAULT_TILE_COLOR);
 
             tiles.AddStims(tile.gameObject);
-            if(!playerViewLoaded) CreateTextOnExperimenterDisplay();
         }
     }
 
@@ -666,23 +668,26 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
         if (!playerViewLoaded)
         {
-            foreach (StimDef sd in tiles.stimDefs)
+            
+            for (int i = 0; i < currMaze.mPath.Count; i++)
             {
-                MazeGame_StimDef stim = (MazeGame_StimDef)sd;
-                Tile tileComponent = stim.StimGameObject.GetComponent<Tile>();
-                Vector2 textSize = new Vector2(200, 200);
-                for (int i = 0; i < currMaze.mPath.Count; i++)
+                Debug.Log("CURRMAZE.MPATH[I] " + currMaze.mPath[i]);
+                foreach (StimDef sd in tiles.stimDefs)
                 {
+                    Tile tileComponent = sd.StimGameObject.GetComponent<Tile>();
+                    Vector2 textSize = new Vector2(200, 200);
+                    Debug.Log("SD COORD: " + tileComponent.mCoord);
                     if(tileComponent.mCoord == currMaze.mPath[i])
                     {
-                        textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent);
-                        playerViewText = playerView.writeText(i.ToString(),
+                        textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(tile.transform.position), playerViewParent);
+                        playerViewText = playerView.writeText((i+1).ToString(),
                             Color.red, textLocation, textSize, playerViewParent);
                     }
                 }
-                playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
-                playerViewTextList.Add(playerViewText);
             }
+            playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
+            playerViewTextList.Add(playerViewText);
+            
             playerViewLoaded = true;
         }
     }

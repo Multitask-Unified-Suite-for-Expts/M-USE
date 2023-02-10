@@ -142,7 +142,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             mgTL.defaultTileColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "DefaultTileColor");
         else Debug.LogError("Default Tile Color settings not defined in the TaskDef");
     }
-
     private void LoadMazeDef()
     {
         SessionSettings.ImportSettings_SingleTypeArray<MazeDef>("MazeDefs", mazeKeyFilePath);
@@ -163,7 +162,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             MazeName[iMaze] = MazeDefs[iMaze].mName;
         }
     }
-
     private void FindMaze()
     {
         //for given block MazeDims, MazeNumSquares, MazeNumTurns, get all indices of that value, find intersect

@@ -199,28 +199,27 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             HotKeyList.Add(restartBlock);
 
             //PreviousBlock Hot Key
-            //HotKey previousBlock = new HotKey
-            //{
-            //    keyDescription = "B",
-            //    actionName = "Previous Block",
-            //    hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.B),
-            //    hotKeyAction = () =>
-            //    {
-            //        if (HkPanel.TrialLevel.BlockCount == 0)
-            //        {
-            //            Debug.Log("Can't go to previous block, because this is the first block!");
-            //            return;
-            //        }
-            //        else
-            //        {
-            //            HkPanel.TrialLevel.AbortCode = 4;
-            //            HkPanel.TrialLevel.ForceBlockEnd = true;
-            //            HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
-            //            HkPanel.TaskLevel.BlockCount -= 2;
-            //        }
-            //    }
-            //};
-            //HotKeyList.Add(previousBlock);
+            HotKey previousBlock = new HotKey
+            {
+                keyDescription = "B",
+                actionName = "Previous Block",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.B),
+                hotKeyAction = () =>
+                {
+                    HkPanel.TrialLevel.AbortCode = 4;
+                    HkPanel.TrialLevel.ForceBlockEnd = true;
+                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+                    
+                    if (HkPanel.TrialLevel.BlockCount == 0)
+                    {
+                        Debug.Log("Can't go to previous block, because this is the first block! Restarting Current Block instead.");
+                        HkPanel.TaskLevel.BlockCount--;
+                    }
+                    else
+                        HkPanel.TaskLevel.BlockCount -= 2;
+                }
+            };
+            HotKeyList.Add(previousBlock);
 
             //End Block Hot Key
             HotKey endBlock = new HotKey

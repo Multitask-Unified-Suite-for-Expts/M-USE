@@ -505,7 +505,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         if(AbortCode == 0)
             CurrentTaskLevel.SetBlockSummaryString();
 
-        if (AbortCode == AbortCodeDict["RestartBlock"])
+        if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"])
         {
             CurrentTaskLevel.BlockSummaryString.Clear();
             CurrentTaskLevel.BlockSummaryString.AppendLine("");

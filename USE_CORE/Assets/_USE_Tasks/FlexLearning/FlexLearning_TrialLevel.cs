@@ -156,6 +156,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
 
             StartButton.SetActive(true);
+
+            CurrentTaskLevel.CalculateBlockSummaryString();
         });
         InitTrial.AddUpdateMethod(() =>
         {
@@ -290,9 +292,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
                                            (NumTokenBarFull_InBlock* CurrentTrialDef.NumTokenBar);
-            SetTrialSummaryString();
-            CurrentTaskLevel.CalculateBlockSummaryString();
-            
+            SetTrialSummaryString();            
             delayDuration = tokenFbDuration.value;
             stateAfterDelay = ITI;
         });
@@ -304,15 +304,27 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 ContextName = "itiImage";
                 RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
             }
-            
-            // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
-            tStim.ToggleVisibility(false);
-            TokenFBController.enabled = false;
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
         AssignTrialData();
         AssignFrameData();
+    }
+
+    public override void FinishTrialCleanup()
+    {
+        // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
+        tStim.ToggleVisibility(false);
+        TokenFBController.enabled = false;
+
+        if (AbortCode == 0)
+            CurrentTaskLevel.CalculateBlockSummaryString();
+
+        if (AbortCode == AbortCodeDict["RestartBlock"])
+        {
+            CurrentTaskLevel.ClearStrings();
+            CurrentTaskLevel.BlockSummaryString.AppendLine("");
+        }
     }
 
     protected override void DefineTrialStims()

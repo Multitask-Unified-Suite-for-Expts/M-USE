@@ -624,10 +624,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Red = StimLeft.GetComponent<Renderer>().material.color;
         StimLeft.GetComponent<Renderer>().material.color = Red;
         TrialStimInitLocalScale = StimLeft.transform.localScale;
+        AddRigidBody(StimLeft);
 
         StimRight = Instantiate(StimRightPrefab, StimRightPrefab.transform.position, StimRightPrefab.transform.rotation);
         StimRight.name = "StimRight";
         StimRight.GetComponent<Renderer>().material.color = Red;
+        AddRigidBody(StimRight);
 
         Reward = Instantiate(RewardPrefab, RewardPrefab.transform.position, RewardPrefab.transform.rotation);
         Reward.name = "Reward";
@@ -766,6 +768,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             outline.transform.parent = container.transform;
             outline.name = "Outline" + containerName + (i);
             outline.transform.localScale += (i) * ScaleUpAmount;
+            AddRigidBody(outline);
             outline.SetActive(true);
         }
     }
@@ -779,6 +782,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             GameObject RewardClone = Instantiate(Reward, pos, Reward.transform.rotation, container.transform);
             RewardClone.transform.Translate(new Vector3(i * width, 0, 0), Space.World);
             RewardClone.name = "Reward" + SideChoice + (i + 1);
+            AddRigidBody(RewardClone);
             RewardClone.SetActive(true);
         }
     }

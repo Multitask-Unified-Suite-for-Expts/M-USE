@@ -283,7 +283,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
                                            (NumTokenBarFull_InBlock * CurrentTrialDef.NumTokenBar);
             SetTrialSummaryString();
-            //CurrentTaskLevel.SetBlockSummaryString();
             stateAfterDelay = ITI;
             delayDuration = tokenFbDuration.value;
         });
@@ -316,11 +315,23 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
         if(AbortCode == AbortCodeDict["RestartBlock"])
         {
-            Debug.Log("GOING TO CLEAR STRINGS!");
             CurrentTaskLevel.ClearStrings();
             CurrentTaskLevel.BlockSummaryString.AppendLine("");
         }
 
+    }
+
+    public void ResetBlockVariables()
+    {
+        SearchDurationsList.Clear();
+        AverageSearchDuration_InBlock = 0;
+        NumErrors_InBlock = 0;
+        NumCorrect_InBlock = 0;
+        NumRewardPulses_InBlock = 0;
+        NumTokenBarFull_InBlock = 0;
+        TouchDurationError_InBlock = 0;
+        TotalTokensCollected_InBlock = 0;
+        Accuracy_InBlock = 0;
     }
 
     protected override void DefineTrialStims()

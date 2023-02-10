@@ -214,6 +214,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 variablesLoaded = true;
                 LoadTrialVariables();
             }
+            ResetTrialVariables();
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
             if (slotErrorCount_InBlock >= CurrentTrialDef.ErrorThreshold || distractorSlotErrorCount_InBlock > CurrentTrialDef.ErrorThreshold || touchDurationErrorCount_InBlock > CurrentTrialDef.ErrorThreshold || repetitionErrorCount_InBlock > CurrentTrialDef.ErrorThreshold || noSelectionErrorCount_InBlock > CurrentTrialDef.ErrorThreshold)
@@ -473,31 +474,68 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 errorTypeString = "NoSelectionError";
                 noSelectionErrorCount_InBlock++;
             }
-            searchStims.ToggleVisibility(false);
-            distractorStims.ToggleVisibility(false);
+
             if (NeutralITI)
             {
                 ContextName = "itiImage";
                 RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
             }
-            DestroyTextOnExperimenterDisplay();
-            GenerateFinalTrialData();
-            searchStims.ToggleVisibility(false);
-            sliderGO.SetActive(false);
-            CurrentTaskLevel.SetBlockSummaryString();
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
         {
-            CurrentTaskLevel.SetBlockSummaryString();
-            ClearDataLogging();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
-            
         });
         //------------------------------------------------------------------------ADDING VALUES TO DATA FILE--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         LogTrialData();
         LogFrameData();
         ClearDataLogging();
+    }
+
+    public override void FinishTrialCleanup()
+    {
+        searchStims.ToggleVisibility(false);
+        distractorStims.ToggleVisibility(false);
+        DestroyTextOnExperimenterDisplay();
+        GenerateFinalTrialData();
+        searchStims.ToggleVisibility(false);
+        sliderGO.SetActive(false);
+        ClearDataLogging();
+
+        if(AbortCode == 0)
+            CurrentTaskLevel.SetBlockSummaryString();
+
+        if (AbortCode == AbortCodeDict["RestartBlock"])
+        {
+            CurrentTaskLevel.BlockSummaryString.Clear();
+            CurrentTaskLevel.BlockSummaryString.AppendLine("");
+        }
+    }
+
+    public void ResetTrialVariables()
+    {
+        searchDuration = 0;
+        CorrectSelection = false;
+    }
+
+    public void ResetBlockVariables()
+    {
+        errorType_InBlockString = "";
+        errorType_InBlock.Clear();
+        slotErrorCount_InBlock = 0;
+        distractorSlotErrorCount_InBlock = 0;
+        repetitionErrorCount_InBlock = 0;
+        noSelectionErrorCount_InBlock = 0;
+        touchDurationErrorCount_InBlock = 0;
+        numNonStimSelections_InBlock = 0;
+        numRewardGiven_InBlock = 0;
+        //comment better here
+        Array.Clear(numTotal_InBlock, 0, numTotal_InBlock.Length);
+        Array.Clear(numCorrect_InBlock, 0, numCorrect_InBlock.Length);
+        Array.Clear(numErrors_InBlock, 0, numErrors_InBlock.Length);
+        accuracyLog_InBlock = "";
+        averageSearchDuration_InBlock = 0;
+        runningAcc.Clear();
     }
     
     protected override bool CheckBlockEnd()

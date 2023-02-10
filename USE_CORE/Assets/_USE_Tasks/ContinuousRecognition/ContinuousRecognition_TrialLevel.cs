@@ -422,7 +422,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-        DisplayResults.AddTimer(() => itiDuration.value, ITI, () =>
+        DisplayResults.AddTimer(() => displayResultsDuration.value, ITI, () =>
         {
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
@@ -489,13 +489,19 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     void RemoveShakeStimScript(StimGroup stimGroup)
     {
         foreach (var stim in stimGroup.stimDefs)
+        {
             Destroy(stim.StimGameObject.GetComponent<ShakeStim>());
+            Destroy(stim.StimGameObject.GetComponent<Rigidbody>());
+        }
     }
 
     void AddShakeStimScript(StimGroup stimGroup)
     {
         foreach (var stim in stimGroup.stimDefs)
+        {
+            AddRigidBody(stim.StimGameObject);
             stim.StimGameObject.AddComponent<ShakeStim>();
+        }
     }
 
     void DeactivateTextObjects()

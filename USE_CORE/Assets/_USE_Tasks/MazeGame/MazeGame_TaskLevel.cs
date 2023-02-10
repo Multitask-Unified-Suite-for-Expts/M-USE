@@ -77,6 +77,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         LoadMazeDef();
         RunBlock.AddInitializationMethod(() =>
         {
+            
             //HARD CODED TO MINIMIZE EMPTY SKYBOX DURATION, CAN'T ACCESS TRIAL DEF YET & CONTEXT NOT IN BLOCK DEF
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + "Concrete3.png");
             mgTL.ContextActive = true;
@@ -88,6 +89,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         });
         BlockFeedback.AddInitializationMethod(() =>
         {
+            mgTL.DestroyChildren(GameObject.Find("MainCameraCopy"));
             if (mgTL.AbortCode == 0)
             {
                 CurrentBlockString += "\n" + "\n";

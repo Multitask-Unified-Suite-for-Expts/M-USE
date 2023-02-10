@@ -126,7 +126,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     //Player View Variables
     private PlayerViewPanel playerView;
     private bool playerViewLoaded;
-    private Transform playerViewParent; // Helps set things onto the player view in the experimenter display
+    private GameObject playerViewParent; // Helps set things onto the player view in the experimenter display
     private int response;
 
     // Touch Evaluation Variables
@@ -193,8 +193,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             tileTex = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + TileTexture + ".png");
 
             //player view variables
-            playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
-            playerViewText = new GameObject("PlayerViewText");
+            
+            playerViewParent = GameObject.Find("MainCameraCopy");
         });
         SetupTrial.AddInitializationMethod(() =>
         {
@@ -226,7 +226,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             //NonStimTouches_InBlock += mouseHandler.GetNumNonStimSelection(); COUNT ALL TOUCHES BETTER OR CHANGE NAME
             InstantiateCurrMaze();
-            if(!playerViewLoaded) CreateTextOnExperimenterDisplay();
+            if(TrialCount_InBlock==0) CreateTextOnExperimenterDisplay();
+            if(!playerViewLoaded) ActivateChildren(playerViewParent);
 //            EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderReset"]);
         });
         MouseTracker.AddSelectionHandler(mouseHandler, ChooseTile);
@@ -665,7 +666,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     }
     private void CreateTextOnExperimenterDisplay()
     {
-        playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
+         // sets parent for any playerView elements on experimenter display
+        playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
+        playerViewText = new GameObject("PlayerViewText");
         if (!playerViewLoaded)
         {
             
@@ -677,9 +680,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     Vector2 textSize = new Vector2(200, 200);
                     if(tileComponent.mCoord == currMaze.mPath[i])
                     {
-                        textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(tileComponent.transform.position), playerViewParent);
+                        textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(tileComponent.transform.position), playerViewParent.transform);
                         playerViewText = playerView.writeText((i+1).ToString(),
-                            Color.red, textLocation, textSize, playerViewParent);
+                            Color.red, textLocation, textSize, playerViewParent.transform);
                         playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                     }
                 }
@@ -692,13 +695,16 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private void DestroyTextOnExperimenterDisplay()
     {
         GameObject cam = GameObject.Find("MainCameraCopy");
-        DestroyChildren(cam);
+        DeactivateChildren(cam);
+        playerViewLoaded = false;
     }
     public override void FinishTrialCleanup()
     {
         DestroyTextOnExperimenterDisplay();
         tiles.DestroyStimGroup();
-
+        MazeBackground.SetActive(false);
+        SliderGo.SetActive(false);
+        SliderHaloGo.SetActive(false);
         if (TokenFBController.isActiveAndEnabled)
             TokenFBController.enabled = false;
 

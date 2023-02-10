@@ -45,7 +45,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             //Set the Initial Token Values for the Block
             flTL.TokenFBController.SetTotalTokensNum(flBD.NumTokenBar);
             flTL.TokenFBController.SetTokenBarValue(flBD.NumInitialTokens);
-            flTL.InitialTokenAmount = flBD.NumInitialTokens;
             CalculateBlockSummaryString();
             
         });
@@ -96,12 +95,14 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     {
         flTL.SearchDurationsList.Clear();
         flTL.runningAcc.Clear();
+        flTL.Accuracy_InBlock = 0;
         flTL.AverageSearchDuration_InBlock = 0;
         flTL.NumErrors_InBlock = 0;
         flTL.NumCorrect_InBlock = 0;
         flTL.NumRewardPulses_InBlock = 0;
         flTL.NumTokenBarFull_InBlock = 0;
         flTL.TouchDurationError_InBlock = 0;
+        flTL.TotalTokensCollected_InBlock = 0;
     }
     public override OrderedDictionary GetSummaryData()
     {
@@ -144,7 +145,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("NumTokenBarFilled", ()=> flTL.NumTokenBarFull_InBlock);
         BlockData.AddDatum("TotalTokensCollected", ()=> flTL.TotalTokensCollected_InBlock);
     }
-    private void ClearStrings()
+    public void ClearStrings()
     {
         CurrentBlockString = "";
         BlockSummaryString.Clear();

@@ -21,7 +21,6 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
             ResetBlockVariables();
             wmTL.TokenFBController.SetTotalTokensNum(wmBD.NumTokenBar);
             wmTL.TokenFBController.SetTokenBarValue(wmBD.NumInitialTokens);
-            wmTL.InitialTokenAmount = wmBD.NumInitialTokens;
 
             SetBlockSummaryString();
         });

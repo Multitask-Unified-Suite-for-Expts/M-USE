@@ -16,12 +16,19 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 {
     [HideInInspector] public MazeDef[] MazeDefs;
     [HideInInspector] public int[] MazeNumSquares, MazeNumTurns;
-    public Vector2[] MazeDims, MazeStart, MazeFinish;
+    [HideInInspector]public Vector2[] MazeDims, MazeStart, MazeFinish;
     [HideInInspector] public string[] MazeName;
-    [HideInInspector]public IDictionary<string, int> BlockDataDictionary = new Dictionary<string, int>();
+    private int mIndex;
     MazeGame_BlockDef mgBD => GetCurrentBlockDef<MazeGame_BlockDef>();
     MazeGame_TrialLevel mgTL;
     private string mazeKeyFilePath;
+    public int totalErrors_InBlock = 0,
+    perseverativeErrors_InBlock = 0,
+    backtrackErrors_InBlock = 0,
+    ruleAbidingErrors_InBlock = 0,
+    ruleBreakingErrors_InBlock = 0,
+    retouchCorrect_InBlock = 0,
+    correctTouches_InBlock = 0;
 
     public override void DefineControlLevel()
     {
@@ -33,41 +40,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         { 
             //HARD CODED TO MINIMIZE EMPTY SKYBOX DURATION, CAN'T ACCESS TRIAL DEF YET & CONTEXT NOT IN BLOCK DEF
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +  "Concrete3.png");
-            
             LoadMazeDef();
         });
 
         RunBlock.AddInitializationMethod(() =>
-        {/*
-            BlockDataDictionary["Total Errors in Block"] = 0;
-            BlockDataDictionary["Perseverative Errors in Block"] = 0;
-            BlockDataDictionary["Backtracking Errors in Block"] =  0;
-            BlockDataDictionary["Rule-Abiding Errors in Block"] =  0;
-            BlockDataDictionary["Rule-Breaking Errors in Block"] = 0;*/
-            mgTL.
-            ResetBlockDataTrackingVariables();
-            //for given block MazeDims, MazeNumSquares, MazeNumTurns, get all indices of that value, find intersect
-            //then choose random member of intersect and assign to this block's trials
-            
-            int[] mdIndices = MazeDims.FindAllIndexof(mgBD.MazeDims);
-            int[] mnsIndices = MazeNumSquares.FindAllIndexof(mgBD.MazeNumSquares);
-            int[] mntIndices = MazeNumTurns.FindAllIndexof(mgBD.MazeNumTurns);
-            int[] msIndices = MazeStart.FindAllIndexof(mgBD.MazeStart);
-            int[] mfIndices = MazeFinish.FindAllIndexof(mgBD.MazeFinish);
-            int[] possibleMazeDefIndices = mfIndices.Intersect(msIndices.Intersect(mntIndices.Intersect(mdIndices.Intersect(mnsIndices)))).ToArray();
-            
-            
-            int chosenIndex = possibleMazeDefIndices[Random.Range(0, possibleMazeDefIndices.Length)];
-            mgTL.mazeDefName = MazeName[chosenIndex];
-            Debug.Log("MAZE DEF NAME: " + mgTL.mazeDefName);
-            //remove the maze specifications from all of the arrays
-            MazeDefs = MazeDefs.Where((source, index) =>index != chosenIndex).ToArray();
-            MazeDims = MazeDims.Where((source, index) =>index != chosenIndex).ToArray();
-            MazeNumSquares = MazeNumSquares.Where((source, index) =>index != chosenIndex).ToArray();
-            MazeNumTurns = MazeNumTurns.Where((source, index) =>index != chosenIndex).ToArray();
-            MazeStart = MazeStart.Where((source, index) =>index != chosenIndex).ToArray();
-            MazeFinish = MazeFinish.Where((source, index) =>index != chosenIndex).ToArray();
-            MazeName = MazeName.Where((source, index) =>index != chosenIndex).ToArray(); 
+        {
+            ResetBlockVariables();
+            FindMaze();
         });
         
         
@@ -75,21 +54,27 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
     public void AssignBlockData()
     {
-        foreach (KeyValuePair<string, int> datum in BlockDataDictionary)
-        {
-            BlockData.AddDatum(datum.Key, ()=> datum.Value);
-            Debug.Log("KEY:" + datum.Key + "VALUE: " + datum.Value);
-        }
-            
+        BlockData.AddDatum("TotalErrors", ()=> totalErrors_InBlock);
+        BlockData.AddDatum("CorrectTouches", ()=>correctTouches_InBlock);
+        BlockData.AddDatum("RetouchCorrect", ()=>retouchCorrect_InBlock);
+        BlockData.AddDatum("PerseverativeErrors", ()=> perseverativeErrors_InBlock);
+        BlockData.AddDatum("BacktrackErrors", ()=>backtrackErrors_InBlock);
+        BlockData.AddDatum("RuleAbidingErrors", ()=>ruleAbidingErrors_InBlock);
+        BlockData.AddDatum("RuleBreakingErrors", ()=>ruleBreakingErrors_InBlock);
+        BlockData.AddDatum("NumRewardPulses", ()=>mgTL.NumRewardPulses_InBlock);
+        BlockData.AddDatum("NumNonStimSelections", ()=>mgTL.NumNonStimSelections_InBlock);
     }
     private void ResetBlockVariables()
     {
-        mgTL.totalErrors_InBlock = 0;
-        mgTL.perseverativeErrors_InBlock = 0;
-        mgTL.backtrackErrors_InBlock = 0;
-        mgTL.ruleAbidingErrors_InBlock = 0;
-        mgTL.ruleBreakingErrors_InBlock = 0;
+        totalErrors_InBlock = 0;
+        correctTouches_InBlock = 0;
+        retouchCorrect_InBlock = 0;
+        perseverativeErrors_InBlock = 0;
+        backtrackErrors_InBlock = 0;
+        ruleAbidingErrors_InBlock = 0;
+        ruleBreakingErrors_InBlock = 0;
         mgTL.NumRewardPulses_InBlock = 0;
+        mgTL.NumNonStimSelections_InBlock = 0;
     }
 
     private void SetSettings()
@@ -116,7 +101,14 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         else
         {
             mgTL.TileSize = 0.5f; // default value in the case it isn't specified
-            Debug.Log("Tile Size settings not defined in the TaskDef. Default setting of " + mgTL.TileSize + "is used instead.");
+            Debug.Log("Tile Size settings not defined in the TaskDef. Default setting of " + mgTL.TileSize + " is used instead.");
+        }
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TileTexture"))
+            mgTL.TileTexture = (string)SessionSettings.Get(TaskName + "_TaskSettings", "TileTexture");
+        else
+        {
+            mgTL.TileTexture = "Tile"; // default value in the case it isn't specified
+            Debug.Log("Tile Texture settings not defined in the TaskDef. Default setting of " + mgTL.TileTexture + " is used instead.");
         }
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NumBlinks"))
             mgTL.NumBlinks = (int)SessionSettings.Get(TaskName + "_TaskSettings", "NumBlinks");
@@ -163,6 +155,39 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             MazeFinish[iMaze] = MazeDefs[iMaze].mFinish;
             MazeName[iMaze] = MazeDefs[iMaze].mName;
         }
+    }
+
+    private void FindMaze()
+    {
+        //for given block MazeDims, MazeNumSquares, MazeNumTurns, get all indices of that value, find intersect
+        //then choose random member of intersect and assign to this block's trials
+            
+        if (mgBD.MazeName != null) mIndex = MazeName.FindAllIndexof(mgBD.MazeName)[0];
+        else
+        {
+            int[] mdIndices = MazeDims.FindAllIndexof(mgBD.MazeDims);
+            int[] mnsIndices = MazeNumSquares.FindAllIndexof(mgBD.MazeNumSquares);
+            int[] mntIndices = MazeNumTurns.FindAllIndexof(mgBD.MazeNumTurns);
+            int[] msIndices = MazeStart.FindAllIndexof(mgBD.MazeStart);
+            int[] mfIndices = MazeFinish.FindAllIndexof(mgBD.MazeFinish);
+            int[] possibleMazeDefIndices = mfIndices
+                .Intersect(msIndices.Intersect(mntIndices.Intersect(mdIndices.Intersect(mnsIndices)))).ToArray();
+
+            mIndex = possibleMazeDefIndices[Random.Range(0, possibleMazeDefIndices.Length)];
+            
+            //remove the maze specifications from all of the arrays so the maze won't repeat on subsequent blocks of the same conditions
+            MazeDefs = MazeDefs.Where((source, index) => index != mIndex).ToArray();
+            MazeDims = MazeDims.Where((source, index) => index != mIndex).ToArray();
+            MazeNumSquares = MazeNumSquares.Where((source, index) => index != mIndex).ToArray();
+            MazeNumTurns = MazeNumTurns.Where((source, index) => index != mIndex).ToArray();
+            MazeStart = MazeStart.Where((source, index) => index != mIndex).ToArray();
+            MazeFinish = MazeFinish.Where((source, index) => index != mIndex).ToArray();
+            MazeName = MazeName.Where((source, index) => index != mIndex).ToArray();
+        }
+        mgTL.mazeDefName = MazeName[mIndex];
+        Debug.Log("MAZE DEF NAME: " + mgTL.mazeDefName);
+        
+        
     }
 
 }

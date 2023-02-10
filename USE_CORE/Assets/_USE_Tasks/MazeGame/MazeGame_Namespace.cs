@@ -34,6 +34,7 @@ namespace MazeGame_Namespace
         public float[] IncorrectRuleAbidingColor;
         public float[] IncorrectRuleBreakingColor;
         public float[] DefaultTileColor;
+        public string TileTexture;
 
 
     }
@@ -54,12 +55,10 @@ namespace MazeGame_Namespace
         public Vector2 MazeDims, MazeStart, MazeFinish;
         public int MazeNumSquares;
         public int MazeNumTurns;
-        //  public Color TileColor;
-        public float[] TileColor;
+        public string MazeName;
         
         public int PulseSize;
         public int NumPulses;
-        public int Texture;
         public bool ViewPath;
         public string ContextName;
         public int[] SliderGain;
@@ -85,14 +84,8 @@ namespace MazeGame_Namespace
             {
                 MazeGame_TrialDef td = new MazeGame_TrialDef();
                 td.TrialID = TrialID;
-                /*td.TileColor = TileColor;
-                td.TileSize = TileSize;*/
-                //td.Texture = Texture;
                 td.NumPulses = NumPulses;
                 td.PulseSize = PulseSize;
-               /* td.MazeDims = MazeDims;
-                td.MazeNumSquares = MazeNumSquares;
-                td.MazeNumTurns = MazeNumTurns;*/
                 td.ViewPath = ViewPath;
                 td.ContextName = ContextName;
                 td.MazeInfo = MazeInfo;

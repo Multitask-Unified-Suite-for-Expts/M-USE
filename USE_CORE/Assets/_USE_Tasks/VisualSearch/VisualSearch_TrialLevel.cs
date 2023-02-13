@@ -77,10 +77,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     {
         State InitTrial = new State("InitTrial");
         State SearchDisplay = new State("SearchDisplay");
+        State SearchDisplayDelay = new State("SearchDisplayDelay");
         State SelectionFeedback = new State("SelectionFeedback");
         State TokenFeedback = new State("TokenFeedback");
         State ITI = new State("ITI");
-        State SearchDisplayDelay = new State("SearchDisplayDelay");
         State Delay = new State("Delay");
         
         AddActiveStates(new List<State> {InitTrial, SearchDisplay, SelectionFeedback, TokenFeedback, ITI, Delay, SearchDisplayDelay});
@@ -111,11 +111,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
             
             //Set the Stimuli Light/Shadow settings
+            SetShadowType(ShadowType, "VisualSearch_DirectionalLight");
             if (StimFacingCamera)
             {
                 foreach (var stim in tStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
             }
-            SetShadowType(ShadowType, "VisualSearch_DirectionalLight");
+            
             
             //Create and Load variables needed at the start of the trial
             if (!ObjectsCreated)
@@ -175,10 +176,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay);
         SearchDisplay.AddInitializationMethod(() =>
         {
+            tStim.ToggleVisibility(true);
             Input.ResetInputAxes(); //reset input in case they holding down
             // Toggle TokenBar and Stim to be visible
             TokenFBController.enabled = true;
-            tStim.ToggleVisibility(true);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);
         });
@@ -251,6 +252,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddInitializationMethod(() =>
         {
+            tStim.ToggleVisibility(false);
             if (selectedSD.StimTrialRewardMag > 0)
             {
                 //AudioFBController.Play("Positive");
@@ -339,6 +341,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
         tStim = new StimGroup("SearchStimuli", ExternalStims, CurrentTrialDef.TrialStimIndices);
+       // tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("SelectionFeedback"));
         TrialStims.Add(tStim);
         for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
@@ -420,8 +423,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     {
         // All AddDatum commmands from the Frame Data
         FrameData.AddDatum("ContextName", () => ContextName);
-        FrameData.AddDatum("StartButtonVisibility", () => StartButton.activeSelf);
-        FrameData.AddDatum("TrialStimVisibility", () => tStim.IsActive);
+        FrameData.AddDatum("StartButtonVisibility", () => StartButton == null ? false:StartButton.activeSelf); // CHECK THE DATA!
+        FrameData.AddDatum("TrialStimVisibility", () => tStim == null? false:tStim.IsActive);
     }
     private void CreateObjects()
     {

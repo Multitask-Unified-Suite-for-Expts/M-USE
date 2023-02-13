@@ -160,13 +160,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public override void DefineControlLevel()
     {
         //define States within this Control Level
-        var InitTrial = new State("InitTrial");
-        var ChooseTile = new State("ChooseTile");
-        var SelectionFeedback = new State("SelectionFeedback");
-        var TileFlashFeedback = new State("TileFlashFeedback");
-        var FinalFeedback = new State("FinalFeedback");
-        var delay = new State("Delay");
-        var ITI = new State("ITI");
+        State InitTrial = new State("InitTrial");
+        State ChooseTile = new State("ChooseTile");
+        State SelectionFeedback = new State("SelectionFeedback");
+        State TileFlashFeedback = new State("TileFlashFeedback");
+        State FinalFeedback = new State("FinalFeedback");
+        State ITI = new State("ITI");
+        State delay = new State("Delay");
         AddActiveStates(new List<State>
             { InitTrial, ChooseTile, SelectionFeedback, TileFlashFeedback, FinalFeedback, ITI, delay });
 
@@ -280,20 +280,18 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             delayDuration = 0;
             valueRemaining = 0;
             SliderHaloGo.SetActive(false);
+            CorrectSelection = false;
             if (end)
             {
                 stateAfterDelay = FinalFeedback;
-                CorrectSelection = false;
             }
             else if (CheckTileFlash())
             {
                 stateAfterDelay = TileFlashFeedback;
-                CorrectSelection = false;
             }
             else
             {
-                stateAfterDelay = ChooseTile;
-                CorrectSelection = false; // could be incorrect or correct but it will still go back
+                stateAfterDelay = ChooseTile; // could be incorrect or correct but it will still go back
             }
         });
         TileFlashFeedback.AddInitializationMethod(() => { tile.StartCoroutine(tile.FlashingFeedback()); });
@@ -476,6 +474,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             fbDuration = tile.PREV_CORRECT_FEEDBACK_SECONDS;
             retouchCorrect_InTrial++;
             consecutiveErrors = 0;
+            CorrectSelection = true;
             return 2;
         }
 

@@ -160,18 +160,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         State SelectionFeedback = new State("StimulusChosen");
         State FinalFeedback = new State("FinalFeedback");
         State ITI = new State("ITI");
-        State StimulusChosenSuccesorState = new State("StimulusChosenSuccesorState");
         State delay = new State("Delay");
-        State UpdateSlider = new State("UpdateSlider");
-
         AddActiveStates(new List<State>
         {
-            StartButton, ChooseStimulus, SelectionFeedback, FinalFeedback, ITI, StimulusChosenSuccesorState,
-            ChooseStimulusDelay, delay, UpdateSlider
+            StartButton, ChooseStimulus, SelectionFeedback, FinalFeedback, ITI,
+            ChooseStimulusDelay, delay
         });
 
         string[] stateNames = new string[]
-            {"StartButton", "StartButtonDelay", "ChooseStimulus", "StimulusChosen", "FinalFeedback", "ITI", "Delay", "ChooseStimulusDelay", "UpdateSlide"};
+            {"StartButton", "StartButtonDelay", "ChooseStimulus", "StimulusChosen", "FinalFeedback", "ITI", "Delay", "ChooseStimulusDelay"};
 
         // A state that just waits for some time
         State stateAfterDelay = null;

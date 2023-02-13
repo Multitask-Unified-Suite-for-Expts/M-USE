@@ -86,14 +86,14 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     {
         State InitTrial = new State("InitTrial");
         State DisplaySample = new State("DisplaySample");
-        State DisplayPostSampleDistractors = new State("DisplayPostSampleDistractors");
+        State DisplayDistractors = new State("DisplayDistractors");
         State SearchDisplay = new State("SearchDisplay");
         State SelectionFeedback = new State("SelectionFeedback");
         State TokenFeedback = new State("TokenFeedback");
         State ITI = new State("ITI");
         State Delay = new State("Delay");
 
-        AddActiveStates(new List<State> { InitTrial, Delay, DisplaySample, DisplayPostSampleDistractors, SearchDisplay, SelectionFeedback, TokenFeedback, ITI });
+        AddActiveStates(new List<State> { InitTrial, Delay, DisplaySample, DisplayDistractors, SearchDisplay, SelectionFeedback, TokenFeedback, ITI });
 
         // A state that just waits for some time
         State stateAfterDelay = null;
@@ -121,6 +121,13 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
             TokenFBController.SetTokenBarFull(false);
+            SetShadowType(ShadowType, "WorkingMemory_DirectionalLight");
+            if (StimFacingCamera)
+            {
+                foreach (var stim in searchStims.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
+                foreach (var stim in sampleStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
+                foreach (var stim in postSampleDistractorStims.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
+            }
         });
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -155,7 +162,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                                                (NumTokenBarFull_InBlock * CurrentTrialDef.NumTokenBar);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
                 
-                SetShadowType(ShadowType, "WorkingMemory_DirectionalLight");
                 // Set Experimenter Display Data Summary Strings
                 CurrentTaskLevel.SetBlockSummaryString();
                 SetTrialSummaryString();
@@ -164,11 +170,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         // Show the target/sample by itself for some time
         DisplaySample.AddTimer(() => displaySampleDuration.value, Delay, () =>
           {
-              stateAfterDelay = DisplayPostSampleDistractors;
+              stateAfterDelay = DisplayDistractors;
               delayDuration = postSampleDelayDuration.value;
           });
         // Show some distractors without the target/sample
-        DisplayPostSampleDistractors.AddTimer(() => displayPostSampleDistractorsDuration.value, Delay, () =>
+        DisplayDistractors.AddTimer(() => displayPostSampleDistractorsDuration.value, Delay, () =>
           {
               stateAfterDelay = SearchDisplay;
               delayDuration = preTargetDelayDuration.value;
@@ -181,13 +187,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         SearchDisplay.AddInitializationMethod(() =>
         {
             CreateTextOnExperimenterDisplay();
-            if (StimFacingCamera)
-            {
-                foreach (var stim in searchStims.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
-                foreach (var stim in sampleStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
-                foreach (var stim in postSampleDistractorStims.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
-            }
-            
+
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);
         
@@ -260,6 +260,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         // The state that will handle the token feedback and wait for any animations
         TokenFeedback.AddInitializationMethod(() =>
         {
+            searchStims.ToggleVisibility(false);
             if (selectedSD.IsTarget)
             {
                 AudioFBController.Play("Positive");
@@ -317,7 +318,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         DestroyTextOnExperimenterDisplay();
         ResetDataTrackingVariables();
         TokenFBController.enabled = false;
-
+        searchStims.ToggleVisibility(false);
+        sampleStim.ToggleVisibility(false);
+        postSampleDistractorStims.ToggleVisibility(false);
         if (AbortCode == 0)
             CurrentTaskLevel.SetBlockSummaryString();
 
@@ -347,7 +350,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         //destroyed at TrialLevel_Finish
 
         searchStims = new StimGroup("SearchStims", ExternalStims, CurrentTrialDef.SearchStimIndices);
-        searchStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
+        //searchStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
         searchStims.SetLocations(CurrentTrialDef.SearchStimLocations);
 
         List<StimDef> rewardedStimdefs = new List<StimDef>();
@@ -461,28 +464,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             }
         }
         return selectedReward.NumTokens;
-    }
-    private void SetShadowType()
-    {
-        //User options are None, Soft, Hard
-        switch (ShadowType)
-        {
-            case "None":
-                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.None;
-                GameObject.Find("WorkingMemory_DirectionalLight").GetComponent<Light>().shadows = LightShadows.None;
-                break;
-            case "Soft":
-                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.Soft;
-                GameObject.Find("WorkingMemory_DirectionalLight").GetComponent<Light>().shadows = LightShadows.Soft;
-                break;
-            case "Hard":
-                GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.Hard;
-                GameObject.Find("WorkingMemory_DirectionalLight").GetComponent<Light>().shadows = LightShadows.Hard;
-                break;
-            default:
-                Debug.Log("User did not Input None, Soft, or Hard for the Shadow Type");
-                break;
-        }
     }
     void SetTrialSummaryString()
     {

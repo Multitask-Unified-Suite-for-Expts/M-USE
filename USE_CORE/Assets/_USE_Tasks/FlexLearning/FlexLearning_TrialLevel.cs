@@ -89,8 +89,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
-        State SearchDisplayDelay = new State("SearchDisplayDelay");
         State SearchDisplay = new State("SearchDisplay");
+        State SearchDisplayDelay = new State("SearchDisplayDelay");
         State SelectionFeedback = new State("SelectionFeedback");
         State TokenFeedback = new State("TokenFeedback");
         State ITI = new State("ITI");
@@ -122,11 +122,12 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
 
             //Set the Stimuli Light/Shadow settings
+            SetShadowType(ShadowType, "FlexLearning_DirectionalLight");
             if (StimFacingCamera)
             {
                 foreach (var stim in tStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
             }
-            SetShadowType(ShadowType, "FlexLearning_DirectionalLight");
+            
             
             //Create and Load variables needed at the start of the trial
             if (!ObjectsCreated)
@@ -262,6 +263,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddInitializationMethod(() =>
         {
+            tStim.ToggleVisibility(false);
             if (selectedSD.StimTrialRewardMag > 0)
             {
                 AudioFBController.Play("Positive");
@@ -333,7 +335,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         //destroyed at TrialLevel_Finish
         int temp = 0;
         tStim = new StimGroup("SearchStimuli", ExternalStims, CurrentTrialDef.TrialStimIndices);
-        tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
+        //tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("SelectionFeedback"));
         TrialStims.Add(tStim);
         for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
@@ -374,8 +376,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     {
         // All AddDatum commmands from the Frame Data
         FrameData.AddDatum("ContextName", () => ContextName);
-        FrameData.AddDatum("StartButtonVisibility", () => StartButton.activeSelf);
-        FrameData.AddDatum("TrialStimVisibility", () => tStim.IsActive);
+        FrameData.AddDatum("StartButtonVisibility", () => StartButton == null ? false:StartButton.activeSelf); // CHECK THE DATA!
+        FrameData.AddDatum("TrialStimVisibility", () => tStim == null? false:tStim.IsActive);
     }
     private void ResetTrialVariables()
     {

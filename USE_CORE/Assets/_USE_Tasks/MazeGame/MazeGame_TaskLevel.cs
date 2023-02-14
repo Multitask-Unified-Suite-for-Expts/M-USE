@@ -52,6 +52,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     private string mazeKeyFilePath;
     private MazeGame_TrialLevel mgTL;
     private int mIndex;
+    public string TaskName = "MazeGame";
     private MazeGame_BlockDef mgBD => GetCurrentBlockDef<MazeGame_BlockDef>();
 
     public override void DefineControlLevel()
@@ -162,7 +163,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
         CurrentBlockString = "<b>Current Block:</b>" +
                              "\nTotal Errors: " + totalErrors_InBlock +
-                             "\nCorrect Touches: " + correctTouches_InBlock +
+                             //"\nCorrect Touches: " + correctTouches_InBlock +
                              "\nRule-Abiding Errors: " + ruleAbidingErrors_InBlock +
                              "\nRule-Breaking Errors: " + ruleBreakingErrors_InBlock + 
                              "\nPerseverative Errors: " + perseverativeErrors_InBlock +
@@ -235,7 +236,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     }
     private void SetSettings()
     {
-        var TaskName = "MazeGame";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             mgTL.ContextExternalFilePath =
                 (string)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");

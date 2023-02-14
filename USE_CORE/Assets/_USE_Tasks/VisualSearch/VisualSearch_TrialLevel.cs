@@ -47,7 +47,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     
     //Player View Variables
     private PlayerViewPanel playerView;
-    private Transform playerViewParent; // Helps set things onto the player view in the experimenter display
+    private GameObject playerViewParent; // Helps set things onto the player view in the experimenter display
     private List<GameObject> playerViewTextList = new List<GameObject>();
     private GameObject playerViewText;
     private Vector2 textLocation;
@@ -98,6 +98,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         Text commandText = null;
         playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
         playerViewText = new GameObject();
+        playerViewParent = GameObject.Find("MainCameraCopy");
         taskHelper = new TaskHelperFunctions();
         
         
@@ -156,8 +157,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
             {
                 TouchDurationError = true;
-                SetTrialSummaryString();
                 TouchDurationErrorFeedback(mouseHandler, StartButton);
+                SetTrialSummaryString();
                 CurrentTaskLevel.SetBlockSummaryString(); //TCIB is incremented during setuptrial, so "trialNum" in blocksummarystring is wrong unless you update it here. I would say change the variable in the summary string. 
             }
         });
@@ -217,7 +218,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 SelectedStimIndex = selectedSD.StimIndex;
                 SelectedStimLocation = selectedSD.StimLocation;
             }
-            SetTrialSummaryString();
             Accuracy_InBlock = NumCorrect_InBlock/(TrialCount_InBlock + 1);
         });
 
@@ -284,7 +284,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
                                            (NumTokenBarFull_InBlock * CurrentTrialDef.NumTokenBar);
-            SetTrialSummaryString();
             stateAfterDelay = ITI;
             delayDuration = tokenFbDuration.value;
         });
@@ -385,9 +384,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     }
     void SetTrialSummaryString()
     {
-        TrialSummaryString = "<b>Trial Count in Block: " + (TrialCount_InBlock + 1) + "</b>"+
-                             "\nTrial Count in Task: " + (TrialCount_InTask + 1) +
-                             "\n" +
+        TrialSummaryString = "<b>Task Name: " + CurrentTaskLevel.TaskName+ "</b>" + 
+                             "\n"+
+                             "\n<b>Trial Count in Task: </b>" + (TrialCount_InTask + 1) +
+                             "\n"+
                              "\nSelected Object Index: " + SelectedStimIndex +
                              "\nSelected Object Location: " + SelectedStimLocation +
                              "\n" + 
@@ -434,8 +434,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         ObjectsCreated = true;
     }
     private void CreateTextOnExperimenterDisplay()
-    {
-        playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
+    { // sets parent for any playerView elements on experimenter display
         if (!playerViewLoaded)
         {
             //Create corresponding text on player view of experimenter display
@@ -445,11 +444,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 {
                     textLocation =
                         playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation),
-                            playerViewParent);
+                            playerViewParent.transform);
                     textLocation.y += 50;
                     Vector2 textSize = new Vector2(200, 200);
                     playerViewText = playerView.writeText("TargetText","TARGET",
-                        Color.red, textLocation, textSize, playerViewParent);
+                        Color.red, textLocation, textSize, playerViewParent.transform);
                     playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                     playerViewTextList.Add(playerViewText);
                     playerViewLoaded = true;
@@ -459,8 +458,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     }
     private void DestroyTextOnExperimenterDisplay()
     {
-        if (playerViewLoaded)
-            foreach (GameObject txt in playerViewTextList) Destroy(txt);
+        DestroyChildren(playerViewParent);
         playerViewLoaded = false;
     }
     private void TouchDurationErrorFeedback(SelectionHandler<VisualSearch_StimDef> MouseHandler, GameObject go)

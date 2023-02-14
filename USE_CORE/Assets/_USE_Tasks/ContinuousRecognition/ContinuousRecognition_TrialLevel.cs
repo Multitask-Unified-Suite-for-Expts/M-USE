@@ -152,9 +152,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (TrialCount_InBlock == 0)
             {
-                TokenFBController.SetTokenBarValue(InitialTokenAmount);
-                currentTask.CalculateBlockSummaryString(); //setting again just in case they used RestartBlock hotkey.
-                if (IsHuman)
+                currentTask.CalculateBlockSummaryString();
+                if(IsHuman)
                 {
                     AdjustStartButtonPos(); //Adjust startButton position (move down) to make room for Title text. 
                     TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
@@ -178,11 +177,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             SetTokenFeedbackTimes();
             SetStimStrings();
-            SetShadowType(currentTrial.ShadowType, "ContinuousRecognition_DirectionalLight");
-
-            //MAKE EACH STIM GAME OBJECT FACE THE CAMERA WHILE SPAWNED
-            if (currentTrial.StimFacingCamera)
-                MakeStimsFaceCamera(trialStims);     
+            SetShadowType(currentTrial.ShadowType, "ContinuousRecognition_DirectionalLight");   
         });
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
@@ -210,7 +205,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
 
-            if(currentTrial.ShakeStim)
+            //MAKE EACH STIM GAME OBJECT FACE THE CAMERA WHILE SPAWNED
+            if (currentTrial.StimFacingCamera)
+                MakeStimsFaceCamera(trialStims);
+
+            if (currentTrial.ShakeStim)
                 AddShakeStimScript(trialStims);
         });
 

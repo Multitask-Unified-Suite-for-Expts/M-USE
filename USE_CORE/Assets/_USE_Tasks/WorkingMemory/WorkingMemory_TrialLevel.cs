@@ -493,7 +493,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                     textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent);
                     textLocation.y += 50;
                     Vector2 textSize = new Vector2(200, 200);
-                    playerViewText = playerView.writeText("TARGET",
+                    playerViewText = playerView.writeText("TargetText","TARGET",
                         Color.red, textLocation, textSize, playerViewParent);
                     playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                     playerViewTextList.Add(playerViewText);

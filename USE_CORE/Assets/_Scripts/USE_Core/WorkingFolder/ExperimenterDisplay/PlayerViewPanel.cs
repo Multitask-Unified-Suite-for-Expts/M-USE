@@ -50,9 +50,9 @@ public class PlayerViewPanel //: MonoBehaviour
         lineComp.relativeSize = false;
         return sampleLines;
     }
-    public GameObject writeText(string text, Color col, Vector2 textLocation, Vector2 size, Transform parent)
+    public GameObject writeText(string textName, string text, Color col, Vector2 textLocation, Vector2 size, Transform parent)
     {
-        GameObject textObject = new GameObject("Text", typeof(RectTransform), typeof(Text));
+        GameObject textObject = new GameObject(textName, typeof(RectTransform), typeof(Text));
         textObject.transform.SetParent(parent);
         textObject.GetComponent<RectTransform>().localPosition = Vector2.zero;
         textObject.GetComponent<RectTransform>().sizeDelta = size;

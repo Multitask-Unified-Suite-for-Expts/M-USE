@@ -424,6 +424,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         // All AddDatum commmands from the Frame Data
         FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("StartButtonVisibility", () => StartButton == null ? false:StartButton.activeSelf); // CHECK THE DATA!
+        FrameData.AddDatum("FBSquareVisibility", ()=> FBSquare == null? false:FBSquare.activeSelf);
         FrameData.AddDatum("TrialStimVisibility", () => tStim == null? false:tStim.IsActive);
     }
     private void CreateObjects()
@@ -447,7 +448,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                             playerViewParent);
                     textLocation.y += 50;
                     Vector2 textSize = new Vector2(200, 200);
-                    playerViewText = playerView.writeText("TARGET",
+                    playerViewText = playerView.writeText("TargetText","TARGET",
                         Color.red, textLocation, textSize, playerViewParent);
                     playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                     playerViewTextList.Add(playerViewText);

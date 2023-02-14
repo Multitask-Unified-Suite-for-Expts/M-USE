@@ -313,7 +313,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             if ((int)(10 * (Time.time - startTime)) % 4 == 0)
                 SliderHaloImage.color = new Color(1, 1, 1, 0.2f);
-            else if ((int)(10 * (Time.time - startTime)) % 2 == 0) SliderHaloImage.color = new Color(1, 0, 0, 0.2f);
+            else if ((int)(10 * (Time.time - startTime)) % 2 == 0) SliderHaloImage.color = new Color(1, 1, 0, 0.2f);
         });
         FinalFeedback.AddTimer(() => finalFbDuration.value, ITI, () =>
         {
@@ -338,8 +338,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         MazeBackground.transform.SetParent(MazeContainer.transform); // setting it last so that it doesn't cover tiles
         MazeBackground.transform.localScale = new Vector3(mazeLength + 2 * spaceBetweenTiles.value,
             mazeHeight + 2 * spaceBetweenTiles.value, 0.1f);
-        /*SortingGroup mazeSG = MazeBackground.AddComponent<SortingGroup>() as SortingGroup;
-        mazeSG.sortingOrder = 0;*/
         MazeBackground.SetActive(true);
         var bottomLeftMazePos = mazeCenter - new Vector3(mazeLength / 2, mazeHeight / 2, 0);
 
@@ -474,7 +472,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             fbDuration = tile.PREV_CORRECT_FEEDBACK_SECONDS;
             retouchCorrect_InTrial++;
             consecutiveErrors = 0;
-            CorrectSelection = true;
             return 2;
         }
 
@@ -680,7 +677,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     if(tileComponent.mCoord == currMaze.mPath[i])
                     {
                         textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(tileComponent.transform.position), playerViewParent.transform);
-                        playerViewText = playerView.writeText((i+1).ToString(),
+                        playerViewText = playerView.writeText((i+1).ToString(),(i+1).ToString(),
                             Color.red, textLocation, textSize, playerViewParent.transform);
                         playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                     }

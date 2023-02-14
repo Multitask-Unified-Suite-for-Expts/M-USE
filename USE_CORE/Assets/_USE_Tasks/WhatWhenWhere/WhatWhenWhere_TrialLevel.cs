@@ -450,7 +450,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
             else if ((int) (10 * (Time.time - startTime)) % 2 == 0)
             {
-                sliderHaloImage.color = new Color(0, 0, 0, 0.2f);
+                sliderHaloImage.color = new Color(1, 1, 0, 0.2f);
             }
         });
         FinalFeedback.AddTimer(() => finalFbDuration.value, ITI, () =>
@@ -841,7 +841,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         playerViewParent);
                 textLocation.y += 50;
                 Vector2 textSize = new Vector2(200, 200);
-                playerViewText = playerView.writeText(CurrentTrialDef.CorrectObjectTouchOrder[i].ToString(),
+                playerViewText = playerView.writeText(CurrentTrialDef.CorrectObjectTouchOrder[i].ToString(), CurrentTrialDef.CorrectObjectTouchOrder[i].ToString(),
                     Color.red, textLocation, textSize, playerViewParent);
                 playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                 playerViewTextList.Add(playerViewText);

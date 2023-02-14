@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using UnityEngine;
 using USE_Data;
+using USE_StimulusManagement;
 
 public class MouseTracker : InputTracker
 {
     [CanBeNull] private GameObject HoverObject;
     private bool UsingSecondMonitor = false;
     private int ClickCount = 0;
+    private string hoverObjectName = "";
 
     public void ResetClickCount() {
         ClickCount = 0;
@@ -24,7 +26,7 @@ public class MouseTracker : InputTracker
         frameData.AddDatum("MouseButton0", () => InputBroker.GetMouseButton(0));
         frameData.AddDatum("MouseButton1", () => InputBroker.GetMouseButton(1));
         frameData.AddDatum("MouseButton2", () => InputBroker.GetMouseButton(2));
-        frameData.AddDatum("HoverObject", () => HoverObject != null ? HoverObject.name : null);
+        frameData.AddDatum("HoverObject", ()=> HoverObject != null ? hoverObjectName : null);
     }
 
     public override GameObject FindCurrentTarget()
@@ -44,6 +46,11 @@ public class MouseTracker : InputTracker
         if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out RaycastHit hit, Mathf.Infinity))
         {
             HoverObject = hit.transform.root.gameObject;
+            
+                if(HoverObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer))
+                    hoverObjectName =  (sdPointer as StimDefPointer).GetStimDef<StimDef>().Name;
+                else hoverObjectName = HoverObject.name;
+            
             if (InputBroker.GetMouseButton(0))
             {
                 return HoverObject;

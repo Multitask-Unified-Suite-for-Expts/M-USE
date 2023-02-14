@@ -21,7 +21,11 @@ namespace USE_StimulusManagement
 		{
 			get
 			{
-				string[] strings = ExternalFilePath.Split('/');
+				string[] strings;
+				if (ExternalFilePath.Contains("\\"))
+					strings = ExternalFilePath.Split('\\');
+				else
+					strings = ExternalFilePath.Split('/');
 				string split = strings[strings.Length - 1];
 				return split.Split('.')[0];
 			}

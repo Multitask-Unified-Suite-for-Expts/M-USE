@@ -160,15 +160,18 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         State SelectionFeedback = new State("StimulusChosen");
         State FinalFeedback = new State("FinalFeedback");
         State ITI = new State("ITI");
+        State StimulusChosenSuccesorState = new State("StimulusChosenSuccesorState");
         State delay = new State("Delay");
+        State UpdateSlider = new State("UpdateSlider");
+
         AddActiveStates(new List<State>
         {
-            StartButton, ChooseStimulus, SelectionFeedback, FinalFeedback, ITI,
-            ChooseStimulusDelay, delay
+            StartButton, ChooseStimulus, SelectionFeedback, FinalFeedback, ITI, StimulusChosenSuccesorState,
+            ChooseStimulusDelay, delay, UpdateSlider
         });
 
         string[] stateNames = new string[]
-            {"StartButton", "StartButtonDelay", "ChooseStimulus", "StimulusChosen", "FinalFeedback", "ITI", "Delay", "ChooseStimulusDelay"};
+            {"StartButton", "StartButtonDelay", "ChooseStimulus", "StimulusChosen", "FinalFeedback", "ITI", "Delay", "ChooseStimulusDelay", "UpdateSlide"};
 
         // A state that just waits for some time
         State stateAfterDelay = null;
@@ -450,7 +453,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
             else if ((int) (10 * (Time.time - startTime)) % 2 == 0)
             {
-                sliderHaloImage.color = new Color(1, 1, 0, 0.2f);
+                sliderHaloImage.color = new Color(0, 0, 0, 0.2f);
             }
         });
         FinalFeedback.AddTimer(() => finalFbDuration.value, ITI, () =>

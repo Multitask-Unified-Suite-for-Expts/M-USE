@@ -53,7 +53,8 @@ namespace ConfigParsing {
     public static class ConfigParsing{
 
         // Parses the text from textfile
-        public static Settings parseConfigFile(string configPath){
+        public static Settings parseConfigFile(string configPath)
+        {
             Settings settingsOut = new Settings();
 
             //indices for config parser

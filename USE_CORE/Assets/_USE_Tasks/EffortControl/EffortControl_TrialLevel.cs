@@ -419,8 +419,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //ITI state -------------------------------------------------------------------------------------------------------
         ITI.AddTimer(itiDuration.value, FinishTrial, () => EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]));
         
-        LogTrialData();
-        LogFrameData();
+        DefineTrialData();
+        DefineFrameData();
     }
 
     //HELPER FUNCTIONS -------------------------------------------------------------------------------------------------------
@@ -801,7 +801,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TrialSummaryString = "";
     }
 
-    void LogTrialData()
+    void DefineTrialData()
     {
         TrialData.AddDatum("ClicksNeeded", () => ClicksNeeded);
         TrialData.AddDatum("ClicksNeededLeft", () => currentTrial.NumClicksLeft);
@@ -817,7 +817,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("Trial Touches", () => currentTrial.Touches);
     }
 
-    void LogFrameData()
+    void DefineFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
         FrameData.AddDatum("StartButton", () => StartButton.activeInHierarchy);

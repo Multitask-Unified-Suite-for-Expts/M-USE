@@ -237,9 +237,9 @@ namespace USE_ExperimentTemplate_Trial
                 child.gameObject.SetActive(false);
         }
 
-        public void DestroyChildren(GameObject container)
+        public void DestroyChildren(GameObject parent)
         {
-            foreach (Transform child in container.transform)
+            foreach (Transform child in parent.transform)
                 Destroy(child.gameObject);
         }
 

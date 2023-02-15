@@ -23,7 +23,6 @@ namespace ConfigDynamicUI
 
         //UI Hotkeys
         List<Selectable> m_orderedSelectables = new List<Selectable>();
-        List<HotKeyPanel.HotKey> ConfigUIHotKeys = new List<HotKeyPanel.HotKey>();
 
         // UI - prefabs
         public GameObject prefabNumberInput;
@@ -33,7 +32,7 @@ namespace ConfigDynamicUI
 		public GameObject prefabBoolean;
 
 		public void clear(){
-			this.store.clear();
+			store.clear();
 			foreach (GameObject g in this.listGeneratedObjects)
 			{
 				Destroy(g);
@@ -75,7 +74,7 @@ namespace ConfigDynamicUI
 		public GameObject GenerateBoolean(ConfigBoolean b)
 		{
 			GameObject n = Instantiate(prefabBoolean);
-			n.transform.SetParent(this.varUIContainer, false);
+			n.transform.SetParent(varUIContainer, false);
 			UIBoolean ui = n.GetComponent<UIBoolean>();
 			ui.setConfigVar(b);
 			n.SetActive(true);
@@ -84,7 +83,7 @@ namespace ConfigDynamicUI
 		
 		public GameObject GenerateSlider(ConfigNumber f){
 			GameObject n = Instantiate(prefabSlider);
-			n.transform.SetParent(this.varUIContainer, false);
+			n.transform.SetParent(varUIContainer, false);
 			UIRange ui = n.GetComponent<UIRange>();
 			ui.setConfigVar(f);
 			n.SetActive(true);
@@ -94,7 +93,7 @@ namespace ConfigDynamicUI
 	
 		public GameObject GenerateSlider2(ConfigNumberRanged f){
 			GameObject n = Instantiate(prefabSlider2);
-			n.transform.SetParent(this.varUIContainer, false);
+			n.transform.SetParent(varUIContainer, false);
 			UIRange2 ui = n.GetComponent<UIRange2>();
 			ui.setConfigVar(f);
 			n.SetActive(true);
@@ -103,7 +102,7 @@ namespace ConfigDynamicUI
 			
 		public GameObject GenerateSlider3(ConfigNumberRangedInt f){
 			GameObject n = Instantiate(prefabSlider3);
-			n.transform.SetParent(this.varUIContainer, false);
+			n.transform.SetParent(varUIContainer, false);
 			UIRange2Int ui = n.GetComponent<UIRange2Int>();
 			ui.setConfigVar(f);
 			n.SetActive(true);
@@ -112,7 +111,7 @@ namespace ConfigDynamicUI
 
 		public GameObject GenerateNumberInput(ConfigNumber f){
 			GameObject n = Instantiate(prefabNumberInput);
-			n.transform.SetParent(this.varUIContainer, false);
+			n.transform.SetParent(varUIContainer, false);
 			UINumber ui = n.GetComponent<UINumber>();
 			ui.setConfigVar(f);
 			n.SetActive(true);
@@ -134,75 +133,73 @@ namespace ConfigDynamicUI
 		}
 		
 		public float GetFloat(string variableName){
-			return (float) this.store.get<ConfigNumber>(variableName).value;
-			//			return (float) this.store.get<ConfigNumber>(variableName).SetRandomValue();
+			return (float) store.get<ConfigNumber>(variableName).value;
 		}
 		public int GetInt(string variableName)
 		{
-			return (int) this.store.get<ConfigNumber>(variableName).value;
+			return (int) store.get<ConfigNumber>(variableName).value;
 		}
 
 		public void SetRandomValueMono(string variableName){
-			this.store.get<ConfigNumber>(variableName).SetRandomValue();
+			store.get<ConfigNumber>(variableName).SetRandomValue();
 		}
 
 		public float GetFloatRanged(string variableName){
-			return (float) this.store.get<ConfigNumberRanged>(variableName).value;
-			//			return (float) this.store.get<ConfigNumber>(variableName).SetRandomValue();
+			return (float) store.get<ConfigNumberRanged>(variableName).value;
 		}
 
 		public int GetIntRanged(string variableName)
 		{
-			return (int) this.store.get<ConfigNumberRangedInt>(variableName).value;
+			return (int) store.get<ConfigNumberRangedInt>(variableName).value;
 		}
 			
 		public bool GetBool(string variableName)
 		{
-			return this.store.get<ConfigBoolean>(variableName).value;
+			return store.get<ConfigBoolean>(variableName).value;
 		}
 
 		public string GetString(string variableName)
 		{
-			return this.store.get<ConfigString>(variableName).value;
+			return store.get<ConfigString>(variableName).value;
 		}
 			
 		public ConfigNumber CreateNumber(string name, int value = 0){
 			ConfigNumber n = new ConfigNumber(name, value);
-			this.store.putVar(n);
+			store.putVar(n);
 			return n;
 		}
 		
 		public ConfigNumber CreateNumber(string name, float value = 0)
 		{
 			ConfigNumber n = new ConfigNumber(name, value).SetPrecision(2);
-			this.store.putVar(n);
+			store.putVar(n);
 			return n;
 		}
 			
 		public ConfigNumberRanged CreateNumberRanged(string name, float minvalue = 0, float maxvalue = 0)
 		{
 			ConfigNumberRanged n = new ConfigNumberRanged(name, minvalue, maxvalue).SetPrecision(2);
-			this.store.putVar(n);
+			store.putVar(n);
 			return n;
 		}
 
 		public ConfigNumberRangedInt CreateNumberRangedInt(string name, int minvalue = 0, int maxvalue = 0){
 			ConfigNumberRangedInt n = new ConfigNumberRangedInt(name, minvalue, maxvalue);
-			this.store.putVar(n);
+			store.putVar(n);
 			return n;
 		}
 			
 		public ConfigString CreateString(string name, string value = "")
 		{
 			ConfigString v = new ConfigString(name, value);
-			this.store.putVar(v);
+			store.putVar(v);
 			return v;
 		}
 		
 		public ConfigBoolean CreateBoolean(string name, bool value = false)
 		{
 			ConfigBoolean v = new ConfigBoolean(name, value);
-			this.store.putVar(v);
+			store.putVar(v);
 			return v;
 		}
 

@@ -254,8 +254,10 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.TrialData = TrialData;
             TrialData.fileName = FilePrefix + "__TrialData.txt";
 
+
             FrameData = (FrameData) SessionDataControllers.InstantiateDataController<FrameData>("FrameData", ConfigName,
                 StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
+
             //SessionDataControllers.InstantiateFrameData(StoreData, ConfigName,
               //  TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
             FrameData.taskLevel = this;

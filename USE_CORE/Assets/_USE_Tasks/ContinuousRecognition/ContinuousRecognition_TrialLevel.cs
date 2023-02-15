@@ -76,8 +76,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public StimGroup RightGroup;
     [HideInInspector] public StimGroup WrongGroup;
 
-    public Vector3 ButtonScale;
-    public Vector3 ButtonPosition;
+    [HideInInspector] public Vector3 ButtonScale;
+    [HideInInspector] public Vector3 ButtonPosition;
 
     [HideInInspector] GameObject chosenStimObj;
     [HideInInspector] ContinuousRecognition_StimDef chosenStimDef;
@@ -98,9 +98,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
-        TokenFBController.SetFlashingTime(1f);
-        HaloFBController.SetHaloIntensity(2);
-        HaloFBController.SetHaloSize(1);
+        SetControllerBlockValues();
 
         OriginalFbTextPosition = YouLoseTextGO.transform.position;
         OriginalTitleTextPosition = TitleTextGO.transform.position;
@@ -114,14 +112,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (!CR_CanvasGO.activeInHierarchy)
                 CR_CanvasGO.SetActive(true);
 
-            //Make sure text and timer objects are inactive in case they used hotkey to end last block.
-            if (TrialCount_InBlock == 0 && IsHuman)
-                DeactivateTextObjects();
-
-            //In case restart block hot key was pressed. 
-            if(TrialCount_InBlock == 0 && BorderPrefabList.Count > 0)
-                DestroyFeedbackBorders();
-
             NumFeedbackRows = 0;
 
             if (StartButton == null)
@@ -133,7 +123,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
 
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
-            
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -152,9 +141,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (TrialCount_InBlock == 0)
             {
-                TokenFBController.SetTokenBarValue(InitialTokenAmount);
-                currentTask.CalculateBlockSummaryString(); //setting again just in case they used RestartBlock hotkey.
-                if (IsHuman)
+                currentTask.CalculateBlockSummaryString();
+                if(IsHuman)
                 {
                     AdjustStartButtonPos(); //Adjust startButton position (move down) to make room for Title text. 
                     TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
@@ -179,10 +167,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             SetTokenFeedbackTimes();
             SetStimStrings();
             SetShadowType(currentTrial.ShadowType, "ContinuousRecognition_DirectionalLight");
-
-            //MAKE EACH STIM GAME OBJECT FACE THE CAMERA WHILE SPAWNED
-            if (currentTrial.StimFacingCamera)
-                MakeStimsFaceCamera(trialStims);     
         });
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
@@ -209,6 +193,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
+
+            //MAKE EACH STIM GAME OBJECT FACE THE CAMERA WHILE SPAWNED
+            if (currentTrial.StimFacingCamera)
+                MakeStimsFaceCamera(trialStims);  
 
             if(currentTrial.ShakeStim)
                 AddShakeStimScript(trialStims);
@@ -484,6 +472,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TimeToCompletion_Block = 0;
         NumRewards_Block = 0;
         Score = 0;
+    }
+
+    public void SetControllerBlockValues()
+    {
+        TokenFBController.SetFlashingTime(1f);
+        HaloFBController.SetHaloIntensity(2);
+        HaloFBController.SetHaloSize(1);
     }
 
     void RemoveShakeStimScript(StimGroup stimGroup)

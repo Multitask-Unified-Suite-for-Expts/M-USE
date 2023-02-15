@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -75,7 +76,7 @@ namespace USE_ExperimentTemplate_Session
         private bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         private string EyetrackerType;
         private Dictionary<string, EventCode> SessionEventCodes;
-
+        [HideInInspector] public StringBuilder SessionSummaryString;
         public override void LoadSettings()
         {
             //load session config file
@@ -222,6 +223,10 @@ namespace USE_ExperimentTemplate_Session
 
             bool waitForSerialPort = false;
             bool taskAutomaticallySelected = false;
+            Add_ControlLevel_InitializationMethod(()=>
+            {
+                SessionSummaryString = new StringBuilder();
+            });
             setupSession.AddDefaultInitializationMethod(() =>
             {
                 PauseCanvasGO = GameObject.Find("PauseCanvas");
@@ -481,6 +486,7 @@ namespace USE_ExperimentTemplate_Session
                 CameraMirrorTexture.Release();
                 SessionCam.gameObject.SetActive(false);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
+                //SessionSummaryString.Append()
                 CurrentTask.TrialLevel.TaskLevel = CurrentTask;
                 ExperimenterDisplayController.ResetTask(CurrentTask, CurrentTask.TrialLevel);
                 if (SerialPortActive)

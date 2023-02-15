@@ -20,6 +20,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;
     [HideInInspector] public int BlockStringsAdded = 0;
+    [HideInInspector] public string TaskName = "FlexLearning";
     FlexLearning_BlockDef flBD => GetCurrentBlockDef<FlexLearning_BlockDef>();
     FlexLearning_TrialLevel flTL;
     public override void DefineControlLevel()
@@ -65,7 +66,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 
     private void SetSettings()
     {
-        string TaskName = "FlexLearning";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             flTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
         else flTL.ContextExternalFilePath = ContextExternalFilePath;
@@ -119,10 +119,11 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     {
         ClearStrings();
         
-        BlockSummaryString.AppendLine("<b>Block Num: " + (flTL.BlockCount + 1) + "</b>"+
-                                      "\nTrial Num: " + (flTL.TrialCount_InBlock + 1) +
+        BlockSummaryString.AppendLine("<b>Block Num: </b>" + (flTL.BlockCount + 1) +
                                       "\n" + 
-                                      "\nAccuracy: " + String.Format("{0:0.000}", flTL.Accuracy_InBlock) +  
+                                      "<b>\nTrial Num: </b>" + (flTL.TrialCount_InBlock + 1) +
+                                      "\n" + 
+                                      "\nAccuracy: " + String.Format("{0:0.000}", (float)flTL.Accuracy_InBlock) +  
                                       "\n" + 
                                       "\nAvg Search Duration: " + String.Format("{0:0.000}", flTL.AverageSearchDuration_InBlock) +
                                       "\n" + 

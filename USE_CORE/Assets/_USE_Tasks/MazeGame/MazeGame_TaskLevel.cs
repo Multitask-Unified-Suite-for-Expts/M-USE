@@ -1,5 +1,8 @@
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
+using System.Text;
 using MazeGame_Namespace;
 using UnityEngine;
 using USE_ExperimentTemplate_Task;
@@ -18,32 +21,85 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         ruleAbidingErrors_InBlock,
         ruleBreakingErrors_InBlock,
         retouchCorrect_InBlock,
-        correctTouches_InBlock;
+        correctTouches_InBlock, 
+        numRewardPulses_InBlock,
+        nonStimTouches_InBlock;
 
+    
+    private List<int> totalErrors_InTask,
+        perseverativeErrors_InTask,
+        backtrackErrors_InTask,
+        ruleAbidingErrors_InTask,
+        ruleBreakingErrors_InTask,
+        retouchCorrect_InTask,
+        correctTouches_InTask,
+        numRewardPulses_InTask;
+
+    private float AvgTotalErrors,
+        AvgPerseverativeErrors,
+        AvgBacktrackErrors,
+        AvgRuleAbidingErrors,
+        AvgRuleBreakingErrors,
+        AvgRetouchCorrect, 
+        AvgCorrectTouches,
+        AvgReward;
+
+    [HideInInspector] public string BlockAveragesString;
+    [HideInInspector] public string CurrentBlockString;
+    [HideInInspector] public StringBuilder PreviousBlocksString;
+    private int blocksAdded = 0;
     [HideInInspector] public MazeDef[] MazeDefs;
     private string mazeKeyFilePath;
     private MazeGame_TrialLevel mgTL;
     private int mIndex;
+    public string TaskName = "MazeGame";
     private MazeGame_BlockDef mgBD => GetCurrentBlockDef<MazeGame_BlockDef>();
 
     public override void DefineControlLevel()
     {
+        totalErrors_InTask = new List<int>();
+        perseverativeErrors_InTask = new List<int>();
+        backtrackErrors_InTask = new List<int>();
+        ruleAbidingErrors_InTask = new List<int>();
+        ruleBreakingErrors_InTask = new List<int>();
+        retouchCorrect_InTask = new List<int>();
+        correctTouches_InTask = new List<int>();
+        numRewardPulses_InTask = new List<int>();
+        
         mgTL = (MazeGame_TrialLevel)TrialLevel;
         SetSettings();
         AssignBlockData();
-
-        SetupTask.AddInitializationMethod(() =>
-        {
-            //HARD CODED TO MINIMIZE EMPTY SKYBOX DURATION, CAN'T ACCESS TRIAL DEF YET & CONTEXT NOT IN BLOCK DEF
-            RenderSettings.skybox =
-                CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + "Concrete3.png");
-            LoadMazeDef();
-        });
-
+        
+        BlockAveragesString = "";
+        CurrentBlockString = "";
+        PreviousBlocksString = new StringBuilder();
+        
+        blocksAdded = 0;
+        LoadMazeDef();
         RunBlock.AddInitializationMethod(() =>
         {
+            
+            //HARD CODED TO MINIMIZE EMPTY SKYBOX DURATION, CAN'T ACCESS TRIAL DEF YET & CONTEXT NOT IN BLOCK DEF
+            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + "Concrete3.png");
+            mgTL.ContextActive = true;
+         //   EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
+            
             ResetBlockVariables();
             FindMaze();
+            CalculateBlockSummaryString();
+        });
+        BlockFeedback.AddInitializationMethod(() =>
+        {
+            mgTL.DestroyChildren(GameObject.Find("MainCameraCopy"));
+            if (mgTL.AbortCode == 0)
+            {
+                CurrentBlockString += "\n" + "\n";
+                CurrentBlockString = CurrentBlockString.Replace("Current Block", $"Block {blocksAdded + 1}");
+                PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
+                AddBlockValuesToTaskValues();
+                blocksAdded++;
+            }
+            CalculateBlockAverages();
         });
     }
 
@@ -56,10 +112,39 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("BacktrackErrors", () => backtrackErrors_InBlock);
         BlockData.AddDatum("RuleAbidingErrors", () => ruleAbidingErrors_InBlock);
         BlockData.AddDatum("RuleBreakingErrors", () => ruleBreakingErrors_InBlock);
-        BlockData.AddDatum("NumRewardPulses", () => mgTL.NumRewardPulses_InBlock);
-        BlockData.AddDatum("NumNonStimSelections", () => mgTL.NumNonStimSelections_InBlock);
+        BlockData.AddDatum("NumRewardPulses", () => numRewardPulses_InBlock);
+       // BlockData.AddDatum("NumNonStimSelections", () => mgTL.NonStimTouches_InBlock);
     }
+    public void AddBlockValuesToTaskValues()
+    {
+        Debug.Log("TASK THING: " + (numRewardPulses_InTask == null ? "NULL" : "NOT NULL"));
+        numRewardPulses_InTask.Add(numRewardPulses_InBlock);
+        totalErrors_InTask.Add(totalErrors_InBlock);
+        correctTouches_InTask.Add(correctTouches_InBlock);
+        retouchCorrect_InTask.Add(retouchCorrect_InBlock);
+        perseverativeErrors_InTask.Add(perseverativeErrors_InBlock);
+        backtrackErrors_InTask.Add(backtrackErrors_InBlock);
+        ruleAbidingErrors_InTask.Add(ruleAbidingErrors_InBlock);
+        ruleBreakingErrors_InTask.Add(ruleBreakingErrors_InBlock);
+        
 
+        //TrialsCompleted_Task.Add(mgTL.NumTrials_Block);
+
+    }
+    public override OrderedDictionary GetSummaryData()
+    {
+        OrderedDictionary data = new OrderedDictionary();
+
+        data["Num Reward Pulses"] = numRewardPulses_InTask.AsQueryable().Sum();
+        data["Total Errors"] = totalErrors_InTask.AsQueryable().Sum();
+        data["Correct Touches"] = correctTouches_InTask.AsQueryable().Sum();
+        data["Retouch Correct"] = retouchCorrect_InTask.AsQueryable().Sum();
+        data["Perseverative Errors"] = perseverativeErrors_InTask.AsQueryable().Sum();
+        data["Backtrack Errors"] = backtrackErrors_InTask.AsQueryable().Sum();
+        data["Rule-Abiding Errors"] = ruleAbidingErrors_InTask.AsQueryable().Sum();
+        data["Rule-Breaking Errors"] = ruleBreakingErrors_InTask.AsQueryable().Sum();
+        return data;
+    }
     private void ResetBlockVariables()
     {
         totalErrors_InBlock = 0;
@@ -69,13 +154,88 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         backtrackErrors_InBlock = 0;
         ruleAbidingErrors_InBlock = 0;
         ruleBreakingErrors_InBlock = 0;
-        mgTL.NumRewardPulses_InBlock = 0;
-        mgTL.NumNonStimSelections_InBlock = 0;
+        numRewardPulses_InBlock = 0;
+        nonStimTouches_InBlock = 0;
     }
+    public void CalculateBlockSummaryString()
+    {
+        ClearStrings();
 
+        CurrentBlockString = "<b>Current Block:</b>" +
+                             "\nTotal Errors: " + totalErrors_InBlock +
+                             //"\nCorrect Touches: " + correctTouches_InBlock +
+                             "\nRule-Abiding Errors: " + ruleAbidingErrors_InBlock +
+                             "\nRule-Breaking Errors: " + ruleBreakingErrors_InBlock + 
+                             "\nPerseverative Errors: " + perseverativeErrors_InBlock +
+                             "\nBacktrack Errors: " + backtrackErrors_InBlock +
+                             "\nRetouch Correct: " + retouchCorrect_InBlock +
+                             "\nRewards: " + numRewardPulses_InBlock;
+        // "\nAvgTimeToChoice: " + trialLevel.AvgTimeToChoice_Block.ToString("0.00") + "s" +
+        if (blocksAdded > 1)
+            CurrentBlockString += "\n";
+
+        //Add CurrentBlockString if block wasn't aborted:
+        if (mgTL.AbortCode == 0)
+            BlockSummaryString.AppendLine(CurrentBlockString.ToString());
+
+
+        if (blocksAdded > 1) //If atleast 2 blocks to average, set Averages string and add to BlockSummaryString:
+        {
+            BlockAveragesString = "-------------------------------------------------" +
+                              "\n" +
+                              "\n<b>Block Averages (" + blocksAdded + " blocks):" + "</b>" +
+                              "\nAvg Total Errors: " + AvgTotalErrors.ToString("0.00") +
+                              "\nAvg Correct Touches: " + AvgCorrectTouches.ToString("0.00") +
+                              "\nAvg Rule-Abiding Errors: " + AvgRuleAbidingErrors.ToString("0.00") + "s" +
+                              "\nAvg Rule-Breaking Errors: " + AvgRuleBreakingErrors.ToString("0.00") +
+                              "\nAvg Preservative Errors: " + AvgPerseverativeErrors.ToString("0.00") +
+                              "\nAvg Backtrack Errors: " + AvgBacktrackErrors.ToString("0.00") + "s" +
+                              "\nAvg Retouch Correct: " + AvgRetouchCorrect.ToString("0.00") +
+                              "\nAvg Reward: " + AvgReward.ToString("0.00");
+            
+            BlockSummaryString.AppendLine(BlockAveragesString.ToString());
+        }
+
+        //Add Previous blocks string:
+        if(PreviousBlocksString.Length > 0)
+        {
+            BlockSummaryString.AppendLine("\n" + PreviousBlocksString.ToString());
+        }
+    }
+    public void ClearStrings()
+    {
+        BlockAveragesString = "";
+        CurrentBlockString = "";
+        BlockSummaryString.Clear();
+    }
+    private void CalculateBlockAverages()
+    {
+        if (totalErrors_InTask.Count >= 1)
+            AvgTotalErrors = (float)totalErrors_InTask.AsQueryable().Average();
+        
+        if (correctTouches_InTask.Count >= 1)
+            AvgCorrectTouches = (float)correctTouches_InTask.AsQueryable().Average();
+
+        if (retouchCorrect_InTask.Count >= 1)
+            AvgRetouchCorrect = (float)retouchCorrect_InTask.AsQueryable().Average();
+
+        if (perseverativeErrors_InTask.Count >= 1)
+            AvgPerseverativeErrors = (float)perseverativeErrors_InTask.AsQueryable().Average();
+
+        if (backtrackErrors_InTask.Count >= 1)
+            AvgBacktrackErrors = (float)backtrackErrors_InTask.AsQueryable().Average();
+        
+        if (ruleAbidingErrors_InTask.Count >= 1)
+            AvgRuleAbidingErrors = (float)ruleAbidingErrors_InTask.AsQueryable().Average();
+        
+        if (ruleBreakingErrors_InTask.Count >= 1)
+            AvgRuleBreakingErrors = (float)ruleBreakingErrors_InTask.AsQueryable().Average();
+
+        if (numRewardPulses_InTask.Count >= 1)
+            AvgReward = (float)numRewardPulses_InTask.AsQueryable().Average();
+    }
     private void SetSettings()
     {
-        var TaskName = "MazeGame";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             mgTL.ContextExternalFilePath =
                 (string)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");

@@ -160,18 +160,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         State SelectionFeedback = new State("StimulusChosen");
         State FinalFeedback = new State("FinalFeedback");
         State ITI = new State("ITI");
-        State StimulusChosenSuccesorState = new State("StimulusChosenSuccesorState");
         State delay = new State("Delay");
-        State UpdateSlider = new State("UpdateSlider");
-
         AddActiveStates(new List<State>
         {
-            StartButton, ChooseStimulus, SelectionFeedback, FinalFeedback, ITI, StimulusChosenSuccesorState,
-            ChooseStimulusDelay, delay, UpdateSlider
+            StartButton, ChooseStimulus, SelectionFeedback, FinalFeedback, ITI,
+            ChooseStimulusDelay, delay
         });
 
         string[] stateNames = new string[]
-            {"StartButton", "StartButtonDelay", "ChooseStimulus", "StimulusChosen", "FinalFeedback", "ITI", "Delay", "ChooseStimulusDelay", "UpdateSlide"};
+            {"StartButton", "StartButtonDelay", "ChooseStimulus", "StimulusChosen", "FinalFeedback", "ITI", "Delay", "ChooseStimulusDelay"};
 
         // A state that just waits for some time
         State stateAfterDelay = null;
@@ -453,7 +450,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
             else if ((int) (10 * (Time.time - startTime)) % 2 == 0)
             {
-                sliderHaloImage.color = new Color(0, 0, 0, 0.2f);
+                sliderHaloImage.color = new Color(1, 1, 0, 0.2f);
             }
         });
         FinalFeedback.AddTimer(() => finalFbDuration.value, ITI, () =>
@@ -844,7 +841,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         playerViewParent);
                 textLocation.y += 50;
                 Vector2 textSize = new Vector2(200, 200);
-                playerViewText = playerView.writeText(CurrentTrialDef.CorrectObjectTouchOrder[i].ToString(),
+                playerViewText = playerView.writeText(CurrentTrialDef.CorrectObjectTouchOrder[i].ToString(), CurrentTrialDef.CorrectObjectTouchOrder[i].ToString(),
                     Color.red, textLocation, textSize, playerViewParent);
                 playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                 playerViewTextList.Add(playerViewText);

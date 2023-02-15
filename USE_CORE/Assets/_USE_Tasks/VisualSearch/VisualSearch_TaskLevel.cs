@@ -18,6 +18,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;
     [HideInInspector] public int BlockStringsAdded = 0;
+    [HideInInspector]public string TaskName = "VisualSearch";
     VisualSearch_BlockDef vsBD => GetCurrentBlockDef<VisualSearch_BlockDef>();
     VisualSearch_TrialDef vsTD;
     //private VisualSearch_TrialDef vsTD => GetCurrentTrialDef<VisualSearch_TrialDef>();
@@ -71,9 +72,10 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     {
         ClearStrings();
         BlockSummaryString.AppendLine("<b>Block Num: " + (vsTL.BlockCount + 1) + "</b>" +
-                                      "\nTrial Num: " + (vsTL.TrialCount_InBlock + 1) +
                                       "\n" + 
-                                      "\nAccuracy: " + String.Format("{0:0.00}", vsTL.Accuracy_InBlock) +  
+                                      "<b>\nTrial Num: </b>" + (vsTL.TrialCount_InBlock + 1) +
+                                      "\n" + 
+                                      "\nAccuracy: " + String.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
                                       "\n" + 
                                       "\nAvg Search Duration: " + String.Format("{0:0.00}", vsTL.AverageSearchDuration_InBlock) +
                                       "\n" + 
@@ -90,8 +92,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 
     private void SetSettings()
     {
-        string TaskName = "VisualSearch";
-        
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             vsTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
         else vsTL.ContextExternalFilePath = ContextExternalFilePath;

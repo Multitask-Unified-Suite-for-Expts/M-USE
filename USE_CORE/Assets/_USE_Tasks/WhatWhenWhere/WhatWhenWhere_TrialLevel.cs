@@ -195,6 +195,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             startButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
             FBSquare = CreateSquare("FBSquare", FBSquareTexture, FBSquarePosition, FBSquareScale);
             playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
+
+            //Removing shadows from Directional Light (was distorting stim):
+            SetShadowType("None", "WhatWhenWhere_DirectionalLight");
+            //SetShadowType(currentTrial.ShadowType, "WhatWhenWhere_DirectionalLight"); //Adding this as well in case you want to add a trial variable and delete line above this. 
+
         });
 
         SetupTrial.AddInitializationMethod(() =>
@@ -259,6 +264,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddInitializationMethod(() =>
         {
+            MakeStimFaceCamera();
+
             AssignCorrectStim();
             CreateTextOnExperimenterDisplay();
             choiceMade = false;
@@ -507,6 +514,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.BlockSummaryString.Clear();
             CurrentTaskLevel.BlockSummaryString.AppendLine("");
         }
+    }
+
+    public void MakeStimFaceCamera()
+    {
+        foreach (StimGroup group in TrialStims)
+            foreach (var stim in group.stimDefs)
+                stim.StimGameObject.AddComponent<FaceCamera>();
     }
 
     public void ResetTrialVariables()
@@ -863,8 +877,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         distractorStims = new StimGroup("DistractorStims", ExternalStims, CurrentTrialDef.DistractorStimsIndices);
         searchStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback"));
         distractorStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback"));
+
         TrialStims.Add(searchStims);
         TrialStims.Add(distractorStims);
+
 
         randomizedLocations = CurrentTrialDef.RandomizedLocations; 
 

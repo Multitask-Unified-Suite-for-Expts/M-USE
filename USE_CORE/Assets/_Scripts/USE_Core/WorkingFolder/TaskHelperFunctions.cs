@@ -18,6 +18,7 @@ public class TaskHelperFunctions
 
     public IEnumerator GratedSquareFlash(Texture2D newTexture, GameObject square, float gratingSquareDuration)
     {
+        //eventually replace with state timer logic
         Grating = true;
         Color32 originalColor = square.GetComponent<Renderer>().material.color;
         Texture originalTexture = square.GetComponent<Renderer>().material.mainTexture;

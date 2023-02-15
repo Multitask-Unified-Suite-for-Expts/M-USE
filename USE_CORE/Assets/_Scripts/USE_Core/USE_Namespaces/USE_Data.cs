@@ -421,14 +421,94 @@ namespace USE_Data
 			data.Add(datum);
 		}
 
+		public void AddDatum(string name, Func<List<int>> variable)
+		{
+			IDatum datum = new Datum<List<int>>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<List<int?>> variable)
+		{
+			IDatum datum = new Datum<List<int?>>(name, () => variable());
+			data.Add(datum);
+		}
 		public void AddDatum(string name, Func<List<Int64>> variable)
 		{
 			IDatum datum = new Datum<List<Int64>>(name, () => variable());
 			data.Add(datum);
 		}
-		public void AddDatum(string name, Func<List<int>> variable)
+		public void AddDatum(string name, Func<List<Int64?>> variable)
 		{
-			IDatum datum = new Datum<List<int>>(name, () => variable());
+			IDatum datum = new Datum<List<Int64?>>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<List<float>> variable)
+		{
+			IDatum datum = new Datum<List<float>>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<List<float?>> variable)
+		{
+			IDatum datum = new Datum<List<float?>>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<List<bool>> variable)
+		{
+			IDatum datum = new Datum<List<bool>>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<List<bool?>> variable)
+		{
+			IDatum datum = new Datum<List<bool?>>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<List<string>> variable)
+		{
+			IDatum datum = new Datum<List<string>>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<int[]> variable)
+		{
+			IDatum datum = new Datum<int[]>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<int?[]> variable)
+		{
+			IDatum datum = new Datum<int?[]>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<Int64[]> variable)
+		{
+			IDatum datum = new Datum<Int64[]>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<Int64?[]> variable)
+		{
+			IDatum datum = new Datum<Int64?[]>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<float[]> variable)
+		{
+			IDatum datum = new Datum<float[]>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<float?[]> variable)
+		{
+			IDatum datum = new Datum<float?[]>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<bool[]> variable)
+		{
+			IDatum datum = new Datum<bool[]>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<bool?[]> variable)
+		{
+			IDatum datum = new Datum<bool?[]>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<string[]> variable)
+		{
+			IDatum datum = new Datum<string[]>(name, () => variable());
 			data.Add(datum);
 		}
 

@@ -3605,7 +3605,7 @@ GameObject:
   - component: {fileID: 546467805092879883}
   - component: {fileID: 7820722863910833494}
   m_Layer: 5
-  m_Name: LogPanelText
+  m_Name: SessionInfoPanelText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

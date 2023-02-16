@@ -15,16 +15,18 @@ public class SessionInfoPanel : ExperimenterDisplayPanel
     public override void CustomPanelInitialization()
     {
         sessionInfoPanel = GameObject.Find("SessionInfoPanel");
-        sessionInfoPanelText = GameObject.Find("SessionInfoText");
+        sessionInfoPanelText = GameObject.Find("SessionInfoPanelText");
     }
 
     public override void CustomPanelUpdate()
     {
-        if (TrialLevel != null)
+        if (TaskLevel != null)
         {
+            Debug.Log("IN THE SESSION INFO PANEL IF1");
             if(SessionLevel.SessionSummaryString.Length > 0)
             {
                 sessionInfoPanelText.GetComponent<Text>().supportRichText = true;
+                Debug.Log("IN THE SESSION INFO PANEL IF2");
                 sessionInfoPanelText.GetComponent<Text>().text = "\n<size=23><color=#2d3436ff>" + SessionLevel.SessionSummaryString + "</color></size>";
             }
         }

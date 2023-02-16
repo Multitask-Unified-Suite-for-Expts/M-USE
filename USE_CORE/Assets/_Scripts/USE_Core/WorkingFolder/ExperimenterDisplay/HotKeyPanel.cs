@@ -141,31 +141,40 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             List<HotKey> HotKeyList = new List<HotKey>();
 
             // Toggle Displays HotKey
-            //HotKey toggleDisplays = new HotKey
-            //{
-            //    keyDescription = "W",
-            //    actionName = "Toggle Displays",
-            //    hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.W),
-            //    hotKeyAction = () =>
-            //    {
-            //        var cams = GameObject.FindObjectsOfType<Camera>();
-            //        foreach (Camera c in cams) //MirrorCam:0, BackgroundCamera:1, CR_Cam: 0, MainCameraCopy:1 (DC)
-            //        {
-            //            Debug.Log(c.name + " before: " + c.targetDisplay);
-            //            c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-            //            Debug.Log(c.name + " after: " + c.targetDisplay);
-            //        }
-            //        var canvases = GameObject.FindObjectsOfType<Canvas>();
-            //        foreach (Canvas c in canvases) //ExperimenterCanvas: 1, TaskSelectionCanvas:0 (DC), InitScreenCanvas:1, CR_Canvas:0 (DC)
-            //        {
-            //            Debug.Log(c.name + " before: " + c.targetDisplay);
-            //            c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-            //            Debug.Log(c.name + " after: " + c.targetDisplay);
-            //        }
-            //        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-            //    }
-            //};
-            //HotKeyList.Add(toggleDisplays);
+            HotKey toggleDisplays = new HotKey
+            {
+                keyDescription = "W",
+                actionName = "Toggle Displays",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.W),
+                hotKeyAction = () =>
+                {
+                    //NT: MAYBE WE ALSO NEED TO GET MAIN CAMERA AND INIT CAMERA, WHICH ARE INACTIVE AND SO NOT BEING FOUND BELOW?
+
+                    var cams = GameObject.FindObjectsOfType<Camera>();
+                    foreach (Camera c in cams) //MirrorCam (0 to 1), BackgroundCamera (1 to 0), TaskCam (0 to 1), MainCameraCopy(1 DC!!)
+                        c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
+                    
+                    var canvases = GameObject.FindObjectsOfType<Canvas>();
+                    foreach (Canvas c in canvases) //ExperimenterCanvas: 1, TaskSelectionCanvas:0 (DC), InitScreenCanvas:1, CR_Canvas:0 (DC)
+                    {
+                        if (c.renderMode == RenderMode.ScreenSpaceCamera) //TaskSelectionCanvas (0 to 1 ),
+                        {
+                            Debug.Log("CAM REND BEFORE = " + c.name + " " + c.worldCamera.targetDisplay);
+                            c.worldCamera.targetDisplay = 1 - c.worldCamera.targetDisplay;
+                            Debug.Log("CAM REND AFTER = " + c.name + " " + c.worldCamera.targetDisplay);
+                        }
+
+                        else //ExperimenterCanvas (1 to 0), InitScreenCanvas (1 to 0),
+                        {
+                            Debug.Log("BEFORE = " + c.name + " " + c.targetDisplay);
+                            c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
+                            Debug.Log("AFTER = " + c.name + " " + c.targetDisplay);
+                        }
+                    }
+                    //SceneManager.LoadScene(SceneManager.GetActiveScene().name); //Doesn't work. Will load task again but without TaskSelection scene.
+                }
+            };
+            HotKeyList.Add(toggleDisplays);
 
             // Remove Cursor Hot Key
             HotKey toggleCursor = new HotKey

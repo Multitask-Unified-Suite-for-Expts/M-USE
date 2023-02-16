@@ -64,7 +64,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     string EffortChoice; //higher or lower
 
     //To center the balloon they selected:
-    public float CenteringSpeed = 1.5f;
+    public float CenteringSpeed = 1f;
     [HideInInspector] bool Centered;
     [HideInInspector] Vector3 CenteredPos;
     [HideInInspector] public bool Flashing;
@@ -191,30 +191,57 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             CreateRewards(currentTrial.NumCoinsRight, RewardContainerRight.transform.position, RewardContainerRight);
 
             CreateTransparentBalloons();
+
+            SideChoice = null;
         });
 
         ChooseBalloon.AddUpdateMethod(() =>
         {
-            GameObject hit = mouseHandler.SelectedGameObject;
-            if (hit == null)
-                return;
-            else
+            //IF WE WANT TO LET THEM CLICK ANYWHERE ON LEFT OR RIGHT SIDE TO SELECT BALLOON:
+            if (InputBroker.GetMouseButtonDown(0))
             {
-                mouseHandler.Stop();
-                if (hit.transform.name.Contains("Left"))
-                {
+                float middle = .5f;
+                float clickPosX = InputBroker.mousePosition.x / Screen.width;
+
+                if (clickPosX < middle)
                     SideChoice = "Left";
-                    TrialStim = StimLeft;
-                }
-                else if(hit.transform.name.Contains("Right"))
-                {
+                
+                if (clickPosX > middle)
                     SideChoice = "Right";
-                    TrialStim = StimRight;
-                }
             }
+
+            //IF WE WANT THEM TO HAVE TO ACTUALLY CLICK WITHIN THE BALLOON TO SELECT IT:
+            //GameObject hit = mouseHandler.SelectedGameObject;
+            //if (hit == null)
+            //    return;
+            //else
+            //{
+            //    mouseHandler.Stop();
+            //    if (hit.transform.name.Contains("Left"))
+            //    {
+            //        SideChoice = "Left";
+            //        TrialStim = StimLeft;
+            //    }
+            //    else if (hit.transform.name.Contains("Right"))
+            //    {
+            //        SideChoice = "Right";
+            //        TrialStim = StimRight;
+            //    }
+            //}
+
+            //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.
+            //if (InputBroker.GetMouseButtonDown(0) && SideChoice == null)
+            //{
+            //    Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
+            //    RaycastHit hitt;
+            //    if (!Physics.Raycast(ray, out hitt))
+            //        if (!AudioFBController.IsPlaying())
+            //            AudioFBController.Play("Negative");
+            //}
         });
-        ChooseBalloon.SpecifyTermination(() => TrialStim != null, CenterSelection, () =>
+        ChooseBalloon.SpecifyTermination(() => SideChoice != null, CenterSelection, () =>
         {
+            TrialStim = (SideChoice == "Left" ? StimLeft : StimRight);
             DestroyChildren(SideChoice == "Left" ? RewardContainerRight : RewardContainerLeft);
             ClicksNeeded = (SideChoice == "Left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
             AudioFBController.Play("EC_BalloonChosen");
@@ -258,6 +285,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         CenterSelection.SpecifyTermination(() => Centered, InflateBalloon);
         CenterSelection.AddDefaultTerminationMethod(() =>
         {
+
             RemoveParents(Wrapper, RemoveParentList);
 
             if (SideChoice == "Left")
@@ -289,6 +317,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             clickTimings = new List<float>();
             timeTracker = 0;
             mouseClicks = 0;
+            AudioFBController.audioSource.Stop(); //stopping "CenterBalloon" audio at last possible second before they may click outside balloon and cause neg fb to play.
         });
         InflateBalloon.AddUpdateMethod(() =>
         {
@@ -339,6 +368,16 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 mouseClicks = MouseTracker.GetClickCount();
             }
 
+            //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.
+            if (InputBroker.GetMouseButtonDown(0) && Response != 1)
+            {
+                Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
+                RaycastHit hit;
+                if (!Physics.Raycast(ray, out hit))
+                    if (!AudioFBController.IsPlaying())
+                        AudioFBController.Play("Negative");
+            }
+
         });
         InflateBalloon.AddTimer(() => inflateDuration.value, PopBalloon);
         InflateBalloon.SpecifyTermination(() => Response == 1, PopBalloon);
@@ -363,6 +402,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             if (Response == 1)
             {
+                AudioFBController.audioSource.Stop();
                 if(IsHuman)
                     AudioFBController.Play("EC_HarshPop"); //better for humans
                 else

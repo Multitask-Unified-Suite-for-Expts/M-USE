@@ -46,7 +46,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public static List<GameObject> pathProgressGO = new List<GameObject>();
     private static int pathProgressIndex = 0;
     public static bool viewPath;
-    private static bool CorrectSelection;
+    private static bool CorrectSelection, ReturnToLast;
     public List<Maze> mazeList = new List<Maze>();
     public int ind;
 
@@ -264,6 +264,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 //ADD ANYTHING ELSE THAT OCCURS DURING CORRECT SELECTION FEEDBACK
                 AudioFBController.Play("Positive");
             }
+            else if (ReturnToLast)
+            {
+                valueToAdd = 0f;
+                AudioFBController.Play("Positive");
+            }
             else
             {
                 valueToAdd = 0f;
@@ -287,6 +292,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             valueRemaining = 0;
             SliderHaloGo.SetActive(false);
             CorrectSelection = false;
+            ReturnToLast = false;
             if (end)
             {
                 stateAfterDelay = FinalFeedback;
@@ -489,6 +495,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             touchedCoord)
         {
             Debug.Log("*Last Correct Tile Touch*");
+            ReturnToLast = true;
             fbDuration = tile.PREV_CORRECT_FEEDBACK_SECONDS;
             retouchCorrect_InTrial++;
             consecutiveErrors = 0;

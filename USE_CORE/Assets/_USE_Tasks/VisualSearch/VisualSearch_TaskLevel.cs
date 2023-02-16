@@ -122,7 +122,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 
     public void AssignBlockData()
     {
-        BlockData.AddDatum("Block Accuracy", ()=> vsTL.Accuracy_InBlock);
+        BlockData.AddDatum("Block Accuracy", ()=> (float)vsTL.Accuracy_InBlock);
         BlockData.AddDatum("Avg Search Duration", ()=> vsTL.AverageSearchDuration_InBlock);
         BlockData.AddDatum("Num Touch Duration Error", ()=> vsTL.TouchDurationError_InBlock);
         BlockData.AddDatum("Num Reward Given", ()=> vsTL.NumRewardPulses_InBlock);

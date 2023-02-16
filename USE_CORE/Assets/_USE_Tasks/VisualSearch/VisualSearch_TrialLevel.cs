@@ -60,7 +60,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int NumRewardPulses_InBlock;
     [HideInInspector] public int NumTokenBarFull_InBlock;
     [HideInInspector] public int TotalTokensCollected_InBlock;
-    [HideInInspector] public float Accuracy_InBlock;
+    [HideInInspector] public decimal Accuracy_InBlock;
     [HideInInspector] public float AverageSearchDuration_InBlock;
     [HideInInspector] public int TouchDurationError_InBlock;
    
@@ -214,7 +214,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 SelectedStimIndex = selectedSD.StimIndex;
                 SelectedStimLocation = selectedSD.StimLocation;
             }
-            Accuracy_InBlock = NumCorrect_InBlock/(TrialCount_InBlock + 1);
+            Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock,(TrialCount_InBlock + 1));
         });
 
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, ()=> 

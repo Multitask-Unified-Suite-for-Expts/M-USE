@@ -25,6 +25,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     VisualSearch_TrialLevel vsTL;
     public override void DefineControlLevel()
     {
+        
         vsTL = (VisualSearch_TrialLevel)TrialLevel;
         //vsTD = (VisualSearch_TrialDef)vsTL.GetCurrentTrialDef<VisualSearch_TrialDef>();
         SetSettings();

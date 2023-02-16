@@ -187,7 +187,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         SearchDisplay.AddInitializationMethod(() =>
         {
             CreateTextOnExperimenterDisplay();
-
+            searchStims.ToggleVisibility(true);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);
         
@@ -376,8 +376,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         TrialStims.Add(searchStims);
         TrialStims.Add(sampleStim);
 
-        postSampleDistractorStims = new StimGroup("PostSampleDistractor", ExternalStims, CurrentTrialDef.PostSampleDistractorIndices);
-        postSampleDistractorStims.SetVisibilityOnOffStates(GetStateFromName("DisplayPostSampleDistractors"), GetStateFromName("DisplayPostSampleDistractors"));
+        postSampleDistractorStims = new StimGroup("DisplayDistractors", ExternalStims, CurrentTrialDef.PostSampleDistractorIndices);
+        postSampleDistractorStims.SetVisibilityOnOffStates(GetStateFromName("DisplayDistractors"), GetStateFromName("DisplayDistractors"));
         postSampleDistractorStims.SetLocations(CurrentTrialDef.PostSampleDistractorLocations);
         TrialStims.Add(postSampleDistractorStims);
         

@@ -204,10 +204,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             isContextActive = true;
             viewPath = CurrentTrialDef.ViewPath;
             contextName = CurrentTrialDef.ContextName;
-            SetTrialSummaryString();
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +
                                                  CurrentTrialDef.ContextName + ".png");
-            if (!variablesLoaded) loadVariables();
+            if (!variablesLoaded)
+                loadVariables();
             //read maze value for maze def
             var textMaze = File.ReadAllLines(MazeFilePath + Path.DirectorySeparatorChar + mazeDefName);
             currMaze = new Maze(textMaze[0]);
@@ -227,6 +227,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             StartButton.SetActive(false);
 
             ConfigureSlider();
+            SetTrialSummaryString();
 
             //NonStimTouches_InBlock += mouseHandler.GetNumNonStimSelection(); COUNT ALL TOUCHES BETTER OR CHANGE NAME
             InstantiateCurrMaze();
@@ -740,20 +741,35 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     }
     void SetTrialSummaryString()
     {
-        TrialSummaryString = "<b>Task Name: " + CurrentTaskLevel.TaskName+ "</b>" + 
-                             "\n"+
-                             "<b>\nTrial Count in Block: " + (TrialCount_InBlock + 1) + "</b>" +
-                             "\nTrial Count in Task: " + (TrialCount_InTask + 1) +
-                             "\n" +
-                             "\nTotal Errors: " + totalErrors_InTrial +
-                             //"\nCorrect Touches: " + correctTouches_InBlock + COME UP WITH SOMETHING MORE USEFUL
-                             "\nRule-Abiding Errors: " + ruleAbidingErrors_InTrial +
-                             "\nRule-Breaking Errors: " + ruleBreakingErrors_InTrial + 
-                             "\nPerseverative Errors: " + perseverativeErrors_InTrial +
-                             "\nBacktrack Errors: " + backtrackErrors_InTrial +
-                             "\nRetouch Correct: " + retouchCorrect_InTrial+ 
-                             "\nMaze Duration: " + mazeEndTime +
-                             "\n" +
-                             "\nSlider Value: " + Slider.value;
+
+
+        //TrialSummaryString = "<b>Task Name: " + CurrentTaskLevel.TaskName+ "</b>" + 
+        //                     "\n"+
+        //                     "<b>\nTrial Count in Block: " + (TrialCount_InBlock + 1) + "</b>" +
+        //                     "\nTrial Count in Task: " + (TrialCount_InTask + 1) +
+        //                     "\n" +
+        //                     "\nTotal Errors: " + totalErrors_InTrial +
+        //                     //"\nCorrect Touches: " + correctTouches_InBlock + COME UP WITH SOMETHING MORE USEFUL
+        //                     "\nRule-Abiding Errors: " + ruleAbidingErrors_InTrial +
+        //                     "\nRule-Breaking Errors: " + ruleBreakingErrors_InTrial + 
+        //                     "\nPerseverative Errors: " + perseverativeErrors_InTrial +
+        //                     "\nBacktrack Errors: " + backtrackErrors_InTrial +
+        //                     "\nRetouch Correct: " + retouchCorrect_InTrial+ 
+        //                     "\nMaze Duration: " + mazeEndTime +
+        //                     "\n" +
+        //                     "\nSlider Value: " + Slider.value;
+
+        Debug.Log("TASK NAME = " + CurrentTaskLevel.TaskName);
+        Debug.Log("TCIB: " + TrialCount_InBlock);
+        Debug.Log(TrialCount_InTask);
+        Debug.Log("TOTAL ERRORS: " + totalErrors_InTrial);
+
+        Debug.Log(ruleAbidingErrors_InTrial);
+        Debug.Log(ruleBreakingErrors_InTrial);
+        Debug.Log(perseverativeErrors_InTrial);
+        Debug.Log(backtrackErrors_InTrial);
+        Debug.Log(retouchCorrect_InTrial);
+        Debug.Log(mazeEndTime);
+        Debug.Log(Slider.value);
     }
 }

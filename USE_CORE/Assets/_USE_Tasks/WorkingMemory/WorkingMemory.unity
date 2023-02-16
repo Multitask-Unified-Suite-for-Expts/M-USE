@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311915, g: 0.3807396, b: 0.35872662, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -199,12 +199,14 @@ MonoBehaviour:
   SelectionType: 
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
+  InitialTokenAmount: 0
   StartButtonTexture: {fileID: 0}
   FBSquareTexture: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
   BackdropTexture: {fileID: 0}
+  MazeBackgroundTexture: {fileID: 0}
   runningAcc: 
   MinTrials: 0
   MaxTrials: 0
@@ -328,6 +330,14 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
+  tokenFbDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
   ContextExternalFilePath: 
   ButtonPosition: {x: 0, y: 0, z: 0}
   ButtonScale: {x: 0, y: 0, z: 0}
@@ -335,6 +345,7 @@ MonoBehaviour:
   FBSquareScale: {x: 0, y: 0, z: 0}
   StimFacingCamera: 0
   ShadowType: 
+  NeutralITI: 0
   playerViewTextList: []
   playerViewText: {fileID: 0}
   NumCorrect_InBlock: 0
@@ -509,13 +520,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1249321956}
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1812093639
 GameObject:
   m_ObjectHideFlags: 0

@@ -48,7 +48,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     //Player View Variables
     private PlayerViewPanel playerView;
     private GameObject playerViewParent; // Helps set things onto the player view in the experimenter display
-    private List<GameObject> playerViewTextList = new List<GameObject>();
     private GameObject playerViewText;
     private Vector2 textLocation;
     private bool playerViewLoaded;
@@ -124,12 +123,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 CreateObjects();
             if (!configUIVariablesLoaded) 
                 LoadConfigUIVariables();
-            if (playerViewText == null)
+            if (!playerViewLoaded)
                 CreateTextOnExperimenterDisplay();
-            if (TrialCount_InBlock == 0)
-            {
-                playerViewText.SetActive(false);
-            }
             
             SetTrialSummaryString();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
@@ -178,6 +173,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         SearchDisplay.AddInitializationMethod(() =>
         {
             tStim.ToggleVisibility(true);
+            ActivateChildren(playerViewParent);
             Input.ResetInputAxes(); //reset input in case they holding down
             // Toggle TokenBar and Stim to be visible
             TokenFBController.enabled = true;
@@ -253,6 +249,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         TokenFeedback.AddInitializationMethod(() =>
         {
             tStim.ToggleVisibility(false);
+            DestroyTextOnExperimenterDisplay();
             if (selectedSD.StimTrialRewardMag > 0)
             {
                 //AudioFBController.Play("Positive");
@@ -305,9 +302,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
+        Debug.Log("IN TRIAL CLEANUP");
         DestroyTextOnExperimenterDisplay();
         tStim.ToggleVisibility(false);
-
+        
+        Debug.Log("PLAYER VIEW PARENT " + playerViewParent.activeSelf);
         if (TokenFBController.isActiveAndEnabled)
             TokenFBController.enabled = false;
 
@@ -435,26 +434,21 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     }
     private void CreateTextOnExperimenterDisplay()
     { // sets parent for any playerView elements on experimenter display
-        if (!playerViewLoaded)
+        
+        //Create corresponding text on player view of experimenter display
+        foreach (VisualSearch_StimDef stim in tStim.stimDefs)
         {
-            //Create corresponding text on player view of experimenter display
-            foreach (VisualSearch_StimDef stim in tStim.stimDefs)
+            if (stim.IsTarget)
             {
-                if (stim.IsTarget)
-                {
-                    textLocation =
-                        playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation),
-                            playerViewParent.transform);
-                    textLocation.y += 50;
-                    Vector2 textSize = new Vector2(200, 200);
-                    playerViewText = playerView.writeText("TargetText","TARGET",
-                        Color.red, textLocation, textSize, playerViewParent.transform);
-                    playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
-                    playerViewTextList.Add(playerViewText);
-                    playerViewLoaded = true;
-                }
+                textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent.transform);
+                textLocation.y += 50;
+                Vector3 textSize = new Vector3(2,2,0);
+                playerViewText = playerView.writeText("TargetText","TARGET",
+                    Color.red, textLocation, textSize, playerViewParent.transform);
             }
         }
+        playerViewLoaded = true;
+        DeactivateChildren(playerViewParent);
     }
     private void DestroyTextOnExperimenterDisplay()
     {

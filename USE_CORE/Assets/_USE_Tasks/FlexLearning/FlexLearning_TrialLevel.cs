@@ -61,7 +61,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     //Player View Variables
     private PlayerViewPanel playerView;
     private GameObject playerViewParent; // Helps set things onto the player view in the experimenter display
-    private List<GameObject> playerViewTextList = new List<GameObject>();
     private GameObject playerViewText;
     private Vector2 textLocation;
     private bool playerViewLoaded;
@@ -135,12 +134,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 CreateObjects();
             if (!configUIVariablesLoaded) 
                 LoadConfigUIVariables();
-            if (playerViewText == null)
+            if (!playerViewLoaded)
                 CreateTextOnExperimenterDisplay();
-            if (TrialCount_InBlock == 0)
-            {
-                playerViewText.SetActive(false);
-            }
             
             SetTrialSummaryString();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
@@ -190,6 +185,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             // Toggle TokenBar and Stim to be visible
             TokenFBController.enabled = true;
             tStim.ToggleVisibility(true);
+            ActivateChildren(playerViewParent);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);
         });
@@ -267,6 +263,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         TokenFeedback.AddInitializationMethod(() =>
         {
             tStim.ToggleVisibility(false);
+            DestroyTextOnExperimenterDisplay();
             if (selectedSD.StimTrialRewardMag > 0)
             {
                 AudioFBController.Play("Positive");
@@ -321,7 +318,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
         tStim.ToggleVisibility(false);
         TokenFBController.enabled = false;
-
+        DestroyTextOnExperimenterDisplay();
         if (AbortCode == 0)
             CurrentTaskLevel.CalculateBlockSummaryString();
 
@@ -395,30 +392,26 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     }
     private void CreateTextOnExperimenterDisplay()
     {
-        if (!playerViewLoaded)
+        //Create corresponding text on player view of experimenter display
+        foreach (FlexLearning_StimDef stim in tStim.stimDefs)
         {
-            //Create corresponding text on player view of experimenter display
-            foreach (FlexLearning_StimDef stim in tStim.stimDefs)
+            if (stim.IsTarget)
             {
-                if (stim.IsTarget)
-                {
-                    textLocation =
-                        playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation),
-                            playerViewParent.transform);
-                    textLocation.y += 50;
-                    Vector2 textSize = new Vector2(200, 200);
-                    playerViewText = playerView.writeText("TargetText","TARGET",
-                        Color.red, textLocation, textSize, playerViewParent.transform);
-                    playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
-                    playerViewTextList.Add(playerViewText);
-                    playerViewLoaded = true;
-                }
+                textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent.transform);
+                textLocation.y += 50;
+                Vector3 textSize = new Vector3(2, 2,1);
+                playerViewText = playerView.writeText("TargetText","TARGET",
+                    Color.red, textLocation, textSize, playerViewParent.transform);
+                
             }
         }
+        playerViewLoaded = true;
+        DeactivateChildren(playerViewParent);
     }
     private void DestroyTextOnExperimenterDisplay()
     {
         DestroyChildren(playerViewParent);
+        playerViewText = null;
         playerViewLoaded = false;
     }
 

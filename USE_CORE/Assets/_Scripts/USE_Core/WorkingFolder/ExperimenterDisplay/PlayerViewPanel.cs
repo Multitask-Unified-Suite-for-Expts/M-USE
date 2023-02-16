@@ -55,7 +55,7 @@ public class PlayerViewPanel //: MonoBehaviour
         GameObject textObject = new GameObject(textName, typeof(RectTransform), typeof(Text));
         textObject.transform.SetParent(parent);
         textObject.GetComponent<RectTransform>().localPosition = Vector2.zero;
-        textObject.GetComponent<RectTransform>().sizeDelta = size;
+        textObject.GetComponent<RectTransform>().localScale = size;
         textObject.GetComponent<RectTransform>().anchoredPosition = textLocation;
         textObject.GetComponent<RectTransform>().anchorMax = Vector2.zero;
         textObject.GetComponent<RectTransform>().anchorMin = Vector2.zero;

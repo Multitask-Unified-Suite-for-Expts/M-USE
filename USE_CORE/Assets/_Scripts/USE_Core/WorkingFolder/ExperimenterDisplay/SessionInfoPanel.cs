@@ -22,11 +22,9 @@ public class SessionInfoPanel : ExperimenterDisplayPanel
     {
         if (TaskLevel != null)
         {
-            Debug.Log("IN THE SESSION INFO PANEL IF1");
             if(SessionLevel.SessionSummaryString.Length > 0)
             {
                 sessionInfoPanelText.GetComponent<Text>().supportRichText = true;
-                Debug.Log("IN THE SESSION INFO PANEL IF2");
                 sessionInfoPanelText.GetComponent<Text>().text = "\n<size=23><color=#2d3436ff>" + SessionLevel.SessionSummaryString + "</color></size>";
             }
         }

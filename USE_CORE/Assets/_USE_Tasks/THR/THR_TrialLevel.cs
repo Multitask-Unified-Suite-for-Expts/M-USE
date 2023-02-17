@@ -46,9 +46,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     public bool GiveTouchReward;
     public bool GiveReleaseReward;
-    public bool ClickedSquare;
+    public bool GiveReward;
     public bool TimeRanOut;
-    public bool ConfigVariablesLoaded;
 
     public List<int> TrialCompletionList;
     public int TrialsCompleted_Block;
@@ -79,14 +78,15 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public Material SquareMaterial;
 
     //misc
-    public bool WhiteSquareTouched;
     public bool BlueSquareTouched;
     public bool BlueSquareReleased;
     public bool ClickedOutsideSquare;
     public bool ClickedWhiteSquare;
-    public bool IsLevelOne;
     public bool PerfThresholdMet;
-    public bool ColorsSet;
+    public bool AudioPlayed;
+    public bool Grating;
+    public bool HeldTooShort;
+    public bool HeldTooLong;
 
     public Color32 LightBlueColor;
     public Color32 LightRedColor;
@@ -101,11 +101,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public float BlockDefaultMaxTouchDuration;
     public float BlockDefaultWhiteSquareDuration;
     public float BlockDefaultBlueSquareDuration;
-
-    public bool AudioPlayed;
-    public bool Grating;
-    public bool HeldTooShort;
-    public bool HeldTooLong;
 
     public float WhiteTimeoutTime;
     public float WhiteStartTime;
@@ -136,29 +131,29 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         State WhiteSquare = new State("WhiteSquare");
         State BlueSquare = new State("BlueSquare");
         State Feedback = new State("Feedback");
+        State Reward = new State("Reward");
         State ITI = new State("ITI");
-        AddActiveStates(new List<State> { InitTrial, WhiteSquare, BlueSquare, Feedback, ITI});
+        AddActiveStates(new List<State> { InitTrial, WhiteSquare, BlueSquare, Feedback, Reward, ITI});
 
         LoadTextures(MaterialFilePath);
+
+        Add_ControlLevel_InitializationMethod(() =>
+        {
+            if (BackdropGO == null)
+                CreateBackdrop();
+            if (SquareGO == null)
+                CreateSquare();
+            CreateColors();
+        });
 
         //SETUP TRIAL state -------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
-            if (!ColorsSet)
-                CreateColors();
-
-            if (BackdropGO == null)
-                CreateBackdrop();
-
-            if (SquareGO == null)
-                CreateSquare();
-
             if (TrialCount_InBlock == 0)
-                TrialCompletionList = new List<int>();
-
-            if (TrialCount_InBlock == 0)
+            {
                 SetBlockDefaultValues();
-            
+                TrialCompletionList = new List<int>();
+            }
             SetTrialSummaryString();
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -198,7 +193,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 ActivateSquareAndBackdrop();
             WhiteStartTime = Time.time;
             WhiteTimeoutTime = 0;
-            WhiteSquareTouched = false;
         });
         WhiteSquare.AddUpdateMethod(() =>
         {
@@ -363,44 +357,34 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         });
         Feedback.AddUpdateMethod(() =>
         {
-            if(GiveReleaseReward)
+            if((GiveTouchReward || GiveReleaseReward) && SyncBoxController != null)
             {
-                if (GraySquareTimer < currentTrial.GreyOnReleaseDuration)
-                    GraySquareTimer += Time.deltaTime;
-                else
-                    GraySquareTimer = -1;
-
-                if(SyncBoxController != null)
-                {
-                    if (RewardTimer < currentTrial.ReleaseToRewardDelay)
-                        RewardTimer += Time.deltaTime;
-                    else
-                    {
-                        SyncBoxController.SendRewardPulses(currentTrial.NumReleasePulses, currentTrial.PulseSize);
-                        RewardGiven = true;
-                        ReleaseRewards_Trial += currentTrial.NumReleasePulses;
-                    }
-                }
-            }
-            if(GiveTouchReward && SyncBoxController != null)
-            {
-                if(RewardTimer < currentTrial.TouchToRewardDelay)
+                if (RewardTimer < (GiveTouchReward ? currentTrial.TouchToRewardDelay : currentTrial.ReleaseToRewardDelay))
                     RewardTimer += Time.deltaTime;
                 else
-                {
-                    SyncBoxController.SendRewardPulses(currentTrial.NumTouchPulses, currentTrial.PulseSize);
-                    RewardGiven = true;
-                    TouchRewards_Trial += currentTrial.NumTouchPulses;
-                }
+                    GiveReward = true;
             }
         });
-        Feedback.SpecifyTermination(() => GiveReleaseReward && SyncBoxController == null && GraySquareTimer == -1, ITI); //to handle when syncbox is null and releaseReward so gotta wait for graytimer!
-        Feedback.SpecifyTermination(() => GiveReleaseReward && RewardGiven && GraySquareTimer == -1, ITI); //when they receive release reward and graytimer done!
-        Feedback.SpecifyTermination(() => GiveTouchReward && SyncBoxController == null, ITI); //earned touch reward but no syncbox. don't need to wait for gray since touch is immediate.
-        Feedback.SpecifyTermination(() => GiveTouchReward && RewardGiven, ITI); //when they receive touch reward!
-        Feedback.SpecifyTermination(() => (HeldTooShort || HeldTooLong || MovedOutside) && AudioPlayed && !Grating, ITI); //If they got wrong
-        Feedback.SpecifyTermination(() => (TimeRanOut) && AudioPlayed, ITI); //state ends after receiving neg FB (if didn't get correct).
+        Feedback.SpecifyTermination(() => GiveReward, Reward); //If they got right, syncbox isn't null, and timer is met.
+        Feedback.SpecifyTermination(() => (GiveTouchReward || GiveReleaseReward) && SyncBoxController == null, ITI); //If they got right, syncbox IS null, don't make them wait.  
+        Feedback.SpecifyTermination(() => !GiveTouchReward && !GiveReleaseReward && AudioPlayed && !Grating, ITI); //if didn't get right, so no pulses. 
         Feedback.AddTimer(() => currentTrial.FbDuration, ITI);
+
+        Reward.AddInitializationMethod(() =>
+        {
+            if (GiveReleaseReward && SyncBoxController != null)
+            {
+                SyncBoxController.SendRewardPulses(currentTrial.NumReleasePulses, currentTrial.PulseSize);
+                ReleaseRewards_Trial += currentTrial.NumReleasePulses;
+            }
+            if (GiveTouchReward && SyncBoxController != null)
+            {
+                SyncBoxController.SendRewardPulses(currentTrial.NumTouchPulses, currentTrial.PulseSize);
+                TouchRewards_Trial += currentTrial.NumTouchPulses;
+                RewardGiven = true;
+            }
+        });
+        Reward.SpecifyTermination(() => true, ITI);
 
         //ITI state ---------------------------------------------------------------------------------------------------------------------------------
         ITI.AddUpdateMethod(() =>
@@ -414,7 +398,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         FinishTrial.AddInitializationMethod(() =>
         {
             SquareGO.SetActive(false);
-            ConfigVariablesLoaded = false;
 
             if (GiveReleaseReward || GiveTouchReward)
                 TrialsCorrect_Block++;
@@ -538,7 +521,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         BackdropRenderer = BackdropGO.GetComponent<Renderer>();
         BackdropRenderer.material.mainTexture = BackdropTexture;
-        //BackdropMaterial = BackdropRenderer.material;
         InitialBackdropColor = BackdropRenderer.material.color;
 
         BackdropGO.GetComponent<Renderer>().material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
@@ -637,7 +619,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         ItiTouches_Trial = 0;
         TouchStartTime = 0;
         HeldDuration = 0;
-    }
+        TouchRewards_Trial = 0;
+        ReleaseRewards_Trial = 0;
+}
 
     void LogTrialData()
     {

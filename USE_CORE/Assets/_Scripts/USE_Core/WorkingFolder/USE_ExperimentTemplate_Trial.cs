@@ -374,18 +374,19 @@ namespace USE_ExperimentTemplate_Trial
         }
         public void SetShadowType(String ShadowType, String LightName)
         {
+            ShadowType = ShadowType.ToLower();
             //User options are None, Soft, Hard
             switch (ShadowType)
             {
-                case "None":
+                case "none":
                     GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.None;
                     GameObject.Find(LightName).GetComponent<Light>().shadows = LightShadows.None;
                     break;
-                case "Soft":
+                case "soft":
                     GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.Soft;
                     GameObject.Find(LightName).GetComponent<Light>().shadows = LightShadows.Soft;
                     break;
-                case "Hard":
+                case "hard":
                     GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.Hard;
                     GameObject.Find(LightName).GetComponent<Light>().shadows = LightShadows.Hard;
                     break;

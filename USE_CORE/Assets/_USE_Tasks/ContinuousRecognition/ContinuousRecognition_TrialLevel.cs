@@ -445,8 +445,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             else if (AbortCode == AbortCodeDict["Pause"]) //If used Pause hotkey to end trial, end entire Block
                 EndBlock = true;
         });
-        LogTrialData();
-        LogFrameData();
+        DefineTrialData();
+        DefineFrameData();
     }
 
 
@@ -1066,7 +1066,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     List<int> ShuffleList(List<int> list)
     {
-        if (list.Count == 1) return list;
+        if (list.Count == 1)
+            return list;
         
         else
         {
@@ -1154,7 +1155,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     }
 
-    void LogTrialData()
+    void DefineTrialData()
     {
         TrialData.AddDatum("Context", () => currentTrial.ContextName);
         TrialData.AddDatum("Starfield", () => currentTrial.UseStarfield);
@@ -1168,7 +1169,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("PC_Percentage", () => currentTrial.PC_Percentage_String);
     }
 
-    void LogFrameData()
+    void DefineFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
         FrameData.AddDatum("ContextActive", () => ContextActive);

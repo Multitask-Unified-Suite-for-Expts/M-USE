@@ -644,7 +644,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         ItiTouches_Trial = 0;
         TouchStartTime = 0;
         HeldDuration = 0;
-    }
+        TouchRewards_Trial = 0;
+        ReleaseRewards_Trial = 0;
+}
 
     void LogTrialData()
     {

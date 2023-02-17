@@ -45,6 +45,7 @@ namespace VisualSearch_Namespace
         public int NumTokenBar;
         public int PulseSize;
         public bool RandomizedLocations;
+        public bool? TokensWithStimOn;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -59,7 +60,11 @@ namespace VisualSearch_Namespace
                 td.TrialStimTokenReward = TrialStimTokenReward;
                 td.NumInitialTokens = NumInitialTokens;
                 td.RandomizedLocations = RandomizedLocations;
-                td.BlockCount = BlockCount;
+                if (TokensWithStimOn != null)
+                    td.TokensWithStimOn = TokensWithStimOn;
+                else
+                    td.TokensWithStimOn = false;
+                TrialDefs[iTrial] = td;                td.BlockCount = BlockCount;
                 TrialDefs.Add(td);
             }
         }
@@ -74,6 +79,11 @@ namespace VisualSearch_Namespace
                 td.NumPulses = NumPulses;
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
+                if (TokensWithStimOn != null)
+                    td.TokensWithStimOn = TokensWithStimOn;
+                else
+                    td.TokensWithStimOn = false;
+                TrialDefs[iTrial] = td;
                 TrialDefs[iTrial] = td;
             }
         }
@@ -88,6 +98,7 @@ namespace VisualSearch_Namespace
         public Vector3[] TrialStimLocations;
         public string TrialID;
         public TokenReward[][] TrialStimTokenReward;
+        public bool? TokensWithStimOn;
         public int NumPulses;
         public int NumInitialTokens;
         public int NumTokenBar;

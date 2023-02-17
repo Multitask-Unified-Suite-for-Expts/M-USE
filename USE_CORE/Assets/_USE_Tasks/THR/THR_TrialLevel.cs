@@ -365,6 +365,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         {
             if(GiveReleaseReward)
             {
+                //Timer to let the grey square end:
                 if (GraySquareTimer < currentTrial.GreyOnReleaseDuration)
                     GraySquareTimer += Time.deltaTime;
                 else
@@ -376,9 +377,12 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                         RewardTimer += Time.deltaTime;
                     else
                     {
-                        SyncBoxController.SendRewardPulses(currentTrial.NumReleasePulses, currentTrial.PulseSize);
-                        RewardGiven = true;
-                        ReleaseRewards_Trial += currentTrial.NumReleasePulses;
+                        if(!RewardGiven)
+                        {
+                            SyncBoxController.SendRewardPulses(currentTrial.NumReleasePulses, currentTrial.PulseSize);
+                            ReleaseRewards_Trial += currentTrial.NumReleasePulses;
+                            RewardGiven = true;
+                        }
                     }
                 }
             }
@@ -388,9 +392,12 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     RewardTimer += Time.deltaTime;
                 else
                 {
-                    SyncBoxController.SendRewardPulses(currentTrial.NumTouchPulses, currentTrial.PulseSize);
-                    RewardGiven = true;
-                    TouchRewards_Trial += currentTrial.NumTouchPulses;
+                    if(!RewardGiven)
+                    {
+                        SyncBoxController.SendRewardPulses(currentTrial.NumTouchPulses, currentTrial.PulseSize);
+                        RewardGiven = true;
+                        TouchRewards_Trial += currentTrial.NumTouchPulses;
+                    }
                 }
             }
         });

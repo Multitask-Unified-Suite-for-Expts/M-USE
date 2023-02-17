@@ -25,8 +25,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     public TextMeshProUGUI TimerText;
     public GameObject TimerTextGO;
-    public GameObject CR_CanvasGO;
     public GameObject TitleTextGO;
+    public GameObject CR_CanvasGO;
     public GameObject YouWinTextGO;
     public GameObject YouLoseTextGO;
     public GameObject ScoreTextGO;
@@ -211,6 +211,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         ChooseStim.AddInitializationMethod(() =>
         {
+            MakeStimPopOut();
+
             chosenStimObj = null;
             chosenStimDef = null;
             StimIsChosen = false;

@@ -255,6 +255,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 {
                     HkPanel.TrialLevel.AbortCode = 5;
                     HkPanel.TrialLevel.ForceBlockEnd = true;
+                    HkPanel.TrialLevel.FinishTrialCleanup();
                     HkPanel.TaskLevel.SpecifyCurrentState(HkPanel.TaskLevel.GetStateFromName("FinishTask"));
                 }
             };

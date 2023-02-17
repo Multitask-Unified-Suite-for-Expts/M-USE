@@ -230,6 +230,7 @@ namespace USE_ExperimentTemplate_Task
                 {
                     Destroy(child.gameObject);
                 }
+                
             });
 
 

@@ -76,8 +76,8 @@ namespace USE_ExperimentTemplate_Session
         private bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         private string EyetrackerType;
         private Dictionary<string, EventCode> SessionEventCodes;
-        [HideInInspector] public StringBuilder SessionSummaryString;
         private List<string> selectedConfigsList = new List<string>();
+        private SessionInfoPanel SessionInfoPanel = new SessionInfoPanel();
         public override void LoadSettings()
         {
             //load session config file
@@ -226,8 +226,6 @@ namespace USE_ExperimentTemplate_Session
             bool taskAutomaticallySelected = false;
             setupSession.AddDefaultInitializationMethod(() =>
             {
-                SessionSummaryString = new StringBuilder();
-                
                 PauseCanvasGO = GameObject.Find("PauseCanvas");
                 PauseCanvasGO.SetActive(false);
                 PauseCanvas = PauseCanvasGO.GetComponent<Canvas>();
@@ -470,6 +468,8 @@ namespace USE_ExperimentTemplate_Session
                 {
                     SceneLoaded(selectedConfigName, false);
                     CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigName == selectedConfigName);
+                    //selectedConfigsList.Add(CurrentTask.ConfigName);  
+                    SessionInfoPanel.TaskSummaryString.AppendLine(CurrentTask.ConfigName);
                 };
             });
             
@@ -487,8 +487,6 @@ namespace USE_ExperimentTemplate_Session
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
                 CurrentTask.TrialLevel.TaskLevel = CurrentTask;
                 ExperimenterDisplayController.ResetTask(CurrentTask, CurrentTask.TrialLevel);
-                selectedConfigsList.Add(CurrentTask.ConfigName);
-                SetSessionSummaryString();
                 
                 if (SerialPortActive)
                 {
@@ -510,9 +508,10 @@ namespace USE_ExperimentTemplate_Session
                 mainCameraCopy.texture = CameraMirrorTexture;
                 // mirrorCamera.CopyFrom(CurrentTask.TaskCam);
                 // mirrorCamera.cullingMask = 0;
-
                 PauseCanvas.renderMode = RenderMode.ScreenSpaceCamera;
                 PauseCanvas.worldCamera = CurrentTask.TaskCam;
+                
+                //Assign Session Info Panel Values
             });
 
             if (EventCodesActive)
@@ -746,15 +745,6 @@ namespace USE_ExperimentTemplate_Session
             if (tl.TaskCam == null)
                 tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
             tl.TaskCam.gameObject.SetActive(false);
-        }
-        private void SetSessionSummaryString()
-        {
-            SessionSummaryString.Clear();
-            SessionSummaryString.Append("<b>Selected Configs</b>: \n");
-            foreach (string configName in selectedConfigsList)
-            {
-                SessionSummaryString.AppendLine(configName);
-            }
         }
         // public void FindTaskCam<T>(string taskName) where T : ControlLevel_Task_Template
         // {

@@ -46,6 +46,10 @@ public class HaloFBController : MonoBehaviour
             }
         }
         instantiated = Instantiate(haloPrefab, gameObj.transform);
+        float behindStimPos = gameObject.transform.position.z - 10; // adjusts so that the halo is behind the object
+        haloPrefab.transform.localPosition = new Vector3(haloPrefab.transform.position.x, haloPrefab.transform.position.y,
+            behindStimPos);
+
     }
     
 

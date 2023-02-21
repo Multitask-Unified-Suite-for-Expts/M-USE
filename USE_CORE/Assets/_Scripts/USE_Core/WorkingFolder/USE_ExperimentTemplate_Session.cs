@@ -76,7 +76,8 @@ namespace USE_ExperimentTemplate_Session
         private bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         private string EyetrackerType;
         private Dictionary<string, EventCode> SessionEventCodes;
-        [HideInInspector] public StringBuilder SessionSummaryString;
+        private List<string> selectedConfigsList = new List<string>();
+        private SessionInfoPanel sessionInfoPanel;
         public override void LoadSettings()
         {
             //load session config file
@@ -223,12 +224,9 @@ namespace USE_ExperimentTemplate_Session
 
             bool waitForSerialPort = false;
             bool taskAutomaticallySelected = false;
-            Add_ControlLevel_InitializationMethod(()=>
-            {
-                SessionSummaryString = new StringBuilder();
-            });
             setupSession.AddDefaultInitializationMethod(() =>
             {
+                
                 PauseCanvasGO = GameObject.Find("PauseCanvas");
                 PauseCanvasGO.SetActive(false);
                 PauseCanvas = PauseCanvasGO.GetComponent<Canvas>();
@@ -333,6 +331,7 @@ namespace USE_ExperimentTemplate_Session
                     SessionSettings.Save();
                     GameObject initCam = GameObject.Find("InitCamera");
                     initCam.SetActive(false);
+                    sessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
                 });
 
             //bool tasksFinished = false;
@@ -471,6 +470,8 @@ namespace USE_ExperimentTemplate_Session
                 {
                     SceneLoaded(selectedConfigName, false);
                     CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigName == selectedConfigName);
+                    //selectedConfigsList.Add(CurrentTask.ConfigName);  
+                    sessionInfoPanel.UpdateSessionSummaryValues();
                 };
             });
             
@@ -486,9 +487,9 @@ namespace USE_ExperimentTemplate_Session
                 CameraMirrorTexture.Release();
                 SessionCam.gameObject.SetActive(false);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
-                //SessionSummaryString.Append()
                 CurrentTask.TrialLevel.TaskLevel = CurrentTask;
                 ExperimenterDisplayController.ResetTask(CurrentTask, CurrentTask.TrialLevel);
+                
                 if (SerialPortActive)
                 {
                     AppendSerialData();
@@ -509,9 +510,10 @@ namespace USE_ExperimentTemplate_Session
                 mainCameraCopy.texture = CameraMirrorTexture;
                 // mirrorCamera.CopyFrom(CurrentTask.TaskCam);
                 // mirrorCamera.cullingMask = 0;
-
                 PauseCanvas.renderMode = RenderMode.ScreenSpaceCamera;
                 PauseCanvas.worldCamera = CurrentTask.TaskCam;
+                
+                //Assign Session Info Panel Values
             });
 
             if (EventCodesActive)

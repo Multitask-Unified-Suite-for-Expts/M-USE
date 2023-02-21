@@ -51,6 +51,7 @@ namespace FlexLearning_Namespace
         public int NumPulses;
         public int PulseSize;
         public bool RandomizedLocations;
+        public bool? TokensWithStimOn = null;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -76,6 +77,10 @@ namespace FlexLearning_Namespace
                 td.NumPulses = NumPulses;
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
+                if (TokensWithStimOn != null)
+                    td.TokensWithStimOn = TokensWithStimOn;
+                else
+                    td.TokensWithStimOn = false;
                 TrialDefs.Add(td);
             }
         }
@@ -94,6 +99,10 @@ namespace FlexLearning_Namespace
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
                 td.ContextName = ContextName;
+                if (TokensWithStimOn != null)
+                    td.TokensWithStimOn = TokensWithStimOn;
+                else
+                    td.TokensWithStimOn = false;
                 TrialDefs[iTrial] = td;
             }
         }
@@ -119,6 +128,7 @@ namespace FlexLearning_Namespace
         public int NumInitialTokens;
         public int NumTokenBar;
         public int PulseSize;
+        public bool? TokensWithStimOn;
 
     }
 

@@ -42,6 +42,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public bool StimFacingCamera;
     [HideInInspector] public string ShadowType;
     [HideInInspector] public bool NeutralITI;
+    [HideInInspector] public bool? TokensWithStimOn;
     
     // Stim Evaluation Variables
     private GameObject trialStim;
@@ -53,7 +54,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     //Player View Variables
     private PlayerViewPanel playerView;
     private GameObject playerViewParent; // Helps set things onto the player view in the experimenter display
-    private List<GameObject> playerViewTextList = new List<GameObject>();
     private GameObject playerViewText;
     private Vector2 textLocation;
     private bool playerViewLoaded;
@@ -66,9 +66,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int NumRewardPulses_InBlock;
     [HideInInspector] public int NumTokenBarFull_InBlock;
     [HideInInspector] public int TotalTokensCollected_InBlock;
-    [HideInInspector] public float Accuracy_InBlock;
+    [HideInInspector] public decimal Accuracy_InBlock;
     [HideInInspector] public float AverageSearchDuration_InBlock;
     [HideInInspector] public int TouchDurationError_InBlock;
+    [HideInInspector] public int AbortedTrials_InBlock;
    
     // Trial Data Variables
     private int? SelectedStimIndex = null;
@@ -77,6 +78,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private float SearchDuration = 0;
     private bool RewardGiven = false;
     private bool TouchDurationError = false;
+    private bool aborted = false;
 
     public override void DefineControlLevel()
     {
@@ -122,27 +124,22 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             {
                 foreach (var stim in tStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
             }
-            
-            
+
             //Create and Load variables needed at the start of the trial
             if (!ObjectsCreated)
                 CreateObjects();
             if (!configUIVariablesLoaded) 
                 LoadConfigUIVariables();
-            if (playerViewText == null)
+            if (!playerViewLoaded)
                 CreateTextOnExperimenterDisplay();
-            if (TrialCount_InBlock == 0)
-            {
-                playerViewText.SetActive(false);
-            }
             
             SetTrialSummaryString();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
         });
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);
+        //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
         MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
-        
         InitTrial.AddInitializationMethod(() =>
         {
             CurrentTaskLevel.SetBlockSummaryString();
@@ -155,8 +152,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
             StartButton.SetActive(true);
         });
-        
-        //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
         InitTrial.AddUpdateMethod(() =>
         {
             if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
@@ -182,10 +177,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay);
         SearchDisplay.AddInitializationMethod(() =>
         {
-            tStim.ToggleVisibility(true);
             Input.ResetInputAxes(); //reset input in case they holding down
             // Toggle TokenBar and Stim to be visible
             TokenFBController.enabled = true;
+            ActivateChildren(playerViewParent);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);
         });
@@ -223,7 +218,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 SelectedStimIndex = selectedSD.StimIndex;
                 SelectedStimLocation = selectedSD.StimLocation;
             }
-            Accuracy_InBlock = NumCorrect_InBlock/(TrialCount_InBlock + 1);
+            Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock,(TrialCount_InBlock + 1));
         });
 
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, ()=> 
@@ -231,6 +226,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
             {
                 Debug.Log("Timed out of selection state before making a choice");
+                AbortedTrials_InBlock++;
+                aborted = true;  
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
             }
         });
@@ -242,37 +239,38 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             SearchDurationsList.Add(SearchDuration);
             AverageSearchDuration_InBlock = SearchDurationsList.Average();
             SetTrialSummaryString();
-            if (CorrectSelection) HaloFBController.ShowPositive(selected);
-            else HaloFBController.ShowNegative(selected);
+            
+            if (CorrectSelection) 
+                HaloFBController.ShowPositive(selected);
+            else 
+                HaloFBController.ShowNegative(selected);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
         });
 
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback,()=>
         {   
             HaloFBController.Destroy();
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOff"]);
         });
         
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddInitializationMethod(() =>
         {
-            tStim.ToggleVisibility(false);
+            DestroyTextOnExperimenterDisplay();
             if (selectedSD.StimTrialRewardMag > 0)
             {
-                //AudioFBController.Play("Positive");
                 TokenFBController.AddTokens(selected, selectedSD.StimTrialRewardMag);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
                 
             }
             else
             {
-                //AudioFBController.Play("Negative");
                 TokenFBController.RemoveTokens(selected, -selectedSD.StimTrialRewardMag);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
             }
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
         });
-        TokenFeedback.SpecifyTermination(() => !TokenFBController.IsAnimating(), Delay, () =>
+        TokenFeedback.AddTimer(() => tokenFbDuration.value, () => ITI, ()=>
         {
             if (TokenFBController.isTokenBarFull())
             {
@@ -286,11 +284,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 }
             }
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
                                            (NumTokenBarFull_InBlock * CurrentTrialDef.NumTokenBar);
-            stateAfterDelay = ITI;
-            delayDuration = tokenFbDuration.value;
         });
         // ITI STATE ---------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>
@@ -299,9 +294,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             {
                 ContextName = "itiImage";
                 RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             }
         });
-    
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
         AssignTrialData();
@@ -312,7 +307,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     {
         DestroyTextOnExperimenterDisplay();
         tStim.ToggleVisibility(false);
-
+        
         if (TokenFBController.isActiveAndEnabled)
             TokenFBController.enabled = false;
 
@@ -338,6 +333,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         TouchDurationError_InBlock = 0;
         TotalTokensCollected_InBlock = 0;
         Accuracy_InBlock = 0;
+        AbortedTrials_InBlock = 0;
     }
 
     protected override void DefineTrialStims()
@@ -345,7 +341,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
         tStim = new StimGroup("SearchStimuli", ExternalStims, CurrentTrialDef.TrialStimIndices);
-       // tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("SelectionFeedback"));
+        if(TokensWithStimOn?? false)
+            tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("ITI"));
+        else
+            tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"),GetStateFromName("SelectionFeedback"));
         TrialStims.Add(tStim);
         for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
@@ -371,38 +370,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             tStim.SetLocations(CurrentTrialDef.TrialStimLocations);
         }
     }
-    void LoadConfigUIVariables()
-    {
-        //config UI variables
-        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
-        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
-        itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
-        searchDisplayDelay = ConfigUiVariables.get<ConfigNumber>("searchDisplayDelay");
-        selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
-        fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
-        tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
-        tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");
-        gratingSquareDuration = ConfigUiVariables.get<ConfigNumber>("gratingSquareDuration");
-        tokenFbDuration = ConfigUiVariables.get<ConfigNumber>("tokenFbDuration");
-        //finalFbDuration = ConfigUiVariables.get<ConfigNumber>("finalFbDuration");
-        configUIVariablesLoaded = true;
-    }
-    void SetTrialSummaryString()
-    {
-        TrialSummaryString = "<b>Task Name: " + CurrentTaskLevel.TaskName+ "</b>" + 
-                             "\n"+
-                             "\n<b>Trial Count in Task: </b>" + (TrialCount_InTask + 1) +
-                             "\n"+
-                             "\nSelected Object Index: " + SelectedStimIndex +
-                             "\nSelected Object Location: " + SelectedStimLocation +
-                             "\n" + 
-                             "\nCorrect Selection?: " + CorrectSelection +
-                             "\nTouch Duration Error?: " + TouchDurationError +
-                             "\n" +
-                             "\nSearch Duration: " + SearchDuration +
-                             "\n" + 
-                             "\nToken Bar Value: " + TokenFBController.GetTokenBarValue();
-    }
     private void ResetTrialVariables()
     {
         SelectedStimIndex = null;
@@ -411,6 +378,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         CorrectSelection = false;
         RewardGiven = false;
         TouchDurationError = false;
+        aborted = false;
         MouseTracker.ResetClickCount();
     }
     private void AssignTrialData()
@@ -423,6 +391,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("SearchDuration", ()=> SearchDuration);
         TrialData.AddDatum("RewardGiven", ()=> RewardGiven? 1 : 0);
         TrialData.AddDatum("TotalClicks", ()=> MouseTracker.GetClickCount());
+        TrialData.AddDatum("AbortedTrial", ()=> aborted);
     }
     private void AssignFrameData()
     {
@@ -440,31 +409,57 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     }
     private void CreateTextOnExperimenterDisplay()
     { // sets parent for any playerView elements on experimenter display
-        if (!playerViewLoaded)
+        
+        //Create corresponding text on player view of experimenter display
+        foreach (VisualSearch_StimDef stim in tStim.stimDefs)
         {
-            //Create corresponding text on player view of experimenter display
-            foreach (VisualSearch_StimDef stim in tStim.stimDefs)
+            if (stim.IsTarget)
             {
-                if (stim.IsTarget)
-                {
-                    textLocation =
-                        playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation),
-                            playerViewParent.transform);
-                    textLocation.y += 50;
-                    Vector2 textSize = new Vector2(200, 200);
-                    playerViewText = playerView.writeText("TargetText","TARGET",
-                        Color.red, textLocation, textSize, playerViewParent.transform);
-                    playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
-                    playerViewTextList.Add(playerViewText);
-                    playerViewLoaded = true;
-                }
+                textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent.transform);
+                textLocation.y += 50;
+                Vector3 textSize = new Vector3(2,2,1);
+                playerViewText = playerView.writeText("TargetText","TARGET",
+                    Color.red, textLocation, textSize, playerViewParent.transform);
             }
         }
+        playerViewLoaded = true;
+        DeactivateChildren(playerViewParent);
     }
     private void DestroyTextOnExperimenterDisplay()
     {
         DestroyChildren(playerViewParent);
         playerViewLoaded = false;
+    }
+    void LoadConfigUIVariables()
+    {
+        //config UI variables
+        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
+        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
+        itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
+        searchDisplayDelay = ConfigUiVariables.get<ConfigNumber>("searchDisplayDelay");
+        selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
+        fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
+        tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
+        tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");
+        gratingSquareDuration = ConfigUiVariables.get<ConfigNumber>("gratingSquareDuration");
+        tokenFbDuration = ConfigUiVariables.get<ConfigNumber>("tokenFbDuration");
+        configUIVariablesLoaded = true;
+    }
+    void SetTrialSummaryString()
+    {
+        TrialSummaryString = "<b>Task Name: " + CurrentTaskLevel.TaskName + "</b>" +
+                             "\n<b>Trial Count in Task: </b>" + (TrialCount_InTask + 1) +
+                             "\n" +
+                             "\nSelected Object Index: " + SelectedStimIndex +
+                             "\nSelected Object Location: " + SelectedStimLocation +
+                             "\n" +
+                             "\nCorrect Selection? : " + CorrectSelection +
+                             "\nTouch Duration Error? : " + TouchDurationError +
+                             "\nAborted Trial? : " + aborted +
+                             "\n" +
+                             "\nSearch Duration: " + SearchDuration +
+                             "\n" + 
+                             "\nToken Bar Value: " + TokenFBController.GetTokenBarValue();
     }
     private void TouchDurationErrorFeedback(SelectionHandler<VisualSearch_StimDef> MouseHandler, GameObject go)
     {///CANT FIGURE OUT WHY I CANT USE TEMPLATE, ANYWAYS MAKE A SEPARATE FEEDBACK SCRIPT

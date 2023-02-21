@@ -228,8 +228,9 @@ namespace USE_ExperimentTemplate_Task
                 //Destroy Text on Experimenter Display:
                 foreach(Transform child in GameObject.Find("MainCameraCopy").transform)
                 {
-                    child.gameObject.SetActive(false);
+                    Destroy(child.gameObject);
                 }
+                
             });
 
 

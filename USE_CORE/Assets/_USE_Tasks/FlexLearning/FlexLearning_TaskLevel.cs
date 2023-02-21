@@ -38,6 +38,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             int RandomMaxTrials = rnd.Next(flBD.MinMaxTrials[0], flBD.MinMaxTrials[1]);
             flTL.MaxTrials = RandomMaxTrials;
             flTL.MinTrials = flBD.MinMaxTrials[0];
+            flTL.TokensWithStimOn = flBD.TokensWithStimOn;
             
             ResetBlockVariables();
             RenderSettings.skybox = CreateSkybox(flTL.GetContextNestedFilePath(flTL.ContextExternalFilePath, flBD.ContextName));

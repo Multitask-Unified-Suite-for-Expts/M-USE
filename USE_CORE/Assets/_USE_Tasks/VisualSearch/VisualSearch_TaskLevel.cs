@@ -36,9 +36,11 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         {
             //Hard coded because trial level variable isn't available yet
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +  "Grass");
-            vsTL.ResetBlockVariables();
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
             
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
+
+            vsTL.TokensWithStimOn = vsBD.TokensWithStimOn;
+            vsTL.ResetBlockVariables();
             //Set the Initial Token Values for the Block
             vsTL.TokenFBController.SetTotalTokensNum(vsBD.NumTokenBar);
             vsTL.TokenFBController.SetTokenBarValue(vsBD.NumInitialTokens);
@@ -122,7 +124,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 
     public void AssignBlockData()
     {
-        BlockData.AddDatum("Block Accuracy", ()=> vsTL.Accuracy_InBlock);
+        BlockData.AddDatum("Block Accuracy", ()=> (float)vsTL.Accuracy_InBlock);
         BlockData.AddDatum("Avg Search Duration", ()=> vsTL.AverageSearchDuration_InBlock);
         BlockData.AddDatum("Num Touch Duration Error", ()=> vsTL.TouchDurationError_InBlock);
         BlockData.AddDatum("Num Reward Given", ()=> vsTL.NumRewardPulses_InBlock);

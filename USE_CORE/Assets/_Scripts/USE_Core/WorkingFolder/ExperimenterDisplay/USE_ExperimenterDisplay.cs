@@ -15,7 +15,7 @@ namespace USE_ExperimenterDisplay
         protected ControlLevel_Trial_Template TrialLevel;
         protected GameObject ExperimenterDisplayGameObject;
 
-        private List<ExperimenterDisplayPanel> TaskPanels;
+        public List<ExperimenterDisplayPanel> TaskPanels;
         //any other fields necessary to control which display it is on, etc
 
         public void InitializeExperimenterDisplay(ControlLevel_Session_Template sessionLevel,
@@ -107,10 +107,15 @@ namespace USE_ExperimenterDisplay
         public static List<ExperimenterDisplayPanel> DefaultPanelList()
         {
             List<ExperimenterDisplayPanel> defaultPanelList = new List<ExperimenterDisplayPanel>();
-            defaultPanelList.Add(new TrialInfoPanel());
-            defaultPanelList.Add(new BlockInfoPanel());
+            defaultPanelList.Add(GameObject.Find("TrialInfoPanel").AddComponent<TrialInfoPanel>()); 
+            defaultPanelList.Add(GameObject.Find("BlockInfoPanel").AddComponent<BlockInfoPanel>()); 
+            defaultPanelList.Add(GameObject.Find("SessionInfoPanel").AddComponent<SessionInfoPanel>()); 
+            defaultPanelList.Add(GameObject.Find("HotKeyPanel").AddComponent<HotKeyPanel>()); 
+            defaultPanelList.Add(GameObject.Find("LogPanel").AddComponent<LogPanel>()); 
+            /*defaultPanelList.Add(new BlockInfoPanel());
+            defaultPanelList.Add(new SessionInfoPanel());
             defaultPanelList.Add(new HotKeyPanel());
-            defaultPanelList.Add(new LogPanel());
+            defaultPanelList.Add(new LogPanel());*/
             // defaultPanelList.Add(new PlayerViewPanel());
             //all other default panels
             return defaultPanelList;

@@ -48,4 +48,12 @@ public class SessionInfoPanel : ExperimenterDisplayPanel
         if (TaskLevel != null)
             SessionSummaryString.AppendLine("Selected Configs: " + TaskSummaryString);
     }
+
+    public void UpdateSessionSummaryValues()
+    {
+        totalTrials = 10;
+        totalRewardPulses = 20;
+        sessionDuration = 30;
+        timeFromLastTrialCompletion = 40;
+    }
 }

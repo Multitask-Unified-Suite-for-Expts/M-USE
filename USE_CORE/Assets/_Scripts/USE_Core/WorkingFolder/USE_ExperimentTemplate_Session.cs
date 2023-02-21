@@ -77,7 +77,7 @@ namespace USE_ExperimentTemplate_Session
         private string EyetrackerType;
         private Dictionary<string, EventCode> SessionEventCodes;
         private List<string> selectedConfigsList = new List<string>();
-        private SessionInfoPanel SessionInfoPanel = new SessionInfoPanel();
+        private SessionInfoPanel sessionInfoPanel;
         public override void LoadSettings()
         {
             //load session config file
@@ -226,6 +226,7 @@ namespace USE_ExperimentTemplate_Session
             bool taskAutomaticallySelected = false;
             setupSession.AddDefaultInitializationMethod(() =>
             {
+                
                 PauseCanvasGO = GameObject.Find("PauseCanvas");
                 PauseCanvasGO.SetActive(false);
                 PauseCanvas = PauseCanvasGO.GetComponent<Canvas>();
@@ -330,6 +331,7 @@ namespace USE_ExperimentTemplate_Session
                     SessionSettings.Save();
                     GameObject initCam = GameObject.Find("InitCamera");
                     initCam.SetActive(false);
+                    sessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
                 });
 
             //bool tasksFinished = false;
@@ -469,7 +471,7 @@ namespace USE_ExperimentTemplate_Session
                     SceneLoaded(selectedConfigName, false);
                     CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigName == selectedConfigName);
                     //selectedConfigsList.Add(CurrentTask.ConfigName);  
-                    SessionInfoPanel.TaskSummaryString.AppendLine(CurrentTask.ConfigName);
+                    sessionInfoPanel.UpdateSessionSummaryValues();
                 };
             });
             

@@ -348,7 +348,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
@@ -475,12 +475,15 @@ MonoBehaviour:
   SelectionType: 
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
+  InitialTokenAmount: 0
   StartButtonTexture: {fileID: 0}
   FBSquareTexture: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
   BackdropTexture: {fileID: 0}
+  MazeBackgroundTexture: {fileID: 0}
+  MG_CanvasGO: {fileID: 584128556}
   mazeList: []
   ind: 0
   SCREEN_WIDTH: 0
@@ -492,8 +495,11 @@ MonoBehaviour:
   incorrectRuleAbidingColor: []
   incorrectRuleBreakingColor: []
   defaultTileColor: []
+  NumBlinks: 0
   TilePrefab: {fileID: 925009272087881901, guid: 5796f049ef3372046b3edd4795fcdc39,
     type: 3}
+  TileSize: 0
+  TileTexture: 
   minObjectTouchDuration:
     name: 
     hidden: 0
@@ -511,14 +517,6 @@ MonoBehaviour:
     min: 0
     precision: 0
   finalFbDuration:
-    name: 
-    hidden: 0
-    value: 0
-    isRange: 0
-    max: 0
-    min: 0
-    precision: 0
-  fbDuration:
     name: 
     hidden: 0
     value: 0
@@ -550,7 +548,7 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  mazeOnsetDelay:
+  tileBlinkingDuration:
     name: 
     hidden: 0
     value: 0
@@ -559,6 +557,14 @@ MonoBehaviour:
     min: 0
     precision: 0
   spaceBetweenTiles:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  mazeOnsetDelay:
     name: 
     hidden: 0
     value: 0
@@ -602,8 +608,7 @@ MonoBehaviour:
   MazeFilePath: 
   ButtonPosition: {x: 0, y: 0, z: 0}
   ButtonScale: {x: 0, y: 0, z: 0}
-  mazeBackground: {fileID: 0}
-  backgroundTex: {fileID: 0}
+  MazeBackground: {fileID: 0}
   mazeDefName: 
   SliderPrefab: {fileID: 2122826529044376720, guid: 4edf39309c5fdfe4786b98a260c324e0,
     type: 3}
@@ -611,6 +616,7 @@ MonoBehaviour:
     type: 3}
   playerViewTextList: []
   playerViewText: {fileID: 0}
+  ContextActive: 0
 --- !u!114 &1860654111
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -677,7 +683,21 @@ MonoBehaviour:
   MazeNumSquares: 
   MazeNumTurns: 
   MazeDims: []
+  MazeStart: []
+  MazeFinish: []
   MazeName: []
+  totalErrors_InBlock: 0
+  perseverativeErrors_InBlock: 0
+  backtrackErrors_InBlock: 0
+  ruleAbidingErrors_InBlock: 0
+  ruleBreakingErrors_InBlock: 0
+  retouchCorrect_InBlock: 0
+  correctTouches_InBlock: 0
+  numRewardPulses_InBlock: 0
+  nonStimTouches_InBlock: 0
+  BlockAveragesString: 
+  CurrentBlockString: 
+  TaskName: MazeGame
 --- !u!4 &1860654112
 Transform:
   m_ObjectHideFlags: 0

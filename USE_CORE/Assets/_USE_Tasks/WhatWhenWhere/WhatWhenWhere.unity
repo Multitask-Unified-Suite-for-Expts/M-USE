@@ -397,6 +397,7 @@ MonoBehaviour:
   BackdropStripesTexture: {fileID: 0}
   BackdropTexture: {fileID: 0}
   MazeBackgroundTexture: {fileID: 0}
+  WWW_CanvasGO: {fileID: 2128323196}
   SliderPrefab: {fileID: 2122826529044376720, guid: 4edf39309c5fdfe4786b98a260c324e0,
     type: 3}
   SliderHaloPrefab: {fileID: 4317252536729789219, guid: f372d073062e1954ba552b4c8bbb2d93,
@@ -643,7 +644,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}

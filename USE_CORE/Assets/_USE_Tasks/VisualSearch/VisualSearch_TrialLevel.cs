@@ -11,12 +11,17 @@ using USE_States;
 using USE_StimulusManagement;
 using USE_ExperimentTemplate_Trial;
 using VisualSearch_Namespace;
+using USE_UI;
 
 public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 {
     public VisualSearch_TrialDef CurrentTrialDef => GetCurrentTrialDef<VisualSearch_TrialDef>(); 
     public VisualSearch_TaskLevel CurrentTaskLevel => GetTaskLevel<VisualSearch_TaskLevel>();
-    
+
+    public GameObject VS_CanvasGO;
+
+    public USE_StartButton USE_StartButton;
+
     // Stimuli Variables
     private StimGroup tStim;
     private GameObject StartButton;

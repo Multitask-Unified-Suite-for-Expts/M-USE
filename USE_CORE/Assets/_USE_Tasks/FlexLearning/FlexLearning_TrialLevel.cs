@@ -21,7 +21,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 {
     public FlexLearning_TrialDef CurrentTrialDef => GetCurrentTrialDef<FlexLearning_TrialDef>();
     public FlexLearning_TaskLevel CurrentTaskLevel => GetTaskLevel<FlexLearning_TaskLevel>();
-    
+
+    public GameObject FL_CanvasGO;
+    public USE_StartButton USE_StartButton;
+
     // Block End Variables
     public List<int> runningAcc;
     public int MinTrials, MaxTrials;

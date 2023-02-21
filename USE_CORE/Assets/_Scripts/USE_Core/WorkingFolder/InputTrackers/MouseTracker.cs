@@ -51,6 +51,11 @@ public class MouseTracker : InputTracker
         if (hitObject != null)
         {
             HoverObject = hitObject;
+
+            if (HoverObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer))
+                hoverObjectName = (sdPointer as StimDefPointer).GetStimDef<StimDef>().Name;
+            else hoverObjectName = HoverObject.name;
+
             if (InputBroker.GetMouseButton(0))
                 return hitObject;
         }
@@ -68,6 +73,7 @@ public class MouseTracker : InputTracker
         if(Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out hit, Mathf.Infinity))
         {
             target = hit.transform.gameObject;
+            Debug.Log("TARGET NAME = " + target.name);
             distance3D = (hit.point - touchPos).magnitude;
         }
 

@@ -134,6 +134,7 @@ public class SelectionHandler<T> where T : StimDef
                 if (withinDuration)
                 {
                     SelectedGameObject = targetedGameObject;
+                    Debug.Log("SELECTED GO = " + SelectedGameObject.name);
                     SelectedStimDef = null;
                     if (SelectedGameObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer))
                         SelectedStimDef = (sdPointer as StimDefPointer).GetStimDef<T>();

@@ -9,9 +9,13 @@ using UnityEngine.UI;
 using USE_ExperimentTemplate_Trial;
 using USE_States;
 using USE_StimulusManagement;
+using USE_UI;
 
 public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 {
+    public GameObject MG_CanvasGO;
+    public USE_StartButton USE_StartButton;
+
     private static bool end;
 
     // TILE FLASH VARIABLES

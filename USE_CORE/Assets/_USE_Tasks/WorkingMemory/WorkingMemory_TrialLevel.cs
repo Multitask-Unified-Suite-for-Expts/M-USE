@@ -86,6 +86,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     private float SearchDuration = 0;
     private bool RewardGiven = false;
     private bool TouchDurationError = false;
+
+
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
@@ -116,10 +118,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.SetHaloSize(5);
             if (StartButton == null)
             {
-                Debug.Log("Creating start button!");
                 USE_StartButton = new USE_StartButton(WM_CanvasGO.GetComponent<Canvas>());
                 StartButton = USE_StartButton.StartButtonGO;
-                //StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
             }
             FBSquare = CreateSquare("FBSquare", FBSquareTexture, FBSquarePosition, FBSquareScale);
         });
@@ -213,6 +213,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             }
         });
         SearchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, SelectionFeedback, () => {
+            Debug.Log("MADE IT OUT!!!");
             selected = mouseHandler.SelectedGameObject; 
             selectedSD = mouseHandler.SelectedStimDef;
             CorrectSelection = selectedSD.IsTarget;
@@ -237,14 +238,14 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
             Accuracy_InBlock = NumCorrect_InBlock/(TrialCount_InBlock + 1);
         });
-        SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, ()=>
-        {
-            if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
-            {
-                Debug.Log("Timed out of selection state before making a choice");
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
-            }
-        });
+        //SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, ()=>
+        //{
+        //    if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
+        //    {
+        //        Debug.Log("Timed out of selection state before making a choice");
+        //        EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
+        //    }
+        //});
 
         SelectionFeedback.AddInitializationMethod(() =>
         {

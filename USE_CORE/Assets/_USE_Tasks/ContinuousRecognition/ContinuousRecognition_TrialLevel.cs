@@ -115,6 +115,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             USE_StartButton = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>());
             StartButton = USE_StartButton.StartButtonGO;
             OriginalStartButtonPosition = StartButton.transform.position;
+            USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
         }
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
@@ -165,8 +166,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (currentTrial.UseStarfield)
                 Starfield.SetActive(true);
-
-            StartButton.SetActive(true);
             
             TokenFBController.enabled = false;
 
@@ -179,8 +178,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
-            StartButton.SetActive(false);
-
             if (TitleTextGO.activeInHierarchy)
             {
                 TitleTextGO.SetActive(false);
@@ -294,7 +291,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (chosenStimObj != null) //if they chose a stimObj and it has a pointer to the actual stimDef.  
             {
                 StimDefPointer pointer = chosenStimObj.GetComponent<StimDefPointer>();
-                if (!pointer) return;
+                if (!pointer)   return;
                 else StimIsChosen = true;
             }
 

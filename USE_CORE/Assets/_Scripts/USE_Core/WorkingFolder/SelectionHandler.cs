@@ -134,10 +134,15 @@ public class SelectionHandler<T> where T : StimDef
                 if (withinDuration)
                 {
                     SelectedGameObject = targetedGameObject;
-                    Debug.Log("SELECTED GO = " + SelectedGameObject.name);
                     SelectedStimDef = null;
+
                     if (SelectedGameObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer))
+                    {
+                        Debug.Log("FOUND THE STIM DEF COMPONENT!");
                         SelectedStimDef = (sdPointer as StimDefPointer).GetStimDef<T>();
+                    }
+                    else
+                        Debug.Log("NOPEEEEEEEEEE! DIDNT FIND STIM DEF COMPONENT!");
                 }
                 else
                 {

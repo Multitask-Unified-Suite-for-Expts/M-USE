@@ -19,7 +19,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     public VisualSearch_TaskLevel CurrentTaskLevel => GetTaskLevel<VisualSearch_TaskLevel>();
 
     public GameObject VS_CanvasGO;
-
     public USE_StartButton USE_StartButton;
 
     // Stimuli Variables
@@ -80,6 +79,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private bool TouchDurationError = false;
     private bool aborted = false;
 
+    public GameObject chosenStimObj;
+    public VisualSearch_StimDef chosenStimDef;
+    public bool StimIsChosen;
+
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
@@ -126,6 +129,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             }
 
             //Create and Load variables needed at the start of the trial
+            if(StartButton == null)
+            {
+                USE_StartButton = new USE_StartButton(VS_CanvasGO.GetComponent<Canvas>());
+                StartButton = USE_StartButton.StartButtonGO;
+            }
+
             if (!ObjectsCreated)
                 CreateObjects();
             if (!configUIVariablesLoaded) 
@@ -183,9 +192,19 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             ActivateChildren(playerViewParent);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);
+
+            chosenStimDef = null;
+            chosenStimObj = null;
+            StimIsChosen = false;            
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
+            chosenStimObj = mouseHandler.SelectedGameObject;
+            chosenStimDef = mouseHandler.SelectedStimDef;
+
+            if (chosenStimDef != null)
+                Debug.Log("CHOSEN STIM DEF IS NOT NULL!!!!!!!!!!!!!!!");
+
             if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
             {
                 TouchDurationError = true;
@@ -194,9 +213,19 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 TouchDurationErrorFeedback(mouseHandler, FBSquare);
                 CurrentTaskLevel.SetBlockSummaryString();
             }
+
+            if (chosenStimObj != null)
+            {
+                StimDefPointer pointer = chosenStimObj.GetComponent<StimDefPointer>();
+                if (!pointer)
+                    return;
+                else
+                    StimIsChosen = true;
+            }
         });
-        SearchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, SelectionFeedback, () => {
-            
+        SearchDisplay.SpecifyTermination(() => StimIsChosen, SelectionFeedback, () => {
+
+            Debug.Log("TERMINATING ");
             selected = mouseHandler.SelectedGameObject;
             selectedSD = mouseHandler.SelectedStimDef;
             CorrectSelection = selectedSD.IsTarget;
@@ -221,16 +250,16 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock,(TrialCount_InBlock + 1));
         });
 
-        SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, ()=> 
-        {
-            if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
-            {
-                Debug.Log("Timed out of selection state before making a choice");
-                AbortedTrials_InBlock++;
-                aborted = true;  
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
-            }
-        });
+        //SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, ()=> 
+        //{
+        //    if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
+        //    {
+        //        Debug.Log("Timed out of selection state before making a choice");
+        //        AbortedTrials_InBlock++;
+        //        aborted = true;  
+        //        EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
+        //    }
+        //});
         
         // SELECTION FEEDBACK STATE ---------------------------------------------------------------------------------------   
         SelectionFeedback.AddInitializationMethod(() =>
@@ -403,7 +432,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     }
     private void CreateObjects()
     {
-        StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
         FBSquare = CreateSquare("FBSquare", FBSquareTexture, FBSquarePosition, FBSquareScale);
         ObjectsCreated = true;
     }

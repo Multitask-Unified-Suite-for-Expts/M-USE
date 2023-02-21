@@ -39,6 +39,8 @@ namespace USE_ExperimentTemplate_Trial
 
         [HideInInspector] public ConfigVarStore ConfigUiVariables;
         [HideInInspector] public ExperimenterDisplayController ExperimenterDisplayController;
+        [HideInInspector] public SessionInfoPanel SessionInfoPanel;
+        public float TrialCompleteTime;
         
         // Feedback Controllers
         [HideInInspector] public AudioFBController AudioFBController;
@@ -92,6 +94,7 @@ namespace USE_ExperimentTemplate_Trial
             //DefineTrial();
             Add_ControlLevel_InitializationMethod(() =>
             {
+                SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
                 TrialCount_InBlock = -1;
                 TrialStims = new List<StimGroup>();
                 AudioFBController.UpdateAudioSource();
@@ -101,6 +104,7 @@ namespace USE_ExperimentTemplate_Trial
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
                 AbortCode = 0;
+                SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials",1));
                 TrialCount_InTask++;
                 TrialCount_InBlock++;
                 FrameData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
@@ -128,6 +132,9 @@ namespace USE_ExperimentTemplate_Trial
 
             FinishTrial.AddUniversalTerminationMethod(() =>
             {
+                TrialCompleteTime = FinishTrial.TimingInfo.StartTimeAbsolute + (Time.time - FinishTrial.TimingInfo.StartTimeAbsolute);
+                Debug.Log("TRIAL COMPLETE TIME: " + TrialCompleteTime);
+                Debug.Log("FINISH TRIAL TIMING DURATION: " + (Time.time - FinishTrial.TimingInfo.StartTimeAbsolute));
                 FinishTrialCleanup();
 
                 int nStimGroups = TrialStims.Count;

@@ -75,7 +75,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     {
         ClearStrings();
         BlockSummaryString.AppendLine("<b>Block Num: " + (vsTL.BlockCount + 1) + "</b>" +
-                                      "\n" + 
                                       "<b>\nTrial Num: </b>" + (vsTL.TrialCount_InBlock + 1) +
                                       "\n" + 
                                       "\nAccuracy: " + String.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  

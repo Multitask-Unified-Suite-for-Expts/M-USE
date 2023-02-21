@@ -109,6 +109,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         LoadTextures(MaterialFilePath);
 
+        if (StartButton == null)
+        {
+            //StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale); //Old method
+            USE_StartButton = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>());
+            StartButton = USE_StartButton.StartButtonGO;
+            OriginalStartButtonPosition = StartButton.transform.position;
+        }
+
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
@@ -116,14 +124,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 CR_CanvasGO.SetActive(true);
 
             NumFeedbackRows = 0;
-
-            if (StartButton == null)
-            {
-                //StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale); //Old method
-                USE_StartButton = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>());
-                StartButton = USE_StartButton.StartButtonGO;
-                OriginalStartButtonPosition = StartButton.transform.position;
-            }
 
             if (!VariablesLoaded)
                 LoadConfigUIVariables();

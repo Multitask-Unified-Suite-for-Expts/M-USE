@@ -9,6 +9,7 @@ using System.IO;
 using USE_Settings;
 using USE_ExperimentTemplate_Trial;
 using ConfigDynamicUI;
+using USE_UI;
 
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
@@ -26,6 +27,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     public Vector3 ButtonPosition;
     public Vector3 ButtonScale;
     public Vector3 OriginalStartButtonPosition;
+
+    public GameObject EC_CanvasGO;
+
+    public USE_StartButton USE_StartButton;
 
     //Game Objects:
     GameObject StartButton, StimLeft, StimRight, TrialStim, BalloonContainerLeft, BalloonContainerRight,
@@ -128,8 +133,15 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
+            if (StartButton == null)
+            {
+                USE_StartButton = new USE_StartButton(EC_CanvasGO.GetComponent<Canvas>());
+                StartButton = USE_StartButton.StartButtonGO;
+            }
+
             if (!ObjectsCreated)
                 CreateObjects();
+
             LoadConfigUIVariables();
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);

@@ -44,34 +44,20 @@ public class MouseTracker : InputTracker
         if (InputBroker.GetMouseButtonUp(0))
             ClickCount++;
 
-        //OLD SOLUTION:
-        //if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out RaycastHit hit, Mathf.Infinity))
-        //{
-        //    HoverObject = hit.transform.root.gameObject;
 
-        //    if (HoverObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer))
-        //        hoverObjectName = (sdPointer as StimDefPointer).GetStimDef<StimDef>().Name;
-        //    else hoverObjectName = HoverObject.name;
+        Vector3 direction = touchPos - Camera.main.transform.position;
+        GameObject hitObject = RaycastBoth(touchPos, direction);
 
-        //    if (InputBroker.GetMouseButton(0))
-        //    {
-        //        return HoverObject;
-        //    }
-        //}
-        //return null;
-
-        if (InputBroker.GetMouseButtonDown(0))
+        if (hitObject != null)
         {
-            Vector3 direction = touchPos - Camera.main.transform.position;
-            GameObject hitObject = RaycastBoth(touchPos, direction);
-
-            if (hitObject != null)
+            HoverObject = hitObject;
+            if (InputBroker.GetMouseButton(0))
                 return hitObject;
         }
         return null;
     }
 
-    public GameObject RaycastBoth(Vector3 origin, Vector3 direction)
+    public GameObject RaycastBoth(Vector3 touchPos, Vector3 direction)
     {
         GameObject target = null;
         float distance2D = 0;
@@ -79,15 +65,15 @@ public class MouseTracker : InputTracker
 
         //3D:
         RaycastHit hit;
-        if(Physics.Raycast(Camera.main.ScreenPointToRay(origin), out hit, Mathf.Infinity))
+        if(Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out hit, Mathf.Infinity))
         {
             target = hit.transform.gameObject;
-            distance3D = (hit.point - origin).magnitude;
+            distance3D = (hit.point - touchPos).magnitude;
         }
 
         //2D:
         PointerEventData eventData = new PointerEventData(EventSystem.current);
-        eventData.position = Input.mousePosition;
+        eventData.position = touchPos;
 
         List<RaycastResult> results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
@@ -95,12 +81,11 @@ public class MouseTracker : InputTracker
         {
             if (result.gameObject != null)
             {
-                distance2D = (result.gameObject.transform.position - origin).magnitude;
+                distance2D = (result.gameObject.transform.position - touchPos).magnitude;
                 if(target == null || (distance3D != 0 && (distance2D < distance3D)))
                     target = result.gameObject;
             }
         }
-
         return target;
     }
 

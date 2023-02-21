@@ -82,140 +82,31 @@ namespace USE_UI
 			Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
 		}
 
+        public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
+        {
+            if (setActiveOnInit != null)
+            {
+                SetActiveOnInitialization = setActiveOnInit;
+                SetActiveOnInitialization.StateInitializationFinished += ActivateOnStateInit;
+            }
+            if (setInactiveOnTerm != null)
+            {
+                SetInactiveOnTermination = setInactiveOnTerm;
+                SetInactiveOnTermination.StateTerminationFinished += InactivateOnStateTerm;
+            }
+        }
+
+        private void ActivateOnStateInit(object sender, EventArgs e)
+        {
+            StartButtonGO.SetActive(true);
+        }
+
+        private void InactivateOnStateTerm(object sender, EventArgs e)
+        {
+            StartButtonGO.SetActive(false);
+        }
+
     }
-
-    //public class USE_Button
-    //{
-    //	Button button;
-
-    //	public Vector3 ButtonPosition;
-    //	public Vector3 ButtonScale;
-    //	public Color ButtonColor;
-    //	public string ButtonText;
-
-    //	public State SetActiveOnInitialization;
-    //	public State SetInactiveOnTermination;
-
-    //	public bool pressed = false;
-
-    //	public USE_Button(Canvas canvas)
-    //	{
-    //		//ButtonPosition = new Vector3(0f, 0f, 0f);
-    //		//ButtonScale = new Vector3(1f, 1f, 1f);
-    //		//ButtonColor = new Color(0.28f, 0.56f, 0.88f);
-    //		//ButtonText = "";
-
-    //		GameObject newButton = DefaultControls.CreateButton(new DefaultControls.Resources());
-    //		newButton.transform.SetParent(canvas.transform, false);
-    //		button = newButton.GetComponent<Button>();
-    //	}
-
-    //	public USE_Button(Vector3 position, Vector3 scale, Canvas canvas)
-    //	{
-    //           GameObject newButton = DefaultControls.CreateButton(new DefaultControls.Resources());
-    //		newButton.transform.SetParent(canvas.transform, false);
-    //		button = newButton.GetComponent<Button>();
-
-    //		ButtonPosition = position;
-    //           ButtonScale = scale;
-    //		ButtonColor = new Color(0.28f, 0.56f, 0.88f);
-    //		ButtonText = "";
-    //       }
-
-    //       public USE_Button(Vector3 position, Vector3 scale, Canvas canvas, Color color)
-    //	{
-    //		//ButtonPosition = position;
-    //		//ButtonScale = scale;
-    //		//ButtonColor = color;
-    //		//ButtonText = "";
-
-    //           GameObject newButton = DefaultControls.CreateButton(new DefaultControls.Resources());
-    //		newButton.transform.SetParent(canvas.transform, false);
-    //		button = newButton.GetComponent<Button>();
-
-    //           var colors = button.colors;
-    //           colors.normalColor = color;
-
-    //		newButton.GetComponent<Image>().color = color;
-    //	}
-
-    //	public USE_Button(Vector3 position, Vector3 scale, Canvas canvas, Color color, string text)
-    //	{
-    //		//ButtonPosition = position;
-    //		//ButtonScale = scale;
-    //		//ButtonColor = color;
-    //		//ButtonText = text;
-
-    //		GameObject newButton = DefaultControls.CreateButton(new DefaultControls.Resources());
-    //		newButton.transform.SetParent(canvas.transform, false);
-    //		button = newButton.GetComponent<Button>();
-
-    //           var colors = button.colors;
-    //           colors.normalColor = color;
-
-    //           button.GetComponentInChildren<Text>().text = text;
-    //		//button.GetComponentInChildren<Text>().color = textColor; //add this for text color change. 
-
-    //		newButton.GetComponent<Image>().color = color;
-
-    //	}
-
-    //	public USE_Button AddEventListener(UnityAction functionName)
-    //	{
-    //		button.onClick.AddListener(functionName);
-    //		return this;
-    //	}
-
-    //	//      public void defineButton()
-    //	//{
-    //	//	button.gameObject.transform.position = ButtonPosition;
-    //	//	button.transform.localScale = ButtonScale;
-    //	//	ColorBlock cb = button.colors;
-    //	//	cb.normalColor = ButtonColor;
-    //	//	button.colors = cb;
-    //	//	button.GetComponentInChildren<Text>().text = ButtonText;
-    //	//	button.onClick.AddListener(EventOnClick);
-    //	//}
-
-
-    //	//private void EventOnClick()
-    //	//{
-    //	//	pressed = true;
-    //	//	Debug.Log("CLICKED!");
-    //	//}
-
-    //	public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
-    //	{
-    //		if (setActiveOnInit != null)
-    //		{
-    //			SetActiveOnInitialization = setActiveOnInit;
-    //			SetActiveOnInitialization.StateInitializationFinished += ActivateOnStateInit;
-    //		}
-    //		if (setInactiveOnTerm != null)
-    //		{
-    //			SetInactiveOnTermination = setInactiveOnTerm;
-    //			SetInactiveOnTermination.StateTerminationFinished += InactivateOnStateTerm;
-    //		}
-    //	}
-
-    //	private void ActivateOnStateInit(object sender, EventArgs e)
-    //	{
-    //		ToggleVisibility(true);
-    //	}
-
-    //	private void InactivateOnStateTerm(object sender, EventArgs e)
-    //	{
-    //		ToggleVisibility(false);
-    //	}
-
-    //	public void ToggleVisibility(bool visibility)
-    //	{
-    //		 button.gameObject.SetActive(visibility);
-    //	}
-
-    //}
-
-
 
 }
 

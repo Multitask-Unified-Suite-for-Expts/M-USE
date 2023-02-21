@@ -16,12 +16,16 @@ using System.IO;
 using UnityEngine.Profiling;
 using TMPro;
 using USE_UI;
+using USE_Data;
 
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
     public ContinuousRecognition_TrialDef currentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
     public ContinuousRecognition_TaskLevel currentTask => GetTaskLevel<ContinuousRecognition_TaskLevel>();
+
+    public USE_StartButton USE_StartButton;
+    public GameObject StartButton;
 
     public TextMeshProUGUI TimerText;
     public GameObject TimerTextGO;
@@ -32,7 +36,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public GameObject ScoreTextGO;
     public GameObject NumTrialsTextGO;
     public GameObject TimerBackdropGO;
-    public GameObject StartButton;
     public GameObject GreenBorderPrefab;
     public GameObject RedBorderPrefab;
     public GameObject Starfield;
@@ -115,7 +118,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             NumFeedbackRows = 0;
 
             if (StartButton == null)
-                StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
+            {
+                //StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale); //Old method
+                USE_StartButton = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>());
+                StartButton = USE_StartButton.StartButtonGO;
+                OriginalStartButtonPosition = StartButton.transform.position;
+            }
 
             if (!VariablesLoaded)
                 LoadConfigUIVariables();
@@ -211,8 +219,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         ChooseStim.AddInitializationMethod(() =>
         {
-            MakeStimPopOut();
-
             chosenStimObj = null;
             chosenStimDef = null;
             StimIsChosen = false;
@@ -406,8 +412,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
                         YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Game Over \n HighScore: {Score} xp";
                         YouLoseTextGO.SetActive(true);
-                        AudioFBController.Play("CR_BlockFailed");
-                        //AudioFBController.Play("CR_SouthParkFail");
+                        //AudioFBController.Play("CR_BlockFailed");
+                        AudioFBController.Play("CR_SouthParkFail");
                     }
                 }
             }
@@ -536,7 +542,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     void AdjustStartButtonPos()
     {
         Vector3 buttonPos = StartButton.transform.position;
-        buttonPos.y -= .1f;
+        buttonPos.y -= 1f;
         StartButton.transform.position = buttonPos;
     }
 

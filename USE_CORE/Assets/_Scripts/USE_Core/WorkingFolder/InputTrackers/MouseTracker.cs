@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using UnityEngine;
 using USE_Data;
 using USE_StimulusManagement;
+using UnityEngine.EventSystems;
 
 public class MouseTracker : InputTracker
 {
@@ -42,21 +43,65 @@ public class MouseTracker : InputTracker
         // If the mouse button is up, that means they clicked and released. This is a good way to only count clicks and not holds
         if (InputBroker.GetMouseButtonUp(0))
             ClickCount++;
-        
-        if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out RaycastHit hit, Mathf.Infinity))
-        {
-            HoverObject = hit.transform.root.gameObject;
-            
-                if(HoverObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer))
-                    hoverObjectName =  (sdPointer as StimDefPointer).GetStimDef<StimDef>().Name;
-                else hoverObjectName = HoverObject.name;
-            
-            if (InputBroker.GetMouseButton(0))
-            {
-                return HoverObject;
-            }
 
+        //OLD SOLUTION:
+        //if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out RaycastHit hit, Mathf.Infinity))
+        //{
+        //    HoverObject = hit.transform.root.gameObject;
+
+        //    if (HoverObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer))
+        //        hoverObjectName = (sdPointer as StimDefPointer).GetStimDef<StimDef>().Name;
+        //    else hoverObjectName = HoverObject.name;
+
+        //    if (InputBroker.GetMouseButton(0))
+        //    {
+        //        return HoverObject;
+        //    }
+        //}
+        //return null;
+
+        if (InputBroker.GetMouseButtonDown(0))
+        {
+            Vector3 direction = touchPos - Camera.main.transform.position;
+            GameObject hitObject = RaycastBoth(touchPos, direction);
+
+            if (hitObject != null)
+                return hitObject;
         }
         return null;
     }
+
+    public GameObject RaycastBoth(Vector3 origin, Vector3 direction)
+    {
+        GameObject target = null;
+        float distance2D = 0;
+        float distance3D = 0;
+
+        //3D:
+        RaycastHit hit;
+        if(Physics.Raycast(Camera.main.ScreenPointToRay(origin), out hit, Mathf.Infinity))
+        {
+            target = hit.transform.gameObject;
+            distance3D = (hit.point - origin).magnitude;
+        }
+
+        //2D:
+        PointerEventData eventData = new PointerEventData(EventSystem.current);
+        eventData.position = Input.mousePosition;
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+        foreach(RaycastResult result in results)
+        {
+            if (result.gameObject != null)
+            {
+                distance2D = (result.gameObject.transform.position - origin).magnitude;
+                if(target == null || (distance3D != 0 && (distance2D < distance3D)))
+                    target = result.gameObject;
+            }
+        }
+
+        return target;
+    }
+
 }

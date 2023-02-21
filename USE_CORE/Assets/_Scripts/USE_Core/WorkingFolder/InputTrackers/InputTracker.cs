@@ -38,7 +38,6 @@ public abstract class InputTracker : MonoBehaviour
     {
         AddFieldsToFrameData(frameData);
         AllowedDisplay = allowedDisplay;
-
     }
 
     private void Update()

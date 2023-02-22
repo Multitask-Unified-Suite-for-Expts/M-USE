@@ -27,7 +27,7 @@ public class MouseTracker : InputTracker
         frameData.AddDatum("MouseButton0", () => InputBroker.GetMouseButton(0));
         frameData.AddDatum("MouseButton1", () => InputBroker.GetMouseButton(1));
         frameData.AddDatum("MouseButton2", () => InputBroker.GetMouseButton(2));
-        frameData.AddDatum("HoverObject", ()=> HoverObject != null ? hoverObjectName : null);
+        frameData.AddDatum("HoverObject", ()=> HoverObject != null ? HoverObject.name : null);
     }
 
     public override GameObject FindCurrentTarget()
@@ -53,10 +53,11 @@ public class MouseTracker : InputTracker
             HoverObject = hitObject;
 
             //for hover object name:
-            if (HoverObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer))
-                hoverObjectName = (sdPointer as StimDefPointer).GetStimDef<StimDef>().Name;
-            else hoverObjectName = HoverObject.name;
+            // if (HoverObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer))
+            //     hoverObjectName = (sdPointer as StimDefPointer).GetStimDef<StimDef>().Name;
+            // else hoverObjectName = HoverObject.name;
 
+            // hoverObjectName = HoverObject.name;
             if (InputBroker.GetMouseButton(0))
                 return hitObject;
         }

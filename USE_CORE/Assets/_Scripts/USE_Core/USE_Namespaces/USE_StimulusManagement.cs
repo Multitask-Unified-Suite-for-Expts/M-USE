@@ -17,22 +17,22 @@ namespace USE_StimulusManagement
 	{
 		public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)
 		public string StimName;
-		public string Name
-		{
-			get
-			{
-				string[] strings;
-
-				if (ExternalFilePath.Contains("\\"))
-                    strings = ExternalFilePath.Split('\\');
-				else
-					strings = ExternalFilePath.Split('/');
-
-                string split = strings[strings.Length - 1];
-				return split.Split('.')[0];
-			}
-
-		}
+		// public string Name
+		// {
+		// 	get
+		// 	{
+		// 		string[] strings;
+  //
+		// 		if (ExternalFilePath.Contains("\\"))
+  //                   strings = ExternalFilePath.Split('\\');
+		// 		else
+		// 			strings = ExternalFilePath.Split('/');
+  //
+  //               string split = strings[strings.Length - 1];
+		// 		return split.Split('.')[0];
+		// 	}
+  //
+		// }
 		public string StimPath;
 		public string PrefabPath;
 		public string ExternalFilePath;
@@ -311,6 +311,19 @@ namespace USE_StimulusManagement
 
 			if (!string.IsNullOrEmpty(StimName))
 				StimGameObject.name = StimName;
+			else
+			{
+				string[] FileNameStrings;
+				Debug.Log(ExternalFilePath);
+				if (ExternalFilePath.Contains("\\"))
+		                  FileNameStrings = ExternalFilePath.Split('\\');
+				else
+					FileNameStrings = ExternalFilePath.Split('/');
+
+				string splitString = FileNameStrings[FileNameStrings.Length - 1];
+				StimGameObject.name = splitString.Split('.')[0];
+				Debug.Log(StimGameObject.name);
+			}
 
 			// StimGameObject.AddComponent<StimDefPointer>();
 			// StimGameObject.GetComponent<StimDefPointer>().StimDef = this;
@@ -318,6 +331,30 @@ namespace USE_StimulusManagement
 			return StimGameObject;
 		}
 
+		private List<GameObject> GetAllChildren(GameObject parentObject)
+		{
+			List<GameObject> children = new List<GameObject>();
+			children.Add(parentObject);
+			foreach (Transform child in parentObject.transform)
+			{
+				children.Add(child.gameObject);
+				List<GameObject> childChildren = GetAllChildren(child.gameObject);
+				children.AddRange(childChildren);
+			}
+			return children;
+		}
+
+		private void AssignStimDefPointeToObjectHierarchy(GameObject parentObject, StimDef sd)
+		{
+			List<GameObject> objectChildren = GetAllChildren(parentObject);
+			foreach (GameObject child in objectChildren)
+			{
+				child.AddComponent<StimDefPointer>();
+				child.GetComponent<StimDefPointer>().StimDef = this;
+			}
+		}
+		
+		
 		public GameObject LoadPrefabFromResources(string prefabPath = "")
 		{
 			if (!string.IsNullOrEmpty(prefabPath))
@@ -326,8 +363,10 @@ namespace USE_StimulusManagement
 			PositionRotationScale();
 			if (!string.IsNullOrEmpty(StimName))
 				StimGameObject.name = StimName;
-			StimGameObject.AddComponent<StimDefPointer>();
-			StimGameObject.GetComponent<StimDefPointer>().StimDef = this;
+			AssignStimDefPointeToObjectHierarchy(StimGameObject, this);
+			// //replace with looping through all the object's children and assign to each
+			// StimGameObject.AddComponent<StimDefPointer>();
+			// StimGameObject.GetComponent<StimDefPointer>().StimDef = this;
 			return StimGameObject;
 		}
 
@@ -387,8 +426,7 @@ namespace USE_StimulusManagement
 			PositionRotationScale();
 			if (!string.IsNullOrEmpty(StimName))
 				StimGameObject.name = StimName;
-			StimGameObject.AddComponent<StimDefPointer>();
-			StimGameObject.GetComponent<StimDefPointer>().StimDef = this;
+			AssignStimDefPointeToObjectHierarchy(StimGameObject, this);
 			return StimGameObject;
 		}
 

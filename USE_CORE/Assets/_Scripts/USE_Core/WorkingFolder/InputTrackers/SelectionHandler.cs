@@ -129,6 +129,8 @@ public class SelectionHandler<T> where T : StimDef
             GetNumNonStimSelection();
             if (targetedGameObject != null) // Evaluates when the player releases the selected object
             {
+                Debug.Log("########################################targeted game object");
+                Debug.Log(targetedGameObject.name);
                 bool withinDuration = currentTargetDuration >= MinDuration && 
                                       ((currentTargetDuration <= MaxDuration) || MaxDuration == null);
                 if (withinDuration)

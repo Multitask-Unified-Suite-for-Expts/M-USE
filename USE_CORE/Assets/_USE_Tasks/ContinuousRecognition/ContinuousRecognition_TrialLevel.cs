@@ -79,9 +79,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public StimGroup RightGroup;
     [HideInInspector] public StimGroup WrongGroup;
 
-    [HideInInspector] public Vector3 ButtonScale;
-    [HideInInspector] public Vector3 ButtonPosition;
-
     [HideInInspector] GameObject chosenStimObj;
     [HideInInspector] ContinuousRecognition_StimDef chosenStimDef;
 
@@ -111,7 +108,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         if (StartButton == null)
         {
-            //StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale); //Old method
             USE_StartButton = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>());
             StartButton = USE_StartButton.StartButtonGO;
             OriginalStartButtonPosition = StartButton.transform.position;

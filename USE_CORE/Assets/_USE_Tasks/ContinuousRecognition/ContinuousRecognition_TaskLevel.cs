@@ -123,17 +123,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
         else
             trialLevel.MacMainDisplayBuild = false;
-
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-        {
-            trialLevel.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-            trialLevel.OriginalStartButtonPosition = trialLevel.ButtonPosition;
-        }
-        else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-            trialLevel.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-        else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
     }
 
     public override OrderedDictionary GetSummaryData()

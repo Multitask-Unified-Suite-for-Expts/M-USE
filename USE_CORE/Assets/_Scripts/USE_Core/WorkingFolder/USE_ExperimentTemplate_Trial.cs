@@ -133,8 +133,6 @@ namespace USE_ExperimentTemplate_Trial
             FinishTrial.AddUniversalTerminationMethod(() =>
             {
                 TrialCompleteTime = FinishTrial.TimingInfo.StartTimeAbsolute + (Time.time - FinishTrial.TimingInfo.StartTimeAbsolute);
-                Debug.Log("TRIAL COMPLETE TIME: " + TrialCompleteTime);
-                Debug.Log("FINISH TRIAL TIMING DURATION: " + (Time.time - FinishTrial.TimingInfo.StartTimeAbsolute));
                 FinishTrialCleanup();
 
                 int nStimGroups = TrialStims.Count;

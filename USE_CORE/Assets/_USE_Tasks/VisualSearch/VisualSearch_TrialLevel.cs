@@ -108,7 +108,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddInitializationMethod(() =>
         {
             ResetTrialVariables();
-            TokenFBController.SetTokenBarFull(false);
+            TokenFBController.ResetTokenBarFull();
             //Set the context for the upcoming trial with the Start Button visible
             ContextName = CurrentTrialDef.ContextName;
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
@@ -267,8 +267,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
         TokenFeedback.AddTimer(() => tokenFbDuration.value, () => ITI, ()=>
         {
+            Debug.Log("IS TOKEN BAR FULL: " + TokenFBController.isTokenBarFull());
             if (TokenFBController.isTokenBarFull())
-            {
+            {Debug.Log("IN THE IS TOKEN BAR FULL LOOP");
                 NumTokenBarFull_InBlock++;
                 if (SyncBoxController != null)
                 {
@@ -440,6 +441,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");
         gratingSquareDuration = ConfigUiVariables.get<ConfigNumber>("gratingSquareDuration");
         tokenFbDuration = ConfigUiVariables.get<ConfigNumber>("tokenFbDuration");
+        TokenFBController.SetFlashingTime(tokenFbDuration.value - 0.5f); //ensures that the token bar flashes
+                                                                         //in accordance to the loaded config time
         configUIVariablesLoaded = true;
     }
     void SetTrialSummaryString()

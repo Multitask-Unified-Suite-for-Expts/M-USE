@@ -94,9 +94,9 @@ public class TokenFBController : MonoBehaviour
     {
         return numCollected;
     }
-    public void SetTokenBarFull(bool value)
+    public void ResetTokenBarFull()
     {
-        tokenBarFull = value;
+        tokenBarFull = false;
     }
     public bool isTokenBarFull()
     {
@@ -186,13 +186,13 @@ public class TokenFBController : MonoBehaviour
                     if (numCollected >= totalTokensNum)
                     {
                         animationPhase = AnimationPhase.Flashing;
+                        tokenBarFull = true;
                         StartCoroutine(FlashingBeeps(flashingNumBeeps)); //NT: put here instead of flashPhase, for it to be immediate. 
                         animationEndTime += flashingTime;
                     }
                     break;
                 case AnimationPhase.Flashing:
                     //audioFBController.Play("Flashing"); //flashing clip doesn't exist
-                    tokenBarFull = true;
                     numCollected = 0;
                     animationPhase = AnimationPhase.None;
                     break;

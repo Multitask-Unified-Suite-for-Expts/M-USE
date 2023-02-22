@@ -119,7 +119,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddInitializationMethod(() =>
         {
             ResetTrialVariables();
-            TokenFBController.SetTokenBarFull(false);
+            TokenFBController.ResetTokenBarFull();
             //Set the context for the upcoming trial
             ContextName = CurrentTrialDef.ContextName;
             RenderSettings.skybox =

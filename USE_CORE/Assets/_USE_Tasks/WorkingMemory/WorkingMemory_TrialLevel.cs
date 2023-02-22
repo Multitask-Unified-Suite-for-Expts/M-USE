@@ -120,7 +120,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             if (!configUIVariablesLoaded) LoadConfigUIVariables();
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
-            TokenFBController.SetTokenBarFull(false);
+            TokenFBController.ResetTokenBarFull();
             SetShadowType(ShadowType, "WorkingMemory_DirectionalLight");
             if (StimFacingCamera)
             {

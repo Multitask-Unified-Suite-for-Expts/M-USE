@@ -40,6 +40,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] Color Red;
     [HideInInspector] Color32 OffWhiteOutlineColor = new Color32(250, 249, 246, 0);
 
+    //NT: remove hideininspectors if private
     [HideInInspector] Vector3 LeftScaleUpAmount;
     [HideInInspector] Vector3 RightScaleUpAmount;
     [HideInInspector] Vector3 MaxScale;
@@ -122,13 +123,16 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         SelectionHandler<EffortControl_StimDef> mouseHandler = new SelectionHandler<EffortControl_StimDef>();
 
-        LoadTextures(MaterialFilePath);
+        Add_ControlLevel_InitializationMethod(() =>
+        {
+            LoadTextures(MaterialFilePath);
   
-        if(TokenFBController != null)
-            SetTokenVariables();
+            if(TokenFBController != null)
+                SetTokenVariables();
 
-        if(AudioFBController != null)
-            InflateClipDuration = AudioFBController.GetClip("EC_Inflate").length;
+            if(AudioFBController != null)
+                InflateClipDuration = AudioFBController.GetClip("EC_Inflate").length;
+        });
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>

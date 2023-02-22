@@ -66,7 +66,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         else
             trialLevel.IsHuman = false;
 
-        string TaskName = "EffortControl";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
         else if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))

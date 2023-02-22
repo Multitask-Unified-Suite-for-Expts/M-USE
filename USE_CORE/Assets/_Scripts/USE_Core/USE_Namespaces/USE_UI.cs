@@ -74,6 +74,9 @@ namespace USE_UI
 
         public IEnumerator GratedStartButtonFlash(Texture2D newTexture, float duration, bool deactivateAfter)
         {
+            if (!StartButtonGO.activeInHierarchy)
+                StartButtonGO.SetActive(true);
+
             Color32 originalColor = Image.color;
             Sprite originalSprite = Image.sprite;
 

@@ -119,28 +119,6 @@ static public class USE_Tasks_CustomTypes
                 StimDefType = typeof(THR_StimDef)
             }
         }
-        //,{
-        //    "FinderGame", new TaskTypes
-        //    {
-        //        TaskLevelType = typeof(FinderGame_TaskLevel),
-        //        TrialLevelType = typeof(FinderGame_TrialLevel),
-        //        TaskDefType = typeof(FinderGame_TaskDef),
-        //        BlockDefType = typeof(FinderGame_BlockDef),
-        //        TrialDefType = typeof(FinderGame_TrialDef),
-        //        StimDefType = typeof(FinderGame_StimDef)
-        //    }
-        //}
-        //,{
-        //    "Kia_Task", new TaskTypes
-        //    {
-        //        TaskLevelType = typeof(Kia_Task_TaskLevel),
-        //        TrialLevelType = typeof(Kia_Task_TrialLevel),
-        //        TaskDefType = typeof(Kia_Task_TaskDef),
-        //        BlockDefType = typeof(Kia_Task_BlockDef),
-        //        TrialDefType = typeof(Kia_Task_TrialDef),
-        //        StimDefType = typeof(Kia_Task_StimDef)
-        //    }
-        //}
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#
     };
 

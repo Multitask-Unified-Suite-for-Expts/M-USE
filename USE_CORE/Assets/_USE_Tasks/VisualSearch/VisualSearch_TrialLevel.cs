@@ -214,18 +214,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.SetBlockSummaryString();
             }
 
-            if (chosenStimObj != null)
-            {
-                StimDefPointer pointer = chosenStimObj.GetComponent<StimDefPointer>();
-                if (!pointer)
-                    return;
-                else
-                    StimIsChosen = true;
-            }
+            if (chosenStimObj != null && chosenStimDef != null)
+                StimIsChosen = true;
+            
         });
-        SearchDisplay.SpecifyTermination(() => StimIsChosen, SelectionFeedback, () => {
-
-            Debug.Log("TERMINATING ");
+        SearchDisplay.SpecifyTermination(() => StimIsChosen, SelectionFeedback, () =>
+        {
             selected = mouseHandler.SelectedGameObject;
             selectedSD = mouseHandler.SelectedStimDef;
             CorrectSelection = selectedSD.IsTarget;

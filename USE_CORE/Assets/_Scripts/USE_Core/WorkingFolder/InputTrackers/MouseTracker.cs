@@ -89,7 +89,10 @@ public class MouseTracker : InputTracker
             {
                 distance2D = (result.gameObject.transform.position - touchPos).magnitude;
                 if(target == null || (distance3D != 0 && (distance2D < distance3D)))
+                {
                     target = result.gameObject;
+                    break;
+                }
             }
         }
         return target;

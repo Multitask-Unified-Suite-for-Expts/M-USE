@@ -288,12 +288,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            if (chosenStimObj != null) //if they chose a stimObj and it has a pointer to the actual stimDef.  
-            {
-                StimDefPointer pointer = chosenStimObj.GetComponent<StimDefPointer>();
-                if (!pointer)   return;
-                else StimIsChosen = true;
-            }
+            if (chosenStimObj != null && chosenStimDef != null) //if they chose a stim 
+                StimIsChosen = true;
 
             //Count NonStim Clicks:
             if (InputBroker.GetMouseButtonDown(0))

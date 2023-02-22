@@ -141,8 +141,6 @@ public class SelectionHandler<T> where T : StimDef
                         Debug.Log("FOUND THE STIM DEF COMPONENT!");
                         SelectedStimDef = (sdPointer as StimDefPointer).GetStimDef<T>();
                     }
-                    else
-                        Debug.Log("NOPEEEEEEEEEE! DIDNT FIND STIM DEF COMPONENT!");
                 }
                 else
                 {

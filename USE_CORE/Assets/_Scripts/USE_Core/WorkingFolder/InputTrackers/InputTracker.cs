@@ -15,10 +15,11 @@ public abstract class InputTracker : MonoBehaviour
 
     public void AddSelectionHandler<T>(SelectionHandler<T> selectionHandler, State startState, State endState = null) where T : StimDef
     {
-        if (endState == null) {
+        if (endState == null)
             endState = startState;
-        }
-        void targetUpdatedHandler(object sender, EventArgs e) {
+        
+        void targetUpdatedHandler(object sender, EventArgs e)
+        {
             selectionHandler.UpdateTarget(CurrentTargetGameObject);
         }
 

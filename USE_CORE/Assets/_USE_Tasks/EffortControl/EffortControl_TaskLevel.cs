@@ -1,14 +1,8 @@
 using System;
-using System.Text;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using USE_Settings;
-using USE_StimulusManagement;
 using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Block;
 using System.Collections.Specialized;
-using System.IO;
 using EffortControl_Namespace;
 
 public class EffortControl_TaskLevel : ControlLevel_Task_Template

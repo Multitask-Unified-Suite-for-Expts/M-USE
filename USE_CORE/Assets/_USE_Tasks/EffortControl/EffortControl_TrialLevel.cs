@@ -3,10 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using USE_States;
 using EffortControl_Namespace;
-using System;
 using System.Linq;
-using System.IO;
-using USE_Settings;
 using USE_ExperimentTemplate_Trial;
 using ConfigDynamicUI;
 using USE_UI;
@@ -36,6 +33,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     GameObject StartButton, StimLeft, StimRight, TrialStim, BalloonContainerLeft, BalloonContainerRight,
                BalloonOutline, RewardContainerLeft, RewardContainerRight, Reward, MiddleBarrier, Borders;
 
+    //make private scope explicit, delete hideininspector for non public vars
     //Colors:
     [HideInInspector] Color Red;
     [HideInInspector] Color32 OffWhiteOutlineColor = new Color32(250, 249, 246, 0);
@@ -125,18 +123,16 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
+            //potentially refactor this?
             LoadTextures(MaterialFilePath);
   
+            //can we move SetTokenVariables into TokenFbController class?
             if(TokenFBController != null)
                 SetTokenVariables();
 
             if(AudioFBController != null)
                 InflateClipDuration = AudioFBController.GetClip("EC_Inflate").length;
-        });
-
-        //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
-        SetupTrial.AddInitializationMethod(() =>
-        {
+            
             if (StartButton == null)
             {
                 USE_StartButton = new USE_StartButton(EC_CanvasGO.GetComponent<Canvas>());
@@ -145,7 +141,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if (!ObjectsCreated)
                 CreateObjects();
+        });
 
+        //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
+        SetupTrial.AddInitializationMethod(() =>
+        {
             LoadConfigUIVariables();
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -161,6 +161,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             ResetRelativeStartTime(); 
             DisableAllGameobjects();
             StartButton.SetActive(true);
+            
+            //maybe make reset counters method?
             ClickCount = 0;
             Response = -1;
             ChooseDuration = 0; //reset how long it took them to choose each trial.
@@ -186,6 +188,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
 
         //Choose Balloon state -------------------------------------------------------------------------------------------------------
+        //should automatically have selection handlers for mouse, gaze, touch in session/task/trial levels
         MouseTracker.AddSelectionHandler(mouseHandler, ChooseBalloon);
         ChooseBalloon.AddInitializationMethod(() =>
         {
@@ -673,7 +676,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void CreateObjects()
     {
-        StartButton = CreateSquare("Start Button", StartButtonTexture, ButtonPosition, ButtonScale);
+        // StartButton = CreateSquare("Start Button", StartButtonTexture, ButtonPosition, ButtonScale);
 
         StimLeft = Instantiate(StimLeftPrefab, StimLeftPrefab.transform.position, StimLeftPrefab.transform.rotation);
         StimLeft.name = "StimLeft";
@@ -700,6 +703,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         Borders = new GameObject("Borders");
 
+        //can we replace all this with a single UI square with solid border and no fill?
+        
         GameObject topBorder = GameObject.CreatePrimitive(PrimitiveType.Cube);
         topBorder.name = "TopBorder";
         topBorder.transform.parent = Borders.transform;
@@ -734,6 +739,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         Borders.transform.position = new Vector3(0, 1.755f, 0);
 
+        //replace with ui thing
         MiddleBarrier = GameObject.CreatePrimitive(PrimitiveType.Cube);
         MiddleBarrier.name = "MiddleBarrier";
         MiddleBarrier.transform.position = new Vector3(0, .602f, 0);
@@ -748,6 +754,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             mat.SetFloat("_SpecularHighlights", 0f);
         }
 
+        //pontentially replace with prefab?
         BalloonContainerLeft = new GameObject("BalloonContainerLeft");
         BalloonContainerLeft.transform.position = new Vector3(-1, .15f, .5f);
         BalloonContainerLeft.transform.localScale = new Vector3(1, 1, 1);

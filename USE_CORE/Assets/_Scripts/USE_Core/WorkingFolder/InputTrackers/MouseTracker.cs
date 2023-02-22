@@ -44,7 +44,6 @@ public class MouseTracker : InputTracker
         if (InputBroker.GetMouseButtonUp(0))
             ClickCount++;
 
-
         Vector3 direction = touchPos - Camera.main.transform.position;
         GameObject hitObject = RaycastBoth(touchPos, direction);
 
@@ -52,12 +51,6 @@ public class MouseTracker : InputTracker
         {
             HoverObject = hitObject;
 
-            //for hover object name:
-            // if (HoverObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer))
-            //     hoverObjectName = (sdPointer as StimDefPointer).GetStimDef<StimDef>().Name;
-            // else hoverObjectName = HoverObject.name;
-
-            // hoverObjectName = HoverObject.name;
             if (InputBroker.GetMouseButton(0))
                 return hitObject;
         }

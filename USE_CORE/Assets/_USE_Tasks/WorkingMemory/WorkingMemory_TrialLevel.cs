@@ -34,14 +34,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     // Stimuli Variables
     private StimGroup searchStims, sampleStim, postSampleDistractorStims;
     private GameObject StartButton;
-    private GameObject FBSquare;
     private GameObject SquareGO;
     // public Texture2D HeldTooShortTexture;
     // public Texture2D HeldTooLongTexture;
     // private Texture2D StartButtonTexture;
-    // private Texture2D FBSquareTexture;
     private bool Grating = false;
-    private TaskHelperFunctions taskHelper;
 
     
     //configUI variables
@@ -54,7 +51,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     private bool configUIVariablesLoaded = false;
     public string ContextExternalFilePath;
     public Vector3 ButtonPosition, ButtonScale;
-    public Vector3 FBSquarePosition, FBSquareScale;
     public bool StimFacingCamera;
     public string ShadowType;
     public bool NeutralITI;
@@ -109,7 +105,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         Text commandText = null;
         playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
         playerViewText = new GameObject();
-        taskHelper = new TaskHelperFunctions();
         SelectionHandler<WorkingMemory_StimDef> mouseHandler = new SelectionHandler<WorkingMemory_StimDef>();
 
         Add_ControlLevel_InitializationMethod(() =>
@@ -121,7 +116,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 USE_StartButton = new USE_StartButton(WM_CanvasGO.GetComponent<Canvas>());
                 StartButton = USE_StartButton.StartButtonGO;
             }
-            FBSquare = CreateSquare("FBSquare", FBSquareTexture, FBSquarePosition, FBSquareScale);
         });
         SetupTrial.AddInitializationMethod(() =>
         {
@@ -156,7 +150,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             {
                 TouchDurationError = true;
                 SetTrialSummaryString();
-                TouchDurationErrorFeedback(mouseHandler, StartButton);
+                TouchDurationErrorFeedback(mouseHandler, false);
                 CurrentTaskLevel.SetBlockSummaryString();
             }
         });
@@ -206,14 +200,13 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
             {
                 TouchDurationError = true;
-                FBSquare.SetActive(true);
                 SetTrialSummaryString();
-                TouchDurationErrorFeedback(mouseHandler, FBSquare);
+                TouchDurationErrorFeedback(mouseHandler, true);
                 CurrentTaskLevel.SetBlockSummaryString();
             }
         });
-        SearchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, SelectionFeedback, () => {
-            Debug.Log("MADE IT OUT!!!");
+        SearchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, SelectionFeedback, () =>
+        {
             selected = mouseHandler.SelectedGameObject; 
             selectedSD = mouseHandler.SelectedStimDef;
             CorrectSelection = selectedSD.IsTarget;
@@ -238,14 +231,14 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
             Accuracy_InBlock = NumCorrect_InBlock/(TrialCount_InBlock + 1);
         });
-        //SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, ()=>
-        //{
-        //    if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
-        //    {
-        //        Debug.Log("Timed out of selection state before making a choice");
-        //        EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
-        //    }
-        //});
+        SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
+        {
+            if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
+            {
+                Debug.Log("Timed out of selection state before making a choice");
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
+            }
+        });
 
         SelectionFeedback.AddInitializationMethod(() =>
         {
@@ -455,7 +448,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         for (int i = 0; i < tokenRewards.Length; i++)
         {
             totalProbability += tokenRewards[i].Probability;
-        }
+        } 
 
         if (Math.Abs(totalProbability - 1) > 0.001)
             Debug.LogError("Sum of token reward probabilities on this trial is " + totalProbability + ", probabilities will be scaled to sum to 1.");
@@ -518,13 +511,13 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             foreach (GameObject txt in playerViewTextList) txt.SetActive(false);
         playerViewLoaded = false;
     }
-    private void TouchDurationErrorFeedback(SelectionHandler<WorkingMemory_StimDef> MouseHandler, GameObject go)
+    private void TouchDurationErrorFeedback(SelectionHandler<WorkingMemory_StimDef> MouseHandler, bool deactivateAfter)
     {
         AudioFBController.Play("Negative");
         if (MouseHandler.GetHeldTooShort())
-            StartCoroutine(taskHelper.GratedSquareFlash(HeldTooShortTexture, go, gratingSquareDuration.value));
+            StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
         else if (MouseHandler.GetHeldTooLong())
-            StartCoroutine(taskHelper.GratedSquareFlash(HeldTooLongTexture, go, gratingSquareDuration.value));
+            StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
         MouseHandler.SetHeldTooLong(false);
         MouseHandler.SetHeldTooShort(false);
         TouchDurationError = false;

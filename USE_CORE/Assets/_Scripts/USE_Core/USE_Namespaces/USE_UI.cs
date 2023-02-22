@@ -12,6 +12,8 @@ using TriLib;
 using USE_States;
 using Object = UnityEngine.Object;
 using UnityEngine.Events;
+using UnityEngine.Rendering.PostProcessing;
+using System.Collections;
 
 namespace USE_UI
 {
@@ -70,7 +72,21 @@ namespace USE_UI
             StartButtonGO.SetActive(false);
         }
 
-		public void SetButtonColor(Color color)
+        public IEnumerator GratedStartButtonFlash(Texture2D newTexture, float duration, bool deactivateAfter)
+        {
+            Color32 originalColor = Image.color;
+            Sprite originalSprite = Image.sprite;
+
+            Image.color = new Color32(224, 78, 92, 255);
+            Image.sprite = Sprite.Create(newTexture, new Rect(0, 0, newTexture.width, newTexture.height), Vector2.one / 2f);
+            yield return new WaitForSeconds(duration);
+            Image.color = originalColor;
+            Image.sprite = originalSprite;
+            if (deactivateAfter)
+                StartButtonGO.SetActive(false);
+        }
+
+        public void SetButtonColor(Color color)
 		{
 			ButtonColor = color;
 			Image.color = ButtonColor;

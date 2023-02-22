@@ -202,9 +202,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             chosenStimObj = mouseHandler.SelectedGameObject;
             chosenStimDef = mouseHandler.SelectedStimDef;
 
-            if (chosenStimDef != null)
-                Debug.Log("CHOSEN STIM DEF IS NOT NULL!!!!!!!!!!!!!!!");
-
             if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
             {
                 TouchDurationError = true;
@@ -295,12 +292,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
         TokenFeedback.AddTimer(() => tokenFbDuration.value, () => ITI, ()=>
         {
+            
             if (TokenFBController.isTokenBarFull())
             {
                 NumTokenBarFull_InBlock++;
                 if (SyncBoxController != null)
                 {
-                    Debug.Log("IN THE SYNCBOX LOOP");
                     SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["Fluid1Onset"]);
                     SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));

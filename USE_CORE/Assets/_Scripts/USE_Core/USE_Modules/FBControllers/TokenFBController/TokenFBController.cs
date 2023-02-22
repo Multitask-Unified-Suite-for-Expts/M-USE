@@ -166,7 +166,7 @@ public class TokenFBController : MonoBehaviour
         if (Time.unscaledTime >= animationEndTime)
         {
             animationStartTime = Time.unscaledTime;
-            animationEndTime = animationStartTime;
+            animationEndTime = animationStartTime; //will be qdded to
             switch (animationPhase)
             {
                 case AnimationPhase.Show:
@@ -191,7 +191,6 @@ public class TokenFBController : MonoBehaviour
                     }
                     break;
                 case AnimationPhase.Flashing:
-                    //audioFBController.Play("Flashing"); //flashing clip doesn't exist
                     tokenBarFull = true;
                     numCollected = 0;
                     animationPhase = AnimationPhase.None;

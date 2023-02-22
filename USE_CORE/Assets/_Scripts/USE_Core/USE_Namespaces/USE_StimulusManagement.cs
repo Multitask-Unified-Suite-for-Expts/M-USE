@@ -314,7 +314,6 @@ namespace USE_StimulusManagement
 			else
 			{
 				string[] FileNameStrings;
-				Debug.Log(ExternalFilePath);
 				if (ExternalFilePath.Contains("\\"))
 		                  FileNameStrings = ExternalFilePath.Split('\\');
 				else
@@ -322,7 +321,6 @@ namespace USE_StimulusManagement
 
 				string splitString = FileNameStrings[FileNameStrings.Length - 1];
 				StimGameObject.name = splitString.Split('.')[0];
-				Debug.Log(StimGameObject.name);
 			}
 
 			// StimGameObject.AddComponent<StimDefPointer>();

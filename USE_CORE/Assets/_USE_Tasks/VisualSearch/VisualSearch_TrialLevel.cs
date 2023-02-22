@@ -300,8 +300,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 NumTokenBarFull_InBlock++;
                 if (SyncBoxController != null)
                 {
+                    Debug.Log("IN THE SYNCBOX LOOP");
                     SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["Fluid1Onset"]);
+                    SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
                     NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                     RewardGiven = true;
                 }

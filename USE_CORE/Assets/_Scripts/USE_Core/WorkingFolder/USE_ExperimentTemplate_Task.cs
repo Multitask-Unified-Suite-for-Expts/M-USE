@@ -68,6 +68,7 @@ namespace USE_ExperimentTemplate_Task
         protected ConfigUI configUI;
         protected ConfigVarStore ConfigUiVariables;
         [HideInInspector] public ExperimenterDisplayController ExperimenterDisplayController;
+        [HideInInspector] public SessionInfoPanel SessionInfoPanel;
 
         private GameObject Controllers;
 

@@ -13,9 +13,13 @@ using System.IO;
 using UnityEngine.AI;
 using USE_ExperimentTemplate_Trial;
 using USE_ExperimentTemplate_Task;
+using USE_UI;
 
 public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 {
+    public GameObject WWW_CanvasGO;
+    public USE_StartButton USE_StartButton;
+
     //This variable is required for most tasks, and is defined as the output of the GetCurrentTrialDef function 
     public WhatWhenWhere_TrialDef CurrentTrialDef => GetCurrentTrialDef<WhatWhenWhere_TrialDef>();
 

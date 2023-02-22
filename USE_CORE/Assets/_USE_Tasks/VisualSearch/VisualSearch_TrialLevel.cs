@@ -11,12 +11,16 @@ using USE_States;
 using USE_StimulusManagement;
 using USE_ExperimentTemplate_Trial;
 using VisualSearch_Namespace;
+using USE_UI;
 
 public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 {
     public VisualSearch_TrialDef CurrentTrialDef => GetCurrentTrialDef<VisualSearch_TrialDef>(); 
     public VisualSearch_TaskLevel CurrentTaskLevel => GetTaskLevel<VisualSearch_TaskLevel>();
-    
+
+    public GameObject VS_CanvasGO;
+    public USE_StartButton USE_StartButton;
+
     // Stimuli Variables
     private StimGroup tStim;
     private GameObject StartButton;
@@ -75,6 +79,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private bool TouchDurationError = false;
     private bool aborted = false;
 
+    public GameObject chosenStimObj;
+    public VisualSearch_StimDef chosenStimDef;
+    public bool StimIsChosen;
+
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
@@ -108,7 +116,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddInitializationMethod(() =>
         {
             ResetTrialVariables();
-            TokenFBController.ResetTokenBarFull();
+            TokenFBController.SetTokenBarFull(false);
             //Set the context for the upcoming trial with the Start Button visible
             ContextName = CurrentTrialDef.ContextName;
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
@@ -121,6 +129,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             }
 
             //Create and Load variables needed at the start of the trial
+            if(StartButton == null)
+            {
+                USE_StartButton = new USE_StartButton(VS_CanvasGO.GetComponent<Canvas>());
+                StartButton = USE_StartButton.StartButtonGO;
+            }
+
             if (!ObjectsCreated)
                 CreateObjects();
             if (!configUIVariablesLoaded) 
@@ -178,9 +192,16 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             ActivateChildren(playerViewParent);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);
+
+            chosenStimDef = null;
+            chosenStimObj = null;
+            StimIsChosen = false;            
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
+            chosenStimObj = mouseHandler.SelectedGameObject;
+            chosenStimDef = mouseHandler.SelectedStimDef;
+
             if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
             {
                 TouchDurationError = true;
@@ -189,9 +210,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 TouchDurationErrorFeedback(mouseHandler, FBSquare);
                 CurrentTaskLevel.SetBlockSummaryString();
             }
-        });
-        SearchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, SelectionFeedback, () => {
+
+            if (chosenStimObj != null && chosenStimDef != null)
+                StimIsChosen = true;
             
+        });
+        SearchDisplay.SpecifyTermination(() => StimIsChosen, SelectionFeedback, () =>
+        {
             selected = mouseHandler.SelectedGameObject;
             selectedSD = mouseHandler.SelectedStimDef;
             CorrectSelection = selectedSD.IsTarget;
@@ -216,16 +241,16 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock,(TrialCount_InBlock + 1));
         });
 
-        SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, ()=> 
-        {
-            if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
-            {
-                Debug.Log("Timed out of selection state before making a choice");
-                AbortedTrials_InBlock++;
-                aborted = true;  
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
-            }
-        });
+        //SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, ()=> 
+        //{
+        //    if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
+        //    {
+        //        Debug.Log("Timed out of selection state before making a choice");
+        //        AbortedTrials_InBlock++;
+        //        aborted = true;  
+        //        EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
+        //    }
+        //});
         
         // SELECTION FEEDBACK STATE ---------------------------------------------------------------------------------------   
         SelectionFeedback.AddInitializationMethod(() =>
@@ -267,13 +292,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
         TokenFeedback.AddTimer(() => tokenFbDuration.value, () => ITI, ()=>
         {
-            Debug.Log("IS TOKEN BAR FULL: " + TokenFBController.isTokenBarFull());
+            
             if (TokenFBController.isTokenBarFull())
-            {Debug.Log("IN THE IS TOKEN BAR FULL LOOP");
+            {
                 NumTokenBarFull_InBlock++;
                 if (SyncBoxController != null)
                 {
-                    Debug.Log("IN THE SYNCBOX LOOP");
                     SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["Fluid1Onset"]);
                     SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
@@ -401,7 +425,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     }
     private void CreateObjects()
     {
-        StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
         FBSquare = CreateSquare("FBSquare", FBSquareTexture, FBSquarePosition, FBSquareScale);
         ObjectsCreated = true;
     }
@@ -441,8 +464,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");
         gratingSquareDuration = ConfigUiVariables.get<ConfigNumber>("gratingSquareDuration");
         tokenFbDuration = ConfigUiVariables.get<ConfigNumber>("tokenFbDuration");
-        TokenFBController.SetFlashingTime(tokenFbDuration.value - 0.5f); //ensures that the token bar flashes
-                                                                         //in accordance to the loaded config time
         configUIVariablesLoaded = true;
     }
     void SetTrialSummaryString()

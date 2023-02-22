@@ -12,9 +12,13 @@ using USE_Settings;
 using USE_States;
 using USE_StimulusManagement;
 using WorkingMemory_Namespace;
+using USE_UI;
 
 public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 {
+    public GameObject WM_CanvasGO;
+    public USE_StartButton USE_StartButton;
+
     public WorkingMemory_TrialDef CurrentTrialDef => GetCurrentTrialDef<WorkingMemory_TrialDef>();
     public WorkingMemory_TaskLevel CurrentTaskLevel => GetTaskLevel<WorkingMemory_TaskLevel>();
     // Block End Variables
@@ -82,6 +86,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     private float SearchDuration = 0;
     private bool RewardGiven = false;
     private bool TouchDurationError = false;
+
+
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
@@ -110,7 +116,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         {
             LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
-            StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
+            if (StartButton == null)
+            {
+                USE_StartButton = new USE_StartButton(WM_CanvasGO.GetComponent<Canvas>());
+                StartButton = USE_StartButton.StartButtonGO;
+            }
             FBSquare = CreateSquare("FBSquare", FBSquareTexture, FBSquarePosition, FBSquareScale);
         });
         SetupTrial.AddInitializationMethod(() =>
@@ -189,8 +199,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             CreateTextOnExperimenterDisplay();
             searchStims.ToggleVisibility(true);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);
-        
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);        
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
@@ -204,7 +213,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             }
         });
         SearchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, SelectionFeedback, () => {
-            selected = mouseHandler.SelectedGameObject;
+            Debug.Log("MADE IT OUT!!!");
+            selected = mouseHandler.SelectedGameObject; 
             selectedSD = mouseHandler.SelectedStimDef;
             CorrectSelection = selectedSD.IsTarget;
             if (CorrectSelection)
@@ -228,14 +238,14 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
             Accuracy_InBlock = NumCorrect_InBlock/(TrialCount_InBlock + 1);
         });
-        SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, ()=>
-        {
-            if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
-            {
-                Debug.Log("Timed out of selection state before making a choice");
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
-            }
-        });
+        //SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, ()=>
+        //{
+        //    if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
+        //    {
+        //        Debug.Log("Timed out of selection state before making a choice");
+        //        EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
+        //    }
+        //});
 
         SelectionFeedback.AddInitializationMethod(() =>
         {

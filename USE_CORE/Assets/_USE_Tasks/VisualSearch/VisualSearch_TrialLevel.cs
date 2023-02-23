@@ -6,6 +6,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using ConfigDynamicUI;
+using ConfigParsing;
 using UnityEngine.Serialization;
 using USE_States;
 using USE_StimulusManagement;
@@ -28,11 +29,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private bool Grating = false;
     private TaskHelperFunctions taskHelper;
     
-    // ConfigUI variables
+    // ConfigUI variables / Timing Variable
     private bool configUIVariablesLoaded;
     [HideInInspector]
     public ConfigNumber minObjectTouchDuration, itiDuration, fbDuration, maxObjectTouchDuration, 
-        selectObjectDuration, tokenRevealDuration, tokenUpdateDuration, searchDisplayDelay, gratingSquareDuration, tokenFbDuration;
+        selectObjectDuration, tokenRevealDuration, tokenUpdateDuration, tokenFlashingDuration, searchDisplayDelay, gratingSquareDuration;
+    private float tokenFbDuration;
     
     // Set in the Task Level
     [HideInInspector] public string ContextExternalFilePath;
@@ -116,7 +118,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddInitializationMethod(() =>
         {
             ResetTrialVariables();
-            TokenFBController.SetTokenBarFull(false);
+            TokenFBController.ResetTokenBarFull();
             //Set the context for the upcoming trial with the Start Button visible
             ContextName = CurrentTrialDef.ContextName;
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
@@ -158,7 +160,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
-
+            TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
             StartButton.SetActive(true);
         });
         InitTrial.AddUpdateMethod(() =>
@@ -288,11 +290,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 TokenFBController.RemoveTokens(selected, -selectedSD.StimTrialRewardMag);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
             }
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
-        });
-        TokenFeedback.AddTimer(() => tokenFbDuration.value, () => ITI, ()=>
-        {
             
+        });
+        //TokenFeedback.SpecifyTermination(()=>!TokenFBController.IsAnimating(), () => ITI, ()=>
+        TokenFeedback.AddTimer(()=>tokenFbDuration, () => ITI, ()=>
+        {
+            Debug.Log("ANIMATION PHASE: " + TokenFBController.GetAnimationPhase() + " IS TOKEN BAR FULL? " + TokenFBController.isTokenBarFull());
             if (TokenFBController.isTokenBarFull())
             {
                 NumTokenBarFull_InBlock++;
@@ -305,6 +308,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                     RewardGiven = true;
                 }
             }
+            
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
             TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
                                            (NumTokenBarFull_InBlock * CurrentTrialDef.NumTokenBar);
@@ -460,10 +464,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         searchDisplayDelay = ConfigUiVariables.get<ConfigNumber>("searchDisplayDelay");
         selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
         fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
+        gratingSquareDuration = ConfigUiVariables.get<ConfigNumber>("gratingSquareDuration");
         tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");
-        gratingSquareDuration = ConfigUiVariables.get<ConfigNumber>("gratingSquareDuration");
-        tokenFbDuration = ConfigUiVariables.get<ConfigNumber>("tokenFbDuration");
+        tokenFlashingDuration = ConfigUiVariables.get<ConfigNumber>("tokenFlashingDuration");
+
+        tokenFbDuration = (tokenFlashingDuration.value + tokenUpdateDuration.value + tokenRevealDuration.value) + 0.1f;//ensures full flashing duration within
+                                                                                                              ////configured token fb duration
         configUIVariablesLoaded = true;
     }
     void SetTrialSummaryString()

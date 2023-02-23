@@ -78,7 +78,7 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
                                       "\n" + 
                                       "\nNum Touch Duration Error: " + wmTL.TouchDurationError_InBlock + 
                                       "\n" +
-                                      "\nNum Reward Given: " + wmTL.NumRewardGiven_InBlock + 
+                                      "\nNum Reward Given: " + wmTL.NumRewardPulses_InBlock + 
                                       "\nNum Token Bar Filled: " + wmTL.NumTokenBarFull_InBlock +
                                       "\nTotal Tokens Collected: " + wmTL.TotalTokensCollected_InBlock);
     }
@@ -87,7 +87,7 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("Block Accuracy", ()=> wmTL.Accuracy_InBlock);
         BlockData.AddDatum("Avg Search Duration", ()=> wmTL.AverageSearchDuration_InBlock);
         BlockData.AddDatum("Num Touch Duration Error", ()=> wmTL.TouchDurationError_InBlock);
-        BlockData.AddDatum("Num Reward Given", ()=> wmTL.NumRewardGiven_InBlock);
+        BlockData.AddDatum("Num Reward Given", ()=> wmTL.NumRewardPulses_InBlock);
         BlockData.AddDatum("Num Token Bar Filled", ()=> wmTL.NumTokenBarFull_InBlock);
         BlockData.AddDatum("Total Tokens Collected", ()=> wmTL.TotalTokensCollected_InBlock);
     }

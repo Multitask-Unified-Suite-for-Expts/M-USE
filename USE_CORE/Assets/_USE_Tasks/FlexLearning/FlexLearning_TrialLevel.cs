@@ -41,8 +41,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     private bool configUIVariablesLoaded;
     [HideInInspector]
     public ConfigNumber minObjectTouchDuration, itiDuration, 
-        fbDuration, gratingSquareDuration, maxObjectTouchDuration, selectObjectDuration, tokenRevealDuration, tokenUpdateDuration, 
-        searchDisplayDelay, tokenFbDuration;
+        fbDuration, gratingSquareDuration, maxObjectTouchDuration, selectObjectDuration, tokenRevealDuration, tokenUpdateDuration, tokenFlashingDuration, 
+        searchDisplayDelay;
+
+    private float tokenFbDuration;
     
     // Set in the Task Level
     [HideInInspector] public string ContextExternalFilePath;
@@ -159,6 +161,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
+            TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
 
             StartButton.SetActive(true);
         });
@@ -281,7 +284,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             }
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
         });
-        TokenFeedback.AddTimer(() => tokenFbDuration.value, ITI, () =>
+        TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
         {
             if (TokenFBController.isTokenBarFull())
             {
@@ -438,10 +441,13 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         searchDisplayDelay = ConfigUiVariables.get<ConfigNumber>("searchDisplayDelay");
         selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
         fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
+        gratingSquareDuration = ConfigUiVariables.get<ConfigNumber>("gratingSquareDuration");
         tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");
-        gratingSquareDuration = ConfigUiVariables.get<ConfigNumber>("gratingSquareDuration");
-        tokenFbDuration = ConfigUiVariables.get<ConfigNumber>("tokenFbDuration");
+        tokenFlashingDuration = ConfigUiVariables.get<ConfigNumber>("tokenFlashingDuration");
+
+        tokenFbDuration = (tokenFlashingDuration.value + tokenUpdateDuration.value + tokenRevealDuration.value) + 0.1f;//ensures full flashing duration within
+        ////configured token fb duration
         configUIVariablesLoaded = true;
     }
     void SetTrialSummaryString()

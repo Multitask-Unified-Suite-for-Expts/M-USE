@@ -1,6 +1,7 @@
 using UnityEngine;
 using USE_Data;
 using System.Collections;
+using System.Runtime.CompilerServices;
 using ConfigParsing;
 
 
@@ -160,7 +161,8 @@ public class TokenFBController : MonoBehaviour
 
     public void Update()
     {
-        if (animationPhase == AnimationPhase.None) return;
+        if (animationPhase == AnimationPhase.None)
+            return;
 
         // Switch to next animation phase if the current one ended
         if (Time.unscaledTime >= animationEndTime)
@@ -174,10 +176,12 @@ public class TokenFBController : MonoBehaviour
                     animationEndTime += updateTime;
                     break;
                 case AnimationPhase.Update:
-                   if (tokensChange < 0) {
+                    if (tokensChange < 0)
+                    {
                         audioFBController.Play("NegativeUpdate"); //not added
                     }
-                    else {
+                    else
+                    {
                         audioFBController.Play("PositiveUpdate"); //not added
                     }
                     numCollected += tokensChange;
@@ -187,7 +191,7 @@ public class TokenFBController : MonoBehaviour
                     {
                         animationPhase = AnimationPhase.Flashing;
                         tokenBarFull = true;
-                        StartCoroutine(FlashingBeeps(flashingNumBeeps)); //NT: put here instead of flashPhase, for it to be immediate. 
+                        StartCoroutine(FlashingBeeps(flashingNumBeeps));
                         animationEndTime += flashingTime;
                     }
                     break;
@@ -209,8 +213,13 @@ public class TokenFBController : MonoBehaviour
                 animatedTokensPos = Vector2.Lerp(animatedTokensStartPos, animatedTokensEndPos, dt / updateTime);
                 break;
             case AnimationPhase.Flashing:
-                if (dt < flashingTime / 2) tokenBoxColor = colorFlashing1;
-                else tokenBoxColor = colorFlashing2;
+                int flashingInterval = (int)(flashingTime * 10000 / 4);
+                int elapsed = (int)((Time.unscaledTime - animationStartTime) * 10000 % (flashingTime * 10000));
+                int colorIndex = elapsed / flashingInterval;
+                if (colorIndex % 2 == 0)
+                    tokenBoxColor = colorFlashing1;
+                else
+                    tokenBoxColor = colorFlashing2;
                 break;
         }
     }

@@ -287,11 +287,6 @@ namespace USE_StimulusManagement
 
 		public GameObject Load()
 		{
-			//if (StimGameObject != null)
-			//{
-			//	Debug.LogWarning("Attempting to load stimulus " + StimName + ", but there is already a GameObject associated with this stimulus loaded.");
-			//}
-
 			if (!string.IsNullOrEmpty(ExternalFilePath))
 			{
 				StimGameObject = LoadExternalStimFromFile();
@@ -322,9 +317,6 @@ namespace USE_StimulusManagement
 				string splitString = FileNameStrings[FileNameStrings.Length - 1];
 				StimGameObject.name = splitString.Split('.')[0];
 			}
-
-			// StimGameObject.AddComponent<StimDefPointer>();
-			// StimGameObject.GetComponent<StimDefPointer>().StimDef = this;
 			
 			return StimGameObject;
 		}

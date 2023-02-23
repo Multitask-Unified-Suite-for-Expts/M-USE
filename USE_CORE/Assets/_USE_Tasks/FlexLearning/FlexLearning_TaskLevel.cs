@@ -20,7 +20,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;
     [HideInInspector] public int BlockStringsAdded = 0;
-    [HideInInspector] public string TaskName = "FlexLearning";
     FlexLearning_BlockDef flBD => GetCurrentBlockDef<FlexLearning_BlockDef>();
     FlexLearning_TrialLevel flTL;
     public override void DefineControlLevel()
@@ -76,12 +75,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
             flTL.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
         else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquarePosition"))
-            flTL.FBSquarePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquarePosition");
-        else Debug.LogError("FB Square Position settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquareScale"))
-            flTL.FBSquareScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquareScale");
-        else Debug.LogError("FB Square Scale settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
             flTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
         else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");

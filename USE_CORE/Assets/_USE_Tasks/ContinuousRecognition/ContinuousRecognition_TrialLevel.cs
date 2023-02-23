@@ -79,9 +79,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public StimGroup RightGroup;
     [HideInInspector] public StimGroup WrongGroup;
 
-    [HideInInspector] public Vector3 ButtonScale;
-    [HideInInspector] public Vector3 ButtonPosition;
-
     [HideInInspector] GameObject chosenStimObj;
     [HideInInspector] ContinuousRecognition_StimDef chosenStimDef;
 
@@ -101,22 +98,24 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
-        SetControllerBlockValues();
-
-        OriginalFbTextPosition = YouLoseTextGO.transform.position;
-        OriginalTitleTextPosition = TitleTextGO.transform.position;
-        OriginalTimerPosition = TimerBackdropGO.transform.position;
-
-        LoadTextures(MaterialFilePath);
-
-        if (StartButton == null)
+        Add_ControlLevel_InitializationMethod(() =>
         {
-            //StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale); //Old method
-            USE_StartButton = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>());
-            StartButton = USE_StartButton.StartButtonGO;
-            OriginalStartButtonPosition = StartButton.transform.position;
-            USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
-        }
+            SetControllerBlockValues();
+
+            OriginalFbTextPosition = YouLoseTextGO.transform.position;
+            OriginalTitleTextPosition = TitleTextGO.transform.position;
+            OriginalTimerPosition = TimerBackdropGO.transform.position;
+
+            LoadTextures(MaterialFilePath);
+
+            if (StartButton == null)
+            {
+                USE_StartButton = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>());
+                StartButton = USE_StartButton.StartButtonGO;
+                OriginalStartButtonPosition = StartButton.transform.position;
+                USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+            }
+        });
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>

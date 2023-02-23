@@ -193,7 +193,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             InitializeSlider();
             LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
-            StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
+            if (StartButton == null)
+            {
+                USE_StartButton = new USE_StartButton(MG_CanvasGO.GetComponent<Canvas>());
+                StartButton = USE_StartButton.StartButtonGO;
+            }
             MazeContainer = new GameObject("MazeContainer");
             MazeBackground = CreateSquare("MazeBackground", MazeBackgroundTexture, new Vector3(0, 0, 0),
                 new Vector3(5, 5, 5));

@@ -32,10 +32,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     // Stimuli Variables
     private StimGroup tStim;
     private GameObject StartButton;
-    private GameObject FBSquare;
-    private GameObject SquareGO;
-    private bool Grating = false;
-    private TaskHelperFunctions taskHelper;
 
     // ConfigUI Variables
     private bool configUIVariablesLoaded;
@@ -49,7 +45,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     // Set in the Task Level
     [HideInInspector] public string ContextExternalFilePath;
     [HideInInspector] public Vector3 ButtonPosition, ButtonScale;
-    [HideInInspector] public Vector3 FBSquarePosition, FBSquareScale;
     [HideInInspector] public bool StimFacingCamera;
     [HideInInspector] public string ShadowType;
     [HideInInspector] public bool NeutralITI;
@@ -119,7 +114,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         playerView = new PlayerViewPanel();
         playerViewText = new GameObject();
         playerViewParent = GameObject.Find("MainCameraCopy");
-        taskHelper = new TaskHelperFunctions();
 
         SetupTrial.AddInitializationMethod(() =>
         {
@@ -137,9 +131,12 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 foreach (var stim in tStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
             }
 
-            //Create and Load variables needed at the start of the trial
-            if (!ObjectsCreated)
-                CreateObjects();
+            if (StartButton == null)
+            {
+                USE_StartButton = new USE_StartButton(FL_CanvasGO.GetComponent<Canvas>());
+                StartButton = USE_StartButton.StartButtonGO;
+            }
+
             if (!configUIVariablesLoaded)
                 LoadConfigUIVariables();
             if (!playerViewLoaded)
@@ -170,7 +167,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
             {
                 TouchDurationError = true;
-                TouchDurationErrorFeedback(mouseHandler, StartButton);
+                TouchDurationErrorFeedback(mouseHandler, false);
                 SetTrialSummaryString();
                 CurrentTaskLevel.CalculateBlockSummaryString();
             }
@@ -202,9 +199,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
             {
                 TouchDurationError = true;
-                FBSquare.SetActive(true);
                 SetTrialSummaryString();
-                TouchDurationErrorFeedback(mouseHandler, FBSquare);
+                TouchDurationErrorFeedback(mouseHandler, true);
                 CurrentTaskLevel.CalculateBlockSummaryString();
             }
         });
@@ -399,15 +395,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         // All AddDatum commmands from the Frame Data
         FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("StartButtonVisibility", () => StartButton == null ? false:StartButton.activeSelf); // CHECK THE DATA!
-        FrameData.AddDatum("FBSquareVisibility", ()=> FBSquare == null? false:FBSquare.activeSelf);
         FrameData.AddDatum("TrialStimVisibility", () => tStim == null? false:tStim.IsActive);
     }
-    private void CreateObjects()
-    {
-        StartButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
-        FBSquare = CreateSquare("FBSquare", FBSquareTexture, FBSquarePosition, FBSquareScale);
-        ObjectsCreated = true;
-    }
+
     private void CreateTextOnExperimenterDisplay()
     {
         //Create corresponding text on player view of experimenter display
@@ -474,13 +464,13 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             TrialDefs.Count) || TrialCount_InBlock == MaxTrials);
         
     }
-    private void TouchDurationErrorFeedback(SelectionHandler<FlexLearning_StimDef> MouseHandler, GameObject go)
+    private void TouchDurationErrorFeedback(SelectionHandler<FlexLearning_StimDef> MouseHandler, bool deactivateAfter)
     {
         AudioFBController.Play("Negative");
         if (MouseHandler.GetHeldTooShort())
-            StartCoroutine(taskHelper.GratedSquareFlash(HeldTooShortTexture, go, gratingSquareDuration.value));
+            StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
         else if (MouseHandler.GetHeldTooLong())
-            StartCoroutine(taskHelper.GratedSquareFlash(HeldTooLongTexture, go, gratingSquareDuration.value));
+            StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
         MouseHandler.SetHeldTooLong(false);
         MouseHandler.SetHeldTooShort(false);
         TouchDurationError = false;

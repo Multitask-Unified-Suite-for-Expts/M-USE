@@ -25,9 +25,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     // Stimuli Variables
     private StimGroup tStim;
     private GameObject StartButton;
-    private GameObject FBSquare;
-    private bool Grating = false;
-    private TaskHelperFunctions taskHelper;
     
     // ConfigUI variables / Timing Variable
     private bool configUIVariablesLoaded;
@@ -39,7 +36,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     // Set in the Task Level
     [HideInInspector] public string ContextExternalFilePath;
     [HideInInspector] public Vector3 ButtonPosition, ButtonScale;
-    [HideInInspector] public Vector3 FBSquarePosition, FBSquareScale;
     [HideInInspector] public bool StimFacingCamera;
     [HideInInspector] public string ShadowType;
     [HideInInspector] public bool NeutralITI;
@@ -111,7 +107,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
         playerViewText = new GameObject();
         playerViewParent = GameObject.Find("MainCameraCopy");
-        taskHelper = new TaskHelperFunctions();
         
         
         
@@ -130,15 +125,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 foreach (var stim in tStim.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
             }
 
-            //Create and Load variables needed at the start of the trial
             if(StartButton == null)
             {
                 USE_StartButton = new USE_StartButton(VS_CanvasGO.GetComponent<Canvas>());
                 StartButton = USE_StartButton.StartButtonGO;
             }
 
-            if (!ObjectsCreated)
-                CreateObjects();
             if (!configUIVariablesLoaded) 
                 LoadConfigUIVariables();
             if (!playerViewLoaded)
@@ -168,7 +160,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
             {
                 TouchDurationError = true;
-                TouchDurationErrorFeedback(mouseHandler, StartButton);
+                TouchDurationErrorFeedback(mouseHandler, false);
                 SetTrialSummaryString();
                 CurrentTaskLevel.SetBlockSummaryString(); //TCIB is incremented during setuptrial, so "trialNum" in blocksummarystring is wrong unless you update it here. I would say change the variable in the summary string. 
             }
@@ -207,15 +199,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
             {
                 TouchDurationError = true;
-                FBSquare.SetActive(true);
                 SetTrialSummaryString();
-                TouchDurationErrorFeedback(mouseHandler, FBSquare);
+                TouchDurationErrorFeedback(mouseHandler, true);
                 CurrentTaskLevel.SetBlockSummaryString();
             }
 
             if (chosenStimObj != null && chosenStimDef != null)
                 StimIsChosen = true;
-            
         });
         SearchDisplay.SpecifyTermination(() => StimIsChosen, SelectionFeedback, () =>
         {
@@ -242,18 +232,17 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             }
             Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock,(TrialCount_InBlock + 1));
         });
+        SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
+        {
+            if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
+            {
+                Debug.Log("Timed out of selection state before making a choice");
+                AbortedTrials_InBlock++;
+                aborted = true;
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
+            }
+        });
 
-        //SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, ()=> 
-        //{
-        //    if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
-        //    {
-        //        Debug.Log("Timed out of selection state before making a choice");
-        //        AbortedTrials_InBlock++;
-        //        aborted = true;  
-        //        EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
-        //    }
-        //});
-        
         // SELECTION FEEDBACK STATE ---------------------------------------------------------------------------------------   
         SelectionFeedback.AddInitializationMethod(() =>
         {
@@ -424,14 +413,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         // All AddDatum commmands from the Frame Data
         FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("StartButtonVisibility", () => StartButton == null ? false:StartButton.activeSelf); // CHECK THE DATA!
-        FrameData.AddDatum("FBSquareVisibility", ()=> FBSquare == null? false:FBSquare.activeSelf);
         FrameData.AddDatum("TrialStimVisibility", () => tStim == null? false:tStim.IsActive);
     }
-    private void CreateObjects()
-    {
-        FBSquare = CreateSquare("FBSquare", FBSquareTexture, FBSquarePosition, FBSquareScale);
-        ObjectsCreated = true;
-    }
+
     private void CreateTextOnExperimenterDisplay()
     { // sets parent for any playerView elements on experimenter display
         
@@ -489,13 +473,14 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                              "\n" + 
                              "\nToken Bar Value: " + TokenFBController.GetTokenBarValue();
     }
-    private void TouchDurationErrorFeedback(SelectionHandler<VisualSearch_StimDef> MouseHandler, GameObject go)
+
+    private void TouchDurationErrorFeedback(SelectionHandler<VisualSearch_StimDef> MouseHandler, bool deactivateAfter)
     {///CANT FIGURE OUT WHY I CANT USE TEMPLATE, ANYWAYS MAKE A SEPARATE FEEDBACK SCRIPT
         AudioFBController.Play("Negative");
         if (MouseHandler.GetHeldTooShort())
-            StartCoroutine(taskHelper.GratedSquareFlash(HeldTooShortTexture, go, gratingSquareDuration.value));
+            StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
         else if (MouseHandler.GetHeldTooLong())
-            StartCoroutine(taskHelper.GratedSquareFlash(HeldTooLongTexture, go, gratingSquareDuration.value));
+            StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
         MouseHandler.SetHeldTooLong(false);
         MouseHandler.SetHeldTooShort(false);
         TouchDurationError = false;

@@ -34,7 +34,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     // Config Variables
     public string ContextExternalFilePath;
     public Vector3 ButtonPosition, ButtonScale;
-    public Vector3 FBSquarePosition, FBSquareScale;
     public bool StimFacingCamera;
     public string ShadowType;
     public bool NeutralITI;
@@ -128,13 +127,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     // Stimuli Variables
     private GameObject startButton;
-    private GameObject FBSquare;
     // public Texture2D HeldTooShortTexture;
     // public Texture2D HeldTooLongTexture;
     // private Texture2D StartButtonTexture;
-    // private Texture2D FBSquareTexture;
     private bool Grating = false;
-    private TaskHelperFunctions taskHelper;
     
     // Stim Evaluation Variables
     private GameObject trialStim;
@@ -181,7 +177,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         //MouseTracker variables
         SelectionHandler<WhatWhenWhere_StimDef> gazeHandler = new SelectionHandler<WhatWhenWhere_StimDef>();
         SelectionHandler<WhatWhenWhere_StimDef> mouseHandler = new SelectionHandler<WhatWhenWhere_StimDef>();
-        taskHelper = new TaskHelperFunctions();
         GazeTracker.SpoofGazeWithMouse = true;
 
         //player view variables
@@ -196,8 +191,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             InitializeSlider();
             LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
-            startButton = CreateSquare("StartButton", StartButtonTexture, ButtonPosition, ButtonScale);
-            FBSquare = CreateSquare("FBSquare", FBSquareTexture, FBSquarePosition, FBSquareScale);
+            if (startButton == null)
+            {
+                USE_StartButton = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>());
+                startButton = USE_StartButton.StartButtonGO;
+            }
+
             playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
 
             //Removing shadows from Directional Light (was distorting stim):
@@ -247,7 +246,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 touchDurationError = true;
                 SetTrialSummaryString();
-                TouchDurationErrorFeedback(mouseHandler, startButton);
+                TouchDurationErrorFeedback(mouseHandler, false);
                 CurrentTaskLevel.SetBlockSummaryString();
             }
         });
@@ -281,9 +280,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
             {
                 touchDurationError = true;
-                FBSquare.SetActive(true);
                 SetTrialSummaryString();
-                TouchDurationErrorFeedback(mouseHandler, FBSquare);
+                TouchDurationErrorFeedback(mouseHandler, true);
                 CurrentTaskLevel.SetBlockSummaryString();
             }
         });
@@ -941,7 +939,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         Vector2 pvPosition = new Vector2((position[0] / Screen.width) * playerViewParent.GetComponent<RectTransform>().sizeDelta.x, (position[1] / Screen.height) * playerViewParent.GetComponent<RectTransform>().sizeDelta.y);
         return pvPosition;
     }
-    private void TouchDurationErrorFeedback(SelectionHandler<WhatWhenWhere_StimDef> MouseHandler, GameObject go)
+    private void TouchDurationErrorFeedback(SelectionHandler<WhatWhenWhere_StimDef> MouseHandler, bool deactivateAfter)
     {
         EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchDurationError"]);
         EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchErrorImageOn"]);
@@ -950,9 +948,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         AudioFBController.Play("Negative");
         //eventually replace with state timer logic
         if (MouseHandler.GetHeldTooShort())
-            StartCoroutine(taskHelper.GratedSquareFlash(HeldTooShortTexture, go, gratingSquareDuration.value));
+            StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
         else if (MouseHandler.GetHeldTooLong())
-            StartCoroutine(taskHelper.GratedSquareFlash(HeldTooLongTexture, go, gratingSquareDuration.value));
+            StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
         MouseHandler.SetHeldTooLong(false);
         MouseHandler.SetHeldTooShort(false);
         touchDurationError = false;

@@ -738,7 +738,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public override void FinishTrialCleanup()
     {
         DestroyTextOnExperimenterDisplay();
-        tiles.DestroyStimGroup();
+        if (tiles != null)
+            tiles.DestroyStimGroup();
         MazeBackground.SetActive(false);
         SliderGo.SetActive(false);
         SliderHaloGo.SetActive(false);

@@ -111,15 +111,17 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         Add_ControlLevel_InitializationMethod(() =>
         {
             LoadTextures(ContextExternalFilePath);
-            HaloFBController.SetHaloSize(5);
+            // Initialize FB Controller Values
+            HaloFBController.SetHaloSize(4.5f);
+            HaloFBController.SetHaloIntensity(5);
+        });
+        SetupTrial.AddInitializationMethod(() =>
+        {
             if (StartButton == null)
             {
                 USE_StartButton = new USE_StartButton(WM_CanvasGO.GetComponent<Canvas>());
                 StartButton = USE_StartButton.StartButtonGO;
             }
-        });
-        SetupTrial.AddInitializationMethod(() =>
-        {
             ContextName = CurrentTrialDef.ContextName;
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
             if (!configUIVariablesLoaded) LoadConfigUIVariables();

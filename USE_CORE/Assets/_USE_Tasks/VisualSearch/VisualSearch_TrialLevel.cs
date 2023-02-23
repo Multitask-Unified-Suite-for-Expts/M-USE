@@ -94,21 +94,27 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         AddActiveStates(new List<State> {InitTrial, SearchDisplay, SelectionFeedback, TokenFeedback, ITI, Delay, SearchDisplayDelay});
         SelectionHandler<VisualSearch_StimDef> mouseHandler = new SelectionHandler<VisualSearch_StimDef>();
         
-        // Initialize FB Controller Values
-        HaloFBController.SetHaloSize(5);
+        
         
         // A state that just waits for some time
         State stateAfterDelay = null;
         float delayDuration = 0;
         Delay.AddTimer(() => delayDuration, () => stateAfterDelay);
         
-        LoadTextures(ContextExternalFilePath);
-        Text commandText = null;
-        playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
-        playerViewText = new GameObject();
-        playerViewParent = GameObject.Find("MainCameraCopy");
         
         
+        Add_ControlLevel_InitializationMethod(() =>
+        {
+            LoadTextures(ContextExternalFilePath);
+            Text commandText = null;
+            playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
+            playerViewText = new GameObject();
+            playerViewParent = GameObject.Find("MainCameraCopy");     
+            
+            // Initialize FB Controller Values
+            HaloFBController.SetHaloSize(4.5f);
+            HaloFBController.SetHaloIntensity(5);
+        });
         
         SetupTrial.AddInitializationMethod(() =>
         {
@@ -284,7 +290,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         //TokenFeedback.SpecifyTermination(()=>!TokenFBController.IsAnimating(), () => ITI, ()=>
         TokenFeedback.AddTimer(()=>tokenFbDuration, () => ITI, ()=>
         {
-            Debug.Log("ANIMATION PHASE: " + TokenFBController.GetAnimationPhase() + " IS TOKEN BAR FULL? " + TokenFBController.isTokenBarFull());
             if (TokenFBController.isTokenBarFull())
             {
                 NumTokenBarFull_InBlock++;

@@ -67,7 +67,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public float TimeRemaining;
     [HideInInspector] public List <float> TimeToChoice_Block;
 
-    [HideInInspector] public int TokenCount;
     [HideInInspector] public int NumFeedbackRows;
     [HideInInspector] public int Score;
 
@@ -343,23 +342,19 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 if(TrialCount_InBlock == currentTrial.MaxNumTrials-1 || currentTrial.PNC_Stim.Count == 0) //If they get the last trial right (or find all stim), fill up bar!
                 {
                     currentTrial.NumRewardPulses++;
-                    int numToFillBar = currentTrial.NumTokenBar - TokenCount;
+                    int numToFillBar = currentTrial.NumTokenBar - TokenFBController.GetTokenBarValue();
                     TokenFBController.AddTokens(chosenStimObj, numToFillBar);
-                    TokenCount += numToFillBar;
                 }
                 else
-                {
                     TokenFBController.AddTokens(chosenStimObj, currentTrial.RewardMag);
-                    TokenCount++;
-                }
+                
                 HandleTokenUpdate();
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
             }
             else //Got wrong
             {
-                TokenFBController.RemoveTokens(chosenStimObj, 1);
+                TokenFBController.RemoveTokens(chosenStimObj,currentTrial.RewardMag);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
-                TokenCount--;
                 HandleTokenUpdate();
                 EndBlock = true;
             }
@@ -1050,11 +1045,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     void HandleTokenUpdate()
     {
-        if (TokenCount == currentTrial.NumTokenBar)
+        if(TokenFBController.isTokenBarFull())
         {
             NumTbCompletions_Block++;
             NumRewards_Block += currentTrial.NumRewardPulses;
-            TokenCount = 0;
 
             if (SyncBoxController != null)
             {

@@ -472,8 +472,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public void SetControllerBlockValues()
     {
         TokenFBController.SetFlashingTime(1f);
-        HaloFBController.SetHaloIntensity(2);
-        HaloFBController.SetHaloSize(1);
+        HaloFBController.SetHaloIntensity(1);
+        HaloFBController.SetHaloSize(0.8f);
     }
 
     void RemoveShakeStimScript(StimGroup stimGroup)

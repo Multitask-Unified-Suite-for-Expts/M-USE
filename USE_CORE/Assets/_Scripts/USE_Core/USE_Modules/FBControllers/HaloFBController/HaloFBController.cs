@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 using USE_Data;
 
 public class HaloFBController : MonoBehaviour
@@ -44,11 +45,18 @@ public class HaloFBController : MonoBehaviour
                 Debug.LogWarning("Trying to show HaloFB but one is already being shown");
                 Destroy(instantiated);
             }
+
+            return;
         }
-        instantiated = Instantiate(haloPrefab, gameObj.transform);
-        float behindStimPos = gameObject.transform.position.z - 10; // adjusts so that the halo is behind the object
-        haloPrefab.transform.localPosition = new Vector3(haloPrefab.transform.position.x, haloPrefab.transform.position.y,
-            behindStimPos);
+        GameObject rootObj = gameObj.transform.root.gameObject;
+        instantiated = Instantiate(haloPrefab, rootObj.transform);
+        instantiated.transform.SetParent(rootObj.transform);
+
+        // Position the haloPrefab behind the game object
+        float distanceBehind = 0.3f; // Set the distance behind the gameObj
+        Vector3 behindPos = rootObj.transform.position - rootObj.transform.forward * distanceBehind;
+        instantiated.transform.position = behindPos;
+
 
     }
     

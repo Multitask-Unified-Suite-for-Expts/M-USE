@@ -1,7 +1,9 @@
 using VisualSearch_Namespace;
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 using USE_Settings;
@@ -14,6 +16,10 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int NumRewardPulses_InTask = 0;
     [HideInInspector] public int NumTokenBarFull_InTask = 0;
     [HideInInspector] public int TotalTokensCollected_InTask = 0;
+    [HideInInspector] public int AbortedTrials_InTask = 0;
+    [HideInInspector] public int NumCorrect_InTask = 0;
+    [HideInInspector] public int NumErrors_InTask = 0;
+    [HideInInspector] public List<float> SearchDurationsList_InTask;
 
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;
@@ -31,6 +37,11 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         SetSettings();
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
+        
+        Add_ControlLevel_InitializationMethod(() =>
+        {
+            ResetTaskVariables();
+        });
         
         RunBlock.AddInitializationMethod(() =>
         {
@@ -51,12 +62,11 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             if (BlockStringsAdded > 0)
                 CurrentBlockString += "\n";
             BlockStringsAdded++;
+            
             PreviousBlocksString.Insert(0, CurrentBlockString);
-
-            TouchDurationError_InTask += vsTL.TouchDurationError_InBlock;
-            NumRewardPulses_InTask += vsTL.NumRewardPulses_InBlock;
-            NumTokenBarFull_InTask += vsTL.NumTokenBarFull_InBlock;
-            TotalTokensCollected_InTask += vsTL.TotalTokensCollected_InBlock;
+            
+            TouchDurationError_InTask += vsTL.TouchDurationError_InBlock; //Not actively updating on session panel, 
+                                                                            //ok to calculate after block end
         });
         AssignBlockData();
     }
@@ -69,6 +79,9 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         data["Reward Pulses"] = NumRewardPulses_InTask;
         data["Token Bar Full"] = NumTokenBarFull_InTask;
         data["Total Tokens Collected"] = TotalTokensCollected_InTask;
+        data["Average Search Duration"] = SearchDurationsList_InTask.Average();
+        data["Accuracy"] = decimal.Divide(NumCorrect_InTask, (vsTL.TrialCount_InTask));
+        
         return data;
     }
     public void SetBlockSummaryString()
@@ -82,16 +95,32 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
                                       "\nAvg Search Duration: " + String.Format("{0:0.00}", vsTL.AverageSearchDuration_InBlock) +
                                       "\n" + 
                                       "\nNum Touch Duration Error: " + vsTL.TouchDurationError_InBlock + 
-                                      "\n" +
+                                      "\nNum Aborted Trials" + + vsTL.AbortedTrials_InBlock + 
+                                      "\n"+
                                       "\nNum Reward Given: " + vsTL.NumRewardPulses_InBlock + 
                                       "\nNum Token Bar Filled: " + vsTL.NumTokenBarFull_InBlock +
                                       "\nTotal Tokens Collected: " + vsTL.TotalTokensCollected_InBlock);
-        BlockSummaryString.AppendLine(CurrentBlockString).ToString();
+        BlockSummaryString.AppendLine(CurrentBlockString);
         if (PreviousBlocksString.Length > 0)
             BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
     }
 
-
+    public override void SetTaskSummaryString()
+    {
+        CurrentTaskSummaryString.Clear();
+        if (vsTL.TrialCount_InTask != 0)
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" + 
+                                        $"\n# Trials: {vsTL.TrialCount_InTask + 1} ({(Math.Round(decimal.Divide(AbortedTrials_InTask,(vsTL.TrialCount_InTask)),2))*100}% aborted)" + 
+                                        $"\n#Blocks Completed: {BlockCount}" + 
+                                        $"\nAccuracy: {(Math.Round(decimal.Divide(NumCorrect_InTask,(vsTL.TrialCount_InTask)),2))*100}%" + 
+                                        $"\nAvg Search Duration: {Math.Round(SearchDurationsList_InTask.Average(),2)}" +
+                                        $"\n# Reward Pulses: {NumRewardPulses_InTask}" +
+                                        $"\n# Token Bar Filled: {NumTokenBarFull_InTask}" +
+                                        $"\n# Tokens Collected: {TotalTokensCollected_InTask}");
+        else
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
+    }
+    
     private void SetSettings()
     {
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
@@ -128,5 +157,16 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     {
         CurrentBlockString = "";
         BlockSummaryString.Clear();
+    }
+    public void ResetTaskVariables()
+    {
+        NumCorrect_InTask = 0;
+        NumErrors_InTask = 0;
+        TouchDurationError_InTask = 0;
+        NumRewardPulses_InTask = 0;
+        NumTokenBarFull_InTask = 0;
+        TotalTokensCollected_InTask = 0;
+        AbortedTrials_InTask = 0;
+        SearchDurationsList_InTask.Clear();
     }
 }

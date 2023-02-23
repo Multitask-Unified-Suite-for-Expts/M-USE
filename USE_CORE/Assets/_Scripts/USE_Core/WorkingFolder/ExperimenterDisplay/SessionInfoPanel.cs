@@ -65,7 +65,12 @@ public class SessionInfoPanel : ExperimenterDisplayPanel
         
         TaskSummaryString.Clear();
         if (TaskLevel != null)
-            TaskSummaryString.Append("<b>\n\nSelected Configs: </b>" + TaskLevel.ConfigName);
+        {
+            TaskSummaryString.Append("<b>\n\nSelected Configs: </b>" + TaskLevel.CurrentTaskSummaryString);
+        }
+        if (SessionLevel.PreviousTaskSummaryString.Length > 0)
+            TaskSummaryString.AppendLine(SessionLevel.PreviousTaskSummaryString.ToString());
+
     }
 
     public void UpdateSessionSummaryValues(params (string, object)[] valuesToUpdate)

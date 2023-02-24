@@ -18,7 +18,7 @@ public class PlayerViewPanel //: MonoBehaviour
     {
         // parent = transform;
     }
-    public GameObject drawCircle(Vector2 circleLocation, Vector2 size)
+    public GameObject DrawCircle(Vector2 circleLocation, Vector2 size)
     {
         GameObject degreeCircle = new GameObject("DegreeCircle", typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UICircle));
 
@@ -31,7 +31,7 @@ public class PlayerViewPanel //: MonoBehaviour
         return degreeCircle;
 
     }
-    public GameObject drawSampleLines(string lineName, Color col, List<Vector2> pointList) // removed GameObject parent
+    public GameObject DrawSampleLines(string lineName, Color col, List<Vector2> pointList) // removed GameObject parent
     {
         float radPix = 100; // dummy value 1920 used, ((MonitorDetails)SessionSettings.Get("sessionConfig", "monitorDetails")).CmSize[0]
 
@@ -50,7 +50,7 @@ public class PlayerViewPanel //: MonoBehaviour
         lineComp.relativeSize = false;
         return sampleLines;
     }
-    public GameObject writeText(string textName, string text, Color col, Vector2 textLocation, Vector2 size, Transform parent)
+    public GameObject WriteText(string textName, string text, Color col, Vector2 textLocation, Vector2 size, Transform parent)
     {
         GameObject textObject = new GameObject(textName, typeof(RectTransform), typeof(Text));
         textObject.transform.SetParent(parent);
@@ -64,6 +64,7 @@ public class PlayerViewPanel //: MonoBehaviour
         txt.text = text;
         txt.color = col;
         txt.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        txt.fontStyle = FontStyle.Bold;
         txt.alignment = TextAnchor.MiddleCenter;
 
         return textObject;

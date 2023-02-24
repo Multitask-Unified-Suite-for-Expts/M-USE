@@ -213,7 +213,7 @@ public class TokenFBController : MonoBehaviour
                 animatedTokensPos = Vector2.Lerp(animatedTokensStartPos, animatedTokensEndPos, dt / updateTime);
                 break;
             case AnimationPhase.Flashing:
-                int flashingInterval = (int)(flashingTime * 10000 / 4);
+                int flashingInterval = (int)(flashingTime * 10000 / 2);
                 int elapsed = (int)((Time.unscaledTime - animationStartTime) * 10000 % (flashingTime * 10000));
                 int colorIndex = elapsed / flashingInterval;
                 if (colorIndex % 2 == 0)

@@ -21,10 +21,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
     public GameObject VS_CanvasGO;
     public USE_StartButton USE_StartButton;
-
+    public USE_StartButton USE_FBSquare;
+    
     // Stimuli Variables
     private StimGroup tStim;
     private GameObject StartButton;
+    private GameObject FBSquare;
     
     // ConfigUI variables / Timing Variable
     private bool configUIVariablesLoaded;
@@ -133,6 +135,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 StartButton = USE_StartButton.StartButtonGO;
                 USE_StartButton.SetButtonSize(80);
                 USE_StartButton.SetButtonPosition(new Vector3(0, 0, -400));
+            }
+            if (FBSquare == null)
+            {
+                USE_FBSquare = new USE_StartButton(VS_CanvasGO.GetComponent<Canvas>());
+                FBSquare = USE_FBSquare.StartButtonGO;
+                FBSquare.name = "FBSquare";
             }
 
             if (!configUIVariablesLoaded) 
@@ -415,6 +423,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         // All AddDatum commmands from the Frame Data
         FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("StartButtonVisibility", () => StartButton == null ? false:StartButton.activeSelf); // CHECK THE DATA!
+        FrameData.AddDatum("FBSquareVisibility", () => FBSquare == null ? false:FBSquare.activeSelf); // CHECK THE DATA!
         FrameData.AddDatum("TrialStimVisibility", () => tStim == null? false:tStim.IsActive);
     }
 
@@ -429,7 +438,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent.transform);
                 textLocation.y += 50;
                 Vector3 textSize = new Vector3(2,2,1);
-                playerViewText = playerView.writeText("TargetText","TARGET",
+                playerViewText = playerView.WriteText("TargetText","TARGET",
                     Color.red, textLocation, textSize, playerViewParent.transform);
             }
         }
@@ -455,7 +464,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");
         tokenFlashingDuration = ConfigUiVariables.get<ConfigNumber>("tokenFlashingDuration");
 
-        tokenFbDuration = (tokenFlashingDuration.value + tokenUpdateDuration.value + tokenRevealDuration.value) + 0.1f;//ensures full flashing duration within
+        tokenFbDuration = (tokenFlashingDuration.value + tokenUpdateDuration.value + tokenRevealDuration.value);//ensures full flashing duration within
                                                                                                               ////configured token fb duration
         configUIVariablesLoaded = true;
     }

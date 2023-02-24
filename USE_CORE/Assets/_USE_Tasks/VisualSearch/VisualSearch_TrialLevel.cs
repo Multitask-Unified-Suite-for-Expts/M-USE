@@ -423,6 +423,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         // All AddDatum commmands from the Frame Data
         FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("StartButtonVisibility", () => StartButton == null ? false:StartButton.activeSelf); // CHECK THE DATA!
+        FrameData.AddDatum("FBSquareVisibility", () => FBSquare == null ? false:FBSquare.activeSelf); // CHECK THE DATA!
         FrameData.AddDatum("TrialStimVisibility", () => tStim == null? false:tStim.IsActive);
     }
 
@@ -463,7 +464,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");
         tokenFlashingDuration = ConfigUiVariables.get<ConfigNumber>("tokenFlashingDuration");
 
-        tokenFbDuration = (tokenFlashingDuration.value + tokenUpdateDuration.value + tokenRevealDuration.value) + 0.1f;//ensures full flashing duration within
+        tokenFbDuration = (tokenFlashingDuration.value + tokenUpdateDuration.value + tokenRevealDuration.value);//ensures full flashing duration within
                                                                                                               ////configured token fb duration
         configUIVariablesLoaded = true;
     }

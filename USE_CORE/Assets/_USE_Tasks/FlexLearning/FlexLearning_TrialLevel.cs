@@ -141,6 +141,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             {
                 USE_StartButton = new USE_StartButton(FL_CanvasGO.GetComponent<Canvas>());
                 StartButton = USE_StartButton.StartButtonGO;
+                USE_StartButton.SetButtonSize(80);
+                USE_StartButton.SetButtonPosition(new Vector3(0, 0, -400));
             }
             if (FBSquare == null)
             {
@@ -459,7 +461,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");
         tokenFlashingDuration = ConfigUiVariables.get<ConfigNumber>("tokenFlashingDuration");
 
-        tokenFbDuration = (tokenFlashingDuration.value + tokenUpdateDuration.value + tokenRevealDuration.value) + 0.1f;//ensures full flashing duration within
+        tokenFbDuration = (tokenFlashingDuration.value + tokenUpdateDuration.value + tokenRevealDuration.value);//ensures full flashing duration within
         ////configured token fb duration
         configUIVariablesLoaded = true;
     }

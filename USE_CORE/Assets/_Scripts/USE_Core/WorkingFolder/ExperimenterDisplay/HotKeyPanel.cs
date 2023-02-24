@@ -139,6 +139,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
         public List<HotKey> DefaultHotKeyList()
         {
             List<HotKey> HotKeyList = new List<HotKey>();
+            SessionInfoPanel SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
 
             // Toggle Displays HotKey
             HotKey toggleDisplays = new HotKey
@@ -321,7 +322,11 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyAction = () =>
                 {
                     if (HkPanel.TrialLevel.SyncBoxController != null)
+                    {
                         HkPanel.TrialLevel.SyncBoxController.SendRewardPulses(HkPanel.SessionLevel.RewardHotKeyNumPulses, HkPanel.SessionLevel.RewardHotKeyPulseSize);
+                        SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",HkPanel.SessionLevel.RewardHotKeyNumPulses));
+
+                    }
                     else
                         Debug.LogError("Tried to send Reward but SyncBoxController is null!");
                 }

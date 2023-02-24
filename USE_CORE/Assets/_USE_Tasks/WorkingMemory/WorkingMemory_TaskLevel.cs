@@ -36,7 +36,6 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
 
     public void SetSettings()
     {
-        string TaskName = "WorkingMemory";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             wmTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
         else wmTL.ContextExternalFilePath = ContextExternalFilePath;

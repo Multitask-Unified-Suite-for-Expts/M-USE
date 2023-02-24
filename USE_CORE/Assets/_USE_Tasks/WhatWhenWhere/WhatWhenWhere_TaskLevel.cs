@@ -69,7 +69,6 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
     public void SetSettings()
     {
-        string TaskName = "WhatWhenWhere";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             wwwTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
         else wwwTL.ContextExternalFilePath = ContextExternalFilePath;

@@ -24,7 +24,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;
     [HideInInspector] public int BlockStringsAdded = 0;
-    [HideInInspector]public string TaskName = "VisualSearch";
     VisualSearch_BlockDef vsBD => GetCurrentBlockDef<VisualSearch_BlockDef>();
     VisualSearch_TrialDef vsTD;
     //private VisualSearch_TrialDef vsTD => GetCurrentTrialDef<VisualSearch_TrialDef>();

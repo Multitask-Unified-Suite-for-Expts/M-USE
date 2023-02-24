@@ -48,7 +48,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
     {
         trialLevel = (THR_TrialLevel)TrialLevel;
 
-        string TaskName = "THR";
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
 

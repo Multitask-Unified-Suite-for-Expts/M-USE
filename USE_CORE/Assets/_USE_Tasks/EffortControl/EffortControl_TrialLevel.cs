@@ -22,12 +22,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     public GameObject OutlinePrefab;
 
     public Vector3 ButtonPosition;
-    public Vector3 ButtonScale;
+    public float ButtonScale;
     public Vector3 OriginalStartButtonPosition;
 
     public GameObject EC_CanvasGO;
-
-    public USE_StartButton USE_StartButton;
+    public USE_StartButton StartButtonClassInstance;
 
     //Game Objects:
     GameObject StartButton, StimLeft, StimRight, TrialStim, BalloonContainerLeft, BalloonContainerRight,
@@ -135,8 +134,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             
             if (StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(EC_CanvasGO.GetComponent<Canvas>());
-                StartButton = USE_StartButton.StartButtonGO;
+                StartButtonClassInstance = new USE_StartButton(EC_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                StartButton = StartButtonClassInstance.StartButtonGO;
             }
 
             if (!ObjectsCreated)

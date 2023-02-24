@@ -123,6 +123,16 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
         else
             trialLevel.MacMainDisplayBuild = false;
+
+        if (SessionSettings.SettingExists("Session", "ButtonPosition"))
+            trialLevel.ButtonPosition = (Vector3)SessionSettings.Get("Session", "ButtonPosition");
+        else
+            trialLevel.ButtonPosition = new Vector3(0, 0, 0);
+
+        if (SessionSettings.SettingExists("Session", "ButtonScale"))
+            trialLevel.ButtonScale = (float)SessionSettings.Get("Session", "ButtonScale");
+        else
+            trialLevel.ButtonScale = 120f;
     }
 
     public override OrderedDictionary GetSummaryData()

@@ -447,6 +447,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             else if (AbortCode == AbortCodeDict["Pause"]) //If used Pause hotkey to end trial, end entire Block
                 EndBlock = true;
         });
+        //----------------------------------------------------------------------------------------------------------------------
         DefineTrialData();
         DefineFrameData();
     }
@@ -479,8 +480,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public void SetControllerBlockValues()
     {
         TokenFBController.SetFlashingTime(1f);
-        HaloFBController.SetHaloIntensity(1);
-        HaloFBController.SetHaloSize(0.8f);
+        HaloFBController.SetPositiveHaloColor(Color.yellow);
+        HaloFBController.SetNegativeHaloColor(Color.gray);
+        HaloFBController.SetHaloSize(1f);
     }
 
     void RemoveShakeStimScript(StimGroup stimGroup)

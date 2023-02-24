@@ -83,6 +83,7 @@ namespace USE_ExperimentTemplate_Session
         private Dictionary<string, EventCode> SessionEventCodes;
         private List<string> selectedConfigsList = new List<string>();
         private SessionInfoPanel SessionInfoPanel;
+        public StringBuilder PreviousTaskSummaryString = new StringBuilder(); 
         public override void LoadSettings()
         {
             //load session config file
@@ -555,6 +556,8 @@ namespace USE_ExperimentTemplate_Session
             
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
             {
+                PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
+                
                 SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
                 SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));

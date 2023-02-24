@@ -37,7 +37,8 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         [HideInInspector] public string ContextExternalFilePath, SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
         [HideInInspector] public LocateFile LocateFile;
-        [HideInInspector] public StringBuilder BlockSummaryString;
+        [HideInInspector] public StringBuilder BlockSummaryString, CurrentTaskSummaryString;
+        private int TaskStringsAdded = 0;
 
         // public string TaskSceneName;
         public Camera TaskCam;
@@ -125,6 +126,10 @@ namespace USE_ExperimentTemplate_Task
             {
                 BlockCount = -1;
                 BlockSummaryString = new StringBuilder();
+                CurrentTaskSummaryString = new StringBuilder();
+                
+                SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
+
                 TaskCam.gameObject.SetActive(true);
                 if (TaskCanvasses != null)
                     foreach (GameObject go in TaskCanvasses)
@@ -140,6 +145,11 @@ namespace USE_ExperimentTemplate_Task
                 configUI.GenerateUI();
 
                 Controllers.SetActive(true);
+            });
+            
+            SetupTask.AddInitializationMethod(() =>
+            {
+                SetTaskSummaryString();
             });
 
             SetupTask.SpecifyTermination(() => true, RunBlock);
@@ -193,6 +203,7 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.TrialSummaryString = "";
                 BlockSummaryString.Clear();
                 BlockSummaryString.AppendLine("");
+                
             });
 
             FinishTask.SpecifyTermination(() => true, () => null);
@@ -774,6 +785,11 @@ namespace USE_ExperimentTemplate_Task
         public T GetCurrentBlockDef<T>() where T : BlockDef
         {
             return (T)CurrentBlockDef;
+        }
+
+        public virtual void SetTaskSummaryString()
+        {
+            CurrentTaskSummaryString.Append("");
         }
 
     }

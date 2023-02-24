@@ -58,8 +58,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     // Block Data Variables
     [HideInInspector] public string ContextName = "";
     [HideInInspector] public int NumCorrect_InBlock;
-    [HideInInspector] public List<float> SearchDurationsList = new List<float>();
     [HideInInspector] public int NumErrors_InBlock;
+    [HideInInspector] public List<float> SearchDurationsList = new List<float>();
     [HideInInspector] public int NumRewardPulses_InBlock;
     [HideInInspector] public int NumTokenBarFull_InBlock;
     [HideInInspector] public int TotalTokensCollected_InBlock;
@@ -93,15 +93,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         AddActiveStates(new List<State> {InitTrial, SearchDisplay, SelectionFeedback, TokenFeedback, ITI, Delay, SearchDisplayDelay});
         SelectionHandler<VisualSearch_StimDef> mouseHandler = new SelectionHandler<VisualSearch_StimDef>();
-        
-        
-        
+   
         // A state that just waits for some time
         State stateAfterDelay = null;
         float delayDuration = 0;
         Delay.AddTimer(() => delayDuration, () => stateAfterDelay);
-        
-        
         
         Add_ControlLevel_InitializationMethod(() =>
         {
@@ -112,7 +108,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             playerViewParent = GameObject.Find("MainCameraCopy");     
             
             // Initialize FB Controller Values
-            HaloFBController.SetHaloSize(4.5f);
+            HaloFBController.SetHaloSize(5f);
             HaloFBController.SetHaloIntensity(5);
         });
         
@@ -152,7 +148,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         InitTrial.AddInitializationMethod(() =>
         {
             CurrentTaskLevel.SetBlockSummaryString();
-
+            CurrentTaskLevel.SetTaskSummaryString();
+            
             //Initialize FB Controller Variables
             mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
             mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
@@ -192,15 +189,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             ActivateChildren(playerViewParent);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);
-
-            chosenStimDef = null;
-            chosenStimObj = null;
-            StimIsChosen = false;            
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
-            chosenStimObj = mouseHandler.SelectedGameObject;
-            chosenStimDef = mouseHandler.SelectedStimDef;
 
             if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
             {
@@ -209,11 +200,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 TouchDurationErrorFeedback(mouseHandler, true);
                 CurrentTaskLevel.SetBlockSummaryString();
             }
-
-            if (chosenStimObj != null && chosenStimDef != null)
-                StimIsChosen = true;
         });
-        SearchDisplay.SpecifyTermination(() => StimIsChosen, SelectionFeedback, () =>
+        SearchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, SelectionFeedback, () =>
         {
             selected = mouseHandler.SelectedGameObject;
             selectedSD = mouseHandler.SelectedStimDef;
@@ -221,12 +209,14 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (CorrectSelection)
             {       
                 NumCorrect_InBlock++;
+                CurrentTaskLevel.NumCorrect_InTask++;
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["TouchTargetStart"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["CorrectResponse"]);
             }
             else
             {
                 NumErrors_InBlock++;
+                CurrentTaskLevel.NumErrors_InTask++;
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["TouchDistractorStart"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["IncorrectResponse"]);
             }
@@ -244,6 +234,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             {
                 Debug.Log("Timed out of selection state before making a choice");
                 AbortedTrials_InBlock++;
+                CurrentTaskLevel.AbortedTrials_InTask++;
                 aborted = true;
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
             }
@@ -254,6 +245,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             SearchDuration = SearchDisplay.TimingInfo.Duration;
             SearchDurationsList.Add(SearchDuration);
+            CurrentTaskLevel.SearchDurationsList_InTask.Add(SearchDuration);
             AverageSearchDuration_InBlock = SearchDurationsList.Average();
             SetTrialSummaryString();
             
@@ -285,7 +277,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 TokenFBController.RemoveTokens(selected, -selectedSD.StimTrialRewardMag);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
             }
-            
         });
         //TokenFeedback.SpecifyTermination(()=>!TokenFBController.IsAnimating(), () => ITI, ()=>
         TokenFeedback.AddTimer(()=>tokenFbDuration, () => ITI, ()=>
@@ -293,12 +284,14 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (TokenFBController.isTokenBarFull())
             {
                 NumTokenBarFull_InBlock++;
+                CurrentTaskLevel.NumTokenBarFull_InTask++;
                 if (SyncBoxController != null)
                 {
                     SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["Fluid1Onset"]);
                     SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
                     NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
+                    CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
                     RewardGiven = true;
                 }
             }
@@ -306,6 +299,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
             TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
                                            (NumTokenBarFull_InBlock * CurrentTrialDef.NumTokenBar);
+            CurrentTaskLevel.TotalTokensCollected_InTask = TokenFBController.GetTokenBarValue() +
+                                           (CurrentTaskLevel.NumTokenBarFull_InTask * CurrentTrialDef.NumTokenBar);
         });
         // ITI STATE ---------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>
@@ -346,8 +341,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     {
         SearchDurationsList.Clear();
         AverageSearchDuration_InBlock = 0;
-        NumErrors_InBlock = 0;
         NumCorrect_InBlock = 0;
+        NumErrors_InBlock = 0;
         NumRewardPulses_InBlock = 0;
         NumTokenBarFull_InBlock = 0;
         TouchDurationError_InBlock = 0;

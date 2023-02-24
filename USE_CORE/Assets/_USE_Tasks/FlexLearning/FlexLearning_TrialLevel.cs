@@ -115,7 +115,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             playerViewParent = GameObject.Find("MainCameraCopy");     
             
             // Initialize FB Controller Values
-            HaloFBController.SetHaloSize(4.5f);
+            HaloFBController.SetHaloSize(5f);
             HaloFBController.SetHaloIntensity(5);
         });
         
@@ -155,7 +155,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
         InitTrial.AddInitializationMethod(() =>
         {
-            CurrentTaskLevel.CalculateBlockSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
+            CurrentTaskLevel.SetTaskSummaryString();
             
             //Initialize FB Controller Variables
             mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
@@ -173,7 +174,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 TouchDurationError = true;
                 TouchDurationErrorFeedback(mouseHandler, false);
                 SetTrialSummaryString();
-                CurrentTaskLevel.CalculateBlockSummaryString();
+                CurrentTaskLevel.SetBlockSummaryString();
             }
         });
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
@@ -205,7 +206,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 TouchDurationError = true;
                 SetTrialSummaryString();
                 TouchDurationErrorFeedback(mouseHandler, true);
-                CurrentTaskLevel.CalculateBlockSummaryString();
+                CurrentTaskLevel.SetBlockSummaryString();
             }
         });
         SearchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, SelectionFeedback, () => {
@@ -215,6 +216,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (CorrectSelection)
             {       
                 NumCorrect_InBlock++;
+                CurrentTaskLevel.NumCorrect_InTask++;
                 runningAcc.Add(1);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["TouchTargetStart"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["CorrectResponse"]);
@@ -222,6 +224,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             else
             {
                 NumErrors_InBlock++;
+                CurrentTaskLevel.NumErrors_InTask++;
                 runningAcc.Add(0);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["TouchDistractorStart"]);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["IncorrectResponse"]);
@@ -242,6 +245,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 runningAcc.Add(0);
                 Debug.Log("Timed out of selection state before making a choice");
                 AbortedTrials_InBlock++;
+                CurrentTaskLevel.AbortedTrials_InTask++;
                 aborted = true;  
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
             }
@@ -252,6 +256,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             SearchDuration = SearchDisplay.TimingInfo.Duration;
             SearchDurationsList.Add(SearchDuration);
+            CurrentTaskLevel.SearchDurationsList_InTask.Add(SearchDuration);
             AverageSearchDuration_InBlock = SearchDurationsList.Average();
             SetTrialSummaryString();
             
@@ -282,24 +287,29 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 TokenFBController.RemoveTokens(selected, -selectedSD.StimTrialRewardMag);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
             }
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
         });
         TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
         {
             if (TokenFBController.isTokenBarFull())
             {
                 NumTokenBarFull_InBlock++;
+                CurrentTaskLevel.NumTokenBarFull_InTask++;
+
                 if (SyncBoxController != null)
                 {
                     SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["Fluid1Onset"]);
+                    SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
                     NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
+                    CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
                     RewardGiven = true;
                 }
             }
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
             TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
                                            (NumTokenBarFull_InBlock* CurrentTrialDef.NumTokenBar);
+            CurrentTaskLevel.TotalTokensCollected_InTask = TokenFBController.GetTokenBarValue() +
+                                                           (CurrentTaskLevel.NumTokenBarFull_InTask * CurrentTrialDef.NumTokenBar);
         });
         // ITI STATE ---------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>
@@ -327,7 +337,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = false;
         
         if (AbortCode == 0)
-            CurrentTaskLevel.CalculateBlockSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
 
         if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"])
         {

@@ -137,7 +137,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (FBSquare == null)
             {
                 USE_FBSquare = new USE_StartButton(VS_CanvasGO.GetComponent<Canvas>());
-                FBSquare = USE_StartButton.StartButtonGO;
+                FBSquare = USE_FBSquare.StartButtonGO;
                 FBSquare.name = "FBSquare";
             }
 

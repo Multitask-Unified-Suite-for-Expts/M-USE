@@ -715,7 +715,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     if(tileComponent.mCoord == currMaze.mPath[i])
                     {
                         textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(tileComponent.transform.position), playerViewParent.transform);
-                        playerViewText = playerView.writeText((i+1).ToString(),(i+1).ToString(),
+                        playerViewText = playerView.WriteText((i+1).ToString(),(i+1).ToString(),
                             Color.red, textLocation, textSize, playerViewParent.transform);
                         playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                     }

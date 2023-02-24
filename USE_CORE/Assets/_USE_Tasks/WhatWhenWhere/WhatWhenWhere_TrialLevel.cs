@@ -833,7 +833,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         playerViewParent);
                 textLocation.y += 50;
                 Vector2 textSize = new Vector2(200, 200);
-                playerViewText = playerView.writeText(CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(), CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
+                playerViewText = playerView.WriteText(CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(), CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
                     Color.red, textLocation, textSize, playerViewParent);
                 playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                 //should this ^ line be deleted and text size be congtrolled by textSize variable?

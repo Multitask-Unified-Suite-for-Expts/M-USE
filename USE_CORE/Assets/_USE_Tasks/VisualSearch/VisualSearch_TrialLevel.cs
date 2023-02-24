@@ -21,10 +21,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
     public GameObject VS_CanvasGO;
     public USE_StartButton USE_StartButton;
-
+    public USE_StartButton USE_FBSquare;
+    
     // Stimuli Variables
     private StimGroup tStim;
     private GameObject StartButton;
+    private GameObject FBSquare;
     
     // ConfigUI variables / Timing Variable
     private bool configUIVariablesLoaded;
@@ -131,6 +133,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             {
                 USE_StartButton = new USE_StartButton(VS_CanvasGO.GetComponent<Canvas>());
                 StartButton = USE_StartButton.StartButtonGO;
+            }
+            if (FBSquare == null)
+            {
+                USE_FBSquare = new USE_StartButton(VS_CanvasGO.GetComponent<Canvas>());
+                FBSquare = USE_StartButton.StartButtonGO;
+                FBSquare.name = "FBSquare";
             }
 
             if (!configUIVariablesLoaded) 
@@ -427,7 +435,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent.transform);
                 textLocation.y += 50;
                 Vector3 textSize = new Vector3(2,2,1);
-                playerViewText = playerView.writeText("TargetText","TARGET",
+                playerViewText = playerView.WriteText("TargetText","TARGET",
                     Color.red, textLocation, textSize, playerViewParent.transform);
             }
         }

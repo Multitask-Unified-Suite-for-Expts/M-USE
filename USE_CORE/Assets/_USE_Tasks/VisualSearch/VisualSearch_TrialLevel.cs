@@ -142,6 +142,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 FBSquare = USE_FBSquare.StartButtonGO;
                 FBSquare.name = "FBSquare";
             }
+        DeactivateChildren(VS_CanvasGO);            
 
             if (!configUIVariablesLoaded) 
                 LoadConfigUIVariables();
@@ -489,9 +490,20 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     {///CANT FIGURE OUT WHY I CANT USE TEMPLATE, ANYWAYS MAKE A SEPARATE FEEDBACK SCRIPT
         AudioFBController.Play("Negative");
         if (MouseHandler.GetHeldTooShort())
-            StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
+        {
+            if (StartButton.activeInHierarchy)
+                StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
+            else if (FBSquare.activeInHierarchy)
+                StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
+        }
         else if (MouseHandler.GetHeldTooLong())
-            StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
+        {
+            if (StartButton.activeInHierarchy)
+                StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
+            else if (FBSquare.activeInHierarchy)
+                StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
+        }
+        
         MouseHandler.SetHeldTooLong(false);
         MouseHandler.SetHeldTooShort(false);
         TouchDurationError = false;

@@ -114,9 +114,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 StartButtonClassInstance = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
                 StartButton = StartButtonClassInstance.StartButtonGO;
-                
-                OriginalStartButtonPosition = StartButton.transform.position;
                 StartButtonClassInstance.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                OriginalStartButtonPosition = StartButton.transform.position;
             }
         });
 

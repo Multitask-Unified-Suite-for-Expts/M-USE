@@ -26,6 +26,8 @@ namespace USE_UI
 		public Image Image;
         public Vector3 LocalPosition = new Vector3(0, 0, 0);
 
+        public bool IsGrating;
+
         public State SetActiveOnInitialization;
         public State SetInactiveOnTermination;
 
@@ -124,6 +126,8 @@ namespace USE_UI
 
         public IEnumerator GratedStartButtonFlash(Texture2D newTexture, float duration, bool deactivateAfter)
         {
+            IsGrating = true;
+
             if (!StartButtonGO.activeInHierarchy)
                 StartButtonGO.SetActive(true);
 
@@ -137,6 +141,8 @@ namespace USE_UI
             Image.sprite = originalSprite;
             if (deactivateAfter)
                 StartButtonGO.SetActive(false);
+
+            IsGrating = false;
         }
 
     }

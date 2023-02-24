@@ -311,7 +311,39 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 }
             };
             HotKeyList.Add(pauseGame);
-      
+
+            //Reward HotKey:
+            HotKey reward = new HotKey
+            {
+                keyDescription = "G",
+                actionName = "GiveReward",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.G),
+                hotKeyAction = () =>
+                {
+                    if (HkPanel.TrialLevel.SyncBoxController != null)
+                        HkPanel.TrialLevel.SyncBoxController.SendRewardPulses(HkPanel.SessionLevel.RewardHotKeyNumPulses, HkPanel.SessionLevel.RewardHotKeyPulseSize);
+                    else
+                        Debug.LogError("Tried to send Reward but SyncBoxController is null!");
+                }
+            };
+            HotKeyList.Add(reward);
+
+            //Long-Reward HotKey:
+            HotKey longReward = new HotKey
+            {
+                keyDescription = "L",
+                actionName = "LongReward",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.L),
+                hotKeyAction = () =>
+                {
+                    if (HkPanel.TrialLevel.SyncBoxController != null)
+                        HkPanel.TrialLevel.SyncBoxController.SendRewardPulses(HkPanel.SessionLevel.RewardHotKeyNumPulses, HkPanel.SessionLevel.RewardHotKeyPulseSize);
+                    else
+                        Debug.LogError("Tried to send LongReward but SyncBoxController is null!");
+                }
+            };
+            HotKeyList.Add(longReward);
+
             return (HotKeyList);
         }
 

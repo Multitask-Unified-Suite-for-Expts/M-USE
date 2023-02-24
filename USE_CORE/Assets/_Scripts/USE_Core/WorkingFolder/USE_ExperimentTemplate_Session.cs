@@ -58,6 +58,11 @@ namespace USE_ExperimentTemplate_Session
         protected int taskCount;
         private float TaskSelectionTimeout;
 
+        public int LongRewardHotKeyPulseSize;
+        public int LongRewardHotKeyNumPulses;
+        public int RewardHotKeyPulseSize;
+        public int RewardHotKeyNumPulses;
+
         //For Loading config information
         public SessionDetails SessionDetails;
         public LocateFile LocateFile;
@@ -109,6 +114,27 @@ namespace USE_ExperimentTemplate_Session
                 SonicationActive = (bool)SessionSettings.Get("Session", "SonicationActive");
             else
                 SonicationActive = false;
+
+            if (SessionSettings.SettingExists("Session", "LongRewardHotKeyPulseSize"))
+                LongRewardHotKeyPulseSize = (int)SessionSettings.Get("Session", "LongRewardHotKeyPulseSize");
+            else
+                LongRewardHotKeyPulseSize = 500;
+
+            if (SessionSettings.SettingExists("Session", "LongRewardHotKeyNumPulses"))
+                LongRewardHotKeyNumPulses = (int)SessionSettings.Get("Session", "LongRewardHotKeyNumPulses");
+            else
+                LongRewardHotKeyNumPulses = 1;
+
+            if (SessionSettings.SettingExists("Session", "RewardHotKeyPulseSize"))
+                RewardHotKeyPulseSize = (int)SessionSettings.Get("Session", "RewardHotKeyPulseSize");
+            else
+                RewardHotKeyPulseSize = 250;
+
+            if (SessionSettings.SettingExists("Session", "RewardHotKeyNumPulses"))
+                RewardHotKeyNumPulses = (int)SessionSettings.Get("Session", "RewardHotKeyNumPulses");
+            else
+                RewardHotKeyNumPulses = 1;
+
 
             // if (EventCodesActive || RewardPulsesActive || SonicationActive)
             // 	SyncBoxActive = true;

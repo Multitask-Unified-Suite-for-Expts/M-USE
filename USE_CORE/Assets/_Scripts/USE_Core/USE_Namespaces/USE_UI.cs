@@ -73,6 +73,11 @@ namespace USE_UI
             StartButtonGO.SetActive(false);
         }
         //----------------------------------------------------------------------
+        public void SetButtonPosition(Vector3 pos)
+        {
+            StartButtonGO.transform.localPosition = pos;
+        }
+
         public void SetButtonColor(Color color)
 		{
 			ButtonColor = color;

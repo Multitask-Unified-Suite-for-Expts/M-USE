@@ -133,6 +133,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             {
                 USE_StartButton = new USE_StartButton(VS_CanvasGO.GetComponent<Canvas>());
                 StartButton = USE_StartButton.StartButtonGO;
+                USE_StartButton.SetButtonSize(80);
+                USE_StartButton.SetButtonPosition(new Vector3(0, 0, -400));
             }
             if (FBSquare == null)
             {

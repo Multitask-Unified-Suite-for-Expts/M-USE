@@ -79,8 +79,10 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         data["Reward Pulses"] = NumRewardPulses_InTask;
         data["Token Bar Full"] = NumTokenBarFull_InTask;
         data["Total Tokens Collected"] = TotalTokensCollected_InTask;
-        data["Average Search Duration"] = SearchDurationsList_InTask.Average();
-        data["Accuracy"] = decimal.Divide(NumCorrect_InTask, (vsTL.TrialCount_InTask));
+        if(SearchDurationsList_InTask.Count > 0)
+            data["Average Search Duration"] = SearchDurationsList_InTask.Average();
+        if(vsTL.TrialCount_InTask != 0)
+            data["Accuracy"] = decimal.Divide(NumCorrect_InTask, (vsTL.TrialCount_InTask));
         
         return data;
     }
@@ -126,12 +128,14 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             vsTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
         else vsTL.ContextExternalFilePath = ContextExternalFilePath;
+
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
             vsTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
         else Debug.LogError("Start Button Position settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
             vsTL.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
         else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
+
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
             vsTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
         else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");

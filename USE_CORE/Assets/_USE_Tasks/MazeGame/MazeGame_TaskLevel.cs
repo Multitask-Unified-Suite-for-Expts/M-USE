@@ -52,7 +52,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     private string mazeKeyFilePath;
     private MazeGame_TrialLevel mgTL;
     private int mIndex;
-    public string TaskName = "MazeGame";
     private MazeGame_BlockDef mgBD => GetCurrentBlockDef<MazeGame_BlockDef>();
 
     public override void DefineControlLevel()

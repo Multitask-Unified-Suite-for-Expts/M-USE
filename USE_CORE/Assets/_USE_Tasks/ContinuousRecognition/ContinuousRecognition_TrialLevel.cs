@@ -24,7 +24,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public ContinuousRecognition_TrialDef currentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
     public ContinuousRecognition_TaskLevel currentTask => GetTaskLevel<ContinuousRecognition_TaskLevel>();
 
-    public USE_StartButton USE_StartButton;
+    public USE_StartButton StartButtonClassInstance;
     public GameObject StartButton;
 
     public TextMeshProUGUI TimerText;
@@ -78,6 +78,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public StimGroup RightGroup;
     [HideInInspector] public StimGroup WrongGroup;
 
+    [HideInInspector] public float ButtonScale;
+    [HideInInspector] public Vector3 ButtonPosition;
+
     [HideInInspector] GameObject chosenStimObj;
     [HideInInspector] ContinuousRecognition_StimDef chosenStimDef;
 
@@ -109,10 +112,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>());
-                StartButton = USE_StartButton.StartButtonGO;
+                StartButtonClassInstance = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                StartButton = StartButtonClassInstance.StartButtonGO;
+                StartButtonClassInstance.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 OriginalStartButtonPosition = StartButton.transform.position;
-                USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
             }
         });
 
@@ -341,21 +344,21 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 if(TrialCount_InBlock == currentTrial.MaxNumTrials-1 || currentTrial.PNC_Stim.Count == 0) //If they get the last trial right (or find all stim), fill up bar!
                 {
-                    currentTrial.NumRewardPulses++;
                     int numToFillBar = currentTrial.NumTokenBar - TokenFBController.GetTokenBarValue();
                     TokenFBController.AddTokens(chosenStimObj, numToFillBar);
                 }
                 else
+                {
                     TokenFBController.AddTokens(chosenStimObj, currentTrial.RewardMag);
-                
-                HandleTokenUpdate();
+                }
+                //HandleTokenUpdate();
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
             }
             else //Got wrong
             {
                 TokenFBController.RemoveTokens(chosenStimObj,currentTrial.RewardMag);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
-                HandleTokenUpdate();
+                //HandleTokenUpdate();
                 EndBlock = true;
             }
         });
@@ -363,6 +366,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenUpdate.SpecifyTermination(() => !StimIsChosen, DisplayResults);
         TokenUpdate.AddDefaultTerminationMethod(() =>
         {
+            Debug.Log("hitting default term method");
+            HandleTokenUpdate();
+
             if (currentTrial.ShakeStim)
                 RemoveShakeStimScript(trialStims);
 
@@ -440,6 +446,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             else if (AbortCode == AbortCodeDict["Pause"]) //If used Pause hotkey to end trial, end entire Block
                 EndBlock = true;
         });
+        //----------------------------------------------------------------------------------------------------------------------
         DefineTrialData();
         DefineFrameData();
     }
@@ -472,8 +479,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public void SetControllerBlockValues()
     {
         TokenFBController.SetFlashingTime(1f);
-        HaloFBController.SetHaloIntensity(1);
-        HaloFBController.SetHaloSize(0.8f);
+        HaloFBController.SetPositiveHaloColor(Color.yellow);
+        HaloFBController.SetNegativeHaloColor(Color.gray);
+        HaloFBController.SetHaloSize(1f);
     }
 
     void RemoveShakeStimScript(StimGroup stimGroup)
@@ -1045,10 +1053,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     void HandleTokenUpdate()
     {
+        Debug.Log(TokenFBController.GetTokenBarValue());
         if(TokenFBController.isTokenBarFull())
         {
             NumTbCompletions_Block++;
             NumRewards_Block += currentTrial.NumRewardPulses;
+            TokenFBController.ResetTokenBarFull();
 
             if (SyncBoxController != null)
             {

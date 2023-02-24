@@ -14,6 +14,7 @@ using Object = UnityEngine.Object;
 using UnityEngine.Events;
 using UnityEngine.Rendering.PostProcessing;
 using System.Collections;
+using USE_UI;
 
 namespace USE_UI
 {
@@ -23,6 +24,9 @@ namespace USE_UI
 		public float ButtonSize = 120f;
 		public Color ButtonColor = new Color(0, 0, 128, 255);
 		public Image Image;
+        public Vector3 LocalPosition = new Vector3(0, 0, 0);
+
+        public bool IsGrating;
 
         public State SetActiveOnInitialization;
         public State SetInactiveOnTermination;
@@ -36,33 +40,23 @@ namespace USE_UI
             Image.rectTransform.anchoredPosition = Vector2.zero;
             Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
 			Image.color = ButtonColor;
+            StartButtonGO.transform.localPosition = LocalPosition;
             StartButtonGO.SetActive(false);
         }
-        public USE_StartButton(Canvas parent, Color color)
+        public USE_StartButton(Canvas parent, Vector3 localPos)
         {
-			ButtonColor = color;
-			StartButtonGO = new GameObject("StartButton");
-            Image image = StartButtonGO.AddComponent<Image>();
+            LocalPosition = localPos;
+            StartButtonGO = new GameObject("StartButton");
+            Image = StartButtonGO.AddComponent<Image>();
             StartButtonGO.transform.SetParent(parent.transform, false);
-            image.rectTransform.anchoredPosition = Vector2.zero;
-            image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
-            image.color = ButtonColor;
+            Image.rectTransform.anchoredPosition = Vector2.zero;
+            Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
+            Image.color = ButtonColor;
+            StartButtonGO.transform.localPosition = LocalPosition;
             StartButtonGO.SetActive(false);
         }
         public USE_StartButton(Canvas parent, float size)
         {
-            ButtonSize = size;
-			StartButtonGO = new GameObject("StartButton");
-            Image image = StartButtonGO.AddComponent<Image>();
-            StartButtonGO.transform.SetParent(parent.transform, false);
-            image.rectTransform.anchoredPosition = Vector2.zero;
-            image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
-            image.color = ButtonColor;
-            StartButtonGO.SetActive(false);
-        }
-        public USE_StartButton(Canvas parent, Color color, float size)
-        {
-            ButtonColor = color;
             ButtonSize = size;
             StartButtonGO = new GameObject("StartButton");
             Image image = StartButtonGO.AddComponent<Image>();
@@ -70,8 +64,23 @@ namespace USE_UI
             image.rectTransform.anchoredPosition = Vector2.zero;
             image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
             image.color = ButtonColor;
+            StartButtonGO.transform.localPosition = LocalPosition;
             StartButtonGO.SetActive(false);
         }
+        public USE_StartButton(Canvas parent, Vector3 localPos, float size)
+        {
+            LocalPosition = localPos;
+            ButtonSize = size;
+            StartButtonGO = new GameObject("StartButton");
+            Image = StartButtonGO.AddComponent<Image>();
+            StartButtonGO.transform.SetParent(parent.transform, false);
+            Image.rectTransform.anchoredPosition = Vector2.zero;
+            Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
+            Image.color = ButtonColor;
+            StartButtonGO.transform.localPosition = LocalPosition;
+            StartButtonGO.SetActive(false);
+        }
+
         //----------------------------------------------------------------------
         public void SetButtonPosition(Vector3 pos)
         {
@@ -117,6 +126,8 @@ namespace USE_UI
 
         public IEnumerator GratedStartButtonFlash(Texture2D newTexture, float duration, bool deactivateAfter)
         {
+            IsGrating = true;
+
             if (!StartButtonGO.activeInHierarchy)
                 StartButtonGO.SetActive(true);
 
@@ -130,9 +141,42 @@ namespace USE_UI
             Image.sprite = originalSprite;
             if (deactivateAfter)
                 StartButtonGO.SetActive(false);
+
+            IsGrating = false;
         }
 
     }
 
 }
+
+
+
+
+
+//Additional Constructors:
+
+//public USE_StartButton(Canvas parent, Color color)
+//{
+//    ButtonColor = color;
+//    StartButtonGO = new GameObject("StartButton");
+//    Image image = StartButtonGO.AddComponent<Image>();
+//    StartButtonGO.transform.SetParent(parent.transform, false);
+//    image.rectTransform.anchoredPosition = Vector2.zero;
+//    image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
+//    image.color = ButtonColor;
+//    StartButtonGO.SetActive(false);
+//}
+
+//public USE_StartButton(Canvas parent, Color color, float size)
+//{
+//    ButtonColor = color;
+//    ButtonSize = size;
+//    StartButtonGO = new GameObject("StartButton");
+//    Image image = StartButtonGO.AddComponent<Image>();
+//    StartButtonGO.transform.SetParent(parent.transform, false);
+//    image.rectTransform.anchoredPosition = Vector2.zero;
+//    image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
+//    image.color = ButtonColor;
+//    StartButtonGO.SetActive(false);
+//}
 

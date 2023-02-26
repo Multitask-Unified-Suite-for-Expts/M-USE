@@ -346,12 +346,12 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             else //held too long, held too short, moved outside, or timeRanOut
             {
                 AudioFBController.Play("Negative");
-                if (HeldTooShort)
-                    StartCoroutine(GratedSquareFlash(HeldTooShortTexture));
-                else if (HeldTooLong)
-                    StartCoroutine(GratedSquareFlash(HeldTooLongTexture));
-                else if (MovedOutside)
-                    StartCoroutine(GratedSquareFlash(BackdropStripesTexture));
+                //if (HeldTooShort)
+                //    StartCoroutine(GratedSquareFlash(HeldTooShortTexture));
+                //else if (HeldTooLong)
+                //    StartCoroutine(GratedSquareFlash(HeldTooLongTexture));
+                //else if (MovedOutside)
+                //    StartCoroutine(GratedSquareFlash(BackdropStripesTexture));
             }
             AudioPlayed = true;
         });

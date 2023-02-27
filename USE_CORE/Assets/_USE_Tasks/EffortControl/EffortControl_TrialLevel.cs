@@ -68,7 +68,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     //To center the balloon they selected:
     public float CenteringSpeed = 1f;
-    [HideInInspector] bool Centered;
     [HideInInspector] Vector3 CenteredPos;
     [HideInInspector] public bool Flashing;
 
@@ -274,7 +273,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             Wrapper = new GameObject();
             Wrapper.name = "Wrapper";
-            Centered = false;
             CenteredPos = new Vector3((SideChoice == "Left" ? 1f : -1f), 0, 0);
 
             MiddleBarrier.SetActive(false);
@@ -296,14 +294,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             if(Wrapper.transform.position != CenteredPos)
                 Wrapper.transform.position = Vector3.MoveTowards(Wrapper.transform.position, CenteredPos, CenteringSpeed * Time.deltaTime);
-
-            if (Wrapper.transform.position == CenteredPos)
-                Centered = true;
         });
-        CenterSelection.SpecifyTermination(() => Centered, InflateBalloon);
+        CenterSelection.SpecifyTermination(() => Wrapper.transform.position == CenteredPos, InflateBalloon);
         CenterSelection.AddDefaultTerminationMethod(() =>
         {
-
             RemoveParents(Wrapper, RemoveParentList);
 
             if (SideChoice == "Left")
@@ -335,7 +329,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             clickTimings = new List<float>();
             timeTracker = 0;
             mouseClicks = 0;
-            AudioFBController.audioSource.Stop(); //stopping "CenterBalloon" audio at last possible second before they may click outside balloon and cause neg fb to play.
         });
         InflateBalloon.AddUpdateMethod(() =>
         {
@@ -343,6 +336,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             {
                 if (!InflateAudioPlayed)
                 {
+                    if (AudioFBController.IsPlaying())
+                        AudioFBController.audioSource.Stop();
                     AudioFBController.Play("EC_Inflate");
                     InflateAudioPlayed = true;
                 }
@@ -392,8 +387,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
                 RaycastHit hit;
                 if (!Physics.Raycast(ray, out hit))
-                    if (!AudioFBController.IsPlaying())
-                        AudioFBController.Play("Negative");
+                {
+                    if(AudioFBController.IsPlaying())
+                        AudioFBController.audioSource.Stop();
+                    AudioFBController.Play("Negative");
+                }
             }
 
         });

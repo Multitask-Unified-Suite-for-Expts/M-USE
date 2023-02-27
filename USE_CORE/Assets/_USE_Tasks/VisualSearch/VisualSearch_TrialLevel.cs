@@ -37,7 +37,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     
     // Set in the Task Level
     [HideInInspector] public string ContextExternalFilePath;
-    [HideInInspector] public Vector3 ButtonPosition, ButtonScale;
+    [HideInInspector] public Vector3 ButtonPosition;
+    [HideInInspector] public float ButtonScale;
     [HideInInspector] public bool StimFacingCamera;
     [HideInInspector] public string ShadowType;
     [HideInInspector] public bool NeutralITI;
@@ -91,15 +92,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         State SelectionFeedback = new State("SelectionFeedback");
         State TokenFeedback = new State("TokenFeedback");
         State ITI = new State("ITI");
-        State Delay = new State("Delay");
         
-        AddActiveStates(new List<State> {InitTrial, SearchDisplay, SelectionFeedback, TokenFeedback, ITI, Delay, SearchDisplayDelay});
+        AddActiveStates(new List<State> {InitTrial, SearchDisplay, SelectionFeedback, TokenFeedback, ITI, SearchDisplayDelay});
         SelectionHandler<VisualSearch_StimDef> mouseHandler = new SelectionHandler<VisualSearch_StimDef>();
-   
-        // A state that just waits for some time
-        State stateAfterDelay = null;
-        float delayDuration = 0;
-        Delay.AddTimer(() => delayDuration, () => stateAfterDelay);
         
         Add_ControlLevel_InitializationMethod(() =>
         {
@@ -131,18 +126,17 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
             if(StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(VS_CanvasGO.GetComponent<Canvas>());
+                USE_StartButton = new USE_StartButton(VS_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
                 StartButton = USE_StartButton.StartButtonGO;
-                USE_StartButton.SetButtonSize(80);
-                USE_StartButton.SetButtonPosition(new Vector3(0, 0, -400));
+                USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
             }
             if (FBSquare == null)
             {
-                USE_FBSquare = new USE_StartButton(VS_CanvasGO.GetComponent<Canvas>());
+                USE_FBSquare = new USE_StartButton(VS_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
                 FBSquare = USE_FBSquare.StartButtonGO;
-                FBSquare.name = "FBSquare";
             }
-        DeactivateChildren(VS_CanvasGO);            
+            
+            DeactivateChildren(VS_CanvasGO);            
 
             if (!configUIVariablesLoaded) 
                 LoadConfigUIVariables();
@@ -167,7 +161,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
-            StartButton.SetActive(true);
         });
         InitTrial.AddUpdateMethod(() =>
         {
@@ -183,7 +176,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             SearchDisplayDelay, () => 
             { 
                 // Turn off start button
-                StartButton.SetActive(false);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
             });
         
@@ -203,7 +195,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
-
             if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
             {
                 TouchDurationError = true;
@@ -493,14 +484,14 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             if (StartButton.activeInHierarchy)
                 StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
-            else if (FBSquare.activeInHierarchy)
+            else
                 StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
         }
         else if (MouseHandler.GetHeldTooLong())
         {
             if (StartButton.activeInHierarchy)
-                StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
-            else if (FBSquare.activeInHierarchy)
+                StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
+            else
                 StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
         }
         

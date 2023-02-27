@@ -130,11 +130,12 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
             vsTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-        else Debug.LogError("Start Button Position settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-            vsTL.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-        else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
-
+        else
+            vsTL.ButtonPosition = new Vector3(0, 0, 0);
+        if (SessionSettings.SettingExists(TaskName +"_TaskSettings", "ButtonScale"))
+            vsTL.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+        else
+            vsTL.ButtonScale = 120f;
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
             vsTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
         else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");

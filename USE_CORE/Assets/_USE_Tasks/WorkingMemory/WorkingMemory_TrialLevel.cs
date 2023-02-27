@@ -132,6 +132,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 FBSquare = USE_FBSquare.StartButtonGO;
                 FBSquare.name = "FBSquare";
             }
+            
+            DeactivateChildren(WM_CanvasGO);
+            
             ContextName = CurrentTrialDef.ContextName;
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
             if (!configUIVariablesLoaded) LoadConfigUIVariables();
@@ -532,14 +535,14 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         {
             if (StartButton.activeInHierarchy)
                 StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
-            else if (FBSquare.activeInHierarchy)
+            else
                 StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
         }
         else if (MouseHandler.GetHeldTooLong())
         {
             if (StartButton.activeInHierarchy)
                 StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
-            else if (FBSquare.activeInHierarchy)
+            else
                 StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
         }
         MouseHandler.SetHeldTooLong(false);

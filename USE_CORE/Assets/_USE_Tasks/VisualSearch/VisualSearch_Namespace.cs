@@ -20,15 +20,6 @@ namespace VisualSearch_Namespace
         //public List<string[]> FeatureNames;
         //public string neutralPatternedColorName;
         //public float? ExternalStimScale;
-
-        Vector3 ButtonPosition;
-        Vector3 ButtonScale;
-        Vector3 ButtonColor;
-        string ButtonText;
-        string ContextExternalFilePath;
-        bool StimFacingCamera;
-        string ShadowType;
-        bool NeutralITI;
     }
 
     public class VisualSearch_BlockDef : BlockDef

@@ -325,7 +325,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     {
                         HkPanel.TrialLevel.SyncBoxController.SendRewardPulses(HkPanel.SessionLevel.RewardHotKeyNumPulses, HkPanel.SessionLevel.RewardHotKeyPulseSize);
                         SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",HkPanel.SessionLevel.RewardHotKeyNumPulses));
-
                     }
                     else
                         Debug.LogError("Tried to send Reward but SyncBoxController is null!");
@@ -342,7 +341,10 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyAction = () =>
                 {
                     if (HkPanel.TrialLevel.SyncBoxController != null)
+                    {
                         HkPanel.TrialLevel.SyncBoxController.SendRewardPulses(HkPanel.SessionLevel.RewardHotKeyNumPulses, HkPanel.SessionLevel.RewardHotKeyPulseSize);
+                        SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",HkPanel.SessionLevel.RewardHotKeyNumPulses));
+                    }
                     else
                         Debug.LogError("Tried to send LongReward but SyncBoxController is null!");
                 }

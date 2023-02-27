@@ -25,6 +25,7 @@ public abstract class InputTracker : MonoBehaviour
         //assign the selectionhandler's UpdateTarget method to this tracker
         void targetUpdatedHandler(object sender, EventArgs e)
         {
+            selectionHandler.CurrentSelectionLocation = CurrentSelectionLocation;
             selectionHandler.UpdateTarget(CurrentTargetGameObject);
         }
 

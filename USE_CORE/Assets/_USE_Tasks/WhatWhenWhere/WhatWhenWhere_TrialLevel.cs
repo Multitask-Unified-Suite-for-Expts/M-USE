@@ -256,7 +256,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             sliderGO.SetActive(true);
             startButton.SetActive(false);
             ConfigureSlider();        
-            numNonStimSelections_InBlock += mouseHandler.GetNumNonStimSelection();
+            numNonStimSelections_InBlock += mouseHandler.UpdateNumNonStimSelection();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderReset"]);
         });

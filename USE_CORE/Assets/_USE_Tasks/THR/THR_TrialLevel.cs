@@ -38,7 +38,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public float TrialStartTime;
     public float TouchStartTime;
     public float TouchReleaseTime;
-    public float HeldDuration;
+    public float? HeldDuration;
     public float BackdropTouchTime;
     public float BackdropTouches;
 

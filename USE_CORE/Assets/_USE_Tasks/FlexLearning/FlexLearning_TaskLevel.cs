@@ -22,6 +22,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int NumCorrect_InTask = 0;
     [HideInInspector] public int NumErrors_InTask = 0;
     [HideInInspector] public List<float> SearchDurationsList_InTask;
+    private double avgSearchDuration = 0;
     
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;
@@ -116,8 +117,10 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         data["Reward Pulses"] = NumRewardPulses_InTask;
         data["Token Bar Full"] = NumTokenBarFull_InTask;
         data["Total Tokens Collected"] = TotalTokensCollected_InTask;
-        data["Average Search Duration"] = SearchDurationsList_InTask.Average();
-        data["Accuracy"] = decimal.Divide(NumCorrect_InTask, (flTL.TrialCount_InTask));
+        if(SearchDurationsList_InTask.Count > 0)
+            data["Average Search Duration"] = SearchDurationsList_InTask.Average();
+        if(flTL.TrialCount_InTask != 0)
+            data["Accuracy"] = decimal.Divide(NumCorrect_InTask, (flTL.TrialCount_InTask));
         
         return data;
     }
@@ -125,7 +128,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         ClearStrings();
-        
         BlockSummaryString.AppendLine("<b>Block Num: " + (flTL.BlockCount + 1) + "</b>" +
                                       "\n" + 
                                       "<b>\nTrial Num: </b>" + (flTL.TrialCount_InBlock + 1) +
@@ -146,12 +148,14 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     public override void SetTaskSummaryString()
     {
         CurrentTaskSummaryString.Clear();
+        if (SearchDurationsList_InTask.Count > 0)
+            avgSearchDuration = Math.Round(SearchDurationsList_InTask.Average(), 2);
         if (flTL.TrialCount_InTask != 0)
             CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" + 
                                             $"\n# Trials: {flTL.TrialCount_InTask + 1} ({(Math.Round(decimal.Divide(AbortedTrials_InTask,(flTL.TrialCount_InTask)),2))*100}% aborted)" + 
                                             $"\n#Blocks Completed: {BlockCount}" + 
                                             $"\nAccuracy: {(Math.Round(decimal.Divide(NumCorrect_InTask,(flTL.TrialCount_InTask)),2))*100}%" + 
-                                            $"\nAvg Search Duration: {Math.Round(SearchDurationsList_InTask.Average(),2)}" +
+                                            $"\nAvg Search Duration: {avgSearchDuration}" +
                                             $"\n# Reward Pulses: {NumRewardPulses_InTask}" +
                                             $"\n# Token Bar Filled: {NumTokenBarFull_InTask}" +
                                             $"\n# Tokens Collected: {TotalTokensCollected_InTask}");

@@ -6,7 +6,7 @@ using USE_Data;
 public class GazeTracker : InputTracker
 {
     // private Vector3 CurrentSelectionLocation = new Vector3 (-1f, -1f, -1f);
-    public bool SpoofGazeWithMouse = false;
+    public bool SpoofGazeWithMouse = true;
     private GameObject HoverObject;
 
     public override void AddFieldsToFrameData(DataController frameData)
@@ -17,10 +17,13 @@ public class GazeTracker : InputTracker
 
     public override GameObject FindCurrentTarget()
     {
-        if (Physics.Raycast(Camera.main.ScreenPointToRay(CurrentSelectionLocation.Value), out RaycastHit hit, Mathf.Infinity))
+        if (CurrentSelectionLocation != null)
         {
-            HoverObject = hit.transform.root.gameObject;
-            return HoverObject;
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(CurrentSelectionLocation.Value), out RaycastHit hit, Mathf.Infinity))
+            {
+                HoverObject = hit.transform.root.gameObject;
+                return HoverObject;
+            }
         }
         return null;
     }

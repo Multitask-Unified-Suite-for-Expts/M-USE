@@ -215,49 +215,53 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         ChooseBalloon.AddUpdateMethod(() =>
         {
             //IF WE WANT TO LET THEM CLICK ANYWHERE ON LEFT OR RIGHT SIDE TO SELECT BALLOON:
-            if (InputBroker.GetMouseButtonDown(0))
-            {
-                float middle = .5f;
-                float clickPosX = InputBroker.mousePosition.x / Screen.width;
+            //if (InputBroker.GetMouseButtonDown(0))
+            //{
+            //    float middle = .5f;
+            //    float clickPosX = InputBroker.mousePosition.x / Screen.width;
 
-                if (clickPosX < middle)
-                    SideChoice = "Left";
-                
-                if (clickPosX > middle)
-                    SideChoice = "Right";
-            }
+            //    if (clickPosX < middle)
+            //        SideChoice = "Left";
+
+            //    if (clickPosX > middle)
+            //        SideChoice = "Right";
+            //}
 
             //IF WE WANT THEM TO HAVE TO ACTUALLY CLICK WITHIN THE BALLOON TO SELECT IT:
-            //GameObject hit = mouseHandler.SelectedGameObject;
-            //if (hit == null)
-            //    return;
-            //else
-            //{
-            //    mouseHandler.Stop();
-            //    if (hit.transform.name.Contains("Left"))
-            //    {
-            //        SideChoice = "Left";
-            //        TrialStim = StimLeft;
-            //    }
-            //    else if (hit.transform.name.Contains("Right"))
-            //    {
-            //        SideChoice = "Right";
-            //        TrialStim = StimRight;
-            //    }
-            //}
+            GameObject hit = mouseHandler.SelectedGameObject;
+            if (hit == null)
+                return;
+            else
+            {
+                mouseHandler.Stop();
+                if (hit.transform.name.Contains("Left"))
+                {
+                    SideChoice = "Left";
+                    TrialStim = StimLeft;
+                }
+                else if (hit.transform.name.Contains("Right"))
+                {
+                    SideChoice = "Right";
+                    TrialStim = StimRight;
+                }
+            }
 
             //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.
-            //if (InputBroker.GetMouseButtonDown(0) && SideChoice == null)
-            //{
-            //    Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-            //    RaycastHit hitt;
-            //    if (!Physics.Raycast(ray, out hitt))
-            //        if (!AudioFBController.IsPlaying())
-            //            AudioFBController.Play("Negative");
-            //}
+            if (InputBroker.GetMouseButtonDown(0) && SideChoice == null)
+            {
+                Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
+                RaycastHit hitt;
+                if (!Physics.Raycast(ray, out hitt))
+                {
+                    AudioFBController.audioSource.Stop();
+                    AudioFBController.Play("Negative");
+                }
+            }
         });
         ChooseBalloon.SpecifyTermination(() => SideChoice != null, CenterSelection, () =>
         {
+            EventCodeManager.SendCodeImmediate(TaskEventCodes["BalloonChosen"]);
+
             TrialStim = (SideChoice == "Left" ? StimLeft : StimRight);
             DestroyChildren(SideChoice == "Left" ? RewardContainerRight : RewardContainerLeft);
             ClicksNeeded = (SideChoice == "Left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
@@ -339,6 +343,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     if (AudioFBController.IsPlaying())
                         AudioFBController.audioSource.Stop();
                     AudioFBController.Play("EC_Inflate");
+                    EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionAuditoryFbOn"]);
                     InflateAudioPlayed = true;
                 }
 
@@ -391,6 +396,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     if(AudioFBController.IsPlaying())
                         AudioFBController.audioSource.Stop();
                     AudioFBController.Play("Negative");
+                    EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionAuditoryFbOn"]);
                 }
             }
 

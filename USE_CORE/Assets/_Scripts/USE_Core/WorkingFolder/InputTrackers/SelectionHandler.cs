@@ -24,6 +24,7 @@ public class SelectionHandler<T> where T : StimDef
 
     public GameObject targetedGameObject;
     public float currentTargetDuration;
+    public Vector3? CurrentSelectionLocation;
     private bool started;
     
 
@@ -129,6 +130,8 @@ public class SelectionHandler<T> where T : StimDef
             GetNumNonStimSelection();
             if (targetedGameObject != null) // Evaluates when the player releases the selected object
             {
+                Debug.Log("########################################targeted game object");
+                Debug.Log(targetedGameObject.name);
                 bool withinDuration = currentTargetDuration >= MinDuration && 
                                       ((currentTargetDuration <= MaxDuration) || MaxDuration == null);
                 if (withinDuration)
@@ -137,7 +140,9 @@ public class SelectionHandler<T> where T : StimDef
                     SelectedStimDef = null;
 
                     if (SelectedGameObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer))
+                    {
                         SelectedStimDef = (sdPointer as StimDefPointer).GetStimDef<T>();
+                    }
                 }
                 else
                 {
@@ -155,10 +160,8 @@ public class SelectionHandler<T> where T : StimDef
             HeldTooShort = false;
             HeldTooLong = false;
             // Continuously checking the Selected GameObject and resets the currentTargetDuration when the selection changes
-            if (go != targetedGameObject)
-                currentTargetDuration = 0;
-            else
-                currentTargetDuration += Time.deltaTime;
+            if (go != targetedGameObject) currentTargetDuration = 0;
+            else currentTargetDuration += Time.deltaTime;
             targetedGameObject = go;
         }
     }

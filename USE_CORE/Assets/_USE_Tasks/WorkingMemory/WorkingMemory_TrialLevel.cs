@@ -303,6 +303,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 if (SyncBoxController != null)
                 {
                     SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+                    SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["Fluid1Onset"]);
                     NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                     RewardGiven = true;

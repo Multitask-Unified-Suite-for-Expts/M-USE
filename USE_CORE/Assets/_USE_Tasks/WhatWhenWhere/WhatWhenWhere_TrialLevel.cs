@@ -445,6 +445,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (SyncBoxController != null)
             {
                 SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize); 
+                SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["Fluid1Onset"]);
                 numRewardGiven_InBlock += CurrentTrialDef.NumPulses;
             }

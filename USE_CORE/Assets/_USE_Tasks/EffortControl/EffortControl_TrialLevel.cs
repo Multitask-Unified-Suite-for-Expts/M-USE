@@ -639,11 +639,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if (SideChoice == "Left")
         {
             SyncBoxController.SendRewardPulses(currentTrial.NumPulsesLeft, currentTrial.PulseSizeLeft);
+            SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumPulsesLeft));
             RewardPulses_Block += currentTrial.NumPulsesLeft;
         }
         else
         {
             SyncBoxController.SendRewardPulses(currentTrial.NumPulsesRight, currentTrial.PulseSizeRight);
+            SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumPulsesRight));
             RewardPulses_Block += currentTrial.NumPulsesRight;
         }
     }

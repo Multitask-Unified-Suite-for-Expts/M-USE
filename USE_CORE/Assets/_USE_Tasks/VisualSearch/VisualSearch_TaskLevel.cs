@@ -20,7 +20,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int NumCorrect_InTask = 0;
     [HideInInspector] public int NumErrors_InTask = 0;
     [HideInInspector] public List<float> SearchDurationsList_InTask;
-
+    private double avgSearchDuration = 0;
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;
     [HideInInspector] public int BlockStringsAdded = 0;
@@ -109,12 +109,14 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     public override void SetTaskSummaryString()
     {
         CurrentTaskSummaryString.Clear();
+        if (SearchDurationsList_InTask.Count > 0)
+            avgSearchDuration = Math.Round(SearchDurationsList_InTask.Average(), 2);
         if (vsTL.TrialCount_InTask != 0)
             CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" + 
                                         $"\n# Trials: {vsTL.TrialCount_InTask + 1} ({(Math.Round(decimal.Divide(AbortedTrials_InTask,(vsTL.TrialCount_InTask)),2))*100}% aborted)" + 
                                         $"\n#Blocks Completed: {BlockCount}" + 
                                         $"\nAccuracy: {(Math.Round(decimal.Divide(NumCorrect_InTask,(vsTL.TrialCount_InTask)),2))*100}%" + 
-                                        $"\nAvg Search Duration: {Math.Round(SearchDurationsList_InTask.Average(),2)}" +
+                                        $"\nAvg Search Duration: {avgSearchDuration}" +
                                         $"\n# Reward Pulses: {NumRewardPulses_InTask}" +
                                         $"\n# Token Bar Filled: {NumTokenBarFull_InTask}" +
                                         $"\n# Tokens Collected: {TotalTokensCollected_InTask}");
@@ -130,11 +132,12 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
             vsTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-        else Debug.LogError("Start Button Position settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-            vsTL.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-        else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
-
+        else
+            vsTL.ButtonPosition = new Vector3(0, 0, 0);
+        if (SessionSettings.SettingExists(TaskName +"_TaskSettings", "ButtonScale"))
+            vsTL.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+        else
+            vsTL.ButtonScale = 120f;
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
             vsTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
         else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");

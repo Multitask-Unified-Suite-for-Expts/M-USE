@@ -38,7 +38,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public float TrialStartTime;
     public float TouchStartTime;
     public float TouchReleaseTime;
-    public float HeldDuration;
+    public float? HeldDuration;
     public float BackdropTouchTime;
     public float BackdropTouches;
 
@@ -379,11 +379,13 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             {
                 SyncBoxController.SendRewardPulses(currentTrial.NumReleasePulses, currentTrial.PulseSize);
                 ReleaseRewards_Trial += currentTrial.NumReleasePulses;
+                SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumReleasePulses));
             }
             if (GiveTouchReward && SyncBoxController != null)
             {
                 SyncBoxController.SendRewardPulses(currentTrial.NumTouchPulses, currentTrial.PulseSize);
                 TouchRewards_Trial += currentTrial.NumTouchPulses;
+                SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumReleasePulses));
                 RewardGiven = true;
             }
         });

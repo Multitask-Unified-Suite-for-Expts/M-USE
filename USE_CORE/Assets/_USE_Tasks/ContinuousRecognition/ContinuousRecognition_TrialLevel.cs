@@ -1063,6 +1063,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (SyncBoxController != null)
             {
                 SyncBoxController.SendRewardPulses(currentTrial.NumRewardPulses, currentTrial.PulseSize);
+                SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumRewardPulses));
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["Fluid1Onset"]);
             }
         }

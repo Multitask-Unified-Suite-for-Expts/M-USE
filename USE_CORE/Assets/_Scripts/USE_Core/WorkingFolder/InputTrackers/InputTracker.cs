@@ -10,7 +10,7 @@ public abstract class InputTracker : MonoBehaviour
     public GameObject CurrentTargetGameObject;
     public StimDef CurrentTargetStimDef;
     protected int AllowedDisplay = -1;
-
+    public Vector3? CurrentSelectionLocation;
     private event EventHandler<EventArgs> SelectionHandler_UpdateTarget;
 
     public void AddSelectionHandler<T>(SelectionHandler<T> selectionHandler, State startState, State endState = null) where T : StimDef
@@ -25,6 +25,7 @@ public abstract class InputTracker : MonoBehaviour
         //assign the selectionhandler's UpdateTarget method to this tracker
         void targetUpdatedHandler(object sender, EventArgs e)
         {
+            selectionHandler.CurrentSelectionLocation = CurrentSelectionLocation;
             selectionHandler.UpdateTarget(CurrentTargetGameObject);
         }
 

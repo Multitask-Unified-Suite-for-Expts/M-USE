@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using MazeGame_Namespace;
 using UnityEngine;
+using UnityEngine.UIElements;
 using USE_StimulusManagement;
 
 // Only min duration means that selection is finished once min duration is met
@@ -17,13 +18,20 @@ public class SelectionHandler<T> where T : StimDef
 
     private int NumNonStimSelection = 0;
     private int NumTouchDurationError = 0;
+
+    private float? MaxMoveDistance = 2;
+    
     
     // When a selection has been finalized and meets all the constraints, these will be populated
     public GameObject SelectedGameObject = null;
     public T SelectedStimDef = null;
+    
 
     public GameObject targetedGameObject;
-    public float currentTargetDuration;
+    public float? currentTargetDuration;
+    public Vector3? CurrentSelectionLocation;
+    private Vector3 startingPosition;
+    private bool isDragging;
     private bool started;
     
 
@@ -72,7 +80,7 @@ public class SelectionHandler<T> where T : StimDef
         return MaxDuration;
     }
 
-    public float GetTargetTouchDuration()
+    public float? GetTargetTouchDuration()
     {
         return currentTargetDuration;
     }
@@ -93,6 +101,11 @@ public class SelectionHandler<T> where T : StimDef
     {
         HeldTooShort = heldTooShort;
     }
+
+    public void SetMaxMoveDistance(float distance)
+    {
+        MaxMoveDistance = distance;
+    }
     //-------------------------------------- Get/Set Data tracking variables------------------------------------------
     public int GetNumTouchDurationError()
     {
@@ -103,7 +116,7 @@ public class SelectionHandler<T> where T : StimDef
     {
         NumTouchDurationError = val;
     }
-    public int GetNumNonStimSelection()
+    public int UpdateNumNonStimSelection()
     {
         if (InputBroker.GetMouseButtonDown(0))
         {
@@ -115,18 +128,18 @@ public class SelectionHandler<T> where T : StimDef
         return NumNonStimSelection;
     }
 
-    public void SetNumNonStimSelection(int val)
+    public void ResetNumNonStimSelection()
     {
-        NumNonStimSelection = val;
+        NumNonStimSelection = 0;
     }
     
     //---------------------------------------------UPDATING SELECTION MANAGEMENT-----------------------------------------
     public void UpdateTarget(GameObject go)
     {
         if (!started) return;
-        if (go == null) // Evaluates when the player is not selecting anything
+        /*UpdateNumNonStimSelection();*/
+        if (go == null & !InputBroker.GetMouseButtonDown(0)) // Evaluates when the player is not selecting anything
         {
-            GetNumNonStimSelection();
             if (targetedGameObject != null) // Evaluates when the player releases the selected object
             {
                 bool withinDuration = currentTargetDuration >= MinDuration && 
@@ -137,29 +150,65 @@ public class SelectionHandler<T> where T : StimDef
                     SelectedStimDef = null;
 
                     if (SelectedGameObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer))
+                    {
                         SelectedStimDef = (sdPointer as StimDefPointer).GetStimDef<T>();
+                    }
                 }
                 else
                 {
                     NumTouchDurationError++;
                     if (currentTargetDuration <= MinDuration) HeldTooShort = true;
                     else if (currentTargetDuration >= MaxDuration) HeldTooLong = true;
-                    Debug.Log("Did not select for the appropriate duration"); //ADD FURTHER ERROR FEEDBACK HERE
+                    Debug.Log("Did not select for the appropriate duration"); 
                 }
             }
+            // resets target and duration after release, SelectedGameObject and SelectedStimDef are still assigned
             targetedGameObject = null;
-            currentTargetDuration = 0;
+            currentTargetDuration = null;
         }
         else
         {
             HeldTooShort = false;
             HeldTooLong = false;
+            isDragging = false;
+            
             // Continuously checking the Selected GameObject and resets the currentTargetDuration when the selection changes
-            if (go != targetedGameObject)
-                currentTargetDuration = 0;
-            else
-                currentTargetDuration += Time.deltaTime;
-            targetedGameObject = go;
+            if (InputBroker.GetMouseButtonDown(0))
+            {
+                if (CurrentSelectionLocation != null)
+                    startingPosition = (Vector3)CurrentSelectionLocation;
+                Debug.Log("STARTING POSITION DEFINE: " + startingPosition);
+                if (go != targetedGameObject)
+                {
+                    currentTargetDuration = 0;
+                    isDragging = false; // Reset the dragging flag when the selection changes
+                }
+                else
+                {
+                    if (CurrentSelectionLocation != null)
+                    {
+                        if (Vector3.Distance((Vector3)CurrentSelectionLocation, startingPosition) > MaxMoveDistance)
+                        {
+                            // The player has dragged past MaxMoveDistance, so they must release the mouse
+                            isDragging = true;
+                            Debug.Log("IS DRAGGING????? " + isDragging);
+                            if (InputBroker.GetMouseButtonUp(0))
+                            {
+                                startingPosition = (Vector3)CurrentSelectionLocation;
+                                currentTargetDuration = 0;
+                                isDragging = false;
+                            }
+                        }
+                        else
+                        {
+                            currentTargetDuration += Time.deltaTime;
+                            Debug.Log("CURRENT TARGET DURATION: " + currentTargetDuration);
+                        }
+                    }
+                }
+                targetedGameObject = go;
+            }
+            
         }
     }
 }

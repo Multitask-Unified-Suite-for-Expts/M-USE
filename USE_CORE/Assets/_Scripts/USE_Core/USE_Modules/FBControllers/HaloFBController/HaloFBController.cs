@@ -53,7 +53,7 @@ public class HaloFBController : MonoBehaviour
         instantiated.transform.SetParent(rootObj.transform);
 
         // Position the haloPrefab behind the game object
-        float distanceBehind = 0.3f; // Set the distance behind the gameObj
+        float distanceBehind = 0.5f; // Set the distance behind the gameObj
         Vector3 behindPos = rootObj.transform.position - rootObj.transform.forward * distanceBehind;
         instantiated.transform.position = behindPos;
 

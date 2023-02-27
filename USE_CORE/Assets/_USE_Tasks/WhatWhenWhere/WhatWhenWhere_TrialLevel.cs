@@ -256,7 +256,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             sliderGO.SetActive(true);
             startButton.SetActive(false);
             ConfigureSlider();        
-            numNonStimSelections_InBlock += mouseHandler.GetNumNonStimSelection();
+            numNonStimSelections_InBlock += mouseHandler.UpdateNumNonStimSelection();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderReset"]);
         });
@@ -445,6 +445,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (SyncBoxController != null)
             {
                 SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize); 
+                SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["Fluid1Onset"]);
                 numRewardGiven_InBlock += CurrentTrialDef.NumPulses;
             }

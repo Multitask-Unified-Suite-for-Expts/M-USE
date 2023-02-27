@@ -341,7 +341,12 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyAction = () =>
                 {
                     if (HkPanel.TrialLevel.SyncBoxController != null)
+                    {
+                        HkPanel.TrialLevel.AudioFBController.Play("Positive");
                         HkPanel.TrialLevel.SyncBoxController.SendRewardPulses(HkPanel.SessionLevel.LongRewardHotKeyNumPulses, HkPanel.SessionLevel.LongRewardHotKeyPulseSize);
+                        SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",HkPanel.SessionLevel.LongRewardHotKeyNumPulses));
+                    }
+                        
                     else
                         Debug.LogError("Tried to send LongReward but SyncBoxController is null!");
                 }

@@ -5,8 +5,6 @@ using UnityEngine.UI;
 using Cursor = UnityEngine.Cursor;
 using ConfigDynamicUI;
 using USE_ExperimenterDisplay;
-using UnityEngine.SceneManagement;
-using USE_ExperimentTemplate_Trial;
 
 public class HotKeyPanel : ExperimenterDisplayPanel
 {
@@ -343,7 +341,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyAction = () =>
                 {
                     if (HkPanel.TrialLevel.SyncBoxController != null)
-                        HkPanel.TrialLevel.SyncBoxController.SendRewardPulses(HkPanel.SessionLevel.RewardHotKeyNumPulses, HkPanel.SessionLevel.RewardHotKeyPulseSize);
+                        HkPanel.TrialLevel.SyncBoxController.SendRewardPulses(HkPanel.SessionLevel.LongRewardHotKeyNumPulses, HkPanel.SessionLevel.LongRewardHotKeyPulseSize);
                     else
                         Debug.LogError("Tried to send LongReward but SyncBoxController is null!");
                 }

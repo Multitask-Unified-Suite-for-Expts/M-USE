@@ -5,19 +5,19 @@ using USE_Data;
 
 public class GazeTracker : InputTracker
 {
-    private Vector3 GazePos = new Vector3 (-1f, -1f, -1f);
+    // private Vector3 CurrentSelectionLocation = new Vector3 (-1f, -1f, -1f);
     public bool SpoofGazeWithMouse = false;
     private GameObject HoverObject;
 
     public override void AddFieldsToFrameData(DataController frameData)
     {
-        frameData.AddDatum("GazePosition", () => GazePos);
+        frameData.AddDatum("GazePosition", () => CurrentSelectionLocation);
         frameData.AddDatum("HoverObject", () => HoverObject != null ? HoverObject.name : null);
     }
 
     public override GameObject FindCurrentTarget()
     {
-        if (Physics.Raycast(Camera.main.ScreenPointToRay(GazePos), out RaycastHit hit, Mathf.Infinity))
+        if (Physics.Raycast(Camera.main.ScreenPointToRay(CurrentSelectionLocation.Value), out RaycastHit hit, Mathf.Infinity))
         {
             HoverObject = hit.transform.root.gameObject;
             return HoverObject;
@@ -28,7 +28,7 @@ public class GazeTracker : InputTracker
     {
         if (SpoofGazeWithMouse)
         {
-            GazePos = InputBroker.mousePosition;
+            CurrentSelectionLocation = InputBroker.mousePosition;
         }
     }
 }

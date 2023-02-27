@@ -32,7 +32,9 @@ public class MouseTracker : InputTracker
 
     public override GameObject FindCurrentTarget()
     {
-        Vector3 touchPos = InputBroker.mousePosition;
+        CurrentSelectionLocation = InputBroker.mousePosition;
+        if (CurrentSelectionLocation.Value.x < 0 || CurrentSelectionLocation.Value.y < 0) //should also be if x or y is greater than screen
+            CurrentSelectionLocation = null;
 #if !UNITY_EDITOR
         Vector3 screenCoords = Display.RelativeMouseAt(touchPos);
         if (AllowedDisplay >= 0 && touchPos.z != AllowedDisplay) {
@@ -45,22 +47,27 @@ public class MouseTracker : InputTracker
             ClickCount++;
 
 
-        Vector3 direction = touchPos - Camera.main.transform.position;
-        GameObject hitObject = RaycastBoth(touchPos, direction);
-
-        if (hitObject != null)
+        if (CurrentSelectionLocation != null)
         {
-            HoverObject = hitObject;
+            Vector3 direction = CurrentSelectionLocation.Value - Camera.main.transform.position;
+            GameObject hitObject = RaycastBoth(CurrentSelectionLocation.Value, direction);
 
-            //for hover object name:
-            // if (HoverObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer))
-            //     hoverObjectName = (sdPointer as StimDefPointer).GetStimDef<StimDef>().Name;
-            // else hoverObjectName = HoverObject.name;
 
-            // hoverObjectName = HoverObject.name;
-            if (InputBroker.GetMouseButton(0))
-                return hitObject;
+            if (hitObject != null)
+            {
+                HoverObject = hitObject;
+
+                //for hover object name:
+                // if (HoverObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer))
+                //     hoverObjectName = (sdPointer as StimDefPointer).GetStimDef<StimDef>().Name;
+                // else hoverObjectName = HoverObject.name;
+
+                // hoverObjectName = HoverObject.name;
+                if (InputBroker.GetMouseButton(0))
+                    return hitObject;
+            }
         }
+
         return null;
     }
 

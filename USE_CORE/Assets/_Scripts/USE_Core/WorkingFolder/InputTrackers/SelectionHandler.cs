@@ -24,6 +24,7 @@ public class SelectionHandler<T> where T : StimDef
 
     public GameObject targetedGameObject;
     public float currentTargetDuration;
+    public Vector3? CurrentSelectionLocation;
     private bool started;
     
 
@@ -140,7 +141,6 @@ public class SelectionHandler<T> where T : StimDef
 
                     if (SelectedGameObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer))
                     {
-                        Debug.Log("FOUND THE STIM DEF COMPONENT!");
                         SelectedStimDef = (sdPointer as StimDefPointer).GetStimDef<T>();
                     }
                 }

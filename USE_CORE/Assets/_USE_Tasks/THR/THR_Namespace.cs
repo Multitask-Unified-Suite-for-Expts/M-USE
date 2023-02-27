@@ -36,6 +36,7 @@ namespace THR_Namespace
         public string BlockName;
         //public string ContextName;
         public int[] MinMaxNumTrials;
+        public bool ShowNegFb;
         public int PulseSize;
         public int PerfWindowEndTrials;
         public float PerfThresholdEndTrials;
@@ -80,6 +81,7 @@ namespace THR_Namespace
                 trial.BlockName = BlockName;
                 trial.MinNumTrials = MinMaxNumTrials[0];
                 trial.MaxNumTrials = MinMaxNumTrials[1];
+                trial.ShowNegFb = ShowNegFb;
                 trial.PulseSize = PulseSize;
                 trial.PerfWindowEndTrials = PerfWindowEndTrials;
                 trial.PerfThresholdEndTrials = PerfThresholdEndTrials;
@@ -127,6 +129,7 @@ namespace THR_Namespace
         public string BlockName;
         public int MinNumTrials;
         public int MaxNumTrials;
+        public bool ShowNegFb;
         public int PulseSize;
         public int PerfWindowEndTrials;
         public float PerfThresholdEndTrials;

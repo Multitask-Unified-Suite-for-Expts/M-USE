@@ -26,7 +26,7 @@ namespace USE_UI
 		public Image Image;
         public Vector3 LocalPosition = new Vector3(0, 0, 0);
 
-        public bool IsGrating;
+        public bool IsGrating = false;
 
         public State SetActiveOnInitialization;
         public State SetInactiveOnTermination;

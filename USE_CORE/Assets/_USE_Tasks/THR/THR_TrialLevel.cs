@@ -346,12 +346,15 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             else //held too long, held too short, moved outside, or timeRanOut
             {
                 AudioFBController.Play("Negative");
-                if (HeldTooShort)
-                    StartCoroutine(GratedSquareFlash(HeldTooShortTexture));
-                else if (HeldTooLong)
-                    StartCoroutine(GratedSquareFlash(HeldTooLongTexture));
-                else if (MovedOutside)
-                    StartCoroutine(GratedSquareFlash(BackdropStripesTexture));
+                if(currentTrial.ShowNegFb)
+                {
+                    if (HeldTooShort)
+                        StartCoroutine(GratedSquareFlash(HeldTooShortTexture));
+                    else if (HeldTooLong)
+                        StartCoroutine(GratedSquareFlash(HeldTooLongTexture));
+                    else if (MovedOutside)
+                        StartCoroutine(GratedSquareFlash(BackdropStripesTexture));
+                }
             }
             AudioPlayed = true;
         });
@@ -582,9 +585,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     IEnumerator GratedSquareFlash(Texture2D newTexture)
     {
         Grating = true;
+        Color originalColor = SquareMaterial.color;
         SquareMaterial.color = LightRedColor;
         SquareRenderer.material.mainTexture = newTexture;
         yield return new WaitForSeconds(currentTrial.GratingSquareDuration);
+        SquareMaterial.color = originalColor;
         SquareRenderer.material.mainTexture = SquareTexture;
         Grating = false;
     }

@@ -124,13 +124,13 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         else
             trialLevel.MacMainDisplayBuild = false;
 
-        if (SessionSettings.SettingExists("Session", "ButtonPosition"))
-            trialLevel.ButtonPosition = (Vector3)SessionSettings.Get("Session", "ButtonPosition");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+            trialLevel.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
         else
             trialLevel.ButtonPosition = new Vector3(0, 0, 0);
 
-        if (SessionSettings.SettingExists("Session", "ButtonScale"))
-            trialLevel.ButtonScale = (float)SessionSettings.Get("Session", "ButtonScale");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+            trialLevel.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
         else
             trialLevel.ButtonScale = 120f;
     }

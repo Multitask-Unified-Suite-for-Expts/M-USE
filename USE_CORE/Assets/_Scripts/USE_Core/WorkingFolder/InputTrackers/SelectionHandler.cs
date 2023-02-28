@@ -138,7 +138,7 @@ public class SelectionHandler<T> where T : StimDef
     {
         if (!started) return;
         /*UpdateNumNonStimSelection();*/
-        if (go == null & !InputBroker.GetMouseButtonDown(0)) // Evaluates when the player is not selecting anything
+        if (go == null) // Evaluates when the player is not selecting anything
         {
             if (targetedGameObject != null) // Evaluates when the player releases the selected object
             {
@@ -173,42 +173,20 @@ public class SelectionHandler<T> where T : StimDef
             isDragging = false;
             
             // Continuously checking the Selected GameObject and resets the currentTargetDuration when the selection changes
-            if (InputBroker.GetMouseButtonDown(0))
+            if (go != targetedGameObject) // indicates that selection has changed
             {
-                if (CurrentSelectionLocation != null)
-                    startingPosition = (Vector3)CurrentSelectionLocation;
-                Debug.Log("STARTING POSITION DEFINE: " + startingPosition);
-                if (go != targetedGameObject)
-                {
-                    currentTargetDuration = 0;
-                    isDragging = false; // Reset the dragging flag when the selection changes
-                }
-                else
-                {
-                    if (CurrentSelectionLocation != null)
-                    {
-                        if (Vector3.Distance((Vector3)CurrentSelectionLocation, startingPosition) > MaxMoveDistance)
-                        {
-                            // The player has dragged past MaxMoveDistance, so they must release the mouse
-                            isDragging = true;
-                            Debug.Log("IS DRAGGING????? " + isDragging);
-                            if (InputBroker.GetMouseButtonUp(0))
-                            {
-                                startingPosition = (Vector3)CurrentSelectionLocation;
-                                currentTargetDuration = 0;
-                                isDragging = false;
-                            }
-                        }
-                        else
-                        {
-                            currentTargetDuration += Time.deltaTime;
-                            Debug.Log("CURRENT TARGET DURATION: " + currentTargetDuration);
-                        }
-                    }
-                }
-                targetedGameObject = go;
+                currentTargetDuration = 0; // Resets the touch duration when selection changes
+                isDragging = false; // Reset the dragging flag when the selection changes
+            }
+            else
+            {
+                currentTargetDuration += Time.deltaTime;
+                Debug.Log("CURRENT TARGET DURATION: " + currentTargetDuration);
             }
             
+            targetedGameObject = go;
         }
+            
     }
+    
 }

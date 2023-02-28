@@ -31,7 +31,7 @@ public class SelectionHandler<T> where T : StimDef
     public float? currentTargetDuration;
     public Vector3? CurrentSelectionLocation;
     private Vector3 startingPosition;
-    private bool isDragging;
+    private bool isMouseDragging;
     private bool started;
     
 
@@ -134,77 +134,85 @@ public class SelectionHandler<T> where T : StimDef
     }
     
     //---------------------------------------------UPDATING SELECTION MANAGEMENT-----------------------------------------
-    public void UpdateTarget(GameObject go)
+    public void UpdateTarget(GameObject selectedGameObject)
     {
-        if (!started) return;
-        if (InputBroker.GetMouseButtonDown(0) && CurrentSelectionLocation != null) // indicates that the player is making a selection in general
+        // Check if input has started and if there is a current selection location
+        if (!started || CurrentSelectionLocation == null) 
         {
-            startingPosition = (Vector3)CurrentSelectionLocation;
-            Debug.Log("STARTING POSITION" + startingPosition);
+            return;
         }
-        /*UpdateNumNonStimSelection();*/
-        if (go == null && !isDragging) // Evaluates when the player is not selecting anything
+       
+        // Check if the left mouse button is pressed 
+        if (InputBroker.GetMouseButtonDown(0))
         {
-            if (targetedGameObject != null) // Evaluates when the player releases the selected object
+            // Set the starting position of the touch, regardless of if on stim or not
+            startingPosition = CurrentSelectionLocation.Value;
+        }
+        
+        // Check if selectedGameObject is null and if the player is not dragging the mouse
+        if (selectedGameObject == null && !isMouseDragging)
+        {
+            // Check if there is a targeted game object
+            if (targetedGameObject != null)
             {
+                // Check if the touch duration is within the appropriate range
                 bool withinDuration = currentTargetDuration >= MinDuration && 
                                       ((currentTargetDuration <= MaxDuration) || MaxDuration == null);
+
                 if (withinDuration)
                 {
+                    // Set the selected game object and check if it has stimDefPointer to set
                     SelectedGameObject = targetedGameObject;
-                    SelectedStimDef = null;
-
-                    if (SelectedGameObject.TryGetComponent(typeof(StimDefPointer), out Component sdPointer))
-                    {
-                        SelectedStimDef = (sdPointer as StimDefPointer).GetStimDef<T>();
-                    }
+                    SelectedStimDef = targetedGameObject?.GetComponent<StimDefPointer>()?.GetStimDef<T>();
                 }
                 else
                 {
+                    // Increment the number of touch duration errors and set flags accordingly
                     NumTouchDurationError++;
-                    if (currentTargetDuration <= MinDuration) HeldTooShort = true;
-                    else if (currentTargetDuration >= MaxDuration) HeldTooLong = true;
+                    
+                    if (currentTargetDuration <= MinDuration) 
+                        HeldTooShort = true;
+                    else if (currentTargetDuration >= MaxDuration) 
+                        HeldTooLong = true;
+
                     Debug.Log("Did not select for the appropriate duration"); 
                 }
-            }
-            // resets target and duration after release, SelectedGameObject and SelectedStimDef are still assigned
-            targetedGameObject = null;
-            currentTargetDuration = null;
 
+                targetedGameObject = null;
+                currentTargetDuration = null;
+            }
+            return;
         }
-        else
+
+        HeldTooShort = false;
+        HeldTooLong = false;
+
+        if (Vector3.Distance(CurrentSelectionLocation.Value, startingPosition) > MaxMoveDistance)
         {
-            HeldTooShort = false;
-            HeldTooLong = false;
+            // Set the isMouseDragging flag and check if the left mouse button is released
+            isMouseDragging = true;
             
-            if (Vector3.Distance((Vector3)CurrentSelectionLocation, startingPosition) > MaxMoveDistance)
+            if(InputBroker.GetMouseButtonUp(0))
             {
-                isDragging = true;
-                Debug.Log("ASSIGNING DRAGGING FLAG: " + isDragging);
-                
-                if(InputBroker.GetMouseButtonUp(0))
-                {
-                    isDragging = false;
-                    targetedGameObject = null;
-                    Debug.Log("RESETTING DRAGGING FLAG: " + isDragging);
-                }
+                // Reset the isMouseDragging flag and targeted game object
+                isMouseDragging = false;
+                targetedGameObject = null;
             }
-            
-            // Continuously checking the Selected GameObject and resets the currentTargetDuration when the selection changes
-            if (go != targetedGameObject && !isDragging) // indicates that selection has changed and the mouse is not being dragged
-            {
-                Debug.Log("NEW REAL SELECTION");
-                currentTargetDuration = 0; // Resets the touch duration when selection changes
-                startingPosition = (Vector3)CurrentSelectionLocation;
-            }
-            else if (!isDragging)
-            {
-                currentTargetDuration += Time.deltaTime;
-            }
-            
-            targetedGameObject = go;
         }
-            
+        // Check if selectedGameObject is not the same as the targeted game object and the mouse is not being dragged
+        if (selectedGameObject != targetedGameObject && !isMouseDragging)
+        {
+            currentTargetDuration = 0;
+            startingPosition = CurrentSelectionLocation.Value;
+        }
+        else if (!isMouseDragging)
+        {
+            // Increment the touch duration if the mouse is not being dragged
+            currentTargetDuration += Time.deltaTime;
+        }
+        
+        // Set targeted game object to selectedGameObject
+        targetedGameObject = selectedGameObject;
     }
     
 }

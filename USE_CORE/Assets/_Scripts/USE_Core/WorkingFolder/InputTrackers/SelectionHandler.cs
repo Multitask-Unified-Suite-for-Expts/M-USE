@@ -137,8 +137,13 @@ public class SelectionHandler<T> where T : StimDef
     public void UpdateTarget(GameObject go)
     {
         if (!started) return;
+        if (InputBroker.GetMouseButtonDown(0) && CurrentSelectionLocation != null) // indicates that the player is making a selection in general
+        {
+            startingPosition = (Vector3)CurrentSelectionLocation;
+            Debug.Log("STARTING POSITION" + startingPosition);
+        }
         /*UpdateNumNonStimSelection();*/
-        if (go == null) // Evaluates when the player is not selecting anything
+        if (go == null && !isDragging) // Evaluates when the player is not selecting anything
         {
             if (targetedGameObject != null) // Evaluates when the player releases the selected object
             {
@@ -165,23 +170,36 @@ public class SelectionHandler<T> where T : StimDef
             // resets target and duration after release, SelectedGameObject and SelectedStimDef are still assigned
             targetedGameObject = null;
             currentTargetDuration = null;
+
         }
         else
         {
             HeldTooShort = false;
             HeldTooLong = false;
-            isDragging = false;
+            
+            if (Vector3.Distance((Vector3)CurrentSelectionLocation, startingPosition) > MaxMoveDistance)
+            {
+                isDragging = true;
+                Debug.Log("ASSIGNING DRAGGING FLAG: " + isDragging);
+                
+                if(InputBroker.GetMouseButtonUp(0))
+                {
+                    isDragging = false;
+                    targetedGameObject = null;
+                    Debug.Log("RESETTING DRAGGING FLAG: " + isDragging);
+                }
+            }
             
             // Continuously checking the Selected GameObject and resets the currentTargetDuration when the selection changes
-            if (go != targetedGameObject) // indicates that selection has changed
+            if (go != targetedGameObject && !isDragging) // indicates that selection has changed and the mouse is not being dragged
             {
+                Debug.Log("NEW REAL SELECTION");
                 currentTargetDuration = 0; // Resets the touch duration when selection changes
-                isDragging = false; // Reset the dragging flag when the selection changes
+                startingPosition = (Vector3)CurrentSelectionLocation;
             }
-            else
+            else if (!isDragging)
             {
                 currentTargetDuration += Time.deltaTime;
-                Debug.Log("CURRENT TARGET DURATION: " + currentTargetDuration);
             }
             
             targetedGameObject = go;

@@ -80,7 +80,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             
             //HARD CODED TO MINIMIZE EMPTY SKYBOX DURATION, CAN'T ACCESS TRIAL DEF YET & CONTEXT NOT IN BLOCK DEF
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + "Concrete3.png");
-            mgTL.ContextActive = true;
          //   EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
             
             ResetBlockVariables();
@@ -250,7 +249,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             mgTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
         else Debug.LogError("Start Button Position settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-            mgTL.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+            mgTL.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
         else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TileSize"))
         {

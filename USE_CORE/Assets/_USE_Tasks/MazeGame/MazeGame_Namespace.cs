@@ -9,32 +9,6 @@ namespace MazeGame_Namespace
 {
     public class MazeGame_TaskDef : TaskDef
     {
-        //Already-existing fields (inherited from TaskDef)      
-        //public DateTime TaskStart_DateTime;
-        //public int TaskStart_Frame;
-        //public float TaskStart_UnityTime;
-        //public string TaskName;
-        //public string ExternalStimFolderPath;
-        //public string PrefabStimFolderPath;
-        //public string ExternalStimExtension;
-        //public List<string[]> FeatureNames;
-        //public string neutralPatternedColorName;
-        //public float? ExternalStimScale;
-        public int NumBlinks;
-        public Color TileColor;
-        public float TileSize;
-        public Vector3 ButtonPosition;
-        public Vector3 ButtonScale;
-        public string MazeExternalFilePath;
-        public string MazeKeyFilePath;
-        public float[] StartColor;
-        public float[] FinishColor;
-        public float[] CorrectColor;
-        public float[] LastCorrectColor;
-        public float[] IncorrectRuleAbidingColor;
-        public float[] IncorrectRuleBreakingColor;
-        public float[] DefaultTileColor;
-        public string TileTexture;
 
 
     }

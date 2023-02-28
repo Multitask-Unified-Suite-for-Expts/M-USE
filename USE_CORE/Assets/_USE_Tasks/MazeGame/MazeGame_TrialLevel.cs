@@ -13,27 +13,13 @@ using USE_UI;
 
 public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 {
+    //Generic Task Variables
     public GameObject MG_CanvasGO;
     public USE_StartButton USE_StartButton;
-
+    private GameObject StartButton;
+    
     private static bool end;
-
-    // TILE FLASH VARIABLES
-    public static bool TileFlash;
-
-    private static float flashDuration;
-    /*public float CORRECT_FEEDBACK_SECONDS, PREV_CORRECT_FEEDBACK_SECONDS, 
-        INCORRECT_RULEABIDING_SECONDS, INCORRECT_RULEBREAKING_SECONDS, TIMEOUT_SECONDS;*/
-
-    //MazeVis Variables
-    // public TileRow[] tileRows;
-    public static GameObject mazeListObj;
-    // public LoadMazeList mazeListScript;
-
-    // public static GameConfigs gameConfigs = new GameConfigs();
     public static Maze currMaze;
-    private static int count;
-
     public static float fbDuration;
 
     // TRIAL DATA TRACKING VARIABLES
@@ -51,9 +37,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private static int pathProgressIndex = 0;
     public static bool viewPath;
     private static bool CorrectSelection, ReturnToLast;
-    public List<Maze> mazeList = new List<Maze>();
-    public int ind;
-
+    
     //game configs variables
     [HideInInspector]public float SCREEN_WIDTH, TILE_WIDTH;
 
@@ -71,32 +55,26 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector]public float TileSize;
     [HideInInspector]public string TileTexture;
     private Texture2D tileTex;
-    
-    //private float spaceBetweenSquares;
-
-    [HideInInspector] public ConfigNumber minObjectTouchDuration,
-        itiDuration,
-        finalFbDuration,
-        maxObjectTouchDuration,
-        selectObjectDuration,
-        sliderSize;
-
-    [FormerlySerializedAs("tileFlashDuration")] [HideInInspector]
-    public ConfigNumber tileBlinkingDuration;
 
     [HideInInspector] public ConfigNumber spaceBetweenTiles,
         mazeOnsetDelay,
         correctFbDuration,
         previousCorrectFbDuration,
         incorrectRuleAbidingFbDuration,
-        incorrectRuleBreakingFbDuration;
+        incorrectRuleBreakingFbDuration, minObjectTouchDuration,
+        itiDuration,
+        finalFbDuration,
+        maxObjectTouchDuration,
+        selectObjectDuration,
+        sliderSize, tileBlinkingDuration;
 
     //Block Data Variables
     //public int NumRewardPulses_InBlock, NonStimTouches_InBlock = 0;
 
 
     public string ContextExternalFilePath, MazeFilePath;
-    public Vector3 ButtonPosition, ButtonScale;
+    public Vector3 ButtonPosition;
+    public float ButtonScale;
     public GameObject MazeBackground;
     public string mazeDefName;
     public GameObject SliderPrefab, SliderHaloPrefab;
@@ -111,7 +89,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     private Vector2 dim;
 
-//update slider variables
+    //update slider variables
     private float endupdatetime;
     private RaycastHit hit;
     private float incrementalVal;
@@ -137,15 +115,17 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     // Touch Evaluation Variables
     private GameObject selectedGO;
     private MazeGame_StimDef selectedSD = null;
+    
+    // Slider & Animation variables
     private Slider Slider;
     private GameObject SliderGo, SliderHaloGo;
     private Image SliderHaloImage;
     private Vector3 SliderInitPosition;
     private float sliderValueChange;
+    private float valueRemaining;
+    private float valueToAdd;
 
     // Nonstim Scene Elements
-    private GameObject StartButton;
-
     private float flashingStartTime;
     private static float mazeStartTime;
     private static float mazeEndTime;
@@ -154,12 +134,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private GameObject tileGO;
     private StimGroup tiles; // top of triallevel with other variable defs
 
-    private int trialIndex;
-    private float valueRemaining;
-    private float valueToAdd;
-
-    public bool ContextActive;
-
+    
     private bool variablesLoaded;
     public MazeGame_TrialDef CurrentTrialDef => GetCurrentTrialDef<MazeGame_TrialDef>();
     public MazeGame_TaskLevel CurrentTaskLevel => GetTaskLevel<MazeGame_TaskLevel>();
@@ -193,22 +168,23 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             InitializeSlider();
             LoadTextures(ContextExternalFilePath);
             HaloFBController.SetHaloSize(5);
-            if (StartButton == null)
-            {
-                USE_StartButton = new USE_StartButton(MG_CanvasGO.GetComponent<Canvas>());
-                StartButton = USE_StartButton.StartButtonGO;
-            }
             MazeContainer = new GameObject("MazeContainer");
             MazeBackground = CreateSquare("MazeBackground", MazeBackgroundTexture, new Vector3(0, 0, 0),
                 new Vector3(5, 5, 5));
             tileTex = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + TileTexture + ".png");
 
             //player view variables
-            
             playerViewParent = GameObject.Find("MainCameraCopy");
         });
         SetupTrial.AddInitializationMethod(() =>
         {
+            if(StartButton == null)
+            {
+                USE_StartButton = new USE_StartButton(MG_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                StartButton = USE_StartButton.StartButtonGO;
+                USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+            }
+            
             isContextActive = true;
             viewPath = CurrentTrialDef.ViewPath;
             contextName = CurrentTrialDef.ContextName;
@@ -225,14 +201,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
         MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
-        InitTrial.AddInitializationMethod(() => { StartButton.SetActive(true); });
         //  StartButton.SpecifyTermination(() => mouseHandler.SelectionMatches(initButton), MazeVis);
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), delay, () =>
         {
             stateAfterDelay = ChooseTile;
             delayDuration = mazeOnsetDelay.value;
             SliderGo.SetActive(true);
-            StartButton.SetActive(false);
 
             ConfigureSlider();
             SetTrialSummaryString();
@@ -408,7 +382,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         if (i == 99)
         {
             //slider.value += sliderValueIncreaseAmount;
-            ++count;
             end = true;
         }
 
@@ -553,7 +526,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         SliderHaloImage = SliderHaloGo.GetComponent<Image>();
         Slider = SliderGo.GetComponent<Slider>();
         //SliderGo.GetComponent<RectTransform>().
-        SliderGo.transform.localPosition = new Vector3(0, 470, 0);
+        SliderGo.transform.localPosition = new Vector3(0, 180, 0);
         SliderInitPosition = SliderGo.transform.position;
         //consider making slider stuff into USE level class
         Slider.value = 0;
@@ -727,18 +700,18 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             playerViewLoaded = true;
         }
     }
-    private void DestroyTextOnExperimenterDisplay()
+    private void DeactivateTextOnExperimenterDisplay()
     {
-        DeactivateChildren(playerViewParent);
         foreach (var txt in playerViewTextList)
         {
             txt.GetComponent<Text>().color = Color.red; //resets the color if we repeat the sequence in the block
         }
+        DeactivateChildren(playerViewParent);
         playerViewLoaded = false;
     }
     public override void FinishTrialCleanup()
     {
-        DestroyTextOnExperimenterDisplay();
+        DeactivateTextOnExperimenterDisplay();
         if (tiles != null)
             tiles.DestroyStimGroup();
         MazeBackground.SetActive(false);
@@ -760,33 +733,19 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
 
 
-        //TrialSummaryString = "<b>Task Name: " + CurrentTaskLevel.TaskName+ "</b>" + 
-        //                     "\n"+
-        //                     "<b>\nTrial Count in Block: " + (TrialCount_InBlock + 1) + "</b>" +
-        //                     "\nTrial Count in Task: " + (TrialCount_InTask + 1) +
-        //                     "\n" +
-        //                     "\nTotal Errors: " + totalErrors_InTrial +
-        //                     //"\nCorrect Touches: " + correctTouches_InBlock + COME UP WITH SOMETHING MORE USEFUL
-        //                     "\nRule-Abiding Errors: " + ruleAbidingErrors_InTrial +
-        //                     "\nRule-Breaking Errors: " + ruleBreakingErrors_InTrial + 
-        //                     "\nPerseverative Errors: " + perseverativeErrors_InTrial +
-        //                     "\nBacktrack Errors: " + backtrackErrors_InTrial +
-        //                     "\nRetouch Correct: " + retouchCorrect_InTrial+ 
-        //                     "\nMaze Duration: " + mazeEndTime +
-        //                     "\n" +
-        //                     "\nSlider Value: " + Slider.value;
+        TrialSummaryString = "<b>\nTrial Count in Block: " + (TrialCount_InBlock + 1) + "</b>" +
+                             "\nTrial Count in Task: " + (TrialCount_InTask + 1) +
+                             "\n" +
+                             "\nTotal Errors: " + totalErrors_InTrial +
+                             //"\nCorrect Touches: " + correctTouches_InBlock + COME UP WITH SOMETHING MORE USEFUL
+                             "\nRule-Abiding Errors: " + ruleAbidingErrors_InTrial +
+                             "\nRule-Breaking Errors: " + ruleBreakingErrors_InTrial + 
+                             "\nPerseverative Errors: " + perseverativeErrors_InTrial +
+                             "\nBacktrack Errors: " + backtrackErrors_InTrial +
+                             "\nRetouch Correct: " + retouchCorrect_InTrial+ 
+                             "\nMaze Duration: " + mazeEndTime +
+                             "\n" +
+                             "\nSlider Value: " + Slider.value;
 
-        Debug.Log("TASK NAME = " + CurrentTaskLevel.TaskName);
-        Debug.Log("TCIB: " + TrialCount_InBlock);
-        Debug.Log(TrialCount_InTask);
-        Debug.Log("TOTAL ERRORS: " + totalErrors_InTrial);
-
-        Debug.Log(ruleAbidingErrors_InTrial);
-        Debug.Log(ruleBreakingErrors_InTrial);
-        Debug.Log(perseverativeErrors_InTrial);
-        Debug.Log(backtrackErrors_InTrial);
-        Debug.Log(retouchCorrect_InTrial);
-        Debug.Log(mazeEndTime);
-        Debug.Log(Slider.value);
     }
 }

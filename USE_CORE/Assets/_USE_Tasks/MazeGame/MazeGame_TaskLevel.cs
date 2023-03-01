@@ -115,7 +115,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     }
     public void AddBlockValuesToTaskValues()
     {
-        Debug.Log("TASK THING: " + (numRewardPulses_InTask == null ? "NULL" : "NOT NULL"));
         numRewardPulses_InTask.Add(numRewardPulses_InBlock);
         totalErrors_InTask.Add(totalErrors_InBlock);
         correctTouches_InTask.Add(correctTouches_InBlock);

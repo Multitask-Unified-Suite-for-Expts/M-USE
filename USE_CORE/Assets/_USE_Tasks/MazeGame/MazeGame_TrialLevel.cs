@@ -134,6 +134,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private GameObject tileGO;
     private StimGroup tiles; // top of triallevel with other variable defs
 
+    Color PositiveHaloColor = new Color(1, 1, 0, 0.2f);
+    Color NegativeHaloColor = new Color(1, 1, 1, 0.2f);
     
     private bool variablesLoaded;
     public MazeGame_TrialDef CurrentTrialDef => GetCurrentTrialDef<MazeGame_TrialDef>();
@@ -200,7 +202,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
         MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
-        //  StartButton.SpecifyTermination(() => mouseHandler.SelectionMatches(initButton), MazeVis);
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), Delay, () =>
         {
             StateAfterDelay = ChooseTile;
@@ -212,36 +213,31 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             //NonStimTouches_InBlock += mouseHandler.GetNumNonStimSelection(); COUNT ALL TOUCHES BETTER OR CHANGE NAME
             InstantiateCurrMaze();
-            if(TrialCount_InBlock==0) CreateTextOnExperimenterDisplay();
-            if(!playerViewLoaded) ActivateChildren(playerViewParent);
+            if(TrialCount_InBlock==0) 
+                CreateTextOnExperimenterDisplay();
+            if(!playerViewLoaded) 
+                ActivateChildren(playerViewParent);
 //            EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderReset"]);
         });
         MouseTracker.AddSelectionHandler(mouseHandler, ChooseTile);
-        ChooseTile.AddUpdateMethod(() =>
+        ChooseTile.SpecifyTermination(() =>  mouseHandler.SelectedGameObject?.GetComponent<Tile>() != null, SelectionFeedback, () =>
         {
-            //SELECTION HANDLER ISN'T WORKING, GIVES THE MAZE CONTAINER AS .SELECTEDGAMEOBJECT & CHILDREN ARE ALL TILES
-            //Input.ResetInputAxes(); //reset input in case they holding down
-            if (InputBroker.GetMouseButtonDown(0))
-            {
-                var ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-                if (Physics.Raycast(ray, out hit))
-                {
-                    selectedGO = hit.transform.gameObject;
-                    if (selectedGO.GetComponent<Tile>() != null) choiceMade = true;
-                }
-            }
+            selectedGO = mouseHandler.SelectedGameObject;
+            selectedSD = mouseHandler.SelectedStimDef;
         });
-        ChooseTile.SpecifyTermination(() => choiceMade, SelectionFeedback);
         SelectionFeedback.AddInitializationMethod(() =>
         {
             SetTrialSummaryString();
             choiceMade = false;
             selectedGO.GetComponent<Tile>().OnMouseDown();
             endupdatetime = Time.time + fbDuration;
+            SliderHaloGo.SetActive(true);
+
             if (CorrectSelection)
             {
                 isSliderValueIncrease = true;
                 valueToAdd = sliderValueChange;
+                SliderHaloImage.color = PositiveHaloColor;
                 playerViewParent.transform.Find((pathProgressIndex + 1).ToString()).GetComponent<Text>().color = new Color(0,0.392f,0);
                 //ADD ANYTHING ELSE THAT OCCURS DURING CORRECT SELECTION FEEDBACK
                 AudioFBController.Play("Positive");
@@ -249,11 +245,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             else if (ReturnToLast)
             {
                 valueToAdd = 0f;
+                SliderHaloImage.color = NegativeHaloColor;
                 AudioFBController.Play("Positive");
             }
             else
             {
                 valueToAdd = 0f;
+                SliderHaloImage.color = NegativeHaloColor;
                 AudioFBController.Play("Negative");
             }
 
@@ -269,24 +267,24 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
-        State temp = null;
-        SelectionFeedback.AddTimer(() => fbDuration, temp, () =>
+        SelectionFeedback.AddTimer(() => fbDuration, Delay, () =>
         {
             valueRemaining = 0;
+            DelayDuration = 0;
             SliderHaloGo.SetActive(false);
             CorrectSelection = false;
             ReturnToLast = false;
             if (end)
             {
-                temp = FinalFeedback;
+                StateAfterDelay = FinalFeedback;
             }
             else if (CheckTileFlash())
             {
-                temp = TileFlashFeedback;
+                StateAfterDelay = TileFlashFeedback;
             }
             else
             {
-                temp = ChooseTile; // could be incorrect or correct but it will still go back
+                StateAfterDelay = ChooseTile; // could be incorrect or correct but it will still go back
             }
         });
         TileFlashFeedback.AddInitializationMethod(() => { tile.StartCoroutine(tile.FlashingFeedback()); });
@@ -295,7 +293,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             Debug.Log("the end");
             SliderHaloGo.SetActive(true);
-            SliderHaloImage.color = new Color(1, 1, 1, 0.2f);
+            SliderHaloImage.color = NegativeHaloColor;
             flashingStartTime = Time.time;
             if (SyncBoxController != null)
             {
@@ -308,8 +306,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         FinalFeedback.AddUpdateMethod(() =>
         {
             if ((int)(10 * (Time.time - flashingStartTime)) % 4 == 0)
-                SliderHaloImage.color = new Color(1, 1, 1, 0.2f);
-            else if ((int)(10 * (Time.time - flashingStartTime)) % 2 == 0) SliderHaloImage.color = new Color(1, 1, 0, 0.2f);
+                SliderHaloImage.color = NegativeHaloColor;
+            else if ((int)(10 * (Time.time - flashingStartTime)) % 2 == 0)
+                SliderHaloImage.color = PositiveHaloColor;
         });
         FinalFeedback.AddTimer(() => finalFbDuration.value, ITI, () =>
         {
@@ -355,8 +354,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             tile.transform.position = newTilePosition;
             tile.mCoord = new Coords(x, y);
+            tile.gameObject.name = $"({tile.mCoord.x}, {tile.mCoord.y})";
 
-            if (x == currMaze.mStart.x && y == currMaze.mStart.y)
+        if (x == currMaze.mStart.x && y == currMaze.mStart.y)
                 tile.gameObject.GetComponent<Tile>().setColor(tile.START_COLOR);
             else if (x == currMaze.mFinish.x && y == currMaze.mFinish.y)
                 tile.gameObject.GetComponent<Tile>().setColor(tile.FINISH_COLOR);
@@ -527,10 +527,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         Slider = SliderGo.GetComponent<Slider>();
         //SliderGo.GetComponent<RectTransform>().
         SliderGo.transform.localPosition = new Vector3(0, 180, 0);
-        SliderInitPosition = SliderGo.transform.position;
         //consider making slider stuff into USE level class
         Slider.value = 0;
-        SliderHaloGo.transform.position = SliderInitPosition;
+        SliderHaloGo.transform.position = new Vector3(SliderGo.transform.position.x, SliderGo.transform.position.y, SliderGo.transform.position.z -5);
 //        int numSliderSteps = CurrentTrialDef.SliderGain.Sum() + CurrentTrialDef.SliderInitial;
         Slider.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
         SliderHaloGo.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
@@ -570,8 +569,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         SCREEN_WIDTH = 4;
 
         // Default tile width - edit at the task level def
-
-
         //---------------------------------------------------------
 
         // TILE COLORS
@@ -649,6 +646,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         //playerViewLoaded = false;
         pathProgress.Clear();
         pathProgressGO.Clear();
+        consecutiveErrors = 0;
         end = false;
         choiceMade = false;
         valueToAdd = 0;
@@ -695,7 +693,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     }
                 }
             }
-            
             playerViewTextList.Add(playerViewText);
             playerViewLoaded = true;
         }
@@ -717,6 +714,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         MazeBackground.SetActive(false);
         SliderGo.SetActive(false);
         SliderHaloGo.SetActive(false);
+        ResetTrialTrackingVariables();
         if (TokenFBController.isActiveAndEnabled)
             TokenFBController.enabled = false;
 

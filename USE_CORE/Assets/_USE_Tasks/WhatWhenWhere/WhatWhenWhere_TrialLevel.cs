@@ -332,7 +332,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     }
                 }
             }
-            
         });
         ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI);
         ChooseStimulus.SpecifyTermination(() => trialComplete, FinalFeedback);
@@ -399,12 +398,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             //slider class ^
         });
 
-        State temp = null;
-        
         //don't control timing with AddTimer, use slider class SliderUpdateFinished bool 
-        SelectionFeedback.AddTimer(()=>fbDuration.value, temp, () =>
+        SelectionFeedback.AddTimer(()=>fbDuration.value, Delay, () =>
         {
             sliderHaloGO.SetActive(false);
+            DelayDuration = 0;
             DestroyTextOnExperimenterDisplay();
             
             if (!CurrentTrialDef.LeaveFeedbackOn) HaloFBController.Destroy();
@@ -413,14 +411,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOff"]);
             if (CorrectSelection)
             {
-                temp = ChooseStimulus;
-                // StateAfterDelay = ChooseStimulus;
+                StateAfterDelay = ChooseStimulus;
                 CorrectSelection = false;
             }
             else 
             {
-                temp = ITI;
-                // StateAfterDelay = ITI;
+                StateAfterDelay = ITI;
             }
         });
         FinalFeedback.AddInitializationMethod(() =>

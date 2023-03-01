@@ -159,20 +159,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         State SelectionFeedback = new State("SelectionFeedback");
         State FinalFeedback = new State("FinalFeedback");
         State ITI = new State("ITI");
-        State delay = new State("Delay");
+        State Delay = new State("Delay");
         AddActiveStates(new List<State>
         {
             StartButton, ChooseStimulus, SelectionFeedback, FinalFeedback, ITI,
-            ChooseStimulusDelay, delay
+            ChooseStimulusDelay, Delay
         });
 
         string[] stateNames = new string[]
-            {"StartButton", "StartButtonDelay", "ChooseStimulus", "SelectionFeedback", "FinalFeedback", "ITI", "Delay", "ChooseStimulusDelay"};
-
-        // A state that just waits for some time
-        State stateAfterDelay = null;
-        float delayDuration = 0;
-        delay.AddTimer(() => delayDuration, () => stateAfterDelay);
+            {"StartButton", "StartButtonDelay", "ChooseStimulus", "SelectionFeedback", "FinalFeedback", "ITI", "ChooseStimulusDelay"};
 
         //MouseTracker variables
         SelectionHandler<WhatWhenWhere_StimDef> gazeHandler = new SelectionHandler<WhatWhenWhere_StimDef>();
@@ -403,11 +398,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
             //slider class ^
         });
+
+        State temp = null;
         
         //don't control timing with AddTimer, use slider class SliderUpdateFinished bool 
-        SelectionFeedback.AddTimer(()=>fbDuration.value, delay, () =>
+        SelectionFeedback.AddTimer(()=>fbDuration.value, temp, () =>
         {
-            delayDuration = 0;
             sliderHaloGO.SetActive(false);
             DestroyTextOnExperimenterDisplay();
             
@@ -417,12 +413,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOff"]);
             if (CorrectSelection)
             {
-                stateAfterDelay = ChooseStimulus;
+                temp = ChooseStimulus;
+                // StateAfterDelay = ChooseStimulus;
                 CorrectSelection = false;
             }
             else 
             {
-                stateAfterDelay = ITI;
+                temp = ITI;
+                // StateAfterDelay = ITI;
             }
         });
         FinalFeedback.AddInitializationMethod(() =>

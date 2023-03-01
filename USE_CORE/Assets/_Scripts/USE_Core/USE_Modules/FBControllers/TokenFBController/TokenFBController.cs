@@ -178,11 +178,11 @@ public class TokenFBController : MonoBehaviour
                 case AnimationPhase.Update:
                     if (tokensChange < 0)
                     {
-                        audioFBController.Play("NegativeUpdate"); //not added
+                        audioFBController.Play("Negative"); //not added
                     }
                     else
                     {
-                        audioFBController.Play("PositiveUpdate"); //not added
+                        audioFBController.Play("Positive"); //not added
                     }
                     numCollected += tokensChange;
                     if (numCollected < 0) numCollected = 0; //set number to 0 if you lose more than you have, avoids neg tokens

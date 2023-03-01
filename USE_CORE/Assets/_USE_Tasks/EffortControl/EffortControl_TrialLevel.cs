@@ -110,7 +110,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public float StartButtonSelectedTime;
 
     public List<GameObject> ObjectList;
-    public bool ObjectsActivated;
 
     public override void DefineControlLevel()
     {
@@ -118,10 +117,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         State ChooseBalloon = new State("ChooseBalloon");
         State CenterSelection = new State("CenterSelection");
         State InflateBalloon = new State("InflateBalloon");
-        State PopBalloon = new State("PopBalloon");
         State Feedback = new State("Feedback");
         State ITI = new State("ITI");
-        AddActiveStates(new List<State> { InitTrial, ChooseBalloon, CenterSelection, InflateBalloon, PopBalloon, Feedback, ITI });
+        AddActiveStates(new List<State> { InitTrial, ChooseBalloon, CenterSelection, InflateBalloon, Feedback, ITI });
 
         SelectionHandler<EffortControl_StimDef> mouseHandler = new SelectionHandler<EffortControl_StimDef>();
 
@@ -151,6 +149,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddInitializationMethod(() =>
         {
             LoadConfigUIVariables();
+            EventCodeManager.SendCodeImmediate(TaskEventCodes["TrlStart"]);
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -185,9 +184,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 TrialStim = null;
             }
         });
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), ChooseBalloon, () =>
+        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), Delay, () =>
         {
-            StartButtonSelectedTime = Time.time;
+            DelayDuration = sbToBalloonDelay.value;
+            StateAfterDelay = ChooseBalloon;
             StartButton.SetActive(false);
             EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
         });
@@ -197,7 +197,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         MouseTracker.AddSelectionHandler(mouseHandler, ChooseBalloon);
         ChooseBalloon.AddInitializationMethod(() =>
         {
+
             Input.ResetInputAxes(); //reset input in case they holding down
+            //maybe this should be a method in selectionhandlers?
 
             MaxScale = new Vector3(60, 0, 60);
             LeftScaleUpAmount = MaxScale / currentTrial.NumClicksLeft;
@@ -208,74 +210,52 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             CreateRewards(currentTrial.NumCoinsLeft, RewardContainerLeft.transform.position, RewardContainerLeft);
             CreateRewards(currentTrial.NumCoinsRight, RewardContainerRight.transform.position, RewardContainerRight);
             CreateTransparentBalloons();
-            ObjectsActivated = false;
+            ActivateObjects();
 
             SideChoice = null;
         });
 
         ChooseBalloon.AddUpdateMethod(() =>
         {
-            //IF WE WANT TO LET THEM CLICK ANYWHERE ON LEFT OR RIGHT SIDE TO SELECT BALLOON:
-            //if (InputBroker.GetMouseButtonDown(0))
-            //{
-            //    float middle = .5f;
-            //    float clickPosX = InputBroker.mousePosition.x / Screen.width;
-
-            //    if (clickPosX < middle)
-            //        SideChoice = "Left";
-
-            //    if (clickPosX > middle)
-            //        SideChoice = "Right";
-            //}
-
-            if (!ObjectsActivated && Time.time - StartButtonSelectedTime >= sbToBalloonDelay.value)
-                ActivateObjects();
-            
-
-            //IF WE WANT THEM TO HAVE TO ACTUALLY CLICK WITHIN THE BALLOON TO SELECT IT:
-            if(ObjectsActivated)
+            GameObject hit = mouseHandler.SelectedGameObject;
+            if (hit != null)
             {
-                GameObject hit = mouseHandler.SelectedGameObject;
-                if (hit == null)
-                    return;
-                else
+                BalloonSelectedTime = Time.time;
+                if (hit.transform.name.Contains("Left"))
                 {
-                    BalloonSelectedTime = Time.time;
-                    mouseHandler.Stop();
-                    if (hit.transform.name.Contains("Left"))
-                    {
-                        SideChoice = "Left";
-                        TrialStim = StimLeft;
-                    }
-                    else if (hit.transform.name.Contains("Right"))
-                    {
-                        SideChoice = "Right";
-                        TrialStim = StimRight;
-                    }
+                    SideChoice = "Left";
+                    TrialStim = StimLeft;
                 }
-
-                //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.
-                if (InputBroker.GetMouseButtonDown(0) && SideChoice == null)
+                else if (hit.transform.name.Contains("Right"))
                 {
-                    Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-                    RaycastHit hitt;
-                    if (!Physics.Raycast(ray, out hitt))
-                    {
-                        AudioFBController.audioSource.Stop();
-                        AudioFBController.Play("Negative");
-                    }
+                    SideChoice = "Right";
+                    TrialStim = StimRight;
                 }
             }
+
+            //this will be move to selectionhandler / inputtrackers
+            //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.
+            if (InputBroker.GetMouseButtonDown(0) && SideChoice == null)
+            {
+                Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
+                RaycastHit hitt;
+                if (!Physics.Raycast(ray, out hitt))
+                {
+                    AudioFBController.audioSource.Stop();
+                    AudioFBController.Play("Negative");
+                    //implement stopping previous sounds or waiting until they end in AudioFeedbackController
+                }
+            }
+
         });
         ChooseBalloon.SpecifyTermination(() => SideChoice != null, CenterSelection, () =>
         {
             EventCodeManager.SendCodeImmediate(TaskEventCodes["BalloonChosen"]);
 
-            TrialStim = (SideChoice == "Left" ? StimLeft : StimRight);
             DestroyChildren(SideChoice == "Left" ? RewardContainerRight : RewardContainerLeft);
             ClicksNeeded = (SideChoice == "Left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
             AudioFBController.Play("EC_BalloonChosen");
-            SetChoices();
+            RecordChoices();
             SetTrialSummaryString();
         });
 
@@ -306,14 +286,18 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         CenterSelection.AddUpdateMethod(() =>
         {
+            //does centeringSpeed actually do anything?
             if(Wrapper.transform.position != CenteredPos)
                 Wrapper.transform.position = Vector3.MoveTowards(Wrapper.transform.position, CenteredPos,
                                                                 CenteringSpeed * Time.deltaTime);
         });
-        CenterSelection.SpecifyTermination(() => Wrapper.transform.position == CenteredPos, InflateBalloon);
+        CenterSelection.SpecifyTermination(() => Wrapper.transform.position == CenteredPos, Delay);
 
         CenterSelection.AddDefaultTerminationMethod(() =>
         {
+            StateAfterDelay = InflateBalloon;
+            DelayDuration = choiceToTouchDelay.value;
+            
             RemoveParents(Wrapper, RemoveParentList);
 
             if (SideChoice == "Left")
@@ -348,78 +332,79 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         InflateBalloon.AddUpdateMethod(() =>
         {
-            if(Time.time - BalloonSelectedTime >= choiceToTouchDelay.value) //works but takes about .67 to even get here
+            if (Inflate)
             {
-                if (Inflate)
+                if (!InflateAudioPlayed)
                 {
-                    if (!InflateAudioPlayed)
-                    {
-                        if (AudioFBController.IsPlaying())
-                            AudioFBController.audioSource.Stop();
-                        AudioFBController.Play("EC_Inflate");
-                        EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionAuditoryFbOn"]);
-                        InflateAudioPlayed = true;
-                    }
+                    if (AudioFBController.IsPlaying())
+                        AudioFBController.audioSource.Stop();
+                    AudioFBController.Play("EC_Inflate");
+                    EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionAuditoryFbOn"]);
+                    InflateAudioPlayed = true;
+                }
 
-                    ScaleTimer += Time.deltaTime;
+                ScaleTimer += Time.deltaTime;
 
-                    if(ScaleTimer >= (InflateClipDuration / scalingInterval.value)) //When timer hits for next inflation
+                if (ScaleTimer >= (InflateClipDuration / scalingInterval.value)) //When timer hits for next inflation
+                {
+                    if (TrialStim.transform.localScale != NextScale)
+                        ScaleToNextInterval();
+                    else
                     {
-                        if (TrialStim.transform.localScale != NextScale)
-                            ScaleToNextInterval();
-                        else
+                        Inflate = false;
+                        mouseHandler.Start();
+                        if (ClickCount >= ClicksNeeded)
                         {
-                            Inflate = false;
-                            mouseHandler.Start();
-                            if (ClickCount >= ClicksNeeded)
-                            {
-                                Response = 1;
-                                AvgClickTime = clickTimings.Average();
-                            }
+                            Response = 1;
+                            AvgClickTime = clickTimings.Average();
                         }
-                        ScaleTimer = 0; //Reset Timer for next inflation increment;
                     }
-                }
 
-                if (mouseHandler.SelectionMatches(TrialStim) || mouseHandler.SelectionMatches(MaxOutline_Left) || mouseHandler.SelectionMatches(MaxOutline_Right))
+                    ScaleTimer = 0; //Reset Timer for next inflation increment;
+                }
+            }
+
+            if (mouseHandler.SelectionMatches(TrialStim) || mouseHandler.SelectionMatches(MaxOutline_Left) ||
+                mouseHandler.SelectionMatches(MaxOutline_Right))
+            {
+                Input.ResetInputAxes();
+                ClickCount++;
+                clickTimings.Add(Time.time - timeTracker);
+                timeTracker = Time.time;
+                mouseHandler.Stop();
+
+                CalculateInflation(); //Sets Inflate to TRUE at end of func
+                InflateAudioPlayed = false;
+            }
+
+            if (mouseClicks != MouseTracker.GetClickCount())
+            {
+                currentTrial.Touches += MouseTracker.GetClickCount() - mouseClicks;
+                SetTrialSummaryString();
+                mouseClicks = MouseTracker.GetClickCount();
+            }
+
+            //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.
+            if (InputBroker.GetMouseButtonDown(0) && Response != 1)
+            {
+                //should also be handled by inputbroker
+                Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
+                RaycastHit hit;
+                if (!Physics.Raycast(ray, out hit))
                 {
-                    Input.ResetInputAxes();
-                    ClickCount++;
-                    clickTimings.Add(Time.time - timeTracker);
-                    timeTracker = Time.time;
-                    mouseHandler.Stop();
-
-                    CalculateInflation(); //Sets Inflate to TRUE at end of func
-                    InflateAudioPlayed = false;
+                    if (AudioFBController.IsPlaying())
+                        AudioFBController.audioSource.Stop();
+                    AudioFBController.Play("Negative");
+                    EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionAuditoryFbOn"]);
                 }
-
-                if (mouseClicks != MouseTracker.GetClickCount())
-                {
-                    currentTrial.Touches += MouseTracker.GetClickCount() -  mouseClicks;
-                    SetTrialSummaryString();
-                    mouseClicks = MouseTracker.GetClickCount();
-                }
-
-                //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.
-                if (InputBroker.GetMouseButtonDown(0) && Response != 1)
-                {
-                    Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-                    RaycastHit hit;
-                    if (!Physics.Raycast(ray, out hit))
-                    {
-                        if(AudioFBController.IsPlaying())
-                            AudioFBController.audioSource.Stop();
-                        AudioFBController.Play("Negative");
-                        EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionAuditoryFbOn"]);
-                    }
-                }
-
             }
         });
-        InflateBalloon.AddTimer(() => inflateDuration.value, PopBalloon);
-        InflateBalloon.SpecifyTermination(() => Response == 1, PopBalloon);
+        InflateBalloon.AddTimer(() => inflateDuration.value, Delay);
+        InflateBalloon.SpecifyTermination(() => Response == 1, Delay);
         InflateBalloon.AddDefaultTerminationMethod(() =>
         {
+            StateAfterDelay = Feedback;
+            DelayDuration = popToFeedbackDelay.value;
             //add trial touches to total touches:
             TotalTouches_Block += currentTrial.Touches;
 
@@ -430,13 +415,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             DestroyChildren(SideChoice == "Left" ? BalloonContainerLeft : BalloonContainerRight);
             InflateAudioPlayed = false;
-        });
-
-        //PopBalloon state -------------------------------------------------------------------------------------------------------
-        float delayTimer = 0;
-
-        PopBalloon.AddDefaultInitializationMethod(() =>
-        {
+            
+            
             if (Response == 1)
             {
                 AudioFBController.audioSource.Stop();
@@ -453,13 +433,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
             TrialStim.SetActive(false);
         });
-        PopBalloon.AddUpdateMethod(() =>
-        {
-            if (!TrialStim.activeInHierarchy)
-                delayTimer += Time.deltaTime;
-        });
-        PopBalloon.SpecifyTermination(() => !TrialStim.activeInHierarchy && delayTimer > popToFeedbackDelay.value, Feedback, () => delayTimer = 0);
 
+        
         //Feedback state -------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
         {
@@ -482,19 +457,18 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             else
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
         });
-        Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI, () =>
-        {
-            TokenFBController.enabled = false;
-            AddTokenInflateAudioPlayed = false;
-        });
+        Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI);
         Feedback.SpecifyTermination(() => true && Response != 1, ITI);
         Feedback.AddDefaultTerminationMethod(() =>
         {
+            TokenFBController.enabled = false;
+            AddTokenInflateAudioPlayed = false;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
         });
 
         //ITI state -------------------------------------------------------------------------------------------------------
-        ITI.AddTimer(itiDuration.value, FinishTrial, () => EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]));
+        ITI.AddTimer(itiDuration.value, FinishTrial);
+        
         
         DefineTrialData();
         DefineFrameData();
@@ -540,7 +514,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if (go != null)
                 go.SetActive(true);
         }
-        ObjectsActivated = true;
     }
 
     public void ResetBlockVariables()
@@ -596,7 +569,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Flashing = false;
     }
 
-    void SetChoices()
+    void RecordChoices()
     {
         if(SideChoice == "Left")
         {
@@ -836,6 +809,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void CreateTransparentBalloons()
     {
+        //transparent balloon with size of biggest outline, allows easy detection of clicks within the entire balloon
         MaxOutline_Left = Instantiate(StimNoMaterialPrefab, StimLeft.transform.position, StimLeftPrefab.transform.rotation);
         MaxOutline_Left.name = "MaxOutline_Left";
         MaxOutline_Left.transform.localScale = new Vector3(70f, .1f, 70f);
@@ -852,12 +826,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void CreateBalloonOutlines(int numBalloons, Vector3 ScaleUpAmount, int clickPerOutline, Vector3 pos, GameObject container)
     {
-        string containerName = (container.name == "BalloonContainerLeft" ? "Left" : "Right");
         for (int i = clickPerOutline; i <= numBalloons; i += clickPerOutline)
         {
             GameObject outline = Instantiate(BalloonOutline, pos, BalloonOutline.transform.rotation);
             outline.transform.parent = container.transform;
-            outline.name = "Outline" + containerName + (i);
+            outline.name = "Outline" + container.name == "BalloonContainerLeft" ? "Left" : "Right" + (i);
             outline.transform.localScale += (i) * ScaleUpAmount;
             AddRigidBody(outline);
             ObjectList.Add(outline);

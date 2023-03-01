@@ -28,7 +28,10 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public bool StoreData, ForceBlockEnd, SerialPortActive, EyetrackerActive;
         [HideInInspector] public string TaskDataPath, FilePrefix, TrialSummaryString;
 
-        protected State SetupTrial, FinishTrial;
+        protected State SetupTrial, FinishTrial, Delay;
+        
+        protected State StateAfterDelay = null;
+        protected float DelayDuration = 0;
 
         public ControlLevel_Task_Template TaskLevel;
         public List<TrialDef> TrialDefs;
@@ -84,7 +87,10 @@ namespace USE_ExperimentTemplate_Trial
         {
             SetupTrial = new State("SetupTrial");
             FinishTrial = new State("FinishTrial");
-            AddActiveStates(new List<State> { SetupTrial, FinishTrial });
+            Delay = new State("Delay");
+            AddActiveStates(new List<State> { SetupTrial, FinishTrial, Delay });
+            // A state that just waits for some time;
+            Delay.AddTimer(() => DelayDuration, () => StateAfterDelay);
 
             Cursor.visible = false;
             TokenFBController.enabled = false;
@@ -150,6 +156,12 @@ namespace USE_ExperimentTemplate_Trial
            // TrialData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
 
 
+        }
+
+        protected void SetDelayState(State stateAfterDelay, float duration)
+        {
+            StateAfterDelay = stateAfterDelay;
+            DelayDuration = duration;
         }
 
         public virtual void FinishTrialCleanup()

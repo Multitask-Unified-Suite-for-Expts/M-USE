@@ -148,17 +148,16 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         State TileFlashFeedback = new State("TileFlashFeedback");
         State FinalFeedback = new State("FinalFeedback");
         State ITI = new State("ITI");
-        State delay = new State("Delay");
         AddActiveStates(new List<State>
-            { InitTrial, ChooseTile, SelectionFeedback, TileFlashFeedback, FinalFeedback, ITI, delay });
+            { InitTrial, ChooseTile, SelectionFeedback, TileFlashFeedback, FinalFeedback, ITI  });
 
         string[] stateNames =
-            { "StartButton", "ChooseTile", "SelectionFeedback", "TileFlashFeedback", "FinalFeedback", "ITI", "Delay" };
+            { "StartButton", "ChooseTile", "SelectionFeedback", "TileFlashFeedback", "FinalFeedback", "ITI"};
 
         // A state that just waits for some time
-        State stateAfterDelay = null;
-        float delayDuration = 0;
-        delay.AddTimer(() => delayDuration, () => stateAfterDelay);
+        // State stateAfterDelay = null;
+        // float delayDuration = 0;
+        // delay.AddTimer(() => delayDuration, () => stateAfterDelay);
 
         var mouseHandler = new SelectionHandler<MazeGame_StimDef>();
         
@@ -202,10 +201,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
         MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
         //  StartButton.SpecifyTermination(() => mouseHandler.SelectionMatches(initButton), MazeVis);
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), delay, () =>
+        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), Delay, () =>
         {
-            stateAfterDelay = ChooseTile;
-            delayDuration = mazeOnsetDelay.value;
+            StateAfterDelay = ChooseTile;
+            DelayDuration = mazeOnsetDelay.value;
             SliderGo.SetActive(true);
 
             ConfigureSlider();
@@ -269,24 +268,25 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 valueRemaining -= incrementalVal;
             }
         });
-        SelectionFeedback.AddTimer(() => fbDuration, delay, () =>
+
+        State temp = null;
+        SelectionFeedback.AddTimer(() => fbDuration, temp, () =>
         {
-            delayDuration = 0;
             valueRemaining = 0;
             SliderHaloGo.SetActive(false);
             CorrectSelection = false;
             ReturnToLast = false;
             if (end)
             {
-                stateAfterDelay = FinalFeedback;
+                temp = FinalFeedback;
             }
             else if (CheckTileFlash())
             {
-                stateAfterDelay = TileFlashFeedback;
+                temp = TileFlashFeedback;
             }
             else
             {
-                stateAfterDelay = ChooseTile; // could be incorrect or correct but it will still go back
+                temp = ChooseTile; // could be incorrect or correct but it will still go back
             }
         });
         TileFlashFeedback.AddInitializationMethod(() => { tile.StartCoroutine(tile.FlashingFeedback()); });

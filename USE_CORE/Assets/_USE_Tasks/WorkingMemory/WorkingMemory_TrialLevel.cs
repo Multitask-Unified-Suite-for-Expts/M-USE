@@ -96,14 +96,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         State SelectionFeedback = new State("SelectionFeedback");
         State TokenFeedback = new State("TokenFeedback");
         State ITI = new State("ITI");
-        State Delay = new State("Delay");
 
-        AddActiveStates(new List<State> { InitTrial, Delay, DisplaySample, DisplayDistractors, SearchDisplay, SelectionFeedback, TokenFeedback, ITI });
+        AddActiveStates(new List<State> { InitTrial, DisplaySample, DisplayDistractors, SearchDisplay, SelectionFeedback, TokenFeedback, ITI });
 
-        // A state that just waits for some time
-        State stateAfterDelay = null;
-        float delayDuration = 0;
-        Delay.AddTimer(() => delayDuration, () => stateAfterDelay);
         
         Text commandText = null;
         playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
@@ -191,14 +186,14 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         // Show the target/sample by itself for some time
         DisplaySample.AddTimer(() => displaySampleDuration.value, Delay, () =>
           {
-              stateAfterDelay = DisplayDistractors;
-              delayDuration = postSampleDelayDuration.value;
+              StateAfterDelay = DisplayDistractors;
+              DelayDuration = postSampleDelayDuration.value;
           });
         // Show some distractors without the target/sample
         DisplayDistractors.AddTimer(() => displayPostSampleDistractorsDuration.value, Delay, () =>
           {
-              stateAfterDelay = SearchDisplay;
-              delayDuration = preTargetDelayDuration.value;
+              StateAfterDelay = SearchDisplay;
+              DelayDuration = preTargetDelayDuration.value;
               
           });
 

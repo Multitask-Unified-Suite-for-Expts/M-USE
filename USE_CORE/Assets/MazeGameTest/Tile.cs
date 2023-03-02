@@ -13,6 +13,7 @@ public class Tile : MonoBehaviour
     // Tiles are distiguished by their (x, y) coordinate 
     // This means the bottom-left-most tile is (1, 1).
     public Coords mCoord;
+    public float sliderValueChange;
    
     // DEFAULT MAZE CONFIGS - CONFIGURABLE IN TASK DEF/ TRIAL LEVEL
     public Color START_COLOR = new Color(0.94f, 0.93f, 0.48f);
@@ -47,7 +48,6 @@ public class Tile : MonoBehaviour
     {
         int correctnessCode;
         correctnessCode = MazeGame_TrialLevel.ManageTileTouch(this);
-        MazeGame_TrialLevel.setEnd(correctnessCode);
         StartCoroutine(ColorFeedback(correctnessCode));
     }
    public void setColor(Color c)
@@ -79,7 +79,7 @@ public class Tile : MonoBehaviour
 
         originalTileColor = gameObject.GetComponent<Renderer>().material.color;
         gameObject.GetComponent<Renderer>().material.color = fbColor;
-        yield return new WaitForSeconds(MazeGame_TrialLevel.fbDuration);
+        yield return new WaitForSeconds(MazeGame_TrialLevel.tileFbDuration);
         if (!MazeGame_TrialLevel.viewPath || code != 1)
             gameObject.GetComponent<Renderer>().material.color = originalTileColor;
 

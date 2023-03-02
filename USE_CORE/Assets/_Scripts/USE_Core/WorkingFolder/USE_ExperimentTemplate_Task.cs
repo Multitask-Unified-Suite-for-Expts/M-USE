@@ -317,6 +317,7 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
             TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
             TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
+            TrialLevel.SliderFBController = fbControllers.GetComponent<SliderFBController>();
 
 
             TrialLevel.SerialPortController = SerialPortController;
@@ -339,20 +340,30 @@ namespace USE_ExperimentTemplate_Task
                             TrialLevel.AudioFBController.Init(FrameData);
                             audioInited = true;
                         }
-
-                        break;
+                        break; 
+                    
                     case "Halo":
                         TrialLevel.HaloFBController.Init(FrameData);
                         break;
+                    
                     case "Token":
                         if (!audioInited)
                         {
                             TrialLevel.AudioFBController.Init(FrameData);
                             audioInited = true;
                         }
-
                         TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
                         break;
+                    
+                    case "Slider":
+                        if (!audioInited)
+                        {
+                            TrialLevel.AudioFBController.Init(FrameData);
+                            audioInited = true;
+                        }
+                        TrialLevel.SliderFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
+                        break;
+                    
                     default:
                         Debug.LogWarning(fbController + " is not a valid feedback controller.");
                         break;

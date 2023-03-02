@@ -77,7 +77,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         LoadMazeDef();
         RunBlock.AddInitializationMethod(() =>
         {
-            
+            if (mgTL.playerViewLoaded)
+            {
+                mgTL.DestroyChildren(GameObject.Find("MainCameraCopy"));
+                mgTL.playerViewTextList.Clear();
+                mgTL.playerViewLoaded = false;
+            }
+                
             //HARD CODED TO MINIMIZE EMPTY SKYBOX DURATION, CAN'T ACCESS TRIAL DEF YET & CONTEXT NOT IN BLOCK DEF
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + "Concrete3.png");
          //   EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
@@ -88,7 +94,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         });
         BlockFeedback.AddInitializationMethod(() =>
         {
-            mgTL.DestroyChildren(GameObject.Find("MainCameraCopy"));
             if (mgTL.AbortCode == 0)
             {
                 CurrentBlockString += "\n" + "\n";
@@ -100,7 +105,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             CalculateBlockAverages();
         });
     }
-
     public void AssignBlockData()
     {
         BlockData.AddDatum("TotalErrors", () => totalErrors_InBlock);
@@ -124,9 +128,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         ruleAbidingErrors_InTask.Add(ruleAbidingErrors_InBlock);
         ruleBreakingErrors_InTask.Add(ruleBreakingErrors_InBlock);
         
-
-        //TrialsCompleted_Task.Add(mgTL.NumTrials_Block);
-
     }
     public override OrderedDictionary GetSummaryData()
     {
@@ -250,6 +251,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
             mgTL.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
         else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))
+            mgTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");
+        else
+        {
+            mgTL.NeutralITI = false;
+            Debug.LogError("Neutral ITI settings not defined in the TaskDef. Default Setting of false is used instead");
+        }
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TileSize"))
         {
             mgTL.TileSize = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TileSize");

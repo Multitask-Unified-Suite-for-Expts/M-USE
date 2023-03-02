@@ -49,6 +49,8 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public AudioFBController AudioFBController;
         [HideInInspector] public HaloFBController HaloFBController;
         [HideInInspector] public TokenFBController TokenFBController;
+        [HideInInspector] public SliderFBController SliderFBController;
+        
         // Input Trackers
         [HideInInspector] public MouseTracker MouseTracker;
         [HideInInspector] public GazeTracker GazeTracker;

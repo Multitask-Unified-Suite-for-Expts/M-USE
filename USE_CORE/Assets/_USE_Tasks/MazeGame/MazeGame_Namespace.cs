@@ -102,6 +102,7 @@ namespace MazeGame_Namespace
 
     public class MazeGame_StimDef : StimDef
     {
+        public float SliderValueChange;
         //Already-existing fields (inherited from Stim  Def)
         //public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)
         //public string StimName;
@@ -130,7 +131,7 @@ namespace MazeGame_Namespace
         //public bool TriggersSonication;
         //public State SetActiveOnInitialization;
         //public State SetInactiveOnTermination;
-       // public int test;
+        // public int test;
     }
 
     public class MazeDef

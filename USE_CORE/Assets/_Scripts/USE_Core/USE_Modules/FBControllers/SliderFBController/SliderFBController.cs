@@ -19,7 +19,7 @@ public class SliderFBController : MonoBehaviour
     
     enum AnimationPhase { None, Update, Flashing };
     private AnimationPhase animationPhase = AnimationPhase.None;
-    private bool isSliderBarFull;
+    private bool sliderBarFull;
     
     private float animationStartTime;
     private float animationEndTime;
@@ -38,7 +38,7 @@ public class SliderFBController : MonoBehaviour
     public void Init(DataController trialData, DataController frameData, AudioFBController audioFBController)
     {
         trialData.AddDatum("SliderBarValue", () => Slider.value);
-        trialData.AddDatum("SliderBarFilled", ()=> isSliderBarFull);
+        trialData.AddDatum("SliderBarFilled", ()=> sliderBarFull);
         frameData.AddDatum("SliderAnimationPhase", () => animationPhase.ToString());
         frameData.AddDatum("SliderVisibility", ()=> Slider != null? Slider.enabled : false);
         this.audioFBController = audioFBController;
@@ -74,11 +74,20 @@ public class SliderFBController : MonoBehaviour
         flashingTime = flashingDuration;
     }
 
+    public bool isSliderBarFull()
+    {
+        return sliderBarFull;
+    }
+    public void ResetSliderBarFull()
+    {
+        sliderBarFull = false;
+    }
     public void Update()
     {
         if (animationPhase == AnimationPhase.None)
         {
             SliderHaloGO.SetActive(false);
+           // sliderBarFull = false;
             return;
         }
         // Switch to next animation phase if the current one ended
@@ -98,7 +107,7 @@ public class SliderFBController : MonoBehaviour
                     if (Slider.value >= 1)
                     {
                         animationPhase = AnimationPhase.Flashing;
-                        isSliderBarFull = true;
+                        sliderBarFull = true;
                         StartCoroutine(FlashingBeeps(flashingNumBeeps));
                         animationEndTime += updateTime + flashingTime;
                     }

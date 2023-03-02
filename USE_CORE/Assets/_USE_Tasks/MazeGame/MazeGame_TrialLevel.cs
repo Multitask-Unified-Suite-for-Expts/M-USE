@@ -214,8 +214,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             DelayDuration = 0;
             CorrectSelection = false;
             ReturnToLast = false;
-            if (end)
+            if (end) // NEED TO CHANGE IF WE ARE GIVING FEEDBACK/REWARD BEFORE END
             {
+                SliderFBController.ResetSliderBarFull();
                 StateAfterDelay = ITI;
                 if (SyncBoxController != null)
                 {

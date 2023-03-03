@@ -272,6 +272,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     HkPanel.TaskLevel.Terminated = true;
                     HkPanel.SessionLevel.TasksFinished = true;
                     HkPanel.SessionLevel.SpecifyCurrentState(HkPanel.SessionLevel.GetStateFromName("FinishSession"));
+                    Application.Quit();
                 }
             };
             HotKeyList.Add(quitGame);

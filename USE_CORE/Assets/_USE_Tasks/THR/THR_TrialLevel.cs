@@ -117,7 +117,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     public float GraySquareTimer;
     public float RewardEarnedTime;
+    public float RewardGivenTime;
     public float RewardTimer;
+    public bool RewardGiven;
 
     public float HoldSquareTime;
     public bool MovedOutside;
@@ -335,7 +337,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             GraySquareTimer = 0;
             AudioPlayed = false;
             GiveReward = false;
-            RewardTimer = 0;
 
             if(GiveTouchReward || GiveReleaseReward)
             {
@@ -372,7 +373,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         Feedback.SpecifyTermination(() => (GiveTouchReward || GiveReleaseReward) && SyncBoxController == null, ITI); //If they got right, syncbox IS null, don't make them wait.  
         Feedback.SpecifyTermination(() => !GiveTouchReward && !GiveReleaseReward && AudioPlayed && !Grating, ITI); //if didn't get right, so no pulses. 
 
-        //REWARD state ----------------------------------------------------------------------------------------------------------------------------
         Reward.AddInitializationMethod(() =>
         {
             if (GiveReleaseReward && SyncBoxController != null)
@@ -386,6 +386,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 SyncBoxController.SendRewardPulses(currentTrial.NumTouchPulses, currentTrial.PulseSize);
                 TouchRewards_Trial += currentTrial.NumTouchPulses;
                 SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumReleasePulses));
+                RewardGiven = true;
             }
         });
         Reward.SpecifyTermination(() => true, ITI);
@@ -614,6 +615,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     {
         HeldTooLong = false;
         HeldTooShort = false;
+        RewardGiven = false;
         GiveReleaseReward = false;
         GiveTouchReward = false;
         TimeRanOut = false;

@@ -86,7 +86,8 @@ public class SliderFBController : MonoBehaviour
     {
         if (animationPhase == AnimationPhase.None)
         {
-            SliderHaloGO.SetActive(false);
+            if (SliderHaloGO != null)
+                SliderHaloGO.SetActive(false);
            // sliderBarFull = false;
             return;
         }

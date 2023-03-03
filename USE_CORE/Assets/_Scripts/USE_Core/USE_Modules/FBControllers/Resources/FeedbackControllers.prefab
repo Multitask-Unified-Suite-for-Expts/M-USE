@@ -113,9 +113,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 468dee814850444e2a84e6626d4453d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SliderPrefab: {fileID: 2122826529044376720, guid: 4edf39309c5fdfe4786b98a260c324e0,
+  SliderPrefab: {fileID: 2122826529044376720, guid: 5a5bf5ae5720f8143853442d9ce8eb9d,
     type: 3}
-  SliderHaloPrefab: {fileID: 4317252536729789219, guid: f372d073062e1954ba552b4c8bbb2d93,
+  SliderHaloPrefab: {fileID: 4317252536729789219, guid: 5efb6373ff4d278409cfb7efbcb9b7f7,
     type: 3}
   SliderGO: {fileID: 2122826529044376720, guid: 4edf39309c5fdfe4786b98a260c324e0,
     type: 3}

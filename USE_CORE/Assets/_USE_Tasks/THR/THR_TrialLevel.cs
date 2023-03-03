@@ -117,9 +117,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     public float GraySquareTimer;
     public float RewardEarnedTime;
-    public float RewardGivenTime;
     public float RewardTimer;
-    public bool RewardGiven;
 
     public float HoldSquareTime;
     public bool MovedOutside;
@@ -336,6 +334,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             RewardTimer = Time.time - RewardEarnedTime; //start the timer at the difference between rewardtimeEarned and right now.
             GraySquareTimer = 0;
             AudioPlayed = false;
+            GiveReward = false;
+            RewardTimer = 0;
 
             if(GiveTouchReward || GiveReleaseReward)
             {
@@ -371,8 +371,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         Feedback.SpecifyTermination(() => GiveReward, Reward); //If they got right, syncbox isn't null, and timer is met.
         Feedback.SpecifyTermination(() => (GiveTouchReward || GiveReleaseReward) && SyncBoxController == null, ITI); //If they got right, syncbox IS null, don't make them wait.  
         Feedback.SpecifyTermination(() => !GiveTouchReward && !GiveReleaseReward && AudioPlayed && !Grating, ITI); //if didn't get right, so no pulses. 
-        Feedback.AddTimer(() => currentTrial.FbDuration, ITI);
 
+        //REWARD state ----------------------------------------------------------------------------------------------------------------------------
         Reward.AddInitializationMethod(() =>
         {
             if (GiveReleaseReward && SyncBoxController != null)
@@ -386,7 +386,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 SyncBoxController.SendRewardPulses(currentTrial.NumTouchPulses, currentTrial.PulseSize);
                 TouchRewards_Trial += currentTrial.NumTouchPulses;
                 SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumReleasePulses));
-                RewardGiven = true;
             }
         });
         Reward.SpecifyTermination(() => true, ITI);
@@ -615,7 +614,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     {
         HeldTooLong = false;
         HeldTooShort = false;
-        RewardGiven = false;
         GiveReleaseReward = false;
         GiveTouchReward = false;
         TimeRanOut = false;

@@ -223,6 +223,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         //BLUE SQUARE state -------------------------------------------------------------------------------------------------------------------------
         MouseTracker.AddSelectionHandler(mouseHandler, BlueSquare);
+        float startTime;
 
         BlueSquare.AddInitializationMethod(() =>
         {
@@ -233,10 +234,12 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             BlueStartTime = Time.time;
             BlueSquareTouched = false;
             BlueSquareReleased = false;
-            BackdropTouchTime = 0;
-            BackdropTouches = 0;
             MovedOutside = false;
             ClickedOutsideSquare = false;
+            BackdropTouchTime = 0;
+            BackdropTouches = 0;
+            HeldDuration = 0;
+            startTime = 0;
         });
         BlueSquare.AddUpdateMethod(() =>
         {
@@ -250,8 +253,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 }
 
                 HeldDuration = mouseHandler.currentTargetDuration;
-                //Fix short touches from turning blue for split sec before changing. 
-                if (HeldDuration >= .045f) 
+                if(HeldDuration >= .04)
                     SquareMaterial.color = Color.blue;
 
                 if (currentTrial.RewardTouch)
@@ -298,11 +300,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             if (InputBroker.GetMouseButtonUp(0))
             {
-                if(BlueSquareTouched && !BlueSquareReleased)
+                if (BlueSquareTouched && !BlueSquareReleased)
                 {
                     TouchReleaseTime = Time.time;
                     HeldDuration = mouseHandler.currentTargetDuration;
-                    if(currentTrial.RewardRelease)
+                    if (currentTrial.RewardRelease)
                     {
                         if(HeldDuration >= currentTrial.MinTouchDuration && HeldDuration <= currentTrial.MaxTouchDuration)
                         {
@@ -328,7 +330,13 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         });
         //Go back to white square if bluesquare time lapses (and they aren't already holding down)
         BlueSquare.SpecifyTermination(() => (Time.time - BlueStartTime > currentTrial.BlueSquareDuration) && !InputBroker.GetMouseButton(0) && !BlueSquareReleased && !Grating, WhiteSquare);
-        BlueSquare.SpecifyTermination(() => (BlueSquareReleased && !Grating) || MovedOutside || HeldTooLong || HeldTooShort || TimeRanOut || GiveTouchReward, Feedback); //If rewarding touch and they touched, or click the square and release, or run out of time. 
+        BlueSquare.SpecifyTermination(() => (BlueSquareReleased && !Grating) || MovedOutside || HeldTooLong || HeldTooShort || TimeRanOut || GiveTouchReward, Feedback, () =>
+        {
+            Debug.Log("REWARD? " + (GiveTouchReward || GiveReleaseReward));
+            Debug.Log("HELD: " + HeldDuration);
+            Debug.Log("MIN: " + currentTrial.MinTouchDuration);
+            Debug.Log("MAX: " + currentTrial.MaxTouchDuration);
+        }); //If rewarding touch and they touched, or click the square and release, or run out of time. 
 
         //FEEDBACK state ----------------------------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
@@ -347,7 +355,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             else //held too long, held too short, moved outside, or timeRanOut
             {
                 AudioFBController.Play("Negative");
-                if(currentTrial.ShowNegFb)
+                if (currentTrial.ShowNegFb)
                 {
                     if (HeldTooShort)
                         StartCoroutine(GratedSquareFlash(HeldTooShortTexture));
@@ -587,11 +595,10 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     IEnumerator GratedSquareFlash(Texture2D newTexture)
     {
         Grating = true;
-        Color originalColor = SquareMaterial.color;
         SquareMaterial.color = LightRedColor;
         SquareRenderer.material.mainTexture = newTexture;
         yield return new WaitForSeconds(currentTrial.GratingSquareDuration);
-        SquareMaterial.color = originalColor;
+        SquareMaterial.color = Color.gray;
         SquareRenderer.material.mainTexture = SquareTexture;
         Grating = false;
     }

@@ -109,6 +109,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public float BalloonSelectedTime;
     [HideInInspector] public float StartButtonSelectedTime;
 
+    [HideInInspector] public int TrialTouches;
+
     public List<GameObject> ObjectList;
 
     public override void DefineControlLevel()
@@ -174,7 +176,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             SideChoice = "";
             EffortChoice = "";
             RewardChoice = "";
-            currentTrial.Touches = 0;
+            TrialTouches = 0;
 
             ResetToOriginalPositions();
 
@@ -197,7 +199,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         MouseTracker.AddSelectionHandler(mouseHandler, ChooseBalloon);
         ChooseBalloon.AddInitializationMethod(() =>
         {
-
             Input.ResetInputAxes(); //reset input in case they holding down
             //maybe this should be a method in selectionhandlers?
 
@@ -379,7 +380,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if (mouseClicks != MouseTracker.GetClickCount())
             {
-                currentTrial.Touches += MouseTracker.GetClickCount() - mouseClicks;
+                TrialTouches += MouseTracker.GetClickCount() - mouseClicks;
                 SetTrialSummaryString();
                 mouseClicks = MouseTracker.GetClickCount();
             }
@@ -406,7 +407,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             StateAfterDelay = Feedback;
             DelayDuration = popToFeedbackDelay.value;
             //add trial touches to total touches:
-            TotalTouches_Block += currentTrial.Touches;
+            TotalTouches_Block += TrialTouches;
 
             if (SideChoice == "Left")
                 MaxOutline_Left.transform.parent = BalloonContainerLeft.transform;
@@ -854,7 +855,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     void SetTrialSummaryString()
     {
         TrialSummaryString = ("<b>Trial Info:</b>" +
-                            "\nTouches: " + currentTrial.Touches +
+                            "\nTouches: " + TrialTouches +
                             "\nSide Chosen: " + SideChoice +
                             "\nReward Chosen: " + RewardChoice +
                             "\nEffort Chosen: " + EffortChoice);
@@ -878,7 +879,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("TimeTakenToChoose", () => ChooseDuration);
         TrialData.AddDatum("AverageClickTimes", () => AvgClickTime);
         TrialData.AddDatum("ClicksPerOutline", () => currentTrial.ClicksPerOutline);
-        TrialData.AddDatum("Trial Touches", () => currentTrial.Touches);
+        TrialData.AddDatum("Trial TrialTouches", () => TrialTouches);
     }
 
     void DefineFrameData()

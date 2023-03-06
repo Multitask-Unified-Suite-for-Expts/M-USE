@@ -29,7 +29,6 @@ namespace EffortControl_Namespace
         public int PulseSizeLeft;
         public int PulseSizeRight;
         public int ClicksPerOutline;
-        public int Touches;
     }
 
     public class EffortControl_StimDef : StimDef

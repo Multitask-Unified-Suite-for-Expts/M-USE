@@ -196,7 +196,6 @@ public class TokenFBController : MonoBehaviour
                     }
                     break;
                 case AnimationPhase.Flashing:
-                    //audioFBController.Play("Flashing"); //flashing clip doesn't exist
                     numCollected = 0;
                     animationPhase = AnimationPhase.None;
                     break;

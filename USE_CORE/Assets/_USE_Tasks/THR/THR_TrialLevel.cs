@@ -262,7 +262,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     RewardEarnedTime = Time.time;
                 }
                 //Auto stop them if holding the square for max duration
-                if (mouseHandler.currentTargetDuration > currentTrial.MaxTouchDuration)
+                if (mouseHandler.currentHoldDuration > currentTrial.MaxTouchDuration)
                 {
                     NumReleasedLate_Block++;
                     HeldTooLong = true;

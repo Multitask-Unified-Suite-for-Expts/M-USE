@@ -218,7 +218,6 @@ public class SelectionHandler<T> where T : StimDef
         // Check if selectedGameObject is not the same as the targeted game object and the mouse is not being dragged
         if (selectedGameObject != targetedGameObject && !isMouseDragging)
         {
-            Debug.Log("asdlgkhsalfghaslfgh");
             currentTargetDuration = 0;
             startingPosition = GetScreenPos(CurrentSelectionLocation.Value);
         }

@@ -422,13 +422,8 @@ namespace USE_ExperimentTemplate_Trial
             string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
 
             if (filePaths.Length >= 1)
-            {
                 contextPath = filePaths[0];
-                contextPath = contextPath.Replace(@"\", @"\\").Replace(@"\\\\", @"\\");
 
-                Debug.Log("CONTEXT PATH: " + contextPath);
-            }
-                
             else
             {
                 contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0]; //Use Default LinearDark if can't find file.

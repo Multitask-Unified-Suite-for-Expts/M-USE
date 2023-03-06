@@ -35,12 +35,12 @@ public class MouseTracker : InputTracker
         CurrentSelectionLocation = InputBroker.mousePosition;
         if (CurrentSelectionLocation.Value.x < 0 || CurrentSelectionLocation.Value.y < 0) //should also be if x or y is greater than screen
             CurrentSelectionLocation = null;
-#if !UNITY_EDITOR
-        Vector3 screenCoords = Display.RelativeMouseAt(touchPos);
-        if (AllowedDisplay >= 0 && touchPos.z != AllowedDisplay) {
-            return null;
-        }
-#endif
+//#if !UNITY_EDITOR
+//        Vector3 screenCoords = Display.RelativeMouseAt(touchPos);
+//        if (AllowedDisplay >= 0 && touchPos.z != AllowedDisplay) {
+//            return null;
+//        }
+//#endif
 
         // If the mouse button is up, that means they clicked and released. This is a good way to only count clicks and not holds
         if (InputBroker.GetMouseButtonUp(0))

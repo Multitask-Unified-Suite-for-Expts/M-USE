@@ -175,14 +175,15 @@ public class TokenFBController : MonoBehaviour
                     animationEndTime += updateTime;
                     break;
                 case AnimationPhase.Update:
-                    if (tokensChange < 0)
-                    {
-                        audioFBController.Play("Negative"); //not added
-                    }
-                    else
-                    {
-                        audioFBController.Play("Positive"); //not added
-                    }
+                    //if (tokensChange < 0)
+                    //{
+                    //    audioFBController.Play("Negative"); //not added
+                    //}
+                    //else
+                    //{
+                    //    Debug.Log("PLAYING POS SHOW!");
+                    //    audioFBController.Play("Positive"); //not added
+                    //}
                     numCollected += tokensChange;
                     if (numCollected < 0) numCollected = 0; //set number to 0 if you lose more than you have, avoids neg tokens
                     animationPhase = AnimationPhase.None;
@@ -195,7 +196,6 @@ public class TokenFBController : MonoBehaviour
                     }
                     break;
                 case AnimationPhase.Flashing:
-                    //audioFBController.Play("Flashing"); //flashing clip doesn't exist
                     numCollected = 0;
                     animationPhase = AnimationPhase.None;
                     break;
@@ -319,10 +319,14 @@ public class TokenFBController : MonoBehaviour
         animatedTokensColor = color;
 
         // Start the animation phase state machine with the first state
-        if (tokensChange < 0) {
+        if (tokensChange < 0)
+        {
+            Debug.Log("Playing negative show!");
             audioFBController.Play("NegativeShow");
         }
-        else {
+        else
+        {
+            Debug.Log("playing positive show!");
             audioFBController.Play("PositiveShow");
         }
         animationPhase = AnimationPhase.Show;

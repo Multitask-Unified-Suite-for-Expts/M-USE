@@ -268,17 +268,18 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.Escape),
                 hotKeyAction = () =>
                 {
-                    if (HkPanel.TrialLevel != null)
-                    {
+                    if(HkPanel.TrialLevel != null)
                         HkPanel.TrialLevel.ForceBlockEnd = true;
-                        HkPanel.TaskLevel.Terminated = true;
-                    }
 
-                    if (HkPanel.SessionLevel != null)
+                    if (HkPanel.TaskLevel != null)
+                        HkPanel.TaskLevel.Terminated = true;
+
+                    if(HkPanel.SessionLevel != null)
                     {
                         HkPanel.SessionLevel.TasksFinished = true;
                         HkPanel.SessionLevel.SpecifyCurrentState(HkPanel.SessionLevel.GetStateFromName("FinishSession"));
                     }
+
                     Application.Quit();
                 }
             };

@@ -351,14 +351,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 {
                     TokenFBController.AddTokens(chosenStimObj, currentTrial.RewardMag);
                 }
-                //HandleTokenUpdate();
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
             }
             else //Got wrong
             {
                 TokenFBController.RemoveTokens(chosenStimObj,currentTrial.RewardMag);
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
-                //HandleTokenUpdate();
                 EndBlock = true;
             }
         });
@@ -366,7 +364,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenUpdate.SpecifyTermination(() => !StimIsChosen, DisplayResults);
         TokenUpdate.AddDefaultTerminationMethod(() =>
         {
-            Debug.Log("hitting default term method");
             HandleTokenUpdate();
 
             if (currentTrial.ShakeStim)
@@ -1053,7 +1050,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     void HandleTokenUpdate()
     {
-        Debug.Log(TokenFBController.GetTokenBarValue());
         if(TokenFBController.isTokenBarFull())
         {
             NumTbCompletions_Block++;

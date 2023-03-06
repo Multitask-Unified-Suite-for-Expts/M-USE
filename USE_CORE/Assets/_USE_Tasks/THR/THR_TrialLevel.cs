@@ -233,10 +233,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             BlueStartTime = Time.time;
             BlueSquareTouched = false;
             BlueSquareReleased = false;
-            BackdropTouchTime = 0;
-            BackdropTouches = 0;
             MovedOutside = false;
             ClickedOutsideSquare = false;
+            BackdropTouchTime = 0;
+            BackdropTouches = 0;
+            HeldDuration = 0;
         });
         BlueSquare.AddUpdateMethod(() =>
         {
@@ -249,9 +250,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     BlueSquareTouched = true;
                 }
 
-                HeldDuration = mouseHandler.currentTargetDuration;
-                //Fix short touches from turning blue for split sec before changing. 
-                if (HeldDuration >= .045f) 
+                HeldDuration = mouseHandler.currentHoldDuration;
+                if(HeldDuration >= .04)
                     SquareMaterial.color = Color.blue;
 
                 if (currentTrial.RewardTouch)
@@ -261,7 +261,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     RewardEarnedTime = Time.time;
                 }
                 //Auto stop them if holding the square for max duration
-                if (mouseHandler.currentTargetDuration > currentTrial.MaxTouchDuration)
+                if (mouseHandler.currentHoldDuration > currentTrial.MaxTouchDuration)
                 {
                     NumReleasedLate_Block++;
                     HeldTooLong = true;
@@ -298,11 +298,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             if (InputBroker.GetMouseButtonUp(0))
             {
-                if(BlueSquareTouched && !BlueSquareReleased)
+                if (BlueSquareTouched && !BlueSquareReleased)
                 {
                     TouchReleaseTime = Time.time;
-                    HeldDuration = mouseHandler.currentTargetDuration;
-                    if(currentTrial.RewardRelease)
+                    HeldDuration = mouseHandler.currentHoldDuration;
+                    if (currentTrial.RewardRelease)
                     {
                         if(HeldDuration >= currentTrial.MinTouchDuration && HeldDuration <= currentTrial.MaxTouchDuration)
                         {
@@ -347,7 +347,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             else //held too long, held too short, moved outside, or timeRanOut
             {
                 AudioFBController.Play("Negative");
-                if(currentTrial.ShowNegFb)
+                if (currentTrial.ShowNegFb)
                 {
                     if (HeldTooShort)
                         StartCoroutine(GratedSquareFlash(HeldTooShortTexture));
@@ -587,11 +587,10 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     IEnumerator GratedSquareFlash(Texture2D newTexture)
     {
         Grating = true;
-        Color originalColor = SquareMaterial.color;
         SquareMaterial.color = LightRedColor;
         SquareRenderer.material.mainTexture = newTexture;
         yield return new WaitForSeconds(currentTrial.GratingSquareDuration);
-        SquareMaterial.color = originalColor;
+        SquareMaterial.color = Color.gray;
         SquareRenderer.material.mainTexture = SquareTexture;
         Grating = false;
     }

@@ -94,6 +94,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int NumLowerEffortChosen_Block;
     [HideInInspector] public int NumHigherRewardChosen_Block;
     [HideInInspector] public int NumLowerRewardChosen_Block;
+    [HideInInspector] public int NumAborted_Block;
 
     [HideInInspector] public ConfigNumber scalingInterval, inflateDuration, itiDuration, popToFeedbackDelay, choiceToTouchDelay, sbToBalloonDelay; //ScalingInterval is used for balloonInflation!
 
@@ -148,6 +149,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
         SetupTrial.AddInitializationMethod(() =>
         {
+            currentTask.SetTaskSummaryString();
             LoadConfigUIVariables();
             EventCodeManager.SendCodeImmediate(TaskEventCodes["TrlStart"]);
         });
@@ -430,6 +432,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 AudioFBController.Play("TimeRanOut");
                 TokenFBController.enabled = false;
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["NoChoice"]);
+                NumAborted_Block++;
             }
             TrialStim.SetActive(false);
         });
@@ -502,6 +505,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             currentTask.ClearStrings();
             currentTask.BlockSummaryString.AppendLine("");
+            NumAborted_Block++;
         }
 
         ClearTrialSummaryString();
@@ -527,6 +531,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         NumLowerEffortChosen_Block = 0;
         TotalTouches_Block = 0;
         RewardPulses_Block = 0;
+        NumAborted_Block = 0;
     }
 
     void ScaleToNextInterval()
@@ -853,11 +858,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void SetTrialSummaryString()
     {
-        TrialSummaryString = ("<b>Trial Info:</b>" +
-                            "\nTouches: " + currentTrial.Touches +
-                            "\nSide Chosen: " + SideChoice +
-                            "\nReward Chosen: " + RewardChoice +
-                            "\nEffort Chosen: " + EffortChoice);
+        TrialSummaryString = ("\nTouches: " + currentTrial.Touches +
+                              "\nSide Chosen: " + SideChoice +
+                              "\nReward Chosen: " + RewardChoice +
+                              "\nEffort Chosen: " + EffortChoice);
     }
 
     void ClearTrialSummaryString()

@@ -108,20 +108,25 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 
     public override void SetTaskSummaryString()
     {
-        CurrentTaskSummaryString.Clear();
         if (SearchDurationsList_InTask.Count > 0)
             avgSearchDuration = Math.Round(SearchDurationsList_InTask.Average(), 2);
         if (vsTL.TrialCount_InTask != 0)
+        {
+            CurrentTaskSummaryString.Clear();
             CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" + 
-                                        $"\n# Trials: {vsTL.TrialCount_InTask + 1} ({(Math.Round(decimal.Divide(AbortedTrials_InTask,(vsTL.TrialCount_InTask)),2))*100}% aborted)" + 
-                                        $"\n#Blocks Completed: {BlockCount}" + 
-                                        $"\nAccuracy: {(Math.Round(decimal.Divide(NumCorrect_InTask,(vsTL.TrialCount_InTask)),2))*100}%" + 
-                                        $"\nAvg Search Duration: {avgSearchDuration}" +
-                                        $"\n# Reward Pulses: {NumRewardPulses_InTask}" +
-                                        $"\n# Token Bar Filled: {NumTokenBarFull_InTask}" +
-                                        $"\n# Tokens Collected: {TotalTokensCollected_InTask}");
+                                                    $"\n# Trials: {vsTL.TrialCount_InTask} ({(Math.Round(decimal.Divide(AbortedTrials_InTask,(vsTL.TrialCount_InTask)),2))*100}% aborted)" + 
+                                                    $"\n# Blocks: {BlockCount}" + 
+                                                    $"\nAccuracy: {(Math.Round(decimal.Divide(NumCorrect_InTask,(vsTL.TrialCount_InTask)),2))*100}%" + 
+                                                    $"\nAvg Search Duration: {avgSearchDuration}" +
+                                                    $"\n# Reward Pulses: {NumRewardPulses_InTask}" +
+                                                    $"\n# Token Bar Filled: {NumTokenBarFull_InTask}" +
+                                                    $"\n# Tokens Collected: {TotalTokensCollected_InTask}");
+        }
         else
+        {
             CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
+        }
+            
     }
     
     private void SetSettings()

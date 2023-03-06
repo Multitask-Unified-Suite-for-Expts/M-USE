@@ -343,6 +343,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"])
         {
+            aborted = true;
+            AbortedTrials_InBlock++;
             CurrentTaskLevel.ClearStrings();
             CurrentTaskLevel.BlockSummaryString.AppendLine("");
         }

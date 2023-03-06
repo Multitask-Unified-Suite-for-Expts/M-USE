@@ -800,7 +800,7 @@ namespace USE_ExperimentTemplate_Task
 
         public virtual void SetTaskSummaryString()
         {
-            CurrentTaskSummaryString.Append("");
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
         }
 
     }

@@ -96,6 +96,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int NumHigherRewardChosen_Block;
     [HideInInspector] public int NumLowerRewardChosen_Block;
     [HideInInspector] public int NumSameRewardChosen_Block;
+    [HideInInspector] public int NumAborted_Block;
+
 
     [HideInInspector] public ConfigNumber scalingInterval, inflateDuration, itiDuration, popToFeedbackDelay, choiceToTouchDelay, sbToBalloonDelay; //ScalingInterval is used for balloonInflation!
 
@@ -430,6 +432,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
             else
             {
+                NumAborted_Block++;
                 AudioFBController.Play("TimeRanOut");
                 TokenFBController.enabled = false;
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["NoChoice"]);
@@ -503,6 +506,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"]) //If used RestartBlock or PreviousBlock hotkeys
         {
+            NumAborted_Block++;
             currentTask.ClearStrings();
             currentTask.BlockSummaryString.AppendLine("");
         }
@@ -532,6 +536,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         NumSameRewardChosen_Block = 0;
         TotalTouches_Block = 0;
         RewardPulses_Block = 0;
+        NumAborted_Block = 0;
     }
 
     void ScaleToNextInterval()

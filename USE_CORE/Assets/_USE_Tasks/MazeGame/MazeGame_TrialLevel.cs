@@ -153,8 +153,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             }
             
             contextName = CurrentTrialDef.ContextName;
-            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +
-                                                 contextName + ".png");
+            RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, CurrentTrialDef.ContextName, "LinearDark"));
             if (!configVariablesLoaded)
                 LoadConfigVariables();
             LoadMazeDef();

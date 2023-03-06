@@ -19,6 +19,8 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int NumChosenLowerReward_Task = 0;
     [HideInInspector] public int NumChosenHigherEffort_Task = 0;
     [HideInInspector] public int NumChosenLowerEffort_Task = 0;
+    [HideInInspector] public int NumChosenSameReward_Task = 0;
+    [HideInInspector] public int NumChosenSameEffort_Task = 0;
 
     [HideInInspector] public string CurrentBlockString;
 
@@ -95,8 +97,10 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         NumChosenRight_Task += trialLevel.NumChosenRight_Block;
         NumChosenHigherEffort_Task += trialLevel.NumHigherEffortChosen_Block;
         NumChosenLowerEffort_Task += trialLevel.NumLowerEffortChosen_Block;
+        NumChosenSameEffort_Task += trialLevel.NumSameEffortChosen_Block;
         NumChosenHigherReward_Task += trialLevel.NumHigherRewardChosen_Block;
         NumChosenLowerReward_Task += trialLevel.NumLowerRewardChosen_Block;
+        NumChosenSameReward_Task += trialLevel.NumSameRewardChosen_Block;
     }
 
     public override OrderedDictionary GetSummaryData()
@@ -110,8 +114,10 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         data["Chose Right"] = NumChosenRight_Task;
         data["Chose Higher Reward"] = NumChosenHigherReward_Task;
         data["Chose Lower Reward"] = NumChosenLowerReward_Task;
+        data["Chose Same Reward"] = NumChosenSameReward_Task;
         data["Chose Higher Effort"] = NumChosenHigherEffort_Task;
         data["Chose Lower Effort"] = NumChosenLowerEffort_Task;
+        data["Chose Same Effort"] = NumChosenSameEffort_Task;
 
         return data;
     }
@@ -128,8 +134,10 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
                         "\nChoseRight: " + trialLevel.NumChosenRight_Block +
                         "\nChoseHigherReward: " + trialLevel.NumHigherRewardChosen_Block +
                         "\nChoseLowerReward: " + trialLevel.NumLowerRewardChosen_Block +
+                        "\nChoseSameReward: " + trialLevel.NumSameRewardChosen_Block +
                         "\nChoseHigherEffort: " + trialLevel.NumHigherEffortChosen_Block +
                         "\nChoseLowerEffort: " + trialLevel.NumLowerEffortChosen_Block +
+                        "\nChoseSameEffort: " + trialLevel.NumSameEffortChosen_Block +
                         "\n");
         BlockSummaryString.AppendLine(CurrentBlockString).ToString();
     }

@@ -92,8 +92,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int NumChosenRight_Block;
     [HideInInspector] public int NumHigherEffortChosen_Block;
     [HideInInspector] public int NumLowerEffortChosen_Block;
+    [HideInInspector] public int NumSameEffortChosen_Block;
     [HideInInspector] public int NumHigherRewardChosen_Block;
     [HideInInspector] public int NumLowerRewardChosen_Block;
+    [HideInInspector] public int NumSameRewardChosen_Block;
 
     [HideInInspector] public ConfigNumber scalingInterval, inflateDuration, itiDuration, popToFeedbackDelay, choiceToTouchDelay, sbToBalloonDelay; //ScalingInterval is used for balloonInflation!
 
@@ -526,6 +528,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         NumLowerRewardChosen_Block = 0;
         NumHigherEffortChosen_Block = 0;
         NumLowerEffortChosen_Block = 0;
+        NumSameEffortChosen_Block = 0;
+        NumSameRewardChosen_Block = 0;
         TotalTouches_Block = 0;
         RewardPulses_Block = 0;
     }
@@ -575,25 +579,39 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if(SideChoice == "Left")
         {
             NumChosenLeft_Block++;
-            EffortChoice = (currentTrial.NumClicksLeft > currentTrial.NumClicksRight ? "Higher" : "Lower");
-            RewardChoice = (currentTrial.NumCoinsLeft > currentTrial.NumCoinsRight ? "Higher" : "Lower");
+            EffortChoice = CompareValues(currentTrial.NumClicksLeft, currentTrial.NumClicksRight);
+            RewardChoice = CompareValues(currentTrial.NumCoinsLeft, currentTrial.NumCoinsRight);
         }
         else
         {
             NumChosenRight_Block++;
-            EffortChoice = (currentTrial.NumClicksLeft > currentTrial.NumClicksRight ? "Lower" : "Higher");
-            RewardChoice = (currentTrial.NumCoinsLeft > currentTrial.NumCoinsRight ? "Lower" : "Higher");
+            EffortChoice = CompareValues(currentTrial.NumClicksRight, currentTrial.NumClicksLeft);
+            RewardChoice = CompareValues(currentTrial.NumCoinsRight, currentTrial.NumCoinsLeft);
         }
 
         if (EffortChoice == "Higher")
             NumHigherEffortChosen_Block++;
-        else
+        else if (EffortChoice == "Lower")
             NumLowerEffortChosen_Block++;
+        else
+            NumSameEffortChosen_Block++;
 
         if (RewardChoice == "Higher")
             NumHigherRewardChosen_Block++;
-        else
+        else if (RewardChoice == "Lower")
             NumLowerRewardChosen_Block++;
+        else
+            NumSameRewardChosen_Block++;
+    }
+
+    public string CompareValues(int chosenValue, int otherValue)
+    {
+        if (chosenValue == otherValue)
+            return "Same";
+        else if (chosenValue > otherValue)
+            return "Higher";
+        else
+            return "Lower";
     }
 
     void SetTokenVariables()

@@ -50,7 +50,7 @@ public class SelectionHandler<T> where T : StimDef
         SelectedStimDef = null;
         targetedGameObject = null;
         currentTargetDuration = null;
-        currentHoldDuration = null;
+        currentHoldDuration = 0;
         NumNonStimSelection = 0; 
         NumTouchDurationError = 0; 
     }

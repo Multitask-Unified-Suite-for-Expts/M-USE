@@ -183,7 +183,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         //WHITE SQUARE state ------------------------------------------------------------------------------------------------------------------------
         SelectionHandler<THR_StimDef> mouseHandler = new SelectionHandler<THR_StimDef>();
-        mouseHandler.SetMaxMoveDistance(200f);
         MouseTracker.AddSelectionHandler(mouseHandler, WhiteSquare);
 
         WhiteSquare.AddInitializationMethod(() =>
@@ -329,13 +328,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         });
         //Go back to white square if bluesquare time lapses (and they aren't already holding down)
         BlueSquare.SpecifyTermination(() => (Time.time - BlueStartTime > currentTrial.BlueSquareDuration) && !InputBroker.GetMouseButton(0) && !BlueSquareReleased && !Grating, WhiteSquare);
-        BlueSquare.SpecifyTermination(() => (BlueSquareReleased && !Grating) || MovedOutside || HeldTooLong || HeldTooShort || TimeRanOut || GiveTouchReward, Feedback, () =>
-        {
-            Debug.Log("REWARD? " + (GiveTouchReward || GiveReleaseReward));
-            Debug.Log("HELD: " + HeldDuration);
-            Debug.Log("MIN: " + currentTrial.MinTouchDuration);
-            Debug.Log("MAX: " + currentTrial.MaxTouchDuration);
-        }); //If rewarding touch and they touched, or click the square and release, or run out of time. 
+        BlueSquare.SpecifyTermination(() => (BlueSquareReleased && !Grating) || MovedOutside || HeldTooLong || HeldTooShort || TimeRanOut || GiveTouchReward, Feedback); //If rewarding touch and they touched, or click the square and release, or run out of time. 
 
         //FEEDBACK state ----------------------------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>

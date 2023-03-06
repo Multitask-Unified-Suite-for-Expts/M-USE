@@ -183,6 +183,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         //WHITE SQUARE state ------------------------------------------------------------------------------------------------------------------------
         SelectionHandler<THR_StimDef> mouseHandler = new SelectionHandler<THR_StimDef>();
+        mouseHandler.SetMaxMoveDistance(200f);
         MouseTracker.AddSelectionHandler(mouseHandler, WhiteSquare);
 
         WhiteSquare.AddInitializationMethod(() =>
@@ -223,7 +224,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         //BLUE SQUARE state -------------------------------------------------------------------------------------------------------------------------
         MouseTracker.AddSelectionHandler(mouseHandler, BlueSquare);
-        float startTime;
 
         BlueSquare.AddInitializationMethod(() =>
         {
@@ -239,7 +239,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             BackdropTouchTime = 0;
             BackdropTouches = 0;
             HeldDuration = 0;
-            startTime = 0;
         });
         BlueSquare.AddUpdateMethod(() =>
         {

@@ -287,7 +287,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         CenterSelection.AddUpdateMethod(() =>
         {
-            //does centeringSpeed actually do anything?
+            //does centeringSpeed actually do anything? MAYBE MAKE IT SMALLER THAN 0!
             if(Wrapper.transform.position != CenteredPos)
                 Wrapper.transform.position = Vector3.MoveTowards(Wrapper.transform.position, CenteredPos,
                                                                 CenteringSpeed * Time.deltaTime);

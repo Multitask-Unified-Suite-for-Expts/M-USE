@@ -19,7 +19,7 @@ public class SelectionHandler<T> where T : StimDef
     private int NumNonStimSelection = 0;
     private int NumTouchDurationError = 0;
 
-    private float? MaxMoveDistance = 2;
+    private float? MaxMoveDistance = 200;
     
     
     // When a selection has been finalized and meets all the constraints, these will be populated

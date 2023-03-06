@@ -251,7 +251,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     BlueSquareTouched = true;
                 }
 
-                HeldDuration = mouseHandler.currentTargetDuration;
+                HeldDuration = mouseHandler.currentHoldDuration;
                 if(HeldDuration >= .04)
                     SquareMaterial.color = Color.blue;
 
@@ -302,7 +302,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 if (BlueSquareTouched && !BlueSquareReleased)
                 {
                     TouchReleaseTime = Time.time;
-                    HeldDuration = mouseHandler.currentTargetDuration;
+                    HeldDuration = mouseHandler.currentHoldDuration;
                     if (currentTrial.RewardRelease)
                     {
                         if(HeldDuration >= currentTrial.MinTouchDuration && HeldDuration <= currentTrial.MaxTouchDuration)

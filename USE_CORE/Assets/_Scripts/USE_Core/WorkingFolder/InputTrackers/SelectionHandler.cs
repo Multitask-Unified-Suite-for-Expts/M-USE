@@ -19,7 +19,7 @@ public class SelectionHandler<T> where T : StimDef
     private int NumNonStimSelection = 0;
     private int NumTouchDurationError = 0;
 
-    private float? MaxMoveDistance = 200;
+    private float? MaxMoveDistance = 20;
     
     
     // When a selection has been finalized and meets all the constraints, these will be populated
@@ -29,8 +29,10 @@ public class SelectionHandler<T> where T : StimDef
 
     public GameObject targetedGameObject;
     public float? currentTargetDuration;
+    public float? currentHoldDuration;
     public Vector3? CurrentSelectionLocation;
-    private Vector3 startingPosition;
+    private Vector2 currentSelectionLocationPix;
+    private Vector2 startingPosition;
     private bool isMouseDragging;
     private bool started;
     
@@ -47,7 +49,8 @@ public class SelectionHandler<T> where T : StimDef
         SelectedGameObject = null;
         SelectedStimDef = null;
         targetedGameObject = null;
-        currentTargetDuration = 0;
+        currentTargetDuration = null;
+        currentHoldDuration = null;
         NumNonStimSelection = 0; 
         NumTouchDurationError = 0; 
     }
@@ -142,11 +145,23 @@ public class SelectionHandler<T> where T : StimDef
             return;
         }
        
-        // Check if the left mouse button is pressed 
+        // Check if the left mouse button is being pressed 
         if (InputBroker.GetMouseButtonDown(0))
         {
             // Set the starting position of the touch, regardless of if on stim or not
-            startingPosition = CurrentSelectionLocation.Value;
+            startingPosition = GetScreenPos(CurrentSelectionLocation.Value);
+        }
+
+        if (InputBroker.GetMouseButton(0))
+        { //if the mouse button is still being held 
+            if (currentHoldDuration == null)
+            {
+                currentHoldDuration = 0;
+            }
+            else
+            {
+                currentHoldDuration += Time.deltaTime;
+            }
         }
         
         // Check if selectedGameObject is null and if the player is not dragging the mouse
@@ -187,7 +202,8 @@ public class SelectionHandler<T> where T : StimDef
         HeldTooShort = false;
         HeldTooLong = false;
 
-        if (Vector3.Distance(CurrentSelectionLocation.Value, startingPosition) > MaxMoveDistance)
+        
+        if (Vector2.Distance(GetScreenPos(CurrentSelectionLocation.Value), startingPosition) > MaxMoveDistance)
         {
             // Set the isMouseDragging flag and check if the left mouse button is released
             isMouseDragging = true;
@@ -202,8 +218,9 @@ public class SelectionHandler<T> where T : StimDef
         // Check if selectedGameObject is not the same as the targeted game object and the mouse is not being dragged
         if (selectedGameObject != targetedGameObject && !isMouseDragging)
         {
+            Debug.Log("asdlgkhsalfghaslfgh");
             currentTargetDuration = 0;
-            startingPosition = CurrentSelectionLocation.Value;
+            startingPosition = GetScreenPos(CurrentSelectionLocation.Value);
         }
         else if (!isMouseDragging)
         {
@@ -213,6 +230,12 @@ public class SelectionHandler<T> where T : StimDef
         
         // Set targeted game object to selectedGameObject
         targetedGameObject = selectedGameObject;
+    }
+
+    private Vector2 GetScreenPos(Vector3 worldPos)
+    {
+        Vector3 temp = Camera.main.WorldToScreenPoint(worldPos);
+        return new Vector2(temp.x, temp.y);
     }
     
 }

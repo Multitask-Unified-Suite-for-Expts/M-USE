@@ -29,7 +29,7 @@ public class SelectionHandler<T> where T : StimDef
 
     public GameObject targetedGameObject;
     public float? currentTargetDuration;
-    public float? currentHoldDuration;
+    public float currentHoldDuration;
     public Vector3? CurrentSelectionLocation;
     private Vector2 currentSelectionLocationPix;
     private Vector2 startingPosition;
@@ -150,18 +150,12 @@ public class SelectionHandler<T> where T : StimDef
         {
             // Set the starting position of the touch, regardless of if on stim or not
             startingPosition = GetScreenPos(CurrentSelectionLocation.Value);
+            currentHoldDuration = 0;
         }
 
         if (InputBroker.GetMouseButton(0))
         { //if the mouse button is still being held 
-            if (currentHoldDuration == null)
-            {
-                currentHoldDuration = 0;
-            }
-            else
-            {
-                currentHoldDuration += Time.deltaTime;
-            }
+            currentHoldDuration += Time.deltaTime;
         }
         
         // Check if selectedGameObject is null and if the player is not dragging the mouse

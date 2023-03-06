@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using USE_States;
 using USE_StimulusManagement;
@@ -422,6 +423,7 @@ namespace USE_ExperimentTemplate_Trial
 
             if (filePaths.Length >= 1)
                 contextPath = filePaths[0];
+
             else
             {
                 contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0]; //Use Default LinearDark if can't find file.

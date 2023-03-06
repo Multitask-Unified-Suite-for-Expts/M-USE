@@ -84,8 +84,9 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                 mgTL.playerViewLoaded = false;
             }
                 
-            //HARD CODED TO MINIMIZE EMPTY SKYBOX DURATION, CAN'T ACCESS TRIAL DEF YET & CONTEXT NOT IN BLOCK DEF
-            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + "Concrete3.png");
+            //HARD CODED TO MINIMIZE EMPTY SKYBOX DURATION, CAN'T ACCESS TRIAL DEF
+            Debug.Log("CONTEXT NAME: " + mgBD.ContextName);
+            RenderSettings.skybox = CreateSkybox(mgTL.GetContextNestedFilePath(ContextExternalFilePath, mgBD.ContextName, "LinearDark"));
          //   EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
             
             ResetBlockVariables();

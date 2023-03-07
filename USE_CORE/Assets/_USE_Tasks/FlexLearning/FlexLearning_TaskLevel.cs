@@ -52,7 +52,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             flTL.TokensWithStimOn = flBD.TokensWithStimOn;
             
             ResetBlockVariables();
-            RenderSettings.skybox = CreateSkybox(flTL.GetContextNestedFilePath(flTL.ContextExternalFilePath, flBD.ContextName));
+            RenderSettings.skybox = CreateSkybox(flTL.GetContextNestedFilePath(ContextExternalFilePath, flBD.ContextName));
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
             
             //Set the Initial Token Values for the Block

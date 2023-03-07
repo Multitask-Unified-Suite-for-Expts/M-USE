@@ -21,7 +21,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int NumChosenLowerEffort_Task = 0;
     [HideInInspector] public int NumChosenSameReward_Task = 0;
     [HideInInspector] public int NumChosenSameEffort_Task = 0;
-
+    [HideInInspector] public int NumAborted_Task = 0;
     [HideInInspector] public string CurrentBlockString;
 
     EffortControl_BlockDef currentBlock => GetCurrentBlockDef<EffortControl_BlockDef>();
@@ -101,6 +101,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         NumChosenHigherReward_Task += trialLevel.NumHigherRewardChosen_Block;
         NumChosenLowerReward_Task += trialLevel.NumLowerRewardChosen_Block;
         NumChosenSameReward_Task += trialLevel.NumSameRewardChosen_Block;
+        NumAborted_Task += trialLevel.NumAborted_Block;
     }
 
     public override OrderedDictionary GetSummaryData()
@@ -126,17 +127,17 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     {
         ClearStrings();
 
-        CurrentBlockString = ("<b>Block Info:</b>" +
-                        "\nTrialsCompleted: " + trialLevel.Completions_Block +
-                        "\nTouches: " + trialLevel.TotalTouches_Block +
-                        "\nRewardPulses: " + trialLevel.RewardPulses_Block +
-                        "\nChoseLeft: " + trialLevel.NumChosenLeft_Block +
-                        "\nChoseRight: " + trialLevel.NumChosenRight_Block +
-                        "\nChoseHigherReward: " + trialLevel.NumHigherRewardChosen_Block +
-                        "\nChoseLowerReward: " + trialLevel.NumLowerRewardChosen_Block +
-                        "\nChoseSameReward: " + trialLevel.NumSameRewardChosen_Block +
-                        "\nChoseHigherEffort: " + trialLevel.NumHigherEffortChosen_Block +
-                        "\nChoseLowerEffort: " + trialLevel.NumLowerEffortChosen_Block +
+        CurrentBlockString = ("<b>Block Num:</b>" + trialLevel.BlockCount + 
+                        "\nTrials Completed: " + trialLevel.Completions_Block +
+                        "\n\nTouches: " + trialLevel.TotalTouches_Block +
+                        "\nReward Pulses: " + trialLevel.RewardPulses_Block +
+                        "\n\nChose Left: " + trialLevel.NumChosenLeft_Block +
+                        "\nChose Right: " + trialLevel.NumChosenRight_Block +
+                        "\n\nChose Higher Reward: " + trialLevel.NumHigherRewardChosen_Block +
+                        "\nChose Lower Reward: " + trialLevel.NumLowerRewardChosen_Block +
+                        "\nChose Same Reward: " + trialLevel.NumSameRewardChosen_Block +
+                        "\n\nChose Higher Effort: " + trialLevel.NumHigherEffortChosen_Block +
+                        "\nChose Lower Effort: " + trialLevel.NumLowerEffortChosen_Block +
                         "\nChoseSameEffort: " + trialLevel.NumSameEffortChosen_Block +
                         "\n");
         BlockSummaryString.AppendLine(CurrentBlockString).ToString();
@@ -159,6 +160,27 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     {
         CurrentBlockString = "";
         BlockSummaryString.Clear();
+    }
+    public override void SetTaskSummaryString()
+    {
+        if (trialLevel.TrialCount_InTask != 0)
+        {
+            CurrentTaskSummaryString.Clear(); 
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" + 
+                                            $"\n# Trials: {trialLevel.TrialCount_InTask} ({(Math.Round(decimal.Divide(NumAborted_Task,(trialLevel.TrialCount_InTask)),2))*100}% aborted)" + 
+                                            $"\n# Blocks: {BlockCount}" + 
+                                            $"\n# Reward Pulses: {RewardPulses_Task}" +
+                                            $"\n# Token Bar Completions: {Completions_Task}" +
+                                            $"\n% Chose Left: {(Math.Round(decimal.Divide(NumChosenLeft_Task,(trialLevel.TrialCount_InTask)),2))*100}%" +
+                                            $"\n% Chose Higher Reward: {(Math.Round(decimal.Divide(NumChosenHigherReward_Task,(trialLevel.TrialCount_InTask)),2))*100}%" + 
+                                            $"\n% Chose Higher Effort: {(Math.Round(decimal.Divide(NumChosenHigherEffort_Task,(trialLevel.TrialCount_InTask)),2))*100}%");
+
+        }
+        else
+        {
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
+        }
+            
     }
 
 }

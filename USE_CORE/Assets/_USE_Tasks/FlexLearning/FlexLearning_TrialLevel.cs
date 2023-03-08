@@ -173,7 +173,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         });
         InitTrial.AddUpdateMethod(() =>
         {
-            if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
+            if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
             {
                 TouchDurationError = true;
                 TouchDurationErrorFeedback(mouseHandler, false);
@@ -203,7 +203,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
-            if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
+            if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
             {
                 TouchDurationError = true;
                 SetTrialSummaryString();
@@ -486,22 +486,22 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     private void TouchDurationErrorFeedback(SelectionHandler<FlexLearning_StimDef> MouseHandler, bool deactivateAfter)
     {
         AudioFBController.Play("Negative");
-        if (MouseHandler.GetHeldTooShort())
+        if (MouseHandler.GetSelectionTooShort())
         {
             if (StartButton.activeInHierarchy)
                 StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
             else
                 StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
         }
-        else if (MouseHandler.GetHeldTooLong())
+        else if (MouseHandler.GetSelectionTooLong())
         {
             if (StartButton.activeInHierarchy)
                 StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
             else
                 StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
         }
-        MouseHandler.SetHeldTooLong(false);
-        MouseHandler.SetHeldTooShort(false);
+        MouseHandler.SetSelectionTooLong(false);
+        MouseHandler.SetSelectionTooShort(false);
         TouchDurationError = false;
         TouchDurationError_InBlock++;
     }

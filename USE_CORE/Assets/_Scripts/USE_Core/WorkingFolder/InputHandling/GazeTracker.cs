@@ -11,15 +11,15 @@ public class GazeTracker : InputTracker
 
     public override void AddFieldsToFrameData(DataController frameData)
     {
-        frameData.AddDatum("GazePosition", () => CurrentSelectionLocation);
+        frameData.AddDatum("GazePosition", () => CurrentInputScreenPosition);
         frameData.AddDatum("HoverObject", () => HoverObject != null ? HoverObject.name : null);
     }
 
     public override GameObject FindCurrentTarget()
     {
-        if (CurrentSelectionLocation != null)
+        if (CurrentInputScreenPosition != null)
         {
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(CurrentSelectionLocation.Value), out RaycastHit hit, Mathf.Infinity))
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(CurrentInputScreenPosition.Value), out RaycastHit hit, Mathf.Infinity))
             {
                 HoverObject = hit.transform.root.gameObject;
                 return HoverObject;
@@ -31,7 +31,7 @@ public class GazeTracker : InputTracker
     {
         if (SpoofGazeWithMouse)
         {
-            CurrentSelectionLocation = InputBroker.mousePosition;
+            CurrentInputScreenPosition = InputBroker.mousePosition;
         }
     }
 }

@@ -34,6 +34,7 @@ SOFTWARE.
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class InputBroker{
 
@@ -267,4 +268,39 @@ public class InputBroker{
 		yield return new WaitForEndOfFrame();
 		InputBroker.DeleteMouseButton(button);
 	}
+
+    public static GameObject RaycastBoth(Vector3 touchPos, Vector3 direction)
+    {
+        GameObject target = null;
+        float distance2D = 0;
+        float distance3D = 0;
+
+        //3D:
+        RaycastHit hit;
+        if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out hit, Mathf.Infinity))
+        {
+            target = hit.transform.gameObject;
+            distance3D = (hit.point - touchPos).magnitude;
+        }
+
+        //2D:
+        PointerEventData eventData = new PointerEventData(EventSystem.current);
+        eventData.position = touchPos;
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+        foreach (RaycastResult result in results)
+        {
+            if (result.gameObject != null)
+            {
+                distance2D = (result.gameObject.transform.position - touchPos).magnitude;
+                if (target == null || (distance3D != 0 && (distance2D < distance3D)))
+                {
+                    target = result.gameObject;
+                    break;
+                }
+            }
+        }
+        return target;
+    }
 }

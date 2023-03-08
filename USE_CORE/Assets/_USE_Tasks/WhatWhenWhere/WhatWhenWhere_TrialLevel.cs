@@ -237,7 +237,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         StartButton.AddUpdateMethod(() =>
         {
-            if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
+            if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
             {
                 touchDurationError = true;
                 SetTrialSummaryString();
@@ -272,7 +272,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         ChooseStimulus.AddUpdateMethod(() =>
         { 
             // Evaluates whether or not the player selects the stimulus for long enough
-            if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
+            if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
             {
                 touchDurationError = true;
                 SetTrialSummaryString();
@@ -942,12 +942,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         errorTypeString = "TouchDurationError";
         AudioFBController.Play("Negative");
         //eventually replace with state timer logic
-        if (MouseHandler.GetHeldTooShort())
+        if (MouseHandler.GetSelectionTooShort())
             StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
-        else if (MouseHandler.GetHeldTooLong())
+        else if (MouseHandler.GetSelectionTooLong())
             StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
-        MouseHandler.SetHeldTooLong(false);
-        MouseHandler.SetHeldTooShort(false);
+        MouseHandler.SetSelectionTooLong(false);
+        MouseHandler.SetSelectionTooShort(false);
         touchDurationError = false;
         touchDurationErrorCount_InBlock++;
     }

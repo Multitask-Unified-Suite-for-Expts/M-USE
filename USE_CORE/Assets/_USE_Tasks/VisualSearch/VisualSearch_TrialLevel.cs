@@ -164,7 +164,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
         InitTrial.AddUpdateMethod(() =>
         {
-            if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
+            if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
             {
                 TouchDurationError = true;
                 TouchDurationErrorFeedback(mouseHandler, false);
@@ -195,7 +195,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
-            if (mouseHandler.GetHeldTooLong() || mouseHandler.GetHeldTooShort())
+            if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
             {
                 TouchDurationError = true;
                 SetTrialSummaryString();
@@ -482,14 +482,14 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private void TouchDurationErrorFeedback(SelectionHandler<VisualSearch_StimDef> MouseHandler, bool deactivateAfter)
     {///CANT FIGURE OUT WHY I CANT USE TEMPLATE, ANYWAYS MAKE A SEPARATE FEEDBACK SCRIPT
         AudioFBController.Play("Negative");
-        if (MouseHandler.GetHeldTooShort())
+        if (MouseHandler.GetSelectionTooShort())
         {
             if (StartButton.activeInHierarchy)
                 StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
             else
                 StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
         }
-        else if (MouseHandler.GetHeldTooLong())
+        else if (MouseHandler.GetSelectionTooLong())
         {
             if (StartButton.activeInHierarchy)
                 StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
@@ -497,8 +497,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
         }
         
-        MouseHandler.SetHeldTooLong(false);
-        MouseHandler.SetHeldTooShort(false);
+        MouseHandler.SetSelectionTooLong(false);
+        MouseHandler.SetSelectionTooShort(false);
         TouchDurationError = false;
         TouchDurationError_InBlock++;
     }

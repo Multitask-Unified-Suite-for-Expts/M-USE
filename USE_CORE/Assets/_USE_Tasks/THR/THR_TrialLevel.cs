@@ -242,7 +242,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         BlueSquare.AddUpdateMethod(() =>
         {
             //If they clicked the Square (and its not still grating from a previous error)
-            if (MouseTracker.CurrentTargetGameObject == SquareGO && !Grating)
+            if (MouseTracker.TargetedGameObject == SquareGO && !Grating)
             {
                 if (!BlueSquareTouched)
                 {
@@ -250,7 +250,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     BlueSquareTouched = true;
                 }
 
-                HeldDuration = mouseHandler.currentHoldDuration;
+                HeldDuration = mouseHandler.CurrentTargetDuration;
                 if(HeldDuration >= .04)
                     SquareMaterial.color = Color.blue;
 
@@ -261,14 +261,14 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     RewardEarnedTime = Time.time;
                 }
                 //Auto stop them if holding the square for max duration
-                if (mouseHandler.currentHoldDuration > currentTrial.MaxTouchDuration)
+                if (mouseHandler.CurrentTargetDuration > currentTrial.MaxTouchDuration)
                 {
                     NumReleasedLate_Block++;
                     HeldTooLong = true;
                 }
             }
             //If they clicked the Backdrop (and not after clicking and holding the square (handled down below))
-            if (MouseTracker.CurrentTargetGameObject == BackdropGO && !BlueSquareTouched && !Grating)
+            if (MouseTracker.TargetedGameObject == BackdropGO && !BlueSquareTouched && !Grating)
             {
                 ClickedOutsideSquare = true;
                 if (BackdropTouches == 0)
@@ -289,7 +289,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             }
 
             //When they first touch blue square, and then move it over to backdrop.
-            if (MouseTracker.CurrentTargetGameObject == BackdropGO && BlueSquareTouched)
+            if (MouseTracker.TargetedGameObject == BackdropGO && BlueSquareTouched)
             {
                 Input.ResetInputAxes();
                 NumTouchesMovedOutside_Trial++;
@@ -301,7 +301,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 if (BlueSquareTouched && !BlueSquareReleased)
                 {
                     TouchReleaseTime = Time.time;
-                    HeldDuration = mouseHandler.currentHoldDuration;
+                    HeldDuration = mouseHandler.CurrentTargetDuration;
                     if (currentTrial.RewardRelease)
                     {
                         if(HeldDuration >= currentTrial.MinTouchDuration && HeldDuration <= currentTrial.MaxTouchDuration)

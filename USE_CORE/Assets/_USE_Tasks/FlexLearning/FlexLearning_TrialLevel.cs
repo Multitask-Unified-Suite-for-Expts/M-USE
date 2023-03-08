@@ -162,7 +162,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         InitTrial.AddInitializationMethod(() =>
         {
             CurrentTaskLevel.SetBlockSummaryString();
-            CurrentTaskLevel.SetTaskSummaryString();
+            if (TrialCount_InTask != 0)
+                CurrentTaskLevel.SetTaskSummaryString();
             
             //Initialize FB Controller Variables
             mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);

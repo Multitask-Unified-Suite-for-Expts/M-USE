@@ -154,11 +154,11 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         {
             CurrentTaskSummaryString.Clear();
             CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" + 
-                                                        $"\n# Trials: {flTL.TrialCount_InTask} ({(Math.Round(decimal.Divide(AbortedTrials_InTask,(flTL.TrialCount_InTask)),2))*100}% aborted)" + 
-                                                        $"\n# Blocks: {BlockCount}" + 
+                                                        $"\n<b># Trials:</b> {flTL.TrialCount_InTask} ({(Math.Round(decimal.Divide(AbortedTrials_InTask,(flTL.TrialCount_InTask)),2))*100}% aborted)" + 
+                                                        $"\t<b># Blocks:</b> {BlockCount}" + 
+                                                        $"\t<b># Reward Pulses:</b> {NumRewardPulses_InTask}" +
                                                         $"\nAccuracy: {(Math.Round(decimal.Divide(NumCorrect_InTask,(flTL.TrialCount_InTask)),2))*100}%" + 
-                                                        $"\nAvg Search Duration: {avgSearchDuration}" +
-                                                        $"\n# Reward Pulses: {NumRewardPulses_InTask}" +
+                                                        $"\tAvg Search Duration: {avgSearchDuration}" +
                                                         $"\n# Token Bar Filled: {NumTokenBarFull_InTask}" +
                                                         $"\n# Tokens Collected: {TotalTokensCollected_InTask}");
         }

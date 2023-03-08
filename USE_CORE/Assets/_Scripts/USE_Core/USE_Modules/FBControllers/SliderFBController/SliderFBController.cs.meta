@@ -3,7 +3,14 @@ guid: 468dee814850444e2a84e6626d4453d6
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - SliderPrefab: {fileID: 2122826529044376720, guid: 5a5bf5ae5720f8143853442d9ce8eb9d,
+      type: 3}
+  - SliderHaloPrefab: {fileID: 4317252536729789219, guid: 5efb6373ff4d278409cfb7efbcb9b7f7,
+      type: 3}
+  - SliderGO: {instanceID: 0}
+  - SliderHaloGO: {instanceID: 0}
+  - Slider: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

@@ -132,6 +132,7 @@ namespace USE_ExperimentTemplate_Trial
                 {
                     sg.LoadStims();
                 }
+                ResetTrialCounters();
             });
 
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
@@ -426,7 +427,7 @@ namespace USE_ExperimentTemplate_Trial
 
             else
             {
-                contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0]; //Use Default LinearDark if can't find file.
+                contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0];
                 Debug.Log($"Context File Path Not Found. Defaulting to {backupContextName}.");
             }
 
@@ -441,6 +442,11 @@ namespace USE_ExperimentTemplate_Trial
             BackdropStripesTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "bg.png");
             BackdropTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "BackdropGrey.png");
             MazeBackgroundTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "MazeBackground.png");
+        }
+
+        public virtual void ResetTrialCounters()
+        {
+
         }
     }
 

@@ -381,9 +381,12 @@ MonoBehaviour:
     IsActive: 0
   TrialStims: []
   ExperimenterDisplayController: {fileID: 0}
+  SessionInfoPanel: {fileID: 0}
+  TrialCompleteTime: 0
   AudioFBController: {fileID: 0}
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
+  SliderFBController: {fileID: 0}
   MouseTracker: {fileID: 0}
   GazeTracker: {fileID: 0}
   SelectionType: 
@@ -398,15 +401,13 @@ MonoBehaviour:
   BackdropTexture: {fileID: 0}
   MazeBackgroundTexture: {fileID: 0}
   WWW_CanvasGO: {fileID: 2128323196}
-  SliderPrefab: {fileID: 2122826529044376720, guid: 4edf39309c5fdfe4786b98a260c324e0,
+  SliderPrefab: {fileID: 2122826529044376720, guid: 5a5bf5ae5720f8143853442d9ce8eb9d,
     type: 3}
-  SliderHaloPrefab: {fileID: 4317252536729789219, guid: f372d073062e1954ba552b4c8bbb2d93,
+  SliderHaloPrefab: {fileID: 4317252536729789219, guid: 5efb6373ff4d278409cfb7efbcb9b7f7,
     type: 3}
   ContextExternalFilePath: 
   ButtonPosition: {x: 0, y: 0, z: 0}
   ButtonScale: {x: 0, y: 0, z: 0}
-  FBSquarePosition: {x: 0, y: 0, z: 0}
-  FBSquareScale: {x: 0, y: 0, z: 0}
   StimFacingCamera: 0
   ShadowType: 
   NeutralITI: 0
@@ -593,6 +594,7 @@ MonoBehaviour:
   PreloadedStimGameObjects: []
   PrefabStimPaths: []
   ExperimenterDisplayController: {fileID: 0}
+  SessionInfoPanel: {fileID: 0}
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}

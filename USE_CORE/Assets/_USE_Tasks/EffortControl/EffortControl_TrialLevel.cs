@@ -463,7 +463,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     }
 
     //HELPER FUNCTIONS -------------------------------------------------------------------------------------------------------
-    public override void ResetTrialCounters()
+    public override void ResetTrialVariables()
     {
         ClickCount = 0;
         Response = -1;

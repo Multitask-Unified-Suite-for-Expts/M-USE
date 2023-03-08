@@ -444,7 +444,7 @@ namespace USE_ExperimentTemplate_Trial
             MazeBackgroundTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "MazeBackground.png");
         }
 
-        public virtual void ResetTrialCounters()
+        public virtual void ResetTrialVariables()
         {
 
         }

@@ -189,7 +189,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         ChooseBalloon.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they holding down
-            //maybe this should be a method in selectionhandlers?
 
             MaxScale = new Vector3(60, 0, 60);
             LeftScaleUpAmount = MaxScale / currentTrial.NumClicksLeft;

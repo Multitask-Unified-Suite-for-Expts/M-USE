@@ -84,6 +84,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] GameObject chosenStimObj;
     [HideInInspector] ContinuousRecognition_StimDef chosenStimDef;
 
+    [HideInInspector] public int NumPC_Trial;
+    [HideInInspector] public int NumNew_Trial;
+    [HideInInspector] public int NumPNC_Trial;
+
 
     //Config Variables
     [HideInInspector]
@@ -605,9 +609,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     void SetTrialSummaryString()
     {
         TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
-                             "\nPC_Stim: " + currentTrial.PC_Stim.Count +
-                             "\nNew_Stim: " + currentTrial.New_Stim.Count +
-                             "\nPNC_Stim: " + currentTrial.PNC_Stim.Count;
+                             "\nPC_Stim: " + NumPC_Trial +
+                             "\nNew_Stim: " + NumNew_Trial +
+                             "\nPNC_Stim: " + NumPNC_Trial;
     }
 
     Vector3[] CenterFeedbackLocations(Vector3[] locations, int numLocations)
@@ -843,6 +847,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     //The TrialStims group are auto loaded in the SetupTrial StateInitialization, and destroyed in the FinishTrial StateTermination
     protected override void DefineTrialStims()
     {
+        NumPC_Trial = 0;
+        NumNew_Trial = 0;
+        NumPNC_Trial = 0;
+
         if (TrialCount_InBlock == 0)
         {
             trialStims = null;
@@ -868,6 +876,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 currentTrial.TrialStimIndices.Add(ranNum);
                 currentTrial.Unseen_Stim.Remove(ranNum);
                 currentTrial.New_Stim.Add(ranNum);
+                NumNew_Trial++;
             }
 
             trialStims = new StimGroup("TrialStims", ExternalStims, currentTrial.TrialStimIndices);
@@ -903,20 +912,27 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 currentTrial.TrialStimIndices.Add(current);
                 currentTrial.Unseen_Stim.Remove(current);
                 currentTrial.New_Stim.Add(current);
+                NumNew_Trial++;
             }
 
             List<int> PC_Copy = ShuffleList(currentTrial.PC_Stim).ToList();
             if (PC_Copy.Count > 1)
                 PC_Copy = PC_Copy.GetRange(0, PC_Num);
             for (int i = 0; i < PC_Copy.Count; i++)
+            {
                 currentTrial.TrialStimIndices.Add(PC_Copy[i]);
+                NumPC_Trial++;
+            }
             
 
             List<int> PNC_Copy = ShuffleList(currentTrial.PNC_Stim).ToList();
             if (PNC_Copy.Count > 1)
                 PNC_Copy = PNC_Copy.GetRange(0, PNC_Num);
             for (int i = 0; i < PNC_Copy.Count; i++)
+            {
                 currentTrial.TrialStimIndices.Add(PNC_Copy[i]);
+                NumPNC_Trial++;
+            }
 
             trialStims = new StimGroup($"TrialStims", ExternalStims, currentTrial.TrialStimIndices);
             trialStims.SetLocations(currentTrial.TrialStimLocations);

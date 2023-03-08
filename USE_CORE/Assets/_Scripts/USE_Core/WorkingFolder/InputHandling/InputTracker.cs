@@ -23,8 +23,7 @@ public abstract class InputTracker : MonoBehaviour
         
         void CheckForSelection_Handler(object sender, EventArgs e)
         {
-            if(selectionPossible == null || selectionPossible())
-                selectionHandler.CheckForSelection(TargetedGameObject, CurrentInputScreenPosition);
+            selectionHandler.CheckForSelection(TargetedGameObject, CurrentInputScreenPosition);
         }
 
         startState.StateInitializationFinished += (object sender, EventArgs e) =>
@@ -59,8 +58,5 @@ public abstract class InputTracker : MonoBehaviour
     public virtual void CustomUpdate() //Anything a particular tracker needs to track that isn't a target neccessarily (ex: click count). 
     {
     }
-    
-    
-    public delegate bool BoolDelegate();
 
 }

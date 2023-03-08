@@ -132,7 +132,7 @@ namespace USE_ExperimentTemplate_Trial
                 {
                     sg.LoadStims();
                 }
-                ResetTrialCounters();
+                ResetTrialVariables();
             });
 
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);

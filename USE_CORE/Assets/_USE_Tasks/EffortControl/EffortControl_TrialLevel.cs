@@ -29,57 +29,52 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     public GameObject EC_CanvasGO;
     public USE_StartButton StartButtonClassInstance;
 
-    //Game Objects:
-    GameObject StartButton, StimLeft, StimRight, TrialStim, BalloonContainerLeft, BalloonContainerRight,
+    private GameObject StartButton, StimLeft, StimRight, TrialStim, BalloonContainerLeft, BalloonContainerRight,
                BalloonOutline, RewardContainerLeft, RewardContainerRight, Reward, MiddleBarrier, Borders;
 
-    //make private scope explicit, delete hideininspector for non public vars
-    //Colors:
-    [HideInInspector] Color Red;
-    [HideInInspector] Color32 OffWhiteOutlineColor = new Color32(250, 249, 246, 0);
+    private Color Red;
+    private Color32 OffWhiteOutlineColor = new Color32(250, 249, 246, 0);
 
-    //NT: remove hideininspectors if private
-    [HideInInspector] Vector3 LeftScaleUpAmount;
-    [HideInInspector] Vector3 RightScaleUpAmount;
-    [HideInInspector] Vector3 MaxScale;
-    [HideInInspector] Vector3 TrialStimInitLocalScale;
-    [HideInInspector] Vector3 LeftContainerOriginalPosition;
-    [HideInInspector] Vector3 RightContainerOriginalPosition;
-    [HideInInspector] Vector3 LeftRewardContainerOriginalPosition;
-    [HideInInspector] Vector3 RightRewardContainerOriginalPosition;
-    [HideInInspector] Vector3 LeftStimOriginalPosition;
-    [HideInInspector] Vector3 RightStimOriginalPosition;
+    private Vector3 LeftScaleUpAmount;
+    private Vector3 RightScaleUpAmount;
+    private Vector3 MaxScale;
+    private Vector3 TrialStimInitLocalScale;
+    private Vector3 LeftContainerOriginalPosition;
+    private Vector3 RightContainerOriginalPosition;
+    private Vector3 LeftRewardContainerOriginalPosition;
+    private Vector3 RightRewardContainerOriginalPosition;
+    private Vector3 LeftStimOriginalPosition;
+    private Vector3 RightStimOriginalPosition;
 
     //Set in task level:
     [HideInInspector] public bool IsHuman;
     [HideInInspector] public string MaterialFilePath;
 
-    //Misc Variables:
     [System.NonSerialized] public int Response = -1;
-    [HideInInspector] int ClicksNeeded; //becomes left/right num clicks once they make selection. 
-    [HideInInspector] int ClickCount;
-    [HideInInspector] bool AddTokenInflateAudioPlayed;
-    [HideInInspector] bool ObjectsCreated;
-    [HideInInspector] List<GameObject> RemoveParentList;
-    [HideInInspector] GameObject Wrapper;
+    private int ClicksNeeded; //becomes left/right num clicks once they make selection. 
+    private int ClickCount;
+    private bool AddTokenInflateAudioPlayed;
+    private bool ObjectsCreated;
+    [HideInInspector] private List<GameObject> RemoveParentList;
+    [HideInInspector] private GameObject Wrapper;
 
-    string SideChoice; //left or right
-    string RewardChoice; //higher or lower
-    string EffortChoice; //higher or lower
+    private string SideChoice; //left or right
+    private string RewardChoice; //higher or lower
+    private string EffortChoice; //higher or lower
 
     //To center the balloon they selected:
-    public float CenteringSpeed = 1f;
-    [HideInInspector] Vector3 CenteredPos;
+    public float CenteringSpeed;
+    private Vector3 CenteredPos;
     [HideInInspector] public bool Flashing;
 
     //Variables to Inflate balloon at interval rate
-    [HideInInspector] float InflateClipDuration;
-    [HideInInspector] bool Inflate;
-    [HideInInspector] private readonly float MaxInflation_Y = 35f;
-    [HideInInspector] float ScalePerInflation_Y;
+    private float InflateClipDuration;
+    private bool Inflate;
+    private readonly float MaxInflation_Y = 35f;
+    private float ScalePerInflation_Y;
     [HideInInspector] public float ScaleTimer;
-    [HideInInspector] Vector3 IncrementAmounts;
-    Vector3 NextScale;
+    private Vector3 IncrementAmounts;
+    private Vector3 NextScale;
 
     //Trial specific Data variables:
     [HideInInspector] public float AvgClickTime;
@@ -98,7 +93,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int NumSameRewardChosen_Block;
     [HideInInspector] public int NumAborted_Block;
 
-
     [HideInInspector] public ConfigNumber scalingInterval, inflateDuration, itiDuration, popToFeedbackDelay, choiceToTouchDelay, sbToBalloonDelay; //ScalingInterval is used for balloonInflation!
 
     [HideInInspector] public GameObject MaxOutline_Left;
@@ -115,7 +109,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public int TrialTouches;
 
-    public List<GameObject> ObjectList;
+    [HideInInspector] public List<GameObject> ObjectList;
 
     public override void DefineControlLevel()
     {
@@ -149,6 +143,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if (!ObjectsCreated)
                 CreateObjects();
+
+            CenteringSpeed = 1.5f;
         });
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
@@ -173,17 +169,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             ResetRelativeStartTime(); 
             DisableAllGameobjects();
             StartButton.SetActive(true);
-            
-            //maybe make reset counters method?
-            ClickCount = 0;
-            Response = -1;
-            ChooseDuration = 0; //reset how long it took them to choose each trial.
-            ClicksNeeded = 0;
-            AvgClickTime = 0;
-            SideChoice = "";
-            EffortChoice = "";
-            RewardChoice = "";
-            TrialTouches = 0;
 
             ResetToOriginalPositions();
 
@@ -294,10 +279,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         CenterSelection.AddUpdateMethod(() =>
         {
-            //does centeringSpeed actually do anything? MAYBE MAKE IT SMALLER THAN 0!
             if(Wrapper.transform.position != CenteredPos)
-                Wrapper.transform.position = Vector3.MoveTowards(Wrapper.transform.position, CenteredPos,
-                                                                CenteringSpeed * Time.deltaTime);
+                Wrapper.transform.position = Vector3.MoveTowards(Wrapper.transform.position, CenteredPos, CenteringSpeed * Time.deltaTime);
         });
         CenterSelection.SpecifyTermination(() => Wrapper.transform.position == CenteredPos, Delay);
 
@@ -478,12 +461,24 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //ITI state -------------------------------------------------------------------------------------------------------
         ITI.AddTimer(itiDuration.value, FinishTrial);
         
-        
         DefineTrialData();
         DefineFrameData();
     }
 
     //HELPER FUNCTIONS -------------------------------------------------------------------------------------------------------
+    public override void ResetTrialVariables()
+    {
+        ClickCount = 0;
+        Response = -1;
+        ChooseDuration = 0;
+        ClicksNeeded = 0;
+        AvgClickTime = 0;
+        SideChoice = "";
+        EffortChoice = "";
+        RewardChoice = "";
+        TrialTouches = 0;
+    }
+
     public override void FinishTrialCleanup() //called automatically at start of FinishTrial state
     {
         if (TrialStim != null && TrialStim.activeInHierarchy)

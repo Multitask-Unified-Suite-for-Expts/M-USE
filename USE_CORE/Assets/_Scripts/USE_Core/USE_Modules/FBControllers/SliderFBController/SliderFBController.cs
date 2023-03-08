@@ -51,6 +51,7 @@ public class SliderFBController : MonoBehaviour
         SliderHaloGO = Instantiate(SliderHaloPrefab, sliderCanvas);
         SliderGO.SetActive(false);
         SliderHaloGO.SetActive(false);
+        flashBeepInterval = audioFBController.GetClip("Positive").length;
     }
 
     public void ConfigureSlider(Vector3 sliderPosition, float sliderSize)

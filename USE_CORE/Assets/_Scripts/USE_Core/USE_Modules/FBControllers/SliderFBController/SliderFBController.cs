@@ -27,6 +27,7 @@ public class SliderFBController : MonoBehaviour
     private float updateTime = 0.5f;
     private float flashBeepInterval;
     private int flashingNumBeeps = 3; //Num beeps for tokenbar flashing audio
+    private int sliderInitialValue = 0;
 
     private float targetValue;
     private float sliderValueChange;
@@ -54,11 +55,12 @@ public class SliderFBController : MonoBehaviour
         flashBeepInterval = audioFBController.GetClip("Positive").length;
     }
 
-    public void ConfigureSlider(Vector3 sliderPosition, float sliderSize)
+    public void ConfigureSlider(Vector3 sliderPosition, float sliderSize, float sliderInitialValue = 0)
     {
         SliderHaloImage = SliderHaloGO.GetComponent<Image>();
         Slider = SliderGO.GetComponent<Slider>();
         Slider.value = 0;
+        Slider.value += sliderInitialValue;
         SliderGO.transform.localPosition = sliderPosition;
         SliderHaloGO.transform.localPosition = sliderPosition;
         Slider.transform.localScale = new Vector3(sliderSize / 10f, sliderSize / 10f, 1f);
@@ -165,6 +167,7 @@ public class SliderFBController : MonoBehaviour
         targetValue = Slider.value + sliderValueChange;
         AnimateSlider(sliderValueChange);
     }
+
     IEnumerator FlashingBeeps(int numBeeps)
     {
         while(numBeeps > 0)

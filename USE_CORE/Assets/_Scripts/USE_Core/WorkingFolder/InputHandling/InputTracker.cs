@@ -16,14 +16,15 @@ public abstract class InputTracker : MonoBehaviour
     public delegate bool IsSelectionPossible();
 
     //Adds a selection handler (automatically checks for selected objects) to this instance of an InputTracker
-    public void AddSelectionHandler<T>(SelectionHandler<T> selectionHandler, State startState, State endState = null) where T : StimDef
+    public void AddSelectionHandler<T>(SelectionHandler<T> selectionHandler, State startState, State endState = null, BoolDelegate selectionPossible = null) where T : StimDef
     {
         if (endState == null)
             endState = startState;
         
         void CheckForSelection_Handler(object sender, EventArgs e)
         {
-            selectionHandler.CheckForSelection(TargetedGameObject, CurrentInputScreenPosition);
+            if(selectionPossible == null || selectionPossible())
+                selectionHandler.CheckForSelection(TargetedGameObject, CurrentInputScreenPosition);
         }
 
         startState.StateInitializationFinished += (object sender, EventArgs e) =>
@@ -58,5 +59,8 @@ public abstract class InputTracker : MonoBehaviour
     public virtual void CustomUpdate() //Anything a particular tracker needs to track that isn't a target neccessarily (ex: click count). 
     {
     }
+    
+    
+    public delegate bool BoolDelegate();
 
 }

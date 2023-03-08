@@ -30,7 +30,7 @@ public class SelectionHandler<T> where T : StimDef
     private Vector2 CurrentInputScreenPositionPix;
     private bool MovedPastMaxDistance;
     private bool SelectionHandlerStarted;
-    public Vector3 SelectionStartPosition;
+    public Vector2? SelectionStartPosition;
 
 
     public void Start()
@@ -135,17 +135,20 @@ public class SelectionHandler<T> where T : StimDef
     public void CheckForSelection(GameObject targetedGO, Vector3? currentLoc) //TargetedGO is what they're currently hovering over
     {
         CurrentInputScreenPosition = currentLoc;
+        //SelectedGameObject = null;
+        //SelectedStimDef = null;
 
-        SelectedGameObject = null;
-        SelectedStimDef = null;
+        if (targetedGO == null)
+            SelectionStartPosition = null;
 
         // Check if handler has started and if there is a current selection location
         if (!SelectionHandlerStarted || CurrentInputScreenPosition == null) 
             return;
 
         //Have they moved too far?
-        if (Vector2.Distance(GetScreenPos(CurrentInputScreenPosition.Value), SelectionStartPosition) > MaxMoveDistance)
+        if (SelectionStartPosition != null && Vector2.Distance(GetScreenPos(CurrentInputScreenPosition.Value), SelectionStartPosition.Value) > MaxMoveDistance)
         {
+            Debug.Log("moved too far");
             MovedPastMaxDistance = true;
             if (InputBroker.GetMouseButtonUp(0))
                 MovedPastMaxDistance = false;
@@ -164,7 +167,10 @@ public class SelectionHandler<T> where T : StimDef
                 if (targetedGO != SelectedGameObject && CurrentTargetDuration == null)
                 {
                     CurrentTargetDuration = 0;
-                    SelectionStartPosition = GetScreenPos(CurrentInputScreenPosition.Value);
+                    if (CurrentInputScreenPosition != null)
+                        SelectionStartPosition = GetScreenPos(CurrentInputScreenPosition.Value);
+                    else
+                        SelectionStartPosition = null;
                 }
                 else if (!MovedPastMaxDistance)
                     CurrentTargetDuration += Time.deltaTime;
@@ -176,6 +182,7 @@ public class SelectionHandler<T> where T : StimDef
                 {
                     SelectedGameObject = targetedGO;
                     SelectedStimDef = targetedGO?.GetComponent<StimDefPointer>()?.GetStimDef<T>();
+                    MovedPastMaxDistance = false;
                 }
                 else
                 {

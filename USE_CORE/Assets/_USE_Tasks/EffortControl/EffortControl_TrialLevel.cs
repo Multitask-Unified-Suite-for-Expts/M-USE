@@ -158,7 +158,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
+        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, ()=> InputBroker.GetMouseButton(0));
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
@@ -188,11 +188,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         //Choose Balloon state -------------------------------------------------------------------------------------------------------
         //should automatically have selection handlers for mouse, gaze, touch in session/task/trial levels
-        MouseTracker.AddSelectionHandler(mouseHandler, ChooseBalloon);
+        MouseTracker.AddSelectionHandler(mouseHandler, ChooseBalloon, null, ()=> InputBroker.GetMouseButton(0));
         ChooseBalloon.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they holding down
-            //maybe this should be a method in selectionhandlers?
 
             MaxScale = new Vector3(60, 0, 60);
             LeftScaleUpAmount = MaxScale / currentTrial.NumClicksLeft;

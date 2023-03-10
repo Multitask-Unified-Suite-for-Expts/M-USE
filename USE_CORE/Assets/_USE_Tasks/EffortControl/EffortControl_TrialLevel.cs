@@ -185,7 +185,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         //Choose Balloon state -------------------------------------------------------------------------------------------------------
         //should automatically have selection handlers for mouse, gaze, touch in session/task/trial levels
-        MouseTracker.AddSelectionHandler(mouseHandler, ChooseBalloon, null, ()=> InputBroker.GetMouseButton(0));
+        MouseTracker.AddSelectionHandler(mouseHandler, ChooseBalloon, null, 
+            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         ChooseBalloon.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they holding down
@@ -302,7 +303,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
 
         //Inflate Balloon state -------------------------------------------------------------------------------------------------------
-        MouseTracker.AddSelectionHandler(mouseHandler, InflateBalloon);
+        MouseTracker.AddSelectionHandler(mouseHandler, InflateBalloon, null, 
+            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
 
         InflateBalloon.AddInitializationMethod(() =>
         {
@@ -312,7 +314,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             Flashing = false;
             InflateAudioPlayed = false;
             ScaleTimer = 0;
-            MouseTracker.ResetClickCount();
+            MouseTracker.ResetClicks();
             clickTimings = new List<float>();
             timeTracker = 0;
             mouseClicks = 0;
@@ -364,11 +366,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 InflateAudioPlayed = false;
             }
 
-            if (mouseClicks != MouseTracker.GetClickCount())
+            if (mouseClicks != MouseTracker.GetClickCount()[0])
             {
-                TrialTouches += MouseTracker.GetClickCount() - mouseClicks;
+                TrialTouches += MouseTracker.GetClickCount()[0] - mouseClicks;
                 SetTrialSummaryString();
-                mouseClicks = MouseTracker.GetClickCount();
+                mouseClicks = MouseTracker.GetClickCount()[0];
             }
 
             //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.

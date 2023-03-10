@@ -5,6 +5,7 @@ using MazeGame_Namespace;
 using UnityEngine;
 using UnityEngine.UIElements;
 using USE_StimulusManagement;
+using USE_States;
 
 // Only min duration means that selection is finished once min duration is met
 // Both min and max duration means that selection is finished once its let go
@@ -28,7 +29,7 @@ public class SelectionHandler<T> where T : StimDef
     public float? CurrentTargetDuration;
     public Vector3? CurrentInputScreenPosition;
     private Vector2 CurrentInputScreenPositionPix;
-    private bool MovedPastMaxDistance;
+    public bool MovedPastMaxDistance;
     private bool SelectionHandlerStarted;
     public Vector2? SelectionStartPosition;
 
@@ -132,27 +133,24 @@ public class SelectionHandler<T> where T : StimDef
     
     //---------------------------------------------UPDATING SELECTION MANAGEMENT-----------------------------------------
     //Should be checking for a selected GO:
-    public void CheckForSelection(GameObject targetedGO, Vector3? currentLoc) //TargetedGO is what they're currently hovering over
+    public void CheckForSelection(GameObject targetedGO, Vector3? currentLoc, BoolDelegate selectionIsPossible = null,
+        BoolDelegate selectionCompleteIsPossible = null) //TargetedGO is what they're currently hovering over
     {
         CurrentInputScreenPosition = currentLoc;
+        MovedPastMaxDistance = false;
         //SelectedGameObject = null;
         //SelectedStimDef = null;
 
         if (targetedGO == null)
+        {
             SelectionStartPosition = null;
+            MovedPastMaxDistance = false;
+        }
 
         // Check if handler has started and if there is a current selection location
         if (!SelectionHandlerStarted || CurrentInputScreenPosition == null) 
             return;
 
-        //Have they moved too far?
-        if (SelectionStartPosition != null && Vector2.Distance(GetScreenPos(CurrentInputScreenPosition.Value), SelectionStartPosition.Value) > MaxMoveDistance)
-        {
-            Debug.Log("moved too far");
-            MovedPastMaxDistance = true;
-            if (InputBroker.GetMouseButtonUp(0))
-                MovedPastMaxDistance = false;
-        }
 
         // Check if selectedGameObject is null and if input location hasn't moved more than max distance:
         if (SelectedGameObject == null && !MovedPastMaxDistance)
@@ -162,27 +160,37 @@ public class SelectionHandler<T> where T : StimDef
             {
                 SelectionTooShort = false;
                 SelectionTooLong = false;
-
-                //If selection has just started
-                if (targetedGO != SelectedGameObject && CurrentTargetDuration == null)
+                
+                if (selectionIsPossible == null || selectionIsPossible())
                 {
-                    CurrentTargetDuration = 0;
-                    if (CurrentInputScreenPosition != null)
-                        SelectionStartPosition = GetScreenPos(CurrentInputScreenPosition.Value);
-                    else
-                        SelectionStartPosition = null;
+                    //Have they moved too far?
+                    if (SelectionStartPosition != null && Vector2.Distance(GetScreenPos(CurrentInputScreenPosition.Value), SelectionStartPosition.Value) > MaxMoveDistance)
+                    {
+                        Debug.Log(Time.frameCount + ": moved too far");
+                        MovedPastMaxDistance = true;
+                    }
+                    //If selection has just started
+                    if (targetedGO != SelectedGameObject && CurrentTargetDuration == null)
+                    {
+                        CurrentTargetDuration = 0;
+                        if (CurrentInputScreenPosition != null)
+                            SelectionStartPosition = GetScreenPos(CurrentInputScreenPosition.Value);
+                        else
+                            SelectionStartPosition = null;
+                    }
+                    else if (!MovedPastMaxDistance)
+                        CurrentTargetDuration += Time.deltaTime;
                 }
-                else if (!MovedPastMaxDistance)
-                    CurrentTargetDuration += Time.deltaTime;
 
                 // Check if the touch duration is within the appropriate range
                 bool withinDuration = CurrentTargetDuration >= MinDuration && ((CurrentTargetDuration <= MaxDuration) || MaxDuration == null);
 
-                if (withinDuration)
+                if (withinDuration && (selectionCompleteIsPossible == null || selectionCompleteIsPossible()))
                 {
                     SelectedGameObject = targetedGO;
                     SelectedStimDef = targetedGO?.GetComponent<StimDefPointer>()?.GetStimDef<T>();
                     MovedPastMaxDistance = false;
+                    SelectionStartPosition = null;
                 }
                 else
                 {
@@ -194,7 +202,11 @@ public class SelectionHandler<T> where T : StimDef
                 }
             }
             else
+            {
                 CurrentTargetDuration = null;
+                SelectionStartPosition = null;
+                MovedPastMaxDistance = false;
+            }
         }
     }
 
@@ -203,5 +215,4 @@ public class SelectionHandler<T> where T : StimDef
         Vector3 temp = Camera.main.WorldToScreenPoint(worldPos);
         return new Vector2(temp.x, temp.y);
     }
-
 }

@@ -166,7 +166,6 @@ public class SelectionHandler<T> where T : StimDef
                     //Have they moved too far?
                     if (SelectionStartPosition != null && Vector2.Distance(GetScreenPos(CurrentInputScreenPosition.Value), SelectionStartPosition.Value) > MaxMoveDistance)
                     {
-                        Debug.Log(Time.frameCount + ": moved too far");
                         MovedPastMaxDistance = true;
                     }
                     //If selection has just started

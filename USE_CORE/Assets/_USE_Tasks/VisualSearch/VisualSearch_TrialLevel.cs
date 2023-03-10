@@ -398,7 +398,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         RewardGiven = false;
         TouchDurationError = false;
         aborted = false;
-        MouseTracker.ResetClickCount();
+        MouseTracker.ResetClicks();
     }
     private void AssignTrialData()
     {

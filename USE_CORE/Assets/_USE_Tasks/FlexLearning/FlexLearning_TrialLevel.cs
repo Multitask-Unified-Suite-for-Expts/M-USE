@@ -394,7 +394,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         CorrectSelection = false;
         RewardGiven = false;
         TouchDurationError = false;
-        MouseTracker.ResetClickCount();
+        MouseTracker.ResetClicks();
     }
     private void AssignTrialData()
     {

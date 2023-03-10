@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using JetBrains.Annotations;
@@ -9,41 +10,46 @@ using UnityEngine.EventSystems;
 public class MouseTracker : InputTracker
 {
     private bool UsingSecondMonitor = false;
-    private int ButtonClickCount = 0; //change to array ultimatley so we can loop through all buttons. 
-    public float ButtonPressDuration;
+    public int[] ButtonCompletedClickCount = {0, 0 , 0};
+    public int[] ButtonStatus = {0, 0, 0};
+    public float[] ButtonPressDuration = {0, 0, 0};
 
-    public void ResetClickCount()
+    public void ResetClicks()
     {
-        ButtonClickCount = 0;
+        Array.Clear(ButtonCompletedClickCount, 0, ButtonCompletedClickCount.Length);
+        Array.Clear(ButtonPressDuration, 0, ButtonPressDuration.Length);
     }
 
-    public int GetClickCount()
+    public int[] GetClickCount()
     {
-        return ButtonClickCount;
+        return ButtonCompletedClickCount;
     }
 
     //this should include every button
     public override void CustomUpdate()
     {
-        if (InputBroker.GetMouseButtonUp(0))
-            ButtonClickCount++;
-        
-        if (InputBroker.GetMouseButtonDown(0))
+        for (int iButton = 0; iButton < 3; iButton++)
         {
-            ButtonPressDuration = 0;
+            if (InputBroker.GetMouseButtonUp(iButton))
+                ButtonCompletedClickCount[iButton]++;
+            
+            if (InputBroker.GetMouseButton(iButton))
+            {
+                ButtonStatus[iButton] = 1;
+                if (InputBroker.GetMouseButtonDown(iButton))
+                    ButtonPressDuration[iButton] = 0;
+                else
+                    ButtonPressDuration[iButton] += Time.deltaTime;
+            }
+            else
+                ButtonStatus[iButton] = 0;
         }
-
-        if (InputBroker.GetMouseButton(0))
-            ButtonPressDuration += Time.deltaTime;
-        
     }
 
     public override void AddFieldsToFrameData(DataController frameData)
     {
         frameData.AddDatum("MousePosition", () => InputBroker.mousePosition);
-        frameData.AddDatum("MouseButton0", () => InputBroker.GetMouseButton(0));
-        frameData.AddDatum("MouseButton1", () => InputBroker.GetMouseButton(1));
-        frameData.AddDatum("MouseButton2", () => InputBroker.GetMouseButton(2));
+        frameData.AddDatum("MouseButtonStatus", () => ButtonStatus);
         frameData.AddDatum("CurrentTargetGO", ()=> TargetedGameObject != null ? TargetedGameObject.name : null);
     }
 
@@ -70,8 +76,8 @@ public class MouseTracker : InputTracker
             if (hitObject != null)
             {
                 TargetedGameObject = hitObject;
-                if (InputBroker.GetMouseButton(0))
-                    return hitObject;
+                // if (InputBroker.GetMouseButton(0))
+                return hitObject;
             }
         }
         return null;

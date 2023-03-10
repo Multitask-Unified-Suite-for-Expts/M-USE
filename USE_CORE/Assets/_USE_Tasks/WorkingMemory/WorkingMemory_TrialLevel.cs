@@ -146,7 +146,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         });
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);
-        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
+        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, 
+            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         InitTrial.AddInitializationMethod(() =>
         {
             StartButton.SetActive(true);
@@ -199,7 +200,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         // Show the target/sample with some other distractors
         // Wait for a click and provide feedback accordingly
-        MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay);
+        MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay, null, 
+            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         SearchDisplay.AddInitializationMethod(() =>
         {
             CreateTextOnExperimenterDisplay();

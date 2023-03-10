@@ -158,7 +158,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
         
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
-        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
+        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, 
+            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         InitTrial.AddInitializationMethod(() =>
         {
             CurrentTaskLevel.SetBlockSummaryString();
@@ -192,7 +193,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay);
         
         // SEARCH DISPLAY STATE ----------------------------------------------------------------------------------------
-        MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay);
+        MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay, null, 
+            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         SearchDisplay.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they holding down

@@ -162,8 +162,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
-        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), Delay, () =>
+        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, 
+            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), Delay, () =>
         {
             StateAfterDelay = ChooseTile;
             DelayDuration = mazeOnsetDelay.value;
@@ -179,7 +179,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 ActivateChildren(playerViewParent);
 
         });
-        MouseTracker.AddSelectionHandler(mouseHandler, ChooseTile);
+        MouseTracker.AddSelectionHandler(mouseHandler, ChooseTile, null, 
+            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         ChooseTile.SpecifyTermination(() =>  mouseHandler.SelectedGameObject?.GetComponent<Tile>() != null, SelectionFeedback, () =>
         {
             selectedGO = mouseHandler.SelectedGameObject;

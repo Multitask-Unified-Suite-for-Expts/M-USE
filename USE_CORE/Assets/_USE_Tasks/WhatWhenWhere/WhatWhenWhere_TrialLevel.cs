@@ -225,8 +225,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
         });
         SetupTrial.AddTimer(()=> sbDelay, StartButton);
-        MouseTracker.AddSelectionHandler(mouseHandler, StartButton);
-        // define StartButton state
+        MouseTracker.AddSelectionHandler(mouseHandler, StartButton, null, 
+            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);        // define StartButton state
         StartButton.AddInitializationMethod(() =>
         {
             ClearDataLogging();
@@ -258,8 +258,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseStimulusDelay.AddTimer(() => chooseStimOnsetDelay.value, ChooseStimulus);
         GazeTracker.AddSelectionHandler(gazeHandler, ChooseStimulus);
-        MouseTracker.AddSelectionHandler(mouseHandler, ChooseStimulus);
-
+        MouseTracker.AddSelectionHandler(mouseHandler, ChooseStimulus, null, 
+            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddInitializationMethod(() =>
         {

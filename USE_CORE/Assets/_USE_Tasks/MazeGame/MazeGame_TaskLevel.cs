@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
@@ -8,11 +9,13 @@ using UnityEngine;
 using USE_ExperimentTemplate_Task;
 using USE_Settings;
 using USE_Utilities;
+using Random = UnityEngine.Random;
 
 public class MazeGame_TaskLevel : ControlLevel_Task_Template
 {
     [HideInInspector] public int[] MazeNumSquares, MazeNumTurns;
-    [HideInInspector] public Vector2[] MazeDims, MazeStart, MazeFinish;
+    [HideInInspector] public Vector2[] MazeDims;
+    [HideInInspector] public string[] MazeStart, MazeFinish;
     [HideInInspector] public string[] MazeName;
 
     public int totalErrors_InBlock,
@@ -305,6 +308,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "DefaultTileColor"))
             mgTL.defaultTileColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "DefaultTileColor");
         else Debug.LogError("Default Tile Color settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FixedRatioReward"))
+            mgTL.UsingFixedRatioReward = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "FixedRatioReward");
+        else
+        {
+            mgTL.UsingFixedRatioReward = false;
+            Debug.Log("Fixed Ratio Reward settings not defined in the TaskDef, set as default of false");
+        }
     }
     private void LoadMazeDef()
     {
@@ -313,8 +323,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         MazeDims = new Vector2[MazeDefs.Length];
         MazeNumSquares = new int[MazeDefs.Length];
         MazeNumTurns = new int[MazeDefs.Length];
-        MazeStart = new Vector2[MazeDefs.Length];
-        MazeFinish = new Vector2[MazeDefs.Length];
+        MazeStart = new string[MazeDefs.Length];
+        MazeFinish = new string[MazeDefs.Length];
         MazeName = new string[MazeDefs.Length];
         for (var iMaze = 0; iMaze < MazeDefs.Length; iMaze++)
         {

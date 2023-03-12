@@ -23,10 +23,13 @@ namespace MazeGame_Namespace
        // public int Context;
         public int Trial;
         public string TrialID;
+        public string BlockName;
         public int[] MinMaxTrials;
+        public int RewardRatio;
         public string MazeInfo;
 
-        public Vector2 MazeDims, MazeStart, MazeFinish;
+        public Vector2 MazeDims;
+        public string MazeStart, MazeFinish;
         public int MazeNumSquares;
         public int MazeNumTurns;
         public string MazeName;
@@ -35,14 +38,7 @@ namespace MazeGame_Namespace
         public int NumPulses;
         public bool ViewPath;
         public string ContextName;
-        public int[] SliderGain;
         public int SliderInitial;
-        public MazeGame_TaskLevel TaskLevel;
-     //   public string mazePath;
-
-        //  public float MinTouchDuration;
-        //  public float MaxTouchDuration;
-
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -57,13 +53,13 @@ namespace MazeGame_Namespace
             for (int iTrial = 0; iTrial < num; iTrial++)
             {
                 MazeGame_TrialDef td = new MazeGame_TrialDef();
-                td.TrialID = TrialID;
+                td.BlockName = BlockName;
+                td.RewardRatio = RewardRatio;
                 td.NumPulses = NumPulses;
                 td.PulseSize = PulseSize;
                 td.ViewPath = ViewPath;
                 td.ContextName = ContextName;
-                td.MazeInfo = MazeInfo;
-                td.SliderGain = SliderGain;
+                td.MazeName = MazeName;
                 td.SliderInitial = SliderInitial;
 
                 TrialDefs.Add(td);
@@ -79,10 +75,12 @@ namespace MazeGame_Namespace
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
         public string TrialID;
+        public string BlockName;
         public float[] TileColor;
         public float TileSize;
         public int PulseSize;
         public int NumPulses;
+        public int RewardRatio;
         /*public int Texture;
         public Vector2 MazeDims;
         public Vector2 MazeStart;
@@ -91,47 +89,13 @@ namespace MazeGame_Namespace
         public int MazeNumTurns;*/
         public bool ViewPath;
         public string ContextName;
-        public string MazeInfo;
-        public int[] SliderGain;
+        public string MazeName;
         public int SliderInitial;
         public MazeDef MazeDef;
-        //   public string mazePath;
-
-        // public int[] nRepetitionsMinMax;
     }
 
     public class MazeGame_StimDef : StimDef
     {
-        public float SliderValueChange;
-        //Already-existing fields (inherited from Stim  Def)
-        //public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)
-        //public string StimName;
-        //public string StimPath;
-        //public string PrefabPath;
-        //public string ExternalFilePath;
-        //public string StimFolderPath;
-        //public string StimExtension;
-        //public int StimCode; //optional, for analysis purposes
-        //public string StimID;
-        //public int[] StimDimVals; //only if this is parametrically-defined stim
-        //[System.NonSerialized] //public GameObject StimGameObject; //not in config, generated at runtime
-        //public Vector3 StimLocation; //to be passed in explicitly if trial doesn't include location method
-        //public Vector3 StimRotation; //to be passed in explicitly if trial doesn't include location method
-        //public Vector2 StimScreenLocation; //screen position calculated during trial
-        //public float? StimScale;
-        //public bool StimLocationSet;
-        //public bool StimRotationSet;
-        //public float StimTrialPositiveFbProb; //set to -1 if stim is irrelevant
-        //public float StimTrialRewardMag; //set to -1 if stim is irrelevant
-        //public TokenReward[] TokenRewards;
-        //public int[] BaseTokenGain;
-        //public int[] BaseTokenLoss;
-        //public int TimesUsedInBlock;
-        //public bool isRelevant;
-        //public bool TriggersSonication;
-        //public State SetActiveOnInitialization;
-        //public State SetInactiveOnTermination;
-        // public int test;
     }
 
     public class MazeDef
@@ -139,8 +103,8 @@ namespace MazeGame_Namespace
         public Vector2 mDims;
         public int mNumTurns;
         public int mNumSquares;
-        public Vector2 mStart;
-        public Vector2 mFinish;
+        public string mStart;
+        public string mFinish;
         public string mName;
         
     }

@@ -16,6 +16,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         wwwTL = (WhatWhenWhere_TrialLevel)TrialLevel;
 
         SetSettings();
+        DefineBlockData();
         
         SetupTask.AddInitializationMethod(() =>
         {
@@ -40,7 +41,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         BlockSummaryString.Clear();
-        BlockSummaryString.AppendLine("\nBlock Num: " + (wwwTL.BlockCount + 1) +
+        BlockSummaryString.AppendLine("Block Num: " + (wwwTL.BlockCount + 1) +
                                       "\nTrial Num: " + (wwwTL.TrialCount_InBlock + 1) +
                                       "\n" + 
                                       "\nAverage Search Duration: " + wwwTL.averageSearchDuration_InBlock+
@@ -54,16 +55,16 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
                                       "\nNo Selection Error Count: " + wwwTL.noSelectionErrorCount_InBlock);
     }
 
-    private void AssignBlockDatum()
+    private void DefineBlockData()
     {
         BlockData.AddDatum("Block Accuracy", ()=> wwwTL.accuracyLog_InBlock);
         BlockData.AddDatum("Avg Search Duration", ()=> wwwTL.averageSearchDuration_InBlock);
-        BlockData.AddDatum("Num Touch Duration Error", ()=> wwwTL.distractorSlotErrorCount_InBlock);
-        BlockData.AddDatum("Num Touch Duration Error", ()=> wwwTL.slotErrorCount_InBlock);
-        BlockData.AddDatum("Num Touch Duration Error", ()=> wwwTL.repetitionErrorCount_InBlock);
-        BlockData.AddDatum("Num Touch Duration Error", ()=> wwwTL.touchDurationErrorCount_InBlock);
-        BlockData.AddDatum("Num Touch Duration Error", ()=> wwwTL.numNonStimSelections_InBlock);
-        BlockData.AddDatum("Num Touch Duration Error", ()=> wwwTL.noSelectionErrorCount_InBlock);
+        BlockData.AddDatum("Num Distractor Slot Error", ()=> wwwTL.distractorSlotErrorCount_InBlock);
+        BlockData.AddDatum("Num Search Slot Error", ()=> wwwTL.slotErrorCount_InBlock);
+        BlockData.AddDatum("Num Repetition Error", ()=> wwwTL.repetitionErrorCount_InBlock);
+        //BlockData.AddDatum("Num Touch Duration Error", ()=> wwwTL.touchDurationErrorCount_InBlock);
+        //BlockData.AddDatum("Num Non Stim Selections", ()=> wwwTL.numNonStimSelections_InBlock); USE MOUSE TRACKER AND VALIDATE
+        BlockData.AddDatum("Num Aborted Trials", ()=> wwwTL.noSelectionErrorCount_InBlock);
         BlockData.AddDatum("Num Reward Given", ()=> wwwTL.numRewardGiven_InBlock);
     }
 

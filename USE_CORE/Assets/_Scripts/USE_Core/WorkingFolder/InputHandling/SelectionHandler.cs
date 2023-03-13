@@ -189,7 +189,7 @@ public class SelectionHandler<T> where T : StimDef
                 }
                 else
                 {
-                    Debug.Log("HITTING 190");
+                    //Debug.Log("HITTING 190");
                     NumTouchDurationError++;                    
                     if (CurrentTargetDuration <= MinDuration) 
                         SelectionTooShort = true;

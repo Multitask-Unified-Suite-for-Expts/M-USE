@@ -231,9 +231,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 RaycastHit hitt;
                 if (!Physics.Raycast(ray, out hitt))
                 {
-                    AudioFBController.audioSource.Stop();
                     AudioFBController.Play("Negative");
-                    //implement stopping previous sounds or waiting until they end in AudioFeedbackController
                 }
             }
 
@@ -325,8 +323,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             {
                 if (!InflateAudioPlayed)
                 {
-                    if (AudioFBController.IsPlaying())
-                        AudioFBController.audioSource.Stop();
                     AudioFBController.Play("EC_Inflate");
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionAuditoryFbOn"]);
                     InflateAudioPlayed = true;
@@ -381,8 +377,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 RaycastHit hit;
                 if (!Physics.Raycast(ray, out hit))
                 {
-                    if (AudioFBController.IsPlaying())
-                        AudioFBController.audioSource.Stop();
                     AudioFBController.Play("Negative");
                     EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionAuditoryFbOn"]);
                 }
@@ -408,7 +402,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             
             if (Response == 1)
             {
-                AudioFBController.audioSource.Stop();
                 if(IsHuman)
                     AudioFBController.Play("EC_HarshPop"); //better for humans
                 else

@@ -11,9 +11,11 @@ using USE_DisplayManagement;
 using System.Linq;
 using System.IO;
 using UnityEngine.AI;
+using UnityEngine.Rendering.PostProcessing;
 using USE_ExperimentTemplate_Trial;
 using USE_ExperimentTemplate_Task;
 using USE_UI;
+using USE_Utilities;
 
 public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 {
@@ -25,9 +27,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     public WhatWhenWhere_TaskLevel CurrentTaskLevel => GetTaskLevel<WhatWhenWhere_TaskLevel>();
     // game object variables
-    private GameObject sliderGO, sliderHaloGO;
-    public GameObject SliderPrefab, SliderHaloPrefab;
-    private Image sliderHaloImage;
     private Texture2D texture;
     private static int numObjMax = 100;// need to change if stimulus exceeds this amount, not great
     
@@ -44,7 +43,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     // feedback variables
     public int numTouchedStims = 0;
-    private bool correctChoice, incorrectChoice, noSelection, trialComplete = false;
+    private bool noSelection, trialComplete = false;
     
     //Block Data Logging Variables
     public float averageSearchDuration_InBlock=0;
@@ -97,7 +96,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private String ContextName = "";
    // private List<int> trialPerformance = new List<int>();
     private int timeoutCondition = 3;
-
+    private float totalFbDuration;
 
     
     // vector3 variables
@@ -109,7 +108,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private bool variablesLoaded;
     private int correctIndex;
     public int numSlidersCompleted = 0;
-    
+    private int sliderGainSteps, sliderLossSteps;
     private bool isSliderValueIncrease = false;
     
 
@@ -137,14 +136,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private GameObject selected = null;
     private bool CorrectSelection;
     private WhatWhenWhere_StimDef selectedSD = null;
+    private int? stimIdx; // used to index through the arrays in the config file/mapping different columns
     
-    //update slider variables
+    /*//update slider variables
     private float sliderAnimEndTime = 0f;
     private float valueRemaining = 0f;
     private float valueToAddToSlider = 0f;
     private float incrementalVal = 0f;
     private Slider slider;
-    private float sliderValueChange;
+    private float sliderValueChange;*/
     public override void DefineControlLevel()
     {
         // --------------------------------------ADDING PLAYER VIEW STUFF------------------------------------------------------------------------------------
@@ -159,11 +159,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         State SelectionFeedback = new State("SelectionFeedback");
         State FinalFeedback = new State("FinalFeedback");
         State ITI = new State("ITI");
-        State Delay = new State("Delay");
         AddActiveStates(new List<State>
         {
             StartButton, ChooseStimulus, SelectionFeedback, FinalFeedback, ITI,
-            ChooseStimulusDelay, Delay
+            ChooseStimulusDelay
         });
 
         string[] stateNames = new string[]
@@ -183,9 +182,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         
         Add_ControlLevel_InitializationMethod(() =>
         {
-            InitializeSlider();
+            SliderFBController.InitializeSlider();
             LoadTextures(ContextExternalFilePath);
-            HaloFBController.SetHaloSize(5);
+            HaloFBController.SetHaloSize(4.5f);
             if (startButton == null)
             {
                 USE_StartButton = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>());
@@ -211,7 +210,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (!variablesLoaded)
             {
                 variablesLoaded = true;
-                LoadTrialVariables();
+                LoadConfigUiVariables();
             }
             ResetTrialVariables();
             SetTrialSummaryString();
@@ -226,8 +225,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
         });
         SetupTrial.AddTimer(()=> sbDelay, StartButton);
-        MouseTracker.AddSelectionHandler(mouseHandler, StartButton);
-        // define StartButton state
+        MouseTracker.AddSelectionHandler(mouseHandler, StartButton, null, 
+            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);        // define StartButton state
         StartButton.AddInitializationMethod(() =>
         {
             ClearDataLogging();
@@ -248,22 +247,23 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         StartButton.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton), ChooseStimulusDelay, ()=>
         {
-            sliderGO.SetActive(true);
             startButton.SetActive(false);
-            ConfigureSlider();        
+            CalculateSliderSteps();
+            SliderFBController.ConfigureSlider(new Vector3(0,180,0), sliderSize.value, CurrentTrialDef.SliderInitial*(1f/sliderGainSteps));
+            SliderFBController.SliderGO.SetActive(true); 
+            
             numNonStimSelections_InBlock += mouseHandler.UpdateNumNonStimSelection();
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderReset"]);
         });
         ChooseStimulusDelay.AddTimer(() => chooseStimOnsetDelay.value, ChooseStimulus);
         GazeTracker.AddSelectionHandler(gazeHandler, ChooseStimulus);
-        MouseTracker.AddSelectionHandler(mouseHandler, ChooseStimulus);
-
+        MouseTracker.AddSelectionHandler(mouseHandler, ChooseStimulus, null, 
+            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddInitializationMethod(() =>
         {
             MakeStimFaceCamera();
-
             AssignCorrectStim();
             CreateTextOnExperimenterDisplay();
             choiceMade = false;
@@ -341,36 +341,31 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             touchedObjects.Add(selectedSD.StimCode);
             searchDuration = ChooseStimulus.TimingInfo.Duration;
             searchDurations.Add(searchDuration);
+            totalFbDuration = (fbDuration.value + finalFbDuration.value);
             averageSearchDuration_InBlock = searchDurations.Average();
-            sliderAnimEndTime = Time.time + fbDuration.value;
-            
-            //can we move this mostly into slider class
-            if (CorrectSelection) 
-                valueToAddToSlider = sliderValueChange * (CurrentTrialDef.SliderGain[numTouchedStims]);
-            else 
-                valueToAddToSlider = sliderValueChange * CurrentTrialDef.SliderLoss[numTouchedStims];
-            
-            incrementalVal = valueToAddToSlider/(fbDuration.value*60);
-            valueRemaining = valueToAddToSlider;
-            //this in sllider class ^
+            SliderFBController.SetUpdateDuration(fbDuration.value);
+            SliderFBController.SetFlashingDuration(finalFbDuration.value);
+
             
             if (CorrectSelection)
             {
-                numTouchedStims += 1;
                 HaloFBController.ShowPositive(selected);
-                AudioFBController.Play("Positive");
-                sliderHaloGO.SetActive(true);
-                sliderHaloImage.color = new Color(1, 0.8431f, 0, 0.2f);
-                //move to slider class ^
-                //make slider add methods automatically show halo unless extra bool false argument added
+                Debug.Log("THIS IS ADDING: " + CurrentTrialDef.SliderGain[numTouchedStims]*(1f/sliderGainSteps));
+                
+                SliderFBController.UpdateSliderValue(CurrentTrialDef.SliderGain[numTouchedStims]*(1f/sliderGainSteps));
+                numTouchedStims += 1;
                 errorTypeString = "None";
             }
             //Chose Incorrect
             else
             {
                 HaloFBController.ShowNegative(selected);
-                AudioFBController.Play("Negative");
-                sliderHaloImage.color = new Color(0.6627f, 0.6627f, 0.6627f, 0.2f);
+                if (distractorSlotError)
+                    stimIdx = Array.IndexOf(CurrentTrialDef.DistractorStimsIndices, selectedSD.StimIndex); // used to index through the arrays in the config file/mapping different columns
+                else
+                    stimIdx = Array.IndexOf(CurrentTrialDef.SearchStimsIndices, selectedSD.StimIndex);
+
+                SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx]*(1f/sliderLossSteps)); // NOT IMPLEMENTED: NEEDS TO CONSIDER SEPARATE LOSS/GAIN FOR DISTRACTOR & TARGET STIMS SEPARATELY
                 if (slotError)
                     errorTypeString = "SlotError";
                 else if (distractorSlotError)
@@ -380,35 +375,19 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
             SetTrialSummaryString();
         });
-        SelectionFeedback.AddUpdateMethod(() =>
-        {
-            if (valueRemaining >= 0)
-            {
-                if (CorrectSelection == false)
-                {
-                    slider.value -= incrementalVal;
-                    valueRemaining -= incrementalVal;
-                }
-                else
-                {
-                    slider.value += incrementalVal;
-                    valueRemaining -= incrementalVal;
-                }
-            }
-            //slider class ^
-        });
-
         //don't control timing with AddTimer, use slider class SliderUpdateFinished bool 
-        SelectionFeedback.AddTimer(()=>fbDuration.value, Delay, () =>
+        SelectionFeedback.AddTimer(()=>totalFbDuration, Delay, () =>
         {
-            sliderHaloGO.SetActive(false);
             DelayDuration = 0;
             DestroyTextOnExperimenterDisplay();
             
-            if (!CurrentTrialDef.LeaveFeedbackOn) HaloFBController.Destroy();
+            if (!CurrentTrialDef.LeaveFeedbackOn) 
+                HaloFBController.Destroy();
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOff"]);
+            
             CurrentTaskLevel.SetBlockSummaryString();
             SetTrialSummaryString();
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOff"]);
+            
             if (CorrectSelection)
             {
                 StateAfterDelay = ChooseStimulus;
@@ -423,11 +402,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             choiceMade = true;
             trialComplete = false;
-            sliderHaloGO.SetActive(true);
-            sliderHaloImage.color = new Color(1, 1, 1, 0.2f);
             startTime = Time.time;
             errorTypeString = "None";
             
+            Debug.Log("MADE IT TO FINAL FEEDBACK?");
             
             //Destroy all created text objects on Player View of Experimenter Display
             DestroyTextOnExperimenterDisplay();
@@ -445,22 +423,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
            
         });
-
-        FinalFeedback.AddUpdateMethod(() =>
-        {
-            if ((int) (10 * (Time.time - startTime)) % 4 == 0)
-            {
-                sliderHaloImage.color = new Color(1, 1, 1, 0.2f);
-            }
-            else if ((int) (10 * (Time.time - startTime)) % 2 == 0)
-            {
-                sliderHaloImage.color = new Color(1, 1, 0, 0.2f);
-            }
-            //^slider methods
-        });
         FinalFeedback.AddTimer(() => finalFbDuration.value, ITI, () =>
         {
-            sliderHaloGO.SetActive(false);
             EventCodeManager.SendCodeImmediate(TaskEventCodes["SliderCompleteFbOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
@@ -500,7 +464,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         GenerateTrialDataStrings();
         searchStims.ToggleVisibility(false);
         distractorStims.ToggleVisibility(false);
-        sliderGO.SetActive(false);
+        SliderFBController.SliderGO.SetActive(false);
+        SliderFBController.SliderHaloGO.SetActive(false);
         ClearDataLogging();
 
         if(AbortCode == 0)
@@ -520,9 +485,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 stim.StimGameObject.AddComponent<FaceCamera>();
     }
 
-    public void ResetTrialVariables()
+    public void ResetTrialVariables() // CHANGE THIS TO AN OVERRIDE AFTER MERGE
     {
         searchDuration = 0;
+        sliderGainSteps = 0;
+        sliderLossSteps = 0;
+        stimIdx = null;
+        searchDurations.Clear();
+        selected = null;
+        selectedSD = null;
         CorrectSelection = false;
     }
 
@@ -579,9 +550,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
         FrameData.AddDatum("ErrorType", () => errorTypeString);
         FrameData.AddDatum("StartButton", () => startButton.activeSelf);
-        /*FrameData.AddDatum("SliderHalo", () => sliderHaloGO.activeSelf); MOVE TO SLIDER CLASS, NOT INSTANTIATED AT START
-        FrameData.AddDatum("Slider", () => sliderGO.activeSelf);            SO CAN'T COLLECT FRAME DATA
-        FrameData.AddDatum("SliderValue", () => slider.normalizedValue);*/ 
         FrameData.AddDatum("SearchStimuliShown", () => searchStims.IsActive);
         FrameData.AddDatum("DistractorStimuliShown", () => distractorStims.IsActive);
         FrameData.AddDatum("Context", () => ContextName);
@@ -765,33 +733,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         playerViewTextList.Clear();
     }
 
-    private void InitializeSlider()
-    {
-        Transform sliderCanvas = GameObject.Find("SliderCanvas").transform;
-        sliderGO = Instantiate(SliderPrefab, sliderCanvas);
-        sliderHaloGO = Instantiate(SliderHaloPrefab, sliderCanvas);
-        sliderGO.SetActive(false);
-        sliderHaloGO.SetActive(false);
-    }
-    private void ConfigureSlider()
-    {
-        sliderHaloImage = sliderHaloGO.GetComponent<Image>();
-        slider = sliderGO.GetComponent<Slider>();
-        sliderInitPosition = sliderGO.transform.position;
-        //consider making slider stuff into USE level class
-        slider.value = 0;
-        sliderHaloGO.transform.position = sliderInitPosition;
-        int numSliderSteps = CurrentTrialDef.SliderGain.Sum() + CurrentTrialDef.SliderInitial;
-        sliderValueChange = (100f / numSliderSteps) / 100f;
-        slider.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
-        sliderHaloGO.transform.localScale = new Vector3(sliderSize.value / 10f, sliderSize.value / 10f, 1f);
-
-        if (CurrentTrialDef.SliderInitial != 0)
-        {
-            slider.value += sliderValueChange * (CurrentTrialDef.SliderInitial);
-        }
-        isSliderValueIncrease = false;
-    }
     
     private void UpdateCounters_Incorrect(int correctIndex) // Updates Progress tracking information for incorrect selection
     {
@@ -801,8 +742,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         numErrors_InBlock[correctIndex]++;
         numErrors_InSession[correctIndex]++;
         numErrors_InTrial[correctIndex]++;
-
-        // incorrectChoice = true;
     }
     private void UpdateCounters_Correct() // Updates Progress tracking information for correct selection
     {
@@ -812,8 +751,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         numTotal_InBlock[numTouchedStims]++;
         numTotal_InSession[numTouchedStims]++;
         numTotal_InTrial[numTouchedStims]++;
-
-        // correctChoice = true;
     }
     
     //--------------------------------------------------------------METHODS FOR STIMULUS/OBJECT HANDLING-------------------------------------------------------------
@@ -826,7 +763,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 //Create corresponding text on player view of experimenter display
                 textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation),
                         playerViewParent);
-                textLocation.y += 50;
+                textLocation.y += 75;
                 Vector2 textSize = new Vector2(200, 200);
                 playerViewText = playerView.WriteText(CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(), CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
                     Color.red, textLocation, textSize, playerViewParent);
@@ -840,14 +777,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     void disableAllGameobjects()
     {
         startButton.SetActive(false);
-        //sliderHalo.SetActive(false);
-        //grayHaloScene.SetActive(false);
-       // imageTimingError.SetActive(false);
+        SliderFBController.SliderHaloGO.SetActive(false);
+        SliderFBController.SliderGO.SetActive(false);
         searchStims.ToggleVisibility(false);
         distractorStims.ToggleVisibility(false);
-        //slider.gameObject.SetActive(false);
     }
-    void LoadTrialVariables()
+    void LoadConfigUiVariables()
     {
         //config UI variables
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
@@ -877,8 +812,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         TrialStims.Add(searchStims);
         TrialStims.Add(distractorStims);
-
-
+        
         randomizedLocations = CurrentTrialDef.RandomizedLocations; 
 
         if (randomizedLocations)
@@ -928,6 +862,21 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             trialComplete = true;
         }
+    }
+
+    private void CalculateSliderSteps()
+    {
+        //Configure the Slider Steps for each Stim
+        foreach (int sliderGain in CurrentTrialDef.SliderGain)
+        {
+            sliderGainSteps += sliderGain;
+        }
+        sliderGainSteps += CurrentTrialDef.SliderInitial;
+        foreach (int sliderLoss in CurrentTrialDef.SliderLoss)
+        {
+            sliderLossSteps += sliderLoss;
+        }
+        sliderLossSteps += CurrentTrialDef.SliderInitial;
     }
     private Vector2 playerViewPosition(Vector3 position, Transform playerViewParent)
     {

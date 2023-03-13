@@ -152,6 +152,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             LoadConfigUIVariables();
             EventCodeManager.SendCodeImmediate(TaskEventCodes["TrlStart"]);
+            if (TrialCount_InTask != 0)
+                currentTask.SetTaskSummaryString();
+            currentTask.CalculateBlockSummaryString();
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -866,7 +869,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void SetTrialSummaryString()
     {
-        TrialSummaryString = ("<b>Trial Info:</b>" +
+        TrialSummaryString = ("<b>Trial Num In Block: </b>" + (TrialCount_InBlock + 1) +
                             "\nTouches: " + TrialTouches +
                             "\nSide Chosen: " + SideChoice +
                             "\nReward Chosen: " + RewardChoice +

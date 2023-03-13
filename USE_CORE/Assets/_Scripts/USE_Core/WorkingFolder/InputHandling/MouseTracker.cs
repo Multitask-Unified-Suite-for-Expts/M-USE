@@ -1,15 +1,9 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using JetBrains.Annotations;
 using UnityEngine;
 using USE_Data;
-using USE_StimulusManagement;
-using UnityEngine.EventSystems;
 
 public class MouseTracker : InputTracker
 {
-    private bool UsingSecondMonitor = false;
     public int[] ButtonCompletedClickCount = {0, 0 , 0};
     public int[] ButtonStatus = {0, 0, 0};
     public float[] ButtonPressDuration = {0, 0, 0};

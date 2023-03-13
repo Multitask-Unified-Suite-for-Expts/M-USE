@@ -6,17 +6,10 @@ using ContinuousRecognition_Namespace;
 using System;
 using Random = UnityEngine.Random;
 using ConfigDynamicUI;
-using USE_Settings;
 using USE_ExperimentTemplate_Trial;
-using System.Collections;
 using System.Linq;
-using UnityEngine.UI;
-using USE_ExperimentTemplate_Block;
-using System.IO;
-using UnityEngine.Profiling;
 using TMPro;
 using USE_UI;
-using USE_Data;
 
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
@@ -141,7 +134,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         SelectionHandler<ContinuousRecognition_StimDef> mouseHandler = new SelectionHandler<ContinuousRecognition_StimDef>();
-        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
+        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null,
+            () => MouseTracker.ButtonStatus[0] == 1, () => MouseTracker.ButtonStatus[0] == 0);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
@@ -217,7 +211,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         DisplayStims.AddTimer(() => displayStimDuration.value, ChooseStim, () => TimeRemaining = chooseStimDuration.value);
 
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
-        MouseTracker.AddSelectionHandler(mouseHandler, ChooseStim);
+        MouseTracker.AddSelectionHandler(mouseHandler, ChooseStim, null,
+            () => MouseTracker.ButtonStatus[0] == 1, () => MouseTracker.ButtonStatus[0] == 0);
 
         ChooseStim.AddInitializationMethod(() =>
         {

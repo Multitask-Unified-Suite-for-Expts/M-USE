@@ -614,9 +614,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     Vector3[] CenterFeedbackLocations(Vector3[] locations, int numLocations)
     {
+        if (numLocations > 24)
+            Debug.LogError("You are attempting to generate " + numLocations + " feedback Locations, However the maximum is 24");
+
         int MaxNumPerRow = 6;
         float max = 2.25f;
-        
+
+        float horizontalMax = 4;
+
         int numRows = 1;
         if (numLocations > 6) numRows++;
         if (numLocations > 12) numRows++;
@@ -638,11 +643,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 R1_Length = numLocations;
                 break;
             case 2:
-                if(numLocations % 2 == 0)
+                if (numLocations % 2 == 0)
                     R1_Length = R2_Length = numLocations / 2;
                 else
                 {
-                    R1_Length = (int) Math.Floor((decimal)numLocations / 2); //round it down and increase next row by 1.
+                    R1_Length = (int)Math.Floor((decimal)numLocations / 2); //round it down and increase next row by 1.
                     R2_Length = (int)Math.Ceiling((decimal)numLocations / 2); //make last row have one more than first row. 
                 }
                 break;
@@ -659,7 +664,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
                 break;
             case 4:
-                if(numLocations % 4 == 0)
+                if (numLocations % 4 == 0)
                     R1_Length = R2_Length = R3_Length = R4_Length = numLocations / 4;
                 else
                 {
@@ -670,7 +675,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     if (diff == 1) R3_Length++;
                     else if (diff == 2)
                     {
-                        if(R4_Length == MaxNumPerRow)
+                        if (R4_Length == MaxNumPerRow)
                         {
                             R2_Length++;
                             R3_Length++;
@@ -683,54 +688,50 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     }
                 }
                 break;
-            //case 5:
-            //    if (numLocations % 5 == 0)
-            //        R1_Length = R2_Length = R3_Length = R4_Length = R5_Length = numLocations / 5;
-            //    else
-            //    {
-            //        R1_Length = R2_Length = R3_Length = R4_Length = (int)Math.Floor((decimal)numLocations / 5);
-            //        R5_Length = (int)Math.Ceiling((decimal)numLocations / 5);
+                //case 5:
+                //    if (numLocations % 5 == 0)
+                //        R1_Length = R2_Length = R3_Length = R4_Length = R5_Length = numLocations / 5;
+                //    else
+                //    {
+                //        R1_Length = R2_Length = R3_Length = R4_Length = (int)Math.Floor((decimal)numLocations / 5);
+                //        R5_Length = (int)Math.Ceiling((decimal)numLocations / 5);
 
-            //        int diff = numLocations - (R1_Length + R2_Length + R3_Length + R4_Length + R5_Length);
-            //        if (diff == 1) R4_Length++;
-            //        else if (diff == 2)
-            //        {
-            //            R3_Length++;
-            //            R4_Length++;
-            //        }
-            //        else if (diff == 3)
-            //        {
-            //            R2_Length++;
-            //            R3_Length++;
-            //            R4_Length++;
-            //        }
-            //    }
-            //    break;
+                //        int diff = numLocations - (R1_Length + R2_Length + R3_Length + R4_Length + R5_Length);
+                //        if (diff == 1) R4_Length++;
+                //        else if (diff == 2)
+                //        {
+                //            R3_Length++;
+                //            R4_Length++;
+                //        }
+                //        else if (diff == 3)
+                //        {
+                //            R2_Length++;
+                //            R3_Length++;
+                //            R4_Length++;
+                //        }
+                //    }
+                //    break;
         }
+
 
         float leftMargin;
         float rightMargin;
-        float leftMarginNeeded;
-        float leftShiftAmount;
 
         int index = 0;
         int difference = 0;
-        Vector3 current;
+        Vector3 currentShiftedLoc;
         List<Vector3> locList = new List<Vector3>();
 
         //----- CENTER HORIZONTALLY--------------------------------
         //Center ROW 1:
         if (R1_Length > 0)
         {
-            leftMargin = 4 - Math.Abs(locations[0].x);
-            rightMargin = 4f - locations[R1_Length - 1].x;
+            leftMargin = horizontalMax - Math.Abs(locations[0].x);
+            rightMargin = horizontalMax - locations[R1_Length - 1].x;
             for (int i = index; i < R1_Length; i++)
             {
-                leftMarginNeeded = (leftMargin + rightMargin) / 2;
-                leftShiftAmount = leftMarginNeeded - leftMargin;
-                current = locations[i];
-                current.x += leftShiftAmount;
-                locList.Add(current);
+                currentShiftedLoc = ShiftLocationHorizontally(horizontalMax, leftMargin, rightMargin, locations[i]);
+                locList.Add(currentShiftedLoc);
                 index++;
             }
             if (R2_Length > 0)
@@ -741,19 +742,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (R2_Length > 0)
         {
             index += difference;
-            leftMargin = 4 - Math.Abs(locations[index].x);
-            rightMargin = 4f - locations[index + R2_Length - 1].x;
+            leftMargin = horizontalMax - Math.Abs(locations[index].x);
+            rightMargin = horizontalMax - locations[index + R2_Length - 1].x;
             int indy = index;
             for (int i = index; i < (indy + R2_Length); i++)
             {
-                leftMarginNeeded = (leftMargin + rightMargin) / 2;
-                leftShiftAmount = leftMarginNeeded - leftMargin;
-                current = locations[i];
-                current.x += leftShiftAmount;
-                locList.Add(current);
+                currentShiftedLoc = ShiftLocationHorizontally(horizontalMax, leftMargin, rightMargin, locations[i]);
+                locList.Add(currentShiftedLoc);
                 index++;
             }
-            if(R3_Length > 0)
+            if (R3_Length > 0)
                 difference = MaxNumPerRow - R2_Length;
         }
 
@@ -761,16 +759,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (R3_Length > 0)
         {
             index += difference;
-            leftMargin = 4 - Math.Abs(locations[index].x);
-            rightMargin = 4f - locations[index + R3_Length - 1].x;
+            leftMargin = horizontalMax - Math.Abs(locations[index].x);
+            rightMargin = horizontalMax - locations[index + R3_Length - 1].x;
             int indy = index;
             for (int i = index; i < (indy + R3_Length); i++)
             {
-                leftMarginNeeded = (leftMargin + rightMargin) / 2;
-                leftShiftAmount = leftMarginNeeded - leftMargin;
-                current = locations[i];
-                current.x += leftShiftAmount;
-                locList.Add(current);
+                currentShiftedLoc = ShiftLocationHorizontally(horizontalMax, leftMargin, rightMargin, locations[i]);
+                locList.Add(currentShiftedLoc);
                 index++;
             }
             if (R4_Length > 0)
@@ -781,16 +776,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (R4_Length > 0)
         {
             index += difference;
-            leftMargin = 4 - Math.Abs(locations[index].x);
-            rightMargin = 4f - locations[index + R4_Length - 1].x;
+            leftMargin = horizontalMax - Math.Abs(locations[index].x);
+            rightMargin = horizontalMax - locations[index + R4_Length - 1].x;
             int indy = index;
             for (int i = index; i < (indy + R4_Length); i++)
             {
-                leftMarginNeeded = (leftMargin + rightMargin) / 2;
-                leftShiftAmount = leftMarginNeeded - leftMargin;
-                current = locations[i];
-                current.x += leftShiftAmount;
-                locList.Add(current);
+                currentShiftedLoc = ShiftLocationHorizontally(horizontalMax, leftMargin, rightMargin, locations[i]);
+                locList.Add(currentShiftedLoc);
                 index++;
             }
             //if (R5_Length > 0)
@@ -806,11 +798,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //    int indy = index;
         //    for (int i = index; i < (indy + R5_Length); i++)
         //    {
-        //        leftMarginNeeded = (leftMargin + rightMargin) / 2;
-        //        leftShiftAmount = leftMarginNeeded - leftMargin;
-        //        current = locations[i];
-        //        current.x += leftShiftAmount;
-        //        locList.Add(current);
+        //        currentShiftedLoc = ShiftLocationHorizontally(horizontalMax, leftMargin, rightMargin, locations[i]);
+        //        locList.Add(currentShiftedLoc);
         //        index++;
         //    }
         //}
@@ -839,6 +828,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
 
         return FinalLocations;
+    }
+
+    public Vector3 ShiftLocationHorizontally(float horizMax, float leftMarg, float rightMarg, Vector3 currentLoc)
+    {
+        float leftMarginNeeded = (leftMarg + rightMarg) / 2;
+        float leftshiftAmount = leftMarginNeeded - leftMarg;
+        currentLoc.x += leftshiftAmount;
+        return currentLoc;
     }
 
     //Generate the correct number of New, PC, and PNC stim for each trial. Called when the trial is defined!

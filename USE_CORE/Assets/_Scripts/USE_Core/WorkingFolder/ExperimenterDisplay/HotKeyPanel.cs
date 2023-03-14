@@ -116,7 +116,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 HotKeys = CustomHotKeyList(); //allows users to specify task-specific lists - this will end up looking something like the various task-specific classes like WWW_TaskDef or whatever
                 //ConfigUIHotKeys = CustomConfigUIHotKeyList();
             }
-            //GenerateTextForPanel(); //method that loops through each hotkey and creates the string to show the hotkey options, using the GenerateTextDescription function of each on
         }
 
         public void InitializeConfigUI(Func<List<HotKey>> CustomConfigUIHotKeyList = null)
@@ -131,7 +130,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 ConfigUIHotKeys = CustomConfigUIHotKeyList(); //allows users to specify task-specific lists - this will end up looking something like the various task-specific classes like WWW_TaskDef or whatever
 
             }
-            //GenerateTextForPanel(); //method that loops through each hotkey and creates the string to show the hotkey options, using the GenerateTextDescription function of each on
         }
 
         public List<HotKey> DefaultHotKeyList()
@@ -147,8 +145,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.W),
                 hotKeyAction = () =>
                 {
-                    //NT: MAYBE WE ALSO NEED TO GET MAIN CAMERA AND INIT CAMERA, WHICH ARE INACTIVE AND SO NOT BEING FOUND BELOW?
-
                     var cams = GameObject.FindObjectsOfType<Camera>();
                     foreach (Camera c in cams) //MirrorCam (0 to 1), BackgroundCamera (1 to 0), TaskCam (0 to 1), MainCameraCopy(1 DC!!)
                         c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0

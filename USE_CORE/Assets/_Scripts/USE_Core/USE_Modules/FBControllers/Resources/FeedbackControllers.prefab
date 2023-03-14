@@ -67,6 +67,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 9bda41667c36249e7a4b99d77f24dc62, type: 3}
   - name: EC_NicePop
     clip: {fileID: 8300000, guid: 47c7a0232a5394c87b9945b8994c7d71, type: 3}
+  - name: TripleCollected
+    clip: {fileID: 8300000, guid: ada645a54a12a48069725923f52635df, type: 3}
   audioSource: {fileID: 0}
 --- !u!114 &2603858045197797024
 MonoBehaviour:

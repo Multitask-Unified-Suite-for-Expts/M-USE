@@ -105,14 +105,11 @@ public class TokenFBController : MonoBehaviour
     public void OnGUI()
     {
         RenderTexture old = RenderTexture.active;
-        if (Camera.main != null) {
+        if (Camera.main != null)
             RenderTexture.active = Camera.main.targetTexture;
-        }
 
         if (totalTokensNum < 0)
-        {
             return;
-        }
 
         GUI.BeginGroup(tokenBoxRect);
         Color oldBGColor = GUI.backgroundColor;
@@ -130,7 +127,8 @@ public class TokenFBController : MonoBehaviour
         GUI.color = colorCollected;
         startPos = DrawTokens(startPos, numCollected);
         GUI.color = colorUncollected;
-        if (numCollected < 0) numCollected = 0;
+        if (numCollected < 0)
+            numCollected = 0;
         DrawTokens(startPos, totalTokensNum - numCollected);
 
         GUI.backgroundColor = oldBGColor;
@@ -191,7 +189,8 @@ public class TokenFBController : MonoBehaviour
                     {
                         animationPhase = AnimationPhase.Flashing;
                         tokenBarFull = true;
-                        StartCoroutine(FlashingBeeps(flashingNumBeeps));
+                        audioFBController.Play("TripleCollected");
+                        //StartCoroutine(FlashingBeeps(flashingNumBeeps));
                         animationEndTime += flashingTime;
                     }
                     break;

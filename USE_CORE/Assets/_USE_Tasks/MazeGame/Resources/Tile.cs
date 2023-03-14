@@ -90,19 +90,26 @@ public class Tile : MonoBehaviour
 
     public IEnumerator FlashingFeedback()
     {
-            // FAILS TO SELECT LAST CORRECT AFTER ERROR
-            fbColor = PREV_CORRECT_COLOR;
-            originalTileColor = mgTL.pathProgressGO[mgTL.pathProgressGO.Count-1].
-                GetComponent<Renderer>().material.color;
-            float increment = TILE_BLINKING_DURATION / NUM_BLINKS;
-            float flashingTime = 0f;
-            while (flashingTime < TILE_BLINKING_DURATION)
-            {
-                mgTL.pathProgressGO[mgTL.pathProgressGO.Count-1].GetComponent<Renderer>().material.color = fbColor;
-                yield return new WaitForSeconds(increment/2);
-                mgTL.pathProgressGO[mgTL.pathProgressGO.Count-1].GetComponent<Renderer>().material.color = originalTileColor;
-                yield return new WaitForSeconds(increment/2);
-                flashingTime += increment;
-            }
+        // FAILS TO SELECT LAST CORRECT AFTER ERROR
+        fbColor = PREV_CORRECT_COLOR;
+        GameObject flashingTile;
+
+        if (mgTL.pathProgressGO.Count == 0) // haven't selected the start yet
+            flashingTile = mgTL.startTile;
+        else // somewhere along the path, can now index through pathProgress
+            flashingTile = mgTL.pathProgressGO[mgTL.pathProgressGO.Count - 1];
+
+        originalTileColor = flashingTile.GetComponent<Renderer>().material.color;
+
+        float increment = TILE_BLINKING_DURATION / NUM_BLINKS;
+        float flashingTime = 0f;
+        while (flashingTime < TILE_BLINKING_DURATION)
+        {
+            flashingTile.GetComponent<Renderer>().material.color = fbColor;
+            yield return new WaitForSeconds(increment / 2);
+            flashingTile.GetComponent<Renderer>().material.color = originalTileColor;
+            yield return new WaitForSeconds(increment / 2);
+            flashingTime += increment;
+        }
     }
 }

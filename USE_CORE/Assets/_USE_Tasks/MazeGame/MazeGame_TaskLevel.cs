@@ -150,6 +150,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         numAbortedTrials_InTask.Add(numAbortedTrials_InBlock);
         numSliderBarFull_InTask.Add(numSliderBarFull_InBlock);
         mazeDurationsList_InTask.Add(mazeDurationsList_InBlock);
+        Debug.Log("MAZE DURATIONS IN TASK?? " + String.Join(",",String.Join(",",mazeDurationsList_InTask.SelectMany(list => list))));
     }
     public override OrderedDictionary GetSummaryData()
     {
@@ -233,7 +234,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     {
         if (mgTL.TrialCount_InTask != 0)
         {
-            Debug.Log("IN THE OVERRIDE");
             CurrentTaskSummaryString.Clear();
             CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" +
                                             $"\n<b># Trials:</b> {mgTL.TrialCount_InTask} ({(Math.Round(decimal.Divide(numAbortedTrials_InTask.AsQueryable().Sum(), (mgTL.TrialCount_InTask)), 2)) * 100}% aborted)" +
@@ -310,7 +310,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         else
         {
             mgTL.NeutralITI = false;
-            Debug.LogError("Neutral ITI settings not defined in the TaskDef. Default Setting of false is used instead");
+            Debug.Log("Neutral ITI settings not defined in the TaskDef. Default Setting of false is used instead");
         }
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TileSize"))
         {

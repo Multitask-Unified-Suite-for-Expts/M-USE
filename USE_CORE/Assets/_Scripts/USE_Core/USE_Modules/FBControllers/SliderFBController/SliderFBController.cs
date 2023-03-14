@@ -25,9 +25,9 @@ public class SliderFBController : MonoBehaviour
     private float animationEndTime;
     private float flashingTime = 0.5f;
     private float updateTime = 0.5f;
-    private float flashBeepInterval;
     private int flashingNumBeeps = 3; //Num beeps for tokenbar flashing audio
     private int sliderInitialValue = 0;
+    private int numSliderBarFull = 0;
 
     private float targetValue;
     private float sliderValueChange;
@@ -43,7 +43,6 @@ public class SliderFBController : MonoBehaviour
         frameData.AddDatum("SliderAnimationPhase", () => animationPhase.ToString());
         frameData.AddDatum("SliderVisibility", ()=> Slider != null? Slider.enabled : false);
         this.audioFBController = audioFBController;
-
     }
     public void InitializeSlider()
     {
@@ -52,7 +51,8 @@ public class SliderFBController : MonoBehaviour
         SliderHaloGO = Instantiate(SliderHaloPrefab, sliderCanvas);
         SliderGO.SetActive(false);
         SliderHaloGO.SetActive(false);
-        flashBeepInterval = audioFBController.GetClip("Positive").length;
+        numSliderBarFull = 0; // Initialize at the Add_Control_Level_Initialization so this can be reset every block/ new task
+        // flashBeepInterval = audioFBController.GetClip("Positive").length;
     }
 
     public void ConfigureSlider(Vector3 sliderPosition, float sliderSize, float sliderInitialValue = 0)
@@ -80,6 +80,11 @@ public class SliderFBController : MonoBehaviour
     public bool isSliderBarFull()
     {
         return sliderBarFull;
+    }
+
+    public int GetNumSliderBarFull()
+    {
+        return numSliderBarFull;
     }
     public void ResetSliderBarFull()
     {
@@ -112,6 +117,7 @@ public class SliderFBController : MonoBehaviour
                     {
                         animationPhase = AnimationPhase.Flashing;
                         sliderBarFull = true;
+                        numSliderBarFull++;
                         StartCoroutine(FlashingBeeps(flashingNumBeeps));
                         animationEndTime += updateTime + flashingTime;
                     }
@@ -170,12 +176,13 @@ public class SliderFBController : MonoBehaviour
 
     IEnumerator FlashingBeeps(int numBeeps)
     {
-        while(numBeeps > 0)
+        int iBeep = numBeeps;
+        while(iBeep > 0)
         {
             audioFBController.Play("Positive");
-            numBeeps--;
-            if(numBeeps > 0)
-                yield return new WaitForSeconds(flashBeepInterval);
+            iBeep--;
+            if(iBeep > 0)
+                yield return new WaitForSeconds((flashingTime/numBeeps)/2);
         }
     }
 }

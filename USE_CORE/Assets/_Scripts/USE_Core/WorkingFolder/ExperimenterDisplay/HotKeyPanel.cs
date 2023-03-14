@@ -190,6 +190,20 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             HotKeyList.Add(toggleCursor);
 
 
+            // Pause Game Hot Key
+            HotKey pauseGame = new HotKey
+            {
+                keyDescription = "P",
+                actionName = "Pause Game",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.P),
+                hotKeyAction = () =>
+                {
+                    Time.timeScale = Time.timeScale == 1 ? 0 : 1;
+                }
+            };
+            HotKeyList.Add(pauseGame);
+
+
             //RestartBlock Hot Key
             HotKey restartBlock = new HotKey
             {
@@ -285,12 +299,12 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             };
             HotKeyList.Add(quitGame);
 
-            // Pause Game Hot Key
-            HotKey pauseGame = new HotKey
+            // End Trial Game Hot Key
+            HotKey endTrial = new HotKey
             {
-                keyDescription = "P",
-                actionName = "Pause (ends trial)",
-                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.P),
+                keyDescription = "T",
+                actionName = "End Trial",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.T),
                 hotKeyAction = () =>
                 {
                     if (!HkPanel.TrialLevel.Paused) 
@@ -318,7 +332,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     }
                 }
             };
-            HotKeyList.Add(pauseGame);
+            HotKeyList.Add(endTrial);
 
             //Reward HotKey:
             HotKey reward = new HotKey

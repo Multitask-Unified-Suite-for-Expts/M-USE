@@ -218,8 +218,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                         {
                             BackdropTouchTime = Time.time;
                             BlueStartTime += currentTrial.TimeoutDuration; //add extra second so it doesn't go straight to white after grating
-                            Input.ResetInputAxes(); //Reset input axis so they can't keep holding down on the backdrop.
-                            StartCoroutine(GratedBackdropFlash(BackdropStripesTexture)); //Turn the backdrop to grated texture
+                            Input.ResetInputAxes();
+                            StartCoroutine(GratedBackdropFlash(BackdropStripesTexture));
                             BackdropTouches++;
                             BackdropTouches_Trial++;
                         }
@@ -286,8 +286,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 BackdropTouchTime = 0;
             }
         });
-        //Go back to white square if bluesquare time lapses (and they aren't already holding down)
-        BlueSquare.SpecifyTermination(() => (Time.time - BlueStartTime > currentTrial.BlueSquareDuration) && !InputBroker.GetMouseButton(0) && !BlueSquareReleased && !Grating, WhiteSquare);
+        BlueSquare.SpecifyTermination(() => (Time.time - BlueStartTime > currentTrial.BlueSquareDuration) && !InputBroker.GetMouseButton(0) && !BlueSquareReleased && !Grating, WhiteSquare); //Go back to white square if bluesquare time lapses (and they aren't already holding down)
         BlueSquare.SpecifyTermination(() => (BlueSquareReleased && !Grating) || MovedOutside || HeldTooLong || HeldTooShort || TimeRanOut || GiveTouchReward, Feedback); //If rewarding touch and they touched, or click the square and release, or run out of time. 
 
         //FEEDBACK state ----------------------------------------------------------------------------------------------------------------------------

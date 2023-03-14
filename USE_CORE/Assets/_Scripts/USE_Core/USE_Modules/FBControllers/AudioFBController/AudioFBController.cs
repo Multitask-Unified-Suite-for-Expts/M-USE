@@ -72,7 +72,7 @@ public class AudioFBController : MonoBehaviour
         playingClipName = clipName;
         if (clips.TryGetValue(clipName, out AudioClip clip))
         {
-            if(audioSource.isPlaying)
+            if (IsPlaying())
                 audioSource.Stop();
             audioSource.PlayOneShot(clip);
         }

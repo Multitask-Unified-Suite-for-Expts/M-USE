@@ -17,8 +17,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public ContinuousRecognition_TrialDef currentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
     public ContinuousRecognition_TaskLevel currentTask => GetTaskLevel<ContinuousRecognition_TaskLevel>();
 
-    public USE_StartButton StartButtonClassInstance;
-    public GameObject StartButton;
+    [HideInInspector] public USE_StartButton StartButtonClassInstance;
+    [HideInInspector] public GameObject StartButton;
 
     public TextMeshProUGUI TimerText;
     public GameObject TimerTextGO;
@@ -44,8 +44,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public bool ContextActive;
     [HideInInspector] public bool VariablesLoaded;
 
-    [HideInInspector] public StimGroup trialStims;
-    [HideInInspector] public List<int> ChosenStimIndices;
+    private StimGroup trialStims;
+    [HideInInspector] public  List<int> ChosenStimIndices;
     [HideInInspector] public string MaterialFilePath;
 
     [HideInInspector] public int NonStimTouches_Block;
@@ -60,16 +60,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public float TimeRemaining;
     [HideInInspector] public List <float> TimeToChoice_Block;
 
-    [HideInInspector] public int NumFeedbackRows;
-    [HideInInspector] public int Score;
+    private int NumFeedbackRows;
+    private int Score;
 
-    [HideInInspector] public Vector3 OriginalFbTextPosition;
-    [HideInInspector] public Vector3 OriginalTitleTextPosition;
-    [HideInInspector] public Vector3 OriginalStartButtonPosition;
-    [HideInInspector] public Vector3 OriginalTimerPosition;
+    private Vector3 OriginalFbTextPosition;
+    private Vector3 OriginalTitleTextPosition;
+    private Vector3 OriginalStartButtonPosition;
+    private Vector3 OriginalTimerPosition;
 
-    [HideInInspector] public StimGroup RightGroup;
-    [HideInInspector] public StimGroup WrongGroup;
+    private StimGroup RightGroup;
+    private StimGroup WrongGroup;
 
     [HideInInspector] public float ButtonScale;
     [HideInInspector] public Vector3 ButtonPosition;
@@ -77,9 +77,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] GameObject chosenStimObj;
     [HideInInspector] ContinuousRecognition_StimDef chosenStimDef;
 
-    [HideInInspector] public int NumPC_Trial;
-    [HideInInspector] public int NumNew_Trial;
-    [HideInInspector] public int NumPNC_Trial;
+    private int NumPC_Trial;
+    private int NumNew_Trial;
+    private int NumPNC_Trial;
 
 
     //Config Variables
@@ -142,19 +142,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             StartButton.transform.position = OriginalStartButtonPosition;
 
-            CompletedAllTrials = false;
-            EndBlock = false;
-            StimIsChosen = false;
-            currentTrial.GotTrialCorrect = false;
-
             if (TrialCount_InBlock == 0)
             {
                 currentTask.CalculateBlockSummaryString();
-                if(IsHuman)
-                {
-                    AdjustStartButtonPos(); //Adjust startButton position (move down) to make room for Title text. 
-                    TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
-                }
+                //if(IsHuman)
+                //{
+                //    AdjustStartButtonPos(); //Adjust startButton position (move down) to make room for Title text. 
+                //    TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
+                //}
             }
 
             if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
@@ -401,8 +396,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
                         YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Game Over \n HighScore: {Score} xp";
                         YouLoseTextGO.SetActive(true);
-                        //AudioFBController.Play("CR_BlockFailed");
-                        AudioFBController.Play("CR_SouthParkFail");
+                        AudioFBController.Play("CR_BlockFailed");
+                        //AudioFBController.Play("CR_SouthParkFail");
                     }
                 }
             }
@@ -449,6 +444,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS -----------------------------------------------------------------------------------------
+    public override void ResetTrialVariables()
+    {
+        CompletedAllTrials = false;
+        EndBlock = false;
+        StimIsChosen = false;
+        currentTrial.GotTrialCorrect = false;
+    }
+
     public override void FinishTrialCleanup()
     {
         DeactivateTextObjects();

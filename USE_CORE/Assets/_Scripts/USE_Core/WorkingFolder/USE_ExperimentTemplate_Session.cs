@@ -76,7 +76,7 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public RenderTexture CameraMirrorTexture;
 
         private string configFileFolder;
-        private bool TaskSceneLoaded, SceneLoading;
+        private bool TaskSceneLoaded, SceneLoading, GuidedTaskSelection;
 
         private bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         private string EyetrackerType;
@@ -192,7 +192,10 @@ namespace USE_ExperimentTemplate_Session
 
             if (SessionSettings.SettingExists("Session", "TaskIconLocations"))
                 TaskIconLocations = (Vector3[])SessionSettings.Get("Session", "TaskIconLocations");
-
+            
+            if (SessionSettings.SettingExists("Session", "GuidedTaskSelection"))
+                GuidedTaskSelection = (bool)SessionSettings.Get("Session", "GuidedTaskSelection");
+            
             if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
                 ContextExternalFilePath = (string)SessionSettings.Get("Session", "ContextExternalFilePath");
 
@@ -382,7 +385,7 @@ namespace USE_ExperimentTemplate_Session
                 Camera.main.targetTexture = CameraMirrorTexture;
                 mainCameraCopy.texture = CameraMirrorTexture;
 
-                // Don't show the task buttons if if we encountered an error during setup
+                // Don't show the task buttons if we encountered an error during setup
                 if (LogPanel.HasError()) {
                     return;
                 }
@@ -397,6 +400,30 @@ namespace USE_ExperimentTemplate_Session
                 if (taskButtons != null)
                 {
                     taskButtons.SetActive(true);
+                    if (GuidedTaskSelection)
+                    {
+                        // if guided selection, we need to adjust the shading of the icons and buttons after the task buttons object
+                        // is already created
+                        
+                        string key = TaskMappings.Keys.Cast<string>().ElementAt(taskCount);
+                        foreach (KeyValuePair<string, GameObject> taskButton in taskButtonsDict)
+                        {
+                            if (taskButton.Key == key)
+                            { 
+                                taskButton.Value.GetComponent<RawImage>().color = new Color(1f, 1f, 1f, 1f);
+                                Button button = taskButton.Value.AddComponent<Button>();
+                                
+                                // Add listener to now accept touches for the next task in the Session Config
+                                button.onClick.AddListener(() =>
+                                {
+                                    taskAutomaticallySelected = false;
+                                    selectedConfigName = taskButton.Key;
+                                });
+                            }
+                            else
+                                taskButton.Value.GetComponent<RawImage>().color = new Color(.5f, .5f, .5f, .35f);
+                        }
+                    }
                     return;
                 }
 
@@ -424,6 +451,7 @@ namespace USE_ExperimentTemplate_Session
                 int count = 0;
                 foreach (DictionaryEntry task in TaskMappings)
                 {
+                    // Assigns configName and taskName according to Session Config Task Mappings
                     string configName = (string)task.Key;
                     string taskName = (string)task.Value;
 
@@ -438,19 +466,41 @@ namespace USE_ExperimentTemplate_Session
                     taskButtonsDict.Add(configName, taskButton);
                     taskButton.transform.parent = taskButtons.transform;
 
-                    RawImage image = taskButton.AddComponent<RawImage>();
+                    RawImage taskButtonImage = taskButton.AddComponent<RawImage>();
                     string taskIcon = TaskIcons[configName];
-                    image.texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + taskIcon + ".png");
+                    taskButtonImage.texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + taskIcon + ".png");
 
-                    image.rectTransform.localPosition = TaskIconLocations[count];
-                    image.rectTransform.localScale = Vector3.one;
-                    image.rectTransform.sizeDelta = buttonSize * Vector3.one;
-
-                    Button button = taskButton.AddComponent<Button>();
-                    button.onClick.AddListener(() => {
-                        taskAutomaticallySelected = false;
-                        selectedConfigName = configName;
-                    });
+                    taskButtonImage.rectTransform.localPosition = TaskIconLocations[count];
+                    taskButtonImage.rectTransform.localScale = Vector3.one;
+                    taskButtonImage.rectTransform.sizeDelta = buttonSize * Vector3.one;
+                    
+                    if (!GuidedTaskSelection)
+                    {
+                        Button button = taskButton.AddComponent<Button>();
+                        // Will monitor clicks to all task icons
+                        button.onClick.AddListener(() =>
+                        {
+                            taskAutomaticallySelected = false;
+                            selectedConfigName = configName;
+                        });
+                    }
+                    else
+                    {
+                        string key = TaskMappings.Keys.Cast<string>().ElementAt(taskCount);
+                        RawImage image = taskButtonsDict[configName].GetComponent<RawImage>();
+                        if (configName == key)
+                        {
+                            Button button = taskButton.AddComponent<Button>();
+                            button.onClick.AddListener(() =>
+                            {
+                                taskAutomaticallySelected = false;
+                                selectedConfigName = configName;
+                                taskButtonsDict[configName].GetComponent<RawImage>().color = new Color(1f, 1f, 1f, 1f);
+                            });
+                        }
+                        else
+                            image.color = new Color(.5f, .5f, .5f, .35f);
+                    }
                     count++;
                 }
             });

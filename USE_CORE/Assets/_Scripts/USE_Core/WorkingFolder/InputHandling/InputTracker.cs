@@ -27,7 +27,7 @@ public abstract class InputTracker : MonoBehaviour
         
         void CheckForSelection_Handler(object sender, EventArgs e)
         {
-                selectionHandler.CheckForSelection(TargetedGameObject, CurrentInputScreenPosition, selectionIsPossible, selectionCompleteIsPossible);
+            selectionHandler.CheckForSelection(TargetedGameObject, CurrentInputScreenPosition, selectionIsPossible, selectionCompleteIsPossible);
         }
 
         startState.StateInitializationFinished += (object sender, EventArgs e) =>

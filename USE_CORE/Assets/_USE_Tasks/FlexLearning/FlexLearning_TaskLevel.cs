@@ -166,7 +166,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         {
             CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
         }
-            
     }
 
     public void AssignBlockData()

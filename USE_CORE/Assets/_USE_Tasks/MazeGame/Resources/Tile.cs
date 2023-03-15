@@ -4,6 +4,7 @@ using System.IO;
 using HiddenMaze;
 using MazeGame_Namespace;
 using UnityEngine.Serialization;
+using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 
 
@@ -14,7 +15,8 @@ public class Tile : MonoBehaviour
     // This means the bottom-left-most tile is (1, 1).
     public Coords mCoord;
     public float sliderValueChange;
-   
+    private MazeGame_TrialLevel mgTL;
+
     // DEFAULT MAZE CONFIGS - CONFIGURABLE IN TASK DEF/ TRIAL LEVEL
     public Color START_COLOR = new Color(0.94f, 0.93f, 0.48f);
     public Color FINISH_COLOR = new Color(0.37f, 0.59f, 0.94f);
@@ -41,13 +43,14 @@ public class Tile : MonoBehaviour
     void Start()
     {
         gameObject.GetComponent<Renderer>().material.color = baseColor;
+       mgTL = GameObject.Find("MazeGame_Scripts").GetComponent<MazeGame_TrialLevel>();
     }
 
 
     public void OnMouseDown()
     {
         int correctnessCode;
-        correctnessCode = MazeGame_TrialLevel.ManageTileTouch(this);
+        correctnessCode = mgTL.ManageTileTouch(this);
         StartCoroutine(ColorFeedback(correctnessCode));
     }
    public void setColor(Color c)
@@ -79,27 +82,34 @@ public class Tile : MonoBehaviour
 
         originalTileColor = gameObject.GetComponent<Renderer>().material.color;
         gameObject.GetComponent<Renderer>().material.color = fbColor;
-        yield return new WaitForSeconds(MazeGame_TrialLevel.tileFbDuration);
-        if (!MazeGame_TrialLevel.viewPath || code != 1)
+        yield return new WaitForSeconds(mgTL.tileFbDuration);
+        if (!mgTL.viewPath || code != 1)
             gameObject.GetComponent<Renderer>().material.color = originalTileColor;
 
     }
 
     public IEnumerator FlashingFeedback()
     {
-            // FAILS TO SELECT LAST CORRECT AFTER ERROR
-            fbColor = PREV_CORRECT_COLOR;
-            originalTileColor = MazeGame_TrialLevel.pathProgressGO[MazeGame_TrialLevel.pathProgressGO.Count-1].
-                GetComponent<Renderer>().material.color;
-            float increment = TILE_BLINKING_DURATION / NUM_BLINKS;
-            float flashingTime = 0f;
-            while (flashingTime < TILE_BLINKING_DURATION)
-            {
-                MazeGame_TrialLevel.pathProgressGO[MazeGame_TrialLevel.pathProgressGO.Count-1].GetComponent<Renderer>().material.color = fbColor;
-                yield return new WaitForSeconds(increment/2);
-                MazeGame_TrialLevel.pathProgressGO[MazeGame_TrialLevel.pathProgressGO.Count-1].GetComponent<Renderer>().material.color = originalTileColor;
-                yield return new WaitForSeconds(increment/2);
-                flashingTime += increment;
-            }
+        // FAILS TO SELECT LAST CORRECT AFTER ERROR
+        fbColor = PREV_CORRECT_COLOR;
+        GameObject flashingTile;
+
+        if (mgTL.pathProgressGO.Count == 0) // haven't selected the start yet
+            flashingTile = mgTL.startTile;
+        else // somewhere along the path, can now index through pathProgress
+            flashingTile = mgTL.pathProgressGO[mgTL.pathProgressGO.Count - 1];
+
+        originalTileColor = flashingTile.GetComponent<Renderer>().material.color;
+
+        float increment = TILE_BLINKING_DURATION / NUM_BLINKS;
+        float flashingTime = 0f;
+        while (flashingTime < TILE_BLINKING_DURATION)
+        {
+            flashingTile.GetComponent<Renderer>().material.color = fbColor;
+            yield return new WaitForSeconds(increment / 2);
+            flashingTile.GetComponent<Renderer>().material.color = originalTileColor;
+            yield return new WaitForSeconds(increment / 2);
+            flashingTime += increment;
+        }
     }
 }

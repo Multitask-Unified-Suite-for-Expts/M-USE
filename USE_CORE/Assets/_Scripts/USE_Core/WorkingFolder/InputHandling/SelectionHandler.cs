@@ -1,9 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using MazeGame_Namespace;
 using UnityEngine;
-using UnityEngine.UIElements;
 using USE_StimulusManagement;
 using USE_States;
 
@@ -85,6 +80,7 @@ public class SelectionHandler<T> where T : StimDef
 
     public bool GetSelectionTooLong()
     {
+        Debug.Log("HIT THE GET TOO LONG METHOD!" + " " + SelectionTooLong);
         return SelectionTooLong;
     }
     public bool GetSelectionTooShort()
@@ -157,21 +153,20 @@ public class SelectionHandler<T> where T : StimDef
         {
             // Check if there is a targeted game object
             if (targetedGO != null)
-            {
-                SelectionTooShort = false;
-                SelectionTooLong = false;
-                
+            {                
                 if (selectionIsPossible == null || selectionIsPossible())
                 {
                     //Have they moved too far?
                     if (SelectionStartPosition != null && Vector2.Distance(GetScreenPos(CurrentInputScreenPosition.Value), SelectionStartPosition.Value) > MaxMoveDistance)
                     {
-                        Debug.Log(Time.frameCount + ": moved too far");
                         MovedPastMaxDistance = true;
                     }
                     //If selection has just started
                     if (targetedGO != SelectedGameObject && CurrentTargetDuration == null)
                     {
+                        SelectionTooShort = false;
+                        SelectionTooLong = false;
+
                         CurrentTargetDuration = 0;
                         if (CurrentInputScreenPosition != null)
                             SelectionStartPosition = GetScreenPos(CurrentInputScreenPosition.Value);
@@ -183,7 +178,7 @@ public class SelectionHandler<T> where T : StimDef
                 }
 
                 // Check if the touch duration is within the appropriate range
-                bool withinDuration = CurrentTargetDuration >= MinDuration && ((CurrentTargetDuration <= MaxDuration) || MaxDuration == null);
+                bool withinDuration = CurrentTargetDuration >= MinDuration && (MaxDuration == null || (CurrentTargetDuration <= MaxDuration));
 
                 if (withinDuration && (selectionCompleteIsPossible == null || selectionCompleteIsPossible()))
                 {
@@ -194,6 +189,7 @@ public class SelectionHandler<T> where T : StimDef
                 }
                 else
                 {
+                    //Debug.Log("HITTING 190");
                     NumTouchDurationError++;                    
                     if (CurrentTargetDuration <= MinDuration) 
                         SelectionTooShort = true;

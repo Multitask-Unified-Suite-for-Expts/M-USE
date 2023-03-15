@@ -6,17 +6,10 @@ using ContinuousRecognition_Namespace;
 using System;
 using Random = UnityEngine.Random;
 using ConfigDynamicUI;
-using USE_Settings;
 using USE_ExperimentTemplate_Trial;
-using System.Collections;
 using System.Linq;
-using UnityEngine.UI;
-using USE_ExperimentTemplate_Block;
-using System.IO;
-using UnityEngine.Profiling;
 using TMPro;
 using USE_UI;
-using USE_Data;
 
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
@@ -24,8 +17,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public ContinuousRecognition_TrialDef currentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
     public ContinuousRecognition_TaskLevel currentTask => GetTaskLevel<ContinuousRecognition_TaskLevel>();
 
-    public USE_StartButton StartButtonClassInstance;
-    public GameObject StartButton;
+    [HideInInspector] public USE_StartButton StartButtonClassInstance;
+    [HideInInspector] public GameObject StartButton;
 
     public TextMeshProUGUI TimerText;
     public GameObject TimerTextGO;
@@ -51,8 +44,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public bool ContextActive;
     [HideInInspector] public bool VariablesLoaded;
 
-    [HideInInspector] public StimGroup trialStims;
-    [HideInInspector] public List<int> ChosenStimIndices;
+    private StimGroup trialStims;
+    [HideInInspector] public  List<int> ChosenStimIndices;
     [HideInInspector] public string MaterialFilePath;
 
     [HideInInspector] public int NonStimTouches_Block;
@@ -67,16 +60,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public float TimeRemaining;
     [HideInInspector] public List <float> TimeToChoice_Block;
 
-    [HideInInspector] public int NumFeedbackRows;
-    [HideInInspector] public int Score;
+    private int NumFeedbackRows;
+    private int Score;
 
-    [HideInInspector] public Vector3 OriginalFbTextPosition;
-    [HideInInspector] public Vector3 OriginalTitleTextPosition;
-    [HideInInspector] public Vector3 OriginalStartButtonPosition;
-    [HideInInspector] public Vector3 OriginalTimerPosition;
+    private Vector3 OriginalFbTextPosition;
+    private Vector3 OriginalTitleTextPosition;
+    private Vector3 OriginalStartButtonPosition;
+    private Vector3 OriginalTimerPosition;
 
-    [HideInInspector] public StimGroup RightGroup;
-    [HideInInspector] public StimGroup WrongGroup;
+    private StimGroup RightGroup;
+    private StimGroup WrongGroup;
 
     [HideInInspector] public float ButtonScale;
     [HideInInspector] public Vector3 ButtonPosition;
@@ -84,9 +77,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] GameObject chosenStimObj;
     [HideInInspector] ContinuousRecognition_StimDef chosenStimDef;
 
-    [HideInInspector] public int NumPC_Trial;
-    [HideInInspector] public int NumNew_Trial;
-    [HideInInspector] public int NumPNC_Trial;
+    private int NumPC_Trial;
+    private int NumNew_Trial;
+    private int NumPNC_Trial;
 
 
     //Config Variables
@@ -141,26 +134,22 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         SelectionHandler<ContinuousRecognition_StimDef> mouseHandler = new SelectionHandler<ContinuousRecognition_StimDef>();
-        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial);
+        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null,
+            () => MouseTracker.ButtonStatus[0] == 1, () => MouseTracker.ButtonStatus[0] == 0);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
             StartButton.transform.position = OriginalStartButtonPosition;
 
-            CompletedAllTrials = false;
-            EndBlock = false;
-            StimIsChosen = false;
-            currentTrial.GotTrialCorrect = false;
-
             if (TrialCount_InBlock == 0)
             {
                 currentTask.CalculateBlockSummaryString();
-                if(IsHuman)
-                {
-                    AdjustStartButtonPos(); //Adjust startButton position (move down) to make room for Title text. 
-                    TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
-                }
+                //if(IsHuman)
+                //{
+                //    AdjustStartButtonPos(); //Adjust startButton position (move down) to make room for Title text. 
+                //    TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
+                //}
             }
 
             if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
@@ -217,7 +206,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         DisplayStims.AddTimer(() => displayStimDuration.value, ChooseStim, () => TimeRemaining = chooseStimDuration.value);
 
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
-        MouseTracker.AddSelectionHandler(mouseHandler, ChooseStim);
+        MouseTracker.AddSelectionHandler(mouseHandler, ChooseStim, null,
+            () => MouseTracker.ButtonStatus[0] == 1, () => MouseTracker.ButtonStatus[0] == 0);
 
         ChooseStim.AddInitializationMethod(() =>
         {
@@ -406,8 +396,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
                         YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Game Over \n HighScore: {Score} xp";
                         YouLoseTextGO.SetActive(true);
-                        //AudioFBController.Play("CR_BlockFailed");
-                        AudioFBController.Play("CR_SouthParkFail");
+                        AudioFBController.Play("CR_BlockFailed");
+                        //AudioFBController.Play("CR_SouthParkFail");
                     }
                 }
             }
@@ -454,6 +444,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS -----------------------------------------------------------------------------------------
+    public override void ResetTrialVariables()
+    {
+        CompletedAllTrials = false;
+        EndBlock = false;
+        StimIsChosen = false;
+        currentTrial.GotTrialCorrect = false;
+    }
+
     public override void FinishTrialCleanup()
     {
         DeactivateTextObjects();
@@ -616,9 +614,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     Vector3[] CenterFeedbackLocations(Vector3[] locations, int numLocations)
     {
+        if (numLocations > 24)
+            Debug.LogError("You are attempting to generate " + numLocations + " feedback Locations, However the maximum is 24");
+
         int MaxNumPerRow = 6;
         float max = 2.25f;
-        
+
+        float horizontalMax = 4;
+
         int numRows = 1;
         if (numLocations > 6) numRows++;
         if (numLocations > 12) numRows++;
@@ -640,11 +643,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 R1_Length = numLocations;
                 break;
             case 2:
-                if(numLocations % 2 == 0)
+                if (numLocations % 2 == 0)
                     R1_Length = R2_Length = numLocations / 2;
                 else
                 {
-                    R1_Length = (int) Math.Floor((decimal)numLocations / 2); //round it down and increase next row by 1.
+                    R1_Length = (int)Math.Floor((decimal)numLocations / 2); //round it down and increase next row by 1.
                     R2_Length = (int)Math.Ceiling((decimal)numLocations / 2); //make last row have one more than first row. 
                 }
                 break;
@@ -661,7 +664,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
                 break;
             case 4:
-                if(numLocations % 4 == 0)
+                if (numLocations % 4 == 0)
                     R1_Length = R2_Length = R3_Length = R4_Length = numLocations / 4;
                 else
                 {
@@ -672,7 +675,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     if (diff == 1) R3_Length++;
                     else if (diff == 2)
                     {
-                        if(R4_Length == MaxNumPerRow)
+                        if (R4_Length == MaxNumPerRow)
                         {
                             R2_Length++;
                             R3_Length++;
@@ -685,54 +688,50 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     }
                 }
                 break;
-            //case 5:
-            //    if (numLocations % 5 == 0)
-            //        R1_Length = R2_Length = R3_Length = R4_Length = R5_Length = numLocations / 5;
-            //    else
-            //    {
-            //        R1_Length = R2_Length = R3_Length = R4_Length = (int)Math.Floor((decimal)numLocations / 5);
-            //        R5_Length = (int)Math.Ceiling((decimal)numLocations / 5);
+                //case 5:
+                //    if (numLocations % 5 == 0)
+                //        R1_Length = R2_Length = R3_Length = R4_Length = R5_Length = numLocations / 5;
+                //    else
+                //    {
+                //        R1_Length = R2_Length = R3_Length = R4_Length = (int)Math.Floor((decimal)numLocations / 5);
+                //        R5_Length = (int)Math.Ceiling((decimal)numLocations / 5);
 
-            //        int diff = numLocations - (R1_Length + R2_Length + R3_Length + R4_Length + R5_Length);
-            //        if (diff == 1) R4_Length++;
-            //        else if (diff == 2)
-            //        {
-            //            R3_Length++;
-            //            R4_Length++;
-            //        }
-            //        else if (diff == 3)
-            //        {
-            //            R2_Length++;
-            //            R3_Length++;
-            //            R4_Length++;
-            //        }
-            //    }
-            //    break;
+                //        int diff = numLocations - (R1_Length + R2_Length + R3_Length + R4_Length + R5_Length);
+                //        if (diff == 1) R4_Length++;
+                //        else if (diff == 2)
+                //        {
+                //            R3_Length++;
+                //            R4_Length++;
+                //        }
+                //        else if (diff == 3)
+                //        {
+                //            R2_Length++;
+                //            R3_Length++;
+                //            R4_Length++;
+                //        }
+                //    }
+                //    break;
         }
+
 
         float leftMargin;
         float rightMargin;
-        float leftMarginNeeded;
-        float leftShiftAmount;
 
         int index = 0;
         int difference = 0;
-        Vector3 current;
+        Vector3 currentShiftedLoc;
         List<Vector3> locList = new List<Vector3>();
 
         //----- CENTER HORIZONTALLY--------------------------------
         //Center ROW 1:
         if (R1_Length > 0)
         {
-            leftMargin = 4 - Math.Abs(locations[0].x);
-            rightMargin = 4f - locations[R1_Length - 1].x;
+            leftMargin = horizontalMax - Math.Abs(locations[0].x);
+            rightMargin = horizontalMax - locations[R1_Length - 1].x;
             for (int i = index; i < R1_Length; i++)
             {
-                leftMarginNeeded = (leftMargin + rightMargin) / 2;
-                leftShiftAmount = leftMarginNeeded - leftMargin;
-                current = locations[i];
-                current.x += leftShiftAmount;
-                locList.Add(current);
+                currentShiftedLoc = ShiftLocationHorizontally(horizontalMax, leftMargin, rightMargin, locations[i]);
+                locList.Add(currentShiftedLoc);
                 index++;
             }
             if (R2_Length > 0)
@@ -743,19 +742,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (R2_Length > 0)
         {
             index += difference;
-            leftMargin = 4 - Math.Abs(locations[index].x);
-            rightMargin = 4f - locations[index + R2_Length - 1].x;
+            leftMargin = horizontalMax - Math.Abs(locations[index].x);
+            rightMargin = horizontalMax - locations[index + R2_Length - 1].x;
             int indy = index;
             for (int i = index; i < (indy + R2_Length); i++)
             {
-                leftMarginNeeded = (leftMargin + rightMargin) / 2;
-                leftShiftAmount = leftMarginNeeded - leftMargin;
-                current = locations[i];
-                current.x += leftShiftAmount;
-                locList.Add(current);
+                currentShiftedLoc = ShiftLocationHorizontally(horizontalMax, leftMargin, rightMargin, locations[i]);
+                locList.Add(currentShiftedLoc);
                 index++;
             }
-            if(R3_Length > 0)
+            if (R3_Length > 0)
                 difference = MaxNumPerRow - R2_Length;
         }
 
@@ -763,16 +759,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (R3_Length > 0)
         {
             index += difference;
-            leftMargin = 4 - Math.Abs(locations[index].x);
-            rightMargin = 4f - locations[index + R3_Length - 1].x;
+            leftMargin = horizontalMax - Math.Abs(locations[index].x);
+            rightMargin = horizontalMax - locations[index + R3_Length - 1].x;
             int indy = index;
             for (int i = index; i < (indy + R3_Length); i++)
             {
-                leftMarginNeeded = (leftMargin + rightMargin) / 2;
-                leftShiftAmount = leftMarginNeeded - leftMargin;
-                current = locations[i];
-                current.x += leftShiftAmount;
-                locList.Add(current);
+                currentShiftedLoc = ShiftLocationHorizontally(horizontalMax, leftMargin, rightMargin, locations[i]);
+                locList.Add(currentShiftedLoc);
                 index++;
             }
             if (R4_Length > 0)
@@ -783,16 +776,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (R4_Length > 0)
         {
             index += difference;
-            leftMargin = 4 - Math.Abs(locations[index].x);
-            rightMargin = 4f - locations[index + R4_Length - 1].x;
+            leftMargin = horizontalMax - Math.Abs(locations[index].x);
+            rightMargin = horizontalMax - locations[index + R4_Length - 1].x;
             int indy = index;
             for (int i = index; i < (indy + R4_Length); i++)
             {
-                leftMarginNeeded = (leftMargin + rightMargin) / 2;
-                leftShiftAmount = leftMarginNeeded - leftMargin;
-                current = locations[i];
-                current.x += leftShiftAmount;
-                locList.Add(current);
+                currentShiftedLoc = ShiftLocationHorizontally(horizontalMax, leftMargin, rightMargin, locations[i]);
+                locList.Add(currentShiftedLoc);
                 index++;
             }
             //if (R5_Length > 0)
@@ -808,11 +798,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //    int indy = index;
         //    for (int i = index; i < (indy + R5_Length); i++)
         //    {
-        //        leftMarginNeeded = (leftMargin + rightMargin) / 2;
-        //        leftShiftAmount = leftMarginNeeded - leftMargin;
-        //        current = locations[i];
-        //        current.x += leftShiftAmount;
-        //        locList.Add(current);
+        //        currentShiftedLoc = ShiftLocationHorizontally(horizontalMax, leftMargin, rightMargin, locations[i]);
+        //        locList.Add(currentShiftedLoc);
         //        index++;
         //    }
         //}
@@ -841,6 +828,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
 
         return FinalLocations;
+    }
+
+    public Vector3 ShiftLocationHorizontally(float horizMax, float leftMarg, float rightMarg, Vector3 currentLoc)
+    {
+        float leftMarginNeeded = (leftMarg + rightMarg) / 2;
+        float leftshiftAmount = leftMarginNeeded - leftMarg;
+        currentLoc.x += leftshiftAmount;
+        return currentLoc;
     }
 
     //Generate the correct number of New, PC, and PNC stim for each trial. Called when the trial is defined!

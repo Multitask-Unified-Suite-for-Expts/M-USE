@@ -579,7 +579,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private void LoadMazeDef()
     {
         // textMaze will load the text file containing the full Maze path of the intended mazeDef for the block/trial
-        var textMaze = File.ReadAllLines(MazeFilePath + Path.DirectorySeparatorChar + mazeDefName);
+        string mazePath = "";
+        string[] filePaths = Directory.GetFiles(MazeFilePath, $"{mazeDefName}*", SearchOption.AllDirectories);
+        
+        if (filePaths.Length >= 1)
+            mazePath = filePaths[0];
+        var textMaze = File.ReadAllLines(mazePath);
         currMaze = new Maze(textMaze[0]);
     }
     private void LoadConfigVariables()

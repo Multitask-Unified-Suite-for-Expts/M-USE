@@ -18,9 +18,9 @@ namespace HiddenMaze
             this.chessCoord = chessCoord;
         }
 
-        public bool IsAdjacent(string prevCoord)
+        public bool IsAdjacent(Coords prevCoord)
         {
-            Vector2 previousTouchCartesian = GetCartesian(prevCoord); // finds the cartesian equivalent of the chess notation for comparison
+            Vector2 previousTouchCartesian = GetCartesian(prevCoord.chessCoord); // finds the cartesian equivalent of the chess notation for comparison
             Vector2 newTouchCartesian = GetCartesian(this.chessCoord); 
             float dx = Math.Abs(previousTouchCartesian[0]- newTouchCartesian[0]);
             float dy = Math.Abs(previousTouchCartesian[1] - newTouchCartesian[1]);

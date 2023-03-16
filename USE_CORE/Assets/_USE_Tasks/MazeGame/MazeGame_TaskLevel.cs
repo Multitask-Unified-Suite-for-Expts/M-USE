@@ -44,7 +44,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     private List<int> numRewardPulses_InTask;
     private List<int> numAbortedTrials_InTask;
     private List<int> numSliderBarFull_InTask;
-    private List<List<float?>> mazeDurationsList_InTask;
+    private List<string> mazeDurationsList_InTask;
 
     private float AvgTotalErrors;
     private float AvgPerseverativeErrors;
@@ -80,7 +80,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         numRewardPulses_InTask = new List<int>();
         numSliderBarFull_InTask = new List<int>();
         numAbortedTrials_InTask = new List<int>();
-        mazeDurationsList_InTask = new List<List<float?>>();
+        mazeDurationsList_InTask = new List<string>();
         
         mgTL = (MazeGame_TrialLevel)TrialLevel;
         SetSettings();
@@ -134,7 +134,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("NumRewardPulses", () => numRewardPulses_InBlock);
         BlockData.AddDatum("NumSliderBarFull", ()=>numSliderBarFull_InBlock);
         BlockData.AddDatum("NumAbortedTrials", ()=> numAbortedTrials_InBlock);
-        BlockData.AddDatum("MazeDurations", () => String.Join(",",mazeDurationsList_InBlock));
+        BlockData.AddDatum("MazeDurations", () => string.Join(",",mazeDurationsList_InBlock));
        // BlockData.AddDatum("NumNonStimSelections", () => mgTL.NonStimTouches_InBlock);
     }
     public void AddBlockValuesToTaskValues()
@@ -149,8 +149,12 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         ruleBreakingErrors_InTask.Add(ruleBreakingErrors_InBlock);
         numAbortedTrials_InTask.Add(numAbortedTrials_InBlock);
         numSliderBarFull_InTask.Add(numSliderBarFull_InBlock);
-        mazeDurationsList_InTask.Add(mazeDurationsList_InBlock);
-        Debug.Log("MAZE DURATIONS IN TASK?? " + String.Join(",",String.Join(",",mazeDurationsList_InTask.SelectMany(list => list))));
+        mazeDurationsList_InTask.Add(string.Join(",",mazeDurationsList_InBlock));
+        List<float> allDurations = mazeDurationsList_InTask
+            .SelectMany(str => str.Split(','))
+            .Select(str => float.Parse(str))
+            .ToList();
+        Debug.Log("MAZE DURATIONS IN TASK: " + string.Join(",", allDurations));
     }
     public override OrderedDictionary GetSummaryData()
     {
@@ -203,7 +207,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
         //Add CurrentBlockString if block wasn't aborted:
         if (mgTL.AbortCode == 0)
-            BlockSummaryString.AppendLine(CurrentBlockString.ToString());
+            BlockSummaryString.AppendLine(CurrentBlockString);
 
 
         if (blocksAdded > 1) //If atleast 2 blocks to average, set Averages string and add to BlockSummaryString:
@@ -221,13 +225,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                               "\nAvg Reward: " + AvgReward.ToString("0.00") +
                               "\nAvg Maze Duration: " + AvgMazeDuration.ToString("0.00");;
             
-            BlockSummaryString.AppendLine(BlockAveragesString.ToString());
+            BlockSummaryString.AppendLine(BlockAveragesString);
         }
 
         //Add Previous blocks string:
         if(PreviousBlocksString.Length > 0)
         {
-            BlockSummaryString.AppendLine("\n" + PreviousBlocksString.ToString());
+            BlockSummaryString.AppendLine("\n" + PreviousBlocksString);
         }
     }
     public override void SetTaskSummaryString()
@@ -283,8 +287,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             AvgReward = (float)numRewardPulses_InTask.AsQueryable().Average();
 
         if (mazeDurationsList_InTask.Count >= 1)
-            AvgMazeDuration = mazeDurationsList_InTask.SelectMany(list => list)
-                .Average((float? duration) => duration ?? 0);
+        {
+            List<float> allDurations = mazeDurationsList_InTask
+                .SelectMany(str => str.Split(','))
+                .Select(str => float.Parse(str))
+                .ToList();
+            AvgMazeDuration = allDurations.Average();
+        }
     }
     private void SetSettings()
     {

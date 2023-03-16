@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using USE_ExperimentTemplate_Classes;
 
 public class SyncBoxController
 {
@@ -18,6 +19,9 @@ public class SyncBoxController
     public int? maxConsecutiveSonicationTrials;
     private string ultrasoundTriggerDurationTicks;
     private int numTrialsWithoutSonicationAfterMax;
+
+    public EventCodeManager EventCodeManager;
+    public Dictionary<string, EventCode> SessionEventCodes;
 
     public void SendCommand(string command)
     {
@@ -42,15 +46,11 @@ public class SyncBoxController
         for (int i = 0; i < numPulses; i++)
         {
             serialPortController.AddToSend("RWD " + pulseSize);//values less than 20 don't consistently work so use between 20-100 (# in 0.1 ms increments)
-            //eventCodeManager.SendCodeImmediate(eventCodes.Fluid1Onset.Value);
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["SyncBoxController_RewardPulseSent"]);
             MsBetweenRewardPulses = 200;
             Thread.Sleep(MsBetweenRewardPulses + pulseSize/10);
-            
-            //MsBetweenRewardPulses = 52;
-            //Thread.Sleep(MsBetweenRewardPulses);
         }
         rewardFinished = true;
-        //Thread.CurrentThread.Abort();
     }
     void SendSonication()
     {
@@ -59,6 +59,7 @@ public class SyncBoxController
             sonicationSentThisTrial == false)
         {
             serialPortController.AddToSend("RWB " + ultrasoundTriggerDurationTicks);
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["SyncBoxController_SonicationPulseSent"]);
             sonicationSentThisFrame = true;
             sonicationSentThisTrial = true;
             numConsecutiveSonicationTrials += 1;

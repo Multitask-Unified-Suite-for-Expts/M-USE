@@ -13,7 +13,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public THR_TrialDef currentTrial => GetCurrentTrialDef<THR_TrialDef>();
     public THR_TaskLevel currentTask => GetTaskLevel<THR_TaskLevel>();
 
-    public string MaterialFilePath;
+    [HideInInspector] public string MaterialFilePath;
 
     private Renderer BackdropRenderer;
     private GameObject BackdropGO;
@@ -60,8 +60,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     private bool BlueSquareTouched;
     private bool BlueSquareReleased;
-    private bool ClickedOutsideSquare;
-    private bool ClickedWhiteSquare;
     private bool AudioPlayed;
     private bool Grating;
     private bool HeldTooShort;
@@ -72,7 +70,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     private Color32 LightBlueColor;
     private Color32 LightRedColor;
-    private Color32 InitialSquareColor;
     private Color32 InitialBackdropColor;
 
     private float WhiteTimeoutTime;
@@ -88,7 +85,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     private float RewardEarnedTime;
     private float RewardTimer;
-    private bool RewardGiven;
 
 
     public override void DefineControlLevel()
@@ -144,7 +140,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             if(WhiteTimeoutTime != 0 && (Time.time - WhiteTimeoutTime) > currentTrial.TimeoutDuration)
                 WhiteTimeoutTime = 0;
 
-            if (InputBroker.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
+            if (InputBroker.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject()) //makes sure mouse isn't over a UI element. 
             {
                 RaycastHit hit;
                 if (Physics.Raycast(Camera.main.ScreenPointToRay(InputBroker.mousePosition), out hit, Mathf.Infinity))
@@ -162,7 +158,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     if (hit.transform.gameObject.name == "BackdropGO")
                     {
                         BackdropTouches_Trial++;
-                        StartCoroutine(GratedBackdropFlash(BackdropStripesTexture)); //Turn the backdrop to grated texture
+                        StartCoroutine(GratedBackdropFlash(BackdropStripesTexture));
                     }
                 }
 
@@ -181,7 +177,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             BlueSquareTouched = false;
             BlueSquareReleased = false;
             MovedOutside = false;
-            ClickedOutsideSquare = false;
             BackdropTouchTime = 0;
             BackdropTouches = 0;
             HeldDuration = 0;
@@ -213,7 +208,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     }
                     if (hit.transform.gameObject.name == "BackdropGO" && !BlueSquareTouched && !Grating)
                     {
-                        ClickedOutsideSquare = true;
                         if (BackdropTouches == 0)
                         {
                             BackdropTouchTime = Time.time;
@@ -299,7 +293,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             if(GiveTouchReward || GiveReleaseReward)
             {
                 AudioFBController.Play("Positive");
-                if(GiveReleaseReward)
+                if (GiveReleaseReward)
                     SquareMaterial.color = Color.gray;
             }
             else //held too long, held too short, moved outside, or timeRanOut
@@ -344,7 +338,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 SyncBoxController.SendRewardPulses(currentTrial.NumTouchPulses, currentTrial.PulseSize);
                 TouchRewards_Trial += currentTrial.NumTouchPulses;
                 SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumReleasePulses));
-                RewardGiven = true;
             }
         });
         Reward.SpecifyTermination(() => true, ITI);
@@ -516,7 +509,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         SquareRenderer = SquareGO.GetComponent<Renderer>();
         SquareMaterial = SquareRenderer.material;
         SquareTexture = SquareRenderer.material.mainTexture;
-        InitialSquareColor = SquareMaterial.color;
         SquareGO.GetComponent<Renderer>().material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
         SquareGO.GetComponent<Renderer>().material.SetFloat("_SpecularHighlights", 0f);
     }
@@ -557,7 +549,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     {
         HeldTooLong = false;
         HeldTooShort = false;
-        RewardGiven = false;
         GiveReleaseReward = false;
         GiveTouchReward = false;
         TimeRanOut = false;

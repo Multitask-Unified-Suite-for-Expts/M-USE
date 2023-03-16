@@ -103,7 +103,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                 
             RenderSettings.skybox = CreateSkybox(mgTL.GetContextNestedFilePath(ContextExternalFilePath, mgBD.ContextName, "LinearDark"));
             mgTL.contextName = mgBD.ContextName;
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
+            EventCodeManager.SendCodeNextFrame(CustomTaskEventCodes["ContextOn"]);
             
             ResetBlockVariables();
             FindMaze();

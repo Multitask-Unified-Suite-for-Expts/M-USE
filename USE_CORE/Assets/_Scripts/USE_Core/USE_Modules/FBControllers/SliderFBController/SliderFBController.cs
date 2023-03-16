@@ -1,8 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using USE_Data;
+using USE_ExperimentTemplate_Classes;
 
 public class SliderFBController : MonoBehaviour
 {
@@ -35,7 +35,11 @@ public class SliderFBController : MonoBehaviour
     
     // Audio
     AudioFBController audioFBController;
-    
+
+    //Event Codes:
+    public EventCodeManager EventCodeManager;
+    public Dictionary<string, EventCode> SessionEventCodes;
+
     public void Init(DataController trialData, DataController frameData, AudioFBController audioFBController)
     {
         trialData.AddDatum("SliderBarValue", () => Slider.value);
@@ -52,7 +56,8 @@ public class SliderFBController : MonoBehaviour
         SliderGO.SetActive(false);
         SliderHaloGO.SetActive(false);
         numSliderBarFull = 0; // Initialize at the Add_Control_Level_Initialization so this can be reset every block/ new task
-        // flashBeepInterval = audioFBController.GetClip("Positive").length;
+
+        EventCodeManager = new EventCodeManager();
     }
 
     public void ConfigureSlider(Vector3 sliderPosition, float sliderSize, float sliderInitialValue = 0)
@@ -108,22 +113,19 @@ public class SliderFBController : MonoBehaviour
             {
                 case AnimationPhase.Update:
                     if (Slider.value < 0)
-                    {
                         Slider.value = 0; //set number to 0 if you lose more than you have, avoids neg slider
-                    }
-                        
+                    
                     animationPhase = AnimationPhase.None;
                     if (Slider.value >= 1)
                     {
                         animationPhase = AnimationPhase.Flashing;
                         sliderBarFull = true;
                         numSliderBarFull++;
-                        StartCoroutine(FlashingBeeps(flashingNumBeeps));
+                        audioFBController.Play("TripleCollected");
                         animationEndTime += updateTime + flashingTime;
                     }
                     break;
                 case AnimationPhase.Flashing:
-                    //audioFBController.Play("Flashing"); //flashing clip doesn't exist
                     animationPhase = AnimationPhase.None;
                     break;
             }
@@ -174,15 +176,4 @@ public class SliderFBController : MonoBehaviour
         AnimateSlider(sliderValueChange);
     }
 
-    IEnumerator FlashingBeeps(int numBeeps)
-    {
-        int iBeep = numBeeps;
-        while(iBeep > 0)
-        {
-            audioFBController.Play("Positive");
-            iBeep--;
-            if(iBeep > 0)
-                yield return new WaitForSeconds((flashingTime/numBeeps)/2);
-        }
-    }
 }

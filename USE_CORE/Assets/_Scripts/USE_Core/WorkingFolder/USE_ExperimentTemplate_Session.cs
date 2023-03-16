@@ -149,14 +149,14 @@ namespace USE_ExperimentTemplate_Session
                 // SyncBoxActive = true;
             }
 
-            //if there is a single event code config file for all experiments, load it
-            string eventCodeFileString =
-                LocateFile.FindFileInFolder(configFileFolder, "*EventCode*");
+            //Load the Session Event Code Config file
+            string eventCodeFileString = LocateFile.FindFileInFolder(configFileFolder, "*EventCode*");
+
             if (!string.IsNullOrEmpty(eventCodeFileString))
             {
                 SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
                 SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
-                // EventCodesActive = true;
+                EventCodesActive = true;
             }
             else if (EventCodesActive)
                 Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");
@@ -164,11 +164,6 @@ namespace USE_ExperimentTemplate_Session
             if (SyncBoxActive)
                 SerialPortActive = true;
 
-            // if (EventCodesActive)
-            // {
-            // 	SerialPortActive = true;
-            // 	SyncBoxActive = true;
-            // }
 
 
             List<string> taskNames;
@@ -362,6 +357,8 @@ namespace USE_ExperimentTemplate_Session
                     GameObject initCam = GameObject.Find("InitCamera");
                     initCam.SetActive(false);
                     SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
+
+                    EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupSessionEnds"]);
                 });
 
             //bool tasksFinished = false;
@@ -370,7 +367,9 @@ namespace USE_ExperimentTemplate_Session
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
-                if(SerialPortActive){
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["SelectTaskStarts"]);
+
+                if (SerialPortActive){
                     SerialSentData.CreateFile();
                     SerialRecvData.CreateFile();
                 }
@@ -386,9 +385,8 @@ namespace USE_ExperimentTemplate_Session
                 mainCameraCopy.texture = CameraMirrorTexture;
 
                 // Don't show the task buttons if we encountered an error during setup
-                if (LogPanel.HasError()) {
+                if (LogPanel.HasError())
                     return;
-                }
 
                 SceneLoading = true;
                 if (taskCount >= TaskMappings.Count)
@@ -580,6 +578,8 @@ namespace USE_ExperimentTemplate_Session
             //runTask.AddLateUpdateMethod
             runTask.AddUniversalInitializationMethod(() =>
             {
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["RunTaskStarts"]);
+
                 CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
                 CameraMirrorTexture.Create();
                 CurrentTask.TaskCam.targetTexture = CameraMirrorTexture;
@@ -628,6 +628,11 @@ namespace USE_ExperimentTemplate_Session
                 //                             SerialRecvData.GetNiceIntegers(4, taskCount + 1 * 2 - 1) + "_TaskSelection";
                 // SerialSentData.folderPath = SessionDataPath + Path.DirectorySeparatorChar +
                 //                             SerialSentData.GetNiceIntegers(4, taskCount + 1 * 2 - 1) + "_TaskSelection";
+            });
+
+            finishSession.AddInitializationMethod(() =>
+            {
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["FinishSessionStarts"]);
             });
 
             finishSession.SpecifyTermination(() => true, () => null, () =>
@@ -765,13 +770,18 @@ namespace USE_ExperimentTemplate_Session
             tl.ContextExternalFilePath = ContextExternalFilePath;
             tl.SerialPortActive = SerialPortActive;
             tl.SyncBoxActive = SyncBoxActive;
+            tl.EventCodeManager = EventCodeManager;
             tl.EventCodesActive = EventCodesActive;
+            tl.SessionEventCodes = SessionEventCodes;
             if (SerialPortActive)
                 tl.SerialPortController = SerialPortController;
             if (SyncBoxActive)
+            {
+                SyncBoxController.SessionEventCodes = SessionEventCodes;
                 tl.SyncBoxController = SyncBoxController;
-            // if (EventCodesActive)
-            tl.EventCodeManager = EventCodeManager;
+            }
+
+
 
             if (SessionSettings.SettingExists("Session", "RewardPulsesActive"))
                 tl.RewardPulsesActive = (bool)SessionSettings.Get("Session", "RewardPulsesActive");

@@ -46,9 +46,56 @@ namespace SelectionTracking
 
         private void AssignDefaultSelectionHandlers()
         {
-            SelectionHandler shTemp = new SelectionHandler();
-            ActiveSelectionHandlers.Add("RaycastHitsObject", shTemp);
+            // DEFINE RAYCAST SELECTION HANDLING ------------------------------------
+            SelectionHandler raycastSelectionHandler = new SelectionHandler();
+            raycastSelectionHandler.InitCondition(() =>
+            {
+                // when would a selection begin in a raycast selection
+            });
+            raycastSelectionHandler.UpdateCondition(() =>
+            {
+                // when would a selection be updating/sustained in a raycast selection
+            });
+            raycastSelectionHandler.TerminationCondition(() =>
+            {
+                // when would a selection be done in a raycast selection
+            })
+            ActiveSelectionHandlers.Add("RaycastHitsObject", raycastSelectionHandler);
+
+            
+            // DEFINE LEFT MOUSE BUTTON DOWN SELECTION HANDLING ------------------------------------
+            SelectionHandler leftMouseButtonDown = new SelectionHandler();
+            leftMouseButtonDown.InitCondition(() =>
+            {
+                // when would a selection begin in a left mouse button down selection
+            });
+            leftMouseButtonDown.UpdateCondition(() =>
+            {
+                // when would a selection be updating/sustained in a left mouse button down selection
+            });
+            ActiveSelectionHandlers.Add("LeftMouseButtonDown", leftMouseButtonDown);
+            
+            
+            // DEFINE LEFT MOUSE BUTTON CLICK SELECTION HANDLING ------------------------------------
+            SelectionHandler leftMouseButtonClick = new SelectionHandler();
+            leftMouseButtonClick.InitCondition(() =>
+            {
+                // when would a selection begin in a left mouse button down selection
+            });
+            leftMouseButtonClick.UpdateCondition(() =>
+            {
+                // when would a selection be updating/sustained in a left mouse button down selection
+            });
+            leftMouseButtonClick.TerminationCondition(() =>
+            {
+                // when would a selection be completed in a left mouse button down selection
+            });
+            ActiveSelectionHandlers.Add("LeftMouseButtonClick", leftMouseButtonClick);
+            
+            
             //raycast hits object, button 0 down (init + update), button 0 down (init + update) and up (termination), 
+            
+            // include other mouse buttons??
 
         }
 
@@ -141,10 +188,10 @@ namespace SelectionTracking
             else if (go != null)
                 if (go == OngoingSelection.SelectedGameObject)
                 {
-                    if (UpdateCondition()) //
+                    if (UpdateCondition()) // update condition is true (e.g. mouse buton is being held down)
                     {
-                        OngoingSelection.UpdateSelection();
-                        if (TerminationCondition()) // this is kind of broken
+                        OngoingSelection.UpdateSelection(); // will track duration and other custom functions while selecting
+                        if (TerminationCondition()) // this is kind of broken - 
                             OngoingSelection.CompleteSelection();
                     }
                     else

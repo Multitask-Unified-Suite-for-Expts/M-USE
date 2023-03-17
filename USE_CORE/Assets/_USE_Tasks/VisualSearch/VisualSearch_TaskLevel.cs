@@ -47,7 +47,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             //Hard coded because trial level variable isn't available yet
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +  "Grass");
             
-            EventCodeManager.SendCodeNextFrame(CustomTaskEventCodes["ContextOn"]);
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
 
             vsTL.TokensWithStimOn = vsBD.TokensWithStimOn;
             vsTL.ResetBlockVariables();

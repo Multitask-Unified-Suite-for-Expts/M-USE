@@ -196,8 +196,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if(currentTrial.ShakeStim)
                 AddShakeStimScript(trialStims);
 
-            EventCodeManager.SendCodeImmediate(SessionEventCodes["ObjectSelected"]);
-            EventCodeManager.SendCodeImmediate(SessionEventCodes["GenericObject"]);
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
         });
 

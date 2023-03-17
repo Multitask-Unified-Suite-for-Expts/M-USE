@@ -182,8 +182,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             StateAfterDelay = ChooseBalloon;
             StartButton.SetActive(false);
 
-            EventCodeManager.SendCodeImmediate(SessionEventCodes["ObjectSelected"]);
-            EventCodeManager.SendCodeImmediate(SessionEventCodes["GenericObject"]);
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
         });
 
         //Choose Balloon state -------------------------------------------------------------------------------------------------------

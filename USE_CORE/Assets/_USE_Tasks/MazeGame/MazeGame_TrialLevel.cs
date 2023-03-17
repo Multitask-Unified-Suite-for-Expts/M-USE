@@ -172,8 +172,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), Delay, () =>
         {
-            EventCodeManager.SendCodeImmediate(SessionEventCodes["ObjectSelected"]);
-            EventCodeManager.SendCodeImmediate(SessionEventCodes["GenericObject"]);
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
 
             StateAfterDelay = ChooseTile;
             DelayDuration = mazeOnsetDelay.value;

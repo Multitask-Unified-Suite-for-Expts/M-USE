@@ -153,8 +153,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             StartButton.SetActive(true);
             mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
             mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
         });
         InitTrial.AddUpdateMethod(() =>
         {
@@ -177,7 +176,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                     .SetFlashingTime(tokenFlashingDuration.value);
                 TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
                                                (NumTokenBarFull_InBlock * CurrentTrialDef.NumTokenBar);
-                EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
                 
                 // Set Experimenter Display Data Summary Strings
                 CurrentTaskLevel.SetBlockSummaryString();
@@ -206,8 +205,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         {
             CreateTextOnExperimenterDisplay();
             searchStims.ToggleVisibility(true);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);        
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);        
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
@@ -227,14 +226,14 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             if (CorrectSelection)
             {       
                 NumCorrect_InBlock++;
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["TouchTargetStart"]);
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["CorrectResponse"]);
+                EventCodeManager.SendCodeNextFrame(SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                EventCodeManager.SendCodeNextFrame(SessionEventCodes["CorrectResponse"]);
             }
             else
             {
                 NumErrors_InBlock++;
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["TouchDistractorStart"]);
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["IncorrectResponse"]);
+                EventCodeManager.SendCodeNextFrame(SessionEventCodes["Button0PressedOnDistractorObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                EventCodeManager.SendCodeNextFrame(SessionEventCodes["IncorrectResponse"]);
             }
 
             if (selected != null)
@@ -250,7 +249,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
             {
                 Debug.Log("Timed out of selection state before making a choice");
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
+                EventCodeManager.SendCodeNextFrame(SessionEventCodes["NoChoice"]);
             }
         });
 
@@ -260,8 +259,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             SearchDurationsList.Add(SearchDuration);
             AverageSearchDuration_InBlock = SearchDurationsList.Average();
             SetTrialSummaryString();
-            if (!selected) return;
-            else EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
+            if (!selected)
+                return;
             
             if (CorrectSelection) HaloFBController.ShowPositive(selected);
             else HaloFBController.ShowNegative(selected);
@@ -269,8 +268,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         SelectionFeedback.AddTimer(() => selectionFbDuration.value, TokenFeedback, () => 
         {
             HaloFBController.Destroy();
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOff"]);
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOff"]);
         });
 
 
@@ -281,15 +279,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             if (selectedSD.IsTarget)
             {
                 AudioFBController.Play("Positive");
-                TokenFBController.AddTokens(selected, selectedSD.StimTrialRewardMag);
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
-                
+                TokenFBController.AddTokens(selected, selectedSD.StimTrialRewardMag);                
             }
             else
             {
                 AudioFBController.Play("Negative");
                 TokenFBController.RemoveTokens(selected, -selectedSD.StimTrialRewardMag);
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
             }
         });
         TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
@@ -301,12 +296,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 {
                     SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
                     SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
-                    EventCodeManager.SendCodeImmediate(TaskEventCodes["Fluid1Onset"]);
                     NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                     RewardGiven = true;
                 }
             }
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
             TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
                                            (NumTokenBarFull_InBlock* CurrentTrialDef.NumTokenBar);
         });

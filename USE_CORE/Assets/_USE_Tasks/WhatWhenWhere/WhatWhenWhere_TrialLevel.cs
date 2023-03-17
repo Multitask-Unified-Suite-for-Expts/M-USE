@@ -201,7 +201,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             // Set the background texture to that of specified context
             ContextName = CurrentTrialDef.ContextName;
             RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOn"]);
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
             
             if (!variablesLoaded)
             {
@@ -247,8 +247,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.SliderGO.SetActive(true); 
             
             numNonStimSelections_InBlock += mouseHandler.UpdateNumNonStimSelection();
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderReset"]);
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderReset"]);
         });
         ChooseStimulusDelay.AddTimer(() => chooseStimOnsetDelay.value, ChooseStimulus);
         GazeTracker.AddSelectionHandler(gazeHandler, ChooseStimulus);
@@ -286,18 +287,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 UpdateCounters_Correct();
                 isSliderValueIncrease = true;
-                EventCodeManager.SendCodeImmediate(TaskEventCodes["CorrectResponse"]);
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["CorrectResponse"]);
             }
             else
             {
                 runningAcc.Add(0);
                 UpdateCounters_Incorrect(correctIndex);
                 isSliderValueIncrease = false;
-                EventCodeManager.SendCodeImmediate(TaskEventCodes["IncorrectResponse"]);
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["IncorrectResponse"]);
 
                 //Repetition Error
                 if (touchedObjects.Contains(selectedSD.StimName))
@@ -315,7 +312,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         touchedObjects.Add(selectedSD.StimName);
                         distractorSlotErrorCount_InBlock++;
                         distractorSlotError = true;
-                        EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchDistractorStart"]);
+                        EventCodeManager.SendCodeImmediate(SessionEventCodes["Button0PressedOnDistractorObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                     }
                     //Stimuli Slot error
                     else
@@ -375,7 +372,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             
             if (!CurrentTrialDef.LeaveFeedbackOn) 
                 HaloFBController.Destroy();
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOff"]);
             
             CurrentTaskLevel.SetBlockSummaryString();
             SetTrialSummaryString();
@@ -401,23 +397,21 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             DestroyTextOnExperimenterDisplay();
             runningAcc.Add(1);
             numSlidersCompleted += 1;
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderCompleteFbOn"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOff"]);
             
             if (SyncBoxController != null)
             {
                 SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize); 
                 SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
-                EventCodeManager.SendCodeImmediate(TaskEventCodes["Fluid1Onset"]);
                 numRewardGiven_InBlock += CurrentTrialDef.NumPulses;
             }
            
         });
         FinalFeedback.AddTimer(() => flashingFbDuration.value, ITI, () =>
         {
-            EventCodeManager.SendCodeImmediate(TaskEventCodes["SliderCompleteFbOff"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["SliderFbController_SliderCompleteFbOff"]);
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOff"]);
             CurrentTaskLevel.SetBlockSummaryString();
         });
 
@@ -437,10 +431,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
             }
         });
-        ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
-        {
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
-        });
+        ITI.AddTimer(() => itiDuration.value, FinishTrial);
         //------------------------------------------------------------------------ADDING VALUES TO DATA FILE--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         DefineTrialData();
@@ -729,9 +720,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     }
     private void TouchDurationErrorFeedback(SelectionHandler<WhatWhenWhere_StimDef> MouseHandler, bool deactivateAfter)
     {
-        EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchDurationError"]);
-        EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchErrorImageOn"]);
-        EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionAuditoryFbOn"]);
+        EventCodeManager.SendCodeImmediate(SessionEventCodes["TouchDurationError"]);
+        EventCodeManager.SendCodeImmediate(SessionEventCodes["SelectionHandler_TouchErrorImageOn"]); //this should be put into selection handler soon. leaving for now. 
         errorTypeString = "TouchDurationError";
         AudioFBController.Play("Negative");
         //eventually replace with state timer logic

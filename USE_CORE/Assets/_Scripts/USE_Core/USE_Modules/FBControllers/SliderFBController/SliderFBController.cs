@@ -122,11 +122,13 @@ public class SliderFBController : MonoBehaviour
                         sliderBarFull = true;
                         numSliderBarFull++;
                         audioFBController.Play("TripleCollected");
+                        EventCodeManager.SendCodeImmediate(SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
                         animationEndTime += updateTime + flashingTime;
                     }
                     break;
                 case AnimationPhase.Flashing:
                     animationPhase = AnimationPhase.None;
+                    EventCodeManager.SendCodeImmediate(SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
                     break;
             }
         }

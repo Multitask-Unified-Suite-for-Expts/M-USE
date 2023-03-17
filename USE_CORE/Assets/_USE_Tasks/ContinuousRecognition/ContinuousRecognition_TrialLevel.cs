@@ -133,11 +133,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
+        //INIT Trial state -------------------------------------------------------------------------------------------------------
         SelectionHandler<ContinuousRecognition_StimDef> mouseHandler = new SelectionHandler<ContinuousRecognition_StimDef>();
         MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null,
             () => MouseTracker.ButtonStatus[0] == 1, () => MouseTracker.ButtonStatus[0] == 0);
 
-        //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
         {
             StartButton.transform.position = OriginalStartButtonPosition;
@@ -196,7 +196,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if(currentTrial.ShakeStim)
                 AddShakeStimScript(trialStims);
 
-            EventCodeManager.SendCodeImmediate(SessionEventCodes["ObjectSelected"]); //but how we link to StartButton object?
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["ObjectSelected"]);
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["GenericObject"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
         });
 

@@ -181,7 +181,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
             StartButton.SetActive(false);
-            EventCodeManager.SendCodeImmediate(SessionEventCodes["ObjectSelected"]); //but how we link to StartButton object?
+
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["ObjectSelected"]);
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["GenericObject"]);
         });
 
         //Choose Balloon state -------------------------------------------------------------------------------------------------------
@@ -385,7 +387,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             StateAfterDelay = Feedback;
             DelayDuration = popToFeedbackDelay.value;
-            //add trial touches to total touches:
             TotalTouches_Block += TrialTouches;
 
             if (SideChoice == "Left")
@@ -428,14 +429,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 if (SyncBoxController != null)
                 {
                     GiveReward();
-                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
+                    EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]);
                 }
 
                 Completions_Block++;
                 AddTokenInflateAudioPlayed = true;
             }
             else
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
+                EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
         });
         Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI);
         Feedback.SpecifyTermination(() => true && Response != 1, ITI);
@@ -443,7 +444,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             TokenFBController.enabled = false;
             AddTokenInflateAudioPlayed = false;
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
         });
 
         //ITI state -------------------------------------------------------------------------------------------------------

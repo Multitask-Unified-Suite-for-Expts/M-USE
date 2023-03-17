@@ -173,7 +173,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), Delay, () =>
         {
-            EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["ObjectSelected"]);
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["GenericObject"]);
 
             StateAfterDelay = ChooseTile;
             DelayDuration = mazeOnsetDelay.value;
@@ -236,29 +237,31 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 if (ReturnToLast)
                 {
                     AudioFBController.Play("Positive");
-                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]); // MAYBE JUST CHANGE TO NEUTRAL TONE??
-                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["AuditoryFbOn"]);
+                    EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]); 
+                }
+                else if (ErroneousReturnToLast)
+                {
+                    AudioFBController.Play("Negative");
+                    EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
                 }
                 else if (CorrectSelection)
                 {
                     SliderFBController.UpdateSliderValue(selectedGO.GetComponent<Tile>().sliderValueChange);
                     playerViewParent.transform.Find((pathProgressIndex + 1).ToString()).GetComponent<Text>().color =
                         new Color(0, 0.392f, 0);
-                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
-                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["AuditoryFbOn"]);
+                    EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]);
                 }
                 else if (selectedGO != null && !ErroneousReturnToLast)
                 {
                     AudioFBController.Play("Negative");
-                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
-                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["AuditoryFbOn"]);
+                    EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
                 }
                
                 selectedGO = null; //Reset selectedGO before the next touch evaluation
             }
             else
             {
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
+                EventCodeManager.SendCodeNextFrame(SessionEventCodes["NoChoice"]);
                 aborted = true;
                 CurrentTaskLevel.numAbortedTrials_InBlock++;
             }
@@ -280,7 +283,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     if (SyncBoxController != null)
                     {
                         SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
-                        EventCodeManager.SendCodeNextFrame(TaskEventCodes["Fluid1Onset"]);
                         SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
                         CurrentTaskLevel.numRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                     }
@@ -293,12 +295,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 
                 SliderFBController.ResetSliderBarFull();
                 CurrentTaskLevel.numSliderBarFull_InBlock++;
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderCompleteFbOn"]);
+                EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
 
                 if (SyncBoxController != null)
                 {
                     SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
-                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["Fluid1Onset"]);
                     SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
                     CurrentTaskLevel.numRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                 }
@@ -332,15 +333,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             DeactivateChildren(playerViewParent);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOff"]);
             if (finishedMaze)
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderCompleteFbOff"]);
+                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderFbController_SliderCompleteFbOff"]);
 
             if (NeutralITI)
             {
                 contextName = "itiImage";
                 RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + contextName + ".png");
             }
-            
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]); // ITI begins next frame
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
         
@@ -456,7 +455,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         if (touchedCoord.chessCoord == currMaze.mNextStep)
         {
             Debug.Log("*Correct Tile Touch*");
-            EventCodeManager.SendCodeImmediate(TaskEventCodes["CorrectResponse"]);
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["CorrectResponse"]);
 
             correctTouches_InTrial++;
             CurrentTaskLevel.correctTouches_InBlock++;
@@ -748,8 +747,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.ClearStrings();
             CurrentTaskLevel.BlockSummaryString.AppendLine("");
         }
-        
-        EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]); //next trial starts next frame
     }
 
     public override void ResetTrialVariables()

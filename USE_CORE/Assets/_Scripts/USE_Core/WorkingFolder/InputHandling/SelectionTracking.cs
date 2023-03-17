@@ -46,51 +46,75 @@ namespace SelectionTracking
 
         private void AssignDefaultSelectionHandlers()
         {
-            // DEFINE RAYCAST SELECTION HANDLING ------------------------------------
-            SelectionHandler raycastSelectionHandler = new SelectionHandler();
-            raycastSelectionHandler.InitCondition(() =>
+            // DEFINE RAYCAST ON SELECTION HANDLING ------------------------------------
+            SelectionHandler raycastOnSelectionHandler = new SelectionHandler();
+            raycastOnSelectionHandler.InitCondition = () =>
             {
                 // when would a selection begin in a raycast selection
-            });
-            raycastSelectionHandler.UpdateCondition(() =>
+                if (raycastOnSelectionHandler.FindCurrentTarget(InputBroker.mousePosition) != null)
+                    return true;
+                return false;
+            };
+            raycastOnSelectionHandler.UpdateCondition = null;
+            raycastOnSelectionHandler.TerminationCondition = () =>
             {
-                // when would a selection be updating/sustained in a raycast selection
-            });
-            raycastSelectionHandler.TerminationCondition(() =>
-            {
-                // when would a selection be done in a raycast selection
-            })
-            ActiveSelectionHandlers.Add("RaycastHitsObject", raycastSelectionHandler);
+                if (raycastOnSelectionHandler.OngoingSelection.Duration >= raycastOnSelectionHandler.MinDuration &&
+                    raycastOnSelectionHandler.OngoingSelection.Duration <= raycastOnSelectionHandler.MaxDuration)
+                    return true;
+                return false;
+            };
+            ActiveSelectionHandlers.Add("RaycastOnSelection", raycastOnSelectionHandler);
 
+            // DEFINE RAYCAST ON OFF SELECTION HANDLING ------------------------------------
+            SelectionHandler raycastOnOffSelectionHandler = new SelectionHandler();
+            raycastOnOffSelectionHandler.InitCondition = () =>
+            {
+                // when would a selection begin in a raycast selection
+                if (raycastOnOffSelectionHandler.FindCurrentTarget(InputBroker.mousePosition) != null)
+                    return true;
+                return false;
+            };
+            raycastOnOffSelectionHandler.UpdateCondition = null;
+            raycastOnOffSelectionHandler.TerminationCondition = () =>
+            {
+                if (raycastOnOffSelectionHandler.OngoingSelection.Duration >= raycastOnOffSelectionHandler.MinDuration &&
+                    raycastOnOffSelectionHandler.OngoingSelection.Duration <= raycastOnOffSelectionHandler.MaxDuration && 
+                    raycastOnOffSelectionHandler.FindCurrentTarget(InputBroker.mousePosition) == null)
+                    return true;
+                return false;
+            };
+            ActiveSelectionHandlers.Add("RaycastOnSelection", raycastOnSelectionHandler);
             
             // DEFINE LEFT MOUSE BUTTON DOWN SELECTION HANDLING ------------------------------------
             SelectionHandler leftMouseButtonDown = new SelectionHandler();
-            leftMouseButtonDown.InitCondition(() =>
+            leftMouseButtonDown.InitCondition = () =>
             {
-                // when would a selection begin in a left mouse button down selection
-            });
-            leftMouseButtonDown.UpdateCondition(() =>
-            {
-                // when would a selection be updating/sustained in a left mouse button down selection
-            });
+                if (InputBroker.GetMouseButtonDown(0))
+                    return true;
+                return false;
+            };
+            leftMouseButtonDown.UpdateCondition = null; // same as the init condition
             ActiveSelectionHandlers.Add("LeftMouseButtonDown", leftMouseButtonDown);
-            
-            
+
             // DEFINE LEFT MOUSE BUTTON CLICK SELECTION HANDLING ------------------------------------
             SelectionHandler leftMouseButtonClick = new SelectionHandler();
-            leftMouseButtonClick.InitCondition(() =>
+            leftMouseButtonClick.InitCondition = () =>
             {
-                // when would a selection begin in a left mouse button down selection
-            });
-            leftMouseButtonClick.UpdateCondition(() =>
+                if (InputBroker.GetMouseButtonDown(0))
+                    return true;
+                return false;
+            };
+            leftMouseButtonClick.UpdateCondition = null;
+            leftMouseButtonClick.TerminationCondition = () =>
             {
-                // when would a selection be updating/sustained in a left mouse button down selection
-            });
-            leftMouseButtonClick.TerminationCondition(() =>
-            {
-                // when would a selection be completed in a left mouse button down selection
-            });
+                if (InputBroker.GetMouseButtonUp(0))
+                    return true;
+                return false;
+                
+                // SHOULD WE ADD MIN/MAX DURATION HERE??
+            };
             ActiveSelectionHandlers.Add("LeftMouseButtonClick", leftMouseButtonClick);
+            
             
             
             //raycast hits object, button 0 down (init + update), button 0 down (init + update) and up (termination), 

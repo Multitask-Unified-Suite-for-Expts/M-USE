@@ -6,11 +6,11 @@ using USE_States;
 // Both min and max duration means that selection is finished once its let go
 public class SelectionHandler<T> where T : StimDef
 {
-    private float MinDuration = 0;
-    private float? MaxDuration = null;
+    public float MinDuration = 0;
+    public float? MaxDuration = null;
 
-    private bool SelectionTooShort = false;
-    private bool SelectionTooLong = false;
+    public bool SelectionTooShort = false;
+    public bool SelectionTooLong = false;
 
     private int NumNonStimSelection = 0;
     private int NumTouchDurationError = 0;
@@ -23,11 +23,79 @@ public class SelectionHandler<T> where T : StimDef
     
     public float? CurrentTargetDuration;
     public Vector3? CurrentInputScreenPosition;
-    private Vector2 CurrentInputScreenPositionPix;
+    private Vector2? CurrentInputScreenPositionPix;
     public bool MovedPastMaxDistance;
     private bool SelectionHandlerStarted;
     public Vector2? SelectionStartPosition;
 
+    // public PossibleSelection ongoingSelection;
+
+
+    private void NullSelection()
+    {
+        SelectionStartPosition = null;
+        CurrentTargetDuration = null;
+        SelectedGameObject = null;
+        SelectedStimDef = null;
+        SelectionTooLong = false;
+        SelectionTooShort = false;
+    }
+
+    private void InitSelection()
+    {
+        SelectionStartPosition = CurrentInputScreenPositionPix;
+        CurrentTargetDuration = 0;
+        
+    }
+
+    private void CheckSelectionErrors()
+    {
+        if (Vector2.Distance(CurrentInputScreenPositionPix.Value, SelectionStartPosition.Value) >= MaxMoveDistance)
+            //error, moved too far
+        if (CurrentTargetDuration >= MaxDuration)
+            //error, too long
+    }
+
+    private void UpdateSelection()
+    {
+        
+    }
+    
+    private class PossibleSelection
+    {
+        public Vector2? SelectionStartPosition;
+        public float SelectionStartTime;
+        public float SelectionDuration;
+        public float? maxDuration;
+        public int? maxMoveDistance;
+        public GameObject SelectedGameObject;
+        public T SelectedStimDef;
+
+        public PossibleSelection(Vector2? inputPos, GameObject go, float? maxDur, int? maxDist)
+        {
+            SelectionStartPosition = inputPos;
+            SelectionStartTime = Time.time;
+            SelectionDuration = 0;
+            SelectedGameObject = go;
+            SelectedStimDef = go?.GetComponent<StimDefPointer>()?.GetStimDef<T>();
+            maxDuration = maxDur;
+            maxMoveDistance = maxDist;
+        }
+
+        public void UpdatePossibleSelection(Vector2? inputPos)
+        {
+            SelectionDuration += Time.deltaTime;
+            if (SelectionDuration >= maxDuration)
+            {
+                
+            }
+
+            if (inputPos != null & Vector2.Distance(inputPos.Value, SelectionStartPosition.Value) >= maxMoveDistance)
+            {
+                
+            }
+        }
+    }
 
     public void Start()
     {
@@ -53,63 +121,13 @@ public class SelectionHandler<T> where T : StimDef
         return ReferenceEquals(SelectedStimDef, stimDef);
     }
     //-------------------------------------- Get/Set touch duration variables ------------------------------------------
-    public void SetMinTouchDuration(float minDuration)
-    {
-        MinDuration = minDuration;
-    }
-
-    public float GetMinTouchDuration()
-    {
-        return MinDuration;
-    }
-
-    public void SetMaxTouchDuration(float maxDuration)
-    {
-        MaxDuration = maxDuration;
-    }
-
-    public float? GetMaxTouchDuration()
-    {
-        return MaxDuration;
-    }
-
-    public float? GetTargetTouchDuration()
-    {
-        return CurrentTargetDuration;
-    }
-
-    public bool GetSelectionTooLong()
-    {
-        Debug.Log("HIT THE GET TOO LONG METHOD!" + " " + SelectionTooLong);
-        return SelectionTooLong;
-    }
-    public bool GetSelectionTooShort()
-    {
-        return SelectionTooShort;
-    }
-    public void SetSelectionTooLong(bool heldTooLong)
-    {
-        SelectionTooLong = heldTooLong;
-    }
-    public void SetSelectionTooShort(bool heldTooShort)
-    {
-        SelectionTooShort = heldTooShort;
-    }
+    
 
     public void SetMaxMoveDistance(float distance)
     {
         MaxMoveDistance = distance;
     }
-    //-------------------------------------- Get/Set Data tracking variables------------------------------------------
-    public int GetNumTouchDurationError()
-    {
-        return NumTouchDurationError;
-    }
-
-    public void SetNumTouchDurationError(int val)
-    {
-        NumTouchDurationError = val;
-    }
+    
     public int UpdateNumNonStimSelection()
     {
         if (InputBroker.GetMouseButtonDown(0))
@@ -125,6 +143,20 @@ public class SelectionHandler<T> where T : StimDef
     public void ResetNumNonStimSelection()
     {
         NumNonStimSelection = 0;
+    }
+
+    public void UpdateSelection(GameObject targetedGO, Vector3? currentLoc,
+        BoolDelegate selectionIsPossible = null,
+        BoolDelegate selectionCompleteIsPossible = null) //TargetedGO is what they're currently hovering over
+    {
+        if (targetedGO == null)
+            ongoingSelection = null;
+        else
+        {
+            if (selectionIsPossible())
+                if (ongoingSelection == null)
+                    ongoingSelection = new PossibleSelection(GetScreenPos(currentLoc), targetedGO, );
+        }
     }
     
     //---------------------------------------------UPDATING SELECTION MANAGEMENT-----------------------------------------
@@ -157,7 +189,7 @@ public class SelectionHandler<T> where T : StimDef
                 if (selectionIsPossible == null || selectionIsPossible())
                 {
                     //Have they moved too far?
-                    if (SelectionStartPosition != null && Vector2.Distance(GetScreenPos(CurrentInputScreenPosition.Value), SelectionStartPosition.Value) > MaxMoveDistance)
+                    if (SelectionStartPosition != null && Vector2.Distance(GetScreenPos(CurrentInputScreenPosition).Value, SelectionStartPosition.Value) > MaxMoveDistance)
                     {
                         MovedPastMaxDistance = true;
                     }
@@ -206,9 +238,16 @@ public class SelectionHandler<T> where T : StimDef
         }
     }
 
-    protected Vector2 GetScreenPos(Vector3 worldPos)
+    protected Vector2? GetScreenPos(Vector3? worldPos)
     {
-        Vector3 temp = Camera.main.WorldToScreenPoint(worldPos);
-        return new Vector2(temp.x, temp.y);
+        if (worldPos != null)
+        {
+            Vector3 temp = Camera.main.WorldToScreenPoint(worldPos.Value);
+            return new Vector2(temp.x, temp.y);
+        }
+        else
+        {
+            return null;
+        }
     }
 }

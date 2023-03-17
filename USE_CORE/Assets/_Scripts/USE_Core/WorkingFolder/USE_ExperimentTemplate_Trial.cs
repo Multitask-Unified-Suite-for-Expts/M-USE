@@ -1,9 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using UnityEngine;
 using USE_States;
 using USE_StimulusManagement;
@@ -62,6 +60,8 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public SyncBoxController SyncBoxController;
         [HideInInspector] public EventCodeManager EventCodeManager;
         [HideInInspector] public Dictionary<string, EventCode> TaskEventCodes;
+        [HideInInspector] public Dictionary<string, EventCode> SessionEventCodes;
+
 
         [HideInInspector] public int InitialTokenAmount;
 
@@ -112,6 +112,8 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTrialStarts"]);
+
                 AbortCode = 0;
                 SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials",1));
                 TrialCount_InTask++;
@@ -135,6 +137,7 @@ namespace USE_ExperimentTemplate_Trial
                 ResetTrialVariables();
             });
 
+            FinishTrial.AddInitializationMethod(() => EventCodeManager.SendCodeImmediate(SessionEventCodes["FinishTrialStarts"]));
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => CheckForcedBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Count - 1, SetupTrial);

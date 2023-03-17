@@ -46,6 +46,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public bool viewPath;
     private bool CorrectSelection;
     private bool ReturnToLast;
+    private bool ErroneousReturnToLast;
     public float tileFbDuration;
     public GameObject startTile;
 
@@ -130,7 +131,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         AddActiveStates(new List<State>
             { InitTrial, ChooseTile, SelectionFeedback, TileFlashFeedback, ITI  });
         string[] stateNames =
-            { "StartButton", "ChooseTile", "SelectionFeedback", "TileFlashFeedback", "ITI"};
+            { "InitTrial", "ChooseTile", "SelectionFeedback", "TileFlashFeedback", "ITI"};
 
         SelectionHandler<MazeGame_StimDef> mouseHandler = new SelectionHandler<MazeGame_StimDef>();
         
@@ -201,7 +202,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             selectedGO = mouseHandler.SelectedGameObject;
             selectedSD = mouseHandler.SelectedStimDef;
-            if (selectedGO.GetComponent<Tile>().mCoord.chessCoord == currMaze.mStart && consecutiveErrors == 0)
+            if (selectedGO.GetComponent<Tile>().mCoord.chessCoord == currMaze.mStart)
             {
                 //If the tile that is selected is the start tile, begin the timer for the maze
                 mazeStartTime = Time.time;
@@ -209,12 +210,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["MazeStart"]); 
             }
 
-            if (selectedGO.GetComponent<Tile>().mCoord.chessCoord == currMaze.mFinish && pathProgressIndex + 1 == currMaze.mNumSquares)
+            if (selectedGO.GetComponent<Tile>().mCoord.chessCoord == currMaze.mFinish && currMaze.mNextStep == currMaze.mFinish)
             {
                 //if the tile that is selected is the end tile, stop the timer
                 mazeDuration = Time.time - mazeStartTime;
                 CurrentTaskLevel.mazeDurationsList_InBlock.Add(mazeDuration);
-                Debug.Log("MAZE DURATIONS LIST IN BLOCK?? " + String.Join(",",CurrentTaskLevel.mazeDurationsList_InBlock));
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["MazeFinish"]);
             }
         });
@@ -226,12 +226,20 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             {
                 EventCodeManager.SendCodeNextFrame(TaskEventCodes["TileFbOn"]);
                 
+                // This is what actually determines the result of the tile choice
                 selectedGO.GetComponent<Tile>().OnMouseDown();
                 fbDuration = (tileFbDuration + flashingFbDuration.value);
                 SliderFBController.SetUpdateDuration(tileFbDuration);
                 SliderFBController.SetFlashingDuration(flashingFbDuration.value);
                 
-                if (CorrectSelection)
+                
+                if (ReturnToLast)
+                {
+                    AudioFBController.Play("Positive");
+                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]); // MAYBE JUST CHANGE TO NEUTRAL TONE??
+                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["AuditoryFbOn"]);
+                }
+                else if (CorrectSelection)
                 {
                     SliderFBController.UpdateSliderValue(selectedGO.GetComponent<Tile>().sliderValueChange);
                     playerViewParent.transform.Find((pathProgressIndex + 1).ToString()).GetComponent<Text>().color =
@@ -239,13 +247,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
                     EventCodeManager.SendCodeNextFrame(TaskEventCodes["AuditoryFbOn"]);
                 }
-                else if (ReturnToLast)
-                {
-                    AudioFBController.Play("Positive");
-                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]); // MAYBE JUST CHANGE TO NEUTRAL TONE??
-                    EventCodeManager.SendCodeNextFrame(TaskEventCodes["AuditoryFbOn"]);
-                }
-                else if (selectedGO != null)
+                else if (selectedGO != null && !ErroneousReturnToLast)
                 {
                     AudioFBController.Play("Negative");
                     EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
@@ -313,6 +315,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TileFbOff"]);
             CorrectSelection = false;
             ReturnToLast = false;
+            ErroneousReturnToLast = false;
         });
         TileFlashFeedback.AddInitializationMethod(() =>
         {
@@ -407,6 +410,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         if (consecutiveErrors >= 2)
         {
             // Should provide flashing feedback of the last correct tile
+            Debug.Log("*Perseverative Error*");
+            EventCodeManager.SendCodeImmediate(TaskEventCodes["PerseverativeError"]);
+            
+            perseverativeErrors_InTrial++;
+            CurrentTaskLevel.perseverativeErrors_InBlock++;
             return true;
         }
         return false;
@@ -416,7 +424,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public int ManageTileTouch(Tile tile)
     {
         var touchedCoord = tile.mCoord;
-
+        Debug.Log("COORD NEXT STEP: " + currMaze.mNextStep);
+        Debug.Log("COORD I TOUCHED: " + touchedCoord.chessCoord);
+        
         // ManageTileTouch - Returns correctness code
         // Return values:
         // 1 - correct tile touch
@@ -425,7 +435,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         // 20 - rule-breaking incorrect (failed to start on start tile, failed to return to last correct after error, diagonal/skips)
 
         // RULE - BREAKING ERROR : NOT PRESSING START
-        if (currMaze.mNextStep == currMaze.mStart && touchedCoord.chessCoord != currMaze.mStart)
+        if (!startedMaze)
         {
             Debug.Log("*Rule Breaking Error - Not Pressing the Start Tile to Begin the Maze*");
             EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
@@ -441,39 +451,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             tileFbDuration = tile.INCORRECT_RULEBREAKING_SECONDS;
             return 20;
         }
-
-        // RULE - BREAKING ERROR : PERSEVERATIVE ERROR WITH TILE IN HIDDEN PATH
-        // final AND conditions allows feedback to bypass this loop when the p
-        if (((touchedCoord.chessCoord == currMaze.mNextStep || touchedCoord.IsAdjacent(currMaze.mPath[currMaze.mPath.FindIndex( pathCoord =>
-                    pathCoord == currMaze.mNextStep) - 1]))) && consecutiveErrors != 0 && startedMaze)
-        {
-            Debug.Log("THE MAZE STARTED? " + startedMaze);
-            Debug.Log("*Rule-Breaking Error - Didn't return to previously correct tile after error, but the tile is in the hidden path*");
-            EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
-            
-            totalErrors_InTrial++;
-            CurrentTaskLevel.totalErrors_InBlock++;
-            
-            ruleBreakingErrors_InTrial++;
-            CurrentTaskLevel.ruleBreakingErrors_InBlock++;
-            
-            consecutiveErrors++;
-
-            if (consecutiveErrors >= 2)
-            {
-                Debug.Log("*Perseverative Error*");
-                EventCodeManager.SendCodeImmediate(TaskEventCodes["PerseverativeError"]);
-                
-                perseverativeErrors_InTrial++;
-                CurrentTaskLevel.perseverativeErrors_InBlock++;
-            }
-
-            tileFbDuration = tile.INCORRECT_RULEBREAKING_SECONDS;
-            return 20;
-        }
         
-        // CORRECT TILE TOUCH
-        if (touchedCoord.chessCoord == currMaze.mNextStep && consecutiveErrors == 0)
+        // CORRECT CHOICE
+        if (touchedCoord.chessCoord == currMaze.mNextStep)
         {
             Debug.Log("*Correct Tile Touch*");
             EventCodeManager.SendCodeImmediate(TaskEventCodes["CorrectResponse"]);
@@ -483,52 +463,58 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             
             CorrectSelection = true;
             
+            // Provides feedback for last correct tile touch and updates next tile step
+            if (pathProgress.Contains(touchedCoord))
+            {
+                Debug.Log("*Last Correct Tile Touch*");
+                EventCodeManager.SendCodeImmediate(TaskEventCodes["LastCorrectSelection"]);
+
+                currMaze.mNextStep = currMaze.mPath[currMaze.mPath.FindIndex(pathCoord => pathCoord == touchedCoord.chessCoord) + 1];
+
+                ReturnToLast = true;
+            
+                retouchCorrect_InTrial++;
+                CurrentTaskLevel.retouchCorrect_InBlock++;
+           
+                consecutiveErrors = 0;
+                tileFbDuration = tile.PREV_CORRECT_FEEDBACK_SECONDS;
+                return 2;
+            }
+            
             // Helps set progress on the experimenter display
             pathProgress.Add(touchedCoord);
             pathProgressGO.Add(tile.gameObject);
             pathProgressIndex = currMaze.mPath.FindIndex(pathCoord => pathCoord == touchedCoord.chessCoord);
-
+            
             // Sets the NextStep if the maze isn't finished
             if (touchedCoord.chessCoord != currMaze.mFinish)
             {
-                currMaze.mNextStep =
-                    currMaze.mPath[currMaze.mPath.FindIndex(pathCoord => pathCoord == touchedCoord.chessCoord) + 1];
+                currMaze.mNextStep = currMaze.mPath[currMaze.mPath.FindIndex(pathCoord => pathCoord == touchedCoord.chessCoord) + 1];
+                if (touchedCoord.chessCoord == currMaze.mStart && consecutiveErrors != 0)
+                {
+                    // resetting consecutive errors if they made the error of not starting on start (can't give return to last correct yet)
+                    consecutiveErrors = 0;
+                }
             }
-                
             else
             {
                 finishedMaze = true; // Finished the Maze
             }
-
+            
             //sets the duration of tile feedback
             tileFbDuration = tile.CORRECT_FEEDBACK_SECONDS;
             return 1;
-        }
-
-        // LAST CORRECT TILE TOUCH - idk what kind of error feedback it gives?? just makes dark green tile
-        // second part of the OR lets the start tile act as the previous correct if they fail to start on that tile
-        if (currMaze.mPath[currMaze.mPath.FindIndex(pathCoord => pathCoord == currMaze.mNextStep) - 1] ==
-            touchedCoord.chessCoord || (currMaze.mNextStep == currMaze.mStart && touchedCoord.chessCoord == currMaze.mStart))
-        {
-            Debug.Log("*Last Correct Tile Touch*");
-            EventCodeManager.SendCodeImmediate(TaskEventCodes["LastCorrectSelection"]);
-
-            ReturnToLast = true;
             
-            retouchCorrect_InTrial++;
-            CurrentTaskLevel.retouchCorrect_InBlock++;
-           
-            consecutiveErrors = 0;
-            tileFbDuration = tile.PREV_CORRECT_FEEDBACK_SECONDS;
-            return 2;
         }
-
-        // RULE ABIDING INCORRECT TOUCH 
-        if (currMaze.mNextStep != currMaze.mStart && touchedCoord.IsAdjacent(currMaze.mPath[currMaze.mPath.FindIndex(pathCoord =>
-                    pathCoord == currMaze.mNextStep) - 1]) && !pathProgress.Contains(touchedCoord))
+        // RULE-ABIDING ERROR
+        if (touchedCoord.IsAdjacent(pathProgress[pathProgressIndex]) && !pathProgress.Contains(touchedCoord))
         {
             Debug.Log("*Rule-Abiding Incorrect Error*");
             EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleAbidingError"]);
+
+            // Set the correct next step to the last correct tile touch, only when this is the first time off path
+            if (consecutiveErrors == 0)
+                currMaze.mNextStep = currMaze.mPath[currMaze.mPath.FindIndex(pathCoord => pathCoord == currMaze.mNextStep) - 1];
             
             totalErrors_InTrial++;
             CurrentTaskLevel.totalErrors_InBlock++;
@@ -542,18 +528,38 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             return 10;
         }
 
-        // RULE BREAKING BACKGTRACK ERROR
+        // RULE BREAKING BACKTRACK ERROR OR ERRONEOUS RETOUCH OF LAST CORRECT TILE
         if (pathProgress.Contains(touchedCoord))
         {
+            if (touchedCoord.Equals(pathProgress[pathProgress.Count - 1]))
+            {
+                Debug.Log("*Pressed Last Correct, Without Outstanding Error*");
+                EventCodeManager.SendCodeImmediate(TaskEventCodes["LastCorrectSelection"]);
+
+                ErroneousReturnToLast = true;
+
+                retouchCorrect_InTrial++;
+                CurrentTaskLevel.retouchCorrect_InBlock++;
+
+                consecutiveErrors = 0;
+                tileFbDuration = tile.PREV_CORRECT_FEEDBACK_SECONDS;
+                return 2;
+            }
+
             Debug.Log("*Rule-Breaking Backtrack Error*");
             EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
-            
+
+            // Set the correct next step to the last correct tile touch
+            if (consecutiveErrors == 0)
+                currMaze.mNextStep =
+                    currMaze.mPath[currMaze.mPath.FindIndex(pathCoord => pathCoord == currMaze.mNextStep) - 1];
+
             backtrackErrors_InTrial++;
             CurrentTaskLevel.backtrackErrors_InBlock++;
-            
+
             ruleBreakingErrors_InTrial++;
             CurrentTaskLevel.ruleBreakingErrors_InBlock++;
-            
+
             consecutiveErrors++;
             tileFbDuration = tile.INCORRECT_RULEBREAKING_SECONDS;
         }
@@ -563,6 +569,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             Debug.Log("*Rule-Breaking Incorrect Error*");
             EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
+            
+            // Set the correct next step to the last correct tile touch
+            if (consecutiveErrors == 0)
+                currMaze.mNextStep = currMaze.mPath[currMaze.mPath.FindIndex(pathCoord => pathCoord == currMaze.mNextStep) - 1];
             
             totalErrors_InTrial++;
             CurrentTaskLevel.totalErrors_InBlock++;
@@ -579,12 +589,16 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private void LoadMazeDef()
     {
         // textMaze will load the text file containing the full Maze path of the intended mazeDef for the block/trial
-        string mazePath = "";
+        string mazeFilePath = "";
+
         string[] filePaths = Directory.GetFiles(MazeFilePath, $"{mazeDefName}*", SearchOption.AllDirectories);
-        
+
         if (filePaths.Length >= 1)
-            mazePath = filePaths[0];
-        var textMaze = File.ReadAllLines(mazePath);
+            mazeFilePath = filePaths[0];
+        else
+            Debug.LogError($"Maze not found within the given file path ({mazeFilePath}) or in any nested folders");
+        
+        var textMaze = File.ReadAllLines(mazeFilePath);
         currMaze = new Maze(textMaze[0]);
     }
     private void LoadConfigVariables()
@@ -747,6 +761,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         selectedGO = null;
         selectedSD = null;
         aborted = false;
+        CorrectSelection = false;
+        ReturnToLast = false;
+        ErroneousReturnToLast = false;
         
         totalErrors_InTrial = 0;
         correctTouches_InTrial = 0;
@@ -755,7 +772,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         backtrackErrors_InTrial = 0;
         ruleAbidingErrors_InTrial = 0;
         ruleBreakingErrors_InTrial = 0;
-
+    
         pathProgress.Clear();
         pathProgressGO.Clear();
         consecutiveErrors = 0;

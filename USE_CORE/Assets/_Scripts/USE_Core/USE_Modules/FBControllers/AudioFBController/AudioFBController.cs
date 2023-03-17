@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using USE_Data;
+using USE_ExperimentTemplate_Classes;
 
 public class AudioFBController : MonoBehaviour
 {
@@ -18,6 +19,10 @@ public class AudioFBController : MonoBehaviour
 
     private string playingClipName = null;
 
+    public EventCodeManager EventCodeManager;
+    public Dictionary<string, EventCode> SessionEventCodes;
+
+
     public void Init(DataController frameData)
     {
         frameData.AddDatum("PlayingAudioClipName", () => playingClipName);
@@ -27,11 +32,11 @@ public class AudioFBController : MonoBehaviour
         
         foreach (AudioFB audioFB in DefaultAudioFeedbacks)
             clips.Add(audioFB.name, audioFB.clip);
+
+        EventCodeManager = new EventCodeManager();
     }
 
-    // Every time a new task is started, the old audio source is deactivated,
-    // so we need to make sure to find the new one
-    public void UpdateAudioSource()
+    public void UpdateAudioSource() //When new task starts, old audio is deactivated. need to find the new one
     {
         foreach (GameObject camera in GameObject.FindGameObjectsWithTag("MainCamera"))
         {
@@ -54,19 +59,6 @@ public class AudioFBController : MonoBehaviour
         return this;
     }
 
-    public AudioFBController AddTone(string clipName, float freq, float duration)
-    {
-        AudioClip clip = AudioClip.Create(clipName, (int)(duration * 44100), 1, 44100, false);
-        float[] samples = new float[clip.samples];
-        for (int i = 0; i < samples.Length; i++) {
-            samples[i] = Mathf.Sin(2 * Mathf.PI * freq * i / clip.frequency);
-        }
-        clip.SetData(samples, 0);
-
-        clips[clipName] = clip;
-        return this;
-    }
-
     public void Play(string clipName)
     {
         playingClipName = clipName;
@@ -75,6 +67,7 @@ public class AudioFBController : MonoBehaviour
             if (IsPlaying())
                 audioSource.Stop();
             audioSource.PlayOneShot(clip);
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["AudioFbController_SelectionAuditoryFbOn"]);
         }
         else
             Debug.LogWarning("Trying to play clip " + clipName + " but it has not been added");

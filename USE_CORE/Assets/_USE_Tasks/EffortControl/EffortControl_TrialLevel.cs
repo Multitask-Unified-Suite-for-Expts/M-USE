@@ -7,7 +7,6 @@ using System.Linq;
 using USE_ExperimentTemplate_Trial;
 using ConfigDynamicUI;
 using USE_UI;
-using UnityEngine.UI;
 
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
@@ -151,7 +150,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddInitializationMethod(() =>
         {
             LoadConfigUIVariables();
-            EventCodeManager.SendCodeImmediate(TaskEventCodes["TrlStart"]);
             if (TrialCount_InTask != 0)
                 currentTask.SetTaskSummaryString();
             currentTask.CalculateBlockSummaryString();
@@ -183,7 +181,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
             StartButton.SetActive(false);
-            EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["ObjectSelected"]); //but how we link to StartButton object?
         });
 
         //Choose Balloon state -------------------------------------------------------------------------------------------------------
@@ -327,7 +325,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 if (!InflateAudioPlayed)
                 {
                     AudioFBController.Play("EC_Inflate");
-                    EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionAuditoryFbOn"]);
                     InflateAudioPlayed = true;
                 }
 
@@ -379,10 +376,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
                 RaycastHit hit;
                 if (!Physics.Raycast(ray, out hit))
-                {
-                    AudioFBController.Play("Negative");
-                    EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionAuditoryFbOn"]);
-                }
+                    AudioFBController.Play("Negative");               
             }
         });
         InflateBalloon.AddTimer(() => inflateDuration.value, Delay);

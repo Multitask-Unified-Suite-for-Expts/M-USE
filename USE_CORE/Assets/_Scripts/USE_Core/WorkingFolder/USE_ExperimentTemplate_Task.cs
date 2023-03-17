@@ -76,7 +76,8 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public SerialPortThreaded SerialPortController;
         [HideInInspector] public SyncBoxController SyncBoxController;
         [HideInInspector] public EventCodeManager EventCodeManager;
-        protected Dictionary<string, EventCode> TaskEventCodes;
+        protected Dictionary<string, EventCode> CustomTaskEventCodes;
+        public Dictionary<string, EventCode> SessionEventCodes;
 
         public Type TaskLevelType;
         protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
@@ -150,6 +151,7 @@ namespace USE_ExperimentTemplate_Task
             SetupTask.AddInitializationMethod(() =>
             {
                 SetTaskSummaryString();
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTaskStarts"]);
             });
 
             SetupTask.SpecifyTermination(() => true, RunBlock);
@@ -157,6 +159,8 @@ namespace USE_ExperimentTemplate_Task
 
             RunBlock.AddUniversalInitializationMethod(() =>
             {
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["RunBlockStarts"]);
+
                 BlockCount++;
                 CurrentBlockDef = BlockDefs[BlockCount];
                 TrialLevel.BlockCount = BlockCount;
@@ -172,7 +176,10 @@ namespace USE_ExperimentTemplate_Task
             });
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
 
-
+            BlockFeedback.AddInitializationMethod(() =>
+            {
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["BlockFeedbackStarts"]);
+            });
             BlockFeedback.AddUpdateMethod(() =>
             {
                 // BlockFbFinished = true;
@@ -199,6 +206,8 @@ namespace USE_ExperimentTemplate_Task
 
             FinishTask.AddDefaultInitializationMethod(() =>
             {
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["FinishTaskStarts"]);
+
                 //Clear trialsummarystring and Blocksummarystring at end of task:
                 TrialLevel.TrialSummaryString = "";
                 BlockSummaryString.Clear();
@@ -314,6 +323,11 @@ namespace USE_ExperimentTemplate_Task
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TotalTokensNum"))
                 totalTokensNum = (int)SessionSettings.Get(TaskName + "_TaskSettings", "TotalTokensNum");
 
+            fbControllers.GetComponent<AudioFBController>().SessionEventCodes = SessionEventCodes;
+            fbControllers.GetComponent<HaloFBController>().SessionEventCodes = SessionEventCodes;
+            fbControllers.GetComponent<TokenFBController>().SessionEventCodes = SessionEventCodes;
+            fbControllers.GetComponent<SliderFBController>().SessionEventCodes = SessionEventCodes;
+
             TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
             TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
             TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
@@ -326,8 +340,10 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.SerialSentData = SerialSentData;
             TrialLevel.SyncBoxController = SyncBoxController;
             TrialLevel.EventCodeManager = EventCodeManager;
-            if (TaskEventCodes != null)
-                TrialLevel.TaskEventCodes = TaskEventCodes;
+            if (CustomTaskEventCodes != null)
+                TrialLevel.TaskEventCodes = CustomTaskEventCodes;
+            if (SessionEventCodes != null)
+                TrialLevel.SessionEventCodes = SessionEventCodes;
 
             bool audioInited = false;
             foreach (string fbController in fbControllersList)
@@ -434,11 +450,12 @@ namespace USE_ExperimentTemplate_Task
                 ConfigUiVariables = (ConfigVarStore)SessionSettings.Get(TaskName + "_ConfigUiDetails");
             }
 
+
             string eventCodeFile = LocateFile.FindFileInFolder(TaskConfigPath, "*" + TaskName + "*EventCodeConfig*");
             if (!string.IsNullOrEmpty(eventCodeFile))
             {
                 SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig", eventCodeFile);
-                TaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
+                CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
                 EventCodesActive = true;
             }
 

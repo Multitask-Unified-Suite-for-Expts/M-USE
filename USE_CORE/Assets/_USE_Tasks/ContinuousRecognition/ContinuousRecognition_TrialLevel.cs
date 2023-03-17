@@ -190,15 +190,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetTotalTokensNum(currentTrial.NumTokenBar);
             TokenFBController.enabled = true;
 
-            EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
-
-            //MAKE EACH STIM GAME OBJECT FACE THE CAMERA WHILE SPAWNED
             if (currentTrial.StimFacingCamera)
                 MakeStimsFaceCamera(trialStims);  
 
             if(currentTrial.ShakeStim)
                 AddShakeStimScript(trialStims);
+
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["ObjectSelected"]); //but how we link to StartButton object?
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
         });
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------
@@ -240,8 +239,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 {
                     currentTrial.GotTrialCorrect = true;
 
-                    EventCodeManager.SendCodeImmediate(TaskEventCodes["CorrectResponse"]);
-                    EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchTargetStart"]);
+                    EventCodeManager.SendCodeImmediate(SessionEventCodes["CorrectResponse"]);
 
                     //If chose a PNC Stim, remove it from PNC list.
                     if (currentTrial.PNC_Stim.Contains(chosenStimDef.StimIndex))
@@ -278,8 +276,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 {
                     currentTrial.WrongStimIndex = chosenStimDef.StimIndex; //identifies the stim they got wrong for Block FB purposes. 
                     TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
-                    EventCodeManager.SendCodeImmediate(TaskEventCodes["TouchDistractorStart"]);
-                    EventCodeManager.SendCodeImmediate(TaskEventCodes["IncorrectResponse"]);
+                    EventCodeManager.SendCodeImmediate(SessionEventCodes["IncorrectResponse"]);
                 }
             }
 
@@ -300,7 +297,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             AudioFBController.Play("Negative");
             EndBlock = true;
-            EventCodeManager.SendCodeImmediate(TaskEventCodes["NoChoice"]);
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["NoChoice"]);
         });
 
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------
@@ -313,17 +310,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 HaloFBController.ShowPositive(chosenStimObj);
             else
                 HaloFBController.ShowNegative(chosenStimObj);
-            
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
         });
         TouchFeedback.AddTimer(() => touchFbDuration.value, TokenUpdate);
         TouchFeedback.SpecifyTermination(() => !StimIsChosen, TokenUpdate);
-        TouchFeedback.AddDefaultTerminationMethod(() =>
-        {
-            EventCodeManager.SendCodeImmediate(TaskEventCodes["SelectionVisualFbOff"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
-        });
 
         //TOKEN UPDATE state ---------------------------------------------------------------------------------------------------------
         TokenUpdate.AddInitializationMethod(() =>
@@ -345,12 +334,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 {
                     TokenFBController.AddTokens(chosenStimObj, currentTrial.RewardMag);
                 }
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["Rewarded"]);
             }
             else //Got wrong
             {
                 TokenFBController.RemoveTokens(chosenStimObj,currentTrial.RewardMag);
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["Unrewarded"]);
                 EndBlock = true;
             }
         });
@@ -369,6 +356,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 ScoreTextGO.SetActive(false);
                 NumTrialsTextGO.SetActive(false);
             }
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOff"]);
+
         });
         //DISPLAY RESULTS state --------------------------------------------------------------------------------------------------------
         DisplayResults.AddInitializationMethod(() =>
@@ -402,12 +391,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-        DisplayResults.AddTimer(() => displayResultsDuration.value, ITI, () =>
-        {
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
-        });
+        DisplayResults.AddTimer(() => displayResultsDuration.value, ITI);
         DisplayResults.SpecifyTermination(() => !EndBlock && !CompletedAllTrials, ITI);
         DisplayResults.AddDefaultTerminationMethod(() =>
         {
@@ -415,9 +399,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 RemoveShakeStimScript(trialStims);
 
             TokenFBController.enabled = false;
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOff"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
         });
 
         //ITI State----------------------------------------------------------------------------------------------------------------------
@@ -437,6 +418,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             else if (AbortCode == AbortCodeDict["Pause"]) //If used Pause hotkey to end trial, end entire Block
                 EndBlock = true;
         });
+        FinishTrial.AddDefaultTerminationMethod(() => EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOff"]));
+
         //----------------------------------------------------------------------------------------------------------------------
         DefineTrialData();
         DefineFrameData();
@@ -457,7 +440,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         DeactivateTextObjects();
         DestroyFeedbackBorders();
         ContextActive = false;
-        EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]); //next trial starts next frame
     }
 
     public void ResetBlockVariables()

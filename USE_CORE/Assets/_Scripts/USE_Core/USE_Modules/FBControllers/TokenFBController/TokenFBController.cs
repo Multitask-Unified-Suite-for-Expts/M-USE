@@ -1,8 +1,7 @@
 using UnityEngine;
 using USE_Data;
-using System.Collections;
-using System.Runtime.CompilerServices;
-using ConfigParsing;
+using System.Collections.Generic;
+using USE_ExperimentTemplate_Classes;
 
 
 public class TokenFBController : MonoBehaviour
@@ -42,10 +41,13 @@ public class TokenFBController : MonoBehaviour
     private float revealTime = 0.4f; // How long to show the tokens before animating
     private float updateTime = 0.3f; // How long each token update animation should take
     private float flashingTime = 0.5f; // How long the token bar should flash when it fills up
-    private int flashingNumBeeps = 3; //Num beeps for tokenbar flashing audio
-    private float flashBeepInterval; //Length between beeps for tokenbar flashing audio
     // Audio
     AudioFBController audioFBController;
+    //Event Codes
+    public EventCodeManager EventCodeManager;
+    public Dictionary<string, EventCode> SessionEventCodes;
+
+
 
     public void Init(DataController trialData, DataController frameData, AudioFBController audioFBController)
     {
@@ -64,6 +66,8 @@ public class TokenFBController : MonoBehaviour
 
         SetPositiveShowAudioClip(audioFBController.GetClip("Positive"));
         SetNegativeShowAudioClip(audioFBController.GetClip("Negative"));
+
+        EventCodeManager = new EventCodeManager();
     }
 
     private void RecalculateTokenBox() {
@@ -97,6 +101,7 @@ public class TokenFBController : MonoBehaviour
     public void ResetTokenBarFull()
     {
         tokenBarFull = false;
+
     }
     public bool isTokenBarFull()
     {
@@ -104,7 +109,7 @@ public class TokenFBController : MonoBehaviour
     }
     public void OnGUI()
     {
-        RenderTexture old = RenderTexture.active;
+        RenderTexture oldTexture = RenderTexture.active;
         if (Camera.main != null)
             RenderTexture.active = Camera.main.targetTexture;
 
@@ -143,7 +148,19 @@ public class TokenFBController : MonoBehaviour
 
         GUI.color = oldColor;
 
-        RenderTexture.active = old;
+        RenderTexture.active = oldTexture;
+    }
+
+    private Vector2 DrawTokens(Vector2 startPos, int numTokens)
+    {
+        startPos.x += tokenBoxPadding;
+        startPos.y += tokenBoxPadding;
+        for (int i = 0; i < numTokens; ++i)
+        {
+            GUI.DrawTexture(new Rect(startPos.x, startPos.y, tokenSize, tokenSize), tokenTexture);
+            startPos.x += tokenSize + tokenSpacing;
+        }
+        return startPos;
     }
 
     public bool IsAnimating()
@@ -173,30 +190,24 @@ public class TokenFBController : MonoBehaviour
                     animationEndTime += updateTime;
                     break;
                 case AnimationPhase.Update:
-                    //if (tokensChange < 0)
-                    //{
-                    //    audioFBController.Play("Negative"); //not added
-                    //}
-                    //else
-                    //{
-                    //    Debug.Log("PLAYING POS SHOW!");
-                    //    audioFBController.Play("Positive"); //not added
-                    //}
                     numCollected += tokensChange;
-                    if (numCollected < 0) numCollected = 0; //set number to 0 if you lose more than you have, avoids neg tokens
+                    if (numCollected < 0)
+                        numCollected = 0; //set number to 0 if you lose more than you have, avoids neg tokens
                     animationPhase = AnimationPhase.None;
                     if (numCollected >= totalTokensNum)
                     {
                         animationPhase = AnimationPhase.Flashing;
                         tokenBarFull = true;
                         audioFBController.Play("TripleCollected");
-                        //StartCoroutine(FlashingBeeps(flashingNumBeeps));
+                        EventCodeManager.SendCodeImmediate(SessionEventCodes["TokenFbController_FullTbAnimationStart"]);
                         animationEndTime += flashingTime;
                     }
                     break;
                 case AnimationPhase.Flashing:
                     numCollected = 0;
                     animationPhase = AnimationPhase.None;
+                    EventCodeManager.SendCodeImmediate(SessionEventCodes["TokenFbController_FullTbAnimationEnd"]);
+                    EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenFbController_TbReset"]);
                     break;
             }
         }
@@ -219,17 +230,6 @@ public class TokenFBController : MonoBehaviour
                 else
                     tokenBoxColor = colorFlashing2;
                 break;
-        }
-    }
-
-    IEnumerator FlashingBeeps(int numBeeps)
-    {
-        while(numBeeps > 0)
-        {
-            audioFBController.Play("PositiveShow");
-            numBeeps--;
-            if(numBeeps > 0)
-                yield return new WaitForSeconds(flashBeepInterval);
         }
     }
 
@@ -260,7 +260,6 @@ public class TokenFBController : MonoBehaviour
     
     public TokenFBController SetPositiveShowAudioClip(AudioClip clip) {
         audioFBController.AddClip("PositiveShow", clip);
-        flashBeepInterval = clip.length;
         return this;
     }
     
@@ -327,18 +326,6 @@ public class TokenFBController : MonoBehaviour
         animationStartTime = Time.unscaledTime;
         animationEndTime = animationStartTime + revealTime;
         animatedTokensNum = numTokens;
-    }
-
-    private Vector2 DrawTokens(Vector2 startPos, int numTokens)
-    {
-        startPos.x += tokenBoxPadding;
-        startPos.y += tokenBoxPadding;
-        for (int i = 0; i < numTokens; ++i)
-        {
-            GUI.DrawTexture(new Rect(startPos.x, startPos.y, tokenSize, tokenSize), tokenTexture);
-            startPos.x += tokenSize + tokenSpacing;
-        }
-        return startPos;
     }
 
     private float CalcTokensWidth(int numTokens)

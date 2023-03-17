@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.4465767, g: 0.49641037, b: 0.57481635, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657642, g: 0.4964097, b: 0.5748155, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -123,75 +123,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1001 &139906156
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 7408026283530762082, guid: e00252f712b264ee99c52f7ce5e419c9,
-        type: 3}
-      propertyPath: m_RootOrder
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 7408026283530762082, guid: e00252f712b264ee99c52f7ce5e419c9,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7408026283530762082, guid: e00252f712b264ee99c52f7ce5e419c9,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1.755
-      objectReference: {fileID: 0}
-    - target: {fileID: 7408026283530762082, guid: e00252f712b264ee99c52f7ce5e419c9,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7408026283530762082, guid: e00252f712b264ee99c52f7ce5e419c9,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7408026283530762082, guid: e00252f712b264ee99c52f7ce5e419c9,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7408026283530762082, guid: e00252f712b264ee99c52f7ce5e419c9,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7408026283530762082, guid: e00252f712b264ee99c52f7ce5e419c9,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7408026283530762082, guid: e00252f712b264ee99c52f7ce5e419c9,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7408026283530762082, guid: e00252f712b264ee99c52f7ce5e419c9,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7408026283530762082, guid: e00252f712b264ee99c52f7ce5e419c9,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7408026283530762083, guid: e00252f712b264ee99c52f7ce5e419c9,
-        type: 3}
-      propertyPath: m_Name
-      value: Borders
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: e00252f712b264ee99c52f7ce5e419c9, type: 3}
 --- !u!1 &960539200
 GameObject:
   m_ObjectHideFlags: 0
@@ -284,7 +215,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -364,6 +295,7 @@ MonoBehaviour:
   AudioFBController: {fileID: 0}
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
+  SliderFBController: {fileID: 0}
   MouseTracker: {fileID: 0}
   GazeTracker: {fileID: 0}
   SelectionType: 
@@ -388,12 +320,11 @@ MonoBehaviour:
   OutlinePrefab: {fileID: -927199367670048503, guid: 79fedf5c0c0c9414cb56d8c2e9c25fcf,
     type: 3}
   ButtonPosition: {x: 0, y: 0, z: 0}
-  ButtonScale: {x: 0, y: 0, z: 0}
+  ButtonScale: 0
   OriginalStartButtonPosition: {x: 0, y: 0, z: 0}
   EC_CanvasGO: {fileID: 960539200}
   IsHuman: 0
   MaterialFilePath: 
-  CenteringSpeed: 1.5
   Flashing: 0
   ScaleTimer: 0
   AvgClickTime: 0
@@ -405,8 +336,11 @@ MonoBehaviour:
   NumChosenRight_Block: 0
   NumHigherEffortChosen_Block: 0
   NumLowerEffortChosen_Block: 0
+  NumSameEffortChosen_Block: 0
   NumHigherRewardChosen_Block: 0
   NumLowerRewardChosen_Block: 0
+  NumSameRewardChosen_Block: 0
+  NumAborted_Block: 0
   scalingInterval:
     name: 
     hidden: 0
@@ -439,12 +373,32 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
+  choiceToTouchDelay:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  sbToBalloonDelay:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
   MaxOutline_Left: {fileID: 0}
   MaxOutline_Right: {fileID: 0}
   InflateAudioPlayed: 0
   clickTimings: []
   timeTracker: 0
   mouseClicks: 0
+  BalloonSelectedTime: 0
+  StartButtonSelectedTime: 0
+  TrialTouches: 0
+  ObjectList: []
 --- !u!114 &1719984668
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -519,7 +473,11 @@ MonoBehaviour:
   NumChosenLowerReward_Task: 0
   NumChosenHigherEffort_Task: 0
   NumChosenLowerEffort_Task: 0
+  NumChosenSameReward_Task: 0
+  NumChosenSameEffort_Task: 0
+  NumAborted_Task: 0
   CurrentBlockString: 
+  BlockStringsAdded: 0
 --- !u!4 &1719984669
 Transform:
   m_ObjectHideFlags: 0

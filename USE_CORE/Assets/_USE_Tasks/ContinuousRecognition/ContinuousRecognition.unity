@@ -5879,6 +5879,7 @@ MonoBehaviour:
   AudioFBController: {fileID: 0}
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
+  SliderFBController: {fileID: 0}
   MouseTracker: {fileID: 0}
   GazeTracker: {fileID: 0}
   SelectionType: 
@@ -5916,9 +5917,6 @@ MonoBehaviour:
   AdjustedPositionsForMac: 0
   ContextActive: 0
   VariablesLoaded: 0
-  trialStims:
-    stimGroupName: 
-    IsActive: 0
   ChosenStimIndices: 
   MaterialFilePath: 
   NonStimTouches_Block: 0
@@ -5932,18 +5930,6 @@ MonoBehaviour:
   TokenUpdateStartTime: 0
   TimeRemaining: 0
   TimeToChoice_Block: []
-  NumFeedbackRows: 0
-  Score: 0
-  OriginalFbTextPosition: {x: 0, y: 0, z: 0}
-  OriginalTitleTextPosition: {x: 0, y: 0, z: 0}
-  OriginalStartButtonPosition: {x: 0, y: 0, z: 0}
-  OriginalTimerPosition: {x: 0, y: 0, z: 0}
-  RightGroup:
-    stimGroupName: 
-    IsActive: 0
-  WrongGroup:
-    stimGroupName: 
-    IsActive: 0
   ButtonScale: 0
   ButtonPosition: {x: 0, y: 0, z: 0}
   displayStimDuration:

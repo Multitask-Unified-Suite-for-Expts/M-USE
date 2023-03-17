@@ -153,7 +153,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 CreateTextOnExperimenterDisplay();
 
             SetTrialSummaryString();
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlStart"]);
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
         
@@ -186,7 +185,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
             SearchDisplayDelay, () =>
             {
-                EventCodeManager.SendCodeImmediate(TaskEventCodes["StartButtonSelected"]);
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
             });
 
         // Provide delay following start button selection and before stimuli onset
@@ -201,8 +200,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             // Toggle TokenBar and Stim to be visible
             TokenFBController.enabled = true;
             ActivateChildren(playerViewParent);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["StimOn"]);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TokenBarVisible"]);
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
@@ -223,16 +222,16 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
                 runningAcc.Add(1);
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["TouchTargetStart"]);
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["CorrectResponse"]);
+                EventCodeManager.SendCodeNextFrame(SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                EventCodeManager.SendCodeNextFrame(SessionEventCodes["CorrectResponse"]);
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
                 runningAcc.Add(0);
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["TouchDistractorStart"]);
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["IncorrectResponse"]);
+                EventCodeManager.SendCodeNextFrame(SessionEventCodes["Button0PressedOnDistractorObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                EventCodeManager.SendCodeNextFrame(SessionEventCodes["IncorrectResponse"]);
             }
 
             if (selected != null)
@@ -248,11 +247,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
             {
                 runningAcc.Add(0);
-                Debug.Log("Timed out of selection state before making a choice");
                 AbortedTrials_InBlock++;
                 CurrentTaskLevel.AbortedTrials_InTask++;
                 aborted = true;  
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["NoChoice"]);
+                EventCodeManager.SendCodeNextFrame(SessionEventCodes["NoChoice"]);
             }
         });
         
@@ -269,13 +267,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 HaloFBController.ShowPositive(selected);
             else 
                 HaloFBController.ShowNegative(selected);
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOn"]);
         });
 
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () =>
         {
             HaloFBController.Destroy();
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionVisualFbOff"]);
         });
        
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
@@ -283,15 +279,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             DestroyTextOnExperimenterDisplay();
             if (selectedSD.StimTrialRewardMag > 0)
-            {
                 TokenFBController.AddTokens(selected, selectedSD.StimTrialRewardMag);
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
-            }
             else
-            {
                 TokenFBController.RemoveTokens(selected, -selectedSD.StimTrialRewardMag);
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SelectionAuditoryFbOn"]);
-            }
         });
         TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
         {
@@ -303,14 +293,12 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 if (SyncBoxController != null)
                 {
                     SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
-                    EventCodeManager.SendCodeImmediate(TaskEventCodes["Fluid1Onset"]);
                     SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
                     NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
                     RewardGiven = true;
                 }
             }
-            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TrlEnd"]);
             TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
                                            (NumTokenBarFull_InBlock* CurrentTrialDef.NumTokenBar);
             CurrentTaskLevel.TotalTokensCollected_InTask = TokenFBController.GetTokenBarValue() +
@@ -323,7 +311,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             {
                 ContextName = "itiImage";
                 RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["ContextOff"]);
+                EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOff"]);
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);

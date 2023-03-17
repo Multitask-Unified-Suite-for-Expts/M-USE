@@ -129,6 +129,7 @@ public class SliderFBController : MonoBehaviour
                 case AnimationPhase.Flashing:
                     animationPhase = AnimationPhase.None;
                     EventCodeManager.SendCodeImmediate(SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
+                    EventCodeManager.SendCodeImmediate(SessionEventCodes["SliderFbController_SliderReset"]);
                     break;
             }
         }

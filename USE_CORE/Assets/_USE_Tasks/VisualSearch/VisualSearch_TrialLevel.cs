@@ -157,21 +157,21 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.SetTaskSummaryString();
             
             //Initialize FB Controller Variables
-            mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
-            mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
+            // mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
+            // mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
         });
         InitTrial.AddUpdateMethod(() =>
         {
-            if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
-            {
-                TouchDurationError = true;
-                TouchDurationErrorFeedback(mouseHandler, false);
-                SetTrialSummaryString();
-                CurrentTaskLevel.SetBlockSummaryString(); //TCIB is incremented during setuptrial, so "trialNum" in blocksummarystring is wrong unless you update it here. I would say change the variable in the summary string. 
-            }
+            // if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
+            // {
+            //     TouchDurationError = true;
+            //     TouchDurationErrorFeedback(mouseHandler, false);
+            //     SetTrialSummaryString();
+            //     CurrentTaskLevel.SetBlockSummaryString(); //TCIB is incremented during setuptrial, so "trialNum" in blocksummarystring is wrong unless you update it here. I would say change the variable in the summary string. 
+            // }
         });
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
             SearchDisplayDelay, () => 
@@ -197,13 +197,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
-            if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
-            {
-                TouchDurationError = true;
-                SetTrialSummaryString();
-                TouchDurationErrorFeedback(mouseHandler, true);
-                CurrentTaskLevel.SetBlockSummaryString();
-            }
+            // if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
+            // {
+            //     TouchDurationError = true;
+            //     SetTrialSummaryString();
+            //     TouchDurationErrorFeedback(mouseHandler, true);
+            //     CurrentTaskLevel.SetBlockSummaryString();
+            // }
         });
         SearchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, SelectionFeedback, () =>
         {
@@ -472,26 +472,26 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
     private void TouchDurationErrorFeedback(SelectionHandler<VisualSearch_StimDef> MouseHandler, bool deactivateAfter)
     {///CANT FIGURE OUT WHY I CANT USE TEMPLATE, ANYWAYS MAKE A SEPARATE FEEDBACK SCRIPT
-        AudioFBController.Play("Negative");
-        if (MouseHandler.GetSelectionTooShort())
-        {
-            if (StartButton.activeInHierarchy)
-                StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
-            else
-                StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
-        }
-        else if (MouseHandler.GetSelectionTooLong())
-        {
-            if (StartButton.activeInHierarchy)
-                StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
-            else
-                StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
-        }
-        
-        MouseHandler.SetSelectionTooLong(false);
-        MouseHandler.SetSelectionTooShort(false);
-        TouchDurationError = false;
-        TouchDurationError_InBlock++;
-    }
+    //     AudioFBController.Play("Negative");
+    //     if (MouseHandler.GetSelectionTooShort())
+    //     {
+    //         if (StartButton.activeInHierarchy)
+    //             StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
+    //         else
+    //             StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
+    //     }
+    //     else if (MouseHandler.GetSelectionTooLong())
+    //     {
+    //         if (StartButton.activeInHierarchy)
+    //             StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
+    //         else
+    //             StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
+    //     }
+    //     
+    //     MouseHandler.SetSelectionTooLong(false);
+    //     MouseHandler.SetSelectionTooShort(false);
+    //     TouchDurationError = false;
+    //     TouchDurationError_InBlock++;
+     }
 
 }

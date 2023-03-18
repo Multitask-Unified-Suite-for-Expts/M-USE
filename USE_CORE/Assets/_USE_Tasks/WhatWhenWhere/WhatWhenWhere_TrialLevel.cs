@@ -224,19 +224,19 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);        // define StartButton state
         StartButton.AddInitializationMethod(() =>
         {
-            mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
-            mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
+            // mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
+            // mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
             startButton.SetActive(true);
         });
         StartButton.AddUpdateMethod(() =>
         {
-            if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
-            {
-                touchDurationError = true;
-                SetTrialSummaryString();
-                TouchDurationErrorFeedback(mouseHandler, false);
-                CurrentTaskLevel.SetBlockSummaryString();
-            }
+            // if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
+            // {
+            //     touchDurationError = true;
+            //     SetTrialSummaryString();
+            //     TouchDurationErrorFeedback(mouseHandler, false);
+            //     CurrentTaskLevel.SetBlockSummaryString();
+            // }
         });
 
         StartButton.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton), ChooseStimulusDelay, ()=>
@@ -267,13 +267,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         ChooseStimulus.AddUpdateMethod(() =>
         { 
             // Evaluates whether or not the player selects the stimulus for long enough
-            if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
-            {
-                touchDurationError = true;
-                SetTrialSummaryString();
-                TouchDurationErrorFeedback(mouseHandler, true);
-                CurrentTaskLevel.SetBlockSummaryString();
-            }
+            // if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
+            // {
+            //     touchDurationError = true;
+            //     SetTrialSummaryString();
+            //     TouchDurationErrorFeedback(mouseHandler, true);
+            //     CurrentTaskLevel.SetBlockSummaryString();
+            // }
         });
         ChooseStimulus.SpecifyTermination(()=> mouseHandler.SelectedStimDef != null, SelectionFeedback, ()=>
         {
@@ -720,19 +720,19 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     }
     private void TouchDurationErrorFeedback(SelectionHandler<WhatWhenWhere_StimDef> MouseHandler, bool deactivateAfter)
     {
-        EventCodeManager.SendCodeImmediate(SessionEventCodes["TouchDurationError"]);
-        EventCodeManager.SendCodeImmediate(SessionEventCodes["SelectionHandler_TouchErrorImageOn"]); //this should be put into selection handler soon. leaving for now. 
-        errorTypeString = "TouchDurationError";
-        AudioFBController.Play("Negative");
-        //eventually replace with state timer logic
-        if (MouseHandler.GetSelectionTooShort())
-            StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
-        else if (MouseHandler.GetSelectionTooLong())
-            StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
-        MouseHandler.SetSelectionTooLong(false);
-        MouseHandler.SetSelectionTooShort(false);
-        touchDurationError = false;
-        touchDurationErrorCount_InBlock++;
+        // EventCodeManager.SendCodeImmediate(SessionEventCodes["TouchDurationError"]);
+        // EventCodeManager.SendCodeImmediate(SessionEventCodes["SelectionHandler_TouchErrorImageOn"]); //this should be put into selection handler soon. leaving for now. 
+        // errorTypeString = "TouchDurationError";
+        // AudioFBController.Play("Negative");
+        // //eventually replace with state timer logic
+        // if (MouseHandler.GetSelectionTooShort())
+        //     StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
+        // else if (MouseHandler.GetSelectionTooLong())
+        //     StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
+        // MouseHandler.SetSelectionTooLong(false);
+        // MouseHandler.SetSelectionTooShort(false);
+        // touchDurationError = false;
+        // touchDurationErrorCount_InBlock++;
     }
     private void GenerateAccuracyLog()
     {

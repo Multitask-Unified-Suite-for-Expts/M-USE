@@ -4,18 +4,12 @@ using USE_States;
 using USE_StimulusManagement;
 using FlexLearning_Namespace;
 using USE_ExperimentTemplate_Trial;
-using Random = UnityEngine.Random;
 using USE_UI;
-using USE_Settings;
 using System.IO;
 using System.Linq;
 using ConfigDynamicUI;
 using UnityEngine.UI;
 using USE_ExperimentTemplate_Task;
-using System;
-using ConfigParsing;
-using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 
 public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 {
@@ -157,8 +151,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
         
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
-        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, 
-            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
+        //MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, 
+          //  ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         InitTrial.AddInitializationMethod(() =>
         {
             CurrentTaskLevel.SetBlockSummaryString();
@@ -166,21 +160,21 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.SetTaskSummaryString();
             
             //Initialize FB Controller Variables
-            mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
-            mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
+            // mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
+            // mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
         });
         InitTrial.AddUpdateMethod(() =>
         {
-            if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
-            {
-                TouchDurationError = true;
-                TouchDurationErrorFeedback(mouseHandler, false);
-                SetTrialSummaryString();
-                CurrentTaskLevel.SetBlockSummaryString();
-            }
+            // if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
+            // {
+            //     TouchDurationError = true;
+            //     TouchDurationErrorFeedback(mouseHandler, false);
+            //     SetTrialSummaryString();
+            //     CurrentTaskLevel.SetBlockSummaryString();
+            // }
         });
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
             SearchDisplayDelay, () =>
@@ -192,8 +186,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay);
         
         // SEARCH DISPLAY STATE ----------------------------------------------------------------------------------------
-        MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay, null, 
-            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
+    //    MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay, null, 
+      //      ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         SearchDisplay.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they holding down
@@ -205,13 +199,13 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
-            if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
-            {
-                TouchDurationError = true;
-                SetTrialSummaryString();
-                TouchDurationErrorFeedback(mouseHandler, true);
-                CurrentTaskLevel.SetBlockSummaryString();
-            }
+            // if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
+            // {
+            //     TouchDurationError = true;
+            //     SetTrialSummaryString();
+            //     TouchDurationErrorFeedback(mouseHandler, true);
+            //     CurrentTaskLevel.SetBlockSummaryString();
+            // }
         });
         SearchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, SelectionFeedback, () => {
             selected = mouseHandler.SelectedGameObject;
@@ -475,25 +469,25 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         
     }
     private void TouchDurationErrorFeedback(SelectionHandler<FlexLearning_StimDef> MouseHandler, bool deactivateAfter)
-    {
-        AudioFBController.Play("Negative");
-        if (MouseHandler.GetSelectionTooShort())
-        {
-            if (StartButton.activeInHierarchy)
-                StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
-            else
-                StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
-        }
-        else if (MouseHandler.GetSelectionTooLong())
-        {
-            if (StartButton.activeInHierarchy)
-                StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
-            else
-                StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
-        }
-        MouseHandler.SetSelectionTooLong(false);
-        MouseHandler.SetSelectionTooShort(false);
-        TouchDurationError = false;
-        TouchDurationError_InBlock++;
+     {
+    //     AudioFBController.Play("Negative");
+    //     if (MouseHandler.GetSelectionTooShort())
+    //     {
+    //         if (StartButton.activeInHierarchy)
+    //             StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
+    //         else
+    //             StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
+    //     }
+    //     else if (MouseHandler.GetSelectionTooLong())
+    //     {
+    //         if (StartButton.activeInHierarchy)
+    //             StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
+    //         else
+    //             StartCoroutine(USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
+    //     }
+    //     MouseHandler.SetSelectionTooLong(false);
+    //     MouseHandler.SetSelectionTooShort(false);
+    //     TouchDurationError = false;
+    //     TouchDurationError_InBlock++;
     }
 }

@@ -51,9 +51,15 @@ public class SelectionHandler<T> where T : StimDef
     private void CheckSelectionErrors()
     {
         if (Vector2.Distance(CurrentInputScreenPositionPix.Value, SelectionStartPosition.Value) >= MaxMoveDistance)
+        {
             //error, moved too far
+        }
+
         if (CurrentTargetDuration >= MaxDuration)
+        {
             //error, too long
+
+        }
     }
 
     private void UpdateSelection()
@@ -149,14 +155,14 @@ public class SelectionHandler<T> where T : StimDef
         BoolDelegate selectionIsPossible = null,
         BoolDelegate selectionCompleteIsPossible = null) //TargetedGO is what they're currently hovering over
     {
-        if (targetedGO == null)
-            ongoingSelection = null;
-        else
-        {
-            if (selectionIsPossible())
-                if (ongoingSelection == null)
-                    ongoingSelection = new PossibleSelection(GetScreenPos(currentLoc), targetedGO, );
-        }
+        // if (targetedGO == null)
+        //     ongoingSelection = null;
+        // else
+        // {
+        //     if (selectionIsPossible())
+        //         if (ongoingSelection == null)
+        //             ongoingSelection = new PossibleSelection(GetScreenPos(currentLoc), targetedGO, );
+        // }
     }
     
     //---------------------------------------------UPDATING SELECTION MANAGEMENT-----------------------------------------

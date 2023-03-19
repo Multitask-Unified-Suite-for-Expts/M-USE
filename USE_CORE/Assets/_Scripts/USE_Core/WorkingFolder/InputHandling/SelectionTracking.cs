@@ -24,14 +24,14 @@ namespace SelectionTracking
 
         public SelectionTracker(Dictionary<string, List<SelectionHandler>> shs, bool useDefaultHandlers = true)
         {
-            if (useDefaultHandlers)
-            {
-                AssignDefaultSelectionHandlers();
-                foreach (string key in shs.Keys)
-                    ActiveSelectionHandlers.Add(key, shs[key]);
-            }
-            else
-                ActiveSelectionHandlers = shs;
+            // if (useDefaultHandlers)
+            // {
+            //     AssignDefaultSelectionHandlers();
+            //     foreach (string key in shs.Keys)
+            //         ActiveSelectionHandlers.Add(key, shs[key]);
+            // }
+            // else
+            //     ActiveSelectionHandlers = shs;
 
         }
         

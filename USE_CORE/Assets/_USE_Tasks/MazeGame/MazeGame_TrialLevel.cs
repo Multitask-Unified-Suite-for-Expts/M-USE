@@ -35,6 +35,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private GameObject tileGO;
     public StimGroup tiles; // top of trial level with other variable definitions
     private Texture2D tileTex;
+    private Texture2D mazeBgTex;
 
     // Maze Progress Variables
     private bool finishedMaze;
@@ -78,6 +79,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public Tile TilePrefab;
     public float TileSize;
     public string TileTexture;
+    public string MazeBackgroundTextureName;
     public string ContextExternalFilePath;
     public string MazeFilePath;
     public Vector3 ButtonPosition;
@@ -141,11 +143,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.SetHaloSize(5);
             LoadTextures(ContextExternalFilePath);
             tileTex = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + TileTexture + ".png");
-
+            mazeBgTex = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + MazeBackgroundTextureName + ".png");
             if (MazeContainer == null)
                 MazeContainer = new GameObject("MazeContainer"); 
             if (MazeBackground == null)
-                MazeBackground = CreateSquare("MazeBackground", MazeBackgroundTexture, new Vector3(0, 0, 0),
+                MazeBackground = CreateSquare("MazeBackground", mazeBgTex, new Vector3(0, 0, 0),
                     new Vector3(5, 5, 5));
            
             //player view variables
@@ -236,24 +238,24 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 if (ReturnToLast)
                 {
                     AudioFBController.Play("Positive");
-                    EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]); 
+                  //  EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]); 
                 }
                 else if (ErroneousReturnToLast)
                 {
                     AudioFBController.Play("Negative");
-                    EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
+                    //EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
                 }
                 else if (CorrectSelection)
                 {
                     SliderFBController.UpdateSliderValue(selectedGO.GetComponent<Tile>().sliderValueChange);
                     playerViewParent.transform.Find((pathProgressIndex + 1).ToString()).GetComponent<Text>().color =
                         new Color(0, 0.392f, 0);
-                    EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]);
+                   // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]);
                 }
                 else if (selectedGO != null && !ErroneousReturnToLast)
                 {
                     AudioFBController.Play("Negative");
-                    EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
+                   // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
                 }
                
                 selectedGO = null; //Reset selectedGO before the next touch evaluation
@@ -332,7 +334,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             DeactivateChildren(playerViewParent);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOff"]);
             if (finishedMaze)
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["SliderFbController_SliderCompleteFbOff"]);
+                EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderFbController_SliderCompleteFbOff"]);
 
             if (NeutralITI)
             {
@@ -504,9 +506,22 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             return 1;
             
         }
-        // RULE-ABIDING ERROR
+        // RULE-ABIDING ERROR ( and RULE ABIDING, BUT PERSEVERATIVE)
         if (touchedCoord.IsAdjacent(pathProgress[pathProgressIndex]) && !pathProgress.Contains(touchedCoord))
         {
+            if (consecutiveErrors > 0)
+            {
+                Debug.Log("*Rule-Breaking Perseverative Error*");
+                EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
+                totalErrors_InTrial++;
+                CurrentTaskLevel.totalErrors_InBlock++;
+            
+                ruleBreakingErrors_InTrial++;
+                CurrentTaskLevel.ruleBreakingErrors_InBlock++;
+            
+                consecutiveErrors++;
+                return 20;
+            }
             Debug.Log("*Rule-Abiding Incorrect Error*");
             EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleAbidingError"]);
 

@@ -376,6 +376,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             mgTL.UsingFixedRatioReward = false;
             Debug.Log("Fixed Ratio Reward settings not defined in the TaskDef, set as default of false");
         }
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeBackground"))
+            mgTL.MazeBackgroundTextureName = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeBackgroundTexture");
+        else
+        {
+            mgTL.MazeBackgroundTextureName = "MazeBackground";
+            Debug.Log("Maze Background Texture settings not defined in the TaskDef, set as default of MazeBackground");
+        }
     }
     private void LoadMazeDef()
     {

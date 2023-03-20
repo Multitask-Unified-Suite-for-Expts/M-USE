@@ -206,7 +206,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
         });
         SearchDisplay.AddUpdateMethod(() =>
-        {if (USE_FBSquare.IsGrating)
+        {
+            if (USE_FBSquare.IsGrating)
             {
                 gratingDuration -= Time.deltaTime;
                 if(HeldTooShort)

@@ -76,7 +76,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //private List<float> touchDurations  = new List<float> { };
     private List<float> searchDurations = new List<float> { };
     //private List<Vector3> touchedPositionsList = new List<Vector3>(); // empty now
-    public List<int> runningAcc;
+    private List<int> runningAcc;
 
     [HideInInspector]
     public ConfigNumber flashingFbDuration;
@@ -148,7 +148,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         //MonitorDetails primaryMonitorDetails = new MonitorDetails(new Vector2(1920, 1080), new Vector2(10, 7), 2);
 
         //---------------------------------------DEFINING STATES-----------------------------------------------------------------------
-        State InitTrial = new State("StartButton");
+        State InitTrial = new State("InitTrial");
         //State StartButtonDelay = new State("StartButtonDelay");
         State ChooseStimulus = new State("ChooseStimulus");
         State ChooseStimulusDelay = new State("ChooseStimulusDelay");
@@ -162,7 +162,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
 
         string[] stateNames = new string[]
-            {"StartButton", "StartButtonDelay", "ChooseStimulus", "SelectionFeedback", "FinalFeedback", "ITI", "ChooseStimulusDelay"};
+            {"InitTrial", "StartButtonDelay", "ChooseStimulus", "SelectionFeedback", "FinalFeedback", "ITI", "ChooseStimulusDelay"};
 
         //MouseTracker variables
         SelectionHandler<WhatWhenWhere_StimDef> gazeHandler = new SelectionHandler<WhatWhenWhere_StimDef>();
@@ -185,6 +185,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 USE_StartButton = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>());
                 startButton = USE_StartButton.StartButtonGO;
+                USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
             }
             if (fbSquare == null)
             {

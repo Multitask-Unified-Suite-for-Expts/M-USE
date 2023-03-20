@@ -39,16 +39,17 @@ namespace MazeGame_Namespace
         public bool ViewPath;
         public string ContextName;
         public int SliderInitial;
-
+        
+        public string BlockEndType;
+        public float BlockEndThreshold;
+        public int BlockEndWindow;
+        
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmaxokay 
             System.Random rnd = new System.Random();
             int num = rnd.Next(MinMaxTrials[0], MinMaxTrials[1]);
             TrialDefs = new List<MazeGame_TrialDef>().ConvertAll(x => (TrialDef)x);
-            
-            
-            //select the block's mazedef using intersect from TaskLevel.MazeDefs
             
             for (int iTrial = 0; iTrial < num; iTrial++)
             {
@@ -61,7 +62,10 @@ namespace MazeGame_Namespace
                 td.ContextName = ContextName;
                 td.MazeName = MazeName;
                 td.SliderInitial = SliderInitial;
-
+                td.BlockEndThreshold = BlockEndThreshold;
+                td.BlockEndType = BlockEndType;
+                td.BlockEndWindow = BlockEndWindow;
+                td.MinMaxTrials = MinMaxTrials;
                 TrialDefs.Add(td);
             }
         }
@@ -92,6 +96,11 @@ namespace MazeGame_Namespace
         public string MazeName;
         public int SliderInitial;
         public MazeDef MazeDef;
+        
+        public string BlockEndType;
+        public float BlockEndThreshold;
+        public int BlockEndWindow;
+        public int[] MinMaxTrials;
     }
 
     public class MazeGame_StimDef : StimDef

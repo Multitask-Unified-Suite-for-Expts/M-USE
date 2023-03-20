@@ -53,7 +53,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     private float tokenFbDuration;
  
     public string ContextExternalFilePath;
-    public Vector3 ButtonPosition, ButtonScale;
+    public Vector3 ButtonPosition;
+    public float ButtonScale;
     public bool StimFacingCamera;
     public string ShadowType;
     public bool NeutralITI;

@@ -8,6 +8,7 @@ using MazeGame_Namespace;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
+using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using USE_States;
 using USE_StimulusManagement;
@@ -61,6 +62,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private int correctTouches_InTrial;
     private int backtrackErrors_InTrial;
     private int perseverativeErrors_InTrial;
+    private float accuracy_InTrial;
+    public List<int> runningAcc;
     private bool aborted;
     private bool choiceMade;
     
@@ -168,8 +171,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             LoadMazeDef();
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
             
-            if (TrialCount_InTask != 0)
-                CurrentTaskLevel.SetTaskSummaryString();
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
         MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, 
@@ -196,6 +197,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         });
         MouseTracker.AddSelectionHandler(mouseHandler, ChooseTile, null, 
             ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
+        ChooseTile.AddInitializationMethod(()=>{CurrentTaskLevel.SetTaskSummaryString();});
         ChooseTile.AddUpdateMethod(() =>
         {
             if (startedMaze)
@@ -230,6 +232,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 //if the tile that is selected is the end tile, stop the timer
                 mazeDuration = Time.time - mazeStartTime;
                 CurrentTaskLevel.mazeDurationsList_InBlock.Add(mazeDuration);
+                CurrentTaskLevel.mazeDurationsList_InTask.Add(mazeDuration);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["MazeFinish"]);
             }
         });
@@ -308,6 +311,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 StateAfterDelay = ITI;
                 DelayDuration = 0;
                 
+                accuracy_InTrial = (float)decimal.Divide(totalErrors_InTrial,currMaze.mNumSquares);
+              //  runningAcc.Add(accuracy_InTrial);
                 SliderFBController.ResetSliderBarFull();
                 CurrentTaskLevel.numSliderBarFull_InBlock++;
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
@@ -361,7 +366,14 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         DefineTrialData();
         DefineFrameData();
     }
-
+    protected override bool CheckBlockEnd()
+    {
+        TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
+        Debug.Log("RUNNINGACC STRING" + string.Join(",",runningAcc));
+        return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
+            CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, CurrentTaskLevel.MinTrials,
+            TrialDefs.Count);
+    }
     private void InstantiateCurrMaze()
     {
         // This will Load all tiles within the maze and the background of the maze
@@ -429,6 +441,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             
             perseverativeErrors_InTrial++;
             CurrentTaskLevel.perseverativeErrors_InBlock++;
+            CurrentTaskLevel.perseverativeErrors_InTask++;
             return true;
         }
         return false;
@@ -438,9 +451,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public int ManageTileTouch(Tile tile)
     {
         var touchedCoord = tile.mCoord;
-        Debug.Log("COORD NEXT STEP: " + currMaze.mNextStep);
-        Debug.Log("COORD I TOUCHED: " + touchedCoord.chessCoord);
-        
         // ManageTileTouch - Returns correctness code
         // Return values:
         // 1 - correct tile touch
@@ -456,9 +466,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             
             totalErrors_InTrial++;
             CurrentTaskLevel.totalErrors_InBlock++;
+            CurrentTaskLevel.totalErrors_InTask++;
             
             ruleBreakingErrors_InTrial++;
             CurrentTaskLevel.ruleBreakingErrors_InBlock++;
+            CurrentTaskLevel.ruleBreakingErrors_InTask++;
 
             consecutiveErrors++;
 
@@ -474,6 +486,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             correctTouches_InTrial++;
             CurrentTaskLevel.correctTouches_InBlock++;
+            CurrentTaskLevel.correctTouches_InTask++;
             
             CorrectSelection = true;
             
@@ -489,6 +502,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             
                 retouchCorrect_InTrial++;
                 CurrentTaskLevel.retouchCorrect_InBlock++;
+                CurrentTaskLevel.retouchCorrect_InTask++;
            
                 consecutiveErrors = 0;
                 tileFbDuration = tile.PREV_CORRECT_FEEDBACK_SECONDS;
@@ -527,11 +541,14 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             {
                 Debug.Log("*Rule-Breaking Perseverative Error*");
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
+                
                 totalErrors_InTrial++;
                 CurrentTaskLevel.totalErrors_InBlock++;
+                CurrentTaskLevel.totalErrors_InTask++;
             
                 ruleBreakingErrors_InTrial++;
                 CurrentTaskLevel.ruleBreakingErrors_InBlock++;
+                CurrentTaskLevel.ruleBreakingErrors_InTask++;
             
                 consecutiveErrors++;
                 return 20;
@@ -545,9 +562,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             
             totalErrors_InTrial++;
             CurrentTaskLevel.totalErrors_InBlock++;
+            CurrentTaskLevel.totalErrors_InTask++;
             
             ruleAbidingErrors_InTrial++;
             CurrentTaskLevel.ruleAbidingErrors_InBlock++;
+            CurrentTaskLevel.ruleAbidingErrors_InTask++;
             
             consecutiveErrors++;
 
@@ -567,6 +586,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
                 retouchCorrect_InTrial++;
                 CurrentTaskLevel.retouchCorrect_InBlock++;
+                CurrentTaskLevel.retouchCorrect_InTask++;
 
                 consecutiveErrors = 0;
                 tileFbDuration = tile.PREV_CORRECT_FEEDBACK_SECONDS;
@@ -583,9 +603,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             backtrackErrors_InTrial++;
             CurrentTaskLevel.backtrackErrors_InBlock++;
+            CurrentTaskLevel.backtrackErrors_InTask++;
 
             ruleBreakingErrors_InTrial++;
             CurrentTaskLevel.ruleBreakingErrors_InBlock++;
+            CurrentTaskLevel.ruleBreakingErrors_InTask++;
 
             consecutiveErrors++;
             tileFbDuration = tile.INCORRECT_RULEBREAKING_SECONDS;
@@ -603,9 +625,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             
             totalErrors_InTrial++;
             CurrentTaskLevel.totalErrors_InBlock++;
+            CurrentTaskLevel.totalErrors_InTask++;
             
             ruleBreakingErrors_InTrial++;
             CurrentTaskLevel.ruleBreakingErrors_InBlock++;
+            CurrentTaskLevel.ruleBreakingErrors_InTask++;
            
             consecutiveErrors++;
 
@@ -773,6 +797,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"] || AbortCode == AbortCodeDict["EndBlock"]) //If used RestartBlock, PreviousBlock, or EndBlock hotkeys
         {
             CurrentTaskLevel.numAbortedTrials_InBlock++;
+            CurrentTaskLevel.numAbortedTrials_InTask++;
             CurrentTaskLevel.ClearStrings();
             CurrentTaskLevel.BlockSummaryString.AppendLine("");
         }
@@ -813,7 +838,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     }
     void SetTrialSummaryString()
     {
-        TrialSummaryString = "\nTotal Errors: " + totalErrors_InTrial +
+        TrialSummaryString = "Accuracy: " + accuracy_InTrial +
+                             "\nTotal Errors: " + totalErrors_InTrial +
                              //"\nCorrect Touches: " + correctTouches_InBlock + COME UP WITH SOMETHING MORE USEFUL
                              "\nRule-Abiding Errors: " + ruleAbidingErrors_InTrial +
                              "\nRule-Breaking Errors: " + ruleBreakingErrors_InTrial + 

@@ -124,10 +124,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            //potentially refactor this?
             LoadTextures(MaterialFilePath);
   
-            //can we move SetTokenVariables into TokenFbController class?
             if(TokenFBController != null)
                 SetTokenVariables();
 

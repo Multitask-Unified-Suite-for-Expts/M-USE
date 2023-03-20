@@ -79,14 +79,24 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             flTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
         else flTL.ContextExternalFilePath = ContextExternalFilePath;
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-            flTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
+            flTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
         else
-            flTL.ButtonPosition = new Vector3(0, 0, 0);
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-           flTL.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+            flTL.StartButtonPosition = new Vector3(0, 0, 0);
+        if (SessionSettings.SettingExists(TaskName +"_TaskSettings", "StartButtonScale"))
+            flTL.StartButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
         else
-            flTL.ButtonScale = 120f;
+            flTL.StartButtonScale = 120f;
+        
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquarePosition"))
+            flTL.FBSquarePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquarePosition");
+        else
+            flTL.FBSquarePosition = new Vector3(0, 0, 0);
+        if (SessionSettings.SettingExists(TaskName +"_TaskSettings", "FBSquareScale"))
+            flTL.FBSquareScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquareScale");
+        else
+            flTL.FBSquareScale = 120f;
+
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
             flTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
         else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");

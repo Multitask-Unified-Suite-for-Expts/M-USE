@@ -143,8 +143,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.InitializeSlider();
             HaloFBController.SetHaloSize(5);
             LoadTextures(ContextExternalFilePath);
-            tileTex = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + TileTexture + ".png");
-            mazeBgTex = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + MazeBackgroundTextureName + ".png");
+            tileTex = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, TileTexture));
+            mazeBgTex = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, MazeBackgroundTextureName));
             if (MazeContainer == null)
                 MazeContainer = new GameObject("MazeContainer"); 
             if (MazeBackground == null)
@@ -209,7 +209,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 {
                     if (hit.collider != null && hit.collider.gameObject?.GetComponent<Tile>() != null)
                     {
-                        Debug.Log("in this hit stuff!!!!");
                         choiceMade = true;
                         selectedGO = hit.collider.gameObject;
                     }
@@ -771,8 +770,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         if(AbortCode == 0)
             CurrentTaskLevel.CalculateBlockSummaryString();
 
-        if(AbortCode == AbortCodeDict["RestartBlock"])
+        if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"] || AbortCode == AbortCodeDict["EndBlock"]) //If used RestartBlock, PreviousBlock, or EndBlock hotkeys
         {
+            CurrentTaskLevel.numAbortedTrials_InBlock++;
             CurrentTaskLevel.ClearStrings();
             CurrentTaskLevel.BlockSummaryString.AppendLine("");
         }

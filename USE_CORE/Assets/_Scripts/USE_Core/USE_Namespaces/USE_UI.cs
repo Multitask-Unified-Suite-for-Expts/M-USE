@@ -25,6 +25,8 @@ namespace USE_UI
 		public Color ButtonColor = new Color(0, 0, 128, 255);
 		public Image Image;
         public Vector3 LocalPosition = new Vector3(0, 0, 0);
+        private Color32 originalColor;
+        private Sprite originalSprite;
 
         public bool IsGrating = false;
 
@@ -124,27 +126,30 @@ namespace USE_UI
         }
 
 
-        public IEnumerator GratedStartButtonFlash(Texture2D newTexture, float duration, bool deactivateAfter)
+        public void GratedStartButtonFlash(Texture2D newTexture, float duration, bool deactivateAfter)
         {
-            IsGrating = true;
+            if (!IsGrating)
+            {
+                IsGrating = true;
+                if (!StartButtonGO.activeInHierarchy)
+                    StartButtonGO.SetActive(true);
+                originalColor = Image.color;
+                originalSprite = Image.sprite;
 
-            if (!StartButtonGO.activeInHierarchy)
-                StartButtonGO.SetActive(true);
+                Image.color = new Color32(224, 78, 92, 255);
+                Image.sprite = Sprite.Create(newTexture, new Rect(0, 0, newTexture.width, newTexture.height), Vector2.one / 2f);
+            }
+            if (duration <= 0)
+            {
+                Image.color = originalColor;
+                Image.sprite = originalSprite;
+                if (deactivateAfter)
+                    StartButtonGO.SetActive(false);
 
-            Color32 originalColor = Image.color;
-            Sprite originalSprite = Image.sprite;
-
-            Image.color = new Color32(224, 78, 92, 255);
-            Image.sprite = Sprite.Create(newTexture, new Rect(0, 0, newTexture.width, newTexture.height), Vector2.one / 2f);
-            yield return new WaitForSeconds(duration);
-            Image.color = originalColor;
-            Image.sprite = originalSprite;
-            if (deactivateAfter)
-                StartButtonGO.SetActive(false);
-
-            IsGrating = false;
+                IsGrating = false;
+            }
+            
         }
-
     }
 
 }

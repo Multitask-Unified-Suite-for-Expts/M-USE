@@ -492,7 +492,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if(AbortCode == 0) //Normal{
             currentTask.CalculateBlockSummaryString();
 
-        if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"]) //If used RestartBlock or PreviousBlock hotkeys
+        if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"] || AbortCode == AbortCodeDict["EndBlock"]) //If used RestartBlock, PreviousBlock, or EndBlock hotkeys
         {
             NumAborted_Block++;
             currentTask.NumAborted_Task++;

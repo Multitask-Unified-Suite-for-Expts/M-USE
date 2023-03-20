@@ -8,6 +8,7 @@ using USE_UI;
 using System.IO;
 using System.Linq;
 using ConfigDynamicUI;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using USE_ExperimentTemplate_Task;
 
@@ -40,8 +41,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     
     // Set in the Task Level
     [HideInInspector] public string ContextExternalFilePath;
-    [HideInInspector] public Vector3 ButtonPosition;
-    [HideInInspector] public float ButtonScale;
+    [HideInInspector] public Vector3 StartButtonPosition;
+    [HideInInspector] public float StartButtonScale;
+    [HideInInspector] public Vector3 FBSquarePosition;
+    [HideInInspector] public float FBSquareScale;
     [HideInInspector] public bool StimFacingCamera;
     [HideInInspector] public string ShadowType;
     [HideInInspector] public bool NeutralITI;
@@ -54,6 +57,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     FlexLearning_StimDef selectedSD = null;
     private bool ObjectsCreated = false;
     private bool choiceMade = false;
+    private float? selectionDuration = null;
     
     
     
@@ -85,6 +89,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     private bool RewardGiven = false;
     private bool TouchDurationError = false;
     private bool aborted = false;
+    private Ray ray;
+    private RaycastHit hit;
+    private bool HeldTooShort;
+    private bool HeldTooLong;
+    private float gratingDuration;
     
     public override void DefineControlLevel()
     {
@@ -127,13 +136,13 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             if (StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(FL_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                USE_StartButton = new USE_StartButton(FL_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                 StartButton = USE_StartButton.StartButtonGO;
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
             }
             if (FBSquare == null)
             {
-                USE_FBSquare = new USE_StartButton(FL_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                USE_FBSquare = new USE_StartButton(FL_CanvasGO.GetComponent<Canvas>(), FBSquarePosition, FBSquareScale);
                 FBSquare = USE_FBSquare.StartButtonGO;
                 FBSquare.name = "FBSquare";
             }
@@ -197,29 +206,57 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
         });
         SearchDisplay.AddUpdateMethod(() =>
-        {
-            // if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
-            // {
-            //     TouchDurationError = true;
-            //     SetTrialSummaryString();
-            //     TouchDurationErrorFeedback(mouseHandler, true);
-            //     CurrentTaskLevel.SetBlockSummaryString();
-            // }
-            
-            if (InputBroker.GetMouseButtonDown(0))
+        {if (USE_FBSquare.IsGrating)
             {
-                Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-                RaycastHit hit;
+                gratingDuration -= Time.deltaTime;
+                if(HeldTooShort)
+                    USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture,gratingDuration,true);
+                else
+                    USE_FBSquare.GratedStartButtonFlash(HeldTooLongTexture,gratingDuration,true);
+                return;
+            }
+            if (InputBroker.GetMouseButtonDown(0) && !USE_FBSquare.IsGrating)
+            {
+                ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
+                selectionDuration = 0;
+                HeldTooLong = false;
+                HeldTooShort = false;
+                //record start position as well
+            }
+            selectionDuration += Time.deltaTime;
+            if (InputBroker.GetMouseButtonUp(0) && selectionDuration != null)
+            {
                 if (Physics.Raycast(ray, out hit))
                 {
-                    if (hit.collider != null && hit.collider.gameObject != null)
+                    if ((hit.collider != null) && (hit.collider.gameObject != null) && (selectionDuration >= minObjectTouchDuration.value) && (selectionDuration <= maxObjectTouchDuration.value))
                     {
                         choiceMade = true;
                         selectedGO = hit.collider.gameObject;
                         selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
                         CorrectSelection = selectedSD.IsTarget;
                     }
+                    else if (selectionDuration < minObjectTouchDuration.value)
+                    {
+                        USE_FBSquare.GratedStartButtonFlash(HeldTooShortTexture,gratingSquareDuration.value,true);
+                        gratingDuration = gratingSquareDuration.value;
+                        TouchDurationError = true;
+                        HeldTooShort = true;
+                        TouchDurationError_InBlock++;
+                        CurrentTaskLevel.TouchDurationError_InTask++;
+                        Debug.Log("Didn't select for minimum object touch duration!");
+                    }
+                    else if (selectionDuration > maxObjectTouchDuration.value)
+                    {
+                        USE_FBSquare.GratedStartButtonFlash(HeldTooLongTexture,gratingSquareDuration.value,true);
+                        gratingDuration = gratingSquareDuration.value;
+                        TouchDurationError = true;
+                        HeldTooLong = true;
+                        TouchDurationError_InBlock++;
+                        CurrentTaskLevel.TouchDurationError_InTask++;
+                        Debug.Log("Didn't select under max object touch duration!");
+                    }
                 }
+                selectionDuration = null; // set this as null to consider multiple selections in a state
             }
         });
         SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () => {
@@ -287,9 +324,17 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             DestroyTextOnExperimenterDisplay();
             if (selectedSD.StimTrialRewardMag > 0)
+            {
                 TokenFBController.AddTokens(selectedGO, selectedSD.StimTrialRewardMag);
+                TotalTokensCollected_InBlock += selectedSD.StimTrialRewardMag;
+                CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTrialRewardMag;
+            }
             else
+            {
                 TokenFBController.RemoveTokens(selectedGO, -selectedSD.StimTrialRewardMag);
+                TotalTokensCollected_InBlock -= selectedSD.StimTrialRewardMag;
+                CurrentTaskLevel.TotalTokensCollected_InTask -= selectedSD.StimTrialRewardMag;
+            }
         });
         TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
         {
@@ -307,10 +352,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                     RewardGiven = true;
                 }
             }
-            TotalTokensCollected_InBlock = TokenFBController.GetTokenBarValue() +
-                                           (NumTokenBarFull_InBlock* CurrentTrialDef.NumTokenBar);
-            CurrentTaskLevel.TotalTokensCollected_InTask = TokenFBController.GetTokenBarValue() +
-                                                           (CurrentTaskLevel.NumTokenBarFull_InTask * CurrentTrialDef.NumTokenBar);
         });
         // ITI STATE ---------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>
@@ -340,10 +381,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         if (AbortCode == 0)
             CurrentTaskLevel.SetBlockSummaryString();
 
-        if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"])
+        if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"] || AbortCode == AbortCodeDict["EndBlock"]) //If used RestartBlock, PreviousBlock, or EndBlock hotkeys
         {
             aborted = true;
             AbortedTrials_InBlock++;
+            CurrentTaskLevel.AbortedTrials_InTask++;
             CurrentTaskLevel.ClearStrings();
             CurrentTaskLevel.BlockSummaryString.AppendLine("");
         }

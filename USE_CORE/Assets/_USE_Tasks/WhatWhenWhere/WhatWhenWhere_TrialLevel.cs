@@ -255,7 +255,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             numNonStimSelections_InBlock += mouseHandler.UpdateNumNonStimSelection();
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
-            EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderReset"]);
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderFbController_SliderReset"]);
         });
         ChooseStimulusDelay.AddTimer(() => chooseStimOnsetDelay.value, ChooseStimulus);
         GazeTracker.AddSelectionHandler(gazeHandler, ChooseStimulus);

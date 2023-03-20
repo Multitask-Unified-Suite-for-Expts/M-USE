@@ -113,7 +113,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     // Touch Evaluation Variables
     private GameObject selectedGO;
-    private StimDef selectedSD;
+   // private StimDef selectedSD;
 
     // Slider & Animation variables
     private float sliderValueChange;
@@ -200,11 +200,20 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             if (startedMaze)
                 mazeDuration += Time.deltaTime;
-            if (mouseHandler.SelectedGameObject?.GetComponent<Tile>() != null)
+            
+            if (InputBroker.GetMouseButtonDown(0))
             {
-                choiceMade = true;
-                selectedGO = mouseHandler.SelectedGameObject;
-                selectedSD = mouseHandler.SelectedStimDef;
+                Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
+                RaycastHit hit;
+                if (Physics.Raycast(ray, out hit))
+                {
+                    if (hit.collider != null && hit.collider.gameObject?.GetComponent<Tile>() != null)
+                    {
+                        Debug.Log("in this hit stuff!!!!");
+                        choiceMade = true;
+                        selectedGO = hit.collider.gameObject;
+                    }
+                }
             }
         });
        ChooseTile.SpecifyTermination(() =>  choiceMade, SelectionFeedback, () =>
@@ -281,7 +290,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             SetTrialSummaryString(); //Set the Trial Summary String to reflect the results of choice
             CurrentTaskLevel.CalculateBlockSummaryString();
-
+            choiceMade = false;
             if (UsingFixedRatioReward)
             {
                 if (CorrectSelection && correctTouches_InTrial % CurrentTrialDef.RewardRatio == 0 )
@@ -291,6 +300,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                         SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
                         SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
                         CurrentTaskLevel.numRewardPulses_InBlock += CurrentTrialDef.NumPulses;
+                        //CurrentTaskLevel.numRewardPulses_InTask += CurrentTrialDef.NumPulses;
                     }
                 }
             }
@@ -775,7 +785,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         finishedMaze = false;
         startedMaze = false;
         selectedGO = null;
-        selectedSD = null;
         aborted = false;
         choiceMade = false;
         CorrectSelection = false;
@@ -804,10 +813,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     }
     void SetTrialSummaryString()
     {
-        TrialSummaryString = "<b>Trial Count in Block: " + (TrialCount_InBlock + 1) + "</b>" +
-                             "\nTrial Count in Task: " + (TrialCount_InTask + 1) +
-                             "\n" +
-                             "\nTotal Errors: " + totalErrors_InTrial +
+        TrialSummaryString = "\nTotal Errors: " + totalErrors_InTrial +
                              //"\nCorrect Touches: " + correctTouches_InBlock + COME UP WITH SOMETHING MORE USEFUL
                              "\nRule-Abiding Errors: " + ruleAbidingErrors_InTrial +
                              "\nRule-Breaking Errors: " + ruleBreakingErrors_InTrial + 

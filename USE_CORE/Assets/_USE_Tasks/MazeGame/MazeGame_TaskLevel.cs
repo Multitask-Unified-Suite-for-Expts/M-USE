@@ -34,17 +34,17 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     public int numSliderBarFull_InBlock;
     public List<float?> mazeDurationsList_InBlock = new List<float?>();
 
-    private List<int> totalErrors_InTask;
-    private List<int> perseverativeErrors_InTask;
-    private List<int> backtrackErrors_InTask;
-    private List<int> ruleAbidingErrors_InTask;
-    private List<int> ruleBreakingErrors_InTask;
-    private List<int> retouchCorrect_InTask;
-    private List<int> correctTouches_InTask;
-    private List<int> numRewardPulses_InTask;
-    private List<int> numAbortedTrials_InTask;
-    private List<int> numSliderBarFull_InTask;
-    private List<string> mazeDurationsList_InTask;
+    public List<int> totalErrors_InTask;
+    public List<int> perseverativeErrors_InTask;
+    public List<int> backtrackErrors_InTask;
+    public List<int> ruleAbidingErrors_InTask;
+    public List<int> ruleBreakingErrors_InTask;
+    public List<int> retouchCorrect_InTask;
+    public List<int> correctTouches_InTask;
+    public List<int> numRewardPulses_InTask;
+    public List<int> numAbortedTrials_InTask;
+    public List<int> numSliderBarFull_InTask;
+    public List<string> mazeDurationsList_InTask;
 
     private float AvgTotalErrors;
     private float AvgPerseverativeErrors;
@@ -116,7 +116,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                 CurrentBlockString += "\n" + "\n";
                 CurrentBlockString = CurrentBlockString.Replace("Current Block", $"Block {blocksAdded + 1}");
                 PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
-                AddBlockValuesToTaskValues();
                 blocksAdded++;
             }
             CalculateBlockAverages();
@@ -137,25 +136,25 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("MazeDurations", () => string.Join(",",mazeDurationsList_InBlock));
        // BlockData.AddDatum("NumNonStimSelections", () => mgTL.NonStimTouches_InBlock);
     }
-    public void AddBlockValuesToTaskValues()
-    {
-        numRewardPulses_InTask.Add(numRewardPulses_InBlock);
-        totalErrors_InTask.Add(totalErrors_InBlock);
-        correctTouches_InTask.Add(correctTouches_InBlock);
-        retouchCorrect_InTask.Add(retouchCorrect_InBlock);
-        perseverativeErrors_InTask.Add(perseverativeErrors_InBlock);
-        backtrackErrors_InTask.Add(backtrackErrors_InBlock);
-        ruleAbidingErrors_InTask.Add(ruleAbidingErrors_InBlock);
-        ruleBreakingErrors_InTask.Add(ruleBreakingErrors_InBlock);
-        numAbortedTrials_InTask.Add(numAbortedTrials_InBlock);
-        numSliderBarFull_InTask.Add(numSliderBarFull_InBlock);
-        mazeDurationsList_InTask.Add(string.Join(",",mazeDurationsList_InBlock));
-        List<float> allDurations = mazeDurationsList_InTask
-            .SelectMany(str => str.Split(','))
-            .Select(str => float.Parse(str))
-            .ToList();
-        Debug.Log("MAZE DURATIONS IN TASK: " + string.Join(",", allDurations));
-    }
+    // public void AddBlockValuesToTaskValues()
+    // {
+    //     numRewardPulses_InTask.Add(numRewardPulses_InBlock);
+    //     totalErrors_InTask.Add(totalErrors_InBlock);
+    //     correctTouches_InTask.Add(correctTouches_InBlock);
+    //     retouchCorrect_InTask.Add(retouchCorrect_InBlock);
+    //     perseverativeErrors_InTask.Add(perseverativeErrors_InBlock);
+    //     backtrackErrors_InTask.Add(backtrackErrors_InBlock);
+    //     ruleAbidingErrors_InTask.Add(ruleAbidingErrors_InBlock);
+    //     ruleBreakingErrors_InTask.Add(ruleBreakingErrors_InBlock);
+    //     numAbortedTrials_InTask.Add(numAbortedTrials_InBlock);
+    //     numSliderBarFull_InTask.Add(numSliderBarFull_InBlock);
+    //     mazeDurationsList_InTask.Add(string.Join(",",mazeDurationsList_InBlock));
+    //     List<float> allDurations = mazeDurationsList_InTask
+    //         .SelectMany(str => str.Split(','))
+    //         .Select(str => float.Parse(str))
+    //         .ToList();
+    //     Debug.Log("MAZE DURATIONS IN TASK: " + string.Join(",", allDurations));
+    // }
     public override OrderedDictionary GetSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary();

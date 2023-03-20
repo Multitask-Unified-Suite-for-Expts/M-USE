@@ -31,7 +31,7 @@ public class BlockInfoPanel : ExperimenterDisplayPanel
                 blockInfoPanelText.GetComponent<Text>().text = "<size=23><color=#2d3436ff>" + 
                                                                "<b>\nBlock Count:</b> " + (TaskLevel.BlockCount + 1) +
                                                                "<b>\nTrial Count in Block:</b> " + (TrialLevel.TrialCount_InBlock + 1) +
-                                                               "\n" + TaskLevel.BlockSummaryString + "</color></size>";
+                                                               "\n\n" + TaskLevel.BlockSummaryString + "</color></size>";
                                                                
             }
         }

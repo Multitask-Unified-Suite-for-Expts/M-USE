@@ -49,10 +49,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     
     // Stim Evaluation Variables
     private GameObject trialStim;
-    private GameObject selected = null;
+    private GameObject selectedGO = null;
     private bool CorrectSelection;
     FlexLearning_StimDef selectedSD = null;
     private bool ObjectsCreated = false;
+    private bool choiceMade = false;
     
     
     
@@ -204,10 +205,24 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             //     TouchDurationErrorFeedback(mouseHandler, true);
             //     CurrentTaskLevel.SetBlockSummaryString();
             // }
+            
+            if (InputBroker.GetMouseButtonDown(0))
+            {
+                Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
+                RaycastHit hit;
+                if (Physics.Raycast(ray, out hit))
+                {
+                    if (hit.collider != null && hit.collider.gameObject != null)
+                    {
+                        choiceMade = true;
+                        selectedGO = hit.collider.gameObject;
+                        selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
+                        CorrectSelection = selectedSD.IsTarget;
+                    }
+                }
+            }
         });
-        SearchDisplay.SpecifyTermination(() => mouseHandler.SelectedStimDef != null, SelectionFeedback, () => {
-            selected = mouseHandler.SelectedGameObject;
-            selectedSD = mouseHandler.SelectedStimDef;
+        SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () => {
             CorrectSelection = selectedSD.IsTarget;
             if (CorrectSelection)
             {       
@@ -226,7 +241,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["IncorrectResponse"]);
             }
 
-            if (selected != null)
+            if (selectedGO != null)
             {
                 SelectedStimIndex = selectedSD.StimIndex;
                 SelectedStimLocation = selectedSD.StimLocation;
@@ -256,14 +271,15 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
             
             if (CorrectSelection) 
-                HaloFBController.ShowPositive(selected);
+                HaloFBController.ShowPositive(selectedGO);
             else 
-                HaloFBController.ShowNegative(selected);
+                HaloFBController.ShowNegative(selectedGO);
         });
 
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () =>
         {
             HaloFBController.Destroy();
+            choiceMade = false;
         });
        
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
@@ -271,9 +287,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             DestroyTextOnExperimenterDisplay();
             if (selectedSD.StimTrialRewardMag > 0)
-                TokenFBController.AddTokens(selected, selectedSD.StimTrialRewardMag);
+                TokenFBController.AddTokens(selectedGO, selectedSD.StimTrialRewardMag);
             else
-                TokenFBController.RemoveTokens(selected, -selectedSD.StimTrialRewardMag);
+                TokenFBController.RemoveTokens(selectedGO, -selectedSD.StimTrialRewardMag);
         });
         TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
         {
@@ -369,8 +385,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             tStim.SetLocations(CurrentTrialDef.TrialStimLocations);
         }
     }
-    private void ResetTrialVariables()
+    public override void ResetTrialVariables()
     {
+        choiceMade = false;
+        selectedGO = null;
+        selectedSD = null;
         SelectedStimIndex = null;
         SelectedStimLocation = null;
         SearchDuration = 0;

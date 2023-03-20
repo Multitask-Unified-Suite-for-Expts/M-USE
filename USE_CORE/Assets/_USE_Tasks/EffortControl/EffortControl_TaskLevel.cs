@@ -138,10 +138,8 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     public void CalculateBlockSummaryString()
     {
         ClearStrings();
-
-        CurrentBlockString = ("<b>Block Num: </b>" + (trialLevel.BlockCount + 1) + 
-                        "\nTrials Completed: " + trialLevel.Completions_Block +
-                        "\n\nTouches: " + trialLevel.TotalTouches_Block +
+        Debug.Log("chose left: " + trialLevel.NumChosenLeft_Block);
+        CurrentBlockString = ("Touches: " + trialLevel.TotalTouches_Block +
                         "\nReward Pulses: " + trialLevel.RewardPulses_Block +
                         "\n\nChose Left: " + trialLevel.NumChosenLeft_Block +
                         "\nChose Right: " + trialLevel.NumChosenRight_Block +

@@ -152,7 +152,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             LoadConfigUIVariables();
             if (TrialCount_InTask != 0)
                 currentTask.SetTaskSummaryString();
-            currentTask.CalculateBlockSummaryString();
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -486,7 +485,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Destroy(MaxOutline_Right);
         Destroy(MaxOutline_Left);
 
-        if(AbortCode == 0) //Normal
+        if(AbortCode == 0) //Normal{
             currentTask.CalculateBlockSummaryString();
 
         if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"]) //If used RestartBlock or PreviousBlock hotkeys
@@ -568,6 +567,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     {
         if(SideChoice == "Left")
         {
+            Debug.Log("CHOSE LEFT");
             NumChosenLeft_Block++;
             EffortChoice = CompareValues(currentTrial.NumClicksLeft, currentTrial.NumClicksRight);
             RewardChoice = CompareValues(currentTrial.NumCoinsLeft, currentTrial.NumCoinsRight);

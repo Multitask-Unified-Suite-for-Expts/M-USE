@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Threading.Tasks;
 using UnityEngine.UI;
 using USE_ExperimenterDisplay;
 
@@ -27,7 +28,11 @@ public class BlockInfoPanel : ExperimenterDisplayPanel
             if(TaskLevel.BlockSummaryString.Length > 0)
             {
                 blockInfoPanelText.GetComponent<Text>().supportRichText = true;
-                blockInfoPanelText.GetComponent<Text>().text = "\n<size=23><color=#2d3436ff>" + TaskLevel.BlockSummaryString + "</color></size>";
+                blockInfoPanelText.GetComponent<Text>().text = "<size=23><color=#2d3436ff>" + 
+                                                               "<b>\nBlock Count:</b> " + (TaskLevel.BlockCount + 1) +
+                                                               "<b>\nTrial Count in Block:</b> " + (TrialLevel.TrialCount_InBlock + 1) +
+                                                               "\n" + TaskLevel.BlockSummaryString + "</color></size>";
+                                                               
             }
         }
             

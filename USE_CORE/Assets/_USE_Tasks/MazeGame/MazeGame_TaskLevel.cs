@@ -192,8 +192,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     {
         ClearStrings();
 
-        CurrentBlockString = "<b>Block Num:</b>" + (BlockCount + 1) + 
-                             "\nMaze Durations: " + String.Join(",",mazeDurationsList_InBlock) +
+        CurrentBlockString = "Maze Durations: " + String.Join(",",mazeDurationsList_InBlock) +
                              "\n\nTotal Errors: " + totalErrors_InBlock +
                              "\nRule-Abiding Errors: " + ruleAbidingErrors_InBlock +
                              "\nRule-Breaking Errors: " + ruleBreakingErrors_InBlock + 

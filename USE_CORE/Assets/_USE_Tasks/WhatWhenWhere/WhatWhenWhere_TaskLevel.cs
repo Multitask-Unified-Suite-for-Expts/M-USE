@@ -18,16 +18,15 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         SetSettings();
         DefineBlockData();
         
-        SetupTask.AddInitializationMethod(() =>
-        {
-            //HARD CODED TO MINIMIZE EMPTY SKYBOX DURATION, CAN'T ACCESS TRIAL DEF YET & CONTEXT NOT IN BLOCK DEF
-            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +  "Desert.png");
-        });
         RunBlock.AddInitializationMethod(() =>
         {
-           wwwTL.ResetBlockVariables();
-           wwwTL.MinTrials = wwwBD.nRepetitionsMinMax[0];
-           SetBlockSummaryString();
+            wwwTL.ContextName = wwwTL.ContextName;
+            RenderSettings.skybox = CreateSkybox(wwwTL.GetContextNestedFilePath(ContextExternalFilePath, wwwTL.ContextName));
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
+            
+            wwwTL.ResetBlockVariables();
+            wwwTL.MinTrials = wwwBD.nRepetitionsMinMax[0];
+            SetBlockSummaryString();
         });
 
         // RunBlock.AddUpdateMethod(() =>
@@ -41,10 +40,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         BlockSummaryString.Clear();
-        BlockSummaryString.AppendLine("Block Num: " + (wwwTL.BlockCount + 1) +
-                                      "\nTrial Num: " + (wwwTL.TrialCount_InBlock + 1) +
-                                      "\n" + 
-                                      "\nAverage Search Duration: " + wwwTL.averageSearchDuration_InBlock+
+        BlockSummaryString.AppendLine("Average Search Duration: " + wwwTL.averageSearchDuration_InBlock+
                                       "\nAccuracy: " + wwwTL.accuracyLog_InBlock + 
                                       "\n" +
                                       "\nDistractor Slot Error Count: " + wwwTL.distractorSlotErrorCount_InBlock+
@@ -73,12 +69,18 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             wwwTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
         else wwwTL.ContextExternalFilePath = ContextExternalFilePath;
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-            wwwTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
+            wwwTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
         else Debug.LogError("Start Button Position settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-            wwwTL.ButtonScale = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonScale"))
+            wwwTL.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
         else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquarePosition"))
+            wwwTL.FBSquarePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquarePosition");
+        else Debug.LogError("FB Square Position settings not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquareScale"))
+            wwwTL.FBSquareScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquareScale");
+        else Debug.LogError("FBSquare Scale settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
             wwwTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))

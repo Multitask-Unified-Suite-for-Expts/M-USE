@@ -52,7 +52,8 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             flTL.TokensWithStimOn = flBD.TokensWithStimOn;
             
             ResetBlockVariables();
-            RenderSettings.skybox = CreateSkybox(flTL.GetContextNestedFilePath(ContextExternalFilePath, flBD.ContextName));
+            flTL.ContextName = flBD.ContextName;
+            RenderSettings.skybox = CreateSkybox(flTL.GetContextNestedFilePath(ContextExternalFilePath, flTL.ContextName));
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
             
             //Set the Initial Token Values for the Block
@@ -128,11 +129,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         ClearStrings();
-        BlockSummaryString.AppendLine("<b>Block Num: " + (flTL.BlockCount + 1) + "</b>" +
-                                      "\n" + 
-                                      "<b>\nTrial Num: </b>" + (flTL.TrialCount_InBlock + 1) +
-                                      "\n" + 
-                                      "\nAccuracy: " + String.Format("{0:0.000}", (float)flTL.Accuracy_InBlock) +  
+        BlockSummaryString.AppendLine("Accuracy: " + String.Format("{0:0.000}", (float)flTL.Accuracy_InBlock) +  
                                       "\n" + 
                                       "\nAvg Search Duration: " + String.Format("{0:0.000}", flTL.AverageSearchDuration_InBlock) +
                                       "\n" + 

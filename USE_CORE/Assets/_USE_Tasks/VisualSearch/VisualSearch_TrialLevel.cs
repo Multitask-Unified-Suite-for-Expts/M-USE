@@ -114,9 +114,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             ResetTrialVariables();
             TokenFBController.ResetTokenBarFull();
             //Set the context for the upcoming trial with the Start Button visible
-            ContextName = CurrentTrialDef.ContextName;
-            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
-            
+         
             //Set the Stimuli Light/Shadow settings
             SetShadowType(ShadowType, "VisualSearch_DirectionalLight");
             if (StimFacingCamera)
@@ -455,10 +453,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     }
     void SetTrialSummaryString()
     {
-        TrialSummaryString = "<b>Task Name: " + CurrentTaskLevel.TaskName + "</b>" +
-                             "\n<b>Trial Count in Task: </b>" + (TrialCount_InTask + 1) +
-                             "\n" +
-                             "\nSelected Object Index: " + SelectedStimIndex +
+        TrialSummaryString = "Selected Object Index: " + SelectedStimIndex +
                              "\nSelected Object Location: " + SelectedStimLocation +
                              "\n" +
                              "\nCorrect Selection? : " + CorrectSelection +

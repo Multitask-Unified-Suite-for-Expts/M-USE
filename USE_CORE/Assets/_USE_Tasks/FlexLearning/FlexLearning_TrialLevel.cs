@@ -116,8 +116,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.ResetTokenBarFull();
             //Set the context for the upcoming trial
             ContextName = CurrentTrialDef.ContextName;
-            RenderSettings.skybox =
-                CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
 
             //Set the Stimuli Light/Shadow settings
             SetShadowType(ShadowType, "FlexLearning_DirectionalLight");
@@ -151,8 +149,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
         
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
-        //MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, 
-          //  ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
+        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, 
+            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         InitTrial.AddInitializationMethod(() =>
         {
             CurrentTaskLevel.SetBlockSummaryString();
@@ -186,8 +184,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay);
         
         // SEARCH DISPLAY STATE ----------------------------------------------------------------------------------------
-    //    MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay, null, 
-      //      ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
+        MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay, null, 
+            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         SearchDisplay.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they holding down
@@ -446,10 +444,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     }
     void SetTrialSummaryString()
     {
-        TrialSummaryString = "<b>Task Name: " + CurrentTaskLevel.TaskName+ "</b>" + 
-                             "\n<b>Trial Count in Task: </b>" + (TrialCount_InTask + 1) +
-                             "\n" +
-                             "\nSelected Object Index: " + SelectedStimIndex +
+        TrialSummaryString = "Selected Object Index: " + SelectedStimIndex +
                              "\nSelected Object Location: " + SelectedStimLocation +
                              "\n" +
                              "\nCorrect Selection?: " + CorrectSelection +

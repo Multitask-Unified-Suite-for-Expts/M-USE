@@ -22,6 +22,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 {
     public GameObject WWW_CanvasGO;
     public USE_StartButton USE_StartButton;
+    public USE_StartButton USE_FBSquare;
 
     //This variable is required for most tasks, and is defined as the output of the GetCurrentTrialDef function 
     public WhatWhenWhere_TrialDef CurrentTrialDef => GetCurrentTrialDef<WhatWhenWhere_TrialDef>();
@@ -33,7 +34,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     
     // Config Variables
     public string ContextExternalFilePath;
-    public Vector3 ButtonPosition, ButtonScale;
+    public Vector3 ButtonPosition;
+    public float ButtonScale;
+    public Vector3 FBSquarePosition;
+    public float FBSquareScale;
     public bool StimFacingCamera;
     public string ShadowType;
     public bool NeutralITI;
@@ -100,7 +104,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     
     private float touchDuration, searchDuration, sbDelay = 0;
     private bool choiceMade,halosDestroyed, slotError, distractorSlotError, touchDurationError, repetitionError, noSelectionError = false;
-    private String ContextName = "";
+    public string ContextName = "";
    // private List<int> trialPerformance = new List<int>();
     private int timeoutCondition = 3;
     private float totalFbDuration;
@@ -133,6 +137,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     // Stimuli Variables
     private GameObject startButton;
+    private GameObject fbSquare;
     private bool Grating = false;
     
     // Stim Evaluation Variables
@@ -187,6 +192,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 USE_StartButton = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>());
                 startButton = USE_StartButton.StartButtonGO;
             }
+            if (fbSquare == null)
+            {
+                USE_FBSquare = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                fbSquare = USE_FBSquare.StartButtonGO;
+                fbSquare.name = "FBSquare";
+            }
 
             playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
 
@@ -198,11 +209,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         SetupTrial.AddInitializationMethod(() =>
         {
-            // Set the background texture to that of specified context
-            ContextName = CurrentTrialDef.ContextName;
-            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + CurrentTrialDef.ContextName + ".png");
-            EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
-            
             if (!variablesLoaded)
             {
                 variablesLoaded = true;
@@ -540,12 +546,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         if (TrialCount_InBlock != 0)
             trialProgress = (decimal.Divide(numCorrect_InTrial.Sum(), numTotal_InTrial.Sum())).ToString();
 
-        TrialSummaryString = "Trial Count in Block: " + (TrialCount_InBlock + 1) +
-                             "\nTrial Count in Task: " + (TrialCount_InTask + 1) +
-                             "\n" +
-                             "\nSelected Object Codes: " + string.Join(",",touchedObjects) +
+        TrialSummaryString = "Selected Object Codes: " + string.Join(",",touchedObjects) +
                              "\nCorrect Selection?: " + CorrectSelection +
                              "\nTrial Progress: " + trialProgress +
+                             "\n" +
                              "\nError?: " + errorTypeString +
                              "\n" +
                              "\nSearch Duration: " + string.Join(",", searchDurations);

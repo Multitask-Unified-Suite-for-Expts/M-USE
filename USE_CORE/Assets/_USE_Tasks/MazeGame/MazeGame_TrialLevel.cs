@@ -62,7 +62,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private int backtrackErrors_InTrial;
     private int perseverativeErrors_InTrial;
     private bool aborted;
-
+    private bool choiceMade;
+    
     // Frame Data Variables
     public string contextName = "";
 
@@ -199,11 +200,15 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             if (startedMaze)
                 mazeDuration += Time.deltaTime;
+            if (mouseHandler.SelectedGameObject?.GetComponent<Tile>() != null)
+            {
+                choiceMade = true;
+                selectedGO = mouseHandler.SelectedGameObject;
+                selectedSD = mouseHandler.SelectedStimDef;
+            }
         });
-       ChooseTile.SpecifyTermination(() =>  mouseHandler.SelectedGameObject?.GetComponent<Tile>() != null, SelectionFeedback, () =>
+       ChooseTile.SpecifyTermination(() =>  choiceMade, SelectionFeedback, () =>
         {
-            selectedGO = mouseHandler.SelectedGameObject;
-            selectedSD = mouseHandler.SelectedStimDef;
             if (selectedGO.GetComponent<Tile>().mCoord.chessCoord == currMaze.mStart)
             {
                 //If the tile that is selected is the start tile, begin the timer for the maze
@@ -772,6 +777,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         selectedGO = null;
         selectedSD = null;
         aborted = false;
+        choiceMade = false;
         CorrectSelection = false;
         ReturnToLast = false;
         ErroneousReturnToLast = false;

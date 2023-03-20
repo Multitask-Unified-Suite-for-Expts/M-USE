@@ -44,9 +44,9 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         
         RunBlock.AddInitializationMethod(() =>
         {
-            //Hard coded because trial level variable isn't available yet
-            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +  "Grass");
-            
+            vsTL.ContextName = vsBD.ContextName;
+            RenderSettings.skybox = CreateSkybox(vsTL.GetContextNestedFilePath(ContextExternalFilePath, vsTL.ContextName, "LinearDark"));
+
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
 
             vsTL.TokensWithStimOn = vsBD.TokensWithStimOn;
@@ -88,10 +88,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         ClearStrings();
-        BlockSummaryString.AppendLine("<b>Block Num: " + (vsTL.BlockCount + 1) + "</b>" +
-                                      "<b>\nTrial Num: </b>" + (vsTL.TrialCount_InBlock + 1) +
-                                      "\n" + 
-                                      "\nAccuracy: " + String.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
+        BlockSummaryString.AppendLine("\nAccuracy: " + String.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
                                       "\n" + 
                                       "\nAvg Search Duration: " + String.Format("{0:0.00}", vsTL.AverageSearchDuration_InBlock) +
                                       "\n" + 

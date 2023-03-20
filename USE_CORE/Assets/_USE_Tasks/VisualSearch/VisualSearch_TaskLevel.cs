@@ -44,9 +44,9 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         
         RunBlock.AddInitializationMethod(() =>
         {
-            //Hard coded because trial level variable isn't available yet
-            RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar +  "Grass");
-            
+            vsTL.ContextName = vsBD.ContextName;
+            RenderSettings.skybox = CreateSkybox(vsTL.GetContextNestedFilePath(ContextExternalFilePath, vsTL.ContextName, "LinearDark"));
+
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
 
             vsTL.TokensWithStimOn = vsBD.TokensWithStimOn;
@@ -88,10 +88,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         ClearStrings();
-        BlockSummaryString.AppendLine("<b>Block Num: " + (vsTL.BlockCount + 1) + "</b>" +
-                                      "<b>\nTrial Num: </b>" + (vsTL.TrialCount_InBlock + 1) +
-                                      "\n" + 
-                                      "\nAccuracy: " + String.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
+        BlockSummaryString.AppendLine("\nAccuracy: " + String.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
                                       "\n" + 
                                       "\nAvg Search Duration: " + String.Format("{0:0.00}", vsTL.AverageSearchDuration_InBlock) +
                                       "\n" + 
@@ -135,14 +132,24 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             vsTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
         else vsTL.ContextExternalFilePath = ContextExternalFilePath;
 
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-            vsTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
+            vsTL.FBSquarePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
         else
-            vsTL.ButtonPosition = new Vector3(0, 0, 0);
-        if (SessionSettings.SettingExists(TaskName +"_TaskSettings", "ButtonScale"))
-            vsTL.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+            vsTL.FBSquarePosition = new Vector3(0, 0, 0);
+        if (SessionSettings.SettingExists(TaskName +"_TaskSettings", "StartButtonScale"))
+            vsTL.FBSquareScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
         else
-            vsTL.ButtonScale = 120f;
+            vsTL.FBSquareScale = 120f;
+        
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquarePosition"))
+            vsTL.FBSquarePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquarePosition");
+        else
+            vsTL.FBSquarePosition = new Vector3(0, 0, 0);
+        if (SessionSettings.SettingExists(TaskName +"_TaskSettings", "FBSquareScale"))
+            vsTL.FBSquareScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquareScale");
+        else
+            vsTL.FBSquareScale = 120f;
+        
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
             vsTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
         else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");

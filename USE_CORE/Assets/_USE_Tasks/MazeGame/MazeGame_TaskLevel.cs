@@ -34,17 +34,17 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     public int numSliderBarFull_InBlock;
     public List<float?> mazeDurationsList_InBlock = new List<float?>();
 
-    public List<int> totalErrors_InTask;
-    public List<int> perseverativeErrors_InTask;
-    public List<int> backtrackErrors_InTask;
-    public List<int> ruleAbidingErrors_InTask;
-    public List<int> ruleBreakingErrors_InTask;
-    public List<int> retouchCorrect_InTask;
-    public List<int> correctTouches_InTask;
-    public List<int> numRewardPulses_InTask;
-    public List<int> numAbortedTrials_InTask;
-    public List<int> numSliderBarFull_InTask;
-    public List<string> mazeDurationsList_InTask;
+    public int totalErrors_InTask;
+    public int perseverativeErrors_InTask;
+    public int backtrackErrors_InTask;
+    public int ruleAbidingErrors_InTask;
+    public int ruleBreakingErrors_InTask;
+    public int retouchCorrect_InTask;
+    public int correctTouches_InTask;
+    public int numRewardPulses_InTask;
+    public int numAbortedTrials_InTask;
+    public int numSliderBarFull_InTask;
+    public List<float> mazeDurationsList_InTask;
 
     private float AvgTotalErrors;
     private float AvgPerseverativeErrors;
@@ -55,6 +55,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     private float AvgCorrectTouches;
     private float AvgMazeDuration;
     private float AvgReward;
+
+    public int MinTrials;
 
     [HideInInspector] public string BlockAveragesString;
     [HideInInspector] public string CurrentBlockString;
@@ -69,7 +71,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
 
     public override void DefineControlLevel()
-    {
+    {/*
         totalErrors_InTask = new List<int>();
         perseverativeErrors_InTask = new List<int>();
         backtrackErrors_InTask = new List<int>();
@@ -79,8 +81,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         correctTouches_InTask = new List<int>();
         numRewardPulses_InTask = new List<int>();
         numSliderBarFull_InTask = new List<int>();
-        numAbortedTrials_InTask = new List<int>();
-        mazeDurationsList_InTask = new List<string>();
+        numAbortedTrials_InTask = new List<int>();*/
+        mazeDurationsList_InTask = new List<float>();
         
         mgTL = (MazeGame_TrialLevel)TrialLevel;
         SetSettings();
@@ -89,6 +91,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         BlockAveragesString = "";
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
+
         
         blocksAdded = 0;
         LoadMazeDef();
@@ -103,6 +106,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                 
             RenderSettings.skybox = CreateSkybox(mgTL.GetContextNestedFilePath(ContextExternalFilePath, mgBD.ContextName, "LinearDark"));
             mgTL.contextName = mgBD.ContextName;
+            MinTrials = mgBD.MinMaxTrials[0];
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
             
             ResetBlockVariables();
@@ -118,7 +122,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                 PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
                 blocksAdded++;
             }
-            CalculateBlockAverages();
+           // CalculateBlockAverages();
         });
     }
     public void AssignBlockData()
@@ -159,16 +163,16 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary();
 
-        data["Num Reward Pulses"] = numRewardPulses_InTask.AsQueryable().Sum();
-        data["Total Errors"] = totalErrors_InTask.AsQueryable().Sum();
-        data["Correct Touches"] = correctTouches_InTask.AsQueryable().Sum();
-        data["Retouch Correct"] = retouchCorrect_InTask.AsQueryable().Sum();
-        data["Perseverative Errors"] = perseverativeErrors_InTask.AsQueryable().Sum();
-        data["Backtrack Errors"] = backtrackErrors_InTask.AsQueryable().Sum();
-        data["Rule-Abiding Errors"] = ruleAbidingErrors_InTask.AsQueryable().Sum();
-        data["Rule-Breaking Errors"] = ruleBreakingErrors_InTask.AsQueryable().Sum();
-        data["Num Aborted Trials"] = numAbortedTrials_InTask.AsQueryable().Sum();
-        data["Num Slider Bar Full"] = numSliderBarFull_InTask.AsQueryable().Sum();
+        data["Num Reward Pulses"] = numRewardPulses_InTask;
+        data["Total Errors"] = totalErrors_InTask;
+        data["Correct Touches"] = correctTouches_InTask;
+        data["Retouch Correct"] = retouchCorrect_InTask;
+        data["Perseverative Errors"] = perseverativeErrors_InTask;
+        data["Backtrack Errors"] = backtrackErrors_InTask;
+        data["Rule-Abiding Errors"] = ruleAbidingErrors_InTask;
+        data["Rule-Breaking Errors"] = ruleBreakingErrors_InTask;
+        data["Num Aborted Trials"] = numAbortedTrials_InTask;
+        data["Num Slider Bar Full"] = numSliderBarFull_InTask;
         data["Maze Durations"] = mazeDurationsList_InTask.AsQueryable();
         return data;
     }
@@ -186,6 +190,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         numAbortedTrials_InBlock = 0;
         numSliderBarFull_InBlock = 0;
         mazeDurationsList_InBlock.Clear();
+        mgTL.runningAcc.Clear();
     }
     public void CalculateBlockSummaryString()
     {
@@ -208,7 +213,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             BlockSummaryString.AppendLine(CurrentBlockString);
 
 
-        if (blocksAdded > 1) //If atleast 2 blocks to average, set Averages string and add to BlockSummaryString:
+        /*if (blocksAdded > 1) //If atleast 2 blocks to average, set Averages string and add to BlockSummaryString:
         {
             BlockAveragesString = "-------------------------------------------------" +
                               "\n" +
@@ -224,7 +229,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                               "\nAvg Maze Duration: " + AvgMazeDuration.ToString("0.00");;
             
             BlockSummaryString.AppendLine(BlockAveragesString);
-        }
+        }*/
 
         //Add Previous blocks string:
         if(PreviousBlocksString.Length > 0)
@@ -234,30 +239,33 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     }
     public override void SetTaskSummaryString()
     {
-        if (mgTL.TrialCount_InTask != 0)
-        {
-            CurrentTaskSummaryString.Clear();
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" +
-                                            $"\n<b># Trials:</b> {mgTL.TrialCount_InTask} ({(Math.Round(decimal.Divide(numAbortedTrials_InTask.AsQueryable().Sum(), (mgTL.TrialCount_InTask)), 2)) * 100}% aborted)" +
-                                            $"\t<b># Blocks:</b> {BlockCount}" +
-                                            $"\t<b># Reward Pulses:</b> {numRewardPulses_InTask.AsQueryable().Sum()}" +
-                                            $"\n<b># Rule-Break Errors:</b> {ruleBreakingErrors_InTask.AsQueryable().Sum()}" +
-                                            $"\t<b># Rule-AbidingErrors:</b> {ruleAbidingErrors_InTask.AsQueryable().Sum()}" +
-                                         //   $"\nAccuracy: {(Math.Round(decimal.Divide(NumCorrect_InTask, (flTL.TrialCount_InTask)), 2)) * 100}%" +
-                                            $"\nAvg Maze Duration: {AvgMazeDuration}" +
-                                            $"\n# Slider Bar Filled: {numSliderBarFull_InTask.AsQueryable().Sum()}");
-        }
+        float percentAborted = 0;
+        if (mazeDurationsList_InTask.Count != 0)
+            AvgMazeDuration = (float)Math.Round(mazeDurationsList_InTask.Average(), 2);
         else
-        {
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
-        }
+            AvgMazeDuration = 0;
+        if (mgTL.TrialCount_InTask != 0)
+            percentAborted = (float)(Math.Round(decimal.Divide(numAbortedTrials_InTask, (mgTL.TrialCount_InTask)), 2)) * 100;
+        else
+            percentAborted = 0;
+    
+        CurrentTaskSummaryString.Clear();
+        CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" +
+                                        $"\n<b># Trials:</b> {mgTL.TrialCount_InTask} ({percentAborted}% aborted)" +
+                                        $"\t<b># Blocks:</b> {BlockCount}" +
+                                        $"\t<b># Reward Pulses:</b> {numRewardPulses_InTask}" +
+                                        $"\n<b># Rule-Break Errors:</b> {ruleBreakingErrors_InTask}" +
+                                        $"\t<b># Rule-Abiding Errors:</b> {ruleAbidingErrors_InTask}" +
+                                        $"\nAvg Maze Duration: {AvgMazeDuration}" +
+                                        $"\n# Slider Bar Filled: {numSliderBarFull_InTask}");
+
     }
     public void ClearStrings()
     {
         BlockAveragesString = "";
         CurrentBlockString = "";
         BlockSummaryString.Clear();
-    }
+    }/*
     private void CalculateBlockAverages()
     {
         if (totalErrors_InTask.Count >= 1)
@@ -292,7 +300,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                 .ToList();
             AvgMazeDuration = allDurations.Average();
         }
-    }
+    }*/
     private void SetSettings()
     {
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
@@ -306,11 +314,11 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeFilePath"))
             mgTL.MazeFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeFilePath");
         else Debug.LogError("Maze File Path not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-            mgTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
+            mgTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
         else Debug.LogError("Start Button Position settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-            mgTL.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonScale"))
+            mgTL.StartButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
         else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))
             mgTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");

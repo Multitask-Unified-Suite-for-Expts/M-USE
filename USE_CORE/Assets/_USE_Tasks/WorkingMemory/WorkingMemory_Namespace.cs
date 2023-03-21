@@ -8,27 +8,6 @@ namespace WorkingMemory_Namespace
 {
     public class WorkingMemory_TaskDef : TaskDef
     {
-        //Already-existing fields (inherited from TaskDef)      
-        //public DateTime TaskStart_DateTime;
-        //public int TaskStart_Frame;
-        //public float TaskStart_UnityTime;
-        //public string TaskName;
-        //public string ExternalStimFolderPath;
-        //public string PrefabStimFolderPath;
-        //public string ExternalStimExtension;
-        //public List<string[]> FeatureNames;
-        //public string neutralPatternedColorName;
-        //public float? ExternalStimScale;
-        Vector3 ButtonPosition;
-        Vector3 ButtonScale;
-        Vector3 FBSquarePosition;
-        Vector3 FBSquareScale;
-        Vector3 ButtonColor;
-        string ButtonText;
-        string ContextExternalFilePath;
-        bool StimFacingCamera;
-        string ShadowType;
-        bool NeutralITI;
     }
 
     public class WorkingMemory_BlockDef : BlockDef
@@ -45,6 +24,7 @@ namespace WorkingMemory_Namespace
         public float BlockEndThreshold;
         public int BlockEndWindow;
         public bool StimFacingCamera;
+        public string ContextName;
 
         public override void AddToTrialDefsFromBlockDef()
         {
@@ -60,6 +40,7 @@ namespace WorkingMemory_Namespace
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
                 td.StimFacingCamera = StimFacingCamera;
+                td.ContextName = ContextName;
                 TrialDefs[iTrial] = td;
             }
         }

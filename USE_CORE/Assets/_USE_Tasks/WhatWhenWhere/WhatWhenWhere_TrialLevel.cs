@@ -34,8 +34,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     
     // Config Variables
     public string ContextExternalFilePath;
-    public Vector3 ButtonPosition;
-    public float ButtonScale;
+    [FormerlySerializedAs("ButtonPosition")] public Vector3 StartButtonPosition;
+    [FormerlySerializedAs("ButtonScale")] public float StartButtonScale;
     public Vector3 FBSquarePosition;
     public float FBSquareScale;
     public bool StimFacingCamera;
@@ -51,7 +51,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private bool noSelection, trialComplete = false;
     
     //Block Data Logging Variables
-    public float averageSearchDuration_InBlock=0;
+    public List<float> searchDurations_InBlock;
     public int numRewardGiven_InBlock;
     public int touchDurationErrorCount_InBlock;
     public int repetitionErrorCount_InBlock;
@@ -67,7 +67,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //Trial Data Logging variables
     private string errorTypeString = "";
     string trialProgress = "";
-    
+    private int consecutiveError = 0;
     private float startTime;
     
     public int[] numTotal_InTrial = new int[numObjMax];
@@ -76,7 +76,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //private List<float> touchDurations  = new List<float> { };
     private List<float> searchDurations = new List<float> { };
     //private List<Vector3> touchedPositionsList = new List<Vector3>(); // empty now
-    public List<int> runningAcc;
+    public List<int> runningAcc = new List<int>();
 
     [HideInInspector]
     public ConfigNumber flashingFbDuration;
@@ -97,7 +97,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public string accuracyLog_InSession, accuracyLog_InBlock, accuracyLog_InTrial = "";
     
     private float touchDuration, searchDuration, sbDelay = 0;
-    private bool choiceMade,halosDestroyed, slotError, distractorSlotError, touchDurationError, repetitionError, aborted = false;
+    private bool halosDestroyed, slotError, distractorSlotError, touchDurationError, repetitionError, aborted = false;
     public string ContextName = "";
    // private List<int> trialPerformance = new List<int>();
     private int timeoutCondition = 3;
@@ -112,7 +112,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private Camera cam;
     private bool variablesLoaded;
     private int correctIndex;
-    [FormerlySerializedAs("numSlidersCompleted")] public int NumSliderBarFilled = 0;
+    public int NumSliderBarFilled = 0;
     private int sliderGainSteps, sliderLossSteps;
     private bool isSliderValueIncrease = false;
     
@@ -136,10 +136,17 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     
     // Stim Evaluation Variables
     private GameObject trialStim;
-    private GameObject selected = null;
+    private GameObject selectedGO = null;
     private bool CorrectSelection;
     private WhatWhenWhere_StimDef selectedSD = null;
     private int? stimIdx; // used to index through the arrays in the config file/mapping different columns
+    private Ray ray;
+    private RaycastHit hit;
+    private bool HeldTooShort;
+    private bool HeldTooLong;
+    private float gratingDuration;
+    private float? selectionDuration = null;
+    private bool choiceMade = false;
     
     public override void DefineControlLevel()
     {
@@ -148,7 +155,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         //MonitorDetails primaryMonitorDetails = new MonitorDetails(new Vector2(1920, 1080), new Vector2(10, 7), 2);
 
         //---------------------------------------DEFINING STATES-----------------------------------------------------------------------
-        State InitTrial = new State("StartButton");
+        State InitTrial = new State("InitTrial");
         //State StartButtonDelay = new State("StartButtonDelay");
         State ChooseStimulus = new State("ChooseStimulus");
         State ChooseStimulusDelay = new State("ChooseStimulusDelay");
@@ -162,7 +169,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
 
         string[] stateNames = new string[]
-            {"StartButton", "StartButtonDelay", "ChooseStimulus", "SelectionFeedback", "FinalFeedback", "ITI", "ChooseStimulusDelay"};
+            {"InitTrial", "StartButtonDelay", "ChooseStimulus", "SelectionFeedback", "FinalFeedback", "ITI", "ChooseStimulusDelay"};
 
         //MouseTracker variables
         SelectionHandler<WhatWhenWhere_StimDef> gazeHandler = new SelectionHandler<WhatWhenWhere_StimDef>();
@@ -180,25 +187,24 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             SliderFBController.InitializeSlider();
             LoadTextures(ContextExternalFilePath);
-            HaloFBController.SetHaloSize(4.5f);
+// Initialize FB Controller Values
+            HaloFBController.SetHaloSize(15f);
+            HaloFBController.SetHaloIntensity(5);
             if (startButton == null)
             {
-                USE_StartButton = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>());
+                USE_StartButton = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                 startButton = USE_StartButton.StartButtonGO;
+                USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
             }
             if (fbSquare == null)
             {
-                USE_FBSquare = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                USE_FBSquare = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>(), FBSquarePosition, FBSquareScale);
+                Debug.Log("FBSQUARE POSITION : " + FBSquarePosition + " FB SQUARE SCALE: " + FBSquareScale);
                 fbSquare = USE_FBSquare.StartButtonGO;
                 fbSquare.name = "FBSquare";
             }
 
             playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
-
-            //Removing shadows from Directional Light (was distorting stim):
-            SetShadowType("None", "WhatWhenWhere_DirectionalLight");
-            //SetShadowType(currentTrial.ShadowType, "WhatWhenWhere_DirectionalLight"); //Adding this as well in case you want to add a trial variable and delete line above this. 
-
         });
 
         SetupTrial.AddInitializationMethod(() =>
@@ -212,11 +218,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             SetShadowType(ShadowType, "WhatWhenWhere_DirectionalLight");
             if (StimFacingCamera)
             {
-                foreach (var stim in searchStims.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
-                foreach (var stim in distractorStims.stimDefs) stim.StimGameObject.AddComponent<FaceCamera>();
+                MakeStimFaceCamera();
             }
-            
-            if (slotErrorCount_InBlock >= CurrentTrialDef.ErrorThreshold || distractorSlotErrorCount_InBlock > CurrentTrialDef.ErrorThreshold || touchDurationErrorCount_InBlock > CurrentTrialDef.ErrorThreshold || repetitionErrorCount_InBlock > CurrentTrialDef.ErrorThreshold || AbortedTrials_InBlock > CurrentTrialDef.ErrorThreshold)
+            if (consecutiveError >= CurrentTrialDef.ErrorThreshold)
             {
                 sbDelay = timeoutDuration.value;
             }
@@ -224,74 +228,53 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 sbDelay = startButtonDelay.value;
             }
+
         });
         SetupTrial.AddTimer(()=> sbDelay, InitTrial);
         MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, 
             ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);        // define StartButton state
         InitTrial.AddInitializationMethod(() =>
         {
-            // mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
-            // mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
-            startButton.SetActive(true);
             CurrentTaskLevel.SetBlockSummaryString();
             SetTrialSummaryString();
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
         });
-        InitTrial.AddUpdateMethod(() =>
-        {
-            // if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
-            // {
-            //     touchDurationError = true;
-            //     SetTrialSummaryString();
-            //     TouchDurationErrorFeedback(mouseHandler, false);
-            //     CurrentTaskLevel.SetBlockSummaryString();
-            // }
-        });
 
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton), ChooseStimulusDelay, ()=>
         {
-            startButton.SetActive(false);
             CalculateSliderSteps();
             SliderFBController.ConfigureSlider(new Vector3(0,180,0), sliderSize.value, CurrentTrialDef.SliderInitial*(1f/sliderGainSteps));
-            SliderFBController.SliderGO.SetActive(true); 
-            
+            SliderFBController.SliderGO.SetActive(true);
+
             numNonStimSelections_InBlock += mouseHandler.UpdateNumNonStimSelection();
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderFbController_SliderReset"]);
         });
-        ChooseStimulusDelay.AddTimer(() => chooseStimOnsetDelay.value, ChooseStimulus);
-        GazeTracker.AddSelectionHandler(gazeHandler, ChooseStimulus);
-        MouseTracker.AddSelectionHandler(mouseHandler, ChooseStimulus, null, 
-            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
+        ChooseStimulusDelay.AddTimer(() => chooseStimOnsetDelay.value, ChooseStimulus, ()=>
+        {
+            searchStims.ToggleVisibility(true);
+            distractorStims.ToggleVisibility(true);
+        });
+        
+       // MouseTracker.AddSelectionHandler(mouseHandler, ChooseStimulus, null, 
+         //   ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddInitializationMethod(() =>
         {
-            MakeStimFaceCamera();
             AssignCorrectStim();
-            CreateTextOnExperimenterDisplay();
+            if (GameObject.Find("MainCameraCopy").transform.childCount == 0)
+                CreateTextOnExperimenterDisplay();
             choiceMade = false;
             if (CurrentTrialDef.LeaveFeedbackOn) HaloFBController.SetLeaveFeedbackOn();
         });
         ChooseStimulus.AddUpdateMethod(() =>
-        { 
-            // Evaluates whether or not the player selects the stimulus for long enough
-            // if (mouseHandler.GetSelectionTooLong() || mouseHandler.GetSelectionTooShort())
-            // {
-            //     touchDurationError = true;
-            //     SetTrialSummaryString();
-            //     TouchDurationErrorFeedback(mouseHandler, true);
-            //     CurrentTaskLevel.SetBlockSummaryString();
-            // }
-        });
-        ChooseStimulus.SpecifyTermination(()=> mouseHandler.SelectedStimDef != null, SelectionFeedback, ()=>
         {
-            selected = mouseHandler.SelectedGameObject;
-            selectedSD = mouseHandler.SelectedStimDef;
-            CorrectSelection = selectedSD.IsCurrentTarget;
-            choiceMade = true;
-            SetTrialSummaryString();
+            TouchDurationErrorFeedback(USE_FBSquare, true);
+        });
+        ChooseStimulus.SpecifyTermination(()=> choiceMade, SelectionFeedback, ()=>
+        {
             CurrentTaskLevel.SetBlockSummaryString();
             if (CorrectSelection)
             {
@@ -335,30 +318,38 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
         });
         ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI);
-        ChooseStimulus.SpecifyTermination(() => trialComplete, FinalFeedback);
+        // ChooseStimulus.SpecifyTermination(() => trialComplete, FinalFeedback);
 
         SelectionFeedback.AddInitializationMethod(() =>
         {
             touchedObjects.Add(selectedSD.StimIndex);
             searchDuration = ChooseStimulus.TimingInfo.Duration;
             searchDurations.Add(searchDuration);
+            searchDurations_InBlock.Add(searchDuration);
+            CurrentTaskLevel.SearchDurations_InTask.Add(searchDuration);
             totalFbDuration = (fbDuration.value + flashingFbDuration.value);
-            averageSearchDuration_InBlock = searchDurations.Average();
             SliderFBController.SetUpdateDuration(fbDuration.value);
             SliderFBController.SetFlashingDuration(flashingFbDuration.value);
 
             
             if (CorrectSelection)
             {
-                HaloFBController.ShowPositive(selected);
+                consecutiveError = 0;
+                HaloFBController.ShowPositive(selectedGO);
                 SliderFBController.UpdateSliderValue(CurrentTrialDef.SliderGain[numTouchedStims]*(1f/sliderGainSteps));
                 numTouchedStims += 1;
+                if (numTouchedStims == CurrentTrialDef.CorrectObjectTouchOrder.Length)
+                {
+                    trialComplete = true;
+                }
+
                 errorTypeString = "None";
             }
             //Chose Incorrect
             else
             {
-                HaloFBController.ShowNegative(selected);
+                consecutiveError++;
+                HaloFBController.ShowNegative(selectedGO);
                 if (distractorSlotError)
                     stimIdx = Array.IndexOf(CurrentTrialDef.DistractorStimsIndices, selectedSD.StimIndex); // used to index through the arrays in the config file/mapping different columns
                 else
@@ -373,12 +364,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     errorTypeString = "RepetitionError";
             }
             SetTrialSummaryString();
+            selectedGO = null;
         });
         //don't control timing with AddTimer, use slider class SliderUpdateFinished bool 
         SelectionFeedback.AddTimer(()=>totalFbDuration, Delay, () =>
         {
             DelayDuration = 0;
-            DestroyTextOnExperimenterDisplay();
             
             if (!CurrentTrialDef.LeaveFeedbackOn) 
                 HaloFBController.Destroy();
@@ -388,7 +379,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             
             if (CorrectSelection)
             {
-                StateAfterDelay = ChooseStimulus;
+                if(trialComplete)
+                    StateAfterDelay = FinalFeedback;
+                else
+                    StateAfterDelay = ChooseStimulus;
                 CorrectSelection = false;
             }
             else 
@@ -398,13 +392,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         FinalFeedback.AddInitializationMethod(() =>
         {
-            choiceMade = true;
             trialComplete = false;
             startTime = Time.time;
             errorTypeString = "None";
             
             //Destroy all created text objects on Player View of Experimenter Display
-            DestroyTextOnExperimenterDisplay();
+            DestroyChildren(GameObject.Find("MainCameraCopy"));
             runningAcc.Add(1);
             NumSliderBarFilled += 1;
             CurrentTaskLevel.NumSliderBarFilled_InTask++;
@@ -430,10 +423,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         //Define iti state
         ITI.AddInitializationMethod(() =>
         {
+            searchStims.ToggleVisibility(false);
+            distractorStims.ToggleVisibility(false);
+            if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
+                DestroyChildren(GameObject.Find("MainCameraCopy"));
             if (!choiceMade)
             {
+                consecutiveError++;
                 aborted = true;
-                errorTypeString = "NoSelectionError";
+                runningAcc.Add(0);
+                errorTypeString = "AbortedTrial";
                 AbortedTrials_InBlock++;
                 CurrentTaskLevel.AbortedTrials_InTask++;
             }
@@ -453,7 +452,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
-        DestroyTextOnExperimenterDisplay();
+        if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
+            DestroyChildren(GameObject.Find("MainCameraCopy"));
         searchStims.ToggleVisibility(false);
         distractorStims.ToggleVisibility(false);
         SliderFBController.SliderGO.SetActive(false);
@@ -474,8 +474,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public void MakeStimFaceCamera()
     {
         foreach (StimGroup group in TrialStims)
-            foreach (var stim in group.stimDefs)
-                stim.StimGameObject.AddComponent<FaceCamera>();
+        foreach (var stim in group.stimDefs)
+        {
+            stim.StimGameObject.transform.LookAt(Camera.main.transform);
+        }
     }
 
     public override void ResetTrialVariables()
@@ -491,7 +493,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         sliderGainSteps = 0;
         sliderLossSteps = 0;
         stimIdx = null;
-        selected = null;
+        selectedGO = null;
         selectedSD = null;
         CorrectSelection = false;
         choiceMade = false;
@@ -516,7 +518,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         Array.Clear(numCorrect_InBlock, 0, numCorrect_InBlock.Length);
         Array.Clear(numErrors_InBlock, 0, numErrors_InBlock.Length);
         accuracyLog_InBlock = "";
-        averageSearchDuration_InBlock = 0;
+        searchDurations_InBlock.Clear();
+        consecutiveError = 0;
         runningAcc.Clear();
     }
     
@@ -563,19 +566,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                              "\nSearch Duration: " + string.Join(",", searchDurations);
     }
 
-    private void DestroyTextOnExperimenterDisplay()
-    {
-        if (playerViewLoaded)
-        {
-            foreach (GameObject txt in playerViewTextList)
-            {
-                txt.SetActive(false);
-            }
-        }
-        playerViewLoaded = false;
-        playerViewTextList.Clear();
-    }
-    
     private void UpdateCounters_Incorrect(int correctIndex) // Updates Progress tracking information for incorrect selection
     {
         numTotal_InBlock[numTouchedStims]++;
@@ -600,22 +590,19 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //--------------------------------------------------------------METHODS FOR STIMULUS/OBJECT HANDLING-------------------------------------------------------------
     private void CreateTextOnExperimenterDisplay()
     {
-        if (!playerViewLoaded)
+        for (int iStim = 0; iStim < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++iStim)
         {
-            for (int iStim = 0; iStim < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++iStim)
-            {
-                //Create corresponding text on player view of experimenter display
-                textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation),
-                        playerViewParent);
-                textLocation.y += 75;
-                Vector2 textSize = new Vector2(200, 200);
-                playerViewText = playerView.WriteText(CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(), CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
-                    Color.red, textLocation, textSize, playerViewParent);
-                playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
-                //should this ^ line be deleted and text size be congtrolled by textSize variable?
-                playerViewTextList.Add(playerViewText);
-            }
-            playerViewLoaded = true;
+            //Create corresponding text on player view of experimenter display
+            textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation),
+                playerViewParent);
+            textLocation.y += 75;
+            Vector2 textSize = new Vector2(200, 200);
+            playerViewText = playerView.WriteText(CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
+                CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
+                Color.red, textLocation, textSize, playerViewParent);
+            playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
+            //should this ^ line be deleted and text size be congtrolled by textSize variable?
+            playerViewTextList.Add(playerViewText);
         }
     }
     void LoadConfigUiVariables()
@@ -642,8 +629,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         //StimGroup constructor which creates a subset of an already-existing StimGroup 
         searchStims = new StimGroup("SearchStims", ExternalStims, CurrentTrialDef.SearchStimsIndices);
         distractorStims = new StimGroup("DistractorStims", ExternalStims, CurrentTrialDef.DistractorStimsIndices);
-        searchStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback"));
-        distractorStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback"));
+       // searchStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback")); MAKING QUADDLES TWITCH BETWEEN STATES
+     //   distractorStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback"));
 
         TrialStims.Add(searchStims);
         TrialStims.Add(distractorStims);
@@ -696,10 +683,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 sd.IsDistractor = true;
             }
         }
-        else
-        {
-            trialComplete = true;
-        }
     }
 
     private void CalculateSliderSteps()
@@ -721,21 +704,68 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         Vector2 pvPosition = new Vector2((position[0] / Screen.width) * playerViewParent.GetComponent<RectTransform>().sizeDelta.x, (position[1] / Screen.height) * playerViewParent.GetComponent<RectTransform>().sizeDelta.y);
         return pvPosition;
     }
-    private void TouchDurationErrorFeedback(SelectionHandler<WhatWhenWhere_StimDef> MouseHandler, bool deactivateAfter)
+    private void TouchDurationErrorFeedback(USE_StartButton UIElement, bool deactivateAfter)
     {
-        // EventCodeManager.SendCodeImmediate(SessionEventCodes["TouchDurationError"]);
-        // EventCodeManager.SendCodeImmediate(SessionEventCodes["SelectionHandler_TouchErrorImageOn"]); //this should be put into selection handler soon. leaving for now. 
-        // errorTypeString = "TouchDurationError";
-        // AudioFBController.Play("Negative");
-        // //eventually replace with state timer logic
-        // if (MouseHandler.GetSelectionTooShort())
-        //     StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
-        // else if (MouseHandler.GetSelectionTooLong())
-        //     StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
-        // MouseHandler.SetSelectionTooLong(false);
-        // MouseHandler.SetSelectionTooShort(false);
-        // touchDurationError = false;
-        // touchDurationErrorCount_InBlock++;
+        if (UIElement.IsGrating)
+        {
+            gratingDuration -= Time.deltaTime;
+            if (HeldTooShort)
+                UIElement.GratedStartButtonFlash(HeldTooShortTexture, gratingDuration, deactivateAfter);
+            else
+                UIElement.GratedStartButtonFlash(HeldTooLongTexture, gratingDuration, deactivateAfter);
+            return;
+        }
+
+        if (InputBroker.GetMouseButtonDown(0) && !USE_FBSquare.IsGrating)
+        {
+            ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
+            selectionDuration = 0;
+            HeldTooLong = false;
+            HeldTooShort = false;
+            //record start position as well
+        }
+        selectionDuration += Time.deltaTime;
+        if (InputBroker.GetMouseButtonUp(0) && selectionDuration != null)
+        {
+            if (Physics.Raycast(ray, out hit))
+            {
+                if ((hit.collider != null) && (hit.collider.gameObject != null) &&
+                    (selectionDuration >= minObjectTouchDuration.value) &&
+                    (selectionDuration <= maxObjectTouchDuration.value))
+                {
+                    choiceMade = true;
+                    touchDurationError = false;
+                    selectedGO = hit.collider.gameObject;
+                    selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<WhatWhenWhere_StimDef>();
+                    CorrectSelection = selectedSD.IsCurrentTarget;
+                }
+                else if (selectionDuration < minObjectTouchDuration.value)
+                {
+                    UIElement.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value,
+                        deactivateAfter);
+                    gratingDuration = gratingSquareDuration.value;
+                    touchDurationError = true;
+                    HeldTooShort = true;
+                    touchDurationErrorCount_InBlock++;
+                    CurrentTaskLevel.TouchDurationErrorCount_InTask++;
+                    Debug.Log("Didn't select for minimum object touch duration!");
+                }
+                else if (selectionDuration > maxObjectTouchDuration.value)
+                {
+                    UIElement.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value,
+                        deactivateAfter);
+                    gratingDuration = gratingSquareDuration.value;
+                    touchDurationError = true;
+                    HeldTooLong = true;
+                    touchDurationErrorCount_InBlock++;
+                    CurrentTaskLevel.TouchDurationErrorCount_InTask++;
+                    Debug.Log("Didn't select under max object touch duration!");
+                }
+            }
+
+            selectionDuration = null; // set this as null to consider multiple selections in a state
+            SetTrialSummaryString();
+        }
     }
     private void GenerateAccuracyLog()
     {

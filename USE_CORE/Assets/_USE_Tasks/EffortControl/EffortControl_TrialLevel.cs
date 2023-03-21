@@ -47,8 +47,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     private Vector3 RightStimOriginalPosition;
 
     //Set in task level:
+    [HideInInspector] public string ContextExternalFilePath;
     [HideInInspector] public bool IsHuman;
-    [HideInInspector] public string MaterialFilePath;
 
     [System.NonSerialized] public int Response = -1;
     private int ClicksNeeded; //becomes left/right num clicks once they make selection. 
@@ -125,7 +125,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            LoadTextures(MaterialFilePath);
+            LoadTextures(ContextExternalFilePath);
   
             if(TokenFBController != null)
                 SetTokenVariables();
@@ -887,8 +887,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void SetTrialSummaryString()
     {
-        TrialSummaryString = ("<b>Trial Num In Block: </b>" + (TrialCount_InBlock + 1) +
-                            "\nTouches: " + TrialTouches +
+        TrialSummaryString = ("Touches: " + TrialTouches +
                             "\nSide Chosen: " + SideChoice +
                             "\nReward Chosen: " + RewardChoice +
                             "\nEffort Chosen: " + EffortChoice);

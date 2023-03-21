@@ -63,9 +63,8 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             BlockStringsAdded++;
             
             PreviousBlocksString.Insert(0, CurrentBlockString);
-            
-            TouchDurationError_InTask += vsTL.TouchDurationError_InBlock; //Not actively updating on session panel, 
-                                                                            //ok to calculate after block end
+            TouchDurationError_InTask += vsTL.TouchDurationError_InBlock; //Not actively updating on session panel,ok to calculate after block
+            vsTL.SearchDurationsList.Clear();
         });
         AssignBlockData();
     }
@@ -88,7 +87,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         ClearStrings();
-        BlockSummaryString.AppendLine("\nAccuracy: " + String.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
+        BlockSummaryString.AppendLine("Accuracy: " + String.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
                                       "\n" + 
                                       "\nAvg Search Duration: " + String.Format("{0:0.00}", vsTL.AverageSearchDuration_InBlock) +
                                       "\n" + 
@@ -133,13 +132,13 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         else vsTL.ContextExternalFilePath = ContextExternalFilePath;
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
-            vsTL.FBSquarePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
+            vsTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
         else
-            vsTL.FBSquarePosition = new Vector3(0, 0, 0);
+            vsTL.StartButtonPosition = new Vector3(0, 0, 0);
         if (SessionSettings.SettingExists(TaskName +"_TaskSettings", "StartButtonScale"))
-            vsTL.FBSquareScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
+            vsTL.StartButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
         else
-            vsTL.FBSquareScale = 120f;
+            vsTL.StartButtonScale = 120f;
         
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquarePosition"))
             vsTL.FBSquarePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquarePosition");

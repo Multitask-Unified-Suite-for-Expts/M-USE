@@ -56,7 +56,6 @@ public class HaloFBController : MonoBehaviour
                 Debug.LogWarning("Trying to show HaloFB but one is already being shown");
                 Destroy(instantiated);
             }
-            return;
         }
         GameObject rootObj = gameObj.transform.root.gameObject;
         instantiated = Instantiate(haloPrefab, rootObj.transform);
@@ -64,7 +63,7 @@ public class HaloFBController : MonoBehaviour
         EventCodeManager.SendCodeImmediate(SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
 
         // Position the haloPrefab behind the game object
-        float distanceBehind = 0.5f; // Set the distance behind the gameObj
+        float distanceBehind = 1.5f; // Set the distance behind the gameObj
         Vector3 behindPos = rootObj.transform.position - rootObj.transform.forward * distanceBehind;
         instantiated.transform.position = behindPos;
     }

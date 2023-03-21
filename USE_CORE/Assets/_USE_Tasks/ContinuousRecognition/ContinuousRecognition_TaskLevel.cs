@@ -111,9 +111,9 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     public void SetSettings()
     {
         if (SessionSettings.SettingExists("_TaskSettings", "MakeStimPopOut"))
-            trialLevel.MakeStimPopOut = (bool)SessionSettings.Get("_TaskSettings", "MakeStimPopOut");
+            trialLevel.makeStimPopOut = (bool)SessionSettings.Get("_TaskSettings", "MakeStimPopOut");
         else
-            trialLevel.MakeStimPopOut = false;
+            trialLevel.makeStimPopOut = false;
 
         if (SessionSettings.SettingExists("Session", "IsHuman"))
             trialLevel.IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");

@@ -81,7 +81,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private int NumNew_Trial;
     private int NumPNC_Trial;
 
-    public bool makeStimPopOut;
+    public bool MakeStimPopOut;
 
     //Config Variables
     [HideInInspector]
@@ -200,8 +200,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
 
-            if(makeStimPopOut)
-                MakeStimPopOut();
+            if(MakeStimPopOut)
+                PopStimOut();
         });
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------
@@ -510,7 +510,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    void MakeStimPopOut()
+    void PopStimOut()
     {
         foreach(ContinuousRecognition_StimDef stim in trialStims.stimDefs)
         {

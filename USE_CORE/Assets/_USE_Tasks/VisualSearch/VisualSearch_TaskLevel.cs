@@ -87,7 +87,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         ClearStrings();
-        BlockSummaryString.AppendLine("\nAccuracy: " + String.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
+        BlockSummaryString.AppendLine("Accuracy: " + String.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
                                       "\n" + 
                                       "\nAvg Search Duration: " + String.Format("{0:0.00}", vsTL.AverageSearchDuration_InBlock) +
                                       "\n" + 

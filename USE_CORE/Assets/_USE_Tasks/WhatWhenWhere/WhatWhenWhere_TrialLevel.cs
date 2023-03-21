@@ -34,8 +34,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     
     // Config Variables
     public string ContextExternalFilePath;
-    public Vector3 ButtonPosition;
-    public float ButtonScale;
+    [FormerlySerializedAs("ButtonPosition")] public Vector3 StartButtonPosition;
+    [FormerlySerializedAs("ButtonScale")] public float StartButtonScale;
     public Vector3 FBSquarePosition;
     public float FBSquareScale;
     public bool StimFacingCamera;
@@ -76,7 +76,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //private List<float> touchDurations  = new List<float> { };
     private List<float> searchDurations = new List<float> { };
     //private List<Vector3> touchedPositionsList = new List<Vector3>(); // empty now
-    private List<int> runningAcc = new List<int>();
+    public List<int> runningAcc = new List<int>();
 
     [HideInInspector]
     public ConfigNumber flashingFbDuration;
@@ -188,17 +188,18 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.InitializeSlider();
             LoadTextures(ContextExternalFilePath);
 // Initialize FB Controller Values
-            HaloFBController.SetHaloSize(5f);
+            HaloFBController.SetHaloSize(15f);
             HaloFBController.SetHaloIntensity(5);
             if (startButton == null)
             {
-                USE_StartButton = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>());
+                USE_StartButton = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                 startButton = USE_StartButton.StartButtonGO;
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
             }
             if (fbSquare == null)
             {
-                USE_FBSquare = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                USE_FBSquare = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>(), FBSquarePosition, FBSquareScale);
+                Debug.Log("FBSQUARE POSITION : " + FBSquarePosition + " FB SQUARE SCALE: " + FBSquareScale);
                 fbSquare = USE_FBSquare.StartButtonGO;
                 fbSquare.name = "FBSquare";
             }
@@ -219,7 +220,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 MakeStimFaceCamera();
             }
-            
             if (consecutiveError >= CurrentTrialDef.ErrorThreshold)
             {
                 sbDelay = timeoutDuration.value;
@@ -228,6 +228,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 sbDelay = startButtonDelay.value;
             }
+
         });
         SetupTrial.AddTimer(()=> sbDelay, InitTrial);
         MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, 
@@ -263,7 +264,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         ChooseStimulus.AddInitializationMethod(() =>
         {
             AssignCorrectStim();
-            CreateTextOnExperimenterDisplay();
+            if (GameObject.Find("MainCameraCopy").transform.childCount == 0)
+                CreateTextOnExperimenterDisplay();
             choiceMade = false;
             if (CurrentTrialDef.LeaveFeedbackOn) HaloFBController.SetLeaveFeedbackOn();
         });
@@ -273,7 +275,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseStimulus.SpecifyTermination(()=> choiceMade, SelectionFeedback, ()=>
         {
-            SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
             if (CorrectSelection)
             {
@@ -369,7 +370,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         SelectionFeedback.AddTimer(()=>totalFbDuration, Delay, () =>
         {
             DelayDuration = 0;
-            DestroyTextOnExperimenterDisplay();
             
             if (!CurrentTrialDef.LeaveFeedbackOn) 
                 HaloFBController.Destroy();
@@ -397,7 +397,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             errorTypeString = "None";
             
             //Destroy all created text objects on Player View of Experimenter Display
-            DestroyTextOnExperimenterDisplay();
+            DestroyChildren(GameObject.Find("MainCameraCopy"));
             runningAcc.Add(1);
             NumSliderBarFilled += 1;
             CurrentTaskLevel.NumSliderBarFilled_InTask++;
@@ -425,10 +425,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             searchStims.ToggleVisibility(false);
             distractorStims.ToggleVisibility(false);
+            if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
+                DestroyChildren(GameObject.Find("MainCameraCopy"));
             if (!choiceMade)
             {
                 consecutiveError++;
                 aborted = true;
+                runningAcc.Add(0);
                 errorTypeString = "AbortedTrial";
                 AbortedTrials_InBlock++;
                 CurrentTaskLevel.AbortedTrials_InTask++;
@@ -449,7 +452,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
-        DestroyTextOnExperimenterDisplay();
+        if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
+            DestroyChildren(GameObject.Find("MainCameraCopy"));
         searchStims.ToggleVisibility(false);
         distractorStims.ToggleVisibility(false);
         SliderFBController.SliderGO.SetActive(false);
@@ -562,19 +566,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                              "\nSearch Duration: " + string.Join(",", searchDurations);
     }
 
-    private void DestroyTextOnExperimenterDisplay()
-    {
-        if (playerViewLoaded)
-        {
-            foreach (GameObject txt in playerViewTextList)
-            {
-                txt.SetActive(false);
-            }
-        }
-        playerViewLoaded = false;
-        playerViewTextList.Clear();
-    }
-    
     private void UpdateCounters_Incorrect(int correctIndex) // Updates Progress tracking information for incorrect selection
     {
         numTotal_InBlock[numTouchedStims]++;
@@ -599,22 +590,19 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //--------------------------------------------------------------METHODS FOR STIMULUS/OBJECT HANDLING-------------------------------------------------------------
     private void CreateTextOnExperimenterDisplay()
     {
-        if (!playerViewLoaded)
+        for (int iStim = 0; iStim < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++iStim)
         {
-            for (int iStim = 0; iStim < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++iStim)
-            {
-                //Create corresponding text on player view of experimenter display
-                textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation),
-                        playerViewParent);
-                textLocation.y += 75;
-                Vector2 textSize = new Vector2(200, 200);
-                playerViewText = playerView.WriteText(CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(), CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
-                    Color.red, textLocation, textSize, playerViewParent);
-                playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
-                //should this ^ line be deleted and text size be congtrolled by textSize variable?
-                playerViewTextList.Add(playerViewText);
-            }
-            playerViewLoaded = true;
+            //Create corresponding text on player view of experimenter display
+            textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation),
+                playerViewParent);
+            textLocation.y += 75;
+            Vector2 textSize = new Vector2(200, 200);
+            playerViewText = playerView.WriteText(CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
+                CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
+                Color.red, textLocation, textSize, playerViewParent);
+            playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
+            //should this ^ line be deleted and text size be congtrolled by textSize variable?
+            playerViewTextList.Add(playerViewText);
         }
     }
     void LoadConfigUiVariables()
@@ -716,77 +704,68 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         Vector2 pvPosition = new Vector2((position[0] / Screen.width) * playerViewParent.GetComponent<RectTransform>().sizeDelta.x, (position[1] / Screen.height) * playerViewParent.GetComponent<RectTransform>().sizeDelta.y);
         return pvPosition;
     }
-    //private void TouchDurationErrorFeedback(SelectionHandler<WhatWhenWhere_StimDef> MouseHandler, bool deactivateAfter)
-    //{
-        // EventCodeManager.SendCodeImmediate(SessionEventCodes["TouchDurationError"]);
-        // EventCodeManager.SendCodeImmediate(SessionEventCodes["SelectionHandler_TouchErrorImageOn"]); //this should be put into selection handler soon. leaving for now. 
-        // errorTypeString = "TouchDurationError";
-        // AudioFBController.Play("Negative");
-        // //eventually replace with state timer logic
-        // if (MouseHandler.GetSelectionTooShort())
-        //     StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter));
-        // else if (MouseHandler.GetSelectionTooLong())
-        //     StartCoroutine(USE_StartButton.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter));
-        // MouseHandler.SetSelectionTooLong(false);
-        // MouseHandler.SetSelectionTooShort(false);
-        // touchDurationError = false;
-        // touchDurationErrorCount_InBlock++;
-    //}'
     private void TouchDurationErrorFeedback(USE_StartButton UIElement, bool deactivateAfter)
     {
         if (UIElement.IsGrating)
+        {
+            gratingDuration -= Time.deltaTime;
+            if (HeldTooShort)
+                UIElement.GratedStartButtonFlash(HeldTooShortTexture, gratingDuration, deactivateAfter);
+            else
+                UIElement.GratedStartButtonFlash(HeldTooLongTexture, gratingDuration, deactivateAfter);
+            return;
+        }
+
+        if (InputBroker.GetMouseButtonDown(0) && !USE_FBSquare.IsGrating)
+        {
+            ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
+            selectionDuration = 0;
+            HeldTooLong = false;
+            HeldTooShort = false;
+            //record start position as well
+        }
+        selectionDuration += Time.deltaTime;
+        if (InputBroker.GetMouseButtonUp(0) && selectionDuration != null)
+        {
+            if (Physics.Raycast(ray, out hit))
             {
-                gratingDuration -= Time.deltaTime;
-                if(HeldTooShort)
-                    UIElement.GratedStartButtonFlash(HeldTooShortTexture,gratingDuration,deactivateAfter);
-                else
-                    UIElement.GratedStartButtonFlash(HeldTooLongTexture,gratingDuration,deactivateAfter);
-                return;
-            }
-            if (InputBroker.GetMouseButtonDown(0) && !USE_FBSquare.IsGrating)
-            {
-                ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-                selectionDuration = 0;
-                HeldTooLong = false;
-                HeldTooShort = false;
-                //record start position as well
-            }
-            selectionDuration += Time.deltaTime;
-            if (InputBroker.GetMouseButtonUp(0) && selectionDuration != null)
-            {
-                if (Physics.Raycast(ray, out hit))
+                if ((hit.collider != null) && (hit.collider.gameObject != null) &&
+                    (selectionDuration >= minObjectTouchDuration.value) &&
+                    (selectionDuration <= maxObjectTouchDuration.value))
                 {
-                    if ((hit.collider != null) && (hit.collider.gameObject != null) && (selectionDuration >= minObjectTouchDuration.value) && (selectionDuration <= maxObjectTouchDuration.value))
-                    {
-                        choiceMade = true;
-                        selectedGO = hit.collider.gameObject;
-                        selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<WhatWhenWhere_StimDef>();
-                        CorrectSelection = selectedSD.IsCurrentTarget;
-                    }
-                    else if (selectionDuration < minObjectTouchDuration.value)
-                    {
-                        UIElement.GratedStartButtonFlash(HeldTooShortTexture,gratingSquareDuration.value,deactivateAfter);
-                        gratingDuration = gratingSquareDuration.value;
-                        touchDurationError = true;
-                        HeldTooShort = true;
-                        touchDurationErrorCount_InBlock++;
-                        CurrentTaskLevel.TouchDurationErrorCount_InTask++;
-                        Debug.Log("Didn't select for minimum object touch duration!");
-                    }
-                    else if (selectionDuration > maxObjectTouchDuration.value)
-                    {
-                        UIElement.GratedStartButtonFlash(HeldTooLongTexture,gratingSquareDuration.value,deactivateAfter);
-                        gratingDuration = gratingSquareDuration.value;
-                        touchDurationError = true;
-                        HeldTooLong = true;
-                        touchDurationErrorCount_InBlock++;
-                        CurrentTaskLevel.TouchDurationErrorCount_InTask++;
-                        Debug.Log("Didn't select under max object touch duration!");
-                    }
+                    choiceMade = true;
+                    touchDurationError = false;
+                    selectedGO = hit.collider.gameObject;
+                    selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<WhatWhenWhere_StimDef>();
+                    CorrectSelection = selectedSD.IsCurrentTarget;
                 }
-                selectionDuration = null; // set this as null to consider multiple selections in a state
-                SetTrialSummaryString();
+                else if (selectionDuration < minObjectTouchDuration.value)
+                {
+                    UIElement.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value,
+                        deactivateAfter);
+                    gratingDuration = gratingSquareDuration.value;
+                    touchDurationError = true;
+                    HeldTooShort = true;
+                    touchDurationErrorCount_InBlock++;
+                    CurrentTaskLevel.TouchDurationErrorCount_InTask++;
+                    Debug.Log("Didn't select for minimum object touch duration!");
+                }
+                else if (selectionDuration > maxObjectTouchDuration.value)
+                {
+                    UIElement.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value,
+                        deactivateAfter);
+                    gratingDuration = gratingSquareDuration.value;
+                    touchDurationError = true;
+                    HeldTooLong = true;
+                    touchDurationErrorCount_InBlock++;
+                    CurrentTaskLevel.TouchDurationErrorCount_InTask++;
+                    Debug.Log("Didn't select under max object touch duration!");
+                }
             }
+
+            selectionDuration = null; // set this as null to consider multiple selections in a state
+            SetTrialSummaryString();
+        }
     }
     private void GenerateAccuracyLog()
     {

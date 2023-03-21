@@ -54,7 +54,8 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             trialLevel.ResetBlockVariables();
-            RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(trialLevel.MaterialFilePath, ContextName, "LinearDark"));
+            ContextName = currentBlock.ContextName;
+            RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(ContextExternalFilePath, ContextName, "LinearDark"));
             EventCodeManager.SendCodeImmediate(SessionEventCodes["ContextOn"]);
         });
 
@@ -75,19 +76,8 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             trialLevel.IsHuman = false;
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
-            trialLevel.MaterialFilePath = (String)SessionSettings.Get("Session", "ContextExternalFilePath");
-        else
-            Debug.Log("ContextExternalFilePath NOT specified in the Session Config OR Task Config!");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextName"))
-            ContextName = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextName");
-        else
-        {
-            ContextName = "Dark";
-            Debug.Log($"No ContextName specified in the {TaskName} Task Config. Defaulting to {ContextName}");
-        }
+            trialLevel.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+        else trialLevel.ContextExternalFilePath = ContextExternalFilePath;
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
         {

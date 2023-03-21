@@ -836,10 +836,13 @@ namespace USE_ExperimentTemplate_Task
             int? sumdif; //the simple sum of the number of different trial outcomes in the windows used to compute 
                          //immediateAvg and prevAvg
 
-
-            if (rAcc.Count >= windowSize)
-                immediateAvg = (float)rAcc.GetRange(rAcc.Count - windowSize, windowSize).Average();
-            else
+                         if (rAcc.Count >= windowSize)
+                         {
+                             Debug.Log("RUNNING ACC COUNT: " + runningAcc.Count());
+                             immediateAvg = (float)rAcc.GetRange(rAcc.Count - windowSize, windowSize).Average();
+                            
+                         }
+                         else
                 immediateAvg = null;
 
             if (rAcc.Count >= windowSize * 2)

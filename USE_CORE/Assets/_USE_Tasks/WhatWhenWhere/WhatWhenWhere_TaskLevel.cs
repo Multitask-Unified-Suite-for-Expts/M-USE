@@ -44,14 +44,6 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
             wwwTL.MinTrials = wwwBD.nRepetitionsMinMax[0];
             SetBlockSummaryString();
         });
-
-        // RunBlock.AddUpdateMethod(() =>
-        // {
-        //     BlockSummaryString.Clear();
-        //     BlockSummaryString.AppendLine("Block Num: " + (wwwTL.BlockCount) + "\nTrial Count: " + (wwwTL.TrialCount_InBlock) +
-        //     "\nTotal Errors: " + wwwTL.totalErrors_InBlock + "\nError Type: " + wwwTL.errorType_InBlockString + "\nPerformance: " + wwwTL.accuracyLog_InBlock + "\n# Slider Complete: " + wwwTL.sliderCompleteQuantity);
-        //
-        // });
     }
     public override OrderedDictionary GetSummaryData()
     {
@@ -126,10 +118,10 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
             wwwTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
         else wwwTL.ContextExternalFilePath = ContextExternalFilePath;
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
-            wwwTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
+            wwwTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
         else Debug.LogError("Start Button Position settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonScale"))
-            wwwTL.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
+            wwwTL.StartButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
         else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquarePosition"))
             wwwTL.FBSquarePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquarePosition");

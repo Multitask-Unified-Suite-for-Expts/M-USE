@@ -116,8 +116,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             playerViewParent = GameObject.Find("MainCameraCopy");     
             
             // Initialize FB Controller Values
-            HaloFBController.SetHaloSize(5f);
-            HaloFBController.SetHaloIntensity(5);
+            HaloFBController.SetHaloSize(6f);
+            HaloFBController.SetHaloIntensity(6);
         });
         
         SetupTrial.AddInitializationMethod(() =>
@@ -234,6 +234,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 AbortedTrials_InBlock++;
                 CurrentTaskLevel.AbortedTrials_InTask++;
                 aborted = true;
+                SetTrialSummaryString();
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["NoChoice"]);
             }
         });
@@ -428,7 +429,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (stim.IsTarget)
             {
                 textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent.transform);
-                textLocation.y += 50;
+                textLocation.y += 75;
                 Vector3 textSize = new Vector3(2,2,1);
                 playerViewText = playerView.WriteText("TargetText","TARGET",
                     Color.red, textLocation, textSize, playerViewParent.transform);
@@ -465,9 +466,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         TrialSummaryString = "Selected Object Index: " + SelectedStimIndex +
                              "\nSelected Object Location: " + SelectedStimLocation +
                              "\n" +
-                             "\nCorrect Selection? : " + CorrectSelection +
-                             "\nTouch Duration Error? : " + TouchDurationError +
-                             "\nAborted Trial? : " + aborted +
+                             "\nCorrect Selection: " + CorrectSelection +
+                             "\nTouch Duration Error: " + TouchDurationError +
                              "\n" +
                              "\nSearch Duration: " + SearchDuration +
                              "\n" + 
@@ -475,72 +475,68 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     }
 
     private void TouchDurationErrorFeedback(USE_StartButton UIElement, bool deactivateAfter)
-    {
-        if (UIElement.IsGrating)
-        {
-            gratingDuration -= Time.deltaTime;
-            if (HeldTooShort)
-                UIElement.GratedStartButtonFlash(HeldTooShortTexture, gratingDuration, deactivateAfter);
-            else
-                UIElement.GratedStartButtonFlash(HeldTooLongTexture, gratingDuration, deactivateAfter);
-            return;
-        }
+     {
+         if (UIElement.IsGrating)
+         {
+             gratingDuration -= Time.deltaTime;
+             if (HeldTooShort)
+                 UIElement.GratedStartButtonFlash(HeldTooShortTexture, gratingDuration, deactivateAfter);
+             else
+                 UIElement.GratedStartButtonFlash(HeldTooLongTexture, gratingDuration, deactivateAfter);
+             return;
+         }
 
-        if (InputBroker.GetMouseButtonDown(0) && !UIElement.IsGrating)
-        {
-            ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-            
-            selectionDuration = 0;
-            HeldTooLong = false;
-            HeldTooShort = false;
-            //record start position as well
-        }
+         if (InputBroker.GetMouseButtonDown(0) && !UIElement.IsGrating)
+         {
+             ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
+             selectionDuration = 0;
+             HeldTooLong = false;
+             HeldTooShort = false;
+             //record start position as well
+         }
 
-        selectionDuration += Time.deltaTime;
-        if (InputBroker.GetMouseButtonUp(0) && selectionDuration != null)
-        {
-            
-            if (Physics.Raycast(ray, out hit))
-            {
+         selectionDuration += Time.deltaTime;
+         if (InputBroker.GetMouseButtonUp(0) && selectionDuration != null)
+         {
+             if (Physics.Raycast(ray, out hit))
+             {
+                 if ((hit.collider != null) && (hit.collider.gameObject != null) &&
+                     (selectionDuration >= minObjectTouchDuration.value) &&
+                     (selectionDuration <= maxObjectTouchDuration.value))
+                 {
+                     choiceMade = true;
+                     TouchDurationError = false;
+                     selectedGO = hit.collider.gameObject;
+                     selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<VisualSearch_StimDef>();
+                     CorrectSelection = selectedSD.IsTarget;
+                 }
+                 else if (selectionDuration < minObjectTouchDuration.value)
+                 {
+                     UIElement.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value,
+                         deactivateAfter);
+                     gratingDuration = gratingSquareDuration.value;
+                     TouchDurationError = true;
+                     HeldTooShort = true;
+                     TouchDurationError_InBlock++;
+                     CurrentTaskLevel.TouchDurationError_InTask++;
+                     Debug.Log("Didn't select for minimum object touch duration!");
+                 }
+                 else if (selectionDuration > maxObjectTouchDuration.value)
+                 {
+                     UIElement.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter);
+                     gratingDuration = gratingSquareDuration.value;
+                     TouchDurationError = true;
+                     HeldTooLong = true;
+                     TouchDurationError_InBlock++;
+                     CurrentTaskLevel.TouchDurationError_InTask++;
+                     Debug.Log("Didn't select under max object touch duration!");
+                 }
+             }
 
-                if ((hit.collider != null) && (hit.collider.gameObject != null) &&
-                    (selectionDuration >= minObjectTouchDuration.value) &&
-                    (selectionDuration <= maxObjectTouchDuration.value))
-                {
-                    choiceMade = true;
-                    selectedGO = hit.collider.gameObject;
-                    selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<VisualSearch_StimDef>();
-                    if (selectedSD != null)
-                        CorrectSelection = selectedSD.IsTarget;
-                    Debug.Log("CHOICE MADE IN DURATION" + choiceMade);
+             selectionDuration = null; // set this as null to consider multiple selections in a state
+         }
 
-                }
-                else if (selectionDuration < minObjectTouchDuration.value)
-                {
-                    UIElement.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value, deactivateAfter);
-                    gratingDuration = gratingSquareDuration.value;
-                    TouchDurationError = true;
-                    HeldTooShort = true;
-                    TouchDurationError_InBlock++;
-                    CurrentTaskLevel.TouchDurationError_InTask++;
-                    Debug.Log("Didn't select for minimum object touch duration!");
-                }
-                else if (selectionDuration > maxObjectTouchDuration.value)
-                {
-                    UIElement.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter);
-                    gratingDuration = gratingSquareDuration.value;
-                    TouchDurationError = true;
-                    HeldTooLong = true;
-                    TouchDurationError_InBlock++;
-                    CurrentTaskLevel.TouchDurationError_InTask++;
-                    Debug.Log("Didn't select under max object touch duration!");
-                }
-            }
-
-            selectionDuration = null; // set this as null to consider multiple selections in a state
-        }
-
-        SetTrialSummaryString();
+         SetTrialSummaryString();
     }
 
 }

@@ -86,8 +86,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public string MazeBackgroundTextureName;
     public string ContextExternalFilePath;
     public string MazeFilePath;
-    public Vector3 ButtonPosition;
-    public float ButtonScale;
+    [FormerlySerializedAs("ButtonPosition")] public Vector3 StartButtonPosition;
+    [FormerlySerializedAs("ButtonScale")] public float StartButtonScale;
     public bool NeutralITI;
     [FormerlySerializedAs("fixedRatioReward")] public bool UsingFixedRatioReward;
 
@@ -161,7 +161,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             if(StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(MG_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                USE_StartButton = new USE_StartButton(MG_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                 StartButton = USE_StartButton.StartButtonGO;
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
             }
@@ -839,8 +839,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     }
     void SetTrialSummaryString()
     {
-        TrialSummaryString = "Accuracy: " + accuracy_InTrial +
-                             "\nTotal Errors: " + totalErrors_InTrial +
+        TrialSummaryString = "Total Errors: " + totalErrors_InTrial +
                              //"\nCorrect Touches: " + correctTouches_InBlock + COME UP WITH SOMETHING MORE USEFUL
                              "\nRule-Abiding Errors: " + ruleAbidingErrors_InTrial +
                              "\nRule-Breaking Errors: " + ruleBreakingErrors_InTrial + 

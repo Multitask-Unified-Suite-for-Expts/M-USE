@@ -255,7 +255,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                                         $"\t<b># Blocks:</b> {BlockCount}" +
                                         $"\t<b># Reward Pulses:</b> {numRewardPulses_InTask}" +
                                         $"\n<b># Rule-Break Errors:</b> {ruleBreakingErrors_InTask}" +
-                                        $"\t<b># Rule-AbidingErrors:</b> {ruleAbidingErrors_InTask}" +
+                                        $"\t<b># Rule-Abiding Errors:</b> {ruleAbidingErrors_InTask}" +
                                         $"\nAvg Maze Duration: {AvgMazeDuration}" +
                                         $"\n# Slider Bar Filled: {numSliderBarFull_InTask}");
 

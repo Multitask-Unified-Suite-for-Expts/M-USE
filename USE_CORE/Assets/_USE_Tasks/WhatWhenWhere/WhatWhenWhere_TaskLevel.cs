@@ -1,7 +1,9 @@
 ﻿using WhatWhenWhere_Namespace;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -20,6 +22,8 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     public int AbortedTrials_InTask = 0;
     public int NumRewardPulses_InTask;
     public int NumSliderBarFilled_InTask;
+    public int TouchDurationErrorCount_InTask;
+    public List<float> SearchDurations_InTask;
 
 
     public override void DefineControlLevel()
@@ -49,28 +53,40 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         //
         // });
     }
+    public override OrderedDictionary GetSummaryData()
+    {
+        OrderedDictionary data = new OrderedDictionary();
+
+        data["Touch Duration Error"] = TouchDurationErrorCount_InTask;
+        data["Reward Pulses"] = NumRewardPulses_InTask;
+        data["Slider Bar Full"] = NumSliderBarFilled_InTask;
+        if(SearchDurations_InTask.Count > 0)
+            data["Average Search Duration"] = SearchDurations_InTask.Average();
+        
+        return data;
+    }
     public void SetBlockSummaryString()
     {
         BlockSummaryString.Clear();
-        BlockSummaryString.AppendLine("Average Search Duration: " + wwwTL.averageSearchDuration_InBlock+
+        float avgBlockSearchDuration = 0;
+        if (wwwTL.searchDurations_InBlock.Count > 0)
+            avgBlockSearchDuration = (float)Math.Round(wwwTL.searchDurations_InBlock.Average(), 2);
+
+        BlockSummaryString.AppendLine("Average Search Duration: " + avgBlockSearchDuration +
                                       "\nAccuracy: " + wwwTL.accuracyLog_InBlock + 
                                       "\n" +
                                       "\nDistractor Slot Error Count: " + wwwTL.distractorSlotErrorCount_InBlock+
                                       "\nNon-Distractor Slot Error Count: " + wwwTL.slotErrorCount_InBlock + 
                                       "\nRepetition Error Count: "  + wwwTL.repetitionErrorCount_InBlock +
                                       "\nTouch Duration Error Count: " + wwwTL.touchDurationErrorCount_InBlock + 
-                                      "\nNon-Stim Touch Error Count: " + wwwTL.numNonStimSelections_InBlock+
+                                   //   "\nNon-Stim Touch Error Count: " + wwwTL.numNonStimSelections_InBlock+
                                       "\nNo Selection Error Count: " + wwwTL.AbortedTrials_InBlock);
     }
     public override void SetTaskSummaryString()
     {
-        /*string Accuracy_InTask = "";
-        for (int i = 0; i < NumCorrect_InTask.Length; i++)
-        {
-            int result = NumCorrect_InTask[i] / NumTotal_InTask[i];
-            Accuracy_InTask += ("{0}: {1}", i+1, result);
-        }*/
-        
+        float avgTaskSearchDuration = 0;
+        if (SearchDurations_InTask.Count > 0)
+            avgTaskSearchDuration = (float)Math.Round(SearchDurations_InTask.Average(), 2);
         if (wwwTL.TrialCount_InTask != 0)
         {
             CurrentTaskSummaryString.Clear();
@@ -81,9 +97,8 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
                                             $"\n<b># Trials:</b> {wwwTL.TrialCount_InTask} ({percentAbortedTrials}% aborted)" +
                                             $"\t<b># Blocks:</b> {BlockCount}" +
                                             $"\t<b># Reward Pulses:</b> {NumRewardPulses_InTask}" +
-                                            $"\n# Slider Bar Completions: {NumSliderBarFilled_InTask}");
-            // $"\nAccuracy: {Accuracy_InTask}");
-
+                                            $"\n# Slider Bar Completions: {NumSliderBarFilled_InTask}" + 
+                                            $"\nAvg Search Duration: {avgTaskSearchDuration}");
         }
         else
         {
@@ -95,7 +110,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     private void DefineBlockData()
     {
         BlockData.AddDatum("Block Accuracy", ()=> wwwTL.accuracyLog_InBlock);
-        BlockData.AddDatum("Avg Search Duration", ()=> wwwTL.averageSearchDuration_InBlock);
+        BlockData.AddDatum("Avg Search Duration", ()=> wwwTL.searchDurations_InBlock.Average());
         BlockData.AddDatum("Num Distractor Slot Error", ()=> wwwTL.distractorSlotErrorCount_InBlock);
         BlockData.AddDatum("Num Search Slot Error", ()=> wwwTL.slotErrorCount_InBlock);
         BlockData.AddDatum("Num Repetition Error", ()=> wwwTL.repetitionErrorCount_InBlock);

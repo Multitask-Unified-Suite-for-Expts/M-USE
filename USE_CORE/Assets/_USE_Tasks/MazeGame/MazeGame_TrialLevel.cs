@@ -315,6 +315,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
               //  runningAcc.Add(accuracy_InTrial);
                 SliderFBController.ResetSliderBarFull();
                 CurrentTaskLevel.numSliderBarFull_InBlock++;
+                CurrentTaskLevel.numSliderBarFull_InTask++;
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
 
                 if (SyncBoxController != null)

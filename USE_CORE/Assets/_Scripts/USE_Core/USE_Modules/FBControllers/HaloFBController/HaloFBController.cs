@@ -56,7 +56,6 @@ public class HaloFBController : MonoBehaviour
                 Debug.LogWarning("Trying to show HaloFB but one is already being shown");
                 Destroy(instantiated);
             }
-            return;
         }
         GameObject rootObj = gameObj.transform.root.gameObject;
         instantiated = Instantiate(haloPrefab, rootObj.transform);

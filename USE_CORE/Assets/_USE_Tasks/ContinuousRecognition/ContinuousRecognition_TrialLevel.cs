@@ -81,6 +81,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private int NumNew_Trial;
     private int NumPNC_Trial;
 
+    public bool MakeStimPopOut;
 
     //Config Variables
     [HideInInspector]
@@ -97,13 +98,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
+        OriginalFbTextPosition = YouLoseTextGO.transform.position;
+        OriginalTitleTextPosition = TitleTextGO.transform.position;
+        OriginalTimerPosition = TimerBackdropGO.transform.position;
+
         Add_ControlLevel_InitializationMethod(() =>
         {
             SetControllerBlockValues();
-
-            OriginalFbTextPosition = YouLoseTextGO.transform.position;
-            OriginalTitleTextPosition = TitleTextGO.transform.position;
-            OriginalTimerPosition = TimerBackdropGO.transform.position;
 
             LoadTextures(MaterialFilePath);
 
@@ -198,6 +199,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
+
+            if(MakeStimPopOut)
+                PopStimOut();
         });
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------
@@ -506,7 +510,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    void MakeStimPopOut()
+    void PopStimOut()
     {
         foreach(ContinuousRecognition_StimDef stim in trialStims.stimDefs)
         {
@@ -547,27 +551,27 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             case 1:
                 if (MacMainDisplayBuild && !Debug.isDebugBuild)
-                    yOffset = 95f;
+                    yOffset = 90f; //not checked
                 else
-                    yOffset = 65f;
+                    yOffset = 60f;
                 break;
             case 2:
                 if (MacMainDisplayBuild && !Debug.isDebugBuild)
-                    yOffset = 80f;
+                    yOffset = 75f; //not checked
                 else
-                    yOffset = 55f;
+                    yOffset = 50f;
                 break;
             case 3:
                 if (MacMainDisplayBuild && !Debug.isDebugBuild)
-                    yOffset = 30f;
+                    yOffset = 25f; //not checked
                 else
-                    yOffset = 15f;
+                    yOffset = 10f;
                 break;
             case 4:
                 if (MacMainDisplayBuild && !Debug.isDebugBuild)
-                    yOffset = 0f;
+                    yOffset = -5f; //not checked
                 else
-                    yOffset = -25f;
+                    yOffset = -30f;
                 break;
             //case 5:
             //    if (MacMainDisplayBuild && !Debug.isDebugBuild)
@@ -821,7 +825,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     }
 
     //Generate the correct number of New, PC, and PNC stim for each trial. Called when the trial is defined!
-    //The TrialStims group are auto loaded in the SetupTrial StateInitialization, and destroyed in the FinishTrial StateTermination
     protected override void DefineTrialStims()
     {
         NumPC_Trial = 0;
@@ -1019,12 +1022,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             if (stim.StimIndex == currentTrial.WrongStimIndex)
             {
-                GameObject redBorder = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
+                GameObject redBorder = Instantiate(RedBorderPrefab, (stim.StimGameObject.transform.position + new Vector3(0, .1f, 0)), Quaternion.identity);
                 BorderPrefabList.Add(redBorder); //Add each to list so I can destroy them together
             }
             else
             {
-                GameObject greenBorder = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position, Quaternion.identity);
+                GameObject greenBorder = Instantiate(GreenBorderPrefab, (stim.StimGameObject.transform.position + new Vector3(0, .1f, 0)), Quaternion.identity);
                 BorderPrefabList.Add(greenBorder);
             }
         }

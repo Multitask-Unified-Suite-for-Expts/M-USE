@@ -143,15 +143,19 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             StartButton.transform.position = OriginalStartButtonPosition;
 
-            if (TrialCount_InBlock == 0)
-            {
-                currentTask.CalculateBlockSummaryString();
-                //if(IsHuman)
-                //{
-                //    AdjustStartButtonPos(); //Adjust startButton position (move down) to make room for Title text. 
-                //    TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
-                //}
-            }
+            currentTask.CalculateBlockSummaryString();
+
+            if (TrialCount_InTask != 0)
+                currentTask.SetTaskSummaryString();
+
+            //if (TrialCount_InBlock == 0)
+            //{
+            //    //if(IsHuman)
+            //    //{
+            //    //    AdjustStartButtonPos(); //Adjust startButton position (move down) to make room for Title text. 
+            //    //    TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
+            //    //}
+            //}
 
             if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
             {
@@ -406,15 +410,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
 
         //ITI State----------------------------------------------------------------------------------------------------------------------
-        ITI.AddTimer(() => itiDuration.value, FinishTrial);
-
-        //FinishTrial State (default state) ----------------------------------------------------------------------------------------------------------------------
-        FinishTrial.AddInitializationMethod(() =>
+        ITI.AddInitializationMethod(() =>
         {
-            if(AbortCode == 0) //Normal
+            if (AbortCode == 0) //Normal
             {
                 NumTrials_Block++;
-                if(currentTrial.GotTrialCorrect)
+                if (currentTrial.GotTrialCorrect)
                     NumCorrect_Block++;
 
                 currentTask.CalculateBlockSummaryString();
@@ -422,6 +423,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             else if (AbortCode == AbortCodeDict["Pause"]) //If used Pause hotkey to end trial, end entire Block
                 EndBlock = true;
         });
+        ITI.AddTimer(() => itiDuration.value, FinishTrial);
+
+        //FinishTrial State (default state) ----------------------------------------------------------------------------------------------------------------------
         FinishTrial.AddDefaultTerminationMethod(() => EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOff"]));
 
         //----------------------------------------------------------------------------------------------------------------------

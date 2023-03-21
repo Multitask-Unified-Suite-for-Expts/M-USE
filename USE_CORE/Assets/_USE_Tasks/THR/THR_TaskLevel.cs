@@ -95,6 +95,20 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         });
     }
 
+    public override void SetTaskSummaryString()
+    {
+        if (trialLevel.TrialCount_InTask != 0)
+        {
+            CurrentTaskSummaryString.Clear();
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" +
+                                            $"\n<b># Trials:</b> {trialLevel.TrialCount_InTask} | " +
+                                            $"\t<b># Blocks:</b> {BlockCount} | " +
+                                            $"\t<b># Rewards:</b> {TouchRewards_Task + ReleaseRewards_Task}");
+        }
+        else
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
+    }
+
     public override OrderedDictionary GetSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary();

@@ -70,7 +70,7 @@ namespace USE_ExperimentTemplate_Trial
 
         // Texture Variables
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, 
-            BackdropStripesTexture, BackdropTexture;
+            BackdropStripesTexture, THR_BackdropTexture;
         //[HideInInspector] public bool Grating;
         
         //protected TrialDef CurrentTrialDef;
@@ -427,7 +427,7 @@ namespace USE_ExperimentTemplate_Trial
             HeldTooLongTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "HorizontalStripes.png"));
             HeldTooShortTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "VerticalStripes.png"));
             BackdropStripesTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "bg.png"));
-            BackdropTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "BackdropGrey.png"));
+            THR_BackdropTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "Concrete4.png"));
         }
 
         public virtual void ResetTrialVariables()

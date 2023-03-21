@@ -122,6 +122,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             LoadConfigUIVariables();
             SetSquareSizeAndPosition();
+
+            currentTask.CalculateBlockSummaryString();
+
+            if (TrialCount_InTask != 0)
+                currentTask.SetTaskSummaryString();
         });
         InitTrial.SpecifyTermination(() => true, WhiteSquare, () => TrialStartTime = Time.time);
 
@@ -491,7 +496,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         BackdropGO.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 
         BackdropRenderer = BackdropGO.GetComponent<Renderer>();
-        BackdropRenderer.material.mainTexture = BackdropTexture;
+        BackdropRenderer.material.mainTexture = THR_BackdropTexture;
         InitialBackdropColor = BackdropRenderer.material.color;
 
         BackdropGO.GetComponent<Renderer>().material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
@@ -536,7 +541,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         BackdropRenderer.material.mainTexture = newTexture;
         AudioFBController.Play("Negative");
         yield return new WaitForSeconds(1f);
-        BackdropRenderer.material.mainTexture = BackdropTexture;
+        BackdropRenderer.material.mainTexture = THR_BackdropTexture;
         BackdropRenderer.material.color = InitialBackdropColor;
         SquareMaterial.color = currentSquareColor;
         Grating = false;

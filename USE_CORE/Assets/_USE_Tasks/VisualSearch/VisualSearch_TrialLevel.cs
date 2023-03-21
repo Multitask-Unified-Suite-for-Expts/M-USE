@@ -89,7 +89,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private bool aborted = false;
     private float? selectionDuration = null;
     private bool choiceMade = false;
-    private bool startButtonSelected = false;
 
     public GameObject chosenStimObj;
     public VisualSearch_StimDef chosenStimDef;
@@ -193,7 +192,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             // Toggle TokenBar and Stim to be visible
             selectionDuration = null;
             TokenFBController.enabled = true;
-            ActivateChildren(playerViewParent);
+            CreateTextOnExperimenterDisplay();
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
         });
@@ -262,7 +261,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddInitializationMethod(() =>
         {
-            DestroyTextOnExperimenterDisplay();
+            if (playerViewParent.transform.childCount != 0)
+                DestroyChildren(playerViewParent);
             if (selectedSD.StimTrialRewardMag > 0)
             {
                 TokenFBController.AddTokens(selectedGO, selectedSD.StimTrialRewardMag);
@@ -299,7 +299,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath,"itiImage" ));
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOff"]);
             }
         });
@@ -318,7 +318,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     }
     public override void FinishTrialCleanup()
     {
-        DestroyTextOnExperimenterDisplay();
+        if (playerViewParent.transform.childCount != 0)
+            DestroyChildren(playerViewParent);
         tStim.ToggleVisibility(false);
         
         if (TokenFBController.isActiveAndEnabled)
@@ -396,7 +397,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         TouchDurationError = false;
         aborted = false;
         choiceMade = false;
-        startButtonSelected = false;
         MouseTracker.ResetClicks();
     }
     private void AssignTrialData()
@@ -435,13 +435,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                     Color.red, textLocation, textSize, playerViewParent.transform);
             }
         }
-        playerViewLoaded = true;
         DeactivateChildren(playerViewParent);
-    }
-    private void DestroyTextOnExperimenterDisplay()
-    {
-        DestroyChildren(playerViewParent);
-        playerViewLoaded = false;
     }
     void LoadConfigUIVariables()
     {

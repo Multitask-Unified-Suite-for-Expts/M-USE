@@ -208,6 +208,9 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.R),
                 hotKeyAction = () =>
                 {
+                    if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
+                        HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
+
                     HkPanel.TrialLevel.AbortCode = 2;
                     HkPanel.TrialLevel.ForceBlockEnd = true;
                     HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
@@ -224,6 +227,9 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.B),
                 hotKeyAction = () =>
                 {
+                    if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
+                        HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
+
                     HkPanel.TrialLevel.AbortCode = 4;
                     HkPanel.TrialLevel.ForceBlockEnd = true;
                     HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
@@ -247,6 +253,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.N),
                 hotKeyAction = () =>
                 {
+                    if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
+                        HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
                     HkPanel.TrialLevel.AbortCode = 3;
                     HkPanel.TrialLevel.ForceBlockEnd = true;
                     HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));

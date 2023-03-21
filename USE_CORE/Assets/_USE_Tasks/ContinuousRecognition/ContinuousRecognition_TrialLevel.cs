@@ -98,13 +98,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
+        OriginalFbTextPosition = YouLoseTextGO.transform.position;
+        OriginalTitleTextPosition = TitleTextGO.transform.position;
+        OriginalTimerPosition = TimerBackdropGO.transform.position;
+
         Add_ControlLevel_InitializationMethod(() =>
         {
             SetControllerBlockValues();
-
-            OriginalFbTextPosition = YouLoseTextGO.transform.position;
-            OriginalTitleTextPosition = TitleTextGO.transform.position;
-            OriginalTimerPosition = TimerBackdropGO.transform.position;
 
             LoadTextures(MaterialFilePath);
 
@@ -551,25 +551,25 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             case 1:
                 if (MacMainDisplayBuild && !Debug.isDebugBuild)
-                    yOffset = 95f; //not checked
+                    yOffset = 90f; //not checked
                 else
                     yOffset = 60f;
                 break;
             case 2:
                 if (MacMainDisplayBuild && !Debug.isDebugBuild)
-                    yOffset = 80f; //not checked
+                    yOffset = 75f; //not checked
                 else
                     yOffset = 50f;
                 break;
             case 3:
                 if (MacMainDisplayBuild && !Debug.isDebugBuild)
-                    yOffset = 30f; //not checked
+                    yOffset = 25f; //not checked
                 else
                     yOffset = 10f;
                 break;
             case 4:
                 if (MacMainDisplayBuild && !Debug.isDebugBuild)
-                    yOffset = 0f; //not checked
+                    yOffset = -5f; //not checked
                 else
                     yOffset = -30f;
                 break;

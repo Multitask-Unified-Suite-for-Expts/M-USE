@@ -22,7 +22,7 @@ namespace SelectionTracking
             }
         }
 
-        public SelectionTracker(Dictionary<string, List<SelectionHandler>> shs, bool useDefaultHandlers = true)
+        public SelectionTracker(Dictionary<string, SelectionHandler> shs, bool useDefaultHandlers = true)
         {
             if (useDefaultHandlers)
             {
@@ -48,15 +48,15 @@ namespace SelectionTracking
         {
             // DEFINE RAYCAST ON SELECTION HANDLING ------------------------------------
             SelectionHandler raycastOnSelectionHandler = new SelectionHandler();
-            raycastOnSelectionHandler.InitCondition = () =>
+            raycastOnSelectionHandler.InitConditions.Add () =>
             {
                 // when would a selection begin in a raycast selection
                 if (raycastOnSelectionHandler.FindCurrentTarget(InputBroker.mousePosition) != null)
                     return true;
                 return false;
             };
-            raycastOnSelectionHandler.UpdateCondition = null;
-            raycastOnSelectionHandler.TerminationCondition = () =>
+            // raycastOnSelectionHandler.UpdateConditions.Add null;
+            raycastOnSelectionHandler.TerminationConditions.Add () =>
             {
                 if (raycastOnSelectionHandler.OngoingSelection.Duration >= raycastOnSelectionHandler.MinDuration &&
                     raycastOnSelectionHandler.OngoingSelection.Duration <= raycastOnSelectionHandler.MaxDuration)
@@ -67,15 +67,15 @@ namespace SelectionTracking
 
             // DEFINE RAYCAST ON OFF SELECTION HANDLING ------------------------------------
             SelectionHandler raycastOnOffSelectionHandler = new SelectionHandler();
-            raycastOnOffSelectionHandler.InitCondition = () =>
+            raycastOnOffSelectionHandler.Add () =>
             {
                 // when would a selection begin in a raycast selection
                 if (raycastOnOffSelectionHandler.FindCurrentTarget(InputBroker.mousePosition) != null)
                     return true;
                 return false;
             };
-            raycastOnOffSelectionHandler.UpdateCondition = null;
-            raycastOnOffSelectionHandler.TerminationCondition = () =>
+            raycastOnOffSelectionHandler.UpdateConditions.Add null;
+            raycastOnOffSelectionHandler.TerminationConditions.Add () =>
             {
                 if (raycastOnOffSelectionHandler.OngoingSelection.Duration >= raycastOnOffSelectionHandler.MinDuration &&
                     raycastOnOffSelectionHandler.OngoingSelection.Duration <= raycastOnOffSelectionHandler.MaxDuration && 
@@ -87,7 +87,7 @@ namespace SelectionTracking
             
             // DEFINE LEFT MOUSE BUTTON DOWN SELECTION HANDLING ------------------------------------
             SelectionHandler leftMouseButtonDown = new SelectionHandler();
-            leftMouseButtonDown.InitCondition = () =>
+            leftMouseButtonDown.InitConditions.Add () =>
             {
                 if (InputBroker.GetMouseButtonDown(0))
                     return true;
@@ -173,31 +173,32 @@ namespace SelectionTracking
         public Selection OngoingSelection;
         public float? MinDuration, MaxDuration;
         public int? MaxPixelDisplacement;
-        public BoolDelegate InitCondition, UpdateCondition, TerminationCondition;
+        public List<BoolDelegate> InitConditions, UpdateConditions, TerminationConditions, 
+            InitErrorTriggers, UpdateErrorTriggers, TerminationErrorTriggers;
         public InputDelegate CurrentInputLocation;
 
         public SelectionHandler()
         {
             
         }
-        public SelectionHandler(float? minDuration, float? maxDuration, int? maxPixelDisplacement, BoolDelegate initCondition, BoolDelegate updateCondition = null,
-            BoolDelegate terminationCondition = null)
+        public SelectionHandler(float? minDuration, float? maxDuration, int? maxPixelDisplacement, List<BoolDelegate> initConditions, List<BoolDelegate> updateConditions = null,
+            List<BoolDelegate> terminationConditions = null)
         {
             MinDuration = minDuration;
             MaxDuration = maxDuration;
             MaxPixelDisplacement = maxPixelDisplacement;
             
-            InitCondition = initCondition;
+            InitConditions = initConditions;
             
-            if (updateCondition == null)
-                UpdateCondition = initCondition;
+            if (updateConditions == null)
+                UpdateConditions = initConditions;
             else
-                UpdateCondition = updateCondition;
+                UpdateConditions = updateConditions;
 
-            if (terminationCondition == null)
-                TerminationCondition = UpdateCondition;
+            if (terminationConditions == null)
+                TerminationConditions = UpdateConditions;
             else
-                TerminationCondition = terminationCondition;
+                TerminationConditions = terminationConditions;
 
         }
 
@@ -206,22 +207,16 @@ namespace SelectionTracking
             GameObject go = FindCurrentTarget(CurrentInputLocation());
             if (OngoingSelection == null && go != null) // there is no ongoing selection
             {
-                if (InitCondition()) // intialization condition is true (e.g. mouse button is down)
+                if (CheckAllConditions(InitConditions)) // intialization condition is true (e.g. mouse button is down)
                     OngoingSelection = new Selection(go); // create a new ongoing selection
             }
             else if (go != null)
                 if (go == OngoingSelection.SelectedGameObject)
                 {
-                    if (UpdateCondition()) // update condition is true (e.g. mouse buton is being held down)
-                    {
+                    if (CheckAllConditions(UpdateConditions)) // update condition is true (e.g. mouse buton is being held down)
                         OngoingSelection.UpdateSelection(); // will track duration and other custom functions while selecting
-                        if (TerminationCondition()) // this is kind of broken - 
-                            OngoingSelection.CompleteSelection();
-                    }
-                    else
-                    {
-                        //selection has failed, do something (e.g. max duration exceeded
-                    }
+                    if (CheckAllConditions(TerminationConditions)) 
+                        OngoingSelection.CompleteSelection();
                 }
         }
 
@@ -249,10 +244,22 @@ namespace SelectionTracking
         public delegate GameObject GoDelegate();
 
         public delegate Vector3 InputDelegate();
-
-
+        public bool CheckAllConditions(IEnumerable<BoolDelegate> boolList)
+        {
+            if (boolList != null)
+            {
+                bool returnVal = true;
+                foreach (BoolDelegate bd in boolList)
+                {
+                    if (!bd())
+                        return false;
+                }
+                return returnVal;
+            }
+            else
+                return false;
+        }
     }
-    
     
 
 }

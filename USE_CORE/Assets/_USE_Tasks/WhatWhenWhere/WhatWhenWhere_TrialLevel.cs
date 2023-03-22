@@ -327,7 +327,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             searchDurations.Add(searchDuration);
             searchDurations_InBlock.Add(searchDuration);
             CurrentTaskLevel.SearchDurations_InTask.Add(searchDuration);
-            totalFbDuration = (fbDuration.value + flashingFbDuration.value);
+           // totalFbDuration = (fbDuration.value + flashingFbDuration.value);
             SliderFBController.SetUpdateDuration(fbDuration.value);
             SliderFBController.SetFlashingDuration(flashingFbDuration.value);
 
@@ -367,7 +367,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             selectedGO = null;
         });
         //don't control timing with AddTimer, use slider class SliderUpdateFinished bool 
-        SelectionFeedback.AddTimer(()=>totalFbDuration, Delay, () =>
+        SelectionFeedback.AddTimer(()=>fbDuration.value, Delay, () =>
         {
             DelayDuration = 0;
             
@@ -452,7 +452,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
-        if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
+        if (playerViewParent.transform.childCount != 0)
             DestroyChildren(GameObject.Find("MainCameraCopy"));
         searchStims.ToggleVisibility(false);
         distractorStims.ToggleVisibility(false);
@@ -558,7 +558,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
        //     trialProgress = (decimal.Divide(numCorrect_InTrial.Sum(), numTotal_InTrial.Sum())).ToString();
 
         TrialSummaryString = "Selected Object Indices: " + string.Join(",",touchedObjects) +
-                             "\nCorrect Selection?: " + CorrectSelection +
+                             "\nCorrect Selection? : " + CorrectSelection +
                            //  "\nTrial Progress: " + trialProgress + IMPROVE THE LOGIC IS OFF
                              "\n" +
                              "\nError: " + errorTypeString +

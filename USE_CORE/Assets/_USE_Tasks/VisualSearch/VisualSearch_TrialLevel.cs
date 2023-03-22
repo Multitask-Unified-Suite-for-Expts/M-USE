@@ -115,8 +115,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             playerViewParent = GameObject.Find("MainCameraCopy");     
             
             // Initialize FB Controller Values
-            HaloFBController.SetHaloSize(6f);
-            HaloFBController.SetHaloIntensity(6);
+            HaloFBController.SetHaloSize(5f);
+            HaloFBController.SetHaloIntensity(5);
         });
         
         SetupTrial.AddInitializationMethod(() =>

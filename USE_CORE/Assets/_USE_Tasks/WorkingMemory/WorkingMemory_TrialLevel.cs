@@ -115,8 +115,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         {
             LoadTextures(ContextExternalFilePath);
             // Initialize FB Controller Values
-            HaloFBController.SetHaloSize(6f);
-            HaloFBController.SetHaloIntensity(6);
+            HaloFBController.SetHaloSize(5f);
+            HaloFBController.SetHaloIntensity(5);
         });
         SetupTrial.AddInitializationMethod(() =>
         {

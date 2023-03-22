@@ -394,8 +394,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     private void SetTrialSummaryString()
     {
-        TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) +
-                              "\nRewarding: " + (currentTrial.RewardTouch ? "Touch" : "Release") +
+        TrialSummaryString = "Rewarding: " + (currentTrial.RewardTouch ? "Touch" : "Release") +
                               "\nRandomPosition: " + ((currentTrial.RandomSquarePosition ? "True" : "False")) +
                               "\nRandomSize: " + ((currentTrial.RandomSquareSize ? "True" : "False"));
     }

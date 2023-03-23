@@ -339,8 +339,12 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.SerialRecvData = SerialRecvData;
             TrialLevel.SerialSentData = SerialSentData;
             TrialLevel.SyncBoxController = SyncBoxController;
-            TrialLevel.SyncBoxController.EventCodeManager = EventCodeManager;
+
+            if(SyncBoxController != null)
+                TrialLevel.SyncBoxController.EventCodeManager = EventCodeManager;
+
             TrialLevel.EventCodeManager = EventCodeManager;
+
             if (CustomTaskEventCodes != null)
                 TrialLevel.TaskEventCodes = CustomTaskEventCodes;
             if (SessionEventCodes != null)

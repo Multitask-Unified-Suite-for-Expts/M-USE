@@ -95,7 +95,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public float StartButtonScale;
     public bool NeutralITI;
     public bool UsingFixedRatioReward;
-    public bool ErrorPenalty;
 
     // Config UI Variables
     private bool configVariablesLoaded;
@@ -122,7 +121,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     // Touch Evaluation Variables
     private GameObject selectedGO;
-   // private StimDef selectedSD;
+    // private StimDef selectedSD;
 
     // Slider & Animation variables
     private float sliderValueChange;
@@ -183,7 +182,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             if (!configVariablesLoaded)
                 LoadConfigVariables();
-            
+            CurrentTaskLevel.LoadTextMaze();
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
             
         });
@@ -203,6 +202,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             InstantiateCurrMaze();
             tiles.ToggleVisibility(true);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOn"]);
+            
+            if (playerViewParent.transform.childCount == 0)
+                CreateTextOnExperimenterDisplay();
+            else
+                ActivateChildren(playerViewParent);
         });
         MouseTracker.AddSelectionHandler(mouseHandler, ChooseTile, null, 
             ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
@@ -210,13 +214,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             CurrentTaskLevel.SetTaskSummaryString();
             choiceDuration = 0;
-            
-            
-            
-            if (playerViewParent.transform.childCount == 0)
-                CreateTextOnExperimenterDisplay();
-            else
-                ActivateChildren(playerViewParent);
         });
         ChooseTile.AddUpdateMethod(() =>
         {
@@ -238,7 +235,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-       ChooseTile.SpecifyTermination(() =>  choiceMade, SelectionFeedback, () =>
+        ChooseTile.SpecifyTermination(() =>  choiceMade, SelectionFeedback, () =>
         {
             if (selectedGO.GetComponent<Tile>().mCoord.chessCoord ==  CurrentTaskLevel.currMaze.mStart)
             {
@@ -257,7 +254,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["MazeFinish"]);
             }
         });
-       ChooseTile.SpecifyTermination(()=> mazeDuration > maxMazeDuration.value, ()=> FinishTrial); // Timeout Termination
+        ChooseTile.SpecifyTermination(()=> mazeDuration > maxMazeDuration.value, ()=> FinishTrial); // Timeout Termination
        
         SelectionFeedback.AddInitializationMethod(() =>
         {
@@ -277,9 +274,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 if (ReturnToLast)
                 {
                     AudioFBController.Play("Positive");
-                    if (ErrorPenalty)
+                    if (CurrentTrialDef.ErrorPenalty)
                         SliderFBController.UpdateSliderValue(selectedGO.GetComponent<Tile>().sliderValueChange);
-                  //  EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]); 
+                    //  EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]); 
                 }
                 else if (ErroneousReturnToLast)
                 {
@@ -291,12 +288,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     SliderFBController.UpdateSliderValue(selectedGO.GetComponent<Tile>().sliderValueChange);
                     playerViewParent.transform.Find((pathProgressIndex + 1).ToString()).GetComponent<Text>().color =
                         new Color(0, 0.392f, 0);
-                   // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]);
+                    // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]);
                 }
                 else if (selectedGO != null && !ErroneousReturnToLast)
                 {
                     AudioFBController.Play("Negative");
-                    if (ErrorPenalty && consecutiveErrors == 1)
+                    if (CurrentTrialDef.ErrorPenalty && consecutiveErrors == 1)
                         SliderFBController.UpdateSliderValue(-selectedGO.GetComponent<Tile>().sliderValueChange);
                     // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
                 }
@@ -505,7 +502,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             return 20;
         }
         
-        // CORRECT CHOICE
         if (touchedCoord.chessCoord == CurrentTaskLevel.currMaze.mNextStep)
         {
             Debug.Log("*Correct Tile Touch*");

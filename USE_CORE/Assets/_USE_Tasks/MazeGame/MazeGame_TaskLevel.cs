@@ -403,13 +403,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             mgTL.MazeBackgroundTextureName = "MazeBackground";
             Debug.Log("Maze Background Texture settings not defined in the TaskDef, set as default of MazeBackground");
         }
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ErrorPenalty"))
-            mgTL.ErrorPenalty = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "ErrorPenalty");
-        else
-        {
-            mgTL.ErrorPenalty = false;
-            Debug.Log("Error Penalty settings not defined in the TaskDef, set as default of FALSE");
-        }
+        
     }
     private void LoadMazeDef()
     {
@@ -464,7 +458,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
         mgTL.mazeDefName = MazeName[mIndex];
     }
-    private void LoadTextMaze()
+    public void LoadTextMaze()
     {
         // textMaze will load the text file containing the full Maze path of the intended mazeDef for the block/trial
         string mazeFilePath = "";

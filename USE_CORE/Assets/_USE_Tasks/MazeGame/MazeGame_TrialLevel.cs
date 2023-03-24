@@ -21,6 +21,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public USE_StartButton USE_StartButton;
     private GameObject StartButton;
 
+    // Block Ending Variable
+    public List<float> runningTrialPerformance = new List<float>();
+    private float trialPerformance;
+    public int MinTrials;
+
     // Maze Object Variables
     public static Maze currMaze;
     public string mazeDefName;
@@ -62,8 +67,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private int correctTouches_InTrial;
     private int backtrackErrors_InTrial;
     private int perseverativeErrors_InTrial;
-    private float accuracy_InTrial;
-    public List<int> runningAcc;
     private bool aborted;
     private bool choiceMade;
     
@@ -311,8 +314,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 StateAfterDelay = ITI;
                 DelayDuration = 0;
                 
-                accuracy_InTrial = (float)decimal.Divide(totalErrors_InTrial,currMaze.mNumSquares);
-              //  runningAcc.Add(accuracy_InTrial);
+                trialPerformance = (float)decimal.Divide(totalErrors_InTrial,currMaze.mNumSquares);
+                runningTrialPerformance.Add(trialPerformance);
                 SliderFBController.ResetSliderBarFull();
                 CurrentTaskLevel.numSliderBarFull_InBlock++;
                 CurrentTaskLevel.numSliderBarFull_InTask++;
@@ -370,9 +373,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     protected override bool CheckBlockEnd()
     {
         TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
-        Debug.Log("RUNNINGACC STRING" + string.Join(",",runningAcc));
-        return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
-            CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, CurrentTaskLevel.MinTrials,
+        Debug.Log("RUNNING TRIAL PERFORMANCE: " + string.Join(",",runningTrialPerformance) + "LAST TRIAL PERFORMANCE: " + runningTrialPerformance[runningTrialPerformance.Count-1]);
+        return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningTrialPerformance,
+            CurrentTrialDef.BlockEndThreshold, MinTrials,
             TrialDefs.Count);
     }
     private void InstantiateCurrMaze()

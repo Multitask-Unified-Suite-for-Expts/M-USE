@@ -55,9 +55,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     private float AvgCorrectTouches;
     private float AvgMazeDuration;
     private float AvgReward;
-
-    public int MinTrials;
-
+    
     [HideInInspector] public string BlockAveragesString;
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;
@@ -106,7 +104,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                 
             RenderSettings.skybox = CreateSkybox(mgTL.GetContextNestedFilePath(ContextExternalFilePath, mgBD.ContextName, "LinearDark"));
             mgTL.contextName = mgBD.ContextName;
-            MinTrials = mgBD.MinMaxTrials[0];
+            mgTL.MinTrials = mgBD.MinMaxTrials[0];
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
             
             ResetBlockVariables();
@@ -190,7 +188,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         numAbortedTrials_InBlock = 0;
         numSliderBarFull_InBlock = 0;
         mazeDurationsList_InBlock.Clear();
-        mgTL.runningAcc.Clear();
+        mgTL.runningTrialPerformance.Clear();
     }
     public void CalculateBlockSummaryString()
     {

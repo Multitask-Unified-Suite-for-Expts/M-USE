@@ -558,7 +558,7 @@ namespace USE_Data
 		}
 		public void AddDatum(string name, Func<Vector3?[]> variable)
 		{
-			IDatum datum = new Datum<Vector4?[]>(name, () => variable());
+			IDatum datum = new Datum<Vector3?[]>(name, () => variable());
 			data.Add(datum);
 		}
 		public void AddDatum(string name, Func<Vector4[]> variable)

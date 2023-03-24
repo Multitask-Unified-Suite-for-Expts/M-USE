@@ -396,7 +396,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
         return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningTrialPerformance,
             CurrentTrialDef.BlockEndThreshold, MinTrials,
-            TrialDefs.Count);
+            CurrentTrialDef.MaxTrials);
     }
     private void InstantiateCurrMaze()
     {

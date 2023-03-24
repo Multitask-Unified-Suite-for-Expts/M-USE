@@ -108,7 +108,7 @@ namespace USE_ExperimentTemplate_Task
         public void DefineTaskLevel(bool verifyOnly)
         {
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
-            ReadSettingsFiles();
+            ReadSettingsFiles(verifyOnly);
             ReadCustomSettingsFiles();
             FindStims();
             if (verifyOnly) return;
@@ -417,7 +417,7 @@ namespace USE_ExperimentTemplate_Task
         }
 
 
-        private void ReadSettingsFiles()
+        private void ReadSettingsFiles(bool verifyOnly)
         {
             //user specifies what custom types they have that inherit from TaskDef, BlockDef, and TrialDef;
             SpecifyTypes();
@@ -473,9 +473,12 @@ namespace USE_ExperimentTemplate_Task
                                    " folder, no trials generated as a result.");
                 else
                 {
-                    for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+                    if (!verifyOnly)
                     {
-                        BlockDefs[iBlock].GenerateTrialDefsFromBlockDef();
+                        for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+                        {
+                            BlockDefs[iBlock].GenerateTrialDefsFromBlockDef();
+                        }
                     }
                 }
 
@@ -504,23 +507,30 @@ namespace USE_ExperimentTemplate_Task
                     }
 
                     //add trialDef[] for each block;
-                    for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+                    if (!verifyOnly)
                     {
-                        if (BlockDefs[iBlock] == null)
-                            BlockDefs[iBlock] = new BlockDef();
-                        BlockDefs[iBlock].BlockCount = iBlock;
-                        BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock, AllTrialDefs);
+                        for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+                        {
+                            if (BlockDefs[iBlock] == null)
+                                BlockDefs[iBlock] = new BlockDef();
+                            BlockDefs[iBlock].BlockCount = iBlock;
+                            BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock, AllTrialDefs);
+                        }  
                     }
                 }
                 else //there is a blockDef file, its information may need to be added to TrialDefs
                 {
 
                     //add trialDef[] for each block;
-                    for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+                    if (!verifyOnly)
                     {
-                        BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock + 1, AllTrialDefs);
-                        BlockDefs[iBlock].AddToTrialDefsFromBlockDef();
+                      for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++) 
+                      {
+                          BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock + 1, AllTrialDefs);
+                          BlockDefs[iBlock].AddToTrialDefsFromBlockDef();
+                      }  
                     }
+                    
                 }
             }
         }

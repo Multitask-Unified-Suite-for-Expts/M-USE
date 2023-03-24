@@ -64,14 +64,15 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         if (wwwTL.searchDurations_InBlock.Count > 0)
             avgBlockSearchDuration = (float)Math.Round(wwwTL.searchDurations_InBlock.Average(), 2);
 
-        BlockSummaryString.AppendLine("Average Search Duration: " + avgBlockSearchDuration +
+        BlockSummaryString.AppendLine("<b>Max Trials in Block: </b>" + wwwTL.CurrentTrialDef.MaxTrials + 
+                                      "\nAverage Search Duration: " + avgBlockSearchDuration +
                                       "\nAccuracy: " + wwwTL.accuracyLog_InBlock + 
                                       "\n" +
                                       "\nDistractor Slot Error Count: " + wwwTL.distractorSlotErrorCount_InBlock+
                                       "\nNon-Distractor Slot Error Count: " + wwwTL.slotErrorCount_InBlock + 
                                       "\nRepetition Error Count: "  + wwwTL.repetitionErrorCount_InBlock +
                                       "\nTouch Duration Error Count: " + wwwTL.touchDurationErrorCount_InBlock + 
-                                   //   "\nNon-Stim Touch Error Count: " + wwwTL.numNonStimSelections_InBlock+
+                                      //   "\nNon-Stim Touch Error Count: " + wwwTL.numNonStimSelections_InBlock+
                                       "\nNo Selection Error Count: " + wwwTL.AbortedTrials_InBlock);
     }
     public override void SetTaskSummaryString()

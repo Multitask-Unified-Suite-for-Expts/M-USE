@@ -466,6 +466,36 @@ namespace USE_Data
 			IDatum datum = new Datum<List<string>>(name, () => variable());
 			data.Add(datum);
 		}
+		public void AddDatum(string name, Func<List<Vector2>> variable)
+		{
+			IDatum datum = new Datum<List<Vector2>>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<List<Vector2?>> variable)
+		{
+			IDatum datum = new Datum<List<Vector2?>>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<List<Vector3>> variable)
+		{
+			IDatum datum = new Datum<List<Vector3>>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<List<Vector3?>> variable)
+		{
+			IDatum datum = new Datum<List<Vector3?>>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<List<Vector4>> variable)
+		{
+			IDatum datum = new Datum<List<Vector4>>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<List<Vector4?>> variable)
+		{
+			IDatum datum = new Datum<List<Vector4?>>(name, () => variable());
+			data.Add(datum);
+		}
 		public void AddDatum(string name, Func<int[]> variable)
 		{
 			IDatum datum = new Datum<int[]>(name, () => variable());
@@ -509,6 +539,36 @@ namespace USE_Data
 		public void AddDatum(string name, Func<string[]> variable)
 		{
 			IDatum datum = new Datum<string[]>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<Vector2[]> variable)
+		{
+			IDatum datum = new Datum<Vector2[]>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<Vector2?[]> variable)
+		{
+			IDatum datum = new Datum<Vector2?[]>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<Vector3[]> variable)
+		{
+			IDatum datum = new Datum<Vector3[]>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<Vector3?[]> variable)
+		{
+			IDatum datum = new Datum<Vector4?[]>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<Vector4[]> variable)
+		{
+			IDatum datum = new Datum<Vector4[]>(name, () => variable());
+			data.Add(datum);
+		}
+		public void AddDatum(string name, Func<Vector4?[]> variable)
+		{
+			IDatum datum = new Datum<Vector4?[]>(name, () => variable());
 			data.Add(datum);
 		}
 

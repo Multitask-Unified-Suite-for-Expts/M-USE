@@ -60,7 +60,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     // Trial Data Tracking Variables
     private float mazeDuration;
     private float mazeStartTime;
-    private int totalErrors_InTrial;
+    private int[] totalErrors_InTrial;
     private int[] ruleAbidingErrors_InTrial;
     private int[] ruleBreakingErrors_InTrial;
     private int retouchCorrect_InTrial;
@@ -164,8 +164,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             ruleBreakingErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
             backtrackErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
             perseverativeErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
-            
-            
+            totalErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
             
             //player view variables
             playerViewParent = GameObject.Find("MainCameraCopy");
@@ -264,7 +263,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
                 // This is what actually determines the result of the tile choice
                 selectedGO.GetComponent<Tile>().OnMouseDown();
-                trialPerformance = (float)decimal.Divide(totalErrors_InTrial,CurrentTaskLevel.currMaze.mNumSquares);
+                trialPerformance = (float)decimal.Divide(totalErrors_InTrial.Sum(),CurrentTaskLevel.currMaze.mNumSquares);
 
                 finishedFbDuration = (tileFbDuration + flashingFbDuration.value);
                 SliderFBController.SetUpdateDuration(tileFbDuration);
@@ -335,9 +334,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 StateAfterDelay = ITI;
                 DelayDuration = 0;
                 
-                trialPerformance = (float)decimal.Divide(totalErrors_InTrial,CurrentTaskLevel.currMaze.mNumSquares);
+                trialPerformance = (float)decimal.Divide(totalErrors_InTrial.Sum(),CurrentTaskLevel.currMaze.mNumSquares);
                 runningTrialPerformance.Add(trialPerformance);
-                SliderFBController.ResetSliderBarFull();
                 CurrentTaskLevel.numSliderBarFull_InBlock++;
                 CurrentTaskLevel.numSliderBarFull_InTask++;
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
@@ -385,6 +383,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 contextName = "itiImage";
                 RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage"));
             }
+            Debug.Log("HERE IS THE STRING: " + "[" + string.Join(", ", ruleBreakingErrors_InTrial) + "]");
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
         
@@ -488,8 +487,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Debug.Log("*Rule Breaking Error - Not Pressing the Start Tile to Begin the Maze*");
             EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
             
-            totalErrors_InTrial++;
-            CurrentTaskLevel.totalErrors_InBlock++;
+            totalErrors_InTrial[pathProgressIndex] += 1;
+            CurrentTaskLevel.totalErrors_InBlock[pathProgressIndex] += 1;
             CurrentTaskLevel.totalErrors_InTask++;
 
             ruleBreakingErrors_InTrial[pathProgressIndex] += 1;
@@ -565,8 +564,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 Debug.Log("*Rule-Breaking Perseverative Error*");
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
                 
-                totalErrors_InTrial++;
-                CurrentTaskLevel.totalErrors_InBlock++;
+                totalErrors_InTrial[pathProgressIndex] += 1;
+                CurrentTaskLevel.totalErrors_InBlock[pathProgressIndex] += 1;
                 CurrentTaskLevel.totalErrors_InTask++;
 
                 ruleBreakingErrors_InTrial[pathProgressIndex] += 1;
@@ -579,8 +578,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Debug.Log("*Rule-Abiding Incorrect Error*");
             EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleAbidingError"]);
 
-            totalErrors_InTrial++;
-            CurrentTaskLevel.totalErrors_InBlock++;
+            totalErrors_InTrial[pathProgressIndex] += 1;
+            CurrentTaskLevel.totalErrors_InBlock[pathProgressIndex] += 1;
             CurrentTaskLevel.totalErrors_InTask++;
 
             ruleAbidingErrors_InTrial[pathProgressIndex] += 1;
@@ -643,8 +642,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Debug.Log("*Rule-Breaking Incorrect Error*");
             EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
             
-            totalErrors_InTrial++;
-            CurrentTaskLevel.totalErrors_InBlock++;
+            totalErrors_InTrial[pathProgressIndex] += 1;
+            CurrentTaskLevel.totalErrors_InBlock[pathProgressIndex] += 1;
             CurrentTaskLevel.totalErrors_InTask++;
 
             ruleBreakingErrors_InTrial[pathProgressIndex] += 1;
@@ -743,13 +742,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private void DefineTrialData()
     {
         TrialData.AddDatum("MazeDefName", ()=> mazeDefName);
-        TrialData.AddDatum("TotalErrors", () => totalErrors_InTrial);
+        TrialData.AddDatum("TotalErrors", () => $"[{string.Join(", ", totalErrors_InTrial)}]");
         // TrialData.AddDatum("CorrectTouches", () => correctTouches_InTrial); DOESN'T GIVE ANYTHING USEFUL, JUST PATH LENGTH
         TrialData.AddDatum("RetouchCorrect", () => retouchCorrect_InTrial);
-        TrialData.AddDatum("PerseverativeErrors", () => perseverativeErrors_InTrial);
-        TrialData.AddDatum("BacktrackingErrors", () => backtrackErrors_InTrial);
-        TrialData.AddDatum("Rule-AbidingErrors", () => ruleAbidingErrors_InTrial);
-        TrialData.AddDatum("Rule-BreakingErrors", () => ruleBreakingErrors_InTrial);
+        TrialData.AddDatum("PerseverativeErrors", () => $"[{string.Join(", ", perseverativeErrors_InTrial)}]");
+        TrialData.AddDatum("BacktrackingErrors", () => $"[{string.Join(", ", backtrackErrors_InTrial)}]");
+        TrialData.AddDatum("Rule-AbidingErrors", () => $"[{string.Join(", ", ruleAbidingErrors_InTrial)}]");
+        TrialData.AddDatum("Rule-BreakingErrors", () => $"[{string.Join(", ", ruleBreakingErrors_InTrial)}]");
         TrialData.AddDatum("MazeDuration", ()=> mazeDuration);
     }
 
@@ -815,6 +814,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     public override void ResetTrialVariables()
     {
+        SliderFBController.ResetSliderBarFull();
         mazeDuration = 0;
         mazeStartTime = 0;
         finishedMaze = false;
@@ -826,7 +826,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         ReturnToLast = false;
         ErroneousReturnToLast = false;
         
-        totalErrors_InTrial = 0;
         correctTouches_InTrial = 0;
         retouchCorrect_InTrial = 0;
         if (TrialCount_InBlock != 0)
@@ -835,6 +834,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Array.Clear(backtrackErrors_InTrial, 0, backtrackErrors_InTrial.Length);
             Array.Clear(ruleAbidingErrors_InTrial, 0, ruleAbidingErrors_InTrial.Length);
             Array.Clear(ruleBreakingErrors_InTrial, 0, ruleBreakingErrors_InTrial.Length);
+            Array.Clear(totalErrors_InTrial, 0, totalErrors_InTrial.Length);
         }
         pathProgress.Clear();
         pathProgressGO.Clear();
@@ -852,7 +852,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         TrialSummaryString = "<b>Maze Name: </b>" + mazeDefName +
                              "\n" + 
-                             "\nTotal Errors: " + totalErrors_InTrial +
+                             "\nTotal Errors: " + totalErrors_InTrial.Sum() +
                              "\nTrial Performance: " + trialPerformance + 
                              "\nRule-Abiding Errors: " + ruleAbidingErrors_InTrial.Sum() +
                              "\nRule-Breaking Errors: " + ruleBreakingErrors_InTrial.Sum() + 

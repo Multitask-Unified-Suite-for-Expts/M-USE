@@ -139,7 +139,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         ClearStrings();
-        BlockSummaryString.AppendLine("<b>Max Trials in Block: </b>" + flTL.CurrentTrialDef.MaxTrials + 
+        BlockSummaryString.AppendLine("<b>Max Trials in Block: </b>" + flTL.MaxTrials + 
                                       "\nAccuracy: " + String.Format("{0:0.000}", (float)flTL.Accuracy_InBlock) +  
                                       "\n" + 
                                       "\nAvg Search Duration: " + String.Format("{0:0.000}", flTL.AverageSearchDuration_InBlock) +

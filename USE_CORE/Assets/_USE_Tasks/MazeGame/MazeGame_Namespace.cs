@@ -51,7 +51,6 @@ namespace MazeGame_Namespace
             
             System.Random rnd = new System.Random();
             int num = rnd.Next(MinMaxTrials[0], MinMaxTrials[1]);
-            Debug.Log("SELECTED MAX HERE: " + num);
 
             TrialDefs = new List<MazeGame_TrialDef>().ConvertAll(x => (TrialDef)x);
             

@@ -24,7 +24,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
     
     [HideInInspector]
-    public int totalErrors_InBlock;
+    public int[] totalErrors_InBlock;
     public int[] perseverativeErrors_InBlock;
     public int[] backtrackErrors_InBlock;
     public int[] ruleAbidingErrors_InBlock;
@@ -120,6 +120,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             ruleBreakingErrors_InBlock = new int[currMaze.mNumSquares];
             backtrackErrors_InBlock = new int[currMaze.mNumSquares];
             perseverativeErrors_InBlock = new int[currMaze.mNumSquares];
+            totalErrors_InBlock = new int[currMaze.mNumSquares];
             
             ResetBlockVariables();
             CalculateBlockSummaryString();
@@ -139,13 +140,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     }
     public void AssignBlockData()
     {
-        BlockData.AddDatum("TotalErrors", () => totalErrors_InBlock);
+        BlockData.AddDatum("TotalErrors", () => $"[{string.Join(", ", totalErrors_InBlock)}]");
         BlockData.AddDatum("CorrectTouches", () => correctTouches_InBlock);
         BlockData.AddDatum("RetouchCorrect", () => retouchCorrect_InBlock);
-        BlockData.AddDatum("PerseverativeErrors", () => perseverativeErrors_InBlock);
-        BlockData.AddDatum("BacktrackErrors", () => backtrackErrors_InBlock);
-        BlockData.AddDatum("RuleAbidingErrors", () => ruleAbidingErrors_InBlock);
-        BlockData.AddDatum("RuleBreakingErrors", () => ruleBreakingErrors_InBlock);
+        BlockData.AddDatum("PerseverativeErrors",() => $"[{string.Join(", ", perseverativeErrors_InBlock)}]");
+        BlockData.AddDatum("BacktrackErrors", () => $"[{string.Join(", ", backtrackErrors_InBlock)}]");
+        BlockData.AddDatum("RuleAbidingErrors", () => $"[{string.Join(", ", ruleAbidingErrors_InBlock)}]");
+        BlockData.AddDatum("RuleBreakingErrors", () => $"[{string.Join(", ", ruleBreakingErrors_InBlock)}]");
         BlockData.AddDatum("NumRewardPulses", () => numRewardPulses_InBlock);
         BlockData.AddDatum("NumSliderBarFull", ()=>numSliderBarFull_InBlock);
         BlockData.AddDatum("NumAbortedTrials", ()=> numAbortedTrials_InBlock);
@@ -191,13 +192,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     }
     private void ResetBlockVariables()
     {
-        totalErrors_InBlock = 0;
         correctTouches_InBlock = 0;
         retouchCorrect_InBlock = 0;
         Array.Clear(perseverativeErrors_InBlock, 0, perseverativeErrors_InBlock.Length);
         Array.Clear(backtrackErrors_InBlock, 0, backtrackErrors_InBlock.Length);
         Array.Clear(ruleAbidingErrors_InBlock, 0, ruleAbidingErrors_InBlock.Length);
         Array.Clear(ruleBreakingErrors_InBlock, 0, ruleBreakingErrors_InBlock.Length);
+        Array.Clear(totalErrors_InBlock, 0, totalErrors_InBlock.Length);
         numRewardPulses_InBlock = 0;
         nonStimTouches_InBlock = 0;
         numAbortedTrials_InBlock = 0;
@@ -210,7 +211,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     {
         ClearStrings();
         CurrentBlockString = "<b>Max Trials in Block: </b>" + mgTL.CurrentTrialDef.MaxTrials + 
-                             "\n\nTotal Errors: " + totalErrors_InBlock +
+                             "\n\nTotal Errors: " + totalErrors_InBlock.Sum() +
                              "\nRule-Abiding Errors: " + ruleAbidingErrors_InBlock.Sum() +
                              "\nRule-Breaking Errors: " + ruleBreakingErrors_InBlock.Sum() + 
                              "\nPerseverative Errors: " + perseverativeErrors_InBlock.Sum() +

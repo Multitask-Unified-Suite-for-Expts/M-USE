@@ -508,6 +508,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         searchDurations.Clear();
         touchedObjects.Clear();
         errorTypeString = "";
+        SliderFBController.ResetSliderBarFull();
     }
 
     public void ResetBlockVariables()

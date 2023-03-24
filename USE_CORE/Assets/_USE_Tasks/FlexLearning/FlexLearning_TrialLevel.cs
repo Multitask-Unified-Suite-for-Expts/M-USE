@@ -468,7 +468,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
         return (TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
             CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, MinTrials,
-            TrialDefs.Count) || TrialCount_InBlock == MaxTrials);
+            CurrentTrialDef.MaxTrials) || TrialCount_InBlock == CurrentTrialDef.MaxTrials);
         
     }
     private void TouchDurationErrorFeedback(USE_StartButton UIElement, bool deactivateAfter)

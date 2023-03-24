@@ -120,7 +120,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     // Slider & Animation variables
     private float sliderValueChange;
-    private float fbDuration;
+    private float finishedFbDuration;
 
     public MazeGame_TrialDef CurrentTrialDef => GetCurrentTrialDef<MazeGame_TrialDef>();
     public MazeGame_TaskLevel CurrentTaskLevel => GetTaskLevel<MazeGame_TaskLevel>();
@@ -246,9 +246,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 
                 // This is what actually determines the result of the tile choice
                 selectedGO.GetComponent<Tile>().OnMouseDown();
-                fbDuration = (tileFbDuration + flashingFbDuration.value);
+                finishedFbDuration = (tileFbDuration + flashingFbDuration.value);
                 SliderFBController.SetUpdateDuration(tileFbDuration);
-                SliderFBController.SetFlashingDuration(flashingFbDuration.value);
+                SliderFBController.SetFlashingDuration(finishedFbDuration);
                 
                 
                 if (ReturnToLast)
@@ -266,7 +266,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     SliderFBController.UpdateSliderValue(selectedGO.GetComponent<Tile>().sliderValueChange);
                     playerViewParent.transform.Find((pathProgressIndex + 1).ToString()).GetComponent<Text>().color =
                         new Color(0, 0.392f, 0);
-                   // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]);
+                    // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]);
                 }
                 else if (selectedGO != null && !ErroneousReturnToLast)
                 {
@@ -288,7 +288,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (startedMaze)
                 mazeDuration += Time.deltaTime;
         });
-        SelectionFeedback.AddTimer(() => fbDuration, Delay, () =>
+        SelectionFeedback.AddTimer(() => finishedMaze? finishedFbDuration:tileFbDuration, Delay, () =>
         {
             SetTrialSummaryString(); //Set the Trial Summary String to reflect the results of choice
             CurrentTaskLevel.CalculateBlockSummaryString();

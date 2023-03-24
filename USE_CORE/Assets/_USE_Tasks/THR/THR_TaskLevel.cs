@@ -51,6 +51,9 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
 
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartWithBlueSquare"))
+            trialLevel.StartWithBlueSquare = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StartWithBlueSquare");
+
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
 

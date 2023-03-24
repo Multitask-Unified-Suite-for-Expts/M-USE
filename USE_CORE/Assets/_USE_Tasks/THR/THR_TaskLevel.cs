@@ -138,7 +138,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
                         "\nMovedOutsideSquare: " + trialLevel.NumTouchesMovedOutside_Block +
                         "\nWhiteSquareTouches: " + trialLevel.WhiteSquareTouches_Block +
                         "\nBlueSquareTouches: " + trialLevel.BlueSquareTouches_Block +
-                        "\nNonSquareTouches: " + trialLevel.BackdropTouches_Block +
+                        "\nBackdropTouches: " + trialLevel.BackdropTouches_Block +
                         "\nRewards: " + (trialLevel.NumTouchRewards_Block + trialLevel.NumReleaseRewards_Block) +
                         "\n");
 

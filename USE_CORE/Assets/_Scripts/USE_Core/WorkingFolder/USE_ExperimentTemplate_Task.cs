@@ -339,8 +339,12 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.SerialRecvData = SerialRecvData;
             TrialLevel.SerialSentData = SerialSentData;
             TrialLevel.SyncBoxController = SyncBoxController;
-            TrialLevel.SyncBoxController.EventCodeManager = EventCodeManager;
+
+            if(SyncBoxController != null)
+                TrialLevel.SyncBoxController.EventCodeManager = EventCodeManager;
+
             TrialLevel.EventCodeManager = EventCodeManager;
+
             if (CustomTaskEventCodes != null)
                 TrialLevel.TaskEventCodes = CustomTaskEventCodes;
             if (SessionEventCodes != null)
@@ -826,6 +830,29 @@ namespace USE_ExperimentTemplate_Task
 
     public class TaskLevelTemplate_Methods
     {
+        public bool CheckBlockEnd(string blockEndType, IEnumerable<float> runningTrialPerformance, float performanceThreshold = 1,
+            int? minTrials = null, int? maxTrials = null)
+        {
+            // Takes in accuracy info from the current trial to determine whether to end the block
+            List<float> rTrialPerformance = (List<float>)runningTrialPerformance;
+
+            if (CheckTrialRange(rTrialPerformance.Count, minTrials, maxTrials) != null)
+                return CheckTrialRange(rTrialPerformance.Count, minTrials, maxTrials).Value;
+
+            switch (blockEndType)
+            {
+                case "CurrentTrialPerformance":
+                    if (rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
+                    {
+                        Debug.Log("Block ending due to trial performance below threshold.");
+                        return true;
+                    }
+                    else
+                        return false;
+                default:
+                    return false;
+            }
+        }
         public bool CheckBlockEnd(string blockEndType, IEnumerable<int> runningAcc, float accThreshold = 1, int windowSize = 1, int? minTrials = null, int? maxTrials = null)
         {
             //takes in accuracy information from the current block and determines if the block should end
@@ -836,14 +863,12 @@ namespace USE_ExperimentTemplate_Task
                             //(allows easy comparison of changes between performance across two windows
             int? sumdif; //the simple sum of the number of different trial outcomes in the windows used to compute 
                          //immediateAvg and prevAvg
-
-                         if (rAcc.Count >= windowSize)
-                         {
-                             Debug.Log("RUNNING ACC COUNT: " + runningAcc.Count());
-                             immediateAvg = (float)rAcc.GetRange(rAcc.Count - windowSize, windowSize).Average();
-                            
-                         }
-                         else
+                         
+            if (rAcc.Count >= windowSize)
+            {
+                immediateAvg = (float)rAcc.GetRange(rAcc.Count - windowSize, windowSize).Average();
+            }
+            else
                 immediateAvg = null;
 
             if (rAcc.Count >= windowSize * 2)

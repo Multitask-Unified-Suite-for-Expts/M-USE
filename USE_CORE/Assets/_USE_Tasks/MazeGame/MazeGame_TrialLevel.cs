@@ -126,7 +126,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     // Slider & Animation variables
     private float sliderValueChange;
-    private float fbDuration;
+    private float finishedFbDuration;
 
     public MazeGame_TrialDef CurrentTrialDef => GetCurrentTrialDef<MazeGame_TrialDef>();
     public MazeGame_TaskLevel CurrentTaskLevel => GetTaskLevel<MazeGame_TaskLevel>();
@@ -269,9 +269,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 selectedGO.GetComponent<Tile>().OnMouseDown();
                 trialPerformance = (float)decimal.Divide(totalErrors_InTrial,CurrentTaskLevel.currMaze.mNumSquares);
 
-                fbDuration = (tileFbDuration + flashingFbDuration.value);
+                finishedFbDuration = (tileFbDuration + flashingFbDuration.value);
                 SliderFBController.SetUpdateDuration(tileFbDuration);
-                SliderFBController.SetFlashingDuration(flashingFbDuration.value);
+                SliderFBController.SetFlashingDuration(finishedFbDuration);
                 
                 
                 if (ReturnToLast)
@@ -315,7 +315,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (startedMaze)
                 mazeDuration += Time.deltaTime;
         });
-        SelectionFeedback.AddTimer(() => fbDuration, Delay, () =>
+        SelectionFeedback.AddTimer(() => finishedMaze? finishedFbDuration:tileFbDuration, Delay, () =>
         {
             SetTrialSummaryString(); //Set the Trial Summary String to reflect the results of choice
             CurrentTaskLevel.CalculateBlockSummaryString();

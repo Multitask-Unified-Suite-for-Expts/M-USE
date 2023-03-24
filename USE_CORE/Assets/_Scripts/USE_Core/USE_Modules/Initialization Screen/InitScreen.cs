@@ -53,13 +53,9 @@ public class InitScreen : MonoBehaviour {
     }
 
     IEnumerator HandleConfirm(){
-        if(OnLoadSettings != null){
+        if(OnLoadSettings != null)
             OnLoadSettings();
-        }
-
-
-        // this.gameObject.SetActive(false);
-
+        
         foreach (GameObject g in disableOnConfirm)
             g.SetActive(false);
         foreach (GameObject g in enableOnConfirm)
@@ -69,9 +65,9 @@ public class InitScreen : MonoBehaviour {
         yield return new WaitForEndOfFrame();
 
         Confirmed = true;
-        if(OnConfirm != null){
+        if(OnConfirm != null)
             OnConfirm();
-        }
+ 
         this.gameObject.SetActive(false);
         yield return 0;
     }

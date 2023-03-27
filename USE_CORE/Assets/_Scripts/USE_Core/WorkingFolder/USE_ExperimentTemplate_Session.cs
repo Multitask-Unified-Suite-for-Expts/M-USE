@@ -376,6 +376,7 @@ namespace USE_ExperimentTemplate_Session
                 
                 SessionSettings.Restore();
                 selectedConfigName = null;
+                taskAutomaticallySelected = false; // gives another chance to select even if previous task loading was due to timeout
 
                 SessionCam.gameObject.SetActive(true);
                 // SessionCam.targetDisplay = 2;

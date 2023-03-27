@@ -5,6 +5,7 @@ using USE_ExperimentTemplate_Task;
 using System.Collections.Specialized;
 using System.Text;
 using EffortControl_Namespace;
+using UnityEngine.Serialization;
 
 public class EffortControl_TaskLevel : ControlLevel_Task_Template
 {
@@ -16,12 +17,12 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int Touches_Task = 0;
     [HideInInspector] public int NumChosenLeft_Task = 0;
     [HideInInspector] public int NumChosenRight_Task = 0;
-    [HideInInspector] public int NumChosenHigherReward_Task = 0;
-    [HideInInspector] public int NumChosenLowerReward_Task = 0;
-    [HideInInspector] public int NumChosenHigherEffort_Task = 0;
-    [HideInInspector] public int NumChosenLowerEffort_Task = 0;
-    [HideInInspector] public int NumChosenSameReward_Task = 0;
-    [HideInInspector] public int NumChosenSameEffort_Task = 0;
+    [HideInInspector] public int NumHigherRewardChosen_Task = 0;
+    [HideInInspector] public int NumLowerRewardChosen_Task = 0;
+    [HideInInspector] public int NumSameRewardChosen_Task = 0;
+    [HideInInspector] public int NumHigherEffortChosen_Task = 0;
+    [HideInInspector] public int NumLowerEffortChosen_Task = 0;
+    [HideInInspector] public int NumSameEffortChosen_Task = 0;
     [HideInInspector] public int NumAborted_Task = 0;
     
     [HideInInspector] public string CurrentBlockString;
@@ -53,7 +54,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             trialLevel.ResetBlockVariables();
-            RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(trialLevel.MaterialFilePath, ContextName, "LinearDark"));
+            RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(ContextExternalFilePath, currentBlock.ContextName, "LinearDark"));
             EventCodeManager.SendCodeImmediate(SessionEventCodes["ContextOn"]);
         });
 
@@ -63,7 +64,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
                 CurrentBlockString += "\n";
             BlockStringsAdded++;
             PreviousBlocksString.Insert(0, CurrentBlockString);
-            AddBlockValuesToTaskValues();
         });
     }
 
@@ -75,19 +75,8 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             trialLevel.IsHuman = false;
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
-            trialLevel.MaterialFilePath = (String)SessionSettings.Get("Session", "ContextExternalFilePath");
-        else
-            Debug.Log("ContextExternalFilePath NOT specified in the Session Config OR Task Config!");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextName"))
-            ContextName = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextName");
-        else
-        {
-            ContextName = "Dark";
-            Debug.Log($"No ContextName specified in the {TaskName} Task Config. Defaulting to {ContextName}");
-        }
+            trialLevel.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+        else trialLevel.ContextExternalFilePath = ContextExternalFilePath;
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
         {
@@ -100,21 +89,21 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
     }
 
-    public void AddBlockValuesToTaskValues()
-    {
-        RewardPulses_Task += trialLevel.RewardPulses_Block;
-        Completions_Task += trialLevel.Completions_Block;
-        Touches_Task += trialLevel.TotalTouches_Block;
-        NumChosenLeft_Task += trialLevel.NumChosenLeft_Block;
-        NumChosenRight_Task += trialLevel.NumChosenRight_Block;
-        NumChosenHigherEffort_Task += trialLevel.NumHigherEffortChosen_Block;
-        NumChosenLowerEffort_Task += trialLevel.NumLowerEffortChosen_Block;
-        NumChosenSameEffort_Task += trialLevel.NumSameEffortChosen_Block;
-        NumChosenHigherReward_Task += trialLevel.NumHigherRewardChosen_Block;
-        NumChosenLowerReward_Task += trialLevel.NumLowerRewardChosen_Block;
-        NumChosenSameReward_Task += trialLevel.NumSameRewardChosen_Block;
-        NumAborted_Task += trialLevel.NumAborted_Block;
-    }
+    // public void AddBlockValuesToTaskValues()
+    // {
+    //     RewardPulses_Task += trialLevel.RewardPulses_Block;
+    //     Completions_Task += trialLevel.Completions_Block;
+    //     Touches_Task += trialLevel.TotalTouches_Block;
+    //     NumChosenLeft_Task += trialLevel.NumChosenLeft_Block;
+    //     NumChosenRight_Task += trialLevel.NumChosenRight_Block;
+    //     NumChosenHigherEffort_Task += trialLevel.NumHigherEffortChosen_Block;
+    //     NumChosenLowerEffort_Task += trialLevel.NumLowerEffortChosen_Block;
+    //     NumChosenSameEffort_Task += trialLevel.NumSameEffortChosen_Block;
+    //     NumChosenHigherReward_Task += trialLevel.NumHigherRewardChosen_Block;
+    //     NumChosenLowerReward_Task += trialLevel.NumLowerRewardChosen_Block;
+    //     NumChosenSameReward_Task += trialLevel.NumSameRewardChosen_Block;
+    //     NumAborted_Task += trialLevel.NumAborted_Block;
+    // }
 
     public override OrderedDictionary GetSummaryData()
     {
@@ -125,12 +114,12 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         data["Touches"] = Touches_Task;
         data["Chose Left"] = NumChosenLeft_Task;
         data["Chose Right"] = NumChosenRight_Task;
-        data["Chose Higher Reward"] = NumChosenHigherReward_Task;
-        data["Chose Lower Reward"] = NumChosenLowerReward_Task;
-        data["Chose Same Reward"] = NumChosenSameReward_Task;
-        data["Chose Higher Effort"] = NumChosenHigherEffort_Task;
-        data["Chose Lower Effort"] = NumChosenLowerEffort_Task;
-        data["Chose Same Effort"] = NumChosenSameEffort_Task;
+        data["Chose Higher Reward"] = NumHigherRewardChosen_Task;
+        data["Chose Lower Reward"] = NumLowerRewardChosen_Task;
+        data["Chose Same Reward"] = NumSameRewardChosen_Task;
+        data["Chose Higher Effort"] = NumHigherEffortChosen_Task;
+        data["Chose Lower Effort"] = NumLowerEffortChosen_Task;
+        data["Chose Same Effort"] = NumSameEffortChosen_Task;
 
         return data;
     }
@@ -138,10 +127,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     public void CalculateBlockSummaryString()
     {
         ClearStrings();
-
-        CurrentBlockString = ("<b>Block Num: </b>" + (trialLevel.BlockCount + 1) + 
-                        "\nTrials Completed: " + trialLevel.Completions_Block +
-                        "\n\nTouches: " + trialLevel.TotalTouches_Block +
+        CurrentBlockString = ("Touches: " + trialLevel.TotalTouches_Block +
                         "\nReward Pulses: " + trialLevel.RewardPulses_Block +
                         "\n\nChose Left: " + trialLevel.NumChosenLeft_Block +
                         "\nChose Right: " + trialLevel.NumChosenRight_Block +
@@ -183,10 +169,10 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
             decimal percentAbortedTrials = (Math.Round(decimal.Divide(NumAborted_Task, (trialLevel.TrialCount_InTask)), 2)) * 100;
             decimal percentChoseLeft = Math.Round(decimal.Divide(NumChosenLeft_Task, (trialLevel.TrialCount_InTask)), 2) * 100;
-            decimal percentChoseHigherReward = Math.Round(decimal.Divide(NumChosenHigherReward_Task, (trialLevel.TrialCount_InTask)), 2) * 100;
-            decimal percentChoseHigherEffort = Math.Round(decimal.Divide(NumChosenHigherEffort_Task, (trialLevel.TrialCount_InTask)), 2) * 100;
-            decimal percentChoseSameReward = Math.Round(decimal.Divide(NumChosenSameReward_Task, (trialLevel.TrialCount_InTask)), 2) * 100;
-            decimal percentChoseSameEffort = Math.Round(decimal.Divide(NumChosenSameEffort_Task, (trialLevel.TrialCount_InTask)), 2) * 100;
+            decimal percentChoseHigherReward = Math.Round(decimal.Divide(NumHigherRewardChosen_Task, (trialLevel.TrialCount_InTask)), 2) * 100;
+            decimal percentChoseHigherEffort = Math.Round(decimal.Divide(NumHigherEffortChosen_Task, (trialLevel.TrialCount_InTask)), 2) * 100;
+            decimal percentChoseSameReward = Math.Round(decimal.Divide(NumSameRewardChosen_Task, (trialLevel.TrialCount_InTask)), 2) * 100;
+            decimal percentChoseSameEffort = Math.Round(decimal.Divide(NumSameEffortChosen_Task, (trialLevel.TrialCount_InTask)), 2) * 100;
             
             CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" + 
                                             $"\n<b># Trials:</b> {trialLevel.TrialCount_InTask} ({percentAbortedTrials}% aborted)" + 

@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 37832915}
   - component: {fileID: 37832914}
   - component: {fileID: 37832913}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: VisualSearch_Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -388,19 +388,17 @@ MonoBehaviour:
   AudioFBController: {fileID: 0}
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
+  SliderFBController: {fileID: 0}
   MouseTracker: {fileID: 0}
   GazeTracker: {fileID: 0}
   SelectionType: 
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   InitialTokenAmount: 0
-  StartButtonTexture: {fileID: 0}
-  FBSquareTexture: {fileID: 0}
   HeldTooLongTexture: {fileID: 2800000, guid: 47b4a2dd1c0432a469c082a17ab4256a, type: 3}
   HeldTooShortTexture: {fileID: 2800000, guid: 386006c0d81ea3442b946e37d70067af, type: 3}
   BackdropStripesTexture: {fileID: 0}
   BackdropTexture: {fileID: 0}
-  MazeBackgroundTexture: {fileID: 0}
   VS_CanvasGO: {fileID: 37832912}
   minObjectTouchDuration:
     name: 
@@ -483,8 +481,10 @@ MonoBehaviour:
     min: 0
     precision: 0
   ContextExternalFilePath: 
-  ButtonPosition: {x: 0, y: 0, z: 0}
-  ButtonScale: {x: 0, y: 0, z: 0}
+  FBSquarePosition: {x: 0, y: 0, z: 0}
+  FBSquareScale: 0
+  StartButtonPosition: {x: 0, y: 0, z: 0}
+  StartButtonScale: 0
   StimFacingCamera: 0
   ShadowType: 
   NeutralITI: 0
@@ -574,7 +574,6 @@ MonoBehaviour:
   SearchDurationsList_InTask: []
   CurrentBlockString: 
   BlockStringsAdded: 0
-  TaskName: VisualSearch
 --- !u!4 &1441289830
 Transform:
   m_ObjectHideFlags: 0

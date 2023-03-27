@@ -93,8 +93,22 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             }
             CalculateBlockAverages();
             CalculateStanDev();
-        });
-        
+        });        
+    }
+
+    public override void SetTaskSummaryString()
+    {
+        if(trialLevel.TrialCount_InTask != 0)
+        {
+            CurrentTaskSummaryString.Clear();
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" +
+                                            $"\n<b># Trials:</b> {trialLevel.TrialCount_InTask} | " +
+                                            $"\t<b># Blocks:</b> {BlockCount} | " +
+                                            $"\t<b># Rewards:</b> {TotalRewards_Task.Count} | " +
+                                            $"\t<b># TbFilled:</b> {TokenBarCompletions_Task.Count}");
+        }
+        else
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
     }
 
     public void AddBlockValuesToTaskValues()
@@ -110,6 +124,11 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     public void SetSettings()
     {
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MakeStimPopOut"))
+            trialLevel.MakeStimPopOut = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "MakeStimPopOut");
+        else
+            trialLevel.MakeStimPopOut = false;
+
         if (SessionSettings.SettingExists("Session", "IsHuman"))
             trialLevel.IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");
 

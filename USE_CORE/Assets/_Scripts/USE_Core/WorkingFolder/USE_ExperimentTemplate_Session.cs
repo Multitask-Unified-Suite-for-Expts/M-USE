@@ -431,8 +431,18 @@ namespace USE_ExperimentTemplate_Session
                 taskButtons.transform.localScale = Vector3.one;
                 // We'll use height for the calculations because it is generally smaller than the width
                 int numTasks = TaskMappings.Count;
-                float buttonSize = numTasks > 7 ? 175 : 200;
-                float buttonSpacing = numTasks > 7 ? 15 : 20;
+                float buttonSize;
+                float buttonSpacing;
+                if (MacMainDisplayBuild && !Debug.isDebugBuild)
+                {
+                    buttonSize = 250;
+                    buttonSpacing = 30;
+                }
+                else
+                {
+                    buttonSize = 175;
+                    buttonSpacing = 15;
+                }
                 float buttonsWidth = numTasks * buttonSize + (numTasks - 1) * buttonSpacing;
                 float buttonStartX = (buttonSize - buttonsWidth) / 2;
 

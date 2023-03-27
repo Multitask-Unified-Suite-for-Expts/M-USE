@@ -122,6 +122,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             LoadConfigUIVariables();
             SetSquareSizeAndPosition();
+
+            currentTask.CalculateBlockSummaryString();
+
+            if (TrialCount_InTask != 0)
+                currentTask.SetTaskSummaryString();
         });
         InitTrial.SpecifyTermination(() => true, WhiteSquare, () => TrialStartTime = Time.time);
 
@@ -349,22 +354,18 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 ItiTouches_Trial++;
         });
         ITI.AddTimer(() => currentTrial.ItiDuration, FinishTrial);
-
-        //FinishTrial State (default state) ---------------------------------------------------------------------------------------------------------------------------------
-        FinishTrial.AddInitializationMethod(() =>
+        ITI.AddDefaultTerminationMethod(() =>
         {
             SquareGO.SetActive(false);
 
             if (GiveReleaseReward || GiveTouchReward)
                 TrialsCorrect_Block++;
 
-            if ((currentTrial.RewardTouch && GiveTouchReward) || (currentTrial.RewardRelease && GiveReleaseReward))
+            if (GiveTouchReward || GiveReleaseReward)
                 TrialCompletionList.Insert(0, 1);
             else
                 TrialCompletionList.Insert(0, 0);
-        });
-        FinishTrial.AddUniversalTerminationMethod(() =>
-        {
+            
             AddTrialTouchNumsToBlock();
             TrialsCompleted_Block++;
             currentTask.CalculateBlockSummaryString();
@@ -373,6 +374,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             ConfigValuesChangedInPrevTrial = ConfigValuesChanged();
         });
+
         LogTrialData();
         LogFrameData();
     }
@@ -392,8 +394,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     private void SetTrialSummaryString()
     {
-        TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) +
-                              "\nRewarding: " + (currentTrial.RewardTouch ? "Touch" : "Release") +
+        TrialSummaryString = "Rewarding: " + (currentTrial.RewardTouch ? "Touch" : "Release") +
                               "\nRandomPosition: " + ((currentTrial.RandomSquarePosition ? "True" : "False")) +
                               "\nRandomSize: " + ((currentTrial.RandomSquareSize ? "True" : "False"));
     }
@@ -494,7 +495,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         BackdropGO.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 
         BackdropRenderer = BackdropGO.GetComponent<Renderer>();
-        BackdropRenderer.material.mainTexture = BackdropTexture;
+        BackdropRenderer.material.mainTexture = THR_BackdropTexture;
         InitialBackdropColor = BackdropRenderer.material.color;
 
         BackdropGO.GetComponent<Renderer>().material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
@@ -539,7 +540,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         BackdropRenderer.material.mainTexture = newTexture;
         AudioFBController.Play("Negative");
         yield return new WaitForSeconds(1f);
-        BackdropRenderer.material.mainTexture = BackdropTexture;
+        BackdropRenderer.material.mainTexture = THR_BackdropTexture;
         BackdropRenderer.material.color = InitialBackdropColor;
         SquareMaterial.color = currentSquareColor;
         Grating = false;

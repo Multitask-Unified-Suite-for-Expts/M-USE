@@ -69,8 +69,8 @@ namespace USE_ExperimentTemplate_Trial
 
 
         // Texture Variables
-        [HideInInspector] public Texture2D StartButtonTexture, FBSquareTexture, HeldTooLongTexture, HeldTooShortTexture, 
-            BackdropStripesTexture, BackdropTexture, MazeBackgroundTexture;
+        [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, 
+            BackdropStripesTexture, THR_BackdropTexture;
         //[HideInInspector] public bool Grating;
         
         //protected TrialDef CurrentTrialDef;
@@ -343,20 +343,6 @@ namespace USE_ExperimentTemplate_Trial
             Vector2 pvPosition = new Vector2((position[0] / Screen.width) * playerViewParent.GetComponent<RectTransform>().sizeDelta.x, (position[1] / Screen.height) * playerViewParent.GetComponent<RectTransform>().sizeDelta.y);
             return pvPosition;
         }
-        
-        /*public IEnumerable GratedSquareFlash(Texture2D newTexture, GameObject square, float gratingSquareDuration)
-        {
-            //Grating = true;
-            Color32 originalColor = square.GetComponent<Renderer>().material.color;
-            Texture originalTexture = square.GetComponent<Renderer>().material.mainTexture;
-            square.GetComponent<Renderer>().material.color = new Color32(224, 78, 92, 255);
-            square.GetComponent<Renderer>().material.mainTexture = newTexture;
-            yield return new WaitForSeconds(gratingSquareDuration);
-            square.GetComponent<Renderer>().material.mainTexture = originalTexture;
-            square.GetComponent<Renderer>().material.color = originalColor;
-            //Grating = false;
-            if (square.name == "FBSquare") square.SetActive(false);
-        }*/
         public GameObject CreateSquare(string name, Texture2D tex, Vector3 pos, Vector3 scale)
         {
             GameObject SquareGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -438,13 +424,10 @@ namespace USE_ExperimentTemplate_Trial
         }
         public void LoadTextures(String ContextExternalFilePath)
         {
-            StartButtonTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "StartButtonImage.png");
-            FBSquareTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "Grey.png");
-            HeldTooLongTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "HorizontalStripes.png");
-            HeldTooShortTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "VerticalStripes.png");
-            BackdropStripesTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "bg.png");
-            BackdropTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "BackdropGrey.png");
-            MazeBackgroundTexture = LoadPNG(ContextExternalFilePath + Path.DirectorySeparatorChar + "MazeBackground.png");
+            HeldTooLongTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "HorizontalStripes.png"));
+            HeldTooShortTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "VerticalStripes.png"));
+            BackdropStripesTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "bg.png"));
+            THR_BackdropTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "Concrete4.png"));
         }
 
         public virtual void ResetTrialVariables()

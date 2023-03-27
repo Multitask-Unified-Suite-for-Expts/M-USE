@@ -19,18 +19,18 @@ public class SliderFBController : MonoBehaviour
     
     enum AnimationPhase { None, Update, Flashing };
     private AnimationPhase animationPhase = AnimationPhase.None;
-    private bool sliderBarFull;
+    private bool sliderBarFull = false;
     
-    private float animationStartTime;
-    private float animationEndTime;
+    private float animationStartTime = 0f;
+    private float animationEndTime = 0f;
     private float flashingTime = 0.5f;
     private float updateTime = 0.5f;
     private int sliderInitialValue = 0;
     private int numSliderBarFull = 0;
     private int numFlashes = 4;
 
-    private float targetValue;
-    private float sliderValueChange;
+    private float targetValue = 0;
+    private float sliderValueChange = 0;
     private double frameRate = 0.0167;
     
     // Audio
@@ -189,7 +189,6 @@ public class SliderFBController : MonoBehaviour
         if (Time.unscaledTime >= animationEndTime)
         {
             // when the slider halo is done flashing
-            sliderBarFull = false;
             if(SliderHaloGO != null)
                 SliderHaloGO.SetActive(false);
         }

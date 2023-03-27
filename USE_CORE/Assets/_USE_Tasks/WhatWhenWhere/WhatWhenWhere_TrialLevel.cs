@@ -450,6 +450,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         DefineFrameData();
     }
 
+    protected override bool CheckBlockEnd()
+    {
+        TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
+        return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
+            CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, MinTrials,
+            CurrentTrialDef.MaxTrials);
+    }
     public override void FinishTrialCleanup()
     {
         if (playerViewParent.transform.childCount != 0)
@@ -501,6 +508,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         searchDurations.Clear();
         touchedObjects.Clear();
         errorTypeString = "";
+        SliderFBController.ResetSliderBarFull();
     }
 
     public void ResetBlockVariables()
@@ -522,8 +530,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         consecutiveError = 0;
         runningAcc.Clear();
     }
-    
-    
+
+
     //-----------------------------------------------------------------METHODS FOR DATA HANDLING----------------------------------------------------------------------
     private void DefineTrialData() //All ".AddDatum" commands for Trial Data
     {

@@ -299,7 +299,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage"));
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOff"]);
             }
         });
@@ -468,7 +468,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
         return (TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
             CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, MinTrials,
-            TrialDefs.Count) || TrialCount_InBlock == MaxTrials);
+            MaxTrials) || TrialCount_InBlock == MaxTrials);
         
     }
     private void TouchDurationErrorFeedback(USE_StartButton UIElement, bool deactivateAfter)

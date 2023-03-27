@@ -14,6 +14,7 @@ using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Trial;
 using USE_ExperimentTemplate_Block;
+using SelectionTracking;
 
 namespace USE_ExperimentTemplate_Task
 {
@@ -33,6 +34,7 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public SerialRecvData SerialRecvData;
 
         [HideInInspector] public SessionDataControllers SessionDataControllers;
+        [HideInInspector] public SelectionTracker SelectionTracker;
 
         [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         [HideInInspector] public string ContextExternalFilePath, SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
@@ -328,6 +330,8 @@ namespace USE_ExperimentTemplate_Task
             fbControllers.GetComponent<TokenFBController>().SessionEventCodes = SessionEventCodes;
             fbControllers.GetComponent<SliderFBController>().SessionEventCodes = SessionEventCodes;
 
+
+            TrialLevel.SelectionTracker = SelectionTracker;
             TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
             TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
             TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();

@@ -58,6 +58,7 @@ namespace WhatWhenWhere_Namespace
                 td.PulseSize = PulseSize;
                 td.LeaveFeedbackOn = LeaveFeedbackOn;
                 td.ErrorThreshold = ErrorThreshold;
+                td.MaxTrials = num;
                 TrialDefs.Add(td);
             }
         }
@@ -87,6 +88,8 @@ namespace WhatWhenWhere_Namespace
         public int PulseSize;
         public bool LeaveFeedbackOn;
         public int ErrorThreshold;
+
+        public int MaxTrials;
     }
 
     public class WhatWhenWhere_StimDef : StimDef

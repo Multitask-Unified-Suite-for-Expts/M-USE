@@ -19,18 +19,18 @@ public class SliderFBController : MonoBehaviour
     
     enum AnimationPhase { None, Update, Flashing };
     private AnimationPhase animationPhase = AnimationPhase.None;
-    private bool sliderBarFull;
+    private bool sliderBarFull = false;
     
-    private float animationStartTime;
-    private float animationEndTime;
+    private float animationStartTime = 0f;
+    private float animationEndTime = 0f;
     private float flashingTime = 0.5f;
     private float updateTime = 0.5f;
-    private int flashingNumBeeps = 3; //Num beeps for tokenbar flashing audio
     private int sliderInitialValue = 0;
     private int numSliderBarFull = 0;
+    private int numFlashes = 4;
 
-    private float targetValue;
-    private float sliderValueChange;
+    private float targetValue = 0;
+    private float sliderValueChange = 0;
     private double frameRate = 0.0167;
     
     // Audio
@@ -82,6 +82,11 @@ public class SliderFBController : MonoBehaviour
         flashingTime = flashingDuration;
     }
 
+    public void SetNumFlashes(int num)
+    {
+        numFlashes = num;
+    }
+
     public bool isSliderBarFull()
     {
         return sliderBarFull;
@@ -99,9 +104,7 @@ public class SliderFBController : MonoBehaviour
     {
         if (animationPhase == AnimationPhase.None)
         {
-            if (SliderHaloGO != null)
-                SliderHaloGO.SetActive(false);
-           // sliderBarFull = false;
+            EndHaloAnimation();
             return;
         }
         // Switch to next animation phase if the current one ended
@@ -123,7 +126,9 @@ public class SliderFBController : MonoBehaviour
                         numSliderBarFull++;
                         audioFBController.Play("TripleCollected");
                         EventCodeManager.SendCodeImmediate(SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
+                       // animationEndTime += updateTime + flashingTime;
                         animationEndTime += updateTime + flashingTime;
+
                     }
                     break;
                 case AnimationPhase.Flashing:
@@ -142,7 +147,7 @@ public class SliderFBController : MonoBehaviour
                 Slider.value = Mathf.Lerp(Slider.value, targetValue, progress);
                 break;
             case AnimationPhase.Flashing:
-                int flashingInterval = (int)(flashingTime * 10000 / 2);
+                int flashingInterval = (int)(flashingTime * 10000 / numFlashes);
                 int elapsed = (int)((Time.unscaledTime - animationStartTime) * 10000 % (flashingTime * 10000));
                 int colorIndex = elapsed / flashingInterval;
                 if (colorIndex % 2 == 0)
@@ -177,6 +182,16 @@ public class SliderFBController : MonoBehaviour
         sliderValueChange = sliderChange;
         targetValue = Slider.value + sliderValueChange;
         AnimateSlider(sliderValueChange);
+    }
+
+    private void EndHaloAnimation()
+    {
+        if (Time.unscaledTime >= animationEndTime)
+        {
+            // when the slider halo is done flashing
+            if(SliderHaloGO != null)
+                SliderHaloGO.SetActive(false);
+        }
     }
 
 }

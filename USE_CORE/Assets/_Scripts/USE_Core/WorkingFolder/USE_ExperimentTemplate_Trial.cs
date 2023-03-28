@@ -11,6 +11,7 @@ using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Task;
+using SelectionTracking;
 
 namespace USE_ExperimentTemplate_Trial
 {
@@ -43,6 +44,8 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public ExperimenterDisplayController ExperimenterDisplayController;
         [HideInInspector] public SessionInfoPanel SessionInfoPanel;
         public float TrialCompleteTime;
+
+        [HideInInspector] public SelectionTracker SelectionTracker;
         
         // Feedback Controllers
         [HideInInspector] public AudioFBController AudioFBController;

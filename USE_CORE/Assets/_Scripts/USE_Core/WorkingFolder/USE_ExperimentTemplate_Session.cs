@@ -16,7 +16,7 @@ using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Trial;
+using SelectionTracking;
 using Random = UnityEngine.Random;
 
 
@@ -70,6 +70,7 @@ namespace USE_ExperimentTemplate_Session
         private SerialPortThreaded SerialPortController;
         private SyncBoxController SyncBoxController;
         private EventCodeManager EventCodeManager;
+        [HideInInspector] public SelectionTracker SelectionTracker;
 
         private Camera SessionCam;
         private ExperimenterDisplayController ExperimenterDisplayController;
@@ -246,6 +247,8 @@ namespace USE_ExperimentTemplate_Session
             // mirrorCamera.targetDisplay = 2;
 
             RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
+
+            SelectionTracker = new SelectionTracker();
 
             bool waitForSerialPort = false;
             bool taskAutomaticallySelected = false;
@@ -768,6 +771,8 @@ namespace USE_ExperimentTemplate_Session
             tl.SessionID = SessionID;
             tl.SerialRecvData = SerialRecvData;
             tl.SerialSentData = SerialSentData;
+
+            tl.SelectionTracker = SelectionTracker;
             
             if (SessionSettings.SettingExists("Session", "EyetrackerType"))
                 tl.EyetrackerType = (string)SessionSettings.Get("Session", "EyetrackerType");

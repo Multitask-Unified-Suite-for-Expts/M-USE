@@ -326,7 +326,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 584128556}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
   m_Name: 
@@ -335,7 +335,7 @@ MonoBehaviour:
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 0
 --- !u!114 &584128558
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -571,22 +571,32 @@ MonoBehaviour:
   AudioFBController: {fileID: 0}
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
+  SliderFBController: {fileID: 0}
   MouseTracker: {fileID: 0}
   GazeTracker: {fileID: 0}
   SelectionType: 
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   InitialTokenAmount: 0
-  StartButtonTexture: {fileID: 0}
-  FBSquareTexture: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
-  BackdropTexture: {fileID: 0}
-  MazeBackgroundTexture: {fileID: 0}
+  THR_BackdropTexture: {fileID: 0}
   MG_CanvasGO: {fileID: 859525660}
-  SCREEN_WIDTH: 0
-  TILE_WIDTH: 0
+  runningTrialPerformance: []
+  MinTrials: 0
+  mazeDefName: 
+  MazeBackground: {fileID: 0}
+  tiles:
+    stimGroupName: 
+    IsActive: 0
+  consecutiveErrors: 0
+  pathProgressGO: []
+  viewPath: 0
+  tileFbDuration: 0
+  startTile: {fileID: 0}
+  choiceDurationsList: []
+  contextName: 
   startColor: []
   finishColor: []
   correctColor: []
@@ -599,6 +609,13 @@ MonoBehaviour:
     type: 3}
   TileSize: 0
   TileTexture: 
+  MazeBackgroundTextureName: 
+  ContextExternalFilePath: 
+  MazeFilePath: 
+  StartButtonPosition: {x: 0, y: 0, z: 0}
+  StartButtonScale: 0
+  NeutralITI: 0
+  UsingFixedRatioReward: 0
   spaceBetweenTiles:
     name: 
     hidden: 0
@@ -647,14 +664,6 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  minObjectTouchDuration:
-    name: 
-    hidden: 0
-    value: 0
-    isRange: 0
-    max: 0
-    min: 0
-    precision: 0
   itiDuration:
     name: 
     hidden: 0
@@ -663,23 +672,7 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  finalFbDuration:
-    name: 
-    hidden: 0
-    value: 0
-    isRange: 0
-    max: 0
-    min: 0
-    precision: 0
-  maxObjectTouchDuration:
-    name: 
-    hidden: 0
-    value: 0
-    isRange: 0
-    max: 0
-    min: 0
-    precision: 0
-  selectObjectDuration:
+  flashingFbDuration:
     name: 
     hidden: 0
     value: 0
@@ -703,18 +696,17 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  ContextExternalFilePath: 
-  MazeFilePath: 
-  ButtonPosition: {x: 0, y: 0, z: 0}
-  ButtonScale: 0
-  MazeBackground: {fileID: 0}
-  mazeDefName: 
-  SliderPrefab: {fileID: 2122826529044376720, guid: 4edf39309c5fdfe4786b98a260c324e0,
-    type: 3}
-  SliderHaloPrefab: {fileID: 4317252536729789219, guid: f372d073062e1954ba552b4c8bbb2d93,
-    type: 3}
+  maxMazeDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
   playerViewTextList: []
   playerViewText: {fileID: 0}
+  playerViewLoaded: 0
 --- !u!114 &1860654111
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -785,15 +777,39 @@ MonoBehaviour:
   MazeStart: []
   MazeFinish: []
   MazeName: []
-  totalErrors_InBlock: 0
-  perseverativeErrors_InBlock: 0
-  backtrackErrors_InBlock: 0
-  ruleAbidingErrors_InBlock: 0
-  ruleBreakingErrors_InBlock: 0
+  currMaze:
+    mPath: []
+    mStart: 
+    mFinish: 
+    mNextStep: 
+    mNumSquares: 0
+    mNumTurns: 0
+    mDims: {x: 0, y: 0}
+    mName: 
+    sideRestricted: 0
+  totalErrors_InBlock: 
+  perseverativeErrors_InBlock: 
+  backtrackErrors_InBlock: 
+  ruleAbidingErrors_InBlock: 
+  ruleBreakingErrors_InBlock: 
   retouchCorrect_InBlock: 0
   correctTouches_InBlock: 0
   numRewardPulses_InBlock: 0
+  numAbortedTrials_InBlock: 0
   nonStimTouches_InBlock: 0
+  numSliderBarFull_InBlock: 0
+  choiceDurationsList_InBlock: []
+  totalErrors_InTask: 0
+  perseverativeErrors_InTask: 0
+  backtrackErrors_InTask: 0
+  ruleAbidingErrors_InTask: 0
+  ruleBreakingErrors_InTask: 0
+  retouchCorrect_InTask: 0
+  correctTouches_InTask: 0
+  numRewardPulses_InTask: 0
+  numAbortedTrials_InTask: 0
+  numSliderBarFull_InTask: 0
+  mazeDurationsList_InTask: []
   BlockAveragesString: 
   CurrentBlockString: 
 --- !u!4 &1860654112

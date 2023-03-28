@@ -183,7 +183,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 LoadConfigVariables();
             CurrentTaskLevel.LoadTextMaze();
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
-            
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
         MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, 
@@ -487,12 +486,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Debug.Log("*Rule Breaking Error - Not Pressing the Start Tile to Begin the Maze*");
             EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
             
-            totalErrors_InTrial[pathProgressIndex] += 1;
-            CurrentTaskLevel.totalErrors_InBlock[pathProgressIndex] += 1;
+            totalErrors_InTrial[0] += 1;
+            CurrentTaskLevel.totalErrors_InBlock[0] += 1;
             CurrentTaskLevel.totalErrors_InTask++;
 
-            ruleBreakingErrors_InTrial[pathProgressIndex] += 1;
-            CurrentTaskLevel.ruleBreakingErrors_InBlock[pathProgressIndex] += 1;
+            ruleBreakingErrors_InTrial[0] += 1;
+            CurrentTaskLevel.ruleBreakingErrors_InBlock[0] += 1;
             CurrentTaskLevel.ruleBreakingErrors_InTask++;
 
             consecutiveErrors++;
@@ -750,6 +749,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("Rule-AbidingErrors", () => $"[{string.Join(", ", ruleAbidingErrors_InTrial)}]");
         TrialData.AddDatum("Rule-BreakingErrors", () => $"[{string.Join(", ", ruleBreakingErrors_InTrial)}]");
         TrialData.AddDatum("MazeDuration", ()=> mazeDuration);
+        TrialData.AddDatum("TotalClicks", ()=>MouseTracker.GetClickCount());
     }
 
     private void DefineFrameData()
@@ -825,6 +825,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         CorrectSelection = false;
         ReturnToLast = false;
         ErroneousReturnToLast = false;
+        
+        MouseTracker.ResetClicks();
         
         correctTouches_InTrial = 0;
         retouchCorrect_InTrial = 0;

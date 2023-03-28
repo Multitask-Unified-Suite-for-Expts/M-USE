@@ -210,7 +210,9 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     public void CalculateBlockSummaryString()
     {
         ClearStrings();
-        CurrentBlockString = "<b>Max Trials in Block: </b>" + mgTL.CurrentTrialDef.MaxTrials + 
+        CurrentBlockString = "<b>Min Trials in Block: </b>" + mgTL.CurrentTrialDef.MinMaxTrials[0] + 
+                             "<b>\nMax Trials in Block: </b>" + mgTL.CurrentTrialDef.MaxTrials + 
+                             "<b>\nLearning Criterion: </b>" + mgTL.CurrentTrialDef.BlockEndThreshold + 
                              "\n\nTotal Errors: " + totalErrors_InBlock.Sum() +
                              "\nRule-Abiding Errors: " + ruleAbidingErrors_InBlock.Sum() +
                              "\nRule-Breaking Errors: " + ruleBreakingErrors_InBlock.Sum() + 

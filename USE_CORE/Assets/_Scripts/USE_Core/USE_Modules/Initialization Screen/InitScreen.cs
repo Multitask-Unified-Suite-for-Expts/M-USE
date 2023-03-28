@@ -45,14 +45,16 @@ public class InitScreen : MonoBehaviour {
 
     public event System.Action OnConfirm, OnLoadSettings;
 
-    void Start(){
+    void Start()
+    {
         foreach (GameObject g in disableOnStart)
             g.SetActive(false);
         foreach (GameObject g in enableOnStart)
             g.SetActive(true);
     }
 
-    IEnumerator HandleConfirm(){
+    IEnumerator HandleConfirm()
+    {
         if(OnLoadSettings != null)
             OnLoadSettings();
         

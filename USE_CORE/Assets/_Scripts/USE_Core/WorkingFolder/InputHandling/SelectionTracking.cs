@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using SelectionTracking;
 using UnityEngine;
 using USE_StimulusManagement;
 using USE_States;
@@ -12,30 +13,23 @@ namespace SelectionTracking
         // Start is called before the first frame update
         public Dictionary<string, SelectionHandler> ActiveSelectionHandlers;
 
-        public SelectionTracker(bool useDefaultHandlers = true)
+        public SelectionHandler SetupSelectionHandler(string handlerName, State setActiveOnInit = null, State setInactiveOnTerm = null)
         {
-            if (useDefaultHandlers)
-                ActiveSelectionHandlers = AssignDefaultSelectionHandlers();
-            else
-            {
-                Debug.LogError("A selection tracker is being initialized with UseDefaultHandlers set to false, " +
-                               "but no alternative dictionary of trackers has been provided as an argument.");
-            }
+            SelectionHandler newHandler = GetDefaultSelectionHandler(handlerName);
+            newHandler.HandlerName = handlerName;
+            newHandler.selectionTracker = this;
+            if (setActiveOnInit != null)
+                setActiveOnInit.StateInitializationFinished += newHandler.AddToActiveHandlers;
+
+            if (setInactiveOnTerm == null)
+                setInactiveOnTerm = setActiveOnInit;
+
+            if (setInactiveOnTerm != null)
+                setInactiveOnTerm.StateTerminationFinished += newHandler.RemoveFromActiveHandlers;
+
+            return newHandler;
         }
 
-        public SelectionTracker(Dictionary<string, SelectionHandler> shs, bool useDefaultHandlers = true)
-        {
-            // if (useDefaultHandlers)
-            // {
-            //     AssignDefaultSelectionHandlers();
-            //     foreach (string key in shs.Keys)
-            //         ActiveSelectionHandlers.Add(key, shs[key]);
-            // }
-            // else
-            //     ActiveSelectionHandlers = shs;
-
-        }
-        
         public void UpdateActiveSelections()
         {
             foreach (string key in ActiveSelectionHandlers.Keys)
@@ -45,92 +39,48 @@ namespace SelectionTracking
         }
 
 
-        
-        private Dictionary<string, SelectionHandler> DefaultSelectionHandlers()
+        private SelectionHandler GetDefaultSelectionHandler(string hName)
         {
-            
-            // DEFINE RAYCAST ON SELECTION HANDLING ------------------------------------
-            SelectionHandler tempH = new SelectionHandler();
-            
-            ActiveSelectionHandlers.Add("MouseOnObject", tempH);
-            // raycastOnSelectionHandler.InitConditions.Add () =>
-            // {
-            //     // when would a selection begin in a raycast selection
-            //     if (raycastOnSelectionHandler.FindCurrentTarget(InputBroker.mousePosition) != null)
-            //         return true;
-            //     return false;
-            // };
-            // // raycastOnSelectionHandler.UpdateConditions.Add null;
-            // raycastOnSelectionHandler.TerminationConditions.Add () =>
-            // {
-            //     if (raycastOnSelectionHandler.OngoingSelection.Duration >= raycastOnSelectionHandler.MinDuration &&
-            //         raycastOnSelectionHandler.OngoingSelection.Duration <= raycastOnSelectionHandler.MaxDuration)
-            //         return true;
-            //     return false;
-            // };
-            // ActiveSelectionHandlers.Add("RaycastOnSelection", raycastOnSelectionHandler);
-            //
-            // // DEFINE RAYCAST ON OFF SELECTION HANDLING ------------------------------------
-            // SelectionHandler raycastOnOffSelectionHandler = new SelectionHandler();
-            // raycastOnOffSelectionHandler.Add () =>
-            // {
-            //     // when would a selection begin in a raycast selection
-            //     if (raycastOnOffSelectionHandler.FindCurrentTarget(InputBroker.mousePosition) != null)
-            //         return true;
-            //     return false;
-            // };
-            // raycastOnOffSelectionHandler.UpdateConditions.Add null;
-            // raycastOnOffSelectionHandler.TerminationConditions.Add () =>
-            // {
-            //     if (raycastOnOffSelectionHandler.OngoingSelection.Duration >= raycastOnOffSelectionHandler.MinDuration &&
-            //         raycastOnOffSelectionHandler.OngoingSelection.Duration <= raycastOnOffSelectionHandler.MaxDuration && 
-            //         raycastOnOffSelectionHandler.FindCurrentTarget(InputBroker.mousePosition) == null)
-            //         return true;
-            //     return false;
-            // };
-            // ActiveSelectionHandlers.Add("RaycastOnSelection", raycastOnSelectionHandler);
-            //
-            // // DEFINE LEFT MOUSE BUTTON DOWN SELECTION HANDLING ------------------------------------
-            // SelectionHandler leftMouseButtonDown = new SelectionHandler();
-            // leftMouseButtonDown.InitConditions.Add () =>
-            // {
-            //     if (InputBroker.GetMouseButtonDown(0))
-            //         return true;
-            //     return false;
-            // };
-            // leftMouseButtonDown.UpdateCondition = null; // same as the init condition
-            // ActiveSelectionHandlers.Add("LeftMouseButtonDown", leftMouseButtonDown);
-            //
-            // // DEFINE LEFT MOUSE BUTTON CLICK SELECTION HANDLING ------------------------------------
-            // SelectionHandler leftMouseButtonClick = new SelectionHandler();
-            // leftMouseButtonClick.InitCondition = () =>
-            // {
-            //     if (InputBroker.GetMouseButtonDown(0))
-            //         return true;
-            //     return false;
-            // };
-            // leftMouseButtonClick.UpdateCondition = null;
-            // leftMouseButtonClick.TerminationCondition = () =>
-            // {
-            //     if (InputBroker.GetMouseButtonUp(0))
-            //         return true;
-            //     return false;
-            //     
-            //     // SHOULD WE ADD MIN/MAX DURATION HERE??
-            // };
-            // ActiveSelectionHandlers.Add("LeftMouseButtonClick", leftMouseButtonClick);
-            
-            
-            
-            //raycast hits object, button 0 down (init + update), button 0 down (init + update) and up (termination), 
-            
-            // include other mouse buttons??
+            Dictionary<string, SelectionHandler> DefaultSelectionHandlers =
+                new Dictionary<string, SelectionHandler>();
 
+            SelectionHandler mouseClick = new SelectionHandler();
+            mouseClick.InitConditions.Add(mouseClick.DefaultConditions("RaycastHitsAGameObject"));
+            mouseClick.InitConditions.Add(mouseClick.DefaultConditions("MouseButton0Down"));
+            
+            mouseClick.UpdateConditions.Add(mouseClick.DefaultConditions("MouseButton0Down"));
+            mouseClick.UpdateConditions.Add(mouseClick.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
+            
+            mouseClick.UpdateErrorTriggers.Add(mouseClick.DefaultConditions("MovedTooFar"));
+            mouseClick.UpdateErrorTriggers.Add(mouseClick.DefaultConditions("DurationTooLong"));
+            
+            mouseClick.TerminationConditions.Add(mouseClick.DefaultConditions("MouseButton0Up"));
+
+            mouseClick.TerminationErrorTriggers.Add(mouseClick.DefaultConditions("DurationTooShort"));
+            
+            DefaultSelectionHandlers.Add("MouseButton0Click", mouseClick);
+            
+            
+            SelectionHandler gazeSelection = new SelectionHandler();
+            gazeSelection.InitConditions.Add(gazeSelection.DefaultConditions("RaycastHitsAGameObject"));
+            
+            gazeSelection.UpdateConditions.Add(gazeSelection.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
+            
+            gazeSelection.UpdateErrorTriggers.Add(gazeSelection.DefaultConditions("MovedTooFar"));
+            gazeSelection.UpdateErrorTriggers.Add(gazeSelection.DefaultConditions("DurationTooLong"));
+
+            gazeSelection.TerminationErrorTriggers.Add(gazeSelection.DefaultConditions("DurationTooShort"));
+            DefaultSelectionHandlers.Add("GazeSelection", gazeSelection);
+                
+                
+
+            return DefaultSelectionHandlers[hName];
         }
-
+    }
+    
     }
 
-    public class Selection
+    public class USE_Selection
     {
         public float? Duration, StartTime, EndTime;
         public int StartFrame, EndFrame;
@@ -138,20 +88,18 @@ namespace SelectionTracking
         public bool WasSuccessful;
         public List<Vector3> InputLocations;
 
-        public Selection(GameObject go)
+        public USE_Selection(GameObject go)
         {
             SelectedGameObject = go;
             Duration = 0;
             StartFrame = Time.frameCount;
             StartTime = Time.time;
-            CustomSelectionInit();
         }
 
         public void UpdateSelection(Vector3 inputLocation)
         {
             InputLocations.Add(inputLocation);
             Duration = Time.time - StartTime;
-            CustomSelectionUpdate();
         }
 
         public void CompleteSelection(bool success = true)
@@ -159,31 +107,21 @@ namespace SelectionTracking
             EndTime = Time.time;
             Duration = EndTime - StartTime;
             WasSuccessful = success;
-            CustomSelectionTermination();
-        }
-
-
-        public virtual void CustomSelectionInit()
-        {
-        }
-        public virtual void CustomSelectionUpdate()
-        {
-        }
-        public virtual void CustomSelectionTermination()
-        {
         }
     }
 
     public class SelectionHandler
     {
-        public List<Selection> AllSelections, SuccessfulSelections, UnsuccessfulSelections;
-        private Selection OngoingSelection;
+        public List<USE_Selection> AllSelections, SuccessfulSelections, UnsuccessfulSelections;
+        private USE_Selection OngoingSelection;
         private GameObject currentTarget;
         public float? MinDuration, MaxDuration;
         public int? MaxPixelDisplacement;
         public List<BoolDelegate> InitConditions, UpdateConditions, TerminationConditions, 
             InitErrorTriggers, UpdateErrorTriggers, TerminationErrorTriggers;
         public InputDelegate CurrentInputLocation;
+        public SelectionTracker selectionTracker;
+        public string HandlerName;
 
         public SelectionHandler()
         {
@@ -204,7 +142,17 @@ namespace SelectionTracking
             MaxPixelDisplacement = maxPixelDisplacement;
         }
         
-        
+        public void AddToActiveHandlers(object sender, EventArgs e)
+        {
+            selectionTracker.ActiveSelectionHandlers.Add(HandlerName, this);
+        }
+
+        public void RemoveFromActiveHandlers(object sender, EventArgs e)
+        {
+            selectionTracker.ActiveSelectionHandlers.Remove(HandlerName);
+        }
+
+
         private void SelectionInitErrorHandling(){}
         private void SelectionUpdateErrorHandling(){}
         private void SelectionTerminationErrorHandling(){}
@@ -228,43 +176,30 @@ namespace SelectionTracking
                 {
                     CheckTermination();
                 }
-
                 return;
             }
             
             //if we have reached this point we know there is a target
-            if (OngoingSelection == null || currentTarget != OngoingSelection.SelectedGameObject) //input is over a new gameObject
-                CheckInit();
-            
-            
-            if (OngoingSelection == null && currentTarget != null) // there is no ongoing selection
+            if (OngoingSelection == null) //no previous selection
             {
-                
+                if (CheckInit())
+                    return;
             }
-            else if (currentTarget != null)
+            
+            //if we have reached this point we know there is a target, there was a previous selection,
+            //and this is not the first frame of new selection
+
+            if (currentTarget != OngoingSelection.SelectedGameObject) //previous selection on different game object
             {
-                bool selectionOngoing = true;
-                if (currentTarget == OngoingSelection.SelectedGameObject)
-                {
-                    if (CheckAllConditions(UpdateConditions))
-                    {
-                        // update condition is true (e.g. mouse button is being held down)
-                        if (!CheckAllConditions(UpdateErrorTriggers))
-                            OngoingSelection.UpdateSelection(CurrentInputLocation()); // will track duration and other custom functions while selecting
-                    }
-
-                    if (CheckAllConditions(UpdateErrorTriggers))
-                        SelectionUpdateErrorHandling();
-
-                    if (CheckAllConditions(TerminationConditions))
-                    {
-                        if (!CheckAllConditions(TerminationErrorTriggers))
-                            OngoingSelection.CompleteSelection();
-                        else
-                            SelectionTerminationErrorHandling();
-                    }
-                }
+                CheckTermination(); //check termination of previous selection
+                CheckInit(); //check init of current selection
+                return;
             }
+
+                //if we have reached this point we know we have an ongoing selection
+            CheckUpdate();
+            CheckTermination();
+            
         }
 
         private bool CheckInit()
@@ -272,19 +207,54 @@ namespace SelectionTracking
             bool init = CheckAllConditions(InitConditions);
             bool initErrors = CheckAllConditions(InitErrorTriggers);
             if (init) // intialization condition is true (e.g. mouse button is down)
-            if (!initErrors)
-                OngoingSelection = new Selection(currentTarget); // start a new ongoing selection
-            else
-                SelectionInitErrorHandling();
+                if (!initErrors)
+                    OngoingSelection = new USE_Selection(currentTarget); // start a new ongoing selection
+                else
+                    SelectionInitErrorHandling();
             return init & !initErrors;
         }
 
-        private void CheckUpdate()
+        private bool CheckUpdate()
         {
-            
+            bool update = CheckAllConditions(UpdateConditions);
+            bool updateErrors = CheckAllConditions(UpdateErrorTriggers);
+            if (update)
+            {
+                // update condition is true (e.g. mouse button is being held down)
+                if (!updateErrors)
+                    OngoingSelection.UpdateSelection(CurrentInputLocation()); // will track duration and other custom functions while selecting
+                else
+                    SelectionUpdateErrorHandling();
+            }
+
+            return update & !updateErrors;
         }
-        
-        private void CheckTermination(){}
+
+        private bool CheckTermination()
+        {
+            bool term = CheckAllConditions(TerminationConditions);
+            bool termErrors = CheckAllConditions(TerminationErrorTriggers);
+            if (term)
+            {
+                // update condition is true (e.g. mouse button is being held down)
+                if (!termErrors)
+                {
+                    OngoingSelection.CompleteSelection(true);
+                    OngoingSelection.WasSuccessful = true;
+                    SuccessfulSelections.Add(OngoingSelection);
+                }
+                else
+                {
+                    OngoingSelection.CompleteSelection(false);
+                    OngoingSelection.WasSuccessful = false;
+                    UnsuccessfulSelections.Add(OngoingSelection);
+                    SelectionTerminationErrorHandling();
+                }
+                AllSelections.Add(OngoingSelection);
+                OngoingSelection = null;
+            }
+            return term & !termErrors;
+        }
 
         private GameObject FindCurrentTarget(Vector3? inputLocation)
         {
@@ -298,7 +268,6 @@ namespace SelectionTracking
 
                 if (hitObject != null)
                 {
-                    // if (InputBroker.GetMouseButton(0))
                     return hitObject;
                 }
             }
@@ -325,7 +294,7 @@ namespace SelectionTracking
                 return false;
         }
 
-        private BoolDelegate DefaultConditions(string ConditionName)
+        public BoolDelegate DefaultConditions(string ConditionName)
         {
             Dictionary<string, BoolDelegate> DefaultConditions = new Dictionary<string, BoolDelegate>();
             DefaultConditions.Add("RaycastHitsAGameObject", ()=> currentTarget != null);
@@ -337,6 +306,15 @@ namespace SelectionTracking
             {
                 return Vector3.Distance(CurrentInputLocation(), OngoingSelection.InputLocations[0]) < MaxPixelDisplacement;
             });
+            DefaultConditions.Add("MouseButton0", ()=> InputBroker.GetMouseButton(0));
+            DefaultConditions.Add("MouseButton0Down", ()=> InputBroker.GetMouseButtonDown(0));
+            DefaultConditions.Add("MouseButton0Up", ()=> InputBroker.GetMouseButtonUp(0));
+            DefaultConditions.Add("MouseButton1", ()=> InputBroker.GetMouseButton(1));
+            DefaultConditions.Add("MouseButton1Down", ()=> InputBroker.GetMouseButtonDown(1));
+            DefaultConditions.Add("MouseButton1Up", ()=> InputBroker.GetMouseButtonUp(1));
+            DefaultConditions.Add("MouseButton2", ()=> InputBroker.GetMouseButton(2));
+            DefaultConditions.Add("MouseButton2Down", ()=> InputBroker.GetMouseButtonDown(2));
+            DefaultConditions.Add("MouseButton2Up", ()=> InputBroker.GetMouseButtonUp(2));
             
             
             if (DefaultConditions.ContainsKey(ConditionName))
@@ -349,74 +327,5 @@ namespace SelectionTracking
             }
             
             
-            // raycastOnSelectionHandler.InitConditions.Add () =>
-            // {
-            //     // when would a selection begin in a raycast selection
-            //     if (raycastOnSelectionHandler.FindCurrentTarget(InputBroker.mousePosition) != null)
-            //         return true;
-            //     return false;
-            // };
-            // // raycastOnSelectionHandler.UpdateConditions.Add null;
-            // raycastOnSelectionHandler.TerminationConditions.Add () =>
-            // {
-            //     if (raycastOnSelectionHandler.OngoingSelection.Duration >= raycastOnSelectionHandler.MinDuration &&
-            //         raycastOnSelectionHandler.OngoingSelection.Duration <= raycastOnSelectionHandler.MaxDuration)
-            //         return true;
-            //     return false;
-            // };
-            // ActiveSelectionHandlers.Add("RaycastOnSelection", raycastOnSelectionHandler);
-            //
-            // // DEFINE RAYCAST ON OFF SELECTION HANDLING ------------------------------------
-            // SelectionHandler raycastOnOffSelectionHandler = new SelectionHandler();
-            // raycastOnOffSelectionHandler.Add () =>
-            // {
-            //     // when would a selection begin in a raycast selection
-            //     if (raycastOnOffSelectionHandler.FindCurrentTarget(InputBroker.mousePosition) != null)
-            //         return true;
-            //     return false;
-            // };
-            // raycastOnOffSelectionHandler.UpdateConditions.Add null;
-            // raycastOnOffSelectionHandler.TerminationConditions.Add () =>
-            // {
-            //     if (raycastOnOffSelectionHandler.OngoingSelection.Duration >= raycastOnOffSelectionHandler.MinDuration &&
-            //         raycastOnOffSelectionHandler.OngoingSelection.Duration <= raycastOnOffSelectionHandler.MaxDuration && 
-            //         raycastOnOffSelectionHandler.FindCurrentTarget(InputBroker.mousePosition) == null)
-            //         return true;
-            //     return false;
-            // };
-            // ActiveSelectionHandlers.Add("RaycastOnSelection", raycastOnSelectionHandler);
-            //
-            // // DEFINE LEFT MOUSE BUTTON DOWN SELECTION HANDLING ------------------------------------
-            // SelectionHandler leftMouseButtonDown = new SelectionHandler();
-            // leftMouseButtonDown.InitConditions.Add () =>
-            // {
-            //     if (InputBroker.GetMouseButtonDown(0))
-            //         return true;
-            //     return false;
-            // };
-            // leftMouseButtonDown.UpdateCondition = null; // same as the init condition
-            // ActiveSelectionHandlers.Add("LeftMouseButtonDown", leftMouseButtonDown);
-            //
-            // // DEFINE LEFT MOUSE BUTTON CLICK SELECTION HANDLING ------------------------------------
-            // SelectionHandler leftMouseButtonClick = new SelectionHandler();
-            // leftMouseButtonClick.InitCondition = () =>
-            // {
-            //     if (InputBroker.GetMouseButtonDown(0))
-            //         return true;
-            //     return false;
-            // };
-            // leftMouseButtonClick.UpdateCondition = null;
-            // leftMouseButtonClick.TerminationCondition = () =>
-            // {
-            //     if (InputBroker.GetMouseButtonUp(0))
-            //         return true;
-            //     return false;
-            //     
-            //     // SHOULD WE ADD MIN/MAX DURATION HERE??
-            // };
-            // ActiveSelectionHandlers.Add("LeftMouseButtonClick", leftMouseButtonClick);
         }
     }
-    
-
-}

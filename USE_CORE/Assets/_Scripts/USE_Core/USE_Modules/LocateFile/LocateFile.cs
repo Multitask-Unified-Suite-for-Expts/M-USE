@@ -36,17 +36,18 @@ using UnityEngine;
 using System.IO;
 using System;
 
-public class LocateFile : MonoBehaviour {
-
+public class LocateFile : MonoBehaviour
+{
 	public List<FileSpec> files;
 	public Dictionary<string, FileSpec> mapFiles = new Dictionary<string, FileSpec>();
 
 	public FileItem prefabFileItem;
 	public Transform containerFileItems;
 
-	// Use this for initialization
-	void Start () {
-		foreach(FileSpec f in files){
+	void Start ()
+	{
+		foreach(FileSpec f in files)
+		{
 			GameObject g = (GameObject) Instantiate(prefabFileItem.gameObject);
 			g.transform.SetParent(containerFileItems, false);
 
@@ -59,10 +60,10 @@ public class LocateFile : MonoBehaviour {
 		}
 	}
 	
-	public string GetPath(string keyToFile){
-		if (mapFiles.ContainsKey(keyToFile)){
+	public string GetPath(string keyToFile)
+	{
+		if (mapFiles.ContainsKey(keyToFile))
 			return mapFiles[keyToFile].path;
-		}
 		return null;
 	}
 
@@ -85,7 +86,8 @@ public class LocateFile : MonoBehaviour {
 }
 
 [System.Serializable]
-public class FileSpec{
+public class FileSpec
+{
 	public string name;
 	public bool isFolder = false;
 	public string path = "";

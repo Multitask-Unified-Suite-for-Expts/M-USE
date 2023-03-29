@@ -497,7 +497,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Destroy(MaxOutline_Right);
         Destroy(MaxOutline_Left);
 
-        if(AbortCode == 0) //Normal{
+        if(AbortCode == 0) //Normal
             currentTask.CalculateBlockSummaryString();
 
         if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"] || AbortCode == AbortCodeDict["EndBlock"]) //If used RestartBlock, PreviousBlock, or EndBlock hotkeys

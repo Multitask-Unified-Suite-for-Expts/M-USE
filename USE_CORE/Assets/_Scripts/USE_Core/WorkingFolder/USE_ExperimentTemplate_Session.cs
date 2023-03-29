@@ -365,11 +365,19 @@ namespace USE_ExperimentTemplate_Session
                 });
 
             //bool tasksFinished = false;
+            bool taskSelectionBackgroundSet = false;
             GameObject taskButtons = null;
             Dictionary<string, GameObject> taskButtonsDict = new Dictionary<string, GameObject>();
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
+                if(!taskSelectionBackgroundSet)
+                {
+                    Material taskSelectionBG_Material = Resources.Load<Material>("TaskSelection_BG_Material");
+                    Camera.main.GetComponent<Skybox>().material = taskSelectionBG_Material;
+                    taskSelectionBackgroundSet = true;
+                }
+
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SelectTaskStarts"]);
 
                 if (SerialPortActive){

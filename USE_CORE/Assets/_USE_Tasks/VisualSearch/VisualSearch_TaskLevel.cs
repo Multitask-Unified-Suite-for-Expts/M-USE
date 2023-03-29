@@ -92,7 +92,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
                                       "\nAvg Search Duration: " + String.Format("{0:0.00}", vsTL.AverageSearchDuration_InBlock) +
                                       "\n" + 
                                       "\nNum Touch Duration Error: " + vsTL.TouchDurationError_InBlock + 
-                                      "\nNum Aborted Trials" + + vsTL.AbortedTrials_InBlock + 
+                                      "\nNum Aborted Trials: " + + vsTL.AbortedTrials_InBlock + 
                                       "\n"+
                                       "\nNum Reward Given: " + vsTL.NumRewardPulses_InBlock + 
                                       "\nNum Token Bar Filled: " + vsTL.NumTokenBarFull_InBlock +

@@ -1,17 +1,19 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using SelectionTracking;
 using UnityEngine;
 using USE_StimulusManagement;
 using USE_States;
+
 
 namespace SelectionTracking
 {
     public class SelectionTracker
     {
         // Start is called before the first frame update
-        public Dictionary<string, SelectionHandler> ActiveSelectionHandlers;
+        public Dictionary<string, SelectionHandler> ActiveSelectionHandlers = new Dictionary<string, SelectionHandler>();
 
         public SelectionHandler SetupSelectionHandler(string handlerName, State setActiveOnInit = null, State setInactiveOnTerm = null)
         {
@@ -55,8 +57,10 @@ namespace SelectionTracking
             mouseClick.UpdateErrorTriggers.Add(mouseClick.DefaultConditions("DurationTooLong"));
             
             mouseClick.TerminationConditions.Add(mouseClick.DefaultConditions("MouseButton0Up"));
-
+            
             mouseClick.TerminationErrorTriggers.Add(mouseClick.DefaultConditions("DurationTooShort"));
+
+            mouseClick.CurrentInputLocation = () => InputBroker.mousePosition;
             
             DefaultSelectionHandlers.Add("MouseButton0Click", mouseClick);
             
@@ -107,13 +111,14 @@ namespace SelectionTracking
             EndTime = Time.time;
             Duration = EndTime - StartTime;
             WasSuccessful = success;
+            //error handling?
         }
     }
 
     public class SelectionHandler
     {
         public List<USE_Selection> AllSelections, SuccessfulSelections, UnsuccessfulSelections;
-        private USE_Selection OngoingSelection;
+        public USE_Selection OngoingSelection;
         private GameObject currentTarget;
         public float? MinDuration, MaxDuration;
         public int? MaxPixelDisplacement;
@@ -125,17 +130,22 @@ namespace SelectionTracking
 
         public SelectionHandler()
         {
-            MinDuration = 0.25f;
-            CurrentInputLocation = () => InputBroker.mousePosition;
-            InitConditions = new List<BoolDelegate>(){DefaultConditions("RaycastHitsAGameObject")};
+            InitConditions = new List<BoolDelegate>();
+            UpdateConditions = new List<BoolDelegate>();
+            TerminationConditions = new List<BoolDelegate>();
+            InitErrorTriggers = new List<BoolDelegate>();
+            UpdateErrorTriggers = new List<BoolDelegate>();
+            TerminationErrorTriggers = new List<BoolDelegate>();
+
+            AllSelections = new List<USE_Selection>();
+            SuccessfulSelections = new List<USE_Selection>();
+            UnsuccessfulSelections = new List<USE_Selection>();
         }
         public SelectionHandler(InputDelegate inputLoc = null, float? minDuration = null, float? maxDuration = null, 
-            int? maxPixelDisplacement = null)
+                                int? maxPixelDisplacement = null)
         {
             if (inputLoc == null)
                 CurrentInputLocation = () => InputBroker.mousePosition; //default to just using the mouse
-            else
-                CurrentInputLocation = inputLoc;
             
             MinDuration = minDuration;
             MaxDuration = maxDuration;
@@ -156,6 +166,7 @@ namespace SelectionTracking
         private void SelectionInitErrorHandling(){}
         private void SelectionUpdateErrorHandling(){}
         private void SelectionTerminationErrorHandling(){}
+
         public void UpdateSelections()
         {
             if (CurrentInputLocation == null) // there is no input recorded on the screen
@@ -182,13 +193,16 @@ namespace SelectionTracking
             //if we have reached this point we know there is a target
             if (OngoingSelection == null) //no previous selection
             {
-                if (CheckInit())
-                    return;
-            }
+                CheckInit(); 
+                return;
+            }else
+                Debug.Log("laskhdgkjahsgkjhaskdghkasdhgkahghashgahgohsadghsidhgshglsalighlisadhgliasdglih");
             
             //if we have reached this point we know there is a target, there was a previous selection,
             //and this is not the first frame of new selection
-
+            Debug.Log(currentTarget);
+            Debug.Log(OngoingSelection);
+            Debug.Log(OngoingSelection.SelectedGameObject);
             if (currentTarget != OngoingSelection.SelectedGameObject) //previous selection on different game object
             {
                 CheckTermination(); //check termination of previous selection
@@ -202,42 +216,46 @@ namespace SelectionTracking
             
         }
 
-        private bool CheckInit()
+        private void CheckInit()
         {
-            bool init = CheckAllConditions(InitConditions);
-            bool initErrors = CheckAllConditions(InitErrorTriggers);
-            if (init) // intialization condition is true (e.g. mouse button is down)
-                if (!initErrors)
+            Debug.Log("inititiitititititititi" + InitErrorTriggers);
+            bool? init = CheckAllConditions(InitConditions);
+            bool? initErrors = CheckAllConditions(InitErrorTriggers);
+            if (init != null & init.Value) // intialization condition is true (e.g. mouse button is down)
+                if (initErrors == null || !initErrors.Value)
                     OngoingSelection = new USE_Selection(currentTarget); // start a new ongoing selection
                 else
                     SelectionInitErrorHandling();
-            return init & !initErrors;
+            Debug.Log("INIT " + init);
+            Debug.Log("INITerrror " + initErrors);
+            // return init & !initErrors;
         }
 
-        private bool CheckUpdate()
+        private void CheckUpdate()
         {
-            bool update = CheckAllConditions(UpdateConditions);
-            bool updateErrors = CheckAllConditions(UpdateErrorTriggers);
-            if (update)
+            bool? update = CheckAllConditions(UpdateConditions);
+            bool? updateErrors = CheckAllConditions(UpdateErrorTriggers);
+            Debug.Log("selectionupdate: " + update);
+            Debug.Log("selectionupdateerrors: " + updateErrors);
+            if (update == null || update.Value)
             {
                 // update condition is true (e.g. mouse button is being held down)
-                if (!updateErrors)
+                if (updateErrors == null || !updateErrors.Value)
                     OngoingSelection.UpdateSelection(CurrentInputLocation()); // will track duration and other custom functions while selecting
                 else
                     SelectionUpdateErrorHandling();
             }
-
-            return update & !updateErrors;
+            //what happens if update is false?
         }
 
-        private bool CheckTermination()
+        private void CheckTermination()
         {
-            bool term = CheckAllConditions(TerminationConditions);
-            bool termErrors = CheckAllConditions(TerminationErrorTriggers);
-            if (term)
+            bool? term = CheckAllConditions(TerminationConditions);
+            bool? termErrors = CheckAllConditions(TerminationErrorTriggers);
+            if (term == null || term.Value)
             {
                 // update condition is true (e.g. mouse button is being held down)
-                if (!termErrors)
+                if (termErrors == null || !termErrors.Value)
                 {
                     OngoingSelection.CompleteSelection(true);
                     OngoingSelection.WasSuccessful = true;
@@ -253,12 +271,11 @@ namespace SelectionTracking
                 AllSelections.Add(OngoingSelection);
                 OngoingSelection = null;
             }
-            return term & !termErrors;
         }
 
         private GameObject FindCurrentTarget(Vector3? inputLocation)
         {
-            if (inputLocation.Value.x < 0 || inputLocation.Value.y < 0) //should also be if x or y is greater than screen
+        if (inputLocation.Value.x < 0 || inputLocation.Value.y < 0 || inputLocation.Value.x > Screen.width || inputLocation.Value.y > Screen.height)
                 inputLocation = null;
 
             if (inputLocation != null)
@@ -278,20 +295,20 @@ namespace SelectionTracking
         public delegate GameObject GoDelegate();
 
         public delegate Vector3 InputDelegate();
-        public bool CheckAllConditions(IEnumerable<BoolDelegate> boolList)
+        public bool? CheckAllConditions(List<BoolDelegate> boolList)
         {
-            if (boolList != null)
+            if (boolList != null && boolList.Count > 0)
             {
-                bool returnVal = true;
                 foreach (BoolDelegate bd in boolList)
                 {
+                    Debug.Log("##################################################################################");
                     if (!bd())
                         return false;
                 }
-                return returnVal;
+                return true;
             }
             else
-                return false;
+                return null;
         }
 
         public BoolDelegate DefaultConditions(string ConditionName)
@@ -299,12 +316,14 @@ namespace SelectionTracking
             Dictionary<string, BoolDelegate> DefaultConditions = new Dictionary<string, BoolDelegate>();
             DefaultConditions.Add("RaycastHitsAGameObject", ()=> currentTarget != null);
             DefaultConditions.Add("RaycastHitsSameObjectAsPreviousFrame", ()=> DefaultConditions["RaycastHitsAGameObject"]() && 
+                                                                               OngoingSelection != null && 
                                                                                currentTarget == OngoingSelection.SelectedGameObject);
             DefaultConditions.Add("DurationTooLong", ()=> OngoingSelection.Duration > MaxDuration);
             DefaultConditions.Add("DurationTooShort", ()=> OngoingSelection.Duration < MinDuration);
             DefaultConditions.Add("MovedTooFar", ()=>
             {
-                return Vector3.Distance(CurrentInputLocation(), OngoingSelection.InputLocations[0]) < MaxPixelDisplacement;
+                return MaxPixelDisplacement == null || 
+                       Vector3.Distance(CurrentInputLocation(), OngoingSelection.InputLocations[0]) < MaxPixelDisplacement;
             });
             DefaultConditions.Add("MouseButton0", ()=> InputBroker.GetMouseButton(0));
             DefaultConditions.Add("MouseButton0Down", ()=> InputBroker.GetMouseButtonDown(0));

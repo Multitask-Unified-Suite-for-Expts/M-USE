@@ -154,6 +154,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
+
         MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, ()=> InputBroker.GetMouseButton(0));
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddInitializationMethod(() =>
@@ -174,6 +175,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 TrialStim = null;
             }
         });
+        
         InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), Delay, () =>
         {
             DelayDuration = sbToBalloonDelay.value;
@@ -304,6 +306,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         MouseTracker.AddSelectionHandler(mouseHandler, InflateBalloon, null, 
             ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
 
+        SelectionHandler mouseH = SelectionTracker.SetupSelectionHandler("MouseButton0Click", InflateBalloon);
         InflateBalloon.AddInitializationMethod(() =>
         {
             ScalePerInflation_Y = (MaxInflation_Y - TrialStim.transform.localScale.y) / (SideChoice == "Left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
@@ -319,6 +322,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         InflateBalloon.AddUpdateMethod(() =>
         {
+            
+            Debug.Log("successful selections: " + mouseH.SuccessfulSelections.Count);
+            Debug.Log("unsuccessful selections: " + mouseH.UnsuccessfulSelections.Count);
+            if (mouseH.OngoingSelection != null)
+                Debug.Log("Ongoing selection duration: " + mouseH.OngoingSelection.Duration);
+            
             if (Inflate)
             {
                 if (!InflateAudioPlayed)
@@ -487,7 +496,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Destroy(MaxOutline_Right);
         Destroy(MaxOutline_Left);
 
-        if(AbortCode == 0) //Normal{
+        if(AbortCode == 0) //Normal
             currentTask.CalculateBlockSummaryString();
 
         if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"] || AbortCode == AbortCodeDict["EndBlock"]) //If used RestartBlock, PreviousBlock, or EndBlock hotkeys

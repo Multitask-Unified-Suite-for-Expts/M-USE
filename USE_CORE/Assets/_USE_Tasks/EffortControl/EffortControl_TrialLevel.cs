@@ -307,6 +307,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
 
         SelectionHandler mouseH = SelectionTracker.SetupSelectionHandler("MouseButton0Click", InflateBalloon);
+        // mouseH.MinDuration = 1;
         InflateBalloon.AddInitializationMethod(() =>
         {
             ScalePerInflation_Y = (MaxInflation_Y - TrialStim.transform.localScale.y) / (SideChoice == "Left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);

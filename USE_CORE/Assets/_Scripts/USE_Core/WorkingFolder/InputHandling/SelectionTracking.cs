@@ -12,7 +12,7 @@ namespace SelectionTracking
     public class SelectionTracker
     {
         // Start is called before the first frame update
-        public Dictionary<string, SelectionHandler> ActiveSelectionHandlers;
+        public Dictionary<string, SelectionHandler> ActiveSelectionHandlers = new Dictionary<string, SelectionHandler>();
 
         public SelectionHandler SetupSelectionHandler(string handlerName, State setActiveOnInit = null, State setInactiveOnTerm = null)
         {
@@ -58,6 +58,8 @@ namespace SelectionTracking
             mouseClick.TerminationConditions.Add(mouseClick.DefaultConditions("MouseButton0Up"));
 
             mouseClick.TerminationErrorTriggers.Add(mouseClick.DefaultConditions("DurationTooShort"));
+
+            mouseClick.CurrentInputLocation = () => InputBroker.mousePosition;
             
             DefaultSelectionHandlers.Add("MouseButton0Click", mouseClick);
             
@@ -114,7 +116,7 @@ namespace SelectionTracking
     public class SelectionHandler
     {
         public List<USE_Selection> AllSelections, SuccessfulSelections, UnsuccessfulSelections;
-        private USE_Selection OngoingSelection;
+        public USE_Selection OngoingSelection;
         private GameObject currentTarget;
         public float? MinDuration, MaxDuration;
         public int? MaxPixelDisplacement;
@@ -126,9 +128,16 @@ namespace SelectionTracking
 
         public SelectionHandler()
         {
-            MinDuration = 0.25f;
-            CurrentInputLocation = () => InputBroker.mousePosition;
-            InitConditions = new List<BoolDelegate>(){DefaultConditions("RaycastHitsAGameObject")};
+            InitConditions = new List<BoolDelegate>();
+            UpdateConditions = new List<BoolDelegate>();
+            TerminationConditions = new List<BoolDelegate>();
+            InitErrorTriggers = new List<BoolDelegate>();
+            UpdateErrorTriggers = new List<BoolDelegate>();
+            TerminationErrorTriggers = new List<BoolDelegate>();
+
+            AllSelections = new List<USE_Selection>();
+            SuccessfulSelections = new List<USE_Selection>();
+            UnsuccessfulSelections = new List<USE_Selection>();
         }
         public SelectionHandler(InputDelegate inputLoc = null, float? minDuration = null, float? maxDuration = null, 
                                 int? maxPixelDisplacement = null)
@@ -182,13 +191,16 @@ namespace SelectionTracking
             //if we have reached this point we know there is a target
             if (OngoingSelection == null) //no previous selection
             {
-                if (CheckInit())
-                    return;
-            }
+                CheckInit(); 
+                return;
+            }else
+                Debug.Log("laskhdgkjahsgkjhaskdghkasdhgkahghashgahgohsadghsidhgshglsalighlisadhgliasdglih");
             
             //if we have reached this point we know there is a target, there was a previous selection,
             //and this is not the first frame of new selection
-
+            Debug.Log(currentTarget);
+            Debug.Log(OngoingSelection);
+            Debug.Log(OngoingSelection.SelectedGameObject);
             if (currentTarget != OngoingSelection.SelectedGameObject) //previous selection on different game object
             {
                 CheckTermination(); //check termination of previous selection
@@ -204,6 +216,7 @@ namespace SelectionTracking
 
         private bool CheckInit()
         {
+            Debug.Log("inititiitititititititi");
             bool init = CheckAllConditions(InitConditions);
             bool initErrors = CheckAllConditions(InitErrorTriggers);
             if (init) // intialization condition is true (e.g. mouse button is down)
@@ -211,6 +224,8 @@ namespace SelectionTracking
                     OngoingSelection = new USE_Selection(currentTarget); // start a new ongoing selection
                 else
                     SelectionInitErrorHandling();
+            Debug.Log("ITI INIT " + init);
+            Debug.Log("ITI INITerrror " + initErrors);
             return init & !initErrors;
         }
 
@@ -218,6 +233,8 @@ namespace SelectionTracking
         {
             bool update = CheckAllConditions(UpdateConditions);
             bool updateErrors = CheckAllConditions(UpdateErrorTriggers);
+            Debug.Log("selectionupdate: " + update);
+            Debug.Log("selectionupdateerrors: " + updateErrors);
             if (update)
             {
                 // update condition is true (e.g. mouse button is being held down)
@@ -282,13 +299,13 @@ namespace SelectionTracking
         {
             if (boolList != null)
             {
-                bool returnVal = true;
                 foreach (BoolDelegate bd in boolList)
                 {
+                    Debug.Log("##################################################################################");
                     if (!bd())
                         return false;
                 }
-                return returnVal;
+                return true;
             }
             else
                 return false;
@@ -299,6 +316,7 @@ namespace SelectionTracking
             Dictionary<string, BoolDelegate> DefaultConditions = new Dictionary<string, BoolDelegate>();
             DefaultConditions.Add("RaycastHitsAGameObject", ()=> currentTarget != null);
             DefaultConditions.Add("RaycastHitsSameObjectAsPreviousFrame", ()=> DefaultConditions["RaycastHitsAGameObject"]() && 
+                                                                               OngoingSelection != null && 
                                                                                currentTarget == OngoingSelection.SelectedGameObject);
             DefaultConditions.Add("DurationTooLong", ()=> OngoingSelection.Duration > MaxDuration);
             DefaultConditions.Add("DurationTooShort", ()=> OngoingSelection.Duration < MinDuration);

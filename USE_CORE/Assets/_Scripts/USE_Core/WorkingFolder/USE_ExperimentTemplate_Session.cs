@@ -517,6 +517,11 @@ namespace USE_ExperimentTemplate_Session
                 }
             });
             
+            selectTask.AddFixedUpdateMethod(() =>
+            {
+                SelectionTracker.UpdateActiveSelections();
+            });
+            
             selectTask.AddLateUpdateMethod(() =>
             {
                 AppendSerialData();
@@ -563,6 +568,10 @@ namespace USE_ExperimentTemplate_Session
                 };
             });
             
+            loadTask.AddFixedUpdateMethod(() =>
+            {
+                SelectionTracker.UpdateActiveSelections();
+            });
             
             loadTask.AddLateUpdateMethod(() =>
             {
@@ -612,6 +621,10 @@ namespace USE_ExperimentTemplate_Session
                 // runTask.AddLateUpdateMethod(() => EventCodeManager.EventCodeLateUpdate());
             }
             
+            runTask.AddFixedUpdateMethod(() =>
+            {
+                SelectionTracker.UpdateActiveSelections();
+            });
             
             runTask.AddLateUpdateMethod(() =>
             {

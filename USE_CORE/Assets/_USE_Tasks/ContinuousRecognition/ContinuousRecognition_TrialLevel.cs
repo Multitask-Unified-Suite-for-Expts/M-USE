@@ -122,15 +122,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             if (!CR_CanvasGO.activeInHierarchy)
                 CR_CanvasGO.SetActive(true);
-
-            NumFeedbackRows = 0;
-
-            if (!VariablesLoaded)
-                LoadConfigUIVariables();
-
-            SetTrialSummaryString();
-
-            Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -141,6 +132,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
+            NumFeedbackRows = 0;
+
+            if (!VariablesLoaded)
+                LoadConfigUIVariables();
+
+            SetTrialSummaryString();
+
             StartButton.transform.position = OriginalStartButtonPosition;
 
             currentTask.CalculateBlockSummaryString();
@@ -514,14 +512,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    void PopStimOut()
+    void PopStimOut() //Method used to make the game easier for debugging purposes
     {
         foreach(ContinuousRecognition_StimDef stim in trialStims.stimDefs)
         {
             if (!stim.PreviouslyChosen)
                 stim.StimGameObject.transform.localScale *= 1.35f;
         }
-    } //can use to make game easier if need to debug. 
+    }
 
     void AdjustStartButtonPos()
     {
@@ -1060,7 +1058,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 SyncBoxController.SendRewardPulses(currentTrial.NumRewardPulses, currentTrial.PulseSize);
                 SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumRewardPulses));
-                EventCodeManager.SendCodeImmediate(TaskEventCodes["Fluid1Onset"]);
             }
         }
     }
@@ -1072,12 +1069,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         
         else
         {
-            for (int i = 0; i < list.Count - 1; i++)
+            int n = list.Count;
+            while(n > 1)
             {
-                int temp = list[i];
-                int rand = Random.Range(1, list.Count);
-                list[i] = list[rand];
-                list[rand] = temp;
+                n--;
+                int k = Random.Range(0, n + 1);
+                int temp = list[k];
+                list[k] = list[n];
+                list[n] = temp;
             }
             return list;
         }

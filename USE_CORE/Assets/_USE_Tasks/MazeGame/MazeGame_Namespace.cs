@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
@@ -42,13 +43,15 @@ namespace MazeGame_Namespace
         
         public string BlockEndType;
         public float BlockEndThreshold;
-        public int BlockEndWindow;
+        public bool ErrorPenalty;
         
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmaxokay 
+            
             System.Random rnd = new System.Random();
             int num = rnd.Next(MinMaxTrials[0], MinMaxTrials[1]);
+
             TrialDefs = new List<MazeGame_TrialDef>().ConvertAll(x => (TrialDef)x);
             
             for (int iTrial = 0; iTrial < num; iTrial++)
@@ -64,8 +67,9 @@ namespace MazeGame_Namespace
                 td.SliderInitial = SliderInitial;
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndType = BlockEndType;
-                td.BlockEndWindow = BlockEndWindow;
                 td.MinMaxTrials = MinMaxTrials;
+                td.ErrorPenalty = ErrorPenalty;
+                td.MaxTrials = num;
                 TrialDefs.Add(td);
             }
         }
@@ -92,14 +96,15 @@ namespace MazeGame_Namespace
         public int MazeNumSquares;
         public int MazeNumTurns;*/
         public bool ViewPath;
+        public bool ErrorPenalty;
         public string ContextName;
         public string MazeName;
         public int SliderInitial;
         public MazeDef MazeDef;
+        public int MaxTrials;
         
         public string BlockEndType;
         public float BlockEndThreshold;
-        public int BlockEndWindow;
         public int[] MinMaxTrials;
     }
 

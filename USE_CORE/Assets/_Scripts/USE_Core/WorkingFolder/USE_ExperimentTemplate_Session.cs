@@ -379,6 +379,7 @@ namespace USE_ExperimentTemplate_Session
                 
                 SessionSettings.Restore();
                 selectedConfigName = null;
+                taskAutomaticallySelected = false; // gives another chance to select even if previous task loading was due to timeout
 
                 SessionCam.gameObject.SetActive(true);
                 // SessionCam.targetDisplay = 2;
@@ -516,6 +517,11 @@ namespace USE_ExperimentTemplate_Session
                 }
             });
             
+            selectTask.AddFixedUpdateMethod(() =>
+            {
+                SelectionTracker.UpdateActiveSelections();
+            });
+            
             selectTask.AddLateUpdateMethod(() =>
             {
                 AppendSerialData();
@@ -562,6 +568,10 @@ namespace USE_ExperimentTemplate_Session
                 };
             });
             
+            loadTask.AddFixedUpdateMethod(() =>
+            {
+                SelectionTracker.UpdateActiveSelections();
+            });
             
             loadTask.AddLateUpdateMethod(() =>
             {
@@ -611,6 +621,10 @@ namespace USE_ExperimentTemplate_Session
                 // runTask.AddLateUpdateMethod(() => EventCodeManager.EventCodeLateUpdate());
             }
             
+            runTask.AddFixedUpdateMethod(() =>
+            {
+                SelectionTracker.UpdateActiveSelections();
+            });
             
             runTask.AddLateUpdateMethod(() =>
             {

@@ -296,13 +296,10 @@ MonoBehaviour:
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   InitialTokenAmount: 0
-  StartButtonTexture: {fileID: 0}
-  FBSquareTexture: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
-  BackdropTexture: {fileID: 0}
-  MazeBackgroundTexture: {fileID: 0}
+  THR_BackdropTexture: {fileID: 0}
   MaterialFilePath: 
   TrialCompletionList: 
   TrialsCompleted_Block: 0

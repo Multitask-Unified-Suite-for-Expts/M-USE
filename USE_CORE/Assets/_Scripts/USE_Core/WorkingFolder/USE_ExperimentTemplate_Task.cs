@@ -110,7 +110,7 @@ namespace USE_ExperimentTemplate_Task
         public void DefineTaskLevel(bool verifyOnly)
         {
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
-            ReadSettingsFiles();
+            ReadSettingsFiles(verifyOnly);
             ReadCustomSettingsFiles();
             FindStims();
             if (verifyOnly) return;
@@ -343,7 +343,12 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.SerialRecvData = SerialRecvData;
             TrialLevel.SerialSentData = SerialSentData;
             TrialLevel.SyncBoxController = SyncBoxController;
+
+            if(SyncBoxController != null)
+                TrialLevel.SyncBoxController.EventCodeManager = EventCodeManager;
+
             TrialLevel.EventCodeManager = EventCodeManager;
+
             if (CustomTaskEventCodes != null)
                 TrialLevel.TaskEventCodes = CustomTaskEventCodes;
             if (SessionEventCodes != null)
@@ -416,7 +421,7 @@ namespace USE_ExperimentTemplate_Task
         }
 
 
-        private void ReadSettingsFiles()
+        private void ReadSettingsFiles(bool verifyOnly)
         {
             //user specifies what custom types they have that inherit from TaskDef, BlockDef, and TrialDef;
             SpecifyTypes();
@@ -472,9 +477,12 @@ namespace USE_ExperimentTemplate_Task
                                    " folder, no trials generated as a result.");
                 else
                 {
-                    for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+                    if (!verifyOnly)
                     {
-                        BlockDefs[iBlock].GenerateTrialDefsFromBlockDef();
+                        for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+                        {
+                            BlockDefs[iBlock].GenerateTrialDefsFromBlockDef();
+                        }
                     }
                 }
 
@@ -503,23 +511,30 @@ namespace USE_ExperimentTemplate_Task
                     }
 
                     //add trialDef[] for each block;
-                    for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+                    if (!verifyOnly)
                     {
-                        if (BlockDefs[iBlock] == null)
-                            BlockDefs[iBlock] = new BlockDef();
-                        BlockDefs[iBlock].BlockCount = iBlock;
-                        BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock, AllTrialDefs);
+                        for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+                        {
+                            if (BlockDefs[iBlock] == null)
+                                BlockDefs[iBlock] = new BlockDef();
+                            BlockDefs[iBlock].BlockCount = iBlock;
+                            BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock, AllTrialDefs);
+                        }  
                     }
                 }
                 else //there is a blockDef file, its information may need to be added to TrialDefs
                 {
 
                     //add trialDef[] for each block;
-                    for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+                    if (!verifyOnly)
                     {
-                        BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock + 1, AllTrialDefs);
-                        BlockDefs[iBlock].AddToTrialDefsFromBlockDef();
+                      for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++) 
+                      {
+                          BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock + 1, AllTrialDefs);
+                          BlockDefs[iBlock].AddToTrialDefsFromBlockDef();
+                      }  
                     }
+                    
                 }
             }
         }
@@ -829,6 +844,29 @@ namespace USE_ExperimentTemplate_Task
 
     public class TaskLevelTemplate_Methods
     {
+        public bool CheckBlockEnd(string blockEndType, IEnumerable<float> runningTrialPerformance, float performanceThreshold = 1,
+            int? minTrials = null, int? maxTrials = null)
+        {
+            // Takes in accuracy info from the current trial to determine whether to end the block
+            List<float> rTrialPerformance = (List<float>)runningTrialPerformance;
+
+            if (CheckTrialRange(rTrialPerformance.Count, minTrials, maxTrials) != null)
+                return CheckTrialRange(rTrialPerformance.Count, minTrials, maxTrials).Value;
+
+            switch (blockEndType)
+            {
+                case "CurrentTrialPerformance":
+                    if (rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
+                    {
+                        Debug.Log("Block ending due to trial performance below threshold.");
+                        return true;
+                    }
+                    else
+                        return false;
+                default:
+                    return false;
+            }
+        }
         public bool CheckBlockEnd(string blockEndType, IEnumerable<int> runningAcc, float accThreshold = 1, int windowSize = 1, int? minTrials = null, int? maxTrials = null)
         {
             //takes in accuracy information from the current block and determines if the block should end
@@ -839,14 +877,12 @@ namespace USE_ExperimentTemplate_Task
                             //(allows easy comparison of changes between performance across two windows
             int? sumdif; //the simple sum of the number of different trial outcomes in the windows used to compute 
                          //immediateAvg and prevAvg
-
-                         if (rAcc.Count >= windowSize)
-                         {
-                             Debug.Log("RUNNING ACC COUNT: " + runningAcc.Count());
-                             immediateAvg = (float)rAcc.GetRange(rAcc.Count - windowSize, windowSize).Average();
-                            
-                         }
-                         else
+                         
+            if (rAcc.Count >= windowSize)
+            {
+                immediateAvg = (float)rAcc.GetRange(rAcc.Count - windowSize, windowSize).Average();
+            }
+            else
                 immediateAvg = null;
 
             if (rAcc.Count >= windowSize * 2)

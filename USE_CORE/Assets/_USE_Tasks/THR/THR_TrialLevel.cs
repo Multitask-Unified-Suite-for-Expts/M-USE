@@ -86,6 +86,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     private float RewardEarnedTime;
     private float RewardTimer;
 
+    [HideInInspector] public bool StartWithBlueSquare;
+
 
     public override void DefineControlLevel()
     {
@@ -101,11 +103,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
+            CreateColors();
             if (BackdropGO == null)
                 CreateBackdrop();
             if (SquareGO == null)
                 CreateSquare();
-            CreateColors();
         });
 
         //SETUP TRIAL state -------------------------------------------------------------------------------------------------------------------------
@@ -128,7 +130,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InTask != 0)
                 currentTask.SetTaskSummaryString();
         });
-        InitTrial.SpecifyTermination(() => true, WhiteSquare, () => TrialStartTime = Time.time);
+        InitTrial.SpecifyTermination(() => true && !StartWithBlueSquare, WhiteSquare, () => TrialStartTime = Time.time);
+        InitTrial.SpecifyTermination(() => true && StartWithBlueSquare, BlueSquare, () => TrialStartTime = Time.time);
 
         //WHITE SQUARE state ------------------------------------------------------------------------------------------------------------------------
         WhiteSquare.AddInitializationMethod(() =>
@@ -512,6 +515,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         SquareTexture = SquareRenderer.material.mainTexture;
         SquareGO.GetComponent<Renderer>().material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
         SquareGO.GetComponent<Renderer>().material.SetFloat("_SpecularHighlights", 0f);
+
+        if (StartWithBlueSquare)
+            SquareMaterial.color = LightBlueColor;
+        else
+            SquareMaterial.color = Color.white;
     }
 
     private void CreateColors()

@@ -54,7 +54,8 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             trialLevel.ResetBlockVariables();
-            RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(ContextExternalFilePath, currentBlock.ContextName, "LinearDark"));
+            ContextName = currentBlock.ContextName;
+            RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(ContextExternalFilePath, ContextName, "LinearDark"));
             EventCodeManager.SendCodeImmediate(SessionEventCodes["ContextOn"]);
         });
 

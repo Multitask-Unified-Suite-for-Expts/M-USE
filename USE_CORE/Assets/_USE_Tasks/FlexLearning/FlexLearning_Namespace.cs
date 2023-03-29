@@ -77,6 +77,7 @@ namespace FlexLearning_Namespace
                 td.NumPulses = NumPulses;
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
+                td.MaxTrials = num;
                 if (TokensWithStimOn != null)
                     td.TokensWithStimOn = TokensWithStimOn;
                 else
@@ -129,7 +130,7 @@ namespace FlexLearning_Namespace
         public int NumTokenBar;
         public int PulseSize;
         public bool? TokensWithStimOn;
-
+        public int MaxTrials;
     }
 
     public class FlexLearning_StimDef : StimDef

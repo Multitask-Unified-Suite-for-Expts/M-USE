@@ -117,6 +117,8 @@ namespace USE_ExperimentTemplate_Trial
             {
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTrialStarts"]);
 
+                Input.ResetInputAxes();
+
                 AbortCode = 0;
                 SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials",1));
                 TrialCount_InTask++;

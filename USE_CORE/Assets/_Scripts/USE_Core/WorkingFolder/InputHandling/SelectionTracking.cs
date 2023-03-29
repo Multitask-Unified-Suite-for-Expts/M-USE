@@ -6,6 +6,7 @@ using UnityEngine;
 using USE_StimulusManagement;
 using USE_States;
 
+
 namespace SelectionTracking
 {
     public class SelectionTracker
@@ -130,12 +131,10 @@ namespace SelectionTracking
             InitConditions = new List<BoolDelegate>(){DefaultConditions("RaycastHitsAGameObject")};
         }
         public SelectionHandler(InputDelegate inputLoc = null, float? minDuration = null, float? maxDuration = null, 
-            int? maxPixelDisplacement = null)
+                                int? maxPixelDisplacement = null)
         {
             if (inputLoc == null)
                 CurrentInputLocation = () => InputBroker.mousePosition; //default to just using the mouse
-            else
-                CurrentInputLocation = inputLoc;
             
             MinDuration = minDuration;
             MaxDuration = maxDuration;
@@ -156,6 +155,7 @@ namespace SelectionTracking
         private void SelectionInitErrorHandling(){}
         private void SelectionUpdateErrorHandling(){}
         private void SelectionTerminationErrorHandling(){}
+
         public void UpdateSelections()
         {
             if (CurrentInputLocation == null) // there is no input recorded on the screen
@@ -258,7 +258,7 @@ namespace SelectionTracking
 
         private GameObject FindCurrentTarget(Vector3? inputLocation)
         {
-            if (inputLocation.Value.x < 0 || inputLocation.Value.y < 0) //should also be if x or y is greater than screen
+        if (inputLocation.Value.x < 0 || inputLocation.Value.y < 0 || inputLocation.Value.x > Screen.width || inputLocation.Value.y > Screen.height)
                 inputLocation = null;
 
             if (inputLocation != null)

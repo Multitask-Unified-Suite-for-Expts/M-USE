@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using SelectionTracking;
 using UnityEngine;
 using USE_StimulusManagement;
@@ -56,7 +57,7 @@ namespace SelectionTracking
             mouseClick.UpdateErrorTriggers.Add(mouseClick.DefaultConditions("DurationTooLong"));
             
             mouseClick.TerminationConditions.Add(mouseClick.DefaultConditions("MouseButton0Up"));
-
+            
             mouseClick.TerminationErrorTriggers.Add(mouseClick.DefaultConditions("DurationTooShort"));
 
             mouseClick.CurrentInputLocation = () => InputBroker.mousePosition;
@@ -110,6 +111,7 @@ namespace SelectionTracking
             EndTime = Time.time;
             Duration = EndTime - StartTime;
             WasSuccessful = success;
+            //error handling?
         }
     }
 
@@ -214,47 +216,46 @@ namespace SelectionTracking
             
         }
 
-        private bool CheckInit()
+        private void CheckInit()
         {
-            Debug.Log("inititiitititititititi");
-            bool init = CheckAllConditions(InitConditions);
-            bool initErrors = CheckAllConditions(InitErrorTriggers);
-            if (init) // intialization condition is true (e.g. mouse button is down)
-                if (!initErrors)
+            Debug.Log("inititiitititititititi" + InitErrorTriggers);
+            bool? init = CheckAllConditions(InitConditions);
+            bool? initErrors = CheckAllConditions(InitErrorTriggers);
+            if (init != null & init.Value) // intialization condition is true (e.g. mouse button is down)
+                if (initErrors == null || !initErrors.Value)
                     OngoingSelection = new USE_Selection(currentTarget); // start a new ongoing selection
                 else
                     SelectionInitErrorHandling();
-            Debug.Log("ITI INIT " + init);
-            Debug.Log("ITI INITerrror " + initErrors);
-            return init & !initErrors;
+            Debug.Log("INIT " + init);
+            Debug.Log("INITerrror " + initErrors);
+            // return init & !initErrors;
         }
 
-        private bool CheckUpdate()
+        private void CheckUpdate()
         {
-            bool update = CheckAllConditions(UpdateConditions);
-            bool updateErrors = CheckAllConditions(UpdateErrorTriggers);
+            bool? update = CheckAllConditions(UpdateConditions);
+            bool? updateErrors = CheckAllConditions(UpdateErrorTriggers);
             Debug.Log("selectionupdate: " + update);
             Debug.Log("selectionupdateerrors: " + updateErrors);
-            if (update)
+            if (update == null || update.Value)
             {
                 // update condition is true (e.g. mouse button is being held down)
-                if (!updateErrors)
+                if (updateErrors == null || !updateErrors.Value)
                     OngoingSelection.UpdateSelection(CurrentInputLocation()); // will track duration and other custom functions while selecting
                 else
                     SelectionUpdateErrorHandling();
             }
-
-            return update & !updateErrors;
+            //what happens if update is false?
         }
 
-        private bool CheckTermination()
+        private void CheckTermination()
         {
-            bool term = CheckAllConditions(TerminationConditions);
-            bool termErrors = CheckAllConditions(TerminationErrorTriggers);
-            if (term)
+            bool? term = CheckAllConditions(TerminationConditions);
+            bool? termErrors = CheckAllConditions(TerminationErrorTriggers);
+            if (term == null || term.Value)
             {
                 // update condition is true (e.g. mouse button is being held down)
-                if (!termErrors)
+                if (termErrors == null || !termErrors.Value)
                 {
                     OngoingSelection.CompleteSelection(true);
                     OngoingSelection.WasSuccessful = true;
@@ -270,7 +271,6 @@ namespace SelectionTracking
                 AllSelections.Add(OngoingSelection);
                 OngoingSelection = null;
             }
-            return term & !termErrors;
         }
 
         private GameObject FindCurrentTarget(Vector3? inputLocation)
@@ -295,9 +295,9 @@ namespace SelectionTracking
         public delegate GameObject GoDelegate();
 
         public delegate Vector3 InputDelegate();
-        public bool CheckAllConditions(IEnumerable<BoolDelegate> boolList)
+        public bool? CheckAllConditions(List<BoolDelegate> boolList)
         {
-            if (boolList != null)
+            if (boolList != null && boolList.Count > 0)
             {
                 foreach (BoolDelegate bd in boolList)
                 {
@@ -308,7 +308,7 @@ namespace SelectionTracking
                 return true;
             }
             else
-                return false;
+                return null;
         }
 
         public BoolDelegate DefaultConditions(string ConditionName)
@@ -322,7 +322,8 @@ namespace SelectionTracking
             DefaultConditions.Add("DurationTooShort", ()=> OngoingSelection.Duration < MinDuration);
             DefaultConditions.Add("MovedTooFar", ()=>
             {
-                return Vector3.Distance(CurrentInputLocation(), OngoingSelection.InputLocations[0]) < MaxPixelDisplacement;
+                return MaxPixelDisplacement == null || 
+                       Vector3.Distance(CurrentInputLocation(), OngoingSelection.InputLocations[0]) < MaxPixelDisplacement;
             });
             DefaultConditions.Add("MouseButton0", ()=> InputBroker.GetMouseButton(0));
             DefaultConditions.Add("MouseButton0Down", ()=> InputBroker.GetMouseButtonDown(0));

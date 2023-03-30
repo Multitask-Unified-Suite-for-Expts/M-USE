@@ -631,7 +631,13 @@ namespace USE_ExperimentTemplate_Session
             
             runTask.AddFixedUpdateMethod(() =>
             {
+                Debug.Log(Time.frameCount + " FixedUpdate start ");
                 SelectionTracker.UpdateActiveSelections();
+            });
+            
+            runTask.AddUpdateMethod(() =>
+            {
+                Debug.Log(Time.frameCount + " Update start ");
             });
             
             runTask.AddLateUpdateMethod(() =>

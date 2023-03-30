@@ -325,9 +325,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             
             if (mouseHandler.CurrentTargetDuration != null)
-                Debug.Log("ongoing selection (old) duration: " + mouseHandler.CurrentTargetDuration);
+                Debug.Log(Time.frameCount + " ongoing selection (old) duration: " + mouseHandler.CurrentTargetDuration);
             if (mouseH.OngoingSelection != null)
-                Debug.Log("Ongoing selection duration: " + mouseH.OngoingSelection.Duration);
+                Debug.Log(Time.frameCount + "Ongoing selection duration: " + mouseH.OngoingSelection.Duration);
             
             if (Inflate)
             {
@@ -392,8 +392,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         InflateBalloon.SpecifyTermination(() => Response == 1, Delay);
         InflateBalloon.AddDefaultTerminationMethod(() =>
         {
-            Debug.Log("successful selections: " + mouseH.SuccessfulSelections.Count);
-            Debug.Log("unsuccessful selections: " + mouseH.UnsuccessfulSelections.Count);
+            Debug.Log(Time.frameCount + "successful selections: " + mouseH.SuccessfulSelections.Count);
+            Debug.Log(Time.frameCount + "unsuccessful selections: " + mouseH.UnsuccessfulSelections.Count);
             StateAfterDelay = Feedback;
             DelayDuration = popToFeedbackDelay.value;
             TotalTouches_Block += TrialTouches;

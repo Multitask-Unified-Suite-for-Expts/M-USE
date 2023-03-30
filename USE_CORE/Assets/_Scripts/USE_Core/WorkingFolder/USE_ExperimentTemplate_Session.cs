@@ -629,19 +629,19 @@ namespace USE_ExperimentTemplate_Session
                 // runTask.AddLateUpdateMethod(() => EventCodeManager.EventCodeLateUpdate());
             }
             
-            runTask.AddFixedUpdateMethod(() =>
-            {
-                Debug.Log(Time.frameCount + " FixedUpdate start ");
-                SelectionTracker.UpdateActiveSelections();
-            });
-            
-            runTask.AddUpdateMethod(() =>
-            {
-                Debug.Log(Time.frameCount + " Update start ");
-            });
+            // runTask.AddFixedUpdateMethod(() =>
+            // {
+            //     Debug.Log(Time.frameCount + " FixedUpdate start ");
+            // });
+            //
+            // runTask.AddUpdateMethod(() =>
+            // {
+            //     Debug.Log(Time.frameCount + " Update start ");
+            // });
             
             runTask.AddLateUpdateMethod(() =>
             {
+                SelectionTracker.UpdateActiveSelections();
                 AppendSerialData();
             });
             

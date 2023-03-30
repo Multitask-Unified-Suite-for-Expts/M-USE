@@ -34,7 +34,7 @@ namespace SelectionTracking
 
         public void UpdateActiveSelections()
         {
-            Debug.Log(Time.frameCount + " UpdateActiveSelections started");
+            // Debug.Log(Time.frameCount + " UpdateActiveSelections started");
             foreach (string key in ActiveSelectionHandlers.Keys)
             {
                 ActiveSelectionHandlers[key].UpdateSelections();
@@ -51,7 +51,7 @@ namespace SelectionTracking
             mouseClick.InitConditions.Add(mouseClick.DefaultConditions("RaycastHitsAGameObject"));
             mouseClick.InitConditions.Add(mouseClick.DefaultConditions("MouseButton0Down"));
             
-            mouseClick.UpdateConditions.Add(mouseClick.DefaultConditions("MouseButton0Down"));
+            mouseClick.UpdateConditions.Add(mouseClick.DefaultConditions("MouseButton0"));
             mouseClick.UpdateConditions.Add(mouseClick.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
             
             mouseClick.UpdateErrorTriggers.Add(mouseClick.DefaultConditions("MovedTooFar"));
@@ -171,11 +171,11 @@ namespace SelectionTracking
 
         public void UpdateSelections()
         {
-            Debug.Log(Time.frameCount + " UpdateSelections starting");
+            // Debug.Log(Time.frameCount + " UpdateSelections starting");
             
             if (CurrentInputLocation == null) // there is no input recorded on the screen
             {
-                Debug.Log(Time.frameCount + " currentInputLocation == null");
+                // Debug.Log(Time.frameCount + " currentInputLocation == null");
                 if (OngoingSelection != null) // the previous frame was a selection
                 {
                     CheckTermination();
@@ -188,7 +188,7 @@ namespace SelectionTracking
             currentTarget = FindCurrentTarget(CurrentInputLocation());
             if (currentTarget == null) //input is not over a gameobject
             {
-                Debug.Log(Time.frameCount + " currentTarget == null");
+                // Debug.Log(Time.frameCount + " currentTarget == null");
                 if (OngoingSelection != null) // the previous frame was a selection
                 {
                     CheckTermination();
@@ -199,7 +199,7 @@ namespace SelectionTracking
             //if we have reached this point we know there is a target
             if (OngoingSelection == null) //no previous selection
             {
-                Debug.Log(Time.frameCount + " OngoingSelection == null");
+                // Debug.Log(Time.frameCount + " OngoingSelection == null");
                 CheckInit(); 
                 return;
             }
@@ -210,16 +210,17 @@ namespace SelectionTracking
             
             if (currentTarget != OngoingSelection.SelectedGameObject) //previous selection was on different game object
             {
-                Debug.Log(Time.frameCount + " currentTarget != OngoingSelection.SelectedGameObject");
+                // Debug.Log(Time.frameCount + " currentTarget != OngoingSelection.SelectedGameObject");
                 CheckTermination(); //check termination of previous selection
                 CheckInit(); //check init of current selection
                 return;
             }
 
                 //if we have reached this point we know we have an ongoing selection
-            bool updateFinished = CheckUpdate();
+            bool updateConditionsMet = CheckUpdate();
             CheckTermination();
-            if (!updateFinished)
+            if (!updateConditionsMet && OngoingSelection != null) 
+                //the selection fails because update conditions are not met (but termination condition was not met either)
             {
                 OngoingSelection.CompleteSelection(false);
                 AllSelections.Add(OngoingSelection);
@@ -233,8 +234,8 @@ namespace SelectionTracking
         {
             bool? init = CheckAllConditions(InitConditions);
             bool? initErrors = CheckAllConditions(InitErrorTriggers);
-            Debug.Log(Time.frameCount + "####################init: " + init + ", initerrors: " + initErrors);
-            Debug.Log(Time.frameCount + "Condition 1: " + InitConditions[0]() + "Condition 2: " + InitConditions[1]());
+            // Debug.Log(Time.frameCount + "####################init: " + init + ", initerrors: " + initErrors);
+            // Debug.Log(Time.frameCount + "Condition 1: " + InitConditions[0]() + "Condition 2: " + InitConditions[1]());
             if (init != null & init.Value) // intialization condition is true (e.g. mouse button is down)
                 if (initErrors == null || !initErrors.Value)
                     OngoingSelection = new USE_Selection(currentTarget); // start a new ongoing selection
@@ -244,16 +245,16 @@ namespace SelectionTracking
 
         private bool CheckUpdate()
         {
-            Debug.Log(Time.frameCount + "Condition 1: " + UpdateConditions[0]() + "Condition 2: " + UpdateConditions[1]());
+            // Debug.Log(Time.frameCount + "Condition 1: " + UpdateConditions[0]() + "Condition 2: " + UpdateConditions[1]());
             bool? update = CheckAllConditions(UpdateConditions);
             bool? updateErrors = CheckAllConditions(UpdateErrorTriggers);
-            Debug.Log(Time.frameCount + "####################selectionupdate: " + update + ", selectionupdateerrors: " + updateErrors);
+            // Debug.Log(Time.frameCount + "####################selectionupdate: " + update + ", selectionupdateerrors: " + updateErrors);
             if (update == null || update.Value)
             {
                 // update condition is true (e.g. mouse button is being held down)
                 if (updateErrors == null || !updateErrors.Value)
                 {
-                    Debug.Log(Time.frameCount + "updating selection");
+                    // Debug.Log(Time.frameCount + "updating selection");
                     OngoingSelection.UpdateSelection(
                         CurrentInputLocation()); // will track duration and other custom functions while selecting
                     return true;
@@ -266,7 +267,7 @@ namespace SelectionTracking
             }
             else
             { 
-                Debug.Log(Time.frameCount + "update conditions not met %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+                // Debug.Log(Time.frameCount + "update conditions not met %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
                 SelectionUpdateErrorHandling();
                 return false;
             }
@@ -282,14 +283,14 @@ namespace SelectionTracking
                 // update condition is true (e.g. mouse button is being held down)
                 if (termErrors == null || !termErrors.Value)
                 {
-                    Debug.Log(Time.frameCount + "successful selection");
+                    // Debug.Log(Time.frameCount + "successful selection");
                     OngoingSelection.CompleteSelection(true);
                     OngoingSelection.WasSuccessful = true;
                     SuccessfulSelections.Add(OngoingSelection);
                 }
                 else
                 {
-                    Debug.Log(Time.frameCount + "unsuccessful selection");
+                    // Debug.Log(Time.frameCount + "unsuccessful selection");
                     OngoingSelection.CompleteSelection(false);
                     OngoingSelection.WasSuccessful = false;
                     UnsuccessfulSelections.Add(OngoingSelection);

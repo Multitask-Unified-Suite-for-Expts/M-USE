@@ -172,6 +172,7 @@ namespace SelectionTracking
         {
             if (CurrentInputLocation == null) // there is no input recorded on the screen
             {
+                Debug.Log("currentInputLocation == null");
                 if (OngoingSelection != null) // the previous frame was a selection
                 {
                     CheckTermination();

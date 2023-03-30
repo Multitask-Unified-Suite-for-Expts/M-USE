@@ -8,6 +8,7 @@ using UnityEngine.UI;
 using ConfigDynamicUI;
 using ConfigParsing;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 using USE_States;
 using USE_StimulusManagement;
@@ -149,8 +150,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
             if (!configUIVariablesLoaded) 
                 LoadConfigUIVariables();
-            if (!playerViewLoaded)
-                CreateTextOnExperimenterDisplay();
             
             SetTrialSummaryString();
         });
@@ -172,7 +171,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
         });
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
+        InitTrial.AddUpdateMethod(() =>
+        {
+            TouchDurationErrorFeedback(USE_StartButton, false);
+            
+        });
+        InitTrial.SpecifyTermination(() => choiceMade,
             SearchDisplayDelay, () => 
             { 
                 // Turn off start button
@@ -435,7 +439,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                     Color.red, textLocation, textSize, playerViewParent.transform);
             }
         }
-        DeactivateChildren(playerViewParent);
     }
     void LoadConfigUIVariables()
     {
@@ -492,17 +495,18 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
          selectionDuration += Time.deltaTime;
          if (InputBroker.GetMouseButtonUp(0) && selectionDuration != null)
          {
-             if (Physics.Raycast(ray, out hit))
+             if (MouseTracker.FindCurrentTarget() != null)
              {
-                 if ((hit.collider != null) && (hit.collider.gameObject != null) &&
-                     (selectionDuration >= minObjectTouchDuration.value) &&
+                 GameObject hitGO = MouseTracker.FindCurrentTarget();
+                 if ((selectionDuration >= minObjectTouchDuration.value) &&
                      (selectionDuration <= maxObjectTouchDuration.value))
                  {
                      choiceMade = true;
                      TouchDurationError = false;
-                     selectedGO = hit.collider.gameObject;
+                     selectedGO = hitGO;
                      selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<VisualSearch_StimDef>();
-                     CorrectSelection = selectedSD.IsTarget;
+                     if (selectedSD != null)
+                        CorrectSelection = selectedSD.IsTarget;
                  }
                  else if (selectionDuration < minObjectTouchDuration.value)
                  {
@@ -526,10 +530,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                      Debug.Log("Didn't select under max object touch duration!");
                  }
              }
-
              selectionDuration = null; // set this as null to consider multiple selections in a state
          }
-
          SetTrialSummaryString();
     }
 

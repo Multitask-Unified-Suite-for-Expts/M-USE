@@ -47,11 +47,11 @@ namespace MazeGame_Namespace
         
         public override void GenerateTrialDefsFromBlockDef()
         {
-            //pick # of trials from minmaxokay 
+            //pick # of trials from minmax
             
             System.Random rnd = new System.Random();
-            int num = rnd.Next(MinMaxTrials[0], MinMaxTrials[1]);
-
+            int num = rnd.Next(MinMaxTrials[0], MinMaxTrials[1]+1);
+            
             TrialDefs = new List<MazeGame_TrialDef>().ConvertAll(x => (TrialDef)x);
             
             for (int iTrial = 0; iTrial < num; iTrial++)

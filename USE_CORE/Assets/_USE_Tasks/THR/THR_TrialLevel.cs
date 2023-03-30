@@ -24,7 +24,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     private float TrialStartTime;
     private float TouchStartTime;
-    private float TouchReleaseTime;
     private float? HeldDuration;
     private float BackdropTouchTime;
     private float BackdropTouches;
@@ -249,7 +248,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             {
                 if (BlueSquareTouched && !BlueSquareReleased)
                 {
-                    TouchReleaseTime = Time.time;
                     if (currentTrial.RewardRelease)
                     {
                         if (HeldDuration >= currentTrial.MinTouchDuration && HeldDuration <= currentTrial.MaxTouchDuration)
@@ -409,16 +407,25 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     private void CheckIfBlockShouldEnd()
     {
+        Debug.Log("CHECKING IF BLOCK SHOULD END!");
+
         if(TrialsCompleted_Block >= currentTrial.PerfWindowEndTrials)
         {
-            int sum = 0;
+            float sum = 0;
             for(int i = 0; i < currentTrial.PerfWindowEndTrials; i++)
             {
+                Debug.Log("i: " + i + " | " + "i Value: " + TrialCompletionList[i]);
                 sum += TrialCompletionList[i];
             }
+            Debug.Log("SUM: " + sum);
             float performancePerc = sum / currentTrial.PerfWindowEndTrials;
-            if(performancePerc >= currentTrial.PerfThresholdEndTrials)
+            if (performancePerc >= currentTrial.PerfThresholdEndTrials)
+            {
+                Debug.Log("PERFORMANCE MET!");
                 PerfThresholdMet = true; //Will trigger CheckBlockEnd function to terminate block
+            }
+            else
+                Debug.Log("Not Met! | Performance Percentage = " + performancePerc);
         }
     }
 

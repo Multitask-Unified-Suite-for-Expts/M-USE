@@ -98,6 +98,7 @@ namespace SelectionTracking
             Duration = 0;
             StartFrame = Time.frameCount;
             StartTime = Time.time;
+            InputLocations = new List<Vector3>();
         }
 
         public void UpdateSelection(Vector3 inputLocation)
@@ -183,6 +184,7 @@ namespace SelectionTracking
             currentTarget = FindCurrentTarget(CurrentInputLocation());
             if (currentTarget == null) //input is not over a gameobject
             {
+                Debug.Log("currentTarget == null");
                 if (OngoingSelection != null) // the previous frame was a selection
                 {
                     CheckTermination();
@@ -193,57 +195,75 @@ namespace SelectionTracking
             //if we have reached this point we know there is a target
             if (OngoingSelection == null) //no previous selection
             {
+                Debug.Log("OngoingSelection == null");
                 CheckInit(); 
                 return;
-            }else
-                Debug.Log("laskhdgkjahsgkjhaskdghkasdhgkahghashgahgohsadghsidhgshglsalighlisadhgliasdglih");
+            }
             
             //if we have reached this point we know there is a target, there was a previous selection,
             //and this is not the first frame of new selection
-            Debug.Log(currentTarget);
-            Debug.Log(OngoingSelection);
-            Debug.Log(OngoingSelection.SelectedGameObject);
-            if (currentTarget != OngoingSelection.SelectedGameObject) //previous selection on different game object
+            
+            
+            if (currentTarget != OngoingSelection.SelectedGameObject) //previous selection was on different game object
             {
+                Debug.Log("currentTarget != OngoingSelection.SelectedGameObject");
                 CheckTermination(); //check termination of previous selection
                 CheckInit(); //check init of current selection
                 return;
             }
 
                 //if we have reached this point we know we have an ongoing selection
-            CheckUpdate();
+            bool updateFinished = CheckUpdate();
             CheckTermination();
+            if (!updateFinished)
+            {
+                OngoingSelection.CompleteSelection(false);
+                AllSelections.Add(OngoingSelection);
+                UnsuccessfulSelections.Add(OngoingSelection);
+                OngoingSelection = null;
+            }
             
         }
 
         private void CheckInit()
         {
-            Debug.Log("inititiitititititititi" + InitErrorTriggers);
             bool? init = CheckAllConditions(InitConditions);
             bool? initErrors = CheckAllConditions(InitErrorTriggers);
+            Debug.Log("####################init: " + init + ", initerrors: " + initErrors);
             if (init != null & init.Value) // intialization condition is true (e.g. mouse button is down)
                 if (initErrors == null || !initErrors.Value)
                     OngoingSelection = new USE_Selection(currentTarget); // start a new ongoing selection
                 else
                     SelectionInitErrorHandling();
-            Debug.Log("INIT " + init);
-            Debug.Log("INITerrror " + initErrors);
-            // return init & !initErrors;
         }
 
-        private void CheckUpdate()
+        private bool CheckUpdate()
         {
+            Debug.Log("Condition 1: " + UpdateConditions[0]() + "Condition 2: " + UpdateConditions[1]());
             bool? update = CheckAllConditions(UpdateConditions);
             bool? updateErrors = CheckAllConditions(UpdateErrorTriggers);
-            Debug.Log("selectionupdate: " + update);
-            Debug.Log("selectionupdateerrors: " + updateErrors);
+            Debug.Log("####################selectionupdate: " + update + ", selectionupdateerrors: " + updateErrors);
             if (update == null || update.Value)
             {
                 // update condition is true (e.g. mouse button is being held down)
                 if (updateErrors == null || !updateErrors.Value)
-                    OngoingSelection.UpdateSelection(CurrentInputLocation()); // will track duration and other custom functions while selecting
+                {
+                    Debug.Log("updating selection");
+                    OngoingSelection.UpdateSelection(
+                        CurrentInputLocation()); // will track duration and other custom functions while selecting
+                    return true;
+                }
                 else
+                {
                     SelectionUpdateErrorHandling();
+                    return false;
+                }
+            }
+            else
+            { 
+                Debug.Log("update conditions not met %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+                SelectionUpdateErrorHandling();
+                return false;
             }
             //what happens if update is false?
         }
@@ -257,12 +277,14 @@ namespace SelectionTracking
                 // update condition is true (e.g. mouse button is being held down)
                 if (termErrors == null || !termErrors.Value)
                 {
+                    Debug.Log("successful selection");
                     OngoingSelection.CompleteSelection(true);
                     OngoingSelection.WasSuccessful = true;
                     SuccessfulSelections.Add(OngoingSelection);
                 }
                 else
                 {
+                    Debug.Log("unsuccessful selection");
                     OngoingSelection.CompleteSelection(false);
                     OngoingSelection.WasSuccessful = false;
                     UnsuccessfulSelections.Add(OngoingSelection);
@@ -301,7 +323,6 @@ namespace SelectionTracking
             {
                 foreach (BoolDelegate bd in boolList)
                 {
-                    Debug.Log("##################################################################################");
                     if (!bd())
                         return false;
                 }
@@ -320,6 +341,8 @@ namespace SelectionTracking
                                                                                currentTarget == OngoingSelection.SelectedGameObject);
             DefaultConditions.Add("DurationTooLong", ()=> OngoingSelection.Duration > MaxDuration);
             DefaultConditions.Add("DurationTooShort", ()=> OngoingSelection.Duration < MinDuration);
+            // DefaultConditions.Add("DurationTooLong", ()=> MaxDuration != null && OngoingSelection.Duration > MaxDuration);
+            // DefaultConditions.Add("DurationTooShort", ()=> MinDuration != null && OngoingSelection.Duration < MinDuration);
             DefaultConditions.Add("MovedTooFar", ()=>
             {
                 return MaxPixelDisplacement == null || 

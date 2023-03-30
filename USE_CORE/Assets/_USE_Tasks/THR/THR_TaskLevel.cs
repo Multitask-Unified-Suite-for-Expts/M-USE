@@ -61,6 +61,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
+            trialLevel.TrialCompletionList.Clear();
             trialLevel.TrialsCompleted_Block = 0;
             trialLevel.TrialsCorrect_Block = 0;
             trialLevel.BackdropTouches_Block = 0;

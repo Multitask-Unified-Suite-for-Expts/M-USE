@@ -307,7 +307,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
 
         SelectionHandler mouseH = SelectionTracker.SetupSelectionHandler("MouseButton0Click", InflateBalloon);
-        // mouseH.MinDuration = 1;
+        // mouseH.MinDuration = 0.5f;
         InflateBalloon.AddInitializationMethod(() =>
         {
             ScalePerInflation_Y = (MaxInflation_Y - TrialStim.transform.localScale.y) / (SideChoice == "Left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
@@ -324,10 +324,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         InflateBalloon.AddUpdateMethod(() =>
         {
             
-            Debug.Log("successful selections: " + mouseH.SuccessfulSelections.Count);
-            Debug.Log("unsuccessful selections: " + mouseH.UnsuccessfulSelections.Count);
+            if (mouseHandler.CurrentTargetDuration != null)
+                Debug.Log(Time.frameCount + " ongoing selection (old) duration: " + mouseHandler.CurrentTargetDuration);
             if (mouseH.OngoingSelection != null)
-                Debug.Log("Ongoing selection duration: " + mouseH.OngoingSelection.Duration);
+                Debug.Log(Time.frameCount + "Ongoing selection duration: " + mouseH.OngoingSelection.Duration);
             
             if (Inflate)
             {
@@ -392,6 +392,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         InflateBalloon.SpecifyTermination(() => Response == 1, Delay);
         InflateBalloon.AddDefaultTerminationMethod(() =>
         {
+            Debug.Log(Time.frameCount + "successful selections: " + mouseH.SuccessfulSelections.Count);
+            Debug.Log(Time.frameCount + "unsuccessful selections: " + mouseH.UnsuccessfulSelections.Count);
             StateAfterDelay = Feedback;
             DelayDuration = popToFeedbackDelay.value;
             TotalTouches_Block += TrialTouches;

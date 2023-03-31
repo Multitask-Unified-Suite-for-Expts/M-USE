@@ -1,10 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using SelectionTracking;
 using UnityEngine;
-using USE_StimulusManagement;
 using USE_States;
 
 
@@ -34,10 +31,10 @@ namespace SelectionTracking
 
         public void UpdateActiveSelections()
         {
-            // Debug.Log(Time.frameCount + " UpdateActiveSelections started");
             foreach (string key in ActiveSelectionHandlers.Keys)
             {
-                ActiveSelectionHandlers[key].UpdateSelections();
+                if (ActiveSelectionHandlers[key].HandlerActive)
+                    ActiveSelectionHandlers[key].UpdateSelections();
             }
         }
 
@@ -119,6 +116,9 @@ namespace SelectionTracking
 
     public class SelectionHandler
     {
+        public USE_Selection? LastSelection;
+        public USE_Selection? LastSuccessfulSelection;
+        public USE_Selection? LastUnsuccessfulSelection;
         public List<USE_Selection> AllSelections, SuccessfulSelections, UnsuccessfulSelections;
         public USE_Selection OngoingSelection;
         private GameObject currentTarget;
@@ -130,8 +130,12 @@ namespace SelectionTracking
         public SelectionTracker selectionTracker;
         public string HandlerName;
 
+        public bool HandlerActive;
+
         public SelectionHandler()
         {
+            HandlerActive = true;
+
             InitConditions = new List<BoolDelegate>();
             UpdateConditions = new List<BoolDelegate>();
             TerminationConditions = new List<BoolDelegate>();
@@ -142,10 +146,16 @@ namespace SelectionTracking
             AllSelections = new List<USE_Selection>();
             SuccessfulSelections = new List<USE_Selection>();
             UnsuccessfulSelections = new List<USE_Selection>();
+
+            LastSelection = null;
+            LastSuccessfulSelection = null;
+            LastUnsuccessfulSelection = null;
         }
+
         public SelectionHandler(InputDelegate inputLoc = null, float? minDuration = null, float? maxDuration = null, 
                                 int? maxPixelDisplacement = null)
         {
+
             if (inputLoc == null)
                 CurrentInputLocation = () => InputBroker.mousePosition; //default to just using the mouse
             
@@ -164,6 +174,24 @@ namespace SelectionTracking
             selectionTracker.ActiveSelectionHandlers.Remove(HandlerName);
         }
 
+        public void ClearSuccessfulSelections() //Used in EC.
+        {
+            if (SuccessfulSelections.Count > 0)
+                SuccessfulSelections.Clear();
+        }
+
+        public void ClearSelections() //Not yet used.
+        {
+            if (SuccessfulSelections.Count > 0)
+                SuccessfulSelections.Clear();
+
+            if (UnsuccessfulSelections.Count > 0)
+                UnsuccessfulSelections.Clear();
+
+            if (AllSelections.Count > 0)
+                AllSelections.Clear();
+        }
+
 
         private void SelectionInitErrorHandling(){}
         private void SelectionUpdateErrorHandling(){}
@@ -171,11 +199,10 @@ namespace SelectionTracking
 
         public void UpdateSelections()
         {
-            // Debug.Log(Time.frameCount + " UpdateSelections starting");
-            
+
             if (CurrentInputLocation == null) // there is no input recorded on the screen
             {
-                // Debug.Log(Time.frameCount + " currentInputLocation == null");
+                //Debug.Log(" currentInputLocation == null");
                 if (OngoingSelection != null) // the previous frame was a selection
                 {
                     CheckTermination();
@@ -188,7 +215,7 @@ namespace SelectionTracking
             currentTarget = FindCurrentTarget(CurrentInputLocation());
             if (currentTarget == null) //input is not over a gameobject
             {
-                // Debug.Log(Time.frameCount + " currentTarget == null");
+                //Debug.Log(" currentTarget == null");
                 if (OngoingSelection != null) // the previous frame was a selection
                 {
                     CheckTermination();
@@ -199,7 +226,7 @@ namespace SelectionTracking
             //if we have reached this point we know there is a target
             if (OngoingSelection == null) //no previous selection
             {
-                // Debug.Log(Time.frameCount + " OngoingSelection == null");
+                //Debug.Log(" OngoingSelection == null");
                 CheckInit(); 
                 return;
             }
@@ -210,13 +237,13 @@ namespace SelectionTracking
             
             if (currentTarget != OngoingSelection.SelectedGameObject) //previous selection was on different game object
             {
-                // Debug.Log(Time.frameCount + " currentTarget != OngoingSelection.SelectedGameObject");
+                //Debug.Log(" currentTarget != OngoingSelection.SelectedGameObject");
                 CheckTermination(); //check termination of previous selection
                 CheckInit(); //check init of current selection
                 return;
             }
 
-                //if we have reached this point we know we have an ongoing selection
+            //if we have reached this point we know we have an ongoing selection
             bool updateConditionsMet = CheckUpdate();
             CheckTermination();
             if (!updateConditionsMet && OngoingSelection != null) 
@@ -224,6 +251,7 @@ namespace SelectionTracking
             {
                 OngoingSelection.CompleteSelection(false);
                 AllSelections.Add(OngoingSelection);
+                //LastUnsuccessfulSelection = OngoingSelection; //Not sure if this should go here, or just down below
                 UnsuccessfulSelections.Add(OngoingSelection);
                 OngoingSelection = null;
             }
@@ -234,9 +262,9 @@ namespace SelectionTracking
         {
             bool? init = CheckAllConditions(InitConditions);
             bool? initErrors = CheckAllConditions(InitErrorTriggers);
-            // Debug.Log(Time.frameCount + "####################init: " + init + ", initerrors: " + initErrors);
+            //Debug.Log("####################init: " + init + ", initerrors: " + initErrors);
             // Debug.Log(Time.frameCount + "Condition 1: " + InitConditions[0]() + "Condition 2: " + InitConditions[1]());
-            if (init != null & init.Value) // intialization condition is true (e.g. mouse button is down)
+            if (init != null && init.Value) // intialization condition is true (e.g. mouse button is down)
                 if (initErrors == null || !initErrors.Value)
                     OngoingSelection = new USE_Selection(currentTarget); // start a new ongoing selection
                 else
@@ -283,16 +311,18 @@ namespace SelectionTracking
                 // update condition is true (e.g. mouse button is being held down)
                 if (termErrors == null || !termErrors.Value)
                 {
-                    // Debug.Log(Time.frameCount + "successful selection");
                     OngoingSelection.CompleteSelection(true);
                     OngoingSelection.WasSuccessful = true;
+                    LastSelection = OngoingSelection;
+                    LastSuccessfulSelection = OngoingSelection;
                     SuccessfulSelections.Add(OngoingSelection);
                 }
                 else
                 {
-                    // Debug.Log(Time.frameCount + "unsuccessful selection");
                     OngoingSelection.CompleteSelection(false);
                     OngoingSelection.WasSuccessful = false;
+                    LastSelection = OngoingSelection;
+                    LastUnsuccessfulSelection = OngoingSelection;
                     UnsuccessfulSelections.Add(OngoingSelection);
                     SelectionTerminationErrorHandling();
                 }

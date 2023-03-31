@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using ConfigDynamicUI;
 using HiddenMaze;
 using MazeGame_Namespace;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
@@ -171,7 +168,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.AddInitializationMethod(() =>
         {
-            
             if(StartButton == null)
             {
                 USE_StartButton = new USE_StartButton(MG_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
@@ -672,7 +668,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         tileBlinkingDuration = ConfigUiVariables.get<ConfigNumber>("tileBlinkingDuration");
         maxMazeDuration = ConfigUiVariables.get<ConfigNumber>("maxMazeDuration");
         configVariablesLoaded = true;
-        //disableVariables();
     }
 
     private void SetGameConfigs()

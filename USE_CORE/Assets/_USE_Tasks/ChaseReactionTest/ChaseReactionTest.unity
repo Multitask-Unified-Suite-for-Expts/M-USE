@@ -349,7 +349,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bb555fc580ff54459ccb28a55cbd109, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ControlLevelName: 
+  ControlLevelName: ChaseReactionTest_TrialLevel
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
@@ -403,6 +403,125 @@ MonoBehaviour:
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
   THR_BackdropTexture: {fileID: 0}
+  CRT_CanvasGO: {fileID: 1290506513}
+  runningTrialPerformance: []
+  MinTrials: 0
+  mazeDefName: 
+  MazeBackground: {fileID: 0}
+  tiles:
+    stimGroupName: 
+    IsActive: 0
+  startTile: {fileID: 0}
+  viewPath: 0
+  startColor: []
+  finishColor: []
+  correctColor: []
+  lastCorrectColor: []
+  incorrectRuleAbidingColor: []
+  incorrectRuleBreakingColor: []
+  defaultTileColor: []
+  NumBlinks: 0
+  TilePrefab: {fileID: 925009272087881901, guid: 5796f049ef3372046b3edd4795fcdc39,
+    type: 3}
+  TileSize: 0
+  TileTexture: 
+  MazeBackgroundTextureName: 
+  ContextExternalFilePath: 
+  MazeFilePath: 
+  StartButtonPosition: {x: 0, y: 0, z: 0}
+  StartButtonScale: 0
+  NeutralITI: 0
+  UsingFixedRatioReward: 0
+  spaceBetweenTiles:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  mazeOnsetDelay:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  correctFbDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  previousCorrectFbDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  incorrectRuleAbidingFbDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  incorrectRuleBreakingFbDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  itiDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  flashingFbDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  sliderSize:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  tileBlinkingDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  maxMazeDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  playerViewTextList: []
+  playerViewText: {fileID: 0}
 --- !u!114 &718610680
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -415,19 +534,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f193130b2db63f54f97bb3ef193512e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ControlLevelName: 
+  ControlLevelName: ChaseReactionTest_TaskLevel
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
-  CallDefineLevelAutomatically: 1
+  CallDefineLevelAutomatically: 0
   quitApplicationAtEnd: 0
-  DebugActive: 0
+  DebugActive: 1
   Paused: 1
   ConfigName: 
-  TaskName: 
+  TaskName: ChaseReactionTest
   TaskProjectFolder: 
   BlockCount: 0
-  TrialLevel: {fileID: 0}
+  TrialLevel: {fileID: 718610679}
   SerialSentData: {fileID: 0}
   SerialRecvData: {fileID: 0}
   StoreData: 0
@@ -467,6 +586,30 @@ MonoBehaviour:
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
+  MazeNumSquares: 
+  MazeNumTurns: 
+  MazeDims: []
+  MazeStart: []
+  MazeFinish: []
+  MazeName: []
+  currMaze:
+    mPath: []
+    mStart: 
+    mFinish: 
+    mNextStep: 
+    mNumSquares: 0
+    mNumTurns: 0
+    mDims: {x: 0, y: 0}
+    mName: 
+    sideRestricted: 0
+  totalErrors_InBlock: 
+  numRewardPulses_InBlock: 0
+  numAbortedTrials_InBlock: 0
+  numRewardPulses_InTask: 0
+  numAbortedTrials_InTask: 0
+  numSliderBarFull_InTask: 0
+  BlockAveragesString: 
+  CurrentBlockString: 
 --- !u!1 &1290506513
 GameObject:
   m_ObjectHideFlags: 0

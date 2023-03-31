@@ -1,5 +1,6 @@
 using System.IO;
 using System.Linq;
+using System.Text;
 using USE_Settings;
 using USE_StimulusManagement;
 using USE_ExperimentTemplate_Task;
@@ -19,6 +20,22 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public string[] MazeName;
     [HideInInspector]public Maze currMaze;
     
+    // Block Data Tracking Variables
+    [HideInInspector]
+    public int[] totalErrors_InBlock;
+    public int numRewardPulses_InBlock;
+    public int numAbortedTrials_InBlock;
+    
+    // Task Data Tracking Variables
+    [HideInInspector]
+    public int numRewardPulses_InTask;
+    public int numAbortedTrials_InTask;
+    public int numSliderBarFull_InTask;
+    
+    [HideInInspector] public string BlockAveragesString;
+    [HideInInspector] public string CurrentBlockString;
+    [HideInInspector] public StringBuilder PreviousBlocksString;
+    
     private int blocksAdded = 0;
     private MazeDef[] MazeDefs;
     private string mazeKeyFilePath;
@@ -32,7 +49,26 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
         
 
     }
-private void SetSettings()
+
+    public void CalculateBlockSummaryString()
+    {
+        
+    }
+    public void ClearStrings()
+    {
+        BlockAveragesString = "";
+        CurrentBlockString = "";
+        BlockSummaryString.Clear();
+    }
+
+    private void ResetBlockVariables()
+    {
+        numRewardPulses_InBlock = 0;
+        numAbortedTrials_InBlock = 0;
+        crtTL.runningTrialPerformance.Clear();
+
+    }
+    private void SetSettings()
     {
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             crtTL.ContextExternalFilePath =

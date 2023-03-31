@@ -64,6 +64,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private int[] ruleAbidingErrors_InTrial;
     private int[] ruleBreakingErrors_InTrial;
     private int retouchCorrect_InTrial;
+    private int retouchErroneous_InTrial;
     private int correctTouches_InTrial;
     private int[] backtrackErrors_InTrial;
     private int[] perseverativeErrors_InTrial;
@@ -117,7 +118,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public List<GameObject> playerViewTextList;
     public GameObject playerViewText;
     private Vector2 textLocation;
-    public bool playerViewLoaded;
 
     // Touch Evaluation Variables
     private GameObject selectedGO;
@@ -228,6 +228,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     {
                         choiceMade = true;
                         choiceDurationsList.Add(choiceDuration);
+                        CurrentTaskLevel.choiceDurationsList_InBlock.Add(choiceDuration);
                         selectedGO = hit.collider.gameObject;
                     }
                 }
@@ -252,58 +253,56 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["MazeFinish"]);
             }
         });
-        ChooseTile.SpecifyTermination(()=> mazeDuration > maxMazeDuration.value, ()=> FinishTrial); // Timeout Termination
+        ChooseTile.SpecifyTermination(()=> mazeDuration > maxMazeDuration.value, ()=> FinishTrial, () =>
+        {
+            aborted = true;
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["NoChoice"]);
+            CurrentTaskLevel.numAbortedTrials_InBlock++;
+            CurrentTaskLevel.numAbortedTrials_InTask++;
+        }); // Timeout Termination
        
         SelectionFeedback.AddInitializationMethod(() =>
         {
-            if (selectedGO != null)
+            EventCodeManager.SendCodeNextFrame(TaskEventCodes["TileFbOn"]);
+
+            // This is what actually determines the result of the tile choice
+            selectedGO.GetComponent<Tile>().OnMouseDown();
+            trialPerformance = (float)decimal.Divide(totalErrors_InTrial.Sum(),CurrentTaskLevel.currMaze.mNumSquares);
+
+            finishedFbDuration = (tileFbDuration + flashingFbDuration.value);
+            SliderFBController.SetUpdateDuration(tileFbDuration);
+            SliderFBController.SetFlashingDuration(finishedFbDuration);
+                
+                
+            if (ReturnToLast)
             {
-                EventCodeManager.SendCodeNextFrame(TaskEventCodes["TileFbOn"]);
-
-                // This is what actually determines the result of the tile choice
-                selectedGO.GetComponent<Tile>().OnMouseDown();
-                trialPerformance = (float)decimal.Divide(totalErrors_InTrial.Sum(),CurrentTaskLevel.currMaze.mNumSquares);
-
-                finishedFbDuration = (tileFbDuration + flashingFbDuration.value);
-                SliderFBController.SetUpdateDuration(tileFbDuration);
-                SliderFBController.SetFlashingDuration(finishedFbDuration);
-                
-                
-                if (ReturnToLast)
-                {
-                    AudioFBController.Play("Positive");
-                    if (CurrentTrialDef.ErrorPenalty)
-                        SliderFBController.UpdateSliderValue(selectedGO.GetComponent<Tile>().sliderValueChange);
-                    //  EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]); 
-                }
-                else if (ErroneousReturnToLast)
-                {
-                    AudioFBController.Play("Negative");
-                    //EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
-                }
-                else if (CorrectSelection)
-                {
+                AudioFBController.Play("Positive");
+                if (CurrentTrialDef.ErrorPenalty)
                     SliderFBController.UpdateSliderValue(selectedGO.GetComponent<Tile>().sliderValueChange);
-                    playerViewParent.transform.Find((pathProgressIndex + 1).ToString()).GetComponent<Text>().color =
-                        new Color(0, 0.392f, 0);
-                    // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]);
-                }
-                else if (selectedGO != null && !ErroneousReturnToLast)
-                {
-                    AudioFBController.Play("Negative");
-                    if (CurrentTrialDef.ErrorPenalty && consecutiveErrors == 1)
-                        SliderFBController.UpdateSliderValue(-selectedGO.GetComponent<Tile>().sliderValueChange);
-                    // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
-                }
-               
-                selectedGO = null; //Reset selectedGO before the next touch evaluation
+                //  EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]); 
             }
-            else
+            else if (ErroneousReturnToLast)
             {
-                EventCodeManager.SendCodeNextFrame(SessionEventCodes["NoChoice"]);
-                aborted = true;
-                CurrentTaskLevel.numAbortedTrials_InBlock++;
+                AudioFBController.Play("Negative");
+                //EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
             }
+            else if (CorrectSelection)
+            {
+                SliderFBController.UpdateSliderValue(selectedGO.GetComponent<Tile>().sliderValueChange);
+                playerViewParent.transform.Find((pathProgressIndex + 1).ToString()).GetComponent<Text>().color =
+                    new Color(0, 0.392f, 0);
+                // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]);
+            }
+            else if (selectedGO != null && !ErroneousReturnToLast)
+            {
+                AudioFBController.Play("Negative");
+                if (CurrentTrialDef.ErrorPenalty && consecutiveErrors == 1)
+                    SliderFBController.UpdateSliderValue(-selectedGO.GetComponent<Tile>().sliderValueChange);
+                // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
+            }
+               
+            selectedGO = null; //Reset selectedGO before the next touch evaluation
+            
         });
         SelectionFeedback.AddUpdateMethod(() =>
         {
@@ -384,7 +383,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
-        
         DefineTrialData();
         DefineFrameData();
     }
@@ -604,9 +602,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
                 ErroneousReturnToLast = true;
 
-                retouchCorrect_InTrial++;
-                CurrentTaskLevel.retouchCorrect_InBlock++;
-                CurrentTaskLevel.retouchCorrect_InTask++;
+                retouchErroneous_InTrial++;
+                CurrentTaskLevel.retouchErroneous_InBlock++;
+                CurrentTaskLevel.retouchErroneous_InTask++;
 
                 consecutiveErrors = 0;
                 tileFbDuration = tile.PREV_CORRECT_FEEDBACK_SECONDS;
@@ -743,12 +741,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("TotalErrors", () => $"[{string.Join(", ", totalErrors_InTrial)}]");
         // TrialData.AddDatum("CorrectTouches", () => correctTouches_InTrial); DOESN'T GIVE ANYTHING USEFUL, JUST PATH LENGTH
         TrialData.AddDatum("RetouchCorrect", () => retouchCorrect_InTrial);
+        TrialData.AddDatum("RetouchErroneous", () => retouchErroneous_InTrial);
         TrialData.AddDatum("PerseverativeErrors", () => $"[{string.Join(", ", perseverativeErrors_InTrial)}]");
         TrialData.AddDatum("BacktrackingErrors", () => $"[{string.Join(", ", backtrackErrors_InTrial)}]");
         TrialData.AddDatum("Rule-AbidingErrors", () => $"[{string.Join(", ", ruleAbidingErrors_InTrial)}]");
         TrialData.AddDatum("Rule-BreakingErrors", () => $"[{string.Join(", ", ruleBreakingErrors_InTrial)}]");
         TrialData.AddDatum("MazeDuration", ()=> mazeDuration);
-        TrialData.AddDatum("TotalClicks", ()=>MouseTracker.GetClickCount());
+        TrialData.AddDatum("TotalClicks", ()=>MouseTracker.GetClickCount().Length);
     }
 
     private void DefineFrameData()
@@ -783,7 +782,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         }
-        playerViewLoaded = true;
     }
 
     public override void FinishTrialCleanup()
@@ -829,6 +827,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         
         correctTouches_InTrial = 0;
         retouchCorrect_InTrial = 0;
+        retouchErroneous_InTrial = 0;
         if (TrialCount_InBlock != 0)
         {
             Array.Clear(perseverativeErrors_InTrial, 0, perseverativeErrors_InTrial.Length);
@@ -860,6 +859,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                              "\nPerseverative Errors: " + perseverativeErrors_InTrial.Sum() +
                              "\nBacktrack Errors: " + backtrackErrors_InTrial.Sum() +
                              "\nRetouch Correct: " + retouchCorrect_InTrial+ 
+                             "\nRetouch Erroneous: " + retouchErroneous_InTrial+ 
                              "\nMaze Duration: " + mazeDuration +
                              "\n" +
                              "\nSlider Value: " + SliderFBController.Slider.value;

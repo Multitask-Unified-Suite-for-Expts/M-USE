@@ -11,6 +11,7 @@ using FlexLearning_Namespace;
 using THR_Namespace;
 //using FinderGame_Namespace;
 //using Kia_Task_Namespace;
+using ChaseReactionTest_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -117,6 +118,17 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(THR_BlockDef),
                 TrialDefType = typeof(THR_TrialDef),
                 StimDefType = typeof(THR_StimDef)
+            }
+        }
+        ,{
+            "ChaseReactionTest", new TaskTypes
+            {
+                TaskLevelType = typeof(ChaseReactionTest_TaskLevel),
+                TrialLevelType = typeof(ChaseReactionTest_TrialLevel),
+                TaskDefType = typeof(ChaseReactionTest_TaskDef),
+                BlockDefType = typeof(ChaseReactionTest_BlockDef),
+                TrialDefType = typeof(ChaseReactionTest_TrialDef),
+                StimDefType = typeof(ChaseReactionTest_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

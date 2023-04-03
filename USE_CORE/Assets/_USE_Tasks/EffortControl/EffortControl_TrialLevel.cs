@@ -154,9 +154,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-
-        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, ()=> InputBroker.GetMouseButton(0));
         //INIT Trial state -------------------------------------------------------------------------------------------------------
+        SelectionHandler Handler = SelectionTracker.SetupSelectionHandler("MouseButton0Click", InitTrial, InflateBalloon);
+
         InitTrial.AddInitializationMethod(() =>
         {
             if (!Borders.activeInHierarchy)
@@ -176,9 +176,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
 
             currentTask.CalculateBlockSummaryString();
+
+            if(Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
         });
-        
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), Delay, () =>
+
+        InitTrial.SpecifyTermination(() => Handler.LastSelectionMatches(StartButton), Delay, () =>
         {
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
@@ -187,12 +190,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
         });
 
+
         //Choose Balloon state -------------------------------------------------------------------------------------------------------
-        MouseTracker.AddSelectionHandler(mouseHandler, ChooseBalloon, null, 
-            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
-
-        SelectionHandler handler = SelectionTracker.SetupSelectionHandler("MouseButton0Click", ChooseBalloon);
-
         ChooseBalloon.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they holding down
@@ -209,38 +208,36 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             ActivateObjects();
 
             SideChoice = null;
+
+            if(Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
         });
 
         ChooseBalloon.AddUpdateMethod(() =>
         {
-            GameObject hit = mouseHandler.SelectedGameObject;
-            if (hit != null)
+            if (Handler.SuccessfulSelections.Count > 0)
             {
                 BalloonSelectedTime = Time.time;
-                if (hit.transform.name.Contains("Left"))
+                if (Handler.LastSelection.SelectedGameObject.name.Contains("Left"))
                 {
                     SideChoice = "Left";
                     TrialStim = StimLeft;
                 }
-                else if (hit.transform.name.Contains("Right"))
+                else if (Handler.LastSelection.SelectedGameObject.name.Contains("Right"))
                 {
                     SideChoice = "Right";
                     TrialStim = StimRight;
                 }
             }
 
-            //this will be move to selectionhandler / inputtrackers
-            //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.
+            //Neg FB if touch outside balloon. Adding "sideChoice == null" so that they cant click outside balloon at the end and mess up pop audio.
             if (InputBroker.GetMouseButtonDown(0) && SideChoice == null)
             {
                 Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
                 RaycastHit hitt;
                 if (!Physics.Raycast(ray, out hitt))
-                {
                     AudioFBController.Play("Negative");
-                }
             }
-
         });
         ChooseBalloon.SpecifyTermination(() => SideChoice != null, CenterSelection, () =>
         {
@@ -306,7 +303,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
 
         //Inflate Balloon state -------------------------------------------------------------------------------------------------------
-        handler = SelectionTracker.SetupSelectionHandler("MouseButton0Click", InflateBalloon);
 
         InflateBalloon.AddInitializationMethod(() =>
         {
@@ -322,11 +318,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             TrialTouches = 0;
             NumInflations = 0;
 
-            if (handler.SuccessfulSelections.Count > 0)
-                handler.ClearSuccessfulSelections();
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
 
             SetTrialSummaryString();
-
         });
         InflateBalloon.AddUpdateMethod(() =>
         {
@@ -347,7 +342,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     else
                     {
                         Inflate = false;
-                        handler.HandlerActive = true;
+                        Handler.HandlerActive = true;
                         if (NumInflations >= InflationsNeeded)
                         {
                             Response = 1;
@@ -358,11 +353,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            if (handler.SuccessfulSelections.Count > NumInflations && !Inflate)
+            if (Handler.SuccessfulSelections.Count > NumInflations && !Inflate)
             {
-                GameObject selectedGO = handler.SuccessfulSelections[handler.SuccessfulSelections.Count - 1].SelectedGameObject;
-
-                if (selectedGO == TrialStim || selectedGO == MaxOutline_Left || selectedGO == MaxOutline_Right)
+                if(Handler.LastSelectionMatches(TrialStim) || Handler.LastSelectionMatches(MaxOutline_Left) || Handler.LastSelectionMatches(MaxOutline_Right))
                 {
                     if(NumInflations < InflationsNeeded)
                     {
@@ -370,7 +363,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                         clickTimings.Add(Time.time - timeTracker);
                         timeTracker = Time.time;
 
-                        handler.HandlerActive = false;
+                        Handler.HandlerActive = false;
                         NumInflations++;
                         CalculateInflation(); //Sets Inflate to TRUE at end of func
                         InflateAudioPlayed = false;

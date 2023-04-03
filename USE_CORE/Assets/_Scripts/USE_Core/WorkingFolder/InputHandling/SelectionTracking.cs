@@ -116,9 +116,9 @@ namespace SelectionTracking
 
     public class SelectionHandler
     {
-        public USE_Selection? LastSelection;
-        public USE_Selection? LastSuccessfulSelection;
-        public USE_Selection? LastUnsuccessfulSelection;
+        public USE_Selection LastSelection;
+        public USE_Selection LastSuccessfulSelection;
+        public USE_Selection LastUnsuccessfulSelection;
         public List<USE_Selection> AllSelections, SuccessfulSelections, UnsuccessfulSelections;
         public USE_Selection OngoingSelection;
         private GameObject currentTarget;
@@ -147,9 +147,9 @@ namespace SelectionTracking
             SuccessfulSelections = new List<USE_Selection>();
             UnsuccessfulSelections = new List<USE_Selection>();
 
-            LastSelection = null;
-            LastSuccessfulSelection = null;
-            LastUnsuccessfulSelection = null;
+            LastSelection = new USE_Selection(null);
+            LastSuccessfulSelection = new USE_Selection(null);
+            LastUnsuccessfulSelection = new USE_Selection(null);
         }
 
         public SelectionHandler(InputDelegate inputLoc = null, float? minDuration = null, float? maxDuration = null, 
@@ -174,13 +174,8 @@ namespace SelectionTracking
             selectionTracker.ActiveSelectionHandlers.Remove(HandlerName);
         }
 
-        public void ClearSuccessfulSelections() //Used in EC.
-        {
-            if (SuccessfulSelections.Count > 0)
-                SuccessfulSelections.Clear();
-        }
 
-        public void ClearSelections() //Not yet used.
+        public void ClearSelections()
         {
             if (SuccessfulSelections.Count > 0)
                 SuccessfulSelections.Clear();
@@ -190,7 +185,19 @@ namespace SelectionTracking
 
             if (AllSelections.Count > 0)
                 AllSelections.Clear();
+
+            LastSelection = new USE_Selection(null);
+            LastSuccessfulSelection = new USE_Selection(null);
+            LastUnsuccessfulSelection = new USE_Selection(null);
         }
+
+        public bool LastSelectionMatches(GameObject go)
+        {
+            return ReferenceEquals(LastSelection.SelectedGameObject, go);
+        }
+
+
+
 
 
         private void SelectionInitErrorHandling(){}
@@ -222,7 +229,7 @@ namespace SelectionTracking
                 }
                 return;
             }
-            
+                        
             //if we have reached this point we know there is a target
             if (OngoingSelection == null) //no previous selection
             {

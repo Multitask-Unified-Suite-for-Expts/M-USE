@@ -358,7 +358,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         TileFlashFeedback.AddInitializationMethod(() =>
         {
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["FlashingTileFbOn"]);
-            tile.StartCoroutine(tile.FlashingFeedback());
+            tile.StartCoroutine(tile.LastCorrectFlashingFeedback());
         });
         TileFlashFeedback.AddTimer(() => tileBlinkingDuration.value, ChooseTile, () =>
         {

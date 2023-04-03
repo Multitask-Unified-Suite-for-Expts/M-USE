@@ -353,9 +353,9 @@ MonoBehaviour:
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
-  CallDefineLevelAutomatically: 1
+  CallDefineLevelAutomatically: 0
   quitApplicationAtEnd: 0
-  DebugActive: 0
+  DebugActive: 1
   Paused: 1
   TrialData: {fileID: 0}
   FrameData: {fileID: 0}

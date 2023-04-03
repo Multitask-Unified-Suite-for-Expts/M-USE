@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -25,6 +26,9 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
     public int[] totalErrors_InBlock;
     public int numRewardPulses_InBlock;
     public int numAbortedTrials_InBlock;
+    public List<float?> mazeDurationsList_InBlock = new List<float?>();
+    public List<float?> choiceDurationsList_InBlock = new List<float?>();
+    public int numSliderBarFull_InBlock;
     
     // Task Data Tracking Variables
     [HideInInspector]
@@ -46,7 +50,45 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
     {
         crtTL = (ChaseReactionTest_TrialLevel)TrialLevel;
         SetSettings();
+        crtTL = (ChaseReactionTest_TrialLevel)TrialLevel;
+        AssignBlockData();
         
+        BlockAveragesString = "";
+        CurrentBlockString = "";
+        PreviousBlocksString = new StringBuilder();
+
+        
+        blocksAdded = 0;
+        LoadMazeDef();
+        
+        RunBlock.AddInitializationMethod(() =>
+        {
+            FindMaze();
+            LoadTextMaze();
+                
+            RenderSettings.skybox = CreateSkybox(crtTL.GetContextNestedFilePath(ContextExternalFilePath, crtBD.ContextName, "LinearDark"));
+            crtTL.contextName = crtBD.ContextName;
+            crtTL.MinTrials = crtBD.MinMaxTrials[0];
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
+            
+            //instantiate arrays
+            totalErrors_InBlock = new int[currMaze.mNumSquares];
+            crtTL.DestroyChildren(GameObject.Find("MainCameraCopy"));
+            
+            ResetBlockVariables();
+            CalculateBlockSummaryString();
+        });
+        BlockFeedback.AddInitializationMethod(() =>
+        {
+            if (crtTL.AbortCode == 0)
+            {
+                CurrentBlockString += "\n" + "\n";
+                CurrentBlockString = CurrentBlockString.Replace("Current Block", $"Block {blocksAdded + 1}");
+                PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
+                blocksAdded++;
+            }
+            // CalculateBlockAverages();
+        });
 
     }
 
@@ -70,6 +112,7 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
     }
     private void SetSettings()
     {
+        Debug.Log("CHASE REACTION TASK NAME: "  + TaskName);
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             crtTL.ContextExternalFilePath =
                 (string)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
@@ -227,4 +270,13 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
         currMaze = new Maze(textMaze[0]);
     }
 
+    private void AssignBlockData()
+    {
+        BlockData.AddDatum("TotalErrors", () => $"[{string.Join(", ", totalErrors_InBlock)}]");
+        BlockData.AddDatum("NumRewardPulses", () => numRewardPulses_InBlock);
+        BlockData.AddDatum("NumSliderBarFull", ()=>numSliderBarFull_InBlock);
+        BlockData.AddDatum("NumAbortedTrials", ()=> numAbortedTrials_InBlock);
+        BlockData.AddDatum("MazeDurations", () => string.Join(",",mazeDurationsList_InBlock));
+        BlockData.AddDatum("ChoiceDurations", () => string.Join(",", choiceDurationsList_InBlock));
+    }
 }

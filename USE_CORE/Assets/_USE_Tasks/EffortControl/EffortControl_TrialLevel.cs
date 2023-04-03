@@ -153,7 +153,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
-        SelectionHandler Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InflateBalloon);
+        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InflateBalloon);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -178,8 +178,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if(Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
         });
-
-        InitTrial.SpecifyTermination(() => Handler.LastSelectionMatches(StartButton), Delay, () =>
+        InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), Delay, () =>
         {
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
@@ -353,7 +352,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if (Handler.SuccessfulSelections.Count > NumInflations && !Inflate)
             {
-                if(Handler.LastSelectionMatches(TrialStim) || Handler.LastSelectionMatches(MaxOutline_Left) || Handler.LastSelectionMatches(MaxOutline_Right))
+                if(Handler.SelectionMatches(TrialStim) || Handler.SelectionMatches(MaxOutline_Left) || Handler.SelectionMatches(MaxOutline_Right))
                 {
                     if(NumInflations < InflationsNeeded)
                     {

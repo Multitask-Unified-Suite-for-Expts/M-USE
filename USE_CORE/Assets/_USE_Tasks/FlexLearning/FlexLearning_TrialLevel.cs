@@ -158,7 +158,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
-        SelectionHandler Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, SearchDisplay);
+        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, SearchDisplay);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -176,7 +176,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
         });
-        InitTrial.SpecifyTermination(() => Handler.LastSelectionMatches(StartButton),
+        InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton),
             SearchDisplayDelay, () =>
             {
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);

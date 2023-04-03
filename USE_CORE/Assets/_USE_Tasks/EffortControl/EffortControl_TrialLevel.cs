@@ -121,8 +121,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, ChooseBalloon, CenterSelection, InflateBalloon, Feedback, ITI });
 
-        SelectionHandler<EffortControl_StimDef> mouseHandler = new SelectionHandler<EffortControl_StimDef>();
-
         Add_ControlLevel_InitializationMethod(() =>
         {
             LoadTextures(ContextExternalFilePath);

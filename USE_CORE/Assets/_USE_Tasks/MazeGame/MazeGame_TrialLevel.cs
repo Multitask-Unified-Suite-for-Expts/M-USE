@@ -143,8 +143,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             { InitTrial, ChooseTile, SelectionFeedback, TileFlashFeedback, ITI  });
         string[] stateNames =
             { "InitTrial", "ChooseTile", "SelectionFeedback", "TileFlashFeedback", "ITI"};
-
-        SelectionHandler<MazeGame_StimDef> mouseHandler = new SelectionHandler<MazeGame_StimDef>();
         
         Add_ControlLevel_InitializationMethod(() =>
         {
@@ -171,7 +169,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.AddInitializationMethod(() =>
         {
-            
             if(StartButton == null)
             {
                 USE_StartButton = new USE_StartButton(MG_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
@@ -185,9 +182,16 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
-        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, 
-            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), Delay, () =>
+
+        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ChooseTile);
+
+        InitTrial.AddInitializationMethod(() =>
+        {
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
+        });
+
+        InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), Delay, () =>
         {
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
 
@@ -206,12 +210,14 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             else
                 ActivateChildren(playerViewParent);
         });
-        MouseTracker.AddSelectionHandler(mouseHandler, ChooseTile, null, 
-            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
+
         ChooseTile.AddInitializationMethod(() =>
         {
             CurrentTaskLevel.SetTaskSummaryString();
             choiceDuration = 0;
+
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
         });
         ChooseTile.AddUpdateMethod(() =>
         {

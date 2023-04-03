@@ -279,6 +279,7 @@ namespace SelectionTracking
                     return;
                 }
 
+
                 //if we have reached this point we know there is a target
                 if (OngoingSelection == null) //no previous selection
                 {

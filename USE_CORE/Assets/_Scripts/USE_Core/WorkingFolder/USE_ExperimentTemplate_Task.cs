@@ -214,7 +214,9 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.TrialSummaryString = "";
                 BlockSummaryString.Clear();
                 BlockSummaryString.AppendLine("");
-                
+
+                ClearActiveTaskHandlers();
+
             });
 
             FinishTask.SpecifyTermination(() => true, () => null);
@@ -418,6 +420,27 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.ConfigUiVariables = ConfigUiVariables;
 
             TrialLevel.DefineTrialLevel();
+        }
+
+
+        public void ClearActiveTaskHandlers()
+        {
+            if (SelectionTracker.TaskHandlerNames.Count > 0)
+            {
+                List<string> toRemove = new List<string>();
+
+                foreach (string handlerName in SelectionTracker.TaskHandlerNames)
+                {
+                    if (SelectionTracker.ActiveSelectionHandlers.ContainsKey(handlerName))
+                    {
+                        SelectionTracker.ActiveSelectionHandlers.Remove(handlerName);
+                        toRemove.Add(handlerName);
+                    }
+                }
+
+                foreach (string handlerName in toRemove)
+                    SelectionTracker.TaskHandlerNames.Remove(handlerName);
+            }
         }
 
 

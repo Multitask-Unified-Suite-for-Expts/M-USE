@@ -9,24 +9,32 @@ namespace SelectionTracking
 {
     public class SelectionTracker
     {
-        // Start is called before the first frame update
         public Dictionary<string, SelectionHandler> ActiveSelectionHandlers = new Dictionary<string, SelectionHandler>();
+        public List<string> SessionHandlerNames = new List<string>();
+        public List<string> TaskHandlerNames = new List<string>();
+        public List<string> TrialHandlerNames = new List<string>();
 
-        public SelectionHandler SetupSelectionHandler(string handlerName, State setActiveOnInit = null, State setInactiveOnTerm = null)
+        public SelectionHandler SetupSelectionHandler(string handlerLevel, string handlerName, State setActiveOnInit = null, State setInactiveOnTerm = null)
         {
-            SelectionHandler newHandler = GetDefaultSelectionHandler(handlerName);
-            newHandler.HandlerName = handlerName;
-            newHandler.selectionTracker = this;
-            if (setActiveOnInit != null)
-                setActiveOnInit.StateInitializationFinished += newHandler.AddToActiveHandlers;
+            if (!HandlerLevelValid(handlerLevel))
+                return null;
+            else
+            {
+                SelectionHandler newHandler = GetDefaultSelectionHandler(handlerName);
+                newHandler.HandlerName = handlerName;
+                newHandler.HandlerLevel = handlerLevel.ToLower();
+                newHandler.selectionTracker = this;
+                if (setActiveOnInit != null)
+                    setActiveOnInit.StateInitializationFinished += newHandler.AddToActiveHandlers;
 
-            if (setInactiveOnTerm == null)
-                setInactiveOnTerm = setActiveOnInit;
+                if (setInactiveOnTerm == null)
+                    setInactiveOnTerm = setActiveOnInit;
 
-            if (setInactiveOnTerm != null)
-                setInactiveOnTerm.StateTerminationFinished += newHandler.RemoveFromActiveHandlers;
+                if (setInactiveOnTerm != null)
+                    setInactiveOnTerm.StateTerminationFinished += newHandler.RemoveFromActiveHandlers;
 
-            return newHandler;
+                return newHandler;
+            }
         }
 
         public void UpdateActiveSelections()
@@ -35,6 +43,18 @@ namespace SelectionTracking
             {
                 if (ActiveSelectionHandlers[key].HandlerActive)
                     ActiveSelectionHandlers[key].UpdateSelections();
+            }
+        }
+
+        public bool HandlerLevelValid(string handlerLevel)
+        {
+            List<string> validLevels = new List<string>() {"session", "task", "trial"};
+            if (validLevels.Contains(handlerLevel.ToLower()))
+                return true;
+            else
+            {
+                Debug.Log("The HandlerLevel value you provided is not valid. Valid HanderLevel's include session, task, trial.");
+                return false;
             }
         }
 
@@ -74,13 +94,12 @@ namespace SelectionTracking
             gazeSelection.TerminationErrorTriggers.Add(gazeSelection.DefaultConditions("DurationTooShort"));
             DefaultSelectionHandlers.Add("GazeSelection", gazeSelection);
                 
-                
 
             return DefaultSelectionHandlers[hName];
         }
-    }
+        }
     
-    }
+        }
 
     public class USE_Selection
     {
@@ -129,6 +148,7 @@ namespace SelectionTracking
         public InputDelegate CurrentInputLocation;
         public SelectionTracker selectionTracker;
         public string HandlerName;
+        public string HandlerLevel;
 
         public bool HandlerActive;
 
@@ -167,11 +187,27 @@ namespace SelectionTracking
         public void AddToActiveHandlers(object sender, EventArgs e)
         {
             selectionTracker.ActiveSelectionHandlers.Add(HandlerName, this);
+
+            if (HandlerLevel == "session")
+                selectionTracker.SessionHandlerNames.Add(HandlerName);
+            else if (HandlerLevel == "task")
+                selectionTracker.TaskHandlerNames.Add(HandlerName);
+            else if (HandlerLevel == "trial")
+                selectionTracker.TrialHandlerNames.Add(HandlerName);
+            else
+                Debug.Log("The HandlerLevel value you input does not match the possible values of: session, task, trial");
         }
 
         public void RemoveFromActiveHandlers(object sender, EventArgs e)
         {
             selectionTracker.ActiveSelectionHandlers.Remove(HandlerName);
+
+            if (HandlerLevel == "session")
+                selectionTracker.SessionHandlerNames.Remove(HandlerName);
+            else if (HandlerLevel == "task")
+                selectionTracker.TaskHandlerNames.Remove(HandlerName);
+            else if (HandlerLevel == "trial")
+                selectionTracker.TrialHandlerNames.Remove(HandlerName);
         }
 
 

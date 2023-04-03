@@ -126,7 +126,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
-        SelectionHandler Handler = SelectionTracker.SetupSelectionHandler("MouseButton0Click", InitTrial, ChooseStim);
+        SelectionHandler Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ChooseStim);
 
         InitTrial.AddInitializationMethod(() =>
         {

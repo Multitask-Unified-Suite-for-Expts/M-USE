@@ -17,7 +17,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public ContinuousRecognition_TrialDef currentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
     public ContinuousRecognition_TaskLevel currentTask => GetTaskLevel<ContinuousRecognition_TaskLevel>();
 
-    [HideInInspector] public USE_StartButton StartButtonClassInstance;
+    [HideInInspector] public USE_StartButton USE_StartButtonInstance;
     [HideInInspector] public GameObject StartButton;
 
     public TextMeshProUGUI TimerText;
@@ -91,7 +91,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     //Config Variables
     [HideInInspector]
-    public ConfigNumber displayStimDuration, chooseStimDuration, itiDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration;
+    public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, displayStimDuration, chooseStimDuration, itiDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration;
 
     public override void DefineControlLevel()
     {        
@@ -120,9 +120,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (StartButton == null)
             {
-                StartButtonClassInstance = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
-                StartButton = StartButtonClassInstance.StartButtonGO;
-                StartButtonClassInstance.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                USE_StartButtonInstance = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                StartButton = USE_StartButtonInstance.StartButtonGO;
+                USE_StartButtonInstance.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 OriginalStartButtonPosition = StartButton.transform.position;
             }
 
@@ -140,6 +140,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ChooseStim);
+        Handler.MinDuration = .5f;
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -182,6 +183,35 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
+
+            Handler.MinDuration = minObjectTouchDuration.value;
+            Handler.MaxDuration = maxObjectTouchDuration.value;
+        });
+        InitTrial.AddUpdateMethod(() =>
+        {
+            //if(Handler.AllSelections.Count > 0)
+            //{
+            //    if(!Handler.LastSelection.WasSuccessful)
+            //    {
+            //        if (Handler.LastSelection.ErrorType == "DurationTooShort")
+            //        {
+            //            Debug.Log("TOO SHORT!");
+            //            USE_StartButtonInstance.GratedStartButtonFlash(HeldTooShortTexture, 1f, true);
+            //        }
+            //        else if (Handler.LastSelection.ErrorType == "DurationTooLong")
+            //        {
+            //            Debug.Log("TOO LONG!");
+            //            USE_StartButtonInstance.GratedStartButtonFlash(HeldTooLongTexture, 1f, true);
+            //        }
+            //        else if (Handler.LastSelection.ErrorType == "MovedTooFar")
+            //        {
+            //            Debug.Log("MOVED TOO FAR!");
+            //            USE_StartButtonInstance.GratedStartButtonFlash(BackdropStripesTexture, 1f, true);
+            //        }
+            //        else
+            //            Debug.Log("MUST HAVE BEEN AN ERROR FOR ANOTHER REASON......");
+            //    }
+            //}
         });
         InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
@@ -1298,6 +1328,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     void LoadConfigUIVariables()
     {
+        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
+        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
         displayStimDuration = ConfigUiVariables.get<ConfigNumber>("displayStimDuration");
         chooseStimDuration = ConfigUiVariables.get<ConfigNumber>("chooseStimDuration");
         touchFbDuration = ConfigUiVariables.get<ConfigNumber>("touchFbDuration");

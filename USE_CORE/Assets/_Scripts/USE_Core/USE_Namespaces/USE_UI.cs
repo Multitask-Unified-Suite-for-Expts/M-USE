@@ -125,6 +125,27 @@ namespace USE_UI
             StartButtonGO.SetActive(false);
         }
 
+        //making this one to hopefully replace the one below that calls it consistently with a decrementing duration
+        public IEnumerator GratedSbFlash(Texture2D newTexture, float duration, bool deactivateAfter)
+        {
+            IsGrating = true;
+            if (!StartButtonGO.activeInHierarchy)
+                StartButtonGO.SetActive(true);
+            originalColor = Image.color;
+            originalSprite = Image.sprite;
+
+            Image.color = new Color32(224, 78, 92, 255);
+            Image.sprite = Sprite.Create(newTexture, new Rect(0, 0, newTexture.width, newTexture.height), Vector2.one / 2f);
+
+            yield return new WaitForSeconds(duration);
+
+            Image.color = originalColor;
+            Image.sprite = originalSprite;
+            if (deactivateAfter)
+                StartButtonGO.SetActive(false);
+            IsGrating = false;
+        }
+
 
         public void GratedStartButtonFlash(Texture2D newTexture, float duration, bool deactivateAfter)
         {

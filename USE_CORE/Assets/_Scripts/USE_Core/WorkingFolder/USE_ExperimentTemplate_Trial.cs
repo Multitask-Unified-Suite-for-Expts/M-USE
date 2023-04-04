@@ -12,6 +12,7 @@ using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Task;
 using SelectionTracking;
+using USE_UI;
 
 namespace USE_ExperimentTemplate_Trial
 {
@@ -272,6 +273,36 @@ namespace USE_ExperimentTemplate_Trial
             rb.isKinematic = true;
         }
 
+        public void HandleSbFeedback(SelectionTracker.SelectionHandler Handler, USE_StartButton sb)
+        {
+            if (!Handler.LastSelection.WasSuccessful)
+            {
+                if(!sb.IsGrating)
+                {
+                    AudioFBController.Play("Negative");
+
+                    if (Handler.LastSelection.ErrorType == "DurationTooShort")
+                    {
+                        Debug.Log("TOO SHORT!");
+                        StartCoroutine(sb.GratedSbFlash(HeldTooShortTexture, 1f, false));
+                    }
+                    else if (Handler.LastSelection.ErrorType == "DurationTooLong")
+                    {
+                        Debug.Log("TOO LONG!");
+                        StartCoroutine(sb.GratedSbFlash(HeldTooLongTexture, 1f, false));
+                    }
+                    else if (Handler.LastSelection.ErrorType == "MovedTooFar")
+                    {
+                        Debug.Log("MOVED TOO FAR!");
+                        sb.GratedSbFlash(BackdropStripesTexture, 1f, true);
+                    }
+                    else
+                        Debug.Log("MUST HAVE BEEN AN ERROR FOR ANOTHER REASON...... | ErrorType: " + Handler.LastSelection.ErrorType);
+
+                    Handler.ClearSelections();
+                }
+            }
+        }
 
 
         //Added helper methods for trials. 

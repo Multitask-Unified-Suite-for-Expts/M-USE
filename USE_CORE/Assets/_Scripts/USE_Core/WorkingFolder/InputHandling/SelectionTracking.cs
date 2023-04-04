@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using USE_States;
+using USE_UI;
 
 
 namespace SelectionTracking
@@ -147,8 +148,8 @@ namespace SelectionTracking
             public SelectionTracker selectionTracker;
             public string HandlerName;
             public string HandlerLevel;
-
             public bool HandlerActive;
+
 
             public SelectionHandler()
             {
@@ -230,8 +231,6 @@ namespace SelectionTracking
                 return ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go);
             }
 
-
-
             private void SelectionErrorHandling(string initError)
             {
                 if (OngoingSelection != null)
@@ -252,7 +251,6 @@ namespace SelectionTracking
                 //        break;
                 //}
             }
-
 
             public void UpdateSelections()
             {

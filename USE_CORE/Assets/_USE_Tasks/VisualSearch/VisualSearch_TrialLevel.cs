@@ -163,15 +163,15 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
             
-            //Initialize FB Controller Variables
-            // mouseHandler.SetMinTouchDuration(minObjectTouchDuration.value);
-            // mouseHandler.SetMaxTouchDuration(maxObjectTouchDuration.value);
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
 
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
+
+            Handler.MinDuration = minObjectTouchDuration.value;
+            Handler.MaxDuration = maxObjectTouchDuration.value;
         });
         InitTrial.AddUpdateMethod(() =>
         {

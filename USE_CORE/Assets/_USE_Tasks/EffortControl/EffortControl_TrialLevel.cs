@@ -93,7 +93,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int NumSameRewardChosen_Block;
     [HideInInspector] public int NumAborted_Block;
 
-    [HideInInspector] public ConfigNumber scalingInterval, inflateDuration, itiDuration, popToFeedbackDelay, choiceToTouchDelay, sbToBalloonDelay; //ScalingInterval is used for balloonInflation!
+    [HideInInspector] public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, scalingInterval, inflateDuration, itiDuration, popToFeedbackDelay, choiceToTouchDelay, sbToBalloonDelay; //ScalingInterval is used for balloonInflation!
 
     [HideInInspector] public GameObject MaxOutline_Left;
     [HideInInspector] public GameObject MaxOutline_Right;
@@ -177,6 +177,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if(Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
+
+            Handler.MinDuration = minObjectTouchDuration.value;
+            Handler.MaxDuration = maxObjectTouchDuration.value;
         });
         InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), Delay, () =>
         {
@@ -700,6 +703,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void LoadConfigUIVariables()
     {
+        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
+        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
         scalingInterval = ConfigUiVariables.get<ConfigNumber>("scalingInterval");
         inflateDuration = ConfigUiVariables.get<ConfigNumber>("inflateDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");

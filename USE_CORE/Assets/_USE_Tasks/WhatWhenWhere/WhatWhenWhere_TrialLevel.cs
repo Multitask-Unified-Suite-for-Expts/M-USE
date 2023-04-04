@@ -222,7 +222,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddTimer(()=> sbDelay, InitTrial);
 
         var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ChooseStimulus);
-        Handler.MinDuration = .5f;
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -233,6 +232,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
+
+            //Handler.MinDuration = minObjectTouchDuration.value;
+            Handler.MinDuration = .75f;
+            Handler.MaxDuration = maxObjectTouchDuration.value;
+        });
+        InitTrial.AddUpdateMethod(() =>
+        {
+            if (Handler.AllSelections.Count > 0)
+                HandleSbFeedback(Handler, USE_StartButton);
         });
         InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), ChooseStimulusDelay, ()=>
         {

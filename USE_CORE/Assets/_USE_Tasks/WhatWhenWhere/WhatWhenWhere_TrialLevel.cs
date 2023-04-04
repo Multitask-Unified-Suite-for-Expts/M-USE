@@ -233,7 +233,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
 
-            //Handler.MinDuration = minObjectTouchDuration.value;
+            Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MinDuration = .75f;
             Handler.MaxDuration = maxObjectTouchDuration.value;
         });

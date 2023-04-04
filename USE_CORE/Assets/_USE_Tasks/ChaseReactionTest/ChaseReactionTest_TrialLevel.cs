@@ -172,19 +172,19 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
             if (!configVariablesLoaded)
                 LoadConfigVariables();
             
-
             pathProgressIndex = 0;
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
-        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ChooseTile);
-        
+        var SbHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InitTrial);
+        var ChooseTileHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", ChooseTile, ChooseTile);
+
         InitTrial.AddInitializationMethod(() =>
         {
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            if (SbHandler.AllSelections.Count > 0)
+                SbHandler.ClearSelections();
         });
-        InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), Delay, () =>
+        InitTrial.SpecifyTermination(() => SbHandler.SelectionMatches(StartButton), Delay, () =>
         {
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
 
@@ -216,27 +216,22 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
         ChooseTile.AddInitializationMethod(() =>
         {
             choiceDuration = 0;
-            Handler.HandlerActive = true;
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            if (ChooseTileHandler.AllSelections.Count > 0)
+                ChooseTileHandler.ClearSelections();
         });
         ChooseTile.AddUpdateMethod(() =>
         {
             mazeDuration += Time.deltaTime;
             choiceDuration += Time.deltaTime;
-            Debug.Log("SUCCESSFUL SELECTIONS SIZE: " + Handler.SuccessfulSelections.Count);
 
-            if (Handler.SuccessfulSelections.Count > 0)
+            if (ChooseTileHandler.SuccessfulSelections.Count > 0)
             { 
-                if (Handler.LastSuccessfulSelection.SelectedGameObject.GetComponent<Tile>() != null)
+                if (ChooseTileHandler.LastSuccessfulSelection.SelectedGameObject.GetComponent<Tile>() != null)
                 {
-                    Debug.Log("LAST SUCCESSFUL SELECTION: " + Handler.LastSuccessfulSelection.SelectedGameObject.name);
-
                     choiceMade = true;
                     choiceDurationsList.Add(choiceDuration);
                     CurrentTaskLevel.choiceDurationsList_InBlock.Add(choiceDuration);
-                    selectedGO = Handler.LastSuccessfulSelection.SelectedGameObject;
-                    //Handler.HandlerActive = false;
+                    selectedGO = ChooseTileHandler.LastSuccessfulSelection.SelectedGameObject;
                 }
             }
         });

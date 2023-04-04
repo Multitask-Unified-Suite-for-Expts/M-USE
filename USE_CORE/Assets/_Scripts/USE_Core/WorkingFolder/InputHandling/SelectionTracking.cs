@@ -389,13 +389,9 @@ namespace SelectionTracking
 
                 if (inputLocation != null)
                 {
-                    Vector3 direction = inputLocation.Value - Camera.main.transform.position;
-                    GameObject hitObject = InputBroker.RaycastBoth(inputLocation.Value, direction);
-
+                    GameObject hitObject = InputBroker.RaycastBoth(inputLocation.Value);
                     if (hitObject != null)
-                    {
                         return hitObject;
-                    }
                 }
                 return null;
             }

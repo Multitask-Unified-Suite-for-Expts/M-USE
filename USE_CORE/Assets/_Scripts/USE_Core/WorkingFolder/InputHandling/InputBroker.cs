@@ -35,6 +35,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class InputBroker{
 
@@ -269,7 +270,7 @@ public class InputBroker{
 		InputBroker.DeleteMouseButton(button);
 	}
 
-    public static GameObject RaycastBoth(Vector3 touchPos, Vector3 direction)
+    public static GameObject RaycastBoth(Vector3 touchPos)
     {
         GameObject target = null;
         float distance2D = 0;
@@ -289,9 +290,10 @@ public class InputBroker{
 
         List<RaycastResult> results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
+
         foreach (RaycastResult result in results)
         {
-            if (result.gameObject != null)
+			if (result.gameObject != null)
             {
                 distance2D = (result.gameObject.transform.position - touchPos).magnitude;
                 if (target == null || (distance3D != 0 && (distance2D < distance3D)))

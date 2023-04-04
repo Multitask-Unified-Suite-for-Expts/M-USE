@@ -221,8 +221,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.AddTimer(()=> sbDelay, InitTrial);
 
-        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InitTrial);
-        Handler.MinDuration = .001f;
+        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ChooseStimulus);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -234,15 +233,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
         });
-
-        InitTrial.AddUpdateMethod(() =>
-        {
-            if(Handler.AllSelections.Count > 0)
-            {
-                Debug.Log("SELECTIONS COUNT: " + Handler.AllSelections.Count);
-            }
-        });
-
         InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), ChooseStimulusDelay, ()=>
         {
             CalculateSliderSteps();

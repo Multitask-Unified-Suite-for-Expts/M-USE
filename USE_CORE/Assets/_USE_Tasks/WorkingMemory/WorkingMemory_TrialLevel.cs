@@ -14,6 +14,7 @@ using USE_States;
 using USE_StimulusManagement;
 using WorkingMemory_Namespace;
 using USE_UI;
+using VisualSearch_Namespace;
 
 public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 {
@@ -37,8 +38,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     private StimGroup searchStims, sampleStim, postSampleDistractorStims;
     private GameObject StartButton;
     private GameObject FBSquare;
-
-    
        
     // Config Loading Variables
     private bool configUIVariablesLoaded = false;
@@ -106,10 +105,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         AddActiveStates(new List<State> { InitTrial, DisplaySample, DisplayDistractors, SearchDisplay, SelectionFeedback, TokenFeedback, ITI });
 
         
-        Text commandText = null;
         playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
         playerViewText = new GameObject();
-        SelectionHandler<WorkingMemory_StimDef> mouseHandler = new SelectionHandler<WorkingMemory_StimDef>();
 
         Add_ControlLevel_InitializationMethod(() =>
         {
@@ -149,24 +146,29 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         });
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);
-        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, 
-            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
-    
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
-            DisplaySample, () => {
-                // Turn off start button and set the token bar settings
-                StartButton.SetActive(false);
-                TokenFBController.enabled = true;
-                TokenFBController
-                    .SetRevealTime(tokenRevealDuration.value)
-                    .SetUpdateTime(tokenUpdateDuration.value)
-                    .SetFlashingTime(tokenFlashingDuration.value);
-                EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
+
+        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, SearchDisplay);
+
+        InitTrial.AddInitializationMethod(() =>
+        {
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
+        });
+
+        InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), DisplaySample, () =>
+        {
+            //Set the token bar settings
+            TokenFBController.enabled = true;
+            TokenFBController
+                .SetRevealTime(tokenRevealDuration.value)
+                .SetUpdateTime(tokenUpdateDuration.value)
+                .SetFlashingTime(tokenFlashingDuration.value);
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
                 
-                CurrentTaskLevel.SetBlockSummaryString();
-                if (TrialCount_InTask != 0)
-                    CurrentTaskLevel.SetTaskSummaryString();
-            });
+            CurrentTaskLevel.SetBlockSummaryString();
+            if (TrialCount_InTask != 0)
+                CurrentTaskLevel.SetTaskSummaryString();
+        });
         
         // Show the target/sample by itself for some time
         DisplaySample.AddTimer(() => displaySampleDuration.value, Delay, () =>
@@ -184,8 +186,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         // Show the target/sample with some other distractors
         // Wait for a click and provide feedback accordingly
-        MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay, null, 
-            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         SearchDisplay.AddInitializationMethod(() =>
         {
             CreateTextOnExperimenterDisplay();
@@ -193,6 +193,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
             choiceMade = false;
+
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
@@ -225,7 +228,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         });
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
+            if (Handler.LastSelection.SelectedGameObject.GetComponent<StimDefPointer>()?.GetStimDef<WorkingMemory_StimDef>() == null)   //means the player got timed out and didn't click on anything
             {
                 Debug.Log("Timed out of selection state before making a choice");
                 aborted = true;

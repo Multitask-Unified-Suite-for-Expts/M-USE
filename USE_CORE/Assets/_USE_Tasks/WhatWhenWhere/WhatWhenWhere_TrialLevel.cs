@@ -130,7 +130,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public int MinTrials;
 
     // Stimuli Variables
-    private GameObject startButton;
+    private GameObject StartButton;
     private GameObject fbSquare;
     private bool Grating = false;
     
@@ -173,7 +173,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         //MouseTracker variables
         SelectionHandler<WhatWhenWhere_StimDef> gazeHandler = new SelectionHandler<WhatWhenWhere_StimDef>();
-        SelectionHandler<WhatWhenWhere_StimDef> mouseHandler = new SelectionHandler<WhatWhenWhere_StimDef>();
         GazeTracker.SpoofGazeWithMouse = true;
 
         //player view variables
@@ -190,10 +189,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 // Initialize FB Controller Values
             HaloFBController.SetHaloSize(15f);
             HaloFBController.SetHaloIntensity(5);
-            if (startButton == null)
+            if (StartButton == null)
             {
                 USE_StartButton = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                startButton = USE_StartButton.StartButtonGO;
+                StartButton = USE_StartButton.StartButtonGO;
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
             }
             if (fbSquare == null)
@@ -217,37 +216,44 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             //Set the Stimuli Light/Shadow settings
             SetShadowType(ShadowType, "WhatWhenWhere_DirectionalLight");
             if (StimFacingCamera)
-            {
                 MakeStimFaceCamera();
-            }
+            
             if (consecutiveError >= CurrentTrialDef.ErrorThreshold)
-            {
                 sbDelay = timeoutDuration.value;
-            }
             else
-            {
                 sbDelay = startButtonDelay.value;
-            }
-
         });
         SetupTrial.AddTimer(()=> sbDelay, InitTrial);
-        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, 
-            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);        // define StartButton state
+
+        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ChooseStimulus);
+        Handler.MinDuration = .001f;
+
         InitTrial.AddInitializationMethod(() =>
         {
             CurrentTaskLevel.SetBlockSummaryString();
             SetTrialSummaryString();
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
+
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
         });
 
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(startButton), ChooseStimulusDelay, ()=>
+        InitTrial.AddUpdateMethod(() =>
+        {
+            if(Handler.AllSelections.Count > 0)
+            {
+                Debug.Log("SELECTIONS COUNT: " + Handler.AllSelections.Count);
+            }
+        });
+
+        InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), ChooseStimulusDelay, ()=>
         {
             CalculateSliderSteps();
             SliderFBController.ConfigureSlider(new Vector3(0,180,0), sliderSize.value, CurrentTrialDef.SliderInitial*(1f/sliderGainSteps));
             SliderFBController.SliderGO.SetActive(true);
 
-            numNonStimSelections_InBlock += mouseHandler.UpdateNumNonStimSelection();
+            //numNonStimSelections_InBlock += mouseHandler.UpdateNumNonStimSelection(); //NT: Commented this out. not yet sure where we're gonna implement nonstim touches. Current method doesnt exist in new selection tracker.  
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderFbController_SliderReset"]);
@@ -258,8 +264,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             distractorStims.ToggleVisibility(true);
         });
         
-       // MouseTracker.AddSelectionHandler(mouseHandler, ChooseStimulus, null, 
-         //   ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddInitializationMethod(() =>
         {
@@ -268,6 +272,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 CreateTextOnExperimenterDisplay();
             choiceMade = false;
             if (CurrentTrialDef.LeaveFeedbackOn) HaloFBController.SetLeaveFeedbackOn();
+
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
         });
         ChooseStimulus.AddUpdateMethod(() =>
         {
@@ -547,7 +554,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private void DefineFrameData() //All ".AddDatum" commands for Frame Data
     {
         FrameData.AddDatum("ErrorType", () => errorTypeString);
-        FrameData.AddDatum("StartButton", () => startButton.activeSelf);
+        FrameData.AddDatum("StartButton", () => StartButton.activeSelf);
         FrameData.AddDatum("SearchStimuliShown", () => searchStims.IsActive);
         FrameData.AddDatum("DistractorStimuliShown", () => distractorStims.IsActive);
         FrameData.AddDatum("Context", () => ContextName);

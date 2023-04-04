@@ -51,8 +51,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public bool IsHuman;
 
     [System.NonSerialized] public int Response = -1;
-    private int ClicksNeeded; //becomes left/right num clicks once they make selection. 
-    private int ClickCount;
+    private int InflationsNeeded; //becomes left/right num clicks once they make selection. 
+    private int NumInflations;
     private bool AddTokenInflateAudioPlayed;
     private bool ObjectsCreated;
     [HideInInspector] private List<GameObject> RemoveParentList;
@@ -102,7 +102,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public List<float> clickTimings;
     [HideInInspector] public float timeTracker;
-    [HideInInspector] public int mouseClicks;
 
     [HideInInspector] public float BalloonSelectedTime;
     [HideInInspector] public float StartButtonSelectedTime;
@@ -110,6 +109,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int TrialTouches;
 
     [HideInInspector] public List<GameObject> ObjectList;
+
 
     public override void DefineControlLevel()
     {
@@ -120,8 +120,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         State Feedback = new State("Feedback");
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, ChooseBalloon, CenterSelection, InflateBalloon, Feedback, ITI });
-
-        SelectionHandler<EffortControl_StimDef> mouseHandler = new SelectionHandler<EffortControl_StimDef>();
 
         Add_ControlLevel_InitializationMethod(() =>
         {
@@ -154,9 +152,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-
-        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, ()=> InputBroker.GetMouseButton(0));
         //INIT Trial state -------------------------------------------------------------------------------------------------------
+        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InflateBalloon);
+
         InitTrial.AddInitializationMethod(() =>
         {
             if (!Borders.activeInHierarchy)
@@ -174,9 +172,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 TrialStim.transform.localScale = TrialStimInitLocalScale;
                 TrialStim = null;
             }
+
+            currentTask.CalculateBlockSummaryString();
+
+            if(Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
         });
-        
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), Delay, () =>
+        InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), Delay, () =>
         {
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
@@ -185,10 +187,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
         });
 
+
         //Choose Balloon state -------------------------------------------------------------------------------------------------------
-        //should automatically have selection handlers for mouse, gaze, touch in session/task/trial levels
-        MouseTracker.AddSelectionHandler(mouseHandler, ChooseBalloon, null, 
-            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         ChooseBalloon.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they holding down
@@ -205,48 +205,45 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             ActivateObjects();
 
             SideChoice = null;
+
+            if(Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
         });
 
         ChooseBalloon.AddUpdateMethod(() =>
         {
-            GameObject hit = mouseHandler.SelectedGameObject;
-            if (hit != null)
+            if (Handler.SuccessfulSelections.Count > 0)
             {
                 BalloonSelectedTime = Time.time;
-                if (hit.transform.name.Contains("Left"))
+                if (Handler.LastSelection.SelectedGameObject.name.Contains("Left"))
                 {
                     SideChoice = "Left";
                     TrialStim = StimLeft;
                 }
-                else if (hit.transform.name.Contains("Right"))
+                else if (Handler.LastSelection.SelectedGameObject.name.Contains("Right"))
                 {
                     SideChoice = "Right";
                     TrialStim = StimRight;
                 }
             }
 
-            //this will be move to selectionhandler / inputtrackers
-            //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.
+            //Neg FB if touch outside balloon. Adding "sideChoice == null" so that they cant click outside balloon at the end and mess up pop audio.
             if (InputBroker.GetMouseButtonDown(0) && SideChoice == null)
             {
                 Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
                 RaycastHit hitt;
                 if (!Physics.Raycast(ray, out hitt))
-                {
                     AudioFBController.Play("Negative");
-                }
             }
-
         });
         ChooseBalloon.SpecifyTermination(() => SideChoice != null, CenterSelection, () =>
         {
             EventCodeManager.SendCodeImmediate(TaskEventCodes["BalloonChosen"]);
 
             DestroyChildren(SideChoice == "Left" ? RewardContainerRight : RewardContainerLeft);
-            ClicksNeeded = (SideChoice == "Left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
+            InflationsNeeded = (SideChoice == "Left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
             AudioFBController.Play("EC_BalloonChosen");
             RecordChoices();
-            SetTrialSummaryString();
         });
 
         //Center Selection state -------------------------------------------------------------------------------------------------------
@@ -303,15 +300,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
 
         //Inflate Balloon state -------------------------------------------------------------------------------------------------------
-        MouseTracker.AddSelectionHandler(mouseHandler, InflateBalloon, null, 
-            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
 
-        SelectionHandler mouseH = SelectionTracker.SetupSelectionHandler("MouseButton0Click", InflateBalloon);
-        // mouseH.MinDuration = 1;
         InflateBalloon.AddInitializationMethod(() =>
         {
             ScalePerInflation_Y = (MaxInflation_Y - TrialStim.transform.localScale.y) / (SideChoice == "Left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
-            timeTracker = Time.time;
             IncrementAmounts = new Vector3();
             Flashing = false;
             InflateAudioPlayed = false;
@@ -319,16 +311,17 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             MouseTracker.ResetClicks();
             clickTimings = new List<float>();
             timeTracker = 0;
-            mouseClicks = 0;
+
+            TrialTouches = 0;
+            NumInflations = 0;
+
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
+
+            SetTrialSummaryString();
         });
         InflateBalloon.AddUpdateMethod(() =>
         {
-            
-            Debug.Log("successful selections: " + mouseH.SuccessfulSelections.Count);
-            Debug.Log("unsuccessful selections: " + mouseH.UnsuccessfulSelections.Count);
-            if (mouseH.OngoingSelection != null)
-                Debug.Log("Ongoing selection duration: " + mouseH.OngoingSelection.Duration);
-            
             if (Inflate)
             {
                 if (!InflateAudioPlayed)
@@ -346,47 +339,50 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     else
                     {
                         Inflate = false;
-                        mouseHandler.Start();
-                        if (ClickCount >= ClicksNeeded)
+                        Handler.HandlerActive = true;
+                        if (NumInflations >= InflationsNeeded)
                         {
                             Response = 1;
                             AvgClickTime = clickTimings.Average();
                         }
                     }
-
                     ScaleTimer = 0; //Reset Timer for next inflation increment;
                 }
             }
 
-            if (mouseHandler.SelectionMatches(TrialStim) || mouseHandler.SelectionMatches(MaxOutline_Left) ||
-                mouseHandler.SelectionMatches(MaxOutline_Right))
+            if (Handler.SuccessfulSelections.Count > NumInflations && !Inflate)
             {
-                Input.ResetInputAxes();
-                ClickCount++;
-                clickTimings.Add(Time.time - timeTracker);
-                timeTracker = Time.time;
-                mouseHandler.Stop();
+                if(Handler.SelectionMatches(TrialStim) || Handler.SelectionMatches(MaxOutline_Left) || Handler.SelectionMatches(MaxOutline_Right))
+                {
+                    if(NumInflations < InflationsNeeded)
+                    {
+                        Input.ResetInputAxes();
+                        clickTimings.Add(Time.time - timeTracker);
+                        timeTracker = Time.time;
 
-                CalculateInflation(); //Sets Inflate to TRUE at end of func
-                InflateAudioPlayed = false;
-            }
-
-            if (mouseClicks != MouseTracker.GetClickCount()[0])
-            {
-                TrialTouches += MouseTracker.GetClickCount()[0] - mouseClicks;
-                SetTrialSummaryString();
-                mouseClicks = MouseTracker.GetClickCount()[0];
+                        Handler.HandlerActive = false;
+                        NumInflations++;
+                        CalculateInflation(); //Sets Inflate to TRUE at end of func
+                        InflateAudioPlayed = false;
+                    }
+                }
             }
 
             //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.
             if (InputBroker.GetMouseButtonDown(0) && Response != 1)
             {
-                //should also be handled by inputbroker
                 Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
                 RaycastHit hit;
                 if (!Physics.Raycast(ray, out hit))
-                    AudioFBController.Play("Negative");               
+                    AudioFBController.Play("Negative");
             }
+
+            if(InputBroker.GetMouseButtonUp(0))
+            {
+                TrialTouches++;
+                SetTrialSummaryString();
+            }
+
         });
         InflateBalloon.AddTimer(() => inflateDuration.value, Delay);
         InflateBalloon.SpecifyTermination(() => Response == 1, Delay);
@@ -419,12 +415,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 currentTask.NumAborted_Task++;
                 AudioFBController.Play("TimeRanOut");
                 TokenFBController.enabled = false;
-                EventCodeManager.SendCodeImmediate(TaskEventCodes["NoChoice"]);
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["NoChoice"]);
             }
             TrialStim.SetActive(false);
         });
 
-        
         //Feedback state -------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
         {
@@ -466,10 +461,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     //HELPER FUNCTIONS -------------------------------------------------------------------------------------------------------
     public override void ResetTrialVariables()
     {
-        ClickCount = 0;
+        NumInflations = 0;
         Response = -1;
         ChooseDuration = 0;
-        ClicksNeeded = 0;
+        InflationsNeeded = 0;
         AvgClickTime = 0;
         SideChoice = "";
         EffortChoice = "";
@@ -549,7 +544,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     void CalculateInflation()
     {      
         GameObject container = (SideChoice == "Left") ? BalloonContainerLeft : BalloonContainerRight;
-        NextScale = container.transform.GetChild(ClickCount-1).transform.localScale;
+        NextScale = container.transform.GetChild(NumInflations-1).transform.localScale;
         NextScale.y = ScalePerInflation_Y + TrialStim.transform.localScale.y;
         Vector3 difference = NextScale - TrialStim.transform.localScale;
         IncrementAmounts = new Vector3((difference.x / scalingInterval.value), (difference.y / scalingInterval.value), (difference.z / scalingInterval.value));
@@ -910,7 +905,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void DefineTrialData()
     {
-        TrialData.AddDatum("ClicksNeeded", () => ClicksNeeded);
+        TrialData.AddDatum("ClicksNeeded", () => InflationsNeeded);
         TrialData.AddDatum("ClicksNeededLeft", () => currentTrial.NumClicksLeft);
         TrialData.AddDatum("ClicksNeededRight", () => currentTrial.NumClicksRight);
         TrialData.AddDatum("NumCoinsLeft", () => currentTrial.NumCoinsLeft);
@@ -921,7 +916,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("TimeTakenToChoose", () => ChooseDuration);
         TrialData.AddDatum("AverageClickTimes", () => AvgClickTime);
         TrialData.AddDatum("ClicksPerOutline", () => currentTrial.ClicksPerOutline);
-        TrialData.AddDatum("Trial TrialTouches", () => TrialTouches);
+        TrialData.AddDatum("TrialTouches", () => TrialTouches);
     }
 
     void DefineFrameData()

@@ -15,6 +15,7 @@ using USE_StimulusManagement;
 using USE_ExperimentTemplate_Trial;
 using VisualSearch_Namespace;
 using USE_UI;
+using FlexLearning_Namespace;
 
 public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 {
@@ -105,12 +106,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         
         AddActiveStates(new List<State> {InitTrial, SearchDisplay, SelectionFeedback, TokenFeedback, ITI, SearchDisplayDelay});
-        SelectionHandler<VisualSearch_StimDef> mouseHandler = new SelectionHandler<VisualSearch_StimDef>();
         
         Add_ControlLevel_InitializationMethod(() =>
         {
             LoadTextures(ContextExternalFilePath);
-            Text commandText = null;
             playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
             playerViewText = new GameObject();
             playerViewParent = GameObject.Find("MainCameraCopy");     
@@ -153,11 +152,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             
             SetTrialSummaryString();
         });
-
         SetupTrial.SpecifyTermination(() => true, InitTrial);
+
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
-        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, 
-            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
+        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, SearchDisplay);
+
         InitTrial.AddInitializationMethod(() =>
         {
             CurrentTaskLevel.SetBlockSummaryString();
@@ -170,6 +169,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
+
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
         });
         InitTrial.AddUpdateMethod(() =>
         {
@@ -179,7 +181,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => choiceMade,
             SearchDisplayDelay, () => 
             { 
-                // Turn off start button
                 choiceMade = false;
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
             });
@@ -188,8 +189,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay);
         
         // SEARCH DISPLAY STATE ----------------------------------------------------------------------------------------
-      //  MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay, null, 
-        //    ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         SearchDisplay.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they holding down
@@ -199,6 +198,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             CreateTextOnExperimenterDisplay();
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
+
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
@@ -231,9 +233,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
+            if (Handler.LastSelection.SelectedGameObject.GetComponent<StimDefPointer>()?.GetStimDef<VisualSearch_StimDef>() == null)   //means the player got timed out and didn't click on anything
             {
-                Debug.Log("Timed out of selection state before making a choice");
                 AbortedTrials_InBlock++;
                 CurrentTaskLevel.AbortedTrials_InTask++;
                 aborted = true;

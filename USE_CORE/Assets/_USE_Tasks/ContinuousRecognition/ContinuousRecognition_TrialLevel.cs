@@ -74,14 +74,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public float ButtonScale;
     [HideInInspector] public Vector3 ButtonPosition;
 
-    [HideInInspector] GameObject chosenStimObj;
-    [HideInInspector] ContinuousRecognition_StimDef chosenStimDef;
+    [HideInInspector] GameObject ChosenGO;
+    [HideInInspector] ContinuousRecognition_StimDef ChosenStim;
 
     private int NumPC_Trial;
     private int NumNew_Trial;
     private int NumPNC_Trial;
 
-    public bool MakeStimPopOut;
+    [HideInInspector] public bool MakeStimPopOut;
 
     //Config Variables
     [HideInInspector]
@@ -126,9 +126,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
-        SelectionHandler<ContinuousRecognition_StimDef> mouseHandler = new SelectionHandler<ContinuousRecognition_StimDef>();
-        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null,
-            () => MouseTracker.ButtonStatus[0] == 1, () => MouseTracker.ButtonStatus[0] == 0);
+        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ChooseStim);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -146,14 +144,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InTask != 0)
                 currentTask.SetTaskSummaryString();
 
-            //if (TrialCount_InBlock == 0)
-            //{
-            //    //if(IsHuman)
-            //    //{
-            //    //    AdjustStartButtonPos(); //Adjust startButton position (move down) to make room for Title text. 
-            //    //    TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
-            //    //}
-            //}
+            if (TrialCount_InBlock == 0 && IsHuman)
+            {
+                AdjustStartButtonPos(); //Adjust startButton position (move down) to make room for Title text. 
+                TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
+            }
 
             if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
             {
@@ -171,8 +166,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             SetTokenFeedbackTimes();
             SetStimStrings();
             SetShadowType(currentTrial.ShadowType, "ContinuousRecognition_DirectionalLight");
+
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
         });
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), DisplayStims);
+        InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
             if (TitleTextGO.activeInHierarchy)
@@ -207,21 +205,20 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------
-        //Stim are turned on as soon as it enters DisplayStims state. no initialization method needed.
         DisplayStims.AddTimer(() => displayStimDuration.value, ChooseStim, () => TimeRemaining = chooseStimDuration.value);
 
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
-        MouseTracker.AddSelectionHandler(mouseHandler, ChooseStim, null,
-            () => MouseTracker.ButtonStatus[0] == 1, () => MouseTracker.ButtonStatus[0] == 0);
-
         ChooseStim.AddInitializationMethod(() =>
         {
-            chosenStimObj = null;
-            chosenStimDef = null;
+            ChosenGO = null;
+            ChosenStim = null;
             StimIsChosen = false;
 
             if (TrialCount_InBlock == 0)
                 TimeToCompletion_StartTime = Time.time;
+
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
         });
 
         ChooseStim.AddUpdateMethod(() =>
@@ -231,38 +228,38 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             TimerText.text = TimeRemaining.ToString("0");
 
-            chosenStimObj = mouseHandler.SelectedGameObject;
-            chosenStimDef = mouseHandler.SelectedStimDef;
+            ChosenGO = Handler.LastSelection.SelectedGameObject;
+            ChosenStim = ChosenGO?.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
 
-            if (chosenStimDef != null) //They Clicked a Stim
+            if (ChosenStim != null) //They Clicked a Stim
             {
                 currentTrial.TimeChosen = Time.time;
                 currentTrial.TimeToChoice = currentTrial.TimeChosen - ChooseStim.TimingInfo.StartTimeAbsolute;
                 TimeToChoice_Block.Add(currentTrial.TimeToChoice);
                 CalculateBlockAvgTimeToChoice();
 
-                if (!ChosenStimIndices.Contains(chosenStimDef.StimIndex)) //THEY GUESSED RIGHT
+                if (!ChosenStimIndices.Contains(ChosenStim.StimIndex)) //THEY GUESSED RIGHT
                 {
                     currentTrial.GotTrialCorrect = true;
 
                     EventCodeManager.SendCodeImmediate(SessionEventCodes["CorrectResponse"]);
 
                     //If chose a PNC Stim, remove it from PNC list.
-                    if (currentTrial.PNC_Stim.Contains(chosenStimDef.StimIndex))
-                        currentTrial.PNC_Stim.Remove(chosenStimDef.StimIndex);
+                    if (currentTrial.PNC_Stim.Contains(ChosenStim.StimIndex))
+                        currentTrial.PNC_Stim.Remove(ChosenStim.StimIndex);
                     //If Chose a New Stim, remove it from New list.
-                    if (currentTrial.New_Stim.Contains(chosenStimDef.StimIndex))
-                        currentTrial.New_Stim.Remove(chosenStimDef.StimIndex);
+                    if (currentTrial.New_Stim.Contains(ChosenStim.StimIndex))
+                        currentTrial.New_Stim.Remove(ChosenStim.StimIndex);
 
-                    chosenStimDef.PreviouslyChosen = true;
-                    currentTrial.PC_Stim.Add(chosenStimDef.StimIndex);
-                    ChosenStimIndices.Add(chosenStimDef.StimIndex); //also adding to chosenIndices so I can keep them in order for display results. 
+                    ChosenStim.PreviouslyChosen = true;
+                    currentTrial.PC_Stim.Add(ChosenStim.StimIndex);
+                    ChosenStimIndices.Add(ChosenStim.StimIndex); //also adding to chosenIndices so I can keep them in order for display results. 
 
                     //REMOVE ALL NEW STIM THAT WEREN'T CHOSEN, FROM NEW STIM AND INTO PNC STIM. 
                     List<int> newStimToRemove = currentTrial.New_Stim.ToList();
                     foreach (var stim in newStimToRemove)
                     {
-                        if (currentTrial.New_Stim.Contains(stim) && stim != chosenStimDef.StimIndex)
+                        if (currentTrial.New_Stim.Contains(stim) && stim != ChosenStim.StimIndex)
                         {
                             currentTrial.New_Stim.Remove(stim);
                             currentTrial.PNC_Stim.Add(stim);
@@ -280,13 +277,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
                 else //THEY GUESSED WRONG
                 {
-                    currentTrial.WrongStimIndex = chosenStimDef.StimIndex; //identifies the stim they got wrong for Block FB purposes. 
+                    currentTrial.WrongStimIndex = ChosenStim.StimIndex; //identifies the stim they got wrong for Block FB purposes. 
                     TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
                     EventCodeManager.SendCodeImmediate(SessionEventCodes["IncorrectResponse"]);
                 }
             }
 
-            if (chosenStimObj != null && chosenStimDef != null) //if they chose a stim 
+            if (ChosenGO != null && ChosenStim != null) //if they chose a stim 
                 StimIsChosen = true;
 
             //Count NonStim Clicks:
@@ -313,9 +310,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 return;
 
             if (currentTrial.GotTrialCorrect)
-                HaloFBController.ShowPositive(chosenStimObj);
+                HaloFBController.ShowPositive(ChosenGO);
             else
-                HaloFBController.ShowNegative(chosenStimObj);
+                HaloFBController.ShowNegative(ChosenGO);
         });
         TouchFeedback.AddTimer(() => touchFbDuration.value, TokenUpdate);
         TouchFeedback.SpecifyTermination(() => !StimIsChosen, TokenUpdate);
@@ -334,16 +331,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 if(TrialCount_InBlock == currentTrial.MaxNumTrials-1 || currentTrial.PNC_Stim.Count == 0) //If they get the last trial right (or find all stim), fill up bar!
                 {
                     int numToFillBar = currentTrial.NumTokenBar - TokenFBController.GetTokenBarValue();
-                    TokenFBController.AddTokens(chosenStimObj, numToFillBar);
+                    TokenFBController.AddTokens(ChosenGO, numToFillBar);
                 }
                 else
                 {
-                    TokenFBController.AddTokens(chosenStimObj, currentTrial.RewardMag);
+                    TokenFBController.AddTokens(ChosenGO, currentTrial.RewardMag);
                 }
             }
             else //Got wrong
             {
-                TokenFBController.RemoveTokens(chosenStimObj,currentTrial.RewardMag);
+                TokenFBController.RemoveTokens(ChosenGO,currentTrial.RewardMag);
                 EndBlock = true;
             }
         });

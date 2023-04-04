@@ -11,6 +11,7 @@ using ConfigDynamicUI;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 using USE_ExperimentTemplate_Task;
+using ContinuousRecognition_Namespace;
 
 public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 {
@@ -105,7 +106,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
 
         AddActiveStates(new List<State> { InitTrial, SearchDisplay, SelectionFeedback, TokenFeedback, ITI, SearchDisplayDelay });
-        SelectionHandler<FlexLearning_StimDef> mouseHandler = new SelectionHandler<FlexLearning_StimDef>();
         
         Add_ControlLevel_InitializationMethod(() =>
         {
@@ -156,10 +156,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
-        
+
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
-        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, 
-            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
+        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, SearchDisplay);
+
         InitTrial.AddInitializationMethod(() =>
         {
             CurrentTaskLevel.SetBlockSummaryString();
@@ -172,8 +172,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
+
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
         });
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton),
+        InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton),
             SearchDisplayDelay, () =>
             {
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
@@ -183,8 +186,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay);
         
         // SEARCH DISPLAY STATE ----------------------------------------------------------------------------------------
-        MouseTracker.AddSelectionHandler(mouseHandler, SearchDisplay, null, 
-            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
         SearchDisplay.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they holding down
@@ -227,7 +228,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            if (mouseHandler.SelectedStimDef == null)   //means the player got timed out and didn't click on anything
+            if (Handler.LastSelection.SelectedGameObject.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>() == null)   //means the player got timed out and didn't click on anything
             {
                 runningAcc.Add(0);
                 AbortedTrials_InBlock++;

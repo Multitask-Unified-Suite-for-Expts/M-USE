@@ -151,7 +151,9 @@ namespace USE_ExperimentTemplate_Trial
             FinishTrial.AddUniversalTerminationMethod(() =>
             {
                 TrialCompleteTime = FinishTrial.TimingInfo.StartTimeAbsolute + (Time.time - FinishTrial.TimingInfo.StartTimeAbsolute);
+
                 FinishTrialCleanup();
+                ClearActiveTrialHandlers();
 
                 int nStimGroups = TrialStims.Count;
                 for (int iG = 0; iG < nStimGroups; iG++)
@@ -178,7 +180,26 @@ namespace USE_ExperimentTemplate_Trial
 
         public virtual void FinishTrialCleanup()
         {
+        }
 
+        public void ClearActiveTrialHandlers()
+        {
+            if (SelectionTracker.TrialHandlerNames.Count > 0)
+            {
+                List<string> toRemove = new List<string>();
+
+                foreach (string handlerName in SelectionTracker.TrialHandlerNames)
+                {
+                    if (SelectionTracker.ActiveSelectionHandlers.ContainsKey(handlerName))
+                    {
+                        SelectionTracker.ActiveSelectionHandlers.Remove(handlerName);
+                        toRemove.Add(handlerName);
+                    }
+                }
+
+                foreach (string handlerName in toRemove)
+                    SelectionTracker.TrialHandlerNames.Remove(handlerName);
+            }
         }
 
         public void WriteDataFiles()

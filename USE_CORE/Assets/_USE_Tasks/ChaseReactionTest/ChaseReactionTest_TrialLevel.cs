@@ -153,8 +153,7 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
                 MazeBackground = CreateSquare("MazeBackground", mazeBgTex, new Vector3(0, 0, 0),
                     new Vector3(5, 5, 5));
            
-            // instantiate array
-            totalErrors_InTrial = new int[currentMaze_InTrial.mNumSquares];
+            
 
             //player view variables
             playerViewParent = GameObject.Find("MainCameraCopy");
@@ -172,6 +171,10 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
                 LoadConfigVariables();
             CurrentTaskLevel.LoadTextMaze();
             currentMaze_InTrial = CurrentTaskLevel.currMaze;
+            // instantiate array
+            totalErrors_InTrial = new int[currentMaze_InTrial.mNumSquares];
+            backtrackErrors_InTrial = new int[currentMaze_InTrial.mNumSquares];
+            
             pathProgressIndex = 0;
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
@@ -190,21 +193,22 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
             
             InstantiateCurrMaze();
             tiles.ToggleVisibility(true);
+            mazeStartTime = Time.time;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOn"]);
             
-            if (playerViewParent.transform.childCount == 0)
-                CreateTextOnExperimenterDisplay();
-            else
-                ActivateChildren(playerViewParent);
+            CreateTextOnExperimenterDisplay();
         });
         TileFlash.AddInitializationMethod(() =>
         {
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["FlashingTileFbOn"]);
             tile.NextCorrectFlashingFeedback();
-
+            Debug.Log("TILE BLINKING DURATION: " + tileBlinkingDuration.value);
+            Debug.Log("INITIALIZATION TIME: " + Time.unscaledTime);
         });
-        TileFlash.AddTimer(tileBlinkingDuration.value, ChooseTile, () =>
+        TileFlash.AddTimer(()=>tileBlinkingDuration.value, ChooseTile, () =>
         {
+
+            Debug.Log("DONE FLASHING AT THE TRIAL LEVEL");
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["FlashingTileFbOff"]);
         });
         ChooseTile.AddInitializationMethod(() =>
@@ -214,8 +218,7 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseTile.AddUpdateMethod(() =>
         {
-            if (startedMaze)
-                mazeDuration += Time.deltaTime;
+            mazeDuration += Time.deltaTime;
             choiceDuration += Time.deltaTime;
             if (InputBroker.GetMouseButtonDown(0))
             {
@@ -238,7 +241,6 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
             if (selectedGO.GetComponent<Tile>().mCoord.chessCoord ==  currentMaze_InTrial.mStart)
             {
                 //If the tile that is selected is the start tile, begin the timer for the maze
-                mazeStartTime = Time.time;
                 startedMaze = true;
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["MazeStart"]); 
             }
@@ -263,7 +265,7 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TileFbOn"]);
 
             // This is what actually determines the result of the tile choice
-            selectedGO.GetComponent<Tile>().OnMouseDown();
+            selectedGO.GetComponent<Tile>().SelectionFeedback();
             trialPerformance = (float)decimal.Divide(totalErrors_InTrial.Sum(),currentMaze_InTrial.mNumSquares);
 
             finishedFbDuration = (tileFbDuration + flashingFbDuration.value);
@@ -341,7 +343,7 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
         ITI.AddInitializationMethod(() =>
         {
             DisableSceneElements();
-            DeactivateChildren(playerViewParent);
+            DestroyChildren(playerViewParent);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOff"]);
             if (finishedMaze)
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderFbController_SliderCompleteFbOff"]);
@@ -354,13 +356,6 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
     }
-
-    protected override void DefineTrialStims()
-    {
-        //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
-        //destroyed at TrialLevel_Finish
-    }
-
     public int ManageTileTouch(Tile tile)
     {
         var touchedCoord = tile.mCoord;
@@ -387,6 +382,24 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
             //sets the duration of tile feedback
             tileFbDuration = tile.CORRECT_FEEDBACK_SECONDS;
             return 1;
+        }
+        // RULE BREAKING BACKTRACK ERROR OR ERRONEOUS RETOUCH OF LAST CORRECT TILE
+        if (pathProgress.Contains(touchedCoord))
+        {
+            Debug.Log("*Rule-Breaking Backtrack Error*");
+            EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
+            Debug.Log("SIZE OF BACKTRACK ARRAY: " + backtrackErrors_InTrial.Length + "PATH PROGRESS INDEX" + pathProgressIndex);
+            backtrackErrors_InTrial[pathProgressIndex] += 1;
+            CurrentTaskLevel.backtrackErrors_InBlock[pathProgressIndex] += 1;
+            CurrentTaskLevel.backtrackErrors_InTask++;
+            
+            totalErrors_InTrial[pathProgressIndex] += 1;
+            CurrentTaskLevel.totalErrors_InBlock[pathProgressIndex] += 1;
+            CurrentTaskLevel.totalErrors_InTask++;
+
+            /*if (viewPath)
+                tile.originalTileColor = tile.CORRECT_COLOR;*/
+            tileFbDuration = tile.INCORRECT_RULEBREAKING_SECONDS;
         }
 
         return 20;
@@ -444,7 +457,7 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
    public override void FinishTrialCleanup()
     {
         DisableSceneElements();
-        DeactivateChildren(playerViewParent);
+        DestroyChildren(playerViewParent);
         if (mazeLoaded)
         {
             tiles.DestroyStimGroup();
@@ -453,7 +466,7 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
         
         if (TokenFBController.isActiveAndEnabled)
             TokenFBController.enabled = false;
-
+        
         if(AbortCode == 0)
             CurrentTaskLevel.CalculateBlockSummaryString();
 
@@ -485,18 +498,20 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
         if (TrialCount_InBlock != 0)
         {
             Array.Clear(totalErrors_InTrial, 0, totalErrors_InTrial.Length);
+            Array.Clear(backtrackErrors_InTrial, 0, backtrackErrors_InTrial.Length);
         }
         pathProgress.Clear();
         pathProgressGO.Clear();
         consecutiveErrors = 0;
 
-        if (playerViewParent.transform.childCount > 0 && playerViewTextList.Count > 0)
+        /*
+        if (playerViewParent?.transform.childCount > 0)
         {
             foreach (var txt in playerViewTextList)
             {
                 txt.GetComponent<Text>().color = Color.red; //resets the color if we repeat the sequence in the block
             }
-        }
+        }*/
     }
     private void DisableSceneElements()
     {
@@ -547,7 +562,6 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
             if (chessCoordName == currentMaze_InTrial.mStart)
             {
                 tile.gameObject.GetComponent<Tile>().setColor(tile.START_COLOR);
-                tile.gameObject.GetComponent<Tile>().originalTileColor = tile.START_COLOR;
                 startTile = tile.gameObject; // Have to define to perform feedback if they haven't selected the start yet 
                 //Consider making a separate group for the tiles in the path, this might not improve function that much?
             }
@@ -555,12 +569,10 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
             else if (chessCoordName == currentMaze_InTrial.mFinish)
             {                
                 tile.gameObject.GetComponent<Tile>().setColor(tile.FINISH_COLOR);
-                tile.gameObject.GetComponent<Tile>().originalTileColor = tile.FINISH_COLOR;
             }
             else
             {
                 tile.gameObject.GetComponent<Tile>().setColor(tile.DEFAULT_TILE_COLOR);
-                tile.gameObject.GetComponent<Tile>().originalTileColor = tile.DEFAULT_TILE_COLOR;
             }
             tiles.AddStims(tile.gameObject);
         }

@@ -67,8 +67,10 @@ public class Tile : MonoBehaviour
     }
 
 
-    public void OnMouseDown()
+    public void SelectionFeedback()
     {
+        if (!isFlashing)
+        {
             if (mgTL != null)
             {
                 correctnessCode = mgTL.ManageTileTouch(this);
@@ -78,7 +80,7 @@ public class Tile : MonoBehaviour
                 correctnessCode = crtTL.ManageTileTouch(this);
             }
             ColorFeedback(correctnessCode);
-        
+        }
     }
     public void setColor(Color c)
     {
@@ -106,35 +108,28 @@ public class Tile : MonoBehaviour
                 fbColor = INCORRECT_RULEBREAKING_COLOR;
                 break;
         }
-        
+
+        originalTileColor = gameObject.GetComponent<Renderer>().material.color;
         gameObject.GetComponent<Renderer>().material.color = fbColor;
+        Debug.Log("ORIGINAL TILE COLOR: " + originalTileColor);
+        Debug.Log("FB TILE COLOR: " + fbColor);
         fbStartTime = Time.unscaledTime;
         choiceFeedback = true;
     }
 
-    public IEnumerator LastCorrectFlashingFeedback()
+    public void LastCorrectFlashingFeedback()
     {
         // FAILS TO SELECT LAST CORRECT AFTER ERROR
         fbColor = PREV_CORRECT_COLOR;
-        GameObject flashingTile;
-        isFlashing = true;
         if (mgTL.pathProgressGO.Count == 0) // haven't selected the start yet
             flashingTile = mgTL.startTile;
         else // somewhere along the path, can now index through pathProgress
             flashingTile = mgTL.pathProgressGO[mgTL.pathProgressGO.Count - 1];
 
-        float increment = TILE_BLINKING_DURATION / NUM_BLINKS;
-        float flashingTime = 0f;
-        while (flashingTime < TILE_BLINKING_DURATION)
-        {
-            flashingTile.GetComponent<Renderer>().material.color = fbColor;
-            yield return new WaitForSeconds(increment / 2);
-            flashingTile.GetComponent<Renderer>().material.color = flashingTile.GetComponent<Tile>().originalTileColor;
-            yield return new WaitForSeconds(increment / 2);
-            flashingTime += increment;
-        }
-
-        isFlashing = false;
+        isFlashing = true;
+        flashStartTime = Time.unscaledTime;
+        originalTileColor = flashingTile.GetComponent<Renderer>().material.color; // before it starts flashing set color
+        numFlashes = 0;
     }
     
     public void NextCorrectFlashingFeedback()
@@ -147,7 +142,7 @@ public class Tile : MonoBehaviour
 
         isFlashing = true;
         flashStartTime = Time.unscaledTime;
-
+        originalTileColor = flashingTile.GetComponent<Renderer>().material.color; // before it starts flashing set color
         numFlashes = 0;
     }
 
@@ -164,20 +159,19 @@ public class Tile : MonoBehaviour
                 if (numFlashes % 2 == 0)
                     flashingTile.GetComponent<Renderer>().material.color = fbColor;
                 else
-                    flashingTile.GetComponent<Renderer>().material.color = flashingTile.GetComponent<Tile>().originalTileColor;
+                    flashingTile.GetComponent<Renderer>().material.color = originalTileColor;
             
                 numFlashes++;
             }
         
             if (numFlashes >= 2 * NUM_BLINKS)
             { 
-                flashingTile.GetComponent<Renderer>().material.color = flashingTile.GetComponent<Tile>().originalTileColor;
+                flashingTile.GetComponent<Renderer>().material.color = originalTileColor; // confirm it stops on original tile color
                 isFlashing = false;
             }
-
         }
 
-        if (choiceFeedback)
+        if (choiceFeedback && !isFlashing)
         {
 
             float elapsed = Time.unscaledTime - fbStartTime;
@@ -185,8 +179,12 @@ public class Tile : MonoBehaviour
         
             if (elapsed >=  interval)
             {
-                if (mgTL != null? !mgTL.viewPath:!crtTL.viewPath || correctnessCode != 1)
-                    gameObject.GetComponent<Renderer>().material.color = gameObject.GetComponent<Tile>().originalTileColor;
+                Debug.Log("CORRECTNESS CODE?? " + correctnessCode);
+                if ((mgTL != null ? !mgTL.viewPath : !crtTL.viewPath) || correctnessCode != 1)
+                {
+                    Debug.Log("IN HERE");
+                    gameObject.GetComponent<Renderer>().material.color = originalTileColor;
+                }
                 choiceFeedback = false;
             }
         }

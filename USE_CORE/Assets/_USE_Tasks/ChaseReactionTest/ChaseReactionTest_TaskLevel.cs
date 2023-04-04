@@ -24,17 +24,21 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
     // Block Data Tracking Variables
     [HideInInspector]
     public int[] totalErrors_InBlock;
+    public int[] backtrackErrors_InBlock;
     public int numRewardPulses_InBlock;
     public int numAbortedTrials_InBlock;
     public List<float?> mazeDurationsList_InBlock = new List<float?>();
     public List<float?> choiceDurationsList_InBlock = new List<float?>();
     public int numSliderBarFull_InBlock;
     
+    
     // Task Data Tracking Variables
     [HideInInspector]
     public int numRewardPulses_InTask;
     public int numAbortedTrials_InTask;
     public int numSliderBarFull_InTask;
+    public int backtrackErrors_InTask;
+    public int totalErrors_InTask;
     
     [HideInInspector] public string BlockAveragesString;
     [HideInInspector] public string CurrentBlockString;
@@ -56,7 +60,6 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
         BlockAveragesString = "";
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
-
         
         blocksAdded = 0;
         LoadMazeDef();
@@ -73,6 +76,7 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
             
             //instantiate arrays
             totalErrors_InBlock = new int[currMaze.mNumSquares];
+            backtrackErrors_InBlock = new int[currMaze.mNumSquares];
             crtTL.DestroyChildren(GameObject.Find("MainCameraCopy"));
             
             ResetBlockVariables();

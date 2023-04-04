@@ -156,7 +156,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         //---------------------------------------DEFINING STATES-----------------------------------------------------------------------
         State InitTrial = new State("InitTrial");
-        //State StartButtonDelay = new State("StartButtonDelay");
         State ChooseStimulus = new State("ChooseStimulus");
         State ChooseStimulusDelay = new State("ChooseStimulusDelay");
         State SelectionFeedback = new State("SelectionFeedback");
@@ -169,24 +168,22 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
 
         string[] stateNames = new string[]
-            {"InitTrial", "StartButtonDelay", "ChooseStimulus", "SelectionFeedback", "FinalFeedback", "ITI", "ChooseStimulusDelay"};
+            {"InitTrial", "ChooseStimulus", "ChooseStimulusDelay", "SelectionFeedback", "FinalFeedback", "ITI", "ChooseStimulusDelay"};
 
         //MouseTracker variables
         SelectionHandler<WhatWhenWhere_StimDef> gazeHandler = new SelectionHandler<WhatWhenWhere_StimDef>();
         GazeTracker.SpoofGazeWithMouse = true;
 
         //player view variables
-        
         playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
         playerViewText = new GameObject();
-        //EventCodeManager.SendCodeImmediate(3);
-        //Trial Completion Feedback Variables
+
         
         Add_ControlLevel_InitializationMethod(() =>
         {
             SliderFBController.InitializeSlider();
             LoadTextures(ContextExternalFilePath);
-// Initialize FB Controller Values
+            // Initialize FB Controller Values
             HaloFBController.SetHaloSize(15f);
             HaloFBController.SetHaloIntensity(5);
             if (StartButton == null)
@@ -198,7 +195,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (fbSquare == null)
             {
                 USE_FBSquare = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>(), FBSquarePosition, FBSquareScale);
-                Debug.Log("FBSQUARE POSITION : " + FBSquarePosition + " FB SQUARE SCALE: " + FBSquareScale);
                 fbSquare = USE_FBSquare.StartButtonGO;
                 fbSquare.name = "FBSquare";
             }
@@ -226,7 +222,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddTimer(()=> sbDelay, InitTrial);
 
         var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ChooseStimulus);
-        Handler.MinDuration = .001f;
+        Handler.MinDuration = .5f;
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -238,15 +234,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
         });
-
-        InitTrial.AddUpdateMethod(() =>
-        {
-            if(Handler.AllSelections.Count > 0)
-            {
-                Debug.Log("SELECTIONS COUNT: " + Handler.AllSelections.Count);
-            }
-        });
-
         InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), ChooseStimulusDelay, ()=>
         {
             CalculateSliderSteps();
@@ -628,7 +615,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         chooseStimOnsetDelay = ConfigUiVariables.get<ConfigNumber>("chooseStimOnsetDelay");
         timeoutDuration = ConfigUiVariables.get<ConfigNumber>("timeoutDuration");
         startButtonDelay = ConfigUiVariables.get<ConfigNumber>("startButtonDelay");
-        Debug.Log("Done Loading Variables");
     }
     //-----------------------------------------------------DEFINE QUADDLES-------------------------------------------------------------------------------------
     protected override void DefineTrialStims()
@@ -708,11 +694,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         }
         sliderLossSteps += CurrentTrialDef.SliderInitial;
     }
-    private Vector2 playerViewPosition(Vector3 position, Transform playerViewParent)
-    {
-        Vector2 pvPosition = new Vector2((position[0] / Screen.width) * playerViewParent.GetComponent<RectTransform>().sizeDelta.x, (position[1] / Screen.height) * playerViewParent.GetComponent<RectTransform>().sizeDelta.y);
-        return pvPosition;
-    }
+
     private void TouchDurationErrorFeedback(USE_StartButton UIElement, bool deactivateAfter)
     {
         if (UIElement.IsGrating)

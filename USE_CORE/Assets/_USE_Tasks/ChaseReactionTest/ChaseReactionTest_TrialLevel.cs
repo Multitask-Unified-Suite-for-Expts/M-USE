@@ -176,15 +176,15 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
-        var SbHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InitTrial);
-        var ChooseTileHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", ChooseTile, ChooseTile);
+
+        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ITI);
 
         InitTrial.AddInitializationMethod(() =>
         {
-            if (SbHandler.AllSelections.Count > 0)
-                SbHandler.ClearSelections();
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
         });
-        InitTrial.SpecifyTermination(() => SbHandler.SelectionMatches(StartButton), Delay, () =>
+        InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), Delay, () =>
         {
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
 
@@ -216,22 +216,22 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
         ChooseTile.AddInitializationMethod(() =>
         {
             choiceDuration = 0;
-            if (ChooseTileHandler.AllSelections.Count > 0)
-                ChooseTileHandler.ClearSelections();
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
         });
         ChooseTile.AddUpdateMethod(() =>
         {
             mazeDuration += Time.deltaTime;
             choiceDuration += Time.deltaTime;
 
-            if (ChooseTileHandler.SuccessfulSelections.Count > 0)
+            if (Handler.SuccessfulSelections.Count > 0)
             { 
-                if (ChooseTileHandler.LastSuccessfulSelection.SelectedGameObject.GetComponent<Tile>() != null)
+                if (Handler.LastSuccessfulSelection.SelectedGameObject.GetComponent<Tile>() != null)
                 {
                     choiceMade = true;
                     choiceDurationsList.Add(choiceDuration);
                     CurrentTaskLevel.choiceDurationsList_InBlock.Add(choiceDuration);
-                    selectedGO = ChooseTileHandler.LastSuccessfulSelection.SelectedGameObject;
+                    selectedGO = Handler.LastSuccessfulSelection.SelectedGameObject;
                 }
             }
         });

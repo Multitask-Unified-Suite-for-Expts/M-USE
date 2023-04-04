@@ -83,6 +83,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public bool MakeStimPopOut;
 
+    private PlayerViewPanel playerView;
+    private Transform playerViewParent;
+    private GameObject playerViewText;
+    public List<GameObject> playerViewTextList;
+
+
     //Config Variables
     [HideInInspector]
     public ConfigNumber displayStimDuration, chooseStimDuration, itiDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration;
@@ -102,6 +108,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         OriginalTitleTextPosition = TitleTextGO.transform.position;
         OriginalTimerPosition = TimerBackdropGO.transform.position;
 
+        playerView = new PlayerViewPanel();
+        playerViewText = new GameObject();
+        playerViewTextList = new List<GameObject>();
+
         Add_ControlLevel_InitializationMethod(() =>
         {
             SetControllerBlockValues();
@@ -115,6 +125,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 StartButtonClassInstance.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 OriginalStartButtonPosition = StartButton.transform.position;
             }
+
+            playerViewParent = GameObject.Find("MainCameraCopy").transform;
+
         });
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
@@ -210,6 +223,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
         ChooseStim.AddInitializationMethod(() =>
         {
+            if (GameObject.Find("MainCameraCopy").transform.childCount == 0)
+                CreateTextOnExperimenterDisplay();
+
             ChosenGO = null;
             ChosenStim = null;
             StimIsChosen = false;
@@ -430,6 +446,32 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS -----------------------------------------------------------------------------------------
+    private void DeactivatePlayerViewText()
+    {
+        foreach (GameObject textGO in playerViewTextList)
+            Destroy(textGO);
+    }
+
+    private void CreateTextOnExperimenterDisplay()
+    {
+        Vector2 textLocation = new Vector2();
+
+        for(int i=0; i < currentTrial.NumTrialStims; ++i)
+        {
+            textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(trialStims.stimDefs[i].StimLocation), playerViewParent);
+            textLocation.y += 50;
+            Vector2 textSize = new Vector2(200, 200);
+            string stimString = "Target";
+            ContinuousRecognition_StimDef currentStim = (ContinuousRecognition_StimDef)trialStims.stimDefs[i];
+            if (currentStim.PreviouslyChosen)
+                stimString = "PC";
+
+            playerViewText = playerView.WriteText(stimString, stimString, stimString == "PC" ? Color.red : Color.blue, textLocation, textSize, playerViewParent);
+            playerViewText.GetComponent<RectTransform>().localScale = new Vector3(1.1f, 1.1f, 0);
+            playerViewTextList.Add(playerViewText);
+        }
+    }
+
     public override void ResetTrialVariables()
     {
         CompletedAllTrials = false;
@@ -440,6 +482,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
+        DeactivatePlayerViewText();
         DeactivateTextObjects();
         DestroyFeedbackBorders();
         ContextActive = false;

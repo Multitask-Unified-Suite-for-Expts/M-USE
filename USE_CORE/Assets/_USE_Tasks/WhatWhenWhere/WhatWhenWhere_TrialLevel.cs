@@ -222,6 +222,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddTimer(()=> sbDelay, InitTrial);
 
         var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ChooseStimulus);
+        Handler.MinDuration = .5f;
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -693,11 +694,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         }
         sliderLossSteps += CurrentTrialDef.SliderInitial;
     }
-    private Vector2 playerViewPosition(Vector3 position, Transform playerViewParent)
-    {
-        Vector2 pvPosition = new Vector2((position[0] / Screen.width) * playerViewParent.GetComponent<RectTransform>().sizeDelta.x, (position[1] / Screen.height) * playerViewParent.GetComponent<RectTransform>().sizeDelta.y);
-        return pvPosition;
-    }
+
     private void TouchDurationErrorFeedback(USE_StartButton UIElement, bool deactivateAfter)
     {
         if (UIElement.IsGrating)

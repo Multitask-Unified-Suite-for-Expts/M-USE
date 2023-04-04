@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using USE_States;
 
 
@@ -241,13 +242,13 @@ namespace SelectionTracking
                 //switch (initError)
                 //{
                 //    case "DurationTooShort":
-                //        Debug.Log("WOULD BE GRATING SQUARE FOR HOLDING TOO SHORT!!");
+                //        Debug.Log("HELD TOO SHORT! LOGIC WOULD GO HERE!");
                 //        break;
                 //    case "DurationTooLong":
-                //        Debug.Log("WOULD BE GRATING SQUARE FOR HOLDING TOO LONG!");
+                //        Debug.Log("HELD TOO LONG! LOGIC WOULD GO HERE!!");
                 //        break;
                 //    case "MovedTooFar":
-                //        Debug.Log("WOULD BE DOING LOGIC FOR MOVING TOO FAR!");
+                //        Debug.Log("MOVED TOO FAR! LOGIC WOULD GO HERE!");
                 //        break;
                 //}
             }

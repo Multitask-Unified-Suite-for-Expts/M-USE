@@ -156,7 +156,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         //---------------------------------------DEFINING STATES-----------------------------------------------------------------------
         State InitTrial = new State("InitTrial");
-        //State StartButtonDelay = new State("StartButtonDelay");
         State ChooseStimulus = new State("ChooseStimulus");
         State ChooseStimulusDelay = new State("ChooseStimulusDelay");
         State SelectionFeedback = new State("SelectionFeedback");
@@ -169,24 +168,22 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
 
         string[] stateNames = new string[]
-            {"InitTrial", "StartButtonDelay", "ChooseStimulus", "SelectionFeedback", "FinalFeedback", "ITI", "ChooseStimulusDelay"};
+            {"InitTrial", "ChooseStimulus", "ChooseStimulusDelay", "SelectionFeedback", "FinalFeedback", "ITI", "ChooseStimulusDelay"};
 
         //MouseTracker variables
         SelectionHandler<WhatWhenWhere_StimDef> gazeHandler = new SelectionHandler<WhatWhenWhere_StimDef>();
         GazeTracker.SpoofGazeWithMouse = true;
 
         //player view variables
-        
         playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
         playerViewText = new GameObject();
-        //EventCodeManager.SendCodeImmediate(3);
-        //Trial Completion Feedback Variables
+
         
         Add_ControlLevel_InitializationMethod(() =>
         {
             SliderFBController.InitializeSlider();
             LoadTextures(ContextExternalFilePath);
-// Initialize FB Controller Values
+            // Initialize FB Controller Values
             HaloFBController.SetHaloSize(15f);
             HaloFBController.SetHaloIntensity(5);
             if (StartButton == null)
@@ -198,7 +195,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (fbSquare == null)
             {
                 USE_FBSquare = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>(), FBSquarePosition, FBSquareScale);
-                Debug.Log("FBSQUARE POSITION : " + FBSquarePosition + " FB SQUARE SCALE: " + FBSquareScale);
                 fbSquare = USE_FBSquare.StartButtonGO;
                 fbSquare.name = "FBSquare";
             }
@@ -628,7 +624,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         chooseStimOnsetDelay = ConfigUiVariables.get<ConfigNumber>("chooseStimOnsetDelay");
         timeoutDuration = ConfigUiVariables.get<ConfigNumber>("timeoutDuration");
         startButtonDelay = ConfigUiVariables.get<ConfigNumber>("startButtonDelay");
-        Debug.Log("Done Loading Variables");
     }
     //-----------------------------------------------------DEFINE QUADDLES-------------------------------------------------------------------------------------
     protected override void DefineTrialStims()

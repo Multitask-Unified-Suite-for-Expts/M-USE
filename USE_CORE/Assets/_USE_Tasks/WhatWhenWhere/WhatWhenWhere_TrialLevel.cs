@@ -237,11 +237,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             Handler.MinDuration = .75f;
             Handler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.AddUpdateMethod(() =>
-        {
-            if (Handler.AllSelections.Count > 0)
-                HandleSbFeedback(Handler, USE_StartButton);
-        });
         InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), ChooseStimulusDelay, ()=>
         {
             CalculateSliderSteps();

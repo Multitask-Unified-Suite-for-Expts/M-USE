@@ -128,7 +128,6 @@ namespace USE_UI
         //making this one to hopefully replace the one below that calls it consistently with a decrementing duration
         public IEnumerator GratedSbFlash(Texture2D newTexture, float duration, bool deactivateAfter)
         {
-            Debug.Log("Starting Coroutine for Texture: " + newTexture.name);
             IsGrating = true;
             if (!StartButtonGO.activeInHierarchy)
                 StartButtonGO.SetActive(true);

@@ -153,6 +153,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (MazeBackground == null)
                 MazeBackground = CreateSquare("MazeBackground", mazeBgTex, new Vector3(0, 0, 0),
                     new Vector3(5, 5, 5));
+         
+            //CurrentTaskLevel.LoadTextMaze();
 
             //intantiate array
             ruleAbidingErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
@@ -175,7 +177,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             if (!configVariablesLoaded)
                 LoadConfigVariables();
-            CurrentTaskLevel.LoadTextMaze();
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -194,8 +195,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             StateAfterDelay = ChooseTile;
             DelayDuration = mazeOnsetDelay.value;
+            
             SliderFBController.ConfigureSlider(new Vector3(0,180,0), sliderSize.value);
             SliderFBController.SliderGO.SetActive(true);
+            CurrentTaskLevel.SetTaskSummaryString();
+            CurrentTaskLevel.CalculateBlockSummaryString();
             SetTrialSummaryString();
             
             InstantiateCurrMaze();
@@ -209,9 +213,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         ChooseTile.AddInitializationMethod(() =>
         {
-            CurrentTaskLevel.SetTaskSummaryString();
             choiceDuration = 0;
-
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
         });
@@ -843,15 +845,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         pathProgress.Clear();
         pathProgressGO.Clear();
         consecutiveErrors = 0;
-
-        /*
-        if (playerViewParent.transform.childCount > 0)
-        {
-            foreach (var txt in playerViewTextList)
-            {
-                txt.GetComponent<Text>().color = Color.red; //resets the color if we repeat the sequence in the block
-            }
-        }*/
     }
     void SetTrialSummaryString()
     {

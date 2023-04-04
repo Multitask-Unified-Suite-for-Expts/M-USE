@@ -14,15 +14,20 @@ using Random = UnityEngine.Random;
 
 public class MazeGame_TaskLevel : ControlLevel_Task_Template
 {
+    // Maze Loading Variables
     [HideInInspector] public int[] MazeNumSquares;
     [HideInInspector] public int[] MazeNumTurns;
     [HideInInspector] public Vector2[] MazeDims;
     [HideInInspector] public string[] MazeStart;
     [HideInInspector] public string[] MazeFinish;
     [HideInInspector] public string[] MazeName;
-    [HideInInspector]public Maze currMaze;
-
+    [HideInInspector] public Maze currMaze;
+    private MazeDef[] MazeDefs;
+    private string mazeKeyFilePath;
+    private MazeGame_TrialLevel mgTL;
+    private int mIndex;
     
+    // Block Data Tracking Variables
     [HideInInspector]
     public int[] totalErrors_InBlock;
     public int[] perseverativeErrors_InBlock;
@@ -39,6 +44,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     public List<float?> mazeDurationsList_InBlock = new List<float?>();
     public List<float?> choiceDurationsList_InBlock = new List<float?>();
 
+    // Task Data Tracking Variables
+    [HideInInspector]
     public int totalErrors_InTask;
     public int perseverativeErrors_InTask;
     public int backtrackErrors_InTask;
@@ -53,6 +60,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     public List<float?> mazeDurationsList_InTask;
     public List<float?> choiceDurationsList_InTask;
 
+    // Average Variables
     private float AvgTotalErrors;
     private float AvgPerseverativeErrors;
     private float AvgBacktrackErrors;
@@ -63,15 +71,11 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     private float AvgMazeDuration;
     private float AvgReward;
     
+    // Block Summary String Variables
     [HideInInspector] public string BlockAveragesString;
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;
-
     private int blocksAdded = 0;
-    private MazeDef[] MazeDefs;
-    private string mazeKeyFilePath;
-    private MazeGame_TrialLevel mgTL;
-    private int mIndex;
     private MazeGame_BlockDef mgBD => GetCurrentBlockDef<MazeGame_BlockDef>();
 
 

@@ -111,8 +111,6 @@ public class Tile : MonoBehaviour
 
         originalTileColor = gameObject.GetComponent<Renderer>().material.color;
         gameObject.GetComponent<Renderer>().material.color = fbColor;
-        Debug.Log("ORIGINAL TILE COLOR: " + originalTileColor);
-        Debug.Log("FB TILE COLOR: " + fbColor);
         fbStartTime = Time.unscaledTime;
         choiceFeedback = true;
     }
@@ -179,10 +177,8 @@ public class Tile : MonoBehaviour
         
             if (elapsed >=  interval)
             {
-                Debug.Log("CORRECTNESS CODE?? " + correctnessCode);
                 if ((mgTL != null ? !mgTL.viewPath : !crtTL.viewPath) || correctnessCode != 1)
                 {
-                    Debug.Log("IN HERE");
                     gameObject.GetComponent<Renderer>().material.color = originalTileColor;
                 }
                 choiceFeedback = false;

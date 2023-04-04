@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -10,6 +12,7 @@ using ChaseReactionTest_Namespace;
 using HiddenMaze;
 using UnityEngine;
 using USE_Utilities;
+using Random = UnityEngine.Random;
 
 public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
 {
@@ -20,6 +23,10 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public string[] MazeFinish;
     [HideInInspector] public string[] MazeName;
     [HideInInspector]public Maze currMaze;
+    private MazeDef[] MazeDefs;
+    private string mazeKeyFilePath;
+    private ChaseReactionTest_TrialLevel crtTL;
+    private int mIndex;
     
     // Block Data Tracking Variables
     [HideInInspector]
@@ -31,7 +38,6 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
     public List<float?> choiceDurationsList_InBlock = new List<float?>();
     public int numSliderBarFull_InBlock;
     
-    
     // Task Data Tracking Variables
     [HideInInspector]
     public int numRewardPulses_InTask;
@@ -39,22 +45,25 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
     public int numSliderBarFull_InTask;
     public int backtrackErrors_InTask;
     public int totalErrors_InTask;
+    public List<float?> mazeDurationsList_InTask;
+    public List<float?> choiceDurationsList_InTask;
+    
+    // Average Variables
+    private float AvgMazeDuration = 0;
     
     [HideInInspector] public string BlockAveragesString;
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;
-    
     private int blocksAdded = 0;
-    private MazeDef[] MazeDefs;
-    private string mazeKeyFilePath;
-    private ChaseReactionTest_TrialLevel crtTL;
-    private int mIndex;
+    
     private ChaseReactionTest_BlockDef crtBD => GetCurrentBlockDef<ChaseReactionTest_BlockDef>();
     public override void DefineControlLevel()
     {
+        mazeDurationsList_InTask = new List<float?>();
+        choiceDurationsList_InTask = new List<float?>();
+        
         crtTL = (ChaseReactionTest_TrialLevel)TrialLevel;
         SetSettings();
-        crtTL = (ChaseReactionTest_TrialLevel)TrialLevel;
         AssignBlockData();
         
         BlockAveragesString = "";
@@ -99,6 +108,49 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
     public void CalculateBlockSummaryString()
     {
         
+        ClearStrings();
+        CurrentBlockString = "<b>Min Trials in Block: </b>" + crtTL.CurrentTrialDef.MinMaxTrials[0] +
+                             "<b>\nMax Trials in Block: </b>" + crtTL.CurrentTrialDef.MaxTrials +
+                             "<b>\nLearning Criterion: </b>" + crtTL.CurrentTrialDef.BlockEndThreshold +
+                             "\n\nTotal Errors: " + totalErrors_InBlock.Sum() +
+                             "\nBacktrack Errors: " + backtrackErrors_InBlock.Sum() +
+                             "\n\nRewards: " + numRewardPulses_InBlock +
+                             "\nAverage Choice Duration: " +
+                             String.Format("{0:0.00}", choiceDurationsList_InBlock.Average()) +
+                             "\nAverage Maze Duration: " +
+                             String.Format("{0:0.00}", mazeDurationsList_InBlock.Average());
+        
+        if (blocksAdded > 1)
+            CurrentBlockString += "\n";
+
+        //Add CurrentBlockString if block wasn't aborted:
+        if (crtTL.AbortCode == 0)
+            BlockSummaryString.AppendLine(CurrentBlockString);
+
+
+        /*if (blocksAdded > 1) //If atleast 2 blocks to average, set Averages string and add to BlockSummaryString:
+        {
+            BlockAveragesString = "-------------------------------------------------" +
+                              "\n" +
+                              "\n<b>Block Averages (" + blocksAdded + " blocks):" + "</b>" +
+                              "\nAvg Total Errors: " + AvgTotalErrors.ToString("0.00") +
+                              "\nAvg Correct Touches: " + AvgCorrectTouches.ToString("0.00") +
+                              "\nAvg Rule-Abiding Errors: " + AvgRuleAbidingErrors.ToString("0.00") + "s" +
+                              "\nAvg Rule-Breaking Errors: " + AvgRuleBreakingErrors.ToString("0.00") +
+                              "\nAvg Preservative Errors: " + AvgPerseverativeErrors.ToString("0.00") +
+                              "\nAvg Backtrack Errors: " + AvgBacktrackErrors.ToString("0.00") + "s" +
+                              "\nAvg Retouch Correct: " + AvgRetouchCorrect.ToString("0.00") +
+                              "\nAvg Reward: " + AvgReward.ToString("0.00") +
+                              "\nAvg Maze Duration: " + AvgMazeDuration.ToString("0.00");;
+            
+            BlockSummaryString.AppendLine(BlockAveragesString);
+        }*/
+
+        //Add Previous blocks string:
+        if(PreviousBlocksString.Length > 0)
+        {
+            BlockSummaryString.AppendLine("\n" + PreviousBlocksString);
+        }
     }
     public void ClearStrings()
     {
@@ -111,12 +163,13 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
     {
         numRewardPulses_InBlock = 0;
         numAbortedTrials_InBlock = 0;
+        numSliderBarFull_InBlock = 0;
+        mazeDurationsList_InBlock.Clear();
+        choiceDurationsList_InBlock.Clear();
         crtTL.runningTrialPerformance.Clear();
-
     }
     private void SetSettings()
     {
-        Debug.Log("CHASE REACTION TASK NAME: "  + TaskName);
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             crtTL.ContextExternalFilePath =
                 (string)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
@@ -277,10 +330,45 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
     private void AssignBlockData()
     {
         BlockData.AddDatum("TotalErrors", () => $"[{string.Join(", ", totalErrors_InBlock)}]");
+        BlockData.AddDatum("BacktrackErrors", () => $"[{string.Join(", ", backtrackErrors_InBlock)}]");
         BlockData.AddDatum("NumRewardPulses", () => numRewardPulses_InBlock);
         BlockData.AddDatum("NumSliderBarFull", ()=>numSliderBarFull_InBlock);
         BlockData.AddDatum("NumAbortedTrials", ()=> numAbortedTrials_InBlock);
         BlockData.AddDatum("MazeDurations", () => string.Join(",",mazeDurationsList_InBlock));
         BlockData.AddDatum("ChoiceDurations", () => string.Join(",", choiceDurationsList_InBlock));
+    }
+    public override OrderedDictionary GetSummaryData()
+    {
+        OrderedDictionary data = new OrderedDictionary();
+
+        data["Num Reward Pulses"] = numRewardPulses_InTask;
+        data["Total Errors"] = totalErrors_InTask;
+        data["Backtrack Errors"] = backtrackErrors_InTask;
+        data["Num Aborted Trials"] = numAbortedTrials_InTask;
+        data["Num Slider Bar Full"] = numSliderBarFull_InTask;
+        data["Average Maze Durations"] = mazeDurationsList_InTask.Average();
+        data["Average Choice Duration"] = choiceDurationsList_InTask.Average();
+        return data;
+    }
+    public override void SetTaskSummaryString()
+    {
+        float percentAborted = 0;
+        if (mazeDurationsList_InTask.Count != 0)
+            AvgMazeDuration = (float)mazeDurationsList_InTask.Average();
+        else
+            AvgMazeDuration = 0;
+        if (crtTL.TrialCount_InTask != 0)
+            percentAborted = (float)(Math.Round(decimal.Divide(numAbortedTrials_InTask, (crtTL.TrialCount_InTask)), 2)) * 100;
+        else
+            percentAborted = 0;
+    
+        CurrentTaskSummaryString.Clear();
+        CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" +
+                                        $"\n<b># Trials:</b> {crtTL.TrialCount_InTask} ({percentAborted}% aborted)" +
+                                        $"\t<b># Blocks:</b> {BlockCount}" +
+                                        $"\t<b># Reward Pulses:</b> {numRewardPulses_InTask}" +
+                                        $"\nAvg Maze Duration: {AvgMazeDuration}" +
+                                        $"\n# Slider Bar Filled: {numSliderBarFull_InTask}");
+
     }
 }

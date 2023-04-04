@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 using ConfigDynamicUI;
 using HiddenMaze;
 using ChaseReactionTest_Namespace;
@@ -139,7 +140,6 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
         string[] stateNames =
             { "InitTrial", "TileFlash", "ChooseTile", "SelectionFeedback",  "ITI"};
 
-        SelectionHandler<ChaseReactionTest_StimDef> mouseHandler = new SelectionHandler<ChaseReactionTest_StimDef>();
         Add_ControlLevel_InitializationMethod(() =>
         {
             SliderFBController.InitializeSlider();
@@ -152,8 +152,10 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
             if (MazeBackground == null)
                 MazeBackground = CreateSquare("MazeBackground", mazeBgTex, new Vector3(0, 0, 0),
                     new Vector3(5, 5, 5));
-           
-            
+            currentMaze_InTrial = CurrentTaskLevel.currMaze;
+            // instantiate array
+            totalErrors_InTrial = new int[currentMaze_InTrial.mNumSquares];
+            backtrackErrors_InTrial = new int[currentMaze_InTrial.mNumSquares];
 
             //player view variables
             playerViewParent = GameObject.Find("MainCameraCopy");
@@ -169,26 +171,30 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
 
             if (!configVariablesLoaded)
                 LoadConfigVariables();
-            CurrentTaskLevel.LoadTextMaze();
-            currentMaze_InTrial = CurrentTaskLevel.currMaze;
-            // instantiate array
-            totalErrors_InTrial = new int[currentMaze_InTrial.mNumSquares];
-            backtrackErrors_InTrial = new int[currentMaze_InTrial.mNumSquares];
             
+
             pathProgressIndex = 0;
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
-        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null, 
-            ()=> MouseTracker.ButtonStatus[0] == 1, ()=> MouseTracker.ButtonStatus[0] == 0);
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), Delay, () =>
+        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ChooseTile);
+        
+        InitTrial.AddInitializationMethod(() =>
+        {
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
+        });
+        InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), Delay, () =>
         {
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
 
             StateAfterDelay = TileFlash;
             DelayDuration = mazeOnsetDelay.value;
+            
             SliderFBController.ConfigureSlider(new Vector3(0,180,0), sliderSize.value);
             SliderFBController.SliderGO.SetActive(true);
+            CurrentTaskLevel.SetTaskSummaryString();
+            CurrentTaskLevel.CalculateBlockSummaryString();
             SetTrialSummaryString();
             
             InstantiateCurrMaze();
@@ -202,37 +208,35 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
         {
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["FlashingTileFbOn"]);
             tile.NextCorrectFlashingFeedback();
-            Debug.Log("TILE BLINKING DURATION: " + tileBlinkingDuration.value);
-            Debug.Log("INITIALIZATION TIME: " + Time.unscaledTime);
         });
         TileFlash.AddTimer(()=>tileBlinkingDuration.value, ChooseTile, () =>
         {
-
-            Debug.Log("DONE FLASHING AT THE TRIAL LEVEL");
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["FlashingTileFbOff"]);
         });
         ChooseTile.AddInitializationMethod(() =>
         {
-            CurrentTaskLevel.SetTaskSummaryString();
             choiceDuration = 0;
+            Handler.HandlerActive = true;
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
         });
         ChooseTile.AddUpdateMethod(() =>
         {
             mazeDuration += Time.deltaTime;
             choiceDuration += Time.deltaTime;
-            if (InputBroker.GetMouseButtonDown(0))
-            {
-                Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(ray, out hit))
+            Debug.Log("SUCCESSFUL SELECTIONS SIZE: " + Handler.SuccessfulSelections.Count);
+
+            if (Handler.SuccessfulSelections.Count > 0)
+            { 
+                if (Handler.LastSuccessfulSelection.SelectedGameObject.GetComponent<Tile>() != null)
                 {
-                    if (hit.collider != null && hit.collider.gameObject?.GetComponent<Tile>() != null && (!tile.isFlashing||!tile.choiceFeedback))
-                    {
-                        choiceMade = true;
-                        choiceDurationsList.Add(choiceDuration);
-                        CurrentTaskLevel.choiceDurationsList_InBlock.Add(choiceDuration);
-                        selectedGO = hit.collider.gameObject;
-                    }
+                    Debug.Log("LAST SUCCESSFUL SELECTION: " + Handler.LastSuccessfulSelection.SelectedGameObject.name);
+
+                    choiceMade = true;
+                    choiceDurationsList.Add(choiceDuration);
+                    CurrentTaskLevel.choiceDurationsList_InBlock.Add(choiceDuration);
+                    selectedGO = Handler.LastSuccessfulSelection.SelectedGameObject;
+                    //Handler.HandlerActive = false;
                 }
             }
         });
@@ -250,6 +254,7 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
                 //if the tile that is selected is the end tile, stop the timer
                 mazeDuration = Time.time - mazeStartTime;
                 CurrentTaskLevel.mazeDurationsList_InBlock.Add(mazeDuration);
+                CurrentTaskLevel.mazeDurationsList_InTask.Add(mazeDuration);
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["MazeFinish"]);
             }
         });
@@ -287,7 +292,6 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
             }
                
             selectedGO = null; //Reset selectedGO before the next touch evaluation
-            
         });
         SelectionFeedback.AddUpdateMethod(() =>
         {
@@ -355,6 +359,14 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
+    }
+
+    protected override bool CheckBlockEnd()
+    {
+        TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
+        return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningTrialPerformance,
+            CurrentTrialDef.BlockEndThreshold, MinTrials,
+            CurrentTrialDef.MaxTrials);
     }
     public int ManageTileTouch(Tile tile)
     {
@@ -426,6 +438,7 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
         TrialSummaryString = "<b>Maze Name: </b>" + mazeDefName +
                              "\n" + 
                              "\nTotal Errors: " + totalErrors_InTrial.Sum() +
+                             "\nTotal Backtrack Errors: " + backtrackErrors_InTrial.Sum() +
                              "\nTrial Performance: " + trialPerformance + 
                              // "\nMaze Duration: " + mazeDuration +
                              "\n" +
@@ -504,14 +517,6 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
         pathProgressGO.Clear();
         consecutiveErrors = 0;
 
-        /*
-        if (playerViewParent?.transform.childCount > 0)
-        {
-            foreach (var txt in playerViewTextList)
-            {
-                txt.GetComponent<Text>().color = Color.red; //resets the color if we repeat the sequence in the block
-            }
-        }*/
     }
     private void DisableSceneElements()
     {

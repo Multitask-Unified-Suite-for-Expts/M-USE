@@ -223,8 +223,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
         ChooseStim.AddInitializationMethod(() =>
         {
-            if (GameObject.Find("MainCameraCopy").transform.childCount == 0)
-                CreateTextOnExperimenterDisplay();
+            CreateTextOnExperimenterDisplay();
 
             ChosenGO = null;
             ChosenStim = null;
@@ -365,6 +364,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenUpdate.AddDefaultTerminationMethod(() =>
         {
             HandleTokenUpdate();
+
+            DeactivatePlayerViewText();
 
             if (currentTrial.ShakeStim)
                 RemoveShakeStimScript(trialStims);

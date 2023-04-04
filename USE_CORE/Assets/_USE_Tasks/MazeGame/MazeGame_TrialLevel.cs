@@ -180,16 +180,16 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
-
-        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ChooseTile);
+        var SbHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InitTrial);
+        var ChooseTileHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", ChooseTile, ChooseTile);
 
         InitTrial.AddInitializationMethod(() =>
         {
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            if (SbHandler.AllSelections.Count > 0)
+                SbHandler.ClearSelections();
         });
 
-        InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), Delay, () =>
+        InitTrial.SpecifyTermination(() => SbHandler.SelectionMatches(StartButton), Delay, () =>
         {
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
 
@@ -208,33 +208,26 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             CreateTextOnExperimenterDisplay();
 
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOn"]);
-            
         });
 
         ChooseTile.AddInitializationMethod(() =>
         {
             choiceDuration = 0;
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            if (ChooseTileHandler.AllSelections.Count > 0)
+                ChooseTileHandler.ClearSelections();
         });
         ChooseTile.AddUpdateMethod(() =>
         {
-            if (tiles.IsActive)
-                mazeDuration += Time.deltaTime;
+            mazeDuration += Time.deltaTime;
             choiceDuration += Time.deltaTime;
-            if (InputBroker.GetMouseButtonDown(0))
-            {
-                Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(ray, out hit))
+            if (ChooseTileHandler.SuccessfulSelections.Count > 0)
+            { 
+                if (ChooseTileHandler.LastSuccessfulSelection.SelectedGameObject.GetComponent<Tile>() != null)
                 {
-                    if (hit.collider != null && hit.collider.gameObject?.GetComponent<Tile>() != null)
-                    {
-                        choiceMade = true;
-                        choiceDurationsList.Add(choiceDuration);
-                        CurrentTaskLevel.choiceDurationsList_InBlock.Add(choiceDuration);
-                        selectedGO = hit.collider.gameObject;
-                    }
+                    choiceMade = true;
+                    choiceDurationsList.Add(choiceDuration);
+                    CurrentTaskLevel.choiceDurationsList_InBlock.Add(choiceDuration);
+                    selectedGO = ChooseTileHandler.LastSuccessfulSelection.SelectedGameObject;
                 }
             }
         });

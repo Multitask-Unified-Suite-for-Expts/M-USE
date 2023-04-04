@@ -277,29 +277,34 @@ namespace USE_ExperimentTemplate_Trial
         {
             if (!Handler.LastSelection.WasSuccessful)
             {
-                if(!sb.IsGrating)
+                if (sb.IsGrating)
+                    return;
+                else
                 {
-                    AudioFBController.Play("Negative");
+                    if(Handler.LastSelection.ErrorType != null)
+                    {
+                        AudioFBController.Play("Negative");
 
-                    if (Handler.LastSelection.ErrorType == "DurationTooShort")
-                    {
-                        Debug.Log("TOO SHORT!");
-                        StartCoroutine(sb.GratedSbFlash(HeldTooShortTexture, 1f, false));
-                    }
-                    else if (Handler.LastSelection.ErrorType == "DurationTooLong")
-                    {
-                        Debug.Log("TOO LONG!");
-                        StartCoroutine(sb.GratedSbFlash(HeldTooLongTexture, 1f, false));
-                    }
-                    else if (Handler.LastSelection.ErrorType == "MovedTooFar")
-                    {
-                        Debug.Log("MOVED TOO FAR!");
-                        sb.GratedSbFlash(BackdropStripesTexture, 1f, true);
-                    }
-                    else
-                        Debug.Log("MUST HAVE BEEN AN ERROR FOR ANOTHER REASON...... | ErrorType: " + Handler.LastSelection.ErrorType);
+                        if (Handler.LastSelection.ErrorType == "DurationTooShort")
+                        {
+                            Debug.Log("TOO SHORT!");
+                            StartCoroutine(sb.GratedSbFlash(HeldTooShortTexture, 1f, false));
+                        }
+                        else if (Handler.LastSelection.ErrorType == "DurationTooLong")
+                        {
+                            Debug.Log("TOO LONG!");
+                            StartCoroutine(sb.GratedSbFlash(HeldTooLongTexture, 1f, false));
+                        }
+                        else if (Handler.LastSelection.ErrorType == "MovedTooFar")
+                        {
+                            Debug.Log("MOVED TOO FAR!");
+                            sb.GratedSbFlash(BackdropStripesTexture, 1f, true);
+                        }
+                        else
+                            Debug.Log("MUST HAVE BEEN AN ERROR FOR ANOTHER REASON......");
 
-                    Handler.ClearSelections();
+                        Handler.ClearSelections();
+                    }
                 }
             }
         }

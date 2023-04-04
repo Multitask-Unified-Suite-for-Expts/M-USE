@@ -15,21 +15,25 @@ namespace SelectionTracking
 
         public SelectionHandler SetupSelectionHandler(string handlerLevel, string handlerName, State setActiveOnInit = null, State setInactiveOnTerm = null)
         {
-            SelectionHandler newHandler = GetDefaultSelectionHandler(handlerName);
-            newHandler.HandlerName = handlerName;
-            newHandler.HandlerLevel = handlerLevel.ToLower();
-            newHandler.selectionTracker = this;
-            if (setActiveOnInit != null)
-                setActiveOnInit.StateInitializationFinished += newHandler.AddToActiveHandlers;
+            if (!HandlerLevelValid(handlerLevel))
+                return null;
+            else
+            {
+                SelectionHandler newHandler = GetDefaultSelectionHandler(handlerName);
+                newHandler.HandlerName = handlerName;
+                newHandler.HandlerLevel = handlerLevel.ToLower();
+                newHandler.selectionTracker = this;
+                if (setActiveOnInit != null)
+                    setActiveOnInit.StateInitializationFinished += newHandler.AddToActiveHandlers;
 
-            if (setInactiveOnTerm == null)
-                setInactiveOnTerm = setActiveOnInit;
+                if (setInactiveOnTerm == null)
+                    setInactiveOnTerm = setActiveOnInit;
 
-            if (setInactiveOnTerm != null)
-                setInactiveOnTerm.StateTerminationFinished += newHandler.RemoveFromActiveHandlers;
+                if (setInactiveOnTerm != null)
+                    setInactiveOnTerm.StateTerminationFinished += newHandler.RemoveFromActiveHandlers;
 
-            return newHandler;
-            
+                return newHandler;
+            }
         }
 
         public void UpdateActiveSelections()

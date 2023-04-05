@@ -234,10 +234,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 Handler.ClearSelections();
 
             Handler.MinDuration = minObjectTouchDuration.value;
-            Handler.MinDuration = .75f;
             Handler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), ChooseStimulusDelay, ()=>
+        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton), ChooseStimulusDelay, ()=>
         {
             CalculateSliderSteps();
             SliderFBController.ConfigureSlider(new Vector3(0,180,0), sliderSize.value, CurrentTrialDef.SliderInitial*(1f/sliderGainSteps));
@@ -270,6 +269,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             TouchDurationErrorFeedback(USE_FBSquare, true);
         });
+        //Handler.LastSelection.WasSuccessful
         ChooseStimulus.SpecifyTermination(()=> choiceMade, SelectionFeedback, ()=>
         {
             CurrentTaskLevel.SetBlockSummaryString();

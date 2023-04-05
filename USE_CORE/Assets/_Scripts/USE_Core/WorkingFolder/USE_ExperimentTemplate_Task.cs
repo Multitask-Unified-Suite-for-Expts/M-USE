@@ -331,14 +331,16 @@ namespace USE_ExperimentTemplate_Task
             fbControllers.GetComponent<HaloFBController>().SessionEventCodes = SessionEventCodes;
             fbControllers.GetComponent<TokenFBController>().SessionEventCodes = SessionEventCodes;
             fbControllers.GetComponent<SliderFBController>().SessionEventCodes = SessionEventCodes;
-
+            fbControllers.GetComponent<TouchFBController>().SessionEventCodes = SessionEventCodes;
 
             TrialLevel.SelectionTracker = SelectionTracker;
+
             TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
             TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
             TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
             TrialLevel.SliderFBController = fbControllers.GetComponent<SliderFBController>();
-
+            TrialLevel.TouchFBController = fbControllers.GetComponent<TouchFBController>();
+            TrialLevel.TouchFBController.audioFBController = TrialLevel.AudioFBController;
 
             TrialLevel.SerialPortController = SerialPortController;
             TrialLevel.SerialPortActive = SerialPortActive;
@@ -355,6 +357,12 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.TaskEventCodes = CustomTaskEventCodes;
             if (SessionEventCodes != null)
                 TrialLevel.SessionEventCodes = SessionEventCodes;
+
+
+            TrialLevel.LoadTextures(ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 
+
+            //Automatically giving TouchFbController;
+            TrialLevel.TouchFBController.Init(FrameData);
 
             bool audioInited = false;
             foreach (string fbController in fbControllersList)
@@ -442,7 +450,6 @@ namespace USE_ExperimentTemplate_Task
                     SelectionTracker.TaskHandlerNames.Remove(handlerName);
             }
         }
-
 
         private void ReadSettingsFiles(bool verifyOnly)
         {

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2603858045197797024}
   - component: {fileID: 3953842124438570051}
   - component: {fileID: 6580703731986309559}
+  - component: {fileID: -7043470597752192310}
   m_Layer: 0
   m_Name: FeedbackControllers
   m_TagString: Untagged
@@ -70,6 +71,7 @@ MonoBehaviour:
   - name: TripleCollected
     clip: {fileID: 8300000, guid: ada645a54a12a48069725923f52635df, type: 3}
   audioSource: {fileID: 0}
+  EventCodeManager: {fileID: 0}
 --- !u!114 &2603858045197797024
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -86,6 +88,7 @@ MonoBehaviour:
     type: 3}
   NegativeHaloPrefab: {fileID: 5037791256376228876, guid: 16e45646239064935a4dd461a06a784b,
     type: 3}
+  EventCodeManager: {fileID: 0}
 --- !u!114 &3953842124438570051
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -103,6 +106,7 @@ MonoBehaviour:
   tokenBoxPadding: 0
   tokenBoxYOffset: 10
   tokenTexture: {fileID: 2800000, guid: 5ab9409b99a52f740a325a411069f4fa, type: 3}
+  EventCodeManager: {fileID: 0}
 --- !u!114 &6580703731986309559
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -124,3 +128,19 @@ MonoBehaviour:
   SliderHaloGO: {fileID: 4317252536729789219, guid: f372d073062e1954ba552b4c8bbb2d93,
     type: 3}
   Slider: {fileID: 0}
+  EventCodeManager: {fileID: 0}
+--- !u!114 &-7043470597752192310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3175057839943392719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe7709cf71b9445818636e659c598f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  EventCodeManager: {fileID: 0}
+  CurrentTaskCanvas: {fileID: 0}
+  FeedbackOn: 0

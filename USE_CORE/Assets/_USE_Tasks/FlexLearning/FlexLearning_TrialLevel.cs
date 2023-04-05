@@ -176,7 +176,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton),
+        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton),
             SearchDisplayDelay, () =>
             {
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);

@@ -233,7 +233,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            if (Handler.LastSelection.SelectedGameObject.GetComponent<StimDefPointer>()?.GetStimDef<VisualSearch_StimDef>() == null)   //means the player got timed out and didn't click on anything
+            if (Handler.LastSelection.SelectedStimDefPointer?.GetStimDef<VisualSearch_StimDef>() == null)   //means the player got timed out and didn't click on anything
             {
                 AbortedTrials_InBlock++;
                 CurrentTaskLevel.AbortedTrials_InTask++;

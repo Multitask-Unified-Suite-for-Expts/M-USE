@@ -4,11 +4,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using USE_States;
 using USE_UI;
-
+using USE_StimulusManagement;
+using WhatWhenWhere_Namespace;
 
 namespace SelectionTracking
 {
-    public class SelectionTracker
+    public class SelectionTracker //Available at Trial/Task/Session Level
     {
         public Dictionary<string, SelectionHandler> ActiveSelectionHandlers = new Dictionary<string, SelectionHandler>();
         public List<string> SessionHandlerNames = new List<string>();
@@ -104,13 +105,17 @@ namespace SelectionTracking
             public float? Duration, StartTime, EndTime;
             public int StartFrame, EndFrame;
             public GameObject SelectedGameObject;
+            public StimDefPointer SelectedStimDefPointer;
             public bool WasSuccessful;
             public List<Vector3> InputLocations;
             public string ErrorType;
 
+
             public USE_Selection(GameObject go)
             {
                 SelectedGameObject = go;
+                SelectedStimDefPointer = SelectedGameObject?.GetComponent<StimDefPointer>();
+
                 Duration = 0;
                 StartFrame = Time.frameCount;
                 StartTime = Time.time;
@@ -137,8 +142,9 @@ namespace SelectionTracking
             public USE_Selection LastSelection;
             public USE_Selection LastSuccessfulSelection;
             public USE_Selection LastUnsuccessfulSelection;
-            public List<USE_Selection> AllSelections, SuccessfulSelections, UnsuccessfulSelections;
             public USE_Selection OngoingSelection;
+            public List<USE_Selection> AllSelections, SuccessfulSelections, UnsuccessfulSelections;
+
             private GameObject currentTarget;
             public float? MinDuration, MaxDuration;
             public int? MaxPixelDisplacement;
@@ -150,6 +156,11 @@ namespace SelectionTracking
             public string HandlerLevel;
             public bool HandlerActive;
 
+            public int Num_HeldTooLong;
+            public int Num_HeldTooShort;
+            public int Num_MovedTooFar;
+
+            public event EventHandler<TouchFBController.TouchFeedbackArgs> TouchErrorFeedback;
 
             public SelectionHandler()
             {
@@ -209,7 +220,6 @@ namespace SelectionTracking
                     selectionTracker.TrialHandlerNames.Remove(HandlerName);
             }
 
-
             public void ClearSelections()
             {
                 if (SuccessfulSelections.Count > 0)
@@ -226,30 +236,47 @@ namespace SelectionTracking
                 LastUnsuccessfulSelection = new USE_Selection(null);
             }
 
-            public bool SelectionMatches(GameObject go)
+            public void ClearCounts()
+            {
+                Num_HeldTooLong = 0;
+                Num_HeldTooShort = 0;
+                Num_MovedTooFar = 0;
+            }
+
+            public bool LastSuccessfulSelectionMatches(GameObject go)
             {
                 return ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go);
             }
 
-            private void SelectionErrorHandling(string initError)
+            public void IncrementErrorCount(string error)
+            {
+                switch(error)
+                {
+                    case "DurationTooLong":
+                        Num_HeldTooLong++;
+                        break;
+                    case "DurationTooShort":
+                        Num_HeldTooShort++;
+                        break;
+                    case "MovedTooFar":
+                        Num_MovedTooFar++;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            private void SelectionErrorHandling(string error)
             {
                 if (OngoingSelection != null)
-                    OngoingSelection.ErrorType = initError;
+                {
+                    //Debug.Log("Selection Error Type: " + error);
+                    OngoingSelection.ErrorType = error;
+                    IncrementErrorCount(error);
+                    TouchErrorFeedback?.Invoke(this, new TouchFBController.TouchFeedbackArgs(OngoingSelection.SelectedGameObject, OngoingSelection.ErrorType));
+                }
                 else
-                    Debug.LogError("Trying to set the ErrorType of OngoingSelection, but it's null!");
-
-                //switch (initError)
-                //{
-                //    case "DurationTooShort":
-                //        Debug.Log("HELD TOO SHORT! LOGIC WOULD GO HERE!");
-                //        break;
-                //    case "DurationTooLong":
-                //        Debug.Log("HELD TOO LONG! LOGIC WOULD GO HERE!!");
-                //        break;
-                //    case "MovedTooFar":
-                //        Debug.Log("MOVED TOO FAR! LOGIC WOULD GO HERE!");
-                //        break;
-                //}
+                    Debug.Log("Trying to set the ErrorType of OngoingSelection, but OngoingSelection is null!");
             }
 
             public void UpdateSelections()

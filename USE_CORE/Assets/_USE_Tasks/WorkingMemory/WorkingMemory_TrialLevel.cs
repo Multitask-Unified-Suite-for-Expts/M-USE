@@ -158,7 +158,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             Handler.MaxDuration = maxObjectTouchDuration.value;
         });
 
-        InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), DisplaySample, () =>
+        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton), DisplaySample, () =>
         {
             //Set the token bar settings
             TokenFBController.enabled = true;

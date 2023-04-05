@@ -184,7 +184,7 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
         });
-        InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), Delay, () =>
+        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton), Delay, () =>
         {
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
 

@@ -6,8 +6,10 @@ using ConfigDynamicUI;
 using HiddenMaze;
 using ChaseReactionTest_Namespace;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
+using UnityEngine.XR;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using USE_States;
@@ -181,6 +183,11 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
+            foreach (KeyValuePair<string, SelectionTracking.SelectionTracker.SelectionHandler> pair in SelectionTracker.ActiveSelectionHandlers)
+            {
+                Debug.Log(pair.Key);
+            }
+
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
         });
@@ -216,6 +223,7 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
         ChooseTile.AddInitializationMethod(() =>
         {
             choiceDuration = 0;
+            Handler.HandlerActive = true;
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
         });
@@ -232,6 +240,7 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
                     choiceDurationsList.Add(choiceDuration);
                     CurrentTaskLevel.choiceDurationsList_InBlock.Add(choiceDuration);
                     selectedGO = Handler.LastSuccessfulSelection.SelectedGameObject;
+                    Handler.HandlerActive = false;
                 }
             }
         });
@@ -408,7 +417,10 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
                 tile.originalTileColor = tile.CORRECT_COLOR;*/
             tileFbDuration = tile.INCORRECT_RULEBREAKING_SECONDS;
         }
-
+        
+        totalErrors_InTrial[pathProgressIndex] += 1;
+        CurrentTaskLevel.totalErrors_InBlock[pathProgressIndex] += 1;
+        CurrentTaskLevel.totalErrors_InTask++;
         return 20;
     }
 
@@ -510,6 +522,7 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
         }
         pathProgress.Clear();
         pathProgressGO.Clear();
+        pathProgressIndex = 0;
         consecutiveErrors = 0;
 
     }

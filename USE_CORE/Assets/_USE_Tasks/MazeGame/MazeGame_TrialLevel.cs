@@ -654,6 +654,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             tileFbDuration = tile.INCORRECT_RULEBREAKING_SECONDS;
         }
+        totalErrors_InTrial[pathProgressIndex] += 1;
+        CurrentTaskLevel.totalErrors_InBlock[pathProgressIndex] += 1;
+        CurrentTaskLevel.totalErrors_InTask++;
         return 20;
     }
     
@@ -837,6 +840,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         }
         pathProgress.Clear();
         pathProgressGO.Clear();
+        pathProgressIndex = 0;
         consecutiveErrors = 0;
     }
     void SetTrialSummaryString()

@@ -34,8 +34,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     public int[] backtrackErrors_InBlock;
     public int[] ruleAbidingErrors_InBlock;
     public int[] ruleBreakingErrors_InBlock;
-    public int retouchCorrect_InBlock;
-    public int retouchErroneous_InBlock;
+    public int[] retouchCorrect_InBlock;
+    public int[] retouchErroneous_InBlock;
     public int correctTouches_InBlock; 
     public int numRewardPulses_InBlock;
     public int numAbortedTrials_InBlock;
@@ -109,8 +109,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             FindMaze();
-            LoadTextMaze();
-                
+            LoadTextMaze(); // need currMaze here to set all the arrays
+            
             RenderSettings.skybox = CreateSkybox(mgTL.GetContextNestedFilePath(ContextExternalFilePath, mgBD.ContextName, "LinearDark"));
             mgTL.contextName = mgBD.ContextName;
             mgTL.MinTrials = mgBD.MinMaxTrials[0];
@@ -121,6 +121,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             ruleBreakingErrors_InBlock = new int[currMaze.mNumSquares];
             backtrackErrors_InBlock = new int[currMaze.mNumSquares];
             perseverativeErrors_InBlock = new int[currMaze.mNumSquares];
+            retouchCorrect_InBlock = new int[currMaze.mNumSquares];
+            retouchErroneous_InBlock = new int[currMaze.mNumSquares];
             totalErrors_InBlock = new int[currMaze.mNumSquares];
             
             ResetBlockVariables();
@@ -142,8 +144,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     {
         BlockData.AddDatum("TotalErrors", () => $"[{string.Join(", ", totalErrors_InBlock)}]");
         BlockData.AddDatum("CorrectTouches", () => correctTouches_InBlock);
-        BlockData.AddDatum("RetouchCorrect", () => retouchCorrect_InBlock);
-        BlockData.AddDatum("RetouchErroneous", () => retouchErroneous_InBlock);
+        BlockData.AddDatum("RetouchCorrect",() => $"[{string.Join(", ", retouchCorrect_InBlock)}]");
+        BlockData.AddDatum("RetouchErroneous",() => $"[{string.Join(", ", retouchErroneous_InBlock)}]");
         BlockData.AddDatum("PerseverativeErrors",() => $"[{string.Join(", ", perseverativeErrors_InBlock)}]");
         BlockData.AddDatum("BacktrackErrors", () => $"[{string.Join(", ", backtrackErrors_InBlock)}]");
         BlockData.AddDatum("RuleAbidingErrors", () => $"[{string.Join(", ", ruleAbidingErrors_InBlock)}]");
@@ -196,13 +198,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     private void ResetBlockVariables()
     {
         correctTouches_InBlock = 0;
-        retouchCorrect_InBlock = 0;
-        retouchErroneous_InBlock = 0;
         Array.Clear(perseverativeErrors_InBlock, 0, perseverativeErrors_InBlock.Length);
         Array.Clear(backtrackErrors_InBlock, 0, backtrackErrors_InBlock.Length);
         Array.Clear(ruleAbidingErrors_InBlock, 0, ruleAbidingErrors_InBlock.Length);
         Array.Clear(ruleBreakingErrors_InBlock, 0, ruleBreakingErrors_InBlock.Length);
         Array.Clear(totalErrors_InBlock, 0, totalErrors_InBlock.Length);
+        Array.Clear(retouchCorrect_InBlock, 0, retouchCorrect_InBlock.Length);
+        Array.Clear(retouchErroneous_InBlock, 0, retouchErroneous_InBlock.Length);
         numRewardPulses_InBlock = 0;
         nonStimTouches_InBlock = 0;
         numAbortedTrials_InBlock = 0;
@@ -222,8 +224,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                              "\nRule-Breaking Errors: " + ruleBreakingErrors_InBlock.Sum() +
                              "\nPerseverative Errors: " + perseverativeErrors_InBlock.Sum() +
                              "\nBacktrack Errors: " + backtrackErrors_InBlock.Sum() +
-                             "\nRetouch Correct: " + retouchCorrect_InBlock +
-                             "\nRetouch Erroneous: " + retouchCorrect_InBlock +
+                             "\nRetouch Correct: " + retouchCorrect_InBlock.Sum() +
+                             "\nRetouch Erroneous: " + retouchErroneous_InBlock.Sum() +
                              "\n\nRewards: " + numRewardPulses_InBlock +
                              "\nAverage Choice Duration: " +
                              String.Format("{0:0.00}", choiceDurationsList_InBlock.Average()) +

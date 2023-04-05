@@ -60,8 +60,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private int[] totalErrors_InTrial;
     private int[] ruleAbidingErrors_InTrial;
     private int[] ruleBreakingErrors_InTrial;
-    private int retouchCorrect_InTrial;
-    private int retouchErroneous_InTrial;
+    private int[] retouchCorrect_InTrial;
+    private int[] retouchErroneous_InTrial;
     private int correctTouches_InTrial;
     private int[] backtrackErrors_InTrial;
     private int[] perseverativeErrors_InTrial;
@@ -154,14 +154,15 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 MazeBackground = CreateSquare("MazeBackground", mazeBgTex, new Vector3(0, 0, 0),
                     new Vector3(5, 5, 5));
          
-            //CurrentTaskLevel.LoadTextMaze();
-
             //intantiate array
             ruleAbidingErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
             ruleBreakingErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
             backtrackErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
             perseverativeErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
             totalErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
+            retouchErroneous_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
+            retouchCorrect_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
+            
             
             //player view variables
             playerViewParent = GameObject.Find("MainCameraCopy");
@@ -177,6 +178,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             if (!configVariablesLoaded)
                 LoadConfigVariables();
+            
+            // Load Maze at the start of every trial to keep the mNextStep consistent
+            CurrentTaskLevel.LoadTextMaze();
+
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -514,8 +519,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
                 ReturnToLast = true;
             
-                retouchCorrect_InTrial++;
-                CurrentTaskLevel.retouchCorrect_InBlock++;
+                retouchCorrect_InTrial[pathProgressIndex] += 1;
+                CurrentTaskLevel.retouchCorrect_InBlock[pathProgressIndex] += 1;
                 CurrentTaskLevel.retouchCorrect_InTask++;
            
                 consecutiveErrors = 0;
@@ -598,8 +603,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
                 ErroneousReturnToLast = true;
 
-                retouchErroneous_InTrial++;
-                CurrentTaskLevel.retouchErroneous_InBlock++;
+                retouchErroneous_InTrial[pathProgressIndex] += 1;
+                CurrentTaskLevel.retouchErroneous_InBlock[pathProgressIndex] += 1;
                 CurrentTaskLevel.retouchErroneous_InTask++;
 
                 consecutiveErrors = 0;
@@ -828,8 +833,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         MouseTracker.ResetClicks();
         
         correctTouches_InTrial = 0;
-        retouchCorrect_InTrial = 0;
-        retouchErroneous_InTrial = 0;
         if (TrialCount_InBlock != 0)
         {
             Array.Clear(perseverativeErrors_InTrial, 0, perseverativeErrors_InTrial.Length);
@@ -837,6 +840,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Array.Clear(ruleAbidingErrors_InTrial, 0, ruleAbidingErrors_InTrial.Length);
             Array.Clear(ruleBreakingErrors_InTrial, 0, ruleBreakingErrors_InTrial.Length);
             Array.Clear(totalErrors_InTrial, 0, totalErrors_InTrial.Length);
+            Array.Clear(retouchCorrect_InTrial, 0, retouchCorrect_InTrial.Length);
+            Array.Clear(retouchErroneous_InTrial, 0, retouchErroneous_InTrial.Length);
         }
         pathProgress.Clear();
         pathProgressGO.Clear();
@@ -853,8 +858,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                              "\nRule-Breaking Errors: " + ruleBreakingErrors_InTrial.Sum() + 
                              "\nPerseverative Errors: " + perseverativeErrors_InTrial.Sum() +
                              "\nBacktrack Errors: " + backtrackErrors_InTrial.Sum() +
-                             "\nRetouch Correct: " + retouchCorrect_InTrial+ 
-                             "\nRetouch Erroneous: " + retouchErroneous_InTrial+ 
+                             "\nRetouch Correct: " + retouchCorrect_InTrial.Sum()+ 
+                             "\nRetouch Erroneous: " + retouchErroneous_InTrial.Sum()+ 
                              "\nMaze Duration: " + mazeDuration +
                              "\n" +
                              "\nSlider Value: " + SliderFBController.Slider.value;

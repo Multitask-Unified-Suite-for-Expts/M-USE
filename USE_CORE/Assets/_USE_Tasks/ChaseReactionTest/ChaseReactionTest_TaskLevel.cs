@@ -76,7 +76,7 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             FindMaze();
-            LoadTextMaze();
+            LoadTextMaze(); // need currMaze here to set all the arrays
                 
             RenderSettings.skybox = CreateSkybox(crtTL.GetContextNestedFilePath(ContextExternalFilePath, crtBD.ContextName, "LinearDark"));
             crtTL.contextName = crtBD.ContextName;

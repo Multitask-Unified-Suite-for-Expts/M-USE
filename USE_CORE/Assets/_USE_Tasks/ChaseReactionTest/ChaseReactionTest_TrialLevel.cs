@@ -176,6 +176,8 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
             
             // Load Maze at the start of every trial to keep the mNextStep consistent
             CurrentTaskLevel.LoadTextMaze();
+            CurrentTaskLevel.SetTaskSummaryString();
+            CurrentTaskLevel.CalculateBlockSummaryString();
 
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
@@ -198,10 +200,8 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
             
             SliderFBController.ConfigureSlider(new Vector3(0,180,0), sliderSize.value);
             SliderFBController.SliderGO.SetActive(true);
-            CurrentTaskLevel.SetTaskSummaryString();
-            CurrentTaskLevel.CalculateBlockSummaryString();
             SetTrialSummaryString();
-            
+
             InstantiateCurrMaze();
             tiles.ToggleVisibility(true);
             mazeStartTime = Time.time;
@@ -263,12 +263,14 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
         ChooseTile.SpecifyTermination(()=> mazeDuration > maxMazeDuration.value, ()=> FinishTrial, () =>
         {
             aborted = true;
+            
             EventCodeManager.SendCodeImmediate(SessionEventCodes["NoChoice"]);
             CurrentTaskLevel.numAbortedTrials_InBlock++;
             CurrentTaskLevel.numAbortedTrials_InTask++;
         }); // Timeout Termination
         SelectionFeedback.AddInitializationMethod(() =>
         {
+            choiceMade = false;
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TileFbOn"]);
 
             // This is what actually determines the result of the tile choice
@@ -278,19 +280,16 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
             finishedFbDuration = (tileFbDuration + flashingFbDuration.value);
             SliderFBController.SetUpdateDuration(tileFbDuration);
             SliderFBController.SetFlashingDuration(finishedFbDuration);
-                
-                
+
             if (CorrectSelection)
             {
                 SliderFBController.UpdateSliderValue(selectedGO.GetComponent<Tile>().sliderValueChange);
                 playerViewParent.transform.Find((pathProgressIndex + 1).ToString()).GetComponent<Text>().color =
                     new Color(0, 0.392f, 0);
-                // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]);
             }
             else if (selectedGO != null)
             {
                 AudioFBController.Play("Negative");
-                // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
             }
                
             selectedGO = null; //Reset selectedGO before the next touch evaluation
@@ -304,7 +303,6 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
         {
             SetTrialSummaryString(); //Set the Trial Summary String to reflect the results of choice
             CurrentTaskLevel.CalculateBlockSummaryString();
-            choiceMade = false;
             if (UsingFixedRatioReward)
             {
                 if (CorrectSelection && correctTouches_InTrial % CurrentTrialDef.RewardRatio == 0 )
@@ -322,7 +320,8 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
             {
                 StateAfterDelay = ITI;
                 DelayDuration = 0;
-                
+                SliderFBController.Slider.value = 1;
+
                 trialPerformance = (float)decimal.Divide(totalErrors_InTrial.Sum(),CurrentTaskLevel.currMaze.mNumSquares);
                 runningTrialPerformance.Add(trialPerformance);
                 CurrentTaskLevel.numSliderBarFull_InBlock++;
@@ -361,6 +360,8 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
+        DefineTrialData();
+        DefineFrameData();
     }
 
     protected override bool CheckBlockEnd()
@@ -402,7 +403,6 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
         {
             Debug.Log("*Rule-Breaking Backtrack Error*");
             EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
-            Debug.Log("SIZE OF BACKTRACK ARRAY: " + backtrackErrors_InTrial.Length + "PATH PROGRESS INDEX" + pathProgressIndex);
             backtrackErrors_InTrial[pathProgressIndex] += 1;
             CurrentTaskLevel.backtrackErrors_InBlock[pathProgressIndex] += 1;
             CurrentTaskLevel.backtrackErrors_InTask++;
@@ -414,6 +414,7 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
             /*if (viewPath)
                 tile.originalTileColor = tile.CORRECT_COLOR;*/
             tileFbDuration = tile.INCORRECT_RULEBREAKING_SECONDS;
+            return 20;
         }
         
         totalErrors_InTrial[pathProgressIndex] += 1;
@@ -421,7 +422,19 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.totalErrors_InTask++;
         return 20;
     }
-
+    private void DefineTrialData()
+    {
+        TrialData.AddDatum("MazeDefName", ()=> mazeDefName);
+        TrialData.AddDatum("TotalErrors", () => $"[{string.Join(", ", totalErrors_InTrial)}]");
+        TrialData.AddDatum("BacktrackingErrors", () => $"[{string.Join(", ", backtrackErrors_InTrial)}]");
+        TrialData.AddDatum("MazeDuration", ()=> mazeDuration);
+        TrialData.AddDatum("TotalClicks", ()=>MouseTracker.GetClickCount().Length);
+    }
+    private void DefineFrameData()
+    {
+        FrameData.AddDatum("Context", ()=> contextName);
+        FrameData.AddDatum("ChoiceMade", ()=> choiceMade);
+    }
     private void LoadConfigVariables()
     {
         //config UI variables
@@ -445,9 +458,9 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
                              "\nTotal Errors: " + totalErrors_InTrial.Sum() +
                              "\nTotal Backtrack Errors: " + backtrackErrors_InTrial.Sum() +
                              "\nTrial Performance: " + trialPerformance + 
-                             // "\nMaze Duration: " + mazeDuration +
+                              "\nMaze Duration: " + mazeDuration +
                              "\n" +
-                             "\nSlider Value: " + SliderFBController.Slider.value;
+                             "\nSlider Value: " + String.Format("{0:0.00}", SliderFBController.Slider.value);
 
     }
     private void CreateTextOnExperimenterDisplay()

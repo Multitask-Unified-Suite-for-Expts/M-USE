@@ -181,20 +181,22 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             
             // Load Maze at the start of every trial to keep the mNextStep consistent
             CurrentTaskLevel.LoadTextMaze();
-
+            CurrentTaskLevel.SetTaskSummaryString();
+            CurrentTaskLevel.CalculateBlockSummaryString();
+            
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
-        var SbHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InitTrial);
-        var ChooseTileHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", ChooseTile, ChooseTile);
+        var SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InitTrial);
 
         InitTrial.AddInitializationMethod(() =>
         {
-            if (SbHandler.AllSelections.Count > 0)
-                SbHandler.ClearSelections();
+            SelectionHandler.HandlerActive = true;
+            if (SelectionHandler.AllSelections.Count > 0)
+                SelectionHandler.ClearSelections();
         });
 
-        InitTrial.SpecifyTermination(() => SbHandler.SelectionMatches(StartButton), Delay, () =>
+        InitTrial.SpecifyTermination(() => SelectionHandler.SelectionMatches(StartButton), Delay, () =>
         {
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
 
@@ -203,10 +205,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             
             SliderFBController.ConfigureSlider(new Vector3(0,180,0), sliderSize.value);
             SliderFBController.SliderGO.SetActive(true);
-            CurrentTaskLevel.SetTaskSummaryString();
-            CurrentTaskLevel.CalculateBlockSummaryString();
             SetTrialSummaryString();
-            
+
             InstantiateCurrMaze();
             mazeStartTime = Time.time;
             tiles.ToggleVisibility(true);
@@ -218,21 +218,23 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         ChooseTile.AddInitializationMethod(() =>
         {
             choiceDuration = 0;
-            if (ChooseTileHandler.AllSelections.Count > 0)
-                ChooseTileHandler.ClearSelections();
+            SelectionHandler.HandlerActive = true;
+            if (SelectionHandler.AllSelections.Count > 0)
+                SelectionHandler.ClearSelections();
         });
         ChooseTile.AddUpdateMethod(() =>
         {
             mazeDuration += Time.deltaTime;
             choiceDuration += Time.deltaTime;
-            if (ChooseTileHandler.SuccessfulSelections.Count > 0)
+            if (SelectionHandler.SuccessfulSelections.Count > 0)
             { 
-                if (ChooseTileHandler.LastSuccessfulSelection.SelectedGameObject.GetComponent<Tile>() != null)
+                if (SelectionHandler.LastSuccessfulSelection.SelectedGameObject.GetComponent<Tile>() != null)
                 {
                     choiceMade = true;
                     choiceDurationsList.Add(choiceDuration);
                     CurrentTaskLevel.choiceDurationsList_InBlock.Add(choiceDuration);
-                    selectedGO = ChooseTileHandler.LastSuccessfulSelection.SelectedGameObject;
+                    selectedGO = SelectionHandler.LastSuccessfulSelection.SelectedGameObject;
+                    SelectionHandler.HandlerActive = false;
                 }
             }
         });
@@ -265,7 +267,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         SelectionFeedback.AddInitializationMethod(() =>
         {
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TileFbOn"]);
-
+            choiceMade = false;
             // This is what actually determines the result of the tile choice
             selectedGO.GetComponent<Tile>().SelectionFeedback();
             trialPerformance = (float)decimal.Divide(totalErrors_InTrial.Sum(),CurrentTaskLevel.currMaze.mNumSquares);
@@ -273,8 +275,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             finishedFbDuration = (tileFbDuration + flashingFbDuration.value);
             SliderFBController.SetUpdateDuration(tileFbDuration);
             SliderFBController.SetFlashingDuration(finishedFbDuration);
-                
-                
+            
             if (ReturnToLast)
             {
                 AudioFBController.Play("Positive");
@@ -314,7 +315,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             SetTrialSummaryString(); //Set the Trial Summary String to reflect the results of choice
             CurrentTaskLevel.CalculateBlockSummaryString();
-            choiceMade = false;
             if (UsingFixedRatioReward)
             {
                 if (CorrectSelection && correctTouches_InTrial % CurrentTrialDef.RewardRatio == 0 )
@@ -332,7 +332,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             {
                 StateAfterDelay = ITI;
                 DelayDuration = 0;
-                
+                SliderFBController.Slider.value = 1;
+
                 trialPerformance = (float)decimal.Divide(totalErrors_InTrial.Sum(),CurrentTaskLevel.currMaze.mNumSquares);
                 runningTrialPerformance.Add(trialPerformance);
                 CurrentTaskLevel.numSliderBarFull_InBlock++;
@@ -760,6 +761,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private void DefineFrameData()
     {
         FrameData.AddDatum("Context", ()=> contextName);
+        FrameData.AddDatum("ChoiceMade", ()=> choiceMade);
     }
     private void DisableSceneElements()
     {
@@ -860,9 +862,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                              "\nBacktrack Errors: " + backtrackErrors_InTrial.Sum() +
                              "\nRetouch Correct: " + retouchCorrect_InTrial.Sum()+ 
                              "\nRetouch Erroneous: " + retouchErroneous_InTrial.Sum()+ 
-                             "\nMaze Duration: " + mazeDuration +
+                             "\nMaze Duration: " + String.Format("{0:0.000}", mazeDuration) +
                              "\n" +
-                             "\nSlider Value: " + SliderFBController.Slider.value;
+                             "\nSlider Value: " + String.Format("{0:0.00}", SliderFBController.Slider.value);
 
     }
 }

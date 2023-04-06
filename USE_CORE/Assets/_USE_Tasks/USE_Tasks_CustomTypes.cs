@@ -11,6 +11,7 @@ using FlexLearning_Namespace;
 using THR_Namespace;
 //using FinderGame_Namespace;
 //using Kia_Task_Namespace;
+using FeatureUncertaintyWM_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -117,6 +118,17 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(THR_BlockDef),
                 TrialDefType = typeof(THR_TrialDef),
                 StimDefType = typeof(THR_StimDef)
+            }
+        }
+        ,{
+            "FeatureUncertaintyWM", new TaskTypes
+            {
+                TaskLevelType = typeof(FeatureUncertaintyWM_TaskLevel),
+                TrialLevelType = typeof(FeatureUncertaintyWM_TrialLevel),
+                TaskDefType = typeof(FeatureUncertaintyWM_TaskDef),
+                BlockDefType = typeof(FeatureUncertaintyWM_BlockDef),
+                TrialDefType = typeof(FeatureUncertaintyWM_TrialDef),
+                StimDefType = typeof(FeatureUncertaintyWM_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

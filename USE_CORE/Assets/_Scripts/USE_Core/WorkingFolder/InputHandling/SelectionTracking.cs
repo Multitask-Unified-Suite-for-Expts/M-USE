@@ -233,8 +233,6 @@ namespace SelectionTracking
 
             private void SelectionErrorHandling(string initError)
             {
-                Debug.Log("INIT ERROR: " + initError);
-
                 if (OngoingSelection != null)
                     OngoingSelection.ErrorType = initError;
                 else

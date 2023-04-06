@@ -16,7 +16,6 @@ public class TouchFBController : MonoBehaviour
     //public GameObject TouchFeedback_CanvasGO;
     //public Canvas TouchFeedback_Canvas;
     public AudioFBController audioFBController;
-    //List<TouchFeedback> TouchFeedback_List;
     public GameObject HeldTooLong_Prefab;
     public GameObject HeldTooShort_Prefab;
     public GameObject MovedTooFar_Prefab;
@@ -131,7 +130,7 @@ public class TouchFBController : MonoBehaviour
     //    TouchFeedback_Canvas.renderMode = RenderMode.ScreenSpaceOverlay;
     //    TouchFeedback_CanvasGO.AddComponent<CanvasScaler>();
     //    TouchFeedback_CanvasGO.AddComponent<GraphicRaycaster>();
-    //    TouchFeedback_Canvas.sortingOrder = 32767;
+    //    TouchFeedback_Canvas.sortingOrder = 3000;
     //}
 
 
@@ -161,7 +160,6 @@ public class TouchFBController : MonoBehaviour
             return localPoint;
         }
     }
-
 
 
     public class TouchFeedbackArgs : EventArgs

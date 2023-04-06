@@ -155,7 +155,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         SelectionTracker.SelectionHandler MouseClickHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InflateBalloon);
-        
+        TouchFBController.EnableTouchFeedback(MouseClickHandler, .3f, 150, EC_CanvasGO);
+
         InitTrial.AddInitializationMethod(() =>
         {
             if (!Borders.activeInHierarchy)
@@ -187,7 +188,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
             StartButton.SetActive(false);
-
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
         });
 

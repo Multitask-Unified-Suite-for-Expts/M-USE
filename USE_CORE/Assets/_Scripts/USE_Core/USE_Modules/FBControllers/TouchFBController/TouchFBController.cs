@@ -12,6 +12,7 @@ public class TouchFBController : MonoBehaviour
     SelectionTracker.SelectionHandler Handler;
     public GameObject InstantiatedGO;
     public GameObject TaskCanvasGO;
+    public Canvas TaskCanvas;
     //public GameObject TouchFeedback_CanvasGO;
     //public Canvas TouchFeedback_Canvas;
     public AudioFBController audioFBController;
@@ -19,6 +20,7 @@ public class TouchFBController : MonoBehaviour
     public GameObject HeldTooLong_Prefab;
     public GameObject HeldTooShort_Prefab;
     public GameObject MovedTooFar_Prefab;
+    public int FeedbackSize;
     public float FeedbackDuration;
     public bool FeedbackOn;
     //Textures are currently set in The Trial Template "LoadTextures" method:
@@ -39,35 +41,44 @@ public class TouchFBController : MonoBehaviour
         HeldTooLong_Prefab = null; //making 1 prefab null so we can save a "PrefabsCreated" boolean
     }
 
-    public void EnableTouchFeedback(SelectionTracker.SelectionHandler handler, float fbDuration, GameObject taskCanvasGO)
-    {
-        if(HeldTooLong_Prefab == null)
-            CreatePrefabs();
-        
+    public void EnableTouchFeedback(SelectionTracker.SelectionHandler handler, float fbDuration, int fbSize, GameObject taskCanvasGO)
+    {        
         Handler = handler;
         FeedbackDuration = fbDuration;
+        FeedbackSize = fbSize;
         TaskCanvasGO = taskCanvasGO;
+        TaskCanvas = TaskCanvasGO.GetComponent<Canvas>();
+
+        if (HeldTooLong_Prefab == null)
+        {
+            //CreateFbCanvas();
+            CreatePrefabs();
+        }
+
         Handler.TouchErrorFeedback += OnTouchErrorFeedback; //Subscribe to event
     }
 
     private void OnTouchErrorFeedback(object sender, TouchFeedbackArgs e) //e passes us errorType and the gameobject
     {
-        switch (e.errorTypeString)
+        if(!FeedbackOn)
         {
-            case "DurationTooLong":
-                Debug.Log("Touch Duration too long.....");
-                ShowTouchFeedback(new TouchFeedback(e.gameObject, e.errorTypeString, HeldTooLong_Prefab, this));
-                break;
-            case "DurationTooShort":
-                Debug.Log("Touch Duration too short.....");
-                ShowTouchFeedback(new TouchFeedback(e.gameObject, e.errorTypeString, HeldTooShort_Prefab, this));
-                break;
-            case "MovedTooFar":
-                Debug.Log("Touch Moved too far.....");
-                ShowTouchFeedback(new TouchFeedback(e.gameObject, e.errorTypeString, MovedTooFar_Prefab, this));
-                break;
-            default:
-                break;
+            switch (e.errorTypeString)
+            {
+                case "DurationTooLong":
+                    Debug.Log("Touch Duration too long.....");
+                    ShowTouchFeedback(new TouchFeedback(e.gameObject, e.errorTypeString, HeldTooLong_Prefab, this));
+                    break;
+                case "DurationTooShort":
+                    Debug.Log("Touch Duration too short.....");
+                    ShowTouchFeedback(new TouchFeedback(e.gameObject, e.errorTypeString, HeldTooShort_Prefab, this));
+                    break;
+                case "MovedTooFar":
+                    Debug.Log("Touch Moved too far.....");
+                    ShowTouchFeedback(new TouchFeedback(e.gameObject, e.errorTypeString, MovedTooFar_Prefab, this));
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -81,12 +92,9 @@ public class TouchFBController : MonoBehaviour
 
         InstantiatedGO = Instantiate(touchFb.Prefab, TaskCanvasGO.transform);
         InstantiatedGO.name = "TouchFeedback_GO";
-        InstantiatedGO.GetComponent<RectTransform>().anchoredPosition = new Vector2(.5f, .5f);
-        //InstantiatedGO.GetComponent<RectTransform>().anchoredPosition = new Vector2(touchFb.SelectedGO_ScreenPos.x, touchFb.SelectedGO_ScreenPos.y); //Doesn't work. 
+        InstantiatedGO.GetComponent<RectTransform>().anchoredPosition = touchFb.LocalPosOnCanvas;
 
-        //InstantiatedGO.SetActive(true);
         ////EventCodeManager.SendCodeImmediate(SessionEventCodes["TouchFBController_FeedbackOn"]);
-
         Invoke("DestroyTouchFeedback", FeedbackDuration);
     }
 
@@ -102,22 +110,22 @@ public class TouchFBController : MonoBehaviour
 
     public void CreatePrefabs()
     {
-        HeldTooLong_Prefab = CreatePrefab("HeldTooLongGO", HeldTooLong_Texture, 200f);
-        HeldTooShort_Prefab = CreatePrefab("HeldTooShortGO", HeldTooShort_Texture, 200f);
-        MovedTooFar_Prefab = CreatePrefab("MovedTooFarGO", MovedTooFar_Texture, 200f);
+        HeldTooLong_Prefab = CreatePrefab("HeldTooLongGO", HeldTooLong_Texture);
+        HeldTooShort_Prefab = CreatePrefab("HeldTooShortGO", HeldTooShort_Texture);
+        MovedTooFar_Prefab = CreatePrefab("MovedTooFarGO", MovedTooFar_Texture);
     }
 
-    public GameObject CreatePrefab(string name, Texture2D texture, float size)
+    public GameObject CreatePrefab(string name, Texture2D texture)
     {
         GameObject go = new GameObject(name);
         go.AddComponent<RectTransform>();
         Image image = go.AddComponent<Image>();
         image.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
-        image.rectTransform.sizeDelta = new Vector2(size, size);
+        image.rectTransform.sizeDelta = new Vector2(FeedbackSize, FeedbackSize);
         return go;
     }
 
-    //public void CreateTouchFeedbackCanvas()
+    //public void CreateFbCanvas()
     //{
     //    TouchFeedback_CanvasGO = new GameObject("TouchFeedback_CanvasGO");
     //    TouchFeedback_Canvas = TouchFeedback_CanvasGO.AddComponent<Canvas>();
@@ -133,15 +141,25 @@ public class TouchFBController : MonoBehaviour
         public GameObject Prefab;
         public GameObject SelectedGO;
         public string FeedbackType; //"HeldTooLong" , "HeldTooShort", "MovedTooFar";
-        public Vector3 SelectedGO_ScreenPos;
+        public Vector2 LocalPosOnCanvas;
+        public TouchFBController TouchFeedbackController;
 
         public TouchFeedback(GameObject selectedGO, string fbType, GameObject prefab, TouchFBController touchFbController)
         {
             SelectedGO = selectedGO;
             FeedbackType = fbType;
-            SelectedGO_ScreenPos = Camera.main.WorldToScreenPoint(selectedGO.transform.position);
             Prefab = prefab;
-          
+            TouchFeedbackController = touchFbController;
+            LocalPosOnCanvas = GetLocalPosOnCanvas();
+        }
+
+        public Vector2 GetLocalPosOnCanvas()
+        {
+            RectTransform canvasRect = TouchFeedbackController.TaskCanvas.GetComponent<RectTransform>();
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(SelectedGO.transform.position);
+            Vector2 localPoint;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPos, Camera.main, out localPoint);
+            return localPoint;
         }
     }
 

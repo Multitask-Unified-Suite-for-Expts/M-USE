@@ -270,7 +270,6 @@ namespace SelectionTracking
             {
                 if (OngoingSelection != null)
                 {
-                    //Debug.Log("Selection Error Type: " + error);
                     OngoingSelection.ErrorType = error;
                     IncrementErrorCount(error);
                     TouchErrorFeedback?.Invoke(this, new TouchFBController.TouchFeedbackArgs(OngoingSelection.SelectedGameObject, OngoingSelection.ErrorType));

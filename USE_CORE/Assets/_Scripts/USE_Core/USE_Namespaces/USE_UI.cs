@@ -73,14 +73,17 @@ namespace USE_UI
         }
 
         //For a fullscreen backdrop (for THR):
-        public USE_StartButton(Canvas parent, string name, Color32 color)
+        public USE_StartButton(Canvas parent, string name, Color32 color, bool fullScreen)
         {
             StartButtonGO = new GameObject(name);
             Image = StartButtonGO.AddComponent<Image>();
             StartButtonGO.transform.SetParent(parent.transform, false);
             Image.rectTransform.anchoredPosition = Vector2.zero;
             RectTransform canvasRect = parent.GetComponent<RectTransform>();
-            Image.rectTransform.sizeDelta = new Vector2(canvasRect.rect.width, canvasRect.rect.height);
+            if (fullScreen)
+                Image.rectTransform.sizeDelta = new Vector2(canvasRect.rect.width, canvasRect.rect.height);
+            else
+                Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
             Image.color = color;
             Image.canvas.sortingOrder = -1;
             StartButtonGO.transform.localPosition = LocalPosition;

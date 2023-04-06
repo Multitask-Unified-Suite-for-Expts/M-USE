@@ -111,7 +111,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             CreateColors();
             if(SquareGO == null)
             {
-                USE_BackdropGO = new USE_StartButton(THR_CanvasGO.GetComponent<Canvas>(), "BackdropGO", new Color32(209, 190, 168, 255));
+                USE_BackdropGO = new USE_StartButton(THR_CanvasGO.GetComponent<Canvas>(), "BackdropGO", new Color32(209, 190, 168, 255), true);
                 BackdropGO = USE_BackdropGO.StartButtonGO;
 
                 USE_SquareGO = new USE_StartButton(THR_CanvasGO.GetComponent<Canvas>(), "SquareGO");
@@ -123,10 +123,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT TRIAL state --------------------------------------------------------------------------------------------------------------------------
-        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, Feedback);
-        //float touchFbDuration = .3f;
-        //TouchFBController.EnableTouchFeedback(Handler, touchFbDuration, 500, THR_CanvasGO);
-
         InitTrial.AddInitializationMethod(() =>
         {
             ResetGlobalTrialVariables();
@@ -142,9 +138,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             if (TrialCount_InTask != 0)
                 currentTask.SetTaskSummaryString();
-
-            Handler.MinDuration = currentTrial.MinTouchDuration;
-            Handler.MaxDuration = currentTrial.MaxTouchDuration;
         });
         InitTrial.SpecifyTermination(() => true && !StartWithBlueSquare, WhiteSquare, () => TrialStartTime = Time.time);
         InitTrial.SpecifyTermination(() => true && StartWithBlueSquare, BlueSquare, () => TrialStartTime = Time.time);
@@ -158,11 +151,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 ActivateSquareAndBackdrop();
             WhiteStartTime = Time.time;
             WhiteTimeoutTime = 0;
-
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
-
-            currentTrial.WhiteSquareDuration = 1f; //DELETE THIS BEFORE PUSHING!!!!!!!!!!!!!!!!!
         });
         WhiteSquare.AddUpdateMethod(() =>
         {
@@ -221,9 +209,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             BackdropTouchTime = 0;
             BackdropTouches = 0;
             HeldDuration = 0;
-
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
         });
         BlueSquare.AddUpdateMethod(() =>
         {
@@ -327,7 +312,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         });
         BlueSquare.SpecifyTermination(() => (Time.time - BlueStartTime > currentTrial.BlueSquareDuration) && !InputBroker.GetMouseButton(0) && !BlueSquareReleased && !USE_BackdropGO.IsGrating && !USE_SquareGO.IsGrating, WhiteSquare); //Go back to white square if bluesquare time lapses (and they aren't already holding down)
         BlueSquare.SpecifyTermination(() => (BlueSquareReleased && !USE_BackdropGO.IsGrating && !USE_SquareGO.IsGrating) || MovedOutside || HeldTooLong || HeldTooShort || TimeRanOut || GiveTouchReward, Feedback); //If rewarding touch and they touched, or click the square and release, or run out of time. 
-        BlueSquare.AddDefaultTerminationMethod(() => Handler.HandlerActive = false); //Using this to manually stop handler during feedback since it ends at end of feedback state. 
         //FEEDBACK state ----------------------------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
         {

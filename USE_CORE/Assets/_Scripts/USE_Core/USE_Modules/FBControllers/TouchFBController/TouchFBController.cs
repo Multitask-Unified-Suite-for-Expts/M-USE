@@ -21,7 +21,7 @@ public class TouchFBController : MonoBehaviour
     public GameObject HeldTooShort_Prefab;
     public GameObject MovedTooFar_Prefab;
     public int FeedbackSize;
-    public float FeedbackDuration;
+    public float FeedbackDuration = .3f;
     public bool FeedbackOn;
     //Textures are currently set in The Trial Template "LoadTextures" method:
     public Texture2D HeldTooLong_Texture;
@@ -34,7 +34,6 @@ public class TouchFBController : MonoBehaviour
     public void Init(DataController frameData)
     {
         frameData.AddDatum("FeedbackOn", () => FeedbackOn.ToString());
-        EventCodeManager = new EventCodeManager();
         if (InstantiatedGO != null)
             Destroy(InstantiatedGO);
         InstantiatedGO = null;

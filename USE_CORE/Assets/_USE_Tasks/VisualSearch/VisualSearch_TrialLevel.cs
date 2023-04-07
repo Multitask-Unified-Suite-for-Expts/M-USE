@@ -233,14 +233,14 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            if (Handler.LastSelection.SelectedGameObject.GetComponent<StimDefPointer>()?.GetStimDef<VisualSearch_StimDef>() == null)   //means the player got timed out and didn't click on anything
-            {
+            //if (Handler.LastSelection?.SelectedGameObject.GetComponent<StimDefPointer>()?.GetStimDef<VisualSearch_StimDef>() == null)   //means the player got timed out and didn't click on anything
+            //{
                 AbortedTrials_InBlock++;
                 CurrentTaskLevel.AbortedTrials_InTask++;
                 aborted = true;
                 SetTrialSummaryString();
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["NoChoice"]);
-            }
+            //}
         });
 
         // SELECTION FEEDBACK STATE ---------------------------------------------------------------------------------------   
@@ -407,13 +407,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private void AssignTrialData()
     {
         // All AddDatum commands for the Trial Data
-        TrialData.AddDatum("Context", ()=> CurrentTrialDef.ContextName);
+        TrialData.AddDatum("Context", ()=> ContextName);
         TrialData.AddDatum("SelecteStimIndex", () => selectedSD?.StimIndex ?? null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
         TrialData.AddDatum("CorrectSelection", () => CorrectSelection ? 1 : 0);
         TrialData.AddDatum("SearchDuration", ()=> SearchDuration);
         TrialData.AddDatum("RewardGiven", ()=> RewardGiven? 1 : 0);
-        TrialData.AddDatum("TotalClicks", ()=> MouseTracker.GetClickCount());
+        //TrialData.AddDatum("TotalClicks", ()=> MouseTracker.GetClickCount());
         TrialData.AddDatum("AbortedTrial", ()=> aborted);
     }
     private void AssignFrameData()

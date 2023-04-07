@@ -234,7 +234,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 Handler.ClearSelections();
 
             Handler.MinDuration = minObjectTouchDuration.value;
-            Handler.MinDuration = .75f;
             Handler.MaxDuration = maxObjectTouchDuration.value;
         });
         InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), ChooseStimulusDelay, ()=>
@@ -257,11 +256,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddInitializationMethod(() =>
         {
+            choiceMade = false;
             AssignCorrectStim();
+            
             if (GameObject.Find("MainCameraCopy").transform.childCount == 0)
                 CreateTextOnExperimenterDisplay();
-            choiceMade = false;
-            if (CurrentTrialDef.LeaveFeedbackOn) HaloFBController.SetLeaveFeedbackOn();
+            if (CurrentTrialDef.LeaveFeedbackOn) 
+                HaloFBController.SetLeaveFeedbackOn();
 
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();

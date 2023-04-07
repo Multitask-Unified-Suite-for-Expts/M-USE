@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 562810792}
   - component: {fileID: 562810793}
   m_Layer: 0
-  m_Name: ChaseReactionTest_Camera
+  m_Name: MazeReactionTest_Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -317,7 +317,7 @@ GameObject:
   - component: {fileID: 718610680}
   - component: {fileID: 718610679}
   m_Layer: 0
-  m_Name: ChaseReactionTest_Scripts
+  m_Name: MazeReactionTest_Scripts
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -349,7 +349,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bb555fc580ff54459ccb28a55cbd109, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ControlLevelName: ChaseReactionTest_TrialLevel
+  ControlLevelName: MazeReactionTest_TrialLevel
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
@@ -403,7 +403,7 @@ MonoBehaviour:
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
   THR_BackdropTexture: {fileID: 0}
-  CRT_CanvasGO: {fileID: 1290506513}
+  MRT_CanvasGO: {fileID: 1290506513}
   runningTrialPerformance: []
   MinTrials: 0
   mazeDefName: 
@@ -411,8 +411,13 @@ MonoBehaviour:
   tiles:
     stimGroupName: 
     IsActive: 0
-  startTile: {fileID: 0}
+  totalTilesGO: []
+  consecutiveErrors: 0
+  pathProgressGO: []
+  pathProgressIndex: 0
   viewPath: 0
+  tileFbDuration: 0
+  startTile: {fileID: 0}
   startColor: []
   finishColor: []
   correctColor: []
@@ -522,6 +527,8 @@ MonoBehaviour:
     precision: 0
   playerViewTextList: []
   playerViewText: {fileID: 0}
+  choiceDurationsList: []
+  contextName: 
 --- !u!114 &718610680
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -534,7 +541,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f193130b2db63f54f97bb3ef193512e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ControlLevelName: ChaseReactionTest_TaskLevel
+  ControlLevelName: MazeReactionTest_TaskLevel
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
@@ -543,7 +550,7 @@ MonoBehaviour:
   DebugActive: 1
   Paused: 1
   ConfigName: 
-  TaskName: ChaseReactionTest
+  TaskName: MazeReactionTest
   TaskProjectFolder: 
   BlockCount: 0
   TrialLevel: {fileID: 718610679}
@@ -603,11 +610,15 @@ MonoBehaviour:
     mName: 
     sideRestricted: 0
   totalErrors_InBlock: 
+  backtrackErrors_InBlock: 
   numRewardPulses_InBlock: 0
   numAbortedTrials_InBlock: 0
+  numSliderBarFull_InBlock: 0
   numRewardPulses_InTask: 0
   numAbortedTrials_InTask: 0
   numSliderBarFull_InTask: 0
+  backtrackErrors_InTask: 0
+  totalErrors_InTask: 0
   BlockAveragesString: 
   CurrentBlockString: 
 --- !u!1 &1290506513
@@ -623,7 +634,7 @@ GameObject:
   - component: {fileID: 1290506515}
   - component: {fileID: 1290506514}
   m_Layer: 5
-  m_Name: ChaseReactionTest_Canvas
+  m_Name: MazeReactionTest_Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -720,7 +731,7 @@ GameObject:
   - component: {fileID: 1718850689}
   - component: {fileID: 1718850688}
   m_Layer: 0
-  m_Name: ChaseReactionTest_DirectionalLight
+  m_Name: MazeReactionTest_DirectionalLight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

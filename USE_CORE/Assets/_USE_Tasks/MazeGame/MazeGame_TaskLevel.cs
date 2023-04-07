@@ -130,14 +130,11 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         });
         BlockFeedback.AddInitializationMethod(() =>
         {
-            if (mgTL.AbortCode == 0)
-            {
-                CurrentBlockString += "\n" + "\n";
-                CurrentBlockString = CurrentBlockString.Replace("Current Block", $"Block {blocksAdded + 1}");
-                PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
-                blocksAdded++;
-            }
-           // CalculateBlockAverages();
+            /*if (blocksAdded > 0)
+                CurrentBlockString += "\n";
+            PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
+            blocksAdded++;
+           // CalculateBlockAverages();*/
         });
     }
     public void AssignBlockData()
@@ -179,7 +176,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     public override OrderedDictionary GetSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary();
-
+        data["Trial Count In Task"] = mgTL.TrialCount_InTask;
         data["Num Reward Pulses"] = numRewardPulses_InTask;
         data["Total Errors"] = totalErrors_InTask;
         data["Correct Touches"] = correctTouches_InTask;
@@ -232,37 +229,9 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                              "\nAverage Maze Duration: " +
                              String.Format("{0:0.00}", mazeDurationsList_InBlock.Average());
         
-        if (blocksAdded > 1)
-            CurrentBlockString += "\n";
-
-        //Add CurrentBlockString if block wasn't aborted:
-        if (mgTL.AbortCode == 0)
-            BlockSummaryString.AppendLine(CurrentBlockString);
-
-
-        /*if (blocksAdded > 1) //If atleast 2 blocks to average, set Averages string and add to BlockSummaryString:
-        {
-            BlockAveragesString = "-------------------------------------------------" +
-                              "\n" +
-                              "\n<b>Block Averages (" + blocksAdded + " blocks):" + "</b>" +
-                              "\nAvg Total Errors: " + AvgTotalErrors.ToString("0.00") +
-                              "\nAvg Correct Touches: " + AvgCorrectTouches.ToString("0.00") +
-                              "\nAvg Rule-Abiding Errors: " + AvgRuleAbidingErrors.ToString("0.00") + "s" +
-                              "\nAvg Rule-Breaking Errors: " + AvgRuleBreakingErrors.ToString("0.00") +
-                              "\nAvg Preservative Errors: " + AvgPerseverativeErrors.ToString("0.00") +
-                              "\nAvg Backtrack Errors: " + AvgBacktrackErrors.ToString("0.00") + "s" +
-                              "\nAvg Retouch Correct: " + AvgRetouchCorrect.ToString("0.00") +
-                              "\nAvg Reward: " + AvgReward.ToString("0.00") +
-                              "\nAvg Maze Duration: " + AvgMazeDuration.ToString("0.00");;
-            
-            BlockSummaryString.AppendLine(BlockAveragesString);
-        }*/
-
-        //Add Previous blocks string:
-        if(PreviousBlocksString.Length > 0)
-        {
-            BlockSummaryString.AppendLine("\n" + PreviousBlocksString);
-        }
+        BlockSummaryString.AppendLine(CurrentBlockString).ToString();
+        if (PreviousBlocksString.Length > 0)
+            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
     }
     public override void SetTaskSummaryString()
     {

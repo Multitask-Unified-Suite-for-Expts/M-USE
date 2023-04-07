@@ -6,13 +6,13 @@ using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
 using HiddenMaze;
-namespace ChaseReactionTest_Namespace
+namespace MazeReactionTest_Namespace
 {
-    public class ChaseReactionTest_TaskDef : TaskDef
+    public class MazeReactionTest_TaskDef : TaskDef
     {
     }
 
-    public class ChaseReactionTest_BlockDef : BlockDef
+    public class MazeReactionTest_BlockDef : BlockDef
     {
         public string BlockName;
         public int[] MinMaxTrials;
@@ -41,11 +41,11 @@ namespace ChaseReactionTest_Namespace
             System.Random rnd = new System.Random();
             int num = rnd.Next(MinMaxTrials[0], MinMaxTrials[1]+1);
             
-            TrialDefs = new List<ChaseReactionTest_TrialDef>().ConvertAll(x => (TrialDef)x);
+            TrialDefs = new List<MazeReactionTest_TrialDef>().ConvertAll(x => (TrialDef)x);
             
             for (int iTrial = 0; iTrial < num; iTrial++)
             {
-                ChaseReactionTest_TrialDef td = new ChaseReactionTest_TrialDef();
+                MazeReactionTest_TrialDef td = new MazeReactionTest_TrialDef();
                 td.BlockName = BlockName;
                 td.RewardRatio = RewardRatio;
                 td.NumPulses = NumPulses;
@@ -64,7 +64,7 @@ namespace ChaseReactionTest_Namespace
         }
     }
 
-    public class ChaseReactionTest_TrialDef : TrialDef
+    public class MazeReactionTest_TrialDef : TrialDef
     {
         public string BlockName;
         public int PulseSize;
@@ -81,7 +81,7 @@ namespace ChaseReactionTest_Namespace
         public int[] MinMaxTrials;
     }
 
-    public class ChaseReactionTest_StimDef : StimDef
+    public class MazeReactionTest_StimDef : StimDef
     {
     }
     public class MazeDef

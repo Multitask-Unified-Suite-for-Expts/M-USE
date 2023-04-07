@@ -9,7 +9,7 @@ using USE_ExperimentTemplate_Trial;
 using ConfigDynamicUI;
 using USE_UI;
 using SelectionTracking;
-
+using UnityEngine.EventSystems;
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 {
@@ -155,7 +155,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         SelectionTracker.SelectionHandler MouseClickHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InflateBalloon);
-        TouchFBController.EnableTouchFeedback(MouseClickHandler, 2f, 150, EC_CanvasGO);
+        TouchFBController.EnableTouchFeedback(MouseClickHandler, .3f, ButtonScale, EC_CanvasGO);
+
+        RectTransform rect = EC_CanvasGO.GetComponent<Canvas>().GetComponent<RectTransform>();
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -180,7 +182,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if(MouseClickHandler.AllSelections.Count > 0)
                 MouseClickHandler.ClearSelections();
 
-            MouseClickHandler.MinDuration = 1f;
+            MouseClickHandler.MinDuration = .5f;
             //MouseClickHandler.MinDuration = minObjectTouchDuration.value;
             MouseClickHandler.MaxDuration = maxObjectTouchDuration.value;
         });
@@ -235,9 +237,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             //Neg FB if touch outside balloon. Adding "sideChoice == null" so that they cant click outside balloon at the end and mess up pop audio.
             if (InputBroker.GetMouseButtonDown(0) && SideChoice == null)
             {
-                Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-                RaycastHit hitt;
-                if (!Physics.Raycast(ray, out hitt))
+                GameObject hitGO = InputBroker.RaycastBoth(InputBroker.mousePosition);
+                if (hitGO == null)
                     AudioFBController.Play("Negative");
             }
         });
@@ -376,13 +377,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.
             if (InputBroker.GetMouseButtonDown(0) && Response != 1)
             {
-                Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-                RaycastHit hit;
-                if (!Physics.Raycast(ray, out hit))
+                GameObject hitGO = InputBroker.RaycastBoth(InputBroker.mousePosition);
+                if (hitGO == null)
                     AudioFBController.Play("Negative");
             }
 
-            if(InputBroker.GetMouseButtonUp(0))
+            if (InputBroker.GetMouseButtonUp(0))
             {
                 TrialTouches++;
                 SetTrialSummaryString();

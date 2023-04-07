@@ -110,6 +110,8 @@ namespace SelectionTracking
             public List<Vector3> InputLocations;
             public string ErrorType;
 
+            public string ParentName;
+
 
             public USE_Selection(GameObject go)
             {
@@ -120,6 +122,22 @@ namespace SelectionTracking
                 StartFrame = Time.frameCount;
                 StartTime = Time.time;
                 InputLocations = new List<Vector3>();
+
+                if(go != null)
+                    ParentName = GetRootParentName(go);
+            }
+
+            public static string GetRootParentName(GameObject go)
+            {
+                string rootParentName = go.name;
+                Transform parent = go.transform.parent;
+
+                while (parent != null)
+                {
+                    rootParentName = parent.gameObject.name;
+                    parent = parent.parent;
+                }
+                return rootParentName;
             }
 
             public void UpdateSelection(Vector3 inputLocation)
@@ -160,8 +178,6 @@ namespace SelectionTracking
             public int Num_HeldTooShort;
             public int Num_MovedTooFar;
 
-            public Vector3 InitialTouchPos;
-
             public event EventHandler<TouchFBController.TouchFeedbackArgs> TouchErrorFeedback;
 
             public SelectionHandler()
@@ -182,8 +198,6 @@ namespace SelectionTracking
                 LastSelection = new USE_Selection(null);
                 LastSuccessfulSelection = new USE_Selection(null);
                 LastUnsuccessfulSelection = new USE_Selection(null);
-
-                InitialTouchPos = new Vector3();
             }
 
             public SelectionHandler(InputDelegate inputLoc = null, float? minDuration = null, float? maxDuration = null,
@@ -275,7 +289,7 @@ namespace SelectionTracking
                 {
                     OngoingSelection.ErrorType = error;
                     IncrementErrorCount(error);
-                    TouchErrorFeedback?.Invoke(this, new TouchFBController.TouchFeedbackArgs(OngoingSelection.SelectedGameObject, OngoingSelection.ErrorType));
+                    TouchErrorFeedback?.Invoke(this, new TouchFBController.TouchFeedbackArgs(OngoingSelection));
                 }
                 else
                     Debug.Log("Trying to set the ErrorType of OngoingSelection, but OngoingSelection is null!");
@@ -419,7 +433,9 @@ namespace SelectionTracking
                 {
                     GameObject hitObject = InputBroker.RaycastBoth(inputLocation.Value);
                     if (hitObject != null)
+                    {
                         return hitObject;
+                    }
                 }
                 return null;
             }

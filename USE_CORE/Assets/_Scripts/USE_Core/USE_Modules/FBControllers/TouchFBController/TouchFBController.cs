@@ -19,7 +19,7 @@ public class TouchFBController : MonoBehaviour
     public GameObject HeldTooLong_Prefab;
     public GameObject HeldTooShort_Prefab;
     public GameObject MovedTooFar_Prefab;
-    public int FeedbackSize;
+    public float FeedbackSize;
     public float FeedbackDuration = .3f;
     public bool FeedbackOn;
     //Textures are currently set in The Trial Template "LoadTextures" method:
@@ -39,7 +39,7 @@ public class TouchFBController : MonoBehaviour
         HeldTooLong_Prefab = null; //making 1 prefab null so we can save a "PrefabsCreated" boolean
     }
 
-    public void EnableTouchFeedback(SelectionTracker.SelectionHandler handler, float fbDuration, int fbSize, GameObject taskCanvasGO)
+    public void EnableTouchFeedback(SelectionTracker.SelectionHandler handler, float fbDuration, float fbSize, GameObject taskCanvasGO)
     {        
         Handler = handler;
         FeedbackDuration = fbDuration;
@@ -53,23 +53,26 @@ public class TouchFBController : MonoBehaviour
         Handler.TouchErrorFeedback += OnTouchErrorFeedback; //Subscribe to event
     }
 
-    private void OnTouchErrorFeedback(object sender, TouchFeedbackArgs e) //e passes us errorType and the gameobject
+    private void OnTouchErrorFeedback(object sender, TouchFeedbackArgs e)
     {
+        if (e.Selection.ParentName == "ExperimenterDisplay")
+            return;
+
         if(!FeedbackOn)
         {
-            switch (e.errorTypeString)
+            switch (e.Selection.ErrorType)
             {
                 case "DurationTooLong":
                     Debug.Log("Touch Duration too long.....");
-                    ShowTouchFeedback(new TouchFeedback(e.gameObject, e.errorTypeString, HeldTooLong_Prefab, this));
+                    ShowTouchFeedback(new TouchFeedback(e.Selection, HeldTooLong_Prefab, this));
                     break;
                 case "DurationTooShort":
                     Debug.Log("Touch Duration too short.....");
-                    ShowTouchFeedback(new TouchFeedback(e.gameObject, e.errorTypeString, HeldTooShort_Prefab, this));
+                    ShowTouchFeedback(new TouchFeedback(e.Selection, HeldTooShort_Prefab, this));
                     break;
                 case "MovedTooFar":
                     Debug.Log("Touch Moved too far.....");
-                    ShowTouchFeedback(new TouchFeedback(e.gameObject, e.errorTypeString, MovedTooFar_Prefab, this));
+                    ShowTouchFeedback(new TouchFeedback(e.Selection, MovedTooFar_Prefab, this));
                     break;
                 default:
                     break;
@@ -134,16 +137,14 @@ public class TouchFBController : MonoBehaviour
 
     public class TouchFeedback
     {
+        public SelectionTracker.USE_Selection Selection;
         public GameObject Prefab;
-        public GameObject SelectedGO;
-        public string FeedbackType; //"HeldTooLong" , "HeldTooShort", "MovedTooFar";
         public Vector2 PosOnCanvas;
         public TouchFBController TouchFeedbackController;
 
-        public TouchFeedback(GameObject selectedGO, string fbType, GameObject prefab, TouchFBController touchFbController)
-        {            
-            SelectedGO = selectedGO;
-            FeedbackType = fbType;
+        public TouchFeedback(SelectionTracker.USE_Selection selection, GameObject prefab, TouchFBController touchFbController)
+        {
+            Selection = selection;
             Prefab = prefab;
             TouchFeedbackController = touchFbController;
             PosOnCanvas = GetPosOnCanvas();
@@ -152,7 +153,7 @@ public class TouchFBController : MonoBehaviour
         public Vector2 GetPosOnCanvas()
         {
             RectTransform canvasRect = TouchFeedbackController.TaskCanvas.GetComponent<RectTransform>();
-            Vector3 screenPos = Camera.main.WorldToScreenPoint(SelectedGO.transform.position);
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(Selection.SelectedGameObject.transform.position);
             Vector2 localPoint;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPos, Camera.main, out localPoint);
             return localPoint;
@@ -162,13 +163,14 @@ public class TouchFBController : MonoBehaviour
 
     public class TouchFeedbackArgs : EventArgs
     {
-        public GameObject gameObject { get; }
-        public string errorTypeString { get; }
+        public SelectionTracker.USE_Selection Selection { get; }
+        //public GameObject GO { get; }
+        //public string ErrorType { get; }
+        //public string ParentName { get; }
 
-        public TouchFeedbackArgs(GameObject go, string errorType)
+        public TouchFeedbackArgs(SelectionTracker.USE_Selection selection)
         {
-            gameObject = go;
-            errorTypeString = errorType;
+            Selection = selection;
         }
     }
 }

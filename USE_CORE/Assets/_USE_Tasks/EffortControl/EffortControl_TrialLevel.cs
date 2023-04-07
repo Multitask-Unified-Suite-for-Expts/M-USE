@@ -182,8 +182,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if(MouseClickHandler.AllSelections.Count > 0)
                 MouseClickHandler.ClearSelections();
 
-            MouseClickHandler.MinDuration = .5f;
-            //MouseClickHandler.MinDuration = minObjectTouchDuration.value;
+            MouseClickHandler.MinDuration = minObjectTouchDuration.value;
             MouseClickHandler.MaxDuration = maxObjectTouchDuration.value;
         });
         InitTrial.SpecifyTermination(() => MouseClickHandler.LastSuccessfulSelectionMatches(StartButton), Delay, () =>
@@ -556,25 +555,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         Inflate = true;
     }
-
-    //IEnumerator FlashOutline()
-    //{
-    //    Flashing = true;
-    //    GameObject container = (SideChoice == "Left") ? BalloonContainerLeft : BalloonContainerRight;
-
-    //    GameObject child = container.transform.GetChild(ClickCount).transform.gameObject;
-    //    if (child != null && Response != 1 && !Inflate)
-    //    {
-    //        child.transform.GetComponent<Renderer>().material.color = Color.red;
-    //        yield return new WaitForSeconds(.5f);
-    //        if(child != null)
-    //        {
-    //            child.transform.GetComponent<Renderer>().material.color = OffWhiteOutlineColor;
-    //            yield return new WaitForSeconds(.5f);
-    //        }
-    //    }
-    //    Flashing = false;
-    //}
 
     void RecordChoices()
     {

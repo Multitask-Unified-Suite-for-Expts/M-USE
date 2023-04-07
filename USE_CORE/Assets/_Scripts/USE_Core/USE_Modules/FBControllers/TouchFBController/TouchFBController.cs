@@ -84,15 +84,12 @@ public class TouchFBController : MonoBehaviour
     {
         FeedbackOn = true;
         audioFBController.Play("Negative");
-
-        if (InstantiatedGO != null)
-            Destroy(InstantiatedGO);
-
+        if (InstantiatedGO != null) Destroy(InstantiatedGO);
         InstantiatedGO = Instantiate(touchFb.Prefab, TaskCanvasGO.transform);
         InstantiatedGO.name = "TouchFeedback_GO";
         InstantiatedGO.GetComponent<RectTransform>().anchoredPosition = touchFb.PosOnCanvas;
+        EventCodeManager.SendCodeImmediate(SessionEventCodes["TouchFBController_FeedbackOn"]);
 
-        ////EventCodeManager.SendCodeImmediate(SessionEventCodes["TouchFBController_FeedbackOn"]);
         Invoke("DestroyTouchFeedback", FeedbackDuration);
     }
 
@@ -101,10 +98,10 @@ public class TouchFBController : MonoBehaviour
         if (InstantiatedGO != null)
         {
             Destroy(InstantiatedGO);
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["TouchFBController_FeedbackOn"]);
             FeedbackOn = false;
         }
     }
-
 
     public void CreatePrefabs()
     {

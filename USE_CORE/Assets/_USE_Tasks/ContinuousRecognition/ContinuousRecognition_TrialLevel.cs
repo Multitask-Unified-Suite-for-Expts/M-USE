@@ -182,8 +182,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
 
-            Handler.MinDuration = .5f;
-            //Handler.MinDuration = minObjectTouchDuration.value;
+            Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
 
         });
@@ -219,8 +218,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if(MakeStimPopOut)
                 PopStimOut();
-
-            chooseStimDuration.value = 20f; //DELETE LATER!!!
         });
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------

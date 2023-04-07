@@ -172,15 +172,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
 
-            Handler.MinDuration = .5f;
-            //Handler.MinDuration = minObjectTouchDuration.value;
+            Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
         });
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton),
-            SearchDisplayDelay, () =>
-            {
-                EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
-            });
+            SearchDisplayDelay, () => EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]));
 
         // Provide delay following start button selection and before stimuli onset
         SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay);
@@ -189,7 +185,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SearchDisplay.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they holding down
-            // Toggle TokenBar and Stim to be visible
             TokenFBController.enabled = true;
             ActivateChildren(playerViewParent);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
@@ -202,25 +197,27 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
-            if(Handler.GetErrorCount() > 0)
-            {
-                TouchDurationError = true;
-                TouchDurationError_InBlock++;
-                CurrentTaskLevel.TouchDurationError_InTask++;
-                Handler.ClearCounts();
-            }
-
             if(Handler.SuccessfulSelections.Count > 0)
             {
-                TouchDurationError = false;
                 selectedGO = Handler.LastSuccessfulSelection.SelectedGameObject;
                 selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
                 Handler.ClearSelections();
-                choiceMade = true;
+                if(selectedSD != null)
+                    choiceMade = true;
             }
         });
         SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
+            if (Handler.ErrorCount > 0)
+            {
+                TouchDurationError = true;
+                TouchDurationError_InBlock += Handler.ErrorCount;
+                CurrentTaskLevel.TouchDurationError_InTask += Handler.ErrorCount;
+                Handler.ClearCounts();
+            }
+            else
+                TouchDurationError = false;
+
             CorrectSelection = selectedSD.IsTarget;
             if (CorrectSelection)
             {       
@@ -245,11 +242,12 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 SelectedStimLocation = selectedSD.StimLocation;
             }
             Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock,(TrialCount_InBlock + 1));
+            SetTrialSummaryString();
         });
 
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            if (Handler.LastSelection.SelectedGameObject.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>() == null)   //means the player got timed out and didn't click on anything
+            if (selectedSD == null)   //means the player got timed out and didn't click on anything
             {
                 runningAcc.Add(0);
                 AbortedTrials_InBlock++;

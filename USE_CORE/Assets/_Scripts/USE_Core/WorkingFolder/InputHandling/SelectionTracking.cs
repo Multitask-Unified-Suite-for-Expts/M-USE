@@ -178,6 +178,14 @@ namespace SelectionTracking
             public int Num_HeldTooShort;
             public int Num_MovedTooFar;
 
+            public int ErrorCount
+            {
+                get
+                {
+                    return Num_HeldTooLong + Num_HeldTooShort + Num_MovedTooFar;
+                }
+            }
+
             public event EventHandler<TouchFBController.TouchFeedbackArgs> TouchErrorFeedback;
 
             public SelectionHandler()

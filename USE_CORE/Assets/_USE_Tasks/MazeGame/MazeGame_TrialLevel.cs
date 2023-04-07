@@ -196,11 +196,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 SelectionHandler.ClearSelections();
         });
 
-<<<<<<< HEAD
-        InitTrial.SpecifyTermination(() => SelectionHandler.SelectionMatches(StartButton), Delay, () =>
-=======
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton), Delay, () =>
->>>>>>> origin/NATHAN
+        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatches(StartButton), Delay, () =>
         {
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
 

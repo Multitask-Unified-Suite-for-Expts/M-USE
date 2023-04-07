@@ -4,7 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using ConfigDynamicUI;
 using HiddenMaze;
-using ChaseReactionTest_Namespace;
+using MazeReactionTest_Namespace;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -14,10 +14,10 @@ using USE_States;
 using USE_StimulusManagement;
 using USE_UI;
 
-public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
+public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
 {
     // Generic Task Variables
-    public GameObject CRT_CanvasGO;
+    public GameObject MRT_CanvasGO;
     public USE_StartButton USE_StartButton;
     private GameObject StartButton;
     
@@ -124,8 +124,8 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
     // Frame Data Variables
     public string contextName = "";
 
-    public ChaseReactionTest_TrialDef CurrentTrialDef => GetCurrentTrialDef<ChaseReactionTest_TrialDef>();
-    public ChaseReactionTest_TaskLevel CurrentTaskLevel => GetTaskLevel<ChaseReactionTest_TaskLevel>();
+    public MazeReactionTest_TrialDef CurrentTrialDef => GetCurrentTrialDef<MazeReactionTest_TrialDef>();
+    public MazeReactionTest_TaskLevel CurrentTaskLevel => GetTaskLevel<MazeReactionTest_TaskLevel>();
     public override void DefineControlLevel()
     {
         //define States within this Control Level
@@ -164,7 +164,7 @@ public class ChaseReactionTest_TrialLevel : ControlLevel_Trial_Template
         {
             if(StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(CRT_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                USE_StartButton = new USE_StartButton(MRT_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                 StartButton = USE_StartButton.StartButtonGO;
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
             }

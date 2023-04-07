@@ -138,7 +138,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ChooseStim);
-        TouchFBController.EnableTouchFeedback(Handler, .3f, 150, CR_CanvasGO);
+        TouchFBController.EnableTouchFeedback(Handler, 2f, 150, CR_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -182,7 +182,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
 
-            Handler.MinDuration = minObjectTouchDuration.value;
+            Handler.MinDuration = 1f;
+            //Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
 
         });

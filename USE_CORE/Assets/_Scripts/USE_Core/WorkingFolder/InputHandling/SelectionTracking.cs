@@ -160,6 +160,8 @@ namespace SelectionTracking
             public int Num_HeldTooShort;
             public int Num_MovedTooFar;
 
+            public Vector3 InitialTouchPos;
+
             public event EventHandler<TouchFBController.TouchFeedbackArgs> TouchErrorFeedback;
 
             public SelectionHandler()
@@ -180,12 +182,13 @@ namespace SelectionTracking
                 LastSelection = new USE_Selection(null);
                 LastSuccessfulSelection = new USE_Selection(null);
                 LastUnsuccessfulSelection = new USE_Selection(null);
+
+                InitialTouchPos = new Vector3();
             }
 
             public SelectionHandler(InputDelegate inputLoc = null, float? minDuration = null, float? maxDuration = null,
                                     int? maxPixelDisplacement = null)
             {
-
                 if (inputLoc == null)
                     CurrentInputLocation = () => InputBroker.mousePosition; //default to just using the mouse
 

@@ -193,7 +193,7 @@ Canvas:
   serializedVersion: 3
   m_RenderMode: 1
   m_Camera: {fileID: 1780667517}
-  m_PlaneDistance: 100
+  m_PlaneDistance: 1
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
@@ -292,6 +292,7 @@ MonoBehaviour:
   ExperimenterDisplayController: {fileID: 0}
   SessionInfoPanel: {fileID: 0}
   TrialCompleteTime: 0
+  TouchFBController: {fileID: 0}
   AudioFBController: {fileID: 0}
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
@@ -302,13 +303,10 @@ MonoBehaviour:
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   InitialTokenAmount: 0
-  StartButtonTexture: {fileID: 0}
-  FBSquareTexture: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
-  BackdropTexture: {fileID: 0}
-  MazeBackgroundTexture: {fileID: 0}
+  THR_BackdropTexture: {fileID: 0}
   StimNoMaterialPrefab: {fileID: 3971733981247237095, guid: 48399b3e51fb047ff80a4c57704fcf7f,
     type: 3}
   StimLeftPrefab: {fileID: 7975343082115934864, guid: 807cad8d28a2e48ecb294f7b4351c79d,
@@ -323,8 +321,9 @@ MonoBehaviour:
   ButtonScale: 0
   OriginalStartButtonPosition: {x: 0, y: 0, z: 0}
   EC_CanvasGO: {fileID: 960539200}
+  StartButtonClassInstance: {fileID: 0}
+  ContextExternalFilePath: 
   IsHuman: 0
-  MaterialFilePath: 
   Flashing: 0
   ScaleTimer: 0
   AvgClickTime: 0
@@ -341,6 +340,22 @@ MonoBehaviour:
   NumLowerRewardChosen_Block: 0
   NumSameRewardChosen_Block: 0
   NumAborted_Block: 0
+  minObjectTouchDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  maxObjectTouchDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
   scalingInterval:
     name: 
     hidden: 0
@@ -394,7 +409,6 @@ MonoBehaviour:
   InflateAudioPlayed: 0
   clickTimings: []
   timeTracker: 0
-  mouseClicks: 0
   BalloonSelectedTime: 0
   StartButtonSelectedTime: 0
   TrialTouches: 0
@@ -469,12 +483,12 @@ MonoBehaviour:
   Touches_Task: 0
   NumChosenLeft_Task: 0
   NumChosenRight_Task: 0
-  NumChosenHigherReward_Task: 0
-  NumChosenLowerReward_Task: 0
-  NumChosenHigherEffort_Task: 0
-  NumChosenLowerEffort_Task: 0
-  NumChosenSameReward_Task: 0
-  NumChosenSameEffort_Task: 0
+  NumHigherRewardChosen_Task: 0
+  NumLowerRewardChosen_Task: 0
+  NumSameRewardChosen_Task: 0
+  NumHigherEffortChosen_Task: 0
+  NumLowerEffortChosen_Task: 0
+  NumSameEffortChosen_Task: 0
   NumAborted_Task: 0
   CurrentBlockString: 
   BlockStringsAdded: 0

@@ -155,7 +155,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         SelectionTracker.SelectionHandler MouseClickHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InflateBalloon);
-        TouchFBController.EnableTouchFeedback(MouseClickHandler, .3f, 150, EC_CanvasGO);
+        TouchFBController.EnableTouchFeedback(MouseClickHandler, 2f, 150, EC_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -180,7 +180,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if(MouseClickHandler.AllSelections.Count > 0)
                 MouseClickHandler.ClearSelections();
 
-            MouseClickHandler.MinDuration = minObjectTouchDuration.value;
+            MouseClickHandler.MinDuration = 1f;
+            //MouseClickHandler.MinDuration = minObjectTouchDuration.value;
             MouseClickHandler.MaxDuration = maxObjectTouchDuration.value;
         });
         InitTrial.SpecifyTermination(() => MouseClickHandler.LastSuccessfulSelectionMatches(StartButton), Delay, () =>

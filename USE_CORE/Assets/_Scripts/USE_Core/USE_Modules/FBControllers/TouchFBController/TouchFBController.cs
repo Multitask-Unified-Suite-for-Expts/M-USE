@@ -48,11 +48,8 @@ public class TouchFBController : MonoBehaviour
         TaskCanvas = TaskCanvasGO.GetComponent<Canvas>();
 
         if (HeldTooLong_Prefab == null)
-        {
-            //CreateFbCanvas();
             CreatePrefabs();
-        }
-
+       
         Handler.TouchErrorFeedback += OnTouchErrorFeedback; //Subscribe to event
     }
 
@@ -90,7 +87,7 @@ public class TouchFBController : MonoBehaviour
 
         InstantiatedGO = Instantiate(touchFb.Prefab, TaskCanvasGO.transform);
         InstantiatedGO.name = "TouchFeedback_GO";
-        InstantiatedGO.GetComponent<RectTransform>().anchoredPosition = touchFb.LocalPosOnCanvas;
+        InstantiatedGO.GetComponent<RectTransform>().anchoredPosition = touchFb.PosOnCanvas;
 
         ////EventCodeManager.SendCodeImmediate(SessionEventCodes["TouchFBController_FeedbackOn"]);
         Invoke("DestroyTouchFeedback", FeedbackDuration);
@@ -130,6 +127,7 @@ public class TouchFBController : MonoBehaviour
     //    TouchFeedback_Canvas.renderMode = RenderMode.ScreenSpaceOverlay;
     //    TouchFeedback_CanvasGO.AddComponent<CanvasScaler>();
     //    TouchFeedback_CanvasGO.AddComponent<GraphicRaycaster>();
+    //    TouchFeedback_CanvasGO.GetComponent<RectTransform>().position = new Vector3(0, 0, 0);
     //    TouchFeedback_Canvas.sortingOrder = 3000;
     //}
 
@@ -139,19 +137,19 @@ public class TouchFBController : MonoBehaviour
         public GameObject Prefab;
         public GameObject SelectedGO;
         public string FeedbackType; //"HeldTooLong" , "HeldTooShort", "MovedTooFar";
-        public Vector2 LocalPosOnCanvas;
+        public Vector2 PosOnCanvas;
         public TouchFBController TouchFeedbackController;
 
         public TouchFeedback(GameObject selectedGO, string fbType, GameObject prefab, TouchFBController touchFbController)
-        {
+        {            
             SelectedGO = selectedGO;
             FeedbackType = fbType;
             Prefab = prefab;
             TouchFeedbackController = touchFbController;
-            LocalPosOnCanvas = GetLocalPosOnCanvas();
+            PosOnCanvas = GetPosOnCanvas();
         }
 
-        public Vector2 GetLocalPosOnCanvas()
+        public Vector2 GetPosOnCanvas()
         {
             RectTransform canvasRect = TouchFeedbackController.TaskCanvas.GetComponent<RectTransform>();
             Vector3 screenPos = Camera.main.WorldToScreenPoint(SelectedGO.transform.position);
@@ -174,35 +172,3 @@ public class TouchFBController : MonoBehaviour
         }
     }
 }
-
-
-
-
-
-
-
-
-
-//public GameObject CreateTouchFbPrefab(string fbType)
-//{
-//    GameObject go = new GameObject(fbType);
-//    go.AddComponent<RectTransform>();
-//    Image image = go.AddComponent<Image>();
-//    image.rectTransform.sizeDelta = new Vector2(150f, 150f);
-
-//    switch (fbType)
-//    {
-//        case "DurationTooLong":
-//            image.sprite = Sprite.Create(HeldTooLong_Texture, new Rect(0, 0, HeldTooLong_Texture.width, HeldTooLong_Texture.height), new Vector2(.5f, .5f));
-//            break;
-//        case "DurationTooShort":
-//            image.sprite = Sprite.Create(HeldTooShort_Texture, new Rect(0, 0, HeldTooShort_Texture.width, HeldTooShort_Texture.height), new Vector2(.5f, .5f));
-//            break;
-//        case "MovedTooFar":
-//            image.sprite = Sprite.Create(MovedTooFar_Texture, new Rect(0, 0, MovedTooFar_Texture.width, MovedTooFar_Texture.height), new Vector2(.5f, .5f));
-//            break;
-//        default:
-//            break;
-//    }
-//    return go;
-//}

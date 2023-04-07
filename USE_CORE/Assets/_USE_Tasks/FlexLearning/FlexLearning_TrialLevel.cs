@@ -12,6 +12,7 @@ using UnityEngine.Serialization;
 using UnityEngine.UI;
 using USE_ExperimentTemplate_Task;
 using ContinuousRecognition_Namespace;
+using System.Windows.Forms;
 
 public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 {
@@ -92,9 +93,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     private bool aborted = false;
     private Ray ray;
     private RaycastHit hit;
-    private bool HeldTooShort;
-    private bool HeldTooLong;
-    private float gratingDuration;
+    //private bool HeldTooShort;
+    //private bool HeldTooLong;
+    //private float gratingDuration;
     
     public override void DefineControlLevel()
     {
@@ -110,7 +111,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         Add_ControlLevel_InitializationMethod(() =>
         {
             LoadTextures(ContextExternalFilePath);
-            Text commandText = null;
             playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
             playerViewText = new GameObject();
             playerViewParent = GameObject.Find("MainCameraCopy");     
@@ -129,10 +129,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             //Set the Stimuli Light/Shadow settings
             SetShadowType(ShadowType, "FlexLearning_DirectionalLight");
             if (StimFacingCamera)
-            {
                 MakeStimFaceCamera();
-            }
-
+            
             if (StartButton == null)
             {
                 USE_StartButton = new USE_StartButton(FL_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
@@ -159,6 +157,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
         var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, SearchDisplay);
+        TouchFBController.EnableTouchFeedback(Handler, .3f, StartButtonScale, FL_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -176,11 +175,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton),
-            SearchDisplayDelay, () =>
-            {
-                EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
-            });
+        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton),
+            SearchDisplayDelay, () => EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]));
 
         // Provide delay following start button selection and before stimuli onset
         SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay);
@@ -189,17 +185,39 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SearchDisplay.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they holding down
-            // Toggle TokenBar and Stim to be visible
             TokenFBController.enabled = true;
             ActivateChildren(playerViewParent);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
+
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
+
+            Handler.ClearCounts();
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
-            TouchDurationErrorFeedback(USE_FBSquare, true);
+            if(Handler.SuccessfulSelections.Count > 0)
+            {
+                selectedGO = Handler.LastSuccessfulSelection.SelectedGameObject;
+                selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
+                Handler.ClearSelections();
+                if(selectedSD != null)
+                    choiceMade = true;
+            }
         });
-        SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () => {
+        SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
+        {
+            if (Handler.ErrorCount > 0)
+            {
+                TouchDurationError = true;
+                TouchDurationError_InBlock += Handler.ErrorCount;
+                CurrentTaskLevel.TouchDurationError_InTask += Handler.ErrorCount;
+                Handler.ClearCounts();
+            }
+            else
+                TouchDurationError = false;
+
             CorrectSelection = selectedSD.IsTarget;
             if (CorrectSelection)
             {       
@@ -224,11 +242,12 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 SelectedStimLocation = selectedSD.StimLocation;
             }
             Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock,(TrialCount_InBlock + 1));
+            SetTrialSummaryString();
         });
 
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            if (Handler.LastSelection.SelectedGameObject.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>() == null)   //means the player got timed out and didn't click on anything
+            if (selectedSD == null)   //means the player got timed out and didn't click on anything
             {
                 runningAcc.Add(0);
                 AbortedTrials_InBlock++;
@@ -471,69 +490,5 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, MinTrials,
             MaxTrials) || TrialCount_InBlock == MaxTrials);
         
-    }
-    private void TouchDurationErrorFeedback(USE_StartButton UIElement, bool deactivateAfter)
-     {
-         if (UIElement.IsGrating)
-         {
-             gratingDuration -= Time.deltaTime;
-             if (HeldTooShort)
-                 UIElement.GratedStartButtonFlash(HeldTooShortTexture, gratingDuration, deactivateAfter);
-             else
-                 UIElement.GratedStartButtonFlash(HeldTooLongTexture, gratingDuration, deactivateAfter);
-             return;
-         }
-
-         if (InputBroker.GetMouseButtonDown(0) && !UIElement.IsGrating)
-         {
-             ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-             selectionDuration = 0;
-             HeldTooLong = false;
-             HeldTooShort = false;
-             //record start position as well
-         }
-
-         selectionDuration += Time.deltaTime;
-         if (InputBroker.GetMouseButtonUp(0) && selectionDuration != null)
-         {
-             if (Physics.Raycast(ray, out hit))
-             {
-                 if ((hit.collider != null) && (hit.collider.gameObject != null) &&
-                     (selectionDuration >= minObjectTouchDuration.value) &&
-                     (selectionDuration <= maxObjectTouchDuration.value))
-                 {
-                     choiceMade = true;
-                     TouchDurationError = false;
-                     selectedGO = hit.collider.gameObject;
-                     selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
-                     CorrectSelection = selectedSD.IsTarget;
-                 }
-                 else if (selectionDuration < minObjectTouchDuration.value)
-                 {
-                     UIElement.GratedStartButtonFlash(HeldTooShortTexture, gratingSquareDuration.value,
-                         deactivateAfter);
-                     gratingDuration = gratingSquareDuration.value;
-                     TouchDurationError = true;
-                     HeldTooShort = true;
-                     TouchDurationError_InBlock++;
-                     CurrentTaskLevel.TouchDurationError_InTask++;
-                     Debug.Log("Didn't select for minimum object touch duration!");
-                 }
-                 else if (selectionDuration > maxObjectTouchDuration.value)
-                 {
-                     UIElement.GratedStartButtonFlash(HeldTooLongTexture, gratingSquareDuration.value, deactivateAfter);
-                     gratingDuration = gratingSquareDuration.value;
-                     TouchDurationError = true;
-                     HeldTooLong = true;
-                     TouchDurationError_InBlock++;
-                     CurrentTaskLevel.TouchDurationError_InTask++;
-                     Debug.Log("Didn't select under max object touch duration!");
-                 }
-             }
-
-             selectionDuration = null; // set this as null to consider multiple selections in a state
-         }
-
-         SetTrialSummaryString();
     }
 }

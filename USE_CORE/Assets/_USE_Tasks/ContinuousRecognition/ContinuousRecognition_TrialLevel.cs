@@ -125,9 +125,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 USE_StartButtonInstance.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 OriginalStartButtonPosition = StartButton.transform.position;
             }
-
             playerViewParent = GameObject.Find("MainCameraCopy").transform;
-
         });
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
@@ -140,7 +138,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ChooseStim);
-        Handler.MinDuration = .5f;
+        TouchFBController.EnableTouchFeedback(Handler, .3f, ButtonScale, CR_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -186,34 +184,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
+
         });
-        InitTrial.AddUpdateMethod(() =>
-        {
-            //if(Handler.AllSelections.Count > 0)
-            //{
-            //    if(!Handler.LastSelection.WasSuccessful)
-            //    {
-            //        if (Handler.LastSelection.ErrorType == "DurationTooShort")
-            //        {
-            //            Debug.Log("TOO SHORT!");
-            //            USE_StartButtonInstance.GratedStartButtonFlash(HeldTooShortTexture, 1f, true);
-            //        }
-            //        else if (Handler.LastSelection.ErrorType == "DurationTooLong")
-            //        {
-            //            Debug.Log("TOO LONG!");
-            //            USE_StartButtonInstance.GratedStartButtonFlash(HeldTooLongTexture, 1f, true);
-            //        }
-            //        else if (Handler.LastSelection.ErrorType == "MovedTooFar")
-            //        {
-            //            Debug.Log("MOVED TOO FAR!");
-            //            USE_StartButtonInstance.GratedStartButtonFlash(BackdropStripesTexture, 1f, true);
-            //        }
-            //        else
-            //            Debug.Log("MUST HAVE BEEN AN ERROR FOR ANOTHER REASON......");
-            //    }
-            //}
-        });
-        InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), DisplayStims);
+        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
             if (TitleTextGO.activeInHierarchy)
@@ -328,7 +301,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            if (ChosenGO != null && ChosenStim != null) //if they chose a stim 
+            if (ChosenGO != null && ChosenStim != null && Handler.SuccessfulSelections.Count > 0) //if they chose a stim 
                 StimIsChosen = true;
 
             //Count NonStim Clicks:
@@ -341,7 +314,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
         });
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
-        ChooseStim.AddTimer(() => chooseStimDuration.value, TokenUpdate, () =>  //if time runs out
+        ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
         {
             AudioFBController.Play("Negative");
             EndBlock = true;
@@ -497,7 +470,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (currentStim.PreviouslyChosen)
                 stimString = "PC";
 
-            playerViewText = playerView.WriteText(stimString, stimString, stimString == "PC" ? Color.red : Color.blue, textLocation, textSize, playerViewParent);
+            playerViewText = playerView.WriteText(stimString, stimString, stimString == "PC" ? Color.red : Color.green, textLocation, textSize, playerViewParent);
             playerViewText.GetComponent<RectTransform>().localScale = new Vector3(1.1f, 1.1f, 0);
             playerViewTextList.Add(playerViewText);
         }

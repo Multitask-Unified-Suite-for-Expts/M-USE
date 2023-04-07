@@ -191,23 +191,26 @@ MonoBehaviour:
     IsActive: 0
   TrialStims: []
   ExperimenterDisplayController: {fileID: 0}
+  SessionInfoPanel: {fileID: 0}
+  TrialCompleteTime: 0
+  TouchFBController: {fileID: 0}
   AudioFBController: {fileID: 0}
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
+  SliderFBController: {fileID: 0}
   MouseTracker: {fileID: 0}
   GazeTracker: {fileID: 0}
   SelectionType: 
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   InitialTokenAmount: 0
-  StartButtonTexture: {fileID: 0}
-  FBSquareTexture: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
-  BackdropTexture: {fileID: 0}
-  MazeBackgroundTexture: {fileID: 0}
+  THR_BackdropTexture: {fileID: 0}
   WM_CanvasGO: {fileID: 2045950497}
+  USE_StartButton: {fileID: 0}
+  USE_FBSquare: {fileID: 0}
   runningAcc: 
   MinTrials: 0
   MaxTrials: 0
@@ -251,23 +254,7 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  trialEndDuration:
-    name: 
-    hidden: 0
-    value: 0
-    isRange: 0
-    max: 0
-    min: 0
-    precision: 0
-  initTrialDuration:
-    name: 
-    hidden: 0
-    value: 0
-    isRange: 0
-    max: 0
-    min: 0
-    precision: 0
-  baselineDuration:
+  tokenFlashingDuration:
     name: 
     hidden: 0
     value: 0
@@ -331,33 +318,27 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  tokenFbDuration:
-    name: 
-    hidden: 0
-    value: 0
-    isRange: 0
-    max: 0
-    min: 0
-    precision: 0
   ContextExternalFilePath: 
-  ButtonPosition: {x: 0, y: 0, z: 0}
-  ButtonScale: {x: 0, y: 0, z: 0}
+  StartButtonPosition: {x: 0, y: 0, z: 0}
+  StartButtonScale: 0
   FBSquarePosition: {x: 0, y: 0, z: 0}
-  FBSquareScale: {x: 0, y: 0, z: 0}
+  FBSquareScale: 0
   StimFacingCamera: 0
   ShadowType: 
   NeutralITI: 0
   playerViewTextList: []
   playerViewText: {fileID: 0}
+  ContextName: 
   NumCorrect_InBlock: 0
-  SearchDurationsList: []
+  SearchDurations_InBlock: []
   NumErrors_InBlock: 0
-  NumRewardGiven_InBlock: 0
+  NumRewardPulses_InBlock: 0
   NumTokenBarFull_InBlock: 0
   TotalTokensCollected_InBlock: 0
   Accuracy_InBlock: 0
   AverageSearchDuration_InBlock: 0
   TouchDurationError_InBlock: 0
+  NumAborted_InBlock: 0
 --- !u!114 &108587574
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -418,9 +399,20 @@ MonoBehaviour:
   PreloadedStimGameObjects: []
   PrefabStimPaths: []
   ExperimenterDisplayController: {fileID: 0}
+  SessionInfoPanel: {fileID: 0}
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
+  NumCorrect_InTask: 0
+  SearchDurations_InTask: []
+  NumErrors_InTask: 0
+  NumRewardPulses_InTask: 0
+  NumTokenBarFull_InTask: 0
+  TotalTokensCollected_InTask: 0
+  Accuracy_InTask: 0
+  AverageSearchDuration_InTask: 0
+  TouchDurationError_InTask: 0
+  NumAborted_InTask: 0
 --- !u!4 &108587575
 Transform:
   m_ObjectHideFlags: 0
@@ -747,7 +739,7 @@ Canvas:
   serializedVersion: 3
   m_RenderMode: 1
   m_Camera: {fileID: 1812093641}
-  m_PlaneDistance: 100
+  m_PlaneDistance: 1
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0

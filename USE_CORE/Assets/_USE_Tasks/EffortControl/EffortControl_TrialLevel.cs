@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 using USE_ExperimentTemplate_Trial;
 using ConfigDynamicUI;
 using USE_UI;
-
+using SelectionTracking;
+using UnityEngine.EventSystems;
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 {
@@ -153,7 +154,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
-        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InflateBalloon);
+        SelectionTracker.SelectionHandler MouseClickHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InflateBalloon);
+        TouchFBController.EnableTouchFeedback(MouseClickHandler, .3f, ButtonScale, EC_CanvasGO);
+
+        RectTransform rect = EC_CanvasGO.GetComponent<Canvas>().GetComponent<RectTransform>();
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -175,18 +179,17 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             currentTask.CalculateBlockSummaryString();
 
-            if(Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            if(MouseClickHandler.AllSelections.Count > 0)
+                MouseClickHandler.ClearSelections();
 
-            Handler.MinDuration = minObjectTouchDuration.value;
-            Handler.MaxDuration = maxObjectTouchDuration.value;
+            MouseClickHandler.MinDuration = minObjectTouchDuration.value;
+            MouseClickHandler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => Handler.SelectionMatches(StartButton), Delay, () =>
+        InitTrial.SpecifyTermination(() => MouseClickHandler.LastSuccessfulSelectionMatches(StartButton), Delay, () =>
         {
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
             StartButton.SetActive(false);
-
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
         });
 
@@ -209,21 +212,21 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             SideChoice = null;
 
-            if(Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            if(MouseClickHandler.AllSelections.Count > 0)
+                MouseClickHandler.ClearSelections();
         });
 
         ChooseBalloon.AddUpdateMethod(() =>
         {
-            if (Handler.SuccessfulSelections.Count > 0)
+            if (MouseClickHandler.SuccessfulSelections.Count > 0)
             {
                 BalloonSelectedTime = Time.time;
-                if (Handler.LastSelection.SelectedGameObject.name.Contains("Left"))
+                if (MouseClickHandler.LastSelection.SelectedGameObject.name.Contains("Left"))
                 {
                     SideChoice = "Left";
                     TrialStim = StimLeft;
                 }
-                else if (Handler.LastSelection.SelectedGameObject.name.Contains("Right"))
+                else if (MouseClickHandler.LastSelection.SelectedGameObject.name.Contains("Right"))
                 {
                     SideChoice = "Right";
                     TrialStim = StimRight;
@@ -233,9 +236,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             //Neg FB if touch outside balloon. Adding "sideChoice == null" so that they cant click outside balloon at the end and mess up pop audio.
             if (InputBroker.GetMouseButtonDown(0) && SideChoice == null)
             {
-                Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-                RaycastHit hitt;
-                if (!Physics.Raycast(ray, out hitt))
+                GameObject hitGO = InputBroker.RaycastBoth(InputBroker.mousePosition);
+                if (hitGO == null)
                     AudioFBController.Play("Negative");
             }
         });
@@ -318,8 +320,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             TrialTouches = 0;
             NumInflations = 0;
 
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            if (MouseClickHandler.AllSelections.Count > 0)
+                MouseClickHandler.ClearSelections();
 
             SetTrialSummaryString();
         });
@@ -342,7 +344,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     else
                     {
                         Inflate = false;
-                        Handler.HandlerActive = true;
+                        MouseClickHandler.HandlerActive = true;
                         if (NumInflations >= InflationsNeeded)
                         {
                             Response = 1;
@@ -353,9 +355,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            if (Handler.SuccessfulSelections.Count > NumInflations && !Inflate)
+            if (MouseClickHandler.SuccessfulSelections.Count > NumInflations && !Inflate)
             {
-                if(Handler.SelectionMatches(TrialStim) || Handler.SelectionMatches(MaxOutline_Left) || Handler.SelectionMatches(MaxOutline_Right))
+                if(MouseClickHandler.LastSuccessfulSelectionMatches(TrialStim) || MouseClickHandler.LastSuccessfulSelectionMatches(MaxOutline_Left) || MouseClickHandler.LastSuccessfulSelectionMatches(MaxOutline_Right))
                 {
                     if(NumInflations < InflationsNeeded)
                     {
@@ -363,7 +365,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                         clickTimings.Add(Time.time - timeTracker);
                         timeTracker = Time.time;
 
-                        Handler.HandlerActive = false;
+                        MouseClickHandler.HandlerActive = false;
                         NumInflations++;
                         CalculateInflation(); //Sets Inflate to TRUE at end of func
                         InflateAudioPlayed = false;
@@ -374,13 +376,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.
             if (InputBroker.GetMouseButtonDown(0) && Response != 1)
             {
-                Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-                RaycastHit hit;
-                if (!Physics.Raycast(ray, out hit))
+                GameObject hitGO = InputBroker.RaycastBoth(InputBroker.mousePosition);
+                if (hitGO == null)
                     AudioFBController.Play("Negative");
             }
 
-            if(InputBroker.GetMouseButtonUp(0))
+            if (InputBroker.GetMouseButtonUp(0))
             {
                 TrialTouches++;
                 SetTrialSummaryString();
@@ -554,25 +555,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         Inflate = true;
     }
-
-    //IEnumerator FlashOutline()
-    //{
-    //    Flashing = true;
-    //    GameObject container = (SideChoice == "Left") ? BalloonContainerLeft : BalloonContainerRight;
-
-    //    GameObject child = container.transform.GetChild(ClickCount).transform.gameObject;
-    //    if (child != null && Response != 1 && !Inflate)
-    //    {
-    //        child.transform.GetComponent<Renderer>().material.color = Color.red;
-    //        yield return new WaitForSeconds(.5f);
-    //        if(child != null)
-    //        {
-    //            child.transform.GetComponent<Renderer>().material.color = OffWhiteOutlineColor;
-    //            yield return new WaitForSeconds(.5f);
-    //        }
-    //    }
-    //    Flashing = false;
-    //}
 
     void RecordChoices()
     {

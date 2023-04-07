@@ -47,8 +47,9 @@ namespace USE_ExperimentTemplate_Trial
         public float TrialCompleteTime;
 
         [HideInInspector] public SelectionTracker SelectionTracker;
-        
+
         // Feedback Controllers
+        [HideInInspector] public TouchFBController TouchFBController;
         [HideInInspector] public AudioFBController AudioFBController;
         [HideInInspector] public HaloFBController HaloFBController;
         [HideInInspector] public TokenFBController TokenFBController;
@@ -454,6 +455,10 @@ namespace USE_ExperimentTemplate_Trial
             HeldTooShortTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "VerticalStripes.png"));
             BackdropStripesTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "bg.png"));
             THR_BackdropTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "Concrete4.png"));
+
+            TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
+            TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
+            TouchFBController.MovedTooFar_Texture = BackdropStripesTexture;
         }
 
         public virtual void ResetTrialVariables()

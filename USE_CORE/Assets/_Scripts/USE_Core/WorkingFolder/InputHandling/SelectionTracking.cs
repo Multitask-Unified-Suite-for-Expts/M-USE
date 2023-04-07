@@ -260,6 +260,11 @@ namespace SelectionTracking
                 Num_MovedTooFar = 0;
             }
 
+            public int GetErrorCount()
+            {
+                return Num_HeldTooLong + Num_HeldTooShort + Num_MovedTooFar;
+            }
+
             public bool LastSuccessfulSelectionMatches(GameObject go)
             {
                 return ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go);

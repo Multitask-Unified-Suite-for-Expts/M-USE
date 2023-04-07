@@ -193,7 +193,7 @@ Canvas:
   serializedVersion: 3
   m_RenderMode: 1
   m_Camera: {fileID: 1981090709}
-  m_PlaneDistance: 100
+  m_PlaneDistance: 1
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
@@ -385,6 +385,7 @@ MonoBehaviour:
   ExperimenterDisplayController: {fileID: 0}
   SessionInfoPanel: {fileID: 0}
   TrialCompleteTime: 0
+  TouchFBController: {fileID: 0}
   AudioFBController: {fileID: 0}
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
@@ -398,8 +399,10 @@ MonoBehaviour:
   HeldTooLongTexture: {fileID: 2800000, guid: 47b4a2dd1c0432a469c082a17ab4256a, type: 3}
   HeldTooShortTexture: {fileID: 2800000, guid: 386006c0d81ea3442b946e37d70067af, type: 3}
   BackdropStripesTexture: {fileID: 0}
-  BackdropTexture: {fileID: 0}
+  THR_BackdropTexture: {fileID: 0}
   VS_CanvasGO: {fileID: 37832912}
+  USE_StartButton: {fileID: 0}
+  USE_FBSquare: {fileID: 0}
   minObjectTouchDuration:
     name: 
     hidden: 0

@@ -156,8 +156,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
-        SelectionTracker.SelectionHandler MouseClickHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InflateBalloon);
-        TouchFBController.EnableTouchFeedback(MouseClickHandler, TouchFeedbackDuration, ButtonScale, EC_CanvasGO);
+        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InflateBalloon);
+        TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, ButtonScale, EC_CanvasGO);
 
         RectTransform rect = EC_CanvasGO.GetComponent<Canvas>().GetComponent<RectTransform>();
 
@@ -181,13 +181,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             currentTask.CalculateBlockSummaryString();
 
-            if(MouseClickHandler.AllSelections.Count > 0)
-                MouseClickHandler.ClearSelections();
-
-            MouseClickHandler.MinDuration = minObjectTouchDuration.value;
-            MouseClickHandler.MaxDuration = maxObjectTouchDuration.value;
+            if(Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
+            TouchFBController.ClearErrorCounts();
+            Handler.MinDuration = minObjectTouchDuration.value;
+            Handler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => MouseClickHandler.LastSuccessfulSelectionMatches(StartButton), Delay, () =>
+        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton), Delay, () =>
         {
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
@@ -214,21 +214,21 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             SideChoice = null;
 
-            if(MouseClickHandler.AllSelections.Count > 0)
-                MouseClickHandler.ClearSelections();
+            if(Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
         });
 
         ChooseBalloon.AddUpdateMethod(() =>
         {
-            if (MouseClickHandler.SuccessfulSelections.Count > 0)
+            if (Handler.SuccessfulSelections.Count > 0)
             {
                 BalloonSelectedTime = Time.time;
-                if (MouseClickHandler.LastSelection.SelectedGameObject.name.Contains("Left"))
+                if (Handler.LastSelection.SelectedGameObject.name.Contains("Left"))
                 {
                     SideChoice = "Left";
                     TrialStim = StimLeft;
                 }
-                else if (MouseClickHandler.LastSelection.SelectedGameObject.name.Contains("Right"))
+                else if (Handler.LastSelection.SelectedGameObject.name.Contains("Right"))
                 {
                     SideChoice = "Right";
                     TrialStim = StimRight;
@@ -322,8 +322,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             TrialTouches = 0;
             NumInflations = 0;
 
-            if (MouseClickHandler.AllSelections.Count > 0)
-                MouseClickHandler.ClearSelections();
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
 
             SetTrialSummaryString();
         });
@@ -346,7 +346,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     else
                     {
                         Inflate = false;
-                        MouseClickHandler.HandlerActive = true;
+                        Handler.HandlerActive = true;
                         if (NumInflations >= InflationsNeeded)
                         {
                             Response = 1;
@@ -357,9 +357,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            if (MouseClickHandler.SuccessfulSelections.Count > NumInflations && !Inflate)
+            if (Handler.SuccessfulSelections.Count > NumInflations && !Inflate)
             {
-                if(MouseClickHandler.LastSuccessfulSelectionMatches(TrialStim) || MouseClickHandler.LastSuccessfulSelectionMatches(MaxOutline_Left) || MouseClickHandler.LastSuccessfulSelectionMatches(MaxOutline_Right))
+                if(Handler.LastSuccessfulSelectionMatches(TrialStim) || Handler.LastSuccessfulSelectionMatches(MaxOutline_Left) || Handler.LastSuccessfulSelectionMatches(MaxOutline_Right))
                 {
                     if(NumInflations < InflationsNeeded)
                     {
@@ -367,7 +367,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                         clickTimings.Add(Time.time - timeTracker);
                         timeTracker = Time.time;
 
-                        MouseClickHandler.HandlerActive = false;
+                        Handler.HandlerActive = false;
                         NumInflations++;
                         CalculateInflation(); //Sets Inflate to TRUE at end of func
                         InflateAudioPlayed = false;
@@ -418,7 +418,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             else
             {
                 NumAborted_Block++;
-                currentTask.NumAborted_Task++;
                 AudioFBController.Play("TimeRanOut");
                 TokenFBController.enabled = false;
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["NoChoice"]);
@@ -443,7 +442,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 }
 
                 Completions_Block++;
-                currentTask.Completions_Task++;
                 AddTokenInflateAudioPlayed = true;
             }
             else
@@ -504,7 +502,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"] || AbortCode == AbortCodeDict["EndBlock"]) //If used RestartBlock, PreviousBlock, or EndBlock hotkeys
         {
             NumAborted_Block++;
-            currentTask.NumAborted_Task++;
             currentTask.ClearStrings();
             currentTask.BlockSummaryString.AppendLine("");
         }
@@ -563,49 +560,29 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if(SideChoice == "Left")
         {
             NumChosenLeft_Block++;
-            currentTask.NumChosenLeft_Task++;
             EffortChoice = CompareValues(currentTrial.NumClicksLeft, currentTrial.NumClicksRight);
             RewardChoice = CompareValues(currentTrial.NumCoinsLeft, currentTrial.NumCoinsRight);
         }
         else
         {
             NumChosenRight_Block++;
-            currentTask.NumChosenRight_Task++;
             EffortChoice = CompareValues(currentTrial.NumClicksRight, currentTrial.NumClicksLeft);
             RewardChoice = CompareValues(currentTrial.NumCoinsRight, currentTrial.NumCoinsLeft);
         }
 
         if (EffortChoice == "Higher")
-        {
             NumHigherEffortChosen_Block++;
-            currentTask.NumHigherEffortChosen_Task++;
-        }
         else if (EffortChoice == "Lower")
-        {
             NumLowerEffortChosen_Block++;
-            currentTask.NumLowerEffortChosen_Task++;
-        }
         else
-        {
             NumSameEffortChosen_Block++;
-            currentTask.NumSameEffortChosen_Task++;
-        }
 
         if (RewardChoice == "Higher")
-        {
             NumHigherRewardChosen_Block++;
-            currentTask.NumHigherRewardChosen_Task++;
-        }
         else if (RewardChoice == "Lower")
-        {
             NumLowerRewardChosen_Block++;
-            currentTask.NumLowerRewardChosen_Task++;
-        }
         else
-        { 
             NumSameRewardChosen_Block++;
-            currentTask.NumSameRewardChosen_Task++;
-        }
     }
 
     public string CompareValues(int chosenValue, int otherValue)

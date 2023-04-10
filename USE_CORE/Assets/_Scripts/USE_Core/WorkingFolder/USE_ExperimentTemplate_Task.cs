@@ -371,7 +371,7 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.LoadTextures(ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 
 
             //Automatically giving TouchFbController;
-            TrialLevel.TouchFBController.Init(FrameData);
+            TrialLevel.TouchFBController.Init(TrialData, FrameData);
 
             bool audioInited = false;
             foreach (string fbController in fbControllersList)

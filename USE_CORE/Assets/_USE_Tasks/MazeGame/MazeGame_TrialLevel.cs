@@ -192,7 +192,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         InitTrial.AddInitializationMethod(() =>
         {
             Handler.HandlerActive = true;
-            Handler.ClearCounts();
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
             Handler.MinDuration = minObjectTouchDuration.value;
@@ -226,7 +225,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             choiceDuration = 0;
 
             Handler.HandlerActive = true;
-            Handler.ClearCounts();
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
             Handler.MinDuration = minObjectTouchDuration.value;
@@ -363,13 +361,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 }
             }
             else if (CheckTileFlash())
-            {
                 StateAfterDelay = TileFlashFeedback;
-            }
             else
-            {
                 StateAfterDelay = ChooseTile; // could be incorrect or correct but it will still go back
-            }
             
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["TileFbOff"]);
             CorrectSelection = false;
@@ -387,6 +381,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         });
         ITI.AddInitializationMethod(() =>
         {
+            //if (Handler.ErrorCount > 0)
+            //{
+            //    CurrentTaskLevel.TouchDurationError_Block += Handler.ErrorCount;
+            //    Handler.ClearErrorCounts();
+            //}
+
             DisableSceneElements();
             DestroyChildren(playerViewParent);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOff"]);

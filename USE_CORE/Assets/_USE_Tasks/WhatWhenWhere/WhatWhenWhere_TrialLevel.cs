@@ -51,7 +51,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //Block Data Logging Variables
     public List<float> searchDurations_InBlock;
     public int numRewardGiven_InBlock;
-    public int touchDurationErrorCount_InBlock;
     public int repetitionErrorCount_InBlock;
     public int AbortedTrials_InBlock;
     public int slotErrorCount_InBlock;
@@ -219,7 +218,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.SetTaskSummaryString();
 
             Handler.HandlerActive = true;
-            Handler.ClearCounts();
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
             Handler.MinDuration = minObjectTouchDuration.value;
@@ -253,7 +251,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 HaloFBController.SetLeaveFeedbackOn();
 
             Handler.HandlerActive = true;
-            Handler.ClearCounts();
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
         });
@@ -518,7 +515,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         distractorSlotErrorCount_InBlock = 0;
         repetitionErrorCount_InBlock = 0;
         AbortedTrials_InBlock = 0;
-        touchDurationErrorCount_InBlock = 0;
         numNonStimSelections_InBlock = 0;
         numRewardGiven_InBlock = 0;
         //comment better here

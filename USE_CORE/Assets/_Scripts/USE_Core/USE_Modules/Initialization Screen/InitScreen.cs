@@ -45,8 +45,16 @@ public class InitScreen : MonoBehaviour {
 
     public event System.Action OnConfirm, OnLoadSettings;
 
+    public bool SingleDisplayBuild = true; //Used to control whether or not the InitScreenCanvas renders to Display1 or Display2.
+
     void Start()
     {
+        if(SingleDisplayBuild)
+        {
+            Canvas parentCanvas = GetComponentInParent<Canvas>();
+            parentCanvas.targetDisplay--;
+        }
+
         foreach (GameObject g in disableOnStart)
             g.SetActive(false);
         foreach (GameObject g in enableOnStart)
@@ -70,7 +78,7 @@ public class InitScreen : MonoBehaviour {
         if(OnConfirm != null)
             OnConfirm();
  
-        this.gameObject.SetActive(false);
+        gameObject.SetActive(false);
         yield return 0;
     }
 
@@ -80,3 +88,5 @@ public class InitScreen : MonoBehaviour {
     }
 
 }
+
+

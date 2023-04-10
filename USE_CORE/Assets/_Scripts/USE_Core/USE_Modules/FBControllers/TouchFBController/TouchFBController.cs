@@ -19,8 +19,9 @@ public class TouchFBController : MonoBehaviour
     public GameObject HeldTooLong_Prefab;
     public GameObject HeldTooShort_Prefab;
     public GameObject MovedTooFar_Prefab;
-    public float FeedbackSize;
-    public float FeedbackDuration = .3f;
+    public List<GameObject> PrefabList;
+    public float FeedbackSize = 150f; //Default is 150;
+    public float FeedbackDuration = .3f; //Default is .3
     public bool FeedbackOn;
     //Textures are currently set in The Trial Template "LoadTextures" method:
     public Texture2D HeldTooLong_Texture;
@@ -29,15 +30,35 @@ public class TouchFBController : MonoBehaviour
     [HideInInspector] public EventCodeManager EventCodeManager;
     [HideInInspector] public Dictionary<string, EventCode> SessionEventCodes;
 
+    public int Num_HeldTooLong;
+    public int Num_HeldTooShort;
+    public int Num_MovedTooFar;
 
-    public void Init(DataController frameData)
+    public int ErrorCount
     {
+        get
+        {
+            return Num_HeldTooLong + Num_HeldTooShort + Num_MovedTooFar;
+        }
+    }
+
+
+    public void Init(DataController trialData, DataController frameData)
+    {
+        trialData.AddDatum("Num_HeldTooLong", () => Num_HeldTooLong);
+        trialData.AddDatum("Num_HeldTooShort", () => Num_HeldTooLong);
+        trialData.AddDatum("Num_MovedTooFar", () => Num_HeldTooLong);
+
         frameData.AddDatum("FeedbackOn", () => FeedbackOn.ToString());
         if (InstantiatedGO != null)
             Destroy(InstantiatedGO);
         InstantiatedGO = null;
         HeldTooLong_Prefab = null; //making 1 prefab null so we can save a "PrefabsCreated" boolean
+        Num_HeldTooLong = 0;
+        Num_HeldTooShort = 0;
+        Num_MovedTooFar = 0;
     }
+
 
     public void EnableTouchFeedback(SelectionTracker.SelectionHandler handler, float fbDuration, float fbSize, GameObject taskCanvasGO)
     {        
@@ -52,6 +73,17 @@ public class TouchFBController : MonoBehaviour
        
         Handler.TouchErrorFeedback += OnTouchErrorFeedback; //Subscribe to event
     }
+    public void EnableTouchFeedback(SelectionTracker.SelectionHandler handler, GameObject taskCanvasGO)
+    {
+        Handler = handler;
+        TaskCanvasGO = taskCanvasGO;
+        TaskCanvas = TaskCanvasGO.GetComponent<Canvas>();
+
+        if (HeldTooLong_Prefab == null)
+            CreatePrefabs();
+
+        Handler.TouchErrorFeedback += OnTouchErrorFeedback; //Subscribe to event
+    }
 
     private void OnTouchErrorFeedback(object sender, TouchFeedbackArgs e)
     {
@@ -64,14 +96,18 @@ public class TouchFBController : MonoBehaviour
             {
                 case "DurationTooLong":
                     Debug.Log("Touch Duration too long.....");
+                    Num_HeldTooLong++;
                     ShowTouchFeedback(new TouchFeedback(e.Selection, HeldTooLong_Prefab, this));
                     break;
                 case "DurationTooShort":
                     Debug.Log("Touch Duration too short.....");
+                    Num_HeldTooShort++;
+                    Debug.Log("NUM HELD TOO SHORT AFTER: " + Num_HeldTooLong);
                     ShowTouchFeedback(new TouchFeedback(e.Selection, HeldTooShort_Prefab, this));
                     break;
                 case "MovedTooFar":
                     Debug.Log("Touch Moved too far.....");
+                    Num_MovedTooFar++;
                     ShowTouchFeedback(new TouchFeedback(e.Selection, MovedTooFar_Prefab, this));
                     break;
                 default:
@@ -117,6 +153,7 @@ public class TouchFBController : MonoBehaviour
         Image image = go.AddComponent<Image>();
         image.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
         image.rectTransform.sizeDelta = new Vector2(FeedbackSize, FeedbackSize);
+        PrefabList.Add(go); //add to prefab list. 
         return go;
     }
 
@@ -130,6 +167,47 @@ public class TouchFBController : MonoBehaviour
     //    TouchFeedback_CanvasGO.GetComponent<RectTransform>().position = new Vector3(0, 0, 0);
     //    TouchFeedback_Canvas.sortingOrder = 3000;
     //}
+
+    public void IncrementErrorCount(string error)
+    {
+        switch (error)
+        {
+            case "DurationTooLong":
+                Num_HeldTooLong++;
+                break;
+            case "DurationTooShort":
+                Num_HeldTooShort++;
+                break;
+            case "MovedTooFar":
+                Num_MovedTooFar++;
+                break;
+            default:
+                break;
+        }
+    }
+
+    public int GetErrorCount()
+    {
+        return Num_HeldTooLong + Num_HeldTooShort + Num_MovedTooFar;
+    }
+
+    public void ClearErrorCounts()
+    {
+        Num_HeldTooLong = 0;
+        Num_HeldTooShort = 0;
+        Num_MovedTooFar = 0;
+    }
+
+    public void SetPrefabSizes(float size)
+    {
+        if (PrefabList.Count > 0)
+        {
+            foreach (GameObject prefab in PrefabList)
+                prefab.GetComponent<Image>().rectTransform.sizeDelta = new Vector2(size, size);
+        }
+        else
+            Debug.Log("Trying to change the prefab sizes, but the prefablist only has " + PrefabList.Count + " items!");
+    }
 
 
     public class TouchFeedback
@@ -161,9 +239,6 @@ public class TouchFBController : MonoBehaviour
     public class TouchFeedbackArgs : EventArgs
     {
         public SelectionTracker.USE_Selection Selection { get; }
-        //public GameObject GO { get; }
-        //public string ErrorType { get; }
-        //public string ParentName { get; }
 
         public TouchFeedbackArgs(SelectionTracker.USE_Selection selection)
         {

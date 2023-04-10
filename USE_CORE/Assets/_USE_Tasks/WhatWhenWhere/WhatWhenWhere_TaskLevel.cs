@@ -22,7 +22,6 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     public int AbortedTrials_InTask = 0;
     public int NumRewardPulses_InTask;
     public int NumSliderBarFilled_InTask;
-    public int TouchDurationErrorCount_InTask;
     public List<float> SearchDurations_InTask;
 
 
@@ -49,7 +48,6 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary();
 
-        data["Touch Duration Error"] = TouchDurationErrorCount_InTask;
         data["Reward Pulses"] = NumRewardPulses_InTask;
         data["Slider Bar Full"] = NumSliderBarFilled_InTask;
         if(SearchDurations_InTask.Count > 0)
@@ -71,7 +69,6 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
                                       "\nDistractor Slot Error Count: " + wwwTL.distractorSlotErrorCount_InBlock+
                                       "\nNon-Distractor Slot Error Count: " + wwwTL.slotErrorCount_InBlock + 
                                       "\nRepetition Error Count: "  + wwwTL.repetitionErrorCount_InBlock +
-                                      "\nTouch Duration Error Count: " + wwwTL.touchDurationErrorCount_InBlock + 
                                       //   "\nNon-Stim Touch Error Count: " + wwwTL.numNonStimSelections_InBlock+
                                       "\nNo Selection Error Count: " + wwwTL.AbortedTrials_InBlock);
     }
@@ -107,7 +104,6 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("Num Distractor Slot Error", ()=> wwwTL.distractorSlotErrorCount_InBlock);
         BlockData.AddDatum("Num Search Slot Error", ()=> wwwTL.slotErrorCount_InBlock);
         BlockData.AddDatum("Num Repetition Error", ()=> wwwTL.repetitionErrorCount_InBlock);
-        //BlockData.AddDatum("Num Touch Duration Error", ()=> wwwTL.touchDurationErrorCount_InBlock);
         //BlockData.AddDatum("Num Non Stim Selections", ()=> wwwTL.numNonStimSelections_InBlock); USE MOUSE TRACKER AND VALIDATE
         BlockData.AddDatum("Num Aborted Trials", ()=> wwwTL.AbortedTrials_InBlock);
         BlockData.AddDatum("Num Reward Given", ()=> wwwTL.numRewardGiven_InBlock);

@@ -44,13 +44,9 @@ namespace USE_ExperimentTemplate_Session
         
         public string TaskSelectionSceneName;
 
-        // protected Dictionary<string, ControlLevel_Task_Template> ActiveTaskLevels;
-        // private Dictionary<string, Type> ActiveTaskTypes = new Dictionary<string, Type>();
         protected List<ControlLevel_Task_Template> ActiveTaskLevels;
         private ControlLevel_Task_Template CurrentTask;
-        // public List<ControlLevel_Task_Template> AvailableTaskLevels;
         private OrderedDictionary TaskMappings;
-        private string ContextName = "SolidGREY"; //Hardcoding so that Init Screen and Task Selection background both always this. 
         private string ContextExternalFilePath;
         private string TaskIconsFolderPath;
         [HideInInspector]public Vector3[] TaskIconLocations;
@@ -138,12 +134,8 @@ namespace USE_ExperimentTemplate_Session
                 RewardHotKeyNumPulses = 1;
 
 
-            // if (EventCodesActive || RewardPulsesActive || SonicationActive)
-            // 	SyncBoxActive = true;
-
             //if there is a single syncbox config file for all experiments, load it
-            string syncBoxFileString =
-                    LocateFile.FindFileInFolder(configFileFolder, "*SyncBox*");
+            string syncBoxFileString = LocateFile.FindFileInFolder(configFileFolder, "*SyncBox*");
             if (!string.IsNullOrEmpty(syncBoxFileString))
             {
                 SessionSettings.ImportSettings_MultipleType("SyncBoxConfig", syncBoxFileString);

@@ -385,7 +385,12 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             mgTL.MazeBackgroundTextureName = "MazeBackground";
             Debug.Log("Maze Background Texture settings not defined in the TaskDef, set as default of MazeBackground");
         }
-        
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
+            mgTL.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
+        else
+            mgTL.TouchFeedbackDuration = .3f;
+
     }
     private void LoadMazeDef()
     {

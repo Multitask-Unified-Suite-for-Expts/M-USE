@@ -87,15 +87,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             flTL.StartButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
         else
             flTL.StartButtonScale = 120f;
-        
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquarePosition"))
-            flTL.FBSquarePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquarePosition");
-        else
-            flTL.FBSquarePosition = new Vector3(0, 0, 0);
-        if (SessionSettings.SettingExists(TaskName +"_TaskSettings", "FBSquareScale"))
-            flTL.FBSquareScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquareScale");
-        else
-            flTL.FBSquareScale = 120f;
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
             flTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
@@ -106,6 +97,12 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))
             flTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");
         else Debug.LogError("Neutral ITI setting not defined in the TaskDef");
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
+            flTL.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
+        else
+            flTL.TouchFeedbackDuration = .3f;
+
     }
     private void ResetBlockVariables()
     {

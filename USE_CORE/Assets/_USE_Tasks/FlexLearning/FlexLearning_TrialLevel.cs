@@ -21,7 +21,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
     public GameObject FL_CanvasGO;
     public USE_StartButton USE_StartButton;
-    public USE_StartButton USE_FBSquare;
 
     // Block End Variables
     public List<int> runningAcc;
@@ -30,7 +29,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     // Stimuli Variables
     private StimGroup tStim;
     private GameObject StartButton;
-    private GameObject FBSquare;
 
     // ConfigUI Variables
     private bool configUIVariablesLoaded;
@@ -45,8 +43,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public string ContextExternalFilePath;
     [HideInInspector] public Vector3 StartButtonPosition;
     [HideInInspector] public float StartButtonScale;
-    [HideInInspector] public Vector3 FBSquarePosition;
-    [HideInInspector] public float FBSquareScale;
     [HideInInspector] public bool StimFacingCamera;
     [HideInInspector] public string ShadowType;
     [HideInInspector] public bool NeutralITI;
@@ -93,9 +89,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     private bool aborted = false;
     private Ray ray;
     private RaycastHit hit;
-    //private bool HeldTooShort;
-    //private bool HeldTooLong;
-    //private float gratingDuration;
+
+    [HideInInspector] public float TouchFeedbackDuration;
     
     public override void DefineControlLevel()
     {
@@ -137,13 +132,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 StartButton = USE_StartButton.StartButtonGO;
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
             }
-            if (FBSquare == null)
-            {
-                USE_FBSquare = new USE_StartButton(FL_CanvasGO.GetComponent<Canvas>(), FBSquarePosition, FBSquareScale);
-                FBSquare = USE_FBSquare.StartButtonGO;
-                FBSquare.name = "FBSquare";
-            }
-            
+
             DeactivateChildren(FL_CanvasGO);
             
             if (!configUIVariablesLoaded)
@@ -425,7 +414,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         // All AddDatum commmands from the Frame Data
         FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("StartButtonVisibility", () => StartButton == null ? false:StartButton.activeSelf); // CHECK THE DATA!
-        FrameData.AddDatum("FBSquareVisibility", () => FBSquare == null ? false:FBSquare.activeSelf); // CHECK THE DATA!
         FrameData.AddDatum("TrialStimVisibility", () => tStim == null? false:tStim.IsActive);
     }
 

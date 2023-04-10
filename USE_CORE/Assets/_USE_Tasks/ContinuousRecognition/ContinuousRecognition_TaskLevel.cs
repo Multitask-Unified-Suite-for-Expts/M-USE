@@ -152,6 +152,11 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
         else
             trialLevel.ButtonScale = 120f;
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
+            trialLevel.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
+        else
+            trialLevel.TouchFeedbackDuration = .3f;
     }
 
     public override OrderedDictionary GetSummaryData()

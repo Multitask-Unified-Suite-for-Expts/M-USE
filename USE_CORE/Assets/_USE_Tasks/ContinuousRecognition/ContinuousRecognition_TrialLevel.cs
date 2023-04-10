@@ -88,6 +88,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private GameObject playerViewText;
     public List<GameObject> playerViewTextList;
 
+    [HideInInspector] public float TouchFeedbackDuration;
 
     //Config Variables
     [HideInInspector]

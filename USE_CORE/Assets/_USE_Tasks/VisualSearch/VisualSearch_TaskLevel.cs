@@ -140,15 +140,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         else
             vsTL.StartButtonScale = 120f;
         
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquarePosition"))
-            vsTL.FBSquarePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquarePosition");
-        else
-            vsTL.FBSquarePosition = new Vector3(0, 0, 0);
-        if (SessionSettings.SettingExists(TaskName +"_TaskSettings", "FBSquareScale"))
-            vsTL.FBSquareScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquareScale");
-        else
-            vsTL.FBSquareScale = 120f;
-        
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
             vsTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
         else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");
@@ -158,6 +149,11 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))
             vsTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");
         else Debug.LogError("Neutral ITI setting not defined in the TaskDef");
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
+            vsTL.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
+        else
+            vsTL.TouchFeedbackDuration = .3f;
 
     }
 

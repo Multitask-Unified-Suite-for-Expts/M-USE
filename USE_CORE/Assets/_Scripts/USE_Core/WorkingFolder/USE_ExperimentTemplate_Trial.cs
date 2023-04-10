@@ -265,6 +265,9 @@ namespace USE_ExperimentTemplate_Trial
 
             if (!AbortCodeDict.ContainsKey("EndTask"))
                 AbortCodeDict.Add("EndTask", 5);
+            
+            if (!AbortCodeDict.ContainsKey("NoSelectionMade"))
+                AbortCodeDict.Add("NoSelectionMade", 6);
         }
 
         public void AddRigidBody(GameObject go)

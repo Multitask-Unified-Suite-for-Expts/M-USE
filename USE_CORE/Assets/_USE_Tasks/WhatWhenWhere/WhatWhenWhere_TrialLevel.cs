@@ -435,6 +435,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 errorTypeString = "AbortedTrial";
                 AbortedTrials_InBlock++;
                 CurrentTaskLevel.AbortedTrials_InTask++;
+                AbortCode = 6;
             }
 
             if (NeutralITI)

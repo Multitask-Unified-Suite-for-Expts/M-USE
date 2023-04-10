@@ -227,13 +227,14 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         });
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            if (selectedSD == null)   //means the player got timed out and didn't click on anything
-            {
-                aborted = true;
-                NumAborted_InBlock++;
-                CurrentTaskLevel.NumAborted_InTask++;
-                EventCodeManager.SendCodeNextFrame(SessionEventCodes["NoChoice"]);
-            }
+            //means the player got timed out and didn't click on anything
+
+            aborted = true;
+            NumAborted_InBlock++;
+            CurrentTaskLevel.NumAborted_InTask++;
+            AbortCode = 6;
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["NoChoice"]);
+
         });
 
         SelectionFeedback.AddInitializationMethod(() =>

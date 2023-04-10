@@ -419,6 +419,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             {
                 NumAborted_Block++;
                 currentTask.NumAborted_Task++;
+                AbortCode = 6;
                 AudioFBController.Play("TimeRanOut");
                 TokenFBController.enabled = false;
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["NoChoice"]);

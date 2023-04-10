@@ -30,9 +30,9 @@ public class TouchFBController : MonoBehaviour
     [HideInInspector] public EventCodeManager EventCodeManager;
     [HideInInspector] public Dictionary<string, EventCode> SessionEventCodes;
 
-    public int Num_HeldTooLong = 0;
-    public int Num_HeldTooShort = 0;
-    public int Num_MovedTooFar = 0;
+    private int Num_HeldTooLong = 0;
+    private int Num_HeldTooShort = 0;
+    private int Num_MovedTooFar = 0;
 
     public int ErrorCount
     {
@@ -55,7 +55,6 @@ public class TouchFBController : MonoBehaviour
         InstantiatedGO = null;
         HeldTooLong_Prefab = null; //making 1 prefab null so we can save a "PrefabsCreated" boolean
     }
-
 
     public void EnableTouchFeedback(SelectionTracker.SelectionHandler handler, float fbDuration, float fbSize, GameObject taskCanvasGO)
     {        

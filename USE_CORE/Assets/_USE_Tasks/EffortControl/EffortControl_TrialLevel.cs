@@ -111,6 +111,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public List<GameObject> ObjectList;
 
+    [HideInInspector] public float TouchFeedbackDuration;
+
 
     public override void DefineControlLevel()
     {
@@ -155,7 +157,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         SelectionTracker.SelectionHandler MouseClickHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InflateBalloon);
-        TouchFBController.EnableTouchFeedback(MouseClickHandler, .3f, ButtonScale, EC_CanvasGO);
+        TouchFBController.EnableTouchFeedback(MouseClickHandler, TouchFeedbackDuration, ButtonScale, EC_CanvasGO);
 
         RectTransform rect = EC_CanvasGO.GetComponent<Canvas>().GetComponent<RectTransform>();
 

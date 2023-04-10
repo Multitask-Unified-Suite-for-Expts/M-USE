@@ -61,7 +61,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private int[] totalErrors_InTrial;
     private int[] ruleAbidingErrors_InTrial;
     private int[] ruleBreakingErrors_InTrial;
-    private int retouchCorrect_InTrial;
+    private int[] retouchCorrect_InTrial;
     private int retouchErroneous_InTrial;
     private int correctTouches_InTrial;
     private int[] backtrackErrors_InTrial;
@@ -534,9 +534,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.currMaze.mNextStep = CurrentTaskLevel.currMaze.mPath[CurrentTaskLevel.currMaze.mPath.FindIndex(pathCoord => pathCoord == touchedCoord.chessCoord) + 1];
 
                 ReturnToLast = true;
-            
-                retouchCorrect_InTrial++;
-                CurrentTaskLevel.retouchCorrect_InBlock++;
+
+                retouchCorrect_InTrial[pathProgressIndex] += 1;
+                CurrentTaskLevel.retouchCorrect_InBlock[pathProgressIndex] += 1;
                 CurrentTaskLevel.retouchCorrect_InTask++;
            
                 consecutiveErrors = 0;
@@ -620,7 +620,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 ErroneousReturnToLast = true;
 
                 retouchErroneous_InTrial++;
-                CurrentTaskLevel.retouchErroneous_InBlock++;
+                CurrentTaskLevel.retouchErroneous_InBlock[pathProgressIndex] += 1;
                 CurrentTaskLevel.retouchErroneous_InTask++;
 
                 consecutiveErrors = 0;
@@ -848,7 +848,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         MouseTracker.ResetClicks();
         
         correctTouches_InTrial = 0;
-        retouchCorrect_InTrial = 0;
         retouchErroneous_InTrial = 0;
         if (TrialCount_InBlock != 0)
         {
@@ -857,6 +856,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Array.Clear(ruleAbidingErrors_InTrial, 0, ruleAbidingErrors_InTrial.Length);
             Array.Clear(ruleBreakingErrors_InTrial, 0, ruleBreakingErrors_InTrial.Length);
             Array.Clear(totalErrors_InTrial, 0, totalErrors_InTrial.Length);
+            Array.Clear(retouchCorrect_InTrial, 0, retouchCorrect_InTrial.Length);
         }
         pathProgress.Clear();
         pathProgressGO.Clear();

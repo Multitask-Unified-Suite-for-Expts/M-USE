@@ -108,6 +108,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public ConfigNumber sliderSize;
     public ConfigNumber tileBlinkingDuration;
     public ConfigNumber maxMazeDuration;
+    public ConfigNumber minObjectTouchDuration;
+    public ConfigNumber maxObjectTouchDuration;
 
     // Player View Variables
     private PlayerViewPanel playerView;
@@ -123,6 +125,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     // Slider & Animation variables
     private float sliderValueChange;
     private float finishedFbDuration;
+
+    [HideInInspector] public float TouchFeedbackDuration;
 
     public MazeGame_TrialDef CurrentTrialDef => GetCurrentTrialDef<MazeGame_TrialDef>();
     public MazeGame_TaskLevel CurrentTaskLevel => GetTaskLevel<MazeGame_TaskLevel>();
@@ -188,12 +192,16 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
         var SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ITI);
+        TouchFBController.EnableTouchFeedback(SelectionHandler, TouchFeedbackDuration, StartButtonScale, MG_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
             SelectionHandler.HandlerActive = true;
+            SelectionHandler.ClearCounts();
             if (SelectionHandler.AllSelections.Count > 0)
                 SelectionHandler.ClearSelections();
+            SelectionHandler.MinDuration = minObjectTouchDuration.value;
+            SelectionHandler.MaxDuration = maxObjectTouchDuration.value;
         });
 
         InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatches(StartButton), Delay, () =>
@@ -218,9 +226,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         ChooseTile.AddInitializationMethod(() =>
         {
             choiceDuration = 0;
+            
             SelectionHandler.HandlerActive = true;
+            SelectionHandler.ClearCounts();
             if (SelectionHandler.AllSelections.Count > 0)
                 SelectionHandler.ClearSelections();
+            SelectionHandler.MinDuration = minObjectTouchDuration.value;
+            SelectionHandler.MaxDuration = maxObjectTouchDuration.value;
         });
         ChooseTile.AddUpdateMethod(() =>
         {
@@ -237,12 +249,14 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     CurrentTaskLevel.choiceDurationsList_InBlock.Add(choiceDuration);
                     CurrentTaskLevel.choiceDurationsList_InTask.Add(choiceDuration);
                     selectedGO = SelectionHandler.LastSuccessfulSelection.SelectedGameObject;
-                    SelectionHandler.HandlerActive = false;
+                    SelectionHandler.ClearSelections();
                 }
             }
         });
         ChooseTile.SpecifyTermination(() =>  choiceMade, SelectionFeedback, () =>
         {
+            SelectionHandler.HandlerActive = false;
+
             if (selectedGO.GetComponent<Tile>().mCoord.chessCoord ==  CurrentTaskLevel.currMaze.mStart)
             {
                 //If the tile that is selected is the start tile, begin the timer for the maze
@@ -686,6 +700,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         incorrectRuleBreakingFbDuration = ConfigUiVariables.get<ConfigNumber>("incorrectRuleBreakingFbDuration");
         tileBlinkingDuration = ConfigUiVariables.get<ConfigNumber>("tileBlinkingDuration");
         maxMazeDuration = ConfigUiVariables.get<ConfigNumber>("maxMazeDuration");
+        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
+        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
         configVariablesLoaded = true;
     }
 

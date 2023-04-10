@@ -216,7 +216,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
 
             InstantiateCurrMaze();
-            mazeStartTime = Time.time;
+            mazeStartTime = 0;
             tiles.ToggleVisibility(true);
             CreateTextOnExperimenterDisplay();
 
@@ -259,7 +259,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             if (selectedGO.GetComponent<Tile>().mCoord.chessCoord ==  CurrentTaskLevel.currMaze.mStart)
             {
-                //If the tile that is selected is the start tile, begin the timer for the maze
+                //If the tile that is selected is the start tile
                 startedMaze = true;
                 EventCodeManager.SendCodeImmediate(TaskEventCodes["MazeStart"]); 
             }

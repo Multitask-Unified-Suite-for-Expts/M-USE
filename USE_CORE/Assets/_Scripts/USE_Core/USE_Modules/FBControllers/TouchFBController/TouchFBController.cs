@@ -30,9 +30,9 @@ public class TouchFBController : MonoBehaviour
     [HideInInspector] public EventCodeManager EventCodeManager;
     [HideInInspector] public Dictionary<string, EventCode> SessionEventCodes;
 
-    public int Num_HeldTooLong;
-    public int Num_HeldTooShort;
-    public int Num_MovedTooFar;
+    public int Num_HeldTooLong = 0;
+    public int Num_HeldTooShort = 0;
+    public int Num_MovedTooFar = 0;
 
     public int ErrorCount
     {
@@ -46,17 +46,14 @@ public class TouchFBController : MonoBehaviour
     public void Init(DataController trialData, DataController frameData)
     {
         trialData.AddDatum("Num_HeldTooLong", () => Num_HeldTooLong);
-        trialData.AddDatum("Num_HeldTooShort", () => Num_HeldTooLong);
-        trialData.AddDatum("Num_MovedTooFar", () => Num_HeldTooLong);
+        trialData.AddDatum("Num_HeldTooShort", () => Num_HeldTooShort);
+        trialData.AddDatum("Num_MovedTooFar", () => Num_MovedTooFar);
 
         frameData.AddDatum("FeedbackOn", () => FeedbackOn.ToString());
         if (InstantiatedGO != null)
             Destroy(InstantiatedGO);
         InstantiatedGO = null;
         HeldTooLong_Prefab = null; //making 1 prefab null so we can save a "PrefabsCreated" boolean
-        Num_HeldTooLong = 0;
-        Num_HeldTooShort = 0;
-        Num_MovedTooFar = 0;
     }
 
 
@@ -95,18 +92,14 @@ public class TouchFBController : MonoBehaviour
             switch (e.Selection.ErrorType)
             {
                 case "DurationTooLong":
-                    Debug.Log("Touch Duration too long.....");
                     Num_HeldTooLong++;
                     ShowTouchFeedback(new TouchFeedback(e.Selection, HeldTooLong_Prefab, this));
                     break;
                 case "DurationTooShort":
-                    Debug.Log("Touch Duration too short.....");
                     Num_HeldTooShort++;
-                    Debug.Log("NUM HELD TOO SHORT AFTER: " + Num_HeldTooLong);
                     ShowTouchFeedback(new TouchFeedback(e.Selection, HeldTooShort_Prefab, this));
                     break;
                 case "MovedTooFar":
-                    Debug.Log("Touch Moved too far.....");
                     Num_MovedTooFar++;
                     ShowTouchFeedback(new TouchFeedback(e.Selection, MovedTooFar_Prefab, this));
                     break;

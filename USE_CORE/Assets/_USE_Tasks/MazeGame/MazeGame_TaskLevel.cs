@@ -34,8 +34,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     public int[] backtrackErrors_InBlock;
     public int[] ruleAbidingErrors_InBlock;
     public int[] ruleBreakingErrors_InBlock;
-    public int retouchCorrect_InBlock;
-    public int retouchErroneous_InBlock;
+    public int[] retouchCorrect_InBlock;
+    public int[] retouchErroneous_InBlock;
     public int correctTouches_InBlock; 
     public int numRewardPulses_InBlock;
     public int numAbortedTrials_InBlock;
@@ -109,8 +109,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             FindMaze();
-            LoadTextMaze();
-                
+            LoadTextMaze(); // need currMaze here to set all the arrays
+            
             RenderSettings.skybox = CreateSkybox(mgTL.GetContextNestedFilePath(ContextExternalFilePath, mgBD.ContextName, "LinearDark"));
             mgTL.contextName = mgBD.ContextName;
             mgTL.MinTrials = mgBD.MinMaxTrials[0];
@@ -121,6 +121,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             ruleBreakingErrors_InBlock = new int[currMaze.mNumSquares];
             backtrackErrors_InBlock = new int[currMaze.mNumSquares];
             perseverativeErrors_InBlock = new int[currMaze.mNumSquares];
+            retouchCorrect_InBlock = new int[currMaze.mNumSquares];
+            retouchErroneous_InBlock = new int[currMaze.mNumSquares];
             totalErrors_InBlock = new int[currMaze.mNumSquares];
             
             ResetBlockVariables();
@@ -128,22 +130,19 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         });
         BlockFeedback.AddInitializationMethod(() =>
         {
-            if (mgTL.AbortCode == 0)
-            {
-                CurrentBlockString += "\n" + "\n";
-                CurrentBlockString = CurrentBlockString.Replace("Current Block", $"Block {blocksAdded + 1}");
-                PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
-                blocksAdded++;
-            }
-           // CalculateBlockAverages();
+            /*if (blocksAdded > 0)
+                CurrentBlockString += "\n";
+            PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
+            blocksAdded++;
+           // CalculateBlockAverages();*/
         });
     }
     public void AssignBlockData()
     {
         BlockData.AddDatum("TotalErrors", () => $"[{string.Join(", ", totalErrors_InBlock)}]");
         BlockData.AddDatum("CorrectTouches", () => correctTouches_InBlock);
-        BlockData.AddDatum("RetouchCorrect", () => retouchCorrect_InBlock);
-        BlockData.AddDatum("RetouchErroneous", () => retouchErroneous_InBlock);
+        BlockData.AddDatum("RetouchCorrect",() => $"[{string.Join(", ", retouchCorrect_InBlock)}]");
+        BlockData.AddDatum("RetouchErroneous",() => $"[{string.Join(", ", retouchErroneous_InBlock)}]");
         BlockData.AddDatum("PerseverativeErrors",() => $"[{string.Join(", ", perseverativeErrors_InBlock)}]");
         BlockData.AddDatum("BacktrackErrors", () => $"[{string.Join(", ", backtrackErrors_InBlock)}]");
         BlockData.AddDatum("RuleAbidingErrors", () => $"[{string.Join(", ", ruleAbidingErrors_InBlock)}]");
@@ -177,7 +176,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     public override OrderedDictionary GetSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary();
-
+        data["Trial Count In Task"] = mgTL.TrialCount_InTask;
         data["Num Reward Pulses"] = numRewardPulses_InTask;
         data["Total Errors"] = totalErrors_InTask;
         data["Correct Touches"] = correctTouches_InTask;
@@ -196,13 +195,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     private void ResetBlockVariables()
     {
         correctTouches_InBlock = 0;
-        retouchCorrect_InBlock = 0;
-        retouchErroneous_InBlock = 0;
         Array.Clear(perseverativeErrors_InBlock, 0, perseverativeErrors_InBlock.Length);
         Array.Clear(backtrackErrors_InBlock, 0, backtrackErrors_InBlock.Length);
         Array.Clear(ruleAbidingErrors_InBlock, 0, ruleAbidingErrors_InBlock.Length);
         Array.Clear(ruleBreakingErrors_InBlock, 0, ruleBreakingErrors_InBlock.Length);
         Array.Clear(totalErrors_InBlock, 0, totalErrors_InBlock.Length);
+        Array.Clear(retouchCorrect_InBlock, 0, retouchCorrect_InBlock.Length);
+        Array.Clear(retouchErroneous_InBlock, 0, retouchErroneous_InBlock.Length);
         numRewardPulses_InBlock = 0;
         nonStimTouches_InBlock = 0;
         numAbortedTrials_InBlock = 0;
@@ -222,45 +221,17 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                              "\nRule-Breaking Errors: " + ruleBreakingErrors_InBlock.Sum() +
                              "\nPerseverative Errors: " + perseverativeErrors_InBlock.Sum() +
                              "\nBacktrack Errors: " + backtrackErrors_InBlock.Sum() +
-                             "\nRetouch Correct: " + retouchCorrect_InBlock +
-                             "\nRetouch Erroneous: " + retouchCorrect_InBlock +
+                             "\nRetouch Correct: " + retouchCorrect_InBlock.Sum() +
+                             "\nRetouch Erroneous: " + retouchErroneous_InBlock.Sum() +
                              "\n\nRewards: " + numRewardPulses_InBlock +
                              "\nAverage Choice Duration: " +
                              String.Format("{0:0.00}", choiceDurationsList_InBlock.Average()) +
                              "\nAverage Maze Duration: " +
                              String.Format("{0:0.00}", mazeDurationsList_InBlock.Average());
         
-        if (blocksAdded > 1)
-            CurrentBlockString += "\n";
-
-        //Add CurrentBlockString if block wasn't aborted:
-        if (mgTL.AbortCode == 0)
-            BlockSummaryString.AppendLine(CurrentBlockString);
-
-
-        /*if (blocksAdded > 1) //If atleast 2 blocks to average, set Averages string and add to BlockSummaryString:
-        {
-            BlockAveragesString = "-------------------------------------------------" +
-                              "\n" +
-                              "\n<b>Block Averages (" + blocksAdded + " blocks):" + "</b>" +
-                              "\nAvg Total Errors: " + AvgTotalErrors.ToString("0.00") +
-                              "\nAvg Correct Touches: " + AvgCorrectTouches.ToString("0.00") +
-                              "\nAvg Rule-Abiding Errors: " + AvgRuleAbidingErrors.ToString("0.00") + "s" +
-                              "\nAvg Rule-Breaking Errors: " + AvgRuleBreakingErrors.ToString("0.00") +
-                              "\nAvg Preservative Errors: " + AvgPerseverativeErrors.ToString("0.00") +
-                              "\nAvg Backtrack Errors: " + AvgBacktrackErrors.ToString("0.00") + "s" +
-                              "\nAvg Retouch Correct: " + AvgRetouchCorrect.ToString("0.00") +
-                              "\nAvg Reward: " + AvgReward.ToString("0.00") +
-                              "\nAvg Maze Duration: " + AvgMazeDuration.ToString("0.00");;
-            
-            BlockSummaryString.AppendLine(BlockAveragesString);
-        }*/
-
-        //Add Previous blocks string:
-        if(PreviousBlocksString.Length > 0)
-        {
-            BlockSummaryString.AppendLine("\n" + PreviousBlocksString);
-        }
+        BlockSummaryString.AppendLine(CurrentBlockString).ToString();
+        if (PreviousBlocksString.Length > 0)
+            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
     }
     public override void SetTaskSummaryString()
     {

@@ -19,7 +19,7 @@ public class Tile : MonoBehaviour
     public Coords mCoord;
     public float sliderValueChange;
     private MazeGame_TrialLevel mgTL = null;
-    private ChaseReactionTest_TrialLevel crtTL = null;
+    private MazeReactionTest_TrialLevel mrtTL = null;
 
     // DEFAULT MAZE CONFIGS - CONFIGURABLE IN TASK DEF/ TRIAL LEVEL
     public Color START_COLOR = new Color(0.94f, 0.93f, 0.48f);
@@ -62,7 +62,7 @@ public class Tile : MonoBehaviour
         }
         else
         {
-            crtTL = GameObject.Find("ChaseReactionTest_Scripts").GetComponent<ChaseReactionTest_TrialLevel>();
+            mrtTL = GameObject.Find("MazeReactionTest_Scripts").GetComponent<MazeReactionTest_TrialLevel>();
         }
     }
 
@@ -77,7 +77,7 @@ public class Tile : MonoBehaviour
             }
             else
             {
-                correctnessCode = crtTL.ManageTileTouch(this);
+                correctnessCode = mrtTL.ManageTileTouch(this);
             }
             ColorFeedback(correctnessCode);
         }
@@ -133,10 +133,10 @@ public class Tile : MonoBehaviour
     public void NextCorrectFlashingFeedback()
     {
         // ... code to set flashingTile, originalColor, and flashColor ...
-        if (crtTL.pathProgressGO.Count == 0) // haven't selected the start yet
-            flashingTile = crtTL.startTile;
+        if (mrtTL.pathProgressGO.Count == 0) // haven't selected the start yet
+            flashingTile = mrtTL.startTile;
         else
-            flashingTile = GameObject.Find(crtTL.currentMaze_InTrial.mNextStep);
+            flashingTile = GameObject.Find(mrtTL.CurrentTaskLevel.currMaze.mNextStep);
 
         isFlashing = true;
         flashStartTime = Time.unscaledTime;
@@ -173,11 +173,11 @@ public class Tile : MonoBehaviour
         {
 
             float elapsed = Time.unscaledTime - fbStartTime;
-            float interval = mgTL != null ? mgTL.tileFbDuration : crtTL.tileFbDuration;
+            float interval = mgTL != null ? mgTL.tileFbDuration : mrtTL.tileFbDuration;
         
             if (elapsed >=  interval)
             {
-                if ((mgTL != null ? !mgTL.viewPath : !crtTL.viewPath) || correctnessCode != 1)
+                if ((mgTL != null ? !mgTL.viewPath : !mrtTL.viewPath) || correctnessCode != 1)
                 {
                     gameObject.GetComponent<Renderer>().material.color = originalTileColor;
                 }

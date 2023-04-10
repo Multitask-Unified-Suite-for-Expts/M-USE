@@ -39,7 +39,7 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         [HideInInspector] public string ContextExternalFilePath, SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
         [HideInInspector] public LocateFile LocateFile;
-        [HideInInspector] public StringBuilder BlockSummaryString, CurrentTaskSummaryString;
+        [HideInInspector] public StringBuilder BlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
         private int TaskStringsAdded = 0;
 
         // public string TaskSceneName;
@@ -129,6 +129,7 @@ namespace USE_ExperimentTemplate_Task
             {
                 BlockCount = -1;
                 BlockSummaryString = new StringBuilder();
+                PreviousBlockSummaryString = new StringBuilder();
                 CurrentTaskSummaryString = new StringBuilder();
                 
                 SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
@@ -178,8 +179,15 @@ namespace USE_ExperimentTemplate_Task
             });
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
 
-            BlockFeedback.AddInitializationMethod(() =>
+            BlockFeedback.AddUniversalInitializationMethod(() =>
             {
+                string blockTitle = $"<b>Block {BlockCount}</b>";
+
+                if (BlockSummaryString.Length > 0)
+                {
+                    PreviousBlockSummaryString.Insert(0,BlockSummaryString); //Add current block string to full list of previous blocks. 
+                    PreviousBlockSummaryString.Insert(0, blockTitle);
+                }
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["BlockFeedbackStarts"]);
             });
             BlockFeedback.AddUpdateMethod(() =>

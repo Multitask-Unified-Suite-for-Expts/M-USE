@@ -8,13 +8,13 @@ using USE_Settings;
 using USE_StimulusManagement;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Block;
-using ChaseReactionTest_Namespace;
+using MazeReactionTest_Namespace;
 using HiddenMaze;
 using UnityEngine;
 using USE_Utilities;
 using Random = UnityEngine.Random;
 
-public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
+public class MazeReactionTest_TaskLevel : ControlLevel_Task_Template
 {
     [HideInInspector] public int[] MazeNumSquares;
     [HideInInspector] public int[] MazeNumTurns;
@@ -25,7 +25,7 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
     [HideInInspector]public Maze currMaze;
     private MazeDef[] MazeDefs;
     private string mazeKeyFilePath;
-    private ChaseReactionTest_TrialLevel crtTL;
+    private MazeReactionTest_TrialLevel mrtTL;
     private int mIndex;
     
     // Block Data Tracking Variables
@@ -56,13 +56,13 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public StringBuilder PreviousBlocksString;
     private int blocksAdded = 0;
     
-    private ChaseReactionTest_BlockDef crtBD => GetCurrentBlockDef<ChaseReactionTest_BlockDef>();
+    private MazeReactionTest_BlockDef mrtBD => GetCurrentBlockDef<MazeReactionTest_BlockDef>();
     public override void DefineControlLevel()
     {
         mazeDurationsList_InTask = new List<float?>();
         choiceDurationsList_InTask = new List<float?>();
         
-        crtTL = (ChaseReactionTest_TrialLevel)TrialLevel;
+        mrtTL = (MazeReactionTest_TrialLevel)TrialLevel;
         SetSettings();
         AssignBlockData();
         
@@ -70,36 +70,35 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
         
-        blocksAdded = 0;
         LoadMazeDef();
         
         RunBlock.AddInitializationMethod(() =>
         {
             FindMaze();
-            LoadTextMaze();
+            LoadTextMaze(); // need currMaze here to set all the arrays
                 
-            RenderSettings.skybox = CreateSkybox(crtTL.GetContextNestedFilePath(ContextExternalFilePath, crtBD.ContextName, "LinearDark"));
-            crtTL.contextName = crtBD.ContextName;
-            crtTL.MinTrials = crtBD.MinMaxTrials[0];
+            RenderSettings.skybox = CreateSkybox(mrtTL.GetContextNestedFilePath(ContextExternalFilePath, mrtBD.ContextName, "LinearDark"));
+            mrtTL.contextName = mrtBD.ContextName;
+            mrtTL.MinTrials = mrtBD.MinMaxTrials[0];
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
             
             //instantiate arrays
             totalErrors_InBlock = new int[currMaze.mNumSquares];
             backtrackErrors_InBlock = new int[currMaze.mNumSquares];
-            crtTL.DestroyChildren(GameObject.Find("MainCameraCopy"));
+            mrtTL.DestroyChildren(GameObject.Find("MainCameraCopy"));
             
             ResetBlockVariables();
             CalculateBlockSummaryString();
         });
         BlockFeedback.AddInitializationMethod(() =>
         {
-            if (crtTL.AbortCode == 0)
-            {
+            
+            /*
+            if (blocksAdded > 0)
                 CurrentBlockString += "\n" + "\n";
-                CurrentBlockString = CurrentBlockString.Replace("Current Block", $"Block {blocksAdded + 1}");
-                PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
-                blocksAdded++;
-            }
+            CurrentBlockString = CurrentBlockString.Replace("Current Block", $"<b>Block {blocksAdded + 1}</b>");
+            PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
+            blocksAdded++;*/
             // CalculateBlockAverages();
         });
 
@@ -107,50 +106,23 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
 
     public void CalculateBlockSummaryString()
     {
-        
         ClearStrings();
-        CurrentBlockString = "<b>Min Trials in Block: </b>" + crtTL.CurrentTrialDef.MinMaxTrials[0] +
-                             "<b>\nMax Trials in Block: </b>" + crtTL.CurrentTrialDef.MaxTrials +
-                             "<b>\nLearning Criterion: </b>" + crtTL.CurrentTrialDef.BlockEndThreshold +
-                             "\n\nTotal Errors: " + totalErrors_InBlock.Sum() +
+        CurrentBlockString = "<b>\nMin Trials in Block: </b>" + mrtTL.CurrentTrialDef.MinMaxTrials[0] +
+                             "<b>\nMax Trials in Block: </b>" + mrtTL.CurrentTrialDef.MaxTrials +
+                             "<b>\nLearning Criterion: </b>" + mrtTL.CurrentTrialDef.BlockEndThreshold +
+                             "\n" + 
+                             "\nTotal Errors: " + totalErrors_InBlock.Sum() +
                              "\nBacktrack Errors: " + backtrackErrors_InBlock.Sum() +
-                             "\n\nRewards: " + numRewardPulses_InBlock +
+                             "\n" + 
+                             "\nRewards: " + numRewardPulses_InBlock +
                              "\nAverage Choice Duration: " +
                              String.Format("{0:0.00}", choiceDurationsList_InBlock.Average()) +
                              "\nAverage Maze Duration: " +
                              String.Format("{0:0.00}", mazeDurationsList_InBlock.Average());
         
-        if (blocksAdded > 1)
-            CurrentBlockString += "\n";
-
-        //Add CurrentBlockString if block wasn't aborted:
-        if (crtTL.AbortCode == 0)
-            BlockSummaryString.AppendLine(CurrentBlockString);
-
-
-        /*if (blocksAdded > 1) //If atleast 2 blocks to average, set Averages string and add to BlockSummaryString:
-        {
-            BlockAveragesString = "-------------------------------------------------" +
-                              "\n" +
-                              "\n<b>Block Averages (" + blocksAdded + " blocks):" + "</b>" +
-                              "\nAvg Total Errors: " + AvgTotalErrors.ToString("0.00") +
-                              "\nAvg Correct Touches: " + AvgCorrectTouches.ToString("0.00") +
-                              "\nAvg Rule-Abiding Errors: " + AvgRuleAbidingErrors.ToString("0.00") + "s" +
-                              "\nAvg Rule-Breaking Errors: " + AvgRuleBreakingErrors.ToString("0.00") +
-                              "\nAvg Preservative Errors: " + AvgPerseverativeErrors.ToString("0.00") +
-                              "\nAvg Backtrack Errors: " + AvgBacktrackErrors.ToString("0.00") + "s" +
-                              "\nAvg Retouch Correct: " + AvgRetouchCorrect.ToString("0.00") +
-                              "\nAvg Reward: " + AvgReward.ToString("0.00") +
-                              "\nAvg Maze Duration: " + AvgMazeDuration.ToString("0.00");;
-            
-            BlockSummaryString.AppendLine(BlockAveragesString);
-        }*/
-
-        //Add Previous blocks string:
-        if(PreviousBlocksString.Length > 0)
-        {
-            BlockSummaryString.AppendLine("\n" + PreviousBlocksString);
-        }
+        BlockSummaryString.AppendLine(CurrentBlockString).ToString();
+        if (PreviousBlocksString.Length > 0)
+            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
     }
     public void ClearStrings()
     {
@@ -166,94 +138,94 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
         numSliderBarFull_InBlock = 0;
         mazeDurationsList_InBlock.Clear();
         choiceDurationsList_InBlock.Clear();
-        crtTL.runningTrialPerformance.Clear();
+        mrtTL.runningTrialPerformance.Clear();
     }
     private void SetSettings()
     {
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            crtTL.ContextExternalFilePath =
+            mrtTL.ContextExternalFilePath =
                 (string)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else crtTL.ContextExternalFilePath = ContextExternalFilePath;
+        else mrtTL.ContextExternalFilePath = ContextExternalFilePath;
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeKeyFilePath"))
             mazeKeyFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeKeyFilePath");
         else Debug.LogError("Maze key file path settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeFilePath"))
-            crtTL.MazeFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeFilePath");
+            mrtTL.MazeFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeFilePath");
         else Debug.LogError("Maze File Path not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
-            crtTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
+            mrtTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
         else Debug.LogError("Start Button Position settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonScale"))
-            crtTL.StartButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
+            mrtTL.StartButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
         else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))
-            crtTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");
+            mrtTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");
         else
         {
-            crtTL.NeutralITI = false;
+            mrtTL.NeutralITI = false;
             Debug.Log("Neutral ITI settings not defined in the TaskDef. Default Setting of false is used instead");
         }
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TileSize"))
         {
-            crtTL.TileSize = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TileSize");
+            mrtTL.TileSize = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TileSize");
         }
         else
         {
-            crtTL.TileSize = 0.5f; // default value in the case it isn't specified
-            Debug.Log("Tile Size settings not defined in the TaskDef. Default setting of " + crtTL.TileSize +
+            mrtTL.TileSize = 0.5f; // default value in the case it isn't specified
+            Debug.Log("Tile Size settings not defined in the TaskDef. Default setting of " + mrtTL.TileSize +
                       " is used instead.");
         }
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TileTexture"))
         {
-            crtTL.TileTexture = (string)SessionSettings.Get(TaskName + "_TaskSettings", "TileTexture");
+            mrtTL.TileTexture = (string)SessionSettings.Get(TaskName + "_TaskSettings", "TileTexture");
         }
         else
         {
-            crtTL.TileTexture = "Tile"; // default value in the case it isn't specified
-            Debug.Log("Tile Texture settings not defined in the TaskDef. Default setting of " + crtTL.TileTexture +
+            mrtTL.TileTexture = "Tile"; // default value in the case it isn't specified
+            Debug.Log("Tile Texture settings not defined in the TaskDef. Default setting of " + mrtTL.TileTexture +
                       " is used instead.");
         }
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NumBlinks"))
-            crtTL.NumBlinks = (int)SessionSettings.Get(TaskName + "_TaskSettings", "NumBlinks");
+            mrtTL.NumBlinks = (int)SessionSettings.Get(TaskName + "_TaskSettings", "NumBlinks");
         else Debug.LogError("Num Blinks settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartColor"))
-            crtTL.startColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "StartColor");
+            mrtTL.startColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "StartColor");
         else Debug.LogError("Start Color settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FinishColor"))
-            crtTL.finishColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "FinishColor");
+            mrtTL.finishColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "FinishColor");
         else Debug.LogError("Finish Color settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "CorrectColor"))
-            crtTL.correctColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "CorrectColor");
+            mrtTL.correctColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "CorrectColor");
         else Debug.LogError("Correct Color settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "LastCorrectColor"))
-            crtTL.lastCorrectColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "LastCorrectColor");
+            mrtTL.lastCorrectColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "LastCorrectColor");
         else Debug.LogError("Last Correct Color settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "IncorrectRuleAbidingColor"))
-            crtTL.incorrectRuleAbidingColor =
+            mrtTL.incorrectRuleAbidingColor =
                 (float[])SessionSettings.Get(TaskName + "_TaskSettings", "IncorrectRuleAbidingColor");
         else Debug.LogError("Incorrect Rule Abiding Color settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "IncorrectRuleBreakingColor"))
-            crtTL.incorrectRuleBreakingColor =
+            mrtTL.incorrectRuleBreakingColor =
                 (float[])SessionSettings.Get(TaskName + "_TaskSettings", "IncorrectRuleBreakingColor");
         else Debug.LogError("Incorrect Rule Breaking Color settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "DefaultTileColor"))
-            crtTL.defaultTileColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "DefaultTileColor");
+            mrtTL.defaultTileColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "DefaultTileColor");
         else Debug.LogError("Default Tile Color settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FixedRatioReward"))
-            crtTL.UsingFixedRatioReward = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "FixedRatioReward");
+            mrtTL.UsingFixedRatioReward = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "FixedRatioReward");
         else
         {
-            crtTL.UsingFixedRatioReward = false;
+            mrtTL.UsingFixedRatioReward = false;
             Debug.Log("Fixed Ratio Reward settings not defined in the TaskDef, set as default of false");
         }
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeBackground"))
-            crtTL.MazeBackgroundTextureName = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeBackgroundTexture");
+            mrtTL.MazeBackgroundTextureName = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeBackgroundTexture");
         else
         {
-            crtTL.MazeBackgroundTextureName = "MazeBackground";
+            mrtTL.MazeBackgroundTextureName = "MazeBackground";
             Debug.Log("Maze Background Texture settings not defined in the TaskDef, set as default of MazeBackground");
         }
         
@@ -283,17 +255,17 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
         //for given block MazeDims, MazeNumSquares, MazeNumTurns, get all indices of that value, find intersect
         //then choose random member of intersect and assign to this block's trials
 
-        if (crtBD.MazeName != null)
+        if (mrtBD.MazeName != null)
         {
-            mIndex = MazeName.FindAllIndexof(crtBD.MazeName)[0];
+            mIndex = MazeName.FindAllIndexof(mrtBD.MazeName)[0];
         }
         else
         {
-            var mdIndices = MazeDims.FindAllIndexof(crtBD.MazeDims);
-            var mnsIndices = MazeNumSquares.FindAllIndexof(crtBD.MazeNumSquares);
-            var mntIndices = MazeNumTurns.FindAllIndexof(crtBD.MazeNumTurns);
-            var msIndices = MazeStart.FindAllIndexof(crtBD.MazeStart);
-            var mfIndices = MazeFinish.FindAllIndexof(crtBD.MazeFinish);
+            var mdIndices = MazeDims.FindAllIndexof(mrtBD.MazeDims);
+            var mnsIndices = MazeNumSquares.FindAllIndexof(mrtBD.MazeNumSquares);
+            var mntIndices = MazeNumTurns.FindAllIndexof(mrtBD.MazeNumTurns);
+            var msIndices = MazeStart.FindAllIndexof(mrtBD.MazeStart);
+            var mfIndices = MazeFinish.FindAllIndexof(mrtBD.MazeFinish);
             var possibleMazeDefIndices = mfIndices
                 .Intersect(msIndices.Intersect(mntIndices.Intersect(mdIndices.Intersect(mnsIndices)))).ToArray();
 
@@ -309,14 +281,14 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
             MazeName = MazeName.Where((source, index) => index != mIndex).ToArray();
         }
 
-        crtTL.mazeDefName = MazeName[mIndex];
+        mrtTL.mazeDefName = MazeName[mIndex];
     }
     public void LoadTextMaze()
     {
         // textMaze will load the text file containing the full Maze path of the intended mazeDef for the block/trial
         string mazeFilePath = "";
 
-        string[] filePaths = Directory.GetFiles(crtTL.MazeFilePath, $"{crtTL.mazeDefName}*", SearchOption.AllDirectories);
+        string[] filePaths = Directory.GetFiles(mrtTL.MazeFilePath, $"{mrtTL.mazeDefName}*", SearchOption.AllDirectories);
 
         if (filePaths.Length >= 1)
             mazeFilePath = filePaths[0];
@@ -340,7 +312,7 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
     public override OrderedDictionary GetSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary();
-
+        data["Trial Count In Task"] = mrtTL.TrialCount_InTask;
         data["Num Reward Pulses"] = numRewardPulses_InTask;
         data["Total Errors"] = totalErrors_InTask;
         data["Backtrack Errors"] = backtrackErrors_InTask;
@@ -357,14 +329,14 @@ public class ChaseReactionTest_TaskLevel : ControlLevel_Task_Template
             AvgMazeDuration = (float)mazeDurationsList_InTask.Average();
         else
             AvgMazeDuration = 0;
-        if (crtTL.TrialCount_InTask != 0)
-            percentAborted = (float)(Math.Round(decimal.Divide(numAbortedTrials_InTask, (crtTL.TrialCount_InTask)), 2)) * 100;
+        if (mrtTL.TrialCount_InTask != 0)
+            percentAborted = (float)(Math.Round(decimal.Divide(numAbortedTrials_InTask, (mrtTL.TrialCount_InTask)), 2)) * 100;
         else
             percentAborted = 0;
     
         CurrentTaskSummaryString.Clear();
         CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" +
-                                        $"\n<b># Trials:</b> {crtTL.TrialCount_InTask} ({percentAborted}% aborted)" +
+                                        $"\n<b># Trials:</b> {mrtTL.TrialCount_InTask} ({percentAborted}% aborted)" +
                                         $"\t<b># Blocks:</b> {BlockCount}" +
                                         $"\t<b># Reward Pulses:</b> {numRewardPulses_InTask}" +
                                         $"\nAvg Maze Duration: {AvgMazeDuration}" +

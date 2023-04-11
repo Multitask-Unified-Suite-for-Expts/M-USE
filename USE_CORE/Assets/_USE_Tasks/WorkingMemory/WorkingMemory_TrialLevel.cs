@@ -84,6 +84,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public float TouchFeedbackDuration;
 
+    [HideInInspector] public bool MacMainDisplayBuild;
+    [HideInInspector] public bool AdjustedPositionsForMac;
+
 
     public override void DefineControlLevel()
     {
@@ -137,6 +140,13 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
+            if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
+            {
+                Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
+                TokenFBController.transform.localScale = biggerScale;
+                TokenFBController.tokenSize = 200;
+            }
+
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
 

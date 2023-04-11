@@ -10,15 +10,16 @@ using USE_Settings;
 
 public class DisplayController : MonoBehaviour
 {
-    [HideInInspector] public Canvas InitScreenCanvas;
+    [HideInInspector] public InitScreen InitScreen;
     [HideInInspector] public bool SingleDisplayBuild;
+    [HideInInspector] public bool MacBuild;
 
     public Dictionary<string, bool> DisplayDict;
 
 
     public void HandleDisplays(InitScreen initScreen) //Called by Start method of InitScreen
     {
-        InitScreenCanvas = initScreen.GetComponentInParent<Canvas>();
+        InitScreen = initScreen;
         LoadDisplaySettings();
         SetDisplays();
     }
@@ -30,40 +31,57 @@ public class DisplayController : MonoBehaviour
         if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX || SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux)
         {
             if (Application.isEditor)
-                folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/Desktop/MUSE_Master/DemoConfigs"; //
+                folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/Desktop/MUSE_Master/DemoConfigs";
             else
-                folderPath = Application.dataPath;
+            {
+                MacBuild = true;
+                string[] stringParts = Application.dataPath.Split('/');
+                string path = "/";
+                for (int i = 0; i < stringParts.Length - 3; i++)
+                    path += stringParts[i] + "/";
+                path += "DemoConfigs";
+                folderPath = path;
+            }
         }
         else //Windows:
         {
             if (Application.isEditor)
-                folderPath = "";
+                folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/MUSE_Master/DemoConfigs"; //Needs to be checked.
             else
-                folderPath = Application.dataPath;
+            {
+                string[] stringParts = Application.dataPath.Split('/');
+                string path = "/";
+                for (int i = 0; i < stringParts.Length - 2; i++)
+                    path += stringParts[i] + "/";
+                path += "DemoConfigs";
+                folderPath = path;
+            }
         }
-
-        //Debug.LogError("FOLDER PATH: " + folderPath);
 
         string displayConfigLocation = FindFileInFolder(folderPath, "*DisplayConfig*");
 
         if (!string.IsNullOrEmpty(displayConfigLocation))
         {
-            Debug.Log("String not null! | " + "string: " + displayConfigLocation);
             SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, bool>>("DisplayConfig", displayConfigLocation);
             DisplayDict = (Dictionary<string, bool>)SessionSettings.Get("DisplayConfig");
-            Debug.Log("DISPLAY DICT COUNT: " + DisplayDict.Count);
             SingleDisplayBuild = DisplayDict["SingleDisplayBuild"];
-            Debug.Log("SINGLE DISPLAY BUILD? " + SingleDisplayBuild);
         }
     }
 
     public void SetDisplays()
     {
         if (SingleDisplayBuild)
-            InitScreenCanvas.targetDisplay--;
+            InitScreen.gameObject.GetComponentInParent<Canvas>().targetDisplay--;
+
+        if(MacBuild)
+        {
+            InitScreen.transform.localScale *= 1.75f;
+            GameObject confirmButton = InitScreen.transform.Find("ButtonConfirm").gameObject;
+            confirmButton.transform.position = new Vector3(confirmButton.transform.position.x, confirmButton.transform.position.y + 1000f, confirmButton.transform.position.z);
+        }
     }
 
-    public string FindFileInFolder(string keyToFolder, string stringPattern)
+    public string FindFileInFolder(string keyToFolder, string stringPattern) //There a way to use this from LocateFile?
     {
         string[] possibleFiles = Directory.GetFiles(keyToFolder, stringPattern);
         if (possibleFiles.Length == 1)

@@ -100,6 +100,11 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         else
             flTL.TouchFeedbackDuration = .3f;
 
+        if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
+            flTL.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
+        else
+            flTL.MacMainDisplayBuild = false;
+
     }
     private void ResetBlockVariables()
     {

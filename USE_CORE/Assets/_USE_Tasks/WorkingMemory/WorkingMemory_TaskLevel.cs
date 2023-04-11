@@ -66,6 +66,11 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
             wmTL.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
         else
             wmTL.TouchFeedbackDuration = .3f;
+
+        if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
+            wmTL.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
+        else
+            wmTL.MacMainDisplayBuild = false;
     }    
 
     public void SetBlockSummaryString()

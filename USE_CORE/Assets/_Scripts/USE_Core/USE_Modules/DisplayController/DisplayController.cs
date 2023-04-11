@@ -28,39 +28,7 @@ public class DisplayController : MonoBehaviour
     {
         string folderPath = "";
 
-        if (!Application.isEditor)
-        {
-            if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX || SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux)
-            {
-                MacBuild = true;
-                string[] stringParts = Application.dataPath.Split('/');
-                string path = "/";
-                for (int i = 0; i < stringParts.Length - 3; i++)
-                    path += stringParts[i] + "/";
-                path += "DemoConfigs";
-                folderPath = path;
-            }
-            else
-            {
-                string[] stringParts = Application.dataPath.Split('/');
-                string path = "";
-                for (int i = 0; i < stringParts.Length - 2; i++)
-                    path += stringParts[i] + "/";
-                path += "DemoConfigs";
-                folderPath = path;
-            }
-            
-            string displayConfigLocation = FindFileInFolder(folderPath, "*DisplayConfig*");
-
-            if (!string.IsNullOrEmpty(displayConfigLocation))
-            {
-                SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, bool>>("DisplayConfig", displayConfigLocation);
-                DisplayDict = (Dictionary<string, bool>)SessionSettings.Get("DisplayConfig");
-                SingleDisplayBuild = DisplayDict["SingleDisplayBuild"];
-            }
-        }
-
-        /*if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX || SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux)
+        if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX || SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux)
         {
             if (Application.isEditor)
             {
@@ -81,7 +49,7 @@ public class DisplayController : MonoBehaviour
         {
             if (Application.isEditor)
             {
-                //folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/MUSE_Master/DemoConfigs"; //Needs to be checked.
+                //folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/MUSE_Master/DemoConfigs";
             }
             else
             {
@@ -92,7 +60,19 @@ public class DisplayController : MonoBehaviour
                 path += "DemoConfigs";
                 folderPath = path;
             }
-        } */
+        }
+
+        if (folderPath.Length > 1)
+        {
+            string displayConfigLocation = FindFileInFolder(folderPath, "*DisplayConfig*");
+
+            if (!string.IsNullOrEmpty(displayConfigLocation))
+            {
+                SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, bool>>("DisplayConfig", displayConfigLocation);
+                DisplayDict = (Dictionary<string, bool>)SessionSettings.Get("DisplayConfig");
+                SingleDisplayBuild = DisplayDict["SingleDisplayBuild"];
+            }
+        }
     }
 
     public void SetDisplays()

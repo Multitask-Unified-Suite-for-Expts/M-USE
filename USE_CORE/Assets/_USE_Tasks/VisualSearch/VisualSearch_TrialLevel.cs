@@ -159,6 +159,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
                 TokenFBController.transform.localScale = biggerScale;
                 TokenFBController.tokenSize = 200;
+                AdjustedPositionsForMac = true;
             }
 
             TokenFBController.SetRevealTime(tokenRevealDuration.value);

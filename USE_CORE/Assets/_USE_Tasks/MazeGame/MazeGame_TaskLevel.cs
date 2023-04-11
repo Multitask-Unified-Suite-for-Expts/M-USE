@@ -152,6 +152,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("NumAbortedTrials", ()=> numAbortedTrials_InBlock);
         BlockData.AddDatum("MazeDurations", () => string.Join(",",mazeDurationsList_InBlock));
         BlockData.AddDatum("ChoiceDurations", () => string.Join(",", choiceDurationsList_InBlock));
+        BlockData.AddDatum("MaxTrials", () => mgBD.MinMaxTrials[0]);
+        BlockData.AddDatum("MinTrials", () => mgBD.MaxTrials);
        // BlockData.AddDatum("NumNonStimSelections", () => mgTL.NonStimTouches_InBlock);
     }
     // public void AddBlockValuesToTaskValues()

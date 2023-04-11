@@ -89,6 +89,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public float TouchFeedbackDuration;
     [HideInInspector] public int PreSearch_TouchFbErrorCount;
 
+    [HideInInspector] public bool MacMainDisplayBuild;
+    [HideInInspector] public bool AdjustedPositionsForMac;
+
+
 
     public override void DefineControlLevel()
     {
@@ -149,7 +153,15 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.SetBlockSummaryString();
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
-            
+
+            if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
+            {
+                Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
+                TokenFBController.transform.localScale = biggerScale;
+                TokenFBController.tokenSize = 200;
+                AdjustedPositionsForMac = true;
+            }
+
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);

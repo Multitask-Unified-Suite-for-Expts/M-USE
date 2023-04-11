@@ -151,6 +151,10 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         else
             vsTL.TouchFeedbackDuration = .3f;
 
+        if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
+            vsTL.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
+        else
+            vsTL.MacMainDisplayBuild = false;
     }
 
     public void AssignBlockData()

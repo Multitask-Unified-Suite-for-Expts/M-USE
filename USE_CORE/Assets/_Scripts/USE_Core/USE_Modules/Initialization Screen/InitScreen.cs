@@ -33,6 +33,8 @@ SOFTWARE.
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using USE_ExperimentTemplate_Classes;
+using USE_Settings;
 
 public class InitScreen : MonoBehaviour {
 
@@ -45,15 +47,12 @@ public class InitScreen : MonoBehaviour {
 
     public event System.Action OnConfirm, OnLoadSettings;
 
-    public bool SingleDisplayBuild = true; //Used to control whether or not the InitScreenCanvas renders to Display1 or Display2.
+    public DisplayController displayController;
 
     void Start()
     {
-        if(SingleDisplayBuild)
-        {
-            Canvas parentCanvas = GetComponentInParent<Canvas>();
-            parentCanvas.targetDisplay--;
-        }
+        displayController = gameObject.AddComponent<DisplayController>();
+        displayController.HandleDisplays(this);
 
         foreach (GameObject g in disableOnStart)
             g.SetActive(false);

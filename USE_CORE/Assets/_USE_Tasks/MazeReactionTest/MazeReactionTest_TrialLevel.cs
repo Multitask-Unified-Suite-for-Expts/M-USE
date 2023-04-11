@@ -183,6 +183,7 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         var SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ITI);
+        Debug.Log("FB DUR: " + TouchFeedbackDuration);
         TouchFBController.EnableTouchFeedback(SelectionHandler, TouchFeedbackDuration, StartButtonScale, MRT_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>

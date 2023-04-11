@@ -198,7 +198,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         InitTrial.AddInitializationMethod(() =>
         {
             SelectionHandler.HandlerActive = true;
-            SelectionHandler.ClearCounts();
             if (SelectionHandler.AllSelections.Count > 0)
                 SelectionHandler.ClearSelections();
             SelectionHandler.MinDuration = minObjectTouchDuration.value;
@@ -228,7 +227,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             choiceStartTime = Time.unscaledTime;
             SelectionHandler.HandlerActive = true;
-            SelectionHandler.ClearCounts();
             if (SelectionHandler.AllSelections.Count > 0)
                 SelectionHandler.ClearSelections();
         });

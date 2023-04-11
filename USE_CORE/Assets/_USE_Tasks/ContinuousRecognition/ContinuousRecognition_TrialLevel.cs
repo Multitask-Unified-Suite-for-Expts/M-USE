@@ -320,6 +320,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             AudioFBController.Play("Negative");
             EndBlock = true;
             EventCodeManager.SendCodeImmediate(SessionEventCodes["NoChoice"]);
+            AbortCode = 6;
         });
 
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------

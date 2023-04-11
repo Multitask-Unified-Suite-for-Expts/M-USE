@@ -308,6 +308,8 @@ public class MazeReactionTest_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("NumAbortedTrials", ()=> numAbortedTrials_InBlock);
         BlockData.AddDatum("MazeDurations", () => string.Join(",",mazeDurationsList_InBlock));
         BlockData.AddDatum("ChoiceDurations", () => string.Join(",", choiceDurationsList_InBlock));
+        BlockData.AddDatum("MaxTrials", () => mrtBD.MinMaxTrials[0]);
+        BlockData.AddDatum("MinTrials", () => mrtBD.MaxTrials);
     }
     public override OrderedDictionary GetSummaryData()
     {

@@ -12,7 +12,6 @@ using USE_ExperimentTemplate_Block;
 
 public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 {
-    [HideInInspector] public int TouchDurationError_InTask = 0;
     [HideInInspector] public int NumRewardPulses_InTask = 0;
     [HideInInspector] public int NumTokenBarFull_InTask = 0;
     [HideInInspector] public int TotalTokensCollected_InTask = 0;
@@ -63,7 +62,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             BlockStringsAdded++;
             
             PreviousBlocksString.Insert(0, CurrentBlockString);
-            TouchDurationError_InTask += vsTL.TouchDurationError_InBlock; //Not actively updating on session panel,ok to calculate after block
             vsTL.SearchDurationsList.Clear();
         });
         AssignBlockData();
@@ -73,7 +71,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary();
 
-        data["Touch Duration Error"] = TouchDurationError_InTask;
         data["Reward Pulses"] = NumRewardPulses_InTask;
         data["Token Bar Full"] = NumTokenBarFull_InTask;
         data["Total Tokens Collected"] = TotalTokensCollected_InTask;
@@ -91,7 +88,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
                                       "\n" + 
                                       "\nAvg Search Duration: " + String.Format("{0:0.00}", vsTL.AverageSearchDuration_InBlock) +
                                       "\n" + 
-                                      "\nNum Touch Duration Error: " + vsTL.TouchDurationError_InBlock + 
                                       "\nNum Aborted Trials: " + + vsTL.AbortedTrials_InBlock + 
                                       "\n"+
                                       "\nNum Reward Given: " + vsTL.NumRewardPulses_InBlock + 
@@ -161,7 +157,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     {
         BlockData.AddDatum("Block Accuracy", ()=> (float)vsTL.Accuracy_InBlock);
         BlockData.AddDatum("Avg Search Duration", ()=> vsTL.AverageSearchDuration_InBlock);
-        BlockData.AddDatum("Num Touch Duration Error", ()=> vsTL.TouchDurationError_InBlock);
         BlockData.AddDatum("Num Reward Given", ()=> vsTL.NumRewardPulses_InBlock);
         BlockData.AddDatum("Num Token Bar Filled", ()=> vsTL.NumTokenBarFull_InBlock);
         BlockData.AddDatum("Total Tokens Collected", ()=> vsTL.TotalTokensCollected_InBlock);
@@ -175,7 +170,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     {
         NumCorrect_InTask = 0;
         NumErrors_InTask = 0;
-        TouchDurationError_InTask = 0;
         NumRewardPulses_InTask = 0;
         NumTokenBarFull_InTask = 0;
         TotalTokensCollected_InTask = 0;

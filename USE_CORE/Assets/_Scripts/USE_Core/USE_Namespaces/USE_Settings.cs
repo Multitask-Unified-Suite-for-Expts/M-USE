@@ -180,14 +180,10 @@ namespace USE_Settings
 		public object Get(string key)
 		{
 			if (SettingDict.ContainsKey(key))
-			{
 				return SettingDict[key];
-			}
 			else
-			{
 				throw new Exception("Tried to access value of \"" + key + "\"from Settings " + Name +
 				                    " but this key does not exist in this Settings object.");
-			}
 		}
 
 		private Dictionary<string, Type> TypeDict = new Dictionary<string, Type>

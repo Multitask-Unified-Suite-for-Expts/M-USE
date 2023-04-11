@@ -6,6 +6,8 @@ using USE_Data;
 using SelectionTracking;
 using System;
 using UnityEngine.UI;
+using USE_ExperimentTemplate_Data;
+using System.Linq;
 
 public class TouchFBController : MonoBehaviour
 {
@@ -19,8 +21,9 @@ public class TouchFBController : MonoBehaviour
     public GameObject HeldTooLong_Prefab;
     public GameObject HeldTooShort_Prefab;
     public GameObject MovedTooFar_Prefab;
-    public float FeedbackSize;
-    public float FeedbackDuration = .3f;
+    public List<GameObject> PrefabList;
+    public float FeedbackSize = 150f; //Default is 150;
+    public float FeedbackDuration = .3f; //Default is .3
     public bool FeedbackOn;
     //Textures are currently set in The Trial Template "LoadTextures" method:
     public Texture2D HeldTooLong_Texture;
@@ -29,14 +32,42 @@ public class TouchFBController : MonoBehaviour
     [HideInInspector] public EventCodeManager EventCodeManager;
     [HideInInspector] public Dictionary<string, EventCode> SessionEventCodes;
 
+    private Dictionary<string, int> Error_Dict;
 
-    public void Init(DataController frameData)
+    public int ErrorCount
     {
+        get
+        {
+            return Error_Dict.Values.Sum();
+        }
+    }
+
+
+    public void Init(DataController trialData, DataController frameData)
+    {
+        CreateErrorDict();
+        AddErrorsToTrialData(trialData);
+
         frameData.AddDatum("FeedbackOn", () => FeedbackOn.ToString());
         if (InstantiatedGO != null)
             Destroy(InstantiatedGO);
         InstantiatedGO = null;
         HeldTooLong_Prefab = null; //making 1 prefab null so we can save a "PrefabsCreated" boolean
+    }
+
+    private void CreateErrorDict()
+    {
+        Error_Dict = new Dictionary<string, int>();
+        Error_Dict.Add("HeldTooLong", 0);
+        Error_Dict.Add("HeldTooShort", 0);
+        Error_Dict.Add("MovedTooFar", 0);
+    }
+
+    private void AddErrorsToTrialData(DataController trialData)
+    {
+        trialData.AddDatum("HeldTooLong", () => Error_Dict["HeldTooLong"]);
+        trialData.AddDatum("HeldTooShort", () => Error_Dict["HeldTooShort"]);
+        trialData.AddDatum("MovedTooFar", () => Error_Dict["MovedTooFar"]);
     }
 
     public void EnableTouchFeedback(SelectionTracker.SelectionHandler handler, float fbDuration, float fbSize, GameObject taskCanvasGO)
@@ -53,6 +84,11 @@ public class TouchFBController : MonoBehaviour
         Handler.TouchErrorFeedback += OnTouchErrorFeedback; //Subscribe to event
     }
 
+    public void DisableTouchFeedback()
+    {
+        Handler.TouchErrorFeedback -= OnTouchErrorFeedback;
+    }
+
     private void OnTouchErrorFeedback(object sender, TouchFeedbackArgs e)
     {
         if (e.Selection.ParentName == "ExperimenterDisplay")
@@ -63,15 +99,15 @@ public class TouchFBController : MonoBehaviour
             switch (e.Selection.ErrorType)
             {
                 case "DurationTooLong":
-                    Debug.Log("Touch Duration too long.....");
+                    Error_Dict["HeldTooLong"]++;
                     ShowTouchFeedback(new TouchFeedback(e.Selection, HeldTooLong_Prefab, this));
                     break;
                 case "DurationTooShort":
-                    Debug.Log("Touch Duration too short.....");
+                    Error_Dict["HeldTooShort"]++;
                     ShowTouchFeedback(new TouchFeedback(e.Selection, HeldTooShort_Prefab, this));
                     break;
                 case "MovedTooFar":
-                    Debug.Log("Touch Moved too far.....");
+                    Error_Dict["MovedTooFar"]++;
                     ShowTouchFeedback(new TouchFeedback(e.Selection, MovedTooFar_Prefab, this));
                     break;
                 default:
@@ -84,7 +120,8 @@ public class TouchFBController : MonoBehaviour
     {
         FeedbackOn = true;
         audioFBController.Play("Negative");
-        if (InstantiatedGO != null) Destroy(InstantiatedGO);
+        if (InstantiatedGO != null)
+            Destroy(InstantiatedGO);
         InstantiatedGO = Instantiate(touchFb.Prefab, TaskCanvasGO.transform);
         InstantiatedGO.name = "TouchFeedback_GO";
         InstantiatedGO.GetComponent<RectTransform>().anchoredPosition = touchFb.PosOnCanvas;
@@ -93,7 +130,7 @@ public class TouchFBController : MonoBehaviour
         Invoke("DestroyTouchFeedback", FeedbackDuration);
     }
 
-    public void DestroyTouchFeedback()
+    public void DestroyTouchFeedback() //Called in the Invoke("DestroyTouchFeedback") above ^^
     {
         if (InstantiatedGO != null)
         {
@@ -116,7 +153,9 @@ public class TouchFBController : MonoBehaviour
         go.AddComponent<RectTransform>();
         Image image = go.AddComponent<Image>();
         image.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
+        image.color = new Color32(224, 78, 92, 235);
         image.rectTransform.sizeDelta = new Vector2(FeedbackSize, FeedbackSize);
+        PrefabList.Add(go); 
         return go;
     }
 
@@ -130,6 +169,22 @@ public class TouchFBController : MonoBehaviour
     //    TouchFeedback_CanvasGO.GetComponent<RectTransform>().position = new Vector3(0, 0, 0);
     //    TouchFeedback_Canvas.sortingOrder = 3000;
     //}
+
+    public void ClearErrorCounts()
+    {
+        Error_Dict = Error_Dict.ToDictionary(kvp => kvp.Key, kvp => 0);
+    }
+
+    public void SetPrefabSizes(float size)
+    {
+        if (PrefabList.Count > 0)
+        {
+            foreach (GameObject prefab in PrefabList)
+                prefab.GetComponent<Image>().rectTransform.sizeDelta = new Vector2(size, size);
+        }
+        else
+            Debug.Log("Trying to change the prefab sizes, but the prefablist only has " + PrefabList.Count + " items!");
+    }
 
 
     public class TouchFeedback
@@ -161,9 +216,6 @@ public class TouchFBController : MonoBehaviour
     public class TouchFeedbackArgs : EventArgs
     {
         public SelectionTracker.USE_Selection Selection { get; }
-        //public GameObject GO { get; }
-        //public string ErrorType { get; }
-        //public string ParentName { get; }
 
         public TouchFeedbackArgs(SelectionTracker.USE_Selection selection)
         {

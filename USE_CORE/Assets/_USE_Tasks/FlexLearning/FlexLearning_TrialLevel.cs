@@ -76,7 +76,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int TotalTokensCollected_InBlock;
     [HideInInspector] public decimal Accuracy_InBlock;
     [HideInInspector] public float AverageSearchDuration_InBlock;
-    [HideInInspector] public int TouchDurationError_InBlock;
     [HideInInspector] public int AbortedTrials_InBlock;
    
     // Trial Data Variables
@@ -87,11 +86,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     private bool RewardGiven = false;
     private bool TouchDurationError = false;
     private bool aborted = false;
-    private Ray ray;
-    private RaycastHit hit;
 
     [HideInInspector] public float TouchFeedbackDuration;
-    
+
+    [HideInInspector] public int PreSearch_TouchFbErrorCount;
+
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
@@ -182,7 +181,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
 
-            Handler.ClearCounts();
+            PreSearch_TouchFbErrorCount = TouchFBController.ErrorCount;
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
@@ -197,13 +196,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         });
         SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
-            if (Handler.ErrorCount > 0)
-            {
+            if (TouchFBController.ErrorCount > PreSearch_TouchFbErrorCount)
                 TouchDurationError = true;
-                TouchDurationError_InBlock += Handler.ErrorCount;
-                CurrentTaskLevel.TouchDurationError_InTask += Handler.ErrorCount;
-                Handler.ClearCounts();
-            }
             else
                 TouchDurationError = false;
 

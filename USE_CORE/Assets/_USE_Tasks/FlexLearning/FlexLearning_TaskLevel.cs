@@ -14,7 +14,6 @@ using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 {
-    [HideInInspector] public int TouchDurationError_InTask = 0;
     [HideInInspector] public int NumRewardPulses_InTask = 0;
     [HideInInspector] public int NumTokenBarFull_InTask = 0;
     [HideInInspector] public int TotalTokensCollected_InTask = 0;
@@ -68,8 +67,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
                 CurrentBlockString += "\n";
             BlockStringsAdded++;
             PreviousBlocksString.Insert(0, CurrentBlockString);
-
-            TouchDurationError_InTask += flTL.TouchDurationError_InBlock;
         });
         AssignBlockData();
     }
@@ -114,14 +111,12 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         flTL.NumCorrect_InBlock = 0;
         flTL.NumRewardPulses_InBlock = 0;
         flTL.NumTokenBarFull_InBlock = 0;
-        flTL.TouchDurationError_InBlock = 0;
         flTL.TotalTokensCollected_InBlock = 0;
     }
     public override OrderedDictionary GetSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary();
 
-        data["Touch Duration Error"] = TouchDurationError_InTask;
         data["Reward Pulses"] = NumRewardPulses_InTask;
         data["Token Bar Full"] = NumTokenBarFull_InTask;
         data["Total Tokens Collected"] = TotalTokensCollected_InTask;
@@ -140,8 +135,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
                                       "\nAccuracy: " + String.Format("{0:0.000}", (float)flTL.Accuracy_InBlock) +  
                                       "\n" + 
                                       "\nAvg Search Duration: " + String.Format("{0:0.000}", flTL.AverageSearchDuration_InBlock) +
-                                      "\n" + 
-                                      "\nNum Touch Duration Error: " + flTL.TouchDurationError_InBlock + 
                                       "\n" +
                                       "\nNum Reward Given: " + flTL.NumRewardPulses_InBlock + 
                                       "\nNum Token Bar Filled: " + flTL.NumTokenBarFull_InBlock +
@@ -177,7 +170,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     {
         BlockData.AddDatum("BlockAccuracy", ()=> (float)flTL.Accuracy_InBlock);
         BlockData.AddDatum("AvgSearchDuration", ()=> flTL.AverageSearchDuration_InBlock);
-        BlockData.AddDatum("NumTouchDurationError", ()=> flTL.TouchDurationError_InBlock);
         BlockData.AddDatum("NumRewardGiven", ()=> flTL.NumRewardPulses_InBlock);
         BlockData.AddDatum("NumTokenBarFilled", ()=> flTL.NumTokenBarFull_InBlock);
         BlockData.AddDatum("TotalTokensCollected", ()=> flTL.TotalTokensCollected_InBlock);
@@ -191,7 +183,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     {
         NumCorrect_InTask = 0;
         NumErrors_InTask = 0;
-        TouchDurationError_InTask = 0;
         NumRewardPulses_InTask = 0;
         NumTokenBarFull_InTask = 0;
         TotalTokensCollected_InTask = 0;

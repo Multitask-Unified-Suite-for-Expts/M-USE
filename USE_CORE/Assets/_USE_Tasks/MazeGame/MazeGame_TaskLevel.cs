@@ -128,14 +128,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             ResetBlockVariables();
             CalculateBlockSummaryString();
         });
-        BlockFeedback.AddInitializationMethod(() =>
-        {
-            /*if (blocksAdded > 0)
-                CurrentBlockString += "\n";
-            PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
-            blocksAdded++;
-           // CalculateBlockAverages();*/
-        });
     }
     public void AssignBlockData()
     {

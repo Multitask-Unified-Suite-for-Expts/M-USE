@@ -17,7 +17,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public ContinuousRecognition_TrialDef currentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
     public ContinuousRecognition_TaskLevel currentTask => GetTaskLevel<ContinuousRecognition_TaskLevel>();
 
-    [HideInInspector] public USE_StartButton USE_StartButtonInstance;
+    [HideInInspector] public USE_StartButton USE_StartButton;
     [HideInInspector] public GameObject StartButton;
 
     public TextMeshProUGUI TimerText;
@@ -121,9 +121,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (StartButton == null)
             {
-                USE_StartButtonInstance = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
-                StartButton = USE_StartButtonInstance.StartButtonGO;
-                USE_StartButtonInstance.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                USE_StartButton = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                StartButton = USE_StartButton.StartButtonGO;
+                USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 OriginalStartButtonPosition = StartButton.transform.position;
             }
             playerViewParent = GameObject.Find("MainCameraCopy").transform;
@@ -182,15 +182,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
-
+            TouchFBController.ClearErrorCounts();
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
-
         });
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
             if (TitleTextGO.activeInHierarchy)
+
             {
                 TitleTextGO.SetActive(false);
                 TitleTextGO.transform.position = OriginalTitleTextPosition; //Reset Title Position for next block (in case its not a human block). 
@@ -354,9 +354,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     TokenFBController.AddTokens(ChosenGO, numToFillBar);
                 }
                 else
-                {
                     TokenFBController.AddTokens(ChosenGO, currentTrial.RewardMag);
-                }
             }
             else //Got wrong
             {

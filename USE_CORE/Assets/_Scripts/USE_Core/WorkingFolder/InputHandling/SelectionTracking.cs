@@ -174,18 +174,6 @@ namespace SelectionTracking
             public string HandlerLevel;
             public bool HandlerActive;
 
-            public int Num_HeldTooLong;
-            public int Num_HeldTooShort;
-            public int Num_MovedTooFar;
-
-            public int ErrorCount
-            {
-                get
-                {
-                    return Num_HeldTooLong + Num_HeldTooShort + Num_MovedTooFar;
-                }
-            }
-
             public event EventHandler<TouchFBController.TouchFeedbackArgs> TouchErrorFeedback;
 
             public SelectionHandler()
@@ -261,47 +249,16 @@ namespace SelectionTracking
                 LastUnsuccessfulSelection = new USE_Selection(null);
             }
 
-            public void ClearCounts()
-            {
-                Num_HeldTooLong = 0;
-                Num_HeldTooShort = 0;
-                Num_MovedTooFar = 0;
-            }
-
-            public int GetErrorCount()
-            {
-                return Num_HeldTooLong + Num_HeldTooShort + Num_MovedTooFar;
-            }
-
             public bool LastSuccessfulSelectionMatches(GameObject go)
             {
                 return ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go);
-            }
-
-            public void IncrementErrorCount(string error)
-            {
-                switch(error)
-                {
-                    case "DurationTooLong":
-                        Num_HeldTooLong++;
-                        break;
-                    case "DurationTooShort":
-                        Num_HeldTooShort++;
-                        break;
-                    case "MovedTooFar":
-                        Num_MovedTooFar++;
-                        break;
-                    default:
-                        break;
-                }
             }
 
             private void SelectionErrorHandling(string error)
             {
                 if (OngoingSelection != null)
                 {
-                    OngoingSelection.ErrorType = error;
-                    IncrementErrorCount(error);
+                    OngoingSelection.ErrorType = error;                    
                     TouchErrorFeedback?.Invoke(this, new TouchFBController.TouchFeedbackArgs(OngoingSelection));
                 }
                 else
@@ -515,8 +472,7 @@ namespace SelectionTracking
                 // DefaultConditions.Add("DurationTooShort", ()=> MinDuration != null && OngoingSelection.Duration < MinDuration);
                 DefaultConditions.Add("MovedTooFar", () =>
                 {
-                    return MaxPixelDisplacement != null && 
-                           Vector3.Distance(CurrentInputLocation(), OngoingSelection.InputLocations[0]) < MaxPixelDisplacement;
+                    return MaxPixelDisplacement != null && Vector3.Distance(CurrentInputLocation(), OngoingSelection.InputLocations[0]) < MaxPixelDisplacement;
                 });
                 DefaultConditions.Add("MouseButton0", () => InputBroker.GetMouseButton(0));
                 DefaultConditions.Add("MouseButton0Down", () => InputBroker.GetMouseButtonDown(0));

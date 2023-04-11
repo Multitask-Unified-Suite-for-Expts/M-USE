@@ -69,7 +69,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int TotalTokensCollected_InBlock;
     [HideInInspector] public decimal Accuracy_InBlock;
     [HideInInspector] public float AverageSearchDuration_InBlock;
-    [HideInInspector] public int TouchDurationError_InBlock;
     [HideInInspector] public int AbortedTrials_InBlock;
    
     // Trial Data Variables
@@ -88,6 +87,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     public bool StimIsChosen;
 
     [HideInInspector] public float TouchFeedbackDuration;
+    [HideInInspector] public int PreSearch_TouchFbErrorCount;
 
 
     public override void DefineControlLevel()
@@ -122,9 +122,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             //Set the Stimuli Light/Shadow settings
             SetShadowType(ShadowType, "VisualSearch_DirectionalLight");
             if (StimFacingCamera)
-            {
                 MakeStimFaceCamera();
-            }
 
             if(StartButton == null)
             {
@@ -186,7 +184,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
 
-            Handler.ClearCounts();
+            PreSearch_TouchFbErrorCount = TouchFBController.ErrorCount;
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
@@ -202,13 +200,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
-            if (Handler.ErrorCount > 0)
-            {
+            if (TouchFBController.ErrorCount > PreSearch_TouchFbErrorCount)
                 TouchDurationError = true;
-                TouchDurationError_InBlock += Handler.ErrorCount;
-                CurrentTaskLevel.TouchDurationError_InTask += Handler.ErrorCount;
-                Handler.ClearCounts();
-            }
             else
                 TouchDurationError = false;
 
@@ -356,7 +349,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         NumErrors_InBlock = 0;
         NumRewardPulses_InBlock = 0;
         NumTokenBarFull_InBlock = 0;
-        TouchDurationError_InBlock = 0;
         TotalTokensCollected_InBlock = 0;
         Accuracy_InBlock = 0;
         AbortedTrials_InBlock = 0;

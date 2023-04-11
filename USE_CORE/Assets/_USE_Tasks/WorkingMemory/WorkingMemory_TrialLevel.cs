@@ -69,7 +69,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     public int TotalTokensCollected_InBlock;
     public float Accuracy_InBlock;
     public float AverageSearchDuration_InBlock;
-    public int TouchDurationError_InBlock;
     public int NumAborted_InBlock;
    
     // Trial Data Variables
@@ -185,7 +184,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
-            Handler.ClearCounts();
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
@@ -344,7 +342,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         NumCorrect_InBlock = 0;
         NumRewardPulses_InBlock = 0;
         NumTokenBarFull_InBlock = 0;
-        TouchDurationError_InBlock = 0;
         Accuracy_InBlock = 0;
         TotalTokensCollected_InBlock = 0;
         NumAborted_InBlock = 0;

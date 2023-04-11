@@ -202,15 +202,20 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         numSliderBarFull_InBlock = 0;
         mazeDurationsList_InBlock.Clear();
         choiceDurationsList_InBlock.Clear();
-        mgTL.runningTrialPerformance.Clear();
+        mgTL.runningPercentError.Clear();
     }
     public void CalculateBlockSummaryString()
     {
         ClearStrings();
+        float latestPercentError = -1;
+        if (mgTL.runningPercentError.Count > 0)
+            latestPercentError = (mgTL.runningPercentError[mgTL.runningPercentError.Count - 1])*100;
+
         CurrentBlockString = "<b>Min Trials in Block: </b>" + mgTL.CurrentTrialDef.MinMaxTrials[0] +
                              "<b>\nMax Trials in Block: </b>" + mgTL.CurrentTrialDef.MaxTrials +
                              "<b>\nLearning Criterion: </b>" + mgTL.CurrentTrialDef.BlockEndThreshold +
-                             "\n\nTotal Errors: " + totalErrors_InBlock.Sum() +
+                             "\n\nLast Trial's Percent Error" + (latestPercentError == -1 ?
+                                 (String.Format("{0:0.00}%", latestPercentError)):("No Mazes Completed in Block")) +                             "\nTotal Errors: " + totalErrors_InBlock.Sum() +
                              "\nRule-Abiding Errors: " + ruleAbidingErrors_InBlock.Sum() +
                              "\nRule-Breaking Errors: " + ruleBreakingErrors_InBlock.Sum() +
                              "\nPerseverative Errors: " + perseverativeErrors_InBlock.Sum() +

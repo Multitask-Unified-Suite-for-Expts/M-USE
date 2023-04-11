@@ -181,7 +181,8 @@ namespace USE_ExperimentTemplate_Task
 
             BlockFeedback.AddUniversalInitializationMethod(() =>
             {
-                string blockTitle = $"<b>Block {BlockCount}</b>";
+                string blockTitle = $"<b>Block {BlockCount + 1}" +
+                                    $"\nTrials Completed: {TrialLevel.TrialCount_InBlock + 1}</b>";
 
                 if (BlockSummaryString.Length > 0)
                 {

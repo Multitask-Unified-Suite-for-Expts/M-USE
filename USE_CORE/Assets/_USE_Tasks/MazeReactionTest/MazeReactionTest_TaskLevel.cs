@@ -107,10 +107,15 @@ public class MazeReactionTest_TaskLevel : ControlLevel_Task_Template
     public void CalculateBlockSummaryString()
     {
         ClearStrings();
+        float latestPercentError = -1;
+        if (mrtTL.runningPercentError.Count > 0)
+            latestPercentError = (mrtTL.runningPercentError[mrtTL.runningPercentError.Count - 1])*100;
+
         CurrentBlockString = "<b>\nMin Trials in Block: </b>" + mrtTL.CurrentTrialDef.MinMaxTrials[0] +
                              "<b>\nMax Trials in Block: </b>" + mrtTL.CurrentTrialDef.MaxTrials +
                              "<b>\nLearning Criterion: </b>" + mrtTL.CurrentTrialDef.BlockEndThreshold +
-                             "\n" + 
+                             "\n\nLast Trial's Percent Error" + (latestPercentError == -1 ?
+                                 (String.Format("{0:0.00}%", latestPercentError)):("No Mazes Completed in Block")) +
                              "\nTotal Errors: " + totalErrors_InBlock.Sum() +
                              "\nBacktrack Errors: " + backtrackErrors_InBlock.Sum() +
                              "\n" + 
@@ -138,7 +143,7 @@ public class MazeReactionTest_TaskLevel : ControlLevel_Task_Template
         numSliderBarFull_InBlock = 0;
         mazeDurationsList_InBlock.Clear();
         choiceDurationsList_InBlock.Clear();
-        mrtTL.runningTrialPerformance.Clear();
+        mrtTL.runningPercentError.Clear();
     }
     private void SetSettings()
     {
@@ -228,6 +233,10 @@ public class MazeReactionTest_TaskLevel : ControlLevel_Task_Template
             mrtTL.MazeBackgroundTextureName = "MazeBackground";
             Debug.Log("Maze Background Texture settings not defined in the TaskDef, set as default of MazeBackground");
         }
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
+            mrtTL.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
+        else
+            mrtTL.TouchFeedbackDuration = .3f;
         
     }
     private void LoadMazeDef()

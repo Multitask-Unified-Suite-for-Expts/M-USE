@@ -5,6 +5,7 @@ using ConfigDynamicUI;
 using HiddenMaze;
 using MazeGame_Namespace;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
@@ -20,8 +21,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private GameObject StartButton;
 
     // Block Ending Variable
-    public List<float> runningTrialPerformance = new List<float>();
-    private float trialPerformance;
+    public List<float> runningPercentError = new List<float>();
+    private float percentError;
     public int MinTrials;
 
     // Maze Object Variables
@@ -53,6 +54,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private bool ErroneousReturnToLast;
     public float tileFbDuration;
     public GameObject startTile;
+    private float tileScale;
 
     // Trial Data Tracking Variables
     private float mazeDuration;
@@ -197,6 +199,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
+            TouchFBController.DestroyTouchFeedback();
+            TouchFBController.SetPrefabSizes(StartButtonScale);
             SelectionHandler.HandlerActive = true;
             if (SelectionHandler.AllSelections.Count > 0)
                 SelectionHandler.ClearSelections();
@@ -225,6 +229,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         ChooseTile.AddInitializationMethod(() =>
         {
+            TouchFBController.DestroyTouchFeedback(); // destroys prefab of previous sizing
+            tileScale = 26.25f * TileSize;
+            TouchFBController.SetPrefabSizes(tileScale);
             choiceStartTime = Time.unscaledTime;
             SelectionHandler.HandlerActive = true;
             if (SelectionHandler.AllSelections.Count > 0)
@@ -285,7 +292,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             choiceMade = false;
             // This is what actually determines the result of the tile choice
             selectedGO.GetComponent<Tile>().SelectionFeedback();
-            trialPerformance = (float)decimal.Divide(totalErrors_InTrial.Sum(),CurrentTaskLevel.currMaze.mNumSquares);
+            percentError = (float)decimal.Divide(totalErrors_InTrial.Sum(),CurrentTaskLevel.currMaze.mNumSquares);
 
             finishedFbDuration = (tileFbDuration + flashingFbDuration.value);
             SliderFBController.SetUpdateDuration(tileFbDuration);
@@ -349,8 +356,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 StateAfterDelay = ITI;
                 DelayDuration = 0;
 
-                trialPerformance = (float)decimal.Divide(totalErrors_InTrial.Sum(),CurrentTaskLevel.currMaze.mNumSquares);
-                runningTrialPerformance.Add(trialPerformance);
+                percentError = (float)decimal.Divide(totalErrors_InTrial.Sum(),CurrentTaskLevel.currMaze.mNumSquares);
+                runningPercentError.Add(percentError);
                 CurrentTaskLevel.numSliderBarFull_InBlock++;
                 CurrentTaskLevel.numSliderBarFull_InTask++;
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
@@ -405,7 +412,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     protected override bool CheckBlockEnd()
     {
         TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
-        return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningTrialPerformance,
+        return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningPercentError,
             CurrentTrialDef.BlockEndThreshold, MinTrials,
             CurrentTrialDef.MaxTrials);
     }
@@ -777,6 +784,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         FrameData.AddDatum("Context", ()=> contextName);
         FrameData.AddDatum("ChoiceMade", ()=> choiceMade);
+        FrameData.AddDatum("SelectedObject", () => selectedGO.name);
         FrameData.AddDatum("StartedMaze", ()=> startedMaze);
     }
     private void DisableSceneElements()
@@ -829,8 +837,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             CurrentTaskLevel.numAbortedTrials_InBlock++;
             CurrentTaskLevel.numAbortedTrials_InTask++;
-            CurrentTaskLevel.ClearStrings();
-            CurrentTaskLevel.BlockSummaryString.AppendLine("");
+        //    CurrentTaskLevel.ClearStrings();
+        //    CurrentTaskLevel.BlockSummaryString.AppendLine("");
         }
     }
 
@@ -873,7 +881,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         TrialSummaryString = "<b>Maze Name: </b>" + mazeDefName +
                              "\n" + 
                              "\nTotal Errors: " + totalErrors_InTrial.Sum() +
-                             "\nTrial Performance: " + trialPerformance + 
+                             "\nTrial Performance: " + percentError + 
                              "\n" +
                              "\nRule-Abiding Errors: " + ruleAbidingErrors_InTrial.Sum() +
                              "\nRule-Breaking Errors: " + ruleBreakingErrors_InTrial.Sum() + 

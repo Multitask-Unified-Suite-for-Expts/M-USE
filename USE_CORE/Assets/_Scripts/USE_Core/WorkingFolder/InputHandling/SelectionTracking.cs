@@ -472,8 +472,7 @@ namespace SelectionTracking
                 // DefaultConditions.Add("DurationTooShort", ()=> MinDuration != null && OngoingSelection.Duration < MinDuration);
                 DefaultConditions.Add("MovedTooFar", () =>
                 {
-                    return MaxPixelDisplacement != null && 
-                           Vector3.Distance(CurrentInputLocation(), OngoingSelection.InputLocations[0]) < MaxPixelDisplacement;
+                    return MaxPixelDisplacement != null && Vector3.Distance(CurrentInputLocation(), OngoingSelection.InputLocations[0]) < MaxPixelDisplacement;
                 });
                 DefaultConditions.Add("MouseButton0", () => InputBroker.GetMouseButton(0));
                 DefaultConditions.Add("MouseButton0Down", () => InputBroker.GetMouseButtonDown(0));

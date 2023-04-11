@@ -6,6 +6,8 @@ using USE_Data;
 using SelectionTracking;
 using System;
 using UnityEngine.UI;
+using USE_ExperimentTemplate_Data;
+using System.Linq;
 
 public class TouchFBController : MonoBehaviour
 {
@@ -30,30 +32,42 @@ public class TouchFBController : MonoBehaviour
     [HideInInspector] public EventCodeManager EventCodeManager;
     [HideInInspector] public Dictionary<string, EventCode> SessionEventCodes;
 
-    private int Num_HeldTooLong = 0;
-    private int Num_HeldTooShort = 0;
-    private int Num_MovedTooFar = 0;
+    private Dictionary<string, int> Error_Dict;
 
     public int ErrorCount
     {
         get
         {
-            return Num_HeldTooLong + Num_HeldTooShort + Num_MovedTooFar;
+            return Error_Dict.Values.Sum();
         }
     }
 
 
     public void Init(DataController trialData, DataController frameData)
     {
-        trialData.AddDatum("Num_HeldTooLong", () => Num_HeldTooLong);
-        trialData.AddDatum("Num_HeldTooShort", () => Num_HeldTooShort);
-        trialData.AddDatum("Num_MovedTooFar", () => Num_MovedTooFar);
+        CreateErrorDict();
+        AddErrorsToTrialData(trialData);
 
         frameData.AddDatum("FeedbackOn", () => FeedbackOn.ToString());
         if (InstantiatedGO != null)
             Destroy(InstantiatedGO);
         InstantiatedGO = null;
         HeldTooLong_Prefab = null; //making 1 prefab null so we can save a "PrefabsCreated" boolean
+    }
+
+    private void CreateErrorDict()
+    {
+        Error_Dict = new Dictionary<string, int>();
+        Error_Dict.Add("HeldTooLong", 0);
+        Error_Dict.Add("HeldTooShort", 0);
+        Error_Dict.Add("MovedTooFar", 0);
+    }
+
+    private void AddErrorsToTrialData(DataController trialData)
+    {
+        trialData.AddDatum("HeldTooLong", () => Error_Dict["HeldTooLong"]);
+        trialData.AddDatum("HeldTooShort", () => Error_Dict["HeldTooShort"]);
+        trialData.AddDatum("MovedTooFar", () => Error_Dict["MovedTooFar"]);
     }
 
     public void EnableTouchFeedback(SelectionTracker.SelectionHandler handler, float fbDuration, float fbSize, GameObject taskCanvasGO)
@@ -69,16 +83,10 @@ public class TouchFBController : MonoBehaviour
        
         Handler.TouchErrorFeedback += OnTouchErrorFeedback; //Subscribe to event
     }
-    public void EnableTouchFeedback(SelectionTracker.SelectionHandler handler, GameObject taskCanvasGO)
+
+    public void DisableTouchFeedback()
     {
-        Handler = handler;
-        TaskCanvasGO = taskCanvasGO;
-        TaskCanvas = TaskCanvasGO.GetComponent<Canvas>();
-
-        if (HeldTooLong_Prefab == null)
-            CreatePrefabs();
-
-        Handler.TouchErrorFeedback += OnTouchErrorFeedback; //Subscribe to event
+        Handler.TouchErrorFeedback -= OnTouchErrorFeedback;
     }
 
     private void OnTouchErrorFeedback(object sender, TouchFeedbackArgs e)
@@ -91,15 +99,15 @@ public class TouchFBController : MonoBehaviour
             switch (e.Selection.ErrorType)
             {
                 case "DurationTooLong":
-                    Num_HeldTooLong++;
+                    Error_Dict["HeldTooLong"]++;
                     ShowTouchFeedback(new TouchFeedback(e.Selection, HeldTooLong_Prefab, this));
                     break;
                 case "DurationTooShort":
-                    Num_HeldTooShort++;
+                    Error_Dict["HeldTooShort"]++;
                     ShowTouchFeedback(new TouchFeedback(e.Selection, HeldTooShort_Prefab, this));
                     break;
                 case "MovedTooFar":
-                    Num_MovedTooFar++;
+                    Error_Dict["MovedTooFar"]++;
                     ShowTouchFeedback(new TouchFeedback(e.Selection, MovedTooFar_Prefab, this));
                     break;
                 default:
@@ -112,7 +120,8 @@ public class TouchFBController : MonoBehaviour
     {
         FeedbackOn = true;
         audioFBController.Play("Negative");
-        if (InstantiatedGO != null) Destroy(InstantiatedGO);
+        if (InstantiatedGO != null)
+            Destroy(InstantiatedGO);
         InstantiatedGO = Instantiate(touchFb.Prefab, TaskCanvasGO.transform);
         InstantiatedGO.name = "TouchFeedback_GO";
         InstantiatedGO.GetComponent<RectTransform>().anchoredPosition = touchFb.PosOnCanvas;
@@ -121,7 +130,7 @@ public class TouchFBController : MonoBehaviour
         Invoke("DestroyTouchFeedback", FeedbackDuration);
     }
 
-    public void DestroyTouchFeedback()
+    public void DestroyTouchFeedback() //Called in the Invoke("DestroyTouchFeedback") above ^^
     {
         if (InstantiatedGO != null)
         {
@@ -144,8 +153,9 @@ public class TouchFBController : MonoBehaviour
         go.AddComponent<RectTransform>();
         Image image = go.AddComponent<Image>();
         image.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
+        image.color = new Color32(224, 78, 92, 235);
         image.rectTransform.sizeDelta = new Vector2(FeedbackSize, FeedbackSize);
-        PrefabList.Add(go); //add to prefab list. 
+        PrefabList.Add(go); 
         return go;
     }
 
@@ -160,34 +170,9 @@ public class TouchFBController : MonoBehaviour
     //    TouchFeedback_Canvas.sortingOrder = 3000;
     //}
 
-    public void IncrementErrorCount(string error)
-    {
-        switch (error)
-        {
-            case "DurationTooLong":
-                Num_HeldTooLong++;
-                break;
-            case "DurationTooShort":
-                Num_HeldTooShort++;
-                break;
-            case "MovedTooFar":
-                Num_MovedTooFar++;
-                break;
-            default:
-                break;
-        }
-    }
-
-    public int GetErrorCount()
-    {
-        return Num_HeldTooLong + Num_HeldTooShort + Num_MovedTooFar;
-    }
-
     public void ClearErrorCounts()
     {
-        Num_HeldTooLong = 0;
-        Num_HeldTooShort = 0;
-        Num_MovedTooFar = 0;
+        Error_Dict = Error_Dict.ToDictionary(kvp => kvp.Key, kvp => 0);
     }
 
     public void SetPrefabSizes(float size)

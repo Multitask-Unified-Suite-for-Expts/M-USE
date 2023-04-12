@@ -1,15 +1,13 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using USE_States;
 using EffortControl_Namespace;
 using System.Linq;
-using System.Threading.Tasks;
 using USE_ExperimentTemplate_Trial;
 using ConfigDynamicUI;
 using USE_UI;
 using SelectionTracking;
-using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 {
@@ -183,7 +181,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if(Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
-            TouchFBController.ClearErrorCounts();
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
         });
@@ -703,8 +700,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         Borders = new GameObject("Borders");
 
-        //can we replace all this with a single UI square with solid border and no fill?
-        
         GameObject topBorder = GameObject.CreatePrimitive(PrimitiveType.Cube);
         topBorder.name = "TopBorder";
         topBorder.transform.parent = Borders.transform;
@@ -740,7 +735,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Borders.transform.position = new Vector3(0, 1.755f, 0);
         ObjectList.Add(Borders);
 
-        //replace with ui thing
         MiddleBarrier = GameObject.CreatePrimitive(PrimitiveType.Cube);
         MiddleBarrier.name = "MiddleBarrier";
         MiddleBarrier.transform.position = new Vector3(0, .602f, 0);
@@ -756,7 +750,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             mat.SetFloat("_SpecularHighlights", 0f);
         }
 
-        //pontentially replace with prefab?
         BalloonContainerLeft = new GameObject("BalloonContainerLeft");
         BalloonContainerLeft.transform.position = new Vector3(-1, .15f, .5f);
         BalloonContainerLeft.transform.localScale = new Vector3(1, 1, 1);
@@ -811,6 +804,28 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         ObjectsCreated = true;
     }
+
+    //void CreateBorderUI()
+    //{
+    //    Canvas canvas = EC_CanvasGO.GetComponent<Canvas>();
+    //    int width = 5;
+    //    Border = new GameObject("Border", typeof(Image));
+    //    Border.transform.SetParent(canvas.transform);
+    //    Image borderImage = Border.GetComponent<Image>();
+
+    //    borderImage.color = Color.cyan;
+    //    borderImage.type = Image.Type.Sliced;
+    //    borderImage.sprite = null;
+    //    borderImage.raycastTarget = false;
+
+    //    RectTransform borderRectTransform = Border.GetComponent<RectTransform>();
+    //    borderRectTransform.anchorMin = Vector2.zero;
+    //    borderRectTransform.anchorMax = Vector2.one;
+    //    borderRectTransform.offsetMin = new Vector2(width, width);
+    //    borderRectTransform.offsetMax = new Vector2(-width, -width);
+
+    //    ObjectList.Add(Border);
+    //}
 
     void CreateTransparentBalloons()
     {

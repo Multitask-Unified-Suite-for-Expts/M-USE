@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using USE_ExperimentTemplate_Classes;
@@ -6,7 +5,6 @@ using USE_Data;
 using SelectionTracking;
 using System;
 using UnityEngine.UI;
-using USE_ExperimentTemplate_Data;
 using System.Linq;
 
 public class TouchFBController : MonoBehaviour
@@ -46,8 +44,9 @@ public class TouchFBController : MonoBehaviour
     public void Init(DataController trialData, DataController frameData)
     {
         CreateErrorDict();
-        AddErrorsToTrialData(trialData);
-
+        trialData.AddDatum("HeldTooLong", () => Error_Dict["HeldTooLong"]);
+        trialData.AddDatum("HeldTooShort", () => Error_Dict["HeldTooShort"]);
+        trialData.AddDatum("MovedTooFar", () => Error_Dict["MovedTooFar"]);
         frameData.AddDatum("FeedbackOn", () => FeedbackOn.ToString());
         if (InstantiatedGO != null)
             Destroy(InstantiatedGO);
@@ -57,17 +56,12 @@ public class TouchFBController : MonoBehaviour
 
     private void CreateErrorDict()
     {
-        Error_Dict = new Dictionary<string, int>();
-        Error_Dict.Add("HeldTooLong", 0);
-        Error_Dict.Add("HeldTooShort", 0);
-        Error_Dict.Add("MovedTooFar", 0);
-    }
-
-    private void AddErrorsToTrialData(DataController trialData)
-    {
-        trialData.AddDatum("HeldTooLong", () => Error_Dict["HeldTooLong"]);
-        trialData.AddDatum("HeldTooShort", () => Error_Dict["HeldTooShort"]);
-        trialData.AddDatum("MovedTooFar", () => Error_Dict["MovedTooFar"]);
+        Error_Dict = new Dictionary<string, int>
+        {
+            { "HeldTooLong", 0 },
+            { "HeldTooShort", 0 },
+            { "MovedTooFar", 0 }
+        };
     }
 
     public void EnableTouchFeedback(SelectionTracker.SelectionHandler handler, float fbDuration, float fbSize, GameObject taskCanvasGO)

@@ -66,7 +66,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     private bool BlueSquareTouched;
     private bool BlueSquareReleased;
     private bool AudioPlayed;
-    private bool Grating;
     private bool HeldTooShort;
     private bool HeldTooLong;
     public bool PerfThresholdMet;
@@ -74,8 +73,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     private bool ConfigValuesChangedInPrevTrial;
 
     private Color32 LightBlueColor;
-    private Color32 LightRedColor;
-    private Color32 InitialBackdropColor;
 
     private float WhiteTimeoutTime;
     private float WhiteStartTime;
@@ -513,7 +510,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     private void CreateColors()
     {
-        LightRedColor = new Color32(224, 78, 92, 255);
         LightBlueColor = new Color32(0, 150, 255, 255);
     }
 

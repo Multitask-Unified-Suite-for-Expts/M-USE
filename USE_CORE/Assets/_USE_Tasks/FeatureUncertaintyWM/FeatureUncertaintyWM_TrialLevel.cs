@@ -7,12 +7,31 @@ using USE_Settings;
 using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
 using FeatureUncertaintyWM_Namespace;
+using System;
+using Newtonsoft.Json.Linq;
+using System.Reflection;
+using USE_UI;
 
 public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 {
     private GameObject taskCanvas;
-    
+    public USE_StartButton USE_StartButton;
+    public USE_StartButton USE_FBSquare;
     public FeatureUncertaintyWM_TrialDef CurrentTrialDef => GetCurrentTrialDef<FeatureUncertaintyWM_TrialDef>();
+    public FeatureUncertaintyWM_TaskLevel CurrentTaskLevel => GetTaskLevel<FeatureUncertaintyWM_TaskLevel>();
+
+    // Each trial in the block should have two variables that only one is selected to build the multicomp stim. A certain prop and objectType, and uncertain prop and objectType
+    // whether a trial uses uncertain or certain varibles then is defined by the running accuracy criterion and the min/max number of trials defined
+
+    // Block Uncertainty and End Variables
+    public List<int> runningAcc;
+    public int MinTrials, MaxTrials;
+    public int MinUncertainTrials, MaxUncertainTrials;
+
+
+   
+
+
 
     public override void DefineControlLevel()
     {
@@ -71,7 +90,59 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         //assign appropriate location and size to multiCompPanel
 
         // List<GameObject> componentObjectInstances = new List<GameObject>();
+        //
+
+        // not sure whether it is a correct way of implementing that???
+        GameObject[] multiCompPanel1 = new GameObject[numProbedStim];
+
+        for(int i = 0; i <numProbedStim; i++)
+        {
+            multiCompPanel1[i].AddComponent<CanvasRenderer>();
+            multiCompPanel1[i].GetComponent<RectTransform>().SetParent(taskCanvas.GetComponent<RectTransform>());
+            multiCompPanel1[i].GetComponent<RectTransform>().anchoredPosition = probedStimPosition[i];
+            multiCompPanel1[i].GetComponent<RectTransform>().sizeDelta = probedStimSize[i];
+
+        }
+
+
+
+        //defining each circle and distributing total objecect count on the circles evenly based on their radius
+        // Variables to be taken: 'totalObjectCount' 'angelOffset', 'radius', 'numCircles', 'compScale'
+        //Currently it is written in a way that unity estimates the number of objects per circle in a uniformely distributed fashion based on the circle radius
+        //which one is better? predefined objpercircle or the later?
+
         Vector3[] compLocations = new Vector3[totalObjectCount];
+        Vector3 compScale = new Vector3(1f, 1f, 1f );
+        int numCircles = 3;      
+        float[] radius = new float[totalObjectCount];
+        float[] angelOffset = new float[totalObjectCount];
+        int[] numCompOnCircles = new int[numCircles];
+
+        numCompOnCircles = radius.Select(x => Mathf.RoundToInt(totalObjectCount * x / radius.Sum())).ToArray();
+        int remainngComp = totalObjectCount - numCompOnCircles.Sum();
+
+        // Add or subtract the remaining objects to the last circle
+        if (remainngComp !=0)
+        {
+            numCompOnCircles[numCircles - 1] += remainngComp;
+        }
+
+        // Initialize the coordinates of object locations on all circles
+
+        int counter = 0;
+        for (int j = 0; j < numCircles; j++)
+        {
+            for (int i = 0; i < numCompOnCircles[j]; i++)
+            {
+                float angle = 2 * Mathf.PI * i / numCompOnCircles[j];
+                float x = angelOffset[j] + radius[j] * Mathf.Cos(angle);
+                float y = angelOffset[j] + radius[j] * Mathf.Sin(angle);
+                compLocations[counter] = new Vector3(x, y, 0);
+                counter++;
+            }
+        }
+
+
         int totalObjCounter = 0;
         
         //get actual # of each object type
@@ -79,12 +150,13 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
         for (int iObjType = 0; iObjType < componentObjectTypes.Length; iObjType++)
         {
-            for (int iObj = 1; iObj < numObjsOfEachType[iObjType]; iObjType++)
+            for (int iObj = 1; iObj < numObjsOfEachType[iObjType]; iObj++)
             {
                     
                 GameObject g = Instantiate(componentObjectTypes[iObjType]);
                 g.GetComponent<RectTransform>().SetParent(multiCompPanel.GetComponent<RectTransform>());
                 g.GetComponent<RectTransform>().anchoredPosition = compLocations[iObjType];
+                g.GetComponent<RectTransform>().localScale = compScale;
                 // componentObjectInstances.Add(g);
             }
         }
@@ -92,6 +164,9 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         return multiCompPanel;
 
     }
+
+
+
     
     
 ///from shotgunraycast:

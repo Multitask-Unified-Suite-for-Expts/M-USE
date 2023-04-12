@@ -85,7 +85,7 @@ public class TouchFBController : MonoBehaviour
 
     private void OnTouchErrorFeedback(object sender, TouchFeedbackArgs e)
     {
-        if (e.Selection.ParentName == "ExperimenterDisplay")
+        if (e.Selection.SelectedGameObject == null || e.Selection.ParentName == "ExperimenterDisplay")
             return;
 
         if(!FeedbackOn)
@@ -116,12 +116,14 @@ public class TouchFBController : MonoBehaviour
         audioFBController.Play("Negative");
         if (InstantiatedGO != null)
             Destroy(InstantiatedGO);
+
         InstantiatedGO = Instantiate(touchFb.Prefab, TaskCanvasGO.transform);
         InstantiatedGO.name = "TouchFeedback_GO";
         InstantiatedGO.GetComponent<RectTransform>().anchoredPosition = touchFb.PosOnCanvas;
         EventCodeManager.SendCodeImmediate(SessionEventCodes["TouchFBController_FeedbackOn"]);
 
-        Invoke("DestroyTouchFeedback", FeedbackDuration);
+        Invoke("DestroyTouchFeedback", FeedbackDuration);            
+        
     }
 
     public void DestroyTouchFeedback() //Called in the Invoke("DestroyTouchFeedback") above ^^
@@ -198,9 +200,9 @@ public class TouchFBController : MonoBehaviour
 
         public Vector2 GetPosOnCanvas()
         {
+            Vector2 localPoint;
             RectTransform canvasRect = TouchFeedbackController.TaskCanvas.GetComponent<RectTransform>();
             Vector3 screenPos = Camera.main.WorldToScreenPoint(Selection.SelectedGameObject.transform.position);
-            Vector2 localPoint;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPos, Camera.main, out localPoint);
             return localPoint;
         }

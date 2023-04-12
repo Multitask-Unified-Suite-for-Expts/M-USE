@@ -1,11 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using USE_States;
-using USE_UI;
-using USE_StimulusManagement;
-using WhatWhenWhere_Namespace;
 
 namespace SelectionTracking
 {
@@ -269,7 +265,7 @@ namespace SelectionTracking
 
                 if (CurrentInputLocation == null) // there is no input recorded on the screen
                 {
-                    Debug.Log(" currentInputLocation == null");
+                    //Debug.Log(" currentInputLocation == null");
                     if (OngoingSelection != null) // the previous frame was a selection
                     {
                         CheckTermination();
@@ -282,7 +278,7 @@ namespace SelectionTracking
                 currentTarget = FindCurrentTarget(CurrentInputLocation());
                 if (currentTarget == null) //input is not over a gameobject
                 {
-                    Debug.Log(" currentTarget == null");
+                    //Debug.Log(" currentTarget == null");
                     if (OngoingSelection != null) // the previous frame was a selection
                     {
                         CheckTermination();
@@ -294,7 +290,7 @@ namespace SelectionTracking
                 //if we have reached this point we know there is a target
                 if (OngoingSelection == null) //no previous selection
                 {
-                    Debug.Log(" OngoingSelection == null");
+                    //Debug.Log(" OngoingSelection == null");
                     CheckInit();
                     return;
                 }
@@ -305,7 +301,7 @@ namespace SelectionTracking
 
                 if (currentTarget != OngoingSelection.SelectedGameObject) //previous selection was on different game object
                 {
-                    Debug.Log(" currentTarget != OngoingSelection.SelectedGameObject");
+                    //Debug.Log(" currentTarget != OngoingSelection.SelectedGameObject");
                     CheckTermination(); //check termination of previous selection
                     CheckInit(); //check init of current selection
                     return;

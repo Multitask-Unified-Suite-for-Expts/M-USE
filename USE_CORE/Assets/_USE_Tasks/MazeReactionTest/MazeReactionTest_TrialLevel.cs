@@ -177,13 +177,13 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
             if (!configVariablesLoaded)
                 LoadConfigVariables();
             
-            pathProgressIndex = 0;
+            CurrentTaskLevel.SetTaskSummaryString();
+            CurrentTaskLevel.CalculateBlockSummaryString();
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         var SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ITI);
-        Debug.Log("FB DUR: " + TouchFeedbackDuration);
         TouchFBController.EnableTouchFeedback(SelectionHandler, TouchFeedbackDuration, StartButtonScale, MRT_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
@@ -205,8 +205,6 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
             
             SliderFBController.ConfigureSlider(new Vector3(0,180,0), sliderSize.value);
             SliderFBController.SliderGO.SetActive(true);
-            CurrentTaskLevel.SetTaskSummaryString();
-            CurrentTaskLevel.CalculateBlockSummaryString();
             SetTrialSummaryString();
             
             InstantiateCurrMaze();
@@ -392,7 +390,7 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
     {
         FrameData.AddDatum("Context", ()=> contextName);
         FrameData.AddDatum("ChoiceMade", ()=> choiceMade);
-        FrameData.AddDatum("SelectedObject", () => selectedGO.name);
+    //    FrameData.AddDatum("SelectedObject", () => selectedGO.name);
         FrameData.AddDatum("StartedMaze", ()=> startedMaze);
     }
     protected override bool CheckBlockEnd()
@@ -483,13 +481,13 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
     {
         TrialSummaryString = "<b>Maze Name: </b>" + mazeDefName +
                              "\n" + 
-                             "\nTotal Errors: " + totalErrors_InTrial.Sum() +
-                             "\nTotal Backtrack Errors: " + backtrackErrors_InTrial.Sum() +
-                             "\nTrial Performance: " + percentError + 
-                             "\n"+
-                             "\nChoice Duration: " + String.Format("{0:0.0}", choiceDuration) + 
-                             "\nMaze Duration: " + String.Format("{0:0.0}", mazeDuration) +
-                             "\nSlider Value: " + String.Format("{0:0.00}", SliderFBController.Slider.value);
+                             "\n<b>Percent Error: </b>" +  String.Format("{0:0.00}%", percentError*100) +
+                             "\n<b>Total Errors: </b>" + totalErrors_InTrial.Sum() +
+                             "\n<b>Total Backtrack Errors: </b>" + backtrackErrors_InTrial.Sum() +
+                             "\n" +
+                             "\n<b>Choice Duration: </b>" + String.Format("{0:0.0}", choiceDuration) + 
+                             "\n<b>Maze Duration: </b>" + String.Format("{0:0.0}", mazeDuration) +
+                             "\n<b>Slider Value: </b>" + String.Format("{0:0.00}", SliderFBController.Slider.value);
 
     }
     private void CreateTextOnExperimenterDisplay()

@@ -784,7 +784,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         FrameData.AddDatum("Context", ()=> contextName);
         FrameData.AddDatum("ChoiceMade", ()=> choiceMade);
-        FrameData.AddDatum("SelectedObject", () => selectedGO.name);
+      //  FrameData.AddDatum("SelectedObject", () => selectedGO.name);
         FrameData.AddDatum("StartedMaze", ()=> startedMaze);
     }
     private void DisableSceneElements()
@@ -880,19 +880,19 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         TrialSummaryString = "<b>Maze Name: </b>" + mazeDefName +
                              "\n" + 
-                             "\nTotal Errors: " + totalErrors_InTrial.Sum() +
-                             "\nTrial Performance: " + percentError + 
+                             "\n<b>Percent Error: </b>" +  String.Format("{0:0.00}%", percentError*100) +
+                             "\n<b>Total Errors: </b>" + totalErrors_InTrial.Sum() +
                              "\n" +
-                             "\nRule-Abiding Errors: " + ruleAbidingErrors_InTrial.Sum() +
-                             "\nRule-Breaking Errors: " + ruleBreakingErrors_InTrial.Sum() + 
-                             "\nPerseverative Errors: " + perseverativeErrors_InTrial.Sum() +
-                             "\nBacktrack Errors: " + backtrackErrors_InTrial.Sum() +
-                             "\nRetouch Correct: " + retouchCorrect_InTrial.Sum()+ 
-                             "\nRetouch Erroneous: " + retouchErroneous_InTrial.Sum()+ 
+                             "\n<b>Rule-Abiding Errors: </b>" + ruleAbidingErrors_InTrial.Sum() +
+                             "\n<b>Rule-Breaking Errors: </b>" + ruleBreakingErrors_InTrial.Sum() + 
+                             "\n<b>Perseverative Errors: </b>" + perseverativeErrors_InTrial.Sum() +
+                             "\n<b>Backtrack Errors: </b>" + backtrackErrors_InTrial.Sum() +
+                             "\n<b>Retouch Correct: </b>" + retouchCorrect_InTrial.Sum()+ 
+                             "\n<b>Retouch Erroneous: </b>" + retouchErroneous_InTrial.Sum()+ 
                              "\n" +
-                             "\nChoice Duration: " + String.Format("{0:0.0}", choiceDuration) + 
-                             "\nMaze Duration: " + String.Format("{0:0.0}", mazeDuration) +
-                             "\nSlider Value: " + String.Format("{0:0.00}", SliderFBController.Slider.value);
+                             "\n<b>Choice Duration: </b>" + String.Format("{0:0.0}", choiceDuration) + 
+                             "\n<b>Maze Duration: </b>" + String.Format("{0:0.0}", mazeDuration) +
+                             "\n<b>Slider Value: </b>" + String.Format("{0:0.00}", SliderFBController.Slider.value);
 
     }
 }

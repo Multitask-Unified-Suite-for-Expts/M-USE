@@ -211,11 +211,12 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         if (mgTL.runningPercentError.Count > 0)
             latestPercentError = (mgTL.runningPercentError[mgTL.runningPercentError.Count - 1])*100;
 
-        CurrentBlockString = "<b>Min Trials in Block: </b>" + mgTL.CurrentTrialDef.MinMaxTrials[0] +
+        CurrentBlockString = "<b>\nMin Trials in Block: </b>" + mgTL.CurrentTrialDef.MinMaxTrials[0] +
                              "<b>\nMax Trials in Block: </b>" + mgTL.CurrentTrialDef.MaxTrials +
-                             "<b>\nLearning Criterion: </b>" + mgTL.CurrentTrialDef.BlockEndThreshold +
-                             "\n\nLast Trial's Percent Error" + (latestPercentError == -1 ?
-                                 (String.Format("{0:0.00}%", latestPercentError)):("No Mazes Completed in Block")) +                             "\nTotal Errors: " + totalErrors_InBlock.Sum() +
+                             "<b>\nLearning Criterion: </b>" + String.Format("{0:0.00}%", mgTL.CurrentTrialDef.BlockEndThreshold*100) +
+                             "\n\nLast Trial's Percent Error: " + (latestPercentError == -1 ?
+                                 ("N/A"):String.Format("{0:0.00}%", latestPercentError)) +
+                             "\nTotal Errors: " + totalErrors_InBlock.Sum() +
                              "\nRule-Abiding Errors: " + ruleAbidingErrors_InBlock.Sum() +
                              "\nRule-Breaking Errors: " + ruleBreakingErrors_InBlock.Sum() +
                              "\nPerseverative Errors: " + perseverativeErrors_InBlock.Sum() +

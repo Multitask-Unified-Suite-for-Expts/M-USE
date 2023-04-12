@@ -26,12 +26,14 @@ public class DisplayController : MonoBehaviour
 
     public void LoadDisplaySettings()
     {
-        string folderPath;
+        string folderPath = "";
 
         if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX || SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux)
         {
             if (Application.isEditor)
-                folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/Desktop/MUSE_Master/DemoConfigs";
+            {
+                //folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/Desktop/MUSE_Master/DemoConfigs";
+            }
             else
             {
                 MacBuild = true;
@@ -46,11 +48,13 @@ public class DisplayController : MonoBehaviour
         else //Windows:
         {
             if (Application.isEditor)
-                folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/MUSE_Master/DemoConfigs"; //Needs to be checked.
+            {
+                //folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/MUSE_Master/DemoConfigs";
+            }
             else
             {
                 string[] stringParts = Application.dataPath.Split('/');
-                string path = "/";
+                string path = "";
                 for (int i = 0; i < stringParts.Length - 2; i++)
                     path += stringParts[i] + "/";
                 path += "DemoConfigs";
@@ -58,13 +62,16 @@ public class DisplayController : MonoBehaviour
             }
         }
 
-        string displayConfigLocation = FindFileInFolder(folderPath, "*DisplayConfig*");
-
-        if (!string.IsNullOrEmpty(displayConfigLocation))
+        if (folderPath.Length > 1)
         {
-            SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, bool>>("DisplayConfig", displayConfigLocation);
-            DisplayDict = (Dictionary<string, bool>)SessionSettings.Get("DisplayConfig");
-            SingleDisplayBuild = DisplayDict["SingleDisplayBuild"];
+            string displayConfigLocation = FindFileInFolder(folderPath, "*DisplayConfig*");
+
+            if (!string.IsNullOrEmpty(displayConfigLocation))
+            {
+                SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, bool>>("DisplayConfig", displayConfigLocation);
+                DisplayDict = (Dictionary<string, bool>)SessionSettings.Get("DisplayConfig");
+                SingleDisplayBuild = DisplayDict["SingleDisplayBuild"];
+            }
         }
     }
 

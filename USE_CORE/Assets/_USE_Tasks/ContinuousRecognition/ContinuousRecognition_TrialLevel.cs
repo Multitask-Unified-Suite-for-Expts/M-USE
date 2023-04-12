@@ -115,15 +115,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            //string[] stringParts = Application.dataPath.Split('/');
-            //string path = "/";
-            //for (int i = 0; i < stringParts.Length - 3; i++)
-            //{
-            //    path += stringParts[i] + "/";
-            //}
-            //path += "DemoConfigs";
-            //Debug.LogError("FULL PATH: " + path);
-
             SetControllerBlockValues();
 
             LoadTextures(MaterialFilePath);

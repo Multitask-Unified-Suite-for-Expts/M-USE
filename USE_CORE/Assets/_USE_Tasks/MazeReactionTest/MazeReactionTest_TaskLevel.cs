@@ -113,9 +113,9 @@ public class MazeReactionTest_TaskLevel : ControlLevel_Task_Template
 
         CurrentBlockString = "<b>\nMin Trials in Block: </b>" + mrtTL.CurrentTrialDef.MinMaxTrials[0] +
                              "<b>\nMax Trials in Block: </b>" + mrtTL.CurrentTrialDef.MaxTrials +
-                             "<b>\nLearning Criterion: </b>" + mrtTL.CurrentTrialDef.BlockEndThreshold +
-                             "\n\nLast Trial's Percent Error" + (latestPercentError == -1 ?
-                                 (String.Format("{0:0.00}%", latestPercentError)):("No Mazes Completed in Block")) +
+                             "<b>\nLearning Criterion: </b>" + String.Format("{0:0.00}%", mrtTL.CurrentTrialDef.BlockEndThreshold*100) +
+                             "\n\nLast Trial's Percent Error: " + (latestPercentError == -1 ?
+                                 ("N/A"):String.Format("{0:0.00}%", latestPercentError)) +
                              "\nTotal Errors: " + totalErrors_InBlock.Sum() +
                              "\nBacktrack Errors: " + backtrackErrors_InBlock.Sum() +
                              "\n" + 

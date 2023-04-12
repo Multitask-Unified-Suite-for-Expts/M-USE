@@ -181,11 +181,13 @@ namespace USE_ExperimentTemplate_Task
 
             BlockFeedback.AddUniversalInitializationMethod(() =>
             {
-                string blockTitle = $"<b>Block {BlockCount + 1}" +
-                                    $"\nTrials Completed: {TrialLevel.TrialCount_InBlock + 1}</b>";
-
                 if (BlockSummaryString.Length > 0)
                 {
+                    int trialsCompleted = (TrialLevel.AbortCode == 0 || TrialLevel.AbortCode == 6) ? TrialLevel.TrialCount_InBlock + 1 : TrialLevel.TrialCount_InBlock;
+                    string blockTitle = $"<b>\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" +
+                                        $"\n\nBlock {BlockCount + 1}" +
+                                        $"\nTrials Completed: {trialsCompleted}\n</b>";
+
                     PreviousBlockSummaryString.Insert(0,BlockSummaryString); //Add current block string to full list of previous blocks. 
                     PreviousBlockSummaryString.Insert(0, blockTitle);
                 }

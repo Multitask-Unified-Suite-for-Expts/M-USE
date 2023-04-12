@@ -163,7 +163,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
             }
 
-            if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
+            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
             {
                 AdjustTextPosForMac();
                 AdjustedPositionsForMac = true;
@@ -577,6 +577,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
         TokenFBController.transform.localScale = biggerScale;
         TokenFBController.tokenSize = 200;
+        TokenFBController.RecalculateTokenBox();
 
         //move Timer up
         Vector3 Pos = OriginalTimerPosition;
@@ -596,31 +597,31 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         switch (NumFeedbackRows)
         {
             case 1:
-                if (MacMainDisplayBuild && !Debug.isDebugBuild)
+                if (MacMainDisplayBuild && Application.isEditor)
                     yOffset = 90f; //not checked
                 else
                     yOffset = 60f;
                 break;
             case 2:
-                if (MacMainDisplayBuild && !Debug.isDebugBuild)
+                if (MacMainDisplayBuild && Application.isEditor)
                     yOffset = 75f; //not checked
                 else
                     yOffset = 50f;
                 break;
             case 3:
-                if (MacMainDisplayBuild && !Debug.isDebugBuild)
+                if (MacMainDisplayBuild && Application.isEditor)
                     yOffset = 25f; //not checked
                 else
                     yOffset = 10f;
                 break;
             case 4:
-                if (MacMainDisplayBuild && !Debug.isDebugBuild)
+                if (MacMainDisplayBuild && Application.isEditor)
                     yOffset = -5f; //not checked
                 else
                     yOffset = -30f;
                 break;
             //case 5:
-            //    if (MacMainDisplayBuild && !Debug.isDebugBuild)
+            //    if (MacMainDisplayBuild && Application.isEditor)
             //        yOffset = -30f; //Check!
             //    else
             //        yOffset = -35f; //Check! (not checked but could be close)

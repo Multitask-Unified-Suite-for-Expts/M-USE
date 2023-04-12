@@ -157,11 +157,12 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
 
-            if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
+            if (MacMainDisplayBuild & !UnityEngine.Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
             {
                 Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
                 TokenFBController.transform.localScale = biggerScale;
                 TokenFBController.tokenSize = 200;
+                TokenFBController.RecalculateTokenBox();
                 AdjustedPositionsForMac = true;
             }
 

@@ -32,7 +32,7 @@ public class DisplayController : MonoBehaviour
         {
             if (Application.isEditor)
             {
-                //folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/Desktop/MUSE_Master/DemoConfigs";
+                folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/Desktop/MUSE_Master/DemoConfigs";
             }
             else
             {

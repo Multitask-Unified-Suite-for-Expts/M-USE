@@ -69,7 +69,8 @@ public class TokenFBController : MonoBehaviour
         EventCodeManager = new EventCodeManager();
     }
 
-    private void RecalculateTokenBox() {
+    public void RecalculateTokenBox()
+    {
         float width = CalcTokensWidth(totalTokensNum) + 2 * tokenBoxPadding;
         tokenBoxRect = new Rect(
             (Screen.width - width) / 2,

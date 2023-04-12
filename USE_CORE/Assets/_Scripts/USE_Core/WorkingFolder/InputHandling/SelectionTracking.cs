@@ -84,7 +84,6 @@ namespace SelectionTracking
 
             DefaultSelectionHandlers.Add("MouseButton0Click", mouseClick);
 
-
             SelectionHandler gazeSelection = new SelectionHandler();
             gazeSelection.InitConditions.Add(gazeSelection.DefaultConditions("RaycastHitsAGameObject"));
 
@@ -270,7 +269,7 @@ namespace SelectionTracking
 
                 if (CurrentInputLocation == null) // there is no input recorded on the screen
                 {
-                    //Debug.Log(" currentInputLocation == null");
+                    Debug.Log(" currentInputLocation == null");
                     if (OngoingSelection != null) // the previous frame was a selection
                     {
                         CheckTermination();
@@ -283,7 +282,7 @@ namespace SelectionTracking
                 currentTarget = FindCurrentTarget(CurrentInputLocation());
                 if (currentTarget == null) //input is not over a gameobject
                 {
-                    //Debug.Log(" currentTarget == null");
+                    Debug.Log(" currentTarget == null");
                     if (OngoingSelection != null) // the previous frame was a selection
                     {
                         CheckTermination();
@@ -295,7 +294,7 @@ namespace SelectionTracking
                 //if we have reached this point we know there is a target
                 if (OngoingSelection == null) //no previous selection
                 {
-                    //Debug.Log(" OngoingSelection == null");
+                    Debug.Log(" OngoingSelection == null");
                     CheckInit();
                     return;
                 }
@@ -306,7 +305,7 @@ namespace SelectionTracking
 
                 if (currentTarget != OngoingSelection.SelectedGameObject) //previous selection was on different game object
                 {
-                    //Debug.Log(" currentTarget != OngoingSelection.SelectedGameObject");
+                    Debug.Log(" currentTarget != OngoingSelection.SelectedGameObject");
                     CheckTermination(); //check termination of previous selection
                     CheckInit(); //check init of current selection
                     return;
@@ -410,7 +409,6 @@ namespace SelectionTracking
                 return null;
             }
 
-
             public delegate GameObject GoDelegate();
 
             public delegate Vector3 InputDelegate();
@@ -466,13 +464,13 @@ namespace SelectionTracking
                 DefaultConditions.Add("RaycastHitsSameObjectAsPreviousFrame", () => DefaultConditions["RaycastHitsAGameObject"]() &&
                                                                                    OngoingSelection != null &&
                                                                                    currentTarget == OngoingSelection.SelectedGameObject);
-                DefaultConditions.Add("DurationTooLong", () => OngoingSelection.Duration > MaxDuration);
-                DefaultConditions.Add("DurationTooShort", () => OngoingSelection.Duration < MinDuration);
-                // DefaultConditions.Add("DurationTooLong", ()=> MaxDuration != null && OngoingSelection.Duration > MaxDuration);
-                // DefaultConditions.Add("DurationTooShort", ()=> MinDuration != null && OngoingSelection.Duration < MinDuration);
+                DefaultConditions.Add("DurationTooLong", () => MaxDuration != null && OngoingSelection != null && OngoingSelection.Duration > MaxDuration);
+                DefaultConditions.Add("DurationTooShort", () => MinDuration != null && OngoingSelection != null && OngoingSelection.Duration < MinDuration);
                 DefaultConditions.Add("MovedTooFar", () =>
                 {
-                    return MaxPixelDisplacement != null && Vector3.Distance(CurrentInputLocation(), OngoingSelection.InputLocations[0]) < MaxPixelDisplacement;
+                    return MaxPixelDisplacement != null
+                           && OngoingSelection.InputLocations.Count > 0
+                           && Vector3.Distance(OngoingSelection.InputLocations[0], CurrentInputLocation()) > MaxPixelDisplacement;
                 });
                 DefaultConditions.Add("MouseButton0", () => InputBroker.GetMouseButton(0));
                 DefaultConditions.Add("MouseButton0Down", () => InputBroker.GetMouseButtonDown(0));
@@ -490,7 +488,7 @@ namespace SelectionTracking
                 else
                 {
                     Debug.LogError("Attempted to load a selection handler condition called " + ConditionName +
-                                   "but there is no such condition in the default dictionary.");
+                                   " but there is no such condition in the default dictionary.");
                     return null;
                 }
 

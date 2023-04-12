@@ -1,15 +1,13 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using USE_States;
 using EffortControl_Namespace;
 using System.Linq;
-using System.Threading.Tasks;
 using USE_ExperimentTemplate_Trial;
 using ConfigDynamicUI;
 using USE_UI;
 using SelectionTracking;
-using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 {
@@ -31,7 +29,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     public USE_StartButton StartButtonClassInstance;
 
     private GameObject StartButton, StimLeft, StimRight, TrialStim, BalloonContainerLeft, BalloonContainerRight,
-               BalloonOutline, RewardContainerLeft, RewardContainerRight, Reward, MiddleBarrier, Borders;
+               BalloonOutline, RewardContainerLeft, RewardContainerRight, Reward, MiddleBarrier;
 
     private Color Red;
     private Color32 OffWhiteOutlineColor = new Color32(250, 249, 246, 0);
@@ -163,9 +161,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-            if (!Borders.activeInHierarchy)
-                Borders.SetActive(true);
-
             TokenFBController.enabled = false;
             ResetRelativeStartTime(); 
             DisableAllGameobjects();
@@ -183,7 +178,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if(Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
-            TouchFBController.ClearErrorCounts();
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
         });
@@ -200,6 +194,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         ChooseBalloon.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they holding down
+
+            MiddleBarrier.SetActive(true);
 
             MaxScale = new Vector3(60, 0, 60);
             LeftScaleUpAmount = MaxScale / currentTrial.NumClicksLeft;
@@ -699,64 +695,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         BalloonOutline.transform.localScale = new Vector3(10, 0.01f, 10);
         BalloonOutline.GetComponent<Renderer>().material.color = OffWhiteOutlineColor;
 
-        List<GameObject> borderList = new List<GameObject>();
 
-        Borders = new GameObject("Borders");
-
-        //can we replace all this with a single UI square with solid border and no fill?
-        
-        GameObject topBorder = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        topBorder.name = "TopBorder";
-        topBorder.transform.parent = Borders.transform;
-        topBorder.transform.position = new Vector3(0, -.005f, 0);
-        topBorder.transform.eulerAngles = new Vector3(0, 0, 90f);
-        topBorder.transform.localScale = new Vector3(.075f, 3.995f, .001f);
-        borderList.Add(topBorder);
-
-        GameObject rightBorder = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        rightBorder.name = "RightBorder";
-        rightBorder.transform.parent = Borders.transform;
-        rightBorder.transform.position = new Vector3(2.035f, -1.157f, 0);
-        rightBorder.transform.eulerAngles = Vector3.zero;
-        rightBorder.transform.localScale = new Vector3(.075f, 2.35f, .001f);
-        borderList.Add(rightBorder);
-
-        GameObject leftBorder = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        leftBorder.name = "LeftBorder";
-        leftBorder.transform.parent = Borders.transform;
-        leftBorder.transform.position = new Vector3(-2.035f, -1.159f, 0);
-        leftBorder.transform.eulerAngles = Vector3.zero;
-        leftBorder.transform.localScale = new Vector3(.075f, 2.35f, .001f);
-        borderList.Add(leftBorder);
-
-        GameObject bottomBorder = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        bottomBorder.name = "BottomBorder";
-        bottomBorder.transform.parent = Borders.transform;
-        bottomBorder.transform.position = new Vector3(0, -2.3f, 0);
-        bottomBorder.transform.eulerAngles = new Vector3(0, 0, 90f);
-        bottomBorder.transform.localScale = new Vector3(.075f, 3.995f, .001f);
-        borderList.Add(bottomBorder);
-
-        Borders.transform.position = new Vector3(0, 1.755f, 0);
-        ObjectList.Add(Borders);
-
-        //replace with ui thing
-        MiddleBarrier = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        MiddleBarrier.name = "MiddleBarrier";
-        MiddleBarrier.transform.position = new Vector3(0, .602f, 0);
-        MiddleBarrier.transform.localScale = new Vector3(.0125f, 2.22f, .001f);
-        ObjectList.Add(MiddleBarrier);
-        borderList.Add(MiddleBarrier);
-
-        foreach (GameObject border in borderList)
-        {
-            Material mat = border.GetComponent<Renderer>().material;
-            mat.color = OffWhiteOutlineColor;
-            mat.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
-            mat.SetFloat("_SpecularHighlights", 0f);
-        }
-
-        //pontentially replace with prefab?
         BalloonContainerLeft = new GameObject("BalloonContainerLeft");
         BalloonContainerLeft.transform.position = new Vector3(-1, .15f, .5f);
         BalloonContainerLeft.transform.localScale = new Vector3(1, 1, 1);
@@ -777,6 +716,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         RewardContainerRight.transform.localScale = new Vector3(1, 1, 1);
         ObjectList.Add(RewardContainerRight);
 
+        CreateMiddleBarrier();
 
         //Wrap Left side objects in container and Center to left side:
         GameObject leftWrapper = new GameObject();
@@ -803,13 +743,21 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         RemoveParents(leftWrapper, leftList);
         RemoveParents(rightWrapper, rightList);
 
-        MiddleBarrier.SetActive(false);
         StartButton.SetActive(false);
         BalloonOutline.SetActive(false);
         Reward.SetActive(false);
-        Borders.SetActive(false);
 
         ObjectsCreated = true;
+    }
+
+    void CreateMiddleBarrier()
+    {
+        MiddleBarrier = new GameObject("MiddleBarrier");
+        MiddleBarrier.transform.SetParent(EC_CanvasGO.transform, false);
+        Image image = MiddleBarrier.AddComponent<Image>();
+        image.rectTransform.anchoredPosition = Vector2.zero;
+        image.transform.localScale = new Vector3(.035f, 4.5f, .001f);
+        MiddleBarrier.SetActive(false);
     }
 
     void CreateTransparentBalloons()

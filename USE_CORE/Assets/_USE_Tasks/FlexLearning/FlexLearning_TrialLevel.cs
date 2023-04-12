@@ -5,14 +5,9 @@ using USE_StimulusManagement;
 using FlexLearning_Namespace;
 using USE_ExperimentTemplate_Trial;
 using USE_UI;
-using System.IO;
 using System.Linq;
 using ConfigDynamicUI;
-using UnityEngine.Serialization;
-using UnityEngine.UI;
 using USE_ExperimentTemplate_Task;
-using ContinuousRecognition_Namespace;
-using System.Windows.Forms;
 
 public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 {
@@ -49,13 +44,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public bool? TokensWithStimOn;
     
     // Stim Evaluation Variables
-    private GameObject trialStim;
     private GameObject selectedGO = null;
     private bool CorrectSelection;
     FlexLearning_StimDef selectedSD = null;
-    private bool ObjectsCreated = false;
     private bool choiceMade = false;
-    private float? selectionDuration = null;
     
     
     
@@ -80,7 +72,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
    
     // Trial Data Variables
     private int? SelectedStimIndex = null;
-    private string selectedStimName = null;
     private Vector3? SelectedStimLocation = null;
     private float SearchDuration = 0;
     private bool RewardGiven = false;
@@ -157,11 +148,12 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
 
-            if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
+            if (MacMainDisplayBuild & !UnityEngine.Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
             {
                 Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
                 TokenFBController.transform.localScale = biggerScale;
                 TokenFBController.tokenSize = 200;
+                TokenFBController.RecalculateTokenBox();
                 AdjustedPositionsForMac = true;
             }
 

@@ -1,20 +1,11 @@
-using System;
 using ConfigDynamicUI;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using EffortControl_Namespace;
 using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.UI;
-using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
-using USE_Settings;
 using USE_States;
 using USE_StimulusManagement;
 using WorkingMemory_Namespace;
 using USE_UI;
-using VisualSearch_Namespace;
 
 public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 {
@@ -140,11 +131,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-            if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
+            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
             {
                 Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
                 TokenFBController.transform.localScale = biggerScale;
                 TokenFBController.tokenSize = 200;
+                TokenFBController.RecalculateTokenBox();
                 AdjustedPositionsForMac = true;
             }
 

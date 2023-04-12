@@ -413,6 +413,7 @@ MonoBehaviour:
   StartButtonSelectedTime: 0
   TrialTouches: 0
   ObjectList: []
+  TouchFeedbackDuration: 0
 --- !u!114 &1719984668
 MonoBehaviour:
   m_ObjectHideFlags: 0

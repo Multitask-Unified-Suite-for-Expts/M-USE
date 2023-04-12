@@ -1,10 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using UnityEngine.UI;
-using USE_ExperimentTemplate_Classes;
 using USE_Settings;
 
 
@@ -32,7 +29,7 @@ public class DisplayController : MonoBehaviour
         {
             if (Application.isEditor)
             {
-                //folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/Desktop/MUSE_Master/DemoConfigs";
+                folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/Desktop/MUSE_Master/DemoConfigs";
             }
             else
             {

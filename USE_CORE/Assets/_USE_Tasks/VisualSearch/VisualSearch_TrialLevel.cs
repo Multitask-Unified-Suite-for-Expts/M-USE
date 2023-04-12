@@ -1,21 +1,12 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO;
 using UnityEngine;
-using UnityEngine.UI;
 using ConfigDynamicUI;
-using ConfigParsing;
-using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 using USE_States;
 using USE_StimulusManagement;
 using USE_ExperimentTemplate_Trial;
 using VisualSearch_Namespace;
 using USE_UI;
-using FlexLearning_Namespace;
 
 public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 {
@@ -154,11 +145,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
 
-            if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
+            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
             {
                 Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
                 TokenFBController.transform.localScale = biggerScale;
                 TokenFBController.tokenSize = 200;
+                TokenFBController.RecalculateTokenBox();
                 AdjustedPositionsForMac = true;
             }
 

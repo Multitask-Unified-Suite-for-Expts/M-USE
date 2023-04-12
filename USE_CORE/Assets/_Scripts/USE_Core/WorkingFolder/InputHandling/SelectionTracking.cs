@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using USE_States;
 
 namespace SelectionTracking
@@ -262,46 +263,33 @@ namespace SelectionTracking
 
             public void UpdateSelections()
             {
-
                 if (CurrentInputLocation == null) // there is no input recorded on the screen
                 {
-                    //Debug.Log(" currentInputLocation == null");
                     if (OngoingSelection != null) // the previous frame was a selection
-                    {
                         CheckTermination();
-                    }
                     return;
                 }
 
                 //if we have reached this point we know there is input
-
                 currentTarget = FindCurrentTarget(CurrentInputLocation());
                 if (currentTarget == null) //input is not over a gameobject
                 {
-                    //Debug.Log(" currentTarget == null");
                     if (OngoingSelection != null) // the previous frame was a selection
-                    {
                         CheckTermination();
-                    }
                     return;
                 }
-
 
                 //if we have reached this point we know there is a target
                 if (OngoingSelection == null) //no previous selection
                 {
-                    //Debug.Log(" OngoingSelection == null");
                     CheckInit();
                     return;
                 }
 
                 //if we have reached this point we know there is a target, there was a previous selection,
                 //and this is not the first frame of new selection
-
-
                 if (currentTarget != OngoingSelection.SelectedGameObject) //previous selection was on different game object
                 {
-                    //Debug.Log(" currentTarget != OngoingSelection.SelectedGameObject");
                     CheckTermination(); //check termination of previous selection
                     CheckInit(); //check init of current selection
                     return;
@@ -310,16 +298,14 @@ namespace SelectionTracking
                 //if we have reached this point we know we have an ongoing selection
                 bool updateConditionsMet = CheckUpdate();
                 CheckTermination();
-                if (!updateConditionsMet && OngoingSelection != null)
                 //the selection fails because update conditions are not met (but termination condition was not met either)
+                if (!updateConditionsMet && OngoingSelection != null)
                 {
                     OngoingSelection.CompleteSelection(false);
                     AllSelections.Add(OngoingSelection);
-                    //LastUnsuccessfulSelection = OngoingSelection; //Not sure if this should go here, or just down below
                     UnsuccessfulSelections.Add(OngoingSelection);
                     OngoingSelection = null;
                 }
-
             }
 
             private void CheckInit()
@@ -340,6 +326,7 @@ namespace SelectionTracking
             {
                 bool? update = CheckAllConditions(UpdateConditions);
                 string? updateErrors = CheckAllErrorTriggers("update");
+
                 if (update == null || update.Value)
                 {
                     if (updateErrors == null) // update condition is true (e.g. mouse button is being held down)
@@ -358,7 +345,6 @@ namespace SelectionTracking
                     SelectionErrorHandling(updateErrors);
                     return false;
                 }
-                //what happens if update is false?
             }
 
             private void CheckTermination()

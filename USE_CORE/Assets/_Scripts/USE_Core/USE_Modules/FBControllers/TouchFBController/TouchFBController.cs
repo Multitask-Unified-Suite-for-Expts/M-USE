@@ -112,6 +112,7 @@ public class TouchFBController : MonoBehaviour
 
     private void ShowTouchFeedback(TouchFeedback touchFb)
     {
+        Handler.HandlerActive = false;
         FeedbackOn = true;
         audioFBController.Play("Negative");
         if (InstantiatedGO != null)
@@ -133,9 +134,10 @@ public class TouchFBController : MonoBehaviour
             Destroy(InstantiatedGO);
             EventCodeManager.SendCodeImmediate(SessionEventCodes["TouchFBController_FeedbackOn"]);
             FeedbackOn = false;
+            Handler.HandlerActive = true;
         }
     }
-
+    
     public void CreatePrefabs()
     {
         HeldTooLong_Prefab = CreatePrefab("HeldTooLongGO", HeldTooLong_Texture);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using USE_States;
 
 namespace SelectionTracking
@@ -63,11 +64,13 @@ namespace SelectionTracking
                 new Dictionary<string, SelectionHandler>();
 
             SelectionHandler mouseClick = new SelectionHandler();
-            mouseClick.InitConditions.Add(mouseClick.DefaultConditions("RaycastHitsAGameObject"));
+            mouseClick.InitConditions.Add(mouseClick.DefaultConditions("ShotgunRaycastHitsProportion"));
+            //mouseClick.InitConditions.Add(mouseClick.DefaultConditions("RaycastHitsAGameObject"));
             mouseClick.InitConditions.Add(mouseClick.DefaultConditions("MouseButton0Down"));
 
             mouseClick.UpdateConditions.Add(mouseClick.DefaultConditions("MouseButton0"));
-            mouseClick.UpdateConditions.Add(mouseClick.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
+            //mouseClick.UpdateConditions.Add(mouseClick.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
+            mouseClick.UpdateConditions.Add(mouseClick.DefaultConditions("ShotgunRaycastHitsPreviouslyHitGO"));
 
             mouseClick.UpdateErrorTriggers.Add("MovedTooFar", mouseClick.DefaultConditions("MovedTooFar"));
             mouseClick.UpdateErrorTriggers.Add("DurationTooLong", mouseClick.DefaultConditions("DurationTooLong"));
@@ -81,9 +84,11 @@ namespace SelectionTracking
             DefaultSelectionHandlers.Add("MouseButton0Click", mouseClick);
 
             SelectionHandler gazeSelection = new SelectionHandler();
-            gazeSelection.InitConditions.Add(gazeSelection.DefaultConditions("RaycastHitsAGameObject"));
+            //gazeSelection.InitConditions.Add(gazeSelection.DefaultConditions("RaycastHitsAGameObject"));
+            gazeSelection.InitConditions.Add(gazeSelection.DefaultConditions("ShotgunRaycastHitsProportion"));
 
-            gazeSelection.UpdateConditions.Add(gazeSelection.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
+            //gazeSelection.UpdateConditions.Add(gazeSelection.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
+            gazeSelection.UpdateConditions.Add(gazeSelection.DefaultConditions("ShotgunRaycastHitsPreviouslyHitGO"));
 
             gazeSelection.UpdateErrorTriggers.Add("MovedTooFar", gazeSelection.DefaultConditions("MovedTooFar"));
             gazeSelection.UpdateErrorTriggers.Add("DurationTooLong", gazeSelection.DefaultConditions("DurationTooLong"));
@@ -158,6 +163,11 @@ namespace SelectionTracking
             public USE_Selection OngoingSelection;
             public List<USE_Selection> AllSelections, SuccessfulSelections, UnsuccessfulSelections;
 
+            private ShotgunRaycast shotgunRaycast;
+            private float ShotgunThreshold;
+            private List<GameObject> ShotgunGoAboveThreshold;
+            public GameObject ModalShotgunGO;
+
             private GameObject currentTarget;
             public float? MinDuration, MaxDuration;
             public int? MaxPixelDisplacement;
@@ -189,6 +199,10 @@ namespace SelectionTracking
                 LastSelection = new USE_Selection(null);
                 LastSuccessfulSelection = new USE_Selection(null);
                 LastUnsuccessfulSelection = new USE_Selection(null);
+
+                ModalShotgunGO = null;
+                ShotgunGoAboveThreshold = new List<GameObject>();
+                shotgunRaycast = GameObject.Find("MiscScripts").GetComponent<ShotgunRaycast>();
             }
 
             public SelectionHandler(InputDelegate inputLoc = null, float? minDuration = null, float? maxDuration = null,
@@ -262,46 +276,33 @@ namespace SelectionTracking
 
             public void UpdateSelections()
             {
-
                 if (CurrentInputLocation == null) // there is no input recorded on the screen
                 {
-                    //Debug.Log(" currentInputLocation == null");
                     if (OngoingSelection != null) // the previous frame was a selection
-                    {
                         CheckTermination();
-                    }
                     return;
                 }
 
                 //if we have reached this point we know there is input
-
                 currentTarget = FindCurrentTarget(CurrentInputLocation());
                 if (currentTarget == null) //input is not over a gameobject
                 {
-                    //Debug.Log(" currentTarget == null");
                     if (OngoingSelection != null) // the previous frame was a selection
-                    {
                         CheckTermination();
-                    }
                     return;
                 }
-
 
                 //if we have reached this point we know there is a target
                 if (OngoingSelection == null) //no previous selection
                 {
-                    //Debug.Log(" OngoingSelection == null");
                     CheckInit();
                     return;
                 }
 
                 //if we have reached this point we know there is a target, there was a previous selection,
                 //and this is not the first frame of new selection
-
-
                 if (currentTarget != OngoingSelection.SelectedGameObject) //previous selection was on different game object
                 {
-                    //Debug.Log(" currentTarget != OngoingSelection.SelectedGameObject");
                     CheckTermination(); //check termination of previous selection
                     CheckInit(); //check init of current selection
                     return;
@@ -310,16 +311,14 @@ namespace SelectionTracking
                 //if we have reached this point we know we have an ongoing selection
                 bool updateConditionsMet = CheckUpdate();
                 CheckTermination();
-                if (!updateConditionsMet && OngoingSelection != null)
                 //the selection fails because update conditions are not met (but termination condition was not met either)
+                if (!updateConditionsMet && OngoingSelection != null)
                 {
                     OngoingSelection.CompleteSelection(false);
                     AllSelections.Add(OngoingSelection);
-                    //LastUnsuccessfulSelection = OngoingSelection; //Not sure if this should go here, or just down below
                     UnsuccessfulSelections.Add(OngoingSelection);
                     OngoingSelection = null;
                 }
-
             }
 
             private void CheckInit()
@@ -340,6 +339,7 @@ namespace SelectionTracking
             {
                 bool? update = CheckAllConditions(UpdateConditions);
                 string? updateErrors = CheckAllErrorTriggers("update");
+
                 if (update == null || update.Value)
                 {
                     if (updateErrors == null) // update condition is true (e.g. mouse button is being held down)
@@ -358,7 +358,6 @@ namespace SelectionTracking
                     SelectionErrorHandling(updateErrors);
                     return false;
                 }
-                //what happens if update is false?
             }
 
             private void CheckTermination()
@@ -396,6 +395,23 @@ namespace SelectionTracking
 
                 if (inputLocation != null)
                 {
+                    //Set Current Raycast Target:
+                    Dictionary<GameObject, float> proportions = shotgunRaycast.RaycastShotgunProportions(inputLocation.Value, Camera.main);
+                    Debug.Log("PROPORTIONS COUNT: " + proportions.Count);
+
+                    foreach(var pair in proportions)
+                    {
+                        Debug.Log("KEY: " + pair.Key + " | VALUE: " + pair.Value);
+                        if (pair.Value > ShotgunThreshold)
+                            ShotgunGoAboveThreshold.Add(pair.Key); //Not sure what we're actually doing with this List
+                    }
+
+                    ModalShotgunGO = shotgunRaycast.ModalShotgunTarget(proportions);
+                    if (ModalShotgunGO != null)
+                        Debug.Log("MODAL SHOTGUN GO: " + ModalShotgunGO.name);
+
+
+                    //Find Current Target and return it if found:
                     GameObject hitObject = InputBroker.RaycastBoth(inputLocation.Value);
                     if (hitObject != null)
                     {
@@ -456,10 +472,14 @@ namespace SelectionTracking
             public BoolDelegate DefaultConditions(string ConditionName)
             {
                 Dictionary<string, BoolDelegate> DefaultConditions = new Dictionary<string, BoolDelegate>();
-                DefaultConditions.Add("RaycastHitsAGameObject", () => currentTarget != null);
-                DefaultConditions.Add("RaycastHitsSameObjectAsPreviousFrame", () => DefaultConditions["RaycastHitsAGameObject"]() &&
-                                                                                   OngoingSelection != null &&
-                                                                                   currentTarget == OngoingSelection.SelectedGameObject);
+                DefaultConditions.Add("ShotgunRaycastHitsProportion", () => ShotgunGoAboveThreshold.Count > 0);
+                DefaultConditions.Add("ShotgunRaycastHitsPreviouslyHitGO", () => DefaultConditions["ShotgunRaycastHitsProportion"]() &&
+                                                                            OngoingSelection != null &&
+                                                                            ModalShotgunGO == OngoingSelection.SelectedGameObject);
+                //DefaultConditions.Add("RaycastHitsAGameObject", () => currentTarget != null);
+                //DefaultConditions.Add("RaycastHitsSameObjectAsPreviousFrame", () => DefaultConditions["RaycastHitsAGameObject"]() &&
+                //                                                                   OngoingSelection != null &&
+                //                                                                   currentTarget == OngoingSelection.SelectedGameObject);
                 DefaultConditions.Add("DurationTooLong", () => MaxDuration != null && OngoingSelection != null && OngoingSelection.Duration > MaxDuration);
                 DefaultConditions.Add("DurationTooShort", () => MinDuration != null && OngoingSelection != null && OngoingSelection.Duration < MinDuration);
                 DefaultConditions.Add("MovedTooFar", () =>

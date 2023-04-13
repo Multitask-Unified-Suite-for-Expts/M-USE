@@ -135,9 +135,10 @@ public class TouchFBController : MonoBehaviour
             EventCodeManager.SendCodeImmediate(SessionEventCodes["TouchFBController_FeedbackOn"]);
             Handler.HandlerActive = true;
             FeedbackOn = false;
+            Handler.HandlerActive = true;
         }
     }
-
+    
     public void CreatePrefabs()
     {
         HeldTooLong_Prefab = CreatePrefab("HeldTooLongGO", HeldTooLong_Texture);

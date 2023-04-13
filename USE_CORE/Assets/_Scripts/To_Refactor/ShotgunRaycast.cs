@@ -3,16 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
 using System.Linq;
+using UnityEngine.EventSystems;
+using USE_DisplayManagement;
 //using MGcommon;
 
 public class ShotgunRaycast : MonoBehaviour
 {
-
-	//	public int[] monitorResolution = new int[2]{2560, 1440}; //pixel size of monitor - set for Apple Cinema display (needs to be in config)
-	//	public float[] monitorSize = new float[2]{33.3f,59.4f}; //cm size of monitor
 	public float DefaultRadiusDVA = 1;
 	public float DefaultParticipantDistanceCm = 60f;
-	public float DefaultRaycastSpacingDVA = 0.1f;
+	public float DefaultRaycastSpacingDVA = 0.3f;
 	public float DefaultRayLengthWorldUnits = 100f;
 	public USE_DisplayManagement.MonitorDetails monitorDetails;
 
@@ -22,47 +21,20 @@ public class ShotgunRaycast : MonoBehaviour
 
 	private Color[] rayColors;
 
-	void Awake()
-	{
-		cylinder = GameObject.Find("Cylinder");
-		//		if (!showCylinder) {
-		//			cylinder.SetActive (false);
-		//		}
-		arena = GameObject.Find("Arena");
-		rayColors = new Color[] {
-			Color.black,
-			Color.blue,
-			Color.cyan,
-			Color.gray,
-			Color.green,
-			Color.magenta,
-			Color.red,
-			Color.white,
-			Color.yellow
-		};
-	}
 
-	public List<RaycastHit> RaycastShotgun(Vector2 gazePoint, Camera cam, float? customRadiusDVA = null, 
+    private void Awake()
+    {
+		float dpi = Screen.dpi;
+		float width = (Screen.currentResolution.width / dpi) * 2.54f;
+		float height = (Screen.currentResolution.height / dpi) * 2.54f;
+		Vector2 resolutionCM = new Vector2(width, height);
+		monitorDetails = new USE_DisplayManagement.MonitorDetails(new Vector2(Screen.currentResolution.width, Screen.currentResolution.height), resolutionCM);
+    }
+
+
+    public List<DoubleRaycast> RaycastShotgun(Vector2 gazePoint, Camera cam, float? customRadiusDVA = null, 
 		float? customRaycastSpacingDVA = null, float? customParticipantDistanceToScreen = null, float? customRaycastLengthWorldUnits = null, bool drawRays = false)
 	{
-		//Debug.Log("Frame: " + Time.frameCount + ", GazePoint: " + gazePoint + "length: " + rayLength);
-		//gazePoint = new Vector2(960, 540);
-		//RaycastSpacingDVA = 0.05f;
-		//		arena.SetActive (false);
-		//RaycastShotgun spits out a list of *almost* all non-occluded objects within a truncated cone.
-
-		//*Almost* because it actually does a series of raycasts that cover a great deal of territory within the cone,
-		//but technically it is possible to miss an object if its collider is a really weird shape and just happens to meet the cone at exactly the right angle.
-		//(To get around this problem, you can decrease maxBetweenRayDist, but this may lead to performance issues as it can add many rays).
-
-		//Truncated cone is length rayLength, and projected directly out from the camera cam.
-
-		//The inner angle is defined such that the circle projected onto the screen from any cross-section of the cone is of radius visualAngle.
-
-		//Rays are cast around a series of concentric circles, which are evenly spaced such that each one's radius is no more than maxBetweenRayDist greater than one smaller.
-
-		//On each circle, the rays are cast at evenly-spaced points such that the length of the arc between each point is no more than maxBetweenRayDist.
-
 		//check for custom values
 		float radiusDVA = customRadiusDVA == null ? DefaultRadiusDVA : customRadiusDVA.Value;
 		float raycastSpacingDVA = customRaycastSpacingDVA == null ? DefaultRaycastSpacingDVA : customRaycastSpacingDVA.Value;
@@ -79,8 +51,6 @@ public class ShotgunRaycast : MonoBehaviour
 			cam.ScreenToWorldPoint (new Vector3 (gazePoint.x, gazePoint.y, raycastLengthWorldUnits))
 		};
 
-		//Debug.Log("Gazepoint: " + gazePoint + ", start: " + centres[0] + ", end: " + centres[1]);
-
 		//points on outside of circles
 		Vector3[] outsidePoints = new Vector3[2]{cam.ScreenToWorldPoint (new Vector3 (gazePoint.x + radPix, gazePoint.y, cam.nearClipPlane)),
 			cam.ScreenToWorldPoint (new Vector3 (gazePoint.x + radPix, gazePoint.y, raycastLengthWorldUnits))
@@ -89,45 +59,17 @@ public class ShotgunRaycast : MonoBehaviour
 		//find radii of circles
 		float[] radWorld = new float[2] { Vector3.Distance(centres[0], outsidePoints[0]), Vector3.Distance(centres[1], outsidePoints[1]) };
 
-
 		Vector3 rot = new Vector3(cam.transform.rotation.eulerAngles.x + 90, cam.transform.rotation.eulerAngles.y, cam.transform.rotation.eulerAngles.z);
-		if (showCylinder)
-		{
-			cylinder.transform.rotation = Quaternion.Euler(rot);
-		}
-		if (Time.frameCount % 2 == 0)
-		{
-			float diam = 2f * radWorld[1];
-			if (showCylinder)
-			{
-				cylinder.transform.position = centres[1];
-				cylinder.transform.localScale = new Vector3(diam, cylinder.transform.localScale.y, diam);
-			}
-		}
-		else
-		{
-			float diam = 2f * radWorld[0];
-			if (showCylinder)
-			{
-				cylinder.transform.position = centres[0] + cam.transform.forward * 0.001f;
-				cylinder.transform.localScale = new Vector3(diam, cylinder.transform.localScale.y, diam);
-			}
-		}
 
-		//prepare list of raycast hits
-		List<RaycastHit> hitList = new List<RaycastHit>();
-		RaycastHit tempHit = new RaycastHit();
-
-		//raycast from the centre.
-		if (Physics.Raycast(cam.ScreenPointToRay(centres[0]), out tempHit, raycastLengthWorldUnits))
-			hitList.Add(tempHit);
-		else
-			hitList.Add(new RaycastHit());
+		//raycast....
+		List<DoubleRaycast> raycastList = new List<DoubleRaycast>();
+		DoubleRaycast doubleRay = DualRaycast(gazePoint);
+		//DoubleRaycast doubleRay = DualRaycast(centres[0]);
+			raycastList.Add(doubleRay);
 
 
 		//Determine appropriate number of circles and increase in radius between them (in worldspace units, both at the screen and distance rayLength from it)
 		int numCircles = (int)Mathf.Ceil(radWorld[1] / raycastSpacingDVA);
-		//		print (numCircles);
 		float[] radStepSize = new float[2] { radWorld[0] / numCircles, radWorld[1] / numCircles };
 
 		Vector3 normal = GeometryUtility.CalculateFrustumPlanes(cam)[4].normal;
@@ -139,7 +81,6 @@ public class ShotgunRaycast : MonoBehaviour
 		//iterate from the smallest circle to the largest
 		for (int i = 0; i < numCircles; i++)
 		{
-
 			//find radius of current circles - one at screen and one at distance rayLength
 			float[] rad = new float[2] { radStepSize[0] * (i + 1), radStepSize[1] * (i + 1) };
 
@@ -168,21 +109,57 @@ public class ShotgunRaycast : MonoBehaviour
 					centres[1].y + rad[1] * (orthonormals[0].y * Mathf.Cos(angle) + orthonormals[1].y * Mathf.Sin(angle)),
 					centres[1].z + rad[1] * (orthonormals[0].z * Mathf.Cos(angle) + orthonormals[1].z * Mathf.Sin(angle)));
 
+
 				//perform raycast
 				if (drawRays)
 					Debug.DrawLine(startPoint, endPoint, rayColors[Random.Range(0, rayColors.Length)]);
-				if (Physics.Raycast(startPoint, endPoint - startPoint, out tempHit, raycastLengthWorldUnits))
-					hitList.Add(tempHit);
-				else
-					hitList.Add(new RaycastHit());
-				//Debug.Log("Frame " + Time.frameCount + ", Start: " + startPoint + ", End: " + endPoint + ", Vector: " + (endPoint - startPoint) + ", GazePoint: " + gazePoint);
+
+				DoubleRaycast doubleRaycast = DualRaycast(startPoint - endPoint);
+				raycastList.Add(doubleRaycast);
 			}
 		}
-		return hitList;
+		return raycastList;
 	}
 
-	public Dictionary<string, float> RaycastShotgunProportions(Vector2 gazePoint, Camera cam, 
-		float? customRadiusDVA = null, float? customRaycastSpacingDVA = null, float? customParticipantDistanceToScreen = null, 
+    private static DoubleRaycast DualRaycast(Vector3 touchPos)
+    {
+		DoubleRaycast doubleRaycast = null;
+        float distance2D = 0;
+        float distance3D = 0;
+
+        //3D
+        RaycastHit hit;
+        if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out hit, Mathf.Infinity))
+        {
+			distance3D = (hit.point - touchPos).magnitude;
+            doubleRaycast = new DoubleRaycast(hit.transform.gameObject, distance3D);
+        }
+
+        //2D:
+        PointerEventData eventData = new PointerEventData(EventSystem.current);
+        eventData.position = touchPos;
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+
+        foreach (RaycastResult result in results)
+        {
+            if (result.gameObject != null)
+            {
+                distance2D = (result.gameObject.transform.position - touchPos).magnitude;
+                if (doubleRaycast == null || (distance3D != 0 && (distance2D < distance3D)))
+                {
+					doubleRaycast = new DoubleRaycast(result.gameObject, distance2D);
+                    break;
+                }
+            }
+        }
+        return doubleRaycast;
+    }
+
+
+	public Dictionary<GameObject, float> RaycastShotgunProportions(Vector3 gazePoint, Camera cam,
+		float? customRadiusDVA = null, float? customRaycastSpacingDVA = null, float? customParticipantDistanceToScreen = null,
 		float? customRaycastLengthWorldUnits = null, bool drawRays = false)
 	{
 
@@ -192,49 +169,36 @@ public class ShotgunRaycast : MonoBehaviour
 		float participantDistanceToScreenCm = customParticipantDistanceToScreen == null ? DefaultParticipantDistanceCm : customParticipantDistanceToScreen.Value;
 		float raycastLengthWorldUnits = customRaycastLengthWorldUnits == null ? DefaultRayLengthWorldUnits : customRaycastLengthWorldUnits.Value;
 
-		List<RaycastHit> hits = RaycastShotgun(gazePoint, cam, radiusDVA, raycastSpacingDVA, participantDistanceToScreenCm, raycastLengthWorldUnits, drawRays);
-		Dictionary<string, int> hitCounts = new Dictionary<string, int>();
-		foreach (RaycastHit hit in hits)
-		{
-			if (hit.transform != null)
-			{
-				GameObject g = hit.transform.gameObject;
-				StimObject so = g.GetComponent<StimObject>();
-				string objName = "";
-				if (so != null)
-					objName = so.stimDef.StimID;
-				else
-					objName = hit.collider.name;
+		List<DoubleRaycast> doubleRays = RaycastShotgun(gazePoint, cam, radiusDVA, raycastSpacingDVA, participantDistanceToScreenCm, raycastLengthWorldUnits, drawRays);
 
-				if (!hitCounts.ContainsKey(objName))
-					hitCounts.Add(objName, 1);
-				else
-					hitCounts[objName]++;
-			}
-            else
+		Dictionary<GameObject, int> hitCounts = new Dictionary<GameObject, int>();
+		foreach (DoubleRaycast ray in doubleRays)
+		{
+			if (ray != null)
 			{
-				if (!hitCounts.ContainsKey("NoHit"))
-                    hitCounts.Add("NoHit", 1);
-                else
-                    hitCounts["NoHit"]++;
-            }
-        }
-		Dictionary<string, float> proportionHits = new Dictionary<string, float>();
-		//ProportionHit[] proportionHits = new ProportionHit[hitCounts.Count];
-		List<string> keys = new List<string>(hitCounts.Keys);
+				GameObject go = ray.Go;
+				if (!hitCounts.ContainsKey(go))
+					hitCounts.Add(go, 1);
+				else
+					hitCounts[go]++;
+			}
+
+		}
+		Dictionary<GameObject, float> proportionHits = new Dictionary<GameObject, float>();
+		List<GameObject> keys = new List<GameObject>(hitCounts.Keys);
 		for (int i = 0; i < hitCounts.Count; i++)
 		{
-			proportionHits.Add(keys[i], hitCounts[keys[i]] / (float)hits.Count);
+			proportionHits.Add(keys[i], hitCounts[keys[i]] / (float)doubleRays.Count);
 		}
 		return proportionHits;
 	}
 
-    public string ModalShotgunTarget(Dictionary<string,float> proportionHits)
+	public GameObject ModalShotgunTarget(Dictionary<GameObject,float> proportionHits)
     {
-        string modalTarget = "null";
+		GameObject modalTarget = null;
         float highestProp = 0f;
 
-        foreach (string key in proportionHits.Keys)
+        foreach (GameObject key in proportionHits.Keys)
         {
 			if (proportionHits[key] > highestProp)
 			{
@@ -242,58 +206,57 @@ public class ShotgunRaycast : MonoBehaviour
 				highestProp = proportionHits[key];
 			}
         }
-
         return modalTarget;
     }
 
 
-	public class FullShotgunOutput
-	{
-		public string SimpleRaycastTarget { get; }
-		public string ShotgunRaycastTargetsString { get; }
-		public Dictionary<string, float> ShotgunRaycastTargetsDict { get; }
-		public string ModalShotgunRaycastTarget { get; }
+	//public class FullShotgunOutput
+	//{
+	//	public string SimpleRaycastTarget { get; }
+	//	public string ShotgunRaycastTargetsString { get; }
+	//	public Dictionary<string, float> ShotgunRaycastTargetsDict { get; }
+	//	public string ModalShotgunRaycastTarget { get; }
 
-		public FullShotgunOutput(ShotgunRaycast sRaycast,
-			Vector3 gazePos, float? customRadiusDVA = null, float? customRaycastSpacingDVA = null, 
-			float? customParticipantDistanceToScreen = null, float? customRaycastLengthWorldUnits = null)
-		{
+	//	public FullShotgunOutput(ShotgunRaycast sRaycast,
+	//		Vector3 gazePos, float? customRadiusDVA = null, float? customRaycastSpacingDVA = null, 
+	//		float? customParticipantDistanceToScreen = null, float? customRaycastLengthWorldUnits = null)
+	//	{
 
-			//check for custom values
-			float radiusDVA = customRadiusDVA == null ? sRaycast.DefaultRadiusDVA : customRadiusDVA.Value;
-			float raycastSpacingDVA = customRaycastSpacingDVA == null ? sRaycast.DefaultRaycastSpacingDVA : customRaycastSpacingDVA.Value;
-			float participantDistanceToScreenCm = customParticipantDistanceToScreen == null ? sRaycast.DefaultParticipantDistanceCm : customParticipantDistanceToScreen.Value;
-			float raycastLengthWorldUnits = customRaycastLengthWorldUnits == null ? sRaycast.DefaultRayLengthWorldUnits : customRaycastLengthWorldUnits.Value;
+	//		//check for custom values
+	//		float radiusDVA = customRadiusDVA == null ? sRaycast.DefaultRadiusDVA : customRadiusDVA.Value;
+	//		float raycastSpacingDVA = customRaycastSpacingDVA == null ? sRaycast.DefaultRaycastSpacingDVA : customRaycastSpacingDVA.Value;
+	//		float participantDistanceToScreenCm = customParticipantDistanceToScreen == null ? sRaycast.DefaultParticipantDistanceCm : customParticipantDistanceToScreen.Value;
+	//		float raycastLengthWorldUnits = customRaycastLengthWorldUnits == null ? sRaycast.DefaultRayLengthWorldUnits : customRaycastLengthWorldUnits.Value;
 
-			RaycastHit hit = new RaycastHit();
-			if (!float.IsNaN(gazePos.x))
-			{
-				if (Physics.Raycast(Camera.main.ScreenPointToRay(gazePos), out hit, Mathf.Infinity))
-				{
-					GameObject g = hit.transform.gameObject;
-					StimObject so = g.GetComponent<StimObject>();
-					if (so != null)
-						SimpleRaycastTarget = so.stimDef.StimID;
-					else
-						SimpleRaycastTarget = hit.collider.name;
-				}
-				else
-					SimpleRaycastTarget = "";
+	//		RaycastHit hit = new RaycastHit();
+	//		if (!float.IsNaN(gazePos.x))
+	//		{
+	//			if (Physics.Raycast(Camera.main.ScreenPointToRay(gazePos), out hit, Mathf.Infinity))
+	//			{
+	//				GameObject g = hit.transform.gameObject;
+	//				StimObject so = g.GetComponent<StimObject>();
+	//				if (so != null)
+	//					SimpleRaycastTarget = so.stimDef.StimID;
+	//				else
+	//					SimpleRaycastTarget = hit.collider.name;
+	//			}
+	//			else
+	//				SimpleRaycastTarget = "";
 
-				ShotgunRaycastTargetsDict = sRaycast.RaycastShotgunProportions(new Vector2(gazePos.x, gazePos.y),
-					Camera.main, radiusDVA, raycastSpacingDVA, participantDistanceToScreenCm, raycastLengthWorldUnits);
-				ShotgunRaycastTargetsString = JsonConvert.SerializeObject(ShotgunRaycastTargetsDict);//.ToString(Formatting.None);
-				ModalShotgunRaycastTarget = sRaycast.ModalShotgunTarget(ShotgunRaycastTargetsDict);
-			}
-			else
-			{
-				ShotgunRaycastTargetsDict = null;
-				SimpleRaycastTarget = "";
-				ShotgunRaycastTargetsString = "";
-				ModalShotgunRaycastTarget = "";
-			}
-		}
-	}
+	//			ShotgunRaycastTargetsDict = sRaycast.RaycastShotgunProportions(new Vector2(gazePos.x, gazePos.y),
+	//				Camera.main, radiusDVA, raycastSpacingDVA, participantDistanceToScreenCm, raycastLengthWorldUnits);
+	//			ShotgunRaycastTargetsString = JsonConvert.SerializeObject(ShotgunRaycastTargetsDict);//.ToString(Formatting.None);
+	//			ModalShotgunRaycastTarget = sRaycast.ModalShotgunTarget(ShotgunRaycastTargetsDict);
+	//		}
+	//		else
+	//		{
+	//			ShotgunRaycastTargetsDict = null;
+	//			SimpleRaycastTarget = "";
+	//			ShotgunRaycastTargetsString = "";
+	//			ModalShotgunRaycastTarget = "";
+	//		}
+	//	}
+	//}
 
 
 	public class ObjectFixationDetails
@@ -413,3 +376,14 @@ public class ShotgunRaycast : MonoBehaviour
 
 }
 
+public class DoubleRaycast
+{
+	public GameObject Go;
+	public float Distance;
+
+	public DoubleRaycast(GameObject go, float distance)
+	{
+		Go = go;
+		Distance = distance;
+	}
+}

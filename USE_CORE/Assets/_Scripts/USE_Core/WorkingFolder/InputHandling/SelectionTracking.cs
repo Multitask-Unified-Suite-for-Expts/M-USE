@@ -159,6 +159,11 @@ namespace SelectionTracking
             public USE_Selection OngoingSelection;
             public List<USE_Selection> AllSelections, SuccessfulSelections, UnsuccessfulSelections;
 
+            private ShotgunRaycast shotgunRaycast;
+            private float ShotgunThreshold;
+            private List<GameObject> ShotgunGoAboveThreshold;
+            private GameObject ModalShotgunGO;
+
             private GameObject currentTarget;
             public float? MinDuration, MaxDuration;
             public int? MaxPixelDisplacement;
@@ -190,6 +195,9 @@ namespace SelectionTracking
                 LastSelection = new USE_Selection(null);
                 LastSuccessfulSelection = new USE_Selection(null);
                 LastUnsuccessfulSelection = new USE_Selection(null);
+
+                ShotgunGoAboveThreshold = new List<GameObject>();
+                shotgunRaycast = GameObject.Find("MiscScripts").GetComponent<ShotgunRaycast>();
             }
 
             public SelectionHandler(InputDelegate inputLoc = null, float? minDuration = null, float? maxDuration = null,
@@ -375,6 +383,7 @@ namespace SelectionTracking
                 }
             }
 
+
             private GameObject FindCurrentTarget(Vector3? inputLocation)
             {
                 if (inputLocation.Value.x < 0 || inputLocation.Value.y < 0 || inputLocation.Value.x > Screen.width || inputLocation.Value.y > Screen.height)
@@ -382,6 +391,26 @@ namespace SelectionTracking
 
                 if (inputLocation != null)
                 {
+                    //Set Current Raycast Target:
+                    Vector2 location2D = new Vector2(inputLocation.Value.x, inputLocation.Value.y);
+                    Dictionary<GameObject, float> proportions = shotgunRaycast.RaycastShotgunProportions(location2D, Camera.main);
+                    Debug.Log("PROPORTIONS COUNT: " + proportions.Count);
+
+                    foreach(var pair in proportions)
+                    {
+                        Debug.Log("KEY: " + pair.Key + " | VALUE: " + pair.Value);
+                        if (pair.Value > ShotgunThreshold)
+                            ShotgunGoAboveThreshold.Add(pair.Key);
+                    }
+
+                    ModalShotgunGO = shotgunRaycast.ModalShotgunTarget(proportions);
+                    if (ModalShotgunGO != null)
+                        Debug.Log("MODAL SHOTGUN GO: " + ModalShotgunGO.name);
+                    else
+                        Debug.Log("MODAL SHOTGUN GO IS NULL........");
+
+
+                    //Current Target:
                     GameObject hitObject = InputBroker.RaycastBoth(inputLocation.Value);
                     if (hitObject != null)
                     {
@@ -390,6 +419,7 @@ namespace SelectionTracking
                 }
                 return null;
             }
+
 
             public delegate GameObject GoDelegate();
 
@@ -442,13 +472,13 @@ namespace SelectionTracking
             public BoolDelegate DefaultConditions(string ConditionName)
             {
                 Dictionary<string, BoolDelegate> DefaultConditions = new Dictionary<string, BoolDelegate>();
-                //DefaultConditions.Add("ShotgunRaycastHit", () => )
+                //DefaultConditions.Add("ShotgunRaycastHitsProportion", () => );
                 DefaultConditions.Add("RaycastHitsAGameObject", () => currentTarget != null);
                 DefaultConditions.Add("RaycastHitsSameObjectAsPreviousFrame", () => DefaultConditions["RaycastHitsAGameObject"]() &&
                                                                                    OngoingSelection != null &&
                                                                                    currentTarget == OngoingSelection.SelectedGameObject);
                 DefaultConditions.Add("DurationTooLong", () => MaxDuration != null && OngoingSelection != null && OngoingSelection.Duration > MaxDuration);
-                DefaultConditions.Add("DurationTooShort", () => !DefaultConditions["MovedTooFar"]() && MinDuration != null && OngoingSelection != null && OngoingSelection.Duration < MinDuration);
+                DefaultConditions.Add("DurationTooShort", () => MinDuration != null && OngoingSelection != null && OngoingSelection.Duration < MinDuration);
                 DefaultConditions.Add("MovedTooFar", () =>
                 {
                     return MaxPixelDisplacement != null

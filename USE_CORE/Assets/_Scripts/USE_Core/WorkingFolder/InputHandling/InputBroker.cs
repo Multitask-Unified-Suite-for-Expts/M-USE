@@ -276,28 +276,14 @@ public class InputBroker
         GameObject target = null;
         float distance2D = 0;
         float distance3D = 0;
-		GameObject go = new GameObject();
-
-		//SHOTGUN RAYCAST SECTION POTENTIALLY REPLACING OLD 3D RAYCAST:
-		ShotgunRaycast shotgunRaycast = go.AddComponent<ShotgunRaycast>();
-		List<RaycastHit> shotgunHits = shotgunRaycast.RaycastShotgun(touchPos, Camera.main);
-
-		if(shotgunHits.Count > 0)
-		{
-			foreach(RaycastHit hit in shotgunHits)
-			{
-				target = hit.transform.gameObject;
-				distance3D = (hit.point - touchPos).magnitude;
-			}
-		}
 
 		//3D:
-		//RaycastHit hit;
-		//if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out hit, Mathf.Infinity))
-		//{
-		//	target = hit.transform.gameObject;
-		//	distance3D = (hit.point - touchPos).magnitude;
-		//}
+		RaycastHit hit;
+		if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out hit, Mathf.Infinity))
+		{
+			target = hit.transform.gameObject;
+			distance3D = (hit.point - touchPos).magnitude;
+		}
 
 		//2D:
 		PointerEventData eventData = new PointerEventData(EventSystem.current);

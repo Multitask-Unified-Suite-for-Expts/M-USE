@@ -397,13 +397,14 @@ namespace SelectionTracking
                 {
                     //Set Current Raycast Target:
                     Dictionary<GameObject, float> proportions = shotgunRaycast.RaycastShotgunProportions(inputLocation.Value, Camera.main);
-                    Debug.Log("PROPORTIONS COUNT: " + proportions.Count);
 
                     foreach(var pair in proportions)
                     {
-                        Debug.Log("KEY: " + pair.Key + " | VALUE: " + pair.Value);
                         if (pair.Value > ShotgunThreshold)
-                            ShotgunGoAboveThreshold.Add(pair.Key); //Not sure what we're actually doing with this List
+                        {
+                            Debug.Log("KEY: " + pair.Key + " | " + pair.Value);
+                            ShotgunGoAboveThreshold.Add(pair.Key);
+                        }
                     }
 
                     ModalShotgunGO = shotgunRaycast.ModalShotgunTarget(proportions);

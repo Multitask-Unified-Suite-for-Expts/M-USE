@@ -27,6 +27,9 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
     public List<int> runningAcc;
     public int MinTrials, MaxTrials;
     public int MinUncertainTrials, MaxUncertainTrials;
+    
+    
+    private StimGroup multiCompStims;
 
 
    
@@ -53,14 +56,8 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
     }
 
-    protected override void DefineTrialStims()
-    {
-        //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
-        //destroyed at TrialLevel_Finish
-    }
 
-
-    private GameObject GenerateMultiCompStim(int[] objsPerCircle, GameObject[] componentObjectTypes, float[] objProportions)
+    private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_StimDef sd)// int[] objsPerCircle, GameObject[] componentObjectTypes, float[] objProportions)
     {
         //objsPerCircle = 1 array element per circle used to compose multicompstim, # indicates number of smaller stim on that circle
         //objNames = strings representing the files (preloaded textures?) used for each of the distinct sub stimulus types
@@ -165,11 +162,34 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
     }
 
+    protected override void DefineTrialStims()
+    {
+        //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
+        //destroyed at TrialLevel_Finish
+        //StimGroup constructor which creates a subset of an already-existing StimGroup 
+
+        multiCompStims = new StimGroup("MultiCompStims"); // can add state control of onset/offset
+        for (int iStim = 0; iStim < CurrentTrialDef.numProbedStim; iStim++)
+        {
+            FeatureUncertaintyWM_StimDef sd = new FeatureUncertaintyWM_StimDef(); // populate with appropriate values
+            multiCompStims.AddStims(GenerateMultiCompStim(sd));
+            sd.AssignStimDefPointeToObjectHierarchy(sd.StimGameObject, sd);
+        }
+        
+        TrialStims.Add(multiCompStims);
+        // distractorStims = new StimGroup("DistractorStims", ExternalStims, CurrentTrialDef.DistractorStimsIndices);
+        // // searchStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback")); MAKING QUADDLES TWITCH BETWEEN STATES
+        // //   distractorStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback"));
+        //
+        // TrialStims.Add(searchStims);
+        // TrialStims.Add(distractorStims);
+    }
 
 
-    
-    
-///from shotgunraycast:
+
+
+
+    ///from shotgunraycast:
 /*
 //Determine appropriate number of circles and increase in radius between them (in worldspace units, both at the screen and distance rayLength from it)
 int numCircles = (int)Mathf.Ceil(radWorld[1] / raycastSpacingDVA);

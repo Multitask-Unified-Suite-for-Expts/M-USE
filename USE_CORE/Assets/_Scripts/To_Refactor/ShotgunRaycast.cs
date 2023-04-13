@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
 using System.Linq;
+using UnityEngine.EventSystems;
 //using MGcommon;
 
 public class ShotgunRaycast : MonoBehaviour
@@ -22,47 +23,20 @@ public class ShotgunRaycast : MonoBehaviour
 
 	private Color[] rayColors;
 
-	void Awake()
-	{
-		cylinder = GameObject.Find("Cylinder");
-		//		if (!showCylinder) {
-		//			cylinder.SetActive (false);
-		//		}
-		arena = GameObject.Find("Arena");
-		rayColors = new Color[] {
-			Color.black,
-			Color.blue,
-			Color.cyan,
-			Color.gray,
-			Color.green,
-			Color.magenta,
-			Color.red,
-			Color.white,
-			Color.yellow
-		};
-	}
 
-	public List<RaycastHit> RaycastShotgun(Vector2 gazePoint, Camera cam, float? customRadiusDVA = null, 
+    private void Awake()
+    {
+		float dpi = Screen.dpi;
+		float width = (Screen.currentResolution.width / dpi) * 2.54f;
+		float height = (Screen.currentResolution.height / dpi) * 2.54f;
+		Vector2 resolutionCM = new Vector2(width, height);
+		monitorDetails = new USE_DisplayManagement.MonitorDetails(new Vector2(Screen.currentResolution.width, Screen.currentResolution.height), resolutionCM);
+    }
+
+
+    public List<RaycastHit> RaycastShotgun(Vector2 gazePoint, Camera cam, float? customRadiusDVA = null, 
 		float? customRaycastSpacingDVA = null, float? customParticipantDistanceToScreen = null, float? customRaycastLengthWorldUnits = null, bool drawRays = false)
 	{
-		//Debug.Log("Frame: " + Time.frameCount + ", GazePoint: " + gazePoint + "length: " + rayLength);
-		//gazePoint = new Vector2(960, 540);
-		//RaycastSpacingDVA = 0.05f;
-		//		arena.SetActive (false);
-		//RaycastShotgun spits out a list of *almost* all non-occluded objects within a truncated cone.
-
-		//*Almost* because it actually does a series of raycasts that cover a great deal of territory within the cone,
-		//but technically it is possible to miss an object if its collider is a really weird shape and just happens to meet the cone at exactly the right angle.
-		//(To get around this problem, you can decrease maxBetweenRayDist, but this may lead to performance issues as it can add many rays).
-
-		//Truncated cone is length rayLength, and projected directly out from the camera cam.
-
-		//The inner angle is defined such that the circle projected onto the screen from any cross-section of the cone is of radius visualAngle.
-
-		//Rays are cast around a series of concentric circles, which are evenly spaced such that each one's radius is no more than maxBetweenRayDist greater than one smaller.
-
-		//On each circle, the rays are cast at evenly-spaced points such that the length of the arc between each point is no more than maxBetweenRayDist.
-
 		//check for custom values
 		float radiusDVA = customRadiusDVA == null ? DefaultRadiusDVA : customRadiusDVA.Value;
 		float raycastSpacingDVA = customRaycastSpacingDVA == null ? DefaultRaycastSpacingDVA : customRaycastSpacingDVA.Value;
@@ -79,8 +53,6 @@ public class ShotgunRaycast : MonoBehaviour
 			cam.ScreenToWorldPoint (new Vector3 (gazePoint.x, gazePoint.y, raycastLengthWorldUnits))
 		};
 
-		//Debug.Log("Gazepoint: " + gazePoint + ", start: " + centres[0] + ", end: " + centres[1]);
-
 		//points on outside of circles
 		Vector3[] outsidePoints = new Vector3[2]{cam.ScreenToWorldPoint (new Vector3 (gazePoint.x + radPix, gazePoint.y, cam.nearClipPlane)),
 			cam.ScreenToWorldPoint (new Vector3 (gazePoint.x + radPix, gazePoint.y, raycastLengthWorldUnits))
@@ -91,43 +63,27 @@ public class ShotgunRaycast : MonoBehaviour
 
 
 		Vector3 rot = new Vector3(cam.transform.rotation.eulerAngles.x + 90, cam.transform.rotation.eulerAngles.y, cam.transform.rotation.eulerAngles.z);
-		if (showCylinder)
-		{
-			cylinder.transform.rotation = Quaternion.Euler(rot);
-		}
-		if (Time.frameCount % 2 == 0)
-		{
-			float diam = 2f * radWorld[1];
-			if (showCylinder)
-			{
-				cylinder.transform.position = centres[1];
-				cylinder.transform.localScale = new Vector3(diam, cylinder.transform.localScale.y, diam);
-			}
-		}
-		else
-		{
-			float diam = 2f * radWorld[0];
-			if (showCylinder)
-			{
-				cylinder.transform.position = centres[0] + cam.transform.forward * 0.001f;
-				cylinder.transform.localScale = new Vector3(diam, cylinder.transform.localScale.y, diam);
-			}
-		}
 
-		//prepare list of raycast hits
-		List<RaycastHit> hitList = new List<RaycastHit>();
+
+
+
+
+		//3D raycast....
+		List<RaycastHit> hitList3D = new List<RaycastHit>();
 		RaycastHit tempHit = new RaycastHit();
 
-		//raycast from the centre.
 		if (Physics.Raycast(cam.ScreenPointToRay(centres[0]), out tempHit, raycastLengthWorldUnits))
-			hitList.Add(tempHit);
+			hitList3D.Add(tempHit);
 		else
-			hitList.Add(new RaycastHit());
+			hitList3D.Add(new RaycastHit());
+
+		//2D raycast would go here?
+
+
 
 
 		//Determine appropriate number of circles and increase in radius between them (in worldspace units, both at the screen and distance rayLength from it)
 		int numCircles = (int)Mathf.Ceil(radWorld[1] / raycastSpacingDVA);
-		//		print (numCircles);
 		float[] radStepSize = new float[2] { radWorld[0] / numCircles, radWorld[1] / numCircles };
 
 		Vector3 normal = GeometryUtility.CalculateFrustumPlanes(cam)[4].normal;
@@ -172,16 +128,65 @@ public class ShotgunRaycast : MonoBehaviour
 				if (drawRays)
 					Debug.DrawLine(startPoint, endPoint, rayColors[Random.Range(0, rayColors.Length)]);
 				if (Physics.Raycast(startPoint, endPoint - startPoint, out tempHit, raycastLengthWorldUnits))
-					hitList.Add(tempHit);
+					hitList3D.Add(tempHit);
 				else
-					hitList.Add(new RaycastHit());
+					hitList3D.Add(new RaycastHit());
 				//Debug.Log("Frame " + Time.frameCount + ", Start: " + startPoint + ", End: " + endPoint + ", Vector: " + (endPoint - startPoint) + ", GazePoint: " + gazePoint);
 			}
 		}
-		return hitList;
+
+		return hitList3D;
 	}
 
-	public Dictionary<string, float> RaycastShotgunProportions(Vector2 gazePoint, Camera cam, 
+	public static List<RaycastResult> Raycast2D(Vector3 touchPos)
+	{
+        PointerEventData eventData = new PointerEventData(EventSystem.current);
+        eventData.position = touchPos;
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+
+		return results;
+    }
+
+    private static DoubleRaycast RaycastBoth(Vector3 touchPos)
+    {
+		DoubleRaycast doubleRaycast = null;
+        float distance2D = 0;
+        float distance3D = 0;
+
+        //3D
+        RaycastHit hit;
+        if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out hit, Mathf.Infinity))
+        {
+            distance3D = (hit.point - touchPos).magnitude;
+            doubleRaycast = new DoubleRaycast(hit.transform.gameObject, distance3D);
+        }
+
+        //2D:
+        PointerEventData eventData = new PointerEventData(EventSystem.current);
+        eventData.position = touchPos;
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+
+        foreach (RaycastResult result in results)
+        {
+            if (result.gameObject != null)
+            {
+                distance2D = (result.gameObject.transform.position - touchPos).magnitude;
+                if (doubleRaycast.Go == null || (distance3D != 0 && (distance2D < distance3D)))
+                {
+					doubleRaycast = new DoubleRaycast(result.gameObject, distance2D);
+                    break;
+                }
+            }
+        }
+        return doubleRaycast;
+    }
+
+
+    public Dictionary<string, float> RaycastShotgunProportions(Vector2 gazePoint, Camera cam, 
 		float? customRadiusDVA = null, float? customRaycastSpacingDVA = null, float? customParticipantDistanceToScreen = null, 
 		float? customRaycastLengthWorldUnits = null, bool drawRays = false)
 	{
@@ -413,3 +418,14 @@ public class ShotgunRaycast : MonoBehaviour
 
 }
 
+public class DoubleRaycast
+{
+	public GameObject Go;
+	public float Distance;
+
+	public DoubleRaycast(GameObject go, float distance)
+	{
+		Go = go;
+		Distance = distance;
+	}
+}

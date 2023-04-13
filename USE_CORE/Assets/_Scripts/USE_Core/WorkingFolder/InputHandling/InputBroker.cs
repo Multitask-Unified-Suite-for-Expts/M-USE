@@ -37,7 +37,8 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class InputBroker{
+public class InputBroker
+{
 
 	public enum InputState{
 		DOWN,
@@ -276,16 +277,16 @@ public class InputBroker{
         float distance2D = 0;
         float distance3D = 0;
 
-        //3D:
-        RaycastHit hit;
-        if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out hit, Mathf.Infinity))
-        {
-            target = hit.transform.gameObject;
-            distance3D = (hit.point - touchPos).magnitude;
-        }
+		//3D:
+		RaycastHit hit;
+		if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out hit, Mathf.Infinity))
+		{
+			target = hit.transform.gameObject;
+			distance3D = (hit.point - touchPos).magnitude;
+		}
 
-        //2D:
-        PointerEventData eventData = new PointerEventData(EventSystem.current);
+		//2D:
+		PointerEventData eventData = new PointerEventData(EventSystem.current);
         eventData.position = touchPos;
 
         List<RaycastResult> results = new List<RaycastResult>();

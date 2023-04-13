@@ -28,6 +28,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     public GameObject EC_CanvasGO;
     public USE_StartButton StartButtonClassInstance;
 
+    [HideInInspector] public bool MacMainDisplayBuild;
+
     private GameObject StartButton, StimLeft, StimRight, TrialStim, BalloonContainerLeft, BalloonContainerRight,
                BalloonOutline, RewardContainerLeft, RewardContainerRight, Reward, MiddleBarrier;
 
@@ -756,7 +758,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         MiddleBarrier.transform.SetParent(EC_CanvasGO.transform, false);
         Image image = MiddleBarrier.AddComponent<Image>();
         image.rectTransform.anchoredPosition = Vector2.zero;
-        image.transform.localScale = new Vector3(.035f, 4.5f, .001f);
+
+        if (MacMainDisplayBuild)
+            image.transform.localScale = new Vector3(.035f, 6f, .001f);
+        else
+            image.transform.localScale = new Vector3(.035f, 4.5f, .001f);
+
         MiddleBarrier.SetActive(false);
     }
 

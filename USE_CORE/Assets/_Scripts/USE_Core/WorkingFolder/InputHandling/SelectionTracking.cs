@@ -442,12 +442,13 @@ namespace SelectionTracking
             public BoolDelegate DefaultConditions(string ConditionName)
             {
                 Dictionary<string, BoolDelegate> DefaultConditions = new Dictionary<string, BoolDelegate>();
+                //DefaultConditions.Add("ShotgunRaycastHit", () => )
                 DefaultConditions.Add("RaycastHitsAGameObject", () => currentTarget != null);
                 DefaultConditions.Add("RaycastHitsSameObjectAsPreviousFrame", () => DefaultConditions["RaycastHitsAGameObject"]() &&
                                                                                    OngoingSelection != null &&
                                                                                    currentTarget == OngoingSelection.SelectedGameObject);
                 DefaultConditions.Add("DurationTooLong", () => MaxDuration != null && OngoingSelection != null && OngoingSelection.Duration > MaxDuration);
-                DefaultConditions.Add("DurationTooShort", () => MinDuration != null && OngoingSelection != null && OngoingSelection.Duration < MinDuration);
+                DefaultConditions.Add("DurationTooShort", () => !DefaultConditions["MovedTooFar"]() && MinDuration != null && OngoingSelection != null && OngoingSelection.Duration < MinDuration);
                 DefaultConditions.Add("MovedTooFar", () =>
                 {
                     return MaxPixelDisplacement != null

@@ -98,6 +98,11 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             trialLevel.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
         else
             trialLevel.TouchFeedbackDuration = .3f;
+
+        if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
+            trialLevel.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
+        else
+            trialLevel.MacMainDisplayBuild = false;
     }
 
     public void AddBlockValuesToTaskValues()

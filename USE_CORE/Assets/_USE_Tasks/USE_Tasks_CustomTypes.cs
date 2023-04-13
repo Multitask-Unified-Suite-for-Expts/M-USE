@@ -11,7 +11,7 @@ using FlexLearning_Namespace;
 using THR_Namespace;
 //using FinderGame_Namespace;
 //using Kia_Task_Namespace;
-using FeatureUncertaintyWM_Namespace;
+using MazeReactionTest_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -121,14 +121,14 @@ static public class USE_Tasks_CustomTypes
             }
         }
         ,{
-            "FeatureUncertaintyWM", new TaskTypes
+            "MazeReactionTest", new TaskTypes
             {
-                TaskLevelType = typeof(FeatureUncertaintyWM_TaskLevel),
-                TrialLevelType = typeof(FeatureUncertaintyWM_TrialLevel),
-                TaskDefType = typeof(FeatureUncertaintyWM_TaskDef),
-                BlockDefType = typeof(FeatureUncertaintyWM_BlockDef),
-                TrialDefType = typeof(FeatureUncertaintyWM_TrialDef),
-                StimDefType = typeof(FeatureUncertaintyWM_StimDef)
+                TaskLevelType = typeof(MazeReactionTest_TaskLevel),
+                TrialLevelType = typeof(MazeReactionTest_TrialLevel),
+                TaskDefType = typeof(MazeReactionTest_TaskDef),
+                BlockDefType = typeof(MazeReactionTest_BlockDef),
+                TrialDefType = typeof(MazeReactionTest_TrialDef),
+                StimDefType = typeof(MazeReactionTest_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

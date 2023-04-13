@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using USE_ExperimentTemplate_Block;
@@ -6,15 +6,13 @@ using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
 using HiddenMaze;
-namespace MazeGame_Namespace
+namespace MazeReactionTest_Namespace
 {
-    public class MazeGame_TaskDef : TaskDef
+    public class MazeReactionTest_TaskDef : TaskDef
     {
-
-
     }
 
-    public class MazeGame_BlockDef : BlockDef
+    public class MazeReactionTest_BlockDef : BlockDef
     {
         public string BlockName;
         public int[] MinMaxTrials;
@@ -43,11 +41,11 @@ namespace MazeGame_Namespace
             System.Random rnd = new System.Random();
             int num = rnd.Next(MinMaxTrials[0], MinMaxTrials[1]+1);
             
-            TrialDefs = new List<MazeGame_TrialDef>().ConvertAll(x => (TrialDef)x);
+            TrialDefs = new List<MazeReactionTest_TrialDef>().ConvertAll(x => (TrialDef)x);
             
             for (int iTrial = 0; iTrial < num; iTrial++)
             {
-                MazeGame_TrialDef td = new MazeGame_TrialDef();
+                MazeReactionTest_TrialDef td = new MazeReactionTest_TrialDef();
                 td.BlockName = BlockName;
                 td.RewardRatio = RewardRatio;
                 td.NumPulses = NumPulses;
@@ -66,7 +64,7 @@ namespace MazeGame_Namespace
         }
     }
 
-    public class MazeGame_TrialDef : TrialDef
+    public class MazeReactionTest_TrialDef : TrialDef
     {
         public string BlockName;
         public int PulseSize;
@@ -83,10 +81,9 @@ namespace MazeGame_Namespace
         public int[] MinMaxTrials;
     }
 
-    public class MazeGame_StimDef : StimDef
+    public class MazeReactionTest_StimDef : StimDef
     {
     }
-
     public class MazeDef
     {
         public Vector2 mDims;

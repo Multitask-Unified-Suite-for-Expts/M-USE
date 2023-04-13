@@ -20,7 +20,6 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
     public int TotalTokensCollected_InTask = 0;
     public float Accuracy_InTask = 0;
     public float AverageSearchDuration_InTask = 0;
-    public int TouchDurationError_InTask = 0;
     public int NumAborted_InTask = 0;
     public override void DefineControlLevel()
     {
@@ -53,13 +52,6 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
             wmTL.StartButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
         else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
         
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquarePosition"))
-            wmTL.FBSquarePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquarePosition");
-        else Debug.LogError("FB Square Position settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FBSquareScale"))
-            wmTL.FBSquareScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "FBSquareScale");
-        else Debug.LogError("FB Square Scale settings not defined in the TaskDef");
-        
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
             wmTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
         else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");
@@ -69,8 +61,16 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))
             wmTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");
         else Debug.LogError("Neutral ITI setting not defined in the TaskDef");
-       
 
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
+            wmTL.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
+        else
+            wmTL.TouchFeedbackDuration = .3f;
+
+        if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
+            wmTL.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
+        else
+            wmTL.MacMainDisplayBuild = false;
     }    
 
     public void SetBlockSummaryString()
@@ -82,8 +82,6 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
         BlockSummaryString.AppendLine("Accuracy: " + String.Format("{0:0.000}", wmTL.Accuracy_InBlock) +  
                                       "\n" + 
                                       "\nAvg Search Duration: " + String.Format("{0:0.000}", avgBlockSearchDuration) +
-                                      "\n" + 
-                                      "\nNum Touch Duration Error: " + wmTL.TouchDurationError_InBlock + 
                                       "\n" +
                                       "\nNum Reward Given: " + wmTL.NumRewardPulses_InBlock + 
                                       "\nNum Token Bar Filled: " + wmTL.NumTokenBarFull_InBlock +
@@ -116,7 +114,6 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
     {
         BlockData.AddDatum("Block Accuracy", ()=> wmTL.Accuracy_InBlock);
         BlockData.AddDatum("Avg Search Duration", ()=> wmTL.AverageSearchDuration_InBlock);
-        BlockData.AddDatum("Num Touch Duration Error", ()=> wmTL.TouchDurationError_InBlock);
         BlockData.AddDatum("Num Reward Given", ()=> wmTL.NumRewardPulses_InBlock);
         BlockData.AddDatum("Num Token Bar Filled", ()=> wmTL.NumTokenBarFull_InBlock);
         BlockData.AddDatum("Total Tokens Collected", ()=> wmTL.TotalTokensCollected_InBlock);

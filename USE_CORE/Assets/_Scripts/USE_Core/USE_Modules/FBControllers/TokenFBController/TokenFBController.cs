@@ -55,7 +55,6 @@ public class TokenFBController : MonoBehaviour
         trialData.AddDatum("TokenChange", () => tokensChange == 0 ? null : (float?)tokensChange);
         trialData.AddDatum("TokenBarCompletedThisTrial", ()=> tokenBarFull);
         frameData.AddDatum("TokenAnimationPhase", () => animationPhase.ToString());
-        //frameData.AddDatum("TokenBarVisibility", ()=> enabled); WON'T WORK IF TOKENFBCONTROLLED DELETED DURING TASK END
         this.audioFBController = audioFBController;
         numCollected = 0;
 
@@ -70,7 +69,8 @@ public class TokenFBController : MonoBehaviour
         EventCodeManager = new EventCodeManager();
     }
 
-    private void RecalculateTokenBox() {
+    public void RecalculateTokenBox()
+    {
         float width = CalcTokensWidth(totalTokensNum) + 2 * tokenBoxPadding;
         tokenBoxRect = new Rect(
             (Screen.width - width) / 2,

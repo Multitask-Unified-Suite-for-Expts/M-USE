@@ -31,7 +31,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class InitScreen : MonoBehaviour {
@@ -45,8 +44,13 @@ public class InitScreen : MonoBehaviour {
 
     public event System.Action OnConfirm, OnLoadSettings;
 
+    public DisplayController displayController;
+
     void Start()
     {
+        displayController = gameObject.AddComponent<DisplayController>();
+        displayController.HandleDisplays(this);
+
         foreach (GameObject g in disableOnStart)
             g.SetActive(false);
         foreach (GameObject g in enableOnStart)
@@ -70,7 +74,7 @@ public class InitScreen : MonoBehaviour {
         if(OnConfirm != null)
             OnConfirm();
  
-        this.gameObject.SetActive(false);
+        gameObject.SetActive(false);
         yield return 0;
     }
 
@@ -80,3 +84,5 @@ public class InitScreen : MonoBehaviour {
     }
 
 }
+
+

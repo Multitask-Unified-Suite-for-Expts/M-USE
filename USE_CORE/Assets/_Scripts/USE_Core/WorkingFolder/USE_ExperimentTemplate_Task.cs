@@ -39,7 +39,7 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         [HideInInspector] public string ContextExternalFilePath, SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
         [HideInInspector] public LocateFile LocateFile;
-        [HideInInspector] public StringBuilder BlockSummaryString, CurrentTaskSummaryString;
+        [HideInInspector] public StringBuilder BlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
         private int TaskStringsAdded = 0;
 
         // public string TaskSceneName;
@@ -129,6 +129,7 @@ namespace USE_ExperimentTemplate_Task
             {
                 BlockCount = -1;
                 BlockSummaryString = new StringBuilder();
+                PreviousBlockSummaryString = new StringBuilder();
                 CurrentTaskSummaryString = new StringBuilder();
                 
                 SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
@@ -178,8 +179,18 @@ namespace USE_ExperimentTemplate_Task
             });
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
 
-            BlockFeedback.AddInitializationMethod(() =>
+            BlockFeedback.AddUniversalInitializationMethod(() =>
             {
+                if (BlockSummaryString.Length > 0)
+                {
+                    int trialsCompleted = (TrialLevel.AbortCode == 0 || TrialLevel.AbortCode == 6) ? TrialLevel.TrialCount_InBlock + 1 : TrialLevel.TrialCount_InBlock;
+                    string blockTitle = $"<b>\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" +
+                                        $"\n\nBlock {BlockCount + 1}" +
+                                        $"\nTrials Completed: {trialsCompleted}\n</b>";
+
+                    PreviousBlockSummaryString.Insert(0,BlockSummaryString); //Add current block string to full list of previous blocks. 
+                    PreviousBlockSummaryString.Insert(0, blockTitle);
+                }
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["BlockFeedbackStarts"]);
             });
             BlockFeedback.AddUpdateMethod(() =>
@@ -214,7 +225,9 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.TrialSummaryString = "";
                 BlockSummaryString.Clear();
                 BlockSummaryString.AppendLine("");
-                
+
+                ClearActiveTaskHandlers();
+
             });
 
             FinishTask.SpecifyTermination(() => true, () => null);
@@ -329,14 +342,16 @@ namespace USE_ExperimentTemplate_Task
             fbControllers.GetComponent<HaloFBController>().SessionEventCodes = SessionEventCodes;
             fbControllers.GetComponent<TokenFBController>().SessionEventCodes = SessionEventCodes;
             fbControllers.GetComponent<SliderFBController>().SessionEventCodes = SessionEventCodes;
-
+            fbControllers.GetComponent<TouchFBController>().SessionEventCodes = SessionEventCodes;
 
             TrialLevel.SelectionTracker = SelectionTracker;
+
             TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
             TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
             TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
             TrialLevel.SliderFBController = fbControllers.GetComponent<SliderFBController>();
-
+            TrialLevel.TouchFBController = fbControllers.GetComponent<TouchFBController>();
+            TrialLevel.TouchFBController.audioFBController = TrialLevel.AudioFBController;
 
             TrialLevel.SerialPortController = SerialPortController;
             TrialLevel.SerialPortActive = SerialPortActive;
@@ -348,11 +363,18 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.SyncBoxController.EventCodeManager = EventCodeManager;
 
             TrialLevel.EventCodeManager = EventCodeManager;
+            TrialLevel.TouchFBController.EventCodeManager = EventCodeManager;
 
             if (CustomTaskEventCodes != null)
                 TrialLevel.TaskEventCodes = CustomTaskEventCodes;
             if (SessionEventCodes != null)
                 TrialLevel.SessionEventCodes = SessionEventCodes;
+
+
+            TrialLevel.LoadTextures(ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 
+
+            //Automatically giving TouchFbController;
+            TrialLevel.TouchFBController.Init(TrialData, FrameData);
 
             bool audioInited = false;
             foreach (string fbController in fbControllersList)
@@ -420,6 +442,26 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.DefineTrialLevel();
         }
 
+
+        public void ClearActiveTaskHandlers()
+        {
+            if (SelectionTracker.TaskHandlerNames.Count > 0)
+            {
+                List<string> toRemove = new List<string>();
+
+                foreach (string handlerName in SelectionTracker.TaskHandlerNames)
+                {
+                    if (SelectionTracker.ActiveSelectionHandlers.ContainsKey(handlerName))
+                    {
+                        SelectionTracker.ActiveSelectionHandlers.Remove(handlerName);
+                        toRemove.Add(handlerName);
+                    }
+                }
+
+                foreach (string handlerName in toRemove)
+                    SelectionTracker.TaskHandlerNames.Remove(handlerName);
+            }
+        }
 
         private void ReadSettingsFiles(bool verifyOnly)
         {

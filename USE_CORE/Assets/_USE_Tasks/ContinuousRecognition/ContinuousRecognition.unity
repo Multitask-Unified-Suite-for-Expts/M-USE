@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 208675866}
   - component: {fileID: 208675868}
   - component: {fileID: 208675867}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: ScoreText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -276,7 +276,7 @@ GameObject:
   - component: {fileID: 321374839}
   - component: {fileID: 321374838}
   - component: {fileID: 321374837}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: ContinuousRecognition_Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -334,7 +334,7 @@ Canvas:
   serializedVersion: 3
   m_RenderMode: 1
   m_Camera: {fileID: 528903573}
-  m_PlaneDistance: 50
+  m_PlaneDistance: 1
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
@@ -380,7 +380,7 @@ GameObject:
   - component: {fileID: 368680575}
   - component: {fileID: 368680577}
   - component: {fileID: 368680576}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: TimerText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -692,7 +692,7 @@ GameObject:
   - component: {fileID: 983582367}
   - component: {fileID: 983582369}
   - component: {fileID: 983582368}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: YouLoseText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1078,6 +1078,7 @@ MonoBehaviour:
   ExperimenterDisplayController: {fileID: 0}
   SessionInfoPanel: {fileID: 0}
   TrialCompleteTime: 0
+  TouchFBController: {fileID: 0}
   AudioFBController: {fileID: 0}
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
@@ -1092,6 +1093,7 @@ MonoBehaviour:
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
   THR_BackdropTexture: {fileID: 0}
+  USE_StartButtonInstance: {fileID: 0}
   StartButton: {fileID: 0}
   TimerText: {fileID: 0}
   TimerTextGO: {fileID: 368680574}
@@ -1132,6 +1134,23 @@ MonoBehaviour:
   ButtonScale: 0
   ButtonPosition: {x: 0, y: 0, z: 0}
   MakeStimPopOut: 0
+  playerViewTextList: []
+  minObjectTouchDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  maxObjectTouchDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
   displayStimDuration:
     name: 
     hidden: 0
@@ -1199,7 +1218,7 @@ GameObject:
   - component: {fileID: 1268475003}
   - component: {fileID: 1268475005}
   - component: {fileID: 1268475004}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: YouWinText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1337,7 +1356,7 @@ GameObject:
   - component: {fileID: 1932148020}
   - component: {fileID: 1932148022}
   - component: {fileID: 1932148021}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: NumTrialsText
   m_TagString: Untagged
   m_Icon: {fileID: 0}

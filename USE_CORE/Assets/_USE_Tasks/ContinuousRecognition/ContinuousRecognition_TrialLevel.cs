@@ -17,7 +17,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public ContinuousRecognition_TrialDef currentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
     public ContinuousRecognition_TaskLevel currentTask => GetTaskLevel<ContinuousRecognition_TaskLevel>();
 
-    [HideInInspector] public USE_StartButton StartButtonClassInstance;
+    [HideInInspector] public USE_StartButton USE_StartButton;
     [HideInInspector] public GameObject StartButton;
 
     public TextMeshProUGUI TimerText;
@@ -74,18 +74,25 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public float ButtonScale;
     [HideInInspector] public Vector3 ButtonPosition;
 
-    [HideInInspector] GameObject chosenStimObj;
-    [HideInInspector] ContinuousRecognition_StimDef chosenStimDef;
+    [HideInInspector] GameObject ChosenGO;
+    [HideInInspector] ContinuousRecognition_StimDef ChosenStim;
 
     private int NumPC_Trial;
     private int NumNew_Trial;
     private int NumPNC_Trial;
 
-    public bool MakeStimPopOut;
+    [HideInInspector] public bool MakeStimPopOut;
+
+    private PlayerViewPanel playerView;
+    private Transform playerViewParent;
+    private GameObject playerViewText;
+    public List<GameObject> playerViewTextList;
+
+    [HideInInspector] public float TouchFeedbackDuration;
 
     //Config Variables
     [HideInInspector]
-    public ConfigNumber displayStimDuration, chooseStimDuration, itiDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration;
+    public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, displayStimDuration, chooseStimDuration, itiDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration;
 
     public override void DefineControlLevel()
     {        
@@ -102,6 +109,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         OriginalTitleTextPosition = TitleTextGO.transform.position;
         OriginalTimerPosition = TimerBackdropGO.transform.position;
 
+        playerView = new PlayerViewPanel();
+        playerViewText = new GameObject();
+        playerViewTextList = new List<GameObject>();
+
         Add_ControlLevel_InitializationMethod(() =>
         {
             SetControllerBlockValues();
@@ -110,11 +121,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (StartButton == null)
             {
-                StartButtonClassInstance = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
-                StartButton = StartButtonClassInstance.StartButtonGO;
-                StartButtonClassInstance.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                USE_StartButton = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                StartButton = USE_StartButton.StartButtonGO;
+                USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 OriginalStartButtonPosition = StartButton.transform.position;
             }
+            playerViewParent = GameObject.Find("MainCameraCopy").transform;
         });
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
@@ -126,9 +138,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
-        SelectionHandler<ContinuousRecognition_StimDef> mouseHandler = new SelectionHandler<ContinuousRecognition_StimDef>();
-        MouseTracker.AddSelectionHandler(mouseHandler, InitTrial, null,
-            () => MouseTracker.ButtonStatus[0] == 1, () => MouseTracker.ButtonStatus[0] == 0);
+        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ChooseStim);
+        //Handler.MaxPixelDisplacement = 150;
+        TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, ButtonScale, CR_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -146,16 +158,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InTask != 0)
                 currentTask.SetTaskSummaryString();
 
-            //if (TrialCount_InBlock == 0)
-            //{
-            //    //if(IsHuman)
-            //    //{
-            //    //    AdjustStartButtonPos(); //Adjust startButton position (move down) to make room for Title text. 
-            //    //    TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
-            //    //}
-            //}
+            if (TrialCount_InBlock == 0 && IsHuman)
+            {
+                AdjustStartButtonPos(); //Adjust startButton position (move down) to make room for Title text. 
+                TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
+            }
 
-            if (MacMainDisplayBuild & !Debug.isDebugBuild && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
+            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
             {
                 AdjustTextPosForMac();
                 AdjustedPositionsForMac = true;
@@ -171,8 +180,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             SetTokenFeedbackTimes();
             SetStimStrings();
             SetShadowType(currentTrial.ShadowType, "ContinuousRecognition_DirectionalLight");
+
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
+            Handler.MinDuration = minObjectTouchDuration.value;
+            Handler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => mouseHandler.SelectionMatches(StartButton), DisplayStims);
+        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
             if (TitleTextGO.activeInHierarchy)
@@ -207,21 +221,22 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------
-        //Stim are turned on as soon as it enters DisplayStims state. no initialization method needed.
         DisplayStims.AddTimer(() => displayStimDuration.value, ChooseStim, () => TimeRemaining = chooseStimDuration.value);
 
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
-        MouseTracker.AddSelectionHandler(mouseHandler, ChooseStim, null,
-            () => MouseTracker.ButtonStatus[0] == 1, () => MouseTracker.ButtonStatus[0] == 0);
-
         ChooseStim.AddInitializationMethod(() =>
         {
-            chosenStimObj = null;
-            chosenStimDef = null;
+            CreateTextOnExperimenterDisplay();
+
+            ChosenGO = null;
+            ChosenStim = null;
             StimIsChosen = false;
 
             if (TrialCount_InBlock == 0)
                 TimeToCompletion_StartTime = Time.time;
+
+            if (Handler.AllSelections.Count > 0)
+                Handler.ClearSelections();
         });
 
         ChooseStim.AddUpdateMethod(() =>
@@ -231,38 +246,38 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             TimerText.text = TimeRemaining.ToString("0");
 
-            chosenStimObj = mouseHandler.SelectedGameObject;
-            chosenStimDef = mouseHandler.SelectedStimDef;
+            ChosenGO = Handler.LastSelection.SelectedGameObject;
+            ChosenStim = ChosenGO?.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
 
-            if (chosenStimDef != null) //They Clicked a Stim
+            if (ChosenStim != null) //They Clicked a Stim
             {
                 currentTrial.TimeChosen = Time.time;
                 currentTrial.TimeToChoice = currentTrial.TimeChosen - ChooseStim.TimingInfo.StartTimeAbsolute;
                 TimeToChoice_Block.Add(currentTrial.TimeToChoice);
                 CalculateBlockAvgTimeToChoice();
 
-                if (!ChosenStimIndices.Contains(chosenStimDef.StimIndex)) //THEY GUESSED RIGHT
+                if (!ChosenStimIndices.Contains(ChosenStim.StimIndex)) //THEY GUESSED RIGHT
                 {
                     currentTrial.GotTrialCorrect = true;
 
                     EventCodeManager.SendCodeImmediate(SessionEventCodes["CorrectResponse"]);
 
                     //If chose a PNC Stim, remove it from PNC list.
-                    if (currentTrial.PNC_Stim.Contains(chosenStimDef.StimIndex))
-                        currentTrial.PNC_Stim.Remove(chosenStimDef.StimIndex);
+                    if (currentTrial.PNC_Stim.Contains(ChosenStim.StimIndex))
+                        currentTrial.PNC_Stim.Remove(ChosenStim.StimIndex);
                     //If Chose a New Stim, remove it from New list.
-                    if (currentTrial.New_Stim.Contains(chosenStimDef.StimIndex))
-                        currentTrial.New_Stim.Remove(chosenStimDef.StimIndex);
+                    if (currentTrial.New_Stim.Contains(ChosenStim.StimIndex))
+                        currentTrial.New_Stim.Remove(ChosenStim.StimIndex);
 
-                    chosenStimDef.PreviouslyChosen = true;
-                    currentTrial.PC_Stim.Add(chosenStimDef.StimIndex);
-                    ChosenStimIndices.Add(chosenStimDef.StimIndex); //also adding to chosenIndices so I can keep them in order for display results. 
+                    ChosenStim.PreviouslyChosen = true;
+                    currentTrial.PC_Stim.Add(ChosenStim.StimIndex);
+                    ChosenStimIndices.Add(ChosenStim.StimIndex); //also adding to chosenIndices so I can keep them in order for display results. 
 
                     //REMOVE ALL NEW STIM THAT WEREN'T CHOSEN, FROM NEW STIM AND INTO PNC STIM. 
                     List<int> newStimToRemove = currentTrial.New_Stim.ToList();
                     foreach (var stim in newStimToRemove)
                     {
-                        if (currentTrial.New_Stim.Contains(stim) && stim != chosenStimDef.StimIndex)
+                        if (currentTrial.New_Stim.Contains(stim) && stim != ChosenStim.StimIndex)
                         {
                             currentTrial.New_Stim.Remove(stim);
                             currentTrial.PNC_Stim.Add(stim);
@@ -280,13 +295,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
                 else //THEY GUESSED WRONG
                 {
-                    currentTrial.WrongStimIndex = chosenStimDef.StimIndex; //identifies the stim they got wrong for Block FB purposes. 
+                    currentTrial.WrongStimIndex = ChosenStim.StimIndex; //identifies the stim they got wrong for Block FB purposes. 
                     TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
                     EventCodeManager.SendCodeImmediate(SessionEventCodes["IncorrectResponse"]);
                 }
             }
 
-            if (chosenStimObj != null && chosenStimDef != null) //if they chose a stim 
+            if (ChosenGO != null && ChosenStim != null && Handler.SuccessfulSelections.Count > 0) //if they chose a stim 
                 StimIsChosen = true;
 
             //Count NonStim Clicks:
@@ -299,11 +314,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
         });
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
-        ChooseStim.AddTimer(() => chooseStimDuration.value, TokenUpdate, () =>  //if time runs out
+        ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
         {
             AudioFBController.Play("Negative");
             EndBlock = true;
             EventCodeManager.SendCodeImmediate(SessionEventCodes["NoChoice"]);
+            AbortCode = 6;
         });
 
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------
@@ -313,9 +329,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 return;
 
             if (currentTrial.GotTrialCorrect)
-                HaloFBController.ShowPositive(chosenStimObj);
+                HaloFBController.ShowPositive(ChosenGO);
             else
-                HaloFBController.ShowNegative(chosenStimObj);
+                HaloFBController.ShowNegative(ChosenGO);
         });
         TouchFeedback.AddTimer(() => touchFbDuration.value, TokenUpdate);
         TouchFeedback.SpecifyTermination(() => !StimIsChosen, TokenUpdate);
@@ -334,16 +350,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 if(TrialCount_InBlock == currentTrial.MaxNumTrials-1 || currentTrial.PNC_Stim.Count == 0) //If they get the last trial right (or find all stim), fill up bar!
                 {
                     int numToFillBar = currentTrial.NumTokenBar - TokenFBController.GetTokenBarValue();
-                    TokenFBController.AddTokens(chosenStimObj, numToFillBar);
+                    TokenFBController.AddTokens(ChosenGO, numToFillBar);
                 }
                 else
-                {
-                    TokenFBController.AddTokens(chosenStimObj, currentTrial.RewardMag);
-                }
+                    TokenFBController.AddTokens(ChosenGO, currentTrial.RewardMag);
             }
             else //Got wrong
             {
-                TokenFBController.RemoveTokens(chosenStimObj,currentTrial.RewardMag);
+                TokenFBController.RemoveTokens(ChosenGO,currentTrial.RewardMag);
                 EndBlock = true;
             }
         });
@@ -352,6 +366,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenUpdate.AddDefaultTerminationMethod(() =>
         {
             HandleTokenUpdate();
+
+            DeactivatePlayerViewText();
 
             if (currentTrial.ShakeStim)
                 RemoveShakeStimScript(trialStims);
@@ -433,6 +449,32 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS -----------------------------------------------------------------------------------------
+    private void DeactivatePlayerViewText()
+    {
+        foreach (GameObject textGO in playerViewTextList)
+            Destroy(textGO);
+    }
+
+    private void CreateTextOnExperimenterDisplay()
+    {
+        Vector2 textLocation = new Vector2();
+
+        for(int i=0; i < currentTrial.NumTrialStims; ++i)
+        {
+            textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(trialStims.stimDefs[i].StimLocation), playerViewParent);
+            textLocation.y += 50;
+            Vector2 textSize = new Vector2(200, 200);
+            string stimString = "Target";
+            ContinuousRecognition_StimDef currentStim = (ContinuousRecognition_StimDef)trialStims.stimDefs[i];
+            if (currentStim.PreviouslyChosen)
+                stimString = "PC";
+
+            playerViewText = playerView.WriteText(stimString, stimString, stimString == "PC" ? Color.red : Color.green, textLocation, textSize, playerViewParent);
+            playerViewText.GetComponent<RectTransform>().localScale = new Vector3(1.1f, 1.1f, 0);
+            playerViewTextList.Add(playerViewText);
+        }
+    }
+
     public override void ResetTrialVariables()
     {
         CompletedAllTrials = false;
@@ -443,6 +485,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
+        DeactivatePlayerViewText();
         DeactivateTextObjects();
         DestroyFeedbackBorders();
         ContextActive = false;
@@ -533,6 +576,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
         TokenFBController.transform.localScale = biggerScale;
         TokenFBController.tokenSize = 200;
+        TokenFBController.RecalculateTokenBox();
 
         //move Timer up
         Vector3 Pos = OriginalTimerPosition;
@@ -552,31 +596,31 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         switch (NumFeedbackRows)
         {
             case 1:
-                if (MacMainDisplayBuild && !Debug.isDebugBuild)
+                if (MacMainDisplayBuild && Application.isEditor)
                     yOffset = 90f; //not checked
                 else
                     yOffset = 60f;
                 break;
             case 2:
-                if (MacMainDisplayBuild && !Debug.isDebugBuild)
+                if (MacMainDisplayBuild && Application.isEditor)
                     yOffset = 75f; //not checked
                 else
                     yOffset = 50f;
                 break;
             case 3:
-                if (MacMainDisplayBuild && !Debug.isDebugBuild)
+                if (MacMainDisplayBuild && Application.isEditor)
                     yOffset = 25f; //not checked
                 else
                     yOffset = 10f;
                 break;
             case 4:
-                if (MacMainDisplayBuild && !Debug.isDebugBuild)
+                if (MacMainDisplayBuild && Application.isEditor)
                     yOffset = -5f; //not checked
                 else
                     yOffset = -30f;
                 break;
             //case 5:
-            //    if (MacMainDisplayBuild && !Debug.isDebugBuild)
+            //    if (MacMainDisplayBuild && Application.isEditor)
             //        yOffset = -30f; //Check!
             //    else
             //        yOffset = -35f; //Check! (not checked but could be close)
@@ -1257,6 +1301,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     void LoadConfigUIVariables()
     {
+        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
+        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
         displayStimDuration = ConfigUiVariables.get<ConfigNumber>("displayStimDuration");
         chooseStimDuration = ConfigUiVariables.get<ConfigNumber>("chooseStimDuration");
         touchFbDuration = ConfigUiVariables.get<ConfigNumber>("touchFbDuration");

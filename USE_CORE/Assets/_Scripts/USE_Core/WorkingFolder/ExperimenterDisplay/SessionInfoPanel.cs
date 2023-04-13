@@ -60,8 +60,8 @@ public class SessionInfoPanel : ExperimenterDisplayPanel
         SessionSummaryString.Append(
             "Total Trials: " + totalTrials +
             "\nTotal Reward Pulses: " + totalRewardPulses +
-            "\nSession Duration: " + sessionDuration +
-            "\nTime From Last Trial Completion: " + timeFromLastTrialCompletion);
+            "\nSession Duration: " + String.Format("{0:0.0}", sessionDuration) + " s" +
+            "\nTime From Last Trial Completion: " + String.Format("{0:0.0}", timeFromLastTrialCompletion) + " s");
         
         TaskSummaryString.Clear();
         if (TaskLevel != null)

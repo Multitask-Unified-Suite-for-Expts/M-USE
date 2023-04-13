@@ -24,7 +24,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int NumLowerEffortChosen_Task = 0;
     [HideInInspector] public int NumSameEffortChosen_Task = 0;
     [HideInInspector] public int NumAborted_Task = 0;
-    
+
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;
     [HideInInspector] public int BlockStringsAdded = 0;
@@ -61,10 +61,15 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddInitializationMethod(() =>
         {
+            if(trialLevel.AbortCode == 0)
+            {
+
+            }
             if (BlockStringsAdded > 0)
                 CurrentBlockString += "\n";
-            BlockStringsAdded++;
             PreviousBlocksString.Insert(0, CurrentBlockString);
+            AddBlockValuesToTaskValues();
+            BlockStringsAdded++;
         });
     }
 
@@ -88,23 +93,33 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
             trialLevel.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
         else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
+            trialLevel.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
+        else
+            trialLevel.TouchFeedbackDuration = .3f;
+
+        if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
+            trialLevel.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
+        else
+            trialLevel.MacMainDisplayBuild = false;
     }
 
-    // public void AddBlockValuesToTaskValues()
-    // {
-    //     RewardPulses_Task += trialLevel.RewardPulses_Block;
-    //     Completions_Task += trialLevel.Completions_Block;
-    //     Touches_Task += trialLevel.TotalTouches_Block;
-    //     NumChosenLeft_Task += trialLevel.NumChosenLeft_Block;
-    //     NumChosenRight_Task += trialLevel.NumChosenRight_Block;
-    //     NumChosenHigherEffort_Task += trialLevel.NumHigherEffortChosen_Block;
-    //     NumChosenLowerEffort_Task += trialLevel.NumLowerEffortChosen_Block;
-    //     NumChosenSameEffort_Task += trialLevel.NumSameEffortChosen_Block;
-    //     NumChosenHigherReward_Task += trialLevel.NumHigherRewardChosen_Block;
-    //     NumChosenLowerReward_Task += trialLevel.NumLowerRewardChosen_Block;
-    //     NumChosenSameReward_Task += trialLevel.NumSameRewardChosen_Block;
-    //     NumAborted_Task += trialLevel.NumAborted_Block;
-    // }
+    public void AddBlockValuesToTaskValues()
+    {
+        RewardPulses_Task += trialLevel.RewardPulses_Block;
+        Completions_Task += trialLevel.Completions_Block;
+        Touches_Task += trialLevel.TotalTouches_Block;
+        NumChosenLeft_Task += trialLevel.NumChosenLeft_Block;
+        NumChosenRight_Task += trialLevel.NumChosenRight_Block;
+        NumHigherEffortChosen_Task += trialLevel.NumHigherEffortChosen_Block;
+        NumLowerEffortChosen_Task += trialLevel.NumLowerEffortChosen_Block;
+        NumSameEffortChosen_Task += trialLevel.NumSameEffortChosen_Block;
+        NumHigherRewardChosen_Task += trialLevel.NumHigherRewardChosen_Block;
+        NumLowerRewardChosen_Task += trialLevel.NumLowerRewardChosen_Block;
+        NumSameRewardChosen_Task += trialLevel.NumSameRewardChosen_Block;
+        NumAborted_Task += trialLevel.NumAborted_Block;
+    }
 
     public override OrderedDictionary GetSummaryData()
     {

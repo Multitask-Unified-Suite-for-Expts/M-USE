@@ -12,6 +12,8 @@ using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Task;
 using SelectionTracking;
+using USE_UI;
+using System.IO.Ports;
 
 namespace USE_ExperimentTemplate_Trial
 {
@@ -46,8 +48,9 @@ namespace USE_ExperimentTemplate_Trial
         public float TrialCompleteTime;
 
         [HideInInspector] public SelectionTracker SelectionTracker;
-        
+
         // Feedback Controllers
+        [HideInInspector] public TouchFBController TouchFBController;
         [HideInInspector] public AudioFBController AudioFBController;
         [HideInInspector] public HaloFBController HaloFBController;
         [HideInInspector] public TokenFBController TokenFBController;
@@ -151,7 +154,9 @@ namespace USE_ExperimentTemplate_Trial
             FinishTrial.AddUniversalTerminationMethod(() =>
             {
                 TrialCompleteTime = FinishTrial.TimingInfo.StartTimeAbsolute + (Time.time - FinishTrial.TimingInfo.StartTimeAbsolute);
+
                 FinishTrialCleanup();
+                ClearActiveTrialHandlers();
 
                 int nStimGroups = TrialStims.Count;
                 for (int iG = 0; iG < nStimGroups; iG++)
@@ -178,7 +183,26 @@ namespace USE_ExperimentTemplate_Trial
 
         public virtual void FinishTrialCleanup()
         {
+        }
 
+        public void ClearActiveTrialHandlers()
+        {
+            if (SelectionTracker.TrialHandlerNames.Count > 0)
+            {
+                List<string> toRemove = new List<string>();
+
+                foreach (string handlerName in SelectionTracker.TrialHandlerNames)
+                {
+                    if (SelectionTracker.ActiveSelectionHandlers.ContainsKey(handlerName))
+                    {
+                        SelectionTracker.ActiveSelectionHandlers.Remove(handlerName);
+                        toRemove.Add(handlerName);
+                    }
+                }
+
+                foreach (string handlerName in toRemove)
+                    SelectionTracker.TrialHandlerNames.Remove(handlerName);
+            }
         }
 
         public void WriteDataFiles()
@@ -242,6 +266,9 @@ namespace USE_ExperimentTemplate_Trial
 
             if (!AbortCodeDict.ContainsKey("EndTask"))
                 AbortCodeDict.Add("EndTask", 5);
+            
+            if (!AbortCodeDict.ContainsKey("NoSelectionMade"))
+                AbortCodeDict.Add("NoSelectionMade", 6);
         }
 
         public void AddRigidBody(GameObject go)
@@ -250,7 +277,6 @@ namespace USE_ExperimentTemplate_Trial
             rb.useGravity = false;
             rb.isKinematic = true;
         }
-
 
 
         //Added helper methods for trials. 
@@ -433,6 +459,10 @@ namespace USE_ExperimentTemplate_Trial
             HeldTooShortTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "VerticalStripes.png"));
             BackdropStripesTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "bg.png"));
             THR_BackdropTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "Concrete4.png"));
+
+            TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
+            TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
+            TouchFBController.MovedTooFar_Texture = BackdropStripesTexture;
         }
 
         public virtual void ResetTrialVariables()

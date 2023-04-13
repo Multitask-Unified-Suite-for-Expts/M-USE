@@ -142,7 +142,7 @@ public class SliderFBController : MonoBehaviour
                 Slider.value = Mathf.Lerp(Slider.value, targetValue, progress);
                 break;
             case AnimationPhase.Flashing:
-                int flashingInterval = (int)(flashingTime * 10000 / 2);
+                int flashingInterval = (int)(flashingTime * 10000 / 4);
                 int elapsed = (int)((Time.unscaledTime - animationStartTime) * 10000 % (flashingTime * 10000));
                 int colorIndex = elapsed / flashingInterval;
                 if (colorIndex % 2 == 0)

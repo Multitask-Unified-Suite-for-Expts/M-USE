@@ -65,7 +65,7 @@ public class MouseTracker : InputTracker
         if (CurrentInputScreenPosition != null)
         {
             Vector3 direction = CurrentInputScreenPosition.Value - Camera.main.transform.position;
-            GameObject hitObject = InputBroker.RaycastBoth(CurrentInputScreenPosition.Value, direction);
+            GameObject hitObject = InputBroker.RaycastBoth(CurrentInputScreenPosition.Value);
 
             if (hitObject != null)
             {

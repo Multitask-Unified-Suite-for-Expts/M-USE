@@ -1,15 +1,9 @@
 using System;
 using System.Text;
-using System.Collections.Generic;
 using THR_Namespace;
-using UnityEngine;
-using UnityEngine.UI;
 using USE_Settings;
-using USE_StimulusManagement;
 using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Block;
 using System.Collections.Specialized;
-using System.IO;
 
 public class THR_TaskLevel : ControlLevel_Task_Template
 {
@@ -61,6 +55,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
+            trialLevel.TrialCompletionList.Clear();
             trialLevel.TrialsCompleted_Block = 0;
             trialLevel.TrialsCorrect_Block = 0;
             trialLevel.BackdropTouches_Block = 0;

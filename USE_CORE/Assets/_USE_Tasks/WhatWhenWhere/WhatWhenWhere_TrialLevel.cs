@@ -640,7 +640,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             var totalStims = searchStims.stimDefs.Concat(distractorStims.stimDefs);
             var stimLocations = CurrentTrialDef.SearchStimsLocations.Concat(CurrentTrialDef.DistractorStimsLocations);
 
-            int[] positionIndexArray = Enumerable.Range(0, totalStims.Count()).ToArray();
+            int[] positionIndexArray = Enumerable.Range(0, stimLocations.Count()).ToArray();
             System.Random random = new System.Random();
             positionIndexArray = positionIndexArray.OrderBy(x => random.Next()).ToArray();
 

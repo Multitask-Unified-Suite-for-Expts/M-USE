@@ -236,15 +236,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            if (selectedSD == null)   //means the player got timed out and didn't click on anything
-            {
-                AbortedTrials_InBlock++;
-                CurrentTaskLevel.AbortedTrials_InTask++;
-                AbortCode = 6;
-                aborted = true;
-                SetTrialSummaryString();
-                EventCodeManager.SendCodeNextFrame(SessionEventCodes["NoChoice"]);
-            }
+            AbortedTrials_InBlock++;
+            CurrentTaskLevel.AbortedTrials_InTask++;
+            AbortCode = 6;
+            aborted = true;
+            SetTrialSummaryString();
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["NoChoice"]);
         });
 
         // SELECTION FEEDBACK STATE ---------------------------------------------------------------------------------------   

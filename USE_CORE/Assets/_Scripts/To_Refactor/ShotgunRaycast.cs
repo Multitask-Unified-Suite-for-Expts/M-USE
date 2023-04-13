@@ -4,13 +4,11 @@ using UnityEngine;
 using Newtonsoft.Json;
 using System.Linq;
 using UnityEngine.EventSystems;
+using USE_DisplayManagement;
 //using MGcommon;
 
 public class ShotgunRaycast : MonoBehaviour
 {
-
-	//	public int[] monitorResolution = new int[2]{2560, 1440}; //pixel size of monitor - set for Apple Cinema display (needs to be in config)
-	//	public float[] monitorSize = new float[2]{33.3f,59.4f}; //cm size of monitor
 	public float DefaultRadiusDVA = 1;
 	public float DefaultParticipantDistanceCm = 60f;
 	public float DefaultRaycastSpacingDVA = 0.3f;
@@ -65,7 +63,8 @@ public class ShotgunRaycast : MonoBehaviour
 
 		//raycast....
 		List<DoubleRaycast> raycastList = new List<DoubleRaycast>();
-		DoubleRaycast doubleRay = DualRaycast(centres[0]);
+		DoubleRaycast doubleRay = DualRaycast(gazePoint);
+		//DoubleRaycast doubleRay = DualRaycast(centres[0]);
 			raycastList.Add(doubleRay);
 
 
@@ -132,7 +131,7 @@ public class ShotgunRaycast : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out hit, Mathf.Infinity))
         {
-            distance3D = (hit.point - touchPos).magnitude;
+			distance3D = (hit.point - touchPos).magnitude;
             doubleRaycast = new DoubleRaycast(hit.transform.gameObject, distance3D);
         }
 
@@ -148,7 +147,7 @@ public class ShotgunRaycast : MonoBehaviour
             if (result.gameObject != null)
             {
                 distance2D = (result.gameObject.transform.position - touchPos).magnitude;
-                if (doubleRaycast.Go == null || (distance3D != 0 && (distance2D < distance3D)))
+                if (doubleRaycast == null || (distance3D != 0 && (distance2D < distance3D)))
                 {
 					doubleRaycast = new DoubleRaycast(result.gameObject, distance2D);
                     break;
@@ -159,7 +158,7 @@ public class ShotgunRaycast : MonoBehaviour
     }
 
 
-	public Dictionary<GameObject, float> RaycastShotgunProportions(Vector2 gazePoint, Camera cam,
+	public Dictionary<GameObject, float> RaycastShotgunProportions(Vector3 gazePoint, Camera cam,
 		float? customRadiusDVA = null, float? customRaycastSpacingDVA = null, float? customParticipantDistanceToScreen = null,
 		float? customRaycastLengthWorldUnits = null, bool drawRays = false)
 	{
@@ -171,6 +170,7 @@ public class ShotgunRaycast : MonoBehaviour
 		float raycastLengthWorldUnits = customRaycastLengthWorldUnits == null ? DefaultRayLengthWorldUnits : customRaycastLengthWorldUnits.Value;
 
 		List<DoubleRaycast> doubleRays = RaycastShotgun(gazePoint, cam, radiusDVA, raycastSpacingDVA, participantDistanceToScreenCm, raycastLengthWorldUnits, drawRays);
+
 		Dictionary<GameObject, int> hitCounts = new Dictionary<GameObject, int>();
 		foreach (DoubleRaycast ray in doubleRays)
 		{
@@ -182,13 +182,7 @@ public class ShotgunRaycast : MonoBehaviour
 				else
 					hitCounts[go]++;
 			}
-			//else
-			//{
-			//	if (!hitCounts.ContainsKey("NoHit"))
-			//		hitCounts.Add("NoHit", 1);
-			//	else
-			//		hitCounts["NoHit"]++;
-			//}
+
 		}
 		Dictionary<GameObject, float> proportionHits = new Dictionary<GameObject, float>();
 		List<GameObject> keys = new List<GameObject>(hitCounts.Keys);

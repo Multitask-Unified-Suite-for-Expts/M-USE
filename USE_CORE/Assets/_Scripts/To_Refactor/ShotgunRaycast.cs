@@ -9,7 +9,7 @@ using USE_DisplayManagement;
 
 public class ShotgunRaycast : MonoBehaviour
 {
-	public float DefaultRadiusDVA = 1;
+	public float DefaultRadiusDVA = 360;
 	public float DefaultParticipantDistanceCm = 60f;
 	public float DefaultRaycastSpacingDVA = 0.3f;
 	public float DefaultRayLengthWorldUnits = 100f;
@@ -35,6 +35,9 @@ public class ShotgunRaycast : MonoBehaviour
     public List<DoubleRaycast> RaycastShotgun(Vector2 gazePoint, Camera cam, float? customRadiusDVA = null, 
 		float? customRaycastSpacingDVA = null, float? customParticipantDistanceToScreen = null, float? customRaycastLengthWorldUnits = null, bool drawRays = false)
 	{
+
+		drawRays = true;
+
 		//check for custom values
 		float radiusDVA = customRadiusDVA == null ? DefaultRadiusDVA : customRadiusDVA.Value;
 		float raycastSpacingDVA = customRaycastSpacingDVA == null ? DefaultRaycastSpacingDVA : customRaycastSpacingDVA.Value;
@@ -63,9 +66,9 @@ public class ShotgunRaycast : MonoBehaviour
 
 		//raycast....
 		List<DoubleRaycast> raycastList = new List<DoubleRaycast>();
-		DoubleRaycast doubleRay = DualRaycast(gazePoint);
-		//DoubleRaycast doubleRay = DualRaycast(centres[0]);
-			raycastList.Add(doubleRay);
+		//DoubleRaycast doubleRay = DualRaycast(gazePoint);
+		DoubleRaycast doubleRay = DualRaycast(centres[0]);
+		raycastList.Add(doubleRay);
 
 
 		//Determine appropriate number of circles and increase in radius between them (in worldspace units, both at the screen and distance rayLength from it)
@@ -112,7 +115,7 @@ public class ShotgunRaycast : MonoBehaviour
 
 				//perform raycast
 				if (drawRays)
-					Debug.DrawLine(startPoint, endPoint, rayColors[Random.Range(0, rayColors.Length)]);
+					Debug.DrawLine(startPoint, endPoint, Color.cyan);
 
 				DoubleRaycast doubleRaycast = DualRaycast(startPoint - endPoint);
 				raycastList.Add(doubleRaycast);
@@ -131,6 +134,7 @@ public class ShotgunRaycast : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out hit, Mathf.Infinity))
         {
+			Debug.Log("3D HIT!!!!!!");
 			distance3D = (hit.point - touchPos).magnitude;
             doubleRaycast = new DoubleRaycast(hit.transform.gameObject, distance3D);
         }
@@ -146,6 +150,7 @@ public class ShotgunRaycast : MonoBehaviour
         {
             if (result.gameObject != null)
             {
+                Debug.Log("2D HIT!!!!!!");
                 distance2D = (result.gameObject.transform.position - touchPos).magnitude;
                 if (doubleRaycast == null || (distance3D != 0 && (distance2D < distance3D)))
                 {
@@ -169,6 +174,9 @@ public class ShotgunRaycast : MonoBehaviour
 		float participantDistanceToScreenCm = customParticipantDistanceToScreen == null ? DefaultParticipantDistanceCm : customParticipantDistanceToScreen.Value;
 		float raycastLengthWorldUnits = customRaycastLengthWorldUnits == null ? DefaultRayLengthWorldUnits : customRaycastLengthWorldUnits.Value;
 
+		radiusDVA = 360;
+		//drawRays = true;
+
 		List<DoubleRaycast> doubleRays = RaycastShotgun(gazePoint, cam, radiusDVA, raycastSpacingDVA, participantDistanceToScreenCm, raycastLengthWorldUnits, drawRays);
 
 		Dictionary<GameObject, int> hitCounts = new Dictionary<GameObject, int>();
@@ -176,6 +184,7 @@ public class ShotgunRaycast : MonoBehaviour
 		{
 			if (ray != null)
 			{
+				Debug.Log("RAY NOT NULL!");
 				GameObject go = ray.Go;
 				if (!hitCounts.ContainsKey(go))
 					hitCounts.Add(go, 1);

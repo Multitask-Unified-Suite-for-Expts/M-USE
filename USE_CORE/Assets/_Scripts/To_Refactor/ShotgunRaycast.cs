@@ -143,8 +143,7 @@ public class ShotgunRaycast : MonoBehaviour
         //2D:
         PointerEventData eventData = new PointerEventData(EventSystem.current);
 
-		Vector3 newOrigin = Camera.main.WorldToScreenPoint(origin);
-        eventData.position = newOrigin;
+		eventData.position = Camera.main.WorldToScreenPoint(origin);
 
         List<RaycastResult> results = new List<RaycastResult>();
 		EventSystem.current.RaycastAll(eventData, results);

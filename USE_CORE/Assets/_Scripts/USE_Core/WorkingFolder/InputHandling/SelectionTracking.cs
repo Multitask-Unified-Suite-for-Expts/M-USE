@@ -418,14 +418,9 @@ namespace SelectionTracking
                     foreach (var pair in proportions)
                     {
                         if (pair.Value > ShotgunThreshold)
-                        {
-                            Debug.Log(pair.Key + " | " + pair.Value);
                             ShotgunGoAboveThreshold.Add(pair.Key);
-                        }
                     }
-                    Debug.Log("ABOVE THRESHOLD COUNT: " + ShotgunGoAboveThreshold.Count);
                     ShotgunCurrentTarget = shotgunRaycast.ModalShotgunTarget(proportions);
-
 
 
                     //Find Current Target and return it if found:

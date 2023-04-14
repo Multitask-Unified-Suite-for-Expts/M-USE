@@ -398,11 +398,11 @@ namespace SelectionTracking
                     //Set Current Raycast Target:
                     Dictionary<GameObject, float> proportions = shotgunRaycast.RaycastShotgunProportions(inputLocation.Value, Camera.main);
 
-                    foreach(var pair in proportions)
+                    foreach (var pair in proportions)
                     {
                         if (pair.Value > ShotgunThreshold)
                         {
-                            Debug.Log("KEY: " + pair.Key + " | " + pair.Value);
+                            Debug.Log(pair.Key + " | " + pair.Value);
                             ShotgunGoAboveThreshold.Add(pair.Key);
                         }
                     }
@@ -421,6 +421,7 @@ namespace SelectionTracking
                 }
                 return null;
             }
+
 
             public delegate GameObject GoDelegate();
 

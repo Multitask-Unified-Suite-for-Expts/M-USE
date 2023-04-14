@@ -9,10 +9,10 @@ using USE_DisplayManagement;
 
 public class ShotgunRaycast : MonoBehaviour
 {
-	public float DefaultRadiusDVA = 360;
-	public float DefaultParticipantDistanceCm = 60f;
-	public float DefaultRaycastSpacingDVA = 0.3f;
-	public float DefaultRayLengthWorldUnits = 100f;
+	public float DefaultRadiusDVA;
+	public float DefaultParticipantDistanceCm;
+	public float DefaultRaycastSpacingDVA;
+	public float DefaultRayLengthWorldUnits;
 	public USE_DisplayManagement.MonitorDetails monitorDetails;
 
 	private GameObject cylinder;
@@ -24,18 +24,26 @@ public class ShotgunRaycast : MonoBehaviour
 
     private void Awake()
     {
+		DefaultRadiusDVA = 1f;
+		DefaultParticipantDistanceCm = 60f;
+		DefaultRaycastSpacingDVA = .1f;
+		DefaultRayLengthWorldUnits = 100f;
+
+		//Vector2 pixelRes = new Vector2(1920, 1080);
+		//Vector2 resCM = new Vector2(47.8f, 27.3f);
+		//monitorDetails = new USE_DisplayManagement.MonitorDetails(pixelRes, resCM);
+
 		float dpi = Screen.dpi;
-		float width = (Screen.currentResolution.width / dpi) * 2.54f;
-		float height = (Screen.currentResolution.height / dpi) * 2.54f;
-		Vector2 resolutionCM = new Vector2(width, height);
+		float widthCM = (Screen.currentResolution.width / dpi) * 2.54f;
+		float heightCM = (Screen.currentResolution.height / dpi) * 2.54f;
+		Vector2 resolutionCM = new Vector2(widthCM, heightCM);
 		monitorDetails = new USE_DisplayManagement.MonitorDetails(new Vector2(Screen.currentResolution.width, Screen.currentResolution.height), resolutionCM);
-    }
+	}
 
 
     public List<DoubleRaycast> RaycastShotgun(Vector2 gazePoint, Camera cam, float? customRadiusDVA = null, 
 		float? customRaycastSpacingDVA = null, float? customParticipantDistanceToScreen = null, float? customRaycastLengthWorldUnits = null, bool drawRays = false)
 	{
-		drawRays = true;
 
 		//check for custom values
 		float radiusDVA = customRadiusDVA == null ? DefaultRadiusDVA : customRadiusDVA.Value;
@@ -79,8 +87,8 @@ public class ShotgunRaycast : MonoBehaviour
 
 		int totalRaysCast = 0;
 
-		//iterate from the smallest circle to the largest
-		for (int i = 0; i < numCircles; i++)
+        //iterate from the smallest circle to the largest
+        for (int i = 0; i < numCircles; i++)
 		{
 			//find radius of current circles - one at screen and one at distance rayLength
 			float[] rad = new float[2] { radStepSize[0] * (i + 1), radStepSize[1] * (i + 1) };
@@ -110,12 +118,17 @@ public class ShotgunRaycast : MonoBehaviour
 					centres[1].y + rad[1] * (orthonormals[0].y * Mathf.Cos(angle) + orthonormals[1].y * Mathf.Sin(angle)),
 					centres[1].z + rad[1] * (orthonormals[0].z * Mathf.Cos(angle) + orthonormals[1].z * Mathf.Sin(angle)));
 
+				//Debug.Log("Start Point: " + startPoint + " | " + "End Point: " + endPoint);
 
 				//perform raycast
 				if (drawRays)
 					Debug.DrawLine(startPoint, endPoint, Color.cyan);
 
 				DoubleRaycast doubleRaycast = DualRaycast(startPoint - endPoint);
+				if (doubleRaycast == null)
+					Debug.Log("DOUBLE RAYCAST NULL!");
+				else
+					Debug.Log("DOUBLE RAYCAST NOT NULL!");
 				raycastList.Add(doubleRaycast);
 			}
 		}
@@ -161,7 +174,7 @@ public class ShotgunRaycast : MonoBehaviour
     }
 
 
-	public Dictionary<GameObject, float> RaycastShotgunProportions(Vector3 gazePoint, Camera cam,
+	public Dictionary<GameObject, float> RaycastShotgunProportions(Vector2 gazePoint, Camera cam,
 		float? customRadiusDVA = null, float? customRaycastSpacingDVA = null, float? customParticipantDistanceToScreen = null,
 		float? customRaycastLengthWorldUnits = null, bool drawRays = false)
 	{
@@ -173,21 +186,23 @@ public class ShotgunRaycast : MonoBehaviour
 		float raycastLengthWorldUnits = customRaycastLengthWorldUnits == null ? DefaultRayLengthWorldUnits : customRaycastLengthWorldUnits.Value;
 
 		List<DoubleRaycast> doubleRays = RaycastShotgun(gazePoint, cam, radiusDVA, raycastSpacingDVA, participantDistanceToScreenCm, raycastLengthWorldUnits, drawRays);
-
+		Debug.Log("DOUBLE RAYS COUNT: " + doubleRays.Count);
+		int count = 0;
 		Dictionary<GameObject, int> hitCounts = new Dictionary<GameObject, int>();
 		foreach (DoubleRaycast ray in doubleRays)
 		{
+			count++;
+
 			if (ray != null)
 			{
-				Debug.Log("RAY NOT NULL!");
 				GameObject go = ray.Go;
 				if (!hitCounts.ContainsKey(go))
 					hitCounts.Add(go, 1);
 				else
 					hitCounts[go]++;
 			}
-
 		}
+		Debug.Log("COUNT = " + count + " | But Double rays count is " + doubleRays.Count);
 		Dictionary<GameObject, float> proportionHits = new Dictionary<GameObject, float>();
 		List<GameObject> keys = new List<GameObject>(hitCounts.Keys);
 		for (int i = 0; i < hitCounts.Count; i++)

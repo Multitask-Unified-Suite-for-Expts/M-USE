@@ -123,6 +123,40 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!21 &55288186
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: UI/RoundedCorners/RoundedCorners
+  m_Shader: {fileID: 4800000, guid: 0bd2ec5d73751e34a814274a454bec41, type: 3}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _ColorMask: 15
+    - _Stencil: 0
+    - _StencilComp: 8
+    - _StencilOp: 0
+    - _StencilReadMask: 255
+    - _StencilWriteMask: 255
+    - _UseUIAlphaClip: 0
+    m_Colors:
+    - _WidthHeightRadius: {r: 1500, g: 750, b: 100, a: 0}
+  m_BuildTextureStacks: []
 --- !u!1 &110561260
 GameObject:
   m_ObjectHideFlags: 0
@@ -300,7 +334,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   InitScreen: {fileID: 0}
+  InitScreenCanvas: {fileID: 0}
   SingleDisplayBuild: 0
+  SwitchDisplays: 0
   MacBuild: 0
 --- !u!114 &1017469090
 MonoBehaviour:
@@ -346,10 +382,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27ab5663ebb6b4ce287e84f7b1719b78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DefaultRadiusDVA: 1
-  DefaultParticipantDistanceCm: 60
-  DefaultRaycastSpacingDVA: 0.3
-  DefaultRayLengthWorldUnits: 100
+  DefaultRadiusDVA: 0
+  DefaultParticipantDistanceCm: 0
+  DefaultRaycastSpacingDVA: 0
+  DefaultRayLengthWorldUnits: 0
   showCylinder: 0
 --- !u!1 &1213845836
 GameObject:
@@ -498,6 +534,7 @@ MonoBehaviour:
   SessionDetails: {fileID: 2102576459}
   LocateFile: {fileID: 2102576458}
   CameraMirrorTexture: {fileID: 0}
+  DisplayController: {fileID: 0}
 --- !u!4 &1375570696
 Transform:
   m_ObjectHideFlags: 0
@@ -1031,40 +1068,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2008034526}
   m_CullTransparentMesh: 1
---- !u!21 &2072241174
-Material:
-  serializedVersion: 6
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: UI/RoundedCorners/RoundedCorners
-  m_Shader: {fileID: 4800000, guid: 0bd2ec5d73751e34a814274a454bec41, type: 3}
-  m_ShaderKeywords: 
-  m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
-  m_SavedProperties:
-    serializedVersion: 3
-    m_TexEnvs:
-    - _MainTex:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    m_Floats:
-    - _ColorMask: 15
-    - _Stencil: 0
-    - _StencilComp: 8
-    - _StencilOp: 0
-    - _StencilReadMask: 255
-    - _StencilWriteMask: 255
-    - _UseUIAlphaClip: 0
-    m_Colors:
-    - _WidthHeightRadius: {r: 1500, g: 750, b: 100, a: 0}
-  m_BuildTextureStacks: []
 --- !u!1001 &2102576455
 PrefabInstance:
   m_ObjectHideFlags: 0

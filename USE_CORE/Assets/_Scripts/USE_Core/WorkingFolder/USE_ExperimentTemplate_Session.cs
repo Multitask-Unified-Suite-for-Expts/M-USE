@@ -80,7 +80,10 @@ namespace USE_ExperimentTemplate_Session
         private Dictionary<string, EventCode> SessionEventCodes;
         private List<string> selectedConfigsList = new List<string>();
         private SessionInfoPanel SessionInfoPanel;
-        public StringBuilder PreviousTaskSummaryString = new StringBuilder(); 
+        public StringBuilder PreviousTaskSummaryString = new StringBuilder();
+
+        public DisplayController DisplayController;
+
         public override void LoadSettings()
         {
             //load session config file
@@ -212,6 +215,8 @@ namespace USE_ExperimentTemplate_Session
 
         public override void DefineControlLevel()
         {
+            DisplayController = GameObject.Find("InitializationScreen").GetComponent<DisplayController>();
+
             //DontDestroyOnLoad(gameObject);
             State setupSession = new State("SetupSession");
             State selectTask = new State("SelectTask");
@@ -236,7 +241,6 @@ namespace USE_ExperimentTemplate_Session
             Camera mirrorCamera = cameraObj.AddComponent<Camera>();
             mirrorCamera.CopyFrom(Camera.main);
             mirrorCamera.cullingMask = 0;
-            // mirrorCamera.targetDisplay = 2;
 
             RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
 
@@ -246,7 +250,6 @@ namespace USE_ExperimentTemplate_Session
             bool taskAutomaticallySelected = false;
             setupSession.AddDefaultInitializationMethod(() =>
             {
-                
                 PauseCanvasGO = GameObject.Find("PauseCanvas");
                 PauseCanvasGO.SetActive(false);
                 PauseCanvas = PauseCanvasGO.GetComponent<Canvas>();
@@ -382,11 +385,12 @@ namespace USE_ExperimentTemplate_Session
                 taskAutomaticallySelected = false; // gives another chance to select even if previous task loading was due to timeout
 
                 SessionCam.gameObject.SetActive(true);
-                // SessionCam.targetDisplay = 2;
+
                 CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
                 CameraMirrorTexture.Create();
                 Camera.main.targetTexture = CameraMirrorTexture;
                 mainCameraCopy.texture = CameraMirrorTexture;
+
 
                 // Don't show the task buttons if we encountered an error during setup
                 if (LogPanel.HasError())
@@ -586,7 +590,7 @@ namespace USE_ExperimentTemplate_Session
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
                 CurrentTask.TrialLevel.TaskLevel = CurrentTask;
                 ExperimenterDisplayController.ResetTask(CurrentTask, CurrentTask.TrialLevel);
-                
+
                 if (SerialPortActive)
                 {
                     AppendSerialData();
@@ -603,15 +607,19 @@ namespace USE_ExperimentTemplate_Session
             {
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["RunTaskStarts"]);
 
+                //if ((DisplayController.SingleDisplayBuild && DisplayController.SwitchDisplays) || DisplayController.SwitchDisplays)
+                //{
+                //    CurrentTask.TaskCam.targetDisplay++;
+                //    CurrentTask.TaskCam.Render();
+                //}
+
                 CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
                 CameraMirrorTexture.Create();
                 CurrentTask.TaskCam.targetTexture = CameraMirrorTexture;
                 mainCameraCopy.texture = CameraMirrorTexture;
-                // mirrorCamera.CopyFrom(CurrentTask.TaskCam);
-                // mirrorCamera.cullingMask = 0;
                 PauseCanvas.renderMode = RenderMode.ScreenSpaceCamera;
                 PauseCanvas.worldCamera = CurrentTask.TaskCam;
-                
+
                 //Assign Session Info Panel Values
             });
 
@@ -621,15 +629,6 @@ namespace USE_ExperimentTemplate_Session
                 // runTask.AddLateUpdateMethod(() => EventCodeManager.EventCodeLateUpdate());
             }
             
-            // runTask.AddFixedUpdateMethod(() =>
-            // {
-            //     Debug.Log(Time.frameCount + " FixedUpdate start ");
-            // });
-            //
-            // runTask.AddUpdateMethod(() =>
-            // {
-            //     Debug.Log(Time.frameCount + " Update start ");
-            // });
             
             runTask.AddLateUpdateMethod(() =>
             {

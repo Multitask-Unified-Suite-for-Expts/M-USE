@@ -8,7 +8,9 @@ using USE_Settings;
 public class DisplayController : MonoBehaviour
 {
     [HideInInspector] public InitScreen InitScreen;
+    [HideInInspector] public Canvas InitScreenCanvas;
     [HideInInspector] public bool SingleDisplayBuild;
+    [HideInInspector] public bool SwitchDisplays;
     [HideInInspector] public bool MacBuild;
 
     public Dictionary<string, bool> DisplayDict;
@@ -17,6 +19,7 @@ public class DisplayController : MonoBehaviour
     public void HandleDisplays(InitScreen initScreen) //Called by Start method of InitScreen
     {
         InitScreen = initScreen;
+        InitScreenCanvas = initScreen.GetComponentInParent<Canvas>();
         LoadDisplaySettings();
         SetDisplays();
     }
@@ -28,9 +31,7 @@ public class DisplayController : MonoBehaviour
         if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX || SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux)
         {
             if (Application.isEditor)
-            {
                 folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/Desktop/MUSE_Master/DemoConfigs";
-            }
             else
             {
                 MacBuild = true;
@@ -45,9 +46,7 @@ public class DisplayController : MonoBehaviour
         else //Windows:
         {
             if (Application.isEditor)
-            {
-                //folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/MUSE_Master/DemoConfigs";
-            }
+                folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/MUSE_Master/DemoConfigs";
             else
             {
                 string[] stringParts = Application.dataPath.Split('/');
@@ -68,14 +67,25 @@ public class DisplayController : MonoBehaviour
                 SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, bool>>("DisplayConfig", displayConfigLocation);
                 DisplayDict = (Dictionary<string, bool>)SessionSettings.Get("DisplayConfig");
                 SingleDisplayBuild = DisplayDict["SingleDisplayBuild"];
+                SwitchDisplays = DisplayDict["SwitchDisplays"];
             }
         }
     }
 
+
     public void SetDisplays()
     {
-        if (SingleDisplayBuild)
-            InitScreen.gameObject.GetComponentInParent<Canvas>().targetDisplay--;
+        //if ((SingleDisplayBuild && SwitchDisplays) || SwitchDisplays) //If both, just switch. Basically error handling
+        //{
+        //    InitScreenCanvas.targetDisplay = 0;
+        //    GameObject.Find("InitCamera").GetComponent<Camera>().targetDisplay = 0;
+        //    Debug.Log("MAIN CAM NAME: " + Camera.main.name);
+        //    Camera.main.targetDisplay = 1; //Change main camera cuz that's where TaskSelectionCanvas rendering to
+        //    //And then in session, when experimenter display is instantiated, change all its children with cameras to targetdisplay 0.
+        //}
+        if (SingleDisplayBuild && !SwitchDisplays) //Put InitScreen on Main Display
+            InitScreenCanvas.targetDisplay = 0;
+        
 
         if(MacBuild)
         {
@@ -85,7 +95,7 @@ public class DisplayController : MonoBehaviour
         }
     }
 
-    public string FindFileInFolder(string keyToFolder, string stringPattern) //There a way to use this from LocateFile?
+    public string FindFileInFolder(string keyToFolder, string stringPattern)
     {
         string[] possibleFiles = Directory.GetFiles(keyToFolder, stringPattern);
         if (possibleFiles.Length == 1)

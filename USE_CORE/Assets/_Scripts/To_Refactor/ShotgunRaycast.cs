@@ -35,7 +35,6 @@ public class ShotgunRaycast : MonoBehaviour
     public List<DoubleRaycast> RaycastShotgun(Vector2 gazePoint, Camera cam, float? customRadiusDVA = null, 
 		float? customRaycastSpacingDVA = null, float? customParticipantDistanceToScreen = null, float? customRaycastLengthWorldUnits = null, bool drawRays = false)
 	{
-
 		drawRays = true;
 
 		//check for custom values
@@ -66,10 +65,9 @@ public class ShotgunRaycast : MonoBehaviour
 
 		//raycast....
 		List<DoubleRaycast> raycastList = new List<DoubleRaycast>();
-		//DoubleRaycast doubleRay = DualRaycast(gazePoint);
-		DoubleRaycast doubleRay = DualRaycast(centres[0]);
+		DoubleRaycast doubleRay = DualRaycast(gazePoint);
+		//DoubleRaycast doubleRay = DualRaycast(centres[0]);
 		raycastList.Add(doubleRay);
-
 
 		//Determine appropriate number of circles and increase in radius between them (in worldspace units, both at the screen and distance rayLength from it)
 		int numCircles = (int)Mathf.Ceil(radWorld[1] / raycastSpacingDVA);
@@ -173,9 +171,6 @@ public class ShotgunRaycast : MonoBehaviour
 		float raycastSpacingDVA = customRaycastSpacingDVA == null ? DefaultRaycastSpacingDVA : customRaycastSpacingDVA.Value;
 		float participantDistanceToScreenCm = customParticipantDistanceToScreen == null ? DefaultParticipantDistanceCm : customParticipantDistanceToScreen.Value;
 		float raycastLengthWorldUnits = customRaycastLengthWorldUnits == null ? DefaultRayLengthWorldUnits : customRaycastLengthWorldUnits.Value;
-
-		radiusDVA = 360;
-		//drawRays = true;
 
 		List<DoubleRaycast> doubleRays = RaycastShotgun(gazePoint, cam, radiusDVA, raycastSpacingDVA, participantDistanceToScreenCm, raycastLengthWorldUnits, drawRays);
 

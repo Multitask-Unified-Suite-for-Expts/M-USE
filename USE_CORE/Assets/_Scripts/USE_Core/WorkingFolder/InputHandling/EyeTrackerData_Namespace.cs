@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using USE_Common_Namespace;
 
 namespace EyeTrackerData_Namespace
 {
@@ -24,5 +25,16 @@ namespace EyeTrackerData_Namespace
         public int leftGazePointValidity;
         public double systemTimeStamp;
     }
-    
+    public class CalibrationResult
+    {
+        public bool calibrationStatus;
+        public List<CalibrationPointResult> results;
+        public CalibrationResult()
+        {
+            this.calibrationStatus = false;
+            this.results = new List<CalibrationPointResult>();
+        }
+        //		public List<List<
+    }
+
 }

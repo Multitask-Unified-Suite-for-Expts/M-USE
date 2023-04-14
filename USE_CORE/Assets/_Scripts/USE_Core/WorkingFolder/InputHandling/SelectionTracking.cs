@@ -408,8 +408,8 @@ namespace SelectionTracking
                     }
 
                     ModalShotgunGO = shotgunRaycast.ModalShotgunTarget(proportions);
-                    if (ModalShotgunGO != null)
-                        Debug.Log("MODAL SHOTGUN GO: " + ModalShotgunGO.name);
+                    // if (ModalShotgunGO != null)
+                        // Debug.Log("MODAL SHOTGUN GO: " + ModalShotgunGO.name);
 
 
                     //Find Current Target and return it if found:

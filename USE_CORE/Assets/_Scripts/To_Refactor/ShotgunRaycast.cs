@@ -78,10 +78,11 @@ public class ShotgunRaycast : MonoBehaviour
 		Vector3.OrthoNormalize(ref normal, ref orthonormals[0], ref orthonormals[1]);
 
 		int totalRaysCast = 0;
-
+		int hitcount = 0;
 		//iterate from the smallest circle to the largest
 		for (int i = 0; i < numCircles; i++)
 		{
+			Debug.Log("CIRCLE " + i);
 			//find radius of current circles - one at screen and one at distance rayLength
 			float[] rad = new float[2] { radStepSize[0] * (i + 1), radStepSize[1] * (i + 1) };
 
@@ -98,9 +99,12 @@ public class ShotgunRaycast : MonoBehaviour
 			//iterate around the circle
 			for (int j = 0; j < numRays; j++)
 			{
+				Debug.Log("RAY " + i);
 				totalRaysCast++;
 
 				float angle = angleStepSize * j + angleJitter;
+				
+				Debug.Log("ANGLE " + angle);
 
 				//find start and end points of current ray - see https://stackoverflow.com/questions/27714014/3d-point-on-circumference-of-a-circle-with-a-center-radius-and-normal-vector
 				Vector3 startPoint = new Vector3(centres[0].x + rad[0] * (orthonormals[0].x * Mathf.Cos(angle) + orthonormals[1].x * Mathf.Sin(angle)),
@@ -117,6 +121,11 @@ public class ShotgunRaycast : MonoBehaviour
 
 				DoubleRaycast doubleRaycast = DualRaycast(startPoint - endPoint);
 				raycastList.Add(doubleRaycast);
+				if (doubleRaycast.Go != null)
+				{
+					hitcount++;
+					Debug.Log("HIT: " + hitcount);
+				}
 			}
 		}
 		return raycastList;
@@ -148,7 +157,7 @@ public class ShotgunRaycast : MonoBehaviour
         {
             if (result.gameObject != null)
             {
-                Debug.Log("2D HIT!!!!!!");
+                // Debug.Log("2D HIT!!!!!!");
                 distance2D = (result.gameObject.transform.position - touchPos).magnitude;
                 if (doubleRaycast == null || (distance3D != 0 && (distance2D < distance3D)))
                 {
@@ -182,9 +191,15 @@ public class ShotgunRaycast : MonoBehaviour
 				Debug.Log("RAY NOT NULL!");
 				GameObject go = ray.Go;
 				if (!hitCounts.ContainsKey(go))
+				{
+					Debug.Log("i am here");
 					hitCounts.Add(go, 1);
+				}
 				else
+				{
+					Debug.Log("no, i am actually here");
 					hitCounts[go]++;
+				}
 			}
 
 		}

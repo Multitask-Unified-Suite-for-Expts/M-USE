@@ -57,110 +57,110 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
     }
 
 
-    private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_StimDef sd)// int[] objsPerCircle, GameObject[] componentObjectTypes, float[] objProportions)
-    {
+    // private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_StimDef sd)// int[] objsPerCircle, GameObject[] componentObjectTypes, float[] objProportions)
+    // {
         //objsPerCircle = 1 array element per circle used to compose multicompstim, # indicates number of smaller stim on that circle
         //objNames = strings representing the files (preloaded textures?) used for each of the distinct sub stimulus types
         //objProportions = floats representing the proportion of total objects that will be composed of each sub stimulus type
-
-        
-        //error checking
-        if (componentObjectTypes.Length != objProportions.Length)
-        {
-            Debug.LogError("MultiComponent Stimulus Generation failed due to different # of elemnts in ObjNames and ObjProportions");
-        }
-        if (objProportions.Sum() != 1) // normalize proportions
-            for (int iObj = 0; iObj < objProportions.Length; iObj++)
-            {
-                objProportions[iObj] = objProportions[iObj] / objProportions.Sum();
-            }
-        
-        int totalObjectCount = objsPerCircle.Sum();
-        
-        //define each circle - locations specified as x/y proportions of panel
-        //obtain appropriate # of equally-spaced coordinates on each circle
-        //see shotgunraycast stuff below - assign compLocations values
-    
-        GameObject multiCompPanel = new GameObject("multiCompPanel");
-        multiCompPanel.AddComponent<CanvasRenderer>();
-        multiCompPanel.GetComponent<RectTransform>().SetParent(taskCanvas.GetComponent<RectTransform>());
-        //assign appropriate location and size to multiCompPanel
-
-        // List<GameObject> componentObjectInstances = new List<GameObject>();
-        //
-
-        // not sure whether it is a correct way of implementing that???
-        GameObject[] multiCompPanel1 = new GameObject[numProbedStim];
-
-        for(int i = 0; i <numProbedStim; i++)
-        {
-            multiCompPanel1[i].AddComponent<CanvasRenderer>();
-            multiCompPanel1[i].GetComponent<RectTransform>().SetParent(taskCanvas.GetComponent<RectTransform>());
-            multiCompPanel1[i].GetComponent<RectTransform>().anchoredPosition = probedStimPosition[i];
-            multiCompPanel1[i].GetComponent<RectTransform>().sizeDelta = probedStimSize[i];
-
-        }
-
-
-
-        //defining each circle and distributing total objecect count on the circles evenly based on their radius
-        // Variables to be taken: 'totalObjectCount' 'angelOffset', 'radius', 'numCircles', 'compScale'
-        //Currently it is written in a way that unity estimates the number of objects per circle in a uniformely distributed fashion based on the circle radius
-        //which one is better? predefined objpercircle or the later?
-
-        Vector3[] compLocations = new Vector3[totalObjectCount];
-        Vector3 compScale = new Vector3(1f, 1f, 1f );
-        int numCircles = 3;      
-        float[] radius = new float[totalObjectCount];
-        float[] angelOffset = new float[totalObjectCount];
-        int[] numCompOnCircles = new int[numCircles];
-
-        numCompOnCircles = radius.Select(x => Mathf.RoundToInt(totalObjectCount * x / radius.Sum())).ToArray();
-        int remainngComp = totalObjectCount - numCompOnCircles.Sum();
-
-        // Add or subtract the remaining objects to the last circle
-        if (remainngComp !=0)
-        {
-            numCompOnCircles[numCircles - 1] += remainngComp;
-        }
-
-        // Initialize the coordinates of object locations on all circles
-
-        int counter = 0;
-        for (int j = 0; j < numCircles; j++)
-        {
-            for (int i = 0; i < numCompOnCircles[j]; i++)
-            {
-                float angle = 2 * Mathf.PI * i / numCompOnCircles[j];
-                float x = angelOffset[j] + radius[j] * Mathf.Cos(angle);
-                float y = angelOffset[j] + radius[j] * Mathf.Sin(angle);
-                compLocations[counter] = new Vector3(x, y, 0);
-                counter++;
-            }
-        }
-
-
-        int totalObjCounter = 0;
-        
-        //get actual # of each object type
-        int[] numObjsOfEachType = new int[componentObjectTypes.Length];
-
-        for (int iObjType = 0; iObjType < componentObjectTypes.Length; iObjType++)
-        {
-            for (int iObj = 1; iObj < numObjsOfEachType[iObjType]; iObj++)
-            {
-                    
-                GameObject g = Instantiate(componentObjectTypes[iObjType]);
-                g.GetComponent<RectTransform>().SetParent(multiCompPanel.GetComponent<RectTransform>());
-                g.GetComponent<RectTransform>().anchoredPosition = compLocations[iObjType];
-                g.GetComponent<RectTransform>().localScale = compScale;
-                // componentObjectInstances.Add(g);
-            }
-        }
-
-        return multiCompPanel;
-
-    }
+    //
+    //     
+    //     //error checking
+    //     if (componentObjectTypes.Length != objProportions.Length)
+    //     {
+    //         Debug.LogError("MultiComponent Stimulus Generation failed due to different # of elemnts in ObjNames and ObjProportions");
+    //     }
+    //     if (objProportions.Sum() != 1) // normalize proportions
+    //         for (int iObj = 0; iObj < objProportions.Length; iObj++)
+    //         {
+    //             objProportions[iObj] = objProportions[iObj] / objProportions.Sum();
+    //         }
+    //     
+    //     int totalObjectCount = objsPerCircle.Sum();
+    //     
+    //     //define each circle - locations specified as x/y proportions of panel
+    //     //obtain appropriate # of equally-spaced coordinates on each circle
+    //     //see shotgunraycast stuff below - assign compLocations values
+    //
+    //     GameObject multiCompPanel = new GameObject("multiCompPanel");
+    //     multiCompPanel.AddComponent<CanvasRenderer>();
+    //     multiCompPanel.GetComponent<RectTransform>().SetParent(taskCanvas.GetComponent<RectTransform>());
+    //     //assign appropriate location and size to multiCompPanel
+    //
+    //     // List<GameObject> componentObjectInstances = new List<GameObject>();
+    //     //
+    //
+    //     // not sure whether it is a correct way of implementing that???
+    //     GameObject[] multiCompPanel1 = new GameObject[numProbedStim];
+    //
+    //     for(int i = 0; i <numProbedStim; i++)
+    //     {
+    //         multiCompPanel1[i].AddComponent<CanvasRenderer>();
+    //         multiCompPanel1[i].GetComponent<RectTransform>().SetParent(taskCanvas.GetComponent<RectTransform>());
+    //         multiCompPanel1[i].GetComponent<RectTransform>().anchoredPosition = probedStimPosition[i];
+    //         multiCompPanel1[i].GetComponent<RectTransform>().sizeDelta = probedStimSize[i];
+    //
+    //     }
+    //
+    //
+    //
+    //     //defining each circle and distributing total objecect count on the circles evenly based on their radius
+    //     // Variables to be taken: 'totalObjectCount' 'angelOffset', 'radius', 'numCircles', 'compScale'
+    //     //Currently it is written in a way that unity estimates the number of objects per circle in a uniformely distributed fashion based on the circle radius
+    //     //which one is better? predefined objpercircle or the later?
+    //
+    //     Vector3[] compLocations = new Vector3[totalObjectCount];
+    //     Vector3 compScale = new Vector3(1f, 1f, 1f );
+    //     int numCircles = 3;      
+    //     float[] radius = new float[totalObjectCount];
+    //     float[] angelOffset = new float[totalObjectCount];
+    //     int[] numCompOnCircles = new int[numCircles];
+    //
+    //     numCompOnCircles = radius.Select(x => Mathf.RoundToInt(totalObjectCount * x / radius.Sum())).ToArray();
+    //     int remainngComp = totalObjectCount - numCompOnCircles.Sum();
+    //
+    //     // Add or subtract the remaining objects to the last circle
+    //     if (remainngComp !=0)
+    //     {
+    //         numCompOnCircles[numCircles - 1] += remainngComp;
+    //     }
+    //
+    //     // Initialize the coordinates of object locations on all circles
+    //
+    //     int counter = 0;
+    //     for (int j = 0; j < numCircles; j++)
+    //     {
+    //         for (int i = 0; i < numCompOnCircles[j]; i++)
+    //         {
+    //             float angle = 2 * Mathf.PI * i / numCompOnCircles[j];
+    //             float x = angelOffset[j] + radius[j] * Mathf.Cos(angle);
+    //             float y = angelOffset[j] + radius[j] * Mathf.Sin(angle);
+    //             compLocations[counter] = new Vector3(x, y, 0);
+    //             counter++;
+    //         }
+    //     }
+    //
+    //
+    //     int totalObjCounter = 0;
+    //     
+    //     //get actual # of each object type
+    //     int[] numObjsOfEachType = new int[componentObjectTypes.Length];
+    //
+    //     for (int iObjType = 0; iObjType < componentObjectTypes.Length; iObjType++)
+    //     {
+    //         for (int iObj = 1; iObj < numObjsOfEachType[iObjType]; iObj++)
+    //         {
+    //                 
+    //             GameObject g = Instantiate(componentObjectTypes[iObjType]);
+    //             g.GetComponent<RectTransform>().SetParent(multiCompPanel.GetComponent<RectTransform>());
+    //             g.GetComponent<RectTransform>().anchoredPosition = compLocations[iObjType];
+    //             g.GetComponent<RectTransform>().localScale = compScale;
+    //             // componentObjectInstances.Add(g);
+    //         }
+    //     }
+    //
+    //     return multiCompPanel;
+    //
+    // }
 
     protected override void DefineTrialStims()
     {
@@ -172,17 +172,13 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         for (int iStim = 0; iStim < CurrentTrialDef.numProbedStim; iStim++)
         {
             FeatureUncertaintyWM_StimDef sd = new FeatureUncertaintyWM_StimDef(); // populate with appropriate values
-            multiCompStims.AddStims(GenerateMultiCompStim(sd));
+            // multiCompStims.AddStims(GenerateMultiCompStim(sd));
             sd.AssignStimDefPointeToObjectHierarchy(sd.StimGameObject, sd);
         }
         
         TrialStims.Add(multiCompStims);
-        // distractorStims = new StimGroup("DistractorStims", ExternalStims, CurrentTrialDef.DistractorStimsIndices);
         // // searchStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback")); MAKING QUADDLES TWITCH BETWEEN STATES
         // //   distractorStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback"));
-        //
-        // TrialStims.Add(searchStims);
-        // TrialStims.Add(distractorStims);
     }
 
 

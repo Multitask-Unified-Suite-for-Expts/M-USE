@@ -25,7 +25,7 @@ public class ShotgunRaycast : MonoBehaviour
     private void Awake()
     {
 		//access in TrialLevel 
-		ShotgunRaycastCircleSize_DVA = 3f; //configurable
+		ShotgunRaycastCircleSize_DVA = .5f; //configurable
 		ParticipantDistance_CM = 60f; //configurable
 		ShotgunRaycastSpacing_DVA = .3f; //configurable
 		ShotgunRayLengthWorldUnits = 100f; //don't touch
@@ -142,9 +142,7 @@ public class ShotgunRaycast : MonoBehaviour
 
         //2D:
         PointerEventData eventData = new PointerEventData(EventSystem.current);
-
 		eventData.position = Camera.main.WorldToScreenPoint(origin);
-
         List<RaycastResult> results = new List<RaycastResult>();
 		EventSystem.current.RaycastAll(eventData, results);
 

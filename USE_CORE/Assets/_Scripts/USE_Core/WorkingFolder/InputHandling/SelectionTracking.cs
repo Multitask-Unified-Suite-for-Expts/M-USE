@@ -100,11 +100,9 @@ namespace SelectionTracking
 
 
             SelectionHandler gazeSelection = new SelectionHandler();
-            //gazeSelection.InitConditions.Add(gazeSelection.DefaultConditions("RaycastHitsAGameObject"));
-            gazeSelection.InitConditions.Add(gazeSelection.DefaultConditions("ShotgunRaycastHitsProportion"));
+            gazeSelection.InitConditions.Add(gazeSelection.DefaultConditions("RaycastHitsAGameObject"));
 
-            //gazeSelection.UpdateConditions.Add(gazeSelection.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
-            gazeSelection.UpdateConditions.Add(gazeSelection.DefaultConditions("ShotgunRaycastHitsPreviouslyHitGO"));
+            gazeSelection.UpdateConditions.Add(gazeSelection.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
 
             gazeSelection.UpdateErrorTriggers.Add("MovedTooFar", gazeSelection.DefaultConditions("MovedTooFar"));
             gazeSelection.UpdateErrorTriggers.Add("DurationTooLong", gazeSelection.DefaultConditions("DurationTooLong"));
@@ -411,23 +409,27 @@ namespace SelectionTracking
 
                 if (inputLocation != null)
                 {
-                    //Set Current Raycast Target:
-                    Dictionary<GameObject, float> proportions = shotgunRaycast.RaycastShotgunProportions(inputLocation.Value, Camera.main);
-                    ShotgunGoAboveThreshold.Clear();
-
-                    foreach (var pair in proportions)
+                    if(HandlerName == "TouchShotgun")
                     {
-                        if (pair.Value > ShotgunThreshold)
-                            ShotgunGoAboveThreshold.Add(pair.Key);
+                        //Find Current Shotgun Target:
+                        Dictionary<GameObject, float> proportions = shotgunRaycast.RaycastShotgunProportions(inputLocation.Value, Camera.main);
+                        ShotgunGoAboveThreshold.Clear();
+
+                        foreach (var pair in proportions)
+                        {
+                            if (pair.Value > ShotgunThreshold)
+                                ShotgunGoAboveThreshold.Add(pair.Key);
+                        }
+                        ShotgunCurrentTarget = shotgunRaycast.ModalShotgunTarget(proportions);
+                        if(ShotgunCurrentTarget != null)
+                            return ShotgunCurrentTarget;
                     }
-                    ShotgunCurrentTarget = shotgunRaycast.ModalShotgunTarget(proportions);
-
-
-                    //Find Current Target and return it if found:
-                    GameObject hitObject = InputBroker.RaycastBoth(inputLocation.Value);
-                    if (hitObject != null)
+                    else //They're using a different handler, so do normal raycastBoth instead of shotgun
                     {
-                        return hitObject;
+                        //Find Current Target and return it if found:
+                        GameObject hitObject = InputBroker.RaycastBoth(inputLocation.Value);
+                        if (hitObject != null)
+                            return hitObject;
                     }
                 }
                 return null;

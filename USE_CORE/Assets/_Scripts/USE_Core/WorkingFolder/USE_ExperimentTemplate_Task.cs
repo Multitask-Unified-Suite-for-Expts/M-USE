@@ -21,6 +21,10 @@ namespace USE_ExperimentTemplate_Task
 
     public abstract class ControlLevel_Task_Template : ControlLevel
     {
+        public float ShotgunRaycastCircleSize_DVA;
+        public float ShotgunRaycastSpacing_DVA;
+        public float ParticipantDistance_CM;
+
         public string ConfigName;
         public string TaskName;
         public string TaskProjectFolder;
@@ -369,6 +373,23 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.TaskEventCodes = CustomTaskEventCodes;
             if (SessionEventCodes != null)
                 TrialLevel.SessionEventCodes = SessionEventCodes;
+
+
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShotgunRaycastCircleSize_DVA"))
+                TrialLevel.ShotgunRaycastCircleSize_DVA = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ShotgunRaycastCircleSize_DVA");
+            else
+                TrialLevel.ShotgunRaycastCircleSize_DVA = ShotgunRaycastCircleSize_DVA;
+
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ParticipantDistance_CM"))
+                TrialLevel.ParticipantDistance_CM = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ParticipantDistance_CM");
+            else
+                TrialLevel.ParticipantDistance_CM = ParticipantDistance_CM;
+
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShotgunRaycastSpacing_DVA"))
+                TrialLevel.ShotgunRaycastSpacing_DVA = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ShotgunRaycastSpacing_DVA");
+            else
+                TrialLevel.ShotgunRaycastSpacing_DVA = ShotgunRaycastSpacing_DVA;
+
 
 
             TrialLevel.LoadTextures(ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 

@@ -177,7 +177,8 @@ namespace SelectionTracking
             public USE_Selection OngoingSelection;
             public List<USE_Selection> AllSelections, SuccessfulSelections, UnsuccessfulSelections;
 
-            private ShotgunRaycast shotgunRaycast;
+
+            public ShotgunRaycast shotgunRaycast;
             private float ShotgunThreshold;
             private List<GameObject> ShotgunGoAboveThreshold;
             public GameObject ShotgunCurrentTarget;

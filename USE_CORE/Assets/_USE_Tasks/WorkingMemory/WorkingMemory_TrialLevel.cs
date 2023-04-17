@@ -126,8 +126,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        var Handler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, SearchDisplay);
-        TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, StartButtonScale, WM_CanvasGO);
+        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, SearchDisplay);
+        ShotgunHandler.shotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
+        TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale, WM_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -140,14 +141,14 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 AdjustedPositionsForMac = true;
             }
 
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            if (ShotgunHandler.AllSelections.Count > 0)
+                ShotgunHandler.ClearSelections();
 
-            Handler.MinDuration = minObjectTouchDuration.value;
-            Handler.MaxDuration = maxObjectTouchDuration.value;
+            ShotgunHandler.MinDuration = minObjectTouchDuration.value;
+            ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
 
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton), DisplaySample, () =>
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), DisplaySample, () =>
         {
             //Set the token bar settings
             TokenFBController.enabled = true;
@@ -185,16 +186,16 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
             choiceMade = false;
 
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            if (ShotgunHandler.AllSelections.Count > 0)
+                ShotgunHandler.ClearSelections();
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
-            if (Handler.SuccessfulSelections.Count > 0)
+            if (ShotgunHandler.SuccessfulSelections.Count > 0)
             {
-                selectedGO = Handler.LastSuccessfulSelection.SelectedGameObject;
+                selectedGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
                 selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<WorkingMemory_StimDef>();
-                Handler.ClearSelections();
+                ShotgunHandler.ClearSelections();
                 if (selectedSD != null)
                     choiceMade = true;
             }

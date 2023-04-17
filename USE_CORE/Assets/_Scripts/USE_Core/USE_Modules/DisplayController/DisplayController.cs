@@ -31,7 +31,7 @@ public class DisplayController : MonoBehaviour
         if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX || SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux)
         {
             if (Application.isEditor)
-                folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/Desktop/MUSE_Master/DemoConfigs";
+                folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/Desktop/MUSE/Configs";
             else
             {
                 MacBuild = true;
@@ -39,21 +39,21 @@ public class DisplayController : MonoBehaviour
                 string path = "/";
                 for (int i = 0; i < stringParts.Length - 3; i++)
                     path += stringParts[i] + "/";
-                path += "DemoConfigs";
+                path += "Configs";
                 folderPath = path;
             }
         }
         else //Windows:
         {
             if (Application.isEditor)
-                folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/MUSE_Master/DemoConfigs";
+                folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/MUSE/Configs";
             else
             {
                 string[] stringParts = Application.dataPath.Split('/');
                 string path = "";
                 for (int i = 0; i < stringParts.Length - 2; i++)
                     path += stringParts[i] + "/";
-                path += "DemoConfigs";
+                path += "Configs";
                 folderPath = path;
             }
         }

@@ -9,9 +9,10 @@ using EffortControl_Namespace;
 using MazeGame_Namespace;
 using FlexLearning_Namespace;
 using THR_Namespace;
+using MazeReactionTest_Namespace;
+using GazeCalibration_Namespace;
 //using FinderGame_Namespace;
 //using Kia_Task_Namespace;
-using MazeReactionTest_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -129,6 +130,17 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(MazeReactionTest_BlockDef),
                 TrialDefType = typeof(MazeReactionTest_TrialDef),
                 StimDefType = typeof(MazeReactionTest_StimDef)
+            }
+        }
+        ,{
+            "GazeCalibration", new TaskTypes
+            {
+                TaskLevelType = typeof(GazeCalibration_TaskLevel),
+                TrialLevelType = typeof(GazeCalibration_TrialLevel),
+                TaskDefType = typeof(GazeCalibration_TaskDef),
+                BlockDefType = typeof(GazeCalibration_BlockDef),
+                TrialDefType = typeof(GazeCalibration_TrialDef),
+                StimDefType = typeof(GazeCalibration_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

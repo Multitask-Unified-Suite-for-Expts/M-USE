@@ -133,6 +133,7 @@ public class TouchFBController : MonoBehaviour
         {
             Destroy(InstantiatedGO);
             EventCodeManager.SendCodeImmediate(SessionEventCodes["TouchFBController_FeedbackOn"]);
+            Handler.HandlerActive = true;
             FeedbackOn = false;
             Handler.HandlerActive = true;
         }

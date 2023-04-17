@@ -155,7 +155,7 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
             if (MazeContainer == null)
                 MazeContainer = new GameObject("MazeContainer"); 
             if (MazeBackground == null)
-                MazeBackground = CreateSquare("MazeBackground", mazeBgTex, new Vector3(0, 0, 0),
+                MazeBackground = CreateSquare("MazeBackground", mazeBgTex, new Vector3(0, 0.42f, 0),
                     new Vector3(5, 5, 5));
             // instantiate array
             totalErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
@@ -203,7 +203,7 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
             StateAfterDelay = TileFlash;
             DelayDuration = mazeOnsetDelay.value;
             
-            SliderFBController.ConfigureSlider(new Vector3(0,180,0), sliderSize.value);
+            SliderFBController.ConfigureSlider(new Vector3(0,209,0), sliderSize.value);
             SliderFBController.SliderGO.SetActive(true);
             SetTrialSummaryString();
             
@@ -577,13 +577,13 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
         // This will Load all tiles within the maze and the background of the maze
 
         mazeDims = CurrentTaskLevel.currMaze.mDims;
-        var mazeCenter = new Vector3(0, 0, 0);
+        var mazeCenter = MazeBackground.transform.localPosition;
 
         mazeLength = mazeDims.x * TileSize + (mazeDims.x - 1) * spaceBetweenTiles.value;
         mazeHeight = mazeDims.y * TileSize + (mazeDims.y - 1) * spaceBetweenTiles.value;
         MazeBackground.transform.SetParent(MazeContainer.transform); // setting it last so that it doesn't cover tiles
         MazeBackground.transform.localScale = new Vector3(mazeLength + 2 * spaceBetweenTiles.value,
-            mazeHeight + 2 * spaceBetweenTiles.value, 0.1f);
+            mazeHeight + 2 * (spaceBetweenTiles.value/4f), 0.1f);
         MazeBackground.SetActive(true);
         var bottomLeftMazePos = mazeCenter - new Vector3(mazeLength / 2, mazeHeight / 2, 0);
 
@@ -595,7 +595,7 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
             // Configures Tile objects and Prefab within the maze container
             tile = Instantiate(TilePrefab, MazeContainer.transform);
             SetGameConfigs();
-            tile.transform.localScale = new Vector3(TileSize, TileSize, 0.5f);
+            tile.transform.localScale = new Vector3(TileSize, TileSize, 0.15f);
             tile.gameObject.SetActive(true);
             tile.gameObject.GetComponent<Tile>().enabled = true;
             tile.gameObject.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = tileTex;

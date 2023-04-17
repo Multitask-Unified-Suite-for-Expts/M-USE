@@ -69,6 +69,7 @@ public class TokenFBController : MonoBehaviour
         EventCodeManager = new EventCodeManager();
     }
 
+
     public void RecalculateTokenBox()
     {
         float width = CalcTokensWidth(totalTokensNum) + 2 * tokenBoxPadding;
@@ -116,7 +117,9 @@ public class TokenFBController : MonoBehaviour
         if (totalTokensNum < 0)
             return;
 
+
         GUI.BeginGroup(tokenBoxRect);
+
         Color oldBGColor = GUI.backgroundColor;
         Color oldColor = GUI.color;
 

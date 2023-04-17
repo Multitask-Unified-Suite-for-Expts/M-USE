@@ -74,10 +74,6 @@ namespace USE_ExperimenterDisplay
 
     public class ExperimenterDisplayPanel : MonoBehaviour
     {
-        //     private Rect Position; // + any other fields necessary for all panels
-        //     protected Action CustomInitializationMethods;
-        //     public Action CustomUpdateMethods;
-
         public ControlLevel_Session_Template SessionLevel;
         public ControlLevel_Task_Template TaskLevel;
         public ControlLevel_Trial_Template TrialLevel;
@@ -120,27 +116,5 @@ namespace USE_ExperimenterDisplay
             //all other default panels
             return defaultPanelList;
         }
-
-        // private class HotkeyPanel : ExperimenterDisplayPanel
-        // {
-        //     //add any custom fields needed
-        //     public HotkeyPanel()
-        //     {
-        //         //fill in the { }s with whatever custom init and update methods are associated with this panel
-        //         CustomInitializationMethods = () => { };
-        //         CustomUpdateMethods = () => { };
-        //     }
-        // }
-        //
-        // private class PlayerViewPanel : ExperimenterDisplayPanel
-        // {
-        //     //add any custom fields needed
-        //     public PlayerViewPanel()
-        //     {
-        //         //fill in the { }s with whatever custom init and update methods are associated with this panel
-        //         CustomInitializationMethods = () => { };
-        //         CustomUpdateMethods = () => { };
-        //     }
-        // }
     }
 }

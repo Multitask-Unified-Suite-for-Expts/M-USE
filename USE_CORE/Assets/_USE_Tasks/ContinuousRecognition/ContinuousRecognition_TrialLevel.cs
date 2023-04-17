@@ -138,7 +138,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
-        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ChooseStim);
+        var Handler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, ChooseStim);
         //Handler.MaxPixelDisplacement = 150;
         TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, ButtonScale, CR_CanvasGO);
 

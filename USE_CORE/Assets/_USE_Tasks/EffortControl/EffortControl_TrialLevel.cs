@@ -156,7 +156,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
-        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InflateBalloon);
+        var Handler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, InflateBalloon);
         TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, ButtonScale, EC_CanvasGO);
 
         RectTransform rect = EC_CanvasGO.GetComponent<Canvas>().GetComponent<RectTransform>();

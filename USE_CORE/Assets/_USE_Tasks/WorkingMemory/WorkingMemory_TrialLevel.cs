@@ -126,7 +126,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, SearchDisplay);
+        var Handler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, SearchDisplay);
         TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, StartButtonScale, WM_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>

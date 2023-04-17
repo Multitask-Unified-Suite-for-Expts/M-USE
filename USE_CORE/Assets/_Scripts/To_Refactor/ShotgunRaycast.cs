@@ -5,14 +5,13 @@ using Newtonsoft.Json;
 using System.Linq;
 using UnityEngine.EventSystems;
 using USE_DisplayManagement;
-//using MGcommon;
 
 public class ShotgunRaycast : MonoBehaviour
 {
 	public float ShotgunRaycastCircleSize_DVA;
 	public float ParticipantDistance_CM;
-	public float ShotgunRaycastSpacing_DVA;
-	public float ShotgunRayLengthWorldUnits;
+	public float ShotgunRaycastSpacing_DVA; 
+	private float ShotgunRayLengthWorldUnits; //Don't Change!
 	public USE_DisplayManagement.MonitorDetails monitorDetails;
 
 	private GameObject cylinder;
@@ -24,18 +23,20 @@ public class ShotgunRaycast : MonoBehaviour
 
     private void Awake()
     {
-		//access in TrialLevel 
-		ShotgunRaycastCircleSize_DVA = .5f; //configurable
-		ParticipantDistance_CM = 60f; //configurable
-		ShotgunRaycastSpacing_DVA = .3f; //configurable
-		ShotgunRayLengthWorldUnits = 100f; //don't touch
+		ShotgunRayLengthWorldUnits = 100f;
 
-		//May come back to not hard coding this
 		float dpi = Screen.dpi;
 		float widthCM = (Screen.currentResolution.width / dpi) * 2.54f;
 		float heightCM = (Screen.currentResolution.height / dpi) * 2.54f;
 		Vector2 resolutionCM = new Vector2(widthCM, heightCM);
 		monitorDetails = new USE_DisplayManagement.MonitorDetails(new Vector2(Screen.currentResolution.width, Screen.currentResolution.height), resolutionCM);
+	}
+
+	public void SetShotgunVariables(float circleSize, float participantDist, float spacing)
+	{
+		ShotgunRaycastCircleSize_DVA = circleSize;
+		ParticipantDistance_CM = participantDist;
+		ShotgunRaycastSpacing_DVA = spacing;
 	}
 
 
@@ -49,8 +50,8 @@ public class ShotgunRaycast : MonoBehaviour
 		float participantDistanceToScreenCm = customParticipantDistanceToScreen == null ? ParticipantDistance_CM : customParticipantDistanceToScreen.Value;
 		float raycastLengthWorldUnits = customRaycastLengthWorldUnits == null ? ShotgunRayLengthWorldUnits : customRaycastLengthWorldUnits.Value;
 
-		//find cm and pixel size of radius visualAngle at surface of screen
-		float radCm = 2 * participantDistanceToScreenCm * (Mathf.Tan((Mathf.PI * radiusDVA / 180f) / 2));
+        //find cm and pixel size of radius visualAngle at surface of screen
+        float radCm = 2 * participantDistanceToScreenCm * (Mathf.Tan((Mathf.PI * radiusDVA / 180f) / 2));
 		float radPix = 50;
 		radPix = radCm * monitorDetails.PixelResolution[0] / monitorDetails.CmSize[0];
 

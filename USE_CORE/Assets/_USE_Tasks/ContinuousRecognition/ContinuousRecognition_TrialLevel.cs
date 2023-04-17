@@ -95,7 +95,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, displayStimDuration, chooseStimDuration, itiDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration;
 
     public override void DefineControlLevel()
-    {        
+    {
         State InitTrial = new State("InitTrial");
         State DisplayStims = new State("DisplayStims");
         State ChooseStim = new State("ChooseStim");
@@ -138,9 +138,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
-        var Handler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, ChooseStim);
-        //Handler.MaxPixelDisplacement = 150;
-        TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, ButtonScale, CR_CanvasGO);
+        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, ChooseStim);
+        ShotgunHandler.shotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
+        TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, ButtonScale, CR_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -181,12 +181,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             SetStimStrings();
             SetShadowType(currentTrial.ShadowType, "ContinuousRecognition_DirectionalLight");
 
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
-            Handler.MinDuration = minObjectTouchDuration.value;
-            Handler.MaxDuration = maxObjectTouchDuration.value;
+            if (ShotgunHandler.AllSelections.Count > 0)
+                ShotgunHandler.ClearSelections();
+            ShotgunHandler.MinDuration = minObjectTouchDuration.value;
+            ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton), DisplayStims);
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
             if (TitleTextGO.activeInHierarchy)
@@ -235,8 +235,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InBlock == 0)
                 TimeToCompletion_StartTime = Time.time;
 
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            if (ShotgunHandler.AllSelections.Count > 0)
+                ShotgunHandler.ClearSelections();
         });
 
         ChooseStim.AddUpdateMethod(() =>
@@ -246,7 +246,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             TimerText.text = TimeRemaining.ToString("0");
 
-            ChosenGO = Handler.LastSelection.SelectedGameObject;
+            ChosenGO = ShotgunHandler.LastSelection.SelectedGameObject;
             ChosenStim = ChosenGO?.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
 
             if (ChosenStim != null) //They Clicked a Stim
@@ -301,7 +301,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            if (ChosenGO != null && ChosenStim != null && Handler.SuccessfulSelections.Count > 0) //if they chose a stim 
+            if (ChosenGO != null && ChosenStim != null && ShotgunHandler.SuccessfulSelections.Count > 0) //if they chose a stim 
                 StimIsChosen = true;
 
             //Count NonStim Clicks:

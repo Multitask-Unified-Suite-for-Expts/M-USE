@@ -73,6 +73,10 @@ namespace USE_ExperimentTemplate_Trial
 
         public Dictionary<string, int> AbortCodeDict;
 
+        public float ShotgunRaycastSpacing_DVA;
+        public float ParticipantDistance_CM;
+        public float ShotgunRaycastCircleSize_DVA;
+
 
         // Texture Variables
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, 

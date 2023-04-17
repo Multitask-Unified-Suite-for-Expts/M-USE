@@ -139,8 +139,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
-        var Handler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, SearchDisplay);
-        TouchFBController.EnableTouchFeedback(Handler, .3f, StartButtonScale, FL_CanvasGO);
+        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, SearchDisplay);
+        ShotgunHandler.shotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
+        TouchFBController.EnableTouchFeedback(ShotgunHandler, .3f, StartButtonScale, FL_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -162,13 +163,13 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
 
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            if (ShotgunHandler.AllSelections.Count > 0)
+                ShotgunHandler.ClearSelections();
 
-            Handler.MinDuration = minObjectTouchDuration.value;
-            Handler.MaxDuration = maxObjectTouchDuration.value;
+            ShotgunHandler.MinDuration = minObjectTouchDuration.value;
+            ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton),
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton),
             SearchDisplayDelay, () => EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]));
 
         // Provide delay following start button selection and before stimuli onset
@@ -183,18 +184,18 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
 
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            if (ShotgunHandler.AllSelections.Count > 0)
+                ShotgunHandler.ClearSelections();
 
             PreSearch_TouchFbErrorCount = TouchFBController.ErrorCount;
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
-            if(Handler.SuccessfulSelections.Count > 0)
+            if(ShotgunHandler.SuccessfulSelections.Count > 0)
             {
-                selectedGO = Handler.LastSuccessfulSelection.SelectedGameObject;
+                selectedGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
                 selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
-                Handler.ClearSelections();
+                ShotgunHandler.ClearSelections();
                 if(selectedSD != null)
                     choiceMade = true;
             }

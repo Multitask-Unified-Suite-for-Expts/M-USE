@@ -207,8 +207,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.AddTimer(()=> sbDelay, InitTrial);
 
-        var Handler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, FinalFeedback);
-        TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, StartButtonScale, WWW_CanvasGO);
+        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, FinalFeedback);
+        ShotgunHandler.shotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
+        TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale, WWW_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -217,13 +218,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
 
-            Handler.HandlerActive = true;
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
-            Handler.MinDuration = minObjectTouchDuration.value;
-            Handler.MaxDuration = maxObjectTouchDuration.value;
+            ShotgunHandler.HandlerActive = true;
+            if (ShotgunHandler.AllSelections.Count > 0)
+                ShotgunHandler.ClearSelections();
+            ShotgunHandler.MinDuration = minObjectTouchDuration.value;
+            ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton), ChooseStimulusDelay, ()=>
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), ChooseStimulusDelay, ()=>
         {
             CalculateSliderSteps();
             SliderFBController.ConfigureSlider(new Vector3(0,180,0), sliderSize.value, CurrentTrialDef.SliderInitial*(1f/sliderGainSteps));
@@ -250,17 +251,17 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (CurrentTrialDef.LeaveFeedbackOn)
                 HaloFBController.SetLeaveFeedbackOn();
 
-            Handler.HandlerActive = true;
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            ShotgunHandler.HandlerActive = true;
+            if (ShotgunHandler.AllSelections.Count > 0)
+                ShotgunHandler.ClearSelections();
         });
         ChooseStimulus.AddUpdateMethod(() =>
         {
-            if (Handler.SuccessfulSelections.Count > 0)
+            if (ShotgunHandler.SuccessfulSelections.Count > 0)
             {
-                selectedGO = Handler.LastSuccessfulSelection.SelectedGameObject;
+                selectedGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
                 selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<WhatWhenWhere_StimDef>();
-                Handler.ClearSelections();
+                ShotgunHandler.ClearSelections();
                 if (selectedSD != null)
                     choiceMade = true;
             }
@@ -387,7 +388,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         FinalFeedback.AddInitializationMethod(() =>
         {
-            Handler.HandlerActive = false;
+            ShotgunHandler.HandlerActive = false;
 
             trialComplete = false;
             startTime = Time.time;

@@ -31,6 +31,10 @@ namespace USE_ExperimentTemplate_Session
 
         private bool IsHuman;
 
+        public float ParticipantDistance_CM;
+        public float ShotgunRaycastSpacing_DVA;
+        public float ShotgunRaycastCircleSize_DVA;
+
         [HideInInspector] public bool TasksFinished;
 
         protected SummaryData SummaryData;
@@ -170,13 +174,26 @@ namespace USE_ExperimentTemplate_Session
                 taskNames.ForEach((taskName) => TaskMappings.Add(taskName, taskName));
             }
             else if (SessionSettings.SettingExists("Session", "TaskMappings"))
-            {
                 TaskMappings = (OrderedDictionary)SessionSettings.Get("Session", "TaskMappings");
-            }
             else if (TaskMappings.Count == 0)
-            {
                 Debug.LogError("No task names or task mappings specified in Session config file or by other means.");
-            }
+
+
+            if (SessionSettings.SettingExists("Session", "ShotgunRaycastCircleSize_DVA"))
+                ShotgunRaycastCircleSize_DVA = (float)SessionSettings.Get("Session", "ShotgunRaycastCircleSize_DVA");
+            else
+                ShotgunRaycastCircleSize_DVA = 1.25f;
+
+            if (SessionSettings.SettingExists("Session", "ParticipantDistance_CM"))
+                ParticipantDistance_CM = (float)SessionSettings.Get("Session", "ParticipantDistance_CM");
+            else
+                ParticipantDistance_CM = 60f;
+
+            if (SessionSettings.SettingExists("Session", "ShotgunRaycastSpacing_DVA"))
+                ShotgunRaycastSpacing_DVA = (float)SessionSettings.Get("Session", "ShotgunRaycastSpacing_DVA");
+            else
+                ShotgunRaycastSpacing_DVA = .3f;
+
 
             if (SessionSettings.SettingExists("Session", "IsHuman"))
                 IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");
@@ -814,7 +831,9 @@ namespace USE_ExperimentTemplate_Session
                 SyncBoxController.SessionEventCodes = SessionEventCodes;
                 tl.SyncBoxController = SyncBoxController;
             }
-
+            tl.ShotgunRaycastCircleSize_DVA = ShotgunRaycastCircleSize_DVA;
+            tl.ShotgunRaycastSpacing_DVA = ShotgunRaycastSpacing_DVA;
+            tl.ParticipantDistance_CM = ParticipantDistance_CM;
 
 
             if (SessionSettings.SettingExists("Session", "RewardPulsesActive"))

@@ -63,26 +63,29 @@ namespace SelectionTracking
             Dictionary<string, SelectionHandler> DefaultSelectionHandlers =
                 new Dictionary<string, SelectionHandler>();
 
+            //----------------------------------------MOUSE CLICK HANDLER: --------------------------------------------------
             SelectionHandler mouseClick = new SelectionHandler();
+            //Init Conditions: Has to click button, and has to hit a GO
             mouseClick.InitConditions.Add(mouseClick.DefaultConditions("RaycastHitsAGameObject"));
             mouseClick.InitConditions.Add(mouseClick.DefaultConditions("MouseButton0Down"));
-
+            //Update Conditions: Mouse button must be down, raycast must hit previously hit GO
             mouseClick.UpdateConditions.Add(mouseClick.DefaultConditions("MouseButton0"));
             mouseClick.UpdateConditions.Add(mouseClick.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
-
+            //Update Error Triggers: Moving too far, holding for too long
             mouseClick.UpdateErrorTriggers.Add("MovedTooFar", mouseClick.DefaultConditions("MovedTooFar"));
             mouseClick.UpdateErrorTriggers.Add("DurationTooLong", mouseClick.DefaultConditions("DurationTooLong"));
-
+            //Termination Conditions: Releasing mouse click
             mouseClick.TerminationConditions.Add(mouseClick.DefaultConditions("MouseButton0Up"));
-
+            //Termination Error Triggers: HoldingTooShort
             mouseClick.TerminationErrorTriggers.Add("DurationTooShort", mouseClick.DefaultConditions("DurationTooShort"));
 
             mouseClick.CurrentInputLocation = () => InputBroker.mousePosition;
-
             DefaultSelectionHandlers.Add("MouseButton0Click", mouseClick);
 
+            //----------------------------------------TOUCH SHOTGUN HANDLER: --------------------------------------------------
             SelectionHandler touchShotgun = new SelectionHandler();
             touchShotgun.InitConditions.Add(touchShotgun.DefaultConditions("ShotgunRaycastHitsProportion"));
+            touchShotgun.InitConditions.Add(touchShotgun.DefaultConditions("MouseButton0Down"));
 
             touchShotgun.UpdateConditions.Add(touchShotgun.DefaultConditions("ShotgunRaycastHitsPreviouslyHitGO"));
             touchShotgun.UpdateConditions.Add(touchShotgun.DefaultConditions("MouseButton0"));
@@ -95,10 +98,9 @@ namespace SelectionTracking
             touchShotgun.TerminationErrorTriggers.Add("DurationTooShort", touchShotgun.DefaultConditions("DurationTooShort"));
 
             touchShotgun.CurrentInputLocation = () => InputBroker.mousePosition;
-
             DefaultSelectionHandlers.Add("TouchShotgun", touchShotgun);
 
-
+            //----------------------------------------GAZE HANDLER: --------------------------------------------------
             SelectionHandler gazeSelection = new SelectionHandler();
             gazeSelection.InitConditions.Add(gazeSelection.DefaultConditions("RaycastHitsAGameObject"));
 
@@ -338,7 +340,7 @@ namespace SelectionTracking
 
             private void CheckInit()
             {
-                bool? init = CheckAllConditions(InitConditions);
+                bool? init = CheckAllConditions(InitConditions); //returning TRUE
                 string? initErrors = CheckAllErrorTriggers("init");
 
                 if (init != null && init.Value) // intialization condition is true (e.g. mouse button is down)
@@ -379,6 +381,7 @@ namespace SelectionTracking
             {
                 bool? term = CheckAllConditions(TerminationConditions);
                 string? termErrors = CheckAllErrorTriggers("term");
+
                 if (term == null || term.Value)
                 {   
                     if (termErrors == null) // update condition is true (e.g. mouse button is being held down)

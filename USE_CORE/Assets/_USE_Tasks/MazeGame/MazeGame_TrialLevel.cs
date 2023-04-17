@@ -344,7 +344,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 {
                     if (SyncBoxController != null)
                     {
-                        SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+                        SyncBoxController.SendRewardPulses(1, CurrentTrialDef.PulseSize);
                         SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
                         CurrentTaskLevel.numRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                         //CurrentTaskLevel.numRewardPulses_InTask += CurrentTrialDef.NumPulses;

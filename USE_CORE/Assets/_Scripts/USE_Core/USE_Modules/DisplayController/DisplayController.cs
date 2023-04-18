@@ -82,7 +82,7 @@ public class DisplayController : MonoBehaviour
             Camera.main.targetDisplay = 1; //Change main camera cuz that's where TaskSelectionCanvas rendering to
             //And then in session, when experimenter display is instantiated, change all its children with cameras to targetdisplay 0.
         }
-        if (SingleDisplayBuild && !SwitchDisplays) //Put InitScreen on Main Display
+        else if (SingleDisplayBuild && !SwitchDisplays) //Put InitScreen on Main Display
             InitScreenCanvas.targetDisplay = 0;
         
 

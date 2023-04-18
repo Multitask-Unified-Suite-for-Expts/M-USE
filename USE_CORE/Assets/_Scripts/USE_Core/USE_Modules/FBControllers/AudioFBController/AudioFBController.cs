@@ -42,7 +42,9 @@ public class AudioFBController : MonoBehaviour
         {
             if (camera.activeInHierarchy)
             {
-                audioSource = camera.AddComponent<AudioSource>();
+                audioSource = camera.GetComponent<AudioSource>();
+                if(audioSource == null)
+                    audioSource = camera.AddComponent<AudioSource>();
                 break;
             }
         }

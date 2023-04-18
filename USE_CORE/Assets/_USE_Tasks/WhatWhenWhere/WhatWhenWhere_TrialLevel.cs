@@ -335,14 +335,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 SliderFBController.UpdateSliderValue(CurrentTrialDef.SliderGain[numTouchedStims]*(1f/sliderGainSteps));
                 numTouchedStims += 1;
                 if (numTouchedStims == CurrentTrialDef.CorrectObjectTouchOrder.Length)
-                {
                     trialComplete = true;
-                }
-
+                
                 errorTypeString = "None";
             }
-            //Chose Incorrect
-            else
+            else //Chose Incorrect
             {
                 consecutiveError++;
                 HaloFBController.ShowNegative(selectedGO);

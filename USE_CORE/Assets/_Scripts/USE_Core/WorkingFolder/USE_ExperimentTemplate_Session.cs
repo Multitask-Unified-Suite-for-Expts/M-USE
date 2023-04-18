@@ -256,7 +256,7 @@ namespace USE_ExperimentTemplate_Session
             ExperimenterDisplayController.InitializeExperimenterDisplay(this, experimenterDisplay);
 
             GameObject mirrorCamGO = new GameObject("MirrorCamera");
-            mirrorCamGO.transform.SetParent(experimenterDisplay.transform);
+            //mirrorCamGO.transform.SetParent(experimenterDisplay.transform);
             Camera mirrorCam = mirrorCamGO.AddComponent<Camera>();
             mirrorCam.CopyFrom(Camera.main);
             mirrorCam.cullingMask = 0;
@@ -686,6 +686,7 @@ namespace USE_ExperimentTemplate_Session
             
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
             {
+
                 PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
                 
                 SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());

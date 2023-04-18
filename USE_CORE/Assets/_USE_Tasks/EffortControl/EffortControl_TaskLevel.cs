@@ -61,10 +61,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddInitializationMethod(() =>
         {
-            if(trialLevel.AbortCode == 0)
-            {
-
-            }
             if (BlockStringsAdded > 0)
                 CurrentBlockString += "\n";
             PreviousBlocksString.Insert(0, CurrentBlockString);

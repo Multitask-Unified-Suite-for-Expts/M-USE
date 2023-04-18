@@ -244,6 +244,9 @@ namespace USE_ExperimentTemplate_Session
             SessionDataControllers = new SessionDataControllers(GameObject.Find("DataControllers"));
             ActiveTaskLevels = new List<ControlLevel_Task_Template>();//new Dictionary<string, ControlLevel_Task_Template>();
 
+            DisplayController = GameObject.Find("InitializationScreen").GetComponent<DisplayController>();
+
+
             SessionCam = Camera.main;
 
             GameObject experimenterDisplay = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
@@ -252,20 +255,13 @@ namespace USE_ExperimentTemplate_Session
             experimenterDisplay.AddComponent<PreserveObject>();
             ExperimenterDisplayController.InitializeExperimenterDisplay(this, experimenterDisplay);
 
-            GameObject cameraObj = new GameObject("MirrorCamera");
-            cameraObj.transform.SetParent(experimenterDisplay.transform);
-            Camera mirrorCamera = cameraObj.AddComponent<Camera>();
-            mirrorCamera.CopyFrom(Camera.main);
-            mirrorCamera.cullingMask = 0;
+            GameObject mirrorCamGO = new GameObject("MirrorCamera");
+            mirrorCamGO.transform.SetParent(experimenterDisplay.transform);
+            Camera mirrorCam = mirrorCamGO.AddComponent<Camera>();
+            mirrorCam.CopyFrom(Camera.main);
+            mirrorCam.cullingMask = 0;
 
-            RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
-
-
-            DisplayController = GameObject.Find("InitializationScreen").GetComponent<DisplayController>();
-            //if (DisplayController.SwitchDisplays)
-            //    SessionCam.targetDisplay = 1;
-            
-
+            RawImage mainCameraCopy_Image = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
 
 
             SelectionTracker = new SelectionTracker();
@@ -371,51 +367,57 @@ namespace USE_ExperimentTemplate_Session
             {
                 //AppendSerialData();
             });
-            
+
+
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort, selectTask,
                 () =>
                 {     
                     SessionSettings.Save();
-
                     GameObject initCamGO = GameObject.Find("InitCamera");
                     initCamGO.SetActive(false);
-
-                    GameObject newCamGO = new GameObject("TS_CAM");
-                    Camera newCam = newCamGO.AddComponent<Camera>();
-
-                    if (DisplayController.SwitchDisplays)
-                    {
-                        newCam.targetDisplay = 0;
-                        GameObject.Find("TaskSelectionCanvas").GetComponent<Canvas>().worldCamera = newCam;
-                        Material mat = Resources.Load<Material>("TaskSelection_BG_Material");
-                        newCamGO.AddComponent<Skybox>().material = mat;
-                    }
-
-                    CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
-                    CameraMirrorTexture.Create();
-                    mainCameraCopy.texture = CameraMirrorTexture;
-
-
                     SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
-
                     EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupSessionEnds"]);
                 });
 
-            //bool tasksFinished = false;
             bool taskSelectionBackgroundSet = false;
             GameObject taskButtons = null;
             Dictionary<string, GameObject> taskButtonsDict = new Dictionary<string, GameObject>();
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
-
-
-                if(!taskSelectionBackgroundSet)
+                if (!taskSelectionBackgroundSet)
                 {
                     Material taskSelectionBG_Material = Resources.Load<Material>("TaskSelection_BG_Material");
-                    Camera.main.GetComponent<Skybox>().material = taskSelectionBG_Material;
+                    SessionCam.GetComponent<Skybox>().material = taskSelectionBG_Material;
                     taskSelectionBackgroundSet = true;
                 }
+
+
+
+                if (DisplayController.SwitchDisplays)
+                {
+                    SessionCam.targetDisplay = 1;
+
+                    Canvas experimenterCanvas = GameObject.Find("ExperimenterCanvas").GetComponent<Canvas>();
+                    experimenterCanvas.targetDisplay = 0;
+                    foreach (Transform child in experimenterDisplay.transform)
+                    {
+                        Camera cam = child.GetComponent<Camera>();
+                        if (cam != null)
+                            cam.targetDisplay = 1 - cam.targetDisplay;
+                    }
+                }
+                else
+                {
+                    CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
+                    CameraMirrorTexture.Create();
+                    SessionCam.targetTexture = CameraMirrorTexture;
+                    mainCameraCopy_Image.texture = CameraMirrorTexture;
+                }
+
+
+
+
 
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SelectTaskStarts"]);
 
@@ -558,6 +560,9 @@ namespace USE_ExperimentTemplate_Session
                     }
                     count++;
                 }
+
+
+
             });
             
             selectTask.AddFixedUpdateMethod(() =>
@@ -624,7 +629,8 @@ namespace USE_ExperimentTemplate_Session
             loadTask.SpecifyTermination(() => !SceneLoading, runTask, () =>
             {
                 runTask.AddChildLevel(CurrentTask);
-                CameraMirrorTexture.Release();
+                if(CameraMirrorTexture != null)
+                    CameraMirrorTexture.Release();
                 SessionCam.gameObject.SetActive(false);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
                 CurrentTask.TrialLevel.TaskLevel = CurrentTask;
@@ -646,10 +652,20 @@ namespace USE_ExperimentTemplate_Session
             {
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["RunTaskStarts"]);
 
-                CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
-                CameraMirrorTexture.Create();
-                CurrentTask.TaskCam.targetTexture = CameraMirrorTexture;
-                mainCameraCopy.texture = CameraMirrorTexture;
+                if (DisplayController.SwitchDisplays)
+                    CurrentTask.TaskCam.targetDisplay = 1;
+                else
+                {
+                    CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
+                    CameraMirrorTexture.Create();
+                    CurrentTask.TaskCam.targetTexture = CameraMirrorTexture;
+                    mainCameraCopy_Image.texture = CameraMirrorTexture;
+                }
+
+
+
+
+
                 PauseCanvas.renderMode = RenderMode.ScreenSpaceCamera;
                 PauseCanvas.worldCamera = CurrentTask.TaskCam;
 

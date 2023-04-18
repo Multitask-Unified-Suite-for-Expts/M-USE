@@ -125,6 +125,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 StartButton = USE_StartButton.StartButtonGO;
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 OriginalStartButtonPosition = StartButton.transform.position;
+                Debug.Log("INITIAL POS: " + StartButton.transform.position);
             }
             playerViewParent = GameObject.Find("MainCameraCopy").transform;
         });
@@ -568,7 +569,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     void AdjustStartButtonPos()
     {
         Vector3 buttonPos = StartButton.transform.position;
-        buttonPos.y -= 1f;
+        buttonPos.y -= .025f;
         StartButton.transform.position = buttonPos;
     }
 
@@ -597,25 +598,25 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         switch (NumFeedbackRows)
         {
             case 1:
-                if (MacMainDisplayBuild && Application.isEditor)
+                if (MacMainDisplayBuild && !Application.isEditor)
                     yOffset = 90f; //not checked
                 else
                     yOffset = 60f;
                 break;
             case 2:
-                if (MacMainDisplayBuild && Application.isEditor)
+                if (MacMainDisplayBuild && !Application.isEditor)
                     yOffset = 75f; //not checked
                 else
                     yOffset = 50f;
                 break;
             case 3:
-                if (MacMainDisplayBuild && Application.isEditor)
+                if (MacMainDisplayBuild && !Application.isEditor)
                     yOffset = 25f; //not checked
                 else
                     yOffset = 10f;
                 break;
             case 4:
-                if (MacMainDisplayBuild && Application.isEditor)
+                if (MacMainDisplayBuild && !Application.isEditor)
                     yOffset = -5f; //not checked
                 else
                     yOffset = -30f;

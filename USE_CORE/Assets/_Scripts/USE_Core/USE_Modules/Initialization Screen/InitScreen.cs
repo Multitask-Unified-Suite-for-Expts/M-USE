@@ -48,8 +48,8 @@ public class InitScreen : MonoBehaviour {
 
     void Start()
     {
-        /*displayController = gameObject.AddComponent<DisplayController>();
-        displayController.HandleDisplays(this);*/
+        displayController = gameObject.AddComponent<DisplayController>();
+        displayController.HandleDisplays(this);
 
         foreach (GameObject g in disableOnStart)
             g.SetActive(false);

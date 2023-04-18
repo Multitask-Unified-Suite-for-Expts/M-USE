@@ -246,7 +246,6 @@ namespace USE_ExperimentTemplate_Session
 
             DisplayController = GameObject.Find("InitializationScreen").GetComponent<DisplayController>();
 
-
             SessionCam = Camera.main;
 
             GameObject experimenterDisplay = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
@@ -256,7 +255,6 @@ namespace USE_ExperimentTemplate_Session
             ExperimenterDisplayController.InitializeExperimenterDisplay(this, experimenterDisplay);
 
             GameObject mirrorCamGO = new GameObject("MirrorCamera");
-            //mirrorCamGO.transform.SetParent(experimenterDisplay.transform);
             Camera mirrorCam = mirrorCamGO.AddComponent<Camera>();
             mirrorCam.CopyFrom(Camera.main);
             mirrorCam.cullingMask = 0;

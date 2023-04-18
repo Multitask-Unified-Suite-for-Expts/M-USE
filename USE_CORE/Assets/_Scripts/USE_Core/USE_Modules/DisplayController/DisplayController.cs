@@ -75,14 +75,14 @@ public class DisplayController : MonoBehaviour
 
     public void SetDisplays()
     {
-        //if ((SingleDisplayBuild && SwitchDisplays) || SwitchDisplays) //If both, just switch. Basically error handling
-        //{
-        //    InitScreenCanvas.targetDisplay = 0;
-        //    GameObject.Find("InitCamera").GetComponent<Camera>().targetDisplay = 0;
-        //    Debug.Log("MAIN CAM NAME: " + Camera.main.name);
-        //    Camera.main.targetDisplay = 1; //Change main camera cuz that's where TaskSelectionCanvas rendering to
-        //    //And then in session, when experimenter display is instantiated, change all its children with cameras to targetdisplay 0.
-        //}
+        if ((SingleDisplayBuild && SwitchDisplays) || SwitchDisplays) //If both, just switch. Basically error handling
+        {
+            InitScreenCanvas.targetDisplay = 0;
+            GameObject.Find("InitCamera").GetComponent<Camera>().targetDisplay = 0;
+            Debug.Log("MAIN CAM NAME: " + Camera.main.name);
+            Camera.main.targetDisplay = 1; //Change main camera cuz that's where TaskSelectionCanvas rendering to
+            //And then in session, when experimenter display is instantiated, change all its children with cameras to targetdisplay 0.
+        }
         if (SingleDisplayBuild && !SwitchDisplays) //Put InitScreen on Main Display
             InitScreenCanvas.targetDisplay = 0;
         

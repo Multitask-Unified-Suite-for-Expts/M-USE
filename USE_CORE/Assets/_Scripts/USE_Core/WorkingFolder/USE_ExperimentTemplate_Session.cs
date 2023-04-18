@@ -18,6 +18,7 @@ using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Task;
 using SelectionTracking;
 using Random = UnityEngine.Random;
+using UnityEngine.Windows.WebCam;
 
 
 namespace USE_ExperimentTemplate_Session
@@ -232,8 +233,6 @@ namespace USE_ExperimentTemplate_Session
 
         public override void DefineControlLevel()
         {
-            DisplayController = GameObject.Find("InitializationScreen").GetComponent<DisplayController>();
-
             //DontDestroyOnLoad(gameObject);
             State setupSession = new State("SetupSession");
             State selectTask = new State("SelectTask");
@@ -260,6 +259,14 @@ namespace USE_ExperimentTemplate_Session
             mirrorCamera.cullingMask = 0;
 
             RawImage mainCameraCopy = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
+
+
+            DisplayController = GameObject.Find("InitializationScreen").GetComponent<DisplayController>();
+            //if (DisplayController.SwitchDisplays)
+            //    SessionCam.targetDisplay = 1;
+            
+
+
 
             SelectionTracker = new SelectionTracker();
 
@@ -369,8 +376,26 @@ namespace USE_ExperimentTemplate_Session
                 () =>
                 {     
                     SessionSettings.Save();
-                    GameObject initCam = GameObject.Find("InitCamera");
-                    initCam.SetActive(false);
+
+                    GameObject initCamGO = GameObject.Find("InitCamera");
+                    initCamGO.SetActive(false);
+
+                    GameObject newCamGO = new GameObject("TS_CAM");
+                    Camera newCam = newCamGO.AddComponent<Camera>();
+
+                    if (DisplayController.SwitchDisplays)
+                    {
+                        newCam.targetDisplay = 0;
+                        GameObject.Find("TaskSelectionCanvas").GetComponent<Canvas>().worldCamera = newCam;
+                        Material mat = Resources.Load<Material>("TaskSelection_BG_Material");
+                        newCamGO.AddComponent<Skybox>().material = mat;
+                    }
+
+                    CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
+                    CameraMirrorTexture.Create();
+                    mainCameraCopy.texture = CameraMirrorTexture;
+
+
                     SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
 
                     EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupSessionEnds"]);
@@ -383,6 +408,8 @@ namespace USE_ExperimentTemplate_Session
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
+
+
                 if(!taskSelectionBackgroundSet)
                 {
                     Material taskSelectionBG_Material = Resources.Load<Material>("TaskSelection_BG_Material");
@@ -402,11 +429,6 @@ namespace USE_ExperimentTemplate_Session
                 taskAutomaticallySelected = false; // gives another chance to select even if previous task loading was due to timeout
 
                 SessionCam.gameObject.SetActive(true);
-
-                CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
-                CameraMirrorTexture.Create();
-                Camera.main.targetTexture = CameraMirrorTexture;
-                mainCameraCopy.texture = CameraMirrorTexture;
 
 
                 // Don't show the task buttons if we encountered an error during setup
@@ -458,7 +480,7 @@ namespace USE_ExperimentTemplate_Session
                 int numTasks = TaskMappings.Count;
                 float buttonSize;
                 float buttonSpacing;
-                if (MacMainDisplayBuild && !Debug.isDebugBuild)
+                if (MacMainDisplayBuild && !Application.isEditor)
                 {
                     buttonSize = 250;
                     buttonSpacing = 30;
@@ -624,12 +646,6 @@ namespace USE_ExperimentTemplate_Session
             {
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["RunTaskStarts"]);
 
-                //if ((DisplayController.SingleDisplayBuild && DisplayController.SwitchDisplays) || DisplayController.SwitchDisplays)
-                //{
-                //    CurrentTask.TaskCam.targetDisplay++;
-                //    CurrentTask.TaskCam.Render();
-                //}
-
                 CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
                 CameraMirrorTexture.Create();
                 CurrentTask.TaskCam.targetTexture = CameraMirrorTexture;
@@ -637,7 +653,6 @@ namespace USE_ExperimentTemplate_Session
                 PauseCanvas.renderMode = RenderMode.ScreenSpaceCamera;
                 PauseCanvas.worldCamera = CurrentTask.TaskCam;
 
-                //Assign Session Info Panel Values
             });
 
             if (EventCodesActive)

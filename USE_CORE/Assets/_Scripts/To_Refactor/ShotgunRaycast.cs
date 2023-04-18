@@ -72,7 +72,6 @@ public class ShotgunRaycast : MonoBehaviour
 
 		//raycast....
 		List<DoubleRaycast> raycastList = new List<DoubleRaycast>();
-		//DoubleRaycast doubleRay = DualRaycast(gazePoint);
 		DoubleRaycast doubleRay = DualRaycast(centres[0], (centres[1] - centres[0]));
 		raycastList.Add(doubleRay);
 
@@ -111,11 +110,11 @@ public class ShotgunRaycast : MonoBehaviour
 
 				//find start and end points of current ray - see https://stackoverflow.com/questions/27714014/3d-point-on-circumference-of-a-circle-with-a-center-radius-and-normal-vector
 				Vector3 startPoint = new Vector3(centres[0].x + rad[0] * (orthonormals[0].x * Mathf.Cos(angle) + orthonormals[1].x * Mathf.Sin(angle)),
-					centres[0].y + rad[0] * (orthonormals[0].y * Mathf.Cos(angle) + orthonormals[1].y * Mathf.Sin(angle)),
-					centres[0].z + rad[0] * (orthonormals[0].z * Mathf.Cos(angle) + orthonormals[1].z * Mathf.Sin(angle)));
+												centres[0].y + rad[0] * (orthonormals[0].y * Mathf.Cos(angle) + orthonormals[1].y * Mathf.Sin(angle)),
+												centres[0].z + rad[0] * (orthonormals[0].z * Mathf.Cos(angle) + orthonormals[1].z * Mathf.Sin(angle)));
 				Vector3 endPoint = new Vector3(centres[1].x + rad[1] * (orthonormals[0].x * Mathf.Cos(angle) + orthonormals[1].x * Mathf.Sin(angle)),
-					centres[1].y + rad[1] * (orthonormals[0].y * Mathf.Cos(angle) + orthonormals[1].y * Mathf.Sin(angle)),
-					centres[1].z + rad[1] * (orthonormals[0].z * Mathf.Cos(angle) + orthonormals[1].z * Mathf.Sin(angle)));
+												centres[1].y + rad[1] * (orthonormals[0].y * Mathf.Cos(angle) + orthonormals[1].y * Mathf.Sin(angle)),
+												centres[1].z + rad[1] * (orthonormals[0].z * Mathf.Cos(angle) + orthonormals[1].z * Mathf.Sin(angle)));
 
 				//perform raycast
 				if (drawRays)

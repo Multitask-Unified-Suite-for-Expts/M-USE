@@ -318,13 +318,14 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString(); //Set the Trial Summary String to reflect the results of choice
             CurrentTaskLevel.CalculateBlockSummaryString();
             choiceMade = false;
+
             if (UsingFixedRatioReward)
             {
-                if (CorrectSelection && correctTouches_InTrial % CurrentTrialDef.RewardRatio == 0 )
+                if (CorrectSelection && (correctTouches_InTrial % CurrentTrialDef.RewardRatio == 0 ))
                 {
                     if (SyncBoxController != null)
                     {
-                        SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+                        SyncBoxController.SendRewardPulses(1, CurrentTrialDef.PulseSize);
                         SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
                         CurrentTaskLevel.numRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                         //CurrentTaskLevel.numRewardPulses_InTask += CurrentTrialDef.NumPulses;
@@ -407,6 +408,7 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
         {
             Debug.Log("*Correct Tile Touch*");
             EventCodeManager.SendCodeImmediate(SessionEventCodes["CorrectResponse"]);
+            correctTouches_InTrial++;
             CorrectSelection = true;
             
             // Helps set progress on the experimenter display
@@ -564,7 +566,7 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
         pathProgressGO.Clear();
         pathProgressIndex = 0;
         consecutiveErrors = 0;
-
+        correctTouches_InTrial = 0;
     }
     private void DisableSceneElements()
     {

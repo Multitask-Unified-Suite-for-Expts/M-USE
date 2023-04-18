@@ -132,6 +132,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 376477136}
+  - component: {fileID: 376477138}
+  - component: {fileID: 376477137}
   m_Layer: 0
   m_Name: GazeCalibration_Scripts
   m_TagString: Untagged
@@ -153,6 +155,158 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &376477137
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 376477135}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f5c4801610a5d9428f664e412c280b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ControlLevelName: GazeCalibration_TaskLevel
+  initScreen: {fileID: 0}
+  Terminated: 0
+  isMainLevel: 0
+  CallDefineLevelAutomatically: 0
+  quitApplicationAtEnd: 0
+  DebugActive: 0
+  Paused: 1
+  ConfigName: 
+  TaskName: 
+  TaskProjectFolder: 
+  BlockCount: 0
+  TrialLevel: {fileID: 376477138}
+  SerialSentData: {fileID: 0}
+  SerialRecvData: {fileID: 0}
+  StoreData: 0
+  SerialPortActive: 0
+  SyncBoxActive: 0
+  EventCodesActive: 0
+  RewardPulsesActive: 0
+  SonicationActive: 0
+  ContextExternalFilePath: 
+  SessionDataPath: 
+  TaskConfigPath: 
+  TaskDataPath: 
+  SubjectID: 
+  SessionID: 
+  FilePrefix: 
+  EyetrackerType: 
+  SelectionType: 
+  LocateFile: {fileID: 0}
+  TaskCam: {fileID: 1497056611}
+  TaskCanvasses: []
+  PreloadedStims:
+    stimGroupName: 
+    IsActive: 0
+  PrefabStims:
+    stimGroupName: 
+    IsActive: 0
+  ExternalStims:
+    stimGroupName: 
+    IsActive: 0
+  RuntimeStims:
+    stimGroupName: 
+    IsActive: 0
+  PreloadedStimGameObjects: []
+  PrefabStimPaths: []
+  ExperimenterDisplayController: {fileID: 0}
+  SessionInfoPanel: {fileID: 0}
+  SerialPortController: {fileID: 0}
+  EventCodeManager: {fileID: 0}
+  DrawRenderTexture: {fileID: 0}
+--- !u!114 &376477138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 376477135}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a75f6a3dd243d5a418f73c851cbbcc3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ControlLevelName: GazeCalibration_TrialLevel
+  initScreen: {fileID: 0}
+  Terminated: 0
+  isMainLevel: 0
+  CallDefineLevelAutomatically: 0
+  quitApplicationAtEnd: 0
+  DebugActive: 1
+  Paused: 1
+  TrialData: {fileID: 0}
+  FrameData: {fileID: 0}
+  SerialSentData: {fileID: 0}
+  SerialRecvData: {fileID: 0}
+  BlockCount: 0
+  TrialCount_InTask: 0
+  TrialCount_InBlock: 0
+  AbortCode: 0
+  StoreData: 0
+  ForceBlockEnd: 0
+  SerialPortActive: 0
+  EyetrackerActive: 0
+  TaskDataPath: 
+  FilePrefix: 
+  TrialSummaryString: 
+  TaskLevel: {fileID: 0}
+  PreloadedStims:
+    stimGroupName: 
+    IsActive: 0
+  PrefabStims:
+    stimGroupName: 
+    IsActive: 0
+  ExternalStims:
+    stimGroupName: 
+    IsActive: 0
+  RuntimeStims:
+    stimGroupName: 
+    IsActive: 0
+  TrialStims: []
+  ExperimenterDisplayController: {fileID: 0}
+  SessionInfoPanel: {fileID: 0}
+  TrialCompleteTime: 0
+  TouchFBController: {fileID: 0}
+  AudioFBController: {fileID: 0}
+  HaloFBController: {fileID: 0}
+  TokenFBController: {fileID: 0}
+  SliderFBController: {fileID: 0}
+  MouseTracker: {fileID: 0}
+  GazeTracker: {fileID: 0}
+  SelectionType: 
+  SerialPortController: {fileID: 0}
+  EventCodeManager: {fileID: 0}
+  InitialTokenAmount: 0
+  HeldTooLongTexture: {fileID: 0}
+  HeldTooShortTexture: {fileID: 0}
+  BackdropStripesTexture: {fileID: 0}
+  THR_BackdropTexture: {fileID: 0}
+  GC_CanvasGO: {fileID: 0}
+  USE_Circle: {fileID: 0}
+  ContextExternalFilePath: 
+  SpoofGazeWithMouse: 0
+  SmallCirclePosition: {x: 0, y: 0, z: 0}
+  SmallCircleSize: 0
+  BigCirclePosition: {x: 0, y: 0, z: 0}
+  BigCircleSize: 0
+  RedSpriteSize: 0
+  BlackSpriteSize: 0
+  BlueSpriteSize: 0
+  ninePoints: []
+  sixPoints: []
+  numCalibPoints: 0
+  calibPointsInset:
+  - 0.1
+  - 0.15
+  calibPointsADCS: []
+  currentCalibrationPointFinished: 0
+  calibrationUnfinished: 0
+  calibrationFinished: 0
 --- !u!1 &672888325
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,0 +1,7 @@
+string	ExternalStimFolderPath	"/Users/marcuswatson/Desktop/MUSE_Master/DemoResources/Stimuli"
+float	ExternalStimScale	0.00775
+Vector3	ButtonPosition	(0,0,0)
+float	ButtonScale	120
+bool	MakeStimPopOut	false
+float	TouchFeedbackDuration	0.3
+List<string>	FeedbackControllers	["Audio", "Halo", "Token"]

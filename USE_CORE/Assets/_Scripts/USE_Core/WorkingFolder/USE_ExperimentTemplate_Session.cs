@@ -390,6 +390,10 @@ namespace USE_ExperimentTemplate_Session
                     taskSelectionBackgroundSet = true;
                 }
 
+                GameObject bouncyStim = GameObject.Find("BouncyStim");
+                if (bouncyStim != null)
+                    bouncyStim.SetActive(false);
+
 
 
                 if (DisplayController.SwitchDisplays)

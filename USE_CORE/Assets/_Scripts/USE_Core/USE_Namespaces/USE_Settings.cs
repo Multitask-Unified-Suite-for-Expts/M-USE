@@ -336,8 +336,6 @@ namespace USE_Settings
 			Debug.Log("Attempting to load settings file " + settingsPath + ".");
 			if (dictName == "")
 				dictName = settingsName;
-			//string t = typeof(T).ToString();
-			//string desiredClassName = t.Substring(t.LastIndexOf('.') + 1);
 			string ext = Path.GetExtension(settingsPath);
 
 			Settings settings = new Settings(dictName, settingsPath);
@@ -364,8 +362,6 @@ namespace USE_Settings
 			if (dictName == "")
 				dictName = settingsName;
 			string[] lineList = ReadSettingsFile(settingsPath, "//", "...");
-			//object[] settingsArray = new object[lineList.Length];
-			//object[] settingsArray = (object[])Activator.CreateInstance(typeof(T), lineList.Length);
 			T[] settingsArray = new T[lineList.Length - 1];
 
 			string[] fieldNames = lineList[0].Split(delimiter);

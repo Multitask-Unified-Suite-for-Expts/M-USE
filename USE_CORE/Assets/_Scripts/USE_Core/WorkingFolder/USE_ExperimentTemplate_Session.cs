@@ -30,7 +30,7 @@ namespace USE_ExperimentTemplate_Session
         public GameObject PauseCanvasGO;
         public Canvas PauseCanvas;
 
-        public bool UseDefaultConfigs;
+        public bool UseDefaultConfigs; //Set true in inspector when gonna create a build with default displays (for website)
 
         private bool IsHuman;
 
@@ -93,17 +93,19 @@ namespace USE_ExperimentTemplate_Session
 
         public override void LoadSettings()
         {
-            //load session config file
 
             if (UseDefaultConfigs)
             {
+                string folderPath = Path.Combine(Application.persistentDataPath, "M_USE_DefaultConfigs");
+                if (Directory.Exists(folderPath))
+                    Directory.Delete(folderPath, true);
+
                 configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
                 //check if the session default configs exist, if not, copy them (this only needs to be done once)
                 if (!Directory.Exists(configFileFolder))
                 {
                     Directory.CreateDirectory(configFileFolder);
                     var db = Resources.Load<TextAsset>("DefaultSessionConfigs/SessionConfig");
-                    Debug.Log(db);
                     byte[] data= db.bytes;
                     System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + "SessionConfig.txt", data);
                     data= Resources.Load<TextAsset>("DefaultSessionConfigs/EventCodeConfig").bytes;
@@ -120,16 +122,9 @@ namespace USE_ExperimentTemplate_Session
             SessionID = SessionDetails.GetItemValue("SessionID");
             FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" +
                          DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
-            // if (UseDefaultConfigs)
-            // {
-            //     //actually this should be checking date changed of files and comparing to date of build, if build is newer, overwrite files
-            //     
-            //     SessionSettings.ImportSettings_MultipleType("Session",
-            //         LocateFile.FindFileInExternalFolder(DefaultConfigPath, "*SessionConfig*"));
-            // }
-            // else
-                SessionSettings.ImportSettings_MultipleType("Session",
-                    LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));
+
+            SessionSettings.ImportSettings_MultipleType("Session",
+                LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));
 
 
             if (SessionSettings.SettingExists("Session", "SyncBoxActive"))
@@ -173,33 +168,14 @@ namespace USE_ExperimentTemplate_Session
                 RewardHotKeyNumPulses = 1;
 
 
-            // //if there is a single syncbox config file for all experiments, load it
-            // string syncBoxFileString = "";
-            // if (UseDefaultConfigs)
-            // {
-            //     syncBoxFileString = LocateFile.FindFileInExternalFolder(DefaultConfigPath, "*SyncBox*");
-            // }
-            // else
-            //     syncBoxFileString = LocateFile.FindFileInExternalFolder(configFileFolder, "*SyncBox*");
-            // if (!string.IsNullOrEmpty(syncBoxFileString))
-            // {
-            //     SessionSettings.ImportSettings_MultipleType("SyncBoxConfig", syncBoxFileString);
-            //     // SyncBoxActive = true;
-            // }
-
             //Load the Session Event Code Config file
             string eventCodeFileString = "";
-            // if (UseDefaultConfigs)
-            // {
-            //     eventCodeFileString = LocateFile.FindFileInExternalFolder(DefaultConfigPath, "*EventCode*");
-            // // }
-            // else
+
             eventCodeFileString = LocateFile.FindFileInExternalFolder(configFileFolder, "*EventCode*");
 
             if (!string.IsNullOrEmpty(eventCodeFileString))
             {
-                SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig",
-                    eventCodeFileString);
+                SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
                 SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
                 EventCodesActive = true;
             }
@@ -272,6 +248,12 @@ namespace USE_ExperimentTemplate_Session
                 SerialPortActive = (bool)SessionSettings.Get("Session", "SerialPortActive");
 
             SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
+
+            if(UseDefaultConfigs)
+            {
+                ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
+                TaskIconsFolderPath = "Assets/_USE_Session/Resources/DefaultResources/TaskIcons";
+            }
 
         }
 
@@ -433,12 +415,6 @@ namespace USE_ExperimentTemplate_Session
                     SessionCam.GetComponent<Skybox>().material = taskSelectionBG_Material;
                     taskSelectionBackgroundSet = true;
                 }
-
-                GameObject bouncyStim = GameObject.Find("BouncyStim");
-                if (bouncyStim != null)
-                    bouncyStim.SetActive(false);
-
-
 
                 if (DisplayController.SwitchDisplays)
                 {
@@ -606,8 +582,6 @@ namespace USE_ExperimentTemplate_Session
                     }
                     count++;
                 }
-
-
 
             });
             
@@ -885,13 +859,33 @@ namespace USE_ExperimentTemplate_Session
                 if (!Directory.Exists(tl.TaskConfigPath))
                 {
                     Directory.CreateDirectory(tl.TaskConfigPath);
-                    
-                    //check existence of each standard config file type, if it exists, copy it
-                    var ta = Resources.Load<TextAsset>(tl.TaskName + "_DefaultConfigs/" + tl.TaskName + "_TaskDef");
-                    if (ta != null)
-                        System.IO.File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + tl.TaskName + "_TaskDef.txt", ta.bytes);
-                    
-                    //repeat 9x
+
+                    Dictionary<string, string> configDict = new Dictionary<string, string>
+                    {
+                        {"_TaskDef", "_TaskDef.txt"},
+                        {"_TaskDeftdf", "_TaskDef.txt"},
+                        {"_BlockDeftdf", "_BlockDeftdf.txt"},
+                        {"_TrialDeftdf", "_TrialDeftdf.txt"},
+                        {"_StimDeftdf", "_StimDeftdf.txt"},
+                        {"_ConfigUiDetails", "_ConfigUiDetails.json"},
+                        {"_EventCodeConfig", "_EventCodeConfig.json"},
+                        {"MazeDef", "MazeDef.txt"}
+                    };
+
+                    TextAsset configFile;
+
+                    foreach(var entry in configDict)
+                    {
+                        configFile = Resources.Load<TextAsset>(tl.TaskName + "_DefaultConfigs/" + tl.TaskName + entry.Key);
+                        if (configFile != null)
+                            System.IO.File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + tl.TaskName + entry.Value, configFile.bytes);
+                        else //try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
+                        {
+                            configFile = Resources.Load<TextAsset>(tl.TaskName + "_DefaultConfigs/" + entry.Key);
+                            if (configFile != null)
+                                System.IO.File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + entry.Value, configFile.bytes);
+                        }
+                    }
                 } 
             }
             
@@ -913,6 +907,8 @@ namespace USE_ExperimentTemplate_Session
                 tl.SelectionType = (string)SessionSettings.Get("Session", "SelectionType");
             else
                 tl.SelectionType = "";
+
+
             tl.ContextExternalFilePath = ContextExternalFilePath;
             tl.SerialPortActive = SerialPortActive;
             tl.SyncBoxActive = SyncBoxActive;

@@ -65,9 +65,7 @@ namespace USE_ExperimentTemplate_Task
             }
         }
 
-        //
-        // private StimGroup AllTaskStims;
-        // public Dictionary<string, StimGroup> AllTaskStimGroups;
+
         public TaskStims TaskStims;
         [HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims, RuntimeStims;
         public List<GameObject> PreloadedStimGameObjects;
@@ -494,12 +492,7 @@ namespace USE_ExperimentTemplate_Task
                 TrialDefType = typeof(TrialDef);
             if (StimDefType == null)
                 StimDefType = typeof(StimDef);
-            
-            //check for existence of default config files, if not, write them all
-            //if task config default folder exists 
-            string DefaultConfigPath = Application.persistentDataPath + Path.DirectorySeparatorChar + 
-                                       "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + TaskName + "_DefaultConfigs";
-            //
+
 
             //read in the TaskDef, BlockDef, TrialDef, and StimDef files (any of these may not exist)
             MethodInfo readTaskDef = GetType().GetMethod(nameof(this.ReadTaskDef))
@@ -632,8 +625,7 @@ namespace USE_ExperimentTemplate_Task
 
             DefinePreloadedStims();
             DefinePrefabStims();
-            DefineExternalStims();
-
+            DefineExternalStims(); //Now includes default config stim
         }
 
         protected virtual void DefinePreloadedStims()
@@ -685,12 +677,19 @@ namespace USE_ExperimentTemplate_Task
 
         }
 
+        protected virtual void DefineInternalStims()
+        {
+
+        }
+
         protected virtual void DefineExternalStims()
         {
             // need to add check for files in stimfolderpath if there is no stimdef file (take all files)
             string stimFolderPath = "";
             string stimExtension = "";
             float stimScale = 1;
+
+
             if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
             {
                 if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ExternalStimFolderPath"))
@@ -700,6 +699,14 @@ namespace USE_ExperimentTemplate_Task
                 if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ExternalStimScale"))
                     stimScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ExternalStimScale");
             }
+            Debug.Log("PATH BEFORE: " + stimFolderPath);
+            if(UseDefaultConfigs)
+                stimFolderPath = "Assets/_USE_Session/Resources/DefaultResources/Stimuli";
+            Debug.Log("PATH AFTER: " + stimFolderPath);
+
+
+            if (ExternalStims.stimDefs == null)
+                Debug.Log("EXTERNAL STIM DEFS NULL!");
 
             foreach (StimDef sd in ExternalStims.stimDefs)
             {
@@ -721,9 +728,6 @@ namespace USE_ExperimentTemplate_Task
                 //we will only use StimFolderPath if ExternalFilePath doesn't already contain it
                 if (!string.IsNullOrEmpty(sd.StimFolderPath) && !sd.ExternalFilePath.StartsWith(sd.StimFolderPath))
                 {
-
-                    //this checking needs to be done during task setup - check each stim exists at start of session instead
-                    //of at start of each trial
                     List<string> filenames = RecursiveFileFinder.FindFile(sd.StimFolderPath, sd.ExternalFilePath, sd.StimExtension);
 
                     if (filenames.Count > 1)
@@ -772,14 +776,9 @@ namespace USE_ExperimentTemplate_Task
         {
             string taskDefFile = LocateFile.FindFileInExternalFolder(taskConfigFolder, "*" + TaskName + "*Task*");
             if (!string.IsNullOrEmpty(taskDefFile))
-            {
-                    SessionSettings.ImportSettings_MultipleType(TaskName + "_TaskSettings", taskDefFile);
-                // TaskDef = (T) SessionSettings.Get(TaskName + "_TaskSettings");
-            }
+                SessionSettings.ImportSettings_MultipleType(TaskName + "_TaskSettings", taskDefFile);
             else
-            {
                 Debug.Log("No taskdef file in config folder (this may not be a problem).");
-            }
         }
 
         public void ReadBlockDefs<T>(string taskConfigFolder) where T : BlockDef
@@ -803,7 +802,6 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadTrialDefs<T>(string taskConfigFolder) where T : TrialDef
         {
-            //string taskConfigFolder = configFileFolder + Path.DirectorySeparatorChar + TaskName;
             string trialDefFile = LocateFile.FindFileInExternalFolder(taskConfigFolder, "*" + TaskName + "*TrialDef*");
             if (!string.IsNullOrEmpty(trialDefFile))
             {
@@ -819,25 +817,29 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadStimDefs<T>(string taskConfigFolder) where T : StimDef
         {
-            //string taskConfigFolder = configFileFolder + Path.DirectorySeparatorChar + TaskName;
-            string stimDefFile = LocateFile.FindFileInExternalFolder(taskConfigFolder, "*" + TaskName + "*StimDef*");
+            string stimDefFile;
+
+            if(UseDefaultConfigs)
+                stimDefFile = taskConfigFolder + "/" + TaskName + "_StimDeftdf.txt";
+            else
+                stimDefFile = LocateFile.FindFileInExternalFolder(taskConfigFolder, "*" + TaskName + "*StimDef*");
+
             if (!string.IsNullOrEmpty(stimDefFile))
             {
                 if (stimDefFile.ToLower().Contains("tdf"))
-                {
                     SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_ExternalStimDefs", stimDefFile);
-                }
-                    
-                SessionSettings.ImportSettings_SingleTypeJSON<T[]>(TaskName + "_ExternalStimDefs", stimDefFile);
+                else
+                    SessionSettings.ImportSettings_SingleTypeJSON<T[]>(TaskName + "_ExternalStimDefs", stimDefFile);
 
                 ExternalStims = new StimGroup("ExternalStims", (T[])SessionSettings.Get(TaskName + "_ExternalStimDefs"));
-                // TaskStims.CreateStimGroup("ExternalStims", (T[]) SessionSettings.Get(TaskName + "_Stims"));
             }
             else
             {
                 ExternalStims = new StimGroup("ExternalStims");
                 Debug.Log("No stimdef file in config folder (this may not be a problem).");
             }
+            
+
         }
 
         public void AddTaskStimDefsToTaskStimGroup<T>(StimGroup sg, IEnumerable<T> stimDefs) where T : StimDef

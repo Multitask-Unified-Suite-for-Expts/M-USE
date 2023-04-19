@@ -361,7 +361,7 @@ namespace USE_StimulusManagement
 		}
 
 		public GameObject LoadExternalStimFromFile(string stimFilePath = "")
-		{			
+		{
 			//add StimExtesion to file path if it doesn't already contain it
 			if (!string.IsNullOrEmpty(StimExtension) && !ExternalFilePath.EndsWith(StimExtension))
 			{
@@ -380,16 +380,7 @@ namespace USE_StimulusManagement
 			}
 			//we will only use StimFolderPath if ExternalFilePath doesn't already contain it
 			else if (!string.IsNullOrEmpty(StimFolderPath) && !ExternalFilePath.StartsWith(StimFolderPath))
-			{
-				// if (!ExternalFilePath.StartsWith(Path.DirectorySeparatorChar.ToString()) &&
-				//     !StimFolderPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
-				// 	ExternalFilePath = StimFolderPath + Path.DirectorySeparatorChar + ExternalFilePath;
-				// else if (ExternalFilePath.StartsWith(Path.DirectorySeparatorChar.ToString()) &&
-				//          StimFolderPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
-				// 	ExternalFilePath = StimFolderPath + ExternalFilePath.Substring(1);
-				// else
-				// 	ExternalFilePath = StimFolderPath + ExternalFilePath;
-				
+			{				
 				//this checking needs to be done during task setup - check each stim exists at start of session instead
 				//of at start of each trial
 				List<string> filenames = RecursiveFileFinder.FindFile(StimFolderPath, ExternalFilePath, StimExtension);

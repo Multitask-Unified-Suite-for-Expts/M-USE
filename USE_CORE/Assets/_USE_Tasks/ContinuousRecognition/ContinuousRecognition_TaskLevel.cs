@@ -123,6 +123,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     public void SetSettings()
     {
+        trialLevel.MaterialFilePath = ContextExternalFilePath;
+
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MakeStimPopOut"))
             trialLevel.MakeStimPopOut = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "MakeStimPopOut");
         else
@@ -130,13 +132,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         if (SessionSettings.SettingExists("Session", "IsHuman"))
             trialLevel.IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
-            trialLevel.MaterialFilePath = (String)SessionSettings.Get("Session", "ContextExternalFilePath");
-        else
-            Debug.Log("ContextExternalFilePath NOT specified in the Session Config OR Task Config!");
 
         if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
             trialLevel.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");

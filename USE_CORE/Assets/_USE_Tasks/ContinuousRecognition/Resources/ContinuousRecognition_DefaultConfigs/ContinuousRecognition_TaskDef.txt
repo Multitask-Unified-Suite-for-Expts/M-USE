@@ -1,4 +1,4 @@
-string	ExternalStimFolderPath	"/Users/marcuswatson/Desktop/MUSE_Master/DemoResources/Stimuli"
+string	ExternalStimFolderPath	"/Users/ntraczewski/Desktop/MUSE/Resources/Stimuli"
 float	ExternalStimScale	0.00775
 Vector3	ButtonPosition	(0,0,0)
 float	ButtonScale	120

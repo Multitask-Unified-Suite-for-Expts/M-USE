@@ -1,12 +1,13 @@
+using System.Collections.Generic;
 using UnityEngine;
 using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
 
-namespace Kia_Task_Namespace
+namespace FeatureUncertaintyWM_Namespace
 {
-    public class Kia_Task_TaskDef : TaskDef
+    public class FeatureUncertaintyWM_TaskDef : TaskDef
     {
         //Already-existing fields (inherited from TaskDef)      
         //public DateTime TaskStart_DateTime;
@@ -21,21 +22,39 @@ namespace Kia_Task_Namespace
         //public float? ExternalStimScale;
     }
 
-    public class Kia_Task_BlockDef : BlockDef
+    public class FeatureUncertaintyWM_BlockDef : BlockDef
     {
         //Already-existing fields (inherited from BlockDef)
 		//public int BlockCount;
 		//public TrialDef[] TrialDefs;
+        public int[] nRepetitionsMinMax;
+        public int numProbedStim;
+
+        public override void GenerateTrialDefsFromBlockDef()
+        {
+            //pick # of trials from minmax
+            System.Random rnd = new System.Random();
+            int num = rnd.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
+
+            TrialDefs = new List<FeatureUncertaintyWM_TrialDef>().ConvertAll(x => (TrialDef)x);
+            for (int iTrial = 0; iTrial < num; iTrial++)
+            {
+                FeatureUncertaintyWM_TrialDef td = new FeatureUncertaintyWM_TrialDef();
+                td.numProbedStim = numProbedStim;
+                TrialDefs.Add(td);
+            }
+        }
     }
 
-    public class Kia_Task_TrialDef : TrialDef
+    public class FeatureUncertaintyWM_TrialDef : TrialDef
     {
         //Already-existing fields (inherited from TrialDef)
 		//public int BlockCount, TrialCountInBlock, TrialCountInTask;
 		//public TrialStims TrialStims;
+        public int numProbedStim;
     }
 
-    public class Kia_Task_StimDef : StimDef
+    public class FeatureUncertaintyWM_StimDef : StimDef
     {
         //Already-existing fields (inherited from Stim  Def)
         //public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)

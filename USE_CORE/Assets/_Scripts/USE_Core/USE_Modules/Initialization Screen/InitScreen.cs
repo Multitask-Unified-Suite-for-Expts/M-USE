@@ -55,6 +55,12 @@ public class InitScreen : MonoBehaviour {
             g.SetActive(false);
         foreach (GameObject g in enableOnStart)
             g.SetActive(true);
+
+        if (GameObject.Find("ControlLevels").GetComponent<M_USE_ControlLevel_Session>().UseDefaultConfigs)
+        {
+            //figure out paths of default configs
+            StartCoroutine(HandleConfirm());
+        }
     }
 
     IEnumerator HandleConfirm()

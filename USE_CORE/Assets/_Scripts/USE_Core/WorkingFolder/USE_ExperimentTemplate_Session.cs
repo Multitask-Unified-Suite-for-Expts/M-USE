@@ -30,6 +30,8 @@ namespace USE_ExperimentTemplate_Session
         public GameObject PauseCanvasGO;
         public Canvas PauseCanvas;
 
+        public bool UseDefaultConfigs;
+
         private bool IsHuman;
 
         public float ParticipantDistance_CM;
@@ -92,13 +94,42 @@ namespace USE_ExperimentTemplate_Session
         public override void LoadSettings()
         {
             //load session config file
-            configFileFolder = LocateFile.GetPath("Config File Folder");
+
+            if (UseDefaultConfigs)
+            {
+                configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
+                //check if the session default configs exist, if not, copy them (this only needs to be done once)
+                if (!Directory.Exists(configFileFolder))
+                {
+                    Directory.CreateDirectory(configFileFolder);
+                    var db = Resources.Load<TextAsset>("DefaultSessionConfigs/SessionConfig");
+                    Debug.Log(db);
+                    byte[] data= db.bytes;
+                    System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + "SessionConfig.txt", data);
+                    data= Resources.Load<TextAsset>("DefaultSessionConfigs/EventCodeConfig").bytes;
+                    System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + "EventCodeConfig.txt", data);
+                    data= Resources.Load<TextAsset>("DefaultSessionConfigs/DisplayConfig").bytes;
+                    System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + "DisplayConfig.txt", data);
+                } 
+            }
+            else
+                configFileFolder = LocateFile.GetPath("Config File Folder");
+            
+            
             SubjectID = SessionDetails.GetItemValue("SubjectID");
             SessionID = SessionDetails.GetItemValue("SessionID");
             FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" +
                          DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
-            SessionSettings.ImportSettings_MultipleType("Session",
-                LocateFile.FindFileInFolder(configFileFolder, "*SessionConfig*"));
+            // if (UseDefaultConfigs)
+            // {
+            //     //actually this should be checking date changed of files and comparing to date of build, if build is newer, overwrite files
+            //     
+            //     SessionSettings.ImportSettings_MultipleType("Session",
+            //         LocateFile.FindFileInExternalFolder(DefaultConfigPath, "*SessionConfig*"));
+            // }
+            // else
+                SessionSettings.ImportSettings_MultipleType("Session",
+                    LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));
 
 
             if (SessionSettings.SettingExists("Session", "SyncBoxActive"))
@@ -142,20 +173,33 @@ namespace USE_ExperimentTemplate_Session
                 RewardHotKeyNumPulses = 1;
 
 
-            //if there is a single syncbox config file for all experiments, load it
-            string syncBoxFileString = LocateFile.FindFileInFolder(configFileFolder, "*SyncBox*");
-            if (!string.IsNullOrEmpty(syncBoxFileString))
-            {
-                SessionSettings.ImportSettings_MultipleType("SyncBoxConfig", syncBoxFileString);
-                // SyncBoxActive = true;
-            }
+            // //if there is a single syncbox config file for all experiments, load it
+            // string syncBoxFileString = "";
+            // if (UseDefaultConfigs)
+            // {
+            //     syncBoxFileString = LocateFile.FindFileInExternalFolder(DefaultConfigPath, "*SyncBox*");
+            // }
+            // else
+            //     syncBoxFileString = LocateFile.FindFileInExternalFolder(configFileFolder, "*SyncBox*");
+            // if (!string.IsNullOrEmpty(syncBoxFileString))
+            // {
+            //     SessionSettings.ImportSettings_MultipleType("SyncBoxConfig", syncBoxFileString);
+            //     // SyncBoxActive = true;
+            // }
 
             //Load the Session Event Code Config file
-            string eventCodeFileString = LocateFile.FindFileInFolder(configFileFolder, "*EventCode*");
+            string eventCodeFileString = "";
+            // if (UseDefaultConfigs)
+            // {
+            //     eventCodeFileString = LocateFile.FindFileInExternalFolder(DefaultConfigPath, "*EventCode*");
+            // // }
+            // else
+            eventCodeFileString = LocateFile.FindFileInExternalFolder(configFileFolder, "*EventCode*");
 
             if (!string.IsNullOrEmpty(eventCodeFileString))
             {
-                SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
+                SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig",
+                    eventCodeFileString);
                 SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
                 EventCodesActive = true;
             }
@@ -834,6 +878,23 @@ namespace USE_ExperimentTemplate_Session
             tl.SessionDataPath = SessionDataPath;
             tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName);
 
+            
+            if (UseDefaultConfigs)
+            {
+                //check if the session default configs exist, if not, copy them (this only needs to be done once)
+                if (!Directory.Exists(tl.TaskConfigPath))
+                {
+                    Directory.CreateDirectory(tl.TaskConfigPath);
+                    
+                    //check existence of each standard config file type, if it exists, copy it
+                    var ta = Resources.Load<TextAsset>(tl.TaskName + "_DefaultConfigs/" + tl.TaskName + "_TaskDef");
+                    if (ta != null)
+                        System.IO.File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + tl.TaskName + "_TaskDef.txt", ta.bytes);
+                    
+                    //repeat 9x
+                } 
+            }
+            
             tl.FilePrefix = FilePrefix;
             tl.StoreData = StoreData;
             tl.SubjectID = SubjectID;
@@ -917,6 +978,7 @@ namespace USE_ExperimentTemplate_Session
         {
             string taskName = (string)TaskMappings[configName];
             ControlLevel_Task_Template tl = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
+            tl.UseDefaultConfigs = UseDefaultConfigs;
             tl.ConfigName = configName;
             tl = PopulateTaskLevel(tl, verifyOnly);
             if (tl.TaskCam == null)

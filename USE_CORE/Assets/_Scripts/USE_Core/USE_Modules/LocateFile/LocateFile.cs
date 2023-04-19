@@ -67,7 +67,7 @@ public class LocateFile : MonoBehaviour
 		return null;
 	}
 
-	public string FindFileInFolder(string keyToFolder, string stringPattern)
+	public string FindFileInExternalFolder(string keyToFolder, string stringPattern)
 	{
 		string[] possibleFiles = Directory.GetFiles(keyToFolder, stringPattern);
 		if (possibleFiles.Length == 1)

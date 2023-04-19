@@ -334,7 +334,7 @@ namespace USE_StimulusManagement
 			return children;
 		}
 
-		private void AssignStimDefPointeToObjectHierarchy(GameObject parentObject, StimDef sd)
+		public void AssignStimDefPointeToObjectHierarchy(GameObject parentObject, StimDef sd)
 		{
 			List<GameObject> objectChildren = GetAllChildren(parentObject);
 			foreach (GameObject child in objectChildren)

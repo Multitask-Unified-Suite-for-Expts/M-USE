@@ -1,0 +1,22 @@
+OrderedDictionary<string,string>	TaskMappings	{ContinuousRecognition: ContinuousRecognition}
+Dictionary<string,string>	TaskIcons	{ContinuousRecognition: ContinuousRecognition}
+string	ContextExternalFilePath	"/Users/marcuswatson/Desktop/MUSE_Master/DemoResources/DemoContexts"
+string	TaskIconsFolderPath	"//Users//marcuswatson//Desktop//MUSE_Master//DemoResources//TaskIcons"
+
+
+float	TaskSelectionTimeout	1000
+bool	MacMainDisplayBuild	true
+bool	IsHuman	false	
+bool	StoreData	false
+bool	EventCodesActive	false
+bool	SyncBoxActive	false
+string	SerialPortAddress	"\\\\.\\COM3"
+int	SerialPortSpeed	115200
+List<string>	SyncBoxInitCommands	{"INI", "ECH 0", "TIM 0", "LIN 33", "LVB 0", "NSU 2", "NPD 10", "NHD 2", "NDW 16", "CAO 20000", "TBP 1000", "TBW 50", "TIB 1", "LOG 1"}
+int	SplitBytes	2
+//Vector3[]	TaskIconLocations	[[-220.0,0.0,0.0],[0.0,0.0,0.0],[220.0,0.0,0.0]]
+int	LongRewardHotKeyNumPulses	1
+int	LongRewardHotKeyPulseSize	500
+int	RewardHotKeyNumPulses	1
+int	RewardHotKeyPulseSize	250 
+bool	GuidedTaskSelection	FALSE

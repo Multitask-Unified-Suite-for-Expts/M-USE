@@ -1,8 +1,5 @@
 OrderedDictionary<string,string>	TaskMappings	{ContinuousRecognition: ContinuousRecognition}
 Dictionary<string,string>	TaskIcons	{ContinuousRecognition: ContinuousRecognition}
-string	ContextExternalFilePath	"//Users//ntraczewski//Desktop//MUSE//Resources//Contexts"
-string	TaskIconsFolderPath	"//Users//ntraczewski//Desktop//MUSE//Resources//TaskIcons"
-
 float	TaskSelectionTimeout	1000
 bool	MacMainDisplayBuild	true
 bool	IsHuman	false	

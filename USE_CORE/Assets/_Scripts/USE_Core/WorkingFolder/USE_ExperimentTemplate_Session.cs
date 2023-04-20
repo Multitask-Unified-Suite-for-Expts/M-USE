@@ -683,9 +683,6 @@ namespace USE_ExperimentTemplate_Session
                 }
 
 
-
-
-
                 PauseCanvas.renderMode = RenderMode.ScreenSpaceCamera;
                 PauseCanvas.worldCamera = CurrentTask.TaskCam;
 
@@ -852,7 +849,7 @@ namespace USE_ExperimentTemplate_Session
             tl.SessionDataPath = SessionDataPath;
             tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName);
 
-            
+
             if (UseDefaultConfigs)
             {
                 //check if the session default configs exist, if not, copy them (this only needs to be done once)

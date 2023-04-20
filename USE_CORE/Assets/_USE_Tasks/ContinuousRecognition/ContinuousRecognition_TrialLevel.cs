@@ -877,6 +877,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         NumNew_Trial = 0;
         NumPNC_Trial = 0;
 
+        StimGroup sg = ExternalStims;
+        if (PrefabStims.stimDefs.Count > 0)
+            sg = PrefabStims;
+
         if (TrialCount_InBlock == 0)
         {
             trialStims = null;
@@ -905,7 +909,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 NumNew_Trial++;
             }
 
-            trialStims = new StimGroup("TrialStims", ExternalStims, currentTrial.TrialStimIndices);
+            trialStims = new StimGroup("TrialStims", sg, currentTrial.TrialStimIndices);
             foreach (ContinuousRecognition_StimDef stim in trialStims.stimDefs)
                 stim.PreviouslyChosen = false;
             trialStims.SetLocations(currentTrial.TrialStimLocations);
@@ -960,7 +964,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 NumPNC_Trial++;
             }
 
-            trialStims = new StimGroup($"TrialStims", ExternalStims, currentTrial.TrialStimIndices);
+            trialStims = new StimGroup($"TrialStims", sg, currentTrial.TrialStimIndices);
             trialStims.SetLocations(currentTrial.TrialStimLocations);
             TrialStims.Add(trialStims);
         }
@@ -981,7 +985,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             for(int i = 0; i < num_PC; i++)
                 currentTrial.TrialStimIndices.Add(currentTrial.PC_Stim[i]);
             
-            trialStims = new StimGroup($"TrialStims", ExternalStims, currentTrial.TrialStimIndices);
+            trialStims = new StimGroup($"TrialStims", sg, currentTrial.TrialStimIndices);
             trialStims.SetLocations(currentTrial.TrialStimLocations);
             TrialStims.Add(trialStims);
         }

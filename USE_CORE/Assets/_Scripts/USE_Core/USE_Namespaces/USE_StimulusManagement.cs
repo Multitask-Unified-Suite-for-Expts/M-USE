@@ -271,9 +271,7 @@ namespace USE_StimulusManagement
 
 		public GameObject Load()
 		{
-			Debug.Log("LOADING FILENAME: " + FileName);
-
-			if(PrefabPath != null)
+			if (PrefabPath != null && PrefabPath.Length > 2)
 				StimGameObject = LoadPrefabFromResources(PrefabPath);
 			else
 			{
@@ -300,7 +298,7 @@ namespace USE_StimulusManagement
 				{
 					string[] FileNameStrings;
 					if (FileName.Contains("\\"))
-							  FileNameStrings = FileName.Split('\\');
+						FileNameStrings = FileName.Split('\\');
 					else
 						FileNameStrings = FileName.Split('/');
 
@@ -310,7 +308,7 @@ namespace USE_StimulusManagement
 
 			}
 
-			
+
 			return StimGameObject;
 		}
 
@@ -340,15 +338,17 @@ namespace USE_StimulusManagement
 		
 		public GameObject LoadPrefabFromResources(string prefabPath = "")
 		{
-			if (!string.IsNullOrEmpty(prefabPath))
+			Debug.Log("LOADING PREFAB FROM RESOURCES!");
+
+			if (prefabPath.Length > 2)
 				PrefabPath = prefabPath;
 
-			//THIS WORKS BUT HARD CODED AND PROB WONT WORK FOR BUILD. 
-			FileName = "Assets/_USE_Session/Resources/" + PrefabPath + "/" + FileName;
-            StimGameObject = LoadModel();
+			//THIS WORKS BUT HARD CODED AND PROB WONT WORK FOR BUILD.
+			string path = "Assets/_USE_Session/Resources/" + PrefabPath + "/" + FileName;
+            StimGameObject = LoadModel(path);
 
-			//THIS WORKS BUT JUST FOR LOADING A GO NORMAL, NOT LOADING IT FROM MODEL:
-			//if(FileName.Contains('.'))
+			////THIS WORKS BUT JUST FOR LOADING A GO NORMAL, NOT LOADING IT FROM MODEL:
+			//if (FileName.Contains('.'))
 			//	FileName = FileName.Split('.')[0]; //Removing .fbx from it
 			//StimGameObject = Resources.Load<GameObject>(PrefabPath + "/" + FileName);
 			//if (StimGameObject == null)
@@ -363,6 +363,8 @@ namespace USE_StimulusManagement
 
 		public GameObject LoadExternalStimFromFile(string stimFilePath = "")
 		{
+			Debug.Log("LOADING EXT STIM FROM FILE!");
+
 			//add StimExtesion to file path if it doesn't already contain it
 			if (!string.IsNullOrEmpty(StimExtension) && !FileName.EndsWith(StimExtension))
 			{
@@ -402,9 +404,8 @@ namespace USE_StimulusManagement
 				//but should also have method to check this file exists
 			}
 
-
-	
-			StimGameObject = LoadModel();
+			Debug.Log("FILE NAME BEFORE LOADING MODEL: " + FileName);
+			StimGameObject = LoadModel(FileName);
 			PositionRotationScale();
 			if (!string.IsNullOrEmpty(StimName))
 				StimGameObject.name = StimName;
@@ -441,8 +442,10 @@ namespace USE_StimulusManagement
 			}
 		}
 
-		public GameObject LoadModel(bool visibiility = false)
+		public GameObject LoadModel(string filePath, bool visibiility = false)
 		{
+			Debug.Log("LOADING MODEL!");
+
 			using (var assetLoader = new AssetLoader())
 			{
 				try
@@ -450,11 +453,11 @@ namespace USE_StimulusManagement
 					var assetLoaderOptions = AssetLoaderOptions.CreateInstance();
 					assetLoaderOptions.AutoPlayAnimations = true;
 					assetLoaderOptions.AddAssetUnloader = true;
-					StimGameObject = assetLoader.LoadFromFile(FileName);
+					StimGameObject = assetLoader.LoadFromFile(filePath);
 				}
 				catch (System.Exception e)
 				{
-					Debug.Log("EXT FILE PATH: " + FileName);
+					Debug.Log("FILE PATH: " + filePath);
 					Debug.LogError(e.ToString());
 					return null;
 				}
@@ -703,7 +706,6 @@ namespace USE_StimulusManagement
 
 		public void LoadStims()
 		{
-			Debug.Log("LOADING STIM DEFS!");
 			foreach(StimDef sd in stimDefs)
 			{
 				sd.Load();

@@ -142,10 +142,12 @@ namespace USE_ExperimentTemplate_Trial
                 // FrameData.CreateFile();
                 DefineTrialStims();
                 ResetRelativeStartTime();
+
                 foreach (StimGroup sg in TrialStims)
                 {
                     sg.LoadStims();
                 }
+
                 ResetTrialVariables();
             });
 
@@ -455,6 +457,19 @@ namespace USE_ExperimentTemplate_Trial
 
             return contextPath;
         }
+
+        public void LoadTexturesFromResources()
+        {
+            HeldTooLongTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/HorizontalStripes");
+            HeldTooShortTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/VerticalStripes");
+            BackdropStripesTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/bg");
+            THR_BackdropTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/Concrete4");
+
+            TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
+            TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
+            TouchFBController.MovedTooFar_Texture = BackdropStripesTexture;
+        }
+
         public void LoadTextures(String ContextExternalFilePath)
         {
             HeldTooLongTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "HorizontalStripes.png"));

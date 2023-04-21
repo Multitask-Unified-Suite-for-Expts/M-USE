@@ -391,8 +391,10 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.ShotgunRaycastSpacing_DVA = ShotgunRaycastSpacing_DVA;
 
 
-
-            TrialLevel.LoadTextures(ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 
+            if (UseDefaultConfigs)
+                TrialLevel.LoadTexturesFromResources();
+            else
+                TrialLevel.LoadTextures(ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 
 
             //Automatically giving TouchFbController;
             TrialLevel.TouchFBController.Init(TrialData, FrameData);
@@ -653,6 +655,8 @@ namespace USE_ExperimentTemplate_Task
 
         protected virtual void DefinePrefabStims()
         {
+            Debug.Log("DEFINING PREFAB STIMS!");
+
             MethodInfo taskStimDefFromPrefabPath = GetType().GetMethod(nameof(TaskStimDefFromPrefabPath))
                 .MakeGenericMethod((new Type[] { StimDefType }));
 
@@ -681,6 +685,8 @@ namespace USE_ExperimentTemplate_Task
 
         protected virtual void DefineExternalStims()
         {
+            Debug.Log("DEFINING EXTERNAL STIMS!");
+
             // need to add check for files in stimfolderpath if there is no stimdef file (take all files)
             string stimFolderPath = "";
             string stimExtension = "";
@@ -695,11 +701,6 @@ namespace USE_ExperimentTemplate_Task
                 if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ExternalStimScale"))
                     stimScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ExternalStimScale");
             }
-
-            //if (UseDefaultConfigs)
-            //    if (Application.isEditor)
-            //        stimFolderPath = "Assets/_USE_Session/Resources/DefaultResources/Stimuli";
-
 
             foreach (StimDef sd in ExternalStims.stimDefs)
             {

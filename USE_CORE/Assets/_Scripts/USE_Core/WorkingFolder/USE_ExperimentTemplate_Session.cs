@@ -438,9 +438,6 @@ namespace USE_ExperimentTemplate_Session
                 }
 
 
-
-
-
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SelectTaskStarts"]);
 
                 if (SerialPortActive){
@@ -547,7 +544,10 @@ namespace USE_ExperimentTemplate_Session
 
                     RawImage taskButtonImage = taskButton.AddComponent<RawImage>();
                     string taskIcon = TaskIcons[configName];
-                    taskButtonImage.texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + taskIcon + ".png");
+                    //if (UseDefaultConfigs)
+                    //    taskButtonImage.texture = Resources.Load<Texture2D>("DefaultResources/TaskIcons");
+                    //else
+                        taskButtonImage.texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + taskIcon + ".png");
 
                     taskButtonImage.rectTransform.localPosition = TaskIconLocations[count];
                     taskButtonImage.rectTransform.localScale = Vector3.one;
@@ -681,7 +681,6 @@ namespace USE_ExperimentTemplate_Session
                     CurrentTask.TaskCam.targetTexture = CameraMirrorTexture;
                     mainCameraCopy_Image.texture = CameraMirrorTexture;
                 }
-
 
                 PauseCanvas.renderMode = RenderMode.ScreenSpaceCamera;
                 PauseCanvas.worldCamera = CurrentTask.TaskCam;

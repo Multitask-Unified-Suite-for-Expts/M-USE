@@ -117,7 +117,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             SetControllerBlockValues();
 
-            LoadTextures(MaterialFilePath);
+            if(HeldTooLongTexture == null)
+                LoadTextures(MaterialFilePath);
 
             if (StartButton == null)
             {

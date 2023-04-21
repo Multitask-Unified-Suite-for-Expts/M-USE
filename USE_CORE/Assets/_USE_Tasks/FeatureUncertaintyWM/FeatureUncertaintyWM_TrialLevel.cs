@@ -56,6 +56,20 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
     }
 
+    private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef sd)
+    {
+	    //this has got to be replaced by a working version of the stuff commented out below, it returns a single 
+	    //multicomponent object (which is composed of multiple component objects)
+	    
+	    //but instead of looping through componentObjectTypes, we pass in componentObjIndices
+	    //this is just a vector which is easy to store at the trial level
+	    //same indices as the sample stims
+	    
+	    //probably to save processing, at the beginning of a block you might want to instantiate all the component objects used in that block
+	    //each of them as many times as the max times it is used in any trial... then set them all inactive, and set active in this method as needed
+	    
+	    return new GameObject(); // this line is just here so I don't have to comment out stuff below... the function returns the multiccomp object
+    }
 
     // private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_StimDef sd)// int[] objsPerCircle, GameObject[] componentObjectTypes, float[] objProportions)
     // {
@@ -164,6 +178,9 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
     protected override void DefineTrialStims()
     {
+	    //do all the Sample stuff up here
+	    
+	    
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
         //StimGroup constructor which creates a subset of an already-existing StimGroup 
@@ -171,8 +188,8 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         multiCompStims = new StimGroup("MultiCompStims"); // can add state control of onset/offset
         for (int iStim = 0; iStim < CurrentTrialDef.numProbedStim; iStim++)
         {
-            FeatureUncertaintyWM_StimDef sd = new FeatureUncertaintyWM_StimDef(); // populate with appropriate values
-            // multiCompStims.AddStims(GenerateMultiCompStim(sd));
+            FeatureUncertaintyWM_MultiCompStimDef sd = new FeatureUncertaintyWM_MultiCompStimDef(); // populate with appropriate values
+            multiCompStims.AddStims(GenerateMultiCompStim(sd)); //make a new stim group, add it
             sd.AssignStimDefPointeToObjectHierarchy(sd.StimGameObject, sd);
         }
         

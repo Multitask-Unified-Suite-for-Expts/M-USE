@@ -86,4 +86,10 @@ namespace FeatureUncertaintyWM_Namespace
         //public State SetInactiveOnTermination;
     
     }
+
+    public class FeatureUncertaintyWM_MultiCompStimDef : StimDef
+    {
+        public int[] objsPerCircle, componentObjIndices;
+        public float[] objProportions;
+    }
 }

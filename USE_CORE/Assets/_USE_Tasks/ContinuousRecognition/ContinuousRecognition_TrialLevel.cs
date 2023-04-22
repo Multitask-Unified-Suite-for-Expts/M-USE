@@ -1010,6 +1010,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         Starfield.SetActive(false);
         TokenFBController.enabled = false;
 
+        StimGroup group = ExternalStims;
+        if (UseDefaultConfigs)
+            group = PrefabStims;
+
+
         if (!StimIsChosen && ChosenStimIndices.Count < 1)
             return;
 
@@ -1019,7 +1024,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count];
             FeedbackLocations = CenterFeedbackLocations(currentTrial.TrialFeedbackLocations, FeedbackLocations.Length);
 
-            RightGroup = new StimGroup("Right", ExternalStims, ChosenStimIndices);
+            RightGroup = new StimGroup("Right", group, ChosenStimIndices);
             GenerateFeedbackStim(RightGroup, FeedbackLocations);
             GenerateFeedbackBorders(RightGroup);
 
@@ -1032,7 +1037,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count + 1];
             FeedbackLocations = CenterFeedbackLocations(currentTrial.TrialFeedbackLocations, FeedbackLocations.Length);
 
-            RightGroup = new StimGroup("Right", ExternalStims, ChosenStimIndices);
+            RightGroup = new StimGroup("Right", group, ChosenStimIndices);
             GenerateFeedbackStim(RightGroup, FeedbackLocations.Take(FeedbackLocations.Length - 1).ToArray());
             GenerateFeedbackBorders(RightGroup);
 
@@ -1040,7 +1045,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 MakeStimsFaceCamera(RightGroup);
 
             WrongGroup = new StimGroup("Wrong");
-            StimDef wrongStim = ExternalStims.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(WrongGroup);
+            StimDef wrongStim = group.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(WrongGroup);
             wrongStim.StimGameObject = null;
             GenerateFeedbackStim(WrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length - 1).Take(1).ToArray());
             GenerateFeedbackBorders(WrongGroup);

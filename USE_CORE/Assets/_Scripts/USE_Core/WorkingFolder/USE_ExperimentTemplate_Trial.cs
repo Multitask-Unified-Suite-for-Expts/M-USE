@@ -77,6 +77,8 @@ namespace USE_ExperimentTemplate_Trial
         public float ParticipantDistance_CM;
         public float ShotgunRaycastCircleSize_DVA;
 
+        public bool UseDefaultConfigs;
+
 
         // Texture Variables
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, 

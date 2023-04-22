@@ -338,21 +338,19 @@ namespace USE_StimulusManagement
 		
 		public GameObject LoadPrefabFromResources(string prefabPath = "")
 		{
-			Debug.Log("LOADING PREFAB FROM RESOURCES!");
-
 			if (prefabPath.Length > 2)
 				PrefabPath = prefabPath;
 
 			//THIS WORKS BUT HARD CODED AND PROB WONT WORK FOR BUILD.
-			string path = "Assets/_USE_Session/Resources/" + PrefabPath + "/" + FileName;
-            StimGameObject = LoadModel(path);
-
-			////THIS WORKS BUT JUST FOR LOADING A GO NORMAL, NOT LOADING IT FROM MODEL:
-			//if (FileName.Contains('.'))
-			//	FileName = FileName.Split('.')[0]; //Removing .fbx from it
-			//StimGameObject = Resources.Load<GameObject>(PrefabPath + "/" + FileName);
-			//if (StimGameObject == null)
-			//	Debug.Log("STIM GAME OBJECT IS NULL!!!!!!!!!!!!!!!!!!!!!!!!");
+			string path;
+			if (Application.isEditor)
+				path = "Assets/_USE_Session/Resources/" + PrefabPath + "/" + FileName;
+			else
+			{
+				string splitFileName = FileName.Split('.')[0];
+				path = PrefabPath + "/" + splitFileName;
+			}
+			StimGameObject = LoadModel(path, true);
 
 			PositionRotationScale();
 			if (!string.IsNullOrEmpty(StimName))
@@ -404,7 +402,6 @@ namespace USE_StimulusManagement
 				//but should also have method to check this file exists
 			}
 
-			Debug.Log("FILE NAME BEFORE LOADING MODEL: " + FileName);
 			StimGameObject = LoadModel(FileName);
 			PositionRotationScale();
 			if (!string.IsNullOrEmpty(StimName))
@@ -442,10 +439,8 @@ namespace USE_StimulusManagement
 			}
 		}
 
-		public GameObject LoadModel(string filePath, bool visibiility = false)
+		public GameObject LoadModel(string filePath, bool loadFromResources = false, bool visibiility = false)
 		{
-			Debug.Log("LOADING MODEL!");
-
 			using (var assetLoader = new AssetLoader())
 			{
 				try
@@ -453,11 +448,18 @@ namespace USE_StimulusManagement
 					var assetLoaderOptions = AssetLoaderOptions.CreateInstance();
 					assetLoaderOptions.AutoPlayAnimations = true;
 					assetLoaderOptions.AddAssetUnloader = true;
-					StimGameObject = assetLoader.LoadFromFile(filePath);
+
+					if(loadFromResources)
+					{
+						string path = (PrefabPath + "/" + FileName).Split('.')[0];
+						StimGameObject = Object.Instantiate(Resources.Load(path) as GameObject);
+                    }
+                    else
+						StimGameObject = assetLoader.LoadFromFile(filePath);
+					
 				}
 				catch (System.Exception e)
 				{
-					Debug.Log("FILE PATH: " + filePath);
 					Debug.LogError(e.ToString());
 					return null;
 				}

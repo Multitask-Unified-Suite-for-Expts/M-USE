@@ -249,7 +249,7 @@ namespace USE_ExperimentTemplate_Session
 
             SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
 
-            if(UseDefaultConfigs)
+            if (UseDefaultConfigs)
             {
                 ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
                 TaskIconsFolderPath = "Assets/_USE_Session/Resources/DefaultResources/TaskIcons";
@@ -544,9 +544,10 @@ namespace USE_ExperimentTemplate_Session
 
                     RawImage taskButtonImage = taskButton.AddComponent<RawImage>();
                     string taskIcon = TaskIcons[configName];
-                    //if (UseDefaultConfigs)
-                    //    taskButtonImage.texture = Resources.Load<Texture2D>("DefaultResources/TaskIcons");
-                    //else
+
+                    if (UseDefaultConfigs)
+                        taskButtonImage.texture = Resources.Load<Texture2D>("DefaultResources/TaskIcons/" + taskIcon);
+                    else
                         taskButtonImage.texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + taskIcon + ".png");
 
                     taskButtonImage.rectTransform.localPosition = TaskIconLocations[count];

@@ -31,9 +31,10 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             wmTL.ContextName = wmBD.ContextName;
-            RenderSettings.skybox = CreateSkybox(wmTL.GetContextNestedFilePath(ContextExternalFilePath, wmTL.ContextName, "LinearDark"));
+            RenderSettings.skybox = CreateSkybox(wmTL.GetContextNestedFilePath(ContextExternalFilePath, wmTL.ContextName, "LinearDark"), UseDefaultConfigs);
 
-            EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);            wmTL.ResetBlockVariables();
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
+            wmTL.ResetBlockVariables();
             wmTL.TokenFBController.SetTotalTokensNum(wmBD.NumTokenBar);
             wmTL.TokenFBController.SetTokenBarValue(wmBD.NumInitialTokens);
             SetBlockSummaryString();

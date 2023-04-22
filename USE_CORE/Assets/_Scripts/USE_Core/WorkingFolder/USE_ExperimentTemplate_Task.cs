@@ -374,6 +374,8 @@ namespace USE_ExperimentTemplate_Task
             if (SessionEventCodes != null)
                 TrialLevel.SessionEventCodes = SessionEventCodes;
 
+            TrialLevel.UseDefaultConfigs = UseDefaultConfigs;
+
 
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShotgunRaycastCircleSize_DVA"))
                 TrialLevel.ShotgunRaycastCircleSize_DVA = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ShotgunRaycastCircleSize_DVA");
@@ -865,7 +867,7 @@ namespace USE_ExperimentTemplate_Task
             if (sg != null)
                 sd.AddToStimGroup(sg);
             return (T)sd;
-        }
+        } 
 
         public List<TrialDef> GetTrialDefsInBlock(int BlockNum, TrialDef[] trialDefs)
         {

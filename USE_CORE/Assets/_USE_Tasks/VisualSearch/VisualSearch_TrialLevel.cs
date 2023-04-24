@@ -360,7 +360,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     {
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
-        tStim = new StimGroup("SearchStimuli", ExternalStims, CurrentTrialDef.TrialStimIndices);
+
+        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+
+        tStim = new StimGroup("SearchStimuli", group, CurrentTrialDef.TrialStimIndices);
         if(TokensWithStimOn?? false)
             tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("ITI"));
         else

@@ -878,9 +878,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         NumNew_Trial = 0;
         NumPNC_Trial = 0;
 
-        StimGroup sg = ExternalStims;
-        if (PrefabStims.stimDefs.Count > 0)
-            sg = PrefabStims;
+        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+
 
         if (TrialCount_InBlock == 0)
         {
@@ -910,7 +909,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 NumNew_Trial++;
             }
 
-            trialStims = new StimGroup("TrialStims", sg, currentTrial.TrialStimIndices);
+            trialStims = new StimGroup("TrialStims", group, currentTrial.TrialStimIndices);
             foreach (ContinuousRecognition_StimDef stim in trialStims.stimDefs)
                 stim.PreviouslyChosen = false;
             trialStims.SetLocations(currentTrial.TrialStimLocations);
@@ -965,7 +964,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 NumPNC_Trial++;
             }
 
-            trialStims = new StimGroup($"TrialStims", sg, currentTrial.TrialStimIndices);
+            trialStims = new StimGroup($"TrialStims", group, currentTrial.TrialStimIndices);
             trialStims.SetLocations(currentTrial.TrialStimLocations);
             TrialStims.Add(trialStims);
         }
@@ -986,7 +985,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             for(int i = 0; i < num_PC; i++)
                 currentTrial.TrialStimIndices.Add(currentTrial.PC_Stim[i]);
             
-            trialStims = new StimGroup($"TrialStims", sg, currentTrial.TrialStimIndices);
+            trialStims = new StimGroup($"TrialStims", group, currentTrial.TrialStimIndices);
             trialStims.SetLocations(currentTrial.TrialStimLocations);
             TrialStims.Add(trialStims);
         }
@@ -1010,10 +1009,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         Starfield.SetActive(false);
         TokenFBController.enabled = false;
 
-        StimGroup group = ExternalStims;
-        if (UseDefaultConfigs)
-            group = PrefabStims;
-
+        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
 
         if (!StimIsChosen && ChosenStimIndices.Count < 1)
             return;

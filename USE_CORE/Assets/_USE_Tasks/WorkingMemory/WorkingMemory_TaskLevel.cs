@@ -31,7 +31,14 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             wmTL.ContextName = wmBD.ContextName;
-            RenderSettings.skybox = CreateSkybox(wmTL.GetContextNestedFilePath(ContextExternalFilePath, wmTL.ContextName, "LinearDark"), UseDefaultConfigs);
+
+            string contextFilePath;
+            if (UseDefaultConfigs)
+                contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + wmBD.ContextName;
+            else
+                contextFilePath = wmTL.GetContextNestedFilePath(ContextExternalFilePath, wmBD.ContextName, "LinearDark");
+
+            RenderSettings.skybox = CreateSkybox(contextFilePath, UseDefaultConfigs);
 
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
             wmTL.ResetBlockVariables();

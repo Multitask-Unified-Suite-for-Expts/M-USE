@@ -18,7 +18,7 @@ using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Task;
 using SelectionTracking;
 using Random = UnityEngine.Random;
-using UnityEngine.Windows.WebCam;
+//using UnityEngine.Windows.WebCam;
 
 
 namespace USE_ExperimentTemplate_Session
@@ -30,7 +30,7 @@ namespace USE_ExperimentTemplate_Session
         public GameObject PauseCanvasGO;
         public Canvas PauseCanvas;
 
-        public bool UseDefaultConfigs; //Set true in inspector when gonna create a build with default displays (for website)
+        public bool UseDefaultConfigs; //Set true in inspector when gonna create a build with default configs (for website)
 
         private bool IsHuman;
 

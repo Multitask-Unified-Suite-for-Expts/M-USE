@@ -349,8 +349,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     {
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
+
+        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+
         int temp = 0;
-        tStim = new StimGroup("SearchStimuli", ExternalStims, CurrentTrialDef.TrialStimIndices);
+        tStim = new StimGroup("SearchStimuli", group, CurrentTrialDef.TrialStimIndices);
 
         if(TokensWithStimOn?? false)
             tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("ITI"));

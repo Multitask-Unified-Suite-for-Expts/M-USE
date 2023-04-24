@@ -4,6 +4,7 @@ using THR_Namespace;
 using USE_Settings;
 using USE_ExperimentTemplate_Task;
 using System.Collections.Specialized;
+using UnityEngine;
 
 public class THR_TaskLevel : ControlLevel_Task_Template
 {
@@ -41,6 +42,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
     public override void DefineControlLevel()
     {
         trialLevel = (THR_TrialLevel)TrialLevel;
+
+        trialLevel.MaterialFilePath = ContextExternalFilePath;
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");

@@ -356,7 +356,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
 
-        searchStims = new StimGroup("SearchStims", ExternalStims, CurrentTrialDef.SearchStimIndices);
+        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+
+        searchStims = new StimGroup("SearchStims", group, CurrentTrialDef.SearchStimIndices);
         //searchStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
         searchStims.SetLocations(CurrentTrialDef.SearchStimLocations);
 
@@ -383,7 +385,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         TrialStims.Add(searchStims);
         TrialStims.Add(sampleStim);
 
-        postSampleDistractorStims = new StimGroup("DisplayDistractors", ExternalStims, CurrentTrialDef.PostSampleDistractorIndices);
+        postSampleDistractorStims = new StimGroup("DisplayDistractors", group, CurrentTrialDef.PostSampleDistractorIndices);
         postSampleDistractorStims.SetVisibilityOnOffStates(GetStateFromName("DisplayDistractors"), GetStateFromName("DisplayDistractors"));
         postSampleDistractorStims.SetLocations(CurrentTrialDef.PostSampleDistractorLocations);
         TrialStims.Add(postSampleDistractorStims);

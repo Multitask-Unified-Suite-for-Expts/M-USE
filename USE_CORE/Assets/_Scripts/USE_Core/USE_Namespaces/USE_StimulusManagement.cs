@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Security.Policy;
+//using System.Security.Policy;
 using JetBrains.Annotations;
 using UnityEngine;
 using USE_Settings;
@@ -646,10 +646,7 @@ namespace USE_StimulusManagement
 			SessionSettings.ImportSettings_SingleTypeArray<StimDef>(TaskName + "_StimDefs", stimDefFilePath);
 			List<StimDef> sds = (List<StimDef>)SessionSettings.Get(TaskName + "_StimDefs");
 			foreach (StimDef sd in sds)
-			{
-				sd.AddToStimGroup(this);
-				// sd.ToggleVisibility(false);
-			}
+				sd.AddToStimGroup(this);			
 		}
 
 		public void AddStims(StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)

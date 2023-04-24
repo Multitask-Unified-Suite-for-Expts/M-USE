@@ -35,7 +35,15 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             wwwTL.ContextName = wwwBD.ContextName;
-            RenderSettings.skybox = CreateSkybox(wwwTL.GetContextNestedFilePath(ContextExternalFilePath, wwwTL.ContextName), UseDefaultConfigs);
+
+            string contextFilePath;
+            if (UseDefaultConfigs)
+                contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + wwwBD.ContextName;
+            else
+                contextFilePath = wwwTL.GetContextNestedFilePath(ContextExternalFilePath, wwwBD.ContextName, "LinearDark");
+
+            RenderSettings.skybox = CreateSkybox(contextFilePath, UseDefaultConfigs);
+
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
 
             ErrorType_InTask.Add(string.Join(",",wwwTL.ErrorType_InBlock));

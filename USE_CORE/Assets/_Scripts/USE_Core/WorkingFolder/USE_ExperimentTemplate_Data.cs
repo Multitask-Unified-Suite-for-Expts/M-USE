@@ -9,7 +9,7 @@ using USE_States;
 using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
-using System.Data.SqlClient;
+//using System.Data.SqlClient;
 using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -62,13 +62,13 @@ namespace USE_ExperimentTemplate_Data
 
 
         private readonly string ConnectionString = "server=localhost\\SQLExpress;database=USE_Test;integrated security=true;TrustServerCertificate=true;";
-        public SqlConnection Connection
-        {
-            get
-            {
-                return new SqlConnection(ConnectionString);
-            }
-        }
+        //public SqlConnection Connection
+        //{
+        //    get
+        //    {
+        //        return new SqlConnection(ConnectionString);
+        //    }
+        //}
 
         //Dict to hold all the sql data types, so they will be correct for sql command
         Dictionary<string, string> TypeDict_SQL = new Dictionary<string, string>()
@@ -112,97 +112,97 @@ namespace USE_ExperimentTemplate_Data
 
         public void TestConnectionToDB()
         {
-            using(var conn = Connection)
-            {
-                conn.Open();
-                using(var cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @"SELECT * FROM Task;";
+            //using(var conn = Connection)
+            //{
+            //    conn.Open();
+            //    using(var cmd = conn.CreateCommand())
+            //    {
+            //        cmd.CommandText = @"SELECT * FROM Task;";
 
-                    using(SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while(reader.Read())
-                        {
-                            Debug.Log((int)reader["Id"]);
-                            Debug.Log((reader.GetString(reader.GetOrdinal("Name"))));
-                        }
-                    }
-                }
-            }
+            //        using(SqlDataReader reader = cmd.ExecuteReader())
+            //        {
+            //            while(reader.Read())
+            //            {
+            //                Debug.Log((int)reader["Id"]);
+            //                Debug.Log((reader.GetString(reader.GetOrdinal("Name"))));
+            //            }
+            //        }
+            //    }
+            //}
         }
 
-        public bool DoesSQLTableExist()
-        {
-            bool tableExists = new bool();
-            using(SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using(SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = $@"SELECT * FROM {name};";
-                    SqlDataReader reader = cmd.ExecuteReader();
-                    tableExists = reader.Read();
-                    reader.Close();
-                }
-                conn.Close();
-                return tableExists;
-            }
-        }
+        //public bool DoesSQLTableExist()
+        //{
+        //    bool tableExists = new bool();
+        //    using (SqlConnection conn = Connection)
+        //    {
+        //        conn.Open();
+        //        using (SqlCommand cmd = conn.CreateCommand())
+        //        {
+        //            cmd.CommandText = $@"SELECT * FROM {name};";
+        //            SqlDataReader reader = cmd.ExecuteReader();
+        //            tableExists = reader.Read();
+        //            reader.Close();
+        //        }
+        //        conn.Close();
+        //        return tableExists;
+        //    }
+        //}
 
         public void CreateTable_SQL() //currently using the datacontrollers name as the TableName
         {
-            if (!DoesSQLTableExist())
-            {
-                using (SqlConnection conn = Connection)
-                {
-                    conn.Open();
-                    using (SqlCommand cmd = conn.CreateCommand())
-                    {
-                        string sqlString = $"CREATE TABLE {name} (Id INT PRIMARY KEY";
-                        foreach (IDatum datum in data)
-                        {
-                            var sqlType = GetSQLType(datum);
-                            if (sqlType == null)
-                                Debug.Log(datum.Name + " Does not have a matching SQL Type in the dictionary");
-                            else
-                                sqlString += $", {datum.Name} {sqlType}";
-                        }
-                        sqlString += ")";
-                        cmd.CommandText = sqlString;
-                        cmd.ExecuteNonQuery();
-                    }
-                    conn.Close();
-                }
-            }
+            //if (!DoesSQLTableExist())
+            //{
+            //    using (SqlConnection conn = Connection)
+            //    {
+            //        conn.Open();
+            //        using (SqlCommand cmd = conn.CreateCommand())
+            //        {
+            //            string sqlString = $"CREATE TABLE {name} (Id INT PRIMARY KEY";
+            //            foreach (IDatum datum in data)
+            //            {
+            //                var sqlType = GetSQLType(datum);
+            //                if (sqlType == null)
+            //                    Debug.Log(datum.Name + " Does not have a matching SQL Type in the dictionary");
+            //                else
+            //                    sqlString += $", {datum.Name} {sqlType}";
+            //            }
+            //            sqlString += ")";
+            //            cmd.CommandText = sqlString;
+            //            cmd.ExecuteNonQuery();
+            //        }
+            //        conn.Close();
+            //    }
+            //}
         }
 
         public void AddData_SQL()
         {
-            //First check if table exists in DB:
-            if (DoesSQLTableExist())
-            {
-                using (SqlConnection conn = Connection)
-                {
-                    conn.Open();
-                    DataTable dataTable = new DataTable();
+            ////First check if table exists in DB:
+            //if (DoesSQLTableExist())
+            //{
+            //    using (SqlConnection conn = Connection)
+            //    {
+            //        conn.Open();
+            //        DataTable dataTable = new DataTable();
 
-                    //Add all columns first:
-                    foreach (var datum in data)
-                        dataTable.Columns.Add(datum.Name);
+            //        //Add all columns first:
+            //        foreach (var datum in data)
+            //            dataTable.Columns.Add(datum.Name);
 
-                    //Then add all rows:
-                    foreach (var datum in data)
-                        dataTable.Rows.Add(datum.ValueAsString);
+            //        //Then add all rows:
+            //        foreach (var datum in data)
+            //            dataTable.Rows.Add(datum.ValueAsString);
 
-                    using (SqlBulkCopy bulkCopy = new SqlBulkCopy(conn))
-                    {
-                        bulkCopy.DestinationTableName = name;
-                        bulkCopy.WriteToServer(dataTable);
-                    }
-                }
-            }
-            else
-                Debug.Log($"There is no SQL table in the database with the name {name}");
+            //        using (SqlBulkCopy bulkCopy = new SqlBulkCopy(conn))
+            //        {
+            //            bulkCopy.DestinationTableName = name;
+            //            bulkCopy.WriteToServer(dataTable);
+            //        }
+            //    }
+            //}
+            //else
+            //    Debug.Log($"There is no SQL table in the database with the name {name}");
         }
 
 

@@ -657,8 +657,6 @@ namespace USE_ExperimentTemplate_Task
 
         protected virtual void DefinePrefabStims()
         {
-            Debug.Log("DEFINING PREFAB STIMS!");
-
             MethodInfo taskStimDefFromPrefabPath = GetType().GetMethod(nameof(TaskStimDefFromPrefabPath))
                 .MakeGenericMethod((new Type[] { StimDefType }));
 
@@ -687,8 +685,6 @@ namespace USE_ExperimentTemplate_Task
 
         protected virtual void DefineExternalStims()
         {
-            Debug.Log("DEFINING EXTERNAL STIMS!");
-
             // need to add check for files in stimfolderpath if there is no stimdef file (take all files)
             string stimFolderPath = "";
             string stimExtension = "";
@@ -830,14 +826,20 @@ namespace USE_ExperimentTemplate_Task
                 else
                     SessionSettings.ImportSettings_SingleTypeJSON<T[]>(key, stimDefFile);
 
-                if(UseDefaultConfigs)
-                {
-                    PrefabStims = new StimGroup("PrefabStims", (T[])SessionSettings.Get(key));
-                    foreach (var stim in PrefabStims.stimDefs)
-                        PrefabStimPaths.Add(stim.PrefabPath + "/" + stim.FileName);
-                }
+                IEnumerable<StimDef> potentials = (T[])SessionSettings.Get(key);
+                if (potentials == null || potentials.Count() < 1)
+                    return;
                 else
-                    ExternalStims = new StimGroup("ExternalStims", (T[])SessionSettings.Get(key));                    
+                {
+                    if(UseDefaultConfigs)
+                    {
+                        PrefabStims = new StimGroup("PrefabStims", (T[])SessionSettings.Get(key));
+                        foreach (var stim in PrefabStims.stimDefs)
+                            PrefabStimPaths.Add(stim.PrefabPath + "/" + stim.FileName);
+                    }
+                    else
+                        ExternalStims = new StimGroup("ExternalStims", (T[])SessionSettings.Get(key));                    
+                }
             }
             else
                 Debug.Log("No stimdef file in config folder (this may not be a problem).");

@@ -278,7 +278,8 @@ namespace USE_Settings
 			}
 			else
 			{
-				throw new Exception("Settings not found: " + key);
+				//throw new Exception("Settings not found: " + key);
+				return null;
 			}
 		}
 
@@ -286,13 +287,9 @@ namespace USE_Settings
 		public static object Get<T>(string key, string settingKey = "")
 		{
 			if (settingKey == "")
-			{
 				settingKey = key;
-			}
 			if (!allSettings.ContainsKey(key))
-			{
 				throw new Exception("Settings not found: " + key);
-			}
 			else
 			{
 				try
@@ -300,13 +297,11 @@ namespace USE_Settings
 					if (typeof(T) == typeof(string))
 					{
 						string temp = (string)allSettings[key].Get(settingKey);
-						//return JsonConvert.SerializeObject(allSettings[key].Get(settingKey));
 						return temp.Substring(1, temp.Length - 2);//strings are padded with \" at each end during object conversion
 					}
 					else
-					{
 						return (T)Convert.ChangeType(allSettings[key].Get(settingKey), typeof(T));
-					}
+					
 				}
 				catch (Exception e)
 				{
@@ -320,15 +315,10 @@ namespace USE_Settings
 
 		public static string GetPath(string key, string settingKey)
 		{
-
 			if (!allSettings.ContainsKey(key))
-			{
 				throw new Exception("Settings not found: " + key);
-			}
 			else
-			{
 				return allSettings[key].FilePath;
-			}
 		}
 
 		public static void ImportSettings_SingleTypeJSON<T>(string settingsName, string settingsPath, string dictName = "")
@@ -361,6 +351,10 @@ namespace USE_Settings
 			Debug.Log("Attempting to load settings file " + settingsPath + ".");
 			if (dictName == "")
 				dictName = settingsName;
+
+			if (!File.Exists(settingsPath))
+				return;
+			
 			string[] lineList = ReadSettingsFile(settingsPath, "//", "...");
 			T[] settingsArray = new T[lineList.Length - 1];
 

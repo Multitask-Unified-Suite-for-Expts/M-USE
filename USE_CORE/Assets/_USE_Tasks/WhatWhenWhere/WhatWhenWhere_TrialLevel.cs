@@ -11,7 +11,6 @@ using USE_DisplayManagement;
 using System.Linq;
 using System.IO;
 using UnityEngine.AI;
-using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.Serialization;
 using USE_ExperimentTemplate_Trial;
 using USE_ExperimentTemplate_Task;
@@ -620,11 +619,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //-----------------------------------------------------DEFINE QUADDLES-------------------------------------------------------------------------------------
     protected override void DefineTrialStims()
     {
+        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
         //StimGroup constructor which creates a subset of an already-existing StimGroup 
-        searchStims = new StimGroup("SearchStims", ExternalStims, CurrentTrialDef.SearchStimsIndices);
-        distractorStims = new StimGroup("DistractorStims", ExternalStims, CurrentTrialDef.DistractorStimsIndices);
+        searchStims = new StimGroup("SearchStims", group, CurrentTrialDef.SearchStimsIndices);
+        distractorStims = new StimGroup("DistractorStims", group, CurrentTrialDef.DistractorStimsIndices);
        // searchStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback")); MAKING QUADDLES TWITCH BETWEEN STATES
      //   distractorStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback"));
 

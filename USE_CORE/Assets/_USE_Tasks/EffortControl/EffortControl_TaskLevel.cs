@@ -55,7 +55,15 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         {
             trialLevel.ResetBlockVariables();
             ContextName = currentBlock.ContextName;
-            RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(ContextExternalFilePath, ContextName, "LinearDark"), UseDefaultConfigs);
+
+            string contextFilePath;
+            if (UseDefaultConfigs)
+                contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + currentBlock.ContextName;
+            else
+                contextFilePath = trialLevel.GetContextNestedFilePath(ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
+
+            RenderSettings.skybox = CreateSkybox(contextFilePath, UseDefaultConfigs);
+
             EventCodeManager.SendCodeImmediate(SessionEventCodes["ContextOn"]);
         });
 

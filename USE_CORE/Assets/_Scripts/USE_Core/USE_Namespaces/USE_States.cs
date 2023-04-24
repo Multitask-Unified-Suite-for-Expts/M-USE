@@ -1397,9 +1397,6 @@ namespace USE_States
 			else
 				tex = LoadPNG(filePath); // load the texture from a PNG -> Texture2D
 
-			if (tex == null)
-				Debug.LogError("TEX IS NULL!");
-
 			//Set the textures of the skybox to that of the PNG
 			materialSkybox.SetTexture("_FrontTex", tex);
             materialSkybox.SetTexture("_BackTex", tex);

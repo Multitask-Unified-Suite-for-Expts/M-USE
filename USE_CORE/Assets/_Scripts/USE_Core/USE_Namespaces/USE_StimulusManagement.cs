@@ -17,25 +17,9 @@ namespace USE_StimulusManagement
 	{
 		public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)
 		public string StimName;
-		// public string Name
-		// {
-		// 	get
-		// 	{
-		// 		string[] strings;
-  //
-		// 		if (ExternalFilePath.Contains("\\"))
-  //                   strings = ExternalFilePath.Split('\\');
-		// 		else
-		// 			strings = ExternalFilePath.Split('/');
-  //
-  //               string split = strings[strings.Length - 1];
-		// 		return split.Split('.')[0];
-		// 	}
-  //
-		// }
 		public string StimPath;
 		public string PrefabPath;
-		public string ExternalFilePath;
+		public string FileName;
 		public string StimFolderPath;
 		public string StimExtension;
 		public int StimCode; //optional, for analysis purposes
@@ -67,7 +51,7 @@ namespace USE_StimulusManagement
 
 		public StimDef(StimGroup sg, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
-			if (!(string.IsNullOrEmpty(PrefabPath) | string.IsNullOrWhiteSpace(PrefabPath))  && !(string.IsNullOrEmpty(ExternalFilePath) | string.IsNullOrWhiteSpace(PrefabPath)))
+			if (!(string.IsNullOrEmpty(PrefabPath) | string.IsNullOrWhiteSpace(PrefabPath))  && !(string.IsNullOrEmpty(FileName) | string.IsNullOrWhiteSpace(PrefabPath)))
 				Debug.LogWarning("StimDef for stimulus " + StimName + " is being specified with both an external file path and a prefab path. Only the external filepath will be checked.");
 			sg.stimDefs.Add(this);
 			StimGroups = new Dictionary<string, StimGroup>();
@@ -127,8 +111,8 @@ namespace USE_StimulusManagement
 				sd.StimPath = StimPath;
 			if (PrefabPath != null)
 				sd.PrefabPath = PrefabPath;
-			if (ExternalFilePath != null)
-				sd.ExternalFilePath = ExternalFilePath;
+			if (FileName != null)
+				sd.FileName = FileName;
 			if (StimFolderPath != null)
 				sd.StimFolderPath = StimFolderPath;
 			if (StimExtension != null)
@@ -177,8 +161,8 @@ namespace USE_StimulusManagement
 				sd.StimPath = StimPath;
 			if (PrefabPath != null)
 				sd.PrefabPath = PrefabPath;
-			if (ExternalFilePath != null)
-				sd.ExternalFilePath = ExternalFilePath;
+			if (FileName != null)
+				sd.FileName = FileName;
 			if (StimFolderPath != null)
 				sd.StimFolderPath = StimFolderPath;
 			if (StimExtension != null)
@@ -287,37 +271,44 @@ namespace USE_StimulusManagement
 
 		public GameObject Load()
 		{
-			if (!string.IsNullOrEmpty(ExternalFilePath))
-			{
-				StimGameObject = LoadExternalStimFromFile();
-			}
-			else if (StimDimVals != null)
-			{
-				ExternalFilePath = FilePathFromDims("placeholder1", new List<string[]>(), "placeholder3");
-				StimGameObject = LoadExternalStimFromFile();
-			}
-			else if (!string.IsNullOrEmpty(PrefabPath))
-				StimGameObject = Resources.Load<GameObject>(PrefabPath);
+			if (PrefabPath != null && PrefabPath.Length > 2)
+				StimGameObject = LoadPrefabFromResources(PrefabPath);
 			else
 			{
-				Debug.LogWarning("Attempting to load stimulus " + StimName + ", but no Unity Resources path, external file path, or dimensional values have been provided.");
-				return null;
-			}
-
-			if (!string.IsNullOrEmpty(StimName))
-				StimGameObject.name = StimName;
-			else
-			{
-				string[] FileNameStrings;
-				if (ExternalFilePath.Contains("\\"))
-		                  FileNameStrings = ExternalFilePath.Split('\\');
+				if (!string.IsNullOrEmpty(FileName))
+				{
+					StimGameObject = LoadExternalStimFromFile();
+				}
+				else if (StimDimVals != null)
+				{
+					FileName = FilePathFromDims("placeholder1", new List<string[]>(), "placeholder3");
+					StimGameObject = LoadExternalStimFromFile();
+				}
+				else if (!string.IsNullOrEmpty(PrefabPath))
+					StimGameObject = Resources.Load<GameObject>(PrefabPath);
 				else
-					FileNameStrings = ExternalFilePath.Split('/');
+				{
+					Debug.LogWarning("Attempting to load stimulus " + StimName + ", but no Unity Resources path, external file path, or dimensional values have been provided.");
+					return null;
+				}
 
-				string splitString = FileNameStrings[FileNameStrings.Length - 1];
-				StimGameObject.name = splitString.Split('.')[0];
+				if (!string.IsNullOrEmpty(StimName))
+					StimGameObject.name = StimName;
+				else
+				{
+					string[] FileNameStrings;
+					if (FileName.Contains("\\"))
+						FileNameStrings = FileName.Split('\\');
+					else
+						FileNameStrings = FileName.Split('/');
+
+					string splitString = FileNameStrings[FileNameStrings.Length - 1];
+					StimGameObject.name = splitString.Split('.')[0];
+				}
+
 			}
-			
+
+
 			return StimGameObject;
 		}
 
@@ -334,7 +325,7 @@ namespace USE_StimulusManagement
 			return children;
 		}
 
-		private void AssignStimDefPointeToObjectHierarchy(GameObject parentObject, StimDef sd)
+		public void AssignStimDefPointeToObjectHierarchy(GameObject parentObject, StimDef sd)
 		{
 			List<GameObject> objectChildren = GetAllChildren(parentObject);
 			foreach (GameObject child in objectChildren)
@@ -347,61 +338,62 @@ namespace USE_StimulusManagement
 		
 		public GameObject LoadPrefabFromResources(string prefabPath = "")
 		{
-			if (!string.IsNullOrEmpty(prefabPath))
+			if (prefabPath.Length > 2)
 				PrefabPath = prefabPath;
-			StimGameObject = Resources.Load<GameObject>(PrefabPath);
+
+			//THIS WORKS BUT HARD CODED AND PROB WONT WORK FOR BUILD.
+			string path;
+			if (Application.isEditor)
+				path = "Assets/_USE_Session/Resources/" + PrefabPath + "/" + FileName;
+			else
+			{
+				string splitFileName = FileName.Split('.')[0];
+				path = PrefabPath + "/" + splitFileName;
+			}
+			StimGameObject = LoadModel(path, true);
+
 			PositionRotationScale();
 			if (!string.IsNullOrEmpty(StimName))
 				StimGameObject.name = StimName;
 			AssignStimDefPointeToObjectHierarchy(StimGameObject, this);
-			// //replace with looping through all the object's children and assign to each
-			// StimGameObject.AddComponent<StimDefPointer>();
-			// StimGameObject.GetComponent<StimDefPointer>().StimDef = this;
 			return StimGameObject;
 		}
 
 		public GameObject LoadExternalStimFromFile(string stimFilePath = "")
-		{			
+		{
+			Debug.Log("LOADING EXT STIM FROM FILE!");
+
 			//add StimExtesion to file path if it doesn't already contain it
-			if (!string.IsNullOrEmpty(StimExtension) && !ExternalFilePath.EndsWith(StimExtension))
+			if (!string.IsNullOrEmpty(StimExtension) && !FileName.EndsWith(StimExtension))
 			{
 				if (!StimExtension.StartsWith("."))
-					ExternalFilePath = ExternalFilePath + "." + StimExtension;
+					FileName = FileName + "." + StimExtension;
 				else
-					ExternalFilePath = ExternalFilePath + StimExtension;
+					FileName = FileName + StimExtension;
 			}
 			
 			//by default stimFilePath argument is empty, and files are found using StimFolderPath + ExternalFilePath
 			//so usually this first if statement is never called - used for cases where we might want to find a file in an unusual location
 			if (!string.IsNullOrEmpty(stimFilePath))
 			{
-				ExternalFilePath = stimFilePath;
+				FileName = stimFilePath;
 				//should add a method to check this file exists and return error if not
 			}
 			//we will only use StimFolderPath if ExternalFilePath doesn't already contain it
-			else if (!string.IsNullOrEmpty(StimFolderPath) && !ExternalFilePath.StartsWith(StimFolderPath))
-			{
-				// if (!ExternalFilePath.StartsWith(Path.DirectorySeparatorChar.ToString()) &&
-				//     !StimFolderPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
-				// 	ExternalFilePath = StimFolderPath + Path.DirectorySeparatorChar + ExternalFilePath;
-				// else if (ExternalFilePath.StartsWith(Path.DirectorySeparatorChar.ToString()) &&
-				//          StimFolderPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
-				// 	ExternalFilePath = StimFolderPath + ExternalFilePath.Substring(1);
-				// else
-				// 	ExternalFilePath = StimFolderPath + ExternalFilePath;
-				
+			else if (!string.IsNullOrEmpty(StimFolderPath) && !FileName.StartsWith(StimFolderPath))
+			{				
 				//this checking needs to be done during task setup - check each stim exists at start of session instead
 				//of at start of each trial
-				List<string> filenames = RecursiveFileFinder.FindFile(StimFolderPath, ExternalFilePath, StimExtension);
+				List<string> filenames = RecursiveFileFinder.FindFile(StimFolderPath, FileName, StimExtension);
 				if (filenames.Count == 1)
 				{
-					ExternalFilePath = filenames[0];
+					FileName = filenames[0];
 				}
 				else if (filenames.Count == 0)
-					Debug.LogError("Attempted to load stimulus " + ExternalFilePath + " in folder " + 
+					Debug.LogError("Attempted to load stimulus " + FileName + " in folder " + 
 					               StimFolderPath + "but no file matching this pattern was found in this folder or subdirectories.");
 				else
-					Debug.LogError("Attempted to load stimulus " + ExternalFilePath + " in folder " + 
+					Debug.LogError("Attempted to load stimulus " + FileName + " in folder " + 
 					               StimFolderPath + "but multiple files matching this pattern were found in this folder or subdirectories.");
 			}
 			else
@@ -410,9 +402,7 @@ namespace USE_StimulusManagement
 				//but should also have method to check this file exists
 			}
 
-
-	
-			StimGameObject = LoadModel();
+			StimGameObject = LoadModel(FileName);
 			PositionRotationScale();
 			if (!string.IsNullOrEmpty(StimName))
 				StimGameObject.name = StimName;
@@ -449,7 +439,7 @@ namespace USE_StimulusManagement
 			}
 		}
 
-		public GameObject LoadModel(bool visibiility = false)
+		public GameObject LoadModel(string filePath, bool loadFromResources = false, bool visibiility = false)
 		{
 			using (var assetLoader = new AssetLoader())
 			{
@@ -458,11 +448,18 @@ namespace USE_StimulusManagement
 					var assetLoaderOptions = AssetLoaderOptions.CreateInstance();
 					assetLoaderOptions.AutoPlayAnimations = true;
 					assetLoaderOptions.AddAssetUnloader = true;
-					StimGameObject = assetLoader.LoadFromFile(ExternalFilePath, assetLoaderOptions);
+
+					if(loadFromResources)
+					{
+						string path = (PrefabPath + "/" + FileName).Split('.')[0];
+						StimGameObject = Object.Instantiate(Resources.Load(path) as GameObject);
+                    }
+                    else
+						StimGameObject = assetLoader.LoadFromFile(filePath);
+					
 				}
 				catch (System.Exception e)
 				{
-					Debug.Log(ExternalFilePath);
 					Debug.LogError(e.ToString());
 					return null;
 				}
@@ -712,7 +709,9 @@ namespace USE_StimulusManagement
 		public void LoadStims()
 		{
 			foreach(StimDef sd in stimDefs)
+			{
 				sd.Load();
+			}
 		}
 
 		public void LoadPrefabStimFromResources()

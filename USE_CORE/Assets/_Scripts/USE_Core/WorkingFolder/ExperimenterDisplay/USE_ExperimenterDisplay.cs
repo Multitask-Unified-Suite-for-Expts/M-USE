@@ -107,13 +107,8 @@ namespace USE_ExperimenterDisplay
             defaultPanelList.Add(GameObject.Find("BlockInfoPanel").AddComponent<BlockInfoPanel>()); 
             defaultPanelList.Add(GameObject.Find("SessionInfoPanel").AddComponent<SessionInfoPanel>()); 
             defaultPanelList.Add(GameObject.Find("HotKeyPanel").AddComponent<HotKeyPanel>()); 
-            defaultPanelList.Add(GameObject.Find("LogPanel").AddComponent<LogPanel>()); 
-            /*defaultPanelList.Add(new BlockInfoPanel());
-            defaultPanelList.Add(new SessionInfoPanel());
-            defaultPanelList.Add(new HotKeyPanel());
-            defaultPanelList.Add(new LogPanel());*/
-            // defaultPanelList.Add(new PlayerViewPanel());
-            //all other default panels
+            defaultPanelList.Add(GameObject.Find("LogPanel").AddComponent<LogPanel>());
+
             return defaultPanelList;
         }
     }

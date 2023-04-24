@@ -402,7 +402,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 contextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage"));
+                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage"), UseDefaultConfigs);
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);

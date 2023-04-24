@@ -77,6 +77,8 @@ namespace USE_ExperimentTemplate_Trial
         public float ParticipantDistance_CM;
         public float ShotgunRaycastCircleSize_DVA;
 
+        public bool UseDefaultConfigs;
+
 
         // Texture Variables
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, 
@@ -142,10 +144,12 @@ namespace USE_ExperimentTemplate_Trial
                 // FrameData.CreateFile();
                 DefineTrialStims();
                 ResetRelativeStartTime();
+
                 foreach (StimGroup sg in TrialStims)
                 {
                     sg.LoadStims();
                 }
+
                 ResetTrialVariables();
             });
 
@@ -443,12 +447,10 @@ namespace USE_ExperimentTemplate_Trial
         public string GetContextNestedFilePath(string MaterialFilePath, string contextName, [CanBeNull] string backupContextName = null)
         {
             string contextPath = "";
-
             string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
 
             if (filePaths.Length >= 1)
                 contextPath = filePaths[0];
-
             else
             {
                 contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0];
@@ -457,6 +459,19 @@ namespace USE_ExperimentTemplate_Trial
 
             return contextPath;
         }
+
+        public void LoadTexturesFromResources()
+        {
+            HeldTooLongTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/HorizontalStripes");
+            HeldTooShortTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/VerticalStripes");
+            BackdropStripesTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/bg");
+            THR_BackdropTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/Concrete4");
+
+            TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
+            TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
+            TouchFBController.MovedTooFar_Texture = BackdropStripesTexture;
+        }
+
         public void LoadTextures(String ContextExternalFilePath)
         {
             HeldTooLongTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "HorizontalStripes.png"));

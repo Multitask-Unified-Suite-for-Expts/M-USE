@@ -43,7 +43,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             wwwTL.ContextName = wwwBD.ContextName;
-            RenderSettings.skybox = CreateSkybox(wwwTL.GetContextNestedFilePath(ContextExternalFilePath, wwwTL.ContextName));
+            RenderSettings.skybox = CreateSkybox(wwwTL.GetContextNestedFilePath(ContextExternalFilePath, wwwTL.ContextName), UseDefaultConfigs);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
 
             ErrorType_InTask.Add(string.Join(",",wwwTL.ErrorType_InBlock));

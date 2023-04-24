@@ -346,14 +346,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 SliderFBController.UpdateSliderValue(CurrentTrialDef.SliderGain[numTouchedStims]*(1f/sliderGainSteps));
                 numTouchedStims += 1;
                 if (numTouchedStims == CurrentTrialDef.CorrectObjectTouchOrder.Length)
-                {
                     trialComplete = true;
-                }
-
+                
                 errorTypeString = "None";
             }
-            //Chose Incorrect
-            else
+            else //Chose Incorrect
             {
                 consecutiveError++;
                 HaloFBController.ShowNegative(selectedGO);
@@ -441,7 +438,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+                RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png", UseDefaultConfigs);
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);

@@ -48,13 +48,16 @@ public class InitScreen : MonoBehaviour {
 
     void Start()
     {
-        /*displayController = gameObject.AddComponent<DisplayController>();
-        displayController.HandleDisplays(this);*/
+        displayController = gameObject.AddComponent<DisplayController>();
+        displayController.HandleDisplays(this);
 
         foreach (GameObject g in disableOnStart)
             g.SetActive(false);
         foreach (GameObject g in enableOnStart)
             g.SetActive(true);
+
+        if (GameObject.Find("ControlLevels").GetComponent<M_USE_ControlLevel_Session>().UseDefaultConfigs)
+            StartCoroutine(HandleConfirm());
     }
 
     IEnumerator HandleConfirm()

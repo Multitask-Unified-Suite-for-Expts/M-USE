@@ -117,7 +117,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             SetControllerBlockValues();
 
-            LoadTextures(MaterialFilePath);
+            if(HeldTooLongTexture == null)
+                LoadTextures(MaterialFilePath);
 
             if (StartButton == null)
             {
@@ -139,7 +140,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, ChooseStim);
-        //ShotgunHandler.MaxPixelDisplacement = 150;
         ShotgunHandler.shotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
         TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, ButtonScale, CR_CanvasGO);
 
@@ -568,7 +568,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     void AdjustStartButtonPos()
     {
         Vector3 buttonPos = StartButton.transform.position;
-        buttonPos.y -= 1f;
+        buttonPos.y -= .025f;
         StartButton.transform.position = buttonPos;
     }
 
@@ -597,25 +597,25 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         switch (NumFeedbackRows)
         {
             case 1:
-                if (MacMainDisplayBuild && Application.isEditor)
+                if (MacMainDisplayBuild && !Application.isEditor)
                     yOffset = 90f; //not checked
                 else
                     yOffset = 60f;
                 break;
             case 2:
-                if (MacMainDisplayBuild && Application.isEditor)
+                if (MacMainDisplayBuild && !Application.isEditor)
                     yOffset = 75f; //not checked
                 else
                     yOffset = 50f;
                 break;
             case 3:
-                if (MacMainDisplayBuild && Application.isEditor)
+                if (MacMainDisplayBuild && !Application.isEditor)
                     yOffset = 25f; //not checked
                 else
                     yOffset = 10f;
                 break;
             case 4:
-                if (MacMainDisplayBuild && Application.isEditor)
+                if (MacMainDisplayBuild && !Application.isEditor)
                     yOffset = -5f; //not checked
                 else
                     yOffset = -30f;
@@ -878,6 +878,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         NumNew_Trial = 0;
         NumPNC_Trial = 0;
 
+        StimGroup sg = ExternalStims;
+        if (PrefabStims.stimDefs.Count > 0)
+            sg = PrefabStims;
+
         if (TrialCount_InBlock == 0)
         {
             trialStims = null;
@@ -906,7 +910,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 NumNew_Trial++;
             }
 
-            trialStims = new StimGroup("TrialStims", ExternalStims, currentTrial.TrialStimIndices);
+            trialStims = new StimGroup("TrialStims", sg, currentTrial.TrialStimIndices);
             foreach (ContinuousRecognition_StimDef stim in trialStims.stimDefs)
                 stim.PreviouslyChosen = false;
             trialStims.SetLocations(currentTrial.TrialStimLocations);
@@ -961,7 +965,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 NumPNC_Trial++;
             }
 
-            trialStims = new StimGroup($"TrialStims", ExternalStims, currentTrial.TrialStimIndices);
+            trialStims = new StimGroup($"TrialStims", sg, currentTrial.TrialStimIndices);
             trialStims.SetLocations(currentTrial.TrialStimLocations);
             TrialStims.Add(trialStims);
         }
@@ -982,7 +986,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             for(int i = 0; i < num_PC; i++)
                 currentTrial.TrialStimIndices.Add(currentTrial.PC_Stim[i]);
             
-            trialStims = new StimGroup($"TrialStims", ExternalStims, currentTrial.TrialStimIndices);
+            trialStims = new StimGroup($"TrialStims", sg, currentTrial.TrialStimIndices);
             trialStims.SetLocations(currentTrial.TrialStimLocations);
             TrialStims.Add(trialStims);
         }
@@ -1006,6 +1010,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         Starfield.SetActive(false);
         TokenFBController.enabled = false;
 
+        StimGroup group = ExternalStims;
+        if (UseDefaultConfigs)
+            group = PrefabStims;
+
+
         if (!StimIsChosen && ChosenStimIndices.Count < 1)
             return;
 
@@ -1015,7 +1024,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count];
             FeedbackLocations = CenterFeedbackLocations(currentTrial.TrialFeedbackLocations, FeedbackLocations.Length);
 
-            RightGroup = new StimGroup("Right", ExternalStims, ChosenStimIndices);
+            RightGroup = new StimGroup("Right", group, ChosenStimIndices);
             GenerateFeedbackStim(RightGroup, FeedbackLocations);
             GenerateFeedbackBorders(RightGroup);
 
@@ -1028,7 +1037,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count + 1];
             FeedbackLocations = CenterFeedbackLocations(currentTrial.TrialFeedbackLocations, FeedbackLocations.Length);
 
-            RightGroup = new StimGroup("Right", ExternalStims, ChosenStimIndices);
+            RightGroup = new StimGroup("Right", group, ChosenStimIndices);
             GenerateFeedbackStim(RightGroup, FeedbackLocations.Take(FeedbackLocations.Length - 1).ToArray());
             GenerateFeedbackBorders(RightGroup);
 
@@ -1036,7 +1045,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 MakeStimsFaceCamera(RightGroup);
 
             WrongGroup = new StimGroup("Wrong");
-            StimDef wrongStim = ExternalStims.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(WrongGroup);
+            StimDef wrongStim = group.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(WrongGroup);
             wrongStim.StimGameObject = null;
             GenerateFeedbackStim(WrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length - 1).Take(1).ToArray());
             GenerateFeedbackBorders(WrongGroup);

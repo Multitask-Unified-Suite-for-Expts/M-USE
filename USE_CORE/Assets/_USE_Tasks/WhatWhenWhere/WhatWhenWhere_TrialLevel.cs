@@ -178,7 +178,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             LoadTextures(ContextExternalFilePath);
             // Initialize FB Controller Values
             HaloFBController.SetHaloSize(15f);
-            HaloFBController.SetHaloIntensity(5);
+            HaloFBController.SetHaloIntensity(2);
             if (StartButton == null)
             {
                 USE_StartButton = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
@@ -313,11 +313,22 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-        ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI);
+        ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI, () =>
+        {
+            consecutiveError++;
+            aborted = true;
+            runningAcc.Add(0);
+            errorTypeString = "AbortedTrial";
+            AbortedTrials_InBlock++;
+            CurrentTaskLevel.AbortedTrials_InTask++;
+            AbortCode = 6;
+
+        });
         // ChooseStimulus.SpecifyTermination(() => trialComplete, FinalFeedback);
 
         SelectionFeedback.AddInitializationMethod(() =>
         {
+            ShotgunHandler.HandlerActive = false;
             touchedObjects.Add(selectedSD.StimIndex);
             searchDuration = ChooseStimulus.TimingInfo.Duration;
             searchDurations.Add(searchDuration);
@@ -425,16 +436,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             distractorStims.ToggleVisibility(false);
             if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
                 DestroyChildren(GameObject.Find("MainCameraCopy"));
-            if (!choiceMade)
-            {
-                consecutiveError++;
-                aborted = true;
-                runningAcc.Add(0);
-                errorTypeString = "AbortedTrial";
-                AbortedTrials_InBlock++;
-                CurrentTaskLevel.AbortedTrials_InTask++;
-                AbortCode = 6;
-            }
+            
 
             if (NeutralITI)
             {

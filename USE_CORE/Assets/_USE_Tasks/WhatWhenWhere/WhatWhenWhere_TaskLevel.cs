@@ -24,13 +24,21 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     public int NumSliderBarFilled_InTask;
     public List<float> SearchDurations_InTask;
 
-
+    // Block Summary String Variables
+    [HideInInspector] public string BlockAveragesString;
+    [HideInInspector] public string CurrentBlockString;
+    [HideInInspector] public StringBuilder PreviousBlocksString;
+    private int blocksAdded = 0;
     public override void DefineControlLevel()
     {
         wwwTL = (WhatWhenWhere_TrialLevel)TrialLevel;
 
         SetSettings();
         DefineBlockData();
+        
+        BlockAveragesString = "";
+        CurrentBlockString = "";
+        PreviousBlocksString = new StringBuilder();
         
         RunBlock.AddInitializationMethod(() =>
         {
@@ -47,9 +55,10 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     public override OrderedDictionary GetSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary();
-
-        data["Reward Pulses"] = NumRewardPulses_InTask;
+        data["Trial Count In Task"] = wwwTL.TrialCount_InTask;
+        data["Num Reward Pulses"] = NumRewardPulses_InTask;
         data["Slider Bar Full"] = NumSliderBarFilled_InTask;
+        data["Aborted Trials In Task"] = AbortedTrials_InTask;
         if(SearchDurations_InTask.Count > 0)
             data["Average Search Duration"] = SearchDurations_InTask.Average();
         
@@ -57,20 +66,31 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     }
     public void SetBlockSummaryString()
     {
-        BlockSummaryString.Clear();
+        ClearStrings();
+        float latestAccuracy = -1;
         float avgBlockSearchDuration = 0;
         if (wwwTL.searchDurations_InBlock.Count > 0)
             avgBlockSearchDuration = (float)Math.Round(wwwTL.searchDurations_InBlock.Average(), 2);
+        /*if (wwwTL.runningAcc.Count > 0)
+            latestAccuracy = (wwwTL.runningAcc.Sum()/wwwTL.runningAcc.Count)*100;*/
 
-        BlockSummaryString.AppendLine("<b>Max Trials in Block: </b>" + wwwTL.CurrentTrialDef.MaxTrials + 
-                                      "\nAverage Search Duration: " + avgBlockSearchDuration +
-                                      "\nAccuracy: " + wwwTL.accuracyLog_InBlock + 
+        BlockSummaryString.AppendLine("<b>\nMin Trials in Block: </b>" + wwwTL.MinTrials +
+                                      "<b>\nMax Trials in Block: </b>" + wwwTL.CurrentTrialDef.MaxTrials + 
+                                 //    "<b>\nLearning Criterion: </b>" + String.Format("{0:0.00}%", wwwTL.CurrentTrialDef.BlockEndThreshold*100) +
+                                      /*"\n\n<b>Running Accuracy: </b>" + (latestAccuracy == -1 ?
+                                          ("N/A"):String.Format("{0:0.00}%", latestAccuracy)) +*/
+                                      "\n\nAverage Search Duration: " + avgBlockSearchDuration +
                                       "\n" +
                                       "\nDistractor Slot Error Count: " + wwwTL.distractorSlotErrorCount_InBlock+
                                       "\nNon-Distractor Slot Error Count: " + wwwTL.slotErrorCount_InBlock + 
                                       "\nRepetition Error Count: "  + wwwTL.repetitionErrorCount_InBlock +
                                       //   "\nNon-Stim Touch Error Count: " + wwwTL.numNonStimSelections_InBlock+
                                       "\nNo Selection Error Count: " + wwwTL.AbortedTrials_InBlock);
+         
+        BlockSummaryString.AppendLine(CurrentBlockString).ToString();
+        if (PreviousBlocksString.Length > 0)
+            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
+
     }
     public override void SetTaskSummaryString()
     {
@@ -99,14 +119,14 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
     private void DefineBlockData()
     {
-        BlockData.AddDatum("Block Accuracy", ()=> wwwTL.accuracyLog_InBlock);
-        BlockData.AddDatum("Avg Search Duration", ()=> wwwTL.searchDurations_InBlock.Average());
-        BlockData.AddDatum("Num Distractor Slot Error", ()=> wwwTL.distractorSlotErrorCount_InBlock);
-        BlockData.AddDatum("Num Search Slot Error", ()=> wwwTL.slotErrorCount_InBlock);
-        BlockData.AddDatum("Num Repetition Error", ()=> wwwTL.repetitionErrorCount_InBlock);
+        BlockData.AddDatum("BlockAccuracyLog", ()=> wwwTL.accuracyLog_InBlock);
+        BlockData.AddDatum("AvgSearchDuration", ()=> wwwTL.searchDurations_InBlock.Average());
+        BlockData.AddDatum("NumDistractorSlotError", ()=> wwwTL.distractorSlotErrorCount_InBlock);
+        BlockData.AddDatum("NumSearchSlotError", ()=> wwwTL.slotErrorCount_InBlock);
+        BlockData.AddDatum("NumRepetitionError", ()=> wwwTL.repetitionErrorCount_InBlock);
         //BlockData.AddDatum("Num Non Stim Selections", ()=> wwwTL.numNonStimSelections_InBlock); USE MOUSE TRACKER AND VALIDATE
-        BlockData.AddDatum("Num Aborted Trials", ()=> wwwTL.AbortedTrials_InBlock);
-        BlockData.AddDatum("Num Reward Given", ()=> wwwTL.numRewardGiven_InBlock);
+        BlockData.AddDatum("NumAbortedTrials", ()=> wwwTL.AbortedTrials_InBlock);
+        BlockData.AddDatum("NumRewardGiven", ()=> wwwTL.numRewardGiven_InBlock);
     }
 
     public void SetSettings()
@@ -133,6 +153,12 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
             wwwTL.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
         else
             wwwTL.TouchFeedbackDuration = .3f;
+    }
+    public void ClearStrings()
+    {
+        BlockAveragesString = "";
+        CurrentBlockString = "";
+        BlockSummaryString.Clear();
     }
 
 }

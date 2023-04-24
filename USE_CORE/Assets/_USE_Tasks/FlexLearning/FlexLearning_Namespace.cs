@@ -56,8 +56,7 @@ namespace FlexLearning_Namespace
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
-            System.Random rnd = new System.Random();
-            int num = rnd.Next(MinMaxTrials[0], MinMaxTrials[1]);
+            int num = RandomNumGenerator.Next(MinMaxTrials[0], MinMaxTrials[1]);
             TrialDefs = new List<FlexLearning_TrialDef>().ConvertAll(x => (TrialDef)x);
 
             for (int iTrial = 0; iTrial < num; iTrial++)

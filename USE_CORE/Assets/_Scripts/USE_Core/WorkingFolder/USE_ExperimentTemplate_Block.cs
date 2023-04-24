@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using USE_ExperimentTemplate_Trial;
 
@@ -9,6 +10,7 @@ namespace USE_ExperimentTemplate_Block
 		public List<TrialDef> TrialDefs;
 		public int? TotalTokensNum;
 		public int? MinTrials, MaxTrials;
+		public System.Random RandomNumGenerator;
 
 		public virtual void GenerateTrialDefsFromBlockDef()
 		{

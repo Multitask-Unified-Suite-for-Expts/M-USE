@@ -37,9 +37,7 @@ namespace MazeReactionTest_Namespace
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
-            
-            System.Random rnd = new System.Random();
-            int num = rnd.Next(MinMaxTrials[0], MinMaxTrials[1]+1);
+            int num = RandomNumGenerator.Next(MinMaxTrials[0], MinMaxTrials[1]+1);
             
             TrialDefs = new List<MazeReactionTest_TrialDef>().ConvertAll(x => (TrialDef)x);
             

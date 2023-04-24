@@ -41,8 +41,7 @@ namespace VisualSearch_Namespace
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
-            System.Random rnd = new System.Random();
-            int num = rnd.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
+            int num = RandomNumGenerator.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
             TrialDefs = new List<VisualSearch_TrialDef>().ConvertAll(x => (TrialDef)x);
             for (int iTrial = 0; iTrial < num; iTrial++)
             {

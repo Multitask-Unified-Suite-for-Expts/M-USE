@@ -22,7 +22,7 @@ public class GazeCalibration_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod (() =>
         {
-            SetSettings();
+           // SetSettings();
         });
     }
     private void SetSettings()

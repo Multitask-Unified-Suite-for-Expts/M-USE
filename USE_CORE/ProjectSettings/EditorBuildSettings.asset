@@ -44,4 +44,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_USE_Tasks/GazeCalibration/GazeCalibration.unity
     guid: f95a2d16a11db7846854768b108fbfe2
+  - enabled: 1
+    path: Assets/_USE_Tasks/TobiiGaze/TobiiGaze.unity
+    guid: 843f4b462c28b8142be75f1ff34ca7f9
   m_configObjects: {}

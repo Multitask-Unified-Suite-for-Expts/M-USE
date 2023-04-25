@@ -73,7 +73,7 @@ namespace USE_Common_Namespace {
 		}
 	}
 
-	public static class ScreenTransformations{
+	/*public static class ScreenTransformations{
 
         public static Vector3 AdcsToScreenPoint(Vector2 adcsPoint)
         {
@@ -124,7 +124,7 @@ namespace USE_Common_Namespace {
         //    Vector2 posProp = PixelToProportion(screenPoint, mainDisplayRes);
         //    return ProportionToPixel(posProp, playerViewRes);
         //}
-    }
+    }*/
 
 
 	public class CalibrationResult{

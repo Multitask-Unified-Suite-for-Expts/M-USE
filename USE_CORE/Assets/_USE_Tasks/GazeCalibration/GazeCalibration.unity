@@ -173,10 +173,14 @@ MonoBehaviour:
   isMainLevel: 0
   CallDefineLevelAutomatically: 0
   quitApplicationAtEnd: 0
-  DebugActive: 0
+  DebugActive: 1
   Paused: 1
+  ShotgunRaycastCircleSize_DVA: 0
+  ShotgunRaycastSpacing_DVA: 0
+  ParticipantDistance_CM: 0
+  PrefabPath: 
   ConfigName: 
-  TaskName: 
+  TaskName: GazeCalibration
   TaskProjectFolder: 
   BlockCount: 0
   TrialLevel: {fileID: 376477138}
@@ -188,6 +192,7 @@ MonoBehaviour:
   EventCodesActive: 0
   RewardPulsesActive: 0
   SonicationActive: 0
+  UseDefaultConfigs: 0
   ContextExternalFilePath: 
   SessionDataPath: 
   TaskConfigPath: 
@@ -198,7 +203,7 @@ MonoBehaviour:
   EyetrackerType: 
   SelectionType: 
   LocateFile: {fileID: 0}
-  TaskCam: {fileID: 1497056611}
+  TaskCam: {fileID: 0}
   TaskCanvasses: []
   PreloadedStims:
     stimGroupName: 
@@ -282,11 +287,15 @@ MonoBehaviour:
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   InitialTokenAmount: 0
+  ShotgunRaycastSpacing_DVA: 0
+  ParticipantDistance_CM: 0
+  ShotgunRaycastCircleSize_DVA: 0
+  UseDefaultConfigs: 0
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
   THR_BackdropTexture: {fileID: 0}
-  GC_CanvasGO: {fileID: 0}
+  GC_CanvasGO: {fileID: 1180470800}
   USE_Circle: {fileID: 0}
   ContextExternalFilePath: 
   SpoofGazeWithMouse: 0
@@ -469,7 +478,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 1
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 1497056611}
   m_PlaneDistance: 1
   m_PixelPerfect: 0
   m_ReceivesEvents: 1

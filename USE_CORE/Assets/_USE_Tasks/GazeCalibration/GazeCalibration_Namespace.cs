@@ -35,6 +35,7 @@ namespace GazeCalibration_Namespace
         //Already-existing fields (inherited from TrialDef)
 		//public int BlockCount, TrialCountInBlock, TrialCountInTask;
 		//public TrialStims TrialStims;
+        public int TrialID;
     }
 
     public class GazeCalibration_StimDef : StimDef

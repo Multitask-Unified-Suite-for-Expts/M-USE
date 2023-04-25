@@ -117,11 +117,10 @@ namespace USE_ExperimentTemplate_Session
             else
                 configFileFolder = LocateFile.GetPath("Config File Folder");
             
-            
+
             SubjectID = SessionDetails.GetItemValue("SubjectID");
             SessionID = SessionDetails.GetItemValue("SessionID");
-            FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" +
-                         DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
+            FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" + DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
 
             SessionSettings.ImportSettings_MultipleType("Session",
                 LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));

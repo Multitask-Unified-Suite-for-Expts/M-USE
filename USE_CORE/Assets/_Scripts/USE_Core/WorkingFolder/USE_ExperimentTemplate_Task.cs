@@ -15,6 +15,7 @@ using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Trial;
 using USE_ExperimentTemplate_Block;
 using SelectionTracking;
+using UnityEngine.InputSystem;
 
 namespace USE_ExperimentTemplate_Task
 {

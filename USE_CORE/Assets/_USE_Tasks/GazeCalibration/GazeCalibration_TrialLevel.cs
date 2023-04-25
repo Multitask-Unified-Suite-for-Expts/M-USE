@@ -9,7 +9,6 @@ using GazeCalibration_Namespace;
 using EyeTrackerData_Namespace;
 using System;
 using USE_UI;
-using USE_Common_Namespace;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
 using System.Globalization;
 
@@ -27,11 +26,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public float SmallCircleSize;
     [HideInInspector] public Vector3 BigCirclePosition;
     [HideInInspector] public float BigCircleSize;
-    
-    [HideInInspector] public int RedSpriteSize;
-    [HideInInspector] public int BlackSpriteSize;
-    [HideInInspector] public int BlueSpriteSize;
-
 
 
 
@@ -45,6 +39,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     public float[] calibPointsInset = new float[2] { .1f, .15f };
     [HideInInspector]
     public Vector2[] calibPointsADCS;
+    private ScreenTransformations screenTransformations;
+
 
     //Other Calibration Point Variables....?
     private float acceptableCalibrationDistance;
@@ -57,7 +53,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private Vector3 moveVector;
     private Vector3 calibCircleStartPos;
     private int calibCount;
-    private EyeTrackerData_Namespace.CalibrationResult calibResult;
+    private CalibrationResult calibResult;
 
     //Calibration Timing Variables
     private float epochStartTime;
@@ -79,10 +75,16 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     // Game Objects
     private USE_Circle calibSmallCircle;
     private USE_Circle calibBigCircle;
+    
+    // Selection Handling
+    private SelectionTracking.SelectionTracker.SelectionHandler SelectionHandler;
     //private GameObject calibCanvas;
+    /*
     private Sprite redCircle;
     private Sprite blackCircle;
-    private Sprite blueCircle;
+    private Sprite blueCircle;*/
+
+    //private PlayerViewPanel uiElements;
 
     //public float widthCm;
 
@@ -125,19 +127,34 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             calibCount = 0;
            // calibCanvas.SetActive(true);
             calibrationFinished = false;
-            calibResult = new EyeTrackerData_Namespace.CalibrationResult();
+            calibResult = new CalibrationResult();
 
+            screenTransformations = new ScreenTransformations();
+            
+            RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "LinearDark", "LinearDark"), UseDefaultConfigs);
+            
             // Assign Game Objects
             calibSmallCircle = new USE_Circle(GC_CanvasGO.GetComponent<Canvas>(), SmallCirclePosition, SmallCircleSize, "CalibrationSmallCircle");
             calibBigCircle = new USE_Circle(GC_CanvasGO.GetComponent<Canvas>(), BigCirclePosition, BigCircleSize, "CalibrationBigCircle");
-            redCircle = USE_Circle.CreateCircleSprite(Color.red, RedSpriteSize);
-            blackCircle = USE_Circle.CreateCircleSprite(Color.red, BlackSpriteSize);
-            blueCircle = USE_Circle.CreateCircleSprite(Color.red, BlueSpriteSize);
-            calibBigCircle.SetSprite(blackCircle);
+            calibBigCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.black;
         });
-
-        var SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Init, Calibrate);
+        SetupTrial.AddInitializationMethod(() =>
+        {
+            calibSmallCircle.SetVisibilityOnOffStates(Init,Calibrate);
+            calibBigCircle.SetVisibilityOnOffStates(Init,Calibrate);
+        });
+        SetupTrial.SpecifyTermination(()=>true, Init);
         
+        if (SpoofGazeWithMouse)
+            SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Init, Calibrate);
+        else
+            SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "GazeSelection", Init, Calibrate);
+        
+        Init.AddInitializationMethod(() =>
+        {
+            
+            calibBigCircle.CircleGO.SetActive(true);
+        });
         Init.SpecifyTermination(() => InputBroker.GetKeyUp(KeyCode.Space), Blink, () => {
             numCalibPoints = 9;
             DefineCalibPoints(numCalibPoints);
@@ -169,34 +186,37 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         Blink.AddInitializationMethod(() =>
         {
             //calibAssessment = false;
-            calibBigCircle.transform.localScale = bigCircleMaxScale;
+            calibBigCircle.CircleGO.transform.localScale = bigCircleMaxScale;
             //              if(currentCalibrationPointFinished){
             currentCalibTargetADCS = calibPointsADCS[calibCount];
             //              }
             currentCalibrationPointFinished = false;
-            currentCalibTargetScreen = ScreenTransformations.AdcsToScreenPoint(currentCalibTargetADCS);
-            calibBigCircle.transform.position = currentCalibTargetScreen;
-            calibBigCircle.gameObject.SetActive(true);
-            calibSmallCircle.gameObject.SetActive(false);
+            Debug.Log("CURRENT CALIB TARGET ADCS: " + currentCalibTargetADCS);
+            currentCalibTargetScreen = screenTransformations.AdcsToScreenPoint(currentCalibTargetADCS);
+            Debug.Log("CURRENT CALIB TARGET SCREEN: " + currentCalibTargetScreen);
+
+            calibBigCircle.CircleGO.transform.position = Camera.main.ScreenToWorldPoint(currentCalibTargetScreen);
+            calibBigCircle.CircleGO.SetActive(true);
+            calibSmallCircle.CircleGO.SetActive(false);
             keyboardOverride = false;
         });
         Blink.AddUpdateMethod(() =>
         {
-            blinkStartTime = CheckBlink(blinkStartTime, calibBigCircle.gameObject);
+            blinkStartTime = CheckBlink(blinkStartTime, calibBigCircle.CircleGO);
             keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space);
         });
         Blink.SpecifyTermination(() =>
             keyboardOverride || Vector3.Distance(SelectionHandler.CurrentInputLocation(), currentCalibTargetScreen) < acceptableCalibrationDistance,
-            Shrink, () => calibBigCircle.gameObject.SetActive(true));
+            Shrink, () => calibBigCircle.CircleGO.SetActive(true));
 
         //EPOCH 1 - Shrink calibration circle
         Shrink.AddInitializationMethod(
             () =>
             {
-                calibSmallCircle.transform.localScale = new Vector3(smallCircleSize, smallCircleSize, smallCircleSize);
-                calibSmallCircle.transform.position = currentCalibTargetScreen;
-                calibSmallCircle.SetSprite(redCircle);
-                calibSmallCircle.gameObject.SetActive(true);
+                calibSmallCircle.CircleGO.transform.localScale = new Vector3(smallCircleSize, smallCircleSize, smallCircleSize);
+                calibSmallCircle.CircleGO.transform.position = currentCalibTargetScreen;
+                calibSmallCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.red;
+                calibSmallCircle.CircleGO.SetActive(true);
                 proportionOfShrinkTime = 0;
             });
         Shrink.AddUpdateMethod(() => ShrinkCalibCircle(Shrink.TimingInfo.StartTimeAbsolute));
@@ -241,7 +261,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             resultAdded = false;
             resultsDisplayed = false;
             pointFinished = false;
-            calibSmallCircle.SetSprite(blueCircle);
+            calibSmallCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.blue;
             if (SyncBoxController != null)
             {
                // SyncBoxController.AddToSend("RWD " + rewardTime * 10000);
@@ -302,25 +322,25 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             if (Time.time - Confirm.TimingInfo.StartTimeAbsolute > assessTime)
             {
                 pointFinished = true;
-                calibBigCircle.gameObject.SetActive(false);
-                calibSmallCircle.gameObject.SetActive(false);
+                calibBigCircle.CircleGO.SetActive(false);
+                calibSmallCircle.CircleGO.SetActive(false);
             }
         });
         Confirm.SpecifyTermination(() => calibCount < calibPointsADCS.Length - 1 && pointFinished, Blink, () => {//!calibrationFinished, blink, ()=> {
             calibCount++;
-            calibBigCircle.gameObject.SetActive(false);
-            calibSmallCircle.gameObject.SetActive(false);
+            calibBigCircle.CircleGO.SetActive(false);
+            calibSmallCircle.CircleGO.SetActive(false);
         });
         Confirm.SpecifyTermination(() => recalibpoint, Blink, () => {
-            calibBigCircle.gameObject.SetActive(false);
-            calibSmallCircle.gameObject.SetActive(false);
+            calibBigCircle.CircleGO.SetActive(false);
+            calibSmallCircle.CircleGO.SetActive(false);
         });
         Confirm.SpecifyTermination(() => calibrationFinished, FinishTrial, () =>
         {
             calibrationUnfinished = false;
           //  mainLevel.udpManager.SendString("ET###leave_calibration");
             ClearCalibResults();
-            GameObject.Find("CalibrationCanvas").SetActive(false);
+          //  GameObject.Find("CalibrationCanvas").SetActive(false);
             /*if (mainLevel.usingSyncbox)
             {
                 mainLevel.eventCodeManager.SendCodeImmediate(103);
@@ -350,11 +370,13 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             case 9:
                 calibPointsADCS = ninePoints;
-                acceptableCalibrationDistance = Vector2.Distance(ScreenTransformations.AdcsToScreenPoint(ninePoints[0]), ScreenTransformations.AdcsToScreenPoint(ninePoints[1])) / 2;
+                acceptableCalibrationDistance = Vector2.Distance(screenTransformations.AdcsToScreenPoint(ninePoints[0]), screenTransformations.AdcsToScreenPoint(ninePoints[1])) / 2;
+                Debug.Log("ACCEPTABLE CALIBRATION DISTANCE: " + acceptableCalibrationDistance);
+
                 break;
             case 6:
                 calibPointsADCS = sixPoints;
-                acceptableCalibrationDistance = Vector2.Distance(ScreenTransformations.AdcsToScreenPoint(sixPoints[0]), ScreenTransformations.AdcsToScreenPoint(sixPoints[1])) / 2;
+                acceptableCalibrationDistance = Vector2.Distance(screenTransformations.AdcsToScreenPoint(sixPoints[0]), screenTransformations.AdcsToScreenPoint(sixPoints[1])) / 2;
                 break;
             case 5:
                 calibPointsADCS = new Vector2[5] {
@@ -363,14 +385,14 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 ninePoints [4],
                 ninePoints [6],
                 ninePoints [8]};
-                acceptableCalibrationDistance = Vector2.Distance(ScreenTransformations.AdcsToScreenPoint(ninePoints[0]), ScreenTransformations.AdcsToScreenPoint(ninePoints[4])) / 2;
+                acceptableCalibrationDistance = Vector2.Distance(screenTransformations.AdcsToScreenPoint(ninePoints[0]), screenTransformations.AdcsToScreenPoint(ninePoints[4])) / 2;
                 break;
             case 3:
                 calibPointsADCS = new Vector2[3]{
                 ninePoints [3],
                 ninePoints [4],
                 ninePoints [5] };
-                acceptableCalibrationDistance = Vector2.Distance(ScreenTransformations.AdcsToScreenPoint(ninePoints[0]), ScreenTransformations.AdcsToScreenPoint(ninePoints[1])) / 2;
+                acceptableCalibrationDistance = Vector2.Distance(screenTransformations.AdcsToScreenPoint(ninePoints[0]), screenTransformations.AdcsToScreenPoint(ninePoints[1])) / 2;
                 break;
             case 1:
                 Vector2[] originalPoints = new Vector2[numCalibPoints];
@@ -418,12 +440,12 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         if (proportionOfShrinkTime > 1)
         {
             proportionOfShrinkTime = 1;
-            calibBigCircle.transform.localScale = new Vector3(bigCircleShrinkTargetSize, bigCircleShrinkTargetSize, bigCircleShrinkTargetSize);
+            calibBigCircle.CircleGO.transform.localScale = new Vector3(bigCircleShrinkTargetSize, bigCircleShrinkTargetSize, bigCircleShrinkTargetSize);
         }
         else
         {
             float newScale = bigCircleMaxScale[0] * (1 - ((1 - bigCircleShrinkTargetSize) * proportionOfShrinkTime));
-            calibBigCircle.transform.localScale = new Vector3(newScale, newScale, newScale);
+            calibBigCircle.CircleGO.transform.localScale = new Vector3(newScale, newScale, newScale);
         }
     }
     private float CheckBlink(float blinkStartTime, GameObject circle)
@@ -482,4 +504,5 @@ public bool DisplayCalibrationResults()
 
 
     }
+
 }

@@ -6,6 +6,7 @@ using System.IO;
 using System;
 //using iView;
 using System.Text;
+using EyeTrackerData_Namespace;
 //using MGcommon;
 using USE_Common_Namespace;
 using USE_Settings;
@@ -28,7 +29,7 @@ public class ExternalDataManager : MonoBehaviour
     public bool[] eyeValidity = new bool[2];
     public bool eyetrackerConnectionLost;
     public int gazeRequestFrame;
-
+    private ScreenTransformations screenTransformations;
     private string recvLine = "";
     private string messageType = "";
     private string[] messages;
@@ -192,6 +193,7 @@ public class ExternalDataManager : MonoBehaviour
     {
         if (!replay)
         {
+            screenTransformations = new ScreenTransformations();
             if (eyeTrackType == 1)
             { //mouse cursor position as fixation
                 gazePositionWorld = InputBroker.mousePosition; //
@@ -204,7 +206,7 @@ public class ExternalDataManager : MonoBehaviour
                 }
                 else
                 {
-                    gazePositionWorld = ScreenTransformations.AdcsToScreenPoint(gazeAdcsPos); //should AdcsToScreenPoint become a variable in this script?
+                    gazePositionWorld = screenTransformations.AdcsToScreenPoint(gazeAdcsPos); //should AdcsToScreenPoint become a variable in this script?
                 }
             }
         }

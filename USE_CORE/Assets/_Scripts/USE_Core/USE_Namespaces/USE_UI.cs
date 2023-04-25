@@ -189,50 +189,17 @@ namespace USE_UI
 
         public State SetActiveOnInitialization;
         public State SetInactiveOnTermination;
-        public USE_Circle(Canvas parent, Vector3 localPos, float size, string name)
+        public USE_Circle(Canvas parent, Vector2 circleLocation, float size, string name)
         {
-            LocalPosition = localPos;
-            CircleSize = size;
-            CircleGO = new GameObject(name);
-            
-            Image = CircleGO.AddComponent<Image>();
+            CircleGO = new GameObject(name, typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UICircle));
+
+            CircleGO.AddComponent<CanvasRenderer>();
             CircleGO.transform.SetParent(parent.transform, false);
-            Image.rectTransform.anchoredPosition = Vector2.zero;
-            Image.rectTransform.sizeDelta = new Vector2(CircleSize, CircleSize);
-            Image.color = CircleColor;
-            CircleGO.transform.localPosition = LocalPosition;
+            CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().fill = true;
+            CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().thickness = 2f;
+            CircleGO.GetComponent<RectTransform>().sizeDelta = new Vector2(size, size);
+            CircleGO.GetComponent<RectTransform>().anchoredPosition = circleLocation;// new Vector3(calibPointPixel.x, calibPointPixel.y, exptViewCam.nearClipPlane);
             CircleGO.SetActive(false);
-        }
-        public Sprite CreateCircleSprite(Color color, int size)
-        {
-            Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
-            Color[] colors = new Color[size * size];
-
-            // Set all pixels in the texture to the desired color
-            for (int x = 0; x < size; x++)
-            {
-                for (int y = 0; y < size; y++)
-                {
-                    // Check if the current pixel is inside the circle
-                    if (Mathf.Pow(x - size / 2f, 2) + Mathf.Pow(y - size / 2f, 2) <= Mathf.Pow(size / 2f, 2))
-                    {
-                        colors[x + y * size] = color;
-                    }
-                    else
-                    {
-                        colors[x + y * size] = Color.clear; // Set pixels outside the circle to transparent
-                    }
-                }
-            }
-
-            // Apply the colors to the texture
-            texture.SetPixels(colors);
-            texture.Apply();
-
-            // Create the sprite from the texture
-            Sprite sprite = Sprite.Create(texture, new Rect(0, 0, size, size), Vector2.one * 0.5f);
-
-            return sprite;
         }
 
         //----------------------------------------------------------------------
@@ -240,18 +207,18 @@ namespace USE_UI
         {
             CircleGO.GetComponent<Image>().sprite = sprite;
         }
-        public void SetCirclePosition(Vector3 pos)
+        public void SetSpritePosition(Vector3 pos)
         {
             CircleGO.transform.localPosition = pos;
         }
 
-        public void SetButtonColor(Color color)
+        public void SetSpriteColor(Color color)
         {
             CircleColor = color;
             Image.color = CircleColor;
         }
 
-        public void SetButtonSize(float size)
+        public void SetSpritePosition(float size)
         {
             CircleSize = size;
             Image.rectTransform.sizeDelta = new Vector2(CircleSize, CircleSize);

@@ -18,7 +18,7 @@ public class PlayerViewPanel //: MonoBehaviour
     {
         // parent = transform;
     }
-    public GameObject DrawCircle(Vector2 circleLocation, Vector2 size)
+    /*public GameObject DrawCircle(Vector2 circleLocation, Vector2 size)
     {
         GameObject degreeCircle = new GameObject("DegreeCircle", typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UICircle));
 
@@ -30,7 +30,7 @@ public class PlayerViewPanel //: MonoBehaviour
         degreeCircle.GetComponent<RectTransform>().anchoredPosition = circleLocation;// new Vector3(calibPointPixel.x, calibPointPixel.y, exptViewCam.nearClipPlane);
         return degreeCircle;
 
-    }
+    }*/
     public GameObject DrawSampleLines(string lineName, Color col, List<Vector2> pointList) // removed GameObject parent
     {
         float radPix = 100; // dummy value 1920 used, ((MonitorDetails)SessionSettings.Get("sessionConfig", "monitorDetails")).CmSize[0]

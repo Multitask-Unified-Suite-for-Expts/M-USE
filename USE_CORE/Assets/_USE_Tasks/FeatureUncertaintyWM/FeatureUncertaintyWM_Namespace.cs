@@ -52,6 +52,7 @@ namespace FeatureUncertaintyWM_Namespace
 		//public int BlockCount, TrialCountInBlock, TrialCountInTask;
 		//public TrialStims TrialStims;
         public int numProbedStim;
+        public Vector3[] multiCompStimLocations;
     }
 
     public class FeatureUncertaintyWM_StimDef : StimDef
@@ -89,7 +90,8 @@ namespace FeatureUncertaintyWM_Namespace
 
     public class FeatureUncertaintyWM_MultiCompStimDef : StimDef
     {
-        public int[] objsPerCircle, componentObjIndices;
-        public float[] objProportions;
+        public int numCircles, totalObjectCount;
+        public int[]  componentObjNumber, componentObjIndices, angelOffset;
+        public float[] objProportions, radius;
     }
 }

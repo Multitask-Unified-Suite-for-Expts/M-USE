@@ -14,7 +14,6 @@ using System.Globalization;
 using Tobii.Research;
 using Tobii.Research.Unity;
 using System.Windows.Forms;
-using static UnityEditor.PlayerSettings;
 using USE_Common_Namespace;
 
 public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template

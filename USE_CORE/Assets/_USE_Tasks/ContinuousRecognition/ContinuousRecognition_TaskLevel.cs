@@ -10,7 +10,6 @@ using USE_StimulusManagement;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Block;
 using System.Linq;
-using System.Windows.Forms;
 using System.IO;
 
 public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template

@@ -675,6 +675,8 @@ PlayerSettings:
   scriptingDefineSymbols:
     0: UNITY_POST_PROCESSING_STACK_V2
     1: TRILIB_USE_DEVIL
+    4: TRILIB_USE_DEVIL
+    13: TRILIB_USE_DEVIL
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend: {}

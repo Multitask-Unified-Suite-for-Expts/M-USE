@@ -593,10 +593,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void SetTokenVariables()
     {
-        if (UseDefaultConfigs && MacMainDisplayBuild && !Application.isEditor)
+        if (MacMainDisplayBuild && !Application.isEditor)
         {
-            TokenFBController.tokenSize = 205;
-            TokenFBController.tokenBoxYOffset = 50;
+            TokenFBController.tokenSize = 210;
+            TokenFBController.tokenBoxYOffset = 45;
         }
         else
         {

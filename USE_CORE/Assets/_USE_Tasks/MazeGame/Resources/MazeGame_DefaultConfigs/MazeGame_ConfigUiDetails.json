@@ -11,7 +11,7 @@
     },
     "tileSize": {
       "name": "Tile Size",
-      "value": 2.18,
+      "value": 1.9,
       "min": 0.1,
       "max": 20,
       "precision": 1,
@@ -29,7 +29,7 @@
     },
     "sliderSize": {
       "name": "Slider Size",
-      "value": 20,
+      "value": 15,
       "min": 1,
       "max": 100,
       "precision": 1,

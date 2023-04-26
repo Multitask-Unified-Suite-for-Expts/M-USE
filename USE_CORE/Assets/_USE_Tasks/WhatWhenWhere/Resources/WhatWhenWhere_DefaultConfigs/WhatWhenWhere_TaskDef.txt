@@ -1,5 +1,5 @@
 bool	StimFacingCamera	TRUE
-float	ExternalStimScale	5.5
+float	ExternalStimScale	14.5
 string	ShadowType	"None"
 Vector3	StartButtonPosition	(0, 0, 0)
 float	StartButtonScale	125

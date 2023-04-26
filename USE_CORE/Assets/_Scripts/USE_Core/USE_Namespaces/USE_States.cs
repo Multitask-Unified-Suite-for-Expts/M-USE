@@ -1404,6 +1404,7 @@ namespace USE_States
             materialSkybox.SetTexture("_RightTex", tex);
             materialSkybox.SetTexture("_UpTex", tex);
             materialSkybox.SetTexture("_DownTex", tex);
+
             return materialSkybox;
         }
 

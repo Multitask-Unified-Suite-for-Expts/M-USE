@@ -174,7 +174,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         Add_ControlLevel_InitializationMethod(() =>
         {
             SliderFBController.InitializeSlider();
-            LoadTextures(ContextExternalFilePath);
             // Initialize FB Controller Values
             HaloFBController.SetHaloSize(15f);
             HaloFBController.SetHaloIntensity(2);

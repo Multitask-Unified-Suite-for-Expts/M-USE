@@ -125,9 +125,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         AddActiveStates(new List<State> { InitTrial, ChooseBalloon, CenterSelection, InflateBalloon, Feedback, ITI });
 
         Add_ControlLevel_InitializationMethod(() =>
-        {
-            LoadTextures(ContextExternalFilePath);
-  
+        {  
             if(TokenFBController != null)
                 SetTokenVariables();
 
@@ -595,9 +593,17 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void SetTokenVariables()
     {
+        if (UseDefaultConfigs && MacMainDisplayBuild && !Application.isEditor)
+        {
+            TokenFBController.tokenSize = 205;
+            TokenFBController.tokenBoxYOffset = 50;
+        }
+        else
+        {
+            TokenFBController.tokenSize = 105;
+            TokenFBController.tokenBoxYOffset = 20;
+        }
         TokenFBController.SetFlashingTime(1.5f);
-        TokenFBController.tokenBoxYOffset = 20;
-        TokenFBController.tokenSize = 105;
         TokenFBController.tokenSpacing = -18;
     }
 

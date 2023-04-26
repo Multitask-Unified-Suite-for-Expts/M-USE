@@ -101,8 +101,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, WhiteSquare, BlueSquare, Feedback, Reward, ITI});
 
-        LoadTextures(MaterialFilePath);
-
         Add_ControlLevel_InitializationMethod(() =>
         {
             CreateColors();

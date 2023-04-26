@@ -98,7 +98,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         Add_ControlLevel_InitializationMethod(() =>
         {
-            LoadTextures(ContextExternalFilePath);
             playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
             playerViewText = new GameObject();
             playerViewParent = GameObject.Find("MainCameraCopy");     

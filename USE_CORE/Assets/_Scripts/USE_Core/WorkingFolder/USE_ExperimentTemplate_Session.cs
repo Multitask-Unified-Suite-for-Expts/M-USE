@@ -248,6 +248,7 @@ namespace USE_ExperimentTemplate_Session
 
             SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
 
+
             if (UseDefaultConfigs)
             {
                 ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";

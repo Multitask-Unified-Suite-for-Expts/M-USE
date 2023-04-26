@@ -58,9 +58,9 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
             string contextFilePath;
             if (UseDefaultConfigs)
-                contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + currentBlock.ContextName;
+                contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + ContextName;
             else
-                contextFilePath = trialLevel.GetContextNestedFilePath(ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
+                contextFilePath = trialLevel.GetContextNestedFilePath(ContextExternalFilePath, ContextName, "LinearDark");
 
             RenderSettings.skybox = CreateSkybox(contextFilePath, UseDefaultConfigs);
 
@@ -79,14 +79,12 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
     public void SetSettings()
     {
+        trialLevel.ContextExternalFilePath = ContextExternalFilePath;
+
         if (SessionSettings.SettingExists("Session", "IsHuman"))
             trialLevel.IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");
         else
             trialLevel.IsHuman = false;
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            trialLevel.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else trialLevel.ContextExternalFilePath = ContextExternalFilePath;
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
         {

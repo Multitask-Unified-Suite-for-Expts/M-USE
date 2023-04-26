@@ -311,12 +311,30 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                 (string)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
         else mgTL.ContextExternalFilePath = ContextExternalFilePath;
 
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeKeyFilePath"))
-            mazeKeyFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeKeyFilePath");
-        else Debug.LogError("Maze key file path settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeFilePath"))
-            mgTL.MazeFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeFilePath");
-        else Debug.LogError("Maze File Path not defined in the TaskDef");
+        //BROKEN
+        if(UseDefaultConfigs)
+        {
+            if(Application.isEditor)
+            {
+                mgTL.MazeFilePath = "Assets/_USE_Session/Resources/DefaultResources/Mazes";
+                mazeKeyFilePath = "Assets/_USE_Tasks/MazeGame/Resources/MazeGame_DefaultConfigs/MazeDef.txt";
+            }
+            else
+            {
+                mgTL.MazeFilePath = "DefaultResources/Mazes";
+                mazeKeyFilePath = "MazeGame_DefaultConfigs/MazeDef";
+            }
+        }
+        else
+        {
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeKeyFilePath"))
+                mazeKeyFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeKeyFilePath");
+            else Debug.LogError("Maze key file path settings not defined in the TaskDef");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeFilePath"))
+                mgTL.MazeFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeFilePath");
+            else Debug.LogError("Maze File Path not defined in the TaskDef");
+        }
+
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
             mgTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
         else Debug.LogError("Start Button Position settings not defined in the TaskDef");
@@ -403,6 +421,9 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     {
         SessionSettings.ImportSettings_SingleTypeArray<MazeDef>("MazeDefs", mazeKeyFilePath);
         MazeDefs = (MazeDef[])SessionSettings.Get("MazeDefs");
+        if (MazeDefs == null)
+            Debug.LogError("Maze Defs is null!!!!!!!!!!!!!!!!!");
+
         MazeDims = new Vector2[MazeDefs.Length];
         MazeNumSquares = new int[MazeDefs.Length];
         MazeNumTurns = new int[MazeDefs.Length];

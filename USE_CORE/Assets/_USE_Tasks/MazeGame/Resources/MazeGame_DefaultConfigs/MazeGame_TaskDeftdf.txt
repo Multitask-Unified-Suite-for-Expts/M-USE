@@ -1,10 +1,8 @@
-string	MazeKeyFilePath	"//Users//ntraczewski//Desktop//MUSE//Configs//MazeGame//MazeDef.txt"
-string	MazeFilePath	"//Users//ntraczewski//Desktop//MUSE//Resources//Mazes" 
 float	TouchFeedbackDuration	0.3
 List<string>	FeedbackControllers	["Audio", "Halo", "Slider"]
 Vector3	StartButtonPosition	(0, 0, 0)
 float	StartButtonScale	125
-float	TileSize	2.18
+float	TileSize	1.9
 int	NumBlinks	2
 float[]	StartColor	[0.94, 0.93, 0.48]
 float[]	FinishColor	[0.37, 0.59, 0.94]

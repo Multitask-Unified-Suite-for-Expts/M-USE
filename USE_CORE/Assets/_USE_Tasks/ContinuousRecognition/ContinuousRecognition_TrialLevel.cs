@@ -117,9 +117,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             SetControllerBlockValues();
 
-            if(HeldTooLongTexture == null)
-                LoadTextures(MaterialFilePath);
-
             if (StartButton == null)
             {
                 USE_StartButton = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);

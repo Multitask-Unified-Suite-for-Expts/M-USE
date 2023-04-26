@@ -355,6 +355,7 @@ namespace USE_Settings
 			if (!File.Exists(settingsPath))
 				return;
 			
+			
 			string[] lineList = ReadSettingsFile(settingsPath, "//", "...");
 			T[] settingsArray = new T[lineList.Length - 1];
 

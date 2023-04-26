@@ -169,7 +169,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     //SceneManager.LoadScene(SceneManager.GetActiveScene().name); //Doesn't work. Will load task again but without TaskSelection scene.
                 }
             };
-            HotKeyList.Add(toggleDisplays);
+            //HotKeyList.Add(toggleDisplays);
 
             // Remove Cursor Hot Key
             HotKey toggleCursor = new HotKey

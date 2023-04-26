@@ -341,7 +341,6 @@ namespace USE_StimulusManagement
 			if (prefabPath.Length > 2)
 				PrefabPath = prefabPath;
 
-			//THIS WORKS BUT HARD CODED AND PROB WONT WORK FOR BUILD.
 			string path;
 			if (Application.isEditor)
 				path = "Assets/_USE_Session/Resources/" + PrefabPath + "/" + FileName;
@@ -361,8 +360,6 @@ namespace USE_StimulusManagement
 
 		public GameObject LoadExternalStimFromFile(string stimFilePath = "")
 		{
-			Debug.Log("LOADING EXT STIM FROM FILE!");
-
 			//add StimExtesion to file path if it doesn't already contain it
 			if (!string.IsNullOrEmpty(StimExtension) && !FileName.EndsWith(StimExtension))
 			{
@@ -434,9 +431,7 @@ namespace USE_StimulusManagement
 		public void AddMesh()
 		{
 			foreach (var m in StimGameObject.transform.GetComponentsInChildren<MeshRenderer>())
-			{
 				m.gameObject.AddComponent(typeof(MeshCollider));
-			}
 		}
 
 		public GameObject LoadModel(string filePath, bool loadFromResources = false, bool visibiility = false)

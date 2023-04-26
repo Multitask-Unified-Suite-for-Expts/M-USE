@@ -292,9 +292,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 //string commandString = Input.inputString;
                 if (InputBroker.GetKeyDown(KeyCode.Space) && CalibNum == calibPointsADCS.Length - 1)
                 {
-                    //calibSuccess = true;
                     calibrationFinished = true;
-                    //ClearCalibVisuals();
                 }
                 else if (InputBroker.GetKeyDown(KeyCode.Equals))
                 {
@@ -302,16 +300,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 }
                 else if (InputBroker.GetKeyDown(KeyCode.Minus))
                 {
-                    DiscardCalibrationPoint(currentACDSTarget);
+                    DiscardCalibrationPoint(currentNormPoint);
                     recalibpoint = true;
-                    ////calibSuccess = true;
-                    //calibCount = 0; //set to -1 because the termination includes calibCount++
-                    //ClearCalibResults();
-                    //for (int i = 0; i < numCalibPoints; i++)
-                    //{
-                    //	DiscardCalibrationPoint(i);
-                    //}
-                    //DefineCalibPoints(numCalibPoints);
                 }
               /*  REIMPLEMENT ************* I DIDN'T KNOW HOW TO GET GENERIC INPUT KEY 
                *  
@@ -368,12 +358,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     {
         ScreenBasedCalibration.DiscardData(normalizedPoint2D);
     }
-        // Reimplement without UDP Manager
-
-        //mainLevel.udpManager.SendString("ET###discard_calibration_at_point\tfloat " + ninePoints[point].x.ToString() + "\tfloat " + ninePoints[point].y.ToString());
-        //mainLevel.udpManager.SendString("ET###discard_calibration_at_point###float " + currentCalibTargetADCS.x.ToString() + "###float " + currentCalibTargetADCS.y.ToString());
-   
-
     void DefineCalibPoints(int nPoints)
     {
         switch (nPoints)

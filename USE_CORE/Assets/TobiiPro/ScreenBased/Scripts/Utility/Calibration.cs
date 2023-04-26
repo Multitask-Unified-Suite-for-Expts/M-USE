@@ -71,7 +71,7 @@ namespace Tobii.Research.Unity
                 _showCalibrationPanel = value;
                 _pointScript.gameObject.SetActive(_showCalibrationPanel);
                 _canvas.gameObject.SetActive(_showCalibrationPanel);
-                //_panel.color = _showCalibrationPanel ? Color.black : new Color(0, 0, 0, 0);
+                _panel.color = _showCalibrationPanel ? Color.black : new Color(0, 0, 0, 0);
             }
         }
 

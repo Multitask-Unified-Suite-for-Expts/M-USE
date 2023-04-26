@@ -289,10 +289,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.NumTokenBarFull_InTask++;
                 if (SyncBoxController != null)
                 {
-                    SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+                    int NumPulses = chooseReward(CurrentTrialDef.PulseReward[0]);
+                    SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
                     SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
-                    NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
-                    CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
+                    NumRewardPulses_InBlock +=  NumPulses;
+                    CurrentTaskLevel.NumRewardPulses_InTask +=  NumPulses;
                     RewardGiven = true;
                 }
             }
@@ -369,7 +370,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
             VisualSearch_StimDef sd = (VisualSearch_StimDef)tStim.stimDefs[i];
-            sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.TrialStimTokenReward[i]);
+            sd.StimTrialRewardMag = chooseReward(CurrentTrialDef.TrialStimTokenReward[i]);
             if (sd.StimTrialRewardMag > 0) sd.IsTarget = true; //ONLY HOLDS TRUE IF POSITIVE REWARD GIVEN TO TARGET
             else sd.IsTarget = false;
         }

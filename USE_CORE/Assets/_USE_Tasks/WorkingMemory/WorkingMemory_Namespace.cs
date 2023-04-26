@@ -53,7 +53,7 @@ namespace WorkingMemory_Namespace
         //public TrialStims TrialStims;
         public int[] SearchStimIndices, PostSampleDistractorIndices;
 
-        public TokenReward[][] SearchStimTokenReward;
+        public Reward[][] SearchStimTokenReward;
         //public int[] TargetTokenUpdates, DistractorTokenUpdates;
         public Vector3[] SearchStimLocations, PostSampleDistractorLocations, TargetSampleLocation;
         public string ContextName;

@@ -123,8 +123,8 @@ namespace FLU_Common_Namespace{
         public float BaseRewardMag;
 		public int? NumTotalTokens;
 		public int? NumInitialTokens;
-        public TokenReward[] BaseTokenRewardsPositive;
-		public TokenReward[] BaseTokenRewardsNegative;
+        public Reward[] BaseTokenRewardsPositive;
+		public Reward[] BaseTokenRewardsNegative;
         public bool? PlayTokenOnPositiveSound;
         public bool? PlayTokenOnNegativeSound;
         public bool? PlayFbUpdatePositiveSound;
@@ -182,7 +182,7 @@ namespace FLU_Common_Namespace{
         public float PositiveFbProb;
 		public float RewardProb;
         public float RewardMag;
-        public TokenReward[] TokenRewards;
+        public Reward[] TokenRewards;
     }
 
 
@@ -210,8 +210,8 @@ namespace FLU_Common_Namespace{
         [System.NonSerialized]
         public Material ContextMaterial;
 		public Material ItiContextMaterial;
-		public TokenReward[] TokenRewardsPositive;
-		public TokenReward[] TokenRewardsNegative;
+		public Reward[] TokenRewardsPositive;
+		public Reward[] TokenRewardsNegative;
 		public int? NumInitialTokens;
     }
 
@@ -229,7 +229,7 @@ namespace FLU_Common_Namespace{
 		public Vector3[] IrrelevantStimRotations;
 		public Vector3[] SampleStimLocations;
 		public Vector3[] SampleStimRotations;
-		public TokenReward[][] RelevantTokenRewards;
+		public Reward[][] RelevantTokenRewards;
 
 		public TrialDef ConvertToTrialDef()
 		{
@@ -259,7 +259,7 @@ namespace FLU_Common_Namespace{
 			return stimCodes;
 		}
 
-		private StimDef[] PopulateStimDefs(int[] selectedStimCodes, StimDef[] allStimDefs, Vector3[] stimLocations, Vector3[] stimRotations, TokenReward[][] tokenRewards)
+		private StimDef[] PopulateStimDefs(int[] selectedStimCodes, StimDef[] allStimDefs, Vector3[] stimLocations, Vector3[] stimRotations, Reward[][] tokenRewards)
 		{
 			StimDef[] selectedStimDefs = new StimDef[selectedStimCodes.Length];
 			int[] allStimCodes = GetStimCodes(allStimDefs);
@@ -291,10 +291,10 @@ namespace FLU_Common_Namespace{
 					RelevantStims = PopulateStimDefs(RelevantStimCodes, stimDefs, RelevantStimLocations, RelevantStimRotations, RelevantTokenRewards);
 					return RelevantStims;
 				case "irrelevant":
-					IrrelevantStims = PopulateStimDefs(IrrelevantStimCodes, stimDefs, IrrelevantStimLocations, IrrelevantStimRotations, new TokenReward[0][]);
+					IrrelevantStims = PopulateStimDefs(IrrelevantStimCodes, stimDefs, IrrelevantStimLocations, IrrelevantStimRotations, new Reward[0][]);
 					return IrrelevantStims;
 				case "sample":
-					SampleStims = PopulateStimDefs(SampleStimCodes, stimDefs, SampleStimLocations, SampleStimRotations, new TokenReward[0][]);
+					SampleStims = PopulateStimDefs(SampleStimCodes, stimDefs, SampleStimLocations, SampleStimRotations, new Reward[0][]);
 					return SampleStims;
 				default:
 					return null;
@@ -314,11 +314,11 @@ namespace FLU_Common_Namespace{
 		{
 			//RelevantObjects = PopulateStimDefs(RelevantStimCodes, relStims, RelevantStimLocations, RelevantStimRotations, RelevantTokenRewards);
 			if (irrelStims != null)
-				IrrelevantStims = PopulateStimDefs(IrrelevantStimCodes, irrelStims, IrrelevantStimLocations, IrrelevantStimLocations, new TokenReward[0][]);
+				IrrelevantStims = PopulateStimDefs(IrrelevantStimCodes, irrelStims, IrrelevantStimLocations, IrrelevantStimLocations, new Reward[0][]);
 			else
 				IrrelevantStims = new StimDef[0];
 			if (sampleStims != null)
-				SampleStims = PopulateStimDefs(SampleStimCodes, sampleStims, SampleStimLocations, SampleStimRotations, new TokenReward[0][]);
+				SampleStims = PopulateStimDefs(SampleStimCodes, sampleStims, SampleStimLocations, SampleStimRotations, new Reward[0][]);
 			else
 				SampleStims = new StimDef[0];
 			return ConvertToTrialDef(relStims);
@@ -343,7 +343,7 @@ namespace FLU_Common_Namespace{
         public bool StimRotationSet;
         public float StimTrialPositiveFbProb; //set to -1 if stim is irrelevant
         public float StimTrialRewardMag; //set to -1 if stim is irrelevant
-        public TokenReward[] TokenRewards;
+        public Reward[] TokenRewards;
         public int TimesUsedInBlock;
         public bool isRelevant;
 		public bool TriggersSonication;

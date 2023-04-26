@@ -35,7 +35,8 @@ namespace USE_StimulusManagement
 		public bool StimRotationSet;
 		public float StimTrialPositiveFbProb; //set to -1 if stim is irrelevant
 		public int StimTrialRewardMag; //set to -1 if stim is irrelevant
-		public TokenReward[] TokenRewards;
+		public Reward[] TokenRewards;
+		public PulseReward[] PulseRewards;
 		public int[] BaseTokenGain;
 		public int[] BaseTokenLoss;
 		public int TimesUsedInBlock;

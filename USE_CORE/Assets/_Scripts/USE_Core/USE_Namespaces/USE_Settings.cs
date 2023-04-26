@@ -431,9 +431,11 @@ namespace USE_Settings
 								myFieldInfo.SetValue(settingsArray[iLine - 1], (Vector2[])ConvertStringToType<Vector2[]>(values[iVal]));
 							else if (ft == typeof(Vector3[]))
 								myFieldInfo.SetValue(settingsArray[iLine - 1], (Vector3[])ConvertStringToType<Vector3[]>(values[iVal]));
-							else if (ft == typeof(TokenReward[]))
-								myFieldInfo.SetValue(settingsArray[iLine - 1], (TokenReward[])ConvertStringToType<TokenReward[]>(values[iVal]));
-							else if (ft == typeof(string[][]))
+							else if (ft == typeof(Reward[]))
+								myFieldInfo.SetValue(settingsArray[iLine - 1], (Reward[])ConvertStringToType<Reward[]>(values[iVal]));
+                            else if (ft == typeof(PulseReward[]))
+                                myFieldInfo.SetValue(settingsArray[iLine - 1], (PulseReward[])ConvertStringToType<PulseReward[]>(values[iVal]));
+                            else if (ft == typeof(string[][]))
 								myFieldInfo.SetValue(settingsArray[iLine - 1], (string[][])ConvertStringToType<string[][]>(values[iVal]));
 							else if (ft == typeof(bool[][]))
 								myFieldInfo.SetValue(settingsArray[iLine - 1], (bool[][])ConvertStringToType<bool[][]>(values[iVal]));
@@ -447,9 +449,11 @@ namespace USE_Settings
 								myFieldInfo.SetValue(settingsArray[iLine - 1], (int?[][])ConvertStringToType<int[][]>(values[iVal]));
 							else if (ft == typeof(float?[][]))
 								myFieldInfo.SetValue(settingsArray[iLine - 1], (float?[][])ConvertStringToType<float[][]>(values[iVal]));
-							else if (ft == typeof(TokenReward[][]))
-								myFieldInfo.SetValue(settingsArray[iLine - 1], (TokenReward[][])ConvertStringToType<TokenReward[][]>(values[iVal]));
-							else if (ft == typeof(Color))
+							else if (ft == typeof(Reward[][]))
+								myFieldInfo.SetValue(settingsArray[iLine - 1], (Reward[][])ConvertStringToType<Reward[][]>(values[iVal]));
+                            else if (ft == typeof(PulseReward[][]))
+                                myFieldInfo.SetValue(settingsArray[iLine - 1], (PulseReward[][])ConvertStringToType<PulseReward[][]>(values[iVal]));
+                            else if (ft == typeof(Color))
 								myFieldInfo.SetValue(settingsArray[iLine - 1], (Color)ConvertStringToType<Color>(values[iVal]));
 							else if (ft == typeof(MazeGame_Namespace.MazeDef[]))
 								myFieldInfo.SetValue(settingsArray[iLine - 1], (MazeGame_Namespace.MazeDef[])ConvertStringToType<MazeGame_Namespace.MazeDef[]>(values[iVal]));
@@ -791,11 +795,11 @@ namespace USE_Settings
 					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
 				}
 			}
-			else if (typeof(T) == typeof(TokenReward))
+			else if (typeof(T) == typeof(Reward))
 			{
 				try
 				{
-					return (TokenReward)JsonConvert.DeserializeObject(s, typeof(TokenReward));
+					return (Reward)JsonConvert.DeserializeObject(s, typeof(Reward));
 				}
 				catch (Exception e)
 				{
@@ -805,11 +809,11 @@ namespace USE_Settings
 					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
 				}
 			}
-			else if (typeof(T) == typeof(TokenReward[]))
+			else if (typeof(T) == typeof(Reward[]))
 			{
 				try
 				{
-					return (TokenReward[])JsonConvert.DeserializeObject(s, typeof(TokenReward[]));
+					return (Reward[])JsonConvert.DeserializeObject(s, typeof(Reward[]));
 				}
 				catch (Exception e)
 				{
@@ -819,11 +823,11 @@ namespace USE_Settings
 					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
 				}
 			}
-			else if (typeof(T) == typeof(TokenReward[][]))
+			else if (typeof(T) == typeof(Reward[][]))
 			{
 				try
 				{
-					return (TokenReward[][])JsonConvert.DeserializeObject(s, typeof(TokenReward[][]));
+					return (Reward[][])JsonConvert.DeserializeObject(s, typeof(Reward[][]));
 				}
 				catch (Exception e)
 				{
@@ -833,7 +837,49 @@ namespace USE_Settings
 					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
 				}
 			}
-			else if (typeof(T) == typeof(float[]))
+            else if (typeof(T) == typeof(PulseReward))
+            {
+                try
+                {
+                    return (PulseReward)JsonConvert.DeserializeObject(s, typeof(PulseReward));
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+                        + typeof(T).Name + " but the conversion failed.");
+
+                    throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+                }
+            }
+            else if (typeof(T) == typeof(PulseReward[]))
+            {
+                try
+                {
+                    return (PulseReward[])JsonConvert.DeserializeObject(s, typeof(PulseReward[]));
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+                        + typeof(T).Name + " but the conversion failed.");
+
+                    throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+                }
+            }
+            else if (typeof(T) == typeof(PulseReward[][]))
+            {
+                try
+                {
+                    return (PulseReward[][])JsonConvert.DeserializeObject(s, typeof(PulseReward[][]));
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+                        + typeof(T).Name + " but the conversion failed.");
+
+                    throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+                }
+            }
+            else if (typeof(T) == typeof(float[]))
 			{
 				try
 				{

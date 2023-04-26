@@ -123,7 +123,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     
     //Syncbox variables
     private bool usingSonication = false;
-    public int MinTrials;
+  //  public int MinTrials;
 
     // Stimuli Variables
     private GameObject StartButton;
@@ -450,7 +450,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     {
         TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
         return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
-            CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, MinTrials,
+            CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, CurrentTrialDef.BlockEndWindow,
             CurrentTrialDef.MaxTrials);
     }
     public override void FinishTrialCleanup()

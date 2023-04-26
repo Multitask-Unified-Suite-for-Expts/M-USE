@@ -56,7 +56,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
             ErrorType_InTask.Add(string.Join(",",wwwTL.ErrorType_InBlock));
             wwwTL.ResetBlockVariables();
-            wwwTL.MinTrials = wwwBD.nRepetitionsMinMax[0];
+            //wwwTL.MinTrials = wwwBD.nRepetitionsMinMax[0];
             SetBlockSummaryString();
         });
     }
@@ -82,7 +82,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         /*if (wwwTL.runningAcc.Count > 0)
             latestAccuracy = (wwwTL.runningAcc.Sum()/wwwTL.runningAcc.Count)*100;*/
 
-        BlockSummaryString.AppendLine("<b>\nMin Trials in Block: </b>" + wwwTL.MinTrials +
+        BlockSummaryString.AppendLine(//"<b>\nMin Trials in Block: </b>" + wwwTL.MinTrials +
                                       "<b>\nMax Trials in Block: </b>" + wwwTL.CurrentTrialDef.MaxTrials + 
                                  //    "<b>\nLearning Criterion: </b>" + String.Format("{0:0.00}%", wwwTL.CurrentTrialDef.BlockEndThreshold*100) +
                                       /*"\n\n<b>Running Accuracy: </b>" + (latestAccuracy == -1 ?

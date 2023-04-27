@@ -11,6 +11,7 @@ using System;
 using Newtonsoft.Json.Linq;
 using System.Reflection;
 using USE_UI;
+using UnityEngine.UI;
 using WorkingMemory_Namespace;
 
 public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
@@ -33,6 +34,10 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
     private StimGroup multiCompStims;
     private StimGroup subCompStim;
 
+    private List<List<GameObject>> mcComponentGameObjs;
+    private GameObject mcCompHolder;
+    private int[] mcCompStimIndices;
+
 
 
 
@@ -41,19 +46,47 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
     public override void DefineControlLevel()
     {
         Add_ControlLevel_InitializationMethod(() =>
-            {
-                //load stimuli from file used for component stims
-                //set them inactive
-                taskCanvas = GameObject.Find("FeatureUncertaintyWM_Canvas");
-            }
+	        {
+		        mcCompHolder = new GameObject();
+		        FeatureUncertaintyWM_BlockDef bDef = TaskLevel.GetCurrentBlockDef<FeatureUncertaintyWM_BlockDef>();
+		        //load stimuli from file used for component stims
+		        //set them inactive
+		        taskCanvas = GameObject.Find("FeatureUncertaintyWM_Canvas");
+
+		        mcCompStimIndices = bDef.blockMcCompStimIndices;
+
+		        int maxCompObjs = 20;
+		        //this should be obtained by looping through all trials in TrialDefs and finding max # component stims.
+		        for (int iMC = 0; iMC < bDef.numMcStim; iMC++)
+		        {
+			        int compStimIndex = mcCompStimIndices[iMC];
+			        List<GameObject> compStimCopies = new List<GameObject>();
+			        for (int iComp = 0; iComp < maxCompObjs; iComp++)
+			        {
+				        GameObject compGO = new GameObject();//give it name
+				        compGO.transform.parent = mcCompHolder.transform;
+
+				        RawImage compGOImage = compGO.AddComponent<RawImage>();
+
+				        string stimPath = ExternalStims.stimDefs[compStimIndex].StimPath;
+				        compGOImage.texture = LoadPNG(stimPath);
+				        compStimCopies[iComp] = compGO;
+				        compStimCopies[iComp].SetActive(false);
+			        }
+			        mcComponentGameObjs.Add(compStimCopies);
+		        }
+		        
+		        
+		        //instantiate that # of all component objects
+		        //set all to inactive
+		        //n
+
+	        }
         );
         
-        //somewhere in trial, call
-        // GameObject mcPanel = GenerateMultiCompStim(int[] objsPerCircle, GameObject[] componentObjectTypes,
-        //     float[] objProportions);
+        //############################
+        //at end of state where MC objs appear, reset component objects parent to top level of hierarchy and set inactive
         
-        //during FinishTrial/ITI?
-        //mcPanel.Destroy();
 
 
     }
@@ -101,8 +134,8 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             for (int i = 0; i < numCompOnCircles[j]; i++)
             {
                 float angle = 2 * Mathf.PI * i / numCompOnCircles[j];
-                float x = sd.angelOffset[j] + sd.radius[j] * Mathf.Cos(angle);
-                float y = sd.angelOffset[j] + sd.radius[j] * Mathf.Sin(angle);
+                float x = sd.angleOffset[j] + sd.radius[j] * Mathf.Cos(angle);
+                float y = sd.angleOffset[j] + sd.radius[j] * Mathf.Sin(angle);
                 compLocations[counter] = new Vector3(x, y, 0);
                 counter++;
             }
@@ -122,29 +155,29 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
 
         counter = 0;
-        for (int iComp = 0; iComp < sd.componentObjIndices.Length; iComp++)
+        for (int iComp = 0; iComp < sd.compObjIndices.Length; iComp++)
         {
             for (int iSubComp = startCompInds.ElementAt(iComp); iSubComp < startCompInds.ElementAt(iComp+1); iSubComp++)
             {
 
-                allCompObjIndices[permutedCompInds[counter]] = sd.componentObjIndices[iComp];
+                allCompObjIndices[permutedCompInds[counter]] = sd.compObjIndices[iComp];
                 counter++;
             }
 
         }
 
-
-
-        // generate a group of stims using FeatureUncertaintyWM_StimDef which will make the multicomponent stim
-
-        for (int iComp = 0; iComp < sd.totalObjectCount; iComp++)
+        for (int iComp = 0; iComp < sd.compObjIndices.Length; iComp++)
         {
-            FeatureUncertaintyWM_StimDef sd_Sub = (FeatureUncertaintyWM_StimDef)subCompStim.stimDefs[allCompObjIndices[iComp]];           
-            subCompStim.AddStims(sd_Sub);          
-
+	        int[] thisCompIndices = new int[1];
+	        //populate thisCompIndices with every index of sd.CompObjIndices[iComp] in allCompObjIndices
+	        for (int iGO = 0; iGO < thisCompIndices.Length; iGO++)
+	        {
+		        GameObject compGO = mcComponentGameObjs[iComp][thisCompIndices[iGO]];
+		        compGO.transform.position = compLocations[thisCompIndices[iGO]];
+		        //set parent to canvas
+		        compGO.SetActive(true);
+	        }
         }
-
-        subCompStim.SetLocations(compLocations);
 
         return multiCompPanel;
         //return new GameObject(); // this line is just here so I don't have to comment out stuff below... the function returns the multiccomp object
@@ -265,11 +298,15 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         //StimGroup constructor which creates a subset of an already-existing StimGroup 
 
         multiCompStims = new StimGroup("MultiCompStims"); // can add state control of onset/offset
-        multiCompStims.SetLocations(CurrentTrialDef.multiCompStimLocations);
+        // multiCompStims.SetLocations(CurrentTrialDef.multiCompStimLocations);
        
-        for (int iStim = 0; iStim < CurrentTrialDef.numProbedStim; iStim++)
+        for (int iStim = 0; iStim < CurrentTrialDef.numMcStim; iStim++)
         {
             FeatureUncertaintyWM_MultiCompStimDef sd = new FeatureUncertaintyWM_MultiCompStimDef(); // populate with appropriate values
+            sd.compObjIndices = CurrentTrialDef.mcCompObjIndices[iStim];
+            //sd.whatever = CurrentTrialDef.whatever;
+            //do with all other stimdef fields
+            
             multiCompStims.AddStims(GenerateMultiCompStim(sd)); //make a new stim group, add it
             sd.AssignStimDefPointeToObjectHierarchy(sd.StimGameObject, sd);
         }

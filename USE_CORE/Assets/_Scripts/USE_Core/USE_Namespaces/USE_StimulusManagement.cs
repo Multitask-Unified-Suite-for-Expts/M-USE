@@ -9,6 +9,7 @@ using UnityEngine;
 using USE_Settings;
 using TriLib;
 using USE_States;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace USE_StimulusManagement
@@ -411,8 +412,30 @@ namespace USE_StimulusManagement
 			}
 
 
-	
-			StimGameObject = LoadModel();
+			//handle PNG case here with textres and gameobject sing LoadPNG
+			
+			//switch case based on StimDef filetype
+			if (String.IsNullOrEmpty(StimExtension))
+			{
+				//parse filename for stimExtension and assign
+			}
+			switch (StimExtension.ToLower())
+			{
+				case "fbx":
+					StimGameObject = LoadModel();
+					break;
+				case "png":
+					StimGameObject = new GameObject();//give it name
+					RawImage stimGOImage = StimGameObject.AddComponent<RawImage>();
+					stimGOImage.texture = LoadPNG(stimFilePath);
+					break;
+				default:
+					break;
+			}
+			
+			
+			
+			
 			PositionRotationScale();
 			if (!string.IsNullOrEmpty(StimName))
 				StimGameObject.name = StimName;
@@ -420,6 +443,19 @@ namespace USE_StimulusManagement
 			return StimGameObject;
 		}
 
+		public Texture2D LoadPNG(string filePath)
+		{
+			Texture2D tex = null;
+			byte[] fileData;
+
+			if (File.Exists(filePath))
+			{
+				fileData = File.ReadAllBytes(filePath);
+				tex = new Texture2D(2, 2);
+				tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
+			}
+			return tex;
+		}
 		public void Destroy()
 		{
 			StimGroup[] sgs = StimGroups.Values.ToArray();

@@ -19,7 +19,7 @@ using USE_ExperimentTemplate_Task;
 using SelectionTracking;
 using Random = UnityEngine.Random;
 using UnityEngine.Windows.WebCam;
-
+using USE_DisplayManagement;
 
 namespace USE_ExperimentTemplate_Session
 {
@@ -73,6 +73,7 @@ namespace USE_ExperimentTemplate_Session
         private SerialPortThreaded SerialPortController;
         private SyncBoxController SyncBoxController;
         private EventCodeManager EventCodeManager;
+        private MonitorDetails MonitorDetails;
         [HideInInspector] public SelectionTracker SelectionTracker;
 
         private Camera SessionCam;
@@ -167,6 +168,10 @@ namespace USE_ExperimentTemplate_Session
             else
                 RewardHotKeyNumPulses = 1;
 
+            if (SessionSettings.SettingExists("Session", "MonitorDetails"))
+                MonitorDetails = (MonitorDetails)SessionSettings.Get("Session", "MonitorDetails");
+            else
+                MonitorDetails = new MonitorDetails(new Vector2(1920, 1080), new Vector2(43.5f, 24.0f));
 
             //Load the Session Event Code Config file
             string eventCodeFileString = "";
@@ -184,8 +189,6 @@ namespace USE_ExperimentTemplate_Session
 
             if (SyncBoxActive)
                 SerialPortActive = true;
-
-
 
             List<string> taskNames;
             if (SessionSettings.SettingExists("Session", "TaskNames"))
@@ -922,6 +925,8 @@ namespace USE_ExperimentTemplate_Session
             tl.ShotgunRaycastCircleSize_DVA = ShotgunRaycastCircleSize_DVA;
             tl.ShotgunRaycastSpacing_DVA = ShotgunRaycastSpacing_DVA;
             tl.ParticipantDistance_CM = ParticipantDistance_CM;
+            tl.MonitorDetails = MonitorDetails;
+
 
 
             if (SessionSettings.SettingExists("Session", "RewardPulsesActive"))

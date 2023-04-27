@@ -15,6 +15,8 @@ using Tobii.Research;
 using Tobii.Research.Unity;
 using System.Windows.Forms;
 using USE_Common_Namespace;
+using System.Linq;
+using USE_DisplayManagement;
 
 public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 {
@@ -68,26 +70,33 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private float blinkStartTime = 0;
 
     //Calibration Sizing Variables
-    private Vector3 bigCircleMaxScale = new Vector3(0.6f, 0.6f, 0.6f);
+    private Vector3 bigCircleMaxScale = new Vector3(1.5f, 1.5f, 1f);
     private float bigCircleShrinkTargetSize = .1f;
-    private float smallCircleSize = 0.065f;
+    private float smallCircleSize = 0.15f;
 
     // Game Objects
     private USE_Circle CalibSmallCircle;
     private USE_Circle CalibBigCircle;
 
     // NEW Tobii SDK Variables
-    private DisplayArea DisplayArea;
+    private static DisplayArea DisplayArea;
     private EyeTracker EyeTracker;
+    private IEyeTracker IEyeTracker;
     private NormalizedPoint2D currentNormPoint;
-    private ScreenBasedCalibration ScreenBasedCalibration;
+    private static ScreenBasedCalibration ScreenBasedCalibration;
     private CalibrationResult CalibrationResult;
+    private Vector2? latestGazePosition;
+    public MonitorDetails MonitorDetails;
+
+    private float screenWidth, screenHeight;
 
     private bool recalibpoint = false;
     private bool resultAdded = false;
     private bool resultsDisplayed = false;
     private bool pointFinished = false;
     private bool keyboardOverride = false;
+
+
 
     // Selection Handling
     private SelectionTracking.SelectionTracker.SelectionHandler SelectionHandler;
@@ -130,8 +139,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             // screenTransformations = new ScreenTransformations();
             
             GazeTracker = new GazeTracker();
-            EyeTracker = GameObject.Find("[EyeTracker]").GetComponent<EyeTracker>();
-            ScreenBasedCalibration = new ScreenBasedCalibration((IEyeTracker)EyeTracker);
+            Execute();
+
+            screenWidth = MonitorDetails.PixelResolution.x;
+            screenHeight = MonitorDetails.PixelResolution.y;
+            
 
             RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "LinearDark", "LinearDark"), UseDefaultConfigs);
             
@@ -140,6 +152,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 CalibSmallCircle = new USE_Circle(GC_CanvasGO.GetComponent<Canvas>(), SmallCirclePosition, SmallCircleSize, "CalibrationSmallCircle");
             if (CalibBigCircle == null)
                 CalibBigCircle = new USE_Circle(GC_CanvasGO.GetComponent<Canvas>(), BigCirclePosition, BigCircleSize, "CalibrationBigCircle");
+
+            SetCanvasOriginToBottomLeft(CalibSmallCircle.CircleGO);
+            SetCanvasOriginToBottomLeft(CalibBigCircle.CircleGO);
+
         });
         SetupTrial.AddInitializationMethod(() =>
         {
@@ -152,13 +168,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             ScreenBasedCalibration.EnterCalibrationMode(); // Tell eyetracker to begin calibration
 
             CalibBigCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.black;
-
-            // Set the display area to the monitor that was used for tracker calibration
-            DisplayArea = EyeTracker.GetComponent<DisplayArea>();
-
         });
 
-        SetupTrial.SpecifyTermination(()=>true, Init);
+        SetupTrial.SpecifyTermination(()=> true, Init);
         
         Init.AddInitializationMethod(() =>
         {
@@ -196,11 +208,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             //Set the calibration point to max size
             CalibBigCircle.CircleGO.transform.localScale = bigCircleMaxScale;
+            
+            currentADCSTarget = calibPointsADCS[CalibNum+4]; // get calib coordinates in ADCS space
+            currentScreenTarget = ConvertADCSGazePointToVector2(currentADCSTarget); // get calib coordinates in Screen space
+            CalibBigCircle.CircleGO.GetComponent<RectTransform>().anchoredPosition = currentScreenTarget;
 
-            currentADCSTarget = calibPointsADCS[CalibNum]; // get calib coordinates in ADCS space
-            currentScreenTarget = ConvertADCSGazePointToVector2(currentADCSTarget, DisplayArea); // get calib coordinates in Screen space
-
-            CalibBigCircle.CircleGO.transform.position = Camera.main.ScreenToWorldPoint(currentScreenTarget);
             
             currentCalibrationPointFinished = false;
             keyboardOverride = false;
@@ -211,30 +223,36 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             // Blinks the current calibration point until the acceptable calibration is met or keyboard overrid triggered
             blinkStartTime = CheckBlink(blinkStartTime, CalibBigCircle.CircleGO);
             keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space);
+
+            latestGazePosition = GetGazeLocation();
         });
 
         Blink.SpecifyTermination(() =>
-            keyboardOverride || Vector3.Distance(SelectionHandler.CurrentInputLocation(), currentScreenTarget) < acceptableCalibrationDistance,
+            keyboardOverride || (latestGazePosition != null && Vector2.Distance((Vector2)latestGazePosition, currentScreenTarget) < acceptableCalibrationDistance),
             Shrink, () => CalibBigCircle.CircleGO.SetActive(true));
 
         //----------------- SHRINK THE CALIBRATION POINT ----------------------------
         Shrink.AddInitializationMethod(() =>
         {
             CalibSmallCircle.CircleGO.transform.localScale = new Vector3(smallCircleSize, smallCircleSize, smallCircleSize);
-            CalibSmallCircle.CircleGO.transform.position = currentScreenTarget;
+            CalibSmallCircle.CircleGO.GetComponent<RectTransform>().anchoredPosition = currentScreenTarget;
             CalibSmallCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.red;
             CalibSmallCircle.CircleGO.SetActive(true);
             proportionOfShrinkTime = 0;
         });
 
-        Shrink.AddUpdateMethod(() => ShrinkCalibCircle(Shrink.TimingInfo.StartTimeAbsolute));
+        Shrink.AddUpdateMethod(() =>
+        {
+            ShrinkCalibCircle(Shrink.TimingInfo.StartTimeAbsolute);
+            latestGazePosition = GetGazeLocation();
+        });
         Shrink.SpecifyTermination(() => proportionOfShrinkTime == 1, Check);
-        Shrink.SpecifyTermination(() => !keyboardOverride & Vector3.Distance((Vector3)GazeTracker.CurrentInputScreenPosition, currentScreenTarget) > acceptableCalibrationDistance, Blink);
+        Shrink.SpecifyTermination(() => !keyboardOverride & (latestGazePosition != null && Vector2.Distance((Vector2)latestGazePosition, currentScreenTarget) > acceptableCalibrationDistance), Blink);
       
         //----------------------- CHECK THE READINESS TO CALIBRATE -------------------------
         Check.AddInitializationMethod(() => keyboardOverride = false);
         Check.AddUpdateMethod(() => keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space));
-        Check.SpecifyTermination(() => keyboardOverride || Vector3.Distance((Vector3)GazeTracker.CurrentInputScreenPosition, currentScreenTarget) < acceptableCalibrationDistance, Calibrate);
+        Check.SpecifyTermination(() => keyboardOverride || (latestGazePosition != null && Vector2.Distance((Vector2)latestGazePosition, currentScreenTarget) < acceptableCalibrationDistance), Calibrate);
 
         //------------------------ CALIBRATE THE GAZE INPUT --------------------------------
         Calibrate.AddInitializationMethod(() =>
@@ -248,15 +266,13 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             TobiiReadCalibrationMsg(currentNormPoint);
             keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space);
         });
-        Calibrate.SpecifyTermination(() => currentCalibrationPointFinished | keyboardOverride, Confirm, () => {
-            if (CalibNum == calibPointsADCS.Length - 1)
-            {
-                // The ScreenBasedCalibration.ComputeAndApply() method collects eye tracking data at the current calibration point, computes the calibration settings, and applies them to the eye tracker.
-                // The calibration point and its associated data are then added to the CalibrationResults.CalibrationPoints property.
-                CalibrationResult calibrationResult = ScreenBasedCalibration.ComputeAndApply();
-                Debug.Log(string.Format("Compute and apply returned {0} and collected at {1} points.",
-                    calibrationResult.Status, calibrationResult.CalibrationPoints.Count));
-            }
+        Calibrate.SpecifyTermination(() => currentCalibrationPointFinished | keyboardOverride, Confirm, () =>
+        {
+            // The ScreenBasedCalibration.ComputeAndApply() method collects eye tracking data at the current calibration point, computes the calibration settings, and applies them to the eye tracker.
+            // The calibration point and its associated data are then added to the CalibrationResults.CalibrationPoints property.
+            CalibrationResult = ScreenBasedCalibration.ComputeAndApply();
+            Debug.Log(string.Format("Compute and apply returned {0} and collected at {1} points.",CalibrationResult.Status, CalibrationResult.CalibrationPoints.Count));
+
         });
 
         Confirm.AddInitializationMethod(() =>
@@ -267,8 +283,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             pointFinished = false;
             CalibSmallCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.blue;
 
-            resultsDisplayed = DisplayCalibrationResults(); // just added
-
+          // resultsDisplayed = DisplayCalibrationResults(); // just added
+            PlotSamplePoints();
             if (SyncBoxController != null)
             {
                // SyncBoxController.AddToSend("RWD " + rewardTime * 10000);
@@ -284,7 +300,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             if (CalibNum == calibPointsADCS.Length - 1 && !resultsDisplayed) //put this here instead of init in case calib message takes more than a frame to send
             {
                 ClearCalibVisuals();
-                resultsDisplayed = DisplayCalibrationResults();
+           //     resultsDisplayed = DisplayCalibrationResults();
             }
             if (InputBroker.anyKey)
             {
@@ -363,12 +379,12 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             case 9:
                 calibPointsADCS = ninePoints;
-                acceptableCalibrationDistance = Vector2.Distance((ninePoints[0]), screenTransformations.AdcsToScreenPoint(ninePoints[1])) / 2;
+                acceptableCalibrationDistance = Vector2.Distance(ConvertADCSGazePointToVector2(ninePoints[0]), ConvertADCSGazePointToVector2(ninePoints[1])) / 2;
 
                 break;
             case 6:
                 calibPointsADCS = sixPoints;
-                acceptableCalibrationDistance = Vector2.Distance(screenTransformations.AdcsToScreenPoint(sixPoints[0]), screenTransformations.AdcsToScreenPoint(sixPoints[1])) / 2;
+                acceptableCalibrationDistance = Vector2.Distance(ConvertADCSGazePointToVector2(sixPoints[0]), ConvertADCSGazePointToVector2(sixPoints[1])) / 2;
                 break;
             case 5:
                 calibPointsADCS = new Vector2[5] {
@@ -377,14 +393,14 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 ninePoints [4],
                 ninePoints [6],
                 ninePoints [8]};
-                acceptableCalibrationDistance = Vector2.Distance(ConvertADCSGazePointToVector2(ninePoints[0], DisplayArea), screenTransformations.AdcsToScreenPoint(ninePoints[4])) / 2;
+                acceptableCalibrationDistance = Vector2.Distance(ConvertADCSGazePointToVector2(ninePoints[0]), ConvertADCSGazePointToVector2(ninePoints[4])) / 2;
                 break;
             case 3:
                 calibPointsADCS = new Vector2[3]{
                 ninePoints [3],
                 ninePoints [4],
                 ninePoints [5] };
-                acceptableCalibrationDistance = Vector2.Distance(screenTransformations.AdcsToScreenPoint(ninePoints[0]), screenTransformations.AdcsToScreenPoint(ninePoints[1])) / 2;
+                acceptableCalibrationDistance = Vector2.Distance(ConvertADCSGazePointToVector2(ninePoints[0]), ConvertADCSGazePointToVector2(ninePoints[1])) / 2;
                 break;
             case 1:
                 Vector2[] originalPoints = new Vector2[numCalibPoints];
@@ -454,7 +470,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         }
         return blinkStartTime;
     }
-    public bool DisplayCalibrationResults()
+  /*  public bool DisplayCalibrationResults()
     {
         // Create empty lists to store left and right eye gaze positions
         List<Vector2> leftEyeSamples = new List<Vector2>();
@@ -462,14 +478,15 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         foreach (Tobii.Research.CalibrationPoint point in CalibrationResult.CalibrationPoints)
         {
+            Debug.Log("POINT SAMPLES COUNT: " + point.CalibrationSamples.Count);
             foreach (CalibrationSample sample in point.CalibrationSamples)
             {
                 // Add the left and right eye gaze positions to their respective lists
                 var adcsPointLeft = new Vector2(sample.LeftEye.PositionOnDisplayArea.X, sample.LeftEye.PositionOnDisplayArea.Y);
-                leftEyeSamples.Add(ConvertADCSGazePointToVector2(adcsPointLeft, DisplayArea));
+                leftEyeSamples.Add(ConvertADCSGazePointToVector2(adcsPointLeft));
 
                 var adcsPointRight = new Vector2(sample.RightEye.PositionOnDisplayArea.X, sample.RightEye.PositionOnDisplayArea.Y);
-                rightEyeSamples.Add(ConvertADCSGazePointToVector2(adcsPointRight, DisplayArea));
+                rightEyeSamples.Add(ConvertADCSGazePointToVector2(adcsPointRight));
             }
         }
 
@@ -481,7 +498,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             return true;
         else
             return false;
-    }
+    }*/
 
 
     public void TobiiReadCalibrationMsg(NormalizedPoint2D point)
@@ -503,18 +520,98 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             currentCalibrationPointFinished = false;
         }
     }
-    public Vector2 ConvertADCSGazePointToVector2(Vector2 gazePoint, DisplayArea displayArea)
+    public void Execute()
     {
-        float x = displayArea.BottomLeft.X + gazePoint.x * displayArea.Width;
-        float y = displayArea.BottomLeft.Y + (1 - gazePoint.y) * displayArea.Height;
-        return new Vector2(x, y);
-    }
-    public Vector2 ConvertVector2toADCSGazePoint(Vector2 screenPoint, DisplayArea displayArea)
-    {
-        float x = screenPoint.x / displayArea.Width;
-        float y = 1 - screenPoint.y / displayArea.Height;
-        return new Vector2(x, y);
+        IEyeTracker = EyeTrackingOperations.FindAllEyeTrackers()[0];
+        if (IEyeTracker == null)
+        {
+            Debug.LogError("Could not find the eye tracker.");
+        }
+        else
+        {
+            ScreenBasedCalibration = new ScreenBasedCalibration(IEyeTracker);
+            EyeTracker = GameObject.Find("[EyeTracker]").GetComponent<EyeTracker>();
+            DisplayArea = IEyeTracker.GetDisplayArea();
+        }
+
     }
 
+    private Vector2? GetGazeLocation()
+    {
+        // Get the most recent gaze data point
+        var gazeData = EyeTracker?.LatestGazeData;
+        Vector2? screenPoint = null;
+        if (gazeData != null)
+        {
+
+            // Get the gaze points for each eye
+            var leftGazePoint = gazeData.Left.GazePointOnDisplayArea;
+            var rightGazePoint = gazeData.Right.GazePointOnDisplayArea;
+
+            // Check if both eyes are valid
+            if (gazeData.Left.GazePointValid && gazeData.Right.GazePointValid)
+            {
+                // Average the gaze points from both eyes
+                var combinedGazePoint = new Vector2(
+                    (leftGazePoint.x + rightGazePoint.x) / 2f,
+                    (leftGazePoint.y + rightGazePoint.y) / 2f);
+
+                screenPoint = ConvertADCSGazePointToVector2(combinedGazePoint);
+            }
+            else if (gazeData.Left.GazePointValid)
+            {
+                // Use the gaze point from the left eye
+                screenPoint = ConvertADCSGazePointToVector2(leftGazePoint);
+            }
+            else if (gazeData.Right.GazePointValid)
+            {
+                // Use the gaze point from the right eye
+                screenPoint = ConvertADCSGazePointToVector2(leftGazePoint);
+            }
+
+            return screenPoint;
+        }
+        return null;
+    }
+
+    public Vector2 ConvertADCSGazePointToVector2(Vector2 gazePoint)
+    {
+        float x = gazePoint.x * screenWidth;
+        float y = (1 - gazePoint.y) * screenHeight;
+        return new Vector2(x, y);
+    }
+    public Vector2 ConvertVector2toADCSGazePoint(Vector2 screenPoint)
+    {
+        float x = screenPoint.x / screenWidth;
+        float y = 1 - (screenPoint.y / screenHeight);
+        return new Vector2(x, y);
+    }
+    
+    private void SetCanvasOriginToBottomLeft(GameObject GO)
+    {
+        RectTransform rectTransform = GO.GetComponent<RectTransform>();
+        rectTransform.anchorMin = Vector2.zero;
+        rectTransform.anchorMax = Vector2.zero;
+    }
+
+    private void PlotSamplePoints()
+    {
+        Debug.Log("CALIBRATION RESULTS POINTS: " + CalibrationResult.CalibrationPoints.Count);
+        Tobii.Research.CalibrationPoint calibPoint = CalibrationResult.CalibrationPoints[CalibNum];
+        for (int i = 0; i < calibPoint.CalibrationSamples.Count; i++)
+        {
+            CalibrationSample sample = calibPoint.CalibrationSamples[i];
+            Vector2 samplePos = GetAveragePosition(sample.LeftEye.PositionOnDisplayArea, sample.RightEye.PositionOnDisplayArea);
+            USE_Circle sampleCircle = new USE_Circle(GC_CanvasGO.GetComponent<Canvas>(), currentScreenTarget, 0.15f, $"Sample {1}");
+            sampleCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.red;
+        }
+    }
+
+    private Vector2 GetAveragePosition(NormalizedPoint2D leftEye, NormalizedPoint2D rightEye)
+    {
+        var avgPosition = new Vector2((leftEye.X + rightEye.X) / 2f, (leftEye.Y + rightEye.Y) / 2f);
+        var avgScreenPosition = ConvertADCSGazePointToVector2(avgPosition);
+        return avgScreenPosition;
+    }
 
 }

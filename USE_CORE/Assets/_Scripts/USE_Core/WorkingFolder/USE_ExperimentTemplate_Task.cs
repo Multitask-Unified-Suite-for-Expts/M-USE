@@ -16,6 +16,7 @@ using USE_ExperimentTemplate_Trial;
 using USE_ExperimentTemplate_Block;
 using SelectionTracking;
 using UnityEngine.InputSystem;
+using USE_DisplayManagement;
 
 namespace USE_ExperimentTemplate_Task
 {
@@ -45,6 +46,7 @@ namespace USE_ExperimentTemplate_Task
 
         [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive, UseDefaultConfigs;
         [HideInInspector] public string ContextExternalFilePath, SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
+        [HideInInspector] public MonitorDetails MonitorDetails;
         [HideInInspector] public LocateFile LocateFile;
         [HideInInspector] public StringBuilder BlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
         private int TaskStringsAdded = 0;

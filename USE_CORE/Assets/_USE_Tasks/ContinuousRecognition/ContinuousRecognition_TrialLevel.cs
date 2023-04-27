@@ -576,15 +576,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.tokenSize = 200;
         TokenFBController.RecalculateTokenBox();
 
-        //move Timer up
         Vector3 Pos = OriginalTimerPosition;
-        Pos.y -= 1.5f;
+        Pos.y -= .02f;
         TimerBackdropGO.transform.position = Pos;
-
-        //move TitleText down
-        Vector3 Position = TitleTextGO.transform.position;
-        Position.y -= 1f;
-        TitleTextGO.transform.position = Position;
     }
 
     float GetOffsetY()

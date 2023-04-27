@@ -34,9 +34,9 @@ namespace USE_ExperimentTemplate_Session
 
         private bool IsHuman;
 
-        public float ParticipantDistance_CM;
-        public float ShotgunRaycastSpacing_DVA;
-        public float ShotgunRaycastCircleSize_DVA;
+        [HideInInspector] public float ParticipantDistance_CM;
+        [HideInInspector] public float ShotgunRaycastSpacing_DVA;
+        [HideInInspector] public float ShotgunRaycastCircleSize_DVA;
 
         [HideInInspector] public bool TasksFinished;
 
@@ -61,10 +61,10 @@ namespace USE_ExperimentTemplate_Session
         protected int taskCount;
         private float TaskSelectionTimeout;
 
-        public int LongRewardHotKeyPulseSize;
-        public int LongRewardHotKeyNumPulses;
-        public int RewardHotKeyPulseSize;
-        public int RewardHotKeyNumPulses;
+        [HideInInspector] public int LongRewardHotKeyPulseSize;
+        [HideInInspector] public int LongRewardHotKeyNumPulses;
+        [HideInInspector] public int RewardHotKeyPulseSize;
+        [HideInInspector] public int RewardHotKeyNumPulses;
 
         //For Loading config information
         public SessionDetails SessionDetails;

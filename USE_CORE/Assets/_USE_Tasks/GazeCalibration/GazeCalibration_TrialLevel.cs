@@ -209,7 +209,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             //Set the calibration point to max size
             CalibBigCircle.CircleGO.transform.localScale = bigCircleMaxScale;
             
-            currentADCSTarget = calibPointsADCS[CalibNum+4]; // get calib coordinates in ADCS space
+            currentADCSTarget = calibPointsADCS[CalibNum]; // get calib coordinates in ADCS space
             currentScreenTarget = ConvertADCSGazePointToVector2(currentADCSTarget); // get calib coordinates in Screen space
             CalibBigCircle.CircleGO.GetComponent<RectTransform>().anchoredPosition = currentScreenTarget;
 
@@ -271,7 +271,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             // The ScreenBasedCalibration.ComputeAndApply() method collects eye tracking data at the current calibration point, computes the calibration settings, and applies them to the eye tracker.
             // The calibration point and its associated data are then added to the CalibrationResults.CalibrationPoints property.
             CalibrationResult = ScreenBasedCalibration.ComputeAndApply();
-            Debug.Log(string.Format("Compute and apply returned {0} and collected at {1} points.",CalibrationResult.Status, CalibrationResult.CalibrationPoints.Count));
+            Debug.Log(string.Format("##########Compute and apply returned {0} and collected at {1} points.",CalibrationResult.Status, CalibrationResult.CalibrationPoints.Count));
 
         });
 
@@ -283,7 +283,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             pointFinished = false;
             CalibSmallCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.blue;
 
-          // resultsDisplayed = DisplayCalibrationResults(); // just added
+          // resultsDisplayed = DisplayCalibrationResults(); // just added\
+          if (CalibrationResult.CalibrationPoints.Count != 0)
             PlotSamplePoints();
             if (SyncBoxController != null)
             {
@@ -509,6 +510,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             // Done calibrating the point if successful
             currentCalibrationPointFinished = true;
+            Debug.Log("YAY GOOD");
         }
         else if (status.Equals(CalibrationStatus.Failure))
         {

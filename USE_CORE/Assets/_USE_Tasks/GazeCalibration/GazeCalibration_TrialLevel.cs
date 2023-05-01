@@ -18,6 +18,9 @@ using USE_Common_Namespace;
 using System.Linq;
 using USE_DisplayManagement;
 using static Tobii.Research.Unity.CalibrationThread;
+using static System.Net.Mime.MediaTypeNames;
+using UnityEngine.UI;
+using System.Text;
 
 public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 {
@@ -91,6 +94,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private float screenWidth, screenHeight;
     private GameObject ResultContainer;
+    private GameObject textCanvas;
+    private UnityEngine.UI.Text txt;
 
     private bool recalibpoint = false;
     private bool resultAdded = false;
@@ -141,11 +146,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             // screenTransformations = new ScreenTransformations();
             
             GazeTracker = new GazeTracker();
-            Execute();
+            screenWidth = (MonitorDetails.CmSize.x)*10;
+            screenHeight = (MonitorDetails.CmSize.y)*10;
 
-            screenWidth = MonitorDetails.PixelResolution.x;
-            screenHeight = MonitorDetails.PixelResolution.y;
-            
+            Execute();
 
             RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "LinearDark", "LinearDark"), UseDefaultConfigs);
             
@@ -172,6 +176,13 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
             ScreenBasedCalibration.EnterCalibrationMode(); // Tell eyetracker to begin calibration
             CalibBigCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.black;
+
+            textCanvas = GameObject.Find("TextCanvas");
+            txt = textCanvas.GetComponent<UnityEngine.UI.Text>();
+            txt.color = Color.white;
+            txt.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            txt.fontStyle = FontStyle.Bold;
+            textCanvas.transform.localPosition = new Vector3(-2, 2, 0);
         });
 
         SetupTrial.SpecifyTermination(()=> true, Init);
@@ -190,6 +201,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 ScreenBasedCalibration.CollectData(preCalibPt);
                 ScreenBasedCalibration.DiscardData(preCalibPt);
             }
+        });
+        Init.AddUpdateMethod(() =>
+        {
+            latestGazePosition = GetGazeLocation();
         });
 
         //------------------ DEFINE NUM CALIB POINTS GIVEN KEY CODES ----------------------------------
@@ -223,11 +238,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             //Set the calibration point to max size
             CalibBigCircle.CircleGO.transform.localScale = bigCircleMaxScale;
-            
             currentADCSTarget = calibPointsADCS[CalibNum]; // get calib coordinates in ADCS space
             currentScreenTarget = ADCSToScreen(currentADCSTarget); // get calib coordinates in Screen space
             CalibBigCircle.CircleGO.GetComponent<RectTransform>().anchoredPosition = currentScreenTarget;
-
+            Debug.Log("CALIB NUM: " + CalibNum);
+            Debug.Log("CURRENT SCREEN TARGET: " + currentScreenTarget);
             
             currentCalibrationPointFinished = false;
             keyboardOverride = false;
@@ -239,7 +254,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             blinkStartTime = CheckBlink(blinkStartTime, CalibBigCircle.CircleGO);
             keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space);
 
-            latestGazePosition = GetGazeLocation();
+            latestGazePosition = GetGazeLocation();/*
+            txt.text = $"LATEST GAZE POSITION: {latestGazePosition}  + " +
+            $"\nCURRENT TARGET: {currentScreenTarget}";*/
         });
 
         Blink.SpecifyTermination(() =>
@@ -384,7 +401,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         Confirm.AddDefaultTerminationMethod(() =>
         {
             DestroySampleResults();
-            Debug.Break();
         });
 
     }
@@ -551,7 +567,12 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             ScreenBasedCalibration = new ScreenBasedCalibration(IEyeTracker);
             EyeTracker = GameObject.Find("[EyeTracker]").GetComponent<EyeTracker>();
-            DisplayArea = IEyeTracker.GetDisplayArea();
+            Point3D topLeft = new Point3D(0, 0, 0);
+            Point3D bottomLeft = new Point3D(0, screenHeight, 0);
+            Point3D topRight = new Point3D(screenWidth, 0, 0);
+
+            DisplayArea = new DisplayArea(topLeft, bottomLeft, topRight);
+            IEyeTracker.SetDisplayArea(DisplayArea);
         }
 
     }
@@ -566,9 +587,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
             // Get the gaze points for each eye
             var leftGazePoint = gazeData.Left.GazePointOnDisplayArea;
+          //  leftGazePoint.y = 1 - leftGazePoint.y;
             var rightGazePoint = gazeData.Right.GazePointOnDisplayArea;
+        //    rightGazePoint.y = 1 - rightGazePoint.y;
 
-            // Check if both eyes are valid
             if (gazeData.Left.GazePointValid && gazeData.Right.GazePointValid)
             {
                 // Average the gaze points from both eyes
@@ -586,9 +608,14 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             else if (gazeData.Right.GazePointValid)
             {
                 // Use the gaze point from the right eye
-                screenPoint = ADCSToScreen(leftGazePoint);
+                screenPoint = ADCSToScreen(rightGazePoint);
             }
-
+            txt.text = /*$"LEFT GAZE POINT: ({ADCSToScreen(leftGazePoint).x},{ADCSToScreen(leftGazePoint).y}) " +
+                $"\nRIGHT GAZE POINT: ({ADCSToScreen(rightGazePoint).x},{ADCSToScreen(rightGazePoint).y}) " +*/
+                $"LEFT GAZE POINT: ({leftGazePoint.x},{leftGazePoint.y}) " +
+                $"\nRIGHT GAZE POINT: ({rightGazePoint.x},{rightGazePoint.y}) " +
+                $"\n\n CURRENT TARGET: {ScreenToADCS(currentScreenTarget).ToString()}" +
+                $"\n\n SCREEN POINT: {screenPoint}";
             return screenPoint;
         }
         return null;
@@ -596,14 +623,14 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     public Vector2 ADCSToScreen(Vector2 adcsGazePoint)
     {
-        float x = adcsGazePoint.x * screenWidth;
-        float y = (1 - adcsGazePoint.y) * screenHeight;
+        float x = adcsGazePoint.x * MonitorDetails.PixelResolution.x;
+        float y = MonitorDetails.PixelResolution.y - (adcsGazePoint.y * MonitorDetails.PixelResolution.y);
         return new Vector2(x, y);
     }
     public Vector2 ScreenToADCS(Vector2 screenPoint)
     {
-        float x = screenPoint.x / screenWidth;
-        float y = 1 - (screenPoint.y / screenHeight);
+        float x = screenPoint.x / MonitorDetails.PixelResolution.x;
+        float y = 1 - (screenPoint.y / MonitorDetails.PixelResolution.y);
         return new Vector2(x, y);
     }
     
@@ -616,7 +643,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private void PlotSamplePoints()
     {
-        Debug.Log("CALIBRATION RESULTS POINTS: " + CalibrationResult.CalibrationPoints.Count);
+        /*Debug.Log("CALIBRATION RESULTS POINTS: " + CalibrationResult.CalibrationPoints.Count);
         
 
         Tobii.Research.CalibrationPoint calibPoint = CalibrationResult.CalibrationPoints[CalibNum];
@@ -638,7 +665,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             leftSampleCircle.CircleGO.SetActive(true);
             rightSampleCircle.CircleGO.SetActive(true);
 
-        }
+        }*/
     }
 
     private Vector2 GetAveragePosition(NormalizedPoint2D leftEye, NormalizedPoint2D rightEye)
@@ -661,4 +688,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
+    private void DebugText(StringBuilder str)
+    {
+        txt.text = $"<size=25>{str}</size>";
+
+    }
 }

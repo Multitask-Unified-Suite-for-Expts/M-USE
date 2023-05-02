@@ -487,7 +487,7 @@ MonoBehaviour:
   SessionId_SQL: 0
   PauseCanvasGO: {fileID: 0}
   PauseCanvas: {fileID: 0}
-  UseDefaultConfigs: 0
+  UseDefaultConfigs: 1
   ParticipantDistance_CM: 0
   ShotgunRaycastSpacing_DVA: 0
   ShotgunRaycastCircleSize_DVA: 0
@@ -506,6 +506,7 @@ MonoBehaviour:
   LocateFile: {fileID: 463005619}
   CameraMirrorTexture: {fileID: 0}
   DisplayController: {fileID: 0}
+  WebGL_InputText: {fileID: 0}
 --- !u!4 &1375570696
 Transform:
   m_ObjectHideFlags: 0

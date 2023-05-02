@@ -220,7 +220,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             InstantiateCurrMaze();
             tiles.ToggleVisibility(true);
-            CreateTextOnExperimenterDisplay();
+
+            #if (!UNITY_WEBGL)
+                CreateTextOnExperimenterDisplay();
+            #endif
+
             mazeStartTime = Time.unscaledTime;
 
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOn"]);
@@ -312,8 +316,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             else if (CorrectSelection)
             {
                 SliderFBController.UpdateSliderValue(selectedGO.GetComponent<Tile>().sliderValueChange);
-                playerViewParent.transform.Find((pathProgressIndex + 1).ToString()).GetComponent<Text>().color =
-                    new Color(0, 0.392f, 0);
+                #if (!UNITY_WEBGL)
+                    playerViewParent.transform.Find((pathProgressIndex + 1).ToString()).GetComponent<Text>().color = new Color(0, 0.392f, 0);
+                #endif
                 // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]);
             }
             else if (selectedGO != null && !ErroneousReturnToLast)
@@ -420,13 +425,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         // This will Load all tiles within the maze and the background of the maze
 
         mazeDims = CurrentTaskLevel.currMaze.mDims;
-        var mazeCenter = new Vector3(0, 0, 0);
+        var mazeCenter = MazeBackground.transform.localPosition;
 
         mazeLength = mazeDims.x * TileSize + (mazeDims.x - 1) * spaceBetweenTiles.value;
         mazeHeight = mazeDims.y * TileSize + (mazeDims.y - 1) * spaceBetweenTiles.value;
         MazeBackground.transform.SetParent(MazeContainer.transform); // setting it last so that it doesn't cover tiles
         MazeBackground.transform.localScale = new Vector3(mazeLength + 2 * spaceBetweenTiles.value,
-            mazeHeight + 2 * (spaceBetweenTiles.value/4f), 0.1f);
+            mazeHeight + 2 * (spaceBetweenTiles.value), 0.1f);
         MazeBackground.SetActive(true);
         var bottomLeftMazePos = mazeCenter - new Vector3(mazeLength / 2, mazeHeight / 2, 0);
 
@@ -819,7 +824,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public override void FinishTrialCleanup()
     {
         DisableSceneElements();
-        DestroyChildren(playerViewParent);
+
+        #if (!UNITY_WEBGL)
+            DestroyChildren(playerViewParent);
+        #endif
+
         if (mazeLoaded)
         {
             tiles.DestroyStimGroup();

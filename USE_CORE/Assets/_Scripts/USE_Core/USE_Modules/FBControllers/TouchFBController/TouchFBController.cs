@@ -77,12 +77,16 @@ public class TouchFBController : MonoBehaviour
             if (HeldTooShort_Prefab.GetComponent<Image>().rectTransform.sizeDelta != new Vector2(fbSize, fbSize))
                 SetPrefabSizes(FeedbackSize);
 
-        Handler.TouchErrorFeedback += OnTouchErrorFeedback; //Subscribe to event
+        #if (!UNITY_WEBGL)
+            Handler.TouchErrorFeedback += OnTouchErrorFeedback; //Subscribe to event
+        #endif
     }
 
     public void DisableTouchFeedback()
     {
-        Handler.TouchErrorFeedback -= OnTouchErrorFeedback;
+        #if (!UNITY_WEBGL)
+            Handler.TouchErrorFeedback -= OnTouchErrorFeedback;
+        #endif
     }
 
     private void OnTouchErrorFeedback(object sender, TouchFeedbackArgs e)
@@ -110,6 +114,7 @@ public class TouchFBController : MonoBehaviour
                     break;
             }
         }
+
     }
 
     private void ShowTouchFeedback(TouchFeedback touchFb)

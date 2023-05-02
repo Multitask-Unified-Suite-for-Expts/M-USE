@@ -16,6 +16,7 @@ using USE_ExperimentTemplate_Trial;
 using USE_ExperimentTemplate_Block;
 using SelectionTracking;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 namespace USE_ExperimentTemplate_Task
 {
@@ -78,6 +79,8 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public ExperimenterDisplayController ExperimenterDisplayController;
         [HideInInspector] public SessionInfoPanel SessionInfoPanel;
 
+        [HideInInspector] public DisplayController DisplayController;
+
         private GameObject Controllers;
 
         [HideInInspector] public SerialPortThreaded SerialPortController;
@@ -136,22 +139,25 @@ namespace USE_ExperimentTemplate_Task
                 BlockSummaryString = new StringBuilder();
                 PreviousBlockSummaryString = new StringBuilder();
                 CurrentTaskSummaryString = new StringBuilder();
-                
-                SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
+
+                #if (!UNITY_WEBGL)
+                    SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
+
+                    if (configUI == null)
+                        configUI = FindObjectOfType<ConfigUI>();
+                    configUI.clear();
+                    if (ConfigUiVariables != null)
+                        configUI.store = ConfigUiVariables;
+                    else
+                        configUI.store = new ConfigVarStore();
+                    configUI.GenerateUI();
+
+                #endif
 
                 TaskCam.gameObject.SetActive(true);
                 if (TaskCanvasses != null)
                     foreach (GameObject go in TaskCanvasses)
                         go.SetActive(true);
-
-                if (configUI == null)
-                    configUI = FindObjectOfType<ConfigUI>();
-                configUI.clear();
-                if (ConfigUiVariables != null)
-                    configUI.store = ConfigUiVariables;
-                else
-                    configUI.store = new ConfigVarStore();
-                configUI.GenerateUI();
 
                 Controllers.SetActive(true);
             });
@@ -363,6 +369,8 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.SerialRecvData = SerialRecvData;
             TrialLevel.SerialSentData = SerialSentData;
             TrialLevel.SyncBoxController = SyncBoxController;
+
+            TrialLevel.DisplayController = DisplayController; 
 
             if(SyncBoxController != null)
                 TrialLevel.SyncBoxController.EventCodeManager = EventCodeManager;

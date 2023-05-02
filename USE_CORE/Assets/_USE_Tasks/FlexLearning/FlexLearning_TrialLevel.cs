@@ -130,8 +130,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             
             if (!configUIVariablesLoaded)
                 LoadConfigUIVariables();
-            if (!playerViewLoaded)
-                CreateTextOnExperimenterDisplay();
+
+            #if (!UNITY_WEBGL)
+                if (!playerViewLoaded)
+                    CreateTextOnExperimenterDisplay();
+            #endif
 
             SetTrialSummaryString();
         });
@@ -157,7 +160,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 AdjustedPositionsForMac = true;
             }
 
-
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
@@ -179,7 +181,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             Input.ResetInputAxes(); //reset input in case they holding down
             TokenFBController.enabled = true;
-            ActivateChildren(playerViewParent);
+            #if (!UNITY_WEBGL)
+                ActivateChildren(playerViewParent);
+            #endif
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
 
@@ -268,7 +272,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddInitializationMethod(() =>
         {
-            DestroyTextOnExperimenterDisplay();
+            #if (!UNITY_WEBGL)
+                DestroyTextOnExperimenterDisplay();
+            #endif
+
             if (selectedSD.StimTrialRewardMag > 0)
             {
                 TokenFBController.AddTokens(selectedGO, selectedSD.StimTrialRewardMag);
@@ -325,7 +332,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     public override void FinishTrialCleanup()
     {
         // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
-        DestroyTextOnExperimenterDisplay();
+        #if (!UNITY_WEBGL)
+            DestroyTextOnExperimenterDisplay();
+        #endif
+
         tStim.ToggleVisibility(false);
         
         if (TokenFBController.isActiveAndEnabled)

@@ -87,7 +87,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private Transform playerViewParent;
     private GameObject playerViewText;
     public List<GameObject> playerViewTextList;
-
+    
     [HideInInspector] public float TouchFeedbackDuration;
 
     //Config Variables
@@ -124,7 +124,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 OriginalStartButtonPosition = StartButton.transform.position;
             }
-            playerViewParent = GameObject.Find("MainCameraCopy").transform;
+            #if (!UNITY_WEBGL)
+                playerViewParent = GameObject.Find("MainCameraCopy").transform;
+            #endif
         });
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
@@ -149,7 +151,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             SetTrialSummaryString();
 
-            StartButton.transform.position = OriginalStartButtonPosition;
+            #if (!UNITY_WEBGL)
+                StartButton.transform.position = OriginalStartButtonPosition;
+            #endif
+
 
             currentTask.CalculateBlockSummaryString();
 
@@ -224,7 +229,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
         ChooseStim.AddInitializationMethod(() =>
         {
-            CreateTextOnExperimenterDisplay();
+            #if (!UNITY_WEBGL)
+                CreateTextOnExperimenterDisplay();
+            #endif
 
             ChosenGO = null;
             ChosenStim = null;

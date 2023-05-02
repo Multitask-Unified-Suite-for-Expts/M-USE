@@ -183,7 +183,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 StartButton = USE_StartButton.StartButtonGO;
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
             }
-            playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
+            #if (!UNITY_WEBGL)
+                playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
+            #endif
         });
 
         SetupTrial.AddInitializationMethod(() =>
@@ -243,8 +245,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         ChooseStimulus.AddInitializationMethod(() =>
         {
             AssignCorrectStim();
-            if (GameObject.Find("MainCameraCopy").transform.childCount == 0)
-                CreateTextOnExperimenterDisplay();
+
+            #if (!UNITY_WEBGL)
+                if (GameObject.Find("MainCameraCopy").transform.childCount == 0)
+                    CreateTextOnExperimenterDisplay();
+            #endif
+
             choiceMade = false;
             if (CurrentTrialDef.LeaveFeedbackOn)
                 HaloFBController.SetLeaveFeedbackOn();
@@ -399,9 +405,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             trialComplete = false;
             startTime = Time.time;
             errorTypeString = "None";
-            
+
             //Destroy all created text objects on Player View of Experimenter Display
-            DestroyChildren(GameObject.Find("MainCameraCopy"));
+            #if (!UNITY_WEBGL)
+                DestroyChildren(GameObject.Find("MainCameraCopy"));
+            #endif
+
             runningAcc.Add(1);
             NumSliderBarFilled += 1;
             CurrentTaskLevel.NumSliderBarFilled_InTask++;
@@ -429,10 +438,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             searchStims.ToggleVisibility(false);
             distractorStims.ToggleVisibility(false);
-            if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
-                DestroyChildren(GameObject.Find("MainCameraCopy"));
-            
 
+            #if (!UNITY_WEBGL)
+                if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
+                    DestroyChildren(GameObject.Find("MainCameraCopy"));
+            #endif
+            
             if (NeutralITI)
             {
                 ContextName = "itiImage";
@@ -455,8 +466,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     }
     public override void FinishTrialCleanup()
     {
-        if (playerViewParent.transform.childCount != 0)
-            DestroyChildren(GameObject.Find("MainCameraCopy"));
+        #if (!UNITY_WEBGL)
+            if (playerViewParent.transform.childCount != 0)
+                DestroyChildren(GameObject.Find("MainCameraCopy"));
+        #endif
+
         searchStims.ToggleVisibility(false);
         distractorStims.ToggleVisibility(false);
         SliderFBController.SliderGO.SetActive(false);

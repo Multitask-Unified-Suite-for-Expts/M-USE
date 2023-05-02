@@ -2,7 +2,7 @@
   "varsNumber": {
     "spaceBetweenTiles": {
       "name": "Space Between Tiles",
-      "value": 0.8,
+      "value": 0.6,
       "min": 0.1,
       "max": 20,
       "precision": 1,
@@ -11,7 +11,7 @@
     },
     "tileSize": {
       "name": "Tile Size",
-      "value": 1.9,
+      "value": 2,
       "min": 0.1,
       "max": 20,
       "precision": 1,

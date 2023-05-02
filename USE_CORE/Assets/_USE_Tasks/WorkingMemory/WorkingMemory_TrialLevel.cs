@@ -179,7 +179,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         // Wait for a click and provide feedback accordingly
         SearchDisplay.AddInitializationMethod(() =>
         {
-            CreateTextOnExperimenterDisplay();
+            #if (!UNITY_WEBGL)
+                CreateTextOnExperimenterDisplay();
+            #endif
             searchStims.ToggleVisibility(true);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
@@ -259,8 +261,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         // The state that will handle the token feedback and wait for any animations
         TokenFeedback.AddInitializationMethod(() =>
         {
-            if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
-                DestroyChildren(GameObject.Find("MainCameraCopy"));
+            #if (!UNITY_WEBGL)
+                if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
+                    DestroyChildren(GameObject.Find("MainCameraCopy"));
+            #endif
+
             searchStims.ToggleVisibility(false);
             if (selectedSD.IsTarget)
             {
@@ -318,8 +323,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     public override void FinishTrialCleanup()
     {
         // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
-        if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
-            DestroyChildren(GameObject.Find("MainCameraCopy"));
+        #if (!UNITY_WEBGL)
+            if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
+                DestroyChildren(GameObject.Find("MainCameraCopy"));
+        #endif
+
         TokenFBController.enabled = false;
         searchStims.ToggleVisibility(false);
         sampleStim.ToggleVisibility(false);

@@ -68,6 +68,8 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public Dictionary<string, EventCode> TaskEventCodes;
         [HideInInspector] public Dictionary<string, EventCode> SessionEventCodes;
 
+        [HideInInspector] public DisplayController DisplayController;
+
 
         [HideInInspector] public int InitialTokenAmount;
 
@@ -115,7 +117,10 @@ namespace USE_ExperimentTemplate_Trial
             //DefineTrial();
             Add_ControlLevel_InitializationMethod(() =>
             {
-                SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
+                #if (!UNITY_WEBGL)
+                        SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
+                #endif
+
                 TrialCount_InBlock = -1;
                 TrialStims = new List<StimGroup>();
                 AudioFBController.UpdateAudioSource();
@@ -129,7 +134,15 @@ namespace USE_ExperimentTemplate_Trial
                 Input.ResetInputAxes();
 
                 AbortCode = 0;
-                SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials",1));
+
+                #if (!UNITY_WEBGL)
+                    SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials",1));
+                #endif
+
+                #if (UNITY_WEBGL)
+                    Cursor.visible = true;
+                #endif
+
                 TrialCount_InTask++;
                 TrialCount_InBlock++;
                 FrameData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);

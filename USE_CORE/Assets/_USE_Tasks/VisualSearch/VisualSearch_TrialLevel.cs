@@ -181,7 +181,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             // Toggle TokenBar and Stim to be visible
             selectionDuration = null;
             TokenFBController.enabled = true;
-            CreateTextOnExperimenterDisplay();
+            #if (!UNITY_WEBGL)
+                CreateTextOnExperimenterDisplay();
+            #endif
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
 
@@ -264,8 +266,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddInitializationMethod(() =>
         {
-            if (playerViewParent.transform.childCount != 0)
-                DestroyChildren(playerViewParent);
+            #if (!UNITY_WEBGL)
+                if (playerViewParent.transform.childCount != 0)
+                    DestroyChildren(playerViewParent);
+            #endif
+
             if (selectedSD.StimTrialRewardMag > 0)
             {
                 TokenFBController.AddTokens(selectedGO, selectedSD.StimTrialRewardMag);
@@ -321,8 +326,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     }
     public override void FinishTrialCleanup()
     {
-        if (playerViewParent.transform.childCount != 0)
-            DestroyChildren(playerViewParent);
+        #if (!UNITY_WEBGL)
+            if (playerViewParent.transform.childCount != 0)
+                DestroyChildren(playerViewParent);
+        #endif
+
         tStim.ToggleVisibility(false);
         
         if (TokenFBController.isActiveAndEnabled)

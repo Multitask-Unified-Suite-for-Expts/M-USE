@@ -603,6 +603,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.tokenSize = 105;
             TokenFBController.tokenBoxYOffset = 20;
         }
+
+        #if (UNITY_WEBGL && !UNITY_EDITOR)
+                TokenFBController.tokenSize = 115;
+                TokenFBController.tokenBoxYOffset = 25;
+        #endif
+
         TokenFBController.SetFlashingTime(1.5f);
         TokenFBController.tokenSpacing = -18;
     }
@@ -769,6 +775,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             image.transform.localScale = new Vector3(.035f, 6f, .001f);
         else
             image.transform.localScale = new Vector3(.035f, 4.5f, .001f);
+
+
+        #if (UNITY_WEBGL && !UNITY_EDITOR)
+            image.transform.localScale = new Vector3(.035f, 6f, .001f);
+        #endif
 
         MiddleBarrier.SetActive(false);
     }

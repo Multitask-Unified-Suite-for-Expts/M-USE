@@ -303,6 +303,10 @@ MonoBehaviour:
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   InitialTokenAmount: 0
+  ShotgunRaycastSpacing_DVA: 0
+  ParticipantDistance_CM: 0
+  ShotgunRaycastCircleSize_DVA: 0
+  UseDefaultConfigs: 0
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
@@ -322,6 +326,7 @@ MonoBehaviour:
   OriginalStartButtonPosition: {x: 0, y: 0, z: 0}
   EC_CanvasGO: {fileID: 960539200}
   StartButtonClassInstance: {fileID: 0}
+  MacMainDisplayBuild: 0
   ContextExternalFilePath: 
   IsHuman: 0
   Flashing: 0
@@ -434,6 +439,10 @@ MonoBehaviour:
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
+  ShotgunRaycastCircleSize_DVA: 0
+  ShotgunRaycastSpacing_DVA: 0
+  ParticipantDistance_CM: 0
+  PrefabPath: 
   ConfigName: 
   TaskName: EffortControl
   TaskProjectFolder: 
@@ -447,6 +456,7 @@ MonoBehaviour:
   EventCodesActive: 0
   RewardPulsesActive: 0
   SonicationActive: 0
+  UseDefaultConfigs: 0
   ContextExternalFilePath: 
   SessionDataPath: 
   TaskConfigPath: 

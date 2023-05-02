@@ -91,6 +91,7 @@ namespace USE_ExperimentTemplate_Session
 
         public DisplayController DisplayController;
 
+
         public override void LoadSettings()
         {
 
@@ -287,6 +288,10 @@ namespace USE_ExperimentTemplate_Session
 
             RawImage mainCameraCopy_Image = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
 
+            #if (UNITY_WEBGL)
+                experimenterDisplay.SetActive(false);
+            #endif
+
 
             SelectionTracker = new SelectionTracker();
 
@@ -294,10 +299,12 @@ namespace USE_ExperimentTemplate_Session
             bool taskAutomaticallySelected = false;
             setupSession.AddDefaultInitializationMethod(() =>
             {
-                PauseCanvasGO = GameObject.Find("PauseCanvas");
-                PauseCanvasGO.SetActive(false);
-                PauseCanvas = PauseCanvasGO.GetComponent<Canvas>();
-                PauseCanvas.planeDistance = 1;
+                #if (!UNITY_WEBGL)
+                    PauseCanvasGO = GameObject.Find("PauseCanvas");
+                    PauseCanvasGO.SetActive(false);
+                    PauseCanvas = PauseCanvasGO.GetComponent<Canvas>();
+                    PauseCanvas.planeDistance = 1;
+                #endif
 
                 SessionData.CreateFile();
                 //SessionData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
@@ -399,7 +406,9 @@ namespace USE_ExperimentTemplate_Session
                     SessionSettings.Save();
                     GameObject initCamGO = GameObject.Find("InitCamera");
                     initCamGO.SetActive(false);
-                    SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
+                    #if (!UNITY_WEBGL)
+                        SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
+                    #endif
                     EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupSessionEnds"]);
                 });
 
@@ -595,8 +604,9 @@ namespace USE_ExperimentTemplate_Session
             {
                 AppendSerialData();
             });
-            
+
             selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask);
+
             // Don't have automatic task selection if we encountered an error during setup
             if (TaskSelectionTimeout >= 0 && !LogPanel.HasError())
             {
@@ -683,8 +693,10 @@ namespace USE_ExperimentTemplate_Session
                     mainCameraCopy_Image.texture = CameraMirrorTexture;
                 }
 
-                PauseCanvas.renderMode = RenderMode.ScreenSpaceCamera;
-                PauseCanvas.worldCamera = CurrentTask.TaskCam;
+                #if (!UNITY_WEBGL)
+                    PauseCanvas.renderMode = RenderMode.ScreenSpaceCamera;
+                    PauseCanvas.worldCamera = CurrentTask.TaskCam;
+                #endif
 
             });
 
@@ -844,6 +856,7 @@ namespace USE_ExperimentTemplate_Session
 
         ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
+            tl.DisplayController = DisplayController;
             tl.SessionDataControllers = SessionDataControllers;
             tl.LocateFile = LocateFile;
             tl.SessionDataPath = SessionDataPath;

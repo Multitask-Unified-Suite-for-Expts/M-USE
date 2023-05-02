@@ -43,10 +43,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
-            // Sets Min/Max for the CheckBlockEnd at the TrialLevel
-            System.Random rnd = new System.Random();
-            int RandomMaxTrials = rnd.Next(flBD.MinMaxTrials[0], flBD.MinMaxTrials[1]);
-            flTL.MaxTrials = RandomMaxTrials;
+            
             flTL.MinTrials = flBD.MinMaxTrials[0];
             flTL.TokensWithStimOn = flBD.TokensWithStimOn;
             

@@ -19,7 +19,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
     // Block End Variables
     public List<int> runningAcc;
-    public int MinTrials, MaxTrials;
+    public int? MinTrials, MaxTrials;
     
     // Stimuli Variables
     private StimGroup tStim;
@@ -109,6 +109,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             // Initialize FB Controller Values
             HaloFBController.SetHaloSize(5f);
             HaloFBController.SetHaloIntensity(5);
+
         });
         
         SetupTrial.AddInitializationMethod(() =>
@@ -137,6 +138,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 CreateTextOnExperimenterDisplay();
 
             SetTrialSummaryString();
+            MaxTrials = CurrentTrialDef.MaxTrials;
+
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -294,9 +297,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
                 if (SyncBoxController != null)
                 {
-                    int NumPulses = chooseReward(CurrentTrialDef.PulseReward[0]);
+                    int NumPulses = chooseReward(CurrentTrialDef.PulseReward);
                     SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
-                    SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
+                    SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", NumPulses));
                     NumRewardPulses_InBlock += NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
                     RewardGiven = true;

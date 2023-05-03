@@ -74,10 +74,6 @@ namespace USE_ExperimenterDisplay
 
     public class ExperimenterDisplayPanel : MonoBehaviour
     {
-        //     private Rect Position; // + any other fields necessary for all panels
-        //     protected Action CustomInitializationMethods;
-        //     public Action CustomUpdateMethods;
-
         public ControlLevel_Session_Template SessionLevel;
         public ControlLevel_Task_Template TaskLevel;
         public ControlLevel_Trial_Template TrialLevel;
@@ -111,36 +107,9 @@ namespace USE_ExperimenterDisplay
             defaultPanelList.Add(GameObject.Find("BlockInfoPanel").AddComponent<BlockInfoPanel>()); 
             defaultPanelList.Add(GameObject.Find("SessionInfoPanel").AddComponent<SessionInfoPanel>()); 
             defaultPanelList.Add(GameObject.Find("HotKeyPanel").AddComponent<HotKeyPanel>()); 
-            defaultPanelList.Add(GameObject.Find("LogPanel").AddComponent<LogPanel>()); 
-            /*defaultPanelList.Add(new BlockInfoPanel());
-            defaultPanelList.Add(new SessionInfoPanel());
-            defaultPanelList.Add(new HotKeyPanel());
-            defaultPanelList.Add(new LogPanel());*/
-            // defaultPanelList.Add(new PlayerViewPanel());
-            //all other default panels
+            defaultPanelList.Add(GameObject.Find("LogPanel").AddComponent<LogPanel>());
+
             return defaultPanelList;
         }
-
-        // private class HotkeyPanel : ExperimenterDisplayPanel
-        // {
-        //     //add any custom fields needed
-        //     public HotkeyPanel()
-        //     {
-        //         //fill in the { }s with whatever custom init and update methods are associated with this panel
-        //         CustomInitializationMethods = () => { };
-        //         CustomUpdateMethods = () => { };
-        //     }
-        // }
-        //
-        // private class PlayerViewPanel : ExperimenterDisplayPanel
-        // {
-        //     //add any custom fields needed
-        //     public PlayerViewPanel()
-        //     {
-        //         //fill in the { }s with whatever custom init and update methods are associated with this panel
-        //         CustomInitializationMethods = () => { };
-        //         CustomUpdateMethods = () => { };
-        //     }
-        // }
     }
 }

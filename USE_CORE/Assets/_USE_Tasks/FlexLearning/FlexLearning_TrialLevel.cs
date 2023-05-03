@@ -34,6 +34,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
     private float tokenFbDuration;
     
+
     // Set in the Task Level
     [HideInInspector] public string ContextExternalFilePath;
     [HideInInspector] public Vector3 StartButtonPosition;
@@ -42,6 +43,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public string ShadowType;
     [HideInInspector] public bool NeutralITI;
     [HideInInspector] public bool? TokensWithStimOn;
+
     
     // Stim Evaluation Variables
     private GameObject selectedGO = null;
@@ -139,8 +141,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
-        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, SearchDisplay);
-        TouchFBController.EnableTouchFeedback(Handler, .3f, StartButtonScale, FL_CanvasGO);
+        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, SearchDisplay);
+        ShotgunHandler.shotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
+        TouchFBController.EnableTouchFeedback(ShotgunHandler, .3f, StartButtonScale, FL_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -162,13 +165,13 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
 
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            if (ShotgunHandler.AllSelections.Count > 0)
+                ShotgunHandler.ClearSelections();
 
-            Handler.MinDuration = minObjectTouchDuration.value;
-            Handler.MaxDuration = maxObjectTouchDuration.value;
+            ShotgunHandler.MinDuration = minObjectTouchDuration.value;
+            ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton),
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton),
             SearchDisplayDelay, () => EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]));
 
         // Provide delay following start button selection and before stimuli onset
@@ -183,18 +186,18 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
 
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            if (ShotgunHandler.AllSelections.Count > 0)
+                ShotgunHandler.ClearSelections();
 
             PreSearch_TouchFbErrorCount = TouchFBController.ErrorCount;
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
-            if(Handler.SuccessfulSelections.Count > 0)
+            if(ShotgunHandler.SuccessfulSelections.Count > 0)
             {
-                selectedGO = Handler.LastSuccessfulSelection.SelectedGameObject;
+                selectedGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
                 selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
-                Handler.ClearSelections();
+                ShotgunHandler.ClearSelections();
                 if(selectedSD != null)
                     choiceMade = true;
             }
@@ -291,10 +294,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
                 if (SyncBoxController != null)
                 {
-                    SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+                    int NumPulses = chooseReward(CurrentTrialDef.PulseReward[0]);
+                    SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
                     SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
-                    NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
-                    CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
+                    NumRewardPulses_InBlock += NumPulses;
+                    CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
                     RewardGiven = true;
                 }
             }
@@ -305,7 +309,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage"));
+                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage"), UseDefaultConfigs);
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOff"]);
             }
         });
@@ -359,7 +363,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
             FlexLearning_StimDef sd = (FlexLearning_StimDef)tStim.stimDefs[i];
-            sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.TrialStimTokenReward[i]);
+            sd.StimTrialRewardMag = chooseReward(CurrentTrialDef.TrialStimTokenReward[i]);
             if (sd.StimTrialRewardMag > 0) sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!! only works if the target stim has a non-zero, positive reward
             else sd.IsTarget = false;
         }

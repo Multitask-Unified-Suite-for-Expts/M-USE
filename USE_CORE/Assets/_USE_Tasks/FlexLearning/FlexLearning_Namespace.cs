@@ -43,7 +43,8 @@ namespace FlexLearning_Namespace
         public string BlockName;
         public string ContextName;
         public int NumInitialTokens;
-        public TokenReward[][] TrialStimTokenReward;
+        public Reward[][] TrialStimTokenReward;
+        public Reward[][] PulseReward;
         public string BlockEndType;
         public float BlockEndThreshold;
         public int BlockEndWindow;
@@ -56,8 +57,7 @@ namespace FlexLearning_Namespace
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
-            System.Random rnd = new System.Random();
-            int num = rnd.Next(MinMaxTrials[0], MinMaxTrials[1]);
+            int num = RandomNumGenerator.Next(MinMaxTrials[0], MinMaxTrials[1]);
             TrialDefs = new List<FlexLearning_TrialDef>().ConvertAll(x => (TrialDef)x);
 
             for (int iTrial = 0; iTrial < num; iTrial++)
@@ -74,7 +74,7 @@ namespace FlexLearning_Namespace
                 td.BlockEndType = BlockEndType;
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
-                td.NumPulses = NumPulses;
+                td.PulseReward = PulseReward;
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
                 td.MaxTrials = num;
@@ -96,7 +96,7 @@ namespace FlexLearning_Namespace
                 td.BlockEndType = BlockEndType;
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
-                td.NumPulses = NumPulses;
+                td.PulseReward = PulseReward;
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
                 td.ContextName = ContextName;
@@ -118,7 +118,8 @@ namespace FlexLearning_Namespace
         public Vector3[] TrialStimLocations;
         public string BlockName;
         public string TrialID;
-        public TokenReward[][] TrialStimTokenReward;
+        public Reward[][] TrialStimTokenReward;
+        public Reward[][] PulseReward;
         public bool RandomizedLocations;
         public bool StimFacingCamera;
         public string ContextName;

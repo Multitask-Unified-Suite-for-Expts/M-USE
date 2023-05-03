@@ -28,10 +28,10 @@ namespace VisualSearch_Namespace
         //public int BlockCount;
         //public TrialDef[] TrialDefs;
         public string BlockName;
-        public TokenReward[][]TrialStimTokenReward;
+        public Reward[][]TrialStimTokenReward;
+        public Reward[][]PulseReward;
         public int[] nRepetitionsMinMax;
         public string ContextName;
-        public int NumPulses;
         public int NumInitialTokens;
         public int NumTokenBar;
         public int PulseSize;
@@ -41,21 +41,22 @@ namespace VisualSearch_Namespace
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
-            System.Random rnd = new System.Random();
-            int num = rnd.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
+            int num = RandomNumGenerator.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
             TrialDefs = new List<VisualSearch_TrialDef>().ConvertAll(x => (TrialDef)x);
             for (int iTrial = 0; iTrial < num; iTrial++)
             {
                 VisualSearch_TrialDef td = new VisualSearch_TrialDef();
                 td.ContextName = ContextName;
                 td.TrialStimTokenReward = TrialStimTokenReward;
+                td.PulseReward = PulseReward;
                 td.NumInitialTokens = NumInitialTokens;
                 td.RandomizedLocations = RandomizedLocations;
                 if (TokensWithStimOn != null)
                     td.TokensWithStimOn = TokensWithStimOn;
                 else
                     td.TokensWithStimOn = false;
-                TrialDefs[iTrial] = td;                td.BlockCount = BlockCount;
+                TrialDefs[iTrial] = td;             
+                td.BlockCount = BlockCount;
                 TrialDefs.Add(td);
             }
         }
@@ -66,8 +67,9 @@ namespace VisualSearch_Namespace
                 VisualSearch_TrialDef td = (VisualSearch_TrialDef)TrialDefs[iTrial];
                 td.BlockName = BlockName;
                 td.NumInitialTokens = NumInitialTokens;
+                td.TrialStimTokenReward = TrialStimTokenReward;
+                td.PulseReward = PulseReward; 
                 td.RandomizedLocations = RandomizedLocations;
-                td.NumPulses = NumPulses;
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
                 if (TokensWithStimOn != null)
@@ -88,7 +90,8 @@ namespace VisualSearch_Namespace
         public int[] TrialStimIndices;
         public Vector3[] TrialStimLocations;
         public string TrialID;
-        public TokenReward[][] TrialStimTokenReward;
+        public Reward[][] TrialStimTokenReward;
+        public Reward[][] PulseReward;
         public bool? TokensWithStimOn;
         public int NumPulses;
         public int NumInitialTokens;

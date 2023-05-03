@@ -44,7 +44,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             vsTL.ContextName = vsBD.ContextName;
-            RenderSettings.skybox = CreateSkybox(vsTL.GetContextNestedFilePath(ContextExternalFilePath, vsTL.ContextName, "LinearDark"));
+            RenderSettings.skybox = CreateSkybox(vsTL.GetContextNestedFilePath(ContextExternalFilePath, vsTL.ContextName, "LinearDark"), UseDefaultConfigs);
 
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
 

@@ -73,7 +73,7 @@ namespace USE_Common_Namespace {
 		}
 	}
 
-	public static class ScreenTransformations{
+	/*public static class ScreenTransformations{
 
         public static Vector3 AdcsToScreenPoint(Vector2 adcsPoint)
         {
@@ -124,10 +124,10 @@ namespace USE_Common_Namespace {
         //    Vector2 posProp = PixelToProportion(screenPoint, mainDisplayRes);
         //    return ProportionToPixel(posProp, playerViewRes);
         //}
-    }
+    }*/
 
 
-	public class CalibrationResult{
+	/*public class CalibrationResult{
 		public bool calibrationStatus;
 		public List<CalibrationPointResult> results;
 		public CalibrationResult(){
@@ -136,7 +136,7 @@ namespace USE_Common_Namespace {
 		}
 		//		public List<List<
 	}
-
+*//*
 	public class CalibrationPointResult{
 		public Vector2 testPoint;
 		public List<CalibrationSample> leftSamples{get; set;}
@@ -164,8 +164,8 @@ namespace USE_Common_Namespace {
 				}
 			}
 		}
-	}
-
+	}*/
+/*
 	public class CalibrationSample{
 		public bool validity {get; set;}
 		public Vector2 sample { get; set;}
@@ -174,7 +174,7 @@ namespace USE_Common_Namespace {
 			this.sample = sample;
 		}
 	}
-
+*/
 	//public class MonitorDetails{
 	//	public int[] PixelRes{ get; set; }
 	//	public float[] CmSize{ get; set; }

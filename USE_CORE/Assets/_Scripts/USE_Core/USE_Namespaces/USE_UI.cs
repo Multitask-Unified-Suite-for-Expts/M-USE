@@ -133,7 +133,6 @@ namespace USE_UI
         }
 
 
-
         public IEnumerator GratedFlash(Texture2D newTexture, float duration)
         {
             IsGrating = true;
@@ -173,6 +172,59 @@ namespace USE_UI
                 IsGrating = false;
             }
             
+        }
+    }
+
+    public class USE_Circle : MonoBehaviour
+    {
+        public GameObject CircleGO;
+        public float CircleSize = 10f;
+        public Color CircleColor = new Color(1, 1, 1, 1);
+        public Image Image;
+        public Sprite Sprite;
+      
+        public Vector3 LocalPosition = new Vector3(0, 0, 0);
+        private Color32 originalColor;
+        private Sprite originalSprite;
+
+        public State SetActiveOnInitialization;
+        public State SetInactiveOnTermination;
+        public USE_Circle(Canvas parent, Vector2 circleLocation, float size, string name)
+        {
+            CircleGO = new GameObject(name, typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UICircle));
+
+            CircleGO.AddComponent<CanvasRenderer>();
+            CircleGO.transform.SetParent(parent.transform, false);
+            CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().fill = true;
+            CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().thickness = 2f;
+            CircleGO.GetComponent<RectTransform>().sizeDelta = new Vector2(size, size);
+            CircleGO.GetComponent<RectTransform>().anchoredPosition = circleLocation;// new Vector3(calibPointPixel.x, calibPointPixel.y, exptViewCam.nearClipPlane);
+            CircleGO.SetActive(false);
+        }
+
+        //----------------------------------------------------------------------
+
+        public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
+        {
+            if (setActiveOnInit != null)
+            {
+                SetActiveOnInitialization = setActiveOnInit;
+                SetActiveOnInitialization.StateInitializationFinished += ActivateOnStateInit;
+            }
+            if (setInactiveOnTerm != null)
+            {
+                SetInactiveOnTermination = setInactiveOnTerm;
+                SetInactiveOnTermination.StateTerminationFinished += InactivateOnStateTerm;
+            }
+        }
+        private void ActivateOnStateInit(object sender, EventArgs e)
+        {
+            CircleGO.SetActive(true);
+        }
+
+        private void InactivateOnStateTerm(object sender, EventArgs e)
+        {
+            CircleGO.SetActive(false);
         }
     }
 

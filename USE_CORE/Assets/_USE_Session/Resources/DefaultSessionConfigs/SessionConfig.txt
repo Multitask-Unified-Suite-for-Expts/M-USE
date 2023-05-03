@@ -1,9 +1,5 @@
 OrderedDictionary<string,string>	TaskMappings	{ContinuousRecognition: ContinuousRecognition}
 Dictionary<string,string>	TaskIcons	{ContinuousRecognition: ContinuousRecognition}
-string	ContextExternalFilePath	"/Users/marcuswatson/Desktop/MUSE_Master/DemoResources/DemoContexts"
-string	TaskIconsFolderPath	"//Users//marcuswatson//Desktop//MUSE_Master//DemoResources//TaskIcons"
-
-
 float	TaskSelectionTimeout	1000
 bool	MacMainDisplayBuild	true
 bool	IsHuman	false	
@@ -20,3 +16,6 @@ int	LongRewardHotKeyPulseSize	500
 int	RewardHotKeyNumPulses	1
 int	RewardHotKeyPulseSize	250 
 bool	GuidedTaskSelection	FALSE
+float	ShotgunRaycastCircleSize_DVA	1
+float	ParticipantDistance_CM	60
+float	ShotgunRaycastSpacing_DVA	0.3

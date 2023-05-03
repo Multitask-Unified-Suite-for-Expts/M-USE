@@ -16,17 +16,17 @@ public class TouchFBController : MonoBehaviour
     //public GameObject TouchFeedback_CanvasGO;
     //public Canvas TouchFeedback_Canvas;
     public AudioFBController audioFBController;
-    public GameObject HeldTooLong_Prefab;
-    public GameObject HeldTooShort_Prefab;
-    public GameObject MovedTooFar_Prefab;
-    public List<GameObject> PrefabList;
+    private static GameObject HeldTooLong_Prefab;
+    private static GameObject HeldTooShort_Prefab;
+    private static GameObject MovedTooFar_Prefab;
+    private static List<GameObject> PrefabList;
     public float FeedbackSize = 150f; //Default is 150;
     public float FeedbackDuration = .3f; //Default is .3
     public bool FeedbackOn;
     //Textures are currently set in The Trial Template "LoadTextures" method:
-    public Texture2D HeldTooLong_Texture;
-    public Texture2D HeldTooShort_Texture;
-    public Texture2D MovedTooFar_Texture;
+    public static Texture2D HeldTooLong_Texture;
+    public static Texture2D HeldTooShort_Texture;
+    public static Texture2D MovedTooFar_Texture;
     [HideInInspector] public EventCodeManager EventCodeManager;
     [HideInInspector] public Dictionary<string, EventCode> SessionEventCodes;
 
@@ -51,7 +51,6 @@ public class TouchFBController : MonoBehaviour
         if (InstantiatedGO != null)
             Destroy(InstantiatedGO);
         InstantiatedGO = null;
-        HeldTooLong_Prefab = null; //making 1 prefab null so we can save a "PrefabsCreated" boolean
     }
 
     private void CreateErrorDict()
@@ -72,9 +71,12 @@ public class TouchFBController : MonoBehaviour
         TaskCanvasGO = taskCanvasGO;
         TaskCanvas = TaskCanvasGO.GetComponent<Canvas>();
 
-        if (HeldTooLong_Prefab == null)
+        if (HeldTooShort_Prefab == null) //If null, create the prefabs
             CreatePrefabs();
-       
+        else //If not null, check if existing prefab's size is same as new size. If not, update the prefab size
+            if (HeldTooShort_Prefab.GetComponent<Image>().rectTransform.sizeDelta != new Vector2(fbSize, fbSize))
+                SetPrefabSizes(FeedbackSize);
+
         Handler.TouchErrorFeedback += OnTouchErrorFeedback; //Subscribe to event
     }
 
@@ -118,6 +120,7 @@ public class TouchFBController : MonoBehaviour
         if (InstantiatedGO != null)
             Destroy(InstantiatedGO);
 
+        touchFb.Prefab.SetActive(true);
         InstantiatedGO = Instantiate(touchFb.Prefab, TaskCanvasGO.transform);
         InstantiatedGO.name = "TouchFeedback_GO";
         InstantiatedGO.GetComponent<RectTransform>().anchoredPosition = touchFb.PosOnCanvas;
@@ -133,19 +136,36 @@ public class TouchFBController : MonoBehaviour
         {
             Destroy(InstantiatedGO);
             EventCodeManager.SendCodeImmediate(SessionEventCodes["TouchFBController_FeedbackOn"]);
+            DeactivatePrefabs();
+            Handler.HandlerActive = true;
             FeedbackOn = false;
             Handler.HandlerActive = true;
         }
     }
-    
-    public void CreatePrefabs()
+
+    private void DeactivatePrefabs()
     {
+        foreach (var prefab in PrefabList)
+            if(prefab.activeInHierarchy)
+                prefab.SetActive(false);
+    }
+
+    private void DestroyPrefabs()
+    {
+        foreach (var prefab in PrefabList)
+            Destroy(prefab);
+    }
+
+    private void CreatePrefabs()
+    {
+        PrefabList = new List<GameObject>();
+
         HeldTooLong_Prefab = CreatePrefab("HeldTooLongGO", HeldTooLong_Texture);
         HeldTooShort_Prefab = CreatePrefab("HeldTooShortGO", HeldTooShort_Texture);
         MovedTooFar_Prefab = CreatePrefab("MovedTooFarGO", MovedTooFar_Texture);
     }
 
-    public GameObject CreatePrefab(string name, Texture2D texture)
+    private GameObject CreatePrefab(string name, Texture2D texture)
     {
         GameObject go = new GameObject(name);
         go.AddComponent<RectTransform>();
@@ -153,11 +173,12 @@ public class TouchFBController : MonoBehaviour
         image.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
         image.color = new Color32(224, 78, 92, 235);
         image.rectTransform.sizeDelta = new Vector2(FeedbackSize, FeedbackSize);
+        go.SetActive(false);
         PrefabList.Add(go); 
         return go;
     }
 
-    //public void CreateFbCanvas()
+    //private void CreateFbCanvas()
     //{
     //    TouchFeedback_CanvasGO = new GameObject("TouchFeedback_CanvasGO");
     //    TouchFeedback_Canvas = TouchFeedback_CanvasGO.AddComponent<Canvas>();

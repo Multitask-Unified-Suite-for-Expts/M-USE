@@ -11,7 +11,7 @@ using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Block;
 using System.Linq;
 using System.Windows.Forms;
-
+using System.IO;
 
 public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 {
@@ -71,7 +71,15 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
-            RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(trialLevel.MaterialFilePath, currentBlock.ContextName, "LinearDark"));
+            string contextFilePath;
+            if (UseDefaultConfigs)
+                contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + currentBlock.ContextName;
+            else
+                contextFilePath = trialLevel.GetContextNestedFilePath(trialLevel.MaterialFilePath, currentBlock.ContextName, "LinearDark");
+
+            RenderSettings.skybox = CreateSkybox(contextFilePath, UseDefaultConfigs);
+
+
             trialLevel.ContextActive = true;
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
          
@@ -123,6 +131,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     public void SetSettings()
     {
+        trialLevel.MaterialFilePath = ContextExternalFilePath;
+
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MakeStimPopOut"))
             trialLevel.MakeStimPopOut = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "MakeStimPopOut");
         else
@@ -130,13 +140,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         if (SessionSettings.SettingExists("Session", "IsHuman"))
             trialLevel.IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
-            trialLevel.MaterialFilePath = (String)SessionSettings.Get("Session", "ContextExternalFilePath");
-        else
-            Debug.Log("ContextExternalFilePath NOT specified in the Session Config OR Task Config!");
 
         if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
             trialLevel.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");

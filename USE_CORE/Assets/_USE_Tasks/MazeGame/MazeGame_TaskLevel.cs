@@ -111,7 +111,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             FindMaze();
             LoadTextMaze(); // need currMaze here to set all the arrays
             
-            RenderSettings.skybox = CreateSkybox(mgTL.GetContextNestedFilePath(ContextExternalFilePath, mgBD.ContextName, "LinearDark"));
+            RenderSettings.skybox = CreateSkybox(mgTL.GetContextNestedFilePath(ContextExternalFilePath, mgBD.ContextName, "LinearDark"), UseDefaultConfigs);
             mgTL.contextName = mgBD.ContextName;
             mgTL.MinTrials = mgBD.MinMaxTrials[0];
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
@@ -371,12 +371,12 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "DefaultTileColor"))
             mgTL.defaultTileColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "DefaultTileColor");
         else Debug.LogError("Default Tile Color settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FixedRatioReward"))
-            mgTL.UsingFixedRatioReward = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "FixedRatioReward");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "UsingFixedRatioReward"))
+            mgTL.UsingFixedRatioReward = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "UsingFixedRatioReward");
         else
         {
             mgTL.UsingFixedRatioReward = false;
-            Debug.Log("Fixed Ratio Reward settings not defined in the TaskDef, set as default of false");
+            Debug.Log("Using Fixed Ratio Reward settings not defined in the TaskDef, set as default of false");
         }
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeBackground"))
             mgTL.MazeBackgroundTextureName = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeBackgroundTexture");

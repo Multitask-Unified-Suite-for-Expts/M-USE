@@ -73,6 +73,12 @@ namespace USE_ExperimentTemplate_Trial
 
         public Dictionary<string, int> AbortCodeDict;
 
+        public float ShotgunRaycastSpacing_DVA;
+        public float ParticipantDistance_CM;
+        public float ShotgunRaycastCircleSize_DVA;
+
+        public bool UseDefaultConfigs;
+
 
         // Texture Variables
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, 
@@ -138,10 +144,12 @@ namespace USE_ExperimentTemplate_Trial
                 // FrameData.CreateFile();
                 DefineTrialStims();
                 ResetRelativeStartTime();
+
                 foreach (StimGroup sg in TrialStims)
                 {
                     sg.LoadStims();
                 }
+
                 ResetTrialVariables();
             });
 
@@ -387,31 +395,31 @@ namespace USE_ExperimentTemplate_Trial
             SquareGO.SetActive(false);
             return SquareGO;
         }
-        public int ChooseTokenReward(TokenReward[] tokenRewards)
+        public int chooseReward(Reward[] rewards)
         {
             float totalProbability = 0;
-            for (int i = 0; i < tokenRewards.Length; i++)
+            for (int i = 0; i < rewards.Length; i++)
             {
-                totalProbability += tokenRewards[i].Probability;
+                totalProbability += rewards[i].Probability;
             }
 
             if (Math.Abs(totalProbability - 1) > 0.001)
-                Debug.LogError("Sum of token reward probabilities on this trial is " + totalProbability + ", probabilities will be scaled to sum to 1.");
+                Debug.LogError("Sum of reward probabilities on this trial is " + totalProbability + ", probabilities will be scaled to sum to 1.");
 
             float randomNumber = UnityEngine.Random.Range(0, totalProbability);
 
-            TokenReward selectedReward = tokenRewards[0];
+            Reward selectedReward = rewards[0];
             float curProbSum = 0;
-            foreach (TokenReward tr in tokenRewards)
+            foreach (Reward r in rewards)
             {
-                curProbSum += tr.Probability;
+                curProbSum += r.Probability;
                 if (curProbSum >= randomNumber)
                 {
-                    selectedReward = tr;
+                    selectedReward = r;
                     break;
                 }
             }
-            return selectedReward.NumTokens;
+            return selectedReward.NumReward;
         }
         public void SetShadowType(String ShadowType, String LightName)
         {
@@ -439,12 +447,10 @@ namespace USE_ExperimentTemplate_Trial
         public string GetContextNestedFilePath(string MaterialFilePath, string contextName, [CanBeNull] string backupContextName = null)
         {
             string contextPath = "";
-
             string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
 
             if (filePaths.Length >= 1)
                 contextPath = filePaths[0];
-
             else
             {
                 contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0];
@@ -453,6 +459,19 @@ namespace USE_ExperimentTemplate_Trial
 
             return contextPath;
         }
+
+        public void LoadTexturesFromResources()
+        {
+            HeldTooLongTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/HorizontalStripes");
+            HeldTooShortTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/VerticalStripes");
+            BackdropStripesTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/bg");
+            THR_BackdropTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/Concrete4");
+
+            TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
+            TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
+            TouchFBController.MovedTooFar_Texture = BackdropStripesTexture;
+        }
+
         public void LoadTextures(String ContextExternalFilePath)
         {
             HeldTooLongTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "HorizontalStripes.png"));

@@ -124,7 +124,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     
     //Syncbox variables
     private bool usingSonication = false;
-    public int MinTrials;
+  //  public int MinTrials;
 
     // Stimuli Variables
     private GameObject StartButton;
@@ -178,7 +178,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             LoadTextures(ContextExternalFilePath);
             // Initialize FB Controller Values
             HaloFBController.SetHaloSize(15f);
-            HaloFBController.SetHaloIntensity(5);
+            HaloFBController.SetHaloIntensity(2);
             if (StartButton == null)
             {
                 USE_StartButton = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
@@ -207,8 +207,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.AddTimer(()=> sbDelay, InitTrial);
 
-        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, FinalFeedback);
-        TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, StartButtonScale, WWW_CanvasGO);
+        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, FinalFeedback);
+        ShotgunHandler.shotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
+        TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale, WWW_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -217,13 +218,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
 
-            Handler.HandlerActive = true;
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
-            Handler.MinDuration = minObjectTouchDuration.value;
-            Handler.MaxDuration = maxObjectTouchDuration.value;
+            ShotgunHandler.HandlerActive = true;
+            if (ShotgunHandler.AllSelections.Count > 0)
+                ShotgunHandler.ClearSelections();
+            ShotgunHandler.MinDuration = minObjectTouchDuration.value;
+            ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton), ChooseStimulusDelay, ()=>
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), ChooseStimulusDelay, ()=>
         {
             CalculateSliderSteps();
             SliderFBController.ConfigureSlider(new Vector3(0,180,0), sliderSize.value, CurrentTrialDef.SliderInitial*(1f/sliderGainSteps));
@@ -250,17 +251,17 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (CurrentTrialDef.LeaveFeedbackOn)
                 HaloFBController.SetLeaveFeedbackOn();
 
-            Handler.HandlerActive = true;
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            ShotgunHandler.HandlerActive = true;
+            if (ShotgunHandler.AllSelections.Count > 0)
+                ShotgunHandler.ClearSelections();
         });
         ChooseStimulus.AddUpdateMethod(() =>
         {
-            if (Handler.SuccessfulSelections.Count > 0)
+            if (ShotgunHandler.SuccessfulSelections.Count > 0)
             {
-                selectedGO = Handler.LastSuccessfulSelection.SelectedGameObject;
+                selectedGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
                 selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<WhatWhenWhere_StimDef>();
-                Handler.ClearSelections();
+                ShotgunHandler.ClearSelections();
                 if (selectedSD != null)
                     choiceMade = true;
             }
@@ -312,11 +313,22 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-        ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI);
+        ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI, () =>
+        {
+            consecutiveError++;
+            aborted = true;
+            runningAcc.Add(0);
+            errorTypeString = "AbortedTrial";
+            AbortedTrials_InBlock++;
+            CurrentTaskLevel.AbortedTrials_InTask++;
+            AbortCode = 6;
+
+        });
         // ChooseStimulus.SpecifyTermination(() => trialComplete, FinalFeedback);
 
         SelectionFeedback.AddInitializationMethod(() =>
         {
+            ShotgunHandler.HandlerActive = false;
             touchedObjects.Add(selectedSD.StimIndex);
             searchDuration = ChooseStimulus.TimingInfo.Duration;
             searchDurations.Add(searchDuration);
@@ -334,14 +346,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 SliderFBController.UpdateSliderValue(CurrentTrialDef.SliderGain[numTouchedStims]*(1f/sliderGainSteps));
                 numTouchedStims += 1;
                 if (numTouchedStims == CurrentTrialDef.CorrectObjectTouchOrder.Length)
-                {
                     trialComplete = true;
-                }
-
+                
                 errorTypeString = "None";
             }
-            //Chose Incorrect
-            else
+            else //Chose Incorrect
             {
                 consecutiveError++;
                 HaloFBController.ShowNegative(selectedGO);
@@ -387,7 +396,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         FinalFeedback.AddInitializationMethod(() =>
         {
-            Handler.HandlerActive = false;
+            ShotgunHandler.HandlerActive = false;
 
             trialComplete = false;
             startTime = Time.time;
@@ -424,21 +433,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             distractorStims.ToggleVisibility(false);
             if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
                 DestroyChildren(GameObject.Find("MainCameraCopy"));
-            if (!choiceMade)
-            {
-                consecutiveError++;
-                aborted = true;
-                runningAcc.Add(0);
-                errorTypeString = "AbortedTrial";
-                AbortedTrials_InBlock++;
-                CurrentTaskLevel.AbortedTrials_InTask++;
-                AbortCode = 6;
-            }
+            
 
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+                RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png", UseDefaultConfigs);
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
@@ -452,7 +452,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     {
         TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
         return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
-            CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, MinTrials,
+            CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, CurrentTrialDef.BlockEndWindow,
             CurrentTrialDef.MaxTrials);
     }
     public override void FinishTrialCleanup()
@@ -471,8 +471,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             AbortedTrials_InBlock++;
             CurrentTaskLevel.AbortedTrials_InTask++;
-            CurrentTaskLevel.BlockSummaryString.Clear();
-            CurrentTaskLevel.BlockSummaryString.AppendLine("");
+           // CurrentTaskLevel.BlockSummaryString.Clear();
+          //  CurrentTaskLevel.BlockSummaryString.AppendLine("");
         }
     }
 
@@ -640,7 +640,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             var totalStims = searchStims.stimDefs.Concat(distractorStims.stimDefs);
             var stimLocations = CurrentTrialDef.SearchStimsLocations.Concat(CurrentTrialDef.DistractorStimsLocations);
 
-            int[] positionIndexArray = Enumerable.Range(0, totalStims.Count()).ToArray();
+            int[] positionIndexArray = Enumerable.Range(0, stimLocations.Count()).ToArray();
             System.Random random = new System.Random();
             positionIndexArray = positionIndexArray.OrderBy(x => random.Next()).ToArray();
 

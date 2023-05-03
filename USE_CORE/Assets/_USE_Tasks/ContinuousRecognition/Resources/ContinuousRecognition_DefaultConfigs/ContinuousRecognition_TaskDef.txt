@@ -1,5 +1,4 @@
-string	ExternalStimFolderPath	"/Users/marcuswatson/Desktop/MUSE_Master/DemoResources/Stimuli"
-float	ExternalStimScale	0.00775
+float	ExternalStimScale	.8
 Vector3	ButtonPosition	(0,0,0)
 float	ButtonScale	120
 bool	MakeStimPopOut	false

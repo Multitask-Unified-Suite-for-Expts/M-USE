@@ -57,10 +57,7 @@ public class InitScreen : MonoBehaviour {
             g.SetActive(true);
 
         if (GameObject.Find("ControlLevels").GetComponent<M_USE_ControlLevel_Session>().UseDefaultConfigs)
-        {
-            //figure out paths of default configs
             StartCoroutine(HandleConfirm());
-        }
     }
 
     IEnumerator HandleConfirm()

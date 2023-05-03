@@ -64,11 +64,13 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         });
         BlockFeedback.AddInitializationMethod(() =>
         {
-            if (BlockStringsAdded > 0)
-                CurrentBlockString += "\n";
-            BlockStringsAdded++;
-            
-            PreviousBlocksString.Insert(0, CurrentBlockString);
+            #if (!UNITY_WEBGL)
+                if (BlockStringsAdded > 0)
+                    CurrentBlockString += "\n";
+                BlockStringsAdded++;
+                PreviousBlocksString.Insert(0, CurrentBlockString);
+            #endif
+
             vsTL.SearchDurationsList.Clear();
         });
         AssignBlockData();

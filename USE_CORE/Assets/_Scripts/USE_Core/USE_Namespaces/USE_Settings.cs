@@ -250,13 +250,9 @@ namespace USE_Settings
 		public static bool SettingExists(string key, string settingKey)
 		{
 			if (allSettings.ContainsKey(key))
-			{
 				return allSettings[key].SettingExists(settingKey);
-			}
 			else
-			{
-				throw new Exception("Settings not found: " + key);
-			}
+				return false;
 		}
 
 
@@ -354,8 +350,7 @@ namespace USE_Settings
 
 			if (!File.Exists(settingsPath))
 				return;
-			
-			
+
 			string[] lineList = ReadSettingsFile(settingsPath, "//", "...");
 			T[] settingsArray = new T[lineList.Length - 1];
 
@@ -511,10 +506,9 @@ namespace USE_Settings
 			try
 			{
 				//read in all data and parse it
-				//Debug.Log(settingsPath);
 				textFile = new StreamReader(settingsPath);
-			}
-			catch (Exception e)
+            }
+            catch (Exception e)
 			{
 				Debug.Log("The settings file could not be read:" + settingsPath);
 				throw new Exception(e.Message + "\t" + e.StackTrace);
@@ -525,7 +519,6 @@ namespace USE_Settings
 				string line;
 				while ((line = textFile.ReadLine()) != null)
 				{
-					line = line.Trim();
 					if (string.IsNullOrEmpty(line) || (!string.IsNullOrEmpty(commentPrefix) && line.StartsWith(commentPrefix, StringComparison.Ordinal)))
 						continue;
 					while (!string.IsNullOrEmpty(continueSuffix) && line.EndsWith(continueSuffix, StringComparison.Ordinal))
@@ -539,20 +532,22 @@ namespace USE_Settings
 						line = line + newLine;
 					}
 
+                    //if (!(line.Trim().StartsWith("//", StringComparison.Ordinal) || String.IsNullOrEmpty(line)))
+                    //{ //ignore commented out lines
+                    //line = line.Trim();
+                    //while (line.EndsWith("...", StringComparison.Ordinal))
+                    //{
+                    //	line = line.Remove(line.Length - 3);
+                    //	string newLine = textFile.ReadLine().Trim();
+                    //	while (newLine.StartsWith("//", StringComparison.Ordinal) || String.IsNullOrEmpty(newLine))
+                    //	{
+                    //		newLine = textFile.ReadLine().Trim();
+                    //	}
+                    //	line = line + newLine;
+                    //}
 
-					//if (!(line.Trim().StartsWith("//", StringComparison.Ordinal) || String.IsNullOrEmpty(line)))
-					//{ //ignore commented out lines
-					//line = line.Trim();
-					//while (line.EndsWith("...", StringComparison.Ordinal))
-					//{
-					//	line = line.Remove(line.Length - 3);
-					//	string newLine = textFile.ReadLine().Trim();
-					//	while (newLine.StartsWith("//", StringComparison.Ordinal) || String.IsNullOrEmpty(newLine))
-					//	{
-					//		newLine = textFile.ReadLine().Trim();
-					//	}
-					//	line = line + newLine;
-					//}
+                    if (settingsPath.ToLower().ToString().Contains("maze"))
+                        Debug.Log("ADDING LINE: " + line);
 
 					outputList.Add(line);
 				}

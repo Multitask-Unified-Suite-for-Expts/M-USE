@@ -506,7 +506,6 @@ MonoBehaviour:
   LocateFile: {fileID: 463005619}
   CameraMirrorTexture: {fileID: 0}
   DisplayController: {fileID: 0}
-  WebGL_InputText: {fileID: 0}
 --- !u!4 &1375570696
 Transform:
   m_ObjectHideFlags: 0

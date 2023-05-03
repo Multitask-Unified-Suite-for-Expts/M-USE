@@ -104,7 +104,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
         
         blocksAdded = 0;
-        LoadMazeDef();
+        //LoadMazeDef();
 
         RunBlock.AddInitializationMethod(() =>
         {
@@ -314,7 +314,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         //BROKEN
         if(UseDefaultConfigs)
         {
-            if(Application.isEditor)
+            if (Application.isEditor)
             {
                 mgTL.MazeFilePath = "Assets/_USE_Session/Resources/DefaultResources/Mazes";
                 mazeKeyFilePath = "Assets/_USE_Tasks/MazeGame/Resources/MazeGame_DefaultConfigs/MazeDef.txt";
@@ -327,12 +327,12 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         }
         else
         {
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeKeyFilePath"))
-                mazeKeyFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeKeyFilePath");
-            else Debug.LogError("Maze key file path settings not defined in the TaskDef");
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeFilePath"))
-                mgTL.MazeFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeFilePath");
-            else Debug.LogError("Maze File Path not defined in the TaskDef");
+            //if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeKeyFilePath"))
+            //    mazeKeyFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeKeyFilePath");
+            //else Debug.LogError("Maze key file path settings not defined in the TaskDef");
+            //if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeFilePath"))
+            //    mgTL.MazeFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeFilePath");
+            //else Debug.LogError("Maze File Path not defined in the TaskDef");
         }
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
@@ -362,6 +362,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TileTexture"))
         {
             mgTL.TileTexture = (string)SessionSettings.Get(TaskName + "_TaskSettings", "TileTexture");
+            Debug.Log("TILE TEXTURE AFTER GRABBING FROM SESSION SETTINGS: " + mgTL.TileTexture);
         }
         else
         {
@@ -417,10 +418,22 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             mgTL.TouchFeedbackDuration = .3f;
 
     }
-    private void LoadMazeDef()
+
+    public override Type GetTaskCustomSettingsType(string typeName)
     {
-        SessionSettings.ImportSettings_SingleTypeArray<MazeDef>("MazeDefs", mazeKeyFilePath);
-        MazeDefs = (MazeDef[])SessionSettings.Get("MazeDefs");
+        if(typeName.ToLower() == "mazedef")
+            return typeof(MazeDef);
+        else
+        {
+            Debug.LogError("TYPE ERROR!");
+            return null;
+        }
+    }
+
+    public override void ProcessCustomSettingsFiles()
+    {
+        MazeDefs = (MazeDef[])SessionSettings.Get("MazeDef");
+
         if (MazeDefs == null)
             Debug.LogError("Maze Defs is null!!!!!!!!!!!!!!!!!");
 
@@ -440,6 +453,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             MazeName[iMaze] = MazeDefs[iMaze].mName;
         }
     }
+
+
     private void FindMaze()
     {
         //for given block MazeDims, MazeNumSquares, MazeNumTurns, get all indices of that value, find intersect

@@ -152,6 +152,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             SliderFBController.InitializeSlider();
             HaloFBController.SetHaloSize(5);
+
+            Debug.Log("TILE TEXTURE =  " + TileTexture);
+
             tileTex = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, TileTexture));
             mazeBgTex = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, MazeBackgroundTextureName));
             if (MazeContainer == null)

@@ -88,16 +88,18 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddInitializationMethod(() =>
         {
-            if (trialLevel.AbortCode == 0)
-            {
-                CurrentBlockString += "\n" + "\n";
-                CurrentBlockString = CurrentBlockString.Replace("Current Block", $"Block {blocksAdded + 1}");
-                PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
-                AddBlockValuesToTaskValues();
-                blocksAdded++;
-            }
-            CalculateBlockAverages();
-            CalculateStanDev();
+            #if (!UNITY_WEBGL)
+                if (trialLevel.AbortCode == 0)
+                {
+                    CurrentBlockString += "\n" + "\n";
+                    CurrentBlockString = CurrentBlockString.Replace("Current Block", $"Block {blocksAdded + 1}");
+                    PreviousBlocksString.Insert(0, CurrentBlockString); //Add current block string to full list of previous blocks. 
+                    AddBlockValuesToTaskValues();
+                    blocksAdded++;
+                }
+                CalculateBlockAverages();
+                CalculateStanDev();
+            #endif
         });        
     }
 

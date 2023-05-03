@@ -18,6 +18,7 @@ using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Task;
 using SelectionTracking;
 using Random = UnityEngine.Random;
+using UnityEngine.InputSystem;
 //using UnityEngine.Windows.WebCam;
 
 
@@ -97,11 +98,10 @@ namespace USE_ExperimentTemplate_Session
 
             if (UseDefaultConfigs)
             {
-                string folderPath = Path.Combine(Application.persistentDataPath, "M_USE_DefaultConfigs");
-                if (Directory.Exists(folderPath))
-                    Directory.Delete(folderPath, true);
-
                 configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
+                if (Directory.Exists(configFileFolder))
+                    Directory.Delete(configFileFolder, true);
+
                 //check if the session default configs exist, if not, copy them (this only needs to be done once)
                 if (!Directory.Exists(configFileFolder))
                 {
@@ -109,9 +109,9 @@ namespace USE_ExperimentTemplate_Session
                     var db = Resources.Load<TextAsset>("DefaultSessionConfigs/SessionConfig");
                     byte[] data= db.bytes;
                     System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + "SessionConfig.txt", data);
-                    data= Resources.Load<TextAsset>("DefaultSessionConfigs/EventCodeConfig").bytes;
+                    data = Resources.Load<TextAsset>("DefaultSessionConfigs/EventCodeConfig").bytes;
                     System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + "EventCodeConfig.txt", data);
-                    data= Resources.Load<TextAsset>("DefaultSessionConfigs/DisplayConfig").bytes;
+                    data = Resources.Load<TextAsset>("DefaultSessionConfigs/DisplayConfig").bytes;
                     System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + "DisplayConfig.txt", data);
                 } 
             }
@@ -715,17 +715,25 @@ namespace USE_ExperimentTemplate_Session
             
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
             {
+                #if (!UNITY_WEBGL)
+                    PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
+                    SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
+                #endif
 
-                PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
-                
-                SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
                 SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
-                SessionData.AppendData();
-                SessionData.WriteData();
+
+                #if (!UNITY_WEBGL)
+                    SessionData.AppendData();
+                    SessionData.WriteData();
+                #endif
+
                 CameraMirrorTexture.Release();
+
                 ExperimenterDisplayController.ResetTask(null, null);
+
                 taskCount++;
+
                 if (SerialPortActive)
                 {                 
                     SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataPath, "SerialRecvData", "TaskSelection");                    
@@ -838,20 +846,30 @@ namespace USE_ExperimentTemplate_Session
         
         string GetConfigFolderPath(string configName)
         {
-            if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))
-                return configFileFolder + Path.DirectorySeparatorChar + configName;
+            string path;
+
+            if(UseDefaultConfigs)
+            {
+                path = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
+            }
             else
             {
-                List<string> configFolders =
-                    (List<string>)SessionSettings.Get("Session", "ConfigFolderNames");
-                int index = 0;
-                foreach (string k in TaskMappings.Keys)
+                if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))
+                    return configFileFolder + Path.DirectorySeparatorChar + configName;
+                else
                 {
-                    if (k.Equals(configName)) break;
-                    ++index;
+                    List<string> configFolders =
+                        (List<string>)SessionSettings.Get("Session", "ConfigFolderNames");
+                    int index = 0;
+                    foreach (string k in TaskMappings.Keys)
+                    {
+                        if (k.Equals(configName)) break;
+                        ++index;
+                    }
+                    path = configFileFolder + Path.DirectorySeparatorChar + configFolders[index];
                 }
-                return configFileFolder + Path.DirectorySeparatorChar + configFolders[index];
             }
+            return path;
         }
 
         ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
@@ -860,8 +878,7 @@ namespace USE_ExperimentTemplate_Session
             tl.SessionDataControllers = SessionDataControllers;
             tl.LocateFile = LocateFile;
             tl.SessionDataPath = SessionDataPath;
-            tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName);
-
+            tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
 
             if (UseDefaultConfigs)
             {
@@ -882,19 +899,17 @@ namespace USE_ExperimentTemplate_Session
                         {"MazeDef", "MazeDef.txt"}
                     };
 
-                    TextAsset configFile;
+                    TextAsset configFilePath;
 
                     foreach(var entry in configDict)
                     {
-                        configFile = Resources.Load<TextAsset>(tl.TaskName + "_DefaultConfigs/" + tl.TaskName + entry.Key);
-                        if (configFile != null)
-                            System.IO.File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + tl.TaskName + entry.Value, configFile.bytes);
-                        else //try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
-                        {
-                            configFile = Resources.Load<TextAsset>(tl.TaskName + "_DefaultConfigs/" + entry.Key);
-                            if (configFile != null)
-                                System.IO.File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + entry.Value, configFile.bytes);
-                        }
+                        configFilePath = Resources.Load<TextAsset>(tl.TaskName + "_DefaultConfigs/" + tl.TaskName + entry.Key);
+
+                        if(configFilePath == null)//try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
+                            configFilePath = Resources.Load<TextAsset>(tl.TaskName + "_DefaultConfigs/" + entry.Key);
+
+                        if (configFilePath != null)
+                            System.IO.File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + tl.TaskName + entry.Key, configFilePath.bytes);
                     }
                 } 
             }

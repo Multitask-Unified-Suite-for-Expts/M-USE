@@ -142,6 +142,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 CreateObjects();
 
             CenteringSpeed = 1.5f;
+
+            #if (UNITY_WEBGL)
+                IsHuman = true;
+            #endif
         });
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------

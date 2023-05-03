@@ -69,11 +69,13 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddInitializationMethod(() =>
         {
-            if (BlockStringsAdded > 0)
-                CurrentBlockString += "\n";
-            PreviousBlocksString.Insert(0, CurrentBlockString);
-            AddBlockValuesToTaskValues();
-            BlockStringsAdded++;
+            #if (!UNITY_WEBGL)
+                if (BlockStringsAdded > 0)
+                    CurrentBlockString += "\n";
+                PreviousBlocksString.Insert(0, CurrentBlockString);
+                AddBlockValuesToTaskValues();
+                BlockStringsAdded++;
+            #endif
         });
     }
 

@@ -119,7 +119,7 @@ namespace USE_ExperimentTemplate_Task
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
             ReadSettingsFiles(verifyOnly);
             ReadCustomSettingsFiles();
-            FindStims();
+            CreateTaskStimGroups();
             if (verifyOnly) return;
 
             SetupTask = new State("SetupTask");
@@ -622,7 +622,7 @@ namespace USE_ExperimentTemplate_Task
             return new Dictionary<string, object>();
         }
 
-        public void FindStims()
+        public void CreateTaskStimGroups()
         {
             MethodInfo addTaskStimDefsToTaskStimGroup = GetType().GetMethod(nameof(this.AddTaskStimDefsToTaskStimGroup))
                 .MakeGenericMethod(new Type[] { StimDefType });

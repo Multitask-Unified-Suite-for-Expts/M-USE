@@ -483,8 +483,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             AbortedTrials_InBlock++;
             CurrentTaskLevel.AbortedTrials_InTask++;
-            CurrentTaskLevel.BlockSummaryString.Clear();
-            CurrentTaskLevel.BlockSummaryString.AppendLine("");
+           // CurrentTaskLevel.BlockSummaryString.Clear();
+          //  CurrentTaskLevel.BlockSummaryString.AppendLine("");
         }
     }
 

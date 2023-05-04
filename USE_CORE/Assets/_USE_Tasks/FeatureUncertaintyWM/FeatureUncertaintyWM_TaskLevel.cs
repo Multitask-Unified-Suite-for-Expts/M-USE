@@ -8,7 +8,6 @@ public class FeatureUncertaintyWM_TaskLevel : ControlLevel_Task_Template
 
     public override void DefineControlLevel()
     {
-        //in setup task
 
     }
 

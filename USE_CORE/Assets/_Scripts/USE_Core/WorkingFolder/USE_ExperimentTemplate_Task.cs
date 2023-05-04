@@ -544,11 +544,9 @@ namespace USE_ExperimentTemplate_Task
             string configUIVariableFile = LocateFile.FindFileInExternalFolder(TaskConfigPath, "*" + TaskName + "*ConfigUiDetails*");
             if (!string.IsNullOrEmpty(configUIVariableFile))
             {
-                SessionSettings.ImportSettings_SingleTypeJSON<ConfigVarStore>(TaskName + "_ConfigUiDetails",
-                        configUIVariableFile);
+                SessionSettings.ImportSettings_SingleTypeJSON<ConfigVarStore>(TaskName + "_ConfigUiDetails", configUIVariableFile);
                 ConfigUiVariables = (ConfigVarStore)SessionSettings.Get(TaskName + "_ConfigUiDetails");
             }
-
 
             string eventCodeFile = LocateFile.FindFileInExternalFolder(TaskConfigPath, "*" + TaskName + "*EventCodeConfig*");
             if (!string.IsNullOrEmpty(eventCodeFile))
@@ -560,17 +558,13 @@ namespace USE_ExperimentTemplate_Task
             }
 
 
-            //where are the custom settings read in to setttings?
-            //mazeTaskDef will have field of "CustomSettings". 
 
+            //Add custom settings to Persistant Data path (if use default configs)------------------------------------------------------------------------
             Dictionary<string, string> customSettings = new Dictionary<string, string>();
-
             string settingsFilePath;
 
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "CustomSettings"))
                 customSettings = (Dictionary<string, string>)SessionSettings.Get(TaskName + "_TaskSettings", "CustomSettings");
-
-
 
             if (customSettings != null)
             {
@@ -579,20 +573,15 @@ namespace USE_ExperimentTemplate_Task
                     if (UseDefaultConfigs)
                     {
                         string[] splitKey = key.Split('.');
-
                         string settingsFileName = splitKey[0];
                         string settingsFileExt = splitKey[1];
 
                         string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + TaskName + "_DefaultConfigs";
-
                         string filePath = folderPath + Path.DirectorySeparatorChar + settingsFileName;
-
 
                         if(!Directory.Exists(folderPath))
                             Directory.CreateDirectory(folderPath);
-                        
 
-                        //check if the session default configs exist, if not, copy them (this only needs to be done once)
                         if (!File.Exists(filePath))
                         {
                             var db = Resources.Load<TextAsset>(TaskName + "_DefaultConfigs/" + settingsFileName);
@@ -625,12 +614,10 @@ namespace USE_ExperimentTemplate_Task
                             default:
                                 Debug.LogError("DEFAULT CUSTOM SETTINGS SWITCH STATEMENT");
                                 break;
-
                         }
-
                     }
-
                 }
+                //--------------------------------------------------------------------------------------------------------------------------------------
 
 
                 //handling of block and trial defs so that each BlockDef contains a TrialDef[] array

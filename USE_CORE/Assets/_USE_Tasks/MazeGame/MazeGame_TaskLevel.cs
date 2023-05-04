@@ -10,6 +10,7 @@ using UnityEngine;
 using USE_ExperimentTemplate_Task;
 using USE_Settings;
 using USE_Utilities;
+using static UnityEngine.LightProbeProxyVolume;
 using Random = UnityEngine.Random;
 
 public class MazeGame_TaskLevel : ControlLevel_Task_Template
@@ -108,9 +109,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
-            FindMaze();
-            LoadTextMaze(); // need currMaze here to set all the arrays
-
             string contextFilePath;
             if (UseDefaultConfigs)
                 contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + mgBD.ContextName;
@@ -118,6 +116,11 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                 contextFilePath = mgTL.GetContextNestedFilePath(ContextExternalFilePath, mgBD.ContextName, "LinearDark");
 
             RenderSettings.skybox = CreateSkybox(contextFilePath, UseDefaultConfigs);
+
+
+            FindMaze();
+            LoadTextMaze(); // need currMaze here to set all the arrays
+
 
             mgTL.contextName = mgBD.ContextName;
             mgTL.MinTrials = mgBD.MinMaxTrials[0];
@@ -268,50 +271,51 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         BlockAveragesString = "";
         CurrentBlockString = "";
         BlockSummaryString.Clear();
-    }/*
-    private void CalculateBlockAverages()
-    {
-        if (totalErrors_InTask.Count >= 1)
-            AvgTotalErrors = (float)totalErrors_InTask.AsQueryable().Average();
+    }
+
+    //private void CalculateBlockAverages()
+    //{
+    //    if (totalErrors_InTask.Count >= 1)
+    //        AvgTotalErrors = (float)totalErrors_InTask.AsQueryable().Average();
         
-        if (correctTouches_InTask.Count >= 1)
-            AvgCorrectTouches = (float)correctTouches_InTask.AsQueryable().Average();
+    //    if (correctTouches_InTask.Count >= 1)
+    //        AvgCorrectTouches = (float)correctTouches_InTask.AsQueryable().Average();
 
-        if (retouchCorrect_InTask.Count >= 1)
-            AvgRetouchCorrect = (float)retouchCorrect_InTask.AsQueryable().Average();
+    //    if (retouchCorrect_InTask.Count >= 1)
+    //        AvgRetouchCorrect = (float)retouchCorrect_InTask.AsQueryable().Average();
 
-        if (perseverativeErrors_InTask.Count >= 1)
-            AvgPerseverativeErrors = (float)perseverativeErrors_InTask.AsQueryable().Average();
+    //    if (perseverativeErrors_InTask.Count >= 1)
+    //        AvgPerseverativeErrors = (float)perseverativeErrors_InTask.AsQueryable().Average();
 
-        if (backtrackErrors_InTask.Count >= 1)
-            AvgBacktrackErrors = (float)backtrackErrors_InTask.AsQueryable().Average();
+    //    if (backtrackErrors_InTask.Count >= 1)
+    //        AvgBacktrackErrors = (float)backtrackErrors_InTask.AsQueryable().Average();
         
-        if (ruleAbidingErrors_InTask.Count >= 1)
-            AvgRuleAbidingErrors = (float)ruleAbidingErrors_InTask.AsQueryable().Average();
+    //    if (ruleAbidingErrors_InTask.Count >= 1)
+    //        AvgRuleAbidingErrors = (float)ruleAbidingErrors_InTask.AsQueryable().Average();
         
-        if (ruleBreakingErrors_InTask.Count >= 1)
-            AvgRuleBreakingErrors = (float)ruleBreakingErrors_InTask.AsQueryable().Average();
+    //    if (ruleBreakingErrors_InTask.Count >= 1)
+    //        AvgRuleBreakingErrors = (float)ruleBreakingErrors_InTask.AsQueryable().Average();
 
-        if (numRewardPulses_InTask.Count >= 1)
-            AvgReward = (float)numRewardPulses_InTask.AsQueryable().Average();
+    //    if (numRewardPulses_InTask.Count >= 1)
+    //        AvgReward = (float)numRewardPulses_InTask.AsQueryable().Average();
 
-        if (mazeDurationsList_InTask.Count >= 1)
-        {
-            List<float> allDurations = mazeDurationsList_InTask
-                .SelectMany(str => str.Split(','))
-                .Select(str => float.Parse(str))
-                .ToList();
-            AvgMazeDuration = allDurations.Average();
-        }
-    }*/
+    //    if (mazeDurationsList_InTask.Count >= 1)
+    //    {
+    //        List<float> allDurations = mazeDurationsList_InTask
+    //            .SelectMany(str => str.Split(','))
+    //            .Select(str => float.Parse(str))
+    //            .ToList();
+    //        AvgMazeDuration = allDurations.Average();
+    //    }
+    //}
+
     private void SetSettings()
     {
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            mgTL.ContextExternalFilePath =
-                (string)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+            mgTL.ContextExternalFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
         else mgTL.ContextExternalFilePath = ContextExternalFilePath;
 
-        //BROKEN
+        
         if(UseDefaultConfigs)
         {
             if (Application.isEditor)
@@ -322,7 +326,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             else
             {
                 mgTL.MazeFilePath = "DefaultResources/Mazes";
-                mazeKeyFilePath = "MazeGame_DefaultConfigs/MazeDef";
+                mazeKeyFilePath = "MazeGame_DefaultConfigs/MazeDef.txt";
             }
         }
         else
@@ -454,7 +458,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         }
     }
 
-
     private void FindMaze()
     {
         //for given block MazeDims, MazeNumSquares, MazeNumTurns, get all indices of that value, find intersect
@@ -488,19 +491,30 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
         mgTL.mazeDefName = MazeName[mIndex];
     }
+
     public void LoadTextMaze()
     {
-        // textMaze will load the text file containing the full Maze path of the intended mazeDef for the block/trial
         string mazeFilePath = "";
+        string jsonString = "";
 
-        string[] filePaths = Directory.GetFiles(mgTL.MazeFilePath, $"{mgTL.mazeDefName}*", SearchOption.AllDirectories);
-
-        if (filePaths.Length >= 1)
-            mazeFilePath = filePaths[0];
+        if (UseDefaultConfigs && !Application.isEditor)
+        {
+            TextAsset textAsset = Resources.Load<TextAsset>(mgTL.MazeFilePath + "/" + mgTL.mazeDefName);
+            if (textAsset != null)
+                jsonString = textAsset.text;
+        }
         else
-            Debug.LogError($"Maze not found within the given file path ({mazeFilePath}) or in any nested folders");
-        
-        var textMaze = File.ReadAllLines(mazeFilePath);
-        currMaze = new Maze(textMaze[0]);
+        {
+            string[] filePaths = Directory.GetFiles(mgTL.MazeFilePath, $"*{mgTL.mazeDefName}*", SearchOption.AllDirectories);
+
+            if (filePaths.Length >= 1)
+                mazeFilePath = filePaths[0];
+            else
+                Debug.LogError($"Maze not found within the given file path ({mazeFilePath}) or in any nested folders");
+
+            jsonString = File.ReadAllLines(mazeFilePath)[0];
+        }
+
+        currMaze = new Maze(jsonString);
     }
 }

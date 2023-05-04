@@ -546,9 +546,6 @@ namespace USE_Settings
                     //	line = line + newLine;
                     //}
 
-                    if (settingsPath.ToLower().ToString().Contains("maze"))
-                        Debug.Log("ADDING LINE: " + line);
-
 					outputList.Add(line);
 				}
 			}

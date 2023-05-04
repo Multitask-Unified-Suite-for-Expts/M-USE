@@ -849,9 +849,7 @@ namespace USE_ExperimentTemplate_Session
             string path;
 
             if(UseDefaultConfigs)
-            {
                 path = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
-            }
             else
             {
                 if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))

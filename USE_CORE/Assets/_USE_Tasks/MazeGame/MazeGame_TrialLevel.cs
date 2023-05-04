@@ -153,10 +153,19 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.InitializeSlider();
             HaloFBController.SetHaloSize(5);
 
-            Debug.Log("TILE TEXTURE =  " + TileTexture);
 
-            tileTex = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, TileTexture));
-            mazeBgTex = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, MazeBackgroundTextureName));
+            if (UseDefaultConfigs && !Application.isEditor)
+            {
+                tileTex = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/" + TileTexture);
+                mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/" + MazeBackgroundTextureName);
+            }
+            else
+            {
+                tileTex = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, TileTexture));
+                mazeBgTex = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, MazeBackgroundTextureName));
+            }
+
+
             if (MazeContainer == null)
                 MazeContainer = new GameObject("MazeContainer"); 
             if (MazeBackground == null)

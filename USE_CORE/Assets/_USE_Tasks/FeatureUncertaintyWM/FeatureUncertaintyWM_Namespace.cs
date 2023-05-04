@@ -4,6 +4,7 @@ using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
+using WorkingMemory_Namespace;
 
 namespace FeatureUncertaintyWM_Namespace
 {
@@ -29,8 +30,17 @@ namespace FeatureUncertaintyWM_Namespace
 		//public TrialDef[] TrialDefs;
         public int[] nRepetitionsMinMax, blockMcCompStimIndices; // blockMcCompStimIndices = all indices to all component stims this block
         //blockMcCompStimIndices= {10, 23, 48, 57}
-        public int numMcStim;
-        
+        public int numMcStim, maxComp;
+        public string BlockName;
+        public int NumInitialTokens;
+        public int NumTokenBar;
+        public int NumPulses;
+        public int PulseSize;
+        public string BlockEndType;
+        public float BlockEndThreshold;
+        public int BlockEndWindow;
+        public bool StimFacingCamera;
+        public string ContextName;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -45,6 +55,26 @@ namespace FeatureUncertaintyWM_Namespace
                 td.numMcStim = numMcStim;
                 TrialDefs.Add(td);
             }
+
+        }
+
+        public override void AddToTrialDefsFromBlockDef()
+        {
+            for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
+            {
+                FeatureUncertaintyWM_TrialDef td = (FeatureUncertaintyWM_TrialDef)TrialDefs[iTrial];
+                td.BlockName = BlockName;
+                td.NumInitialTokens = NumInitialTokens;
+                td.NumPulses = NumPulses;
+                td.NumTokenBar = NumTokenBar;
+                td.PulseSize = PulseSize;
+                td.BlockEndType = BlockEndType;
+                td.BlockEndThreshold = BlockEndThreshold;
+                td.BlockEndWindow = BlockEndWindow;
+                td.StimFacingCamera = StimFacingCamera;
+                td.ContextName = ContextName;
+                TrialDefs[iTrial] = td;
+            }
         }
     }
 
@@ -54,11 +84,22 @@ namespace FeatureUncertaintyWM_Namespace
 		//public int BlockCount, TrialCountInBlock, TrialCountInTask;
 		//public TrialStims TrialStims;
         public int numMcStim;
-        public Vector3[] mcStimLocations;
-        public int[] mcNumCircles, mcTotalObjectCount;
+        public Vector3[] mcStimLocations, sampleCompLocations;
+        public int[] mcNumCircles, mcTotalObjectCount, sampleCompIndices;
+        public TokenReward[][] mcStimTokenReward;
         public int[][]  mcCompObjNumber, mcCompObjIndices, mcAngleOffset;
         //mcCompObjIndices= {{57, 10, 23}, {48}}
-        public float[][] radius;
+        public float[][] mcRadius;
+        public string ContextName;
+        public string BlockName;
+        public int NumInitialTokens;
+        public int NumTokenBar;
+        public int NumPulses;
+        public int PulseSize;
+        public string BlockEndType;
+        public float BlockEndThreshold;
+        public int BlockEndWindow;
+        public bool StimFacingCamera;
     }
 
     public class FeatureUncertaintyWM_StimDef : StimDef
@@ -100,5 +141,6 @@ namespace FeatureUncertaintyWM_Namespace
         public int[]  compObjNumber, compObjIndices, angleOffset;
         //componentObjIndices= {57, 10, 23}
         public float[] radius;
+        public bool IsTarget;
     }
 }

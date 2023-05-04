@@ -233,7 +233,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         SearchDisplay.AddInitializationMethod(() =>
         {
             CreateTextOnExperimenterDisplay();
-            searchStims.ToggleVisibility(true);
+            multiCompStims.ToggleVisibility(true);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
             choiceMade = false;

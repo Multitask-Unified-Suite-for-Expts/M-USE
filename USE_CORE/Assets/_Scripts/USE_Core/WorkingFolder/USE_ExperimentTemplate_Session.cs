@@ -95,24 +95,23 @@ namespace USE_ExperimentTemplate_Session
 
         public override void LoadSettings()
         {
-
+            //If using default configs, read in the default Session/EventCode/Display Configs and write them to persistant data path:
             if (UseDefaultConfigs)
             {
                 configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
                 if (Directory.Exists(configFileFolder))
                     Directory.Delete(configFileFolder, true);
 
-                //check if the session default configs exist, if not, copy them (this only needs to be done once)
                 if (!Directory.Exists(configFileFolder))
                 {
                     Directory.CreateDirectory(configFileFolder);
-                    var db = Resources.Load<TextAsset>("DefaultSessionConfigs/SessionConfig");
-                    byte[] data= db.bytes;
-                    System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + "SessionConfig.txt", data);
-                    data = Resources.Load<TextAsset>("DefaultSessionConfigs/EventCodeConfig").bytes;
-                    System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + "EventCodeConfig.txt", data);
-                    data = Resources.Load<TextAsset>("DefaultSessionConfigs/DisplayConfig").bytes;
-                    System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + "DisplayConfig.txt", data);
+                    List<string> configsToWrite = new List<string>() {"SessionConfig", "EventCodeConfig", "DisplayConfig"};
+
+                    foreach(string config in configsToWrite)
+                    {
+                        byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + config).bytes;
+                        System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + config + ".txt", textFileBytes);
+                    }
                 } 
             }
             else
@@ -275,23 +274,31 @@ namespace USE_ExperimentTemplate_Session
 
             SessionCam = Camera.main;
 
-            GameObject experimenterDisplay = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
-            experimenterDisplay.name = "ExperimenterDisplay";
-            ExperimenterDisplayController = experimenterDisplay.AddComponent<ExperimenterDisplayController>();
-            experimenterDisplay.AddComponent<PreserveObject>();
-            ExperimenterDisplayController.InitializeExperimenterDisplay(this, experimenterDisplay);
-
-            GameObject mirrorCamGO = new GameObject("MirrorCamera");
-            Camera mirrorCam = mirrorCamGO.AddComponent<Camera>();
-            mirrorCam.CopyFrom(Camera.main);
-            mirrorCam.cullingMask = 0;
-
-            RawImage mainCameraCopy_Image = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
-
+            //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
             #if (UNITY_WEBGL)
-                experimenterDisplay.SetActive(false);
-            #endif
+                Material taskSelectionBG_Material = Resources.Load<Material>("TaskSelection_BG_Material");
+                SessionCam.GetComponent<Skybox>().material = taskSelectionBG_Material;
+                GameObject initCamGO = GameObject.Find("InitCamera");
+                initCamGO.SetActive(false);
+            #else
+                GameObject experimenterDisplay = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
+                experimenterDisplay.name = "ExperimenterDisplay";
+                ExperimenterDisplayController = experimenterDisplay.AddComponent<ExperimenterDisplayController>();
+                experimenterDisplay.AddComponent<PreserveObject>();
+                ExperimenterDisplayController.InitializeExperimenterDisplay(this, experimenterDisplay);
 
+                GameObject mirrorCamGO = new GameObject("MirrorCamera");
+                Camera mirrorCam = mirrorCamGO.AddComponent<Camera>();
+                mirrorCam.CopyFrom(Camera.main);
+                mirrorCam.cullingMask = 0;
+
+                RawImage mainCameraCopy_Image = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
+
+                PauseCanvasGO = GameObject.Find("PauseCanvas");
+                PauseCanvasGO.SetActive(false);
+                PauseCanvas = PauseCanvasGO.GetComponent<Canvas>();
+                PauseCanvas.planeDistance = 1;
+            #endif
 
             SelectionTracker = new SelectionTracker();
 
@@ -299,13 +306,6 @@ namespace USE_ExperimentTemplate_Session
             bool taskAutomaticallySelected = false;
             setupSession.AddDefaultInitializationMethod(() =>
             {
-                #if (!UNITY_WEBGL)
-                    PauseCanvasGO = GameObject.Find("PauseCanvas");
-                    PauseCanvasGO.SetActive(false);
-                    PauseCanvas = PauseCanvasGO.GetComponent<Canvas>();
-                    PauseCanvas.planeDistance = 1;
-                #endif
-
                 SessionData.CreateFile();
                 //SessionData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
                 //SessionData.TestConnectionToDB(); //Using to test database connection
@@ -313,7 +313,7 @@ namespace USE_ExperimentTemplate_Session
                 EventCodeManager = GameObject.Find("MiscScripts").GetComponent<EventCodeManager>(); //new EventCodeManager();
                 if (SerialPortActive)
                 {
-                    
+        
                     SerialPortController = new SerialPortThreaded();
                     if (SyncBoxActive)
                     {
@@ -400,52 +400,44 @@ namespace USE_ExperimentTemplate_Session
             });
 
 
-            setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort, selectTask,
-                () =>
-                {     
-                    SessionSettings.Save();
+            setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort, selectTask, () =>
+            {
+                SessionSettings.Save();
+                #if (!UNITY_WEBGL)
                     GameObject initCamGO = GameObject.Find("InitCamera");
                     initCamGO.SetActive(false);
-                    #if (!UNITY_WEBGL)
-                        SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
-                    #endif
-                    EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupSessionEnds"]);
-                });
+                    SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
+                #endif
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupSessionEnds"]);
+            });
 
-            bool taskSelectionBackgroundSet = false;
             GameObject taskButtons = null;
             Dictionary<string, GameObject> taskButtonsDict = new Dictionary<string, GameObject>();
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
-                if (!taskSelectionBackgroundSet)
-                {
-                    Material taskSelectionBG_Material = Resources.Load<Material>("TaskSelection_BG_Material");
-                    SessionCam.GetComponent<Skybox>().material = taskSelectionBG_Material;
-                    taskSelectionBackgroundSet = true;
-                }
-
-                if (DisplayController.SwitchDisplays)
-                {
-                    SessionCam.targetDisplay = 1;
-
-                    Canvas experimenterCanvas = GameObject.Find("ExperimenterCanvas").GetComponent<Canvas>();
-                    experimenterCanvas.targetDisplay = 0;
-                    foreach (Transform child in experimenterDisplay.transform)
+                #if (!UNITY_WEBGL)
+                    if (DisplayController.SwitchDisplays) //SwitchDisplay stuff doesnt full work yet!
                     {
-                        Camera cam = child.GetComponent<Camera>();
-                        if (cam != null)
-                            cam.targetDisplay = 1 - cam.targetDisplay;
-                    }
-                }
-                else
-                {
-                    CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
-                    CameraMirrorTexture.Create();
-                    SessionCam.targetTexture = CameraMirrorTexture;
-                    mainCameraCopy_Image.texture = CameraMirrorTexture;
-                }
+                        SessionCam.targetDisplay = 1;
 
+                        Canvas experimenterCanvas = GameObject.Find("ExperimenterCanvas").GetComponent<Canvas>();
+                        experimenterCanvas.targetDisplay = 0;
+                        foreach (Transform child in experimenterDisplay.transform)
+                        {
+                            Camera cam = child.GetComponent<Camera>();
+                            if (cam != null)
+                                cam.targetDisplay = 1 - cam.targetDisplay;
+                        }
+                    }
+                    else
+                    {
+                        CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
+                        CameraMirrorTexture.Create();
+                        SessionCam.targetTexture = CameraMirrorTexture;
+                        mainCameraCopy_Image.texture = CameraMirrorTexture;
+                    }
+                #endif
 
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SelectTaskStarts"]);
 
@@ -477,9 +469,7 @@ namespace USE_ExperimentTemplate_Session
                     taskButtons.SetActive(true);
                     if (GuidedTaskSelection)
                     {
-                        // if guided selection, we need to adjust the shading of the icons and buttons after the task buttons object
-                        // is already created
-                        
+                        // if guided selection, we need to adjust the shading of the icons and buttons after the task buttons object is already created                        
                         string key = TaskMappings.Keys.Cast<string>().ElementAt(taskCount);
                         foreach (KeyValuePair<string, GameObject> taskButton in taskButtonsDict)
                         {
@@ -665,7 +655,8 @@ namespace USE_ExperimentTemplate_Session
                 SessionCam.gameObject.SetActive(false);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
                 CurrentTask.TrialLevel.TaskLevel = CurrentTask;
-                ExperimenterDisplayController.ResetTask(CurrentTask, CurrentTask.TrialLevel);
+                if(ExperimenterDisplayController != null)
+                    ExperimenterDisplayController.ResetTask(CurrentTask, CurrentTask.TrialLevel);
 
                 if (SerialPortActive)
                 {
@@ -683,20 +674,21 @@ namespace USE_ExperimentTemplate_Session
             {
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["RunTaskStarts"]);
 
-                if (DisplayController.SwitchDisplays)
-                    CurrentTask.TaskCam.targetDisplay = 1;
-                else
-                {
-                    CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
-                    CameraMirrorTexture.Create();
-                    CurrentTask.TaskCam.targetTexture = CameraMirrorTexture;
-                    mainCameraCopy_Image.texture = CameraMirrorTexture;
-                }
+#if (!UNITY_WEBGL)
 
-                #if (!UNITY_WEBGL)
+                    if (DisplayController.SwitchDisplays)
+                        CurrentTask.TaskCam.targetDisplay = 1;
+                    else
+                    {
+                        CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
+                        CameraMirrorTexture.Create();
+                        CurrentTask.TaskCam.targetTexture = CameraMirrorTexture;
+                        mainCameraCopy_Image.texture = CameraMirrorTexture;
+                    }
+
                     PauseCanvas.renderMode = RenderMode.ScreenSpaceCamera;
                     PauseCanvas.worldCamera = CurrentTask.TaskCam;
-                #endif
+#endif
 
             });
 
@@ -715,22 +707,21 @@ namespace USE_ExperimentTemplate_Session
             
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
             {
-                #if (!UNITY_WEBGL)
+#if (!UNITY_WEBGL)
                     PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
                     SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
-                #endif
+                    SessionData.AppendData();
+                    SessionData.WriteData();
+#endif
 
                 SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
 
-                #if (!UNITY_WEBGL)
-                    SessionData.AppendData();
-                    SessionData.WriteData();
-                #endif
+                if(CameraMirrorTexture != null)
+                    CameraMirrorTexture.Release();
 
-                CameraMirrorTexture.Release();
-
-                ExperimenterDisplayController.ResetTask(null, null);
+                if(ExperimenterDisplayController != null)
+                    ExperimenterDisplayController.ResetTask(null, null);
 
                 taskCount++;
 
@@ -880,7 +871,6 @@ namespace USE_ExperimentTemplate_Session
 
             if (UseDefaultConfigs)
             {
-                //check if the session default configs exist, if not, copy them (this only needs to be done once)
                 if (!Directory.Exists(tl.TaskConfigPath))
                 {
                     Directory.CreateDirectory(tl.TaskConfigPath);

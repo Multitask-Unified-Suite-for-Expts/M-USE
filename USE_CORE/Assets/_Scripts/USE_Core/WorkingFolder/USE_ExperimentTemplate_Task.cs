@@ -186,6 +186,31 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.TrialDefs = CurrentBlockDef.TrialDefs;
             });
 
+        //Hotkey for WebGL build so we can end task and go to next block
+        #if(UNITY_WEBGL)
+            RunBlock.AddUpdateMethod(() =>
+            {
+                if(TrialLevel != null)
+                {
+                    if(InputBroker.GetKeyUp(KeyCode.E)) //End Task
+                    {
+                        TrialLevel.AbortCode = 5;
+                        TrialLevel.ForceBlockEnd = true;
+                        TrialLevel.FinishTrialCleanup();
+                        TrialLevel.ClearActiveTrialHandlers();
+                        SpecifyCurrentState(FinishTask);
+                    }
+
+                    if(InputBroker.GetKeyUp(KeyCode.N)) //Next Block
+                    {
+                        TrialLevel.AbortCode = 3;
+                        TrialLevel.ForceBlockEnd = true;
+                        TrialLevel.SpecifyCurrentState(TrialLevel.GetStateFromName("FinishTrial"));
+                    }
+                }
+            });
+        #endif
+
             RunBlock.AddLateUpdateMethod(() =>
             {
                 FrameData.AppendData();
@@ -197,8 +222,7 @@ namespace USE_ExperimentTemplate_Task
 
             BlockFeedback.AddUniversalInitializationMethod(() =>
             {
-                #if (!UNITY_WEBGL)
-                if (BlockSummaryString.Length > 0)
+                if(BlockSummaryString != null && BlockSummaryString.Length > 0)
                 {
                     int trialsCompleted = (TrialLevel.AbortCode == 0 || TrialLevel.AbortCode == 6) ? TrialLevel.TrialCount_InBlock + 1 : TrialLevel.TrialCount_InBlock;
                     string blockTitle = $"<b>\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" +
@@ -207,9 +231,9 @@ namespace USE_ExperimentTemplate_Task
 
                     PreviousBlockSummaryString.Insert(0, BlockSummaryString); //Add current block string to full list of previous blocks. 
                     PreviousBlockSummaryString.Insert(0, blockTitle);
+                    
+                    EventCodeManager.SendCodeImmediate(SessionEventCodes["BlockFeedbackStarts"]);
                 }
-                EventCodeManager.SendCodeImmediate(SessionEventCodes["BlockFeedbackStarts"]);
-                #endif
             });
             BlockFeedback.AddUpdateMethod(() =>
             {

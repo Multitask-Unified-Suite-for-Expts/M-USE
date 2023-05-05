@@ -139,6 +139,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         //WHITE SQUARE state ------------------------------------------------------------------------------------------------------------------------
         WhiteSquare.AddInitializationMethod(() =>
         {
+            Debug.Log("SQUARE SIZE: " + currentTrial.SquareSize);
+
             Input.ResetInputAxes();
             USE_SquareGO.SetButtonColor(Color.white);
             if (!SquareGO.activeInHierarchy)
@@ -477,7 +479,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         {
             int randomSize = Random.Range(currentTrial.SquareSizeMin, currentTrial.SquareSizeMax);
             USE_SquareGO.SetButtonSize(randomSize);
-            //SquareGO.transform.localScale = new Vector2(randomSize, randomSize);
             ConfigUiVariables.get<ConfigNumber>("squareSize").SetValue(randomSize);
             currentTrial.SquareSize = randomSize;
         }

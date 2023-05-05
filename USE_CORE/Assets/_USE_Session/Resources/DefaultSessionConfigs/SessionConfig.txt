@@ -1,5 +1,5 @@
-OrderedDictionary<string,string>	TaskMappings	{ContinuousRecognition: ContinuousRecognition, EffortControl:EffortControl, FlexLearning:FlexLearning, MazeGame:MazeGame, VisualSearch:VisualSearch, WhatWhenWhere:WhatWhenWhere, WorkingMemory:WorkingMemory}
-Dictionary<string,string>	TaskIcons	{ContinuousRecognition: ContinuousRecognition, EffortControl:EffortControl, FlexLearning:FlexLearning, MazeGame:MazeGame, VisualSearch:VisualSearch, WhatWhenWhere:WhatWhenWhere, WorkingMemory:WorkingMemory}
+OrderedDictionary<string,string>	TaskMappings	{ContinuousRecognition: ContinuousRecognition, EffortControl:EffortControl, FlexLearning:FlexLearning, MazeGame:MazeGame, THR:THR, VisualSearch:VisualSearch, WhatWhenWhere:WhatWhenWhere, WorkingMemory:WorkingMemory}
+Dictionary<string,string>	TaskIcons	{ContinuousRecognition: ContinuousRecognition, EffortControl:EffortControl, FlexLearning:FlexLearning, MazeGame:MazeGame, THR:THR, VisualSearch:VisualSearch, WhatWhenWhere:WhatWhenWhere, WorkingMemory:WorkingMemory}
 float	TaskSelectionTimeout	1000
 bool	MacMainDisplayBuild	false
 bool	IsHuman	false	

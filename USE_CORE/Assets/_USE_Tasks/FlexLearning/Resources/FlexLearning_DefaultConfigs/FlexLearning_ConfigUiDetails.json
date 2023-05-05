@@ -11,7 +11,7 @@
 			"hidden": false
 		},
 		"minObjectTouchDuration": {
-			"value": 0.1,
+			"value": 0.01,
 			"min": 0.01,
 			"max": 5.0,
 			"precision": 1,
@@ -58,7 +58,7 @@
 		},
 
 		"itiDuration": {
-			"value": 0.3,
+			"value": 0.1,
 			"min": 0.1,
 			"max": 10.0,
 			"precision": 1,

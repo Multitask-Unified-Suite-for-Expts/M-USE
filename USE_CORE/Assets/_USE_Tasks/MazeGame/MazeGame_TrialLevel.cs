@@ -367,7 +367,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     }
                 }
             }
-            else if (finishedMaze) 
+
+            if (finishedMaze) 
             {
                 StateAfterDelay = ITI;
                 DelayDuration = 0;
@@ -411,7 +412,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         ITI.AddInitializationMethod(() =>
         {
             DisableSceneElements();
+            #if (!UNITY_WEBGL)
             DestroyChildren(playerViewParent);
+            #endif
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOff"]);
             if (finishedMaze)
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderFbController_SliderCompleteFbOff"]);
@@ -520,6 +523,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         // 20 - rule-breaking incorrect (failed to start on start tile, failed to return to last correct after error, diagonal/skips)
 
         // RULE - BREAKING ERROR : NOT PRESSING START
+
+        Debug.Log($"TOUCHED COORD: {touchedCoord.chessCoord}, NEXT COORD: {CurrentTaskLevel.currMaze.mNextStep}, END TILE: {CurrentTaskLevel.currMaze.mFinish}");
         if (!startedMaze)
         {
             Debug.Log("*Rule Breaking Error - Not Pressing the Start Tile to Begin the Maze*");
@@ -586,6 +591,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             }
             else
             {
+                Debug.Log("FINISHED MAZE SET TO TRUE!");
                 finishedMaze = true; // Finished the Maze
             }
             
@@ -837,9 +843,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         DisableSceneElements();
 
-        #if (!UNITY_WEBGL)
+#if (!UNITY_WEBGL)
             DestroyChildren(playerViewParent);
-        #endif
+#endif
 
         if (mazeLoaded)
         {

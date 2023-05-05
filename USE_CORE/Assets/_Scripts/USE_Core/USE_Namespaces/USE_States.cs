@@ -1201,7 +1201,7 @@ namespace USE_States
 		//RUN STATEMACHINE
 		void Awake()
 		{
-			Debug.Log("Awake " + ControlLevelName);
+            Debug.Log("Awake " + ControlLevelName);
 			Paused = true;
 			InitializeControlLevel();
 			if (isMainLevel)

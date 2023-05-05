@@ -105,8 +105,8 @@ namespace USE_UI
 		public void SetButtonSize(float size)
 		{
 			ButtonSize = size;
-			Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
-		}
+            Image.rectTransform.localScale = new Vector2(ButtonSize, ButtonSize);
+        }
 
         public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
         {

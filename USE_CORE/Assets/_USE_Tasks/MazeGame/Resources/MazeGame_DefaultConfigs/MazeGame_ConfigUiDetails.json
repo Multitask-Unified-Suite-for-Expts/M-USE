@@ -109,7 +109,7 @@
       "hidden": 0
     },
     "minObjectTouchDuration": {
-			"value": 0.05,
+			"value": 0.01,
 			"min": 0.01,
 			"max": 5.0,
 			"precision": 1,

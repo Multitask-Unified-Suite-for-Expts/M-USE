@@ -263,12 +263,13 @@ namespace USE_ExperimentTemplate_Task
             {
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["FinishTaskStarts"]);
 
-                #if (!UNITY_WEBGL)
-                    //Clear trialsummarystring and Blocksummarystring at end of task:
+                //Clear trialsummarystring and Blocksummarystring at end of task:
+                if(TrialLevel.TrialSummaryString != null && BlockSummaryString != null)
+                {
                     TrialLevel.TrialSummaryString = "";
                     BlockSummaryString.Clear();
                     BlockSummaryString.AppendLine("");
-                #endif
+                }
 
                 ClearActiveTaskHandlers();
             });
@@ -277,11 +278,13 @@ namespace USE_ExperimentTemplate_Task
 
             AddDefaultTerminationMethod(() =>
             {
-                #if (!UNITY_WEBGL)
+                if(SessionDataControllers != null)
+                {
                     SessionDataControllers.RemoveDataController("BlockData_" + TaskName);
                     SessionDataControllers.RemoveDataController("TrialData_" + TaskName);
                     SessionDataControllers.RemoveDataController("FrameData_" + TaskName);
-                #endif
+                }
+
 
                 int sgNum = TaskStims.AllTaskStimGroups.Count;
                 for (int iSg = 0; iSg < sgNum; iSg++)

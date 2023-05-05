@@ -102,6 +102,7 @@ namespace SelectionTracking
 
             //----------------------------------------GAZE HANDLER: --------------------------------------------------
             SelectionHandler gazeSelection = new SelectionHandler();
+            GazeTracker gazeTracker = new GazeTracker();
             gazeSelection.InitConditions.Add(gazeSelection.DefaultConditions("RaycastHitsAGameObject"));
 
             gazeSelection.UpdateConditions.Add(gazeSelection.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
@@ -110,6 +111,17 @@ namespace SelectionTracking
             gazeSelection.UpdateErrorTriggers.Add("DurationTooLong", gazeSelection.DefaultConditions("DurationTooLong"));
 
             gazeSelection.TerminationErrorTriggers.Add("DurationTooShort", gazeSelection.DefaultConditions("DurationTooShort"));
+            gazeSelection.CurrentInputLocation = () => {
+                Vector2? gazePosition = InputBroker.gazePosition;
+                if (gazePosition.HasValue)
+                {
+                    return gazePosition.Value;
+                }
+                else
+                {
+                    return new Vector3(float.NaN, float.NaN, float.NaN); // Return NaN if gazePosition is null
+                }
+            };
             DefaultSelectionHandlers.Add("GazeSelection", gazeSelection);
 
 
@@ -293,13 +305,12 @@ namespace SelectionTracking
 
             public void UpdateSelections()
             {
-                if (CurrentInputLocation == null) // there is no input recorded on the screen
+                if (CurrentInputLocation == null)
                 {
                     if (OngoingSelection != null) // the previous frame was a selection
                         CheckTermination();
                     return;
                 }
-
                 //if we have reached this point we know there is input
                 currentTarget = FindCurrentTarget(CurrentInputLocation());
                 if (currentTarget == null) //input is not over a gameobject
@@ -408,7 +419,8 @@ namespace SelectionTracking
 
             private GameObject FindCurrentTarget(Vector3? inputLocation)
             {
-                if (inputLocation.Value.x < 0 || inputLocation.Value.y < 0 || inputLocation.Value.x > Screen.width || inputLocation.Value.y > Screen.height)
+                if (inputLocation.Value.x < 0 || inputLocation.Value.y < 0 || inputLocation.Value.x > Screen.width || inputLocation.Value.y > Screen.height ||
+                    float.IsNaN(inputLocation.Value.x) || float.IsNaN(inputLocation.Value.y) || float.IsNaN(inputLocation.Value.z))
                     inputLocation = null;
 
                 if (inputLocation != null)

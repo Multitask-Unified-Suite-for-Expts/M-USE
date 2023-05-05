@@ -163,9 +163,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         string[] stateNames = new string[]
             {"InitTrial", "ChooseStimulus", "ChooseStimulusDelay", "SelectionFeedback", "FinalFeedback", "ITI", "ChooseStimulusDelay"};
 
-        //MouseTracker variables
+        /*//MouseTracker variables
         SelectionHandler<WhatWhenWhere_StimDef> gazeHandler = new SelectionHandler<WhatWhenWhere_StimDef>();
-        GazeTracker.SpoofGazeWithMouse = true;
+        GazeTracker.SpoofGazeWithMouse = true;*/
 
         //player view variables
         playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()

@@ -504,6 +504,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         // 20 - rule-breaking incorrect (failed to start on start tile, failed to return to last correct after error, diagonal/skips)
 
         // RULE - BREAKING ERROR : NOT PRESSING START
+
+        Debug.Log($"TOUCHED COORD: {touchedCoord.chessCoord}, NEXT COORD: {CurrentTaskLevel.currMaze.mNextStep}, END TILE: {CurrentTaskLevel.currMaze.mFinish}");
         if (!startedMaze)
         {
             Debug.Log("*Rule Breaking Error - Not Pressing the Start Tile to Begin the Maze*");

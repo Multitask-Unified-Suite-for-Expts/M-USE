@@ -200,7 +200,7 @@ namespace USE_UI
             CircleGO.GetComponent<RectTransform>().sizeDelta = new Vector2(size, size);
             CircleGO.GetComponent<RectTransform>().anchorMin = Vector2.zero;
             CircleGO.GetComponent<RectTransform>().anchorMax = Vector2.zero;
-            CircleGO.GetComponent<RectTransform>().anchoredPosition = circleLocation;// new Vector3(calibPointPixel.x, calibPointPixel.y, exptViewCam.nearClipPlane);
+            CircleGO.GetComponent<RectTransform>().anchoredPosition = circleLocation;
             CircleGO.SetActive(false);
         }
 

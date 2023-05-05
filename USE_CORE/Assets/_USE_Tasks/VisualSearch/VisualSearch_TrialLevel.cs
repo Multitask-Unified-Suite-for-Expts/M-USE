@@ -266,18 +266,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddInitializationMethod(() =>
         {
-<<<<<<< HEAD
             #if (!UNITY_WEBGL)
                 if (playerViewParent.transform.childCount != 0)
                     DestroyChildren(playerViewParent);
             #endif
 
-            if (selectedSD.StimTrialRewardMag > 0)
-=======
-            if (playerViewParent.transform.childCount != 0)
-                DestroyChildren(playerViewParent);
             if (selectedSD.StimTokenRewardMag > 0)
->>>>>>> 89d994c3084c955b439dd347d29100d7acd29ef3
             {
                 TokenFBController.AddTokens(selectedGO, selectedSD.StimTokenRewardMag);
                 TotalTokensCollected_InBlock += selectedSD.StimTokenRewardMag;

@@ -278,17 +278,17 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 DestroyTextOnExperimenterDisplay();
             #endif
 
-            if (selectedSD.StimTrialRewardMag > 0)
+            if (selectedSD.StimTokenRewardMag > 0)
             {
-                TokenFBController.AddTokens(selectedGO, selectedSD.StimTrialRewardMag);
-                TotalTokensCollected_InBlock += selectedSD.StimTrialRewardMag;
-                CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTrialRewardMag;
+                TokenFBController.AddTokens(selectedGO, selectedSD.StimTokenRewardMag);
+                TotalTokensCollected_InBlock += selectedSD.StimTokenRewardMag;
+                CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
             else
             {
-                TokenFBController.RemoveTokens(selectedGO, -selectedSD.StimTrialRewardMag);
-                TotalTokensCollected_InBlock -= selectedSD.StimTrialRewardMag;
-                CurrentTaskLevel.TotalTokensCollected_InTask -= selectedSD.StimTrialRewardMag;
+                TokenFBController.RemoveTokens(selectedGO, -selectedSD.StimTokenRewardMag);
+                TotalTokensCollected_InBlock -= selectedSD.StimTokenRewardMag;
+                CurrentTaskLevel.TotalTokensCollected_InTask -= selectedSD.StimTokenRewardMag;
             }
         });
         TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
@@ -300,7 +300,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
                 if (SyncBoxController != null)
                 {
-                    int NumPulses = chooseReward(CurrentTrialDef.PulseReward[0]);
+                    int NumPulses = chooseReward(CurrentTrialDef.PulseReward);
                     SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
                     SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
                     NumRewardPulses_InBlock += NumPulses;
@@ -375,8 +375,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
             FlexLearning_StimDef sd = (FlexLearning_StimDef)tStim.stimDefs[i];
-            sd.StimTrialRewardMag = chooseReward(CurrentTrialDef.TrialStimTokenReward[i]);
-            if (sd.StimTrialRewardMag > 0) sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!! only works if the target stim has a non-zero, positive reward
+            sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.TrialStimTokenReward[i]);
+            if (sd.StimTokenRewardMag > 0) sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!! only works if the target stim has a non-zero, positive reward
             else sd.IsTarget = false;
         }
         

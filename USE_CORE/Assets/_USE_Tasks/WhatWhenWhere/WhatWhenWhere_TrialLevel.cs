@@ -438,8 +438,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             searchStims.ToggleVisibility(false);
             distractorStims.ToggleVisibility(false);
-<<<<<<< HEAD
-=======
+
             if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
                 DestroyChildren(GameObject.Find("MainCameraCopy"));
             float latestAccuracy = -1;
@@ -450,7 +449,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 if (latestAccuracy > 70 && CurrentTaskLevel.LearningSpeed == -1)
                     CurrentTaskLevel.LearningSpeed = TrialCount_InBlock;
             }
->>>>>>> 89d994c3084c955b439dd347d29100d7acd29ef3
 
             #if (!UNITY_WEBGL)
                 if (GameObject.Find("MainCameraCopy").transform.childCount != 0)

@@ -293,7 +293,7 @@ public class TokenManager : MonoBehaviour {
 	//}
 }
 
-public class TokenReward
+public class Reward
 {
     public int NumTokens;
     public float Probability;

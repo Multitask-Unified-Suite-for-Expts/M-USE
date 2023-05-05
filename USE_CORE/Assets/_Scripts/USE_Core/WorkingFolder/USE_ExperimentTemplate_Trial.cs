@@ -408,7 +408,7 @@ namespace USE_ExperimentTemplate_Trial
             SquareGO.SetActive(false);
             return SquareGO;
         }
-        public int ChooseTokenReward(TokenReward[] tokenRewards)
+        public int ChooseTokenReward(Reward[] tokenRewards)
         {
             float totalProbability = 0;
             for (int i = 0; i < tokenRewards.Length; i++)
@@ -421,9 +421,9 @@ namespace USE_ExperimentTemplate_Trial
 
             float randomNumber = UnityEngine.Random.Range(0, totalProbability);
 
-            TokenReward selectedReward = tokenRewards[0];
+            Reward selectedReward = tokenRewards[0];
             float curProbSum = 0;
-            foreach (TokenReward tr in tokenRewards)
+            foreach (Reward tr in tokenRewards)
             {
                 curProbSum += tr.Probability;
                 if (curProbSum >= randomNumber)

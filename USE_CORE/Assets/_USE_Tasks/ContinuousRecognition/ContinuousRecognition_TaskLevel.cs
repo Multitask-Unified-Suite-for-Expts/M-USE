@@ -44,7 +44,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     public int blocksAdded;
 
-
     public override void SpecifyTypes()
     {
         TaskLevelType = typeof(ContinuousRecognition_TaskLevel);
@@ -84,6 +83,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.TokenFBController.SetTokenBarValue(currentBlock.InitialTokenAmount);
             trialLevel.ResetBlockVariables();
             CalculateBlockSummaryString();
+
+
         });
 
         BlockFeedback.AddInitializationMethod(() =>

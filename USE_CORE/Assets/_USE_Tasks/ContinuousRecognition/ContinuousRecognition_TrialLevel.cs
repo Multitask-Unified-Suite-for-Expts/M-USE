@@ -22,7 +22,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     public TextMeshProUGUI TimerText;
     public GameObject TimerTextGO;
-    public GameObject TitleTextGO;
     public GameObject CR_CanvasGO;
     public GameObject YouWinTextGO;
     public GameObject YouLoseTextGO;
@@ -106,7 +105,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
         OriginalFbTextPosition = YouLoseTextGO.transform.position;
-        OriginalTitleTextPosition = TitleTextGO.transform.position;
         OriginalTimerPosition = TimerBackdropGO.transform.position;
 
         playerView = new PlayerViewPanel();
@@ -122,7 +120,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 USE_StartButton = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
                 StartButton = USE_StartButton.StartButtonGO;
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
-                OriginalStartButtonPosition = StartButton.transform.position;
             }
             #if (!UNITY_WEBGL)
                 playerViewParent = GameObject.Find("MainCameraCopy").transform;
@@ -151,21 +148,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             SetTrialSummaryString();
 
-            #if (!UNITY_WEBGL)
-                StartButton.transform.position = OriginalStartButtonPosition;
-            #endif
-
-
             currentTask.CalculateBlockSummaryString();
 
             if (TrialCount_InTask != 0)
                 currentTask.SetTaskSummaryString();
-
-            if (TrialCount_InBlock == 0 && IsHuman)
-            {
-                AdjustStartButtonPos(); //Adjust startButton position (move down) to make room for Title text. 
-                TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
-            }
 
             if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
             {
@@ -192,12 +178,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
-            if (TitleTextGO.activeInHierarchy)
-            {
-                TitleTextGO.SetActive(false);
-                TitleTextGO.transform.position = OriginalTitleTextPosition; //Reset Title Position for next block (in case its not a human block). 
-            }
-
             if (IsHuman)
             {
                 CR_CanvasGO.SetActive(true);
@@ -567,13 +547,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (!stim.PreviouslyChosen)
                 stim.StimGameObject.transform.localScale *= 1.35f;
         }
-    }
-
-    void AdjustStartButtonPos()
-    {
-        Vector3 buttonPos = StartButton.transform.position;
-        buttonPos.y -= .025f;
-        StartButton.transform.position = buttonPos;
     }
 
     void AdjustTextPosForMac() //When running a build instead of hitting play in editor:

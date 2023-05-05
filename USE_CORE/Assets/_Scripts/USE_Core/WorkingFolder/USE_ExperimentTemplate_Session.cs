@@ -863,6 +863,7 @@ namespace USE_ExperimentTemplate_Session
 
         ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
+            tl.IsHuman = IsHuman;
             tl.DisplayController = DisplayController;
             tl.SessionDataControllers = SessionDataControllers;
             tl.LocateFile = LocateFile;

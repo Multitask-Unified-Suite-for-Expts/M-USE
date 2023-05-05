@@ -199,7 +199,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -395,7 +395,12 @@ MonoBehaviour:
   SelectionType: 
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
+  DisplayController: {fileID: 0}
   InitialTokenAmount: 0
+  ShotgunRaycastSpacing_DVA: 0
+  ParticipantDistance_CM: 0
+  ShotgunRaycastCircleSize_DVA: 0
+  UseDefaultConfigs: 0
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
@@ -445,6 +450,10 @@ MonoBehaviour:
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
+  ShotgunRaycastCircleSize_DVA: 0
+  ShotgunRaycastSpacing_DVA: 0
+  ParticipantDistance_CM: 0
+  PrefabPath: 
   ConfigName: 
   TaskName: THR
   TaskProjectFolder: 
@@ -458,6 +467,7 @@ MonoBehaviour:
   EventCodesActive: 0
   RewardPulsesActive: 0
   SonicationActive: 0
+  UseDefaultConfigs: 0
   ContextExternalFilePath: 
   SessionDataPath: 
   TaskConfigPath: 
@@ -486,9 +496,13 @@ MonoBehaviour:
   PrefabStimPaths: []
   ExperimenterDisplayController: {fileID: 0}
   SessionInfoPanel: {fileID: 0}
+  DisplayController: {fileID: 0}
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
+  IsHuman: 0
+  TaskInstructionsTextGO: {fileID: 0}
+  TaskInstructionsButtonGO: {fileID: 0}
   CurrentBlockString: 
   BlockStringsAdded: 0
   TrialsCompleted_Task: 0

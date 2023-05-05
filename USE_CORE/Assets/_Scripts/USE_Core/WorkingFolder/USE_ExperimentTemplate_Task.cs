@@ -103,6 +103,11 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public RenderTexture DrawRenderTexture;
 
 
+        public bool IsHuman;
+
+        public GameObject TaskInstructionsTextGO;
+        public GameObject TaskInstructionsButtonGO;
+
 
         public virtual void SpecifyTypes()
         {
@@ -118,7 +123,6 @@ namespace USE_ExperimentTemplate_Task
         {
             if (UseDefaultConfigs)
                 PrefabPath = "/DefaultResources/Stimuli";
-
 
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
             ReadSettingsFiles(verifyOnly);
@@ -167,6 +171,8 @@ namespace USE_ExperimentTemplate_Task
             
             SetupTask.AddInitializationMethod(() =>
             {
+                SetTaskInstructions();
+
                 SetTaskSummaryString();
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTaskStarts"]);
             });
@@ -513,6 +519,34 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.ConfigUiVariables = ConfigUiVariables;
 
             TrialLevel.DefineTrialLevel();
+        }
+
+        public void SetTaskInstructions()
+        {
+            Debug.Log("SETTING TASK INSTRUCTIONS FOR: " + TaskName);
+            GameObject go = GameObject.Find(TaskName + "_Instructions");
+            if (go != null)
+            {
+                Debug.Log("Instructions not null!");
+                TaskInstructionsTextGO = go;
+                TaskInstructionsTextGO.SetActive(false);
+            }
+            else
+                Debug.Log("Instructions null!!!!");
+
+            go = GameObject.Find(TaskName + "_InstructionsButton");
+            if (go != null)
+            {
+                Debug.Log("Button not null!");
+                TaskInstructionsButtonGO = go;
+                if (!IsHuman)
+                    TaskInstructionsButtonGO.SetActive(false);
+            }
+            else
+                Debug.Log("Button null!!!!!!");
+
+            if(TaskName == "FlexLearning")
+                Debug.Log("MADE IT TO THE END???");
         }
 
 
@@ -1042,6 +1076,12 @@ namespace USE_ExperimentTemplate_Task
         public virtual void SetTaskSummaryString()
         {
             CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
+        }
+
+
+        public void ToggleInstructions()
+        {
+            TaskInstructionsTextGO.SetActive(TaskInstructionsTextGO.activeInHierarchy ? false : true);
         }
 
     }

@@ -139,6 +139,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             #endif
 
             SetTrialSummaryString();
+            MaxTrials = CurrentTrialDef.MaxTrials;
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 

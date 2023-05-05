@@ -90,6 +90,9 @@ namespace FlexLearning_Namespace
             int maxNum = TrialDefs.Count;
             if (MinMaxTrials != null)
             {
+                if (RandomNumGenerator == null)
+                    Debug.Log("RANDOM NUM GENERATOR NULL!");
+
                 maxNum = RandomNumGenerator.Next(MinMaxTrials[0], MinMaxTrials[1]);
             }
             for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)

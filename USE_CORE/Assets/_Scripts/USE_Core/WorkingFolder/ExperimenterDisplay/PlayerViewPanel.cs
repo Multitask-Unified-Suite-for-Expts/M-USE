@@ -18,19 +18,6 @@ public class PlayerViewPanel //: MonoBehaviour
     {
         // parent = transform;
     }
-    /*public GameObject DrawCircle(Vector2 circleLocation, Vector2 size)
-    {
-        GameObject degreeCircle = new GameObject("DegreeCircle", typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UICircle));
-
-        degreeCircle.AddComponent<CanvasRenderer>();
-        //degreeCircle.transform.SetParent(parent);
-        degreeCircle.GetComponent<UnityEngine.UI.Extensions.UICircle>().fill = false;
-        degreeCircle.GetComponent<UnityEngine.UI.Extensions.UICircle>().thickness = 2f;
-        degreeCircle.GetComponent<RectTransform>().sizeDelta = size;
-        degreeCircle.GetComponent<RectTransform>().anchoredPosition = circleLocation;// new Vector3(calibPointPixel.x, calibPointPixel.y, exptViewCam.nearClipPlane);
-        return degreeCircle;
-
-    }*/
     public GameObject DrawSampleLines(string lineName, Color col, List<Vector2> pointList) // removed GameObject parent
     {
         float radPix = 100; // dummy value 1920 used, ((MonitorDetails)SessionSettings.Get("sessionConfig", "monitorDetails")).CmSize[0]
@@ -50,10 +37,12 @@ public class PlayerViewPanel //: MonoBehaviour
         lineComp.relativeSize = false;
         return sampleLines;
     }
-    public GameObject WriteText(string textName, string text, Color col, Vector2 textLocation, Vector2 size, Transform parent)
+    public GameObject CreateTextObject(string textName, string text, Color col, Vector2 textLocation, Vector2 size, Transform parent)
     {
         GameObject textObject = new GameObject(textName, typeof(RectTransform), typeof(Text));
         textObject.transform.SetParent(parent);
+        textObject.SetActive(false);
+
         textObject.GetComponent<RectTransform>().localPosition = Vector2.zero;
         textObject.GetComponent<RectTransform>().localScale = size;
         textObject.GetComponent<RectTransform>().anchoredPosition = textLocation;
@@ -69,6 +58,7 @@ public class PlayerViewPanel //: MonoBehaviour
 
         return textObject;
     }
+
     /*
     public GameObject drawHalo(Vector2  haloLocation, Vector2 size)
     {

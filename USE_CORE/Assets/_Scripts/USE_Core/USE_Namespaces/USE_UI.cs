@@ -195,9 +195,10 @@ namespace USE_UI
 
             CircleGO.AddComponent<CanvasRenderer>();
             CircleGO.transform.SetParent(parent.transform, false);
+            CircleGO.transform.localScale = new Vector3(size, size, size);
             CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().fill = true;
             CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().thickness = 2f;
-            CircleGO.GetComponent<RectTransform>().sizeDelta = new Vector2(size, size);
+            
             CircleGO.GetComponent<RectTransform>().anchorMin = Vector2.zero;
             CircleGO.GetComponent<RectTransform>().anchorMax = Vector2.zero;
             CircleGO.GetComponent<RectTransform>().anchoredPosition = circleLocation;
@@ -227,6 +228,11 @@ namespace USE_UI
         private void InactivateOnStateTerm(object sender, EventArgs e)
         {
             CircleGO.SetActive(false);
+        }
+
+        public void SetCircleScale(float size)
+        {
+            this.CircleGO.transform.localScale = new Vector3(size, size, size);
         }
     }
 

@@ -111,17 +111,7 @@ namespace SelectionTracking
             gazeSelection.UpdateErrorTriggers.Add("DurationTooLong", gazeSelection.DefaultConditions("DurationTooLong"));
 
             gazeSelection.TerminationErrorTriggers.Add("DurationTooShort", gazeSelection.DefaultConditions("DurationTooShort"));
-            gazeSelection.CurrentInputLocation = () => {
-                Vector2? gazePosition = InputBroker.gazePosition;
-                if (gazePosition.HasValue)
-                {
-                    return gazePosition.Value;
-                }
-                else
-                {
-                    return new Vector3(float.NaN, float.NaN, float.NaN); // Return NaN if gazePosition is null
-                }
-            };
+            gazeSelection.CurrentInputLocation = () => InputBroker.gazePosition;
             DefaultSelectionHandlers.Add("GazeSelection", gazeSelection);
 
 

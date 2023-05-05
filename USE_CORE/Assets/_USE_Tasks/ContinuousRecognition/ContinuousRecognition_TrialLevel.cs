@@ -470,7 +470,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (currentStim.PreviouslyChosen)
                 stimString = "PC";
 
-            playerViewText = playerView.WriteText(stimString, stimString, stimString == "PC" ? Color.red : Color.green, textLocation, textSize, playerViewParent);
+            playerViewText = playerView.CreateTextObject(stimString, stimString, stimString == "PC" ? Color.red : Color.green, textLocation, textSize, playerViewParent);
             playerViewText.GetComponent<RectTransform>().localScale = new Vector3(1.1f, 1.1f, 0);
             playerViewTextList.Add(playerViewText);
         }

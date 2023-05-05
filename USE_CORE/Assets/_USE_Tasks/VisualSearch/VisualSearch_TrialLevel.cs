@@ -437,7 +437,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent.transform);
                 textLocation.y += 75;
                 Vector3 textSize = new Vector3(2,2,1);
-                playerViewText = playerView.WriteText("TargetText","TARGET",
+                playerViewText = playerView.CreateTextObject("TargetText","TARGET",
                     Color.red, textLocation, textSize, playerViewParent.transform);
             }
         }

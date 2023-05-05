@@ -54,7 +54,7 @@ public class InputBroker
 
 	
 	static Vector3 _mousePosition;
-	static Vector2? _gazePosition;
+	static Vector2 _gazePosition;
     public static Vector3 mousePosition{
 		get{
 			if(isSimulation){
@@ -69,7 +69,7 @@ public class InputBroker
 			}
 		}
 	}
-    public static Vector2? gazePosition
+    public static Vector2 gazePosition
     {
         get
         {
@@ -77,7 +77,7 @@ public class InputBroker
             {
                 return _gazePosition;
             }
-            return InitializeGazePosition();
+            return CurrentGazePositionOnDisplayArea();
         }
         set
         {
@@ -328,11 +328,11 @@ public class InputBroker
         }
         return target;
     }
-	private static Vector2? InitializeGazePosition()
+	private static Vector2 CurrentGazePositionOnDisplayArea()
 	{
         // Get the connected eye tracker
         IEyeTracker IEyeTracker = EyeTrackingOperations.FindAllEyeTrackers()[0];
-        Vector2? screenPoint = null;
+        Vector2 screenPoint = new Vector2(float.NaN, float.NaN);
 
         if (IEyeTracker == null)
         {
@@ -341,10 +341,13 @@ public class InputBroker
         else
         {
             DisplayArea displayArea = IEyeTracker.GetDisplayArea();
-            EyeTracker eyeTracker = GameObject.Find("[EyeTracker]").GetComponent<EyeTracker>();
-			Vector2 MonitorResolution = new Vector2(1920, 1080);
+            EyeTracker eyeTracker = GameObject.Find("[EyeTracker]").GetComponent<EyeTracker>(); //REPLACE WITH SOMETHING MORE UNIVERSAL
+           // EyeTracker eyeTracker = IEyeTracker as EyeTracker;
+
+            Vector2 MonitorResolution = new Vector2(1920, 1080);
 			// Get the most recent gaze data point
             var gazeData = eyeTracker?.LatestGazeData;
+
 			if (gazeData != null)
 			{
 				// Get the gaze points for each eye

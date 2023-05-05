@@ -8,6 +8,9 @@ using System.Linq;
 
 public class GazeTracker : InputTracker
 {
+    // ================== DELETE THIS CLASS, EVERYTHING IS IMPLEMENTED IN EITHER THE INPUT BROKER OR SELECTION TRACKING ===============
+
+
     // private Vector3 CurrentSelectionLocation = new Vector3 (-1f, -1f, -1f);
    // public bool SpoofGazeWithMouse = true;
     private GameObject HoverObject;

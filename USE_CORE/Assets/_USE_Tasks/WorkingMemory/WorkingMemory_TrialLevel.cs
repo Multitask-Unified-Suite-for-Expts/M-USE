@@ -269,15 +269,15 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             searchStims.ToggleVisibility(false);
             if (selectedSD.IsTarget)
             {
-                TokenFBController.AddTokens(selectedGO, selectedSD.StimTrialRewardMag);
-                TotalTokensCollected_InBlock += selectedSD.StimTrialRewardMag;
-                CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTrialRewardMag;
+                TokenFBController.AddTokens(selectedGO, selectedSD.StimTokenRewardMag);
+                TotalTokensCollected_InBlock += selectedSD.StimTokenRewardMag;
+                CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
             else
             {
-                TokenFBController.RemoveTokens(selectedGO, -selectedSD.StimTrialRewardMag);
-                TotalTokensCollected_InBlock -= selectedSD.StimTrialRewardMag;
-                CurrentTaskLevel.TotalTokensCollected_InTask -= selectedSD.StimTrialRewardMag;
+                TokenFBController.RemoveTokens(selectedGO, -selectedSD.StimTokenRewardMag);
+                TotalTokensCollected_InBlock -= selectedSD.StimTokenRewardMag;
+                CurrentTaskLevel.TotalTokensCollected_InTask -= selectedSD.StimTokenRewardMag;
             }
         });
         TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
@@ -375,8 +375,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         for (int iStim = 0; iStim < CurrentTrialDef.SearchStimIndices.Length; iStim++)
         {
             WorkingMemory_StimDef sd = (WorkingMemory_StimDef)searchStims.stimDefs[iStim];
-            sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.SearchStimTokenReward[iStim]);
-            if (sd.StimTrialRewardMag > 0)
+            sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.SearchStimTokenReward[iStim]);
+            if (sd.StimTokenRewardMag > 0)
             {
                 WorkingMemory_StimDef newTarg = sd.CopyStimDef<WorkingMemory_StimDef>() as WorkingMemory_StimDef;
                 sampleStim.AddStims(newTarg);

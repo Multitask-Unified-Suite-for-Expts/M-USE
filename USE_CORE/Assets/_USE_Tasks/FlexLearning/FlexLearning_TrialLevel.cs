@@ -34,6 +34,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
     private float tokenFbDuration;
     
+
     // Set in the Task Level
     [HideInInspector] public string ContextExternalFilePath;
     [HideInInspector] public Vector3 StartButtonPosition;
@@ -42,6 +43,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public string ShadowType;
     [HideInInspector] public bool NeutralITI;
     [HideInInspector] public bool? TokensWithStimOn;
+
     
     // Stim Evaluation Variables
     private GameObject selectedGO = null;
@@ -298,10 +300,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
                 if (SyncBoxController != null)
                 {
-                    SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+                    int NumPulses = chooseReward(CurrentTrialDef.PulseReward[0]);
+                    SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
                     SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
-                    NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
-                    CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
+                    NumRewardPulses_InBlock += NumPulses;
+                    CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
                     RewardGiven = true;
                 }
             }
@@ -372,7 +375,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
             FlexLearning_StimDef sd = (FlexLearning_StimDef)tStim.stimDefs[i];
-            sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.TrialStimTokenReward[i]);
+            sd.StimTrialRewardMag = chooseReward(CurrentTrialDef.TrialStimTokenReward[i]);
             if (sd.StimTrialRewardMag > 0) sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!! only works if the target stim has a non-zero, positive reward
             else sd.IsTarget = false;
         }

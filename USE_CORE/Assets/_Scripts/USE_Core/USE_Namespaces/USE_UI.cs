@@ -198,31 +198,13 @@ namespace USE_UI
             CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().fill = true;
             CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().thickness = 2f;
             CircleGO.GetComponent<RectTransform>().sizeDelta = new Vector2(size, size);
-            CircleGO.GetComponent<RectTransform>().anchoredPosition = circleLocation;// new Vector3(calibPointPixel.x, calibPointPixel.y, exptViewCam.nearClipPlane);
+            CircleGO.GetComponent<RectTransform>().anchorMin = Vector2.zero;
+            CircleGO.GetComponent<RectTransform>().anchorMax = Vector2.zero;
+            CircleGO.GetComponent<RectTransform>().anchoredPosition = circleLocation;
             CircleGO.SetActive(false);
         }
 
         //----------------------------------------------------------------------
-        public void SetSprite(Sprite sprite)
-        {
-            CircleGO.GetComponent<Image>().sprite = sprite;
-        }
-        public void SetSpritePosition(Vector3 pos)
-        {
-            CircleGO.transform.localPosition = pos;
-        }
-
-        public void SetSpriteColor(Color color)
-        {
-            CircleColor = color;
-            Image.color = CircleColor;
-        }
-
-        public void SetSpritePosition(float size)
-        {
-            CircleSize = size;
-            Image.rectTransform.sizeDelta = new Vector2(CircleSize, CircleSize);
-        }
 
         public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
         {

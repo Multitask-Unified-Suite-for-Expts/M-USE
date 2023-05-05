@@ -32,7 +32,6 @@ namespace VisualSearch_Namespace
         public Reward[] PulseReward;
         public int[] nRepetitionsMinMax;
         public string ContextName;
-        public int NumPulses;
         public int NumInitialTokens;
         public int NumTokenBar;
         public int PulseSize;
@@ -48,14 +47,19 @@ namespace VisualSearch_Namespace
             {
                 VisualSearch_TrialDef td = new VisualSearch_TrialDef();
                 td.ContextName = ContextName;
-                td.TrialStimTokenReward = TrialStimTokenReward;
+                td.BlockName = BlockName;
+
+                td.PulseReward = PulseReward;
                 td.NumInitialTokens = NumInitialTokens;
-                td.RandomizedLocations = RandomizedLocations;
+                td.NumTokenBar = NumTokenBar;
+                td.PulseSize = PulseSize;
+
                 if (TokensWithStimOn != null)
                     td.TokensWithStimOn = TokensWithStimOn;
                 else
                     td.TokensWithStimOn = false;
-                TrialDefs[iTrial] = td;                td.BlockCount = BlockCount;
+                TrialDefs[iTrial] = td;             
+                td.BlockCount = BlockCount;
                 TrialDefs.Add(td);
             }
         }
@@ -64,17 +68,18 @@ namespace VisualSearch_Namespace
             for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
             {
                 VisualSearch_TrialDef td = (VisualSearch_TrialDef)TrialDefs[iTrial];
+                td.ContextName = ContextName;
                 td.BlockName = BlockName;
+                
+                td.PulseReward = PulseReward;
                 td.NumInitialTokens = NumInitialTokens;
-                td.RandomizedLocations = RandomizedLocations;
-                td.NumPulses = NumPulses;
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
+
                 if (TokensWithStimOn != null)
                     td.TokensWithStimOn = TokensWithStimOn;
                 else
                     td.TokensWithStimOn = false;
-                TrialDefs[iTrial] = td;
                 TrialDefs[iTrial] = td;
             }
         }

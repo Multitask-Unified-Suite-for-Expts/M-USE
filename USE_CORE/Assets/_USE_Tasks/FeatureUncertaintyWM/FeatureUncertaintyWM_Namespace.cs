@@ -27,8 +27,10 @@ namespace FeatureUncertaintyWM_Namespace
         //Already-existing fields (inherited from BlockDef)
 		//public int BlockCount;
 		//public TrialDef[] TrialDefs;
-        public int[] nRepetitionsMinMax;
-        public int numProbedStim;
+        public int[] nRepetitionsMinMax, blockMcCompStimIndices; // blockMcCompStimIndices = all indices to all component stims this block
+        //blockMcCompStimIndices= {10, 23, 48, 57}
+        public int numMcStim;
+        
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -40,7 +42,7 @@ namespace FeatureUncertaintyWM_Namespace
             for (int iTrial = 0; iTrial < num; iTrial++)
             {
                 FeatureUncertaintyWM_TrialDef td = new FeatureUncertaintyWM_TrialDef();
-                td.numProbedStim = numProbedStim;
+                td.numMcStim = numMcStim;
                 TrialDefs.Add(td);
             }
         }
@@ -51,7 +53,12 @@ namespace FeatureUncertaintyWM_Namespace
         //Already-existing fields (inherited from TrialDef)
 		//public int BlockCount, TrialCountInBlock, TrialCountInTask;
 		//public TrialStims TrialStims;
-        public int numProbedStim;
+        public int numMcStim;
+        public Vector3[] mcStimLocations;
+        public int[] mcNumCircles, mcTotalObjectCount;
+        public int[][]  mcCompObjNumber, mcCompObjIndices, mcAngleOffset;
+        //mcCompObjIndices= {{57, 10, 23}, {48}}
+        public float[][] radius;
     }
 
     public class FeatureUncertaintyWM_StimDef : StimDef
@@ -85,5 +92,13 @@ namespace FeatureUncertaintyWM_Namespace
         //public State SetActiveOnInitialization;
         //public State SetInactiveOnTermination;
     
+    }
+
+    public class FeatureUncertaintyWM_MultiCompStimDef : StimDef
+    {
+        public int numCircles, totalObjectCount;
+        public int[]  compObjNumber, compObjIndices, angleOffset;
+        //componentObjIndices= {57, 10, 23}
+        public float[] radius;
     }
 }

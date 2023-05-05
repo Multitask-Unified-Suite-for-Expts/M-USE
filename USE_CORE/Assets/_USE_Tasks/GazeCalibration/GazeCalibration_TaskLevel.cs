@@ -22,18 +22,28 @@ public class GazeCalibration_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod (() =>
         {
-           // SetSettings();
+            // Set the Background image as defined in the BlockDef
+            RenderSettings.skybox = CreateSkybox(gcTL.GetContextNestedFilePath(ContextExternalFilePath, gcBD.ContextName, "LinearDark"), UseDefaultConfigs);
         });
     }
     private void SetSettings()
     {
+        #if (!UNITY_WEBGL)
+            gcTL.MonitorDetails = MonitorDetails;
+        #endif
+
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             gcTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
         else gcTL.ContextExternalFilePath = ContextExternalFilePath;
+
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "SpoofGazeWithMouse"))
             gcTL.SpoofGazeWithMouse = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "SpoofGazeWithMouse");
         else Debug.LogError("Spoof Gaze With Mouse setting not defined in the TaskDef");
-        
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "CalibPointsInset"))
+            gcTL.CalibPointsInset = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "CalibPointsInset");
+        else Debug.LogError("Calib Points Inset setting not defined in the TaskDef");
+
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "SmallCirclePosition"))
             gcTL.SmallCirclePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "SmallCirclePosition");
         else Debug.LogError("SmallCirclePosition setting not defined in the TaskDef");
@@ -48,19 +58,7 @@ public class GazeCalibration_TaskLevel : ControlLevel_Task_Template
         
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "BigCircleSize"))
             gcTL.BigCircleSize = (float)SessionSettings.Get(TaskName + "_TaskSettings", "BigCircleSize");
-        else Debug.LogError("BigCircleSize setting not defined in the TaskDef");/*
-        
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "RedSpriteSize"))
-            gcTL.RedSpriteSize = (int)SessionSettings.Get(TaskName + "_TaskSettings", "RedSpriteSize");
-        else Debug.LogError("RedSpriteSize setting not defined in the TaskDef");
-    
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "BlackSpriteSize"))
-            gcTL.BlackSpriteSize = (int)SessionSettings.Get(TaskName + "_TaskSettings", "BlackSpriteSize");
-        else Debug.LogError("BlackSpriteSize setting not defined in the TaskDef");
-        
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "BlueSpriteSize"))
-            gcTL.BlueSpriteSize = (int)SessionSettings.Get(TaskName + "_TaskSettings", "BlueSpriteSize");
-        else Debug.LogError("BlueSpriteSize setting not defined in the TaskDef");*/
+        else Debug.LogError("BigCircleSize setting not defined in the TaskDef");
 
 
     }

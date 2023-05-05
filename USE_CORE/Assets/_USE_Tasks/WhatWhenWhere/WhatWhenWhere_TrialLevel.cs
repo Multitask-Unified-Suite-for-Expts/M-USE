@@ -162,9 +162,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         string[] stateNames = new string[]
             {"InitTrial", "ChooseStimulus", "ChooseStimulusDelay", "SelectionFeedback", "FinalFeedback", "ITI", "ChooseStimulusDelay"};
 
-        //MouseTracker variables
+        /*//MouseTracker variables
         SelectionHandler<WhatWhenWhere_StimDef> gazeHandler = new SelectionHandler<WhatWhenWhere_StimDef>();
-        GazeTracker.SpoofGazeWithMouse = true;
+        GazeTracker.SpoofGazeWithMouse = true;*/
 
         //player view variables
         playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
@@ -438,6 +438,19 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             searchStims.ToggleVisibility(false);
             distractorStims.ToggleVisibility(false);
+<<<<<<< HEAD
+=======
+            if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
+                DestroyChildren(GameObject.Find("MainCameraCopy"));
+            float latestAccuracy = -1;
+
+            if (runningAcc.Count > 10)
+            {
+                latestAccuracy = ((runningAcc.Skip(Math.Max(0, runningAcc.Count - 10)).Sum() / 10f)*100);
+                if (latestAccuracy > 70 && CurrentTaskLevel.LearningSpeed == -1)
+                    CurrentTaskLevel.LearningSpeed = TrialCount_InBlock;
+            }
+>>>>>>> 89d994c3084c955b439dd347d29100d7acd29ef3
 
             #if (!UNITY_WEBGL)
                 if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
@@ -449,6 +462,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 ContextName = "itiImage";
                 RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png", UseDefaultConfigs);
             }
+
+            GenerateAccuracyLog();
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
         //------------------------------------------------------------------------ADDING VALUES TO DATA FILE--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -483,8 +498,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             AbortedTrials_InBlock++;
             CurrentTaskLevel.AbortedTrials_InTask++;
-            CurrentTaskLevel.BlockSummaryString.Clear();
-            CurrentTaskLevel.BlockSummaryString.AppendLine("");
+           // CurrentTaskLevel.BlockSummaryString.Clear();
+          //  CurrentTaskLevel.BlockSummaryString.AppendLine("");
         }
     }
 

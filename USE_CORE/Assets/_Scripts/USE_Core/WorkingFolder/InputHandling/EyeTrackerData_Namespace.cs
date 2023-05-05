@@ -27,7 +27,7 @@ namespace EyeTrackerData_Namespace
         public int leftGazePointValidity;
         public double systemTimeStamp;
     }
-    public class CalibrationResult
+ /*   public class CalibrationResult
     {
         public bool calibrationStatus;
         public List<CalibrationPointResult> results;
@@ -38,7 +38,7 @@ namespace EyeTrackerData_Namespace
         }
         //		public List<List<
     }
-
+*/
     public class ScreenTransformations
     {
 	    private int xRes;

@@ -266,22 +266,28 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddInitializationMethod(() =>
         {
+<<<<<<< HEAD
             #if (!UNITY_WEBGL)
                 if (playerViewParent.transform.childCount != 0)
                     DestroyChildren(playerViewParent);
             #endif
 
             if (selectedSD.StimTrialRewardMag > 0)
+=======
+            if (playerViewParent.transform.childCount != 0)
+                DestroyChildren(playerViewParent);
+            if (selectedSD.StimTokenRewardMag > 0)
+>>>>>>> 89d994c3084c955b439dd347d29100d7acd29ef3
             {
-                TokenFBController.AddTokens(selectedGO, selectedSD.StimTrialRewardMag);
-                TotalTokensCollected_InBlock += selectedSD.StimTrialRewardMag;
-                CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTrialRewardMag;
+                TokenFBController.AddTokens(selectedGO, selectedSD.StimTokenRewardMag);
+                TotalTokensCollected_InBlock += selectedSD.StimTokenRewardMag;
+                CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
             else
             {
-                TokenFBController.RemoveTokens(selectedGO, -selectedSD.StimTrialRewardMag);
-                TotalTokensCollected_InBlock -= selectedSD.StimTrialRewardMag;
-                CurrentTaskLevel.TotalTokensCollected_InTask -= selectedSD.StimTrialRewardMag;
+                TokenFBController.RemoveTokens(selectedGO, -selectedSD.StimTokenRewardMag);
+                TotalTokensCollected_InBlock -= selectedSD.StimTokenRewardMag;
+                CurrentTaskLevel.TotalTokensCollected_InTask -= selectedSD.StimTokenRewardMag;
             }
         });
         //TokenFeedback.SpecifyTermination(()=>!TokenFBController.IsAnimating(), () => ITI, ()=>
@@ -293,10 +299,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.NumTokenBarFull_InTask++;
                 if (SyncBoxController != null)
                 {
-                    SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
-                    SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
-                    NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
-                    CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
+                    int NumPulses = chooseReward(CurrentTrialDef.PulseReward);
+                    SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
+                    SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", NumPulses));
+                    NumRewardPulses_InBlock +=  NumPulses;
+                    CurrentTaskLevel.NumRewardPulses_InTask +=  NumPulses;
                     RewardGiven = true;
                 }
             }
@@ -379,9 +386,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
             VisualSearch_StimDef sd = (VisualSearch_StimDef)tStim.stimDefs[i];
-            sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.TrialStimTokenReward[i]);
-            if (sd.StimTrialRewardMag > 0) sd.IsTarget = true; //ONLY HOLDS TRUE IF POSITIVE REWARD GIVEN TO TARGET
-            else sd.IsTarget = false;
+            sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.TrialStimTokenReward[i]);
+           
+            if (sd.StimTokenRewardMag > 0) 
+                sd.IsTarget = true; //ONLY HOLDS TRUE IF POSITIVE REWARD GIVEN TO TARGET
+            else 
+                sd.IsTarget = false;
         }
 
         if (CurrentTrialDef.RandomizedLocations)

@@ -27,7 +27,9 @@ public class GazeCalibration_TaskLevel : ControlLevel_Task_Template
     }
     private void SetSettings()
     {
-        gcTL.MonitorDetails = MonitorDetails;
+        #if (!UNITY_WEBGL)
+            gcTL.MonitorDetails = MonitorDetails;
+        #endif
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             gcTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");

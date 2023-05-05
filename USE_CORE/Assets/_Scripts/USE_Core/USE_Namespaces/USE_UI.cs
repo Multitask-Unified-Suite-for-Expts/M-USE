@@ -203,26 +203,6 @@ namespace USE_UI
         }
 
         //----------------------------------------------------------------------
-        public void SetSprite(Sprite sprite)
-        {
-            CircleGO.GetComponent<Image>().sprite = sprite;
-        }
-        public void SetSpritePosition(Vector3 pos)
-        {
-            CircleGO.transform.localPosition = pos;
-        }
-
-        public void SetSpriteColor(Color color)
-        {
-            CircleColor = color;
-            Image.color = CircleColor;
-        }
-
-        public void SetSpritePosition(float size)
-        {
-            CircleSize = size;
-            Image.rectTransform.sizeDelta = new Vector2(CircleSize, CircleSize);
-        }
 
         public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
         {

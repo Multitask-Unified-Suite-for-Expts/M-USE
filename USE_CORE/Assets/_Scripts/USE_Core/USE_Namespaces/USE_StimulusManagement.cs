@@ -34,7 +34,7 @@ namespace USE_StimulusManagement
 		public bool StimLocationSet;
 		public bool StimRotationSet;
 		public float StimTrialPositiveFbProb; //set to -1 if stim is irrelevant
-		public int StimTrialRewardMag; //set to -1 if stim is irrelevant
+		public int StimTokenRewardMag; //set to -1 if stim is irrelevant
 		public Reward[] TokenRewards;
 		public Reward[] PulseRewards;
 		public int[] BaseTokenGain;
@@ -133,7 +133,7 @@ namespace USE_StimulusManagement
 			sd.StimLocationSet = StimLocationSet;
 			sd.StimRotationSet = StimRotationSet;
 			sd.StimTrialPositiveFbProb = StimTrialPositiveFbProb;
-			sd.StimTrialRewardMag = StimTrialRewardMag;
+			sd.StimTokenRewardMag = StimTokenRewardMag;
 			sd.StimIndex = StimIndex;
 			if (TokenRewards != null)
 				sd.TokenRewards = TokenRewards;
@@ -183,7 +183,7 @@ namespace USE_StimulusManagement
 			sd.StimLocationSet = StimLocationSet;
 			sd.StimRotationSet = StimRotationSet;
 			sd.StimTrialPositiveFbProb = StimTrialPositiveFbProb;
-			sd.StimTrialRewardMag = StimTrialRewardMag;
+			sd.StimTokenRewardMag = StimTokenRewardMag;
 			sd.StimIndex = StimIndex;
 			if (TokenRewards != null)
 				sd.TokenRewards = TokenRewards;

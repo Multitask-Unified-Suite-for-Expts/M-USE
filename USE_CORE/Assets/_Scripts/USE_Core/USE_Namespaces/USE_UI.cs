@@ -198,7 +198,9 @@ namespace USE_UI
             CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().fill = true;
             CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().thickness = 2f;
             CircleGO.GetComponent<RectTransform>().sizeDelta = new Vector2(size, size);
-            CircleGO.GetComponent<RectTransform>().anchoredPosition = circleLocation;// new Vector3(calibPointPixel.x, calibPointPixel.y, exptViewCam.nearClipPlane);
+            CircleGO.GetComponent<RectTransform>().anchorMin = Vector2.zero;
+            CircleGO.GetComponent<RectTransform>().anchorMax = Vector2.zero;
+            CircleGO.GetComponent<RectTransform>().anchoredPosition = circleLocation;
             CircleGO.SetActive(false);
         }
 

@@ -22,7 +22,8 @@ public class GazeCalibration_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod (() =>
         {
-           // SetSettings();
+            // Set the Background image as defined in the BlockDef
+            RenderSettings.skybox = CreateSkybox(gcTL.GetContextNestedFilePath(ContextExternalFilePath, gcBD.ContextName, "LinearDark"), UseDefaultConfigs);
         });
     }
     private void SetSettings()
@@ -38,7 +39,11 @@ public class GazeCalibration_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "SpoofGazeWithMouse"))
             gcTL.SpoofGazeWithMouse = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "SpoofGazeWithMouse");
         else Debug.LogError("Spoof Gaze With Mouse setting not defined in the TaskDef");
-        
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "CalibPointsInset"))
+            gcTL.CalibPointsInset = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "CalibPointsInset");
+        else Debug.LogError("Calib Points Inset setting not defined in the TaskDef");
+
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "SmallCirclePosition"))
             gcTL.SmallCirclePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "SmallCirclePosition");
         else Debug.LogError("SmallCirclePosition setting not defined in the TaskDef");

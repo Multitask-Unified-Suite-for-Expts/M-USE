@@ -1,3 +1,4 @@
+using FlexLearning_Namespace;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -26,16 +27,35 @@ namespace GazeCalibration_Namespace
     public class GazeCalibration_BlockDef : BlockDef
     {
         //Already-existing fields (inherited from BlockDef)
-		//public int BlockCount;
-		//public TrialDef[] TrialDefs;
+        //public int BlockCount;
+        //public TrialDef[] TrialDefs;
+        public int BlockID;
+        public string ContextName;
+        public int NumTrials;
+
+        public override void GenerateTrialDefsFromBlockDef()
+        {
+            TrialDefs = new List<GazeCalibration_TrialDef>().ConvertAll(x => (TrialDef)x);
+
+            for (int iTrial = 0; iTrial < NumTrials; iTrial++)
+            {
+                GazeCalibration_TrialDef td = new GazeCalibration_TrialDef();
+                td.BlockID = BlockID;
+                td.ContextName = ContextName;
+                td.NumTrials = NumTrials;
+                TrialDefs.Add(td);
+            }
+        }
     }
 
     public class GazeCalibration_TrialDef : TrialDef
     {
         //Already-existing fields (inherited from TrialDef)
-		//public int BlockCount, TrialCountInBlock, TrialCountInTask;
-		//public TrialStims TrialStims;
-        public int TrialID;
+        //public int BlockCount, TrialCountInBlock, TrialCountInTask;
+        //public TrialStims TrialStims;
+        public int BlockID;
+        public string ContextName;
+        public int NumTrials;
     }
 
     public class GazeCalibration_StimDef : StimDef

@@ -506,6 +506,10 @@ MonoBehaviour:
   LocateFile: {fileID: 463005619}
   CameraMirrorTexture: {fileID: 0}
   DisplayController: {fileID: 0}
+  InstructionsButtonPrefab: {fileID: 4924465247877761067, guid: 93b796f0b6ca645b6b4d53bfe60e04f4,
+    type: 3}
+  InstructionsPrefab: {fileID: 7410627627245931914, guid: 5cac0106dc4a64a068e5d4a7d8de1d71,
+    type: 3}
 --- !u!4 &1375570696
 Transform:
   m_ObjectHideFlags: 0

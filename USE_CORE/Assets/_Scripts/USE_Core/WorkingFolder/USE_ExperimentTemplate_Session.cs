@@ -92,6 +92,10 @@ namespace USE_ExperimentTemplate_Session
 
         public DisplayController DisplayController;
 
+        //Set in inspector
+        public GameObject InstructionsButtonPrefab;
+        public GameObject InstructionsPrefab;
+
 
         public override void LoadSettings()
         {
@@ -863,6 +867,8 @@ namespace USE_ExperimentTemplate_Session
 
         ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
+            tl.InstructionsButtonPrefab = InstructionsButtonPrefab;
+            tl.InstructionsPrefab = InstructionsPrefab;
             tl.IsHuman = IsHuman;
             tl.DisplayController = DisplayController;
             tl.SessionDataControllers = SessionDataControllers;

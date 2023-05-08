@@ -125,8 +125,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
             }
             
-            DeactivateChildren(VS_CanvasGO);            
-
             if (!configUIVariablesLoaded) 
                 LoadConfigUIVariables();
             

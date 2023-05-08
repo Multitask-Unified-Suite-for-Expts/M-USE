@@ -3,7 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using USE_States;
 using System.Collections;
-
+using System.Collections.Generic;
+using TMPro;
 
 namespace USE_UI
 {
@@ -173,6 +174,40 @@ namespace USE_UI
             }
             
         }
+    }
+
+
+
+    public class USE_Instructions : MonoBehaviour
+    {
+        public GameObject InstructionsGO;
+        public GameObject InstructionsButtonGO;
+        public Button button;
+
+        public Dictionary<string, string> TaskInstructionsDict = new Dictionary<string, string>()
+        {
+            { "ContinuousRecognition", "Each trial, objects are displayed and you must choose an object you haven't chosen in a previous trial." },
+            { "EffortControl", "Choose a balloon to inflate. Inflate the balloon by clicking the required number of times. Pop the balloon for your reward!"},
+            { "FlexLearning", "Select the correct object to earn your reward!"},
+            { "MazeGame", "Find your way to the end of the Maze to earn your reward!" },
+            { "THR", "Touch and hold the square for the correct duration to earn your reward!" },
+            { "VisualSearch", "Select the correct object to earn your reward!" },
+            { "WhatWhenWhere", "Select the objects in the correct sequence to earn your reward!" },
+            { "WorkingMemory", "Find the target object among the distractors to earn your reward!" }
+        };
+
+        public USE_Instructions(GameObject instructionsPrefab, GameObject buttonPrefab, Canvas parent, string taskName)
+        {
+            InstructionsGO = Instantiate(instructionsPrefab, parent.transform);
+            InstructionsGO.name = taskName + "_Instructions";
+            InstructionsGO.GetComponentInChildren<Text>().text = TaskInstructionsDict[taskName];
+            InstructionsGO.SetActive(false);
+
+            InstructionsButtonGO = Instantiate(buttonPrefab, parent.transform);
+            InstructionsButtonGO.name = taskName + "_InstructionsButton";
+            button = InstructionsButtonGO.GetComponent<Button>();
+        }
+
     }
 
     public class USE_Circle : MonoBehaviour

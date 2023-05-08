@@ -128,8 +128,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
             }
 
-            DeactivateChildren(FL_CanvasGO);
-            
             if (!configUIVariablesLoaded)
                 LoadConfigUIVariables();
 

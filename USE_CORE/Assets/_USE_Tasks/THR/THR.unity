@@ -136,7 +136,7 @@ GameObject:
   - component: {fileID: 186084663}
   - component: {fileID: 186084662}
   m_Layer: 5
-  m_Name: THR_CanvasGO
+  m_Name: THR_Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -501,8 +501,11 @@ MonoBehaviour:
   EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
   IsHuman: 0
-  TaskInstructionsTextGO: {fileID: 0}
+  InstructionsButtonPrefab: {fileID: 0}
+  InstructionsPrefab: {fileID: 0}
+  USE_InstructionsButton: {fileID: 0}
   TaskInstructionsButtonGO: {fileID: 0}
+  TaskInstructionsTextGO: {fileID: 0}
   CurrentBlockString: 
   BlockStringsAdded: 0
   TrialsCompleted_Task: 0

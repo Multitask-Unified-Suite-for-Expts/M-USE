@@ -381,6 +381,19 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             };
             HotKeyList.Add(longReward);
 
+            //InstructionsButton visibility HotKey:
+            HotKey instructionsButton = new HotKey
+            {
+                keyDescription = "I",
+                actionName = "InstructionsButton",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.I),
+                hotKeyAction = () =>
+                {
+                    HkPanel.TaskLevel.USE_Instructions.InstructionsButtonGO.SetActive(HkPanel.TaskLevel.USE_Instructions.InstructionsButtonGO.activeInHierarchy ? true : false);
+                }
+            };
+            HotKeyList.Add(instructionsButton);
+
             return (HotKeyList);
         }
 

@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.UI;
+using USE_UI;
 using USE_States;
 using USE_Settings;
 using USE_StimulusManagement;
@@ -16,7 +18,6 @@ using USE_ExperimentTemplate_Trial;
 using USE_ExperimentTemplate_Block;
 using SelectionTracking;
 using UnityEngine.InputSystem;
-using UnityEngine.UIElements;
 using static UnityEngine.EventSystems.EventTrigger;
 using MazeGame_Namespace;
 
@@ -105,8 +106,10 @@ namespace USE_ExperimentTemplate_Task
 
         public bool IsHuman;
 
-        public GameObject TaskInstructionsTextGO;
-        public GameObject TaskInstructionsButtonGO;
+
+        public GameObject InstructionsButtonPrefab;
+        public GameObject InstructionsPrefab;
+        public USE_Instructions USE_Instructions;
 
 
         public virtual void SpecifyTypes()
@@ -171,10 +174,11 @@ namespace USE_ExperimentTemplate_Task
             
             SetupTask.AddInitializationMethod(() =>
             {
-                SetTaskInstructions();
-
                 SetTaskSummaryString();
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTaskStarts"]);
+
+                if (IsHuman)
+                    CreateTaskInstructions();
             });
 
             SetupTask.SpecifyTermination(() => true, RunBlock);
@@ -213,6 +217,9 @@ namespace USE_ExperimentTemplate_Task
                         TrialLevel.ForceBlockEnd = true;
                         TrialLevel.SpecifyCurrentState(TrialLevel.GetStateFromName("FinishTrial"));
                     }
+
+                    if (IsHuman && InputBroker.GetKeyUp(KeyCode.I)) //Instructions Button
+                        ToggleInstructionsButton();
                 }
             });
         #endif
@@ -521,33 +528,22 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.DefineTrialLevel();
         }
 
-        public void SetTaskInstructions()
-        {
-            Debug.Log("SETTING TASK INSTRUCTIONS FOR: " + TaskName);
-            GameObject go = GameObject.Find(TaskName + "_Instructions");
-            if (go != null)
-            {
-                Debug.Log("Instructions not null!");
-                TaskInstructionsTextGO = go;
-                TaskInstructionsTextGO.SetActive(false);
-            }
-            else
-                Debug.Log("Instructions null!!!!");
+        //public void SetTaskInstructions()
+        //{
+        //    GameObject go = GameObject.Find(TaskName + "_Instructions");
+        //    if (go != null)
+        //    {
+        //        TaskInstructionsTextGO = go;
+        //        TaskInstructionsTextGO.SetActive(false);
+        //    }
 
-            go = GameObject.Find(TaskName + "_InstructionsButton");
-            if (go != null)
-            {
-                Debug.Log("Button not null!");
-                TaskInstructionsButtonGO = go;
-                if (!IsHuman)
-                    TaskInstructionsButtonGO.SetActive(false);
-            }
-            else
-                Debug.Log("Button null!!!!!!");
-
-            if(TaskName == "FlexLearning")
-                Debug.Log("MADE IT TO THE END???");
-        }
+        //    go = GameObject.Find(TaskName + "_InstructionsButton");
+        //    if (go != null)
+        //    {
+        //        TaskInstructionsButtonGO = go;
+        //        TaskInstructionsButtonGO.SetActive(IsHuman ? true : false);
+        //    }
+        //}
 
 
         public void ClearActiveTaskHandlers()
@@ -1079,9 +1075,22 @@ namespace USE_ExperimentTemplate_Task
         }
 
 
+        public void CreateTaskInstructions()
+        {
+            Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
+            USE_Instructions = new USE_Instructions(InstructionsPrefab, InstructionsButtonPrefab, taskCanvas, TaskName);
+            USE_Instructions.button.onClick.AddListener(ToggleInstructions);
+        }
+
+
         public void ToggleInstructions()
         {
-            TaskInstructionsTextGO.SetActive(TaskInstructionsTextGO.activeInHierarchy ? false : true);
+            USE_Instructions.InstructionsGO.SetActive(USE_Instructions.InstructionsGO.activeInHierarchy ? false : true);
+        }
+
+        public void ToggleInstructionsButton()
+        {
+            USE_Instructions.InstructionsButtonGO.SetActive(USE_Instructions.InstructionsButtonGO.activeInHierarchy ? false : true);
         }
 
     }

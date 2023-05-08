@@ -5,6 +5,8 @@ using USE_States;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using USE_Data;
+using USE_ExperimentTemplate_Classes;
 
 namespace USE_UI
 {
@@ -177,12 +179,17 @@ namespace USE_UI
     }
 
 
-
     public class USE_Instructions : MonoBehaviour
     {
-        public GameObject InstructionsGO;
-        public GameObject InstructionsButtonGO;
+        public static GameObject InstructionsGO;
+        public static GameObject InstructionsButtonGO;
         public Button button;
+
+        public static bool InstructionsOn;
+        public static bool InstructionsButtonOn;
+
+        [HideInInspector] public static EventCodeManager EventCodeManager;
+        [HideInInspector] public static Dictionary<string, EventCode> SessionEventCodes;
 
         public Dictionary<string, string> TaskInstructionsDict = new Dictionary<string, string>()
         {
@@ -196,16 +203,47 @@ namespace USE_UI
             { "WorkingMemory", "Find the target object among the distractors to earn your reward!" }
         };
 
-        public USE_Instructions(GameObject instructionsPrefab, GameObject buttonPrefab, Canvas parent, string taskName)
+
+        public USE_Instructions(GameObject instructionsPrefab, GameObject buttonPrefab, Canvas parent, string taskName, DataController frameData, EventCodeManager eventCodeManager, Dictionary<string, EventCode> sessionEventCodes)
         {
+            SessionEventCodes = sessionEventCodes;
+            EventCodeManager = eventCodeManager;
+
             InstructionsGO = Instantiate(instructionsPrefab, parent.transform);
             InstructionsGO.name = taskName + "_Instructions";
             InstructionsGO.GetComponentInChildren<Text>().text = TaskInstructionsDict[taskName];
             InstructionsGO.SetActive(false);
+            InstructionsOn = false;
 
             InstructionsButtonGO = Instantiate(buttonPrefab, parent.transform);
             InstructionsButtonGO.name = taskName + "_InstructionsButton";
             button = InstructionsButtonGO.GetComponent<Button>();
+            button.onClick.AddListener(ToggleInstructions);
+            InstructionsButtonOn = true;
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["InstructionsButtonOn"]);
+
+            frameData.AddDatum("InstructionsOn", () => InstructionsOn.ToString());
+            frameData.AddDatum("InstructionsButtonOn", () => InstructionsButtonOn.ToString());
+        }
+
+        public static void ToggleInstructions() //Used by Subject/Player to toggle Instructions
+        {
+            InstructionsGO.SetActive(InstructionsGO.activeInHierarchy ? false : true);
+            InstructionsOn = InstructionsGO.activeInHierarchy ? true : false;
+            EventCodeManager.SendCodeImmediate(SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
+
+        }
+
+        public static void ToggleInstructionsButton() //Used by hotkeypanel to toggle Button
+        {
+            InstructionsButtonGO.SetActive(InstructionsButtonGO.activeInHierarchy ? false : true);
+
+            //If deactivating instructions button, deactivate the intructions too
+            if (!InstructionsButtonGO.activeInHierarchy && InstructionsGO.activeInHierarchy) 
+                InstructionsGO.SetActive(false);
+
+            InstructionsButtonOn = InstructionsButtonGO.activeInHierarchy ? true : false;
+            EventCodeManager.SendCodeImmediate(SessionEventCodes[InstructionsButtonGO.activeInHierarchy ? "InstructionsButtonOn" : "InstructionsButtonOff"]);
         }
 
     }

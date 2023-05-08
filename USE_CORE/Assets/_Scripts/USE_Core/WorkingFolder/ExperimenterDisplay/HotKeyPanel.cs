@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using USE_UI;
 using UnityEngine.UI;
 using Cursor = UnityEngine.Cursor;
 using ConfigDynamicUI;
@@ -389,7 +390,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.I),
                 hotKeyAction = () =>
                 {
-                    HkPanel.TaskLevel.USE_Instructions.InstructionsButtonGO.SetActive(HkPanel.TaskLevel.USE_Instructions.InstructionsButtonGO.activeInHierarchy ? true : false);
+                    USE_Instructions.ToggleInstructions();
                 }
             };
             HotKeyList.Add(instructionsButton);

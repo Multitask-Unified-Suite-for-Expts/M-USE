@@ -27,10 +27,6 @@
 		"Value": 7,
 		"Description": "Trial Aborted Due to Object Selection Period Timing Out"
 	},
-	"TouchDurationError": {
-		"Value": 8,
-		"Description": "Did Not Maintain Object Selection For Minimum Touch Duration or Exceeded Maximum Touch Duration"
-	},
 	"SliderFbController_SliderCompleteFbOn": {
 		"Value": 9,
 		"Description": "Slider Complete Feedback Start"
@@ -86,14 +82,6 @@
 	"AudioFbController_SelectionAuditoryFbOn": {
 		"Value": 28,
 		"Description": "Auditory Feedback Played"
-	},
-	"SelectionHandler_TouchErrorImageOn": {
-		"Value": 29,
-		"Description": "Vertial Lines Shown for Not Sufficiently Maintaining Selection"
-	},
-	"SelectionHandler_TouchErrorImageOff": {
-		"Value": 30,
-		"Description": "Vertical Lines from Touch Error are Removed"
 	},
 	"HoverOnObject": {
 		"Value": 31,
@@ -263,6 +251,22 @@
 	"TouchFBController_FeedbackOff": {
 		"Value": 74,
 		"Description": "Touch Feedback Off"
+	},
+	"InstructionsOn": {
+		"Value": 75,
+		"Description": "Instructions On"
+	},
+	"InstructionsOff": {
+		"Value": 76,
+		"Description": "Instructions Off"
+	},
+	"InstructionsButtonOn": {
+		"Value": 77,
+		"Description": "Instructions On"
+	},
+	"InstructionsButtonOff": {
+		"Value": 78,
+		"Description": "Instructions Off"
 	},
 	"SetupTaskStarts": {
 		"Range": [ 101, 130 ],

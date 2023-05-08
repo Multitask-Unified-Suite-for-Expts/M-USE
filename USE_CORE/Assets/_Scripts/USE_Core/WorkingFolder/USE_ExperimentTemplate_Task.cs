@@ -219,7 +219,7 @@ namespace USE_ExperimentTemplate_Task
                     }
 
                     if (IsHuman && InputBroker.GetKeyUp(KeyCode.I)) //Instructions Button
-                        ToggleInstructionsButton();
+                        USE_Instructions.ToggleInstructionsButton();
                 }
             });
         #endif
@@ -527,23 +527,6 @@ namespace USE_ExperimentTemplate_Task
 
             TrialLevel.DefineTrialLevel();
         }
-
-        //public void SetTaskInstructions()
-        //{
-        //    GameObject go = GameObject.Find(TaskName + "_Instructions");
-        //    if (go != null)
-        //    {
-        //        TaskInstructionsTextGO = go;
-        //        TaskInstructionsTextGO.SetActive(false);
-        //    }
-
-        //    go = GameObject.Find(TaskName + "_InstructionsButton");
-        //    if (go != null)
-        //    {
-        //        TaskInstructionsButtonGO = go;
-        //        TaskInstructionsButtonGO.SetActive(IsHuman ? true : false);
-        //    }
-        //}
 
 
         public void ClearActiveTaskHandlers()
@@ -1078,19 +1061,7 @@ namespace USE_ExperimentTemplate_Task
         public void CreateTaskInstructions()
         {
             Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
-            USE_Instructions = new USE_Instructions(InstructionsPrefab, InstructionsButtonPrefab, taskCanvas, TaskName);
-            USE_Instructions.button.onClick.AddListener(ToggleInstructions);
-        }
-
-
-        public void ToggleInstructions()
-        {
-            USE_Instructions.InstructionsGO.SetActive(USE_Instructions.InstructionsGO.activeInHierarchy ? false : true);
-        }
-
-        public void ToggleInstructionsButton()
-        {
-            USE_Instructions.InstructionsButtonGO.SetActive(USE_Instructions.InstructionsButtonGO.activeInHierarchy ? false : true);
+            USE_Instructions = new USE_Instructions(InstructionsPrefab, InstructionsButtonPrefab, taskCanvas, TaskName, FrameData, EventCodeManager, SessionEventCodes);
         }
 
     }

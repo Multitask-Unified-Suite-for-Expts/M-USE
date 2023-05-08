@@ -204,11 +204,17 @@ namespace USE_UI
         };
 
 
-        public USE_Instructions(GameObject instructionsPrefab, GameObject buttonPrefab, Canvas parent, string taskName, DataController frameData, EventCodeManager eventCodeManager, Dictionary<string, EventCode> sessionEventCodes)
+        public USE_Instructions(DataController frameData, EventCodeManager eventCodeManager, Dictionary<string, EventCode> sessionEventCodes)
         {
             SessionEventCodes = sessionEventCodes;
             EventCodeManager = eventCodeManager;
 
+            frameData.AddDatum("InstructionsOn", () => InstructionsOn.ToString());
+            frameData.AddDatum("InstructionsButtonOn", () => InstructionsButtonOn.ToString());
+        }
+
+        public void CreateInstructions(GameObject instructionsPrefab, GameObject buttonPrefab, Canvas parent, string taskName)
+        {
             InstructionsGO = Instantiate(instructionsPrefab, parent.transform);
             InstructionsGO.name = taskName + "_Instructions";
             InstructionsGO.GetComponentInChildren<Text>().text = TaskInstructionsDict[taskName];
@@ -221,9 +227,6 @@ namespace USE_UI
             button.onClick.AddListener(ToggleInstructions);
             InstructionsButtonOn = true;
             EventCodeManager.SendCodeImmediate(SessionEventCodes["InstructionsButtonOn"]);
-
-            frameData.AddDatum("InstructionsOn", () => InstructionsOn.ToString());
-            frameData.AddDatum("InstructionsButtonOn", () => InstructionsButtonOn.ToString());
         }
 
         public static void ToggleInstructions() //Used by Subject/Player to toggle Instructions
@@ -237,13 +240,12 @@ namespace USE_UI
         public static void ToggleInstructionsButton() //Used by hotkeypanel to toggle Button
         {
             InstructionsButtonGO.SetActive(InstructionsButtonGO.activeInHierarchy ? false : true);
+            InstructionsButtonOn = InstructionsButtonGO.activeInHierarchy ? true : false;
+            EventCodeManager.SendCodeImmediate(SessionEventCodes[InstructionsButtonGO.activeInHierarchy ? "InstructionsButtonOn" : "InstructionsButtonOff"]);
 
             //If deactivating instructions button, deactivate the intructions too
             if (!InstructionsButtonGO.activeInHierarchy && InstructionsGO.activeInHierarchy) 
                 InstructionsGO.SetActive(false);
-
-            InstructionsButtonOn = InstructionsButtonGO.activeInHierarchy ? true : false;
-            EventCodeManager.SendCodeImmediate(SessionEventCodes[InstructionsButtonGO.activeInHierarchy ? "InstructionsButtonOn" : "InstructionsButtonOff"]);
         }
 
     }

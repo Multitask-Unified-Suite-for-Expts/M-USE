@@ -1061,7 +1061,8 @@ namespace USE_ExperimentTemplate_Task
         public void CreateTaskInstructions()
         {
             Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
-            USE_Instructions = new USE_Instructions(InstructionsPrefab, InstructionsButtonPrefab, taskCanvas, TaskName, FrameData, EventCodeManager, SessionEventCodes);
+            USE_Instructions = new USE_Instructions(FrameData, EventCodeManager, SessionEventCodes);
+            USE_Instructions.CreateInstructions(InstructionsPrefab, InstructionsButtonPrefab, taskCanvas, TaskName);
         }
 
     }

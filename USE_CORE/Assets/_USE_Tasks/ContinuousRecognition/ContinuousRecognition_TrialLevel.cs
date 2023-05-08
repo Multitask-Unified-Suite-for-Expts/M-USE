@@ -226,13 +226,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         ChooseStim.AddUpdateMethod(() =>
         {
-            if(InputBroker.GetMouseButtonDown(0))
-            {
-                GameObject go = InputBroker.RaycastBoth(InputBroker.mousePosition);
-                if (go != null)
-                    Debug.Log("HIT: " + go.name);
-            }
-
             if (TimeRemaining > 0)
                 TimeRemaining -= Time.deltaTime;
 
@@ -306,13 +299,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
         });
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
-        //ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
-        //{
-        //    AudioFBController.Play("Negative");
-        //    EndBlock = true;
-        //    EventCodeManager.SendCodeImmediate(SessionEventCodes["NoChoice"]);
-        //    AbortCode = 6;
-        //});
+        ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
+        {
+            AudioFBController.Play("Negative");
+            EndBlock = true;
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["NoChoice"]);
+            AbortCode = 6;
+        });
 
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------
         TouchFeedback.AddInitializationMethod(() =>

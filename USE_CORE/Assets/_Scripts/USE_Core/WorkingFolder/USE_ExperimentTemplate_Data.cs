@@ -9,11 +9,11 @@ using USE_States;
 using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
-//using System.Data.SqlClient;
 using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
-
+using System.Data.SqlClient;
+//using MySql.Data.MySqlClient;
 
 namespace USE_ExperimentTemplate_Data
 {
@@ -35,10 +35,8 @@ namespace USE_ExperimentTemplate_Data
         public static void AddTaskRunData(string ConfigName, ControlLevel state, OrderedDictionary data)
         {
             if (!storeData)
-            {
                 return;
-            }
-
+            
             data["Start Time"] = state.StartTimeAbsolute;
             data["Duration"] = state.Duration;
 
@@ -46,9 +44,7 @@ namespace USE_ExperimentTemplate_Data
             using (StreamWriter dataStream = File.AppendText(filePath))
             {
                 foreach (DictionaryEntry entry in data)
-                {
                     dataStream.Write($"{entry.Key}:\t{entry.Value}\n");
-                }
             }
         }
     }
@@ -61,14 +57,17 @@ namespace USE_ExperimentTemplate_Data
         public ControlLevel_Trial_Template trialLevel;
 
 
-        private readonly string ConnectionString = "server=localhost\\SQLExpress;database=USE_Test;integrated security=true;TrustServerCertificate=true;";
-        //public SqlConnection Connection
-        //{
-        //    get
-        //    {
-        //        return new SqlConnection(ConnectionString);
-        //    }
-        //}
+        private readonly string ConnectionString = "server=localhost;port=3306;database=USE_Test;uid=MUSE_User;password=Dziadziu21!;";
+
+        public SqlConnection Connection
+        {
+            get
+            {
+                return new SqlConnection(ConnectionString);
+            }
+        }
+
+
 
         //Dict to hold all the sql data types, so they will be correct for sql command
         Dictionary<string, string> TypeDict_SQL = new Dictionary<string, string>()
@@ -112,23 +111,23 @@ namespace USE_ExperimentTemplate_Data
 
         public void TestConnectionToDB()
         {
-            //using(var conn = Connection)
-            //{
-            //    conn.Open();
-            //    using(var cmd = conn.CreateCommand())
-            //    {
-            //        cmd.CommandText = @"SELECT * FROM Task;";
+            using (var conn = Connection)
+            {
+                conn.Open();
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT * FROM Task;";
 
-            //        using(SqlDataReader reader = cmd.ExecuteReader())
-            //        {
-            //            while(reader.Read())
-            //            {
-            //                Debug.Log((int)reader["Id"]);
-            //                Debug.Log((reader.GetString(reader.GetOrdinal("Name"))));
-            //            }
-            //        }
-            //    }
-            //}
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Debug.Log((int)reader["Id"]);
+                            Debug.Log((reader.GetString(reader.GetOrdinal("Name"))));
+                        }
+                    }
+                }
+            }
         }
 
         //public bool DoesSQLTableExist()

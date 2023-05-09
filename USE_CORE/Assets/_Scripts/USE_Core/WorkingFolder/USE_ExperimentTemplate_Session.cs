@@ -103,6 +103,7 @@ namespace USE_ExperimentTemplate_Session
             if (UseDefaultConfigs)
             {
                 configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
+
                 if (Directory.Exists(configFileFolder))
                     Directory.Delete(configFileFolder, true);
 
@@ -250,14 +251,17 @@ namespace USE_ExperimentTemplate_Session
             if (SessionSettings.SettingExists("Session", "SerialPortActive"))
                 SerialPortActive = (bool)SessionSettings.Get("Session", "SerialPortActive");
 
-            SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
 
 
             if (UseDefaultConfigs)
             {
+                SessionDataPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_Data" + "_" + FilePrefix;
+
                 ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
                 TaskIconsFolderPath = "Assets/_USE_Session/Resources/DefaultResources/TaskIcons";
             }
+            else
+                SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
 
         }
 
@@ -311,6 +315,8 @@ namespace USE_ExperimentTemplate_Session
             setupSession.AddDefaultInitializationMethod(() =>
             {
                 SessionData.CreateFile();
+
+                
                 //SessionData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
                 //SessionData.TestConnectionToDB(); //Using to test database connection
 
@@ -711,12 +717,13 @@ namespace USE_ExperimentTemplate_Session
             
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
             {
-#if (!UNITY_WEBGL)
+                if(PreviousTaskSummaryString != null && CurrentTask.CurrentTaskSummaryString != null)
                     PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
-                    SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
-                    SessionData.AppendData();
-                    SessionData.WriteData();
-#endif
+
+                SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
+                SessionData.AppendData();
+                SessionData.WriteData();
+
 
                 SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
@@ -754,7 +761,8 @@ namespace USE_ExperimentTemplate_Session
                 SessionData.WriteData();
            
                 AppendSerialData();
-                if(SerialPortActive){
+                if(SerialPortActive)
+                {
                     SerialSentData.WriteData();
                     SerialRecvData.WriteData();
                 }

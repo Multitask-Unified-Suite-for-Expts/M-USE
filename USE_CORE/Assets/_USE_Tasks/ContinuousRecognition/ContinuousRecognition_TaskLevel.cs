@@ -89,17 +89,18 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddInitializationMethod(() =>
         {
+            CalculateBlockAverages();
+            CalculateStanDev();
+            AddBlockValuesToTaskValues();
+
             #if (!UNITY_WEBGL)
                 if (trialLevel.AbortCode == 0)
                 {
                     CurrentBlockString += "\n" + "\n";
                     CurrentBlockString = CurrentBlockString.Replace("Current Block", $"Block {blocksAdded + 1}");
                     PreviousBlocksString.Insert(0, CurrentBlockString); //Add current block string to full list of previous blocks. 
-                    AddBlockValuesToTaskValues();
                     blocksAdded++;
                 }
-                CalculateBlockAverages();
-                CalculateStanDev();
             #endif
         });        
     }
@@ -167,11 +168,16 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary();
 
-        data["Non Stim Touches"] = NonStimTouches_Task.AsQueryable().Sum();
-        data["Trials Completed"] = TrialsCompleted_Task.AsQueryable().Sum();
-        data["Trials Correct"] = TrialsCorrect_Task.AsQueryable().Sum();
-        data["TokenBar Completions"] = TokenBarCompletions_Task.AsQueryable().Sum();
-        data["Total Rewards"] = TotalRewards_Task.AsQueryable().Sum();
+        if(NonStimTouches_Task.Count > 0)
+            data["Non Stim Touches"] = NonStimTouches_Task.AsQueryable().Sum();
+        if (TrialsCompleted_Task.Count > 0)
+            data["Trials Completed"] = TrialsCompleted_Task.AsQueryable().Sum();
+        if (TrialsCorrect_Task.Count > 0)
+            data["Trials Correct"] = TrialsCorrect_Task.AsQueryable().Sum();
+        if (TokenBarCompletions_Task.Count > 0)
+            data["TokenBar Completions"] = TokenBarCompletions_Task.AsQueryable().Sum();
+        if (TotalRewards_Task.Count > 0)
+            data["Total Rewards"] = TotalRewards_Task.AsQueryable().Sum();
         return data;
     }
 

@@ -195,15 +195,15 @@ namespace USE_UI
         {
             { "ContinuousRecognition", "Each trial, objects are displayed and you must choose an object you haven't chosen in a previous trial." },
             { "EffortControl", "Choose a balloon to inflate. Inflate the balloon by clicking the required number of times. Pop the balloon for your reward!"},
-            { "FlexLearning", "Select the correct object to earn your reward!"},
+            { "FlexLearning", "Learn the visual feature that provides the most reward!"},
             { "MazeGame", "Find your way to the end of the Maze to earn your reward!" },
             { "THR", "Touch and hold the square for the correct duration to earn your reward!" },
-            { "VisualSearch", "Select the correct object to earn your reward!" },
+            { "VisualSearch", "Find the targeted object to earn your reward!" },
             { "WhatWhenWhere", "Select the objects in the correct sequence to earn your reward!" },
-            { "WorkingMemory", "Find the target object among the distractors to earn your reward!" }
+            { "WorkingMemory", "Remember and identify the target object to earn your reward!" }
         };
 
-
+        //Instantiated by the TaskLevel
         public USE_Instructions(DataController frameData, EventCodeManager eventCodeManager, Dictionary<string, EventCode> sessionEventCodes)
         {
             SessionEventCodes = sessionEventCodes;
@@ -213,6 +213,7 @@ namespace USE_UI
             frameData.AddDatum("InstructionsButtonOn", () => InstructionsButtonOn.ToString());
         }
 
+        //Creates the 1)InstructionsGO and the 2)InstructionsButtonGO
         public void CreateInstructions(GameObject instructionsPrefab, GameObject buttonPrefab, Canvas parent, string taskName)
         {
             InstructionsGO = Instantiate(instructionsPrefab, parent.transform);

@@ -82,6 +82,24 @@ namespace SelectionTracking
             mouseClick.CurrentInputLocation = () => InputBroker.mousePosition;
             DefaultSelectionHandlers.Add("MouseButton0Click", mouseClick);
 
+
+            //----------------------------------------MOUSE HOVER HANDLER: --------------------------------------------------
+            SelectionHandler mouseHover = new SelectionHandler();
+            
+            //Init Conditions: has to hit a GO
+            mouseHover.InitConditions.Add(mouseHover.DefaultConditions("RaycastHitsAGameObject"));
+            //Update Conditions: raycast must hit previously hit GO
+            mouseHover.UpdateConditions.Add(mouseHover.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
+            //Update Error Triggers: Moving too far, holding for too long
+            mouseHover.UpdateErrorTriggers.Add("MovedTooFar", mouseHover.DefaultConditions("MovedTooFar"));
+            //Termination Conditions: Hovered above object for long enough
+            mouseHover.TerminationConditions.Add(mouseHover.DefaultConditions("DurationSufficient"));
+            //Termination Error Triggers: HoldingTooShort
+            mouseHover.TerminationErrorTriggers.Add("DurationTooShort", mouseHover.DefaultConditions("DurationTooShort"));
+
+            mouseHover.CurrentInputLocation = () => InputBroker.mousePosition;
+            DefaultSelectionHandlers.Add("MouseHover", mouseHover);
+
             //----------------------------------------TOUCH SHOTGUN HANDLER: --------------------------------------------------
             SelectionHandler touchShotgun = new SelectionHandler();
             touchShotgun.InitConditions.Add(touchShotgun.DefaultConditions("ShotgunRaycastHitsProportion"));
@@ -102,19 +120,34 @@ namespace SelectionTracking
 
             //----------------------------------------GAZE HANDLER: --------------------------------------------------
             SelectionHandler gazeSelection = new SelectionHandler();
-            GazeTracker gazeTracker = new GazeTracker();
             gazeSelection.InitConditions.Add(gazeSelection.DefaultConditions("RaycastHitsAGameObject"));
 
             gazeSelection.UpdateConditions.Add(gazeSelection.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
 
             gazeSelection.UpdateErrorTriggers.Add("MovedTooFar", gazeSelection.DefaultConditions("MovedTooFar"));
-            gazeSelection.UpdateErrorTriggers.Add("DurationTooLong", gazeSelection.DefaultConditions("DurationTooLong"));
+
+            gazeSelection.TerminationConditions.Add(gazeSelection.DefaultConditions("DurationSufficient"));
 
             gazeSelection.TerminationErrorTriggers.Add("DurationTooShort", gazeSelection.DefaultConditions("DurationTooShort"));
             gazeSelection.CurrentInputLocation = () => InputBroker.gazePosition;
             DefaultSelectionHandlers.Add("GazeSelection", gazeSelection);
 
+            //----------------------------------------GAZE SHOTGUN HANDLER: --------------------------------------------------
+            SelectionHandler gazeShotgun = new SelectionHandler();
+            gazeShotgun.InitConditions.Add(gazeShotgun.DefaultConditions("ShotgunRaycastHitsProportion"));
 
+            gazeShotgun.UpdateConditions.Add(gazeShotgun.DefaultConditions("ShotgunRaycastHitsPreviouslyHitGO"));
+
+            gazeShotgun.UpdateErrorTriggers.Add("MovedTooFar", gazeShotgun.DefaultConditions("MovedTooFar"));
+
+            gazeShotgun.TerminationConditions.Add(gazeShotgun.DefaultConditions("DurationSufficient"));
+
+            gazeShotgun.TerminationErrorTriggers.Add("DurationTooShort", gazeShotgun.DefaultConditions("DurationTooShort"));
+
+            gazeShotgun.CurrentInputLocation = () => InputBroker.gazePosition;
+            DefaultSelectionHandlers.Add("GazeShotgun", gazeShotgun);
+            
+            
             return DefaultSelectionHandlers[hName];
         }
 
@@ -501,6 +534,7 @@ namespace SelectionTracking
                 DefaultConditions.Add("RaycastHitsSameObjectAsPreviousFrame", () => DefaultConditions["RaycastHitsAGameObject"]() &&
                                                                                    OngoingSelection != null &&
                                                                                    currentTarget == OngoingSelection.SelectedGameObject);
+                DefaultConditions.Add("DurationSufficient", () => OngoingSelection != null && OngoingSelection.Duration > MinDuration);
                 DefaultConditions.Add("DurationTooLong", () => MaxDuration != null && OngoingSelection != null && OngoingSelection.Duration > MaxDuration);
                 DefaultConditions.Add("DurationTooShort", () => MinDuration != null && OngoingSelection != null && OngoingSelection.Duration < MinDuration);
                 DefaultConditions.Add("MovedTooFar", () =>

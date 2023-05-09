@@ -108,6 +108,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
+            mgTL.MouseHover = true;
             FindMaze();
             LoadTextMaze(); // need currMaze here to set all the arrays
             
@@ -394,6 +395,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     }
     private void LoadMazeDef()
     {
+        Debug.Log("MAZE KEY FILE PATH: " + mazeKeyFilePath);
         SessionSettings.ImportSettings_SingleTypeArray<MazeDef>("MazeDefs", mazeKeyFilePath);
         MazeDefs = (MazeDef[])SessionSettings.Get("MazeDefs");
         MazeDims = new Vector2[MazeDefs.Length];

@@ -14,6 +14,8 @@ using USE_ExperimentTemplate_Task;
 using SelectionTracking;
 using USE_UI;
 using System.IO.Ports;
+using Tobii.Research;
+using Tobii.Research.Unity;
 
 namespace USE_ExperimentTemplate_Trial
 {
@@ -58,7 +60,11 @@ namespace USE_ExperimentTemplate_Trial
         
         // Input Trackers
         [HideInInspector] public MouseTracker MouseTracker;
-        [HideInInspector] public GazeTracker GazeTracker;
+        //[HideInInspector] public GazeTracker GazeTracker;
+        [HideInInspector] public EyeTracker EyeTracker;
+        [HideInInspector] public IEyeTracker IEyeTracker;
+        [HideInInspector] public ScreenBasedCalibration ScreenBasedCalibration;
+        [HideInInspector] public DisplayArea DisplayArea;
 
         [HideInInspector] public string SelectionType;
 

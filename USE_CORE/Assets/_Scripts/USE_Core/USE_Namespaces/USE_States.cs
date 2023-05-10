@@ -709,9 +709,8 @@ namespace USE_States
 		public void InitializeControlLevel()
 		{
 			if (string.IsNullOrEmpty(ControlLevelName))
-			{
 				Debug.LogError("A Control Level requires a name.");
-			}
+			
 			Debug.Log("Initialize " + ControlLevelName);
 			initialized = false;
 			Terminated = false;

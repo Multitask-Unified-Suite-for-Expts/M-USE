@@ -139,8 +139,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         //WHITE SQUARE state ------------------------------------------------------------------------------------------------------------------------
         WhiteSquare.AddInitializationMethod(() =>
         {
-            Debug.Log("SQUARE SIZE: " + currentTrial.SquareSize);
-
             Input.ResetInputAxes();
             USE_SquareGO.SetButtonColor(Color.white);
             if (!SquareGO.activeInHierarchy)

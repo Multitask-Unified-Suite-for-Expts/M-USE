@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -439,8 +440,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             searchStims.ToggleVisibility(false);
             distractorStims.ToggleVisibility(false);
 
-            if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
-                DestroyChildren(GameObject.Find("MainCameraCopy"));
             float latestAccuracy = -1;
 
             if (runningAcc.Count > 10)

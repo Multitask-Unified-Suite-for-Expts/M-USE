@@ -512,13 +512,15 @@ namespace USE_ExperimentTemplate_Session
                 float buttonSpacing;
                 if (MacMainDisplayBuild && !Application.isEditor)
                 {
-                    buttonSize = 250;
-                    buttonSpacing = 30;
+                    buttonSize = Screen.width * .13f;
+                    buttonSpacing = Screen.width * .015f;
                 }
                 else
                 {
-                    buttonSize = 175;
-                    buttonSpacing = 15;
+                    buttonSize = Screen.width * .093f;  
+                    buttonSpacing = Screen.width * .0078125f;
+                    //buttonSize = 175;
+                    //buttonSpacing = 15;
                 }
                 float buttonsWidth = numTasks * buttonSize + (numTasks - 1) * buttonSpacing;
                 float buttonStartX = (buttonSize - buttonsWidth) / 2;

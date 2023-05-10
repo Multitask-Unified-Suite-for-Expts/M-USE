@@ -13,9 +13,9 @@ using USE_UI;
 using System.Globalization;
 using Tobii.Research;
 using Tobii.Research.Unity;
-#if(!UNITY_WEBGL)
-    using System.Windows.Forms;
-#endif
+
+//using System.Windows.Forms; Un Comment this for normal build
+
 using USE_Common_Namespace;
 using System.Linq;
 using USE_DisplayManagement;

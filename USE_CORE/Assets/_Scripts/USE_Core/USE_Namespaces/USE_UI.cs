@@ -248,7 +248,6 @@ namespace USE_UI
             if (!InstructionsButtonGO.activeInHierarchy && InstructionsGO.activeInHierarchy) 
                 InstructionsGO.SetActive(false);
         }
-
     }
 
     public class USE_Circle : MonoBehaviour

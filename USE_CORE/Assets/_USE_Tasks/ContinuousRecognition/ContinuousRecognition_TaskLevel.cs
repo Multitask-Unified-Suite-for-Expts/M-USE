@@ -140,9 +140,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         else
             trialLevel.MakeStimPopOut = false;
 
-        if (SessionSettings.SettingExists("Session", "IsHuman"))
-            trialLevel.IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");
-
         if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
             trialLevel.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
         else

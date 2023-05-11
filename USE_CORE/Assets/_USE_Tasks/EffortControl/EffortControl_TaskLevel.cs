@@ -83,11 +83,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     {
         trialLevel.ContextExternalFilePath = ContextExternalFilePath;
 
-        if (SessionSettings.SettingExists("Session", "IsHuman"))
-            trialLevel.IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");
-        else
-            trialLevel.IsHuman = false;
-
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
         {
             trialLevel.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");

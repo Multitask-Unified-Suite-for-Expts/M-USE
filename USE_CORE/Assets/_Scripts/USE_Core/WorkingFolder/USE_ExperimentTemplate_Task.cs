@@ -524,6 +524,9 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.ExternalStims = ExternalStims;
             TrialLevel.RuntimeStims = RuntimeStims;
             TrialLevel.ConfigUiVariables = ConfigUiVariables;
+            TrialLevel.IsHuman = IsHuman;
+
+            Debug.Log("IS HUMAN WHEN PASSING TO TRIAL LEVEL: " + IsHuman);
 
             TrialLevel.DefineTrialLevel();
         }

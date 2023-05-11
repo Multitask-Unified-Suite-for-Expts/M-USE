@@ -33,8 +33,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public GameObject Starfield;
     [HideInInspector] public List<GameObject> BorderPrefabList;
 
-    [HideInInspector] public bool IsHuman;
-
     [HideInInspector] public bool CompletedAllTrials;
     [HideInInspector] public bool EndBlock;
     [HideInInspector] public bool StimIsChosen;
@@ -174,12 +172,18 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 ShotgunHandler.ClearSelections();
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+
+            if (IsHuman && !USE_Instructions.InstructionsButtonGO.activeInHierarchy)
+                USE_Instructions.InstructionsButtonGO.SetActive(true);
         });
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
             if (IsHuman)
             {
+                if (USE_Instructions.InstructionsButtonGO.activeInHierarchy)
+                    USE_Instructions.InstructionsButtonGO.SetActive(false);
+
                 CR_CanvasGO.SetActive(true);
                 SetScoreAndTrialsText();
                 ScoreTextGO.SetActive(true);

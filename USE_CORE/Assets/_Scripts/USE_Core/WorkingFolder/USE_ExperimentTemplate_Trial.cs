@@ -81,6 +81,8 @@ namespace USE_ExperimentTemplate_Trial
 
         public bool UseDefaultConfigs;
 
+        public bool IsHuman;
+
 
         // Texture Variables
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, 

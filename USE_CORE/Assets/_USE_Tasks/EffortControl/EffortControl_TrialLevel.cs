@@ -49,7 +49,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     //Set in task level:
     [HideInInspector] public string ContextExternalFilePath;
-    [HideInInspector] public bool IsHuman;
 
     [System.NonSerialized] public int Response = -1;
     private int InflationsNeeded; //becomes left/right num clicks once they make selection. 
@@ -184,9 +183,15 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 Handler.ClearSelections();
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
+
+            if (IsHuman && !USE_Instructions.InstructionsButtonGO.activeInHierarchy)
+                USE_Instructions.InstructionsButtonGO.SetActive(true);
         });
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton), Delay, () =>
         {
+            if (IsHuman && USE_Instructions.InstructionsButtonGO.activeInHierarchy)
+                USE_Instructions.InstructionsButtonGO.SetActive(false);
+
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
             StartButton.SetActive(false);

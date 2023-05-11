@@ -143,10 +143,16 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+
+            if (IsHuman && !USE_Instructions.InstructionsButtonGO.activeInHierarchy)
+                USE_Instructions.InstructionsButtonGO.SetActive(true);
         });
 
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), DisplaySample, () =>
         {
+            if (IsHuman && USE_Instructions.InstructionsButtonGO.activeInHierarchy)
+                USE_Instructions.InstructionsButtonGO.SetActive(false);
+
             //Set the token bar settings
             TokenFBController.enabled = true;
             TokenFBController

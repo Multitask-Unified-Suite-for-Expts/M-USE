@@ -19,6 +19,7 @@ using USE_ExperimentTemplate_Task;
 using SelectionTracking;
 using Random = UnityEngine.Random;
 using UnityEngine.InputSystem;
+using TMPro;
 //using UnityEngine.Windows.WebCam;
 
 
@@ -92,10 +93,14 @@ namespace USE_ExperimentTemplate_Session
 
         public DisplayController DisplayController;
 
+        public GameObject TaskButtons;
+
         //Set in inspector
         public GameObject InstructionsButtonPrefab;
         public GameObject InstructionsPrefab;
-
+        public GameObject TaskSelection_Starfield;
+        public GameObject TaskSelection_Header;
+        public GameObject HumanVersionToggleButton;
 
         public override void LoadSettings()
         {
@@ -288,7 +293,10 @@ namespace USE_ExperimentTemplate_Session
                 SessionCam.GetComponent<Skybox>().material = taskSelectionBG_Material;
                 GameObject initCamGO = GameObject.Find("InitCamera");
                 initCamGO.SetActive(false);
+                TaskSelection_Starfield.SetActive(true);
             #else
+
+                TaskSelection_Starfield.SetActive(false);
                 GameObject experimenterDisplay = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
                 experimenterDisplay.name = "ExperimenterDisplay";
                 ExperimenterDisplayController = experimenterDisplay.AddComponent<ExperimenterDisplayController>();
@@ -421,12 +429,14 @@ namespace USE_ExperimentTemplate_Session
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupSessionEnds"]);
             });
 
-            GameObject taskButtons = null;
+            TaskButtons = null;
             Dictionary<string, GameObject> taskButtonsDict = new Dictionary<string, GameObject>();
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
-                #if (!UNITY_WEBGL)
+                #if (UNITY_WEBGL)
+                    TaskSelection_Starfield.SetActive(true);
+                #else
                     if (DisplayController.SwitchDisplays) //SwitchDisplay stuff doesnt full work yet!
                     {
                         SessionCam.targetDisplay = 1;
@@ -474,9 +484,9 @@ namespace USE_ExperimentTemplate_Session
                     return;
                 }
 
-                if (taskButtons != null)
+                if (TaskButtons != null)
                 {
-                    taskButtons.SetActive(true);
+                    TaskButtons.SetActive(true);
                     if (GuidedTaskSelection)
                     {
                         // if guided selection, we need to adjust the shading of the icons and buttons after the task buttons object is already created                        
@@ -502,10 +512,10 @@ namespace USE_ExperimentTemplate_Session
                     return;
                 }
 
-                taskButtons = new GameObject("TaskButtons");
-                taskButtons.transform.parent = GameObject.Find("TaskSelectionCanvas").transform;
-                taskButtons.transform.localPosition = Vector3.zero;
-                taskButtons.transform.localScale = Vector3.one;
+                TaskButtons = new GameObject("TaskButtons");
+                TaskButtons.transform.parent = GameObject.Find("TaskSelectionCanvas").transform;
+                TaskButtons.transform.localPosition = Vector3.zero;
+                TaskButtons.transform.localScale = Vector3.one;
                 // We'll use height for the calculations because it is generally smaller than the width
                 int numTasks = TaskMappings.Count;
                 float buttonSize;
@@ -517,23 +527,27 @@ namespace USE_ExperimentTemplate_Session
                 }
                 else
                 {
-                    buttonSize = Screen.width * .093f;  
+                    buttonSize = Screen.width * .098f;
                     buttonSpacing = Screen.width * .0078125f;
-                    //buttonSize = 175;
-                    //buttonSpacing = 15;
                 }
                 float buttonsWidth = numTasks * buttonSize + (numTasks - 1) * buttonSpacing;
                 float buttonStartX = (buttonSize - buttonsWidth) / 2;
+
+                float buttonY = 0f;
+                #if (UNITY_WEBGL)
+                    buttonY = -100f;
+                #endif
 
                 if(TaskIconLocations.Count() != numTasks) //If user didn't specify in config, Generate default locations:
                 {
                     TaskIconLocations = new Vector3[numTasks];
                     for(int i = 0; i < numTasks; i++)
                     {
-                        TaskIconLocations[i] = new Vector3(buttonStartX, 0, 0);
+                        TaskIconLocations[i] = new Vector3(buttonStartX, buttonY, 0);
                         buttonStartX += buttonSize + buttonSpacing;
                     }
                 }
+                TaskButtons.transform.localScale *= 1.09f;
 
                 int count = 0;
                 foreach (DictionaryEntry task in TaskMappings)
@@ -545,13 +559,13 @@ namespace USE_ExperimentTemplate_Session
                     string taskFolder = GetConfigFolderPath(configName);
                     if (!Directory.Exists(taskFolder))
                     {
-                        Destroy(taskButtons);
+                        Destroy(TaskButtons);
                         throw new DirectoryNotFoundException($"Task folder for '{configName}' at '{taskFolder}' does not exist.");
                     }
 
                     GameObject taskButton = new GameObject(configName + "Button");
                     taskButtonsDict.Add(configName, taskButton);
-                    taskButton.transform.parent = taskButtons.transform;
+                    taskButton.transform.parent = TaskButtons.transform;
 
                     RawImage taskButtonImage = taskButton.AddComponent<RawImage>();
                     string taskIcon = TaskIcons[configName];
@@ -595,6 +609,14 @@ namespace USE_ExperimentTemplate_Session
                     count++;
                 }
 
+                #if(UNITY_WEBGL)
+                    TaskSelection_Header.SetActive(true);
+                    HumanVersionToggleButton.SetActive(true);
+                    Debug.Log(TaskSelection_Header.transform.localPosition);
+                    if (Application.isEditor)
+                        TaskSelection_Header.transform.localPosition = new Vector3(TaskSelection_Header.transform.localPosition.x, TaskSelection_Header.transform.localPosition.y  + 50f, TaskSelection_Header.transform.localPosition.z);
+                    Debug.Log(TaskSelection_Header.transform.localPosition);
+                #endif
             });
             
             selectTask.AddFixedUpdateMethod(() =>
@@ -608,6 +630,10 @@ namespace USE_ExperimentTemplate_Session
             });
 
             selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask);
+            selectTask.AddDefaultTerminationMethod(() =>
+            {
+                TaskSelection_Starfield.SetActive(false);
+            });
 
             // Don't have automatic task selection if we encountered an error during setup
             if (TaskSelectionTimeout >= 0 && !LogPanel.HasError())
@@ -631,7 +657,7 @@ namespace USE_ExperimentTemplate_Session
 
             loadTask.AddInitializationMethod(() =>
             {
-                taskButtons.SetActive(false);
+                TaskButtons.SetActive(false);
                 GameObject taskButton = taskButtonsDict[selectedConfigName];
                 RawImage image = taskButton.GetComponent<RawImage>();
                 Button button = taskButton.GetComponent<Button>();
@@ -811,6 +837,21 @@ namespace USE_ExperimentTemplate_Session
             }
         }
 
+        public void HandleHumanVersionToggleButtonClick()
+        {
+            //Change text on button:
+            HumanVersionToggleButton.GetComponentInChildren<TextMeshProUGUI>().text = IsHuman ? "Human Version" : "Monkey Version";
+            //Toggle Header:
+            TaskSelection_Header.SetActive(TaskSelection_Header.activeInHierarchy ? false : true);
+            //Toggle Starfield:
+            TaskSelection_Starfield.SetActive(TaskSelection_Starfield.activeInHierarchy ? false : true);
+            //push task buttons up to 0 Y for humans, or back to -100 Y for monkeys
+            TaskButtons.transform.localPosition = new Vector3(TaskButtons.transform.localPosition.x, TaskButtons.transform.localPosition.y + (IsHuman ? 100f : -100f), TaskButtons.transform.localPosition.z);
+
+            IsHuman = !IsHuman;
+            Debug.Log("ISHUMAN? : " + IsHuman);
+        }
+
         private void AppendSerialData()
         {
             if (SerialPortActive)
@@ -877,6 +918,8 @@ namespace USE_ExperimentTemplate_Session
 
         ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
+            Debug.Log("ISHUMAN WHEN PASSING TO TASK LEVEL: " + IsHuman);
+
             tl.InstructionsButtonPrefab = InstructionsButtonPrefab;
             tl.InstructionsPrefab = InstructionsPrefab;
             tl.IsHuman = IsHuman;

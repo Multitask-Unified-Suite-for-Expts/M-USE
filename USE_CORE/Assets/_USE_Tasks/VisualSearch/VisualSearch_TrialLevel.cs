@@ -161,10 +161,16 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+
+            if (IsHuman && !USE_Instructions.InstructionsButtonGO.activeInHierarchy)
+                USE_Instructions.InstructionsButtonGO.SetActive(true);
         });
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton),
             SearchDisplayDelay, () => 
-            { 
+            {
+                if (IsHuman && USE_Instructions.InstructionsButtonGO.activeInHierarchy)
+                    USE_Instructions.InstructionsButtonGO.SetActive(false);
+
                 choiceMade = false;
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
             });

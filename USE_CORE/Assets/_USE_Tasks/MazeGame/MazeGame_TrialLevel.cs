@@ -217,10 +217,16 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 SelectionHandler.ClearSelections();
             SelectionHandler.MinDuration = minObjectTouchDuration.value;
             SelectionHandler.MaxDuration = maxObjectTouchDuration.value;
+
+            if (IsHuman && !USE_Instructions.InstructionsButtonGO.activeInHierarchy)
+                USE_Instructions.InstructionsButtonGO.SetActive(true);
         });
 
         InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatches(StartButton), Delay, () =>
         {
+            if (IsHuman && USE_Instructions.InstructionsButtonGO.activeInHierarchy)
+                USE_Instructions.InstructionsButtonGO.SetActive(false);
+
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
 
             StateAfterDelay = ChooseTile;

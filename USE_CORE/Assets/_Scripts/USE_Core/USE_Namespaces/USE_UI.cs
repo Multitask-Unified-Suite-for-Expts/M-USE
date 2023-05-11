@@ -7,9 +7,125 @@ using System.Collections.Generic;
 using TMPro;
 using USE_Data;
 using USE_ExperimentTemplate_Classes;
+using USE_UI;
 
 namespace USE_UI
 {
+    public class HumanStartPanel : MonoBehaviour
+    {
+        public GameObject HumanStartPanelGO;
+
+        public GameObject StartButtonGO;
+        public GameObject InstructionsButtonGO;
+        public GameObject InstructionsGO;
+
+        public GameObject HumanStartPanelPrefab;
+
+        public bool HumanPanelOn;
+        public bool InstructionsOn;
+
+        public Dictionary<string, string> TaskInstructionsDict = new Dictionary<string, string>()
+        {
+            { "ContinuousRecognition", "Each trial, objects are displayed and you must choose an object you haven't chosen in a previous trial." },
+            { "EffortControl", "Choose a balloon to inflate. Inflate the balloon by clicking the required number of times. Pop the balloon for your reward!"},
+            { "FlexLearning", "Learn the visual feature that provides the most reward!"},
+            { "MazeGame", "Find your way to the end of the Maze to earn your reward!" },
+            { "THR", "Touch and hold the square for the correct duration to earn your reward!" },
+            { "VisualSearch", "Find the targeted object to earn your reward!" },
+            { "WhatWhenWhere", "Select the objects in the correct sequence to earn your reward!" },
+            { "WorkingMemory", "Remember and identify the target object to earn your reward!" }
+        };
+        public Dictionary<string, string> TaskNamesDict = new Dictionary<string, string>()
+        {
+            { "ContinuousRecognition", "Continuous Recognition" },
+            { "THR", "Touch Hold Release" },
+            { "EffortControl", "Effort Control" },
+            { "FlexLearning", "Flex Learning" },
+            { "MazeGame", "Maze Game" },
+            { "VisualSearch", "Visual Search" },
+            { "WhatWhenWhere", "What When Where" },
+            { "WorkingMemory", "Working Memory" },
+
+        };
+
+        public State SetActiveOnInitialization;
+        public State SetInactiveOnTermination;
+
+        [HideInInspector] public static EventCodeManager EventCodeManager;
+        [HideInInspector] public static Dictionary<string, EventCode> SessionEventCodes;
+
+
+        public void SetupDataAndCodes(DataController frameData, EventCodeManager eventCodeManager, Dictionary<string, EventCode> sessionEventCodes)
+        {
+            SessionEventCodes = sessionEventCodes;
+            EventCodeManager = eventCodeManager;
+
+            frameData.AddDatum("HumanPanelOn", () => HumanPanelOn.ToString());
+            frameData.AddDatum("InstructionsOn", () => InstructionsOn.ToString());
+        }
+
+
+        public void CreateHumanStartPanel(Canvas parent, string taskName)
+        {
+            HumanStartPanelGO = Instantiate(HumanStartPanelPrefab);
+            HumanStartPanelGO.name = taskName + "_HumanPanel";
+            HumanStartPanelGO.transform.SetParent(parent.transform, false);
+
+            HumanStartPanelGO.transform.Find("TitleText").gameObject.GetComponent<TextMeshProUGUI>().text = TaskNamesDict[taskName];
+            StartButtonGO = HumanStartPanelGO.transform.Find("StartButton").gameObject;
+
+            InstructionsButtonGO = HumanStartPanelGO.transform.Find("InstructionsButton").gameObject;
+            Button button = InstructionsButtonGO.AddComponent<Button>();
+            button.onClick.AddListener(ToggleInstructions);
+
+            InstructionsGO = HumanStartPanelGO.transform.Find("Instructions").gameObject;
+            InstructionsGO.GetComponentInChildren<Text>().text = TaskInstructionsDict[taskName];
+            InstructionsGO.SetActive(false);
+            InstructionsOn = false;
+
+            HumanStartPanelGO.SetActive(false);
+            HumanPanelOn = false;
+        }
+
+
+        public void ToggleInstructions() //Used by Subject/Player to toggle Instructions
+        {
+            InstructionsGO.SetActive(InstructionsGO.activeInHierarchy ? false : true);
+            InstructionsOn = InstructionsGO.activeInHierarchy ? true : false;
+            EventCodeManager.SendCodeImmediate(SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
+
+        }
+
+
+        public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
+        {
+            if (setActiveOnInit != null)
+            {
+                SetActiveOnInitialization = setActiveOnInit;
+                SetActiveOnInitialization.StateInitializationFinished += ActivateOnStateInit;
+            }
+            if (setInactiveOnTerm != null)
+            {
+                SetInactiveOnTermination = setInactiveOnTerm;
+                SetInactiveOnTermination.StateTerminationFinished += InactivateOnStateTerm;
+            }
+        }
+
+        private void ActivateOnStateInit(object sender, EventArgs e)
+        {
+            HumanStartPanelGO.SetActive(true);
+        }
+
+        private void InactivateOnStateTerm(object sender, EventArgs e)
+        {
+            HumanStartPanelGO.SetActive(false);
+        }
+
+
+
+    }
+
+
     public class USE_StartButton : MonoBehaviour
 	{
 		public GameObject StartButtonGO;
@@ -19,48 +135,15 @@ namespace USE_UI
         public Vector3 LocalPosition = new Vector3(0, 0, 0);
         private Color32 originalColor;
         private Sprite originalSprite;
-
         public bool IsGrating = false;
 
         public State SetActiveOnInitialization;
         public State SetInactiveOnTermination;
 
+
         //--------------------------Constructors----------------------------
-        public USE_StartButton(Canvas parent, string name)
-		{
-			StartButtonGO = new GameObject(name);
-			Image = StartButtonGO.AddComponent<Image>();
-            StartButtonGO.transform.SetParent(parent.transform, false);
-            Image.rectTransform.anchoredPosition = Vector2.zero;
-            Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
-			Image.color = ButtonColor;
-            StartButtonGO.transform.localPosition = LocalPosition;
-            StartButtonGO.SetActive(false);
-        }
-        public USE_StartButton(Canvas parent, Vector3 localPos)
-        {
-            LocalPosition = localPos;
-            StartButtonGO = new GameObject("StartButton");
-            Image = StartButtonGO.AddComponent<Image>();
-            StartButtonGO.transform.SetParent(parent.transform, false);
-            Image.rectTransform.anchoredPosition = Vector2.zero;
-            Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
-            Image.color = ButtonColor;
-            StartButtonGO.transform.localPosition = LocalPosition;
-            StartButtonGO.SetActive(false);
-        }
-        public USE_StartButton(Canvas parent, float size)
-        {
-            ButtonSize = size;
-            StartButtonGO = new GameObject("StartButton");
-            Image = StartButtonGO.AddComponent<Image>();
-            StartButtonGO.transform.SetParent(parent.transform, false);
-            Image.rectTransform.anchoredPosition = Vector2.zero;
-            Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
-            Image.color = ButtonColor;
-            StartButtonGO.transform.localPosition = LocalPosition;
-            StartButtonGO.SetActive(false);
-        }
+
+        //Main Constructor:
         public USE_StartButton(Canvas parent, Vector3 localPos, float size)
         {
             LocalPosition = localPos;
@@ -71,6 +154,20 @@ namespace USE_UI
             Image.rectTransform.anchoredPosition = Vector2.zero;
             Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
             Image.color = ButtonColor;
+            StartButtonGO.transform.localPosition = LocalPosition;
+            StartButtonGO.SetActive(false);
+
+        }
+
+        //Used by THR:
+        public USE_StartButton(Canvas parent, string name)
+		{
+			StartButtonGO = new GameObject(name);
+			Image = StartButtonGO.AddComponent<Image>();
+            StartButtonGO.transform.SetParent(parent.transform, false);
+            Image.rectTransform.anchoredPosition = Vector2.zero;
+            Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
+			Image.color = ButtonColor;
             StartButtonGO.transform.localPosition = LocalPosition;
             StartButtonGO.SetActive(false);
         }
@@ -179,76 +276,6 @@ namespace USE_UI
     }
 
 
-    public class USE_Instructions : MonoBehaviour
-    {
-        public static GameObject InstructionsGO;
-        public static GameObject InstructionsButtonGO;
-        public Button button;
-
-        public static bool InstructionsOn;
-        public static bool InstructionsButtonOn;
-
-        [HideInInspector] public static EventCodeManager EventCodeManager;
-        [HideInInspector] public static Dictionary<string, EventCode> SessionEventCodes;
-
-        public Dictionary<string, string> TaskInstructionsDict = new Dictionary<string, string>()
-        {
-            { "ContinuousRecognition", "Each trial, objects are displayed and you must choose an object you haven't chosen in a previous trial." },
-            { "EffortControl", "Choose a balloon to inflate. Inflate the balloon by clicking the required number of times. Pop the balloon for your reward!"},
-            { "FlexLearning", "Learn the visual feature that provides the most reward!"},
-            { "MazeGame", "Find your way to the end of the Maze to earn your reward!" },
-            { "THR", "Touch and hold the square for the correct duration to earn your reward!" },
-            { "VisualSearch", "Find the targeted object to earn your reward!" },
-            { "WhatWhenWhere", "Select the objects in the correct sequence to earn your reward!" },
-            { "WorkingMemory", "Remember and identify the target object to earn your reward!" }
-        };
-
-        //Instantiated by the TaskLevel
-        public USE_Instructions(DataController frameData, EventCodeManager eventCodeManager, Dictionary<string, EventCode> sessionEventCodes)
-        {
-            SessionEventCodes = sessionEventCodes;
-            EventCodeManager = eventCodeManager;
-
-            frameData.AddDatum("InstructionsOn", () => InstructionsOn.ToString());
-            frameData.AddDatum("InstructionsButtonOn", () => InstructionsButtonOn.ToString());
-        }
-
-        //Creates the 1)InstructionsGO and the 2)InstructionsButtonGO
-        public void CreateInstructions(GameObject instructionsPrefab, GameObject buttonPrefab, Canvas parent, string taskName)
-        {
-            InstructionsGO = Instantiate(instructionsPrefab, parent.transform);
-            InstructionsGO.name = taskName + "_Instructions";
-            InstructionsGO.GetComponentInChildren<Text>().text = TaskInstructionsDict[taskName];
-            InstructionsGO.SetActive(false);
-            InstructionsOn = false;
-
-            InstructionsButtonGO = Instantiate(buttonPrefab, parent.transform);
-            InstructionsButtonGO.name = taskName + "_InstructionsButton";
-            button = InstructionsButtonGO.GetComponent<Button>();
-            button.onClick.AddListener(ToggleInstructions);
-            InstructionsButtonOn = true;
-            EventCodeManager.SendCodeImmediate(SessionEventCodes["InstructionsButtonOn"]);
-        }
-
-        public static void ToggleInstructions() //Used by Subject/Player to toggle Instructions
-        {
-            InstructionsGO.SetActive(InstructionsGO.activeInHierarchy ? false : true);
-            InstructionsOn = InstructionsGO.activeInHierarchy ? true : false;
-            EventCodeManager.SendCodeImmediate(SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
-
-        }
-
-        public static void ToggleInstructionsButton() //Used by hotkeypanel to toggle Button
-        {
-            InstructionsButtonGO.SetActive(InstructionsButtonGO.activeInHierarchy ? false : true);
-            InstructionsButtonOn = InstructionsButtonGO.activeInHierarchy ? true : false;
-            EventCodeManager.SendCodeImmediate(SessionEventCodes[InstructionsButtonGO.activeInHierarchy ? "InstructionsButtonOn" : "InstructionsButtonOff"]);
-
-            //If deactivating instructions button, deactivate the intructions too
-            if (!InstructionsButtonGO.activeInHierarchy && InstructionsGO.activeInHierarchy) 
-                InstructionsGO.SetActive(false);
-        }
-    }
 
     public class USE_Circle : MonoBehaviour
     {
@@ -308,3 +335,35 @@ namespace USE_UI
 }
 
 
+
+
+
+
+
+//Unused constructors:
+
+//public USE_StartButton(Canvas parent, Vector3 localPos)
+//{
+//    LocalPosition = localPos;
+//    StartButtonGO = new GameObject("StartButton");
+//    Image = StartButtonGO.AddComponent<Image>();
+//    StartButtonGO.transform.SetParent(parent.transform, false);
+//    Image.rectTransform.anchoredPosition = Vector2.zero;
+//    Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
+//    Image.color = ButtonColor;
+//    StartButtonGO.transform.localPosition = LocalPosition;
+//    StartButtonGO.SetActive(false);
+//}
+
+//public USE_StartButton(Canvas parent, float size)
+//{
+//    ButtonSize = size;
+//    StartButtonGO = new GameObject("StartButton");
+//    Image = StartButtonGO.AddComponent<Image>();
+//    StartButtonGO.transform.SetParent(parent.transform, false);
+//    Image.rectTransform.anchoredPosition = Vector2.zero;
+//    Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
+//    Image.color = ButtonColor;
+//    StartButtonGO.transform.localPosition = LocalPosition;
+//    StartButtonGO.SetActive(false);
+//}

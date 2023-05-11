@@ -110,9 +110,17 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
             if(StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(WM_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                StartButton = USE_StartButton.StartButtonGO;
-                USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                if (IsHuman)
+                {
+                    StartButton = HumanStartPanel.StartButtonGO;
+                    HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
+                else
+                {
+                    USE_StartButton = new USE_StartButton(WM_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                    StartButton = USE_StartButton.StartButtonGO;
+                    USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
             }
                         
             if (!configUIVariablesLoaded) LoadConfigUIVariables();
@@ -144,15 +152,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
 
-            if (IsHuman && !USE_Instructions.InstructionsButtonGO.activeInHierarchy)
-                USE_Instructions.InstructionsButtonGO.SetActive(true);
         });
 
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), DisplaySample, () =>
         {
-            if (IsHuman && USE_Instructions.InstructionsButtonGO.activeInHierarchy)
-                USE_Instructions.InstructionsButtonGO.SetActive(false);
-
             //Set the token bar settings
             TokenFBController.enabled = true;
             TokenFBController

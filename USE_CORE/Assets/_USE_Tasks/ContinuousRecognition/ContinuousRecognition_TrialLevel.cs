@@ -115,9 +115,20 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
-                StartButton = USE_StartButton.StartButtonGO;
-                USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                if (IsHuman)
+                {
+                    if (HumanStartPanel == null)
+                        Debug.Log("HUMAN START PANEL IS NULL!");
+                    StartButton = HumanStartPanel.StartButtonGO;
+                    HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
+                else
+                {
+                    USE_StartButton = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                    StartButton = USE_StartButton.StartButtonGO;
+                    USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
+
             }
             #if (!UNITY_WEBGL)
                 playerViewParent = GameObject.Find("MainCameraCopy").transform;
@@ -173,17 +184,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
 
-            if (IsHuman && !USE_Instructions.InstructionsButtonGO.activeInHierarchy)
-                USE_Instructions.InstructionsButtonGO.SetActive(true);
         });
+
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
             if (IsHuman)
             {
-                if (USE_Instructions.InstructionsButtonGO.activeInHierarchy)
-                    USE_Instructions.InstructionsButtonGO.SetActive(false);
-
                 CR_CanvasGO.SetActive(true);
                 SetScoreAndTrialsText();
                 ScoreTextGO.SetActive(true);

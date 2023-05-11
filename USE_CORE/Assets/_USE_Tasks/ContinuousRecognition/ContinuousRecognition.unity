@@ -1103,6 +1103,7 @@ MonoBehaviour:
   ParticipantDistance_CM: 0
   ShotgunRaycastCircleSize_DVA: 0
   UseDefaultConfigs: 0
+  IsHuman: 0
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
@@ -1123,7 +1124,6 @@ MonoBehaviour:
     type: 3}
   Starfield: {fileID: 307568974}
   BorderPrefabList: []
-  IsHuman: 0
   CompletedAllTrials: 0
   EndBlock: 0
   StimIsChosen: 0

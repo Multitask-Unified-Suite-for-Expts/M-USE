@@ -260,13 +260,13 @@
 		"Value": 76,
 		"Description": "Instructions Off"
 	},
-	"InstructionsButtonOn": {
+	"HumanStartPanelOn": {
 		"Value": 77,
-		"Description": "Instructions On"
+		"Description": "HumanStartPanel On"
 	},
-	"InstructionsButtonOff": {
+	"HumanStartPanelOff": {
 		"Value": 78,
-		"Description": "Instructions Off"
+		"Description": "HumanStartPanel Off"
 	},
 	"SetupTaskStarts": {
 		"Range": [ 101, 130 ],

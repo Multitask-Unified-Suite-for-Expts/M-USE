@@ -26,7 +26,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     public Vector3 OriginalStartButtonPosition;
 
     public GameObject EC_CanvasGO;
-    public USE_StartButton StartButtonClassInstance;
+    public USE_StartButton USE_StartButton;
 
     [HideInInspector] public bool MacMainDisplayBuild;
 
@@ -130,11 +130,21 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if(AudioFBController != null)
                 InflateClipDuration = AudioFBController.GetClip("EC_Inflate").length;
-            
+
+
             if (StartButton == null)
             {
-                StartButtonClassInstance = new USE_StartButton(EC_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
-                StartButton = StartButtonClassInstance.StartButtonGO;
+                if (IsHuman)
+                {
+                    StartButton = HumanStartPanel.StartButtonGO;
+                    HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
+                else
+                {
+                    USE_StartButton = new USE_StartButton(EC_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                    StartButton = USE_StartButton.StartButtonGO;
+                    USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
             }
 
             if (!ObjectsCreated)
@@ -183,15 +193,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 Handler.ClearSelections();
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
-
-            if (IsHuman && !USE_Instructions.InstructionsButtonGO.activeInHierarchy)
-                USE_Instructions.InstructionsButtonGO.SetActive(true);
         });
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton), Delay, () =>
         {
-            if (IsHuman && USE_Instructions.InstructionsButtonGO.activeInHierarchy)
-                USE_Instructions.InstructionsButtonGO.SetActive(false);
-
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
             StartButton.SetActive(false);

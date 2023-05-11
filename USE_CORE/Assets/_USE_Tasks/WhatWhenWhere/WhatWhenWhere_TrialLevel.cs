@@ -180,9 +180,17 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.SetHaloIntensity(2);
             if (StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                StartButton = USE_StartButton.StartButtonGO;
-                USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                if (IsHuman)
+                {
+                    StartButton = HumanStartPanel.StartButtonGO;
+                    HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
+                else
+                {
+                    USE_StartButton = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                    StartButton = USE_StartButton.StartButtonGO;
+                    USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
             }
             #if (!UNITY_WEBGL)
                 playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
@@ -225,14 +233,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
 
-            if (IsHuman && !USE_Instructions.InstructionsButtonGO.activeInHierarchy)
-                USE_Instructions.InstructionsButtonGO.SetActive(true);
         });
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), ChooseStimulusDelay, ()=>
         {
-            if (IsHuman && USE_Instructions.InstructionsButtonGO.activeInHierarchy)
-                USE_Instructions.InstructionsButtonGO.SetActive(false);
-
             CalculateSliderSteps();
             SliderFBController.ConfigureSlider(new Vector3(0,180,0), sliderSize.value, CurrentTrialDef.SliderInitial*(1f/sliderGainSteps));
             SliderFBController.SliderGO.SetActive(true);

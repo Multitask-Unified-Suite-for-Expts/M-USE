@@ -383,17 +383,17 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             HotKeyList.Add(longReward);
 
             //InstructionsButton visibility HotKey:
-            HotKey instructionsButton = new HotKey
-            {
-                keyDescription = "I",
-                actionName = "InstructionsButton",
-                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.I),
-                hotKeyAction = () =>
-                {
-                    USE_Instructions.ToggleInstructions();
-                }
-            };
-            HotKeyList.Add(instructionsButton);
+            //HotKey instructionsButton = new HotKey
+            //{
+            //    keyDescription = "I",
+            //    actionName = "InstructionsButton",
+            //    hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.I),
+            //    hotKeyAction = () =>
+            //    {
+            //        USE_Instructions.ToggleInstructions();
+            //    }
+            //};
+            //HotKeyList.Add(instructionsButton);
 
             return (HotKeyList);
         }

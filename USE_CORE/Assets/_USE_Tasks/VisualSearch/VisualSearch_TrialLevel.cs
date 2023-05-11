@@ -120,9 +120,17 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
             if(StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(VS_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                StartButton = USE_StartButton.StartButtonGO;
-                USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                if (IsHuman)
+                {
+                    StartButton = HumanStartPanel.StartButtonGO;
+                    HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
+                else
+                {
+                    USE_StartButton = new USE_StartButton(VS_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                    StartButton = USE_StartButton.StartButtonGO;
+                    USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
             }
             
             if (!configUIVariablesLoaded) 
@@ -161,16 +169,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
-
-            if (IsHuman && !USE_Instructions.InstructionsButtonGO.activeInHierarchy)
-                USE_Instructions.InstructionsButtonGO.SetActive(true);
         });
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton),
             SearchDisplayDelay, () => 
             {
-                if (IsHuman && USE_Instructions.InstructionsButtonGO.activeInHierarchy)
-                    USE_Instructions.InstructionsButtonGO.SetActive(false);
-
                 choiceMade = false;
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
             });

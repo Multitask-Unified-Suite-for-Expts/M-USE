@@ -82,6 +82,7 @@ namespace USE_ExperimentTemplate_Trial
         public bool UseDefaultConfigs;
 
         public bool IsHuman;
+        public HumanStartPanel HumanStartPanel;
 
 
         // Texture Variables

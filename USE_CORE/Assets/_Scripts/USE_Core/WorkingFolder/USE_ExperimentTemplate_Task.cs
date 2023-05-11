@@ -106,10 +106,7 @@ namespace USE_ExperimentTemplate_Task
 
         public bool IsHuman;
 
-
-        public GameObject InstructionsButtonPrefab;
-        public GameObject InstructionsPrefab;
-        public USE_Instructions USE_Instructions;
+        public HumanStartPanel HumanStartPanel;
 
 
         public virtual void SpecifyTypes()
@@ -177,8 +174,13 @@ namespace USE_ExperimentTemplate_Task
                 SetTaskSummaryString();
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTaskStarts"]);
 
+                //Create HumanStartPanel
                 if (IsHuman)
-                    CreateTaskInstructions();
+                {
+                    HumanStartPanel.SetupDataAndCodes(FrameData, EventCodeManager, SessionEventCodes);
+                    Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
+                    HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
+                }
             });
 
             SetupTask.SpecifyTermination(() => true, RunBlock);
@@ -217,9 +219,6 @@ namespace USE_ExperimentTemplate_Task
                         TrialLevel.ForceBlockEnd = true;
                         TrialLevel.SpecifyCurrentState(TrialLevel.GetStateFromName("FinishTrial"));
                     }
-
-                    if (IsHuman && InputBroker.GetKeyUp(KeyCode.I)) //Instructions Button
-                        USE_Instructions.ToggleInstructionsButton();
                 }
             });
         #endif
@@ -525,6 +524,7 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.RuntimeStims = RuntimeStims;
             TrialLevel.ConfigUiVariables = ConfigUiVariables;
             TrialLevel.IsHuman = IsHuman;
+            TrialLevel.HumanStartPanel = HumanStartPanel;
 
             TrialLevel.DefineTrialLevel();
         }
@@ -1059,11 +1059,9 @@ namespace USE_ExperimentTemplate_Task
         }
 
 
-        public void CreateTaskInstructions()
+        private void CreateHumanStartPanel()
         {
-            Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
-            USE_Instructions = new USE_Instructions(FrameData, EventCodeManager, SessionEventCodes);
-            USE_Instructions.CreateInstructions(InstructionsPrefab, InstructionsButtonPrefab, taskCanvas, TaskName);
+
         }
 
     }

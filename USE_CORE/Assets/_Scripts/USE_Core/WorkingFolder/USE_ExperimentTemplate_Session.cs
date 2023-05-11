@@ -10,6 +10,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using USE_UI;
 using USE_States;
 using USE_Settings;
 using USE_ExperimenterDisplay;
@@ -96,14 +97,22 @@ namespace USE_ExperimentTemplate_Session
         public GameObject TaskButtons;
 
         //Set in inspector
-        public GameObject InstructionsButtonPrefab;
         public GameObject InstructionsPrefab;
         public GameObject TaskSelection_Starfield;
         public GameObject TaskSelection_Header;
         public GameObject HumanVersionToggleButton;
+        public GameObject HumanStartPanelPrefab;
+
+        public GameObject TaskSelectionCanvasGO;
+
+        public HumanStartPanel HumanStartPanel;
+
 
         public override void LoadSettings()
         {
+            HumanStartPanel = gameObject.AddComponent<HumanStartPanel>();
+            HumanStartPanel.HumanStartPanelPrefab = HumanStartPanelPrefab;
+
             //If using default configs, read in the default Session/EventCode/Display Configs and write them to persistant data path:
             if (UseDefaultConfigs)
             {
@@ -434,9 +443,11 @@ namespace USE_ExperimentTemplate_Session
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
-                #if (UNITY_WEBGL)
-                    TaskSelection_Starfield.SetActive(true);
-                #else
+                TaskSelectionCanvasGO.SetActive(true);
+
+                TaskSelection_Starfield.SetActive(IsHuman ? true : false);
+
+                #if (!UNITY_WEBGL)
                     if (DisplayController.SwitchDisplays) //SwitchDisplay stuff doesnt full work yet!
                     {
                         SessionCam.targetDisplay = 1;
@@ -457,7 +468,7 @@ namespace USE_ExperimentTemplate_Session
                         SessionCam.targetTexture = CameraMirrorTexture;
                         mainCameraCopy_Image.texture = CameraMirrorTexture;
                     }
-                #endif
+                            #endif
 
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SelectTaskStarts"]);
 
@@ -534,9 +545,8 @@ namespace USE_ExperimentTemplate_Session
                 float buttonStartX = (buttonSize - buttonsWidth) / 2;
 
                 float buttonY = 0f;
-                #if (UNITY_WEBGL)
+                if(IsHuman)
                     buttonY = -100f;
-                #endif
 
                 if(TaskIconLocations.Count() != numTasks) //If user didn't specify in config, Generate default locations:
                 {
@@ -547,7 +557,7 @@ namespace USE_ExperimentTemplate_Session
                         buttonStartX += buttonSize + buttonSpacing;
                     }
                 }
-                TaskButtons.transform.localScale *= 1.09f;
+                TaskButtons.transform.localScale *= 1.06f;
 
                 int count = 0;
                 foreach (DictionaryEntry task in TaskMappings)
@@ -609,12 +619,13 @@ namespace USE_ExperimentTemplate_Session
                     count++;
                 }
 
-                #if(UNITY_WEBGL)
+                if(IsHuman)
+                {
                     TaskSelection_Header.SetActive(true);
                     HumanVersionToggleButton.SetActive(true);
                     if (Application.isEditor)
                         TaskSelection_Header.transform.localPosition = new Vector3(TaskSelection_Header.transform.localPosition.x, TaskSelection_Header.transform.localPosition.y  + 50f, TaskSelection_Header.transform.localPosition.z);
-                #endif
+                }
             });
             
             selectTask.AddFixedUpdateMethod(() =>
@@ -630,6 +641,7 @@ namespace USE_ExperimentTemplate_Session
             selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask);
             selectTask.AddDefaultTerminationMethod(() =>
             {
+                TaskSelectionCanvasGO.SetActive(false);
                 TaskSelection_Starfield.SetActive(false);
             });
 
@@ -916,8 +928,7 @@ namespace USE_ExperimentTemplate_Session
 
         ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
-            tl.InstructionsButtonPrefab = InstructionsButtonPrefab;
-            tl.InstructionsPrefab = InstructionsPrefab;
+            tl.HumanStartPanel = HumanStartPanel;
             tl.IsHuman = IsHuman;
             tl.DisplayController = DisplayController;
             tl.SessionDataControllers = SessionDataControllers;

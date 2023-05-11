@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641275, b: 0.5748172, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657815, g: 0.49641192, b: 0.57481617, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -276,6 +276,7 @@ MonoBehaviour:
   ExperimenterDisplayController: {fileID: 0}
   SessionInfoPanel: {fileID: 0}
   TrialCompleteTime: 0
+  TouchFBController: {fileID: 0}
   AudioFBController: {fileID: 0}
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
@@ -286,10 +287,130 @@ MonoBehaviour:
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   InitialTokenAmount: 0
+  ShotgunRaycastSpacing_DVA: 0
+  ParticipantDistance_CM: 0
+  ShotgunRaycastCircleSize_DVA: 0
+  UseDefaultConfigs: 0
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
   THR_BackdropTexture: {fileID: 0}
+  USE_StartButton: {fileID: 0}
+  USE_FBSquare: {fileID: 0}
+  runningAcc: 
+  MinTrials: 0
+  MaxTrials: 0
+  MinUncertainTrials: 0
+  MaxUncertainTrials: 0
+  minObjectTouchDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  maxObjectTouchDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  gratingSquareDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  tokenRevealDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  tokenUpdateDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  tokenFlashingDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  selectObjectDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  selectionFbDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  displaySampleDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  postSampleDelayDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  itiDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  ContextExternalFilePath: 
+  StartButtonPosition: {x: 0, y: 0, z: 0}
+  StartButtonScale: 0
+  StimFacingCamera: 0
+  ShadowType: 
+  NeutralITI: 0
+  playerViewTextList: []
+  playerViewText: {fileID: 0}
+  ContextName: 
+  NumCorrect_InBlock: 0
+  SearchDurations_InBlock: []
+  NumErrors_InBlock: 0
+  NumRewardPulses_InBlock: 0
+  NumTokenBarFull_InBlock: 0
+  TotalTokensCollected_InBlock: 0
+  Accuracy_InBlock: 0
+  AverageSearchDuration_InBlock: 0
+  NumAborted_InBlock: 0
+  TouchFeedbackDuration: 0
+  MacMainDisplayBuild: 0
+  AdjustedPositionsForMac: 0
 --- !u!114 &273835037
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -310,6 +431,10 @@ MonoBehaviour:
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
+  ShotgunRaycastCircleSize_DVA: 0
+  ShotgunRaycastSpacing_DVA: 0
+  ParticipantDistance_CM: 0
+  PrefabPath: 
   ConfigName: 
   TaskName: FeatureUncertaintyWM
   TaskProjectFolder: 
@@ -323,6 +448,7 @@ MonoBehaviour:
   EventCodesActive: 0
   RewardPulsesActive: 0
   SonicationActive: 0
+  UseDefaultConfigs: 0
   ContextExternalFilePath: 
   SessionDataPath: 
   TaskConfigPath: 
@@ -354,6 +480,15 @@ MonoBehaviour:
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
+  NumCorrect_InTask: 0
+  SearchDurations_InTask: []
+  NumErrors_InTask: 0
+  NumRewardPulses_InTask: 0
+  NumTokenBarFull_InTask: 0
+  TotalTokensCollected_InTask: 0
+  Accuracy_InTask: 0
+  AverageSearchDuration_InTask: 0
+  NumAborted_InTask: 0
 --- !u!4 &273835038
 Transform:
   m_ObjectHideFlags: 0
@@ -437,7 +572,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 1
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 26745622}
   m_PlaneDistance: 1
   m_PixelPerfect: 0
   m_ReceivesEvents: 1

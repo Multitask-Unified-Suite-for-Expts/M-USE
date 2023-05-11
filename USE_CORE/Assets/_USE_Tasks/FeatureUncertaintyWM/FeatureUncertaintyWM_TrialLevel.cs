@@ -115,7 +115,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
         playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
         playerViewText = new GameObject();
-
+        taskCanvas = GameObject.Find("FeatureUncertaintyWM_Canvas");
 
         Add_ControlLevel_InitializationMethod(() =>
 	        {
@@ -123,7 +123,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 		        FeatureUncertaintyWM_BlockDef bDef = TaskLevel.GetCurrentBlockDef<FeatureUncertaintyWM_BlockDef>();
 		        //load stimuli from file used for component stims
 		        //set them inactive
-		        taskCanvas = GameObject.Find("FeatureUncertaintyWM_Canvas");
+		        
 
 		        mcCompStimIndices = bDef.blockMcCompStimIndices;
 
@@ -449,6 +449,7 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
 
         GameObject mcCompPanel = new GameObject("multiCompPanel");
         mcCompPanel.AddComponent<CanvasRenderer>();
+        mcCompPanel.AddComponent<RectTransform>();
         mcCompPanel.GetComponent<RectTransform>().SetParent(taskCanvas.GetComponent<RectTransform>());
 
 

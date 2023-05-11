@@ -86,7 +86,7 @@ namespace FeatureUncertaintyWM_Namespace
         public int numMcStim;
         public Vector3[] mcStimLocations, sampleCompLocations;
         public int[] mcNumCircles, mcTotalObjectCount, sampleCompIndices;
-        public TokenReward[][] mcStimTokenReward;
+        public Reward[][] mcStimTokenReward;
         public int[][]  mcCompObjNumber, mcCompObjIndices, mcAngleOffset;
         //mcCompObjIndices= {{57, 10, 23}, {48}}
         public float[][] mcRadius;

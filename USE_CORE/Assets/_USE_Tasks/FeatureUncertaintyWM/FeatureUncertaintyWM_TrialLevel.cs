@@ -356,7 +356,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName));
+                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName), true);
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOff"]);
             }
 
@@ -646,11 +646,11 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
 
         // multiCompStims.SetLocations(CurrentTrialDef.multiCompStimLocations);
         for (int iStim = 0; iStim < CurrentTrialDef.sampleCompIndices.Length; iStim++)
-        { 
-        FeatureUncertaintyWM_StimDef sdSample = (FeatureUncertaintyWM_StimDef)sampleComp.stimDefs[iStim];
-        sampleComp.AddStims(sdSample);
+        {
+            FeatureUncertaintyWM_StimDef sdSample = (FeatureUncertaintyWM_StimDef) sampleComp.stimDefs[iStim];
+            sampleComp.AddStims(sdSample);
         }
-        
+
 
         for (int iStim = 0; iStim < CurrentTrialDef.numMcStim; iStim++)
         {
@@ -661,7 +661,7 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
             sd.totalObjectCount = CurrentTrialDef.mcTotalObjectCount[iStim];
             sd.numCircles = CurrentTrialDef.mcNumCircles[iStim];
             sd.radius = CurrentTrialDef.mcRadius[iStim];
-            sd.StimTrialRewardMag = ChooseTokenReward(CurrentTrialDef.mcStimTokenReward[iStim]);
+            sd.StimTrialRewardMag = chooseReward(CurrentTrialDef.mcStimTokenReward[iStim]);
             if (sd.StimTrialRewardMag > 0)
             {
 

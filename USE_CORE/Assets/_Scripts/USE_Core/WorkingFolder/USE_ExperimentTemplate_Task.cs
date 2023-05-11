@@ -526,8 +526,6 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.ConfigUiVariables = ConfigUiVariables;
             TrialLevel.IsHuman = IsHuman;
 
-            Debug.Log("IS HUMAN WHEN PASSING TO TRIAL LEVEL: " + IsHuman);
-
             TrialLevel.DefineTrialLevel();
         }
 

@@ -380,6 +380,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         else
             tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"),GetStateFromName("SelectionFeedback"));
         TrialStims.Add(tStim);
+
         for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
             FlexLearning_StimDef sd = (FlexLearning_StimDef)tStim.stimDefs[i];

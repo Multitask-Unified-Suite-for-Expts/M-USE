@@ -1,3 +1,4 @@
 BlockName	BlockCount	ContextName	MinMaxTrials	NumTokenBar	NumInitialTokens	PulseReward	PulseSize	BlockEndType	BlockEndWindow	BlockEndThreshold
-NNNew.g3l3	1	004_015_010_001_4	[5, 7]	8	0	[{"NumReward":4,"Probability":0.8}, {"NumReward":1, "Probability":0.2}]	250	SimpleThreshold	5	0.8
-NNNew.g3l3	2	004_015_010_001_3	[5, 7]	8	0	[{"NumReward":4,"Probability":0.8}, {"NumReward":1, "Probability":0.2}]	250	SimpleThreshold	5	0.8
+ NNNew.4	1	004_015_010_001_4	[5, 5]	8	0	[{"NumReward":3,"Probability":1.0}]	250	SimpleThreshold	5	0.8
+ IDSame.1	2	004_015_010_001_3	[5, 5]	8	0	[{"NumReward":3,"Probability":1.0}]	250	SimpleThreshold	5	0.8
+ EDSame.2	3	004_015_010_001_4	[5, 5]	8	0	[{"NumReward":3,"Probability":1.0}]	250	SimpleThreshold	5	0.8

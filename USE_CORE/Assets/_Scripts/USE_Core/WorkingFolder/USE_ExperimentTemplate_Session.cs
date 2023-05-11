@@ -612,10 +612,8 @@ namespace USE_ExperimentTemplate_Session
                 #if(UNITY_WEBGL)
                     TaskSelection_Header.SetActive(true);
                     HumanVersionToggleButton.SetActive(true);
-                    Debug.Log(TaskSelection_Header.transform.localPosition);
                     if (Application.isEditor)
                         TaskSelection_Header.transform.localPosition = new Vector3(TaskSelection_Header.transform.localPosition.x, TaskSelection_Header.transform.localPosition.y  + 50f, TaskSelection_Header.transform.localPosition.z);
-                    Debug.Log(TaskSelection_Header.transform.localPosition);
                 #endif
             });
             
@@ -839,6 +837,8 @@ namespace USE_ExperimentTemplate_Session
 
         public void HandleHumanVersionToggleButtonClick()
         {
+            IsHuman = !IsHuman;
+
             //Change text on button:
             HumanVersionToggleButton.GetComponentInChildren<TextMeshProUGUI>().text = IsHuman ? "Human Version" : "Monkey Version";
             //Toggle Header:
@@ -846,10 +846,8 @@ namespace USE_ExperimentTemplate_Session
             //Toggle Starfield:
             TaskSelection_Starfield.SetActive(TaskSelection_Starfield.activeInHierarchy ? false : true);
             //push task buttons up to 0 Y for humans, or back to -100 Y for monkeys
-            TaskButtons.transform.localPosition = new Vector3(TaskButtons.transform.localPosition.x, TaskButtons.transform.localPosition.y + (IsHuman ? 100f : -100f), TaskButtons.transform.localPosition.z);
+            TaskButtons.transform.localPosition = new Vector3(TaskButtons.transform.localPosition.x, TaskButtons.transform.localPosition.y + (IsHuman ? -100f : 100f), TaskButtons.transform.localPosition.z);
 
-            IsHuman = !IsHuman;
-            Debug.Log("ISHUMAN? : " + IsHuman);
         }
 
         private void AppendSerialData()
@@ -918,8 +916,6 @@ namespace USE_ExperimentTemplate_Session
 
         ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
-            Debug.Log("ISHUMAN WHEN PASSING TO TASK LEVEL: " + IsHuman);
-
             tl.InstructionsButtonPrefab = InstructionsButtonPrefab;
             tl.InstructionsPrefab = InstructionsPrefab;
             tl.IsHuman = IsHuman;

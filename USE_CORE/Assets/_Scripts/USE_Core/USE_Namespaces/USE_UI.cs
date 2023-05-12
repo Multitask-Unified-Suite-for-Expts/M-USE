@@ -18,11 +18,16 @@ namespace USE_UI
         public GameObject StartButtonGO;
         public GameObject InstructionsButtonGO;
         public GameObject InstructionsGO;
+        public GameObject TitleTextGO;
+        public GameObject HumanBackgroundGO;
+        public GameObject BackgroundPanelGO;
 
         public GameObject HumanStartPanelPrefab;
 
         public bool HumanPanelOn;
         public bool InstructionsOn;
+
+        public Vector3 InitialStartButtonPosition;
 
         public Dictionary<string, string> TaskInstructionsDict = new Dictionary<string, string>()
         {
@@ -40,7 +45,7 @@ namespace USE_UI
             { "ContinuousRecognition", "Continuous Recognition" },
             { "THR", "Touch Hold Release" },
             { "EffortControl", "Effort Control" },
-            { "FlexLearning", "Flex Learning" },
+            { "FlexLearning", "Flexible Learning" },
             { "MazeGame", "Maze Game" },
             { "VisualSearch", "Visual Search" },
             { "WhatWhenWhere", "What When Where" },
@@ -71,8 +76,13 @@ namespace USE_UI
             HumanStartPanelGO.name = taskName + "_HumanPanel";
             HumanStartPanelGO.transform.SetParent(parent.transform, false);
 
-            HumanStartPanelGO.transform.Find("TitleText").gameObject.GetComponent<TextMeshProUGUI>().text = TaskNamesDict[taskName];
+            TitleTextGO = HumanStartPanelGO.transform.Find("TitleText").gameObject;
+            TitleTextGO.GetComponent<TextMeshProUGUI>().text = TaskNamesDict[taskName];
+
             StartButtonGO = HumanStartPanelGO.transform.Find("StartButton").gameObject;
+            InitialStartButtonPosition = StartButtonGO.transform.localPosition;
+            HumanBackgroundGO = HumanStartPanelGO.transform.Find("HumanBackground").gameObject;
+            BackgroundPanelGO = HumanStartPanelGO.transform.Find("BackgroundPanel").gameObject;
 
             InstructionsButtonGO = HumanStartPanelGO.transform.Find("InstructionsButton").gameObject;
             Button button = InstructionsButtonGO.AddComponent<Button>();
@@ -90,14 +100,47 @@ namespace USE_UI
 
         public void ToggleInstructions() //Used by Subject/Player to toggle Instructions
         {
-            InstructionsGO.SetActive(InstructionsGO.activeInHierarchy ? false : true);
-            InstructionsOn = InstructionsGO.activeInHierarchy ? true : false;
-            EventCodeManager.SendCodeImmediate(SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
+            InstructionsGO.SetActive(InstructionsGO.activeSelf ? false : true);
+            InstructionsOn = InstructionsGO.activeSelf ? true : false;
+            EventCodeManager.SendCodeImmediate(SessionEventCodes[InstructionsGO.activeSelf ? "InstructionsOn" : "InstructionsOff"]);
 
         }
 
+        public void AdjustBasedOnTrialNum(int trialNumber)
+        {
+            Debug.Log("TCIB: " + trialNumber);
 
-        public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
+            if (trialNumber == 0)
+            {
+                if (!HumanBackgroundGO.activeSelf)
+                    HumanBackgroundGO.SetActive(true);
+                if (!TitleTextGO.activeSelf)
+                    TitleTextGO.SetActive(true);
+
+                Debug.Log(BackgroundPanelGO.activeInHierarchy ? "ACTIVE IN HIERARCHY!" : "NOT ACTIVE IN HIERARCHY");
+                Debug.Log(BackgroundPanelGO.activeSelf ? "ACTIVE SELF!" : "NOT ACTIVE SELF");
+
+                if (BackgroundPanelGO.activeSelf)
+                {
+                    Debug.Log("SETTING PANEL INACTIVE!");
+                    BackgroundPanelGO.SetActive(false);
+                }
+
+                StartButtonGO.transform.localPosition = InitialStartButtonPosition;
+            }
+
+            if (trialNumber > 0)
+            {
+                BackgroundPanelGO.SetActive(true);
+                HumanBackgroundGO.SetActive(false);
+                TitleTextGO.SetActive(false);
+                StartButtonGO.transform.localPosition = new Vector3(0, 0, 0);
+            }
+        }
+
+
+
+public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
         {
             if (setActiveOnInit != null)
             {

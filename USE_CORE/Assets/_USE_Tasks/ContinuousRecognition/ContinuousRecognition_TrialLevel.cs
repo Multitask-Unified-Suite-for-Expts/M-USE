@@ -117,8 +117,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 if (IsHuman)
                 {
-                    if (HumanStartPanel == null)
-                        Debug.Log("HUMAN START PANEL IS NULL!");
                     StartButton = HumanStartPanel.StartButtonGO;
                     HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
@@ -150,6 +148,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
+            HumanStartPanel.AdjustBasedOnTrialNum(TrialCount_InBlock);
+
             NumFeedbackRows = 0;
 
             if (!VariablesLoaded)
@@ -393,16 +393,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
                     if (CompletedAllTrials)
                     {
-                        YouWinTextGO.transform.localPosition = new Vector3(YouWinTextGO.transform.localPosition.x, YouWinTextGO.transform.localPosition.y - Y_Offset, YouWinTextGO.transform.localPosition.z);
-                        YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"WINNER! \n New HighScore: {Score} xp";
-                        YouWinTextGO.SetActive(true);
+                        //YouWinTextGO.transform.localPosition = new Vector3(YouWinTextGO.transform.localPosition.x, YouWinTextGO.transform.localPosition.y - Y_Offset, YouWinTextGO.transform.localPosition.z);
+                        //YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"WINNER! \n New HighScore: {Score} xp";
+                        //YouWinTextGO.SetActive(true);
                         AudioFBController.Play("CR_BlockCompleted");
                     }
                     else
                     {
-                        YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
-                        YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Game Over \n HighScore: {Score} xp";
-                        YouLoseTextGO.SetActive(true);
+                        //YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
+                        //YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Game Over \n HighScore: {Score} xp";
+                        //YouLoseTextGO.SetActive(true);
                         AudioFBController.Play("CR_BlockFailed");
                         //AudioFBController.Play("CR_SouthParkFail");
                     }

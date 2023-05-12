@@ -137,6 +137,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
+            HumanStartPanel.AdjustBasedOnTrialNum(TrialCount_InBlock);
+
             if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
             {
                 Vector3 biggerScale = TokenFBController.transform.localScale * 2f;

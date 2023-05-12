@@ -624,7 +624,7 @@ namespace USE_ExperimentTemplate_Session
                     TaskSelection_Header.SetActive(true);
                     HumanVersionToggleButton.SetActive(true);
                     if (Application.isEditor)
-                        TaskSelection_Header.transform.localPosition = new Vector3(TaskSelection_Header.transform.localPosition.x, TaskSelection_Header.transform.localPosition.y  + 50f, TaskSelection_Header.transform.localPosition.z);
+                        TaskSelection_Header.transform.localPosition = new Vector3(TaskSelection_Header.transform.localPosition.x, TaskSelection_Header.transform.localPosition.y, TaskSelection_Header.transform.localPosition.z);
                 }
             });
             
@@ -852,7 +852,7 @@ namespace USE_ExperimentTemplate_Session
             IsHuman = !IsHuman;
 
             //Change text on button:
-            HumanVersionToggleButton.GetComponentInChildren<TextMeshProUGUI>().text = IsHuman ? "Human Version" : "Monkey Version";
+            HumanVersionToggleButton.GetComponentInChildren<TextMeshProUGUI>().text = IsHuman ? "Human Version" : "Primate Version";
             //Toggle Header:
             TaskSelection_Header.SetActive(TaskSelection_Header.activeInHierarchy ? false : true);
             //Toggle Starfield:

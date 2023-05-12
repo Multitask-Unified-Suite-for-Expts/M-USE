@@ -222,6 +222,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
+            HumanStartPanel.AdjustBasedOnTrialNum(TrialCount_InBlock);
+
             CurrentTaskLevel.SetBlockSummaryString();
             SetTrialSummaryString();
             if (TrialCount_InTask != 0)

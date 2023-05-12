@@ -28,10 +28,12 @@ namespace USE_UI
         public bool HumanPanelOn;
         public bool InstructionsOn;
 
+        public Vector3 InitialStartButtonPosition;
+
         public Dictionary<string, string> TaskInstructionsDict = new Dictionary<string, string>()
         {
-            { "ContinuousRecognition", "Each trial, objects are displayed and you must choose an object you haven't chosen in a previous trial." },
-            { "EffortControl", "Choose a balloon to inflate. Inflate the balloon by clicking the required number of times. Pop the balloon for your reward!"},
+            { "ContinuousRecognition", "Each trial, several objects will be displayed and you must choose an object you haven't chosen in a previous trial!" },
+            { "EffortControl", "Choose a balloon to inflate based on the effort required (click) and the reward amount (tokens). Pop the balloon by clicking the required number of times!"},
             { "FlexLearning", "Learn the visual feature that provides the most reward!"},
             { "MazeGame", "Find your way to the end of the Maze to earn your reward!" },
             { "THR", "Touch and hold the square for the correct duration to earn your reward!" },
@@ -42,14 +44,26 @@ namespace USE_UI
         public Dictionary<string, string> TaskNamesDict = new Dictionary<string, string>()
         {
             { "ContinuousRecognition", "Continuous Recognition" },
-            { "THR", "Touch Hold Release" },
             { "EffortControl", "Effort Control" },
             { "FlexLearning", "Flexible Learning" },
             { "MazeGame", "Maze Game" },
+            { "THR", "Touch Hold Release" },
             { "VisualSearch", "Visual Search" },
             { "WhatWhenWhere", "What When Where" },
             { "WorkingMemory", "Working Memory" },
 
+        };
+
+        public Dictionary<string, Vector3> Task_HumanBackgroundPos_Dict = new Dictionary<string, Vector3>()
+        {
+            { "ContinuousRecognition", new Vector3(0, 0, 1000f) },
+            { "EffortControl", new Vector3(0, 0, 500f) },
+            { "FlexLearning", new Vector3(0, 0, 1000f) },
+            { "MazeGame", new Vector3(0, 0, 500f) },
+            { "THR",new Vector3(0, 0, 1000f) },
+            { "VisualSearch", new Vector3(0, 0, 1000f) },
+            { "WhatWhenWhere", new Vector3(0, 0, 500f) },
+            { "WorkingMemory", new Vector3(0, 0, 1000f) },
         };
 
         public string TaskName;
@@ -82,8 +96,11 @@ namespace USE_UI
             TitleTextGO.GetComponent<TextMeshProUGUI>().text = TaskName;
 
             StartButtonGO = HumanStartPanelGO.transform.Find("StartButton").gameObject;
+            InitialStartButtonPosition = StartButtonGO.transform.localPosition;
 
             HumanBackgroundGO = HumanStartPanelGO.transform.Find("HumanBackground").gameObject;
+            HumanBackgroundGO.transform.localPosition = Task_HumanBackgroundPos_Dict[taskName];
+
             BackgroundPanelGO = HumanStartPanelGO.transform.Find("BackgroundPanel").gameObject;
 
             InstructionsButtonGO = HumanStartPanelGO.transform.Find("InstructionsButton").gameObject;
@@ -108,9 +125,9 @@ namespace USE_UI
 
         }
 
-        public void AdjustPanelBasedOnTrialNum(int trialCountInBlock)
+        public void AdjustPanelBasedOnTrialNum(int trialCountInTask, int trialCountInBlock)
         {
-            if (trialCountInBlock == 0)
+            if (trialCountInTask == 0) //Show Full Human Panel With BlueBackground
             {
                 if (!HumanBackgroundGO.activeInHierarchy)
                     HumanBackgroundGO.SetActive(true);
@@ -122,13 +139,23 @@ namespace USE_UI
                 if (BackgroundPanelGO.activeSelf)
                     BackgroundPanelGO.SetActive(false);
             }
-            else if (trialCountInBlock > 0)
+            else
             {
                 BackgroundPanelGO.SetActive(true);
                 HumanBackgroundGO.SetActive(false);
-                TitleTextGO.GetComponent<TextMeshProUGUI>().text = "Trial " + (trialCountInBlock + 1);
-            }
 
+                if(trialCountInBlock > 0) //Mid block -show only playbutton and instructions
+                {
+                    TitleTextGO.SetActive(false);
+                    StartButtonGO.transform.localPosition = Vector3.zero;
+                }
+                else if(trialCountInBlock == 0 && trialCountInTask != 0) //"New Game" - show text, playbutton, instructions
+                {
+                    StartButtonGO.transform.localPosition = InitialStartButtonPosition;
+                    TitleTextGO.GetComponent<TextMeshProUGUI>().text = "New Game";
+                    TitleTextGO.SetActive(true);
+                }
+            }
         }
 
 

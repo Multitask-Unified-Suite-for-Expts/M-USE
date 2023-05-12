@@ -1016,9 +1016,7 @@ MonoBehaviour:
   EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
   IsHuman: 0
-  InstructionsButtonPrefab: {fileID: 0}
-  InstructionsPrefab: {fileID: 0}
-  USE_Instructions: {fileID: 0}
+  HumanStartPanel: {fileID: 0}
   TrialsCompleted_Task: 
   TrialsCorrect_Task: 
   AvgNumCorrect: 0
@@ -1104,6 +1102,7 @@ MonoBehaviour:
   ShotgunRaycastCircleSize_DVA: 0
   UseDefaultConfigs: 0
   IsHuman: 0
+  HumanStartPanel: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}

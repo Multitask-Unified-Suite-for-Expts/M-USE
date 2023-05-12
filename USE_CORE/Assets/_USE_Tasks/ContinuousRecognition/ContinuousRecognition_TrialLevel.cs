@@ -148,9 +148,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-            if(IsHuman)
-                HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InBlock);
-
             NumFeedbackRows = 0;
 
             if (!VariablesLoaded)

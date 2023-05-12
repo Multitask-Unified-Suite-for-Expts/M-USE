@@ -415,6 +415,8 @@ MonoBehaviour:
   ParticipantDistance_CM: 0
   ShotgunRaycastCircleSize_DVA: 0
   UseDefaultConfigs: 0
+  IsHuman: 0
+  HumanStartPanel: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
@@ -594,11 +596,7 @@ MonoBehaviour:
   EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
   IsHuman: 0
-  InstructionsButtonPrefab: {fileID: 0}
-  InstructionsPrefab: {fileID: 0}
-  TaskInstructionsButton: {fileID: 0}
-  TaskInstructionsButtonGO: {fileID: 0}
-  TaskInstructionsTextGO: {fileID: 0}
+  HumanStartPanel: {fileID: 0}
   NumRewardPulses_InTask: 0
   NumTokenBarFull_InTask: 0
   TotalTokensCollected_InTask: 0

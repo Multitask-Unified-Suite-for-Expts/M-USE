@@ -308,6 +308,8 @@ MonoBehaviour:
   ParticipantDistance_CM: 0
   ShotgunRaycastCircleSize_DVA: 0
   UseDefaultConfigs: 0
+  IsHuman: 0
+  HumanStartPanel: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
@@ -326,10 +328,9 @@ MonoBehaviour:
   ButtonScale: 0
   OriginalStartButtonPosition: {x: 0, y: 0, z: 0}
   EC_CanvasGO: {fileID: 960539200}
-  StartButtonClassInstance: {fileID: 0}
+  USE_StartButton: {fileID: 0}
   MacMainDisplayBuild: 0
   ContextExternalFilePath: 
-  IsHuman: 0
   Flashing: 0
   ScaleTimer: 0
   AvgClickTime: 0
@@ -491,11 +492,7 @@ MonoBehaviour:
   EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
   IsHuman: 0
-  InstructionsButtonPrefab: {fileID: 0}
-  InstructionsPrefab: {fileID: 0}
-  TaskInstructionsButton: {fileID: 0}
-  TaskInstructionsButtonGO: {fileID: 0}
-  TaskInstructionsTextGO: {fileID: 0}
+  HumanStartPanel: {fileID: 0}
   ContextName: 
   Completions_Task: 0
   RewardPulses_Task: 0

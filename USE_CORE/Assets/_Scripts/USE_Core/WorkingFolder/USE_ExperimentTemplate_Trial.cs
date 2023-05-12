@@ -168,6 +168,12 @@ namespace USE_ExperimentTemplate_Trial
 
                 ResetTrialVariables();
             });
+            SetupTrial.AddDefaultTerminationMethod(() =>
+            {
+                if (IsHuman)
+                    HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
+                
+            });
 
             FinishTrial.AddInitializationMethod(() => EventCodeManager.SendCodeImmediate(SessionEventCodes["FinishTrialStarts"]));
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);

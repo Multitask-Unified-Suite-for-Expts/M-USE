@@ -298,8 +298,8 @@ namespace USE_ExperimentTemplate_Session
 
             //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
             #if (UNITY_WEBGL)
-                Material taskSelectionBG_Material = Resources.Load<Material>("TaskSelection_BG_Material");
-                SessionCam.GetComponent<Skybox>().material = taskSelectionBG_Material;
+                //Material taskSelectionBG_Material = Resources.Load<Material>("TaskSelection_BG_Material");
+                //SessionCam.GetComponent<Skybox>().material = taskSelectionBG_Material;
                 GameObject initCamGO = GameObject.Find("InitCamera");
                 initCamGO.SetActive(false);
                 TaskSelection_Starfield.SetActive(true);
@@ -538,9 +538,10 @@ namespace USE_ExperimentTemplate_Session
                 }
                 else
                 {
-                    buttonSize = Screen.width * .098f;
-                    buttonSpacing = Screen.width * .0078125f;
+                    buttonSize = 188f;
+                    buttonSpacing = 15f;
                 }
+
                 float buttonsWidth = numTasks * buttonSize + (numTasks - 1) * buttonSpacing;
                 float buttonStartX = (buttonSize - buttonsWidth) / 2;
 

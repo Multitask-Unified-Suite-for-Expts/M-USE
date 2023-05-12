@@ -171,7 +171,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
@@ -401,6 +401,8 @@ MonoBehaviour:
   ParticipantDistance_CM: 0
   ShotgunRaycastCircleSize_DVA: 0
   UseDefaultConfigs: 0
+  IsHuman: 0
+  HumanStartPanel: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
@@ -501,11 +503,7 @@ MonoBehaviour:
   EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
   IsHuman: 0
-  InstructionsButtonPrefab: {fileID: 0}
-  InstructionsPrefab: {fileID: 0}
-  USE_InstructionsButton: {fileID: 0}
-  TaskInstructionsButtonGO: {fileID: 0}
-  TaskInstructionsTextGO: {fileID: 0}
+  HumanStartPanel: {fileID: 0}
   CurrentBlockString: 
   BlockStringsAdded: 0
   TrialsCompleted_Task: 0

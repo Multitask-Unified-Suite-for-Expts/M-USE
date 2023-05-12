@@ -1065,11 +1065,6 @@ namespace USE_ExperimentTemplate_Task
         }
 
 
-        private void CreateHumanStartPanel()
-        {
-
-        }
-
     }
 
 

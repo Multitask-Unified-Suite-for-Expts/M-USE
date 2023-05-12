@@ -156,7 +156,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-            HumanStartPanel.AdjustBasedOnTrialNum(TrialCount_InBlock);
+            if (IsHuman)
+                HumanStartPanel.AdjustBasedOnTrialNum(TrialCount_InBlock);
 
             CurrentTaskLevel.SetBlockSummaryString();
             if (TrialCount_InTask != 0)

@@ -623,8 +623,6 @@ namespace USE_ExperimentTemplate_Session
                 {
                     TaskSelection_Header.SetActive(true);
                     HumanVersionToggleButton.SetActive(true);
-                    if (Application.isEditor)
-                        TaskSelection_Header.transform.localPosition = new Vector3(TaskSelection_Header.transform.localPosition.x, TaskSelection_Header.transform.localPosition.y, TaskSelection_Header.transform.localPosition.z);
                 }
             });
             

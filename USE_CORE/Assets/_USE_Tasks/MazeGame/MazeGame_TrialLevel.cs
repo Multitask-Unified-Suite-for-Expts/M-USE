@@ -218,7 +218,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-            HumanStartPanel.AdjustBasedOnTrialNum(TrialCount_InBlock);
+            if (IsHuman)
+                HumanStartPanel.AdjustBasedOnTrialNum(TrialCount_InBlock);
 
             TouchFBController.DestroyTouchFeedback();
             TouchFBController.SetPrefabSizes(StartButtonScale);

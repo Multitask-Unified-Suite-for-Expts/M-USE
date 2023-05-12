@@ -108,8 +108,6 @@ namespace USE_UI
 
         public void AdjustBasedOnTrialNum(int trialNumber)
         {
-            Debug.Log("TCIB: " + trialNumber);
-
             if (trialNumber == 0)
             {
                 if (!HumanBackgroundGO.activeSelf)
@@ -117,15 +115,9 @@ namespace USE_UI
                 if (!TitleTextGO.activeSelf)
                     TitleTextGO.SetActive(true);
 
-                Debug.Log(BackgroundPanelGO.activeInHierarchy ? "ACTIVE IN HIERARCHY!" : "NOT ACTIVE IN HIERARCHY");
-                Debug.Log(BackgroundPanelGO.activeSelf ? "ACTIVE SELF!" : "NOT ACTIVE SELF");
-
                 if (BackgroundPanelGO.activeSelf)
-                {
-                    Debug.Log("SETTING PANEL INACTIVE!");
                     BackgroundPanelGO.SetActive(false);
-                }
-
+               
                 StartButtonGO.transform.localPosition = InitialStartButtonPosition;
             }
 
@@ -140,7 +132,7 @@ namespace USE_UI
 
 
 
-public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
+        public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
         {
             if (setActiveOnInit != null)
             {

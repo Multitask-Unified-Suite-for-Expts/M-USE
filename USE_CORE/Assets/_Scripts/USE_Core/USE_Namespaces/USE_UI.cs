@@ -28,8 +28,6 @@ namespace USE_UI
         public bool HumanPanelOn;
         public bool InstructionsOn;
 
-        public Vector3 InitialStartButtonPosition;
-
         public Dictionary<string, string> TaskInstructionsDict = new Dictionary<string, string>()
         {
             { "ContinuousRecognition", "Each trial, objects are displayed and you must choose an object you haven't chosen in a previous trial." },
@@ -53,6 +51,8 @@ namespace USE_UI
             { "WorkingMemory", "Working Memory" },
 
         };
+
+        public string TaskName;
 
         public State SetActiveOnInitialization;
         public State SetInactiveOnTermination;
@@ -78,10 +78,10 @@ namespace USE_UI
             HumanStartPanelGO.transform.SetParent(parent.transform, false);
 
             TitleTextGO = HumanStartPanelGO.transform.Find("TitleText").gameObject;
-            TitleTextGO.GetComponent<TextMeshProUGUI>().text = TaskNamesDict[taskName];
+            TaskName = TaskNamesDict[taskName];
+            TitleTextGO.GetComponent<TextMeshProUGUI>().text = TaskName;
 
             StartButtonGO = HumanStartPanelGO.transform.Find("StartButton").gameObject;
-            InitialStartButtonPosition = StartButtonGO.transform.localPosition;
 
             HumanBackgroundGO = HumanStartPanelGO.transform.Find("HumanBackground").gameObject;
             BackgroundPanelGO = HumanStartPanelGO.transform.Find("BackgroundPanel").gameObject;
@@ -114,20 +114,19 @@ namespace USE_UI
             {
                 if (!HumanBackgroundGO.activeInHierarchy)
                     HumanBackgroundGO.SetActive(true);
+
+                TitleTextGO.GetComponent<TextMeshProUGUI>().text = TaskName;
                 if (!TitleTextGO.activeInHierarchy)
                     TitleTextGO.SetActive(true);
 
                 if (BackgroundPanelGO.activeSelf)
                     BackgroundPanelGO.SetActive(false);
-                
-                StartButtonGO.transform.localPosition = InitialStartButtonPosition;
             }
             else if (trialCountInBlock > 0)
             {
                 BackgroundPanelGO.SetActive(true);
                 HumanBackgroundGO.SetActive(false);
-                TitleTextGO.SetActive(false);
-                StartButtonGO.transform.localPosition = new Vector3(0, 0, 0);
+                TitleTextGO.GetComponent<TextMeshProUGUI>().text = "Trial " + (trialCountInBlock + 1);
             }
 
         }

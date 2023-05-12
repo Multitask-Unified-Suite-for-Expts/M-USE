@@ -20,6 +20,7 @@ using SelectionTracking;
 using UnityEngine.InputSystem;
 using static UnityEngine.EventSystems.EventTrigger;
 using MazeGame_Namespace;
+using UnityEngine.UIElements;
 
 namespace USE_ExperimentTemplate_Task
 {
@@ -218,6 +219,8 @@ namespace USE_ExperimentTemplate_Task
 
                     if(InputBroker.GetKeyUp(KeyCode.N)) //Next Block
                     {
+                        if (TrialLevel.AudioFBController.IsPlaying())
+                            TrialLevel.AudioFBController.audioSource.Stop();
                         TrialLevel.AbortCode = 3;
                         TrialLevel.ForceBlockEnd = true;
                         TrialLevel.SpecifyCurrentState(TrialLevel.GetStateFromName("FinishTrial"));

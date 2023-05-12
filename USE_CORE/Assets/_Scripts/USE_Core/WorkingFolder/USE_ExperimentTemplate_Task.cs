@@ -209,8 +209,11 @@ namespace USE_ExperimentTemplate_Task
                         TrialLevel.AbortCode = 5;
                         TrialLevel.ForceBlockEnd = true;
                         TrialLevel.FinishTrialCleanup();
+                        Debug.Log("Passed FinishTrialCleanUp!!!!!");
                         TrialLevel.ClearActiveTrialHandlers();
+                        Debug.Log("Passed Clearing active handlers!!!!");
                         SpecifyCurrentState(FinishTask);
+                        Debug.Log("SPECIFIED CURRENT STATE!");
                     }
 
                     if(InputBroker.GetKeyUp(KeyCode.N)) //Next Block

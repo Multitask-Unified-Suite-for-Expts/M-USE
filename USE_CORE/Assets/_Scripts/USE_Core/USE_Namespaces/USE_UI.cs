@@ -16,13 +16,19 @@ namespace USE_UI
         public GameObject HumanStartPanelGO;
 
         public GameObject StartButtonGO;
+
         public GameObject InstructionsButtonGO;
         public GameObject InstructionsGO;
+        public GameObject TitleTextGO;
+        public GameObject HumanBackgroundGO;
+        public GameObject BackgroundPanelGO;
 
-        public GameObject HumanStartPanelPrefab;
+        public GameObject HumanStartPanelPrefab; //Set to Session In inspector, then passed down
 
         public bool HumanPanelOn;
         public bool InstructionsOn;
+
+        public Vector3 InitialStartButtonPosition;
 
         public Dictionary<string, string> TaskInstructionsDict = new Dictionary<string, string>()
         {
@@ -40,7 +46,7 @@ namespace USE_UI
             { "ContinuousRecognition", "Continuous Recognition" },
             { "THR", "Touch Hold Release" },
             { "EffortControl", "Effort Control" },
-            { "FlexLearning", "Flex Learning" },
+            { "FlexLearning", "Flexible Learning" },
             { "MazeGame", "Maze Game" },
             { "VisualSearch", "Visual Search" },
             { "WhatWhenWhere", "What When Where" },
@@ -71,8 +77,14 @@ namespace USE_UI
             HumanStartPanelGO.name = taskName + "_HumanPanel";
             HumanStartPanelGO.transform.SetParent(parent.transform, false);
 
-            HumanStartPanelGO.transform.Find("TitleText").gameObject.GetComponent<TextMeshProUGUI>().text = TaskNamesDict[taskName];
+            TitleTextGO = HumanStartPanelGO.transform.Find("TitleText").gameObject;
+            TitleTextGO.GetComponent<TextMeshProUGUI>().text = TaskNamesDict[taskName];
+
             StartButtonGO = HumanStartPanelGO.transform.Find("StartButton").gameObject;
+            InitialStartButtonPosition = StartButtonGO.transform.localPosition;
+
+            HumanBackgroundGO = HumanStartPanelGO.transform.Find("HumanBackground").gameObject;
+            BackgroundPanelGO = HumanStartPanelGO.transform.Find("BackgroundPanel").gameObject;
 
             InstructionsButtonGO = HumanStartPanelGO.transform.Find("InstructionsButton").gameObject;
             Button button = InstructionsButtonGO.AddComponent<Button>();
@@ -96,6 +108,30 @@ namespace USE_UI
 
         }
 
+        public void AdjustPanelBasedOnTrialNum(int trialCountInBlock)
+        {
+            if (trialCountInBlock == 0)
+            {
+                if (!HumanBackgroundGO.activeInHierarchy)
+                    HumanBackgroundGO.SetActive(true);
+                if (!TitleTextGO.activeInHierarchy)
+                    TitleTextGO.SetActive(true);
+
+                if (BackgroundPanelGO.activeSelf)
+                    BackgroundPanelGO.SetActive(false);
+                
+                StartButtonGO.transform.localPosition = InitialStartButtonPosition;
+            }
+            else if (trialCountInBlock > 0)
+            {
+                BackgroundPanelGO.SetActive(true);
+                HumanBackgroundGO.SetActive(false);
+                TitleTextGO.SetActive(false);
+                StartButtonGO.transform.localPosition = new Vector3(0, 0, 0);
+            }
+
+        }
+
 
         public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
         {
@@ -114,11 +150,15 @@ namespace USE_UI
         private void ActivateOnStateInit(object sender, EventArgs e)
         {
             HumanStartPanelGO.SetActive(true);
+            HumanPanelOn = true;
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["HumanStartPanelOn"]);
         }
 
         private void InactivateOnStateTerm(object sender, EventArgs e)
         {
             HumanStartPanelGO.SetActive(false);
+            HumanPanelOn = false;
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["HumanStartPanelOff"]);
         }
 
 

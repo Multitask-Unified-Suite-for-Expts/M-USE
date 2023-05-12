@@ -147,6 +147,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
+            if (IsHuman)
+                HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InBlock);
+
             CurrentTaskLevel.SetBlockSummaryString();
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();

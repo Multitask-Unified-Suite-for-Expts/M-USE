@@ -174,6 +174,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
+            if (IsHuman)
+                HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InBlock);
+
             TokenFBController.enabled = false;
             ResetRelativeStartTime(); 
             DisableAllGameobjects();

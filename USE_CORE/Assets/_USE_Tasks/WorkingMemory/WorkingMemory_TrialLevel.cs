@@ -156,6 +156,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), DisplaySample, () =>
         {
+            if (IsHuman)
+                HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InBlock);
+
             //Set the token bar settings
             TokenFBController.enabled = true;
             TokenFBController

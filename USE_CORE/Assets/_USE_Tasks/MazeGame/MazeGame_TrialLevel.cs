@@ -218,6 +218,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
+            Debug.Log(StartButton.activeSelf ? "ACTIVE!" : "NOT ACTIVE!");
+
             TouchFBController.DestroyTouchFeedback();
             TouchFBController.SetPrefabSizes(StartButtonScale);
             SelectionHandler.HandlerActive = true;
@@ -819,7 +821,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     }
     private void DisableSceneElements()
     {
-        StartButton.SetActive(false);
         DeactivateChildren(MazeContainer);
         DeactivateChildren(GameObject.Find("SliderCanvas"));
     } 

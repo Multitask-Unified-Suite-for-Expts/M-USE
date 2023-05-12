@@ -533,8 +533,8 @@ namespace USE_ExperimentTemplate_Session
                 float buttonSpacing;
                 if (MacMainDisplayBuild && !Application.isEditor)
                 {
-                    buttonSize = Screen.width * .13f;
-                    buttonSpacing = Screen.width * .015f;
+                    buttonSize = 249f;
+                    buttonSpacing = 28.5f;
                 }
                 else
                 {

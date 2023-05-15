@@ -28,7 +28,7 @@ public class PlayerViewPanel //: MonoBehaviour
 
         RectTransform rectTransform = myLine.GetComponent<RectTransform>();
         rectTransform.localPosition = Vector3.zero;
-        rectTransform.localScale = new Vector3(1f, 1f, 1f);
+        rectTransform.anchoredPosition = Vector3.zero;
         rectTransform.sizeDelta = myLine.transform.parent.GetComponent<RectTransform>().sizeDelta;
         rectTransform.anchorMin = myLine.transform.parent.GetComponent<RectTransform>().anchorMin;
         rectTransform.anchorMax = myLine.transform.parent.GetComponent<RectTransform>().anchorMax;
@@ -40,8 +40,8 @@ public class PlayerViewPanel //: MonoBehaviour
         lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
         lineRenderer.startColor = color;
         lineRenderer.endColor = color;
-        lineRenderer.startWidth = 2f;
-        lineRenderer.endWidth = 2f;
+        lineRenderer.startWidth = 200f;
+        lineRenderer.endWidth = 200f;
         Debug.Log($"START POS: {start} END POS: {end}");
         lineRenderer.SetPosition(0, start);
         lineRenderer.SetPosition(1, end);
@@ -52,7 +52,23 @@ public class PlayerViewPanel //: MonoBehaviour
         return myLine;
     }
 
+    public GameObject DrawSampleLines(string lineName, Color col, Vector2 start, Vector2 end, Transform parent) // removed GameObject parent
+    {
+        GameObject sampleLines = new GameObject(lineName, typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UILineRenderer));
+        sampleLines.transform.SetParent(parent, false);
+        sampleLines.GetComponent<RectTransform>().anchorMax = Vector2.zero;
+        sampleLines.GetComponent<RectTransform>().anchorMin = Vector2.zero;
+        sampleLines.GetComponent<RectTransform>().sizeDelta = new Vector2(1,1);
+        sampleLines.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
 
+        UnityEngine.UI.Extensions.UILineRenderer lineRenderer = sampleLines.GetComponent<UnityEngine.UI.Extensions.UILineRenderer>();
+
+        lineRenderer.Points = new Vector2[] { start, end };
+        lineRenderer.color = col;
+        lineRenderer.RelativeSize = false;
+        lineRenderer.SetAllDirty();
+        return sampleLines;
+    }
 
     public GameObject CreateTextObject(string textName, string text, Color col, Vector2 textLocation, Vector2 size, Transform parent)
     {

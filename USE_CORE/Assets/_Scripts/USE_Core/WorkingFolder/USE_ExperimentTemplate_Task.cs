@@ -179,7 +179,7 @@ namespace USE_ExperimentTemplate_Task
                 if (IsHuman)
                 {
                     HumanStartPanel.SetupDataAndCodes(FrameData, EventCodeManager, SessionEventCodes);
-                    //HumanStartPanel.SetTaskLevel(this);
+                    HumanStartPanel.SetTaskLevel(this);
                     Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
                     HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
                 }

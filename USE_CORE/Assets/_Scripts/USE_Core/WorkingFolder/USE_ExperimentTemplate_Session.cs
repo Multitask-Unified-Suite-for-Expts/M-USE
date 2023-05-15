@@ -112,7 +112,7 @@ namespace USE_ExperimentTemplate_Session
             Debug.Log("LOADING SESSION SETTINGS!");
 
             HumanStartPanel = gameObject.AddComponent<HumanStartPanel>();
-            //HumanStartPanel.SetSessionLevel(this);
+            HumanStartPanel.SetSessionLevel(this);
             HumanStartPanel.HumanStartPanelPrefab = HumanStartPanelPrefab;
 
             //If using default configs, read in the default Session/EventCode/Display Configs and write them to persistant data path:

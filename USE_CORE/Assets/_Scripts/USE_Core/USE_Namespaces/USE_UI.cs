@@ -8,9 +8,9 @@ using TMPro;
 using USE_Data;
 using USE_ExperimentTemplate_Classes;
 using USE_UI;
-//using USE_ExperimentTemplate_Task;
-//using USE_ExperimentTemplate_Session;
-//using USE_ExperimentTemplate_Trial;
+using USE_ExperimentTemplate_Task;
+using USE_ExperimentTemplate_Session;
+using USE_ExperimentTemplate_Trial;
 
 namespace USE_UI
 {
@@ -78,10 +78,9 @@ namespace USE_UI
         [HideInInspector] public static EventCodeManager EventCodeManager;
         [HideInInspector] public static Dictionary<string, EventCode> SessionEventCodes;
 
-
-        //public ControlLevel_Session_Template SessionLevel;
-        //public ControlLevel_Task_Template TaskLevel;
-        //public ControlLevel_Trial_Template TrialLevel;
+        public ControlLevel_Session_Template SessionLevel;
+        public ControlLevel_Task_Template TaskLevel;
+        public ControlLevel_Trial_Template TrialLevel;
 
 
 
@@ -114,9 +113,9 @@ namespace USE_UI
 
             BackgroundPanelGO = HumanStartPanelGO.transform.Find("BackgroundPanel").gameObject;
 
-            //EndTaskButtonGO = HumanStartPanelGO.transform.Find("EndTaskButton").gameObject;
-            //Button endTaskButton = EndTaskButtonGO.AddComponent<Button>();
-            //endTaskButton.onClick.AddListener(HandleEndTask);
+            EndTaskButtonGO = HumanStartPanelGO.transform.Find("EndTaskButton").gameObject;
+            Button endTaskButton = EndTaskButtonGO.AddComponent<Button>();
+            endTaskButton.onClick.AddListener(HandleEndTask);
 
             InstructionsButtonGO = HumanStartPanelGO.transform.Find("InstructionsButton").gameObject;
             Button button = InstructionsButtonGO.AddComponent<Button>();
@@ -132,17 +131,19 @@ namespace USE_UI
         }
 
 
-        //public void HandleEndTask()
-        //{
-        //    if(TrialLevel != null)
-        //    {
-        //        TrialLevel.AbortCode = 5;
-        //        TrialLevel.ForceBlockEnd = true;
-        //        TrialLevel.FinishTrialCleanup();
-        //        TrialLevel.ClearActiveTrialHandlers();
-        //        TaskLevel.SpecifyCurrentState(TaskLevel.GetStateFromName("FinishTask"));
-        //    }
-        //}
+        public void HandleEndTask()
+        {
+            if (TrialLevel != null)
+            {
+                TrialLevel.AbortCode = 5;
+                TrialLevel.ForceBlockEnd = true;
+                TrialLevel.FinishTrialCleanup();
+                TrialLevel.ClearActiveTrialHandlers();
+                TaskLevel.SpecifyCurrentState(TaskLevel.GetStateFromName("FinishTask"));
+            }
+            else
+                Debug.Log("TRYING TO END TASK (via button), BUT THE TRIALLEVEL IS NULL!");
+        }
 
         public void ToggleInstructions() //Used by Subject/Player to toggle Instructions
         {
@@ -186,18 +187,18 @@ namespace USE_UI
             }
         }
 
-        //public void SetSessionLevel(ControlLevel_Session_Template sessionLevel)
-        //{
-        //    SessionLevel = sessionLevel;
-        //}
-        //public void SetTaskLevel(ControlLevel_Task_Template taskLevel)
-        //{
-        //    TaskLevel = taskLevel;
-        //}
-        //public void SetTrialLevel(ControlLevel_Trial_Template trialLevel)
-        //{
-        //    TrialLevel = trialLevel;
-        //}
+        public void SetSessionLevel(ControlLevel_Session_Template sessionLevel)
+        {
+            SessionLevel = sessionLevel;
+        }
+        public void SetTaskLevel(ControlLevel_Task_Template taskLevel)
+        {
+            TaskLevel = taskLevel;
+        }
+        public void SetTrialLevel(ControlLevel_Trial_Template trialLevel)
+        {
+            TrialLevel = trialLevel;
+        }
 
 
         public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)

@@ -21,6 +21,7 @@ using static Tobii.Research.Unity.CalibrationThread;
 using static System.Net.Mime.MediaTypeNames;
 using UnityEngine.UI;
 using System.Text;
+using UnityEngine.Rendering.PostProcessing;
 
 public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 {
@@ -38,7 +39,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public float ShrinkDuration;
 
     //for calibration point definition
-    [HideInInspector] public NormalizedPoint2D[] ninePoints;
+    [HideInInspector] public NormalizedPoint2D[] allCalibPoints;
     [HideInInspector] public int numCalibPoints;
  //   [HideInInspector] public float[] calibPointsInset = new float[2] { .1f, .15f };
 
@@ -98,6 +99,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private GameObject PlayerTextGO;
     private GameObject ResultContainer;
     private SelectionTracking.SelectionTracker.SelectionHandler SelectionHandler;
+    private List<Vector2> LeftSampleList = new List<Vector2>();
+    private List<Vector2> RightSampleList = new List<Vector2>();
 
 
     public override void DefineControlLevel()
@@ -114,7 +117,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            DefineCalibPoints();
+            AssignCalibPositions();
             InitializeEyeTrackerSettings();
 
             // Create necessary variables to display text onto the Experimenter Display
@@ -128,14 +131,14 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             // Create a container for the calibration results
             if (ResultContainer == null)
             {
-                ResultContainer = new GameObject("ResultContainer", typeof(Canvas));
-                ResultContainer.transform.parent = GC_CanvasGO.GetComponent<Canvas>().transform;
+                ResultContainer = new GameObject("ResultContainer", typeof(Canvas), typeof(CanvasRenderer));
+                ResultContainer.transform.parent = PlayerViewPanelGO.transform;
+                ResultContainer.GetComponent<RectTransform>().sizeDelta = ResultContainer.transform.parent.GetComponent<RectTransform>().sizeDelta;
                 ResultContainer.GetComponent<RectTransform>().anchorMin = Vector3.zero;
                 ResultContainer.GetComponent<RectTransform>().anchorMax = Vector3.zero;
-                ResultContainer.GetComponent<RectTransform>().localPosition = Vector3.zero;
-                ResultContainer.GetComponent<RectTransform>().anchoredPosition = Vector2.zero; // Have to adjust local position in addition to anchored, becauses anchored Position is only Vector2, the z is off -SD
-                ResultContainer.GetComponent<RectTransform>().localScale = new Vector3(1f,1f,1f);
                 ResultContainer.GetComponent<RectTransform>().pivot = Vector3.zero;
+                ResultContainer.GetComponent<RectTransform>().anchoredPosition = Vector3.zero;
+
             }
 
             // Create an object to store any information for the Experimenter
@@ -154,9 +157,16 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddInitializationMethod(() =>
         {
             InitializeExperimenterDisplayInstructions();
+            CalibBigCircle.CircleGO.GetComponent<RectTransform>().anchoredPosition = new Vector3 (0,0,0);
+            CalibBigCircle.CircleGO.SetActive(true);
         });
 
-        SetupTrial.SpecifyTermination(()=> true, Init);
+        SetupTrial.SpecifyTermination(()=> true, Init, () =>
+        {
+            // Only enter Calibration if an eyetracker is being used
+            if (!SpoofGazeWithMouse)
+                ScreenBasedCalibration.EnterCalibrationMode();
+        });
 
         if (SpoofGazeWithMouse)
         {
@@ -166,6 +176,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "GazeSelection", Init, ITI);
         }
+
+        Init.AddInitializationMethod(() =>
+        {
+            CalibBigCircle.CircleGO.SetActive(false);
+        });
 
         Init.AddUpdateMethod(() =>
         {
@@ -199,10 +214,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             if (InstructionsGO != null)
                 InstructionsGO.SetActive(false);
             
-            // Only enter Calibration if an eyetracker is being used
-            if (!SpoofGazeWithMouse)
-                ScreenBasedCalibration.EnterCalibrationMode();
-
             // Assign the correct calibration points given the User's selection
             DefineCalibPoints(numCalibPoints);
         });
@@ -275,7 +286,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             keyboardOverride = false;
             CalibBigCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.green;
-
         });
        
         Calibrate.AddUpdateMethod(() =>
@@ -295,6 +305,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 TrialSummaryString = string.Format("Compute and Apply Returned <b>{0}</b> and collected at <b>{1}</b> points.", CalibrationResult.Status, CalibrationResult.CalibrationPoints.Count);
             }
 
+            currentCalibrationPointFinished = false;
             StateAfterDelay = Confirm;
 
             // Assign a 3 Second delay following calibration to allow the sample to be properly recorded
@@ -308,6 +319,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Confirm.AddInitializationMethod(() =>
         {
+            CurrentTaskLevel.BlockSummaryString.Append("Press \"=\" to accept the point" +
+                                                       "\n\nPress \"-\" to recalibrate the point"); 
+
+            CalibBigCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.white;
+
             pointFinished = false;
             recalibPoint = false;
             assessTime = 5f;
@@ -320,7 +336,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             if (!SpoofGazeWithMouse)
             {
                 // Plots sample points to the Result Container, if they exist for the current calibration point
-                PlotSamplePoints();
+                CollectSamplePoints();
+                CreateSampleLines(LeftSampleList, RightSampleList, ADCSToScreen(calibPointsADCS[CalibNum]));
 
                 if (ResultContainer.transform.GetChildCount() > 0)
                 {
@@ -388,6 +405,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             // Set the calibration point to inactive at the end of confirming
             CalibBigCircle.CircleGO.SetActive(false);
             DestroyChildren(ResultContainer);
+            CurrentTaskLevel.BlockSummaryString.Clear();
         });
 
         ITI.AddInitializationMethod(() =>
@@ -414,60 +432,77 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     }
     void DefineCalibPoints(int nPoints)
     {
+        NormalizedPoint2D preCalibPoint = new NormalizedPoint2D(0.5f, 0.5f);
+        
+        
+
         switch (nPoints)
         {
             case 9:
-                calibPointsADCS = ninePoints;
-                acceptableCalibrationDistance = Vector2.Distance(ADCSToScreen(ninePoints[0]), ADCSToScreen(ninePoints[1])) / 2;
+                calibPointsADCS = new NormalizedPoint2D[10] {
+                preCalibPoint,
+                allCalibPoints [0],
+                allCalibPoints [1],
+                allCalibPoints [2],
+                allCalibPoints [3],
+                allCalibPoints [4],
+                allCalibPoints[5],
+                allCalibPoints[6],
+                allCalibPoints[7],
+                allCalibPoints[8]};
+                acceptableCalibrationDistance = Vector2.Distance(ADCSToScreen(allCalibPoints[0]), ADCSToScreen(allCalibPoints[1])) / 2;
 
                 break;
             case 6:
-                calibPointsADCS = new NormalizedPoint2D[6] {
-                ninePoints [0],
-                ninePoints [1],
-                ninePoints [2],
-                ninePoints [3],
-                ninePoints [4],
-                ninePoints[5]};
-                acceptableCalibrationDistance = Vector2.Distance(ADCSToScreen(ninePoints[0]), ADCSToScreen(ninePoints[1])) / 2;
+                calibPointsADCS = new NormalizedPoint2D[7] {
+                preCalibPoint,
+                allCalibPoints [0],
+                allCalibPoints [1],
+                allCalibPoints [2],
+                allCalibPoints [3],
+                allCalibPoints [4],
+                allCalibPoints[5]};
+                acceptableCalibrationDistance = Vector2.Distance(ADCSToScreen(allCalibPoints[0]), ADCSToScreen(allCalibPoints[1])) / 2;
                 break;
             case 5:
-                calibPointsADCS = new NormalizedPoint2D[5] {
-                ninePoints [0],
-                ninePoints [2],
-                ninePoints [4],
-                ninePoints [6],
-                ninePoints [8]};
-                acceptableCalibrationDistance = Vector2.Distance(ADCSToScreen(ninePoints[0]), ADCSToScreen(ninePoints[4])) / 2;
+                calibPointsADCS = new NormalizedPoint2D[6] {
+                preCalibPoint,
+                allCalibPoints [0],
+                allCalibPoints [2],
+                allCalibPoints [4],
+                allCalibPoints [6],
+                allCalibPoints [8]};
+                acceptableCalibrationDistance = Vector2.Distance(ADCSToScreen(allCalibPoints[0]), ADCSToScreen(allCalibPoints[4])) / 2;
                 break;
             case 3:
-                calibPointsADCS = new NormalizedPoint2D[3]{
-                ninePoints [3],
-                ninePoints [4],
-                ninePoints [5] };
-                acceptableCalibrationDistance = Vector2.Distance(ADCSToScreen(ninePoints[0]), ADCSToScreen(ninePoints[1])) / 2;
+                calibPointsADCS = new NormalizedPoint2D[4]{
+                preCalibPoint,
+                allCalibPoints [3],
+                allCalibPoints [4],
+                allCalibPoints [5] };
+                acceptableCalibrationDistance = Vector2.Distance(ADCSToScreen(allCalibPoints[0]), ADCSToScreen(allCalibPoints[1])) / 2;
                 break;
             case 1:
                 NormalizedPoint2D[] originalPoints = new NormalizedPoint2D[numCalibPoints];
                 switch (numCalibPoints)
                 {
                     case 9:
-                        originalPoints = ninePoints;
+                        originalPoints = allCalibPoints;
                         break;
                     case 5:
                         originalPoints = new NormalizedPoint2D[5] {
-                    ninePoints [0],
-                    ninePoints [2],
-                    ninePoints [4],
-                    ninePoints [6],
-                    ninePoints [8]
+                    allCalibPoints [0],
+                    allCalibPoints [2],
+                    allCalibPoints [4],
+                    allCalibPoints [6],
+                    allCalibPoints [8]
                 };
                         break;
                     case 3:
                         originalPoints = new NormalizedPoint2D[3] {
-                    ninePoints [3],
-                    ninePoints [4],
-                    ninePoints [5]
+                    allCalibPoints [3],
+                    allCalibPoints [4],
+                    allCalibPoints [5]
                 };
                         break;
                 }
@@ -513,9 +548,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     public Vector2 ADCSToScreen(NormalizedPoint2D normADCSGazePoint)
     {
         Vector2 adcsGazePoint = normADCSGazePoint.ToVector2();
-        Debug.Log("THESE ARE THE MONITOR DETAILS X PIXELS: " + MonitorDetails.PixelResolution.x);
         float x = adcsGazePoint.x * MonitorDetails.PixelResolution.x;
-        float y = MonitorDetails.PixelResolution.y - (adcsGazePoint.y * MonitorDetails.PixelResolution.y);
+        float y = ((1- adcsGazePoint.y) * MonitorDetails.PixelResolution.y);
         return new Vector2(x, y);
     }
     public Vector2 ScreenToADCS(Vector2 screenPoint)
@@ -532,9 +566,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         rectTransform.anchorMax = Vector2.zero;
     }
 
-    private void PlotSamplePoints()
+    private void CollectSamplePoints()
     {
-        Debug.Log("CALIBRATION RESULTS POINTS: " + CalibrationResult.CalibrationPoints.Count);
         Tobii.Research.CalibrationPoint calibPoint = null;
         
         Debug.Log($"CURRENT NORM POINT: ({currentNormPoint.X}, {currentNormPoint.Y})");
@@ -558,38 +591,55 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             Debug.Log($"CHOSEN NORM POINT: ({calibPoint.PositionOnDisplayArea.X}, {calibPoint.PositionOnDisplayArea.Y})");
 
-            for (int i = 0; i <= (calibPoint.CalibrationSamples.Count >= 10 ? 10 : calibPoint.CalibrationSamples.Count); i++)
+            for (int i = 0; i < (calibPoint.CalibrationSamples.Count >= 10 ? 10 : calibPoint.CalibrationSamples.Count); i++)
             {
                 CalibrationSample sample = calibPoint.CalibrationSamples[i];
                 // Record the positions of the Left and Right eye for each sample of the calibration point 
                 Vector2 leftSamplePos = ADCSToScreen(sample.LeftEye.PositionOnDisplayArea);
                 Vector2 rightSamplePos = ADCSToScreen(sample.RightEye.PositionOnDisplayArea);
 
-                Debug.Log($"LEFT SAMPLE {i}: ({sample.LeftEye.PositionOnDisplayArea.X},{sample.LeftEye.PositionOnDisplayArea.Y})");
-                Debug.Log($"LEFT SAMPLE CONVERTED TO SCREEN {i}: {leftSamplePos.ToString()}");
-                Debug.Log($"RIGHT SAMPLE {i}: ({sample.RightEye.PositionOnDisplayArea.X},{sample.RightEye.PositionOnDisplayArea.Y})");
-                Debug.Log($"RIGHT SAMPLE CONVERTED TO SCREEN {i}: {rightSamplePos.ToString()}");
+                LeftSampleList.Add(leftSamplePos);
+                RightSampleList.Add(rightSamplePos);
 
                 // Create objects to represent the sample on the experimenter display
 
-                USE_Circle leftSampleCircle = new USE_Circle(ResultContainer.GetComponent<Canvas>(), leftSamplePos, 0.15f, $"L {i}");
-                USE_Circle rightSampleCircle = new USE_Circle(ResultContainer.GetComponent<Canvas>(), rightSamplePos, 0.15f, $"R {i}");
+                /*USE_Circle leftSampleCircle = new USE_Circle(PlayerViewPanelGO.GetComponent<Canvas>(), ScreenToPlayerViewPosition(leftSamplePos,PlayerViewPanelGO.transform), 0.05f, $"L {i}");
+                USE_Circle rightSampleCircle = new USE_Circle(PlayerViewPanelGO.GetComponent<Canvas>(), ScreenToPlayerViewPosition(rightSamplePos, PlayerViewPanelGO.transform), 0.05f, $"R {i}");
 
                 leftSampleCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.blue;
-                rightSampleCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.red;
+                rightSampleCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.red;*/
 
-                leftSampleCircle.CircleGO.SetActive(true);
-                rightSampleCircle.CircleGO.SetActive(true);
+               // leftSampleCircle.CircleGO.SetActive(true);
+               // rightSampleCircle.CircleGO.SetActive(true);
 
             }
         }
     }
 
-    private void DefineCalibPoints()
+    private void CreateSampleLines(List<Vector2> leftSamples, List<Vector2> rightSamples, Vector2 calibPoint)
     {
-        //Define Calibration Points in ADCS (as proportion of the display)
-        ninePoints = new NormalizedPoint2D[]
-        {new NormalizedPoint2D(CalibPointsInset[0], CalibPointsInset[1]),
+        for (int i = 0; i < leftSamples.Count; i++)
+        {
+            Debug.Log("PLAYER VIEW POSITION l SAMPLE: " + ScreenToPlayerViewPosition(leftSamples[i], PlayerViewPanelGO.transform).ToString());
+            /*GameObject leftSampleLine = PlayerViewPanel.CreateLine($"L{i + 1}", ScreenToPlayerViewPosition(leftSamples[i], PlayerViewPanelGO.transform), ScreenToPlayerViewPosition(calibPoint, PlayerViewPanelGO.transform), Color.blue, PlayerViewPanelGO.transform);
+            GameObject rightSampleLine = PlayerViewPanel.CreateLine($"R{i + 1}", ScreenToPlayerViewPosition(rightSamples[i], PlayerViewPanelGO.transform), ScreenToPlayerViewPosition(calibPoint, PlayerViewPanelGO.transform), Color.red, PlayerViewPanelGO.transform);
+           */
+            GameObject leftSampleLine = PlayerViewPanel.CreateLine($"L{i + 1}", ScreenToPlayerViewPosition(leftSamples[i], PlayerViewPanelGO.transform), ScreenToPlayerViewPosition(calibPoint, PlayerViewPanelGO.transform), Color.blue, PlayerViewPanelGO.transform);
+            GameObject rightSampleLine = PlayerViewPanel.CreateLine($"R{i + 1}", ScreenToPlayerViewPosition(rightSamples[i], PlayerViewPanelGO.transform), ScreenToPlayerViewPosition(calibPoint, PlayerViewPanelGO.transform), Color.red, PlayerViewPanelGO.transform);
+            leftSampleLine.SetActive(true);
+            rightSampleLine.SetActive(true);
+        }
+
+        // Clear the list of collect samples after they have been plotted
+        LeftSampleList.Clear();
+        RightSampleList.Clear();
+    }
+
+    private void AssignCalibPositions()
+    {
+        allCalibPoints = new NormalizedPoint2D[]
+        {
+            new NormalizedPoint2D(CalibPointsInset[0], CalibPointsInset[1]),
             new NormalizedPoint2D(0.5f, CalibPointsInset[1]),
             new NormalizedPoint2D(1f - CalibPointsInset[0], CalibPointsInset[1]),
             new NormalizedPoint2D(CalibPointsInset[0], 0.5f),
@@ -606,7 +656,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                                          "\n\nPress the Space Bar to Begin a 9 - Point Calibration" +
                                          "\n\n OR" +
                                          "\n\nPress 1, 3, 5, or 6 to Begin the Respective Point Calibration";
-        Vector2 textLocation = playerViewPosition(new Vector2(960, 540), PlayerViewPanelGO.transform);
+        Vector2 textLocation = ScreenToPlayerViewPosition(new Vector2(960, 540), PlayerViewPanelGO.transform);
         
         InstructionsGO.GetComponent<RectTransform>().anchoredPosition = textLocation;
         InstructionsGO.GetComponent<RectTransform>().sizeDelta = new Vector2(400, 200); //Adjusts the size of box that contains the text
@@ -640,6 +690,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         pointFinished = false;
         calibrationUnfinished = true;
         calibrationFinished = false;
+
+        if(LeftSampleList.Count > 0)
+            LeftSampleList.Clear();
+        if(RightSampleList.Count > 0)
+            RightSampleList.Clear();
     }
 
     public override void FinishTrialCleanup()

@@ -428,7 +428,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             if (stim.IsTarget)
             {
-                textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent.transform);
+                textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent.transform);
                 textLocation.y += 75;
                 Vector3 textSize = new Vector3(2, 2,1);
                 playerViewText = playerView.CreateTextObject("TargetText","TARGET",

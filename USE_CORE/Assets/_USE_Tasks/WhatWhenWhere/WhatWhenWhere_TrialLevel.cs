@@ -601,7 +601,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         for (int iStim = 0; iStim < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++iStim)
         {
             //Create corresponding text on player view of experimenter display
-            textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation),
+            textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation),
                 playerViewParent);
             textLocation.y += 75;
             Vector2 textSize = new Vector2(200, 200);

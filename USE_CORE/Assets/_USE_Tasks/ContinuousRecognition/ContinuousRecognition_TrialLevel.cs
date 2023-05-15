@@ -462,7 +462,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         for(int i=0; i < currentTrial.NumTrialStims; ++i)
         {
-            textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(trialStims.stimDefs[i].StimLocation), playerViewParent);
+            textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(trialStims.stimDefs[i].StimLocation), playerViewParent);
             textLocation.y += 50;
             Vector2 textSize = new Vector2(200, 200);
             string stimString = "Target";

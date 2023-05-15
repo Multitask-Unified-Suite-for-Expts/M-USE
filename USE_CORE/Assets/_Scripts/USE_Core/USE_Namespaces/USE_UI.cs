@@ -8,29 +8,33 @@ using TMPro;
 using USE_Data;
 using USE_ExperimentTemplate_Classes;
 using USE_UI;
+//using USE_ExperimentTemplate_Task;
+//using USE_ExperimentTemplate_Session;
+//using USE_ExperimentTemplate_Trial;
 
 namespace USE_UI
 {
     public class HumanStartPanel : MonoBehaviour
     {
-        public GameObject HumanStartPanelGO;
+        [HideInInspector] public GameObject HumanStartPanelGO;
 
-        public GameObject StartButtonGO;
+        [HideInInspector] public GameObject StartButtonGO;
 
-        public GameObject InstructionsButtonGO;
-        public GameObject InstructionsGO;
-        public GameObject TitleTextGO;
-        public GameObject HumanBackgroundGO;
-        public GameObject BackgroundPanelGO;
+        [HideInInspector] public GameObject InstructionsButtonGO;
+        [HideInInspector] public GameObject InstructionsGO;
+        [HideInInspector] public GameObject TitleTextGO;
+        [HideInInspector] public GameObject HumanBackgroundGO;
+        [HideInInspector] public GameObject BackgroundPanelGO;
+        [HideInInspector] public GameObject EndTaskButtonGO;
 
-        public GameObject HumanStartPanelPrefab; //Set to Session In inspector, then passed down
+        [HideInInspector] public GameObject HumanStartPanelPrefab; //Set to Session In inspector, then passed down
 
         public bool HumanPanelOn;
         public bool InstructionsOn;
 
-        public Vector3 InitialStartButtonPosition;
+        [HideInInspector] public Vector3 InitialStartButtonPosition;
 
-        public Dictionary<string, string> TaskInstructionsDict = new Dictionary<string, string>()
+        [HideInInspector] public Dictionary<string, string> TaskInstructionsDict = new Dictionary<string, string>()
         {
             { "ContinuousRecognition", "Each trial, several objects will be displayed and you must choose an object you haven't chosen in a previous trial!" },
             { "EffortControl", "Choose a balloon to inflate based on the effort required (click) and the reward amount (tokens). Pop the balloon by clicking the required number of times!"},
@@ -41,7 +45,7 @@ namespace USE_UI
             { "WhatWhenWhere", "Select the objects in the correct sequence to earn your reward!" },
             { "WorkingMemory", "Remember and identify the target object to earn your reward!" }
         };
-        public Dictionary<string, string> TaskNamesDict = new Dictionary<string, string>()
+        [HideInInspector] public Dictionary<string, string> TaskNamesDict = new Dictionary<string, string>()
         {
             { "ContinuousRecognition", "Continuous Recognition" },
             { "EffortControl", "Effort Control" },
@@ -54,7 +58,7 @@ namespace USE_UI
 
         };
 
-        public Dictionary<string, Vector3> Task_HumanBackgroundPos_Dict = new Dictionary<string, Vector3>()
+        [HideInInspector] public Dictionary<string, Vector3> Task_HumanBackgroundPos_Dict = new Dictionary<string, Vector3>()
         {
             { "ContinuousRecognition", new Vector3(0, 0, 1000f) },
             { "EffortControl", new Vector3(0, 0, 500f) },
@@ -66,15 +70,22 @@ namespace USE_UI
             { "WorkingMemory", new Vector3(0, 0, 1000f) },
         };
 
-        public string TaskName;
+        [HideInInspector] public string TaskName;
 
-        public State SetActiveOnInitialization;
-        public State SetInactiveOnTermination;
+        private State SetActiveOnInitialization;
+        private State SetInactiveOnTermination;
 
         [HideInInspector] public static EventCodeManager EventCodeManager;
         [HideInInspector] public static Dictionary<string, EventCode> SessionEventCodes;
 
 
+        //public ControlLevel_Session_Template SessionLevel;
+        //public ControlLevel_Task_Template TaskLevel;
+        //public ControlLevel_Trial_Template TrialLevel;
+
+
+
+        //Called by TaskLevel
         public void SetupDataAndCodes(DataController frameData, EventCodeManager eventCodeManager, Dictionary<string, EventCode> sessionEventCodes)
         {
             SessionEventCodes = sessionEventCodes;
@@ -84,7 +95,7 @@ namespace USE_UI
             frameData.AddDatum("InstructionsOn", () => InstructionsOn.ToString());
         }
 
-
+        //Called by TaskLevel
         public void CreateHumanStartPanel(Canvas parent, string taskName)
         {
             HumanStartPanelGO = Instantiate(HumanStartPanelPrefab);
@@ -103,6 +114,10 @@ namespace USE_UI
 
             BackgroundPanelGO = HumanStartPanelGO.transform.Find("BackgroundPanel").gameObject;
 
+            //EndTaskButtonGO = HumanStartPanelGO.transform.Find("EndTaskButton").gameObject;
+            //Button endTaskButton = EndTaskButtonGO.AddComponent<Button>();
+            //endTaskButton.onClick.AddListener(HandleEndTask);
+
             InstructionsButtonGO = HumanStartPanelGO.transform.Find("InstructionsButton").gameObject;
             Button button = InstructionsButtonGO.AddComponent<Button>();
             button.onClick.AddListener(ToggleInstructions);
@@ -117,6 +132,18 @@ namespace USE_UI
         }
 
 
+        //public void HandleEndTask()
+        //{
+        //    if(TrialLevel != null)
+        //    {
+        //        TrialLevel.AbortCode = 5;
+        //        TrialLevel.ForceBlockEnd = true;
+        //        TrialLevel.FinishTrialCleanup();
+        //        TrialLevel.ClearActiveTrialHandlers();
+        //        TaskLevel.SpecifyCurrentState(TaskLevel.GetStateFromName("FinishTask"));
+        //    }
+        //}
+
         public void ToggleInstructions() //Used by Subject/Player to toggle Instructions
         {
             InstructionsGO.SetActive(InstructionsGO.activeInHierarchy ? false : true);
@@ -125,6 +152,7 @@ namespace USE_UI
 
         }
 
+        //Called at end of SetupTrial (TrialLevel)
         public void AdjustPanelBasedOnTrialNum(int trialCountInTask, int trialCountInBlock)
         {
             if (trialCountInTask == 0) //Show Full Human Panel With BlueBackground
@@ -152,11 +180,24 @@ namespace USE_UI
                 else if(trialCountInBlock == 0 && trialCountInTask != 0) //"New Game" - show text, playbutton, instructions
                 {
                     StartButtonGO.transform.localPosition = InitialStartButtonPosition;
-                    TitleTextGO.GetComponent<TextMeshProUGUI>().text = "New Game";
+                    TitleTextGO.GetComponent<TextMeshProUGUI>().text = "Play Again?";
                     TitleTextGO.SetActive(true);
                 }
             }
         }
+
+        //public void SetSessionLevel(ControlLevel_Session_Template sessionLevel)
+        //{
+        //    SessionLevel = sessionLevel;
+        //}
+        //public void SetTaskLevel(ControlLevel_Task_Template taskLevel)
+        //{
+        //    TaskLevel = taskLevel;
+        //}
+        //public void SetTrialLevel(ControlLevel_Trial_Template trialLevel)
+        //{
+        //    TrialLevel = trialLevel;
+        //}
 
 
         public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)

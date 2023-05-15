@@ -117,6 +117,10 @@ namespace USE_ExperimentTemplate_Trial
 
             AddAbortCodeKeys();
 
+            //if(IsHuman)
+            //    HumanStartPanel.SetTrialLevel(this);
+
+
             //DefineTrial();
             Add_ControlLevel_InitializationMethod(() =>
             {

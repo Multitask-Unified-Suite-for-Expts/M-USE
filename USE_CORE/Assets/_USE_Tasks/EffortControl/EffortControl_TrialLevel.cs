@@ -785,13 +785,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         image.rectTransform.anchoredPosition = Vector2.zero;
 
         if (MacMainDisplayBuild)
-            image.transform.localScale = new Vector3(.035f, 6f, .001f);
+            image.transform.localScale = new Vector3(.06f, 15f, .001f);
         else
-            image.transform.localScale = new Vector3(.035f, 4.5f, .001f);
+            image.transform.localScale = new Vector3(.06f, 11f, .001f);
 
 
         #if (UNITY_WEBGL && !UNITY_EDITOR)
-            image.transform.localScale = new Vector3(.035f, 6f, .001f);
+            image.transform.localScale = new Vector3(.06f, 15f, .001f);
         #endif
 
         MiddleBarrier.SetActive(false);

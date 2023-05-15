@@ -102,15 +102,17 @@ namespace USE_ExperimentTemplate_Session
         public GameObject TaskSelection_Header;
         public GameObject HumanVersionToggleButton;
         public GameObject HumanStartPanelPrefab;
-        
         public GameObject TaskSelectionCanvasGO;
 
-        public HumanStartPanel HumanStartPanel;
+        [HideInInspector] public HumanStartPanel HumanStartPanel;
 
 
         public override void LoadSettings()
         {
+            Debug.Log("LOADING SESSION SETTINGS!");
+
             HumanStartPanel = gameObject.AddComponent<HumanStartPanel>();
+            //HumanStartPanel.SetSessionLevel(this);
             HumanStartPanel.HumanStartPanelPrefab = HumanStartPanelPrefab;
 
             //If using default configs, read in the default Session/EventCode/Display Configs and write them to persistant data path:

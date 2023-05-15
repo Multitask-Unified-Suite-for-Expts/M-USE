@@ -661,7 +661,7 @@ MonoBehaviour:
   TaskSelection_Starfield: {fileID: 1391649313}
   TaskSelection_Header: {fileID: 615913943}
   HumanVersionToggleButton: {fileID: 2071187616}
-  HumanStartPanelPrefab: {fileID: 1935723817098034988, guid: 02efb5de491bd4378b33dc776ad47568,
+  HumanStartPanelPrefab: {fileID: 7569599706748818137, guid: e3a91289f22a4401bbc1f44baba80e22,
     type: 3}
   TaskSelectionCanvasGO: {fileID: 1551787081}
   HumanStartPanel: {fileID: 0}
@@ -686,6 +686,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1551787085}
     m_Modifications:
+    - target: {fileID: 207302162286543930, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 130
+      objectReference: {fileID: 0}
+    - target: {fileID: 207302162286543930, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
+        type: 3}
+      propertyPath: m_fontSizeBase
+      value: 130
+      objectReference: {fileID: 0}
     - target: {fileID: 278342826906870817, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
         type: 3}
       propertyPath: m_Name
@@ -805,6 +815,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571402754252976554, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 130
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571402754252976554, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
+        type: 3}
+      propertyPath: m_fontSizeBase
+      value: 130
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 76b66eda407b04844bc5ed4c3acfbcb4, type: 3}

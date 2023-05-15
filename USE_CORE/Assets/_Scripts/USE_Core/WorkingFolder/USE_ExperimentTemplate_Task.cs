@@ -179,6 +179,7 @@ namespace USE_ExperimentTemplate_Task
                 if (IsHuman)
                 {
                     HumanStartPanel.SetupDataAndCodes(FrameData, EventCodeManager, SessionEventCodes);
+                    //HumanStartPanel.SetTaskLevel(this);
                     Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
                     HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
                 }
@@ -205,19 +206,16 @@ namespace USE_ExperimentTemplate_Task
             {
                 if(TrialLevel != null)
                 {
-                    if(InputBroker.GetKeyUp(KeyCode.E)) //End Task
+                    if (InputBroker.GetKeyUp(KeyCode.E)) //End Task
                     {
                         TrialLevel.AbortCode = 5;
                         TrialLevel.ForceBlockEnd = true;
                         TrialLevel.FinishTrialCleanup();
-                        Debug.Log("Passed FinishTrialCleanUp!!!!!");
                         TrialLevel.ClearActiveTrialHandlers();
-                        Debug.Log("Passed Clearing active handlers!!!!");
                         SpecifyCurrentState(FinishTask);
-                        Debug.Log("SPECIFIED CURRENT STATE!");
                     }
 
-                    if(InputBroker.GetKeyUp(KeyCode.N)) //Next Block
+                    if (InputBroker.GetKeyUp(KeyCode.N)) //Next Block
                     {
                         if (TrialLevel.AudioFBController.IsPlaying())
                             TrialLevel.AudioFBController.audioSource.Stop();

@@ -107,6 +107,7 @@ namespace USE_UI
 
             StartButtonGO = HumanStartPanelGO.transform.Find("StartButton").gameObject;
             InitialStartButtonPosition = StartButtonGO.transform.localPosition;
+            StartButtonGO.AddComponent<HoverEffect>();
 
             HumanBackgroundGO = HumanStartPanelGO.transform.Find("HumanBackground").gameObject;
             HumanBackgroundGO.transform.localPosition = Task_HumanBackgroundPos_Dict[taskName];
@@ -114,10 +115,12 @@ namespace USE_UI
             BackgroundPanelGO = HumanStartPanelGO.transform.Find("BackgroundPanel").gameObject;
 
             EndTaskButtonGO = HumanStartPanelGO.transform.Find("EndTaskButton").gameObject;
+            EndTaskButtonGO.AddComponent<HoverEffect>();
             Button endTaskButton = EndTaskButtonGO.AddComponent<Button>();
             endTaskButton.onClick.AddListener(HandleEndTask);
 
             InstructionsButtonGO = HumanStartPanelGO.transform.Find("InstructionsButton").gameObject;
+            InstructionsButtonGO.AddComponent<HoverEffect>();
             Button button = InstructionsButtonGO.AddComponent<Button>();
             button.onClick.AddListener(ToggleInstructions);
 
@@ -126,8 +129,19 @@ namespace USE_UI
             InstructionsGO.SetActive(false);
             InstructionsOn = false;
 
+            AdjustButtonPositions();
+
             HumanStartPanelGO.SetActive(false);
             HumanPanelOn = false;
+        }
+
+        private void AdjustButtonPositions()
+        {
+            if(Application.isEditor)
+            {
+                InstructionsButtonGO.transform.localPosition = new Vector3(InstructionsButtonGO.transform.localPosition.x, InstructionsButtonGO.transform.localPosition.y + 44f, InstructionsButtonGO.transform.localPosition.z);
+                EndTaskButtonGO.transform.localPosition = new Vector3(EndTaskButtonGO.transform.localPosition.x, EndTaskButtonGO.transform.localPosition.y + 44f, EndTaskButtonGO.transform.localPosition.z);
+            }
         }
 
 
@@ -141,8 +155,6 @@ namespace USE_UI
                 TrialLevel.ClearActiveTrialHandlers();
                 TaskLevel.SpecifyCurrentState(TaskLevel.GetStateFromName("FinishTask"));
             }
-            else
-                Debug.Log("TRYING TO END TASK (via button), BUT THE TRIALLEVEL IS NULL!");
         }
 
         public void ToggleInstructions() //Used by Subject/Player to toggle Instructions
@@ -158,15 +170,12 @@ namespace USE_UI
         {
             if (trialCountInTask == 0) //Show Full Human Panel With BlueBackground
             {
-                if (!HumanBackgroundGO.activeInHierarchy)
-                    HumanBackgroundGO.SetActive(true);
+                HumanBackgroundGO.SetActive(true);
 
                 TitleTextGO.GetComponent<TextMeshProUGUI>().text = TaskName;
-                if (!TitleTextGO.activeInHierarchy)
-                    TitleTextGO.SetActive(true);
+                TitleTextGO.SetActive(true);
 
-                if (BackgroundPanelGO.activeSelf)
-                    BackgroundPanelGO.SetActive(false);
+                BackgroundPanelGO.SetActive(false);
             }
             else
             {
@@ -175,13 +184,15 @@ namespace USE_UI
 
                 if(trialCountInBlock > 0) //Mid block -show only playbutton and instructions
                 {
+                    //TitleTextGO.GetComponent<TextMeshProUGUI>().text = "Trial " + (trialCountInBlock + 1);
                     TitleTextGO.SetActive(false);
-                    StartButtonGO.transform.localPosition = Vector3.zero;
+                    StartButtonGO.transform.localPosition = new Vector3(InitialStartButtonPosition.x, InitialStartButtonPosition.y + 75f, InitialStartButtonPosition.z);
                 }
                 else if(trialCountInBlock == 0 && trialCountInTask != 0) //"New Game" - show text, playbutton, instructions
                 {
                     StartButtonGO.transform.localPosition = InitialStartButtonPosition;
                     TitleTextGO.GetComponent<TextMeshProUGUI>().text = "Play Again?";
+
                     TitleTextGO.SetActive(true);
                 }
             }
@@ -220,6 +231,8 @@ namespace USE_UI
             HumanStartPanelGO.SetActive(true);
             HumanPanelOn = true;
             EventCodeManager.SendCodeImmediate(SessionEventCodes["HumanStartPanelOn"]);
+            if (!StartButtonGO.activeInHierarchy)
+                StartButtonGO.SetActive(true);
         }
 
         private void InactivateOnStateTerm(object sender, EventArgs e)
@@ -265,6 +278,18 @@ namespace USE_UI
             StartButtonGO.transform.localPosition = LocalPosition;
             StartButtonGO.SetActive(false);
 
+        }
+
+        public USE_StartButton(Canvas parent)
+        {
+            StartButtonGO = new GameObject("StartButton");
+            Image = StartButtonGO.AddComponent<Image>();
+            StartButtonGO.transform.SetParent(parent.transform, false);
+            Image.rectTransform.anchoredPosition = Vector2.zero;
+            Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
+            Image.color = ButtonColor;
+            StartButtonGO.transform.localPosition = LocalPosition;
+            StartButtonGO.SetActive(false);
         }
 
         //Used by THR:

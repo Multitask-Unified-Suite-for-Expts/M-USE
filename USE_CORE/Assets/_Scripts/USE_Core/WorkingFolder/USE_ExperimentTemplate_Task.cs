@@ -206,6 +206,9 @@ namespace USE_ExperimentTemplate_Task
             {
                 if(TrialLevel != null)
                 {
+                    if(InputBroker.GetKeyUp(KeyCode.P)) //Pause Game:
+                        Time.timeScale = Time.timeScale == 1 ? 0 : 1;
+
                     if (InputBroker.GetKeyUp(KeyCode.E)) //End Task
                     {
                         TrialLevel.AbortCode = 5;
@@ -238,7 +241,7 @@ namespace USE_ExperimentTemplate_Task
 
             BlockFeedback.AddUniversalInitializationMethod(() =>
             {
-                if(BlockSummaryString != null && BlockSummaryString.Length > 0)
+                if(BlockSummaryString != null)
                 {
                     int trialsCompleted = (TrialLevel.AbortCode == 0 || TrialLevel.AbortCode == 6) ? TrialLevel.TrialCount_InBlock + 1 : TrialLevel.TrialCount_InBlock;
                     string blockTitle = $"<b>\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" +
@@ -247,13 +250,13 @@ namespace USE_ExperimentTemplate_Task
 
                     PreviousBlockSummaryString.Insert(0, BlockSummaryString); //Add current block string to full list of previous blocks. 
                     PreviousBlockSummaryString.Insert(0, blockTitle);
-                    
-                    EventCodeManager.SendCodeImmediate(SessionEventCodes["BlockFeedbackStarts"]);
                 }
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["BlockFeedbackStarts"]);
+
+                Debug.Log("BLOCK FEEDBACK INITIALIZATION METHOD ENDING!");
             });
             BlockFeedback.AddUpdateMethod(() =>
             {
-                // BlockFbFinished = true;
                 if (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= BlockFbSimpleDuration)
                     BlockFbFinished = true;
                 else
@@ -261,22 +264,40 @@ namespace USE_ExperimentTemplate_Task
             });
             BlockFeedback.AddLateUpdateMethod(() =>
             {
-                FrameData.AppendData();
+                #if (!UNITY_WEBGL)
+                    if (FrameData != null)
+                        FrameData.AppendData();
+                #endif
                 EventCodeManager.EventCodeLateUpdate();
+                Debug.Log("END OF LATE UPDATE METHOD!");
             });
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock, () =>
             {
-                BlockData.AppendData();
-                BlockData.WriteData();
+                Debug.Log("BLOCK FEEDBACK TERM 1 (more blocks to run)");
+                #if (!UNITY_WEBGL)
+                    if (BlockData != null)
+                    {
+                        BlockData.AppendData();
+                        BlockData.WriteData();
+                    }
+                #endif
             });
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask, () =>
             {
-                BlockData.AppendData();
-                BlockData.WriteData();
+                Debug.Log("BLOCK FEEDBACK TERM 2 (no more blocks to run)");
+                #if (!UNITY_WEBGL)
+                    if (BlockData != null)
+                    {
+                        BlockData.AppendData();
+                        BlockData.WriteData();
+                    }
+                #endif
             });
 
             FinishTask.AddDefaultInitializationMethod(() =>
             {
+                Debug.Log("MADE IT TO FINISH TASK INIT METHOD!");
+
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["FinishTaskStarts"]);
 
                 //Clear trialsummarystring and Blocksummarystring at end of task:
@@ -326,13 +347,13 @@ namespace USE_ExperimentTemplate_Task
 
                 Destroy(Controllers);
 
-                #if (!UNITY_WEBGL)
+#if (!UNITY_WEBGL)
                     //Destroy Text on Experimenter Display:
                     foreach (Transform child in GameObject.Find("MainCameraCopy").transform)
                     {
                         Destroy(child.gameObject);
                     }
-                #endif
+#endif
             });
 
 

@@ -151,10 +151,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 CreateObjects();
 
             CenteringSpeed = 1.5f;
-
-            #if (UNITY_WEBGL)
-                IsHuman = true;
-            #endif
         });
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
@@ -170,14 +166,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InflateBalloon);
         TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, ButtonScale, EC_CanvasGO);
 
-        RectTransform rect = EC_CanvasGO.GetComponent<Canvas>().GetComponent<RectTransform>();
-
         InitTrial.AddInitializationMethod(() =>
         {
             TokenFBController.enabled = false;
             ResetRelativeStartTime(); 
             DisableAllGameobjects();
-            StartButton.SetActive(true);
 
             ResetToOriginalPositions();
 
@@ -198,7 +191,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
-            StartButton.SetActive(false);
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
         });
 

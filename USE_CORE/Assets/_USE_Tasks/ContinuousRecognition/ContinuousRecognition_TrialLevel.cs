@@ -148,6 +148,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
+#if (UNITY_WEBGL)
+            TokenFBController.tokenSize = 110;
+#endif
+
             NumFeedbackRows = 0;
 
             if (!VariablesLoaded)
@@ -505,7 +509,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.SetFlashingTime(1f);
         HaloFBController.SetPositiveHaloColor(Color.yellow);
         HaloFBController.SetNegativeHaloColor(Color.gray);
-        HaloFBController.SetHaloSize(1f);
+        HaloFBController.SetHaloSize(1.1f);
     }
 
     void RemoveShakeStimScript(StimGroup stimGroup)

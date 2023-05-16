@@ -689,17 +689,32 @@ PrefabInstance:
     - target: {fileID: 207302162286543930, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
         type: 3}
       propertyPath: m_fontSize
-      value: 130
+      value: 135
+      objectReference: {fileID: 0}
+    - target: {fileID: 207302162286543930, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
+        type: 3}
+      propertyPath: m_lineSpacing
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 207302162286543930, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
         type: 3}
       propertyPath: m_fontSizeBase
-      value: 130
+      value: 135
+      objectReference: {fileID: 0}
+    - target: {fileID: 207302162286543930, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
+        type: 3}
+      propertyPath: m_characterSpacing
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 278342826906870817, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
         type: 3}
       propertyPath: m_Name
       value: USE_Header
+      objectReference: {fileID: 0}
+    - target: {fileID: 610458894895714152, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
+        type: 3}
+      propertyPath: offsetMultiplier
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 993263140130787404, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
         type: 3}
@@ -789,7 +804,7 @@ PrefabInstance:
     - target: {fileID: 993263140130787404, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 250
+      value: 210
       objectReference: {fileID: 0}
     - target: {fileID: 993263140130787404, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
         type: 3}
@@ -806,6 +821,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4515394295648642384, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
+        type: 3}
+      propertyPath: offsetMultiplier
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5795482201521305795, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
         type: 3}
       propertyPath: m_Name
@@ -819,12 +839,57 @@ PrefabInstance:
     - target: {fileID: 8571402754252976554, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
         type: 3}
       propertyPath: m_fontSize
-      value: 130
+      value: 135
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571402754252976554, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
+        type: 3}
+      propertyPath: m_lineSpacing
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571402754252976554, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
+        type: 3}
+      propertyPath: m_wordSpacing
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8571402754252976554, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
         type: 3}
       propertyPath: m_fontSizeBase
-      value: 130
+      value: 135
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571402754252976554, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
+        type: 3}
+      propertyPath: m_characterSpacing
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571402754252976554, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
+        type: 3}
+      propertyPath: m_fontColorGradient.topLeft.b
+      value: 0.99215686
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571402754252976554, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
+        type: 3}
+      propertyPath: m_fontColorGradient.topLeft.g
+      value: 0.92156863
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571402754252976554, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
+        type: 3}
+      propertyPath: m_fontColorGradient.topLeft.r
+      value: 0.7529412
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571402754252976554, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
+        type: 3}
+      propertyPath: m_fontColorGradient.bottomRight.b
+      value: 0.99215686
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571402754252976554, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
+        type: 3}
+      propertyPath: m_fontColorGradient.bottomRight.g
+      value: 0.92156863
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571402754252976554, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
+        type: 3}
+      propertyPath: m_fontColorGradient.bottomRight.r
+      value: 0.7529412
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 76b66eda407b04844bc5ed4c3acfbcb4, type: 3}

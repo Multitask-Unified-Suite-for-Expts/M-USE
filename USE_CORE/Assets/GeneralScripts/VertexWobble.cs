@@ -9,6 +9,10 @@ public class VertexWobble : MonoBehaviour
     Mesh mesh;
     Vector3[] vertices;
 
+    public float offsetMultiplier = 1f;
+    public float sinMultiplier = 6f;
+    public float cosMultiplier = 6f;
+
     void Start()
     {
         textMesh = GetComponent<TMP_Text>();
@@ -22,7 +26,7 @@ public class VertexWobble : MonoBehaviour
 
         for (int i = 0; i < vertices.Length; i++)
         {
-            Vector3 offset = Wobble(Time.time + i * 75);
+            Vector3 offset = Wobble(Time.time + i * offsetMultiplier);
 
             vertices[i] = vertices[i] + offset;
         }
@@ -33,6 +37,6 @@ public class VertexWobble : MonoBehaviour
 
     Vector2 Wobble(float time)
     {
-        return new Vector2(Mathf.Sin(time * 6), Mathf.Cos(time * 6));
+        return new Vector2(Mathf.Sin(time * sinMultiplier), Mathf.Cos(time * cosMultiplier));
     }
 }

@@ -109,8 +109,6 @@ namespace USE_ExperimentTemplate_Session
 
         public override void LoadSettings()
         {
-            Debug.Log("LOADING SESSION SETTINGS!");
-
             HumanStartPanel = gameObject.AddComponent<HumanStartPanel>();
             HumanStartPanel.SetSessionLevel(this);
             HumanStartPanel.HumanStartPanelPrefab = HumanStartPanelPrefab;
@@ -549,7 +547,7 @@ namespace USE_ExperimentTemplate_Session
 
                 float buttonY = 0f;
                 if(IsHuman)
-                    buttonY = -100f;
+                    buttonY = -125f;
 
                 if(TaskIconLocations.Count() != numTasks) //If user didn't specify in config, Generate default locations:
                 {
@@ -619,6 +617,7 @@ namespace USE_ExperimentTemplate_Session
                         else
                             image.color = new Color(.5f, .5f, .5f, .35f);
                     }
+                    taskButton.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
                     count++;
                 }
 
@@ -859,7 +858,7 @@ namespace USE_ExperimentTemplate_Session
             //Toggle Starfield:
             TaskSelection_Starfield.SetActive(TaskSelection_Starfield.activeInHierarchy ? false : true);
             //push task buttons up to 0 Y for humans, or back to -100 Y for monkeys
-            TaskButtons.transform.localPosition = new Vector3(TaskButtons.transform.localPosition.x, TaskButtons.transform.localPosition.y + (IsHuman ? -100f : 100f), TaskButtons.transform.localPosition.z);
+            TaskButtons.transform.localPosition = new Vector3(TaskButtons.transform.localPosition.x, TaskButtons.transform.localPosition.y + (IsHuman ? -125f : 125f), TaskButtons.transform.localPosition.z);
 
         }
 

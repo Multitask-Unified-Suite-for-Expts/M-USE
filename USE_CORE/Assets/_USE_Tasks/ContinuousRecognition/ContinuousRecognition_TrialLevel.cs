@@ -134,11 +134,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
-        SetupTrial.AddInitializationMethod(() =>
-        {
-            if (!CR_CanvasGO.activeInHierarchy)
-                CR_CanvasGO.SetActive(true);
-        });
+        SetupTrial.AddInitializationMethod(() => CR_CanvasGO.SetActive(true));
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------

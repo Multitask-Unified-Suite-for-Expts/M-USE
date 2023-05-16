@@ -45,11 +45,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
         trialLevel.MaterialFilePath = ContextExternalFilePath;
 
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartWithBlueSquare"))
-            trialLevel.StartWithBlueSquare = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StartWithBlueSquare");
+        SetSettings();
 
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
@@ -96,6 +92,30 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             ReleasedLate_Task += trialLevel.NumReleasedLate_Block;
             TouchesMovedOutside_Task += trialLevel.NumTouchesMovedOutside_Block;
         });
+    }
+
+    public void SetSettings()
+    {
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
+            trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartWithBlueSquare"))
+            trialLevel.StartWithBlueSquare = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StartWithBlueSquare");
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+            trialLevel.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+        else
+            trialLevel.ButtonPosition = new Vector3(0, 0, 0);
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+            trialLevel.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+        else
+            trialLevel.ButtonScale = 120f;
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
+            trialLevel.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
+        else
+            trialLevel.TouchFeedbackDuration = .3f;
     }
 
     public override void SetTaskSummaryString()

@@ -539,7 +539,7 @@ namespace USE_ExperimentTemplate_Session
                 else
                 {
                     buttonSize = 188f;
-                    buttonSpacing = 15f;
+                    buttonSpacing = 18f;
                 }
 
                 float buttonsWidth = numTasks * buttonSize + (numTasks - 1) * buttonSpacing;

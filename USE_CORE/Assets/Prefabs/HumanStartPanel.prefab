@@ -87,6 +87,7 @@ GameObject:
   - component: {fileID: 153646360527862759}
   - component: {fileID: 1413524613918861254}
   - component: {fileID: 323591683072650338}
+  - component: {fileID: 4719990270177543711}
   m_Layer: 0
   m_Name: TitleText
   m_TagString: Untagged
@@ -214,6 +215,21 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &4719990270177543711
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 632577720301088757}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f16bbc8c297044889a29aebfe65e7e77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  offsetMultiplier: 1
+  sinMultiplier: 6
+  cosMultiplier: 6
 --- !u!1 &5342301943932532252
 GameObject:
   m_ObjectHideFlags: 0
@@ -699,6 +715,11 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1811662609282816253, guid: 93419784e89194a7681687af1565a6da,
+        type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: b6ed9fc9dd1a849638b7a6a0732d8e43, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 93419784e89194a7681687af1565a6da, type: 3}
 --- !u!224 &1066302787151821071 stripped
@@ -829,6 +850,11 @@ PrefabInstance:
       propertyPath: m_fontSizeBase
       value: 1.25
       objectReference: {fileID: 0}
+    - target: {fileID: 822179833297103344, guid: 24fc34bed3aaa4463a30eae6cbf66282,
+        type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: b6ed9fc9dd1a849638b7a6a0732d8e43, type: 2}
     - target: {fileID: 1322999733226524500, guid: 24fc34bed3aaa4463a30eae6cbf66282,
         type: 3}
       propertyPath: m_Pivot.x

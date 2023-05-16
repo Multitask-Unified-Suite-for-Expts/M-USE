@@ -84,16 +84,15 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.ResetBlockVariables();
             CalculateBlockSummaryString();
 
-
         });
 
         BlockFeedback.AddInitializationMethod(() =>
         {
-            CalculateBlockAverages();
-            CalculateStanDev();
-            AddBlockValuesToTaskValues();
-
             #if (!UNITY_WEBGL)
+                CalculateBlockAverages();
+                CalculateStanDev();
+                AddBlockValuesToTaskValues();
+
                 if (trialLevel.AbortCode == 0)
                 {
                     CurrentBlockString += "\n" + "\n";

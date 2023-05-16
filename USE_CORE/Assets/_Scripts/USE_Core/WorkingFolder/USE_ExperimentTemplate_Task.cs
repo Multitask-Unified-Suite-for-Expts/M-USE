@@ -252,8 +252,6 @@ namespace USE_ExperimentTemplate_Task
                     PreviousBlockSummaryString.Insert(0, blockTitle);
                 }
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["BlockFeedbackStarts"]);
-
-                Debug.Log("BLOCK FEEDBACK INITIALIZATION METHOD ENDING!");
             });
             BlockFeedback.AddUpdateMethod(() =>
             {
@@ -264,40 +262,30 @@ namespace USE_ExperimentTemplate_Task
             });
             BlockFeedback.AddLateUpdateMethod(() =>
             {
-                #if (!UNITY_WEBGL)
-                    if (FrameData != null)
-                        FrameData.AppendData();
-                #endif
+                if (StoreData)
+                    FrameData.AppendData();
+
                 EventCodeManager.EventCodeLateUpdate();
-                Debug.Log("END OF LATE UPDATE METHOD!");
             });
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock, () =>
             {
-                Debug.Log("BLOCK FEEDBACK TERM 1 (more blocks to run)");
-                #if (!UNITY_WEBGL)
-                    if (BlockData != null)
-                    {
-                        BlockData.AppendData();
-                        BlockData.WriteData();
-                    }
-                #endif
+                if (StoreData)
+                {
+                    BlockData.AppendData();
+                    BlockData.WriteData();
+                }
             });
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask, () =>
             {
-                Debug.Log("BLOCK FEEDBACK TERM 2 (no more blocks to run)");
-                #if (!UNITY_WEBGL)
-                    if (BlockData != null)
-                    {
-                        BlockData.AppendData();
-                        BlockData.WriteData();
-                    }
-                #endif
+                if (StoreData)
+                {
+                    BlockData.AppendData();
+                    BlockData.WriteData();
+                }
             });
 
             FinishTask.AddDefaultInitializationMethod(() =>
             {
-                Debug.Log("MADE IT TO FINISH TASK INIT METHOD!");
-
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["FinishTaskStarts"]);
 
                 //Clear trialsummarystring and Blocksummarystring at end of task:

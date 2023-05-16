@@ -15,7 +15,7 @@ public class GazeTracker : InputTracker
         frameData.AddDatum("ShotgunModalTarget", () => ShotgunModalTarget != null ? ShotgunModalTarget.name : null);
     }
 
-    public override GameObject FindCurrentTarget()
+    public override void FindCurrentTarget()
     {
         CurrentInputScreenPosition = InputBroker.gazePosition;
 
@@ -36,17 +36,11 @@ public class GazeTracker : InputTracker
             }
 
             ShotgunModalTarget = ShotgunRaycast.ModalShotgunTarget(proportions);
-            
-            if (ShotgunModalTarget != null)
-                return ShotgunModalTarget;
 
             //Find Current Target and return it if found:
             SimpleRaycastTarget = InputBroker.RaycastBoth(CurrentInputScreenPosition.Value);
-            if (SimpleRaycastTarget != null)
-                return SimpleRaycastTarget;
 
         }
-        return null;
     }
     public override void CustomUpdate()
     {

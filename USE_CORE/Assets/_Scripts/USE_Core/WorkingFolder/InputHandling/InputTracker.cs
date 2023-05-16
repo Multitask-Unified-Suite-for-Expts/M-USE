@@ -61,7 +61,7 @@ public abstract class InputTracker : MonoBehaviour
     private void Update()
     {
         CustomUpdate();
-        TargetedGameObject = FindCurrentTarget();
+        FindCurrentTarget();
         /*if (TargetedGameObject.GetComponent<StimDefPointer>() != null)
             TargetedStimDef = TargetedGameObject.GetComponent<StimDefPointer>().StimDef;
         else
@@ -71,7 +71,7 @@ public abstract class InputTracker : MonoBehaviour
 
     public abstract void AddFieldsToFrameData(DataController frameData);
 
-    public abstract GameObject FindCurrentTarget();
+    public abstract void FindCurrentTarget();
 
     public virtual void CustomUpdate() //Anything a particular tracker needs to track that isn't a target neccessarily (ex: click count). 
     {

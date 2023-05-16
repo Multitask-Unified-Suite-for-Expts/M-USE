@@ -50,6 +50,7 @@ public class ShotgunRaycast : MonoBehaviour
 		float participantDistanceToScreenCm = customParticipantDistanceToScreen == null ? ParticipantDistance_CM : customParticipantDistanceToScreen.Value;
 		float raycastLengthWorldUnits = customRaycastLengthWorldUnits == null ? ShotgunRayLengthWorldUnits : customRaycastLengthWorldUnits.Value;
 
+
         //find cm and pixel size of radius visualAngle at surface of screen
         float radCm = 2 * participantDistanceToScreenCm * (Mathf.Tan((Mathf.PI * radiusDVA / 180f) / 2));
 		float radPix = 50;

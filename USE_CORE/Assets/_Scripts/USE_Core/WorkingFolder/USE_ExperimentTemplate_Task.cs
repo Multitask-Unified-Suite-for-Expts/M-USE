@@ -464,16 +464,13 @@ namespace USE_ExperimentTemplate_Task
 
             TrialLevel.MouseTracker = inputTrackers.GetComponent<MouseTracker>();
             TrialLevel.MouseTracker.Init(FrameData, 0);
+            TrialLevel.MouseTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
             if (EyeTrackerActive)
-
-
-            /*TrialLevel.GazeTracker = inputTrackers.GetComponent<GazeTracker>();
-            if (!string.IsNullOrEmpty(EyetrackerType) & EyetrackerType.ToLower() != "none" &
-                EyetrackerType.ToLower() != "null")
             {
+                //MAYBE DON'T NEED TO GATE, CHECK - SD
+                TrialLevel.GazeTracker = inputTrackers.GetComponent<GazeTracker>();
                 TrialLevel.GazeTracker.Init(FrameData, 0);
-            }*/
-
+            }
             TrialLevel.SelectionType = SelectionType;
 
             Controllers.SetActive(false);

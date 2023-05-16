@@ -114,12 +114,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 CreateResultContainer();
             }
             
-            // **USED FOR DEBUGGING, DELETE ONCE DONE
-            PlayerTextGO = PlayerViewPanel.CreateTextObject("PlayerText", "Gaze Location", Color.black, new Vector2(960, 540), new Vector2(2, 2), GC_CanvasGO.transform);
-
-            /* DISCUSS IF WE WANT TO INPUT OR USE THE SYSTEM GENERATED DISPLAY - SD
-            screenWidth = (MonitorDetails.CmSize.x)*10;
-            screenHeight = (MonitorDetails.CmSize.y)*10;*/
             MonitorDetails = new MonitorDetails(new Vector2(1920, 1080), new Vector2(43.5f, 24.0f));
         });
 
@@ -143,11 +137,12 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         if (SpoofGazeWithMouse)
         {
-            SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseHover", Init, ITI);
+            SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseHover", MouseTracker, Init, ITI);
         }
         else
         {
-            SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "GazeSelection", Init, ITI);
+            GazeTracker GazeTracker = new GazeTracker(); //MOVE TO SESSION LEVEL
+            SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "GazeSelection", GazeTracker, Init, ITI);
         }
 
         Init.AddInitializationMethod(() =>
@@ -174,8 +169,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 numCalibPoints = 1;
             
             // **USED FOR DEBUGGING, DELETE ONCE DONE
-            PlayerTextGO.GetComponent<UnityEngine.UI.Text>().text = SelectionHandler.CurrentInputLocation().ToString();
-            PlayerTextGO.SetActive(true);
+           // PlayerTextGO.GetComponent<UnityEngine.UI.Text>().text = SelectionHandler.CurrentInputLocation().ToString();
+            //PlayerTextGO.SetActive(true);
             // **
         });
         
@@ -215,11 +210,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             // Blinks the current calibration point until the acceptable calibration is met or keyboard override is triggered
             BlinkCalibrationPoint(CalibCircle.CircleGO);
             keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space);
-
-            // **USED FOR DEBUGGING, DELETE ONCE DONE
-            PlayerTextGO.GetComponent<UnityEngine.UI.Text>().text = SelectionHandler.CurrentInputLocation().ToString();
-            // **
-
         });
 
         Blink.SpecifyTermination(() => keyboardOverride || InCalibrationRange(), Shrink, () => { InfoString.Clear(); });
@@ -493,32 +483,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
                 RecalibCount = new int[3];
                 break;
-            /*case 1:
-                NormalizedPoint2D[] originalPoints = new NormalizedPoint2D[numCalibPoints];
-                switch (numCalibPoints)
-                {
-                    case 9:
-                        originalPoints = allCalibPoints;
-                        break;
-                    case 5:
-                        originalPoints = new NormalizedPoint2D[5] {
-                        allCalibPoints [4],
-                        allCalibPoints [0],
-                        allCalibPoints [2],
-                        allCalibPoints [6],
-                        allCalibPoints [8]
-                        };
-                        break;
-                    case 3:
-                        originalPoints = new NormalizedPoint2D[3] {
-                        allCalibPoints [4],
-                        allCalibPoints [3],
-                        allCalibPoints [5]
-                        };
-                        break;
-                }
-                calibPointsADCS = new NormalizedPoint2D[1] { originalPoints[recalibratePoint - 1] };
-                break;*/
         }
     }
     private void BlinkCalibrationPoint(GameObject go)
@@ -566,23 +530,13 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     public void DetermineCollectDataStatus(NormalizedPoint2D point)
     {
-        Debug.Log($"THIS IS THE POINT THAT I AM COLLECTING ({String.Format("{0:0.000}", point.X)}, {String.Format("{0:0.000}", point.Y)})");
         CalibrationStatus status = ScreenBasedCalibration.CollectData(point);
         
         if (status.Equals(CalibrationStatus.Success))
         {
             // Done calibrating the point if successful
             currentCalibrationPointFinished = true;
-        }/*
-        else if (status.Equals(CalibrationStatus.Failure))
-        {
-            // Continue calibrating the point if failure
-            currentCalibrationPointFinished = false;
         }
-        else //unkown message type
-        {
-            currentCalibrationPointFinished = false;
-        }*/
     }
     
     public Vector2 ADCSToScreen(NormalizedPoint2D normADCSGazePoint)
@@ -631,17 +585,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
                 LeftSamples.Add(leftSamplePos);
                 RightSamples.Add(rightSamplePos);
-
-                /*// Create objects to represent the sample on the experimenter display
-
-                USE_Circle leftSampleCircle = new USE_Circle(GC_CanvasGO.GetComponent<Canvas>(), leftSamplePos, 0.05f, $"L {i}");
-                USE_Circle rightSampleCircle = new USE_Circle(GC_CanvasGO.GetComponent<Canvas>(), rightSamplePos, 0.05f, $"R {i}");
-
-                leftSampleCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.cyan;
-                rightSampleCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.magenta;
-
-                 leftSampleCircle.CircleGO.SetActive(true);
-                 rightSampleCircle.CircleGO.SetActive(true);*/
 
             }
         }

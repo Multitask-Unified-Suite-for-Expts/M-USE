@@ -13,7 +13,7 @@ namespace SelectionTracking
         public List<string> TaskHandlerNames = new List<string>();
         public List<string> TrialHandlerNames = new List<string>();
 
-        public SelectionHandler SetupSelectionHandler(string handlerLevel, string handlerName, State setActiveOnInit = null, State setInactiveOnTerm = null)
+        public SelectionHandler SetupSelectionHandler(string handlerLevel, string handlerName, InputTracker inputTracker, State setActiveOnInit = null, State setInactiveOnTerm = null)
         {
             if (!HandlerLevelValid(handlerLevel))
                 return null;
@@ -22,6 +22,7 @@ namespace SelectionTracking
                 SelectionHandler newHandler = GetDefaultSelectionHandler(handlerName);
                 newHandler.HandlerName = handlerName;
                 newHandler.HandlerLevel = handlerLevel.ToLower();
+                newHandler.InputTracker = inputTracker;
                 newHandler.selectionTracker = this;
                 if (setActiveOnInit != null)
                     setActiveOnInit.StateInitializationFinished += newHandler.AddToActiveHandlers;
@@ -326,8 +327,12 @@ namespace SelectionTracking
                         CheckTermination();
                     return;
                 }
-                //if we have reached this point we know there is input ##CHECK THIS -sd
-                currentTarget = InputTracker.FindCurrentTarget();
+                
+                //if we have reached this point we know there is input
+                if (HandlerName.ToLower().Contains("shotgun"))
+                    currentTarget = InputTracker.ShotgunModalTarget;
+                else
+                    currentTarget = InputTracker.SimpleRaycastTarget;
 
                 if (currentTarget == null) //input is not over a gameobject
                 {

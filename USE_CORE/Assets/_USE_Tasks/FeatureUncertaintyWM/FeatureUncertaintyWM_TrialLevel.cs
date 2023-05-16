@@ -184,7 +184,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, SearchDisplay);
+        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", MouseTracker, InitTrial, SearchDisplay);
         TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, StartButtonScale, taskCanvas);
 
         InitTrial.AddInitializationMethod(() =>

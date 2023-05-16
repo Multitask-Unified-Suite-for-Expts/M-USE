@@ -137,8 +137,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
         var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, SearchDisplay);
-        ShotgunHandler.shotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale, VS_CanvasGO);
+        MouseTracker mouseTracker = new MouseTracker();
+        mouseTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA); TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale, VS_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {

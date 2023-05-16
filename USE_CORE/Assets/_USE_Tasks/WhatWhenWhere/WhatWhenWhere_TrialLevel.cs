@@ -208,7 +208,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddTimer(()=> sbDelay, InitTrial);
 
         var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, FinalFeedback);
-        ShotgunHandler.shotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
+        MouseTracker mouseTracker = new MouseTracker();
+        mouseTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
         TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale, WWW_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>

@@ -433,41 +433,6 @@ namespace SelectionTracking
                 }
             }
 
-            /*private GameObject FindCurrentTarget(Vector3? inputLocation) MOVED TO INPUT TRACKER
-            {
-                if (inputLocation.Value.x < 0 || inputLocation.Value.y < 0 || inputLocation.Value.x > Screen.width || inputLocation.Value.y > Screen.height ||
-                    float.IsNaN(inputLocation.Value.x) || float.IsNaN(inputLocation.Value.y) || float.IsNaN(inputLocation.Value.z))
-                    inputLocation = null;
-
-                if (inputLocation != null)
-                {
-                    if(HandlerName == "TouchShotgun")
-                    {
-                        //Find Current Shotgun Target:
-                        Dictionary<GameObject, float> proportions = shotgunRaycast.RaycastShotgunProportions(inputLocation.Value, Camera.main);
-                        ShotgunGoAboveThreshold.Clear();
-
-                        foreach (var pair in proportions)
-                        {
-                            if (pair.Value > ShotgunThreshold)
-                                ShotgunGoAboveThreshold.Add(pair.Key);
-                        }
-                        ShotgunModalTarget = shotgunRaycast.ModalShotgunTarget(proportions);
-                        if(ShotgunModalTarget != null)
-                            return ShotgunModalTarget;
-                    }
-                    else //They're using a different handler, so do normal raycastBoth instead of shotgun
-                    {
-                        //Find Current Target and return it if found:
-                        GameObject SimpleRaycastTarget = InputBroker.RaycastBoth(inputLocation.Value);
-                        if (SimpleRaycastTarget != null)
-                            return SimpleRaycastTarget;
-                    }
-                }
-                return null;
-            }*/
-
-
             public delegate GameObject GoDelegate();
 
             public delegate Vector3 InputDelegate();

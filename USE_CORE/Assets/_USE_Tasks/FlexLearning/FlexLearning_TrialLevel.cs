@@ -145,7 +145,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
         var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, SearchDisplay);
-        ShotgunHandler.shotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
+        MouseTracker mouseTracker = new MouseTracker();
+        mouseTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
         TouchFBController.EnableTouchFeedback(ShotgunHandler, .3f, StartButtonScale, FL_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>

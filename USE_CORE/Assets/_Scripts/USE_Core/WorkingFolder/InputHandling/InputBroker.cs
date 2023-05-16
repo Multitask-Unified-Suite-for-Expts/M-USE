@@ -341,11 +341,12 @@ public class InputBroker
         else
         {
             DisplayArea displayArea = IEyeTracker.GetDisplayArea();
-            EyeTracker eyeTracker = GameObject.Find("[EyeTracker]").GetComponent<EyeTracker>(); //REPLACE WITH SOMETHING MORE UNIVERSAL
+            EyeTracker eyeTracker = GameObject.Find("[EyeTracker]").GetComponent<EyeTracker>(); 
            // EyeTracker eyeTracker = IEyeTracker as EyeTracker;
 
-            Vector2 MonitorResolution = new Vector2(1920, 1080);
-			// Get the most recent gaze data point
+			// Derive Monitor Resolution in a more Generic way
+            Vector2 MonitorResolution = new Vector2(1920, 1080);//REPLACE WITH SOMETHING MORE UNIVERSAL
+            // Get the most recent gaze data point
             var gazeData = eyeTracker?.LatestGazeData;
 
 			if (gazeData != null)

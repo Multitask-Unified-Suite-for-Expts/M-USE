@@ -759,11 +759,10 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
             {
                 if (stim.IsTarget)
                 {
-                    textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent);
+                    textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent);
                     textLocation.y += 50;
                     Vector2 textSize = new Vector2(200, 200);
-                    playerViewText = playerView.WriteText("TargetText", "TARGET",
-                        Color.red, textLocation, textSize, playerViewParent);
+                    playerViewText = playerView.CreateTextObject("TargetText", "TARGET",Color.red, textLocation, textSize, playerViewParent);
                     playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                     playerViewTextList.Add(playerViewText);
                     playerViewLoaded = true;

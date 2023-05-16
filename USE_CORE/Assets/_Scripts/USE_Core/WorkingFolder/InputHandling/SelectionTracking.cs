@@ -213,12 +213,7 @@ namespace SelectionTracking
             public USE_Selection LastUnsuccessfulSelection;
             public USE_Selection OngoingSelection;
             public List<USE_Selection> AllSelections, SuccessfulSelections, UnsuccessfulSelections;
-
-
-            public ShotgunRaycast shotgunRaycast;
-            private float ShotgunThreshold;
-            private List<GameObject> ShotgunGoAboveThreshold;
-            public GameObject ShotgunCurrentTarget;
+            public InputTracker InputTracker; 
 
             private GameObject currentTarget;
             public float? MinDuration, MaxDuration;
@@ -230,6 +225,7 @@ namespace SelectionTracking
             public string HandlerName;
             public string HandlerLevel;
             public bool HandlerActive;
+
 
             public event EventHandler<TouchFBController.TouchFeedbackArgs> TouchErrorFeedback;
 
@@ -251,10 +247,6 @@ namespace SelectionTracking
                 LastSelection = new USE_Selection(null);
                 LastSuccessfulSelection = new USE_Selection(null);
                 LastUnsuccessfulSelection = new USE_Selection(null);
-
-                ShotgunCurrentTarget = null;
-                ShotgunGoAboveThreshold = new List<GameObject>();
-                shotgunRaycast = GameObject.Find("MiscScripts").GetComponent<ShotgunRaycast>();
             }
 
             public SelectionHandler(InputDelegate inputLoc = null, float? minDuration = null, float? maxDuration = null,
@@ -334,8 +326,9 @@ namespace SelectionTracking
                         CheckTermination();
                     return;
                 }
-                //if we have reached this point we know there is input
-                currentTarget = FindCurrentTarget(CurrentInputLocation());
+                //if we have reached this point we know there is input ##CHECK THIS -sd
+                currentTarget = InputTracker.FindCurrentTarget();
+
                 if (currentTarget == null) //input is not over a gameobject
                 {
                     if (OngoingSelection != null) // the previous frame was a selection
@@ -440,7 +433,7 @@ namespace SelectionTracking
                 }
             }
 
-            private GameObject FindCurrentTarget(Vector3? inputLocation)
+            /*private GameObject FindCurrentTarget(Vector3? inputLocation) MOVED TO INPUT TRACKER
             {
                 if (inputLocation.Value.x < 0 || inputLocation.Value.y < 0 || inputLocation.Value.x > Screen.width || inputLocation.Value.y > Screen.height ||
                     float.IsNaN(inputLocation.Value.x) || float.IsNaN(inputLocation.Value.y) || float.IsNaN(inputLocation.Value.z))
@@ -459,20 +452,20 @@ namespace SelectionTracking
                             if (pair.Value > ShotgunThreshold)
                                 ShotgunGoAboveThreshold.Add(pair.Key);
                         }
-                        ShotgunCurrentTarget = shotgunRaycast.ModalShotgunTarget(proportions);
-                        if(ShotgunCurrentTarget != null)
-                            return ShotgunCurrentTarget;
+                        ShotgunModalTarget = shotgunRaycast.ModalShotgunTarget(proportions);
+                        if(ShotgunModalTarget != null)
+                            return ShotgunModalTarget;
                     }
                     else //They're using a different handler, so do normal raycastBoth instead of shotgun
                     {
                         //Find Current Target and return it if found:
-                        GameObject hitObject = InputBroker.RaycastBoth(inputLocation.Value);
-                        if (hitObject != null)
-                            return hitObject;
+                        GameObject SimpleRaycastTarget = InputBroker.RaycastBoth(inputLocation.Value);
+                        if (SimpleRaycastTarget != null)
+                            return SimpleRaycastTarget;
                     }
                 }
                 return null;
-            }
+            }*/
 
 
             public delegate GameObject GoDelegate();
@@ -526,10 +519,10 @@ namespace SelectionTracking
             public BoolDelegate DefaultConditions(string ConditionName)
             {
                 Dictionary<string, BoolDelegate> DefaultConditions = new Dictionary<string, BoolDelegate>();
-                DefaultConditions.Add("ShotgunRaycastHitsProportion", () => ShotgunGoAboveThreshold.Count > 0);
+                DefaultConditions.Add("ShotgunRaycastHitsProportion", () => InputTracker.ShotgunGoAboveThreshold.Count > 0);
                 DefaultConditions.Add("ShotgunRaycastHitsPreviouslyHitGO", () => DefaultConditions["ShotgunRaycastHitsProportion"]() &&
                                                                             OngoingSelection != null &&
-                                                                            ShotgunCurrentTarget == OngoingSelection.SelectedGameObject);
+                                                                            InputTracker.ShotgunModalTarget == OngoingSelection.SelectedGameObject);
                 DefaultConditions.Add("RaycastHitsAGameObject", () => currentTarget != null);
                 DefaultConditions.Add("RaycastHitsSameObjectAsPreviousFrame", () => DefaultConditions["RaycastHitsAGameObject"]() &&
                                                                                    OngoingSelection != null &&

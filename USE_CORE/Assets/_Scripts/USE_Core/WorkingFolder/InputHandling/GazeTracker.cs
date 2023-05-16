@@ -8,90 +8,48 @@ using System.Linq;
 
 public class GazeTracker : InputTracker
 {
-    // ================== DELETE THIS CLASS, EVERYTHING IS IMPLEMENTED IN EITHER THE INPUT BROKER OR SELECTION TRACKING ===============
-
-
-    // private Vector3 CurrentSelectionLocation = new Vector3 (-1f, -1f, -1f);
-   // public bool SpoofGazeWithMouse = true;
-    private GameObject HoverObject;
-
     public override void AddFieldsToFrameData(DataController frameData)
     {
         frameData.AddDatum("GazePosition", () => CurrentInputScreenPosition);
-     //   frameData.AddDatum("HoverObject", () => HoverObject != null ? HoverObject.name : null);
+        frameData.AddDatum("SimpleRaycastTarget", () => SimpleRaycastTarget != null ? SimpleRaycastTarget.name : null);
+        frameData.AddDatum("ShotgunModalTarget", () => ShotgunModalTarget != null ? ShotgunModalTarget.name : null);
     }
 
     public override GameObject FindCurrentTarget()
     {
-        //OUT OF DATE WITH RECENT SELECTION HANDLING CHANGES
+        CurrentInputScreenPosition = InputBroker.gazePosition;
 
-        /*if (CurrentInputScreenPosition != null)
+        if (CurrentInputScreenPosition.Value.x < 0 || CurrentInputScreenPosition.Value.y < 0 || CurrentInputScreenPosition.Value.x > Screen.width || CurrentInputScreenPosition.Value.y > Screen.height ||
+                    float.IsNaN(CurrentInputScreenPosition.Value.x) || float.IsNaN(CurrentInputScreenPosition.Value.y) || float.IsNaN(CurrentInputScreenPosition.Value.z))
+            CurrentInputScreenPosition = null;
+
+        if (CurrentInputScreenPosition != null)
         {
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(CurrentInputScreenPosition.Value), out RaycastHit hit, Mathf.Infinity))
+            //Find Current Shotgun Target:
+            Dictionary<GameObject, float> proportions = ShotgunRaycast.RaycastShotgunProportions(CurrentInputScreenPosition.Value, Camera.main);
+            ShotgunGoAboveThreshold.Clear();
+
+            foreach (var pair in proportions)
             {
-                HoverObject = hit.transform.root.gameObject;
-                return HoverObject;
+                if (pair.Value > ShotgunThreshold)
+                    ShotgunGoAboveThreshold.Add(pair.Key);
             }
-        }*/
+
+            ShotgunModalTarget = ShotgunRaycast.ModalShotgunTarget(proportions);
+            
+            if (ShotgunModalTarget != null)
+                return ShotgunModalTarget;
+
+            //Find Current Target and return it if found:
+            SimpleRaycastTarget = InputBroker.RaycastBoth(CurrentInputScreenPosition.Value);
+            if (SimpleRaycastTarget != null)
+                return SimpleRaycastTarget;
+
+        }
         return null;
     }
     public override void CustomUpdate()
     {
-        /*// Get the connected eye tracker
-        IEyeTracker IEyeTracker = EyeTrackingOperations.FindAllEyeTrackers()[0];
-        if (IEyeTracker == null)
-        {
-            Debug.LogError("Could not find the eye tracker.");
-        }
-        else
-        {
-            DisplayArea displayArea = IEyeTracker.GetDisplayArea();
-            EyeTracker eyeTracker = GameObject.Find("[EyeTracker]").GetComponent<EyeTracker>();
-            // Get the most recent gaze data point
-            var gazeData = eyeTracker?.LatestGazeData;
-            Vector3? screenPoint = null;
-            if (gazeData != null)
-            {
-                // Get the gaze points for each eye
-                var leftGazePoint = gazeData.Left.GazePointOnDisplayArea;
-                var rightGazePoint = gazeData.Right.GazePointOnDisplayArea;
-
-                // Check if both eyes are valid
-                if (gazeData.Left.GazePointValid && gazeData.Right.GazePointValid)
-                {
-                    // Average the gaze points from both eyes
-                    var combinedGazePoint = new Vector2(
-                        (leftGazePoint.x + rightGazePoint.x) / 2f,
-                        (leftGazePoint.y + rightGazePoint.y) / 2f);
-
-                    // Convert the combined gaze point to screen coordinates
-                    screenPoint = new Vector2(
-                        displayArea.TopLeft.X + combinedGazePoint.x * displayArea.Width,
-                        displayArea.TopLeft.Y + combinedGazePoint.y * displayArea.Height);
-                }
-                else if (gazeData.Left.GazePointValid)
-                {
-                    // Use the gaze point from the left eye
-                    screenPoint = new Vector2(
-                        displayArea.TopLeft.X + leftGazePoint.x * displayArea.Width,
-                        displayArea.TopLeft.Y + leftGazePoint.y * displayArea.Height);
-                }
-                else if (gazeData.Right.GazePointValid)
-                {
-                    // Use the gaze point from the right eye
-                    screenPoint = new Vector2(
-                        displayArea.TopLeft.X + rightGazePoint.x * displayArea.Width,
-                        displayArea.TopLeft.Y + rightGazePoint.y * displayArea.Height);
-                }
-
-                CurrentInputScreenPosition = screenPoint;
-            }
-            else
-            {
-                CurrentInputScreenPosition = null;
-            }
-        }*/
-        
 
     }
 

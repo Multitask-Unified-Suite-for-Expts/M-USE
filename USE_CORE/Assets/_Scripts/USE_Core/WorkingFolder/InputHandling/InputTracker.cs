@@ -3,14 +3,22 @@ using USE_Data;
 using USE_States;
 using USE_StimulusManagement;
 using System;
+using System.Collections.Generic;
 
 public abstract class InputTracker : MonoBehaviour
 {
     private DataController FrameData;
-    public GameObject TargetedGameObject; //Is there an Object where they're looking/touching/click?
+    public GameObject TargetedGameObject;
     public StimDef TargetedStimDef;
     protected int AllowedDisplay = -1;
-    public Vector3? CurrentInputScreenPosition; //Where is my Gaze?
+    public Vector3? CurrentInputScreenPosition;
+
+    public List<GameObject> ShotgunGoAboveThreshold;
+    public GameObject ShotgunModalTarget;
+    public GameObject SimpleRaycastTarget;
+
+    public ShotgunRaycast ShotgunRaycast;
+    public float ShotgunThreshold;
     // private event EventHandler<EventArgs> SelectionHandler_UpdateTarget;
 
     public delegate bool IsSelectionPossible();
@@ -46,16 +54,18 @@ public abstract class InputTracker : MonoBehaviour
     {
         AddFieldsToFrameData(frameData);
         AllowedDisplay = allowedDisplay;
+
+        ShotgunRaycast = GameObject.Find("MiscScripts").GetComponent<ShotgunRaycast>();
     }
 
     private void Update()
     {
         CustomUpdate();
         TargetedGameObject = FindCurrentTarget();
-        if (TargetedGameObject.GetComponent<StimDefPointer>() != null)
+        /*if (TargetedGameObject.GetComponent<StimDefPointer>() != null)
             TargetedStimDef = TargetedGameObject.GetComponent<StimDefPointer>().StimDef;
         else
-            TargetedStimDef = null;
+            TargetedStimDef = null;*/
         // SelectionHandler_UpdateTarget?.Invoke(this, EventArgs.Empty); //if TargetUpdated has any content, run SelectionHandler UpdateTarget method
     }
 

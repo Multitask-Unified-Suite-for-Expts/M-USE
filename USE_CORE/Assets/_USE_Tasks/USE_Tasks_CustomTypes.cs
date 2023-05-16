@@ -13,6 +13,7 @@ using THR_Namespace;
 //using Kia_Task_Namespace;
 using MazeReactionTest_Namespace;
 using FeatureUncertaintyWM_Namespace;
+using GazeCalibration_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -141,6 +142,16 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(FeatureUncertaintyWM_BlockDef),
                 TrialDefType = typeof(FeatureUncertaintyWM_TrialDef),
                 StimDefType = typeof(FeatureUncertaintyWM_StimDef)
+            }
+        },{
+            "GazeCalibration", new TaskTypes
+            {
+                TaskLevelType = typeof(GazeCalibration_TaskLevel),
+                TrialLevelType = typeof(GazeCalibration_TrialLevel),
+                TaskDefType = typeof(GazeCalibration_TaskDef),
+                BlockDefType = typeof(GazeCalibration_BlockDef),
+                TrialDefType = typeof(GazeCalibration_TrialDef),
+                StimDefType = typeof(GazeCalibration_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

@@ -142,5 +142,6 @@ namespace FeatureUncertaintyWM_Namespace
         //componentObjIndices= {57, 10, 23}
         public float[] radius;
         public bool IsTarget;
+        public int StimTrialRewardMag;
     }
 }

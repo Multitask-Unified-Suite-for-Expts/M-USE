@@ -79,9 +79,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private int[] RecalibCount;
 
     // Experimenter Display Text Variables
-    private StringBuilder Instructions = new StringBuilder();
-    private StringBuilder CurrentProgress = new StringBuilder();
-    private StringBuilder Results = new StringBuilder();
+    private StringBuilder InfoString = new StringBuilder();
+    private StringBuilder CurrentProgressString = new StringBuilder();
+    private StringBuilder ResultsString = new StringBuilder();
 
     public override void DefineControlLevel()
     {
@@ -125,8 +125,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         SetupTrial.AddInitializationMethod(() =>
         {
-            Instructions.Append("Press <b>Space</b> to begin a <b>9</b> point calibration"
-                               + "\nPress <b>6</b>, <b>5</b>, or <b>3</b> to begin the respective point calibration");
+            InfoString.Append("<b>Info</b>" 
+                                + "\nPress <b>Space</b> to begin a <b>9</b> point calibration"
+                                + "\nPress <b>6</b>, <b>5</b>, or <b>3</b> to begin the respective point calibration");
+            SetTrialSummaryString();
+            
             CalibCircle.CircleGO.GetComponent<RectTransform>().anchoredPosition = new Vector3 (0,0,0);
             CalibCircle.CircleGO.SetActive(true);
         });
@@ -182,7 +185,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             // Assign the correct calibration points given the User's selection
             DefineCalibPoints(numCalibPoints);
-            Instructions.Clear();
+            InfoString.Clear();
         });
 
         //----------------------------------------------------- BLINK THE CALIBRATION POINT -----------------------------------------------------
@@ -196,9 +199,15 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             // Reset variables relating to calibration completion
             currentCalibrationPointFinished = false;
             keyboardOverride = false;
-            CurrentProgress.Append($"<b>Ca");
-            Instructions.Append("\nThe calibration point is <b>blinking</b>."
+           
+            CurrentProgressString.Clear();
+            CurrentProgressString.Append($"<b>Calib Point #:  {calibNum + 1}</b> (of {numCalibPoints})"
+                                   + $"\n<b>Calib Position:</b> ({String.Format("{0:0.00}", calibPointsADCS[calibNum].X)}, {String.Format("{0:0.00}", calibPointsADCS[calibNum].Y)})"
+                                   + $"\n<b>Recalib Count:</b> {RecalibCount[calibNum]}");
+            InfoString.Append("<b>\n\nInfo</b>" 
+                                + "\nThe calibration point is <b>blinking</b>."
                                 + "\nInstruct the player to focus on the point until the circle shrinks.");
+            SetTrialSummaryString();
         });
 
         Blink.AddUpdateMethod(() =>
@@ -213,14 +222,17 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         });
 
-        Blink.SpecifyTermination(() => keyboardOverride || InCalibrationRange(), Shrink);
+        Blink.SpecifyTermination(() => keyboardOverride || InCalibrationRange(), Shrink, () => { InfoString.Clear(); });
 
         //----------------------------------------------------- SHRINK THE CALIBRATION POINT -----------------------------------------------------
         
         Shrink.AddInitializationMethod(() =>
         {
             elapsedShrinkDuration = 0;
-            TrialSummaryString = "The calibration point is <b>shrinking</b>. Continue to focus on the point to prepare calibration.";
+            InfoString.Append("<b>\n\nInfo</b>"
+                                + "\nThe calibration point is <b>shrinking</b>."
+                                + "\nContinue to focus on the point to prepare for calibration.");
+            SetTrialSummaryString();
         });
 
         Shrink.AddUpdateMethod(() =>
@@ -235,14 +247,18 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         });
 
         Shrink.SpecifyTermination(() => !InCalibrationRange() && elapsedShrinkDuration != 0, Blink);
+        
+        Shrink.AddUniversalTerminationMethod(() => { InfoString.Clear(); });
 
         //----------------------------------------------------- CHECK CALIBRATION READINESS -----------------------------------------------------
         
         Check.AddInitializationMethod(() =>
         {
             keyboardOverride = false;
-            TrialSummaryString = "Checking that input is within range for calibration"
-                                + "\nPress <b>Space</b> to override and calibrate regardless of gaze input location";
+            InfoString.Append("<b>\n\nInfo</b>"
+                                + "\nChecking that input is within range for calibration"
+                                + "\n\nPress <b>Space</b> to override and calibrate regardless of gaze input location");
+            SetTrialSummaryString();
         });
         
         Check.AddUpdateMethod(() => keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space));
@@ -250,7 +266,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         Check.SpecifyTermination(() => keyboardOverride || InCalibrationRange(), Calibrate, () =>
         {
             currentNormPoint = calibPointsADCS[calibNum];
-            TrialSummaryString =  $"Calibration Beginning at <b>{calibPointsADCS[calibNum].ToString()}</b>";
+            InfoString.Clear();
         });
 
         //-------------------------------------------------------- CALIBRATE GAZE POINT --------------------------------------------------------
@@ -259,6 +275,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             keyboardOverride = false;
             CalibCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.green;
+            InfoString.Append("<b>\n\nInfo</b>"
+                                + $"\nCalibration Beginning at <b>({String.Format("{0:0.00}", calibPointsADCS[calibNum].X)}, {String.Format("{0:0.00}", calibPointsADCS[calibNum].Y)})</b>");
+            SetTrialSummaryString();
+
         });
        
         Calibrate.AddUpdateMethod(() =>
@@ -275,7 +295,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             if (!SpoofGazeWithMouse)
             {
                 CalibrationResult = ScreenBasedCalibration.ComputeAndApply();
-                TrialSummaryString = string.Format("Compute and Apply Returned <b>{0}</b> and collected at <b>{1}</b> points.", CalibrationResult.Status, CalibrationResult.CalibrationPoints.Count);
             }
 
             currentCalibrationPointFinished = false;
@@ -286,6 +305,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 DelayDuration = 3f;
             else
                 DelayDuration = 0;
+
+            InfoString.Clear();
         });
 
         //---------------------------------------------------- CONFIRM CALIBRATION RESULTS ----------------------------------------------------
@@ -293,32 +314,32 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         Confirm.AddInitializationMethod(() =>
         {
             CalibCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.white;
-
             if (!SpoofGazeWithMouse)
             {
+                InfoString.Append("<b>\n\nInfo</b>"
+                                + string.Format("\nCompute and Apply Returned <b>{0}</b>", CalibrationResult.Status)
+                                + "\nPress <b> = </b> to accept the point"
+                                + "\nPress <b> - </b> to recalibrate the point");
+
                 // Plots sample points to the Result Container, if they exist for the current calibration point
                 CollectSamplePoints();
                 CreateSampleLines(LeftSamples, RightSamples, ADCSToScreen(calibPointsADCS[calibNum]));
 
                 if (ResultContainer.transform.childCount > 0)
                 {
-                    TrialSummaryString = $"Calibration Results Displayed at <b>({String.Format("{0:0.00}", calibPointsADCS[calibNum].X)}, {String.Format("{0:0.00}", calibPointsADCS[calibNum].Y)})</b>"
-                                         + $"\n\n<b>Left Eye</b>"
+                    ResultsString.Append($"\n\n<b>Calibration Results</b>"
+                                         + $"\n<b>Left Eye</b>"
                                          + $"\n{CalculateSampleStatistics(LeftSampleDistances)}"
                                          + $"\n\n<b>Right Eye</b> "
-                                         + $"\n{CalculateSampleStatistics(RightSampleDistances)}" 
-                                         + "\n\n<b>Instructions</b>"
-                                         + "\n\nPress <b> = </b> to accept the point"
-                                         + "\nPress <b> - </b> to recalibrate the point";
-
-
+                                         + $"\n{CalculateSampleStatistics(RightSampleDistances)}");
                 }
                 else
                 {
-                    TrialSummaryString = $"No Samples Collected at this Calibration Point: <b>({String.Format("{0:0.00}", calibPointsADCS[calibNum].X)}, {String.Format("{0:0.00}", calibPointsADCS[calibNum].Y)})</b>";
+                    ResultsString.Append($"No Samples Collected at this Calibration Point: <b>({String.Format("{0:0.00}", calibPointsADCS[calibNum].X)}, {String.Format("{0:0.00}", calibPointsADCS[calibNum].Y)})</b>");
                 }
             }
-            
+
+            SetTrialSummaryString();
 
             if (SyncBoxController != null)
             {
@@ -363,13 +384,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 // Return to the Blinking state to calibrate the next point, if all points haven't been calibrated yet
                 StateAfterDelay = Blink;
                 calibNum++;
-                TrialSummaryString = $"Timed out of assessment, calibration point is considered valid and continuing on to point {calibNum + 1}.";
             }
             else
             {
                 // Continues to ITI state since all points have been calibrated already
                 StateAfterDelay = ITI;
-                TrialSummaryString = "Timed out of assessment, calibration point is considered valid and calibration is complete.";
             }
         });
 
@@ -378,7 +397,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             // Set the calibration point to inactive at the end of confirming
             CalibCircle.CircleGO.SetActive(false);
             DestroyChildren(ResultContainer);
-            CurrentTaskLevel.BlockSummaryString.Clear();
 
             // Reset variables once they have been evaluated
             pointFinished = false;
@@ -389,6 +407,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             RightSamples.Clear();
             RightSampleDistances.Clear();
 
+            ResultsString.Clear();
+            InfoString.Clear();
+
+            SetTrialSummaryString();
         });
 
         ITI.AddInitializationMethod(() =>
@@ -422,10 +444,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     }
     void DefineCalibPoints(int nPoints)
     {
-        NormalizedPoint2D preCalibPoint = new NormalizedPoint2D(0.5f, 0.5f);
-        
-        
-
         switch (nPoints)
         {
             case 9:
@@ -702,9 +720,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         if(RightSamples.Count > 0)
             RightSamples.Clear();
 
-        CurrentProgress.Clear();
-        Results.Clear();
-        Instructions.Clear();
+        CurrentProgressString.Clear();
+        ResultsString.Clear();
+        InfoString.Clear();
     }
 
     public override void FinishTrialCleanup()
@@ -767,7 +785,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private void SetTrialSummaryString()
     {
-        TrialSummaryString = CurrentProgress.ToString() + Results.ToString() + Instructions.ToString();
+        TrialSummaryString = CurrentProgressString.ToString() + ResultsString.ToString() + InfoString.ToString();
     }
     
 }

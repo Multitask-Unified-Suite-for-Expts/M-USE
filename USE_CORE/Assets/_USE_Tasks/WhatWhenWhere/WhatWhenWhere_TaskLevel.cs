@@ -22,6 +22,8 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     public int AbortedTrials_InTask = 0;
     public int NumRewardPulses_InTask;
     public int NumSliderBarFilled_InTask;
+
+    public int LearningSpeed = -1;
     public List<float> SearchDurations_InTask;
 
     // Block Summary String Variables
@@ -42,6 +44,8 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         
         RunBlock.AddInitializationMethod(() =>
         {
+            LearningSpeed = -1;
+
             wwwTL.ContextName = wwwBD.ContextName;
             RenderSettings.skybox = CreateSkybox(wwwTL.GetContextNestedFilePath(ContextExternalFilePath, wwwTL.ContextName), UseDefaultConfigs);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
@@ -67,18 +71,11 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         ClearStrings();
-        float latestAccuracy = -1;
         float avgBlockSearchDuration = 0;
         if (wwwTL.searchDurations_InBlock.Count > 0)
             avgBlockSearchDuration = (float)Math.Round(wwwTL.searchDurations_InBlock.Average(), 2);
-        /*if (wwwTL.runningAcc.Count > 0)
-            latestAccuracy = (wwwTL.runningAcc.Sum()/wwwTL.runningAcc.Count)*100;*/
 
-        BlockSummaryString.AppendLine(//"<b>\nMin Trials in Block: </b>" + wwwTL.MinTrials +
-                                      "<b>\nMax Trials in Block: </b>" + wwwTL.CurrentTrialDef.MaxTrials + 
-                                 //    "<b>\nLearning Criterion: </b>" + String.Format("{0:0.00}%", wwwTL.CurrentTrialDef.BlockEndThreshold*100) +
-                                      /*"\n\n<b>Running Accuracy: </b>" + (latestAccuracy == -1 ?
-                                          ("N/A"):String.Format("{0:0.00}%", latestAccuracy)) +*/
+        BlockSummaryString.AppendLine( "<b>\nMax Trials in Block: </b>" + wwwTL.CurrentTrialDef.MaxTrials + 
                                       "\n\nAverage Search Duration: " + avgBlockSearchDuration +
                                       "\n" +
                                       "\nDistractor Slot Error Count: " + wwwTL.distractorSlotErrorCount_InBlock+
@@ -119,6 +116,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
     private void DefineBlockData()
     {
+        BlockData.AddDatum("LearningSpeed", () => LearningSpeed);
         BlockData.AddDatum("BlockAccuracyLog", ()=> wwwTL.accuracyLog_InBlock);
         BlockData.AddDatum("AvgSearchDuration", ()=> wwwTL.searchDurations_InBlock.Average());
         BlockData.AddDatum("NumDistractorSlotError", ()=> wwwTL.distractorSlotErrorCount_InBlock);

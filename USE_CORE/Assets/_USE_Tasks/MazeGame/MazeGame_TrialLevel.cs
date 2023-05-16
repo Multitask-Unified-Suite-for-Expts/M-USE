@@ -4,6 +4,8 @@ using System.Linq;
 using ConfigDynamicUI;
 using HiddenMaze;
 using MazeGame_Namespace;
+using Tobii.Research.Unity;
+using Tobii.Research;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -130,7 +132,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private float finishedFbDuration;
 
     [HideInInspector] public float TouchFeedbackDuration;
+    private SelectionTracking.SelectionTracker.SelectionHandler SelectionHandler;
 
+    public bool MouseClick, MouseHover;
     public MazeGame_TrialDef CurrentTrialDef => GetCurrentTrialDef<MazeGame_TrialDef>();
     public MazeGame_TaskLevel CurrentTaskLevel => GetTaskLevel<MazeGame_TaskLevel>();
 
@@ -158,7 +162,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (MazeContainer == null)
                 MazeContainer = new GameObject("MazeContainer"); 
             if (MazeBackground == null)
-                MazeBackground = CreateSquare("MazeBackground", mazeBgTex, new Vector3(0, 0.42f, 0),
+                MazeBackground = CreateSquare("MazeBackground", mazeBgTex, new Vector3(960, 540, 0),
                     new Vector3(5, 5, 5));
          
             //intantiate array
@@ -169,8 +173,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             totalErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
             retouchErroneous_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
             retouchCorrect_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
-            
-            
+
+            InitializeEyeTrackerSettings();
+
             //player view variables
             playerViewParent = GameObject.Find("MainCameraCopy");
         });
@@ -185,7 +190,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             if (!configVariablesLoaded)
                 LoadConfigVariables();
-            
+
             // Load Maze at the start of every trial to keep the mNextStep consistent
             CurrentTaskLevel.LoadTextMaze();
             CurrentTaskLevel.SetTaskSummaryString();
@@ -194,7 +199,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
-        var SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ITI);
+
+        /*  SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ITI);
+          TouchFBController.EnableTouchFeedback(SelectionHandler, TouchFeedbackDuration, StartButtonScale, MG_CanvasGO);*/
+        SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "GazeSelection", InitTrial, ITI);
         TouchFBController.EnableTouchFeedback(SelectionHandler, TouchFeedbackDuration, StartButtonScale, MG_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
@@ -204,8 +212,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SelectionHandler.HandlerActive = true;
             if (SelectionHandler.AllSelections.Count > 0)
                 SelectionHandler.ClearSelections();
+            if (MouseClick)
+                SelectionHandler.MaxDuration = maxObjectTouchDuration.value;
             SelectionHandler.MinDuration = minObjectTouchDuration.value;
-            SelectionHandler.MaxDuration = maxObjectTouchDuration.value;
         });
 
         InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatches(StartButton), Delay, () =>
@@ -351,7 +360,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     }
                 }
             }
-            else if (finishedMaze) 
+            if (finishedMaze) 
             {
                 StateAfterDelay = ITI;
                 DelayDuration = 0;
@@ -419,9 +428,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private void InstantiateCurrMaze()
     {
         // This will Load all tiles within the maze and the background of the maze
-
+        MazeContainer.AddComponent<RectTransform>();
+        MazeContainer.GetComponent<RectTransform>().pivot = Vector3.zero;
+        MazeContainer.GetComponent<RectTransform>().anchorMin = Vector3.zero;
+        MazeContainer.GetComponent<RectTransform>().anchorMax = Vector3.zero;
         mazeDims = CurrentTaskLevel.currMaze.mDims;
-        var mazeCenter = new Vector3(0, 0, 0);
+        var mazeCenter = MazeBackground.transform.localPosition;
 
         mazeLength = mazeDims.x * TileSize + (mazeDims.x - 1) * spaceBetweenTiles.value;
         mazeHeight = mazeDims.y * TileSize + (mazeDims.y - 1) * spaceBetweenTiles.value;
@@ -504,6 +516,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         // 20 - rule-breaking incorrect (failed to start on start tile, failed to return to last correct after error, diagonal/skips)
 
         // RULE - BREAKING ERROR : NOT PRESSING START
+
+        Debug.Log($"TOUCHED COORD: {touchedCoord.chessCoord}, NEXT COORD: {CurrentTaskLevel.currMaze.mNextStep}, END TILE: {CurrentTaskLevel.currMaze.mFinish}");
         if (!startedMaze)
         {
             Debug.Log("*Rule Breaking Error - Not Pressing the Start Tile to Begin the Maze*");
@@ -807,8 +821,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 
                 if (tileComponent.mCoord.chessCoord == CurrentTaskLevel.currMaze.mPath[i])
                 {
-                    textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(tileComponent.transform.position), playerViewParent.transform);
-                    playerViewText = playerView.WriteText((i + 1).ToString(), (i + 1).ToString(),
+                    textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(tileComponent.transform.position), playerViewParent.transform);
+                    playerViewText = playerView.CreateTextObject((i + 1).ToString(), (i + 1).ToString(),
                         Color.red, textLocation, textSize, playerViewParent.transform);
                     playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                     playerViewTextList.Add(playerViewText);
@@ -893,6 +907,33 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                              "\n<b>Choice Duration: </b>" + String.Format("{0:0.0}", choiceDuration) + 
                              "\n<b>Maze Duration: </b>" + String.Format("{0:0.0}", mazeDuration) +
                              "\n<b>Slider Value: </b>" + String.Format("{0:0.00}", SliderFBController.Slider.value);
+
+    }
+    public void InitializeEyeTrackerSettings()
+    {
+        Debug.Log("EYETRACKER AVAILABLE? " + EyeTrackingOperations.FindAllEyeTrackers().Count);
+        IEyeTracker = EyeTrackingOperations.FindAllEyeTrackers()[0];
+        if (IEyeTracker == null)
+        {
+            Debug.LogError("Could not find the eye tracker.");
+        }
+        else
+        {
+            ScreenBasedCalibration = new ScreenBasedCalibration(IEyeTracker);
+            EyeTracker = GameObject.Find("[EyeTracker]").GetComponent<EyeTracker>();
+            // Sets the Display area to the info entered into the Tobii Pro Eye Tracker Manager Display Setup,
+            // but updates with the Unity Editor Display sizing as well
+            DisplayArea = IEyeTracker.GetDisplayArea();
+
+            // INCLUDE INFO BELOW IF WE WANT TO ENTER AND SET THE DISPLAY AREA - SD
+
+            /*Point3D topLeft = new Point3D(0, 0, 0);
+            Point3D bottomLeft = new Point3D(0, -screenHeight, 0);
+            Point3D topRight = new Point3D(screenWidth, 0, 0);
+
+            DisplayArea = new DisplayArea(topLeft, bottomLeft, topRight);*/
+            //IEyeTracker.SetDisplayArea(DisplayArea);
+        }
 
     }
 }

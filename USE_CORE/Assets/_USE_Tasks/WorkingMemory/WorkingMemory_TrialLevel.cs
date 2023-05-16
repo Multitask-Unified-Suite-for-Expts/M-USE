@@ -265,15 +265,15 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             searchStims.ToggleVisibility(false);
             if (selectedSD.IsTarget)
             {
-                TokenFBController.AddTokens(selectedGO, selectedSD.StimTrialRewardMag);
-                TotalTokensCollected_InBlock += selectedSD.StimTrialRewardMag;
-                CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTrialRewardMag;
+                TokenFBController.AddTokens(selectedGO, selectedSD.StimTokenRewardMag);
+                TotalTokensCollected_InBlock += selectedSD.StimTokenRewardMag;
+                CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
             else
             {
-                TokenFBController.RemoveTokens(selectedGO, -selectedSD.StimTrialRewardMag);
-                TotalTokensCollected_InBlock -= selectedSD.StimTrialRewardMag;
-                CurrentTaskLevel.TotalTokensCollected_InTask -= selectedSD.StimTrialRewardMag;
+                TokenFBController.RemoveTokens(selectedGO, -selectedSD.StimTokenRewardMag);
+                TotalTokensCollected_InBlock -= selectedSD.StimTokenRewardMag;
+                CurrentTaskLevel.TotalTokensCollected_InTask -= selectedSD.StimTokenRewardMag;
             }
         });
         TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
@@ -366,8 +366,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         for (int iStim = 0; iStim < CurrentTrialDef.SearchStimIndices.Length; iStim++)
         {
             WorkingMemory_StimDef sd = (WorkingMemory_StimDef)searchStims.stimDefs[iStim];
-            sd.StimTrialRewardMag = chooseReward(CurrentTrialDef.SearchStimTokenReward[iStim]);
-            if (sd.StimTrialRewardMag > 0)
+            sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.SearchStimTokenReward[iStim]);
+            if (sd.StimTokenRewardMag > 0)
             {
                 WorkingMemory_StimDef newTarg = sd.CopyStimDef<WorkingMemory_StimDef>() as WorkingMemory_StimDef;
                 sampleStim.AddStims(newTarg);
@@ -475,10 +475,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             {
                 if (stim.IsTarget)
                 {
-                    textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent);
+                    textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent);
                     textLocation.y += 50;
                     Vector2 textSize = new Vector2(200, 200);
-                    playerViewText = playerView.WriteText("TargetText","TARGET",
+                    playerViewText = playerView.CreateTextObject("TargetText","TARGET",
                         Color.red, textLocation, textSize, playerViewParent);
                     playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                     playerViewTextList.Add(playerViewText);

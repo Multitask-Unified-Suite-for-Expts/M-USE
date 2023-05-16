@@ -14,6 +14,8 @@ using USE_ExperimentTemplate_Task;
 using SelectionTracking;
 using USE_UI;
 using System.IO.Ports;
+using Tobii.Research;
+using Tobii.Research.Unity;
 
 namespace USE_ExperimentTemplate_Trial
 {
@@ -58,7 +60,11 @@ namespace USE_ExperimentTemplate_Trial
         
         // Input Trackers
         [HideInInspector] public MouseTracker MouseTracker;
-        [HideInInspector] public GazeTracker GazeTracker;
+        //[HideInInspector] public GazeTracker GazeTracker;
+        [HideInInspector] public EyeTracker EyeTracker;
+        [HideInInspector] public IEyeTracker IEyeTracker;
+        [HideInInspector] public ScreenBasedCalibration ScreenBasedCalibration;
+        [HideInInspector] public DisplayArea DisplayArea;
 
         [HideInInspector] public string SelectionType;
 
@@ -377,7 +383,7 @@ namespace USE_ExperimentTemplate_Trial
         }
 
         //MOVED TASK HELPER METHODS, MAYBE MOVE TO TRIALlEVEL_METHODS BELOW##########################
-        public Vector2 playerViewPosition(Vector3 position, Transform playerViewParent)
+        public Vector2 ScreenToPlayerViewPosition(Vector3 position, Transform playerViewParent)
         {
             Vector2 pvPosition = new Vector2((position[0] / Screen.width) * playerViewParent.GetComponent<RectTransform>().sizeDelta.x, (position[1] / Screen.height) * playerViewParent.GetComponent<RectTransform>().sizeDelta.y);
             return pvPosition;

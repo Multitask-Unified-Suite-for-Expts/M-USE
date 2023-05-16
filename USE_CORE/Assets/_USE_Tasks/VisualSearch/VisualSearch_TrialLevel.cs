@@ -267,17 +267,17 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             if (playerViewParent.transform.childCount != 0)
                 DestroyChildren(playerViewParent);
-            if (selectedSD.StimTrialRewardMag > 0)
+            if (selectedSD.StimTokenRewardMag > 0)
             {
-                TokenFBController.AddTokens(selectedGO, selectedSD.StimTrialRewardMag);
-                TotalTokensCollected_InBlock += selectedSD.StimTrialRewardMag;
-                CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTrialRewardMag;
+                TokenFBController.AddTokens(selectedGO, selectedSD.StimTokenRewardMag);
+                TotalTokensCollected_InBlock += selectedSD.StimTokenRewardMag;
+                CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
             else
             {
-                TokenFBController.RemoveTokens(selectedGO, -selectedSD.StimTrialRewardMag);
-                TotalTokensCollected_InBlock -= selectedSD.StimTrialRewardMag;
-                CurrentTaskLevel.TotalTokensCollected_InTask -= selectedSD.StimTrialRewardMag;
+                TokenFBController.RemoveTokens(selectedGO, -selectedSD.StimTokenRewardMag);
+                TotalTokensCollected_InBlock -= selectedSD.StimTokenRewardMag;
+                CurrentTaskLevel.TotalTokensCollected_InTask -= selectedSD.StimTokenRewardMag;
             }
         });
         //TokenFeedback.SpecifyTermination(()=>!TokenFBController.IsAnimating(), () => ITI, ()=>
@@ -289,9 +289,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.NumTokenBarFull_InTask++;
                 if (SyncBoxController != null)
                 {
-                    int NumPulses = chooseReward(CurrentTrialDef.PulseReward[0]);
+                    int NumPulses = chooseReward(CurrentTrialDef.PulseReward);
                     SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
-                    SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
+                    SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", NumPulses));
                     NumRewardPulses_InBlock +=  NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask +=  NumPulses;
                     RewardGiven = true;
@@ -370,9 +370,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
             VisualSearch_StimDef sd = (VisualSearch_StimDef)tStim.stimDefs[i];
-            sd.StimTrialRewardMag = chooseReward(CurrentTrialDef.TrialStimTokenReward[i]);
-            if (sd.StimTrialRewardMag > 0) sd.IsTarget = true; //ONLY HOLDS TRUE IF POSITIVE REWARD GIVEN TO TARGET
-            else sd.IsTarget = false;
+            sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.TrialStimTokenReward[i]);
+           
+            if (sd.StimTokenRewardMag > 0) 
+                sd.IsTarget = true; //ONLY HOLDS TRUE IF POSITIVE REWARD GIVEN TO TARGET
+            else 
+                sd.IsTarget = false;
         }
 
         if (CurrentTrialDef.RandomizedLocations)
@@ -431,10 +434,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             if (stim.IsTarget)
             {
-                textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent.transform);
+                textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent.transform);
                 textLocation.y += 75;
                 Vector3 textSize = new Vector3(2,2,1);
-                playerViewText = playerView.WriteText("TargetText","TARGET",
+                playerViewText = playerView.CreateTextObject("TargetText","TARGET",
                     Color.red, textLocation, textSize, playerViewParent.transform);
             }
         }

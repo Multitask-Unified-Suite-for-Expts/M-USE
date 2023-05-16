@@ -9,23 +9,31 @@ namespace EyeTrackerData_Namespace
 {
     public class TobiiGazeSample
     {
-        public int rightPupilValidity;
-        public int leftPupilValidity;
-        public double[] rightGazePointOnDisplayArea;
-        public double[] leftGazePointOnDisplayArea;
-        public int rightGazeOriginValidity;
-        public int leftGazeOriginValidity;
-        public double[] rightGazeOriginInUserCoordinateSystem;
-        public double[] leftGazeOriginInUserCoordinateSystem;
-        public double[] rightGazePointInUserCoordinateSystem;
-        public double[] leftGazePointInUserCoordinateSystem;
-        public double rightPupilDiameter;
-        public double leftPupilDiameter;
-        public double[] rightGazeOriginInTrackboxCoordinateSystem;
-        public double[] leftGazeOriginInTrackboxCoordinateSystem;
-        public int rightGazePointValidity;
-        public int leftGazePointValidity;
-        public double systemTimeStamp;
+        public string rightPupilValidity;
+        public string leftPupilValidity;
+
+        public string rightGazeOriginValidity;
+        public string leftGazeOriginValidity;
+
+        public string rightGazePointValidity;
+        public string leftGazePointValidity;
+
+        public Vector2 rightGazePointOnDisplayArea;
+        public Vector2 leftGazePointOnDisplayArea;
+        
+		public Vector3 rightGazeOriginInUserCoordinateSystem;
+        public Vector3 leftGazeOriginInUserCoordinateSystem;
+        
+		public Vector3 rightGazePointInUserCoordinateSystem;
+        public Vector3 leftGazePointInUserCoordinateSystem;
+        
+		public Vector3 rightGazeOriginInTrackboxCoordinateSystem;
+        public Vector3 leftGazeOriginInTrackboxCoordinateSystem;
+
+        public float rightPupilDiameter;
+        public float leftPupilDiameter;
+
+        public float systemTimeStamp;
     }
  /*   public class CalibrationResult
     {
@@ -38,7 +46,7 @@ namespace EyeTrackerData_Namespace
         }
         //		public List<List<
     }
-*/
+*//*
     public class ScreenTransformations
     {
 	    private int xRes;
@@ -104,7 +112,7 @@ namespace EyeTrackerData_Namespace
 		    }
 
 		    return adcsPoint;
-	    }
+	    }*/
 
 	    //private static Vector2 ProportionToPixel(Vector2 posProp, Vector2 resolution)
 	    //{
@@ -125,6 +133,6 @@ namespace EyeTrackerData_Namespace
 	    //    Vector2 posProp = PixelToProportion(screenPoint, mainDisplayRes);
 	    //    return ProportionToPixel(posProp, playerViewRes);
 	    //}
-    }
+  //  }
 
 }

@@ -163,9 +163,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         string[] stateNames = new string[]
             {"InitTrial", "ChooseStimulus", "ChooseStimulusDelay", "SelectionFeedback", "FinalFeedback", "ITI", "ChooseStimulusDelay"};
 
-        //MouseTracker variables
+        /*//MouseTracker variables
         SelectionHandler<WhatWhenWhere_StimDef> gazeHandler = new SelectionHandler<WhatWhenWhere_StimDef>();
-        GazeTracker.SpoofGazeWithMouse = true;
+        GazeTracker.SpoofGazeWithMouse = true;*/
 
         //player view variables
         playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
@@ -433,13 +433,22 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             distractorStims.ToggleVisibility(false);
             if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
                 DestroyChildren(GameObject.Find("MainCameraCopy"));
-            
+            float latestAccuracy = -1;
+
+            if (runningAcc.Count > 10)
+            {
+                latestAccuracy = ((runningAcc.Skip(Math.Max(0, runningAcc.Count - 10)).Sum() / 10f)*100);
+                if (latestAccuracy > 70 && CurrentTaskLevel.LearningSpeed == -1)
+                    CurrentTaskLevel.LearningSpeed = TrialCount_InBlock;
+            }
 
             if (NeutralITI)
             {
                 ContextName = "itiImage";
                 RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png", UseDefaultConfigs);
             }
+
+            GenerateAccuracyLog();
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
         //------------------------------------------------------------------------ADDING VALUES TO DATA FILE--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -592,11 +601,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         for (int iStim = 0; iStim < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++iStim)
         {
             //Create corresponding text on player view of experimenter display
-            textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation),
+            textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation),
                 playerViewParent);
             textLocation.y += 75;
             Vector2 textSize = new Vector2(200, 200);
-            playerViewText = playerView.WriteText(CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
+            playerViewText = playerView.CreateTextObject(CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
                 CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
                 Color.red, textLocation, textSize, playerViewParent);
             playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);

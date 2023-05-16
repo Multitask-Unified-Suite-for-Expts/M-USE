@@ -81,7 +81,7 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public RenderTexture CameraMirrorTexture;
 
         private string configFileFolder;
-        private bool TaskSceneLoaded, SceneLoading, GuidedTaskSelection;
+        private bool TaskSceneLoaded, SceneLoading, GuidedTaskSelection, EyeTrackerActive;
 
         private bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         private string EyetrackerType;
@@ -227,6 +227,9 @@ namespace USE_ExperimentTemplate_Session
             
             if (SessionSettings.SettingExists("Session", "GuidedTaskSelection"))
                 GuidedTaskSelection = (bool)SessionSettings.Get("Session", "GuidedTaskSelection");
+           
+            if (SessionSettings.SettingExists("Session", "EyeTrackerActive"))
+                EyeTrackerActive = (bool)SessionSettings.Get("Session", "EyeTrackerActive");
             
             if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
                 ContextExternalFilePath = (string)SessionSettings.Get("Session", "ContextExternalFilePath");
@@ -898,10 +901,10 @@ namespace USE_ExperimentTemplate_Session
 
             tl.SelectionTracker = SelectionTracker;
             
-            if (SessionSettings.SettingExists("Session", "EyetrackerType"))
-                tl.EyetrackerType = (string)SessionSettings.Get("Session", "EyetrackerType");
+            if (SessionSettings.SettingExists("Session", "EyeTrackerActive"))
+                tl.EyeTrackerActive = (bool)SessionSettings.Get("Session", "EyeTrackerActive");
             else
-                tl.EyetrackerType = "";
+                tl.EyeTrackerActive = false;
 
             if (SessionSettings.SettingExists("Session", "SelectionType"))
                 tl.SelectionType = (string)SessionSettings.Get("Session", "SelectionType");

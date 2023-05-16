@@ -19,7 +19,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
     // Block End Variables
     public List<int> runningAcc;
-    public int MinTrials, MaxTrials;
+    public int? MinTrials, MaxTrials;
     
     // Stimuli Variables
     private StimGroup tStim;
@@ -109,6 +109,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             // Initialize FB Controller Values
             HaloFBController.SetHaloSize(5f);
             HaloFBController.SetHaloIntensity(5);
+
         });
         
         SetupTrial.AddInitializationMethod(() =>
@@ -137,6 +138,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 CreateTextOnExperimenterDisplay();
 
             SetTrialSummaryString();
+            MaxTrials = CurrentTrialDef.MaxTrials;
+
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -272,17 +275,17 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         TokenFeedback.AddInitializationMethod(() =>
         {
             DestroyTextOnExperimenterDisplay();
-            if (selectedSD.StimTrialRewardMag > 0)
+            if (selectedSD.StimTokenRewardMag > 0)
             {
-                TokenFBController.AddTokens(selectedGO, selectedSD.StimTrialRewardMag);
-                TotalTokensCollected_InBlock += selectedSD.StimTrialRewardMag;
-                CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTrialRewardMag;
+                TokenFBController.AddTokens(selectedGO, selectedSD.StimTokenRewardMag);
+                TotalTokensCollected_InBlock += selectedSD.StimTokenRewardMag;
+                CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
             else
             {
-                TokenFBController.RemoveTokens(selectedGO, -selectedSD.StimTrialRewardMag);
-                TotalTokensCollected_InBlock -= selectedSD.StimTrialRewardMag;
-                CurrentTaskLevel.TotalTokensCollected_InTask -= selectedSD.StimTrialRewardMag;
+                TokenFBController.RemoveTokens(selectedGO, -selectedSD.StimTokenRewardMag);
+                TotalTokensCollected_InBlock -= selectedSD.StimTokenRewardMag;
+                CurrentTaskLevel.TotalTokensCollected_InTask -= selectedSD.StimTokenRewardMag;
             }
         });
         TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
@@ -294,9 +297,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
                 if (SyncBoxController != null)
                 {
-                    int NumPulses = chooseReward(CurrentTrialDef.PulseReward[0]);
+                    int NumPulses = chooseReward(CurrentTrialDef.PulseReward);
                     SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
-                    SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
+                    SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", NumPulses));
                     NumRewardPulses_InBlock += NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
                     RewardGiven = true;
@@ -363,8 +366,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
             FlexLearning_StimDef sd = (FlexLearning_StimDef)tStim.stimDefs[i];
-            sd.StimTrialRewardMag = chooseReward(CurrentTrialDef.TrialStimTokenReward[i]);
-            if (sd.StimTrialRewardMag > 0) sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!! only works if the target stim has a non-zero, positive reward
+            sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.TrialStimTokenReward[i]);
+            if (sd.StimTokenRewardMag > 0) sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!! only works if the target stim has a non-zero, positive reward
             else sd.IsTarget = false;
         }
         
@@ -425,10 +428,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             if (stim.IsTarget)
             {
-                textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent.transform);
+                textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent.transform);
                 textLocation.y += 75;
                 Vector3 textSize = new Vector3(2, 2,1);
-                playerViewText = playerView.WriteText("TargetText","TARGET",
+                playerViewText = playerView.CreateTextObject("TargetText","TARGET",
                     Color.red, textLocation, textSize, playerViewParent.transform);
                 
             }

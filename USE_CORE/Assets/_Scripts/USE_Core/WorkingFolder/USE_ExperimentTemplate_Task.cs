@@ -17,6 +17,8 @@ using USE_ExperimentTemplate_Block;
 using SelectionTracking;
 using UnityEngine.InputSystem;
 using USE_DisplayManagement;
+using Tobii.Research.Unity;
+using Tobii.Research;
 
 namespace USE_ExperimentTemplate_Task
 {
@@ -43,9 +45,14 @@ namespace USE_ExperimentTemplate_Task
 
         [HideInInspector] public SessionDataControllers SessionDataControllers;
         [HideInInspector] public SelectionTracker SelectionTracker;
+        [HideInInspector] public bool EyeTrackerActive;
+        [HideInInspector] public EyeTracker EyeTracker;
+        [HideInInspector] public IEyeTracker IEyeTracker;
+        [HideInInspector] public ScreenBasedCalibration ScreenBasedCalibration;
+        [HideInInspector] public DisplayArea DisplayArea;
 
         [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive, UseDefaultConfigs;
-        [HideInInspector] public string ContextExternalFilePath, SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
+        [HideInInspector] public string ContextExternalFilePath, SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, SelectionType;
         [HideInInspector] public MonitorDetails MonitorDetails;
         [HideInInspector] public LocateFile LocateFile;
         [HideInInspector] public StringBuilder BlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
@@ -129,7 +136,16 @@ namespace USE_ExperimentTemplate_Task
             RunBlock.AddChildLevel(TrialLevel);
             AddActiveStates(new List<State> { SetupTask, RunBlock, BlockFeedback, FinishTask });
 
-            TrialLevel.TrialDefType = TrialDefType;
+            if (EyeTrackerActive)
+            {
+               // InitializeEyeTrackerSettings();
+                TrialLevel.EyeTracker = EyeTracker;
+                TrialLevel.IEyeTracker = IEyeTracker;
+                TrialLevel.ScreenBasedCalibration = ScreenBasedCalibration;
+                TrialLevel.DisplayArea = DisplayArea;
+               // GameObject.Find("[TrackBoxGuide]").GetComponent<TrackBoxGuide>().SetCanvasTrackBox(GameObject.Find($"{TaskName}_Canvas"));
+            }
+                TrialLevel.TrialDefType = TrialDefType;
             TrialLevel.StimDefType = StimDefType;
 
             Add_ControlLevel_InitializationMethod(() =>
@@ -338,6 +354,7 @@ namespace USE_ExperimentTemplate_Task
             GameObject fbControllers = Instantiate(fbControllersPrefab, Controllers.transform);
             GameObject inputTrackers = Instantiate(inputTrackersPrefab, Controllers.transform);
 
+
             List<string> fbControllersList = new List<string>();
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FeedbackControllers"))
                 fbControllersList = (List<string>)SessionSettings.Get(TaskName + "_TaskSettings", "FeedbackControllers");
@@ -352,7 +369,7 @@ namespace USE_ExperimentTemplate_Task
             fbControllers.GetComponent<TouchFBController>().SessionEventCodes = SessionEventCodes;
 
             TrialLevel.SelectionTracker = SelectionTracker;
-
+                
             TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
             TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
             TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
@@ -447,12 +464,15 @@ namespace USE_ExperimentTemplate_Task
 
             TrialLevel.MouseTracker = inputTrackers.GetComponent<MouseTracker>();
             TrialLevel.MouseTracker.Init(FrameData, 0);
-            TrialLevel.GazeTracker = inputTrackers.GetComponent<GazeTracker>();
+            if (EyeTrackerActive)
+
+
+            /*TrialLevel.GazeTracker = inputTrackers.GetComponent<GazeTracker>();
             if (!string.IsNullOrEmpty(EyetrackerType) & EyetrackerType.ToLower() != "none" &
                 EyetrackerType.ToLower() != "null")
             {
                 TrialLevel.GazeTracker.Init(FrameData, 0);
-            }
+            }*/
 
             TrialLevel.SelectionType = SelectionType;
 
@@ -470,7 +490,7 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.DefineTrialLevel();
         }
 
-
+        
         public void ClearActiveTaskHandlers()
         {
             if (SelectionTracker.TaskHandlerNames.Count > 0)
@@ -605,6 +625,7 @@ namespace USE_ExperimentTemplate_Task
                       for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++) 
                       {
                           BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock + 1, AllTrialDefs);
+                          BlockDefs[iBlock].RandomNumGenerator = new System.Random((int)DateTime.Now.Ticks + iBlock);
                           BlockDefs[iBlock].AddToTrialDefsFromBlockDef();
                       }  
                     }

@@ -33,6 +33,8 @@ SOFTWARE.
 
 using System.Collections;
 using System.Collections.Generic;
+using Tobii.Research.Unity;
+using Tobii.Research;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -52,7 +54,8 @@ public class InputBroker
 
 	
 	static Vector3 _mousePosition;
-	public static Vector3 mousePosition{
+	static Vector2 _gazePosition;
+    public static Vector3 mousePosition{
 		get{
 			if(isSimulation){
 				return _mousePosition;
@@ -66,8 +69,26 @@ public class InputBroker
 			}
 		}
 	}
-	
-	public static void SetMouseButtonDown(int button)
+    public static Vector2 gazePosition
+    {
+        get
+        {
+            if (isSimulation)
+            {
+                return _gazePosition;
+            }
+            return CurrentGazePositionOnDisplayArea();
+        }
+        set
+        {
+            if (isSimulation)
+            {
+                _gazePosition = value;
+            }
+        }
+    }
+
+    public static void SetMouseButtonDown(int button)
 	{
 		if (!mouseState.ContainsKey(button))
 			mouseState.Add(button, InputState.DOWN);
@@ -277,6 +298,7 @@ public class InputBroker
         float distance2D = 0;
         float distance3D = 0;
 
+
 		//3D:
 		RaycastHit hit;
 		if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out hit, Mathf.Infinity))
@@ -305,5 +327,56 @@ public class InputBroker
             }
         }
         return target;
+    }
+	private static Vector2 CurrentGazePositionOnDisplayArea()
+	{
+        // Get the connected eye tracker
+        IEyeTracker IEyeTracker = EyeTrackingOperations.FindAllEyeTrackers()[0];
+        Vector2 screenPoint = new Vector2(float.NaN, float.NaN);
+
+        if (IEyeTracker == null)
+        {
+            Debug.LogError("Could not find the eye tracker.");
+        }
+        else
+        {
+            DisplayArea displayArea = IEyeTracker.GetDisplayArea();
+            EyeTracker eyeTracker = GameObject.Find("[EyeTracker]").GetComponent<EyeTracker>(); //REPLACE WITH SOMETHING MORE UNIVERSAL
+           // EyeTracker eyeTracker = IEyeTracker as EyeTracker;
+
+            Vector2 MonitorResolution = new Vector2(1920, 1080);
+			// Get the most recent gaze data point
+            var gazeData = eyeTracker?.LatestGazeData;
+
+			if (gazeData != null)
+			{
+				// Get the gaze points for each eye
+				var leftGazePoint = gazeData.Left.GazePointOnDisplayArea;
+				var rightGazePoint = gazeData.Right.GazePointOnDisplayArea;
+
+				// Check if both eyes are valid
+				if (gazeData.Left.GazePointValid && gazeData.Right.GazePointValid)
+				{
+					// Average the gaze points from both eyes
+					var combinedGazePoint = new Vector2(
+						(leftGazePoint.x + rightGazePoint.x) / 2f,
+						(leftGazePoint.y + rightGazePoint.y) / 2f);
+
+					// Convert the combined gaze point to screen coordinates
+					screenPoint = new Vector2(combinedGazePoint.x * MonitorResolution.x, (1 - combinedGazePoint.y) * MonitorResolution.y);
+				}
+				else if (gazeData.Left.GazePointValid)
+				{
+					// Use the gaze point from the left eye
+					screenPoint = new Vector2(leftGazePoint.x * MonitorResolution.x, (1 - leftGazePoint.y) * MonitorResolution.y);
+				}
+				else if (gazeData.Right.GazePointValid)
+				{
+					// Use the gaze point from the right eye
+					screenPoint = new Vector2(rightGazePoint.x * MonitorResolution.x, (1 - rightGazePoint.y) * MonitorResolution.y);
+				}
+			}
+        }
+		return screenPoint;
     }
 }

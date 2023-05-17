@@ -1,0 +1,146 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3175057839943392719
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3813329795095238364}
+  - component: {fileID: 3479504634869631095}
+  - component: {fileID: 2603858045197797024}
+  - component: {fileID: 3953842124438570051}
+  - component: {fileID: 6580703731986309559}
+  - component: {fileID: -7043470597752192310}
+  m_Layer: 0
+  m_Name: FeedbackControllers
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3813329795095238364
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3175057839943392719}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3479504634869631095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3175057839943392719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b02cb9b89382eb64c9108a27b75f32ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DefaultAudioFeedbacks:
+  - name: Positive
+    clip: {fileID: 8300000, guid: 3057c6465634bff458dbb5fc86a5aab0, type: 3}
+  - name: Negative
+    clip: {fileID: 8300000, guid: b1ead77b8c99d9542827dd1ee3ef5124, type: 3}
+  - name: CR_BlockCompleted
+    clip: {fileID: 8300000, guid: 38a5faffadbec441fa994ef9ef89362b, type: 3}
+  - name: CR_BlockFailed
+    clip: {fileID: 8300000, guid: 423d149ff34dc40598b1e18df2a9bfec, type: 3}
+  - name: CR_SouthParkFail
+    clip: {fileID: 8300000, guid: f3ebbe6eb75364aac9ae63ecaade92ee, type: 3}
+  - name: EC_BalloonChosen
+    clip: {fileID: 8300000, guid: e627cb9c0640e4b61a4d74a6c71379c9, type: 3}
+  - name: EC_Inflate
+    clip: {fileID: 8300000, guid: a0bec86fbd56740f3967199e2c210833, type: 3}
+  - name: EC_HarshPop
+    clip: {fileID: 8300000, guid: 99fd449a5afd24c8da82884185dd9d58, type: 3}
+  - name: TimeRanOut
+    clip: {fileID: 8300000, guid: 9bda41667c36249e7a4b99d77f24dc62, type: 3}
+  - name: EC_NicePop
+    clip: {fileID: 8300000, guid: 47c7a0232a5394c87b9945b8994c7d71, type: 3}
+  - name: TripleCollected
+    clip: {fileID: 8300000, guid: ada645a54a12a48069725923f52635df, type: 3}
+  audioSource: {fileID: 0}
+  EventCodeManager: {fileID: 0}
+--- !u!114 &2603858045197797024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3175057839943392719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b9b0d55229496c40b881734b3d28261, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PositiveHaloPrefab: {fileID: 5037791256376228876, guid: c298de6b03e0a4aa39453b09991fa51a,
+    type: 3}
+  NegativeHaloPrefab: {fileID: 5037791256376228876, guid: 16e45646239064935a4dd461a06a784b,
+    type: 3}
+  EventCodeManager: {fileID: 0}
+--- !u!114 &3953842124438570051
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3175057839943392719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4d52f7165ef1e6428c2e82d3a7b194d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tokenSize: 100
+  tokenSpacing: 0
+  tokenBoxPadding: 0
+  tokenBoxYOffset: 10
+  tokenTexture: {fileID: 2800000, guid: 5ab9409b99a52f740a325a411069f4fa, type: 3}
+  EventCodeManager: {fileID: 0}
+--- !u!114 &6580703731986309559
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3175057839943392719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 468dee814850444e2a84e6626d4453d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SliderPrefab: {fileID: 2122826529044376720, guid: 5a5bf5ae5720f8143853442d9ce8eb9d,
+    type: 3}
+  SliderHaloPrefab: {fileID: 4317252536729789219, guid: 5efb6373ff4d278409cfb7efbcb9b7f7,
+    type: 3}
+  SliderGO: {fileID: 2122826529044376720, guid: 4edf39309c5fdfe4786b98a260c324e0,
+    type: 3}
+  SliderHaloGO: {fileID: 4317252536729789219, guid: f372d073062e1954ba552b4c8bbb2d93,
+    type: 3}
+  Slider: {fileID: 0}
+  EventCodeManager: {fileID: 0}
+--- !u!114 &-7043470597752192310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3175057839943392719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe7709cf71b9445818636e659c598f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  EventCodeManager: {fileID: 0}
+  CurrentTaskCanvas: {fileID: 0}
+  FeedbackOn: 0

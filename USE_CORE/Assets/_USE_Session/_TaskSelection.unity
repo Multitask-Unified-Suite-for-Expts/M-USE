@@ -1721,7 +1721,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: InitializationScreen
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 6074796793574422923, guid: 9bca51db11a472d45a8ce79b08715e46, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 9bca51db11a472d45a8ce79b08715e46, type: 3}
 --- !u!224 &2102715624 stripped
 RectTransform:

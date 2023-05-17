@@ -72,9 +72,18 @@ public class TokenFBController : MonoBehaviour
 
     public void RecalculateTokenBox()
     {
+        Vector2 referenceResolution = new Vector2(1920, 1080);
+        float scaleFactor = Mathf.Min(Screen.width / referenceResolution.x, Screen.height / referenceResolution.y);
+
+        tokenSize = (int)(tokenSize * scaleFactor);
+        tokenBoxPadding = (int)(tokenBoxPadding * scaleFactor);
+        tokenBoxYOffset = (int)(tokenBoxYOffset * scaleFactor);
+
         float width = CalcTokensWidth(totalTokensNum) + 2 * tokenBoxPadding;
+        float adjTokenBarXOffset = (Screen.width - width) / 2;
+
         tokenBoxRect = new Rect(
-            (Screen.width - width) / 2,
+            adjTokenBarXOffset,
             tokenBoxYOffset,
             width,
             tokenSize + 2 * tokenBoxPadding

@@ -104,10 +104,14 @@ namespace USE_ExperimentTemplate_Task
 
         [HideInInspector] public RenderTexture DrawRenderTexture;
 
+        [HideInInspector] public GameObject TaskSelectionCanvasGO;
 
-        public bool IsHuman;
+        [HideInInspector] public bool IsHuman;
 
-        public HumanStartPanel HumanStartPanel;
+        [HideInInspector] public HumanStartPanel HumanStartPanel;
+
+        [HideInInspector] public event EventHandler TaskSkyboxSet_Event;
+
 
 
         public virtual void SpecifyTypes()
@@ -176,6 +180,7 @@ namespace USE_ExperimentTemplate_Task
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTaskStarts"]);
 
                 //Create HumanStartPanel
+
                 if (IsHuman)
                 {
                     HumanStartPanel.SetupDataAndCodes(FrameData, EventCodeManager, SessionEventCodes);
@@ -538,6 +543,7 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.ConfigUiVariables = ConfigUiVariables;
             TrialLevel.IsHuman = IsHuman;
             TrialLevel.HumanStartPanel = HumanStartPanel;
+            TrialLevel.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
 
             TrialLevel.DefineTrialLevel();
         }

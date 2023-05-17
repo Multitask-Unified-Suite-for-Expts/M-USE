@@ -639,11 +639,6 @@ namespace USE_ExperimentTemplate_Session
             });
 
             selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask);
-            selectTask.AddDefaultTerminationMethod(() =>
-            {
-                TaskSelectionCanvasGO.SetActive(false);
-                TaskSelection_Starfield.SetActive(false);
-            });
 
             // Don't have automatic task selection if we encountered an error during setup
             if (TaskSelectionTimeout >= 0 && !LogPanel.HasError())
@@ -697,6 +692,9 @@ namespace USE_ExperimentTemplate_Session
             
             loadTask.SpecifyTermination(() => !SceneLoading, runTask, () =>
             {
+                //TaskSelectionCanvasGO.SetActive(false);
+                TaskSelection_Starfield.SetActive(false);
+
                 runTask.AddChildLevel(CurrentTask);
                 if(CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
@@ -928,6 +926,7 @@ namespace USE_ExperimentTemplate_Session
 
         ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
+            tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
             tl.HumanStartPanel = HumanStartPanel;
             tl.IsHuman = IsHuman;
             tl.DisplayController = DisplayController;

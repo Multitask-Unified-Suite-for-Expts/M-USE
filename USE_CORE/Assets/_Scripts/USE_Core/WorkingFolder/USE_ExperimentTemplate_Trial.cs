@@ -73,16 +73,18 @@ namespace USE_ExperimentTemplate_Trial
 
         [HideInInspector] public int InitialTokenAmount;
 
-        public Dictionary<string, int> AbortCodeDict;
+        [HideInInspector] public Dictionary<string, int> AbortCodeDict;
 
-        public float ShotgunRaycastSpacing_DVA;
-        public float ParticipantDistance_CM;
-        public float ShotgunRaycastCircleSize_DVA;
+        [HideInInspector] public float ShotgunRaycastSpacing_DVA;
+        [HideInInspector] public float ParticipantDistance_CM;
+        [HideInInspector] public float ShotgunRaycastCircleSize_DVA;
 
-        public bool UseDefaultConfigs;
+        [HideInInspector] public bool UseDefaultConfigs;
 
-        public bool IsHuman;
-        public HumanStartPanel HumanStartPanel;
+        [HideInInspector] public bool IsHuman;
+        [HideInInspector] public HumanStartPanel HumanStartPanel;
+        [HideInInspector] public GameObject TaskSelectionCanvasGO;
+
 
 
         // Texture Variables
@@ -136,6 +138,8 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
+                TaskSelectionCanvasGO.SetActive(false);
+
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTrialStarts"]);
 
                 Input.ResetInputAxes();

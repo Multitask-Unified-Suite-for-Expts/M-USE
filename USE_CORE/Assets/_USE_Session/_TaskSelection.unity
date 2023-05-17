@@ -711,6 +711,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: USE_Header
       objectReference: {fileID: 0}
+    - target: {fileID: 278342826906870817, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 610458894895714152, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
         type: 3}
       propertyPath: offsetMultiplier
@@ -864,32 +869,32 @@ PrefabInstance:
     - target: {fileID: 8571402754252976554, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
         type: 3}
       propertyPath: m_fontColorGradient.topLeft.b
-      value: 0.99215686
+      value: 0.972549
       objectReference: {fileID: 0}
     - target: {fileID: 8571402754252976554, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
         type: 3}
       propertyPath: m_fontColorGradient.topLeft.g
-      value: 0.92156863
+      value: 0.9843137
       objectReference: {fileID: 0}
     - target: {fileID: 8571402754252976554, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
         type: 3}
       propertyPath: m_fontColorGradient.topLeft.r
-      value: 0.7529412
+      value: 0.9882353
       objectReference: {fileID: 0}
     - target: {fileID: 8571402754252976554, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
         type: 3}
       propertyPath: m_fontColorGradient.bottomRight.b
-      value: 0.99215686
+      value: 0.972549
       objectReference: {fileID: 0}
     - target: {fileID: 8571402754252976554, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
         type: 3}
       propertyPath: m_fontColorGradient.bottomRight.g
-      value: 0.92156863
+      value: 0.9843137
       objectReference: {fileID: 0}
     - target: {fileID: 8571402754252976554, guid: 76b66eda407b04844bc5ed4c3acfbcb4,
         type: 3}
       propertyPath: m_fontColorGradient.bottomRight.r
-      value: 0.7529412
+      value: 0.9882353
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 76b66eda407b04844bc5ed4c3acfbcb4, type: 3}

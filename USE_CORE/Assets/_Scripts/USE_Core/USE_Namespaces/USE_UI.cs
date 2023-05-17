@@ -58,16 +58,16 @@ namespace USE_UI
 
         };
 
-        [HideInInspector] public Dictionary<string, Vector3> Task_HumanBackgroundPos_Dict = new Dictionary<string, Vector3>()
+        [HideInInspector] public Dictionary<string, float> Task_HumanBackgroundZPos_Dict = new Dictionary<string, float>()
         {
-            { "ContinuousRecognition", new Vector3(0, 0, 1000f) },
-            { "EffortControl", new Vector3(0, 0, 500f) },
-            { "FlexLearning", new Vector3(0, 0, 1000f) },
-            { "MazeGame", new Vector3(0, 0, 500f) },
-            { "THR",new Vector3(0, 0, 1000f) },
-            { "VisualSearch", new Vector3(0, 0, 1000f) },
-            { "WhatWhenWhere", new Vector3(0, 0, 500f) },
-            { "WorkingMemory", new Vector3(0, 0, 1000f) },
+            { "ContinuousRecognition", 1000f },
+            { "EffortControl", 500f },
+            { "FlexLearning", 1000f },
+            { "MazeGame", 500f },
+            { "THR", 1000f },
+            { "VisualSearch", 1000f },
+            { "WhatWhenWhere", 500f },
+            { "WorkingMemory", 1000f },
         };
 
         [HideInInspector] public string TaskName;
@@ -110,7 +110,7 @@ namespace USE_UI
             StartButtonGO.AddComponent<HoverEffect>();
 
             HumanBackgroundGO = HumanStartPanelGO.transform.Find("HumanBackground").gameObject;
-            HumanBackgroundGO.transform.localPosition = Task_HumanBackgroundPos_Dict[taskName];
+            HumanBackgroundGO.transform.localPosition = new Vector3(0, 0, Task_HumanBackgroundZPos_Dict[taskName]);
 
             BackgroundPanelGO = HumanStartPanelGO.transform.Find("BackgroundPanel").gameObject;
 
@@ -129,7 +129,8 @@ namespace USE_UI
             InstructionsGO.SetActive(false);
             InstructionsOn = false;
 
-            AdjustButtonPositions();
+            if(Application.isEditor)
+                AdjustButtonPositions();
 
             HumanStartPanelGO.SetActive(false);
             HumanPanelOn = false;
@@ -137,11 +138,8 @@ namespace USE_UI
 
         private void AdjustButtonPositions()
         {
-            if(Application.isEditor)
-            {
-                InstructionsButtonGO.transform.localPosition = new Vector3(InstructionsButtonGO.transform.localPosition.x, InstructionsButtonGO.transform.localPosition.y + 44f, InstructionsButtonGO.transform.localPosition.z);
-                EndTaskButtonGO.transform.localPosition = new Vector3(EndTaskButtonGO.transform.localPosition.x, EndTaskButtonGO.transform.localPosition.y + 44f, EndTaskButtonGO.transform.localPosition.z);
-            }
+            InstructionsButtonGO.transform.localPosition = new Vector3(InstructionsButtonGO.transform.localPosition.x, InstructionsButtonGO.transform.localPosition.y + 44f, InstructionsButtonGO.transform.localPosition.z);
+            EndTaskButtonGO.transform.localPosition = new Vector3(EndTaskButtonGO.transform.localPosition.x, EndTaskButtonGO.transform.localPosition.y + 44f, EndTaskButtonGO.transform.localPosition.z);
         }
 
 

@@ -18,12 +18,15 @@ using USE_ExperimentTemplate_Trial;
 using USE_ExperimentTemplate_Block;
 using SelectionTracking;
 using UnityEngine.InputSystem;
+<<<<<<< HEAD:USE_CORE/Assets/_Scripts/M_USE/M_USE Modules/M_USE State System/USE_ExperimentTemplate_Task.cs
 using USE_DisplayManagement;
 using Tobii.Research.Unity;
 using Tobii.Research;
+=======
 using static UnityEngine.EventSystems.EventTrigger;
 using MazeGame_Namespace;
 using UnityEngine.UIElements;
+>>>>>>> 71da264fcbec2cc21245a668572e863e5e7d8a77:USE_CORE/Assets/_Scripts/USE_Core/WorkingFolder/USE_ExperimentTemplate_Task.cs
 
 namespace USE_ExperimentTemplate_Task
 {
@@ -57,8 +60,12 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public DisplayArea DisplayArea;
 
         [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive, UseDefaultConfigs;
-        [HideInInspector] public string ContextExternalFilePath, SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
+<<<<<<< HEAD:USE_CORE/Assets/_Scripts/M_USE/M_USE Modules/M_USE State System/USE_ExperimentTemplate_Task.cs
+        [HideInInspector] public string ContextExternalFilePath, SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, SelectionType;
         [HideInInspector] public MonitorDetails MonitorDetails;
+=======
+        [HideInInspector] public string ContextExternalFilePath, SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
+>>>>>>> 71da264fcbec2cc21245a668572e863e5e7d8a77:USE_CORE/Assets/_Scripts/USE_Core/WorkingFolder/USE_ExperimentTemplate_Task.cs
         [HideInInspector] public LocateFile LocateFile;
         [HideInInspector] public StringBuilder BlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
         private int TaskStringsAdded = 0;
@@ -656,7 +663,6 @@ namespace USE_ExperimentTemplate_Task
                 {
                     if (UseDefaultConfigs)
                     {
-                        Debug.Log("sdakgljhklfjgh");
                         string[] splitKey = key.Split('.');
                         string settingsFileName = splitKey[0];
                         string settingsFileExt = splitKey[1];

@@ -144,8 +144,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT TRIAL state --------------------------------------------------------------------------------------------------------------------------
-        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, StartWithBlueSquare ? BlueSquare : WhiteSquare);
-        ShotgunHandler.shotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
+        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", MouseTracker, InitTrial, StartWithBlueSquare ? BlueSquare : WhiteSquare);
+        // ShotgunHandler.shotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
         TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, ButtonScale, THR_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>

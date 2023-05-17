@@ -936,7 +936,11 @@ namespace USE_ExperimentTemplate_Session
             tl.SessionDataControllers = SessionDataControllers;
             tl.LocateFile = LocateFile;
             tl.SessionDataPath = SessionDataPath;
+#if (UNITY_WEBGL)
             tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
+#else
+            tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName);
+#endif
 
             if (UseDefaultConfigs)
             {

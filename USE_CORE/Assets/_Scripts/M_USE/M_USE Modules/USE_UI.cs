@@ -412,30 +412,25 @@ namespace USE_UI
         public Color CircleColor = new Color(1, 1, 1, 1);
         public Image Image;
         public Sprite Sprite;
-      
         public Vector3 LocalPosition = new Vector3(0, 0, 0);
         private Color32 originalColor;
         private Sprite originalSprite;
-
         public State SetActiveOnInitialization;
         public State SetInactiveOnTermination;
         public USE_Circle(Canvas parent, Vector2 circleLocation, float size, string name)
         {
             CircleGO = new GameObject(name, typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UICircle));
-
             CircleGO.AddComponent<CanvasRenderer>();
             CircleGO.transform.SetParent(parent.transform, false);
-            CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().fill = true;
-            CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().thickness = 2f;
-            CircleGO.GetComponent<RectTransform>().sizeDelta = new Vector2(size, size);
+            CircleGO.transform.localScale = new Vector3(size, size, size);
+            CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().Fill = true;
+            CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().Thickness = 2f;
             CircleGO.GetComponent<RectTransform>().anchorMin = Vector2.zero;
             CircleGO.GetComponent<RectTransform>().anchorMax = Vector2.zero;
             CircleGO.GetComponent<RectTransform>().anchoredPosition = circleLocation;
             CircleGO.SetActive(false);
         }
-
         //----------------------------------------------------------------------
-
         public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
         {
             if (setActiveOnInit != null)
@@ -453,12 +448,81 @@ namespace USE_UI
         {
             CircleGO.SetActive(true);
         }
-
         private void InactivateOnStateTerm(object sender, EventArgs e)
         {
             CircleGO.SetActive(false);
         }
+        public void SetCircleScale(float size)
+        {
+            this.CircleGO.transform.localScale = new Vector3(size, size, size);
+        }
     }
+    public class USE_Line : MonoBehaviour
+    {
+        public GameObject LineGO;
+        public float LineSize = 1f;
+        public float LineLength = 0f;
+        public Color LineColor = new Color(1, 1, 1, 1);
+        public Vector3 LocalPosition = new Vector3(0, 0, 0);
+        private Color32 originalColor;
+        private Sprite originalSprite;
+        public State SetActiveOnInitialization;
+        public State SetInactiveOnTermination;
+        public USE_Line(Canvas parent, Vector2 start, Vector2 end, Color col, string name)
+        {
+            LineGO = new GameObject(name, typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UILineRenderer));
+            LineGO.transform.SetParent(parent.transform, false);
+            LineGO.GetComponent<RectTransform>().anchorMax = Vector2.zero;
+            LineGO.GetComponent<RectTransform>().anchorMin = Vector2.zero;
+            LineGO.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+            LineGO.GetComponent<RectTransform>().sizeDelta = new Vector2(LineSize, LineSize);
+            UnityEngine.UI.Extensions.UILineRenderer LineRenderer = LineGO.GetComponent<UnityEngine.UI.Extensions.UILineRenderer>();
+            LineLength = Vector2.Distance(start, end);
+            LineRenderer.Points = new Vector2[] { start, end };
+            LineRenderer.color = col;
+            LineRenderer.RelativeSize = false;
+            LineRenderer.SetAllDirty();
+        }
+        //----------------------------------------------------------------------
+        public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
+        {
+            if (setActiveOnInit != null)
+            {
+                SetActiveOnInitialization = setActiveOnInit;
+                SetActiveOnInitialization.StateInitializationFinished += ActivateOnStateInit;
+            }
+            if (setInactiveOnTerm != null)
+            {
+                SetInactiveOnTermination = setInactiveOnTerm;
+                SetInactiveOnTermination.StateTerminationFinished += InactivateOnStateTerm;
+            }
+        }
+        private void ActivateOnStateInit(object sender, EventArgs e)
+        {
+            LineGO.SetActive(true);
+        }
+        private void InactivateOnStateTerm(object sender, EventArgs e)
+        {
+            LineGO.SetActive(false);
+        }
+        public void SetLineWidth(float size)
+        {
+            this.LineGO.transform.localScale = new Vector3(size, size, size);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
 

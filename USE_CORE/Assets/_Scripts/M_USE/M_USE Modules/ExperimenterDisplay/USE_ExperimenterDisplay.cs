@@ -18,13 +18,11 @@ namespace USE_ExperimenterDisplay
         public List<ExperimenterDisplayPanel> TaskPanels;
         //any other fields necessary to control which display it is on, etc
 
-        public void InitializeExperimenterDisplay(ControlLevel_Session_Template sessionLevel,
-            GameObject expDisplayObject, List<ExperimenterDisplayPanel> taskPanels = null)
+        public void InitializeExperimenterDisplay(ControlLevel_Session_Template sessionLevel,GameObject expDisplayObject, List<ExperimenterDisplayPanel> taskPanels = null)
         {
             //generate the main display, any housekeeping necessary to initialize it
             SessionLevel = sessionLevel;
             ExperimenterDisplayGameObject = expDisplayObject;
-
 
             if (taskPanels != null)
                 TaskPanels = taskPanels;

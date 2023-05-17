@@ -74,16 +74,23 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public Dictionary<string, EventCode> TaskEventCodes;
         [HideInInspector] public Dictionary<string, EventCode> SessionEventCodes;
 
+        [HideInInspector] public DisplayController DisplayController;
+
 
         [HideInInspector] public int InitialTokenAmount;
 
-        public Dictionary<string, int> AbortCodeDict;
+        [HideInInspector] public Dictionary<string, int> AbortCodeDict;
 
-        public float ShotgunRaycastSpacing_DVA;
-        public float ParticipantDistance_CM;
-        public float ShotgunRaycastCircleSize_DVA;
+        [HideInInspector] public float ShotgunRaycastSpacing_DVA;
+        [HideInInspector] public float ParticipantDistance_CM;
+        [HideInInspector] public float ShotgunRaycastCircleSize_DVA;
 
-        public bool UseDefaultConfigs;
+        [HideInInspector] public bool UseDefaultConfigs;
+
+        [HideInInspector] public bool IsHuman;
+        [HideInInspector] public HumanStartPanel HumanStartPanel;
+        [HideInInspector] public GameObject TaskSelectionCanvasGO;
+
 
 
         // Texture Variables
@@ -118,10 +125,17 @@ namespace USE_ExperimentTemplate_Trial
 
             AddAbortCodeKeys();
 
+            if (IsHuman)
+                HumanStartPanel.SetTrialLevel(this);
+
+
             //DefineTrial();
             Add_ControlLevel_InitializationMethod(() =>
             {
-                SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
+                #if (!UNITY_WEBGL)
+                        SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
+                #endif
+
                 TrialCount_InBlock = -1;
                 TrialStims = new List<StimGroup>();
                 AudioFBController.UpdateAudioSource();
@@ -130,12 +144,22 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
+                TaskSelectionCanvasGO.SetActive(false);
+
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTrialStarts"]);
 
                 Input.ResetInputAxes();
 
                 AbortCode = 0;
-                SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials",1));
+
+                #if (!UNITY_WEBGL)
+                    SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials",1));
+                #endif
+
+                #if (UNITY_WEBGL)
+                    Cursor.visible = true;
+                #endif
+
                 TrialCount_InTask++;
                 TrialCount_InBlock++;
                 FrameData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
@@ -157,6 +181,12 @@ namespace USE_ExperimentTemplate_Trial
                 }
 
                 ResetTrialVariables();
+            });
+            SetupTrial.AddDefaultTerminationMethod(() =>
+            {
+                if (IsHuman)
+                    HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
+                
             });
 
             FinishTrial.AddInitializationMethod(() => EventCodeManager.SendCodeImmediate(SessionEventCodes["FinishTrialStarts"]));

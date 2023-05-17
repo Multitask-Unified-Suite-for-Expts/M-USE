@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
+//using System.Windows.Forms;
 using ConfigDynamicUI;
 using HiddenMaze;
 using MazeReactionTest_Namespace;
@@ -149,7 +149,6 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
         {
             SliderFBController.InitializeSlider();
             HaloFBController.SetHaloSize(5);
-            LoadTextures(ContextExternalFilePath);
             tileTex = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, TileTexture));
             mazeBgTex = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, MazeBackgroundTextureName));
             if (MazeContainer == null)

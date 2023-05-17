@@ -1,0 +1,144 @@
+{
+  "TrlStart": {
+    "Value": 1,
+    "Description": "ITI ends"
+  },
+  "TrlEnd": {
+    "Value": 2,
+    "Description": "ITI starts"
+  },
+  "StartButtonSelected": {
+    "Value": 3,
+    "Description": "first frame where the start button is selected"
+  },
+  "MazeStart": {
+    "Value": 4,
+    "Description": "First frame where the maze start tile is selected"
+  },
+  "MazeFinish": {
+    "Value": 5,
+    "Description": "First frame where the final tile of the maze path is selected"
+  },
+  "RuleBreakingError": {
+    "Value": 6,
+    "Description": "First frame where touch target is on a tile that does not follow the rules"
+  },
+  "RuleAbidingError": {
+    "Value": 7,
+    "Description": "First frame where touch target is on a tile that does follow the rules; but is not on the hidden path "
+  },
+  "PerseverativeError": {
+    "Value": 8,
+    "Description": "First frame where the touch target is on a tile following an error; but the tile is not the last correct touch"
+  },
+  "CorrectResponse": {
+    "Value": 9,
+    "Description": "Selected the correct tile within the scene"
+  },
+  "LastCorrectSelection": {
+    "Value": 10,
+    "Description": "Reselected the tile that represents their current location in the maze"
+  },
+  "TouchErrorImageOn": {
+    "Value": 11,
+    "Description": "Vertical lines shown for not sufficiently maintaining selection"
+  },
+  "TouchErrorImageOff": {
+    "Value": 12,
+    "Description": "Vertical lines on screen from touch duration error are removed"
+  },
+  "FlashingTileFbOn": {
+    "Value": 13,
+    "Description": "Last correct tile flashes green due to perseverative error"
+  },
+  "FlashingTileFbOff": {
+    "Value": 14,
+    "Description": "Last correct tile stops flashing green"
+  },
+  "Rewarded": {
+    "Value": 20,
+    "Description": "Positive feedback was given"
+  },
+  "Unrewarded": {
+    "Value": 21,
+    "Description": "Negative feedback was given"
+  },
+  "NoChoice": {
+    "Value": 22,
+    "Description": "Trial aborted due to object selection period timing out"
+  },
+  "ContextOn": {
+    "Value": 30,
+    "Description": "Context background appears"
+  },
+  "ContextOff": {
+    "Value": 31,
+    "Description": "Context background disappears"
+  },
+  "MazeOn": {
+    "Value": 40,
+    "Description": "Maze is made visible on the screen"
+  },
+  "MazeOff": {
+    "Value": 41,
+    "Description": "Maze is removed from the screen"
+  },
+  "TileFbOn": {
+    "Value": 50,
+    "Description": "Tile feedback made visible on the screen"
+  },
+  "TileFbOff": {
+    "Value": 51,
+    "Description": "Tile feedback made not visible on the screen"
+  },
+  "AuditoryFbOn": {
+    "Value": 60,
+    "Description": "Slider complete feedback onset"
+  },
+  "SliderCompleteFbOn": {
+    "Value": 61
+  },
+  "SliderCompleteFbOff": {
+    "Value": 62,
+    "Description": "Slider complete feedback termination"
+  },
+  "Fluid1Onset": {
+    "Value": 70,
+    "Description": "Command sent to initiate fluid reward"
+  },
+  "ContextCode": {
+    "Range": [
+      100,
+      999
+    ],
+    "Description": "100-999 indicates the current context code (must be defined by the experimenter)"
+  },
+  "StimCode": {
+    "Range": [
+      1000,
+      1999
+    ],
+    "Description": "1000-1999 indicates the current stimulus code (must be defined by the experimenter in stimDef)"
+  },
+  "TrialIndex": {
+    "Range": [
+      2000,
+      3999
+    ],
+    "Description": "2000-3999 indicates TrialIndex, which iterates every trial, regardless of aborted status. Most data files have new file saved every TrialIndex."
+  },
+  "TrialNumber": {
+    "Range": [
+      4000,
+      5999
+    ],
+    "Description": "4000-5999 indicates TrialNumber, which only iterates if trial is not aborted. Most interesting data only occurs when this iterates."
+  },
+  "TileCode": {
+    "Range": [
+      7000,
+      8999
+    ],
+    "Description": "7000 8999 indicates the current tile code (must be defined by the experimenter in the Maze folder)"
+  }
+}

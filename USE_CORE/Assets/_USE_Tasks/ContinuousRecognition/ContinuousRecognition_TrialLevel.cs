@@ -22,7 +22,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     public TextMeshProUGUI TimerText;
     public GameObject TimerTextGO;
-    public GameObject TitleTextGO;
     public GameObject CR_CanvasGO;
     public GameObject YouWinTextGO;
     public GameObject YouLoseTextGO;
@@ -33,8 +32,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public GameObject RedBorderPrefab;
     public GameObject Starfield;
     [HideInInspector] public List<GameObject> BorderPrefabList;
-
-    [HideInInspector] public bool IsHuman;
 
     [HideInInspector] public bool CompletedAllTrials;
     [HideInInspector] public bool EndBlock;
@@ -87,7 +84,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private Transform playerViewParent;
     private GameObject playerViewText;
     public List<GameObject> playerViewTextList;
-
+    
     [HideInInspector] public float TouchFeedbackDuration;
 
     //Config Variables
@@ -106,7 +103,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
         OriginalFbTextPosition = YouLoseTextGO.transform.position;
-        OriginalTitleTextPosition = TitleTextGO.transform.position;
         OriginalTimerPosition = TimerBackdropGO.transform.position;
 
         playerView = new PlayerViewPanel();
@@ -117,25 +113,28 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             SetControllerBlockValues();
 
-            if(HeldTooLongTexture == null)
-                LoadTextures(MaterialFilePath);
-
             if (StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
-                StartButton = USE_StartButton.StartButtonGO;
-                USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
-                OriginalStartButtonPosition = StartButton.transform.position;
+                if (IsHuman)
+                {
+                    StartButton = HumanStartPanel.StartButtonGO;
+                    HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
+                else
+                {
+                    USE_StartButton = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                    StartButton = USE_StartButton.StartButtonGO;
+                    USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
+
             }
-            playerViewParent = GameObject.Find("MainCameraCopy").transform;
+            #if (!UNITY_WEBGL)
+                playerViewParent = GameObject.Find("MainCameraCopy").transform;
+            #endif
         });
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
-        SetupTrial.AddInitializationMethod(() =>
-        {
-            if (!CR_CanvasGO.activeInHierarchy)
-                CR_CanvasGO.SetActive(true);
-        });
+        SetupTrial.AddInitializationMethod(() => CR_CanvasGO.SetActive(true));
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
@@ -145,6 +144,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
+#if (UNITY_WEBGL)
+            TokenFBController.tokenSize = 110;
+#endif
+
             NumFeedbackRows = 0;
 
             if (!VariablesLoaded)
@@ -152,18 +155,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             SetTrialSummaryString();
 
-            StartButton.transform.position = OriginalStartButtonPosition;
-
             currentTask.CalculateBlockSummaryString();
 
             if (TrialCount_InTask != 0)
                 currentTask.SetTaskSummaryString();
-
-            if (TrialCount_InBlock == 0 && IsHuman)
-            {
-                AdjustStartButtonPos(); //Adjust startButton position (move down) to make room for Title text. 
-                TitleTextGO.SetActive(true);    //Add title text above StartButton if first trial in block and Human is playing.
-            }
 
             if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
             {
@@ -186,16 +181,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 ShotgunHandler.ClearSelections();
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+
         });
+
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
-            if (TitleTextGO.activeInHierarchy)
-            {
-                TitleTextGO.SetActive(false);
-                TitleTextGO.transform.position = OriginalTitleTextPosition; //Reset Title Position for next block (in case its not a human block). 
-            }
-
             if (IsHuman)
             {
                 CR_CanvasGO.SetActive(true);
@@ -227,7 +218,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
         ChooseStim.AddInitializationMethod(() =>
         {
-            CreateTextOnExperimenterDisplay();
+            #if (!UNITY_WEBGL)
+                CreateTextOnExperimenterDisplay();
+            #endif
 
             ChosenGO = null;
             ChosenStim = null;
@@ -398,16 +391,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
                     if (CompletedAllTrials)
                     {
-                        YouWinTextGO.transform.localPosition = new Vector3(YouWinTextGO.transform.localPosition.x, YouWinTextGO.transform.localPosition.y - Y_Offset, YouWinTextGO.transform.localPosition.z);
-                        YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"WINNER! \n New HighScore: {Score} xp";
-                        YouWinTextGO.SetActive(true);
+                        //YouWinTextGO.transform.localPosition = new Vector3(YouWinTextGO.transform.localPosition.x, YouWinTextGO.transform.localPosition.y - Y_Offset, YouWinTextGO.transform.localPosition.z);
+                        //YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"WINNER! \n New HighScore: {Score} xp";
+                        //YouWinTextGO.SetActive(true);
                         AudioFBController.Play("CR_BlockCompleted");
                     }
                     else
                     {
-                        YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
-                        YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Game Over \n HighScore: {Score} xp";
-                        YouLoseTextGO.SetActive(true);
+                        //YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
+                        //YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Game Over \n HighScore: {Score} xp";
+                        //YouLoseTextGO.SetActive(true);
                         AudioFBController.Play("CR_BlockFailed");
                         //AudioFBController.Play("CR_SouthParkFail");
                     }
@@ -512,7 +505,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.SetFlashingTime(1f);
         HaloFBController.SetPositiveHaloColor(Color.yellow);
         HaloFBController.SetNegativeHaloColor(Color.gray);
-        HaloFBController.SetHaloSize(1f);
+        HaloFBController.SetHaloSize(1.1f);
     }
 
     void RemoveShakeStimScript(StimGroup stimGroup)
@@ -565,13 +558,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    void AdjustStartButtonPos()
-    {
-        Vector3 buttonPos = StartButton.transform.position;
-        buttonPos.y -= .025f;
-        StartButton.transform.position = buttonPos;
-    }
-
     void AdjustTextPosForMac() //When running a build instead of hitting play in editor:
     {
         Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
@@ -579,15 +565,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.tokenSize = 200;
         TokenFBController.RecalculateTokenBox();
 
-        //move Timer up
         Vector3 Pos = OriginalTimerPosition;
-        Pos.y -= 1.5f;
+        Pos.y -= .02f;
         TimerBackdropGO.transform.position = Pos;
-
-        //move TitleText down
-        Vector3 Position = TitleTextGO.transform.position;
-        Position.y -= 1f;
-        TitleTextGO.transform.position = Position;
     }
 
     float GetOffsetY()
@@ -644,6 +624,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                              "\nNew_Stim: " + NumNew_Trial +
                              "\nPNC_Stim: " + NumPNC_Trial;
     }
+
+
 
     Vector3[] CenterFeedbackLocations(Vector3[] locations, int numLocations)
     {
@@ -878,9 +860,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         NumNew_Trial = 0;
         NumPNC_Trial = 0;
 
-        StimGroup sg = ExternalStims;
-        if (PrefabStims.stimDefs.Count > 0)
-            sg = PrefabStims;
+        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+
 
         if (TrialCount_InBlock == 0)
         {
@@ -910,7 +891,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 NumNew_Trial++;
             }
 
-            trialStims = new StimGroup("TrialStims", sg, currentTrial.TrialStimIndices);
+            trialStims = new StimGroup("TrialStims", group, currentTrial.TrialStimIndices);
             foreach (ContinuousRecognition_StimDef stim in trialStims.stimDefs)
                 stim.PreviouslyChosen = false;
             trialStims.SetLocations(currentTrial.TrialStimLocations);
@@ -965,7 +946,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 NumPNC_Trial++;
             }
 
-            trialStims = new StimGroup($"TrialStims", sg, currentTrial.TrialStimIndices);
+            trialStims = new StimGroup($"TrialStims", group, currentTrial.TrialStimIndices);
             trialStims.SetLocations(currentTrial.TrialStimLocations);
             TrialStims.Add(trialStims);
         }
@@ -986,7 +967,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             for(int i = 0; i < num_PC; i++)
                 currentTrial.TrialStimIndices.Add(currentTrial.PC_Stim[i]);
             
-            trialStims = new StimGroup($"TrialStims", sg, currentTrial.TrialStimIndices);
+            trialStims = new StimGroup($"TrialStims", group, currentTrial.TrialStimIndices);
             trialStims.SetLocations(currentTrial.TrialStimLocations);
             TrialStims.Add(trialStims);
         }
@@ -1010,10 +991,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         Starfield.SetActive(false);
         TokenFBController.enabled = false;
 
-        StimGroup group = ExternalStims;
-        if (UseDefaultConfigs)
-            group = PrefabStims;
-
+        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
 
         if (!StimIsChosen && ChosenStimIndices.Count < 1)
             return;

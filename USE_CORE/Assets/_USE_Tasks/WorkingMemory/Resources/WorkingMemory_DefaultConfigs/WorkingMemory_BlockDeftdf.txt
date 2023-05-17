@@ -1,0 +1,3 @@
+BlockName	ContextName	BlockCount	NumInitialTokens	NumTokenBar	NumPulses	PulseSize
+WorkingMem	014_027_014_002_2	1	0	8	2	250
+WorkingMem	014_028_014_001_2	2	0	8	2	250

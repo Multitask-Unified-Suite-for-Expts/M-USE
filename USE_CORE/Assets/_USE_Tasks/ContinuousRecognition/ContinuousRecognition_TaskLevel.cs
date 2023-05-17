@@ -10,7 +10,6 @@ using USE_StimulusManagement;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Block;
 using System.Linq;
-using System.Windows.Forms;
 using System.IO;
 
 public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
@@ -45,7 +44,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     public int blocksAdded;
 
-
     public override void SpecifyTypes()
     {
         TaskLevelType = typeof(ContinuousRecognition_TaskLevel);
@@ -79,7 +77,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
             RenderSettings.skybox = CreateSkybox(contextFilePath, UseDefaultConfigs);
 
-
             trialLevel.ContextActive = true;
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
          
@@ -90,16 +87,19 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddInitializationMethod(() =>
         {
-            if (trialLevel.AbortCode == 0)
-            {
-                CurrentBlockString += "\n" + "\n";
-                CurrentBlockString = CurrentBlockString.Replace("Current Block", $"Block {blocksAdded + 1}");
-                PreviousBlocksString.Insert(0,CurrentBlockString); //Add current block string to full list of previous blocks. 
+            #if (!UNITY_WEBGL)
+                CalculateBlockAverages();
+                CalculateStanDev();
                 AddBlockValuesToTaskValues();
-                blocksAdded++;
-            }
-            CalculateBlockAverages();
-            CalculateStanDev();
+
+                if (trialLevel.AbortCode == 0)
+                {
+                    CurrentBlockString += "\n" + "\n";
+                    CurrentBlockString = CurrentBlockString.Replace("Current Block", $"Block {blocksAdded + 1}");
+                    PreviousBlocksString.Insert(0, CurrentBlockString); //Add current block string to full list of previous blocks. 
+                    blocksAdded++;
+                }
+            #endif
         });        
     }
 
@@ -138,9 +138,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         else
             trialLevel.MakeStimPopOut = false;
 
-        if (SessionSettings.SettingExists("Session", "IsHuman"))
-            trialLevel.IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");
-
         if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
             trialLevel.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
         else
@@ -166,11 +163,16 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary();
 
-        data["Non Stim Touches"] = NonStimTouches_Task.AsQueryable().Sum();
-        data["Trials Completed"] = TrialsCompleted_Task.AsQueryable().Sum();
-        data["Trials Correct"] = TrialsCorrect_Task.AsQueryable().Sum();
-        data["TokenBar Completions"] = TokenBarCompletions_Task.AsQueryable().Sum();
-        data["Total Rewards"] = TotalRewards_Task.AsQueryable().Sum();
+        if(NonStimTouches_Task.Count > 0)
+            data["Non Stim Touches"] = NonStimTouches_Task.AsQueryable().Sum();
+        if (TrialsCompleted_Task.Count > 0)
+            data["Trials Completed"] = TrialsCompleted_Task.AsQueryable().Sum();
+        if (TrialsCorrect_Task.Count > 0)
+            data["Trials Correct"] = TrialsCorrect_Task.AsQueryable().Sum();
+        if (TokenBarCompletions_Task.Count > 0)
+            data["TokenBar Completions"] = TokenBarCompletions_Task.AsQueryable().Sum();
+        if (TotalRewards_Task.Count > 0)
+            data["Total Rewards"] = TotalRewards_Task.AsQueryable().Sum();
         return data;
     }
 

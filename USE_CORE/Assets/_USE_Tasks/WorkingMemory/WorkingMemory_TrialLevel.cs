@@ -97,7 +97,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            LoadTextures(ContextExternalFilePath);
             // Initialize FB Controller Values
             HaloFBController.SetHaloSize(5f);
             HaloFBController.SetHaloIntensity(5);
@@ -111,13 +110,19 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
             if(StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(WM_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                StartButton = USE_StartButton.StartButtonGO;
-                USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                if (IsHuman)
+                {
+                    StartButton = HumanStartPanel.StartButtonGO;
+                    HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
+                else
+                {
+                    USE_StartButton = new USE_StartButton(WM_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                    StartButton = USE_StartButton.StartButtonGO;
+                    USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
             }
-            
-            DeactivateChildren(WM_CanvasGO);  
-            
+                        
             if (!configUIVariablesLoaded) LoadConfigUIVariables();
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
@@ -144,6 +149,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+
         });
 
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), DisplaySample, () =>
@@ -178,7 +184,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         // Wait for a click and provide feedback accordingly
         SearchDisplay.AddInitializationMethod(() =>
         {
-            CreateTextOnExperimenterDisplay();
+            #if (!UNITY_WEBGL)
+                CreateTextOnExperimenterDisplay();
+            #endif
             searchStims.ToggleVisibility(true);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
@@ -258,8 +266,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         // The state that will handle the token feedback and wait for any animations
         TokenFeedback.AddInitializationMethod(() =>
         {
-            if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
-                DestroyChildren(GameObject.Find("MainCameraCopy"));
+            #if (!UNITY_WEBGL)
+                if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
+                    DestroyChildren(GameObject.Find("MainCameraCopy"));
+            #endif
+
             searchStims.ToggleVisibility(false);
             if (selectedSD.IsTarget)
             {
@@ -317,8 +328,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     public override void FinishTrialCleanup()
     {
         // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
-        if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
-            DestroyChildren(GameObject.Find("MainCameraCopy"));
+        #if (!UNITY_WEBGL)
+            if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
+                DestroyChildren(GameObject.Find("MainCameraCopy"));
+        #endif
+
         TokenFBController.enabled = false;
         searchStims.ToggleVisibility(false);
         sampleStim.ToggleVisibility(false);
@@ -354,7 +368,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
 
-        searchStims = new StimGroup("SearchStims", ExternalStims, CurrentTrialDef.SearchStimIndices);
+        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+
+        searchStims = new StimGroup("SearchStims", group, CurrentTrialDef.SearchStimIndices);
         //searchStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
         searchStims.SetLocations(CurrentTrialDef.SearchStimLocations);
 
@@ -381,7 +397,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         TrialStims.Add(searchStims);
         TrialStims.Add(sampleStim);
 
-        postSampleDistractorStims = new StimGroup("DisplayDistractors", ExternalStims, CurrentTrialDef.PostSampleDistractorIndices);
+        postSampleDistractorStims = new StimGroup("DisplayDistractors", group, CurrentTrialDef.PostSampleDistractorIndices);
         postSampleDistractorStims.SetVisibilityOnOffStates(GetStateFromName("DisplayDistractors"), GetStateFromName("DisplayDistractors"));
         postSampleDistractorStims.SetLocations(CurrentTrialDef.PostSampleDistractorLocations);
         TrialStims.Add(postSampleDistractorStims);

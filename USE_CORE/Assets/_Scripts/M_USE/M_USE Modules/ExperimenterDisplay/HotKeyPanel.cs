@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using USE_UI;
 using UnityEngine.UI;
 using Cursor = UnityEngine.Cursor;
 using ConfigDynamicUI;
@@ -169,7 +170,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     //SceneManager.LoadScene(SceneManager.GetActiveScene().name); //Doesn't work. Will load task again but without TaskSelection scene.
                 }
             };
-            HotKeyList.Add(toggleDisplays);
+            //HotKeyList.Add(toggleDisplays);
 
             // Remove Cursor Hot Key
             HotKey toggleCursor = new HotKey
@@ -380,6 +381,19 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 }
             };
             HotKeyList.Add(longReward);
+
+            //InstructionsButton visibility HotKey:
+            //HotKey instructionsButton = new HotKey
+            //{
+            //    keyDescription = "I",
+            //    actionName = "InstructionsButton",
+            //    hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.I),
+            //    hotKeyAction = () =>
+            //    {
+            //        USE_Instructions.ToggleInstructions();
+            //    }
+            //};
+            //HotKeyList.Add(instructionsButton);
 
             return (HotKeyList);
         }

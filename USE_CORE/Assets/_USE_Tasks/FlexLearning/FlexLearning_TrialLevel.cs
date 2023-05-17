@@ -19,7 +19,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
     // Block End Variables
     public List<int> runningAcc;
-    public int? MinTrials, MaxTrials;
+    public int MinTrials, MaxTrials;
     
     // Stimuli Variables
     private StimGroup tStim;
@@ -101,7 +101,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         
         Add_ControlLevel_InitializationMethod(() =>
         {
-            LoadTextures(ContextExternalFilePath);
             playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
             playerViewText = new GameObject();
             playerViewParent = GameObject.Find("MainCameraCopy");     
@@ -109,7 +108,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             // Initialize FB Controller Values
             HaloFBController.SetHaloSize(5f);
             HaloFBController.SetHaloIntensity(5);
-
         });
         
         SetupTrial.AddInitializationMethod(() =>
@@ -125,21 +123,29 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             
             if (StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(FL_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                StartButton = USE_StartButton.StartButtonGO;
-                USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                if (IsHuman)
+                {
+                    StartButton = HumanStartPanel.StartButtonGO;
+                    HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
+                else
+                {
+                    USE_StartButton = new USE_StartButton(FL_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                    StartButton = USE_StartButton.StartButtonGO;
+                    USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
             }
 
-            DeactivateChildren(FL_CanvasGO);
-            
             if (!configUIVariablesLoaded)
                 LoadConfigUIVariables();
-            if (!playerViewLoaded)
-                CreateTextOnExperimenterDisplay();
+
+            #if (!UNITY_WEBGL)
+                if (!playerViewLoaded)
+                    CreateTextOnExperimenterDisplay();
+            #endif
 
             SetTrialSummaryString();
             MaxTrials = CurrentTrialDef.MaxTrials;
-
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -162,7 +168,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 AdjustedPositionsForMac = true;
             }
 
-
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
@@ -172,9 +177,13 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton),
-            SearchDisplayDelay, () => EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]));
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), SearchDisplayDelay, () =>
+        {
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
+        });
+
 
         // Provide delay following start button selection and before stimuli onset
         SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay);
@@ -184,7 +193,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             Input.ResetInputAxes(); //reset input in case they holding down
             TokenFBController.enabled = true;
-            ActivateChildren(playerViewParent);
+            #if (!UNITY_WEBGL)
+                ActivateChildren(playerViewParent);
+            #endif
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
 
@@ -273,7 +284,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddInitializationMethod(() =>
         {
-            DestroyTextOnExperimenterDisplay();
+            #if (!UNITY_WEBGL)
+                DestroyTextOnExperimenterDisplay();
+            #endif
+
             if (selectedSD.StimTokenRewardMag > 0)
             {
                 TokenFBController.AddTokens(selectedGO, selectedSD.StimTokenRewardMag);
@@ -298,7 +312,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 {
                     int NumPulses = chooseReward(CurrentTrialDef.PulseReward);
                     SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
-                    SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", NumPulses));
+                    SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
                     NumRewardPulses_InBlock += NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
                     RewardGiven = true;
@@ -331,7 +345,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     public override void FinishTrialCleanup()
     {
         // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
-        DestroyTextOnExperimenterDisplay();
+        #if (!UNITY_WEBGL)
+            DestroyTextOnExperimenterDisplay();
+        #endif
+
         tStim.ToggleVisibility(false);
         
         if (TokenFBController.isActiveAndEnabled)
@@ -354,14 +371,18 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     {
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
+
+        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+
         int temp = 0;
-        tStim = new StimGroup("SearchStimuli", ExternalStims, CurrentTrialDef.TrialStimIndices);
+        tStim = new StimGroup("SearchStimuli", group, CurrentTrialDef.TrialStimIndices);
 
         if(TokensWithStimOn?? false)
             tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("ITI"));
         else
             tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"),GetStateFromName("SelectionFeedback"));
         TrialStims.Add(tStim);
+
         for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
             FlexLearning_StimDef sd = (FlexLearning_StimDef)tStim.stimDefs[i];

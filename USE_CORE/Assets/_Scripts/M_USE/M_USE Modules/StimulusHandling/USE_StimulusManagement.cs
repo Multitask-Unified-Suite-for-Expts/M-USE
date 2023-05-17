@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Security.Policy;
+//using System.Security.Policy;
 using JetBrains.Annotations;
 using UnityEngine;
 using USE_Settings;
@@ -343,7 +343,6 @@ namespace USE_StimulusManagement
 			if (prefabPath.Length > 2)
 				PrefabPath = prefabPath;
 
-			//THIS WORKS BUT HARD CODED AND PROB WONT WORK FOR BUILD.
 			string path;
 			if (Application.isEditor)
 				path = "Assets/_USE_Session/Resources/" + PrefabPath + "/" + FileName;
@@ -363,8 +362,6 @@ namespace USE_StimulusManagement
 
 		public GameObject LoadExternalStimFromFile(string stimFilePath = "")
 		{
-			Debug.Log("LOADING EXT STIM FROM FILE!");
-
 			//add StimExtesion to file path if it doesn't already contain it
 			if (!string.IsNullOrEmpty(StimExtension) && !FileName.EndsWith(StimExtension))
 			{
@@ -436,9 +433,7 @@ namespace USE_StimulusManagement
 		public void AddMesh()
 		{
 			foreach (var m in StimGameObject.transform.GetComponentsInChildren<MeshRenderer>())
-			{
 				m.gameObject.AddComponent(typeof(MeshCollider));
-			}
 		}
 
 		public GameObject LoadModel(string filePath, bool loadFromResources = false, bool visibiility = false)
@@ -648,10 +643,7 @@ namespace USE_StimulusManagement
 			SessionSettings.ImportSettings_SingleTypeArray<StimDef>(TaskName + "_StimDefs", stimDefFilePath);
 			List<StimDef> sds = (List<StimDef>)SessionSettings.Get(TaskName + "_StimDefs");
 			foreach (StimDef sd in sds)
-			{
-				sd.AddToStimGroup(this);
-				// sd.ToggleVisibility(false);
-			}
+				sd.AddToStimGroup(this);			
 		}
 
 		public void AddStims(StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)

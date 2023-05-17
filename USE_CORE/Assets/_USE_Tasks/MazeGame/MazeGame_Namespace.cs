@@ -85,7 +85,7 @@ namespace MazeGame_Namespace
     {
     }
 
-    public class MazeDef
+    public class MazeDef : CustomSettingsType
     {
         public Vector2 mDims;
         public int mNumTurns;

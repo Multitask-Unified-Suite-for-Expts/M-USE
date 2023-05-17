@@ -1,0 +1,130 @@
+{
+	"MainInitEnd": {
+		"Value": 1,
+		"Description": "Main level - init ends"
+	},
+	"TrlStart": {
+		"Value": 2,
+		"Description": "ITI ends"
+	},
+	"TrlEnd": {
+		"Value": 3,
+		"Description": "ITI starts"
+	},
+	"StartButtonSelected": {
+		"Value": 4,
+		"Description": "first frame where the start button is selected"
+	},
+	"TouchTargetStart": {
+		"Value": 5,
+		"Description": "first frame where touch target is of the correct quaddle group"
+	},
+	"TouchDistractorStart": {
+		"Value": 6,
+		"Description": "first frame where touch target is of the distractor quaddle group"
+	},
+	"TouchIrrelevantStart": {
+		"Value": 7,
+		"Description": "first frame where touch target is not on an object"
+	},
+	"TouchDurationError": {
+		"Value": 8,
+		"Description": "did not maintain object selection for minimum touch duration or exceeded maximum touch duration"
+	},
+	"TouchOff": {
+		"Value": 9,
+		"Description": "touch no longer on fixation point or object"
+	},
+	"CorrectResponse": {
+		"Value": 10,
+		"Description": "Selected the correct object within the scene"
+	},
+	"IncorrectResponse": {
+		"Value": 11,
+		"Description": "Failed to select the correct object within scene"
+	},
+	"Rewarded": {
+		"Value": 12,
+		"Description": "Positive feedback was given"
+	},
+	"Unrewarded": {
+		"Value": 13,
+		"Description": "Negative feedback was given"
+	},
+	"NoChoice": {
+		"Value": 14,
+		"Description": "Trial aborted due to object selection period timing out"
+	},
+	"ContextOn": {
+		"Value": 24,
+		"Description": "Context background appears"
+	},
+	"ContextOff": {
+		"Value": 25,
+		"Description": "Context background disappears"
+	},
+	"StimOn": {
+		"Value": 26,
+		"Description": "Stimulus appears (followed by stim code)"
+	},
+	"StimOff": {
+		"Value": 26,
+		"Description": "Stimulus disappears (followed by stim code)"
+	},
+	"SelectionVisualFbOn": {
+		"Value": 27,
+		"Description": "Selected object is highlighted to indicate accuracy"
+	},
+	"SelectionVisualFbOff": {
+		"Value": 28,
+		"Description": "highlighted object is no longer highlighted"
+	},
+	"SelectionAuditoryFbOn": {
+		"Value": 29,
+		"Description": "Sound played to indicate accuracy"
+	},
+	"TokenCompleteFbOn": {
+		"Value": 30,
+		"Description": "Token bar complete animation begins"
+	},
+	"TokenCompleteFbOff": {
+		"Value": 31,
+		"Description": "Token bar complete animation ends"
+	},
+	"Fluid1Onset": {
+		"Value": 32,
+		"Description": "Command sent to initiate fluid reward"
+	},
+	"TouchErrorImageOn": {
+		"Value": 33,
+		"Description": "Vertial lines shown for not sufficiently maintaining selection"
+	},
+	"TouchErrorImageOff": {
+		"Value": 34,
+		"Description": "vertical lines on screen from touch duration error are removed"
+	},
+	"TokenBarReset": {
+		"Value": 35,
+		"Description": "the token bar is reset to its initial step value (empty)"
+	},
+	"TokenBarVisible": {
+		"Value": 36,
+		"Description": "the token bar is made visible to the player"
+	},
+	"ContextCode": {
+		"Range": [ 100, 999 ],
+		"Description": "100-999 indicates the current context code (must be defined by the experimenter)"
+	},
+	"StimCode": {
+		"Range": [ 1000, 1999 ],
+		"Description": "1000-1999 indicates the current stimulus code (must be defined by the experimenter in stimDef)"
+	},
+	"TrialIndex": {
+		"Range": [ 2000, 3999 ],
+		"Description": "2000-3999 indicates TrialIndex, which iterates every trial, regardless of aborted status. Most data files have new file saved every TrialIndex."
+	},
+	"TrialNumber": {
+		"Range": [ 4000, 5999 ],
+		"Description": "4000-5999 indicates TrialNumber, which only iterates if trial is not aborted. Most interesting data only occurs when this iterates."
+	}
+}

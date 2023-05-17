@@ -98,7 +98,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         Add_ControlLevel_InitializationMethod(() =>
         {
-            LoadTextures(ContextExternalFilePath);
             playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
             playerViewText = new GameObject();
             playerViewParent = GameObject.Find("MainCameraCopy");     
@@ -121,13 +120,19 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
             if(StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(VS_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                StartButton = USE_StartButton.StartButtonGO;
-                USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                if (IsHuman)
+                {
+                    StartButton = HumanStartPanel.StartButtonGO;
+                    HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
+                else
+                {
+                    USE_StartButton = new USE_StartButton(VS_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                    StartButton = USE_StartButton.StartButtonGO;
+                    USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
             }
             
-            DeactivateChildren(VS_CanvasGO);            
-
             if (!configUIVariablesLoaded) 
                 LoadConfigUIVariables();
             
@@ -165,7 +170,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton),
             SearchDisplayDelay, () => 
-            { 
+            {
                 choiceMade = false;
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
             });
@@ -180,7 +185,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             // Toggle TokenBar and Stim to be visible
             selectionDuration = null;
             TokenFBController.enabled = true;
-            CreateTextOnExperimenterDisplay();
+            #if (!UNITY_WEBGL)
+                CreateTextOnExperimenterDisplay();
+            #endif
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
 
@@ -263,8 +270,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddInitializationMethod(() =>
         {
-            if (playerViewParent.transform.childCount != 0)
-                DestroyChildren(playerViewParent);
+            #if (!UNITY_WEBGL)
+                if (playerViewParent.transform.childCount != 0)
+                    DestroyChildren(playerViewParent);
+            #endif
+
             if (selectedSD.StimTokenRewardMag > 0)
             {
                 TokenFBController.AddTokens(selectedGO, selectedSD.StimTokenRewardMag);
@@ -321,8 +331,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     }
     public override void FinishTrialCleanup()
     {
-        if (playerViewParent.transform.childCount != 0)
-            DestroyChildren(playerViewParent);
+        #if (!UNITY_WEBGL)
+            if (playerViewParent.transform.childCount != 0)
+                DestroyChildren(playerViewParent);
+        #endif
+
         tStim.ToggleVisibility(false);
         
         if (TokenFBController.isActiveAndEnabled)
@@ -359,7 +372,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     {
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
-        tStim = new StimGroup("SearchStimuli", ExternalStims, CurrentTrialDef.TrialStimIndices);
+
+        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+
+        tStim = new StimGroup("SearchStimuli", group, CurrentTrialDef.TrialStimIndices);
         if(TokensWithStimOn?? false)
             tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("ITI"));
         else

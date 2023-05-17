@@ -709,9 +709,8 @@ namespace USE_States
 		public void InitializeControlLevel()
 		{
 			if (string.IsNullOrEmpty(ControlLevelName))
-			{
 				Debug.LogError("A Control Level requires a name.");
-			}
+			
 			Debug.Log("Initialize " + ControlLevelName);
 			initialized = false;
 			Terminated = false;
@@ -1201,7 +1200,7 @@ namespace USE_States
 		//RUN STATEMACHINE
 		void Awake()
 		{
-			Debug.Log("Awake " + ControlLevelName);
+            Debug.Log("Awake " + ControlLevelName);
 			Paused = true;
 			InitializeControlLevel();
 			if (isMainLevel)
@@ -1397,9 +1396,6 @@ namespace USE_States
 			else
 				tex = LoadPNG(filePath); // load the texture from a PNG -> Texture2D
 
-			if (tex == null)
-				Debug.LogError("TEX IS NULL!");
-
 			//Set the textures of the skybox to that of the PNG
 			materialSkybox.SetTexture("_FrontTex", tex);
             materialSkybox.SetTexture("_BackTex", tex);
@@ -1407,6 +1403,7 @@ namespace USE_States
             materialSkybox.SetTexture("_RightTex", tex);
             materialSkybox.SetTexture("_UpTex", tex);
             materialSkybox.SetTexture("_DownTex", tex);
+
             return materialSkybox;
         }
 

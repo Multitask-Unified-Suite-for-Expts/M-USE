@@ -18,6 +18,7 @@ public class LogPanel: ExperimenterDisplayPanel
 
         logPanelText = GameObject.Find("LogPanelText").GetComponent<Text>();
         logPanelText.supportRichText = true;
+
         singleton = this;
     }
 
@@ -32,7 +33,11 @@ public class LogPanel: ExperimenterDisplayPanel
         }
     }
 
-    public static bool HasError() {
-        return singleton.logText.Length > 0;
+    public static bool HasError()
+    {
+        if (singleton == null)
+            return false;
+        else
+            return singleton.logText.Length > 0;
     }
 }

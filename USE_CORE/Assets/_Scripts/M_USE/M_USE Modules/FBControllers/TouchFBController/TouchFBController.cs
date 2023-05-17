@@ -110,6 +110,7 @@ public class TouchFBController : MonoBehaviour
                     break;
             }
         }
+
     }
 
     private void ShowTouchFeedback(TouchFeedback touchFb)

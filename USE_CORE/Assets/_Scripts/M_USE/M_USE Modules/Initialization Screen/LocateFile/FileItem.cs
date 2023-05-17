@@ -34,7 +34,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using SFB;
+//using SFB;
 
 public class FileItem : MonoBehaviour
 {
@@ -63,10 +63,10 @@ public class FileItem : MonoBehaviour
 
 	public void locate()
 	{
-		if(!file.isFolder)
-			StandaloneFileBrowser.OpenFilePanelAsync("Open File", inputFilePath.text, "", false, (string[] paths) => { OnFileOpened(paths); });
-		else
-			StandaloneFileBrowser.OpenFolderPanelAsync("Open File", inputFilePath.text, false, (string[] paths) => { OnFileOpened(paths); });
+		//if(!file.isFolder)
+		//	StandaloneFileBrowser.OpenFilePanelAsync("Open File", inputFilePath.text, "", false, (string[] paths) => { OnFileOpened(paths); });
+		//else
+		//	StandaloneFileBrowser.OpenFolderPanelAsync("Open File", inputFilePath.text, false, (string[] paths) => { OnFileOpened(paths); });
 	}
 
 	void OnFileOpened(string[] paths)

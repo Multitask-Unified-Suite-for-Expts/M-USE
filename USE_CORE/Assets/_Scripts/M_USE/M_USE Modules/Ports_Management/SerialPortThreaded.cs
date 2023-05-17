@@ -2,9 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.IO.Ports;
 using System.Threading;
 using USE_Utilities;
+using System.IO.Ports;
+
 
 public class SerialPortThreaded : MonoBehaviour
 {
@@ -62,7 +63,7 @@ public class SerialPortThreaded : MonoBehaviour
 
 	private void SendLoop()
 	{
-		while (active) 
+		while (active)
 		{
 			if (toSendBuffer.Count > 0)
 			{

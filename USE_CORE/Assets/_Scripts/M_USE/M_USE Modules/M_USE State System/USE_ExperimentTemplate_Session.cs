@@ -94,7 +94,7 @@ namespace USE_ExperimentTemplate_Session
 
         public DisplayController DisplayController;
 
-        public GameObject TaskButtons;
+        [HideInInspector] public GameObject TaskButtons;
 
         //Set in inspector
         public GameObject InstructionsPrefab;
@@ -140,6 +140,8 @@ namespace USE_ExperimentTemplate_Session
             SubjectID = SessionDetails.GetItemValue("SubjectID");
             SessionID = SessionDetails.GetItemValue("SessionID");
             FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" + DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
+
+            Debug.Log("CONFIG FILE FOLDER = " + configFileFolder);
 
             SessionSettings.ImportSettings_MultipleType("Session",
                 LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));

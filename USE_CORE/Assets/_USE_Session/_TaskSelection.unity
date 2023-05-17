@@ -362,6 +362,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 810531c98dad74048995093927772f82, type: 3}
+--- !u!114 &815893805 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5372251986244362313, guid: 1737ff5ab2e7b42e485d5b844d7923cf,
+    type: 3}
+  m_PrefabInstance: {fileID: 1959015032}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 127b1188d36f041318828dee27ccbd66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1017469087
 GameObject:
   m_ObjectHideFlags: 0
@@ -560,6 +572,18 @@ Skybox:
   m_GameObject: {fileID: 1213845836}
   m_Enabled: 1
   m_CustomSkybox: {fileID: 2100000, guid: ca8123ef8d8c242698a8136e767957f4, type: 2}
+--- !u!114 &1372741058 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5372678582227864259, guid: 1737ff5ab2e7b42e485d5b844d7923cf,
+    type: 3}
+  m_PrefabInstance: {fileID: 1959015032}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aaf4f3e3769094e66950e4303ab95d66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1375570694
 GameObject:
   m_ObjectHideFlags: 0
@@ -590,7 +614,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: ControlLevel_Session
-  initScreen: {fileID: 0}
+  initScreen: {fileID: 1518002765}
   Terminated: 0
   isMainLevel: 1
   CallDefineLevelAutomatically: 1
@@ -600,7 +624,7 @@ MonoBehaviour:
   SessionId_SQL: 0
   PauseCanvasGO: {fileID: 0}
   PauseCanvas: {fileID: 0}
-  UseDefaultConfigs: 0
+  UseDefaultConfigs: 1
   ParticipantDistance_CM: 0
   ShotgunRaycastSpacing_DVA: 0
   ShotgunRaycastCircleSize_DVA: 0
@@ -615,8 +639,8 @@ MonoBehaviour:
   LongRewardHotKeyNumPulses: 0
   RewardHotKeyPulseSize: 0
   RewardHotKeyNumPulses: 0
-  SessionDetails: {fileID: 0}
-  LocateFile: {fileID: 0}
+  SessionDetails: {fileID: 815893805}
+  LocateFile: {fileID: 1372741058}
   CameraMirrorTexture: {fileID: 0}
   DisplayController: {fileID: 0}
   TaskButtons: {fileID: 0}
@@ -980,6 +1004,18 @@ Skybox:
   m_GameObject: {fileID: 1396040246}
   m_Enabled: 1
   m_CustomSkybox: {fileID: 2100000, guid: ca8123ef8d8c242698a8136e767957f4, type: 2}
+--- !u!114 &1518002765 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5372461101175271013, guid: 1737ff5ab2e7b42e485d5b844d7923cf,
+    type: 3}
+  m_PrefabInstance: {fileID: 1959015032}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fd7b2e598d2440bfa8cd625bebc0df2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1530207056
 GameObject:
   m_ObjectHideFlags: 0
@@ -1240,7 +1276,7 @@ PrefabInstance:
     - target: {fileID: 5190270093001177579, guid: 1737ff5ab2e7b42e485d5b844d7923cf,
         type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5190270093001177579, guid: 1737ff5ab2e7b42e485d5b844d7923cf,
         type: 3}

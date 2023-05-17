@@ -934,7 +934,6 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadCustomSingleTypeArray<T>(string filePath, string settingsName) where T : CustomSettingsType
         {
-            Debug.Log("ABOUT TO IMPORT --> FilePath: " + filePath + " | " + "SettingsName: " + settingsName);
             SessionSettings.ImportSettings_SingleTypeArray<T>(settingsName, filePath);
         }
 

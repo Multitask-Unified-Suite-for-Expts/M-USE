@@ -122,20 +122,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 SquareGO = USE_SquareGO.StartButtonGO;
             }
 
-            if (StartButton == null)
-            {
-                if (IsHuman)
-                {
-                    StartButton = HumanStartPanel.StartButtonGO;
-                    HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
-                }
-                else
-                {
-                    USE_StartButton = new USE_StartButton(THR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
-                    StartButton = USE_StartButton.StartButtonGO;
-                    USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
-                }
-            }
+            if(StartButton == null && IsHuman)
+                StartButton = HumanStartPanel.StartButtonGO;
 
             THR_CanvasGO.GetComponent<Canvas>().sortingOrder = 0;
         });
@@ -145,12 +133,18 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         //INIT TRIAL state --------------------------------------------------------------------------------------------------------------------------
         var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", MouseTracker, InitTrial, StartWithBlueSquare ? BlueSquare : WhiteSquare);
-        // ShotgunHandler.shotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
         TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, ButtonScale, THR_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
+            Debug.Log("ISHUMAN? " + IsHuman);
+
             BackdropGO.SetActive(IsHuman ? false : true);
+
+            if (IsHuman && TrialCount_InTask == 0)
+                HumanStartPanel.HumanStartPanelGO.SetActive(true);
+            else
+                StartButton = null;
 
             ResetGlobalTrialVariables();
             SetTrialSummaryString();
@@ -169,8 +163,14 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton) && !StartWithBlueSquare, WhiteSquare, () => TrialStartTime = Time.time);
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton) && StartWithBlueSquare, BlueSquare, () => TrialStartTime = Time.time);
+        InitTrial.SpecifyTermination(() => true && IsHuman && ShotgunHandler.LastSuccessfulSelectionMatches(StartButton) || StartButton == null, StartWithBlueSquare ? BlueSquare : WhiteSquare);
+        InitTrial.AddDefaultTerminationMethod(() =>
+        {
+            if (IsHuman && TrialCount_InTask == 0)
+                HumanStartPanel.HumanStartPanelGO.SetActive(false);
+
+            TrialStartTime = Time.time;
+        });
 
         //WHITE SQUARE state ------------------------------------------------------------------------------------------------------------------------
         WhiteSquare.AddInitializationMethod(() =>

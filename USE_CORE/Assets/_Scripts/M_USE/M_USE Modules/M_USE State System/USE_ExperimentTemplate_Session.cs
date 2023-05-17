@@ -301,8 +301,6 @@ namespace USE_ExperimentTemplate_Session
 
             //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
             #if (UNITY_WEBGL)
-                //Material taskSelectionBG_Material = Resources.Load<Material>("TaskSelection_BG_Material");
-                //SessionCam.GetComponent<Skybox>().material = taskSelectionBG_Material;
                 GameObject initCamGO = GameObject.Find("InitCamera");
                 initCamGO.SetActive(false);
                 TaskSelection_Starfield.SetActive(true);
@@ -471,7 +469,7 @@ namespace USE_ExperimentTemplate_Session
                         SessionCam.targetTexture = CameraMirrorTexture;
                         mainCameraCopy_Image.texture = CameraMirrorTexture;
                     }
-                            #endif
+                #endif
 
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SelectTaskStarts"]);
 
@@ -936,11 +934,15 @@ namespace USE_ExperimentTemplate_Session
             tl.SessionDataControllers = SessionDataControllers;
             tl.LocateFile = LocateFile;
             tl.SessionDataPath = SessionDataPath;
-#if (UNITY_WEBGL)
-            tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
-#else
-            tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName);
-#endif
+
+//#if (UNITY_WEBGL)
+//            tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
+//#else
+            if(UseDefaultConfigs)
+                tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
+            else
+                tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName);
+//#endif
 
             if (UseDefaultConfigs)
             {
@@ -962,17 +964,17 @@ namespace USE_ExperimentTemplate_Session
 
                     TextAsset configFilePath;
 
-                    foreach(var entry in configDict)
+                    foreach (var entry in configDict)
                     {
                         configFilePath = Resources.Load<TextAsset>(tl.TaskName + "_DefaultConfigs/" + tl.TaskName + entry.Key);
 
-                        if(configFilePath == null)//try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
+                        if (configFilePath == null)//try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
                             configFilePath = Resources.Load<TextAsset>(tl.TaskName + "_DefaultConfigs/" + entry.Key);
 
                         if (configFilePath != null)
                             System.IO.File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + tl.TaskName + entry.Key, configFilePath.bytes);
                     }
-                } 
+                }
             }
             
             tl.FilePrefix = FilePrefix;

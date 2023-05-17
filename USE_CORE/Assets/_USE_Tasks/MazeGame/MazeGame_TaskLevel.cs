@@ -331,12 +331,12 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         }
         else
         {
-            //if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeKeyFilePath"))
-            //    mazeKeyFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeKeyFilePath");
-            //else Debug.LogError("Maze key file path settings not defined in the TaskDef");
-            //if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeFilePath"))
-            //    mgTL.MazeFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeFilePath");
-            //else Debug.LogError("Maze File Path not defined in the TaskDef");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeKeyFilePath"))
+                mazeKeyFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeKeyFilePath");
+            else Debug.LogError("Maze key file path settings not defined in the TaskDef");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeFilePath"))
+                mgTL.MazeFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeFilePath");
+            else Debug.LogError("Maze File Path not defined in the TaskDef");
         }
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
@@ -364,10 +364,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         }
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TileTexture"))
-        {
             mgTL.TileTexture = (string)SessionSettings.Get(TaskName + "_TaskSettings", "TileTexture");
-            Debug.Log("TILE TEXTURE AFTER GRABBING FROM SESSION SETTINGS: " + mgTL.TileTexture);
-        }
         else
         {
             mgTL.TileTexture = "Tile"; // default value in the case it isn't specified
@@ -439,7 +436,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         MazeDefs = (MazeDef[])SessionSettings.Get("MazeDef");
 
         if (MazeDefs == null)
-            Debug.LogError("Maze Defs is null!!!!!!!!!!!!!!!!!");
+            Debug.LogError("MAZE DEFS ARE NULL!");
+
 
         MazeDims = new Vector2[MazeDefs.Length];
         MazeNumSquares = new int[MazeDefs.Length];

@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Windows.Forms;
+#if (!UNITY_WEBGL)
+    using System.Windows.Forms;
+#endif
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace ExperimenterDisplayPanels 
-{   public class Panel
+{
+    public class Panel
     {
         GameObject testCanvas = new GameObject("TestCanvas");
 

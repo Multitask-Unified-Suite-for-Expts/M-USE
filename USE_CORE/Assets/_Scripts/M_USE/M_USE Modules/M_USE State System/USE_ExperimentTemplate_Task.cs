@@ -635,15 +635,14 @@ namespace USE_ExperimentTemplate_Task
             string eventCodeFile = LocateFile.FindFileInExternalFolder(TaskConfigPath, "*" + TaskName + "*EventCodeConfig*");
             if (!string.IsNullOrEmpty(eventCodeFile))
             {
-                SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(
-                    TaskName + "_EventCodeConfig", eventCodeFile);
+                SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig", eventCodeFile);
                 CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
                 EventCodesActive = true;
             }
 
 
 
-            //Add custom settings to Persistant Data path (if use default configs)------------------------------------------------------------------------
+            //---------------------------------------------------------------------------------------------------------------------------------------
             Dictionary<string, string> customSettings = new Dictionary<string, string>();
             string settingsFilePath;
 
@@ -654,15 +653,13 @@ namespace USE_ExperimentTemplate_Task
             {
                 foreach (string key in customSettings.Keys)
                 {
+                    string filePath = TaskConfigPath + Path.DirectorySeparatorChar + key; //initially set for not default configs, then changed below for UseDefaultConfigs
+                    string settingsFileName = key.Split('.')[0];
+
                     if (UseDefaultConfigs)
                     {
-                        Debug.Log("sdakgljhklfjgh");
-                        string[] splitKey = key.Split('.');
-                        string settingsFileName = splitKey[0];
-                        string settingsFileExt = splitKey[1];
-
                         string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + TaskName + "_DefaultConfigs";
-                        string filePath = folderPath + Path.DirectorySeparatorChar + settingsFileName;
+                        filePath = folderPath + Path.DirectorySeparatorChar + settingsFileName;
 
                         if(!Directory.Exists(folderPath))
                             Directory.CreateDirectory(folderPath);
@@ -676,30 +673,27 @@ namespace USE_ExperimentTemplate_Task
                         else
                             settingsFilePath = LocateFile.FindFileInExternalFolder(TaskConfigPath, "*" + TaskName + "*" + settingsFileName + "*");
                         
+                    }
 
-                        Type settingsType = GetTaskCustomSettingsType(settingsFileName);
+                    Type settingsType = GetTaskCustomSettingsType(settingsFileName);
                
-                        switch (customSettings[key].ToLower())
-                        {
-                            case ("singletypearray"):
-                                MethodInfo readCustomSingleTypeArray = GetType().GetMethod(nameof(this.ReadCustomSingleTypeArray))
-                                                            .MakeGenericMethod(new Type[] { settingsType });
-                                readCustomSingleTypeArray.Invoke(this, new object[] { filePath, settingsFileName});
-                                break;
-                            case ("singletypejson"):
-                                MethodInfo readCustomSingleTypeJson = GetType().GetMethod(nameof(this.ReadCustomSingleTypeJson))
-                                                            .MakeGenericMethod(new Type[] { settingsType });
-                                readCustomSingleTypeJson.Invoke(this, new object[] { filePath, settingsFileName });
-                                break;
-                            case ("multipletype"):
-                                MethodInfo readCustomMultipleTypes = GetType().GetMethod(nameof(this.ReadCustomMultipleTypes))
-                                                             .MakeGenericMethod(new Type[] { settingsType });
-                                readCustomMultipleTypes.Invoke(this, new object[] { filePath, settingsFileName });
-                                break;
-                            default:
-                                Debug.LogError("DEFAULT CUSTOM SETTINGS SWITCH STATEMENT");
-                                break;
-                        }
+                    switch (customSettings[key].ToLower())
+                    {
+                        case ("singletypearray"):
+                            MethodInfo readCustomSingleTypeArray = GetType().GetMethod(nameof(this.ReadCustomSingleTypeArray)).MakeGenericMethod(new Type[] { settingsType });
+                            readCustomSingleTypeArray.Invoke(this, new object[] { filePath, settingsFileName});
+                            break;
+                        case ("singletypejson"):
+                            MethodInfo readCustomSingleTypeJson = GetType().GetMethod(nameof(this.ReadCustomSingleTypeJson)).MakeGenericMethod(new Type[] { settingsType });
+                            readCustomSingleTypeJson.Invoke(this, new object[] { filePath, settingsFileName });
+                            break;
+                        case ("multipletype"):
+                            MethodInfo readCustomMultipleTypes = GetType().GetMethod(nameof(this.ReadCustomMultipleTypes)).MakeGenericMethod(new Type[] { settingsType });
+                            readCustomMultipleTypes.Invoke(this, new object[] { filePath, settingsFileName });
+                            break;
+                        default:
+                            Debug.LogError("DEFAULT CUSTOM SETTINGS SWITCH STATEMENT");
+                            break;
                     }
                 }
                 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -789,7 +783,8 @@ namespace USE_ExperimentTemplate_Task
             
         }
 
-        public virtual Dictionary<string, object> SummarizeTask() {
+        public virtual Dictionary<string, object> SummarizeTask()
+        {
             return new Dictionary<string, object>();
         }
 
@@ -939,6 +934,7 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadCustomSingleTypeArray<T>(string filePath, string settingsName) where T : CustomSettingsType
         {
+            Debug.Log("ABOUT TO IMPORT --> FilePath: " + filePath + " | " + "SettingsName: " + settingsName);
             SessionSettings.ImportSettings_SingleTypeArray<T>(settingsName, filePath);
         }
 

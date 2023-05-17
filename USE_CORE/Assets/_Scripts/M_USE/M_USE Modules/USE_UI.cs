@@ -29,8 +29,8 @@ namespace USE_UI
 
         [HideInInspector] public GameObject HumanStartPanelPrefab; //Set to Session In inspector, then passed down
 
-        public bool HumanPanelOn;
-        public bool InstructionsOn;
+        [HideInInspector] public bool HumanPanelOn;
+        [HideInInspector] public bool InstructionsOn;
 
         [HideInInspector] public Vector3 InitialStartButtonPosition;
 
@@ -40,7 +40,7 @@ namespace USE_UI
             { "EffortControl", "Choose a balloon to inflate based on the effort required (click) and the reward amount (tokens). Pop the balloon by clicking the required number of times!"},
             { "FlexLearning", "Learn the visual feature that provides the most reward!"},
             { "MazeGame", "Find your way to the end of the Maze to earn your reward!" },
-            { "THR", "Learn to touch and hold the square for the correct duration, to earn your reward!" },
+            { "THR", "Learn to touch and hold the square. Earn your reward by holding the square for the correct duration!" },
             { "VisualSearch", "Find the targeted object to earn your reward!" },
             { "WhatWhenWhere", "Select the objects in the correct sequence to earn your reward!" },
             { "WorkingMemory", "Remember and identify the target object to earn your reward!" }
@@ -178,7 +178,7 @@ namespace USE_UI
                 BackgroundPanelGO.SetActive(true);
                 HumanBackgroundGO.SetActive(false);
 
-                if(trialCountInBlock > 0) //Mid block -show only playbutton and instructions
+                if(trialCountInBlock > 0) //Mid block - show only playbutton and instructions
                 {
                     //TitleTextGO.GetComponent<TextMeshProUGUI>().text = "Trial " + (trialCountInBlock + 1);
                     TitleTextGO.SetActive(false);

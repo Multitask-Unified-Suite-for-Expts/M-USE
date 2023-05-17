@@ -1510,7 +1510,7 @@ GameObject:
   - component: {fileID: 570913090842704784}
   - component: {fileID: 571130178878180572}
   m_Layer: 5
-  m_Name: InitializationScreen
+  m_Name: OLD_InitializationScreen
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

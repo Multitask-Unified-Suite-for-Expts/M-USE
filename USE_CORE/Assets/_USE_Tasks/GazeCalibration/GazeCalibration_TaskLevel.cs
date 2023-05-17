@@ -28,35 +28,32 @@ public class GazeCalibration_TaskLevel : ControlLevel_Task_Template
     }
     private void SetSettings()
     {
+
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             gcTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
         else gcTL.ContextExternalFilePath = ContextExternalFilePath;
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "SpoofGazeWithMouse"))
             gcTL.SpoofGazeWithMouse = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "SpoofGazeWithMouse");
-        else Debug.LogError("Spoof Gaze With Mouse setting not defined in the TaskDef");
-
+        else
+            Debug.LogError("Spoof Gaze With Mouse setting not defined in the TaskDef. Default set to TRUE.");
+       
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "CalibPointsInset"))
             gcTL.CalibPointsInset = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "CalibPointsInset");
-        else Debug.LogError("Calib Points Inset setting not defined in the TaskDef");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "SmallCirclePosition"))
-            gcTL.SmallCirclePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "SmallCirclePosition");
-        else Debug.LogError("SmallCirclePosition setting not defined in the TaskDef");
+        else
+            Debug.LogError("Calib Points Inset setting not defined in the TaskDef. Default set to [0.1, 0.1]");
         
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "BigCirclePosition"))
-            gcTL.BigCirclePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "BigCirclePosition");
-        else Debug.LogError("BigCirclePosition setting not defined in the TaskDef");
-        
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "SmallCircleSize"))
-            gcTL.SmallCircleSize = (float)SessionSettings.Get(TaskName + "_TaskSettings", "SmallCircleSize");
-        else Debug.LogError("SmallCircleSize setting not defined in the TaskDef");
-        
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "BigCircleSize"))
-            gcTL.BigCircleSize = (float)SessionSettings.Get(TaskName + "_TaskSettings", "BigCircleSize");
-        else Debug.LogError("BigCircleSize setting not defined in the TaskDef");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MaxCircleScale"))
+            gcTL.MaxCircleScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "MaxCircleScale");
+        else Debug.LogError("Max Circle Scale setting not defined in the TaskDef");
 
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MinCircleScale"))
+            gcTL.MinCircleScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "MinCircleScale");
+        else Debug.LogError("Min Circle Scale setting not defined in the TaskDef");
 
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShrinkDuration"))
+            gcTL.ShrinkDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ShrinkDuration");
+        else Debug.LogError("Shrink Duration setting not defined in the TaskDef");
     }
 
 }

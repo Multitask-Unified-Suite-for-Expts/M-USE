@@ -150,8 +150,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
-        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, SearchDisplay);
-        ShotgunHandler.shotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
+        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, SearchDisplay);
         TouchFBController.EnableTouchFeedback(ShotgunHandler, .3f, StartButtonScale, FL_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
@@ -449,10 +448,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             if (stim.IsTarget)
             {
-                textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent.transform);
+                textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent.transform);
                 textLocation.y += 75;
                 Vector3 textSize = new Vector3(2, 2,1);
-                playerViewText = playerView.WriteText("TargetText","TARGET",
+                playerViewText = playerView.CreateTextObject("TargetText","TARGET",
                     Color.red, textLocation, textSize, playerViewParent.transform);
                 
             }

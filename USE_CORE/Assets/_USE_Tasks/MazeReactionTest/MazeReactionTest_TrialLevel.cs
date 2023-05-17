@@ -182,7 +182,7 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        var SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ITI);
+        var SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", MouseTracker, InitTrial, ITI);
         TouchFBController.EnableTouchFeedback(SelectionHandler, TouchFeedbackDuration, StartButtonScale, MRT_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
@@ -504,8 +504,8 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
                 
                 if (tileComponent.mCoord.chessCoord == CurrentTaskLevel.currMaze.mPath[i])
                 {
-                    textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(tileComponent.transform.position), playerViewParent.transform);
-                    playerViewText = playerView.WriteText((i + 1).ToString(), (i + 1).ToString(),
+                    textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(tileComponent.transform.position), playerViewParent.transform);
+                    playerViewText = playerView.CreateTextObject((i + 1).ToString(), (i + 1).ToString(),
                         Color.red, textLocation, textSize, playerViewParent.transform);
                     playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                     playerViewTextList.Add(playerViewText);

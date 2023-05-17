@@ -148,6 +148,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f16bbc8c297044889a29aebfe65e7e77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  offsetMultiplier: 75
+  sinMultiplier: 6
+  cosMultiplier: 6
 --- !u!1 &5795482201521305795
 GameObject:
   m_ObjectHideFlags: 0
@@ -298,3 +301,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f16bbc8c297044889a29aebfe65e7e77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  offsetMultiplier: 75
+  sinMultiplier: 6
+  cosMultiplier: 6

@@ -38,16 +38,13 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_USE_Tasks/FlexLearning/FlexLearning.unity
     guid: a25508fa0608ebf44858b79271ccc086
-  - enabled: 0
+  - enabled: 1
     path: Assets/_USE_Tasks/MazeReactionTest/MazeReactionTest.unity
     guid: d33ffa443a8948f44843e5e19199e612
-  - enabled: 0
+  - enabled: 1
+    path: Assets/_USE_Tasks/FeatureUncertaintyWM/FeatureUncertaintyWM.unity
+    guid: cee0eaf9eb6ba496189bfd870161f1fa
+  - enabled: 1
     path: Assets/_USE_Tasks/GazeCalibration/GazeCalibration.unity
     guid: f95a2d16a11db7846854768b108fbfe2
-  - enabled: 0
-    path: Assets/_USE_Tasks/TobiiGaze/TobiiGaze.unity
-    guid: 843f4b462c28b8142be75f1ff34ca7f9
-  - enabled: 0
-    path: Assets/_USE_Tasks/Tetris/Tetris.unity
-    guid: cfad5afd3724f482ba182d72c1af1d61
   m_configObjects: {}

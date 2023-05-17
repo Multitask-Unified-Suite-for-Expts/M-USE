@@ -14,7 +14,6 @@ using GazeCalibration_Namespace;
 //using FinderGame_Namespace;
 //using Kia_Task_Namespace;
 using TobiiGaze_Namespace;
-using Tetris_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -154,17 +153,6 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(TobiiGaze_BlockDef),
                 TrialDefType = typeof(TobiiGaze_TrialDef),
                 StimDefType = typeof(TobiiGaze_StimDef)
-            }
-        }
-        ,{
-            "Tetris", new TaskTypes
-            {
-                TaskLevelType = typeof(Tetris_TaskLevel),
-                TrialLevelType = typeof(Tetris_TrialLevel),
-                TaskDefType = typeof(Tetris_TaskDef),
-                BlockDefType = typeof(Tetris_BlockDef),
-                TrialDefType = typeof(Tetris_TrialDef),
-                StimDefType = typeof(Tetris_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

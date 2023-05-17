@@ -138,8 +138,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
-        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, ChooseStim);
-        ShotgunHandler.shotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
+        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, ChooseStim);
+
         TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, ButtonScale, CR_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
@@ -455,7 +455,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         for(int i=0; i < currentTrial.NumTrialStims; ++i)
         {
-            textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(trialStims.stimDefs[i].StimLocation), playerViewParent);
+            textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(trialStims.stimDefs[i].StimLocation), playerViewParent);
             textLocation.y += 50;
             Vector2 textSize = new Vector2(200, 200);
             string stimString = "Target";
@@ -463,7 +463,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (currentStim.PreviouslyChosen)
                 stimString = "PC";
 
-            playerViewText = playerView.WriteText(stimString, stimString, stimString == "PC" ? Color.red : Color.green, textLocation, textSize, playerViewParent);
+            playerViewText = playerView.CreateTextObject(stimString, stimString, stimString == "PC" ? Color.red : Color.green, textLocation, textSize, playerViewParent);
             playerViewText.GetComponent<RectTransform>().localScale = new Vector3(1.1f, 1.1f, 0);
             playerViewTextList.Add(playerViewText);
         }

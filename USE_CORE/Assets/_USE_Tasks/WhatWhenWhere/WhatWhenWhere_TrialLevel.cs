@@ -216,8 +216,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.AddTimer(()=> sbDelay, InitTrial);
 
-        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, FinalFeedback);
-        ShotgunHandler.shotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
+        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, FinalFeedback);
+
         TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale, WWW_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
@@ -625,11 +625,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         for (int iStim = 0; iStim < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++iStim)
         {
             //Create corresponding text on player view of experimenter display
-            textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation),
+            textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation),
                 playerViewParent);
             textLocation.y += 75;
             Vector2 textSize = new Vector2(200, 200);
-            playerViewText = playerView.WriteText(CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
+            playerViewText = playerView.CreateTextObject(CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
                 CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
                 Color.red, textLocation, textSize, playerViewParent);
             playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);

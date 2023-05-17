@@ -32,6 +32,8 @@ namespace GazeCalibration_Namespace
         public int BlockID;
         public string ContextName;
         public int NumTrials;
+        public int NumPulses;
+        public int PulseSize;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -43,6 +45,8 @@ namespace GazeCalibration_Namespace
                 td.BlockID = BlockID;
                 td.ContextName = ContextName;
                 td.NumTrials = NumTrials;
+                td.NumPulses = NumPulses;
+                td.PulseSize = PulseSize;
                 TrialDefs.Add(td);
             }
         }
@@ -56,6 +60,8 @@ namespace GazeCalibration_Namespace
         public int BlockID;
         public string ContextName;
         public int NumTrials;
+        public int NumPulses;
+        public int PulseSize;
     }
 
     public class GazeCalibration_StimDef : StimDef

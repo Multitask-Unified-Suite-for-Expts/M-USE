@@ -137,8 +137,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-            Debug.Log("ISHUMAN? " + IsHuman);
-
             BackdropGO.SetActive(IsHuman ? false : true);
 
             if (IsHuman && TrialCount_InTask == 0)

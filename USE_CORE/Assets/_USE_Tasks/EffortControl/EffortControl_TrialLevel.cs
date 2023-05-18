@@ -26,7 +26,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     public Vector3 OriginalStartButtonPosition;
 
     public GameObject EC_CanvasGO;
-    public USE_StartButton StartButtonClassInstance;
+    public USE_StartButton USE_StartButton;
 
     [HideInInspector] public bool MacMainDisplayBuild;
 
@@ -49,7 +49,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     //Set in task level:
     [HideInInspector] public string ContextExternalFilePath;
-    [HideInInspector] public bool IsHuman;
 
     [System.NonSerialized] public int Response = -1;
     private int InflationsNeeded; //becomes left/right num clicks once they make selection. 
@@ -125,19 +124,27 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         AddActiveStates(new List<State> { InitTrial, ChooseBalloon, CenterSelection, InflateBalloon, Feedback, ITI });
 
         Add_ControlLevel_InitializationMethod(() =>
-        {
-            LoadTextures(ContextExternalFilePath);
-  
+        {  
             if(TokenFBController != null)
                 SetTokenVariables();
 
             if(AudioFBController != null)
                 InflateClipDuration = AudioFBController.GetClip("EC_Inflate").length;
-            
+
+
             if (StartButton == null)
             {
-                StartButtonClassInstance = new USE_StartButton(EC_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
-                StartButton = StartButtonClassInstance.StartButtonGO;
+                if (IsHuman)
+                {
+                    StartButton = HumanStartPanel.StartButtonGO;
+                    HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
+                else
+                {
+                    USE_StartButton = new USE_StartButton(EC_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                    StartButton = USE_StartButton.StartButtonGO;
+                    USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
             }
 
             if (!ObjectsCreated)
@@ -156,17 +163,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
-        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, InflateBalloon);
+        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", MouseTracker, InitTrial, InflateBalloon);
         TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, ButtonScale, EC_CanvasGO);
-
-        RectTransform rect = EC_CanvasGO.GetComponent<Canvas>().GetComponent<RectTransform>();
 
         InitTrial.AddInitializationMethod(() =>
         {
             TokenFBController.enabled = false;
             ResetRelativeStartTime(); 
             DisableAllGameobjects();
-            StartButton.SetActive(true);
 
             ResetToOriginalPositions();
 
@@ -187,7 +191,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
-            StartButton.SetActive(false);
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
         });
 
@@ -595,9 +598,23 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void SetTokenVariables()
     {
+        if (MacMainDisplayBuild && !Application.isEditor)
+        {
+            TokenFBController.tokenSize = 210;
+            TokenFBController.tokenBoxYOffset = 45;
+        }
+        else
+        {
+            TokenFBController.tokenSize = 105;
+            TokenFBController.tokenBoxYOffset = 20;
+        }
+
+        #if (UNITY_WEBGL && !UNITY_EDITOR)
+                TokenFBController.tokenSize = 115;
+                TokenFBController.tokenBoxYOffset = 25;
+        #endif
+
         TokenFBController.SetFlashingTime(1.5f);
-        TokenFBController.tokenBoxYOffset = 20;
-        TokenFBController.tokenSize = 105;
         TokenFBController.tokenSpacing = -18;
     }
 
@@ -760,9 +777,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         image.rectTransform.anchoredPosition = Vector2.zero;
 
         if (MacMainDisplayBuild)
-            image.transform.localScale = new Vector3(.035f, 6f, .001f);
+            image.transform.localScale = new Vector3(.06f, 15f, .001f);
         else
-            image.transform.localScale = new Vector3(.035f, 4.5f, .001f);
+            image.transform.localScale = new Vector3(.06f, 11f, .001f);
+
+
+        #if (UNITY_WEBGL && !UNITY_EDITOR)
+            image.transform.localScale = new Vector3(.06f, 15f, .001f);
+        #endif
 
         MiddleBarrier.SetActive(false);
     }

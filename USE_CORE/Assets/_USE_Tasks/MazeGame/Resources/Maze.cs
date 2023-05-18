@@ -54,13 +54,13 @@ namespace HiddenMaze
        
         // Copy Constructor
         public Maze(Maze rhs) {
-            this.mDims = rhs.mDims;
-            this.mPath = rhs.mPath;
-            this.mStart = rhs.mStart;
-            this.mFinish = rhs.mFinish;
-            this.mNextStep = rhs.mNextStep;
-            this.mNumSquares = rhs.mNumSquares;
-            this.mNumTurns = rhs.mNumTurns;
+            mDims = rhs.mDims;
+            mPath = rhs.mPath;
+            mStart = rhs.mStart;
+            mFinish = rhs.mFinish;
+            mNextStep = rhs.mNextStep;
+            mNumSquares = rhs.mNumSquares;
+            mNumTurns = rhs.mNumTurns;
         }
 
         // Create Maze object from JSON representation
@@ -70,14 +70,14 @@ namespace HiddenMaze
 
             // Required because maze generator does not create a field for next step, but the game requires a next step
             jsonMaze.mNextStep = jsonMaze.mStart;
-            this.mDims = jsonMaze.mDims;
-            this.sideRestricted = jsonMaze.sideRestricted;
-            this.mPath = jsonMaze.mPath;
-            this.mStart = jsonMaze.mStart;
-            this.mFinish = jsonMaze.mFinish;
-            this.mNextStep = jsonMaze.mNextStep;
-            this.mNumSquares = jsonMaze.mNumSquares;
-            this.mNumTurns = jsonMaze.mNumTurns;
+            mDims = jsonMaze.mDims;
+            sideRestricted = jsonMaze.sideRestricted;
+            mPath = jsonMaze.mPath;
+            mStart = jsonMaze.mStart;
+            mFinish = jsonMaze.mFinish;
+            mNextStep = jsonMaze.mNextStep;
+            mNumSquares = jsonMaze.mNumSquares;
+            mNumTurns = jsonMaze.mNumTurns;
         }
 
         // Create Maze object from JSON representation

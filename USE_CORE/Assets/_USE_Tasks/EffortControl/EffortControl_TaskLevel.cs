@@ -55,30 +55,33 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         {
             trialLevel.ResetBlockVariables();
             ContextName = currentBlock.ContextName;
-            RenderSettings.skybox = CreateSkybox(trialLevel.GetContextNestedFilePath(ContextExternalFilePath, ContextName, "LinearDark"), UseDefaultConfigs);
+
+            string contextFilePath;
+            if (UseDefaultConfigs)
+                contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + ContextName;
+            else
+                contextFilePath = trialLevel.GetContextNestedFilePath(ContextExternalFilePath, ContextName, "LinearDark");
+
+            RenderSettings.skybox = CreateSkybox(contextFilePath, UseDefaultConfigs);
+
             EventCodeManager.SendCodeImmediate(SessionEventCodes["ContextOn"]);
         });
 
         BlockFeedback.AddInitializationMethod(() =>
         {
-            if (BlockStringsAdded > 0)
-                CurrentBlockString += "\n";
-            PreviousBlocksString.Insert(0, CurrentBlockString);
-            AddBlockValuesToTaskValues();
-            BlockStringsAdded++;
+            #if (!UNITY_WEBGL)
+                if (BlockStringsAdded > 0)
+                    CurrentBlockString += "\n";
+                PreviousBlocksString.Insert(0, CurrentBlockString);
+                AddBlockValuesToTaskValues();
+                BlockStringsAdded++;
+            #endif
         });
     }
 
     public void SetSettings()
     {
-        if (SessionSettings.SettingExists("Session", "IsHuman"))
-            trialLevel.IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");
-        else
-            trialLevel.IsHuman = false;
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            trialLevel.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else trialLevel.ContextExternalFilePath = ContextExternalFilePath;
+        trialLevel.ContextExternalFilePath = ContextExternalFilePath;
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
         {

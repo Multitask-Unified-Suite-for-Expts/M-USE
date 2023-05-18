@@ -4,6 +4,7 @@ using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
+using USE_ExperimentTemplate_Classes;
 
 namespace FlexLearning_Namespace
 {
@@ -44,7 +45,7 @@ namespace FlexLearning_Namespace
         public string ContextName;
         public int NumInitialTokens;
         public Reward[][] TrialStimTokenReward;
-        public Reward[][] PulseReward;
+        public Reward[] PulseReward;
         public string BlockEndType;
         public float BlockEndThreshold;
         public int BlockEndWindow;
@@ -57,10 +58,9 @@ namespace FlexLearning_Namespace
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
-            int num = RandomNumGenerator.Next(MinMaxTrials[0], MinMaxTrials[1]);
+            int maxNum = RandomNumGenerator.Next(MinMaxTrials[0], MinMaxTrials[1]);
             TrialDefs = new List<FlexLearning_TrialDef>().ConvertAll(x => (TrialDef)x);
-
-            for (int iTrial = 0; iTrial < num; iTrial++)
+            for (int iTrial = 0; iTrial < maxNum; iTrial++)
             {
                 FlexLearning_TrialDef td = new FlexLearning_TrialDef();
                 td.TrialID = TrialID;
@@ -77,7 +77,7 @@ namespace FlexLearning_Namespace
                 td.PulseReward = PulseReward;
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
-                td.MaxTrials = num;
+                td.MaxTrials = maxNum;
                 if (TokensWithStimOn != null)
                     td.TokensWithStimOn = TokensWithStimOn;
                 else
@@ -87,12 +87,20 @@ namespace FlexLearning_Namespace
         }
         public override void AddToTrialDefsFromBlockDef()
         {
+            // Sets maxNum to the number of TrialDefs present, and generate a random max if a range is provided
+            int maxNum = TrialDefs.Count;
+            if (MinMaxTrials != null)
+            {
+                if (RandomNumGenerator == null)
+                    Debug.Log("RANDOM NUM GENERATOR NULL!");
+
+                maxNum = RandomNumGenerator.Next(MinMaxTrials[0], MinMaxTrials[1]);
+            }
             for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
             {
                 FlexLearning_TrialDef td = (FlexLearning_TrialDef)TrialDefs[iTrial];
                 td.BlockName = BlockName;
                 td.NumInitialTokens = NumInitialTokens;
-                td.RandomizedLocations = RandomizedLocations;
                 td.BlockEndType = BlockEndType;
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
@@ -100,6 +108,8 @@ namespace FlexLearning_Namespace
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
                 td.ContextName = ContextName;
+                td.MinMaxTrials = MinMaxTrials;
+                td.MaxTrials = maxNum;
                 if (TokensWithStimOn != null)
                     td.TokensWithStimOn = TokensWithStimOn;
                 else
@@ -119,7 +129,7 @@ namespace FlexLearning_Namespace
         public string BlockName;
         public string TrialID;
         public Reward[][] TrialStimTokenReward;
-        public Reward[][] PulseReward;
+        public Reward[] PulseReward;
         public bool RandomizedLocations;
         public bool StimFacingCamera;
         public string ContextName;
@@ -132,6 +142,8 @@ namespace FlexLearning_Namespace
         public int PulseSize;
         public bool? TokensWithStimOn;
         public int MaxTrials;
+        public int[] MinMaxTrials;
+
     }
 
     public class FlexLearning_StimDef : StimDef

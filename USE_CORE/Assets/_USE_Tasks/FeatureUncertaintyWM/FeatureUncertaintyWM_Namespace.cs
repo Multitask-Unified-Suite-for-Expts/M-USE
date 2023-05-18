@@ -5,6 +5,7 @@ using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
 using WorkingMemory_Namespace;
+using USE_ExperimentTemplate_Classes;
 
 namespace FeatureUncertaintyWM_Namespace
 {
@@ -143,5 +144,6 @@ namespace FeatureUncertaintyWM_Namespace
         //componentObjIndices= {57, 10, 23}
         public float[] radius;
         public bool IsTarget;
+        public int StimTrialRewardMag;
     }
 }

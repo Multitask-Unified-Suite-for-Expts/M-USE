@@ -43,16 +43,21 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
-            // Sets Min/Max for the CheckBlockEnd at the TrialLevel
-            System.Random rnd = new System.Random();
-            int RandomMaxTrials = rnd.Next(flBD.MinMaxTrials[0], flBD.MinMaxTrials[1]);
-            flTL.MaxTrials = RandomMaxTrials;
+            
             flTL.MinTrials = flBD.MinMaxTrials[0];
             flTL.TokensWithStimOn = flBD.TokensWithStimOn;
             
             ResetBlockVariables();
             flTL.ContextName = flBD.ContextName;
-            RenderSettings.skybox = CreateSkybox(flTL.GetContextNestedFilePath(ContextExternalFilePath, flTL.ContextName), UseDefaultConfigs);
+
+            string contextFilePath;
+            if (UseDefaultConfigs)
+                contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + flBD.ContextName;
+            else
+                contextFilePath = flTL.GetContextNestedFilePath(ContextExternalFilePath, flBD.ContextName, "LinearDark");
+
+            RenderSettings.skybox = CreateSkybox(contextFilePath, UseDefaultConfigs);
+
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
             
             //Set the Initial Token Values for the Block
@@ -63,10 +68,12 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         });
         BlockFeedback.AddInitializationMethod(() =>
         {
-            if (BlockStringsAdded > 0)
-                CurrentBlockString += "\n";
-            BlockStringsAdded++;
-            PreviousBlocksString.Insert(0, CurrentBlockString);
+            #if (!UNITY_WEBGL)
+                if (BlockStringsAdded > 0)
+                    CurrentBlockString += "\n";
+                BlockStringsAdded++;
+                PreviousBlocksString.Insert(0, CurrentBlockString);
+            #endif
         });
         AssignBlockData();
     }

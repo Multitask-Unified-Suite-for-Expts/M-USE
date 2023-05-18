@@ -9,10 +9,11 @@ using EffortControl_Namespace;
 using MazeGame_Namespace;
 using FlexLearning_Namespace;
 using THR_Namespace;
+using MazeReactionTest_Namespace;
+using GazeCalibration_Namespace;
 //using FinderGame_Namespace;
 //using Kia_Task_Namespace;
-using MazeReactionTest_Namespace;
-using FeatureUncertaintyWM_Namespace;
+using TobiiGaze_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -133,14 +134,25 @@ static public class USE_Tasks_CustomTypes
             }
         }
         ,{
-            "FeatureUncertaintyWM", new TaskTypes
+            "GazeCalibration", new TaskTypes
             {
-                TaskLevelType = typeof(FeatureUncertaintyWM_TaskLevel),
-                TrialLevelType = typeof(FeatureUncertaintyWM_TrialLevel),
-                TaskDefType = typeof(FeatureUncertaintyWM_TaskDef),
-                BlockDefType = typeof(FeatureUncertaintyWM_BlockDef),
-                TrialDefType = typeof(FeatureUncertaintyWM_TrialDef),
-                StimDefType = typeof(FeatureUncertaintyWM_StimDef)
+                TaskLevelType = typeof(GazeCalibration_TaskLevel),
+                TrialLevelType = typeof(GazeCalibration_TrialLevel),
+                TaskDefType = typeof(GazeCalibration_TaskDef),
+                BlockDefType = typeof(GazeCalibration_BlockDef),
+                TrialDefType = typeof(GazeCalibration_TrialDef),
+                StimDefType = typeof(GazeCalibration_StimDef)
+            }
+        }
+        ,{
+            "TobiiGaze", new TaskTypes
+            {
+                TaskLevelType = typeof(TobiiGaze_TaskLevel),
+                TrialLevelType = typeof(TobiiGaze_TrialLevel),
+                TaskDefType = typeof(TobiiGaze_TaskDef),
+                BlockDefType = typeof(TobiiGaze_BlockDef),
+                TrialDefType = typeof(TobiiGaze_TrialDef),
+                StimDefType = typeof(TobiiGaze_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

@@ -174,7 +174,7 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -199,7 +199,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -409,14 +409,20 @@ MonoBehaviour:
   SelectionType: 
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
+  DisplayController: {fileID: 0}
   InitialTokenAmount: 0
+  ShotgunRaycastSpacing_DVA: 0
+  ParticipantDistance_CM: 0
+  ShotgunRaycastCircleSize_DVA: 0
+  UseDefaultConfigs: 0
+  IsHuman: 0
+  HumanStartPanel: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
   THR_BackdropTexture: {fileID: 0}
   FL_CanvasGO: {fileID: 59404236}
   USE_StartButton: {fileID: 0}
-  USE_FBSquare: {fileID: 0}
   runningAcc: 
   MinTrials: 0
   MaxTrials: 0
@@ -503,8 +509,6 @@ MonoBehaviour:
   ContextExternalFilePath: 
   StartButtonPosition: {x: 0, y: 0, z: 0}
   StartButtonScale: 0
-  FBSquarePosition: {x: 0, y: 0, z: 0}
-  FBSquareScale: 0
   StimFacingCamera: 0
   ShadowType: 
   NeutralITI: 0
@@ -516,8 +520,11 @@ MonoBehaviour:
   NumTokenBarFull_InBlock: 0
   TotalTokensCollected_InBlock: 0
   AverageSearchDuration_InBlock: 0
-  TouchDurationError_InBlock: 0
   AbortedTrials_InBlock: 0
+  TouchFeedbackDuration: 0
+  PreSearch_TouchFbErrorCount: 0
+  MacMainDisplayBuild: 0
+  AdjustedPositionsForMac: 0
 --- !u!114 &1578732254
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -538,6 +545,10 @@ MonoBehaviour:
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
+  ShotgunRaycastCircleSize_DVA: 0
+  ShotgunRaycastSpacing_DVA: 0
+  ParticipantDistance_CM: 0
+  PrefabPath: 
   ConfigName: 
   TaskName: FlexLearning
   TaskProjectFolder: 
@@ -551,6 +562,7 @@ MonoBehaviour:
   EventCodesActive: 0
   RewardPulsesActive: 0
   SonicationActive: 0
+  UseDefaultConfigs: 0
   ContextExternalFilePath: 
   SessionDataPath: 
   TaskConfigPath: 
@@ -579,10 +591,12 @@ MonoBehaviour:
   PrefabStimPaths: []
   ExperimenterDisplayController: {fileID: 0}
   SessionInfoPanel: {fileID: 0}
+  DisplayController: {fileID: 0}
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
-  TouchDurationError_InTask: 0
+  IsHuman: 0
+  HumanStartPanel: {fileID: 0}
   NumRewardPulses_InTask: 0
   NumTokenBarFull_InTask: 0
   TotalTokensCollected_InTask: 0

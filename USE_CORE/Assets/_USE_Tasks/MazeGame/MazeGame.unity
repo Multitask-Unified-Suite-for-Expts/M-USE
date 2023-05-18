@@ -450,7 +450,7 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -568,6 +568,7 @@ MonoBehaviour:
   ExperimenterDisplayController: {fileID: 0}
   SessionInfoPanel: {fileID: 0}
   TrialCompleteTime: 0
+  TouchFBController: {fileID: 0}
   AudioFBController: {fileID: 0}
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
@@ -577,13 +578,21 @@ MonoBehaviour:
   SelectionType: 
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
+  DisplayController: {fileID: 0}
   InitialTokenAmount: 0
+  ShotgunRaycastSpacing_DVA: 0
+  ParticipantDistance_CM: 0
+  ShotgunRaycastCircleSize_DVA: 0
+  UseDefaultConfigs: 0
+  IsHuman: 0
+  HumanStartPanel: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
   THR_BackdropTexture: {fileID: 0}
   MG_CanvasGO: {fileID: 859525660}
-  runningTrialPerformance: []
+  USE_StartButton: {fileID: 0}
+  runningPercentError: []
   MinTrials: 0
   mazeDefName: 
   MazeBackground: {fileID: 0}
@@ -704,9 +713,25 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
+  minObjectTouchDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  maxObjectTouchDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
   playerViewTextList: []
   playerViewText: {fileID: 0}
-  playerViewLoaded: 0
+  TouchFeedbackDuration: 0
 --- !u!114 &1860654111
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -727,6 +752,10 @@ MonoBehaviour:
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
+  ShotgunRaycastCircleSize_DVA: 0
+  ShotgunRaycastSpacing_DVA: 0
+  ParticipantDistance_CM: 0
+  PrefabPath: 
   ConfigName: 
   TaskName: MazeGame
   TaskProjectFolder: 
@@ -740,6 +769,7 @@ MonoBehaviour:
   EventCodesActive: 0
   RewardPulsesActive: 0
   SonicationActive: 0
+  UseDefaultConfigs: 0
   ContextExternalFilePath: 
   SessionDataPath: 
   TaskConfigPath: 
@@ -768,9 +798,12 @@ MonoBehaviour:
   PrefabStimPaths: []
   ExperimenterDisplayController: {fileID: 0}
   SessionInfoPanel: {fileID: 0}
+  DisplayController: {fileID: 0}
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
+  IsHuman: 0
+  HumanStartPanel: {fileID: 0}
   MazeNumSquares: 
   MazeNumTurns: 
   MazeDims: []
@@ -792,24 +825,24 @@ MonoBehaviour:
   backtrackErrors_InBlock: 
   ruleAbidingErrors_InBlock: 
   ruleBreakingErrors_InBlock: 
-  retouchCorrect_InBlock: 0
+  retouchCorrect_InBlock: 
+  retouchErroneous_InBlock: 
   correctTouches_InBlock: 0
   numRewardPulses_InBlock: 0
   numAbortedTrials_InBlock: 0
   nonStimTouches_InBlock: 0
   numSliderBarFull_InBlock: 0
-  choiceDurationsList_InBlock: []
   totalErrors_InTask: 0
   perseverativeErrors_InTask: 0
   backtrackErrors_InTask: 0
   ruleAbidingErrors_InTask: 0
   ruleBreakingErrors_InTask: 0
   retouchCorrect_InTask: 0
+  retouchErroneous_InTask: 0
   correctTouches_InTask: 0
   numRewardPulses_InTask: 0
   numAbortedTrials_InTask: 0
   numSliderBarFull_InTask: 0
-  mazeDurationsList_InTask: []
   BlockAveragesString: 
   CurrentBlockString: 
 --- !u!4 &1860654112

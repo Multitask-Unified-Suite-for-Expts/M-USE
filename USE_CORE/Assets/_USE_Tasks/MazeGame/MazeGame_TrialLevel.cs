@@ -152,9 +152,20 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             SliderFBController.InitializeSlider();
             HaloFBController.SetHaloSize(5);
-            LoadTextures(ContextExternalFilePath);
-            tileTex = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, TileTexture));
-            mazeBgTex = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, MazeBackgroundTextureName));
+
+
+            if (UseDefaultConfigs && !Application.isEditor)
+            {
+                tileTex = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/" + TileTexture);
+                mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/" + MazeBackgroundTextureName);
+            }
+            else
+            {
+                tileTex = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, TileTexture));
+                mazeBgTex = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, MazeBackgroundTextureName));
+            }
+
+
             if (MazeContainer == null)
                 MazeContainer = new GameObject("MazeContainer"); 
             if (MazeBackground == null)
@@ -178,9 +189,17 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             if(StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(MG_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                StartButton = USE_StartButton.StartButtonGO;
-                USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                if (IsHuman)
+                {
+                    StartButton = HumanStartPanel.StartButtonGO;
+                    HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
+                else
+                {
+                    USE_StartButton = new USE_StartButton(MG_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                    StartButton = USE_StartButton.StartButtonGO;
+                    USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
             }
 
             if (!configVariablesLoaded)
@@ -194,7 +213,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
-        var SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", InitTrial, ITI);
+        var SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", MouseTracker, InitTrial, ITI);
         TouchFBController.EnableTouchFeedback(SelectionHandler, TouchFeedbackDuration, StartButtonScale, MG_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
@@ -221,7 +240,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             InstantiateCurrMaze();
             tiles.ToggleVisibility(true);
-            CreateTextOnExperimenterDisplay();
+
+            #if (!UNITY_WEBGL)
+                CreateTextOnExperimenterDisplay();
+            #endif
+
             mazeStartTime = Time.unscaledTime;
 
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOn"]);
@@ -313,8 +336,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             else if (CorrectSelection)
             {
                 SliderFBController.UpdateSliderValue(selectedGO.GetComponent<Tile>().sliderValueChange);
-                playerViewParent.transform.Find((pathProgressIndex + 1).ToString()).GetComponent<Text>().color =
-                    new Color(0, 0.392f, 0);
+                #if (!UNITY_WEBGL)
+                    playerViewParent.transform.Find((pathProgressIndex + 1).ToString()).GetComponent<Text>().color = new Color(0, 0.392f, 0);
+                #endif
                 // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]);
             }
             else if (selectedGO != null && !ErroneousReturnToLast)
@@ -351,7 +375,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     }
                 }
             }
-            else if (finishedMaze) 
+
+            if (finishedMaze) 
             {
                 StateAfterDelay = ITI;
                 DelayDuration = 0;
@@ -395,7 +420,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         ITI.AddInitializationMethod(() =>
         {
             DisableSceneElements();
+            #if (!UNITY_WEBGL)
             DestroyChildren(playerViewParent);
+            #endif
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOff"]);
             if (finishedMaze)
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderFbController_SliderCompleteFbOff"]);
@@ -421,13 +448,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         // This will Load all tiles within the maze and the background of the maze
 
         mazeDims = CurrentTaskLevel.currMaze.mDims;
-        var mazeCenter = new Vector3(0, 0, 0);
+        var mazeCenter = MazeBackground.transform.localPosition;
 
         mazeLength = mazeDims.x * TileSize + (mazeDims.x - 1) * spaceBetweenTiles.value;
         mazeHeight = mazeDims.y * TileSize + (mazeDims.y - 1) * spaceBetweenTiles.value;
         MazeBackground.transform.SetParent(MazeContainer.transform); // setting it last so that it doesn't cover tiles
         MazeBackground.transform.localScale = new Vector3(mazeLength + 2 * spaceBetweenTiles.value,
-            mazeHeight + 2 * (spaceBetweenTiles.value/4f), 0.1f);
+            mazeHeight + 2 * (spaceBetweenTiles.value), 0.1f);
         MazeBackground.SetActive(true);
         var bottomLeftMazePos = mazeCenter - new Vector3(mazeLength / 2, mazeHeight / 2, 0);
 
@@ -504,6 +531,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         // 20 - rule-breaking incorrect (failed to start on start tile, failed to return to last correct after error, diagonal/skips)
 
         // RULE - BREAKING ERROR : NOT PRESSING START
+
+        Debug.Log($"TOUCHED COORD: {touchedCoord.chessCoord}, NEXT COORD: {CurrentTaskLevel.currMaze.mNextStep}, END TILE: {CurrentTaskLevel.currMaze.mFinish}");
         if (!startedMaze)
         {
             Debug.Log("*Rule Breaking Error - Not Pressing the Start Tile to Begin the Maze*");
@@ -570,6 +599,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             }
             else
             {
+                Debug.Log("FINISHED MAZE SET TO TRUE!");
                 finishedMaze = true; // Finished the Maze
             }
             
@@ -789,7 +819,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     }
     private void DisableSceneElements()
     {
-        StartButton.SetActive(false);
         DeactivateChildren(MazeContainer);
         DeactivateChildren(GameObject.Find("SliderCanvas"));
     } 
@@ -807,8 +836,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 
                 if (tileComponent.mCoord.chessCoord == CurrentTaskLevel.currMaze.mPath[i])
                 {
-                    textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(tileComponent.transform.position), playerViewParent.transform);
-                    playerViewText = playerView.WriteText((i + 1).ToString(), (i + 1).ToString(),
+                    textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(tileComponent.transform.position), playerViewParent.transform);
+                    playerViewText = playerView.CreateTextObject((i + 1).ToString(), (i + 1).ToString(),
                         Color.red, textLocation, textSize, playerViewParent.transform);
                     playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                     playerViewTextList.Add(playerViewText);
@@ -820,7 +849,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public override void FinishTrialCleanup()
     {
         DisableSceneElements();
-        DestroyChildren(playerViewParent);
+
+#if (!UNITY_WEBGL)
+            DestroyChildren(playerViewParent);
+#endif
+
         if (mazeLoaded)
         {
             tiles.DestroyStimGroup();

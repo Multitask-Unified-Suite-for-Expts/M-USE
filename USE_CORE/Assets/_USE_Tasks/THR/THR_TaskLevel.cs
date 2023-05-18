@@ -4,6 +4,7 @@ using THR_Namespace;
 using USE_Settings;
 using USE_ExperimentTemplate_Task;
 using System.Collections.Specialized;
+using UnityEngine;
 
 public class THR_TaskLevel : ControlLevel_Task_Template
 {
@@ -42,11 +43,9 @@ public class THR_TaskLevel : ControlLevel_Task_Template
     {
         trialLevel = (THR_TrialLevel)TrialLevel;
 
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+        trialLevel.MaterialFilePath = ContextExternalFilePath;
 
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartWithBlueSquare"))
-            trialLevel.StartWithBlueSquare = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StartWithBlueSquare");
+        SetSettings();
 
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
@@ -74,10 +73,12 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddInitializationMethod(() =>
         {
-            if(BlockStringsAdded > 0)
-                CurrentBlockString += "\n";
-            BlockStringsAdded++;
-            PreviousBlocksString.Insert(0, CurrentBlockString);
+            #if (!UNITY_WEBGL)
+                if (BlockStringsAdded > 0)
+                    CurrentBlockString += "\n";
+                BlockStringsAdded++;
+                PreviousBlocksString.Insert(0, CurrentBlockString);
+            #endif
 
             TrialsCompleted_Task += trialLevel.TrialsCompleted_Block;
             TrialsCorrect_Task += trialLevel.TrialsCorrect_Block;
@@ -91,6 +92,30 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             ReleasedLate_Task += trialLevel.NumReleasedLate_Block;
             TouchesMovedOutside_Task += trialLevel.NumTouchesMovedOutside_Block;
         });
+    }
+
+    public void SetSettings()
+    {
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
+            trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartWithBlueSquare"))
+            trialLevel.StartWithBlueSquare = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StartWithBlueSquare");
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+            trialLevel.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+        else
+            trialLevel.ButtonPosition = new Vector3(0, 0, 0);
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
+            trialLevel.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+        else
+            trialLevel.ButtonScale = 120f;
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
+            trialLevel.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
+        else
+            trialLevel.TouchFeedbackDuration = .3f;
     }
 
     public override void SetTaskSummaryString()

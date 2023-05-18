@@ -3,6 +3,7 @@ using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
+using USE_ExperimentTemplate_Classes;
 
 namespace WorkingMemory_Namespace
 {

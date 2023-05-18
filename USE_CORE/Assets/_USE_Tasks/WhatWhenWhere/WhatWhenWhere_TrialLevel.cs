@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,7 +12,6 @@ using USE_DisplayManagement;
 using System.Linq;
 using System.IO;
 using UnityEngine.AI;
-using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.Serialization;
 using USE_ExperimentTemplate_Trial;
 using USE_ExperimentTemplate_Task;
@@ -163,9 +163,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         string[] stateNames = new string[]
             {"InitTrial", "ChooseStimulus", "ChooseStimulusDelay", "SelectionFeedback", "FinalFeedback", "ITI", "ChooseStimulusDelay"};
 
-        //MouseTracker variables
+        /*//MouseTracker variables
         SelectionHandler<WhatWhenWhere_StimDef> gazeHandler = new SelectionHandler<WhatWhenWhere_StimDef>();
-        GazeTracker.SpoofGazeWithMouse = true;
+        GazeTracker.SpoofGazeWithMouse = true;*/
 
         //player view variables
         playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
@@ -175,17 +175,26 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         Add_ControlLevel_InitializationMethod(() =>
         {
             SliderFBController.InitializeSlider();
-            LoadTextures(ContextExternalFilePath);
             // Initialize FB Controller Values
             HaloFBController.SetHaloSize(15f);
             HaloFBController.SetHaloIntensity(2);
             if (StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                StartButton = USE_StartButton.StartButtonGO;
-                USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                if (IsHuman)
+                {
+                    StartButton = HumanStartPanel.StartButtonGO;
+                    HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
+                else
+                {
+                    USE_StartButton = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                    StartButton = USE_StartButton.StartButtonGO;
+                    USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                }
             }
-            playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
+            #if (!UNITY_WEBGL)
+                playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
+            #endif
         });
 
         SetupTrial.AddInitializationMethod(() =>
@@ -207,8 +216,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.AddTimer(()=> sbDelay, InitTrial);
 
-        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", InitTrial, FinalFeedback);
-        ShotgunHandler.shotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
+        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, FinalFeedback);
+
         TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale, WWW_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
@@ -223,6 +232,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 ShotgunHandler.ClearSelections();
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+
         });
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), ChooseStimulusDelay, ()=>
         {
@@ -245,8 +255,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         ChooseStimulus.AddInitializationMethod(() =>
         {
             AssignCorrectStim();
-            if (GameObject.Find("MainCameraCopy").transform.childCount == 0)
-                CreateTextOnExperimenterDisplay();
+
+            #if (!UNITY_WEBGL)
+                if (GameObject.Find("MainCameraCopy").transform.childCount == 0)
+                    CreateTextOnExperimenterDisplay();
+            #endif
+
             choiceMade = false;
             if (CurrentTrialDef.LeaveFeedbackOn)
                 HaloFBController.SetLeaveFeedbackOn();
@@ -401,9 +415,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             trialComplete = false;
             startTime = Time.time;
             errorTypeString = "None";
-            
+
             //Destroy all created text objects on Player View of Experimenter Display
-            DestroyChildren(GameObject.Find("MainCameraCopy"));
+            #if (!UNITY_WEBGL)
+                DestroyChildren(GameObject.Find("MainCameraCopy"));
+            #endif
+
             runningAcc.Add(1);
             NumSliderBarFilled += 1;
             CurrentTaskLevel.NumSliderBarFilled_InTask++;
@@ -431,15 +448,28 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             searchStims.ToggleVisibility(false);
             distractorStims.ToggleVisibility(false);
-            if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
-                DestroyChildren(GameObject.Find("MainCameraCopy"));
-            
 
+            float latestAccuracy = -1;
+
+            if (runningAcc.Count > 10)
+            {
+                latestAccuracy = ((runningAcc.Skip(Math.Max(0, runningAcc.Count - 10)).Sum() / 10f)*100);
+                if (latestAccuracy > 70 && CurrentTaskLevel.LearningSpeed == -1)
+                    CurrentTaskLevel.LearningSpeed = TrialCount_InBlock;
+            }
+
+            #if (!UNITY_WEBGL)
+                if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
+                    DestroyChildren(GameObject.Find("MainCameraCopy"));
+            #endif
+            
             if (NeutralITI)
             {
                 ContextName = "itiImage";
                 RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png", UseDefaultConfigs);
             }
+
+            GenerateAccuracyLog();
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
         //------------------------------------------------------------------------ADDING VALUES TO DATA FILE--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -457,8 +487,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     }
     public override void FinishTrialCleanup()
     {
-        if (playerViewParent.transform.childCount != 0)
-            DestroyChildren(GameObject.Find("MainCameraCopy"));
+        #if (!UNITY_WEBGL)
+            if (playerViewParent.transform.childCount != 0)
+                DestroyChildren(GameObject.Find("MainCameraCopy"));
+        #endif
+
         searchStims.ToggleVisibility(false);
         distractorStims.ToggleVisibility(false);
         SliderFBController.SliderGO.SetActive(false);
@@ -592,11 +625,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         for (int iStim = 0; iStim < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++iStim)
         {
             //Create corresponding text on player view of experimenter display
-            textLocation = playerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation),
+            textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation),
                 playerViewParent);
             textLocation.y += 75;
             Vector2 textSize = new Vector2(200, 200);
-            playerViewText = playerView.WriteText(CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
+            playerViewText = playerView.CreateTextObject(CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
                 CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
                 Color.red, textLocation, textSize, playerViewParent);
             playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
@@ -622,11 +655,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //-----------------------------------------------------DEFINE QUADDLES-------------------------------------------------------------------------------------
     protected override void DefineTrialStims()
     {
+        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
         //StimGroup constructor which creates a subset of an already-existing StimGroup 
-        searchStims = new StimGroup("SearchStims", ExternalStims, CurrentTrialDef.SearchStimsIndices);
-        distractorStims = new StimGroup("DistractorStims", ExternalStims, CurrentTrialDef.DistractorStimsIndices);
+        searchStims = new StimGroup("SearchStims", group, CurrentTrialDef.SearchStimsIndices);
+        distractorStims = new StimGroup("DistractorStims", group, CurrentTrialDef.DistractorStimsIndices);
        // searchStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback")); MAKING QUADDLES TWITCH BETWEEN STATES
      //   distractorStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback"));
 

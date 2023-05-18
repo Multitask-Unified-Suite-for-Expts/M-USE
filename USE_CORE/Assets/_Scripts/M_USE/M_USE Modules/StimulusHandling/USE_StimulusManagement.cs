@@ -8,6 +8,7 @@ using JetBrains.Annotations;
 using UnityEngine;
 using USE_Settings;
 using TriLib;
+using UnityEngine.UI;
 using USE_States;
 using Object = UnityEngine.Object;
 using USE_ExperimentTemplate_Classes;
@@ -400,8 +401,26 @@ namespace USE_StimulusManagement
 				//if ExternalFilePath already contains the StimFolerPath string, do not change it,
 				//but should also have method to check this file exists
 			}
-
-			StimGameObject = LoadModel(FileName);
+			
+			//switch case based on StimDef filetype
+			if (String.IsNullOrEmpty(StimExtension))
+			{
+				//parse filename for stimExtension and assign
+			}
+			switch (StimExtension.ToLower())
+			{
+				case "fbx":
+					StimGameObject = LoadModel(FileName);
+					break;
+				case "png":
+					StimGameObject = new GameObject();//give it name
+					RawImage stimGOImage = StimGameObject.AddComponent<RawImage>();
+					stimGOImage.texture = LoadPNG(stimFilePath);
+					break;
+				default:
+					break;
+			}
+			
 			PositionRotationScale();
 			if (!string.IsNullOrEmpty(StimName))
 				StimGameObject.name = StimName;
@@ -409,6 +428,18 @@ namespace USE_StimulusManagement
 			return StimGameObject;
 		}
 
+		public Texture2D LoadPNG(string filePath)
+		{
+			Texture2D tex = null;
+			byte[] fileData;
+			if (File.Exists(filePath))
+			{
+				fileData = File.ReadAllBytes(filePath);
+				tex = new Texture2D(2, 2);
+				tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
+			}
+			return tex;
+		}
 		public void Destroy()
 		{
 			StimGroup[] sgs = StimGroups.Values.ToArray();

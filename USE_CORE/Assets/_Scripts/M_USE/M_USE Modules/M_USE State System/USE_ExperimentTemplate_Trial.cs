@@ -62,7 +62,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public MouseTracker MouseTracker;
         [HideInInspector] public GazeTracker GazeTracker;
         [HideInInspector] public EyeTracker EyeTracker;
-        [HideInInspector] public IEyeTracker IEyeTracker;
+        [HideInInspector] public TobiiEyeTrackerController TobiiEyeTrackerController;
         [HideInInspector] public ScreenBasedCalibration ScreenBasedCalibration;
         [HideInInspector] public DisplayArea DisplayArea;
 

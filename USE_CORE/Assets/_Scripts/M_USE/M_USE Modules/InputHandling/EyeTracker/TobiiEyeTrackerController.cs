@@ -11,15 +11,18 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
 
     public IEyeTracker iEyeTracker;
     // Start is called before the first frame update
-    void Awake()
+    private void Awake()
     {
         Instance = this;
+        base.Awake();
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        while (iEyeTracker == null)
+            FindEyeTracker();
     }
 
     public override void FindEyeTracker()

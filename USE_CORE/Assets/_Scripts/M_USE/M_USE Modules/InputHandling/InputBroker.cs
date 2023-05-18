@@ -78,8 +78,6 @@ public class InputBroker
             {
                 return _gazePosition;
             }
-
-			Debug.Log($"IS THE EYETRACKER NULL? " + (TobiiEyeTrackerController.Instance.iEyeTracker == null ? "YES":"NO"));
 			return CurrentGazePositionOnDisplayArea(TobiiEyeTrackerController.Instance.iEyeTracker);        
 		}
         set

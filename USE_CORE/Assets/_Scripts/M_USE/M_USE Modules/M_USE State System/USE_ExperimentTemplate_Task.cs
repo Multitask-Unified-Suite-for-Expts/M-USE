@@ -53,7 +53,7 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public bool EyeTrackerActive;
         [HideInInspector] public GazeTracker GazeTracker;
         [HideInInspector] public MouseTracker MouseTracker;
-        [HideInInspector] public IEyeTracker IEyeTracker;
+        [HideInInspector] public TobiiEyeTrackerController TobiiEyeTrackerController;
         [HideInInspector] public ScreenBasedCalibration ScreenBasedCalibration;
         [HideInInspector] public DisplayArea DisplayArea;
 
@@ -152,17 +152,7 @@ namespace USE_ExperimentTemplate_Task
             RunBlock.AddChildLevel(TrialLevel);
             AddActiveStates(new List<State> { SetupTask, RunBlock, BlockFeedback, FinishTask });
 
-            if (EyeTrackerActive)
-            {
-               // InitializeEyeTrackerSettings();
-                /*
-                TrialLevel.EyeTracker = EyeTracker;
-                TrialLevel.IEyeTracker = IEyeTracker;
-                TrialLevel.ScreenBasedCalibration = ScreenBasedCalibration;
-                TrialLevel.DisplayArea = DisplayArea;*/
-               // GameObject.Find("[TrackBoxGuide]").GetComponent<TrackBoxGuide>().SetCanvasTrackBox(GameObject.Find($"{TaskName}_Canvas"));
-            }
-                TrialLevel.TrialDefType = TrialDefType;
+            TrialLevel.TrialDefType = TrialDefType;
             TrialLevel.StimDefType = StimDefType;
 
             Add_ControlLevel_InitializationMethod(() =>
@@ -544,7 +534,12 @@ namespace USE_ExperimentTemplate_Task
             }
 
             TrialLevel.MouseTracker = MouseTracker;
-            
+            if (EyeTrackerActive)
+            {
+                TrialLevel.GazeTracker = GazeTracker;
+                TrialLevel.TobiiEyeTrackerController = TobiiEyeTrackerController;
+            }
+
             TrialLevel.SelectionType = SelectionType;
 
             Controllers.SetActive(false);

@@ -6,13 +6,11 @@ using UnityEngine;
 
 public abstract class EyeTrackerController_Base : MonoBehaviour
 {
-    private void Awake()
+    public void Awake()
     {
-        FindEyeTracker();
         CustomUpdate();
         CalibrateEyeTracker();
     }
-    
 
     public abstract void FindEyeTracker();
 

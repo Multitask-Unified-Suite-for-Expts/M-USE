@@ -70,6 +70,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private CalibrationResult CalibrationResult;
     public GameObject EyeTrackerPrefab;
     public GameObject TrackBoxPrefab;
+    private IEyeTracker IEyeTracker;
 
     // Gaze Data Samples
     private List<Vector2> LeftSamples = new List<Vector2>();
@@ -677,8 +678,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     }
     public void InitializeEyeTrackerSettings()
     {
-        Debug.Log("EYETRACKER AVAILABLE? " + EyeTrackingOperations.FindAllEyeTrackers().Count);
-        IEyeTracker = EyeTrackingOperations.FindAllEyeTrackers()[0];
+        IEyeTracker = TobiiEyeTrackerController.Instance.iEyeTracker;
         if (IEyeTracker == null)
         {
             Debug.LogError("Could not find the eye tracker.");

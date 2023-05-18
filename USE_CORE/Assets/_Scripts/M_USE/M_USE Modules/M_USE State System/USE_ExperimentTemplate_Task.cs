@@ -51,7 +51,8 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public SessionDataControllers SessionDataControllers;
         [HideInInspector] public SelectionTracker SelectionTracker;
         [HideInInspector] public bool EyeTrackerActive;
-        [HideInInspector] public EyeTracker EyeTracker;
+        [HideInInspector] public GazeTracker GazeTracker;
+        [HideInInspector] public MouseTracker MouseTracker;
         [HideInInspector] public IEyeTracker IEyeTracker;
         [HideInInspector] public ScreenBasedCalibration ScreenBasedCalibration;
         [HideInInspector] public DisplayArea DisplayArea;
@@ -94,13 +95,13 @@ namespace USE_ExperimentTemplate_Task
 
         [HideInInspector] public DisplayController DisplayController;
 
-        private GameObject Controllers;
 
         [HideInInspector] public SerialPortThreaded SerialPortController;
         [HideInInspector] public SyncBoxController SyncBoxController;
         [HideInInspector] public EventCodeManager EventCodeManager;
         protected Dictionary<string, EventCode> CustomTaskEventCodes;
-        public Dictionary<string, EventCode> SessionEventCodes;
+        [HideInInspector] public Dictionary<string, EventCode> SessionEventCodes;
+        [HideInInspector] public GameObject Controllers;
 
         public Type TaskLevelType;
         protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
@@ -154,10 +155,11 @@ namespace USE_ExperimentTemplate_Task
             if (EyeTrackerActive)
             {
                // InitializeEyeTrackerSettings();
+                /*
                 TrialLevel.EyeTracker = EyeTracker;
                 TrialLevel.IEyeTracker = IEyeTracker;
                 TrialLevel.ScreenBasedCalibration = ScreenBasedCalibration;
-                TrialLevel.DisplayArea = DisplayArea;
+                TrialLevel.DisplayArea = DisplayArea;*/
                // GameObject.Find("[TrackBoxGuide]").GetComponent<TrackBoxGuide>().SetCanvasTrackBox(GameObject.Find($"{TaskName}_Canvas"));
             }
                 TrialLevel.TrialDefType = TrialDefType;
@@ -421,14 +423,11 @@ namespace USE_ExperimentTemplate_Task
             //FrameData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
 
             //AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
-            Controllers = new GameObject("Controllers");
             GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"), Controllers.transform);
-            GameObject inputTrackers = Instantiate(Resources.Load<GameObject>("InputTrackers"), Controllers.transform);
             
             // fbControllers.transform.SetParent(Controllers.transform);
             // inputTrackers.transform.SetParent(Controllers.transform);
-            if (!EyeTrackerActive)
-                inputTrackers.GetComponent<GazeTracker>().enabled = false;
+            
 
 
             // GameObject fbControllers = Instantiate(fbControllersPrefab, Controllers.transform);
@@ -478,7 +477,7 @@ namespace USE_ExperimentTemplate_Task
 
             TrialLevel.UseDefaultConfigs = UseDefaultConfigs;
 
-
+/*
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShotgunRaycastCircleSize_DVA"))
                 TrialLevel.ShotgunRaycastCircleSize_DVA = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ShotgunRaycastCircleSize_DVA");
             else
@@ -493,7 +492,7 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.ShotgunRaycastSpacing_DVA = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ShotgunRaycastSpacing_DVA");
             else
                 TrialLevel.ShotgunRaycastSpacing_DVA = ShotgunRaycastSpacing_DVA;
-
+*/
 
             if (UseDefaultConfigs)
                 TrialLevel.LoadTexturesFromResources();
@@ -544,15 +543,8 @@ namespace USE_ExperimentTemplate_Task
                 }
             }
 
-            TrialLevel.MouseTracker = inputTrackers.GetComponent<MouseTracker>();
-            TrialLevel.MouseTracker.Init(FrameData, 0);
-            TrialLevel.MouseTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
-            if (EyeTrackerActive)
-            {
-                //MAYBE DON'T NEED TO GATE, CHECK - SD
-                TrialLevel.GazeTracker = inputTrackers.GetComponent<GazeTracker>();
-                TrialLevel.GazeTracker.Init(FrameData, 0);
-            }
+            TrialLevel.MouseTracker = MouseTracker;
+            
             TrialLevel.SelectionType = SelectionType;
 
             Controllers.SetActive(false);

@@ -55,6 +55,7 @@ public class InputBroker
 	
 	static Vector3 _mousePosition;
 	static Vector2 _gazePosition;
+
     public static Vector3 mousePosition{
 		get{
 			if(isSimulation){
@@ -72,13 +73,15 @@ public class InputBroker
     public static Vector2 gazePosition
     {
         get
-        {
-            if (isSimulation)
+        {            
+			if (isSimulation)
             {
                 return _gazePosition;
             }
-            return CurrentGazePositionOnDisplayArea();
-        }
+
+			Debug.Log($"IS THE EYETRACKER NULL? " + (EyeTracker_Controller.Instance.iEyeTracker == null ? "YES":"NO"));
+			return CurrentGazePositionOnDisplayArea(EyeTracker_Controller.Instance.iEyeTracker);        
+		}
         set
         {
             if (isSimulation)
@@ -328,10 +331,9 @@ public class InputBroker
         }
         return target;
     }
-	private static Vector2 CurrentGazePositionOnDisplayArea()
+	private static Vector2 CurrentGazePositionOnDisplayArea(IEyeTracker IEyeTracker)
 	{
-        // Get the connected eye tracker
-        IEyeTracker IEyeTracker = EyeTrackingOperations.FindAllEyeTrackers()[0];
+        
         Vector2 screenPoint = new Vector2(float.NaN, float.NaN);
 
         if (IEyeTracker == null)
@@ -340,7 +342,7 @@ public class InputBroker
         }
         else
         {
-            DisplayArea displayArea = IEyeTracker.GetDisplayArea();
+            //DisplayArea displayArea = IEyeTracker.GetDisplayArea();
             EyeTracker eyeTracker = GameObject.Find("[EyeTracker]").GetComponent<EyeTracker>(); 
            // EyeTracker eyeTracker = IEyeTracker as EyeTracker;
 

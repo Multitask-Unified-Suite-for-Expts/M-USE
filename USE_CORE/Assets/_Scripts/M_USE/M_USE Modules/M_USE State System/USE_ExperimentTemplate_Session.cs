@@ -77,6 +77,13 @@ namespace USE_ExperimentTemplate_Session
         private SyncBoxController SyncBoxController;
         private EventCodeManager EventCodeManager;
         [HideInInspector] public SelectionTracker SelectionTracker;
+        private GameObject Controllers;
+        private MouseTracker MouseTracker;
+        private GazeTracker GazeTracker;
+        private GameObject InputTrackers;
+        protected FrameData FrameData;
+
+
 
         private Camera SessionCam;
         private ExperimenterDisplayController ExperimenterDisplayController;
@@ -166,6 +173,10 @@ namespace USE_ExperimentTemplate_Session
                 SonicationActive = (bool)SessionSettings.Get("Session", "SonicationActive");
             else
                 SonicationActive = false;
+            if (SessionSettings.SettingExists("Session", "EyeTrackerActive"))
+                EyeTrackerActive = (bool)SessionSettings.Get("Session", "EyeTrackerActive");
+            else
+                EyeTrackerActive = false;
 
             if (SessionSettings.SettingExists("Session", "LongRewardHotKeyPulseSize"))
                 LongRewardHotKeyPulseSize = (int)SessionSettings.Get("Session", "LongRewardHotKeyPulseSize");
@@ -326,7 +337,16 @@ namespace USE_ExperimentTemplate_Session
                 PauseCanvasGO.SetActive(false);
                 PauseCanvas = PauseCanvasGO.GetComponent<Canvas>();
                 PauseCanvas.planeDistance = 1;
-            #endif
+#endif
+
+            // Instantiating Task Selection Frame Data
+            FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection",
+            StoreData, SessionDataPath + Path.DirectorySeparatorChar + "FrameData");
+            FrameData.InitDataController();
+            FrameData.ManuallyDefine();
+            if (EventCodesActive)
+                FrameData.AddEventCodeColumns();
+            FrameData.CreateFile();
 
             SelectionTracker = new SelectionTracker();
 
@@ -439,6 +459,17 @@ namespace USE_ExperimentTemplate_Session
                     SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
                 #endif
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupSessionEnds"]);
+
+                // Create the input tracker object
+                Controllers = new GameObject("Controllers");
+                InputTrackers = Instantiate(Resources.Load<GameObject>("InputTrackers"), Controllers.transform);
+                MouseTracker = InputTrackers.GetComponent<MouseTracker>();
+                GazeTracker = InputTrackers.GetComponent<GazeTracker>();
+
+                if (!EyeTrackerActive)
+                {
+                    InputTrackers.GetComponent<GazeTracker>().enabled = false;
+                }
             });
 
             TaskButtons = null;
@@ -446,6 +477,15 @@ namespace USE_ExperimentTemplate_Session
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
+                MouseTracker.Init(FrameData, 0);
+                MouseTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
+
+                if (EyeTrackerActive)
+                {
+                    //MAYBE DON'T NEED TO GATE, CHECK - SD
+                    GazeTracker.Init(FrameData, 0);
+                    GazeTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
+                }
                 TaskSelectionCanvasGO.SetActive(true);
 
                 TaskSelection_Starfield.SetActive(IsHuman ? true : false);
@@ -485,7 +525,7 @@ namespace USE_ExperimentTemplate_Session
                 taskAutomaticallySelected = false; // gives another chance to select even if previous task loading was due to timeout
 
                 SessionCam.gameObject.SetActive(true);
-
+                
 
                 // Don't show the task buttons if we encountered an error during setup
                 if (LogPanel.HasError())
@@ -988,10 +1028,7 @@ namespace USE_ExperimentTemplate_Session
 
             tl.SelectionTracker = SelectionTracker;
             
-            if (SessionSettings.SettingExists("Session", "EyeTrackerActive"))
-                tl.EyeTrackerActive = (bool)SessionSettings.Get("Session", "EyeTrackerActive");
-            else
-                tl.EyeTrackerActive = false;
+            tl.EyeTrackerActive = EyeTrackerActive;
 
             if (SessionSettings.SettingExists("Session", "SelectionType"))
                 tl.SelectionType = (string)SessionSettings.Get("Session", "SelectionType");
@@ -1015,6 +1052,11 @@ namespace USE_ExperimentTemplate_Session
             tl.ShotgunRaycastCircleSize_DVA = ShotgunRaycastCircleSize_DVA;
             tl.ShotgunRaycastSpacing_DVA = ShotgunRaycastSpacing_DVA;
             tl.ParticipantDistance_CM = ParticipantDistance_CM;
+
+            tl.MouseTracker = MouseTracker;
+            tl.GazeTracker = GazeTracker;
+
+            tl.Controllers = Controllers;
 
 
             if (SessionSettings.SettingExists("Session", "RewardPulsesActive"))
@@ -1232,6 +1274,12 @@ namespace USE_ExperimentTemplate_Session
 
                 SessionSettings.StoreSettings(SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings" +
                                               Path.DirectorySeparatorChar);
+
+                if (FrameData != null)
+                {
+                    FrameData.AppendData();
+                    FrameData.WriteData();
+                }
             }
         }
         public void OnGUI()

@@ -489,6 +489,11 @@ namespace USE_ExperimentTemplate_Task
             else
                 TrialLevel.LoadTextures(ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 
 
+            MouseTracker.Init(FrameData, 0);
+            if (EyeTrackerActive)
+                GazeTracker.Init(FrameData, 0);
+
+
             //Automatically giving TouchFbController;
             TrialLevel.TouchFBController.Init(TrialData, FrameData);
 

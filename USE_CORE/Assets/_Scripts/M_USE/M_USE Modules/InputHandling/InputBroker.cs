@@ -78,7 +78,7 @@ public class InputBroker
             {
                 return _gazePosition;
             }
-			return CurrentGazePositionOnDisplayArea(TobiiEyeTrackerController.Instance.iEyeTracker);        
+			return CurrentGazePositionOnDisplayArea(TobiiEyeTrackerController.Instance.iEyeTracker, TobiiEyeTrackerController.Instance.EyeTracker);        
 		}
         set
         {
@@ -329,25 +329,22 @@ public class InputBroker
         }
         return target;
     }
-	private static Vector2 CurrentGazePositionOnDisplayArea(IEyeTracker IEyeTracker)
+	private static Vector2 CurrentGazePositionOnDisplayArea(IEyeTracker IEyeTracker, EyeTracker EyeTracker)
 	{
         
         Vector2 screenPoint = new Vector2(float.NaN, float.NaN);
-
         if (IEyeTracker == null)
         {
             Debug.LogError("Could not find the eye tracker.");
         }
         else
         {
-            //DisplayArea displayArea = IEyeTracker.GetDisplayArea();
-            EyeTracker eyeTracker = GameObject.Find("[EyeTracker]").GetComponent<EyeTracker>(); 
            // EyeTracker eyeTracker = IEyeTracker as EyeTracker;
 
 			// Derive Monitor Resolution in a more Generic way
             Vector2 MonitorResolution = new Vector2(1920, 1080);//REPLACE WITH SOMETHING MORE UNIVERSAL
             // Get the most recent gaze data point
-            var gazeData = eyeTracker?.LatestGazeData;
+            var gazeData = EyeTracker?.LatestGazeData;
 
 			if (gazeData != null)
 			{

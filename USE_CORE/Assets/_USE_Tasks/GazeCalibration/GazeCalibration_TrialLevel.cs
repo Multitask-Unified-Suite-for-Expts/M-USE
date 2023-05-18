@@ -19,6 +19,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     // MUSE Common Variables
     public GazeCalibration_TrialDef CurrentTrialDef => GetCurrentTrialDef<GazeCalibration_TrialDef>();
     public GazeCalibration_TaskLevel CurrentTaskLevel => GetTaskLevel<GazeCalibration_TaskLevel>();
+
+
     public GameObject GC_CanvasGO;
     private SelectionTracking.SelectionTracker.SelectionHandler SelectionHandler;
 
@@ -71,6 +73,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     public GameObject EyeTrackerPrefab;
     public GameObject TrackBoxPrefab;
     private IEyeTracker IEyeTracker;
+    private EyeTracker EyeTracker;
 
     // Gaze Data Samples
     private List<Vector2> LeftSamples = new List<Vector2>();
@@ -686,7 +689,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         else
         {
             ScreenBasedCalibration = new ScreenBasedCalibration(IEyeTracker);
-            EyeTracker = GameObject.Find("[EyeTracker]").GetComponent<EyeTracker>();
+            EyeTracker = TobiiEyeTrackerController.Instance.EyeTracker;
             IEyeTracker.GazeDataReceived += OnGazeDataReceived;
 
             // Sets the Display area to the info entered into the Tobii Pro Eye Tracker Manager Display Setup,

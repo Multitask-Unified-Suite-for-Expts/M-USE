@@ -21,6 +21,7 @@ using SelectionTracking;
 using Random = UnityEngine.Random;
 using UnityEngine.InputSystem;
 using TMPro;
+using Tobii.Research.Unity;
 //using UnityEngine.Windows.WebCam;
 
 
@@ -342,6 +343,8 @@ namespace USE_ExperimentTemplate_Session
             // Instantiating Task Selection Frame Data
             FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection",
             StoreData, SessionDataPath + Path.DirectorySeparatorChar + "FrameData");
+            FrameData.fileName = "TaskSelection__FrameData.txt";
+            
             FrameData.InitDataController();
             FrameData.ManuallyDefine();
             if (EventCodesActive)
@@ -466,10 +469,6 @@ namespace USE_ExperimentTemplate_Session
                 MouseTracker = InputTrackers.GetComponent<MouseTracker>();
                 GazeTracker = InputTrackers.GetComponent<GazeTracker>();
 
-                if (!EyeTrackerActive)
-                {
-                    InputTrackers.GetComponent<GazeTracker>().enabled = false;
-                }
             });
 
             TaskButtons = null;
@@ -482,11 +481,16 @@ namespace USE_ExperimentTemplate_Session
 
                 if (EyeTrackerActive)
                 {
-                    //MAYBE DON'T NEED TO GATE, CHECK - SD
                     GazeTracker.Init(FrameData, 0);
                     GazeTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
                     GameObject TobiiEyeTrackerControllerGO = new GameObject("TobiiEyeTrackerController");
                     TobiiEyeTrackerController = TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
+
+                    GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
+
+
+                    InputTrackers.GetComponent<GazeTracker>().enabled = true;
+
                 }
                 TaskSelectionCanvasGO.SetActive(true);
 
@@ -1031,7 +1035,11 @@ namespace USE_ExperimentTemplate_Session
             tl.SelectionTracker = SelectionTracker;
             
             tl.EyeTrackerActive = EyeTrackerActive;
-            tl.TobiiEyeTrackerController = TobiiEyeTrackerController;
+            if (EyeTrackerActive)
+            {
+                tl.GazeTracker = GazeTracker;
+                tl.TobiiEyeTrackerController = TobiiEyeTrackerController;
+            }
 
             if (SessionSettings.SettingExists("Session", "SelectionType"))
                 tl.SelectionType = (string)SessionSettings.Get("Session", "SelectionType");
@@ -1057,7 +1065,6 @@ namespace USE_ExperimentTemplate_Session
             tl.ParticipantDistance_CM = ParticipantDistance_CM;
 
             tl.MouseTracker = MouseTracker;
-            tl.GazeTracker = GazeTracker;
 
             tl.Controllers = Controllers;
 

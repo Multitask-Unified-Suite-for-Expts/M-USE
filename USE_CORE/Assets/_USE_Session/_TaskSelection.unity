@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657815, g: 0.49641192, b: 0.57481617, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -624,7 +624,7 @@ MonoBehaviour:
   SessionId_SQL: 0
   PauseCanvasGO: {fileID: 0}
   PauseCanvas: {fileID: 0}
-  UseDefaultConfigs: 1
+  UseDefaultConfigs: 0
   ParticipantDistance_CM: 0
   ShotgunRaycastSpacing_DVA: 0
   ShotgunRaycastCircleSize_DVA: 0

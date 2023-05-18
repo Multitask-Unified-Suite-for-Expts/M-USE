@@ -10,6 +10,7 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
     private IEyeTracker cachedEyeTracker = null;
 
     public IEyeTracker iEyeTracker;
+    public EyeTracker EyeTracker;
     // Start is called before the first frame update
     private void Awake()
     {
@@ -21,7 +22,7 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
     // Update is called once per frame
     void Update()
     {
-        while (iEyeTracker == null)
+        while (iEyeTracker == null  && EyeTracker == null)
             FindEyeTracker();
     }
 
@@ -31,6 +32,10 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
         {
             // An eyetracker is connected and on
             iEyeTracker = EyeTrackingOperations.FindAllEyeTrackers()[0];
+        }
+        if (EyeTracker == null && GameObject.Find("EyeTracker(Clone)") != null)
+        {
+            EyeTracker = GameObject.Find("EyeTracker(Clone)").GetComponent<EyeTracker>();
         }
     }
 }

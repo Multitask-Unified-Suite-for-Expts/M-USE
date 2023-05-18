@@ -14,6 +14,7 @@ using USE_UI;
 using UnityEngine.UI;
 using ConfigDynamicUI;
 using WorkingMemory_Namespace;
+using UnityEditor.PackageManager.UI;
 
 public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 {
@@ -33,6 +34,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
     
     
     // MultiComponent Variables
+    private List<List<List<GameObject>>> allMcComponentGameObjs;
     private List<List<GameObject>> mcComponentGameObjs;
     private GameObject mcCompHolder;
     private int[] mcCompStimIndices;
@@ -116,6 +118,8 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
         playerViewText = new GameObject();
         taskCanvas = GameObject.Find("FeatureUncertaintyWM_Canvas");
+        allMcComponentGameObjs = new  List<List<List<GameObject>>>();
+        
 
         Add_ControlLevel_InitializationMethod(() =>
 	        {
@@ -128,25 +132,29 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 		        mcCompStimIndices = bDef.blockMcCompStimIndices;
 
 		        int maxCompObjs = bDef.maxComp;
-		        //this should be obtained by looping through all trials in TrialDefs and finding max # component stims.
-		        for (int iMC = 0; iMC < bDef.numMcStim; iMC++)
-		        {
-			        int compStimIndex = mcCompStimIndices[iMC];
-			        List<GameObject> compStimCopies = new List<GameObject>();
-			        for (int iComp = 0; iComp < maxCompObjs; iComp++)
-			        {
-				        GameObject compGO = new GameObject();//give it name
-				        compGO.transform.parent = mcCompHolder.transform;
-
-				        RawImage compGOImage = compGO.AddComponent<RawImage>();
-
-				        string stimPath = ExternalStims.stimDefs[compStimIndex].StimPath;
-				        compGOImage.texture = LoadPNG(stimPath);
-				        compStimCopies[iComp] = compGO;
-				        compStimCopies[iComp].SetActive(false);
-			        }
-			        mcComponentGameObjs.Add(compStimCopies);
-		        }
+                //this should be obtained by looping through all trials in TrialDefs and finding max # component stims.
+                for (int iStim = 0; iStim < bDef.numMcStim; iStim++)
+                {
+                    mcComponentGameObjs = new List<List<GameObject>>();
+                    for (int iMC = 0; iMC < mcCompStimIndices.Length; iMC++)
+                    {
+                        int compStimIndex = mcCompStimIndices[iMC];
+                        List<GameObject> compStimCopies = new List<GameObject>();
+                        for (int iComp = 0; iComp < maxCompObjs; iComp++)
+                        {
+                            GameObject compGO = new GameObject();//give it name
+                            compGO.transform.parent = mcCompHolder.transform;
+                            RawImage compGOImage = compGO.AddComponent<RawImage>();
+                            string stimPath = ExternalStims.stimDefs[compStimIndex].FileName;
+                            compGOImage.texture = LoadPNG(stimPath);
+                            compGOImage.rectTransform.localScale = new Vector3(0.01f, 0.01f, 0.01f); //add the var in the config later                      
+                            compStimCopies.Add(compGO);
+                            compStimCopies[iComp].SetActive(false);
+                        }
+                        mcComponentGameObjs.Add(compStimCopies);
+                    }
+                    allMcComponentGameObjs.Add(mcComponentGameObjs);
+                }
                 LoadTextures(ContextExternalFilePath);
                 // Initialize FB Controller Values
                 HaloFBController.SetHaloSize(5f);
@@ -363,15 +371,18 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             //Setting back the parent to the mcCompHolder for individual components
             FeatureUncertaintyWM_BlockDef bDef = TaskLevel.GetCurrentBlockDef<FeatureUncertaintyWM_BlockDef>();
             int maxCompObjs = bDef.maxComp;
-            for (int iMC = 0; iMC < bDef.numMcStim; iMC++)
+            for (int iStim = 0; iStim < bDef.numMcStim; iStim++)
             {
-                for (int iComp = 0; iComp < maxCompObjs; iComp++)
+                for (int iMC = 0; iMC < mcCompStimIndices.Length; iMC++)
                 {
+                    for (int iComp = 0; iComp < maxCompObjs; iComp++)
+                    {
 
-                    GameObject compGO = mcComponentGameObjs[iComp][iMC];//give it name
-                    compGO.transform.parent = mcCompHolder.transform;
-                    compGO.SetActive(false);
+                        GameObject compGO = allMcComponentGameObjs[iStim][iMC][iComp];//give it name
+                        compGO.transform.parent = mcCompHolder.transform;
+                        compGO.SetActive(false);
 
+                    }
                 }
             }
 
@@ -487,10 +498,10 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
 
         // Assign random location for each component
 
-        int[] compInds = Enumerable.Range(1, sd.totalObjectCount).ToArray();
+        int[] compInds = Enumerable.Range(0, sd.totalObjectCount).ToArray();
         System.Random random = new System.Random();
         int[] permutedCompInds = compInds.OrderBy(x => random.Next()).ToArray();
-        
+
         //IEnumerable<int> cumulativeComp = sd.compObjNumber
         //    .Select((n, i) => sd.compObjNumber
         //    .Take(i + 1)
@@ -509,19 +520,23 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
         //    }
 
         //}
-
+        Debug.Log(compLocations.Length);
+        Debug.Log(compInds.Max());
+        Debug.Log(permutedCompInds.Max());
+        counter = 0;
         for (int iComp = 0; iComp < sd.compObjIndices.Length; iComp++)
         {
 	        int[] thisCompIndices = new int[1];
 	        //populate thisCompIndices with every index of sd.CompObjIndices[iComp] in allCompObjIndices
 	        for (int iGO = 0; iGO < sd.compObjNumber[iComp]; iGO++)
 	        {
-		        GameObject compGO = mcComponentGameObjs[iComp][iGO];
+		        GameObject compGO = allMcComponentGameObjs[sd.mcStimInd][sd.compObjIndices[iComp]][iGO];
                 compGO.transform.parent = mcCompPanel.transform;
                 compGO.transform.position = compLocations[permutedCompInds[counter]];
                 //set parent to canvas
                 compGO.SetActive(true);
-	        }
+                counter++;
+            }
         }
 
         return mcCompPanel;
@@ -650,8 +665,8 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
         {
             FeatureUncertaintyWM_StimDef sdSample = (FeatureUncertaintyWM_StimDef) sampleComp.stimDefs[iStim];
             sampleComp.AddStims(sdSample);
+            
         }
-
 
         for (int iStim = 0; iStim < CurrentTrialDef.numMcStim; iStim++)
         {
@@ -663,6 +678,7 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
             sd.numCircles = CurrentTrialDef.mcNumCircles[iStim];
             sd.radius = CurrentTrialDef.mcRadius[iStim];
             sd.StimTrialRewardMag = chooseReward(CurrentTrialDef.mcStimTokenReward[iStim]);
+            sd.mcStimInd = iStim;
             if (sd.StimTrialRewardMag > 0)
             {
 
@@ -674,10 +690,13 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
             //do with all other stimdef fields
 
             multiCompStims.AddStims(GenerateMultiCompStim(sd)); //make a new stim group, add it
-            sd.AssignStimDefPointeToObjectHierarchy(sd.StimGameObject, sd);
+            
+            Debug.Log(sd.StimGameObject);
+//            sd.AssignStimDefPointeToObjectHierarchy(sd.StimGameObject, sd);
         }
 
         multiCompStims.SetLocations(CurrentTrialDef.mcStimLocations);
+        Debug.Log(multiCompStims);
         TrialStims.Add(multiCompStims);
         TrialStims.Add(sampleComp);
         sampleComp.SetLocations(CurrentTrialDef.sampleCompLocations);

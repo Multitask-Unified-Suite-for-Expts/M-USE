@@ -37,7 +37,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public bool EndBlock;
     [HideInInspector] public bool StimIsChosen;
     [HideInInspector] public bool MacMainDisplayBuild;
-    [HideInInspector] public bool AdjustedPositionsForMac;
+    [HideInInspector] public bool AdjustedTokenBar;
     [HideInInspector] public bool ContextActive;
     [HideInInspector] public bool VariablesLoaded;
 
@@ -144,9 +144,19 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-#if (UNITY_WEBGL)
-            TokenFBController.tokenSize = 110;
-#endif
+            #if (UNITY_WEBGL)
+                if (!AdjustedTokenBar)
+                {
+                    TokenFBController.AdjustTokenBarSizing(110);
+                    AdjustedTokenBar = true;
+                }
+            #endif
+
+            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedTokenBar) //adj text positions if running build with mac as main display
+            {
+                TokenFBController.AdjustTokenBarSizing(200);
+                AdjustedTokenBar = true;
+            }
 
             NumFeedbackRows = 0;
 
@@ -159,12 +169,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (TrialCount_InTask != 0)
                 currentTask.SetTaskSummaryString();
-
-            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
-            {
-                AdjustTextPosForMac();
-                AdjustedPositionsForMac = true;
-            }
 
             if (currentTrial.UseStarfield)
                 Starfield.SetActive(true);
@@ -487,7 +491,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     public void ResetBlockVariables()
     {
-        AdjustedPositionsForMac = false;
+        AdjustedTokenBar = false;
         ChosenStimIndices.Clear();
         NonStimTouches_Block = 0;
         NumTrials_Block = 0;

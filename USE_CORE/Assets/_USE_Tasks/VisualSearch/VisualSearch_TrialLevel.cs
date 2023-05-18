@@ -81,7 +81,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int PreSearch_TouchFbErrorCount;
 
     [HideInInspector] public bool MacMainDisplayBuild;
-    [HideInInspector] public bool AdjustedPositionsForMac;
+    [HideInInspector] public bool AdjustedTokenBar;
 
 
 
@@ -145,18 +145,23 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
+    #if(UNITY_WEBGL)
+            if (!AdjustedTokenBar)
+            {
+                TokenFBController.AdjustTokenBarSizing(110);
+                AdjustedTokenBar = true;
+            }
+    #endif
+
+            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedTokenBar) //adj text positions if running build with mac as main display
+            {
+                TokenFBController.AdjustTokenBarSizing(200);
+                AdjustedTokenBar = true;
+            }
+
             CurrentTaskLevel.SetBlockSummaryString();
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
-
-            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
-            {
-                Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
-                TokenFBController.transform.localScale = biggerScale;
-                TokenFBController.tokenSize = 200;
-                TokenFBController.RecalculateTokenBox();
-                AdjustedPositionsForMac = true;
-            }
 
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
@@ -321,6 +326,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         AssignTrialData();
         AssignFrameData();
     }
+
     public void MakeStimFaceCamera()
     {
         foreach (StimGroup group in TrialStims)

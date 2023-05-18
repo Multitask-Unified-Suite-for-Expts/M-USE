@@ -234,6 +234,9 @@ namespace USE_ExperimentTemplate_Task
 
                     if (InputBroker.GetKeyUp(KeyCode.E)) //End Task
                     {
+                        if (Time.timeScale == 0) //if paused, unpause before ending task
+                            Time.timeScale = 1;
+
                         TrialLevel.AbortCode = 5;
                         TrialLevel.ForceBlockEnd = true;
                         TrialLevel.FinishTrialCleanup();
@@ -243,6 +246,9 @@ namespace USE_ExperimentTemplate_Task
 
                     if (InputBroker.GetKeyUp(KeyCode.N)) //Next Block
                     {
+                        if (Time.timeScale == 0) //if paused, unpause before ending block
+                            Time.timeScale = 1;
+
                         if (TrialLevel.AudioFBController.IsPlaying())
                             TrialLevel.AudioFBController.audioSource.Stop();
                         TrialLevel.AbortCode = 3;

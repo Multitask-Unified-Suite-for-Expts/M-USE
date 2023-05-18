@@ -610,12 +610,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         }
 
         #if (UNITY_WEBGL && !UNITY_EDITOR)
-                TokenFBController.tokenSize = 115;
-                TokenFBController.tokenBoxYOffset = 25;
+            TokenFBController.tokenSize = 115;
+            TokenFBController.tokenBoxYOffset = 25;
         #endif
 
         TokenFBController.SetFlashingTime(1.5f);
-        TokenFBController.tokenSpacing = -18;
+        TokenFBController.tokenSpacing = -(int)(Screen.width * .009375f);
+
+        Debug.Log("SPACING: " + TokenFBController.tokenSpacing);
     }
 
     void SetParents(GameObject wrapper, List<GameObject> objects) // 1) Setting the parent of each GO, and 2) Adding to RemovalList (so can remove easily later)

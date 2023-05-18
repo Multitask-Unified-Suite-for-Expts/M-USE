@@ -117,6 +117,13 @@ public class TokenFBController : MonoBehaviour
     {
         return tokenBarFull;
     }
+
+    public void AdjustTokenBarSizing(int newTokenSize)
+    {
+        tokenSize = newTokenSize;
+        RecalculateTokenBox();
+    }
+
     public void OnGUI()
     {
         RenderTexture oldTexture = RenderTexture.active;

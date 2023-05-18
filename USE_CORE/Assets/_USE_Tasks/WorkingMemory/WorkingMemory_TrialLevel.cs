@@ -76,7 +76,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public float TouchFeedbackDuration;
 
     [HideInInspector] public bool MacMainDisplayBuild;
-    [HideInInspector] public bool AdjustedPositionsForMac;
+    [HideInInspector] public bool AdjustedTokenBar;
 
 
     public override void DefineControlLevel()
@@ -135,13 +135,18 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
+            #if (UNITY_WEBGL)
+                if(!AdjustedTokenBar)
+                {
+                    TokenFBController.AdjustTokenBarSizing(110);
+                    AdjustedTokenBar = true;
+                }
+            #endif
+
+            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedTokenBar) //adj text positions if running build with mac as main display
             {
-                Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
-                TokenFBController.transform.localScale = biggerScale;
-                TokenFBController.tokenSize = 200;
-                TokenFBController.RecalculateTokenBox();
-                AdjustedPositionsForMac = true;
+                TokenFBController.AdjustTokenBarSizing(200);
+                AdjustedTokenBar = true;
             }
 
             if (ShotgunHandler.AllSelections.Count > 0)
@@ -149,7 +154,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
-
         });
 
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), DisplaySample, () =>
@@ -317,6 +321,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         AssignFrameData();
         AssignTrialData();
     }
+
     public void MakeStimFaceCamera()
     {
         foreach (StimGroup group in TrialStims)

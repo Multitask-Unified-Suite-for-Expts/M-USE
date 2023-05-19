@@ -23,4 +23,10 @@ public class HoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     {
         transform.localScale = originalScale;
     }
+
+
+    public void SetToInitialSize()
+    {
+        transform.localScale = originalScale;
+    }
 }

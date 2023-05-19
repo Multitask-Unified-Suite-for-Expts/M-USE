@@ -37,7 +37,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public bool EndBlock;
     [HideInInspector] public bool StimIsChosen;
     [HideInInspector] public bool MacMainDisplayBuild;
-    [HideInInspector] public bool AdjustedTokenBar;
+    [HideInInspector] public bool AdjustedPositionsForMac;
     [HideInInspector] public bool ContextActive;
     [HideInInspector] public bool VariablesLoaded;
 
@@ -139,24 +139,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, ChooseStim);
-
         TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, ButtonScale, CR_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
             #if (UNITY_WEBGL)
-                if (!AdjustedTokenBar)
-                {
-                    TokenFBController.AdjustTokenBarSizing(110);
-                    AdjustedTokenBar = true;
-                }
+                TokenFBController.tokenSize = 110;
             #endif
 
-            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedTokenBar) //adj text positions if running build with mac as main display
-            {
-                TokenFBController.AdjustTokenBarSizing(200);
-                AdjustedTokenBar = true;
-            }
+            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
+                AdjustTextPosForMac();
 
             NumFeedbackRows = 0;
 
@@ -491,7 +483,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     public void ResetBlockVariables()
     {
-        AdjustedTokenBar = false;
+        AdjustedPositionsForMac = false;
         ChosenStimIndices.Clear();
         NonStimTouches_Block = 0;
         NumTrials_Block = 0;
@@ -564,14 +556,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     void AdjustTextPosForMac() //When running a build instead of hitting play in editor:
     {
-        Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
-        TokenFBController.transform.localScale = biggerScale;
-        TokenFBController.tokenSize = 200;
-        TokenFBController.RecalculateTokenBox();
+        TokenFBController.AdjustTokenBarSizing(200);
 
         Vector3 Pos = OriginalTimerPosition;
         Pos.y -= .02f;
         TimerBackdropGO.transform.position = Pos;
+
+        AdjustedPositionsForMac = true;
     }
 
     float GetOffsetY()

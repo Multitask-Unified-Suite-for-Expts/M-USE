@@ -76,7 +76,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public float TouchFeedbackDuration;
 
     [HideInInspector] public bool MacMainDisplayBuild;
-    [HideInInspector] public bool AdjustedTokenBar;
 
 
     public override void DefineControlLevel()
@@ -136,18 +135,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         InitTrial.AddInitializationMethod(() =>
         {
             #if (UNITY_WEBGL)
-                if(!AdjustedTokenBar)
-                {
-                    TokenFBController.AdjustTokenBarSizing(110);
-                    AdjustedTokenBar = true;
-                }
+                TokenFBController.AdjustTokenBarSizing(110);
             #endif
 
-            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedTokenBar) //adj text positions if running build with mac as main display
-            {
+            if (MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
                 TokenFBController.AdjustTokenBarSizing(200);
-                AdjustedTokenBar = true;
-            }
+            
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();

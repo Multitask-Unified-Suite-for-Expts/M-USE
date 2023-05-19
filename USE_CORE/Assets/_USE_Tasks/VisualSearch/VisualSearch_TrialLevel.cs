@@ -81,7 +81,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int PreSearch_TouchFbErrorCount;
 
     [HideInInspector] public bool MacMainDisplayBuild;
-    [HideInInspector] public bool AdjustedTokenBar;
 
 
 
@@ -145,19 +144,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-    #if(UNITY_WEBGL)
-            if (!AdjustedTokenBar)
-            {
+            #if (UNITY_WEBGL)
                 TokenFBController.AdjustTokenBarSizing(110);
-                AdjustedTokenBar = true;
-            }
-    #endif
+            #endif
 
-            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedTokenBar) //adj text positions if running build with mac as main display
-            {
+            if (MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
                 TokenFBController.AdjustTokenBarSizing(200);
-                AdjustedTokenBar = true;
-            }
 
             CurrentTaskLevel.SetBlockSummaryString();
             if (TrialCount_InTask != 0)

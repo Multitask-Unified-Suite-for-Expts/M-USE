@@ -85,7 +85,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int PreSearch_TouchFbErrorCount;
 
     [HideInInspector] public bool MacMainDisplayBuild;
-    [HideInInspector] public bool AdjustedTokenBar;
 
 
     public override void DefineControlLevel()
@@ -155,19 +154,12 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-        #if (UNITY_WEBGL)
-            if (!AdjustedTokenBar)
-            {
+            #if (UNITY_WEBGL)
                 TokenFBController.AdjustTokenBarSizing(110);
-                AdjustedTokenBar = true;
-            }
-        #endif
+            #endif
 
-            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedTokenBar) //adj text positions if running build with mac as main display
-            {
+            if (MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
                 TokenFBController.AdjustTokenBarSizing(200);
-                AdjustedTokenBar = true;
-            }
 
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
@@ -338,15 +330,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
         AssignTrialData();
         AssignFrameData();
-    }
-
-    public void AdjustTokenBarSizing(int newSize)
-    {
-        Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
-        TokenFBController.transform.localScale = biggerScale;
-        TokenFBController.tokenSize = newSize;
-        TokenFBController.RecalculateTokenBox();
-        AdjustedTokenBar = true;
     }
 
 

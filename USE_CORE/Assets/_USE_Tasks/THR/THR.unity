@@ -392,6 +392,7 @@ MonoBehaviour:
   SliderFBController: {fileID: 0}
   MouseTracker: {fileID: 0}
   GazeTracker: {fileID: 0}
+  EyeTracker: {fileID: 0}
   SelectionType: 
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
@@ -403,6 +404,7 @@ MonoBehaviour:
   UseDefaultConfigs: 0
   IsHuman: 0
   HumanStartPanel: {fileID: 0}
+  TaskSelectionCanvasGO: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
@@ -466,6 +468,8 @@ MonoBehaviour:
   TrialLevel: {fileID: 900455550}
   SerialSentData: {fileID: 0}
   SerialRecvData: {fileID: 0}
+  EyeTrackerActive: 0
+  EyeTracker: {fileID: 0}
   StoreData: 0
   SerialPortActive: 0
   SyncBoxActive: 0
@@ -505,6 +509,7 @@ MonoBehaviour:
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
+  TaskSelectionCanvasGO: {fileID: 0}
   IsHuman: 0
   HumanStartPanel: {fileID: 0}
   CurrentBlockString: 

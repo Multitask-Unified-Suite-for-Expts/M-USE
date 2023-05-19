@@ -361,7 +361,7 @@ namespace USE_UI
         }
 
 
-        public IEnumerator GratedFlash(Texture2D newTexture, float duration)
+        public IEnumerator GratedFlash(Texture2D newTexture, float duration, GameObject goToDeactivate = null)
         {
             IsGrating = true;
             originalColor = Image.color;
@@ -374,33 +374,11 @@ namespace USE_UI
             Image.color = originalColor;
             Image.sprite = originalSprite;
             IsGrating = false;
+
+            if(goToDeactivate != null)
+                goToDeactivate.SetActive(false);
         }
 
-
-        public void GratedStartButtonFlash(Texture2D newTexture, float duration, bool deactivateAfter)
-        {
-            if (!IsGrating)
-            {
-                IsGrating = true;
-                if (!StartButtonGO.activeInHierarchy)
-                    StartButtonGO.SetActive(true);
-                originalColor = Image.color;
-                originalSprite = Image.sprite;
-
-                Image.color = new Color32(224, 78, 92, 255);
-                Image.sprite = Sprite.Create(newTexture, new Rect(0, 0, newTexture.width, newTexture.height), Vector2.one / 2f);
-            }
-            if (duration <= 0)
-            {
-                Image.color = originalColor;
-                Image.sprite = originalSprite;
-                if (deactivateAfter)
-                    StartButtonGO.SetActive(false);
-
-                IsGrating = false;
-            }
-            
-        }
     }
 
 

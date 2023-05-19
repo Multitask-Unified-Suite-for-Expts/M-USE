@@ -371,8 +371,11 @@ namespace USE_StimulusManagement
 				else
 					FileName = FileName + StimExtension;
 			}
-			
-			//by default stimFilePath argument is empty, and files are found using StimFolderPath + ExternalFilePath
+			if(string.IsNullOrEmpty(StimExtension))
+
+			{
+				StimExtension = Path.GetExtension(FileName);
+			}			//by default stimFilePath argument is empty, and files are found using StimFolderPath + ExternalFilePath
 			//so usually this first if statement is never called - used for cases where we might want to find a file in an unusual location
 			if (!string.IsNullOrEmpty(stimFilePath))
 			{
@@ -407,12 +410,13 @@ namespace USE_StimulusManagement
 			{
 				//parse filename for stimExtension and assign
 			}
+			Debug.Log(StimExtension);
 			switch (StimExtension.ToLower())
 			{
-				case "fbx":
+				case ".fbx":
 					StimGameObject = LoadModel(FileName);
 					break;
-				case "png":
+				case ".png":
 					StimGameObject = new GameObject();//give it name
 					RawImage stimGOImage = StimGameObject.AddComponent<RawImage>();
 					stimGOImage.texture = LoadPNG(stimFilePath);
@@ -501,7 +505,9 @@ namespace USE_StimulusManagement
 
 		private void PositionRotationScale()
 		{
-			StimGameObject.transform.position = StimLocation;
+			Debug.Log(StimGameObject);
+			Debug.Log(StimLocation);
+            StimGameObject.transform.position = StimLocation;
 			StimGameObject.transform.rotation = Quaternion.Euler(StimRotation);
 
 			if (StimScale == null)

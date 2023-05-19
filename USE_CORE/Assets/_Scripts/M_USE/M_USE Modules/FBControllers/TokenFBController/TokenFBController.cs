@@ -6,10 +6,10 @@ using USE_ExperimentTemplate_Classes;
 
 public class TokenFBController : MonoBehaviour
 {
-    public int tokenSize = 100;
-    public int tokenSpacing = 0;
-    public int tokenBoxPadding = 0;
-    public int tokenBoxYOffset = 10;
+    [HideInInspector] public int tokenSize = 100;
+    [HideInInspector] public int tokenSpacing = 0;
+    [HideInInspector] public int tokenBoxPadding = 0;
+    [HideInInspector] public int tokenBoxYOffset = 10;
     public Texture2D tokenTexture;
 
 

@@ -283,14 +283,19 @@ MonoBehaviour:
   SliderFBController: {fileID: 0}
   MouseTracker: {fileID: 0}
   GazeTracker: {fileID: 0}
+  EyeTracker: {fileID: 0}
   SelectionType: 
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
+  DisplayController: {fileID: 0}
   InitialTokenAmount: 0
   ShotgunRaycastSpacing_DVA: 0
   ParticipantDistance_CM: 0
   ShotgunRaycastCircleSize_DVA: 0
   UseDefaultConfigs: 0
+  IsHuman: 0
+  HumanStartPanel: {fileID: 0}
+  TaskSelectionCanvasGO: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
@@ -442,6 +447,8 @@ MonoBehaviour:
   TrialLevel: {fileID: 273835036}
   SerialSentData: {fileID: 0}
   SerialRecvData: {fileID: 0}
+  EyeTrackerActive: 0
+  EyeTracker: {fileID: 0}
   StoreData: 0
   SerialPortActive: 0
   SyncBoxActive: 0
@@ -477,9 +484,13 @@ MonoBehaviour:
   PrefabStimPaths: []
   ExperimenterDisplayController: {fileID: 0}
   SessionInfoPanel: {fileID: 0}
+  DisplayController: {fileID: 0}
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
+  TaskSelectionCanvasGO: {fileID: 0}
+  IsHuman: 0
+  HumanStartPanel: {fileID: 0}
   NumCorrect_InTask: 0
   SearchDurations_InTask: []
   NumErrors_InTask: 0
@@ -613,7 +624,7 @@ GameObject:
   - component: {fileID: 2066679265}
   - component: {fileID: 2066679264}
   m_Layer: 0
-  m_Name: Directional Light
+  m_Name: FeatureUncertaintyWM_DirectionalLight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

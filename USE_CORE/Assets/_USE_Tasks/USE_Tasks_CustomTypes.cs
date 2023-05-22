@@ -11,6 +11,7 @@ using FlexLearning_Namespace;
 using THR_Namespace;
 using MazeReactionTest_Namespace;
 using GazeCalibration_Namespace;
+using FeatureUncertaintyWM_Namespace;
 //using FinderGame_Namespace;
 //using Kia_Task_Namespace;
 using TobiiGaze_Namespace;
@@ -153,6 +154,18 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(TobiiGaze_BlockDef),
                 TrialDefType = typeof(TobiiGaze_TrialDef),
                 StimDefType = typeof(TobiiGaze_StimDef)
+            }
+        }
+
+        ,{
+            "FeatureUncertaintyWM", new TaskTypes
+            {
+                TaskLevelType = typeof(FeatureUncertaintyWM_TaskLevel),
+                TrialLevelType = typeof(FeatureUncertaintyWM_TrialLevel),
+                TaskDefType = typeof(FeatureUncertaintyWM_TaskDef),
+                BlockDefType = typeof(FeatureUncertaintyWM_BlockDef),
+                TrialDefType = typeof(FeatureUncertaintyWM_TrialDef),
+                StimDefType = typeof(FeatureUncertaintyWM_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

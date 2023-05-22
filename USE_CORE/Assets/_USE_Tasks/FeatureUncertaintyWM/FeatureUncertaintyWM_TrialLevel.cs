@@ -15,6 +15,7 @@ using UnityEngine.UI;
 using ConfigDynamicUI;
 using WorkingMemory_Namespace;
 using UnityEditor.PackageManager.UI;
+using WhatWhenWhere_Namespace;
 
 public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 {
@@ -171,7 +172,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddInitializationMethod(() =>
         {
             //Set the Stimuli Light/Shadow settings
-            SetShadowType(ShadowType, "WorkingMemory_DirectionalLight");
+            SetShadowType(ShadowType, "FeatureUncertaintyWM_DirectionalLight");
             if (StimFacingCamera)
                 MakeStimFaceCamera();
 
@@ -538,7 +539,8 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
                 counter++;
             }
         }
-
+        
+        sd.StimGameObject = mcCompPanel;
         return mcCompPanel;
         //return new GameObject(); // this line is just here so I don't have to comment out stuff below... the function returns the multiccomp object
     }
@@ -661,11 +663,12 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
         sampleComp = new StimGroup("SampleComp", ExternalStims, CurrentTrialDef.sampleCompIndices);
 
         // multiCompStims.SetLocations(CurrentTrialDef.multiCompStimLocations);
+        Debug.Log("number of Comps" + CurrentTrialDef.sampleCompIndices.Length);
         for (int iStim = 0; iStim < CurrentTrialDef.sampleCompIndices.Length; iStim++)
         {
             FeatureUncertaintyWM_StimDef sdSample = (FeatureUncertaintyWM_StimDef) sampleComp.stimDefs[iStim];
             sampleComp.AddStims(sdSample);
-            
+            Debug.Log("SampleComp : " + sampleComp.stimDefs[iStim].FileName);
         }
 
         for (int iStim = 0; iStim < CurrentTrialDef.numMcStim; iStim++)
@@ -692,11 +695,16 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
             multiCompStims.AddStims(GenerateMultiCompStim(sd)); //make a new stim group, add it
             
             Debug.Log(sd.StimGameObject);
-//            sd.AssignStimDefPointeToObjectHierarchy(sd.StimGameObject, sd);
+            sd.AssignStimDefPointeToObjectHierarchy(sd.StimGameObject, sd);
+            //multiCompStims.stimDefs[iStim].AssignStimDefPointeToObjectHierarchy(multiCompStims.stimDefs[iStim].StimGameObject, multiCompStims.stimDefs[iStim]);
+            Debug.Log(sd.StimGameObject.GetComponent<StimDefPointer>());
+            Debug.Log("mcstimdef" + multiCompStims.stimDefs[iStim].StimGameObject.GetComponent<StimDefPointer>());
+            
         }
 
         multiCompStims.SetLocations(CurrentTrialDef.mcStimLocations);
         Debug.Log(multiCompStims);
+        Debug.Log(multiCompStims.stimDefs[1]);
         TrialStims.Add(multiCompStims);
         TrialStims.Add(sampleComp);
         sampleComp.SetLocations(CurrentTrialDef.sampleCompLocations);
@@ -775,11 +783,16 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
         if (!playerViewLoaded)
         {
             //Create corresponding text on player view of experimenter display
-            foreach (FeatureUncertaintyWM_MultiCompStimDef stim in multiCompStims.stimDefs)
+            for (int iMc = 0; iMc<multiCompStims.stimDefs.Count; iMc++)
             {
-                if (stim.IsTarget)
+                FeatureUncertaintyWM_MultiCompStimDef sd = multiCompStims.stimDefs[iMc] as FeatureUncertaintyWM_MultiCompStimDef;
+//                FeatureUncertaintyWM_MultiCompStimDef sd = (FeatureUncertaintyWM_MultiCompStimDef)multiCompStims.stimDefs[iMc];
+                Debug.Log(sd);
+                Debug.Log(multiCompStims.stimDefs[iMc]);
+                
+                if (sd.IsTarget)
                 {
-                    textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent);
+                    textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(sd.StimLocation), playerViewParent);
                     textLocation.y += 50;
                     Vector2 textSize = new Vector2(200, 200);
                     playerViewText = playerView.CreateTextObject("TargetText", "TARGET",Color.red, textLocation, textSize, playerViewParent);

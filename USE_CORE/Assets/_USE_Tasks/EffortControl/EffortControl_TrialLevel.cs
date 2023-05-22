@@ -124,13 +124,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         AddActiveStates(new List<State> { InitTrial, ChooseBalloon, CenterSelection, InflateBalloon, Feedback, ITI });
 
         Add_ControlLevel_InitializationMethod(() =>
-        {  
+        {
             if(TokenFBController != null)
                 SetTokenVariables();
 
-            if(AudioFBController != null)
+            if (AudioFBController != null)
                 InflateClipDuration = AudioFBController.GetClip("EC_Inflate").length;
-
 
             if (StartButton == null)
             {
@@ -600,22 +599,22 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     {
         if (MacMainDisplayBuild && !Application.isEditor)
         {
-            TokenFBController.tokenSize = 210;
-            TokenFBController.tokenBoxYOffset = 45;
+            TokenFBController.tokenSize = 210f;
+            TokenFBController.tokenBoxYOffset = 45f;
         }
         else
         {
-            TokenFBController.tokenSize = 105;
-            TokenFBController.tokenBoxYOffset = 20;
+            TokenFBController.tokenSize = 105f;
+            TokenFBController.tokenBoxYOffset = 20f;
         }
 
-        #if (UNITY_WEBGL && !UNITY_EDITOR)
-            TokenFBController.tokenSize = 115;
-            TokenFBController.tokenBoxYOffset = 25;
-        #endif
+#if (UNITY_WEBGL && !UNITY_EDITOR)
+        TokenFBController.tokenSize = 115f;
+        TokenFBController.tokenBoxYOffset = 25f; 
+#endif
 
         TokenFBController.SetFlashingTime(1.5f);
-        TokenFBController.tokenSpacing = -(int)(Screen.width * .009375f);
+        TokenFBController.tokenSpacing = -Screen.width * .009375f;
     }
 
     void SetParents(GameObject wrapper, List<GameObject> objects) // 1) Setting the parent of each GO, and 2) Adding to RemovalList (so can remove easily later)
@@ -707,7 +706,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         Reward = Instantiate(RewardPrefab, RewardPrefab.transform.position, RewardPrefab.transform.rotation);
         Reward.name = "Reward";
-        Reward.GetComponent<Renderer>().material.color = Color.gray; //turn token color to grey so they dont look collected yet. 
+        Reward.GetComponent<Renderer>().material.color = Color.gray; //turn token color to grey so they dont look collected yet.
 
         BalloonOutline = Instantiate(OutlinePrefab, OutlinePrefab.transform.position, OutlinePrefab.transform.rotation);
         BalloonOutline.name = "Outline";
@@ -716,12 +715,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
 
         BalloonContainerLeft = new GameObject("BalloonContainerLeft");
-        BalloonContainerLeft.transform.position = new Vector3(-1, .15f, .5f);
+        BalloonContainerLeft.transform.position = new Vector3(-1, -.05f, .5f);
         BalloonContainerLeft.transform.localScale = new Vector3(1, 1, 1);
         ObjectList.Add(BalloonContainerLeft);
 
         BalloonContainerRight = new GameObject("BalloonContainerRight");
-        BalloonContainerRight.transform.position = new Vector3(1, .15f, .5f);
+        BalloonContainerRight.transform.position = new Vector3(1, -.05f, .5f);
         BalloonContainerRight.transform.localScale = new Vector3(1, 1, 1);
         ObjectList.Add(BalloonContainerRight);
 
@@ -742,14 +741,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         leftWrapper.name = "LeftWrapper";
         List<GameObject> leftList = new List<GameObject>() { BalloonContainerLeft, RewardContainerLeft, StimLeft };
         SetParents(leftWrapper, leftList);
-        leftWrapper.transform.position = new Vector3(-.16f, 0, 0); //Centering on left half of screen. 
+        leftWrapper.transform.position = new Vector3(-.16f, -.05f, 0); //Centering on left half of screen. 
 
         //Wrap Right side objects in container and Center to right side:
         GameObject rightWrapper = new GameObject();
         rightWrapper.name = "RightWrapper";
         List<GameObject> rightList = new List<GameObject>() { BalloonContainerRight, RewardContainerRight, StimRight };
         SetParents(rightWrapper, rightList);
-        rightWrapper.transform.position = new Vector3(.16f, 0, 0); //Centering on right half of screen. 
+        rightWrapper.transform.position = new Vector3(.16f, -.05f, 0); //Centering on right half of screen. 
 
         LeftContainerOriginalPosition = BalloonContainerLeft.transform.position;
         RightContainerOriginalPosition = BalloonContainerRight.transform.position;
@@ -826,7 +825,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         for (int i = 0; i < NumRewards; i++)
         {
             GameObject RewardClone = Instantiate(Reward, pos, Reward.transform.rotation, container.transform);
-            RewardClone.transform.Translate(new Vector3(i * width, 0, 0), Space.World);
+            RewardClone.transform.Translate(new Vector3(i * width, 0.05f, 0), Space.World);
             RewardClone.name = "Reward" + SideChoice + (i + 1);
             AddRigidBody(RewardClone);
             ObjectList.Add(RewardClone);

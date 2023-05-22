@@ -446,7 +446,6 @@ namespace USE_ExperimentTemplate_Session
             selectTask.AddUniversalInitializationMethod(() =>
             {
                 TaskSelectionCanvasGO.SetActive(true);
-
                 TaskSelection_Starfield.SetActive(IsHuman ? true : false);
 
                 #if (!UNITY_WEBGL)
@@ -491,6 +490,7 @@ namespace USE_ExperimentTemplate_Session
                     return;
 
                 SceneLoading = true;
+
                 if (taskCount >= TaskMappings.Count)
                 {
                     TasksFinished = true;
@@ -668,9 +668,14 @@ namespace USE_ExperimentTemplate_Session
                 GameObject taskButton = taskButtonsDict[selectedConfigName];
                 RawImage image = taskButton.GetComponent<RawImage>();
                 Button button = taskButton.GetComponent<Button>();
-                Color darkGrey = new Color(.5f, .5f, .5f, .35f);
-                image.color = darkGrey;
-                Destroy(button);
+                taskButton.GetComponent<HoverEffect>().SetToInitialSize(); //Sets grey'd out button back to normal size
+
+                #if (!UNITY_WEBGL)
+                    Color darkGrey = new Color(.5f, .5f, .5f, .35f);
+                    image.color = darkGrey;
+
+                    Destroy(button);
+                #endif
 
                 string taskName = (string)TaskMappings[selectedConfigName];
                 loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
@@ -762,9 +767,10 @@ namespace USE_ExperimentTemplate_Session
                 SessionData.AppendData();
                 SessionData.WriteData();
 
-
                 SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
+
+                ActiveTaskLevels.Remove(CurrentTask);
 
                 if(CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
@@ -928,6 +934,8 @@ namespace USE_ExperimentTemplate_Session
 
         ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
+            Debug.Log("POPULATING TASK LEVEL: " + tl.name);
+
             tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
             tl.HumanStartPanel = HumanStartPanel;
             tl.IsHuman = IsHuman;
@@ -936,14 +944,10 @@ namespace USE_ExperimentTemplate_Session
             tl.LocateFile = LocateFile;
             tl.SessionDataPath = SessionDataPath;
 
-//#if (UNITY_WEBGL)
-//            tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
-//#else
             if(UseDefaultConfigs)
                 tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
             else
                 tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName);
-//#endif
 
             if (UseDefaultConfigs)
             {
@@ -1032,6 +1036,7 @@ namespace USE_ExperimentTemplate_Session
             if (verifyOnly) return tl;
 
             ActiveTaskLevels.Add(tl);
+
             if (tl.TaskCanvasses != null)
                 foreach (GameObject go in tl.TaskCanvasses)
                     go.SetActive(false);
@@ -1049,6 +1054,8 @@ namespace USE_ExperimentTemplate_Session
 
         void SceneLoaded(string configName, bool verifyOnly)
         {
+            Debug.Log("CONFIG NAME: " + configName);
+
             string taskName = (string)TaskMappings[configName];
             var methodInfo = GetType().GetMethod(nameof(this.PrepareTaskLevel));
             

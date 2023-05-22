@@ -249,6 +249,9 @@ namespace USE_ExperimentTemplate_Task
                         if (Time.timeScale == 0) //if paused, unpause before ending block
                             Time.timeScale = 1;
 
+                        if (HumanStartPanel.HumanStartPanelGO.activeInHierarchy)
+                            HumanStartPanel.HumanStartPanelGO.SetActive(false);
+
                         if (TrialLevel.AudioFBController.IsPlaying())
                             TrialLevel.AudioFBController.audioSource.Stop();
                         TrialLevel.AbortCode = 3;

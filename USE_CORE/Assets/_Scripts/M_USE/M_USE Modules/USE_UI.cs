@@ -100,6 +100,8 @@ namespace USE_UI
             HumanStartPanelGO = Instantiate(HumanStartPanelPrefab);
             HumanStartPanelGO.name = taskName + "_HumanPanel";
             HumanStartPanelGO.transform.SetParent(parent.transform, false);
+            HumanStartPanelGO.SetActive(false);
+            HumanPanelOn = false;
 
             TitleTextGO = HumanStartPanelGO.transform.Find("TitleText").gameObject;
             TaskName = TaskNamesDict[taskName];
@@ -129,17 +131,14 @@ namespace USE_UI
             InstructionsGO.SetActive(false);
             InstructionsOn = false;
 
-            if(Application.isEditor)
+            if(Screen.fullScreen || Application.isEditor)
                 AdjustButtonPositions();
-
-            HumanStartPanelGO.SetActive(false);
-            HumanPanelOn = false;
         }
 
         private void AdjustButtonPositions()
         {
-            InstructionsButtonGO.transform.localPosition = new Vector3(InstructionsButtonGO.transform.localPosition.x, InstructionsButtonGO.transform.localPosition.y + 44f, InstructionsButtonGO.transform.localPosition.z);
-            EndTaskButtonGO.transform.localPosition = new Vector3(EndTaskButtonGO.transform.localPosition.x, EndTaskButtonGO.transform.localPosition.y + 44f, EndTaskButtonGO.transform.localPosition.z);
+            InstructionsButtonGO.transform.localPosition += new Vector3(0, 45f, 0);
+            EndTaskButtonGO.transform.localPosition += new Vector3(0, 45f, 0);
         }
 
 

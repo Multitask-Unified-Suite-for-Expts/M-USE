@@ -390,9 +390,10 @@ namespace USE_ExperimentTemplate_Data
             }
             else
             {
-                Debug.LogError("Attempted to add data controller container named " + st +
+                Debug.Log("Attempted to add data controller container named " + st +
                 " to DataControllers but a container with the same name has already been created.");
-                return null;
+                return DataContainer.transform.Find(st).gameObject;
+                //return null;
             }
         }
 

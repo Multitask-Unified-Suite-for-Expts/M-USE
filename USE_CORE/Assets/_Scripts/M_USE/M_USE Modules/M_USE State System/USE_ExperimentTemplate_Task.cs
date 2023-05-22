@@ -165,6 +165,11 @@ namespace USE_ExperimentTemplate_Task
 
             Add_ControlLevel_InitializationMethod(() =>
             {
+                TaskCam.gameObject.SetActive(true);
+                if (TaskCanvasses != null)
+                    foreach (GameObject go in TaskCanvasses)
+                        go.SetActive(true);
+
                 BlockCount = -1;
                 BlockSummaryString = new StringBuilder();
                 PreviousBlockSummaryString = new StringBuilder();
@@ -184,11 +189,6 @@ namespace USE_ExperimentTemplate_Task
 
                 #endif
 
-                TaskCam.gameObject.SetActive(true);
-                if (TaskCanvasses != null)
-                    foreach (GameObject go in TaskCanvasses)
-                        go.SetActive(true);
-
                 Controllers.SetActive(true);
             });
             
@@ -198,7 +198,6 @@ namespace USE_ExperimentTemplate_Task
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTaskStarts"]);
 
                 //Create HumanStartPanel
-
                 if (IsHuman)
                 {
                     HumanStartPanel.SetupDataAndCodes(FrameData, EventCodeManager, SessionEventCodes);
@@ -246,11 +245,9 @@ namespace USE_ExperimentTemplate_Task
 
                     if (InputBroker.GetKeyUp(KeyCode.N)) //Next Block
                     {
-                        if (Time.timeScale == 0) //if paused, unpause before ending block
-                            Time.timeScale = 1;
+                       Time.timeScale = 1;//if paused, unpause before ending block
 
-                        if (HumanStartPanel.HumanStartPanelGO.activeInHierarchy)
-                            HumanStartPanel.HumanStartPanelGO.SetActive(false);
+                       HumanStartPanel.HumanStartPanelGO.SetActive(false);
 
                         if (TrialLevel.AudioFBController.IsPlaying())
                             TrialLevel.AudioFBController.audioSource.Stop();

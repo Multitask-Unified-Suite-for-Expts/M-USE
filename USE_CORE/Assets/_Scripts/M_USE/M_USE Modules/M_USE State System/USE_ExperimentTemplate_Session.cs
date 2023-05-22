@@ -699,13 +699,11 @@ namespace USE_ExperimentTemplate_Session
             
             loadTask.SpecifyTermination(() => !SceneLoading, runTask, () =>
             {
-                //TaskSelectionCanvasGO.SetActive(false);
                 TaskSelection_Starfield.SetActive(false);
 
                 runTask.AddChildLevel(CurrentTask);
                 if(CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
-                SessionCam.gameObject.SetActive(false);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
                 CurrentTask.TrialLevel.TaskLevel = CurrentTask;
                 if(ExperimenterDisplayController != null)
@@ -725,6 +723,8 @@ namespace USE_ExperimentTemplate_Session
             //runTask.AddLateUpdateMethod
             runTask.AddUniversalInitializationMethod(() =>
             {
+                SessionCam.gameObject.SetActive(false);
+
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["RunTaskStarts"]);
 
 #if (!UNITY_WEBGL)
@@ -934,8 +934,6 @@ namespace USE_ExperimentTemplate_Session
 
         ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
-            Debug.Log("POPULATING TASK LEVEL: " + tl.name);
-
             tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
             tl.HumanStartPanel = HumanStartPanel;
             tl.IsHuman = IsHuman;
@@ -1054,8 +1052,6 @@ namespace USE_ExperimentTemplate_Session
 
         void SceneLoaded(string configName, bool verifyOnly)
         {
-            Debug.Log("CONFIG NAME: " + configName);
-
             string taskName = (string)TaskMappings[configName];
             var methodInfo = GetType().GetMethod(nameof(this.PrepareTaskLevel));
             
@@ -1077,6 +1073,7 @@ namespace USE_ExperimentTemplate_Session
                 tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
             tl.TaskCam.gameObject.SetActive(false);
         }
+
         // public void FindTaskCam<T>(string taskName) where T : ControlLevel_Task_Template
         // {
         // 	ControlLevel_Task_Template tl = GameObject.Find("ControlLevels").GetComponent<T>();

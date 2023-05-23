@@ -7,6 +7,7 @@ using USE_StimulusManagement;
 using USE_ExperimentTemplate_Trial;
 using VisualSearch_Namespace;
 using USE_UI;
+using Tobii.Research.Unity;
 
 public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 {
@@ -105,10 +106,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             // Initialize FB Controller Values
             HaloFBController.SetHaloSize(5f);
             HaloFBController.SetHaloIntensity(5);
-        });
+
+            });
         
         SetupTrial.AddInitializationMethod(() =>
         {
+            Debug.Log("TASK CAM LOCAL LOCATION: " + CurrentTaskLevel.TaskCam.transform.localPosition);
+            Debug.Log("TASK CAM LOCATION: " + CurrentTaskLevel.TaskCam.transform.position);
             ResetTrialVariables();
             TokenFBController.ResetTokenBarFull();
             //Set the context for the upcoming trial with the Start Button visible
@@ -137,12 +141,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 LoadConfigUIVariables();
             
             SetTrialSummaryString();
+
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
-        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, SearchDisplay);
-
+        // var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, SearchDisplay);
+        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", GazeTracker, InitTrial, SearchDisplay);
         InitTrial.AddInitializationMethod(() =>
         {
             CurrentTaskLevel.SetBlockSummaryString();

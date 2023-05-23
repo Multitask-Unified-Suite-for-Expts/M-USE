@@ -177,6 +177,11 @@ namespace USE_ExperimentTemplate_Task
                 #endif
 
                 TaskCam.gameObject.SetActive(true);
+                if (TobiiEyeTrackerController.Instance.TrackBoxGuideGO != null)
+                {
+                    TobiiEyeTrackerController.Instance.TrackBoxGuideGO.GetComponent<TrackBoxGuide>()._CanvasTrackBox.GetComponent<Canvas>().worldCamera = TaskCam;
+                }
+
                 if (TaskCanvasses != null)
                     foreach (GameObject go in TaskCanvasses)
                         go.SetActive(true);
@@ -348,7 +353,7 @@ namespace USE_ExperimentTemplate_Task
                     foreach (GameObject go in TaskCanvasses)
                         go.SetActive(false);
 
-                Destroy(Controllers);
+                Destroy(GameObject.Find("FeedbackControllers"));
 
 #if (!UNITY_WEBGL)
                     //Destroy Text on Experimenter Display:

@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System.Text;
 using Tobii.Research;
 using Tobii.Research.Unity;
+using UnityEditor;
 using UnityEngine;
 using USE_DisplayManagement;
 using USE_ExperimentTemplate_Trial;
@@ -75,6 +76,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private IEyeTracker IEyeTracker;
     private EyeTracker EyeTracker;
 
+    // USE_DisplayManagement Variables
+    private DisplayCoordinate DisplayCoordinate;
+    private ScreenDetails ScreenDetails;
+
+
     // Gaze Data Samples
     private List<Vector2> LeftSamples = new List<Vector2>();
     private List<Vector2> RightSamples = new List<Vector2>();
@@ -102,7 +108,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         Add_ControlLevel_InitializationMethod(() =>
         {
             AssignCalibPositions();
-            InitializeEyeTrackerSettings();
 
             // Create necessary variables to display text onto the Experimenter Display
             PlayerViewPanel = new PlayerViewPanel();
@@ -118,11 +123,17 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 CreateResultContainer();
             }
             
-            MonitorDetails = new MonitorDetails(new Vector2(1920, 1080), new Vector2(43.5f, 24.0f));
+            MonitorDetails = new MonitorDetails(new Vector2(1920, 1080), new Vector2(43.498f, 24.13f));
+            ScreenDetails = new ScreenDetails(new Vector2(3.81f, 1.588f), new Vector2(39.846f, 21.273f), new Vector2(1920, 1080));
+
+
         });
 
         SetupTrial.AddInitializationMethod(() =>
         {
+            if (!SpoofGazeWithMouse)
+                InitializeEyeTrackerSettings();
+
             InfoString.Append("<b>Info</b>" 
                                 + "\nPress <b>Space</b> to begin a <b>9</b> point calibration"
                                 + "\nPress <b>6</b>, <b>5</b>, or <b>3</b> to begin the respective point calibration");
@@ -130,9 +141,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             
             CalibCircle.CircleGO.GetComponent<RectTransform>().anchoredPosition = new Vector3 (0,0,0);
             CalibCircle.CircleGO.SetActive(true);
+
+
         });
 
-        SetupTrial.SpecifyTermination(()=> true, Init, () =>
+        SetupTrial.SpecifyTermination(()=> (!SpoofGazeWithMouse? (ScreenBasedCalibration != null):true), Init, () =>
         {
             // Only enter Calibration if an eyetracker is being used
             if (!SpoofGazeWithMouse)
@@ -145,7 +158,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         }
         else
         {
-            GazeTracker GazeTracker = new GazeTracker(); //MOVE TO SESSION LEVEL
             SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "GazeSelection", GazeTracker, Init, ITI);
         }
 
@@ -156,6 +168,16 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Init.AddUpdateMethod(() =>
         {
+            Debug.Log("CURRENT INPUT: " + SelectionHandler.CurrentInputLocation());
+            DisplayCoordinate dc;
+            if (SelectionHandler.CurrentInputLocation() != null)
+            {
+                dc = new DisplayCoordinate((Vector2)SelectionHandler.CurrentInputLocation(), "screenpixel", MonitorDetails, ScreenDetails);
+                Debug.Log("MONITOR PIXEL: " + ((Vector2)dc.MonitorPixel).ToString("F3"));
+            }
+                
+
+
             // Define the number of calibration points given the following key codes (Space, 6, 5, 3, 1)
             if (InputBroker.GetKeyUp(KeyCode.Space))
                 numCalibPoints = 9;
@@ -423,7 +445,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private void OnApplicationQuit()
     {
-        ScreenBasedCalibration.LeaveCalibrationMode();
+        if (!SpoofGazeWithMouse)
+            ScreenBasedCalibration.LeaveCalibrationMode();
     }
 
     // ---------------------------------------------------------- METHODS ----------------------------------------------------------
@@ -681,31 +704,14 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     }
     public void InitializeEyeTrackerSettings()
     {
-        IEyeTracker = TobiiEyeTrackerController.Instance.iEyeTracker;
         if (IEyeTracker == null)
-        {
-            Debug.LogError("Could not find the eye tracker.");
-        }
-        else
-        {
-            ScreenBasedCalibration = new ScreenBasedCalibration(IEyeTracker);
+            IEyeTracker = TobiiEyeTrackerController.Instance.iEyeTracker;
+        if (EyeTracker == null)
             EyeTracker = TobiiEyeTrackerController.Instance.EyeTracker;
-            IEyeTracker.GazeDataReceived += OnGazeDataReceived;
-
-            // Sets the Display area to the info entered into the Tobii Pro Eye Tracker Manager Display Setup,
-            // but updates with the Unity Editor Display sizing as well
-            DisplayArea = IEyeTracker.GetDisplayArea();
-
-            // INCLUDE INFO BELOW IF WE WANT TO ENTER AND SET THE DISPLAY AREA - SD
-
-            /*Point3D topLeft = new Point3D(0, 0, 0);
-            Point3D bottomLeft = new Point3D(0, -screenHeight, 0);
-            Point3D topRight = new Point3D(screenWidth, 0, 0);
-
-            DisplayArea = new DisplayArea(topLeft, bottomLeft, topRight);*/
-            //IEyeTracker.SetDisplayArea(DisplayArea);
-        }
-
+        if (ScreenBasedCalibration == null)
+            ScreenBasedCalibration = new ScreenBasedCalibration(IEyeTracker);
+        if (DisplayArea == null)
+            DisplayArea = TobiiEyeTrackerController.Instance.DisplayArea;
     }
 
     private string CalculateSampleStatistics(List<float> samples)

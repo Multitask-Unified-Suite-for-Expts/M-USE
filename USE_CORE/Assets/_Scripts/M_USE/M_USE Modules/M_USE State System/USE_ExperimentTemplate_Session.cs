@@ -22,6 +22,8 @@ using Random = UnityEngine.Random;
 using UnityEngine.InputSystem;
 using TMPro;
 using Tobii.Research.Unity;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Button = UnityEngine.UI.Button;
 //using UnityEngine.Windows.WebCam;
 
 
@@ -483,12 +485,13 @@ namespace USE_ExperimentTemplate_Session
                 {
                     GazeTracker.Init(FrameData, 0);
                     GazeTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
-                    GameObject TobiiEyeTrackerControllerGO = new GameObject("TobiiEyeTrackerController");
-                    TobiiEyeTrackerController = TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
-
-                    GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
-
-
+                    if (GameObject.Find("TobiiEyeTrackerController") == null)
+                    {
+                        GameObject TobiiEyeTrackerControllerGO = new GameObject("TobiiEyeTrackerController");
+                        TobiiEyeTrackerController = TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
+                        GameObject TrackBoxGO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"), TobiiEyeTrackerControllerGO.transform);
+                        GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
+                    }
                     InputTrackers.GetComponent<GazeTracker>().enabled = true;
 
                 }
@@ -1122,6 +1125,7 @@ namespace USE_ExperimentTemplate_Session
             if (tl.TaskCam == null)
                 tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
             tl.TaskCam.gameObject.SetActive(false);
+
         }
         // public void FindTaskCam<T>(string taskName) where T : ControlLevel_Task_Template
         // {

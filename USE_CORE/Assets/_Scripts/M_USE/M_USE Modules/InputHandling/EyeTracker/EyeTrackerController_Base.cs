@@ -12,7 +12,7 @@ public abstract class EyeTrackerController_Base : MonoBehaviour
         CalibrateEyeTracker();
     }
 
-    public abstract void FindEyeTracker();
+    public abstract void FindEyeTrackerComponents();
 
     public virtual void CustomUpdate()  
     {
@@ -20,4 +20,5 @@ public abstract class EyeTrackerController_Base : MonoBehaviour
     public virtual void CalibrateEyeTracker()
     {
     }
+
 }

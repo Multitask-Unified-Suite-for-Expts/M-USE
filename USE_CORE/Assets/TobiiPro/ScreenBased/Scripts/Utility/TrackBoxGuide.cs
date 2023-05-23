@@ -24,7 +24,7 @@ namespace Tobii.Research.Unity
         private KeyCode _toggleKey = KeyCode.None;
 
         [SerializeField]
-        private GameObject _CanvasTrackBox;
+        public GameObject _CanvasTrackBox;
 
         private Color _colorMoverGood;
         private Color _colorMoverBad;

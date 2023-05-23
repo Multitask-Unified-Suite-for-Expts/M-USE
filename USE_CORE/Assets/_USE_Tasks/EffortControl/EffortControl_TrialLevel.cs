@@ -541,7 +541,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             IncrementAmounts = new Vector3((NextScale.x - TrialStim.transform.localScale.x), (NextScale.y - TrialStim.transform.localScale.y), (NextScale.z - TrialStim.transform.localScale.z));
 
         //Scale:
-        TrialStim.transform.localScale = new Vector3(TrialStim.transform.localScale.x + IncrementAmounts.x, TrialStim.transform.localScale.y + IncrementAmounts.y, TrialStim.transform.localScale.z + IncrementAmounts.z);
+        TrialStim.transform.localScale += new Vector3(IncrementAmounts.x, IncrementAmounts.y, IncrementAmounts.z);
     }
 
     void CalculateInflation()
@@ -713,25 +713,28 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         BalloonOutline.transform.localScale = new Vector3(10, 0.01f, 10);
         BalloonOutline.GetComponent<Renderer>().material.color = OffWhiteOutlineColor;
 
-
         BalloonContainerLeft = new GameObject("BalloonContainerLeft");
         BalloonContainerLeft.transform.position = new Vector3(-1, -.05f, .5f);
         BalloonContainerLeft.transform.localScale = new Vector3(1, 1, 1);
+
         ObjectList.Add(BalloonContainerLeft);
 
         BalloonContainerRight = new GameObject("BalloonContainerRight");
         BalloonContainerRight.transform.position = new Vector3(1, -.05f, .5f);
         BalloonContainerRight.transform.localScale = new Vector3(1, 1, 1);
+
         ObjectList.Add(BalloonContainerRight);
 
         RewardContainerLeft = new GameObject("RewardContainerLeft");
         RewardContainerLeft.transform.position = new Vector3(-.85f, 1.6f, 0);
         RewardContainerLeft.transform.localScale = new Vector3(1, 1, 1);
+
         ObjectList.Add(RewardContainerLeft);
 
         RewardContainerRight = new GameObject("RewardContainerRight");
         RewardContainerRight.transform.position = new Vector3(.85f, 1.6f, 0);
         RewardContainerRight.transform.localScale = new Vector3(1, 1, 1);
+
         ObjectList.Add(RewardContainerRight);
 
         CreateMiddleBarrier();
@@ -825,7 +828,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         for (int i = 0; i < NumRewards; i++)
         {
             GameObject RewardClone = Instantiate(Reward, pos, Reward.transform.rotation, container.transform);
-            RewardClone.transform.Translate(new Vector3(i * width, 0.05f, 0), Space.World);
+            RewardClone.transform.Translate(new Vector3(i * width, 0.028f, 0), Space.World);
             RewardClone.name = "Reward" + SideChoice + (i + 1);
             AddRigidBody(RewardClone);
             ObjectList.Add(RewardClone);

@@ -96,6 +96,7 @@ namespace USE_ExperimentTemplate_Session
 
         [HideInInspector] public GameObject TaskButtons;
 
+
         //Set in inspector
         public GameObject InstructionsPrefab;
         public GameObject TaskSelection_Starfield;
@@ -103,6 +104,12 @@ namespace USE_ExperimentTemplate_Session
         public GameObject HumanVersionToggleButton;
         public GameObject HumanStartPanelPrefab;
         public GameObject TaskSelectionCanvasGO;
+        public GameObject ToggleAudioButton;
+        public AudioClip TaskSelection_HumanAudio;
+
+        [HideInInspector] public float audioPlaybackSpot;
+
+        [HideInInspector] public AudioSource TaskSelection_AudioSource;
 
         [HideInInspector] public HumanStartPanel HumanStartPanel;
 
@@ -301,8 +308,8 @@ namespace USE_ExperimentTemplate_Session
             SessionCam = Camera.main;
 
             //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
-            #if (UNITY_WEBGL)
-                GameObject initCamGO = GameObject.Find("InitCamera");
+#if (UNITY_WEBGL)
+            GameObject initCamGO = GameObject.Find("InitCamera");
                 initCamGO.SetActive(false);
                 TaskSelection_Starfield.SetActive(true);
             #else
@@ -445,6 +452,16 @@ namespace USE_ExperimentTemplate_Session
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
+                //if (IsHuman)
+                //{
+                //    gameObject.AddComponent<AudioListener>();
+                //    if(TaskSelection_AudioSource == null)
+                //        TaskSelection_AudioSource = gameObject.AddComponent<AudioSource>();
+                //    TaskSelection_AudioSource.clip = TaskSelection_HumanAudio;
+                //    TaskSelection_AudioSource.loop = true;
+                //    TaskSelection_AudioSource.Play();
+                //}
+
                 TaskSelectionCanvasGO.SetActive(true);
                 TaskSelection_Starfield.SetActive(IsHuman ? true : false);
 
@@ -627,6 +644,7 @@ namespace USE_ExperimentTemplate_Session
                 {
                     TaskSelection_Header.SetActive(true);
                     HumanVersionToggleButton.SetActive(true);
+                    //ToggleAudioButton.SetActive(true);
                 }
             });
             
@@ -699,6 +717,12 @@ namespace USE_ExperimentTemplate_Session
             
             loadTask.SpecifyTermination(() => !SceneLoading, runTask, () =>
             {
+                //if(IsHuman)
+                //{
+                //    TaskSelection_AudioSource.Stop();
+                //    Destroy(GetComponent<AudioListener>());
+                //}
+
                 TaskSelection_Starfield.SetActive(false);
 
                 runTask.AddChildLevel(CurrentTask);
@@ -853,12 +877,46 @@ namespace USE_ExperimentTemplate_Session
             }
         }
 
+        public void HandleToggleAudioButtonClick()
+        {
+            if (TaskSelection_AudioSource.isPlaying)
+            {
+                audioPlaybackSpot = TaskSelection_AudioSource.time;
+                TaskSelection_AudioSource.Stop();
+                ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
+            }
+            else
+            {
+                TaskSelection_AudioSource.time = audioPlaybackSpot;
+                TaskSelection_AudioSource.Play();
+                ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(false);
+            }
+        }
+
         public void HandleHumanVersionToggleButtonClick()
         {
             IsHuman = !IsHuman;
 
+            //if(IsHuman)
+            //{
+            //    gameObject.AddComponent<AudioListener>();
+            //    TaskSelection_AudioSource = gameObject.AddComponent<AudioSource>();
+            //    TaskSelection_AudioSource.clip = TaskSelection_HumanAudio;
+            //    TaskSelection_AudioSource.loop = true;
+            //    TaskSelection_AudioSource.time = audioPlaybackSpot;
+            //    TaskSelection_AudioSource.Play();
+            //}
+            //else
+            //{
+            //    audioPlaybackSpot = TaskSelection_AudioSource.time;
+            //    TaskSelection_AudioSource.Stop();
+            //    Destroy(GetComponent<AudioListener>());
+            //}
+
             //Change text on button:
             HumanVersionToggleButton.GetComponentInChildren<TextMeshProUGUI>().text = IsHuman ? "Human Version" : "Primate Version";
+            //Toggle Audio Button:
+            //ToggleAudioButton.SetActive(ToggleAudioButton.activeInHierarchy ? false : true);
             //Toggle Header:
             TaskSelection_Header.SetActive(TaskSelection_Header.activeInHierarchy ? false : true);
             //Toggle Starfield:

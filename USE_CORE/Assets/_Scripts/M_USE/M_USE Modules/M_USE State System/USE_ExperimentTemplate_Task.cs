@@ -177,7 +177,7 @@ namespace USE_ExperimentTemplate_Task
                 #endif
 
                 TaskCam.gameObject.SetActive(true);
-                if (TobiiEyeTrackerController.Instance.TrackBoxGuideGO != null)
+                if (EyeTrackerActive && TobiiEyeTrackerController.Instance.TrackBoxGuideGO != null)
                 {
                     TobiiEyeTrackerController.Instance.TrackBoxGuideGO.GetComponent<TrackBoxGuide>()._CanvasTrackBox.GetComponent<Canvas>().worldCamera = TaskCam;
                 }

@@ -98,7 +98,6 @@ namespace USE_ExperimentTemplate_Session
 
 
         //Set in inspector
-        public GameObject InstructionsPrefab;
         public GameObject TaskSelection_Starfield;
         public GameObject TaskSelection_Header;
         public GameObject HumanVersionToggleButton;

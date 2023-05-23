@@ -100,10 +100,8 @@ public class USE_CoordinateConverter
         EyeDistance = eyeDistance;
 
         // Assign Monitor Constants for Calculation
-        monitorPixelsPerCm = (MonitorDetails.PixelResolution.x / MonitorDetails.CmSize.x +
-                              MonitorDetails.PixelResolution.y / MonitorDetails.CmSize.y) / 2;
-        monitorCmPerPixel = (MonitorDetails.CmSize.x / MonitorDetails.PixelResolution.x +
-                             MonitorDetails.CmSize.y / MonitorDetails.PixelResolution.y) / 2;
+        monitorPixelsPerCm = (MonitorDetails.PixelResolution.x / MonitorDetails.CmSize.x + MonitorDetails.PixelResolution.y / MonitorDetails.CmSize.y) / 2;
+        monitorCmPerPixel = (MonitorDetails.CmSize.x / MonitorDetails.PixelResolution.x +MonitorDetails.CmSize.y / MonitorDetails.PixelResolution.y) / 2;
         pixelsPerDegree = 2 * Mathf.Tan(0.5f / Mathf.Rad2Deg) * EyeDistance;
         degreesPerPixel = 2 * Mathf.Atan((monitorCmPerPixel / 2) / EyeDistance);
         cmPerDegree = 1f;
@@ -129,7 +127,6 @@ public class USE_CoordinateConverter
         screenLowerLeftPixels = ScreenDetails.LowerLeft_Cm * monitorPixelsPerCm;
         screenSizeCm = new Vector2(ScreenDetails.ScreenWidth_Cm, ScreenDetails.ScreenHeight_Cm);
     }
-
     public void SetMonitorDetails(MonitorDetails monitorDetails)
     {
         MonitorDetails = monitorDetails;
@@ -143,178 +140,77 @@ public class USE_CoordinateConverter
         degreesPerPixel = 2 * Mathf.Atan((monitorCmPerPixel / 2) / EyeDistance);
         cmPerDegree = 1f;
     }
-
     public void SetEyeDistance(float eyeDistance)
     {
         // Set Default value to null, we're going to want to override default distance on a per calculation basis
         EyeDistance = eyeDistance;
     }
 
-    public Vector2? GetMonitorADCS(Vector2 coord, string coord_type, float eyeDist = 60f)
+    // Methods that return the given coordinate system, given the coord type that is passed
+    public Vector2? GetMonitorPixel(Vector2 coord, string coord_type, float? eyeDist = null)
     {
+        SetEyeDistance((float)eyeDist);
         ConvertToMonitorPixels(coord, coord_type);
 
-        MonitorADCS = MonitorPixelToMonitorADCS(MonitorPixel);
-        return MonitorADCS;
-    }
-    public Vector2? GetScreenADCS(Vector2 coord, string coord_type, float eyeDist = 60f)
-    {
-        
-        return ScreenADCS;
-    }
-    public Vector2? GetMonitorPixel(Vector2 coord, string coord_type, float eyeDist = 60f)
-    {
-        switch (coord_type.ToLower())
-        {
-
-            case "monitorcm":
-                MonitorPixel = coord * monitorPixelsPerCm;
-                break;
-
-            case "monitordva":
-                MonitorPixel = coord * pixelsPerDegree;
-                break;
-            
-            case "monitoradcs":
-                MonitorPixel = coord * MonitorDetails.PixelResolution;
-                MonitorPixel = new Vector2(((Vector2)MonitorPixel).x, MonitorDetails.PixelResolution.y - ((Vector2)MonitorPixel).y);
-                break;
-            
-            case "screenadcs":
-                ScreenPixel = ScreenADCSToScreenPixel(coord);
-                ScreenCm = ScreenPixel * screenPixelsPerCm;
-                MonitorPixel = ScreenCmToMonitorPixel((Vector2)ScreenCm);
-                break;
-
-            case "screenpixel":
-                ScreenCm = coord * screenPixelsPerCm;
-                MonitorPixel = ScreenCmToMonitorPixel((Vector2)ScreenCm);
-                break;
-
-            case "screencm":
-                MonitorPixel = ScreenCmToMonitorPixel(coord);
-                break;
-
-            case "screendva":
-                ScreenCm = coord * cmPerDegree;
-                MonitorPixel = ScreenCmToMonitorPixel((Vector2)ScreenCm);
-                break;
-
-            default:
-                Debug.LogError("Unknown display coordinate type \"" + coord_type + "\" specified in DisplayCoordinate creation.");
-                break;
-        }
-
         return MonitorPixel;
-    }    
-    
-    public Vector2? GetScreenPixel(Vector2 coord, string coord_type, float eyeDist = 60f)
+    }
+    public Vector2? GetScreenPixel(Vector2 coord, string coord_type, float? eyeDist = null)
     {
-        switch (coord_type.ToLower())
-        {
-            case "monitorpixel":
-                MonitorCm = coord * monitorCmPerPixel;
-                ScreenPixel = MonitorCmToScreenPixel((Vector2)MonitorCm);
-                break;
-
-            case "monitorcm":
-                ScreenPixel = MonitorCmToScreenPixel((Vector2)coord);
-                break;
-
-            case "monitordva":
-                MonitorPixel = coord * pixelsPerDegree;
-                MonitorCm = MonitorPixel * monitorCmPerPixel;
-                ScreenPixel = MonitorCmToScreenPixel((Vector2)MonitorCm);
-                break;
-            
-            case "monitoradcs":
-                MonitorPixel = MonitorADCSToMonitorPixel(coord);
-                MonitorCm = MonitorPixel * monitorCmPerPixel;
-                ScreenPixel = MonitorCmToScreenPixel((Vector2)MonitorCm);
-                break;
-            
-            case "screenadcs":
-                ScreenPixel = ScreenADCSToScreenPixel(coord);
-                break;
-
-            /*case "screenpixel":
-                ScreenCm = coord * screenPixelsPerCm;
-                MonitorPixel = ScreenCmToMonitorPixel((Vector2)ScreenCm);
-                break;*/
-
-            case "screencm":
-                ScreenPixel = coord * screenPixelsPerCm;
-                break;
-
-            case "screendva":
-                ScreenCm = coord * cmPerDegree;
-                ScreenPixel = coord * screenPixelsPerCm;
-                break;
-
-            default:
-                Debug.LogError("Unknown display coordinate type \"" + coord_type + "\" specified in DisplayCoordinate creation.");
-                break;
-        }
+        SetEyeDistance((float)eyeDist);
+        ConvertToMonitorPixels(coord, coord_type);
+        ScreenPixel = MonitorPixelToScreenPixel(MonitorPixel);
 
         return ScreenPixel;
     }
-
-    public Vector2? GetMonitorCm(Vector2 coord, string coord_type, float eyeDist = 60f)
+    public Vector2? GetMonitorADCS(Vector2 coord, string coord_type, float? eyeDist = null)
     {
-        switch (coord_type.ToLower())
-        {
-            case "monitorpixel":
-                MonitorCm = coord * monitorCmPerPixel;
-                break;
+        SetEyeDistance((float)eyeDist);
+        ConvertToMonitorPixels(coord, coord_type);
+        MonitorADCS = MonitorPixelToMonitorADCS(MonitorPixel);
+        
+        return MonitorADCS;
+    }
+    public Vector2? GetScreenADCS(Vector2 coord, string coord_type, float? eyeDist = null)
+    {
+        SetEyeDistance((float)eyeDist);
+        ConvertToMonitorPixels(coord, coord_type);
+        ScreenADCS = MonitorPixelToScreenADCS(MonitorPixel);
 
-            /*case "monitorcm":
-                ScreenPixel = MonitorCmToScreenPixel((Vector2)coord);
-                break;*/
-
-            case "monitordva":
-                MonitorPixel = coord * pixelsPerDegree;
-                MonitorCm = MonitorPixel * monitorCmPerPixel;
-                break;
-
-            case "monitoradcs":
-                MonitorPixel = MonitorADCSToMonitorPixel(coord);
-                MonitorCm = MonitorPixel * monitorCmPerPixel;
-                break;
-
-            case "screenadcs":
-                ScreenPixel = ScreenADCSToScreenPixel(coord);
-                ScreenCm = ScreenPixel * screenPixelsPerCm;
-                MonitorPixel = ScreenCmToMonitorPixel((Vector2)ScreenCm);
-                MonitorCm = MonitorPixel * monitorCmPerPixel;
-                break;
-
-            case "screenpixel":
-                ScreenCm = coord * screenPixelsPerCm;
-                MonitorPixel = ScreenCmToMonitorPixel((Vector2)ScreenCm);
-                MonitorCm = MonitorPixel * monitorCmPerPixel;
-                break;
-
-            case "screencm":
-                MonitorPixel = ScreenCmToMonitorPixel((Vector2)ScreenCm);
-                MonitorCm = MonitorPixel * monitorCmPerPixel;
-                break;
-
-            case "screendva":
-                ScreenCm = coord * cmPerDegree;
-                MonitorPixel = ScreenCmToMonitorPixel((Vector2)ScreenCm);
-                MonitorCm = MonitorPixel * monitorCmPerPixel;
-                break;
-
-            default:
-                Debug.LogError("Unknown display coordinate type \"" + coord_type + "\" specified in DisplayCoordinate creation.");
-                break;
-        }
+        return ScreenADCS;
+    }
+    public Vector2? GetMonitorCm(Vector2 coord, string coord_type, float? eyeDist = null)
+    {
+        SetEyeDistance((float)eyeDist);
+        ConvertToMonitorPixels(coord, coord_type);
+        MonitorCm = MonitorPixelToMonitorCm(MonitorPixel);
 
         return MonitorCm;
     }
-/
+    public Vector2? GetScreenCm(Vector2 coord, string coord_type, float? eyeDist = null)
+    {
+        SetEyeDistance((float)eyeDist);
+        ConvertToMonitorPixels(coord, coord_type);
+        ScreenCm = MonitorPixelToScreenCm(MonitorPixel);
 
-    
+        return ScreenCm;
+    }
+    public Vector2? GetMonitorDVA(Vector2 coord, string coord_type, float? eyeDist = null)
+    {
+        SetEyeDistance((float)eyeDist);
+        ConvertToMonitorPixels(coord, coord_type);
+        MonitorDVA = MonitorPixelToMonitorDVA(MonitorPixel);
+
+        return MonitorDVA;
+    }
+    public Vector2? GetScreenDVA(Vector2 coord, string coord_type, float? eyeDist = null)
+    {
+        SetEyeDistance((float)eyeDist);
+        ConvertToMonitorPixels(coord, coord_type);
+        ScreenDVA = MonitorPixelToScreenDVA(MonitorPixel);
+
+        return ScreenDVA;
+    }
+
     // Methods that Convert a given coord to Monitor Pixel
     private Vector2? MonitorCmToMonitorPixel(Vector2? monitorCm)
     {
@@ -359,6 +255,7 @@ public class USE_CoordinateConverter
         return MonitorPixel;
     }
 
+
     // Methods to Convert a Monitor Pixel coord to any other coord
     private Vector2? MonitorPixelToMonitorCm(Vector2? monitorPixel)
     {
@@ -384,7 +281,7 @@ public class USE_CoordinateConverter
         ScreenADCS = new Vector2(((Vector2)ScreenADCS).x, 1 - ((Vector2)ScreenADCS).y);
         return ScreenADCS;
     }
-    private Vector2? MonitorPixelToScreenPixels(Vector2? monitorPixel)
+    private Vector2? MonitorPixelToScreenPixel(Vector2? monitorPixel)
     {
         MonitorCm = monitorPixel * monitorCmPerPixel;
         ScreenCm = MonitorCm - ScreenDetails.LowerLeft_Cm;
@@ -403,6 +300,12 @@ public class USE_CoordinateConverter
         ScreenDVA = MonitorDVA - screenLowerLeftPixels * degreesPerPixel;
         return ScreenDVA;
     }
+    
+    /// <summary>
+    /// Convert to Monitor Pixels given the coord type
+    /// </summary>
+    /// <param name="coord"></param>
+    /// <param name="coord_type"></param>
     private void ConvertToMonitorPixels(Vector2 coord, string coord_type)
     {
         switch (coord_type.ToLower())
@@ -440,8 +343,6 @@ public class USE_CoordinateConverter
                 Debug.LogError("Unknown display coordinate type \"" + coord_type + "\" specified in DisplayCoordinate creation.");
                 break;
         }
-
-        MonitorADCS = MonitorPixelToMonitorADCS(MonitorPixel);
     }
 
 

@@ -125,7 +125,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            if(TokenFBController != null)
+            Camera.main.transform.position = new Vector3(0, .6f, Screen.fullScreen ? -2.5f : -2.18f);
+
+            if (TokenFBController != null)
                 SetTokenVariables();
 
             if (AudioFBController != null)
@@ -260,7 +262,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             Wrapper = new GameObject();
             Wrapper.name = "Wrapper";
-            CenteredPos = new Vector3((SideChoice == "Left" ? 1f : -1f), 0, 0);
+
+            float xValue = Screen.fullScreen ? .945f : 1.01f;
+            CenteredPos = new Vector3((SideChoice == "Left" ? xValue : -xValue), 0, 0);
 
             MiddleBarrier.SetActive(false);
 
@@ -289,7 +293,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             StateAfterDelay = InflateBalloon;
             DelayDuration = choiceToTouchDelay.value;
-            
+
             RemoveParents(Wrapper, RemoveParentList);
 
             if (SideChoice == "Left")
@@ -597,12 +601,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void SetTokenVariables()
     {
-        TokenFBController.tokenSize = (MacMainDisplayBuild && !Application.isEditor ? 210 : 105);
+        TokenFBController.tokenSize = (MacMainDisplayBuild && !Application.isEditor ? 212 : 106);
         TokenFBController.tokenBoxYOffset = (MacMainDisplayBuild && !Application.isEditor ? 45 : 22);
 
         #if (UNITY_WEBGL && !UNITY_EDITOR)
-                TokenFBController.tokenSize = 115;
-                TokenFBController.tokenBoxYOffset = 25; 
+            TokenFBController.tokenSize = Screen.fullScreen ? 105 : 116;
+            TokenFBController.tokenBoxYOffset = Screen.fullScreen ? 100 : 25;
         #endif
 
         TokenFBController.SetFlashingTime(1.5f);
@@ -731,19 +735,24 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         CreateMiddleBarrier();
 
+
+        float wrapperXpos = Screen.fullScreen ? .05f : .14f;
+
         //Wrap Left side objects in container and Center to left side:
         GameObject leftWrapper = new GameObject();
         leftWrapper.name = "LeftWrapper";
         List<GameObject> leftList = new List<GameObject>() { BalloonContainerLeft, RewardContainerLeft, StimLeft };
         SetParents(leftWrapper, leftList);
-        leftWrapper.transform.position = new Vector3(-.16f, -.05f, 0); //Centering on left half of screen. 
+        //MakeObjectsFaceCamera(leftWrapper);
+        leftWrapper.transform.position = new Vector3(-wrapperXpos, -.05f, 0); //Centering on left half of screen. 
 
         //Wrap Right side objects in container and Center to right side:
         GameObject rightWrapper = new GameObject();
         rightWrapper.name = "RightWrapper";
         List<GameObject> rightList = new List<GameObject>() { BalloonContainerRight, RewardContainerRight, StimRight };
         SetParents(rightWrapper, rightList);
-        rightWrapper.transform.position = new Vector3(.16f, -.05f, 0); //Centering on right half of screen. 
+        //MakeObjectsFaceCamera(rightWrapper);
+        rightWrapper.transform.position = new Vector3(wrapperXpos, -.05f, 0); //Centering on right half of screen. 
 
         LeftContainerOriginalPosition = BalloonContainerLeft.transform.position;
         RightContainerOriginalPosition = BalloonContainerRight.transform.position;
@@ -761,6 +770,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Reward.SetActive(false);
 
         ObjectsCreated = true;
+    }
+
+    void MakeObjectsFaceCamera(GameObject parent)
+    {
+        foreach(Transform child in parent.transform)
+            child.LookAt(Camera.main.transform);
     }
 
     void CreateMiddleBarrier()

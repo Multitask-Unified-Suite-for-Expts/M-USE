@@ -245,7 +245,9 @@ namespace USE_ExperimentTemplate_Task
 
                     if (InputBroker.GetKeyUp(KeyCode.N)) //Next Block
                     {
-                       Time.timeScale = 1;//if paused, unpause before ending block
+                        TrialLevel.TokenFBController.animationPhase = TokenFBController.AnimationPhase.None;
+
+                        Time.timeScale = 1;//if paused, unpause before ending block
 
                        HumanStartPanel.HumanStartPanelGO.SetActive(false);
 

@@ -33,8 +33,8 @@ public class TokenFBController : MonoBehaviour
     private GUIStyle whiteStyle;
     // Animation
     private int tokensChange;
-    enum AnimationPhase { None, Show, Update, Flashing };
-    private AnimationPhase animationPhase = AnimationPhase.None;
+    public enum AnimationPhase { None, Show, Update, Flashing };
+    public AnimationPhase animationPhase = AnimationPhase.None;
     private Vector2 animatedTokensPos;
     private Vector2 animatedTokensStartPos;
     private Vector2 animatedTokensEndPos;

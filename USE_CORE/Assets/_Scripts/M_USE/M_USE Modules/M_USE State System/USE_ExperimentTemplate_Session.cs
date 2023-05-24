@@ -341,7 +341,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 SessionData.CreateFile();
 
-                
+
                 //SessionData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
                 //SessionData.TestConnectionToDB(); //Using to test database connection
 
@@ -438,11 +438,11 @@ namespace USE_ExperimentTemplate_Session
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort, selectTask, () =>
             {
                 SessionSettings.Save();
-                #if (!UNITY_WEBGL)
+#if (!UNITY_WEBGL)
                     GameObject initCamGO = GameObject.Find("InitCamera");
                     initCamGO.SetActive(false);
                     SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
-                #endif
+#endif
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupSessionEnds"]);
             });
 

@@ -8,6 +8,7 @@ using USE_UI;
 using System.Linq;
 using ConfigDynamicUI;
 using USE_ExperimentTemplate_Task;
+using TMPro;
 
 public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 {
@@ -154,10 +155,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-            #if (UNITY_WEBGL)
-                TokenFBController.AdjustTokenBarSizing(110);
-            #endif
-
             if (MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
                 TokenFBController.AdjustTokenBarSizing(200);
 

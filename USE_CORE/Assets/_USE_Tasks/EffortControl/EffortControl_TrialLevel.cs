@@ -597,24 +597,16 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void SetTokenVariables()
     {
-        if (MacMainDisplayBuild && !Application.isEditor)
-        {
-            TokenFBController.tokenSize = 210f;
-            TokenFBController.tokenBoxYOffset = 45f;
-        }
-        else
-        {
-            TokenFBController.tokenSize = 105f;
-            TokenFBController.tokenBoxYOffset = 20f;
-        }
+        TokenFBController.tokenSize = (MacMainDisplayBuild && !Application.isEditor ? 210 : 105);
+        TokenFBController.tokenBoxYOffset = (MacMainDisplayBuild && !Application.isEditor ? 45 : 22);
 
-#if (UNITY_WEBGL && !UNITY_EDITOR)
-        TokenFBController.tokenSize = 115f;
-        TokenFBController.tokenBoxYOffset = 25f; 
-#endif
+        #if (UNITY_WEBGL && !UNITY_EDITOR)
+                TokenFBController.tokenSize = 115;
+                TokenFBController.tokenBoxYOffset = 25; 
+        #endif
 
         TokenFBController.SetFlashingTime(1.5f);
-        TokenFBController.tokenSpacing = -Screen.width * .009375f;
+        TokenFBController.tokenSpacing = -(Screen.width * .009375f);
     }
 
     void SetParents(GameObject wrapper, List<GameObject> objects) // 1) Setting the parent of each GO, and 2) Adding to RemovalList (so can remove easily later)

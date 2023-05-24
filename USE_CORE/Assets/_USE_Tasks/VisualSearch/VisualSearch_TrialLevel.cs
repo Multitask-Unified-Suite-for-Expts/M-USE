@@ -7,6 +7,7 @@ using USE_StimulusManagement;
 using USE_ExperimentTemplate_Trial;
 using VisualSearch_Namespace;
 using USE_UI;
+using TMPro;
 
 public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 {
@@ -83,7 +84,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public bool MacMainDisplayBuild;
 
 
-
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
@@ -144,10 +144,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-            #if (UNITY_WEBGL)
-                TokenFBController.AdjustTokenBarSizing(110);
-            #endif
-
             if (MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
                 TokenFBController.AdjustTokenBarSizing(200);
 

@@ -10,7 +10,7 @@ using USE_ExperimentTemplate_Trial;
 using System.Linq;
 using TMPro;
 using USE_UI;
-
+using UnityEngine.UI;
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
@@ -91,6 +91,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector]
     public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, displayStimDuration, chooseStimDuration, itiDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration;
 
+
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
@@ -143,10 +144,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-            #if (UNITY_WEBGL)
-                TokenFBController.tokenSize = 110;
-            #endif
-
             if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
                 AdjustTextPosForMac();
 
@@ -228,6 +225,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
         });
+
+
 
         ChooseStim.AddUpdateMethod(() =>
         {

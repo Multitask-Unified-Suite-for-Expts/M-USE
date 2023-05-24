@@ -202,7 +202,7 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
             StateAfterDelay = TileFlash;
             DelayDuration = mazeOnsetDelay.value;
             
-            SliderFBController.ConfigureSlider(new Vector3(0,209,0), sliderSize.value);
+            SliderFBController.ConfigureSlider(sliderSize.value);
             SliderFBController.SliderGO.SetActive(true);
             SetTrialSummaryString();
             

@@ -237,7 +237,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), ChooseStimulusDelay, ()=>
         {
             CalculateSliderSteps();
-            SliderFBController.ConfigureSlider(new Vector3(0,180,0), sliderSize.value, CurrentTrialDef.SliderInitial*(1f/sliderGainSteps));
+            SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrialDef.SliderInitial*(1f/sliderGainSteps));
             SliderFBController.SliderGO.SetActive(true);
 
             //numNonStimSelections_InBlock += mouseHandler.UpdateNumNonStimSelection(); //NT: Commented this out. not yet sure where we're gonna implement nonstim touches. Current method doesnt exist in new selection tracker.  

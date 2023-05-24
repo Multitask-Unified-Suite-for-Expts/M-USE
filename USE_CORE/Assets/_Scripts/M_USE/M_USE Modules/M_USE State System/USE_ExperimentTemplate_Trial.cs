@@ -144,6 +144,8 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
+                TokenFBController.RecalculateTokenBox(); //recalculate tokenbox incase they switch to fullscreen mode
+
                 TaskSelectionCanvasGO.SetActive(false);
 
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTrialStarts"]);

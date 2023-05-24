@@ -11,7 +11,7 @@
     },
     "itiDuration": {
       "name": "ITI Duration",
-      "value": 0.5,
+      "value": 0.01,
       "min": 0.1,
       "max": 1,
       "precision": 1,

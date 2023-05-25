@@ -254,6 +254,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.N),
                 hotKeyAction = () =>
                 {
+                    HkPanel.TrialLevel.TokenFBController.animationPhase = TokenFBController.AnimationPhase.None;
+
                     if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
                         HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
                     HkPanel.TrialLevel.AbortCode = 3;

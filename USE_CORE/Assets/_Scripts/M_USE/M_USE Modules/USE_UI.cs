@@ -36,14 +36,14 @@ namespace USE_UI
 
         [HideInInspector] public Dictionary<string, string> TaskInstructionsDict = new Dictionary<string, string>()
         {
-            { "ContinuousRecognition", "Each trial, several objects will be displayed and you must choose an object you haven't chosen in a previous trial!" },
-            { "EffortControl", "Choose a balloon to inflate based on the effort required (click) and the reward amount (tokens). Pop the balloon by clicking the required number of times!"},
-            { "FlexLearning", "Learn the visual feature that provides the most reward!"},
-            { "MazeGame", "Find your way to the end of the Maze to earn your reward!" },
-            { "THR", "Learn to touch and hold the square. Earn your reward by holding the square for the correct duration!" },
-            { "VisualSearch", "Find the targeted object to earn your reward!" },
-            { "WhatWhenWhere", "Select the objects in the correct sequence to earn your reward!" },
-            { "WorkingMemory", "Remember and identify the target object to earn your reward!" }
+            { "ContinuousRecognition", "Unique objects are displayed each trial and you must select an object you haven't previously chosen. Complete all trials to win! If you choose an object you've chosen in a previous trial, you lose!" },
+            { "EffortControl", "Choose a balloon to inflate based on the effort required (number of clicks) and the reward amount (number of tokens). Inflate and pop the balloon by clicking it the required number of times!"},
+            { "FlexLearning", "The maximal token gain is associated with one specific visual feature that defines one of the objects. Learn the visual feature that provides the most reward!"},
+            { "MazeGame", "Navigate your way from the start of the maze to the end of the maze to earn your reward. An incorrect step will require re-touching the last correct step." },
+            { "THR", "Learn touching and holding the square for the correct duration to earn your reward. Holding too short, holding too long, and moving outside the square will result in negative feedback." },
+            { "VisualSearch", "Each trial, a target object is displayed among distractor objects. Find the targeted object to earn your reward!" },
+            { "WhatWhenWhere", "Learn the sequential relationship between objects. Select the objects in the correct sequence to earn your reward!" },
+            { "WorkingMemory", "Remember and identify the target object to earn your reward. Don't let the distractor objects fool you!" }
         };
         [HideInInspector] public Dictionary<string, string> TaskNamesDict = new Dictionary<string, string>()
         {
@@ -58,16 +58,16 @@ namespace USE_UI
 
         };
 
-        [HideInInspector] public Dictionary<string, float> Task_HumanBackgroundZPos_Dict = new Dictionary<string, float>()
+        [HideInInspector] public Dictionary<string, Vector3> Task_HumanBackgroundPos_Dict = new Dictionary<string, Vector3>()
         {
-            { "ContinuousRecognition", 1000f },
-            { "EffortControl", 500f },
-            { "FlexLearning", 1000f },
-            { "MazeGame", 500f },
-            { "THR", 1000f },
-            { "VisualSearch", 1000f },
-            { "WhatWhenWhere", 500f },
-            { "WorkingMemory", 1000f },
+            { "ContinuousRecognition", new Vector3(0, 0, 1000f) },
+            { "EffortControl", new Vector3(0, 0, 500f) },
+            { "FlexLearning", new Vector3(0, 0, 1000f) },
+            { "MazeGame", new Vector3(0, 0, 500f) },
+            { "THR", new Vector3(0, 0, 1000f) },
+            { "VisualSearch", new Vector3(0, 0, 1000f) },
+            { "WhatWhenWhere", new Vector3(0, 0, 500f) },
+            { "WorkingMemory", new Vector3(0, 0, 1000f) },
         };
 
         [HideInInspector] public string TaskName;
@@ -100,6 +100,8 @@ namespace USE_UI
             HumanStartPanelGO = Instantiate(HumanStartPanelPrefab);
             HumanStartPanelGO.name = taskName + "_HumanPanel";
             HumanStartPanelGO.transform.SetParent(parent.transform, false);
+            HumanStartPanelGO.SetActive(false);
+            HumanPanelOn = false;
 
             TitleTextGO = HumanStartPanelGO.transform.Find("TitleText").gameObject;
             TaskName = TaskNamesDict[taskName];
@@ -110,7 +112,7 @@ namespace USE_UI
             StartButtonGO.AddComponent<HoverEffect>();
 
             HumanBackgroundGO = HumanStartPanelGO.transform.Find("HumanBackground").gameObject;
-            HumanBackgroundGO.transform.localPosition = new Vector3(0, 0, Task_HumanBackgroundZPos_Dict[taskName]);
+            HumanBackgroundGO.transform.localPosition = Task_HumanBackgroundPos_Dict[taskName];
 
             BackgroundPanelGO = HumanStartPanelGO.transform.Find("BackgroundPanel").gameObject;
 
@@ -129,17 +131,14 @@ namespace USE_UI
             InstructionsGO.SetActive(false);
             InstructionsOn = false;
 
-            if(Application.isEditor)
+            if (Screen.fullScreen || Application.isEditor)
                 AdjustButtonPositions();
-
-            HumanStartPanelGO.SetActive(false);
-            HumanPanelOn = false;
         }
 
         private void AdjustButtonPositions()
         {
-            InstructionsButtonGO.transform.localPosition = new Vector3(InstructionsButtonGO.transform.localPosition.x, InstructionsButtonGO.transform.localPosition.y + 44f, InstructionsButtonGO.transform.localPosition.z);
-            EndTaskButtonGO.transform.localPosition = new Vector3(EndTaskButtonGO.transform.localPosition.x, EndTaskButtonGO.transform.localPosition.y + 44f, EndTaskButtonGO.transform.localPosition.z);
+            InstructionsButtonGO.transform.localPosition += new Vector3(0, 45f, 0);
+            EndTaskButtonGO.transform.localPosition += new Vector3(0, 45f, 0);
         }
 
 
@@ -361,7 +360,7 @@ namespace USE_UI
         }
 
 
-        public IEnumerator GratedFlash(Texture2D newTexture, float duration)
+        public IEnumerator GratedFlash(Texture2D newTexture, float duration, GameObject goToDeactivate = null)
         {
             IsGrating = true;
             originalColor = Image.color;
@@ -374,33 +373,11 @@ namespace USE_UI
             Image.color = originalColor;
             Image.sprite = originalSprite;
             IsGrating = false;
+
+            if(goToDeactivate != null)
+                goToDeactivate.SetActive(false);
         }
 
-
-        public void GratedStartButtonFlash(Texture2D newTexture, float duration, bool deactivateAfter)
-        {
-            if (!IsGrating)
-            {
-                IsGrating = true;
-                if (!StartButtonGO.activeInHierarchy)
-                    StartButtonGO.SetActive(true);
-                originalColor = Image.color;
-                originalSprite = Image.sprite;
-
-                Image.color = new Color32(224, 78, 92, 255);
-                Image.sprite = Sprite.Create(newTexture, new Rect(0, 0, newTexture.width, newTexture.height), Vector2.one / 2f);
-            }
-            if (duration <= 0)
-            {
-                Image.color = originalColor;
-                Image.sprite = originalSprite;
-                if (deactivateAfter)
-                    StartButtonGO.SetActive(false);
-
-                IsGrating = false;
-            }
-            
-        }
     }
 
 

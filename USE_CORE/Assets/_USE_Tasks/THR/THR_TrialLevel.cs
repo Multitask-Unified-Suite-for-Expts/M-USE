@@ -132,8 +132,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT TRIAL state --------------------------------------------------------------------------------------------------------------------------
-        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", MouseTracker, InitTrial, StartWithBlueSquare ? BlueSquare : WhiteSquare);
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, ButtonScale, THR_CanvasGO);
+        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", MouseTracker, InitTrial, InitTrial);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -359,11 +358,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 if (currentTrial.ShowNegFb)
                 {
                     if (HeldTooShort)
-                        StartCoroutine(USE_SquareGO.GratedFlash(HeldTooShortTexture, currentTrial.TimeoutDuration));
+                        StartCoroutine(USE_SquareGO.GratedFlash(HeldTooShortTexture, currentTrial.TimeoutDuration, SquareGO));
                     else if (HeldTooLong)
-                        StartCoroutine(USE_SquareGO.GratedFlash(HeldTooLongTexture, currentTrial.TimeoutDuration));
+                        StartCoroutine(USE_SquareGO.GratedFlash(HeldTooLongTexture, currentTrial.TimeoutDuration, SquareGO));
                     else if (MovedOutside)
-                        StartCoroutine(USE_SquareGO.GratedFlash(BackdropStripesTexture, currentTrial.TimeoutDuration));
+                        StartCoroutine(USE_SquareGO.GratedFlash(BackdropStripesTexture, currentTrial.TimeoutDuration, SquareGO));
                 }
             }
             AudioPlayed = true;

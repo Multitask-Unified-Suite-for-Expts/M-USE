@@ -101,7 +101,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4d52f7165ef1e6428c2e82d3a7b194d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tokenSize: 100
+  tokenSize: 110
   tokenSpacing: 0
   tokenBoxPadding: 0
   tokenBoxYOffset: 10
@@ -141,6 +141,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe7709cf71b9445818636e659c598f28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EventCodeManager: {fileID: 0}
-  CurrentTaskCanvas: {fileID: 0}
+  InstantiatedGO: {fileID: 0}
+  TaskCanvasGO: {fileID: 0}
+  TaskCanvas: {fileID: 0}
+  audioFBController: {fileID: 0}
+  FeedbackSize: 150
+  FeedbackDuration: 0.3
   FeedbackOn: 0
+  EventCodeManager: {fileID: 0}

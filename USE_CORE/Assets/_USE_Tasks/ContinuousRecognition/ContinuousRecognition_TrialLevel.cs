@@ -10,7 +10,7 @@ using USE_ExperimentTemplate_Trial;
 using System.Linq;
 using TMPro;
 using USE_UI;
-
+using UnityEngine.UI;
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
@@ -91,6 +91,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector]
     public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, displayStimDuration, chooseStimDuration, itiDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration;
 
+
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
@@ -139,14 +140,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, ChooseStim);
-
         TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, ButtonScale, CR_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
-#if (UNITY_WEBGL)
-            TokenFBController.tokenSize = 110;
-#endif
+            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
+                AdjustTextPosForMac();
 
             NumFeedbackRows = 0;
 
@@ -159,12 +158,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (TrialCount_InTask != 0)
                 currentTask.SetTaskSummaryString();
-
-            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
-            {
-                AdjustTextPosForMac();
-                AdjustedPositionsForMac = true;
-            }
 
             if (currentTrial.UseStarfield)
                 Starfield.SetActive(true);
@@ -232,6 +225,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
         });
+
+
 
         ChooseStim.AddUpdateMethod(() =>
         {
@@ -560,14 +555,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     void AdjustTextPosForMac() //When running a build instead of hitting play in editor:
     {
-        Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
-        TokenFBController.transform.localScale = biggerScale;
-        TokenFBController.tokenSize = 200;
-        TokenFBController.RecalculateTokenBox();
+        TokenFBController.AdjustTokenBarSizing(200);
 
         Vector3 Pos = OriginalTimerPosition;
         Pos.y -= .02f;
         TimerBackdropGO.transform.position = Pos;
+
+        AdjustedPositionsForMac = true;
     }
 
     float GetOffsetY()

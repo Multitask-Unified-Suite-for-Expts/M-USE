@@ -76,7 +76,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public float TouchFeedbackDuration;
 
     [HideInInspector] public bool MacMainDisplayBuild;
-    [HideInInspector] public bool AdjustedPositionsForMac;
 
 
     public override void DefineControlLevel()
@@ -135,21 +134,19 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
-            {
-                Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
-                TokenFBController.transform.localScale = biggerScale;
-                TokenFBController.tokenSize = 200;
-                TokenFBController.RecalculateTokenBox();
-                AdjustedPositionsForMac = true;
-            }
+            #if (UNITY_WEBGL)
+                TokenFBController.AdjustTokenBarSizing(110);
+            #endif
+
+            if (MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
+                TokenFBController.AdjustTokenBarSizing(200);
+            
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
 
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
-
         });
 
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), DisplaySample, () =>
@@ -317,6 +314,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         AssignFrameData();
         AssignTrialData();
     }
+
     public void MakeStimFaceCamera()
     {
         foreach (StimGroup group in TrialStims)

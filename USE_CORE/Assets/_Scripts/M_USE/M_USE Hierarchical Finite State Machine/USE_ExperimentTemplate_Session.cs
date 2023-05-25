@@ -96,13 +96,19 @@ namespace USE_ExperimentTemplate_Session
 
         [HideInInspector] public GameObject TaskButtons;
 
+
         //Set in inspector
-        public GameObject InstructionsPrefab;
         public GameObject TaskSelection_Starfield;
         public GameObject TaskSelection_Header;
         public GameObject HumanVersionToggleButton;
         public GameObject HumanStartPanelPrefab;
         public GameObject TaskSelectionCanvasGO;
+        public GameObject ToggleAudioButton;
+        public AudioClip TaskSelection_HumanAudio;
+
+        [HideInInspector] public float audioPlaybackSpot;
+
+        [HideInInspector] public AudioSource TaskSelection_AudioSource;
 
         [HideInInspector] public HumanStartPanel HumanStartPanel;
 
@@ -141,7 +147,6 @@ namespace USE_ExperimentTemplate_Session
             SessionID = SessionDetails.GetItemValue("SessionID");
             FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" + DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
 
-            Debug.Log("CONFIG FILE FOLDER = " + configFileFolder);
 
             SessionSettings.ImportSettings_MultipleType("Session",
                 LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));
@@ -302,8 +307,8 @@ namespace USE_ExperimentTemplate_Session
             SessionCam = Camera.main;
 
             //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
-            #if (UNITY_WEBGL)
-                GameObject initCamGO = GameObject.Find("InitCamera");
+#if (UNITY_WEBGL)
+            GameObject initCamGO = GameObject.Find("InitCamera");
                 initCamGO.SetActive(false);
                 TaskSelection_Starfield.SetActive(true);
             #else
@@ -336,7 +341,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 SessionData.CreateFile();
 
-                
+
                 //SessionData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
                 //SessionData.TestConnectionToDB(); //Using to test database connection
 
@@ -433,11 +438,11 @@ namespace USE_ExperimentTemplate_Session
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort, selectTask, () =>
             {
                 SessionSettings.Save();
-                #if (!UNITY_WEBGL)
+#if (!UNITY_WEBGL)
                     GameObject initCamGO = GameObject.Find("InitCamera");
                     initCamGO.SetActive(false);
                     SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
-                #endif
+#endif
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupSessionEnds"]);
             });
 
@@ -446,8 +451,17 @@ namespace USE_ExperimentTemplate_Session
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
-                TaskSelectionCanvasGO.SetActive(true);
+                //if (IsHuman)
+                //{
+                //    gameObject.AddComponent<AudioListener>();
+                //    if(TaskSelection_AudioSource == null)
+                //        TaskSelection_AudioSource = gameObject.AddComponent<AudioSource>();
+                //    TaskSelection_AudioSource.clip = TaskSelection_HumanAudio;
+                //    TaskSelection_AudioSource.loop = true;
+                //    TaskSelection_AudioSource.Play();
+                //}
 
+                TaskSelectionCanvasGO.SetActive(true);
                 TaskSelection_Starfield.SetActive(IsHuman ? true : false);
 
                 #if (!UNITY_WEBGL)
@@ -492,6 +506,7 @@ namespace USE_ExperimentTemplate_Session
                     return;
 
                 SceneLoading = true;
+
                 if (taskCount >= TaskMappings.Count)
                 {
                     TasksFinished = true;
@@ -628,6 +643,7 @@ namespace USE_ExperimentTemplate_Session
                 {
                     TaskSelection_Header.SetActive(true);
                     HumanVersionToggleButton.SetActive(true);
+                    //ToggleAudioButton.SetActive(true);
                 }
             });
             
@@ -669,9 +685,14 @@ namespace USE_ExperimentTemplate_Session
                 GameObject taskButton = taskButtonsDict[selectedConfigName];
                 RawImage image = taskButton.GetComponent<RawImage>();
                 Button button = taskButton.GetComponent<Button>();
-                Color darkGrey = new Color(.5f, .5f, .5f, .35f);
-                image.color = darkGrey;
-                Destroy(button);
+                taskButton.GetComponent<HoverEffect>().SetToInitialSize(); //Sets grey'd out button back to normal size
+
+                #if (!UNITY_WEBGL)
+                    Color darkGrey = new Color(.5f, .5f, .5f, .35f);
+                    image.color = darkGrey;
+
+                    Destroy(button);
+                #endif
 
                 string taskName = (string)TaskMappings[selectedConfigName];
                 loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
@@ -695,13 +716,17 @@ namespace USE_ExperimentTemplate_Session
             
             loadTask.SpecifyTermination(() => !SceneLoading, runTask, () =>
             {
-                //TaskSelectionCanvasGO.SetActive(false);
+                //if(IsHuman)
+                //{
+                //    TaskSelection_AudioSource.Stop();
+                //    Destroy(GetComponent<AudioListener>());
+                //}
+
                 TaskSelection_Starfield.SetActive(false);
 
                 runTask.AddChildLevel(CurrentTask);
                 if(CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
-                SessionCam.gameObject.SetActive(false);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
                 CurrentTask.TrialLevel.TaskLevel = CurrentTask;
                 if(ExperimenterDisplayController != null)
@@ -721,6 +746,8 @@ namespace USE_ExperimentTemplate_Session
             //runTask.AddLateUpdateMethod
             runTask.AddUniversalInitializationMethod(() =>
             {
+                SessionCam.gameObject.SetActive(false);
+
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["RunTaskStarts"]);
 
 #if (!UNITY_WEBGL)
@@ -763,9 +790,10 @@ namespace USE_ExperimentTemplate_Session
                 SessionData.AppendData();
                 SessionData.WriteData();
 
-
                 SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
+
+                ActiveTaskLevels.Remove(CurrentTask);
 
                 if(CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
@@ -848,12 +876,46 @@ namespace USE_ExperimentTemplate_Session
             }
         }
 
+        public void HandleToggleAudioButtonClick()
+        {
+            if (TaskSelection_AudioSource.isPlaying)
+            {
+                audioPlaybackSpot = TaskSelection_AudioSource.time;
+                TaskSelection_AudioSource.Stop();
+                ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
+            }
+            else
+            {
+                TaskSelection_AudioSource.time = audioPlaybackSpot;
+                TaskSelection_AudioSource.Play();
+                ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(false);
+            }
+        }
+
         public void HandleHumanVersionToggleButtonClick()
         {
             IsHuman = !IsHuman;
 
+            //if(IsHuman)
+            //{
+            //    gameObject.AddComponent<AudioListener>();
+            //    TaskSelection_AudioSource = gameObject.AddComponent<AudioSource>();
+            //    TaskSelection_AudioSource.clip = TaskSelection_HumanAudio;
+            //    TaskSelection_AudioSource.loop = true;
+            //    TaskSelection_AudioSource.time = audioPlaybackSpot;
+            //    TaskSelection_AudioSource.Play();
+            //}
+            //else
+            //{
+            //    audioPlaybackSpot = TaskSelection_AudioSource.time;
+            //    TaskSelection_AudioSource.Stop();
+            //    Destroy(GetComponent<AudioListener>());
+            //}
+
             //Change text on button:
             HumanVersionToggleButton.GetComponentInChildren<TextMeshProUGUI>().text = IsHuman ? "Human Version" : "Primate Version";
+            //Toggle Audio Button:
+            //ToggleAudioButton.SetActive(ToggleAudioButton.activeInHierarchy ? false : true);
             //Toggle Header:
             TaskSelection_Header.SetActive(TaskSelection_Header.activeInHierarchy ? false : true);
             //Toggle Starfield:
@@ -937,14 +999,10 @@ namespace USE_ExperimentTemplate_Session
             tl.LocateFile = LocateFile;
             tl.SessionDataPath = SessionDataPath;
 
-//#if (UNITY_WEBGL)
-//            tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
-//#else
             if(UseDefaultConfigs)
                 tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
             else
                 tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName);
-//#endif
 
             if (UseDefaultConfigs)
             {
@@ -1033,6 +1091,7 @@ namespace USE_ExperimentTemplate_Session
             if (verifyOnly) return tl;
 
             ActiveTaskLevels.Add(tl);
+
             if (tl.TaskCanvasses != null)
                 foreach (GameObject go in tl.TaskCanvasses)
                     go.SetActive(false);
@@ -1071,6 +1130,7 @@ namespace USE_ExperimentTemplate_Session
                 tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
             tl.TaskCam.gameObject.SetActive(false);
         }
+
         // public void FindTaskCam<T>(string taskName) where T : ControlLevel_Task_Template
         // {
         // 	ControlLevel_Task_Template tl = GameObject.Find("ControlLevels").GetComponent<T>();

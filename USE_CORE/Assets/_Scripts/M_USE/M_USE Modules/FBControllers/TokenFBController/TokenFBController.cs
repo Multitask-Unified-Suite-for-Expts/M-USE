@@ -6,12 +6,17 @@ using USE_ExperimentTemplate_Classes;
 
 public class TokenFBController : MonoBehaviour
 {
-    public int tokenSize = 100;
-    public int tokenSpacing = 0;
-    public int tokenBoxPadding = 0;
-    public int tokenBoxYOffset = 10;
+    public float tokenSize = 110;
+    public float tokenSpacing = 0;
+    public float tokenBoxPadding = 0;
+    public float tokenBoxYOffset = 10;
     public Texture2D tokenTexture;
 
+    public float scaledTokenSize;
+    public float scaledTokenBoxPadding;
+    public float scaledTokenBoxYOffset;
+
+    public float scaleFactor;
 
     // Color Constants
     private readonly Color colorCollected = Color.green;
@@ -28,8 +33,8 @@ public class TokenFBController : MonoBehaviour
     private GUIStyle whiteStyle;
     // Animation
     private int tokensChange;
-    enum AnimationPhase { None, Show, Update, Flashing };
-    private AnimationPhase animationPhase = AnimationPhase.None;
+    public enum AnimationPhase { None, Show, Update, Flashing };
+    public AnimationPhase animationPhase = AnimationPhase.None;
     private Vector2 animatedTokensPos;
     private Vector2 animatedTokensStartPos;
     private Vector2 animatedTokensEndPos;
@@ -73,20 +78,22 @@ public class TokenFBController : MonoBehaviour
     public void RecalculateTokenBox()
     {
         Vector2 referenceResolution = new Vector2(1920, 1080);
-        float scaleFactor = Mathf.Min(Screen.width / referenceResolution.x, Screen.height / referenceResolution.y);
 
-        tokenSize = (int)(tokenSize * scaleFactor);
-        tokenBoxPadding = (int)(tokenBoxPadding * scaleFactor);
-        tokenBoxYOffset = (int)(tokenBoxYOffset * scaleFactor);
+        scaleFactor = Mathf.Min(Screen.width / referenceResolution.x, Screen.height / referenceResolution.y);
 
-        float width = CalcTokensWidth(totalTokensNum) + 2 * tokenBoxPadding;
-        float adjTokenBarXOffset = (Screen.width - width) / 2;
+        scaledTokenSize = tokenSize * scaleFactor;
+        scaledTokenBoxPadding = tokenBoxPadding * scaleFactor;
+        scaledTokenBoxYOffset = tokenBoxYOffset * scaleFactor;
+
+        float width = CalcTokensWidth(totalTokensNum) + 2 * scaledTokenBoxPadding;
+
+        float xOffset = (Screen.width - width) / 2;
 
         tokenBoxRect = new Rect(
-            adjTokenBarXOffset,
-            tokenBoxYOffset,
+            xOffset,
+            scaledTokenBoxYOffset,
             width,
-            tokenSize + 2 * tokenBoxPadding
+            scaledTokenSize + 2 * scaledTokenBoxPadding
         );
     }
 
@@ -117,6 +124,13 @@ public class TokenFBController : MonoBehaviour
     {
         return tokenBarFull;
     }
+    
+    public void AdjustTokenBarSizing(int newTokenSize)
+    {
+        tokenSize = newTokenSize;
+        RecalculateTokenBox();
+    }
+
     public void OnGUI()
     {
         RenderTexture oldTexture = RenderTexture.active;
@@ -125,7 +139,6 @@ public class TokenFBController : MonoBehaviour
 
         if (totalTokensNum < 0)
             return;
-
 
         GUI.BeginGroup(tokenBoxRect);
 
@@ -140,7 +153,7 @@ public class TokenFBController : MonoBehaviour
         }
 
         // Always draw the tokens
-        Vector2 startPos = Vector2.one * tokenBoxPadding;
+        Vector2 startPos = Vector2.one * scaledTokenBoxPadding;
         GUI.color = colorCollected;
         startPos = DrawTokens(startPos, numCollected);
         GUI.color = colorUncollected;
@@ -159,18 +172,17 @@ public class TokenFBController : MonoBehaviour
         }
 
         GUI.color = oldColor;
-
         RenderTexture.active = oldTexture;
     }
 
     private Vector2 DrawTokens(Vector2 startPos, int numTokens)
     {
-        startPos.x += tokenBoxPadding;
-        startPos.y += tokenBoxPadding;
+        startPos.x += scaledTokenBoxPadding;
+        startPos.y += scaledTokenBoxPadding;
         for (int i = 0; i < numTokens; ++i)
         {
-            GUI.DrawTexture(new Rect(startPos.x, startPos.y, tokenSize, tokenSize), tokenTexture);
-            startPos.x += tokenSize + tokenSpacing;
+            GUI.DrawTexture(new Rect(startPos.x, startPos.y, scaledTokenSize, scaledTokenSize), tokenTexture);
+            startPos.x += scaledTokenSize + tokenSpacing;
         }
         return startPos;
     }
@@ -320,11 +332,11 @@ public class TokenFBController : MonoBehaviour
         animatedTokensStartPos = pos;
         // No need for horizontal padding since it does nothing
         animatedTokensStartPos.x -= CalcTokensWidth(numTokens) / 2;
-        animatedTokensStartPos.y -= tokenBoxPadding + tokenSize;
+        animatedTokensStartPos.y -= scaledTokenBoxPadding + scaledTokenSize;
         animatedTokensPos = animatedTokensStartPos;
 
         animatedTokensEndPos = tokenBoxRect.position;
-        animatedTokensEndPos.x += tokenBoxPadding + CalcTokensWidth(tokensEndNum);
+        animatedTokensEndPos.x += scaledTokenBoxPadding + CalcTokensWidth(tokensEndNum);
         
         animatedTokensColor = color;
 
@@ -342,6 +354,6 @@ public class TokenFBController : MonoBehaviour
 
     private float CalcTokensWidth(int numTokens)
     {
-        return tokenSize * numTokens + tokenSpacing * (numTokens - 1);
+        return scaledTokenSize * numTokens + tokenSpacing * (numTokens - 1);
     }
 }

@@ -741,7 +741,22 @@ namespace USE_StimulusManagement
 		{
 			foreach(StimDef sd in stimDefs)
 			{
-				sd.Load();
+				if (sd.StimGameObject == null)
+				{
+					GameObject tempgo = sd.Load();
+					if (tempgo == null)
+						Debug.LogWarning("Attempted to load stimulus " + sd.StimName + " from StimGroup " +
+						                 stimGroupName + " but errors occurred.");
+				}
+				else if (!sd.StimGameObject.activeSelf)
+				{
+					// sd.StimGameObject.SetActive(true);
+				}
+				else
+				{
+					Debug.LogWarning("Attempted to load stimulus " + sd.StimName + " from StimGroup " +
+					                 stimGroupName + " but errors occurred.");
+				}
 			}
 		}
 
@@ -797,7 +812,10 @@ namespace USE_StimulusManagement
 			if (LocArray.Length == stimDefs.Count)
 			{
 				for (int iL = 0; iL < LocArray.Length; iL++)
+				{
+					Debug.Log("stim " + iL + ", " + LocArray[iL]);
 					stimDefs[iL].StimLocation = LocArray[iL];
+				}
 			}
 			else
 			{

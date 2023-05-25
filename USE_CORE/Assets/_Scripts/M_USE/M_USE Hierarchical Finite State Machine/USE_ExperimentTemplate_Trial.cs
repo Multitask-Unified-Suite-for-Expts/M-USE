@@ -177,7 +177,16 @@ namespace USE_ExperimentTemplate_Trial
 
                 foreach (StimGroup sg in TrialStims)
                 {
-                    sg.LoadStims();
+                    try
+                    {
+                        sg.LoadStims();
+                        
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.Log("Attempted to load StimGroup " + sg.stimGroupName + " but errors occurred.");
+                        Console.WriteLine(e);
+                    }
                 }
 
                 ResetTrialVariables();

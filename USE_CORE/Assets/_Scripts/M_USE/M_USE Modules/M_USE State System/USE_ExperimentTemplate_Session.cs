@@ -24,6 +24,7 @@ using TMPro;
 using Tobii.Research.Unity;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Button = UnityEngine.UI.Button;
+using USE_DisplayManagement;
 //using UnityEngine.Windows.WebCam;
 
 
@@ -86,6 +87,8 @@ namespace USE_ExperimentTemplate_Session
         private GameObject InputTrackers;
         protected FrameData FrameData;
         private TobiiEyeTrackerController TobiiEyeTrackerController;
+        private MonitorDetails MonitorDetails;
+        private ScreenDetails ScreenDetails;
 
 
         private Camera SessionCam;
@@ -284,7 +287,15 @@ namespace USE_ExperimentTemplate_Session
             if (SessionSettings.SettingExists("Session", "SerialPortActive"))
                 SerialPortActive = (bool)SessionSettings.Get("Session", "SerialPortActive");
 
+            if (SessionSettings.SettingExists("Session", "MonitorDetails"))
+            {
+                MonitorDetails  = (MonitorDetails)SessionSettings.Get("Session", "MonitorDetails");
+            }
 
+            if (SessionSettings.SettingExists("Session", "ScreenDetails"))
+            {
+                ScreenDetails = (ScreenDetails)SessionSettings.Get("Session", "ScreenDetails");
+            }
 
             if (UseDefaultConfigs)
             {
@@ -340,7 +351,28 @@ namespace USE_ExperimentTemplate_Session
                 PauseCanvasGO.SetActive(false);
                 PauseCanvas = PauseCanvasGO.GetComponent<Canvas>();
                 PauseCanvas.planeDistance = 1;
+
 #endif
+
+
+            if (EyeTrackerActive)
+            {
+                if (GameObject.Find("TobiiEyeTrackerController") == null)
+                {
+                    // Technically only gets called once when finding and creating the tobii eye tracker prefabs
+                    GameObject TobiiEyeTrackerControllerGO = new GameObject("TobiiEyeTrackerController");
+                    TobiiEyeTrackerController = TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
+                    TobiiEyeTrackerController.MonitorDetails = new MonitorDetails(MonitorDetails.PixelResolution, MonitorDetails.CmSize);
+                    Debug.Log("here;");
+                    TobiiEyeTrackerController.ScreenDetails = new ScreenDetails(ScreenDetails.LowerLeft_Cm, ScreenDetails.UpperRight_Cm, ScreenDetails.PixelResolution);
+                    TobiiEyeTrackerController.CoordinateConverter = new USE_CoordinateConverter(TobiiEyeTrackerController.MonitorDetails, TobiiEyeTrackerController.ScreenDetails);
+                    GameObject TrackBoxGO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"), TobiiEyeTrackerControllerGO.transform);
+                    GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
+                }
+            }
+
+            
+
 
             // Instantiating Task Selection Frame Data
             FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection",
@@ -471,13 +503,6 @@ namespace USE_ExperimentTemplate_Session
                 MouseTracker = InputTrackers.GetComponent<MouseTracker>();
                 GazeTracker = InputTrackers.GetComponent<GazeTracker>();
 
-            });
-
-            TaskButtons = null;
-            Dictionary<string, GameObject> taskButtonsDict = new Dictionary<string, GameObject>();
-            string selectedConfigName = null;
-            selectTask.AddUniversalInitializationMethod(() =>
-            {
                 MouseTracker.Init(FrameData, 0);
                 MouseTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
 
@@ -485,16 +510,17 @@ namespace USE_ExperimentTemplate_Session
                 {
                     GazeTracker.Init(FrameData, 0);
                     GazeTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
-                    if (GameObject.Find("TobiiEyeTrackerController") == null)
-                    {
-                        GameObject TobiiEyeTrackerControllerGO = new GameObject("TobiiEyeTrackerController");
-                        TobiiEyeTrackerController = TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
-                        GameObject TrackBoxGO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"), TobiiEyeTrackerControllerGO.transform);
-                        GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
-                    }
                     InputTrackers.GetComponent<GazeTracker>().enabled = true;
-
                 }
+
+            });
+
+            TaskButtons = null;
+            Dictionary<string, GameObject> taskButtonsDict = new Dictionary<string, GameObject>();
+            string selectedConfigName = null;
+            selectTask.AddUniversalInitializationMethod(() =>
+            {
+                
                 TaskSelectionCanvasGO.SetActive(true);
 
                 TaskSelection_Starfield.SetActive(IsHuman ? true : false);
@@ -1038,6 +1064,7 @@ namespace USE_ExperimentTemplate_Session
             tl.SelectionTracker = SelectionTracker;
             
             tl.EyeTrackerActive = EyeTrackerActive;
+
             if (EyeTrackerActive)
             {
                 tl.GazeTracker = GazeTracker;
@@ -1289,11 +1316,11 @@ namespace USE_ExperimentTemplate_Session
                 SessionSettings.StoreSettings(SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings" +
                                               Path.DirectorySeparatorChar);
 
-                if (FrameData != null)
+                /*if (FrameData != null)
                 {
                     FrameData.AppendData();
                     FrameData.WriteData();
-                }
+                }*/
             }
         }
         public void OnGUI()

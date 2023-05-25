@@ -51,6 +51,7 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public SessionDataControllers SessionDataControllers;
         [HideInInspector] public SelectionTracker SelectionTracker;
         [HideInInspector] public bool EyeTrackerActive;
+
         [HideInInspector] public GazeTracker GazeTracker;
         [HideInInspector] public MouseTracker MouseTracker;
         [HideInInspector] public TobiiEyeTrackerController TobiiEyeTrackerController;
@@ -59,7 +60,6 @@ namespace USE_ExperimentTemplate_Task
 
         [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive, UseDefaultConfigs;
         [HideInInspector] public string ContextExternalFilePath, SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
-        [HideInInspector] public MonitorDetails MonitorDetails;
         [HideInInspector] public LocateFile LocateFile;
         [HideInInspector] public StringBuilder BlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
         private int TaskStringsAdded = 0;
@@ -565,6 +565,8 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.IsHuman = IsHuman;
             TrialLevel.HumanStartPanel = HumanStartPanel;
             TrialLevel.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
+            
+            TrialLevel.EyeTrackerActive = EyeTrackerActive;
 
             TrialLevel.DefineTrialLevel();
         }

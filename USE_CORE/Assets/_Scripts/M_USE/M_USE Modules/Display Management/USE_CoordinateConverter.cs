@@ -115,7 +115,6 @@ public class USE_CoordinateConverter
         screenLowerLeftPixels = ScreenDetails.LowerLeft_Cm * monitorPixelsPerCm;
         screenSizeCm = new Vector2(ScreenDetails.ScreenWidth_Cm, ScreenDetails.ScreenHeight_Cm);
 
-        Debug.Log($"SCREENPIXELS/CM: {screenPixelsPerCm} SCREENCM/PIX: {screenCmPerPixel} SCREENLOWERLEFT: {screenLowerLeftPixels} SCREENSIZECM: {screenSizeCm}");
     }
 
     public void SetScreenDetails(ScreenDetails screenDetails)
@@ -163,7 +162,6 @@ public class USE_CoordinateConverter
         
         if (MonitorPixel != null)
             ScreenPixel = MonitorPixelToScreenPixel(MonitorPixel);
-        Debug.Log("SCREEN PIXELS: " + ScreenPixel);
         return ScreenPixel;
     }
     public Vector2? GetMonitorADCS(Vector2? coord, string coord_type, float? eyeDist = null)
@@ -236,14 +234,15 @@ public class USE_CoordinateConverter
     {
         MonitorPixel = monitorADCS * MonitorDetails.PixelResolution;
         MonitorPixel = new Vector2(((Vector2)MonitorPixel).x, MonitorDetails.PixelResolution.y - ((Vector2)MonitorPixel).y);
-        Debug.Log("MONITOR DETAILS IN FORMULA: " + MonitorDetails.PixelResolution.x + " , " + MonitorDetails.PixelResolution.y);
         return MonitorPixel;
     }
     private Vector2? ScreenADCSToMonitorPixel(Vector2? screenADCS)
     {
         ScreenPixel = screenADCS * ScreenDetails.PixelResolution;
         ScreenPixel = new Vector2(((Vector2)ScreenPixel).x, ScreenDetails.PixelResolution.y - ((Vector2)ScreenPixel).y);
-        ScreenCm = ScreenPixel * screenPixelsPerCm;
+        Debug.Log($"#SCREEN PIXEL: {ScreenPixel} SCREEN ADCS: {screenADCS}");
+
+        ScreenCm = ScreenPixel * screenCmPerPixel;
         MonitorPixel = ScreenCmToMonitorPixel(ScreenCm);
         return MonitorPixel;
     }
@@ -287,6 +286,7 @@ public class USE_CoordinateConverter
     {
         MonitorCm = monitorPixel * monitorCmPerPixel;
         ScreenCm = MonitorCm - ScreenDetails.LowerLeft_Cm;
+
         ScreenADCS = (ScreenCm * screenPixelsPerCm) / ScreenDetails.PixelResolution;
         ScreenADCS = new Vector2(((Vector2)ScreenADCS).x, 1 - ((Vector2)ScreenADCS).y);
         return ScreenADCS;

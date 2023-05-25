@@ -42,7 +42,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int numCalibPoints;
     private float acceptableCalibrationDistance;
     private NormalizedPoint2D currentADCSTarget;
-    private Vector2 currentScreenTarget;
+    private Vector2 currentScreenPixelTarget;
     private int calibNum;
 
     // Blink Calibration Point Variables
@@ -79,6 +79,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     // USE_DisplayManagement Variables
     private DisplayCoordinate DisplayCoordinate;
     private ScreenDetails ScreenDetails;
+    private USE_CoordinateConverter CoordinateConverter;
 
 
     // Gaze Data Samples
@@ -122,10 +123,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             {
                 CreateResultContainer();
             }
-            
-            MonitorDetails = new MonitorDetails(new Vector2(1920, 1080), new Vector2(43.498f, 24.13f));
-            ScreenDetails = new ScreenDetails(new Vector2(3.81f, 1.588f), new Vector2(39.846f, 21.273f), new Vector2(1920, 1080));
 
+            CoordinateConverter = TobiiEyeTrackerController.CoordinateConverter;
 
         });
 
@@ -151,7 +150,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             if (!SpoofGazeWithMouse)
                 ScreenBasedCalibration.EnterCalibrationMode();
         });
-
+        var MouseHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseHover", MouseTracker, Init, ITI);
         if (SpoofGazeWithMouse)
         {
             SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseHover", MouseTracker, Init, ITI);
@@ -168,15 +167,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Init.AddUpdateMethod(() =>
         {
-            Debug.Log("CURRENT INPUT: " + SelectionHandler.CurrentInputLocation());
-            DisplayCoordinate dc;
-            if (SelectionHandler.CurrentInputLocation() != null)
-            {
-                dc = new DisplayCoordinate((Vector2)SelectionHandler.CurrentInputLocation(), "screenpixel", MonitorDetails, ScreenDetails);
-                Debug.Log("MONITOR PIXEL: " + ((Vector2)dc.MonitorPixel).ToString("F3"));
-            }
-                
-
+            Debug.Log($"ACTIVE DISPLAY AREA TOP LEFT: {TobiiEyeTrackerController.DisplayArea.TopLeft.ToVector3().ToString("F3")}" +
+                $" BOTTOM LEFT: {TobiiEyeTrackerController.DisplayArea.BottomLeft.ToVector3().ToString("F3")}" +
+                $" BOTTOM TOP RIGHT: {TobiiEyeTrackerController.DisplayArea.TopRight.ToVector3().ToString("F3")}" +
+                $" BOTTOM WIDTH: {TobiiEyeTrackerController.DisplayArea.Width}");
 
             // Define the number of calibration points given the following key codes (Space, 6, 5, 3, 1)
             if (InputBroker.GetKeyUp(KeyCode.Space))
@@ -339,7 +333,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
                 // Plots sample points to the Result Container, if they exist for the current calibration point
                 CollectSamplePoints();
-                CreateSampleLines(LeftSamples, RightSamples, ADCSToScreen(calibPointsADCS[calibNum]));
+                CreateSampleLines(LeftSamples, RightSamples, (Vector2)CoordinateConverter.GetScreenPixel(calibPointsADCS[calibNum].ToVector2(), "screenadcs", 60));
 
                 if (ResultContainer.transform.childCount > 0)
                 {
@@ -474,7 +468,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 allCalibPoints[6],
                 allCalibPoints[7],
                 allCalibPoints[8]};
-                acceptableCalibrationDistance = Vector2.Distance(ADCSToScreen(allCalibPoints[0]), ADCSToScreen(allCalibPoints[1])) / 2;
+                acceptableCalibrationDistance = Vector2.Distance((Vector2)CoordinateConverter.GetScreenPixel(allCalibPoints[0].ToVector2(), "monitoradcs",60), (Vector2)CoordinateConverter.GetScreenPixel(allCalibPoints[1].ToVector2(), "monitoradcs", 60)) / 2;
 
                 RecalibCount = new int[9];
                 break;
@@ -486,7 +480,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 allCalibPoints [2],
                 allCalibPoints [3],
                 allCalibPoints[5]};
-                acceptableCalibrationDistance = Vector2.Distance(ADCSToScreen(allCalibPoints[0]), ADCSToScreen(allCalibPoints[1])) / 2;
+                acceptableCalibrationDistance = Vector2.Distance((Vector2)CoordinateConverter.GetScreenPixel(allCalibPoints[0].ToVector2(), "monitoradcs", 60), (Vector2)CoordinateConverter.GetScreenPixel(allCalibPoints[1].ToVector2(), "monitoradcs", 60)) / 2;
 
                 RecalibCount = new int[6];
                 break;
@@ -497,7 +491,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 allCalibPoints [2],
                 allCalibPoints [6],
                 allCalibPoints [8]};
-                acceptableCalibrationDistance = Vector2.Distance(ADCSToScreen(allCalibPoints[0]), ADCSToScreen(allCalibPoints[4])) / 2;
+                acceptableCalibrationDistance = Vector2.Distance((Vector2)CoordinateConverter.GetScreenPixel(allCalibPoints[0].ToVector2(), "monitoradcs", 60), (Vector2)CoordinateConverter.GetScreenPixel(allCalibPoints[4].ToVector2(), "monitoradcs", 60)) / 2;
 
                 RecalibCount = new int[5];
                 break;
@@ -506,7 +500,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 allCalibPoints [4],
                 allCalibPoints [3],
                 allCalibPoints [5] };
-                acceptableCalibrationDistance = Vector2.Distance(ADCSToScreen(allCalibPoints[0]), ADCSToScreen(allCalibPoints[1])) / 2;
+                acceptableCalibrationDistance = Vector2.Distance((Vector2)CoordinateConverter.GetScreenPixel(allCalibPoints[0].ToVector2(), "monitoradcs", 60), (Vector2)CoordinateConverter.GetScreenPixel(allCalibPoints[1].ToVector2(), "monitoradcs", 60)) / 2; 
 
                 RecalibCount = new int[3];
                 break;
@@ -607,8 +601,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             {
                 CalibrationSample sample = calibPoint.CalibrationSamples[i];
                 // Record the positions of the Left and Right eye for each sample of the calibration point 
-                Vector2 leftSamplePos = ADCSToScreen(sample.LeftEye.PositionOnDisplayArea);
-                Vector2 rightSamplePos = ADCSToScreen(sample.RightEye.PositionOnDisplayArea);
+                Vector2 leftSamplePos = (Vector2)CoordinateConverter.GetScreenPixel(sample.LeftEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
+                Vector2 rightSamplePos = (Vector2)CoordinateConverter.GetScreenPixel(sample.RightEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
 
                 LeftSamples.Add(leftSamplePos);
                 RightSamples.Add(rightSamplePos);
@@ -646,8 +640,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             new NormalizedPoint2D(1f - CalibPointsInset[0], 0.5f),
             new NormalizedPoint2D(CalibPointsInset[0], 1f - CalibPointsInset[1]),
             new NormalizedPoint2D(0.5f, 1f - CalibPointsInset[1]),
-            new NormalizedPoint2D(1f - CalibPointsInset[0], 1f - CalibPointsInset[1])};
-
+            new NormalizedPoint2D(1f - CalibPointsInset[0], 1f - CalibPointsInset[1])
+        };
     }
 
 
@@ -655,15 +649,18 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     {
         CalibCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.black;
         CalibCircle.SetCircleScale(MaxCircleScale);
-        currentADCSTarget = calibPointsADCS[calibNum]; // get calib coordinates in ADCS space
-        currentScreenTarget = ADCSToScreen(currentADCSTarget); // get calib coordinates in Screen space
-        CalibCircle.CircleGO.GetComponent<RectTransform>().anchoredPosition = currentScreenTarget;
+        currentADCSTarget = calibPointsADCS[calibNum]; // get calib coordinates in screen ADCS space
+
+        currentScreenPixelTarget = (Vector2)CoordinateConverter.GetScreenPixel(currentADCSTarget.ToVector2(), "screenadcs", 60); // get calib coordinates in Screen space
+        Debug.Log("#CURRENT screen Pixel TARGET: " + currentScreenPixelTarget.ToString());
+
+        CalibCircle.CircleGO.GetComponent<RectTransform>().anchoredPosition = currentScreenPixelTarget;
         CalibCircle.CircleGO.SetActive(true);
     }
 
     private bool InCalibrationRange()
     {
-        return (Vector2.Distance((Vector2)SelectionHandler.CurrentInputLocation(), currentScreenTarget) < acceptableCalibrationDistance);
+        return (Vector2.Distance((Vector2)SelectionHandler.CurrentInputLocation(), currentScreenPixelTarget) < acceptableCalibrationDistance);
     }
     private void CreateResultContainer()
     {

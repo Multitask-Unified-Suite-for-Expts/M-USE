@@ -38,6 +38,7 @@ using Tobii.Research;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using USE_DisplayManagement;
 
 public class InputBroker
 {
@@ -78,7 +79,7 @@ public class InputBroker
             {
                 return _gazePosition;
             }
-			return CurrentGazePositionOnDisplayArea(TobiiEyeTrackerController.Instance.iEyeTracker, TobiiEyeTrackerController.Instance.EyeTracker, TobiiEyeTrackerController.Instance.Camera);        
+			return CurrentGazePositionOnDisplayArea(TobiiEyeTrackerController.Instance.iEyeTracker, TobiiEyeTrackerController.Instance.EyeTracker);        
 		}
         set
         {
@@ -329,15 +330,12 @@ public class InputBroker
         }
         return target;
     }
-	private static Vector2 CurrentGazePositionOnDisplayArea(IEyeTracker IEyeTracker, EyeTracker EyeTracker, Camera Camera)
+	private static Vector2 CurrentGazePositionOnDisplayArea(IEyeTracker IEyeTracker, EyeTracker EyeTracker)
 	{
         
         Vector2 screenPoint = new Vector2(float.NaN, float.NaN);
         if (IEyeTracker != null)
-        {
-			// Derive Monitor Resolution in a more Generic way
-            Vector2 MonitorResolution = new Vector2(Camera.pixelWidth, Camera.pixelHeight);//REPLACE WITH SOMETHING MORE UNIVERSAL
-            // Get the most recent gaze data point
+        { // Get the most recent gaze data point
             var gazeData = EyeTracker?.LatestGazeData;
 
 			if (gazeData != null)
@@ -353,23 +351,25 @@ public class InputBroker
 					var combinedGazePoint = new Vector2(
 						(leftGazePoint.x + rightGazePoint.x) / 2f,
 						(leftGazePoint.y + rightGazePoint.y) / 2f);
-
-					// Convert the combined gaze point to screen coordinates
-					screenPoint = new Vector2(combinedGazePoint.x * MonitorResolution.x, (1 - combinedGazePoint.y) * MonitorResolution.y);
-				}
+					Debug.Log("COMBINED MONITOR ADCS: " +  combinedGazePoint.ToString("F3"));
+					Debug.Log("SCREEN HEIGHT: " + Screen.height + " SCREEN WIDTH: " + Screen.width);
+					screenPoint = new Vector2(Screen.width * combinedGazePoint.x, Screen.height * (1 - combinedGazePoint.y));
+                    // Convert the combined gaze point to screen coordinates
+                }
 				else if (gazeData.Left.GazePointValid)
 				{
-					// Use the gaze point from the left eye
-					screenPoint = new Vector2(leftGazePoint.x * MonitorResolution.x, (1 - leftGazePoint.y) * MonitorResolution.y);
-				}
+                    // Use the gaze point from the left eye
+                    screenPoint = new Vector2(Screen.width * leftGazePoint.x, Screen.height * (1 - leftGazePoint.y));
+                }
 				else if (gazeData.Right.GazePointValid)
 				{
-					// Use the gaze point from the right eye
-					screenPoint = new Vector2(rightGazePoint.x * MonitorResolution.x, (1 - rightGazePoint.y) * MonitorResolution.y);
-				}
-			}
+                    // Use the gaze point from the right eye
+
+                    screenPoint = new Vector2(Screen.width * rightGazePoint.x, Screen.height * (1 - rightGazePoint.y));
+                }
+            }
         }
-		//Debug.Log("SCREEN POINT: " + screenPoint.ToString());
+		Debug.Log("SCREEN POINT: " + screenPoint.ToString());
 		return screenPoint;
     }
 }

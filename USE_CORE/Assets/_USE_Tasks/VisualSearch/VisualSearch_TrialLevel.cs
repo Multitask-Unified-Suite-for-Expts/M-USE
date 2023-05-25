@@ -111,8 +111,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         SetupTrial.AddInitializationMethod(() =>
         {
-            Debug.Log("TASK CAM LOCAL LOCATION: " + CurrentTaskLevel.TaskCam.transform.localPosition);
-            Debug.Log("TASK CAM LOCATION: " + CurrentTaskLevel.TaskCam.transform.position);
             ResetTrialVariables();
             TokenFBController.ResetTokenBarFull();
             //Set the context for the upcoming trial with the Start Button visible

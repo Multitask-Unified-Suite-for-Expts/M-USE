@@ -16,6 +16,7 @@ using USE_UI;
 using System.IO.Ports;
 using Tobii.Research;
 using Tobii.Research.Unity;
+using USE_DisplayManagement;
 
 namespace USE_ExperimentTemplate_Trial
 {
@@ -66,6 +67,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public DisplayArea DisplayArea;
 
         [HideInInspector] public string SelectionType;
+        [HideInInspector] public bool EyeTrackerActive;
 
         [HideInInspector] public SerialPortThreaded SerialPortController;
         [HideInInspector] public SyncBoxController SyncBoxController;

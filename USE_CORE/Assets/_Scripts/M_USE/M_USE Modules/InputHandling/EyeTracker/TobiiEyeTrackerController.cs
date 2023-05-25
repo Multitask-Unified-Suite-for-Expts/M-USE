@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Tobii.Research;
 using Tobii.Research.Unity;
+using USE_DisplayManagement;
 
 public class TobiiEyeTrackerController : EyeTrackerController_Base
 {
@@ -15,6 +16,7 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
     public DisplayArea DisplayArea;
     public GameObject TrackBoxGuideGO;
     public Camera Camera;
+
    
     // Start is called before the first frame update
     private void Awake()
@@ -29,12 +31,12 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
     {
         Camera = Camera.main;
 
-        while (iEyeTracker == null  && EyeTracker == null && TrackBoxGuideGO == null)
+        while (iEyeTracker == null  || EyeTracker == null || TrackBoxGuideGO == null)
             FindEyeTrackerComponents();
 
-        if(iEyeTracker != null)
+        if (MonitorDetails != null && ScreenDetails != null && CoordinateConverter == null)
         {
-            InitializeTobiiVariables();
+            InitializeCoordinateConverter();
         }
 
     }
@@ -43,8 +45,11 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
     {
         // An eyetracker is connected and on
         if (iEyeTracker == null && EyeTrackingOperations.FindAllEyeTrackers().Count > 0)
+        {
             iEyeTracker = EyeTrackingOperations.FindAllEyeTrackers()[0];
-        
+            DisplayArea = iEyeTracker.GetDisplayArea();
+        }
+
         if (EyeTracker == null && GameObject.Find("EyeTracker(Clone)") != null)
             EyeTracker = GameObject.Find("EyeTracker(Clone)").GetComponent<EyeTracker>();
 
@@ -53,17 +58,8 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
 
     }
 
-    private void InitializeTobiiVariables()
+    private void InitializeCoordinateConverter()
     {
-        DisplayArea = iEyeTracker.GetDisplayArea();
-        Debug.Log($"DISPLAY ARE: " +
-            $"\nWIDTH: {DisplayArea.Width}" + 
-            $"\nHEIGTH: {DisplayArea.Height}" + 
-            $"\nBOTTOM LEFT: {DisplayArea.BottomLeft.ToVector3().ToString()}" + 
-            $"\nBOTTOM RIGHT: {DisplayArea.BottomRight.ToVector3().ToString()}" + 
-            $"\nTOP LEFT: {DisplayArea.TopLeft.ToVector3().ToString()}" + 
-            $"\nTOP RIGHT: {DisplayArea.TopRight.ToVector3().ToString()}");
-
-
+        CoordinateConverter = new USE_CoordinateConverter(MonitorDetails, ScreenDetails);
     }
 }

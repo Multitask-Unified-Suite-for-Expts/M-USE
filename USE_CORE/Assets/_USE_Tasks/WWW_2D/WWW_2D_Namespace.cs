@@ -3,10 +3,12 @@ using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
+using USE_ExperimentTemplate_Classes;
+using USE_StimulusManagement;
 
-namespace #TASKNAME#_Namespace
+namespace WWW_2D_Namespace
 {
-    public class #TASKNAME#_TaskDef : TaskDef
+    public class WWW_2D_TaskDef : TaskDef
     {
         //Already-existing fields (inherited from TaskDef)      
         //public DateTime TaskStart_DateTime;
@@ -21,21 +23,21 @@ namespace #TASKNAME#_Namespace
         //public float? ExternalStimScale;
     }
 
-    public class #TASKNAME#_BlockDef : BlockDef
+    public class WWW_2D_BlockDef : BlockDef
     {
         //Already-existing fields (inherited from BlockDef)
 		//public int BlockCount;
 		//public TrialDef[] TrialDefs;
     }
 
-    public class #TASKNAME#_TrialDef : TrialDef
+    public class WWW_2D_TrialDef : TrialDef
     {
         //Already-existing fields (inherited from TrialDef)
 		//public int BlockCount, TrialCountInBlock, TrialCountInTask;
 		//public TrialStims TrialStims;
     }
 
-    public class #TASKNAME#_StimDef : StimDef
+    public class WWW_2D_StimDef : StimDef
     {
         //Already-existing fields (inherited from Stim  Def)
         //public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)

@@ -15,6 +15,7 @@ using FeatureUncertaintyWM_Namespace;
 //using FinderGame_Namespace;
 //using Kia_Task_Namespace;
 using TobiiGaze_Namespace;
+using WWW_2D_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -166,6 +167,17 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(FeatureUncertaintyWM_BlockDef),
                 TrialDefType = typeof(FeatureUncertaintyWM_TrialDef),
                 StimDefType = typeof(FeatureUncertaintyWM_StimDef)
+            }
+        }
+        ,{
+            "WWW_2D", new TaskTypes
+            {
+                TaskLevelType = typeof(WWW_2D_TaskLevel),
+                TrialLevelType = typeof(WWW_2D_TrialLevel),
+                TaskDefType = typeof(WWW_2D_TaskDef),
+                BlockDefType = typeof(WWW_2D_BlockDef),
+                TrialDefType = typeof(WWW_2D_TrialDef),
+                StimDefType = typeof(WWW_2D_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

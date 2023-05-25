@@ -184,7 +184,12 @@ namespace USE_Data
 		private bool Defined = false;
 		public bool DefineManually;
 
-		public void InitDataController(int cap = 100)
+
+        public bool SendDataToDropbox = false;
+        private DropboxManager dropboxManager;
+
+
+        public void InitDataController(int cap = 100)
 		{
 			capacity = cap;
 			data = new List<IDatum>();
@@ -666,12 +671,21 @@ namespace USE_Data
 			}
 		}
 
-		/// <summary>
-		/// Adds standardized timing data for the current Control Level's states to be tracked.
-		/// </summary>
-		/// <param name="level">The Control Level whose active states should be tracked.</param>
-		/// <param name="timingTypes">(Optional) List of strings specifying which state timing data to track. Possible values: "StartFrame", "EndFrame", "StartTimeAbsolute", "StartTimeRelative", "EndTimeAbsolute", "EndTimeRelative", "Duration".</param>
-		public void AddStateTimingData(ControlLevel level, IEnumerable<string> timingTypes = null)
+        private async void HandleDropbox()
+        {
+            //dropboxManager = new DropboxManager();
+            //await dropboxManager.Authenticate();
+            //await dropboxManager.WriteFilesToDropbox();
+        }
+
+
+
+        /// <summary>
+        /// Adds standardized timing data for the current Control Level's states to be tracked.
+        /// </summary>
+        /// <param name="level">The Control Level whose active states should be tracked.</param>
+        /// <param name="timingTypes">(Optional) List of strings specifying which state timing data to track. Possible values: "StartFrame", "EndFrame", "StartTimeAbsolute", "StartTimeRelative", "EndTimeAbsolute", "EndTimeRelative", "Duration".</param>
+        public void AddStateTimingData(ControlLevel level, IEnumerable<string> timingTypes = null)
 		{
 			foreach (State s in level.ActiveStates)
 			{

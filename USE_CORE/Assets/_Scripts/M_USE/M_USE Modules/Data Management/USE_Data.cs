@@ -607,10 +607,23 @@ namespace USE_Data
 			}
 		}
 
-		/// <summary>
-		/// Creates a new data file.
-		/// </summary>
-		public void CreateFile()
+        public void CreateSQLTable(string databaseAddress)
+        {
+            //connect to database
+            //create empty table with DataController name
+            //loop through DataController.Data, add column to table for each datum
+        }
+
+        public void CreateSQLTableIfNecessary(string databaseAddess)
+        {
+            //check if table exists in database
+            //if not, CreateSQLTable()
+        }
+
+        /// <summary>
+        /// Creates a new data file.
+        /// </summary>
+        public void CreateFile()
 		{
 			if (storeData && fileName != null)
 			{
@@ -629,19 +642,6 @@ namespace USE_Data
 					dataStream.Write(titleString);
 				}
 			}
-		}
-
-		public void CreateSQLTable(string databaseAddress)
-		{
-			//connect to database
-			//create empty table with DataController name
-			//loop through DataController.Data, add column to table for each datum
-		}
-
-		public void CreateSQLTableIfNecessary(string databaseAddess)
-		{
-			//check if table exists in database
-			//if not, CreateSQLTable()
 		}
 
 		/// <summary>

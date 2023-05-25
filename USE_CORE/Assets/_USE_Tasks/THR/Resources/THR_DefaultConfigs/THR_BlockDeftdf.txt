@@ -1,7 +1,7 @@
 BlockName	MinMaxNumTrials	ShowNegFb	PulseSize	PerfWindowEndTrials	PerfThresholdEndTrials	WhiteSquareDuration	BlueSquareDuration	GratingSquareDuration	GreyOnReleaseDuration	TimeoutDuration	ItiDuration	MinTouchDuration	MaxTouchDuration	SquareSize	SquareSizeMin	SquareSizeMax	PositionX	PositionX_Min	PositionX_Max	PositionY	PositionY_Min	PositionY_Max	RewardTouch	NumTouchPulses	RewardRelease	NumReleasePulses	RandomSquareSize	RandomSquarePosition	TimeToAutoEndTrialSec	TouchToRewardDelay	ReleaseToRewardDelay
 Level1	[1, 2]	TRUE	250	3	0.66	0.25	1.5	0.5	0.5	1	1	0.05	2.5	50	20	65	0	-550	550	0	-200	200	FALSE	1	TRUE	1	FALSE	FALSE	180	0.05	0.05
-Level2	[1, 2]	TRUE	250	3	0.66	0.25	1.5	0.5	0.5	1	1	0.1	2.5	45	20	65	-100	-550	550	50	-200	200	FALSE	1	TRUE	1	FALSE	FALSE	180	0.05	0.05
-Level3	[1, 2]	TRUE	250	3	0.66	0.25	1.5	0.5	0.5	1	1	0.1	2	45	20	65	100	-550	550	-50	-200	200	FALSE	1	TRUE	1	FALSE	FALSE	180	0.05	0.05
-Level4	[1, 2]	TRUE	250	3	0.66	0.25	1.5	0.5	0.5	1	1	0.1	2	45	20	65	-200	-550	550	100	-200	200	FALSE	1	TRUE	1	TRUE	FALSE	180	0.05	0.05
-Level5	[1, 2]	TRUE	250	3	0.66	0.5	2	0.5	0.5	1	1	0.2	1.5	40	20	65	200	-550	550	-100	-200	200	FALSE	1	TRUE	1	FALSE	TRUE	180	0.05	0.05
+Level2	[1, 2]	TRUE	250	3	0.66	0.25	1.5	0.5	0.5	1	1	0.1	2.5	45	20	65	-100	-550	550	50	-200	200	FALSE	1	TRUE	1	FALSE	TRUE	180	0.05	0.05
+Level3	[1, 2]	TRUE	250	3	0.66	0.25	1.5	0.5	0.5	1	1	0.1	2	45	20	65	100	-550	550	-50	-200	200	FALSE	1	TRUE	1	FALSE	TRUE	180	0.05	0.05
+Level4	[1, 2]	TRUE	250	3	0.66	0.25	1.5	0.5	0.5	1	1	0.1	2	45	20	65	-200	-550	550	100	-200	200	FALSE	1	TRUE	1	TRUE	TRUE	180	0.05	0.05
+Level5	[1, 2]	TRUE	250	3	0.66	0.5	2	0.5	0.5	1	1	0.2	1.5	40	20	65	200	-550	550	-100	-200	200	FALSE	1	TRUE	1	TRUE	TRUE	180	0.05	0.05
 Level6	[1, 2]	TRUE	250	3	0.66	0.5	2	0.5	0.5	1	1	0.2	1.5	40	20	65	-400	-550	550	200	-200	200	FALSE	1	TRUE	1	TRUE	TRUE	180	0.05	0.35

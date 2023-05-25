@@ -91,6 +91,8 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public HumanStartPanel HumanStartPanel;
         [HideInInspector] public GameObject TaskSelectionCanvasGO;
 
+        [HideInInspector] public UI_Debugger UI_Debugger;
+
 
 
         // Texture Variables
@@ -127,14 +129,15 @@ namespace USE_ExperimentTemplate_Trial
 
             if (IsHuman)
                 HumanStartPanel.SetTrialLevel(this);
-
+           
+            UI_Debugger = gameObject.AddComponent<UI_Debugger>();
 
             //DefineTrial();
             Add_ControlLevel_InitializationMethod(() =>
             {
-                #if (!UNITY_WEBGL)
+#if (!UNITY_WEBGL)
                         SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
-                #endif
+#endif
 
                 TrialCount_InBlock = -1;
                 TrialStims = new List<StimGroup>();

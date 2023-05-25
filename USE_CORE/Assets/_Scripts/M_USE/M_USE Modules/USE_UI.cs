@@ -131,14 +131,23 @@ namespace USE_UI
             InstructionsGO.SetActive(false);
             InstructionsOn = false;
 
-            if (Screen.fullScreen || Application.isEditor)
-                AdjustButtonPositions();
+            AdjustButtonPositions();
         }
 
         private void AdjustButtonPositions()
         {
-            InstructionsButtonGO.transform.localPosition += new Vector3(0, 45f, 0);
-            EndTaskButtonGO.transform.localPosition += new Vector3(0, 45f, 0);
+            float y = Application.isEditor ? 45f : 0; //windows fullscreen is 1920
+
+            if(Screen.fullScreen)
+            {
+                if (Screen.width == 1920)
+                    y = 45f;
+                else
+                    y = Screen.width > 3000 ? 0f : -90f;
+            }
+
+            InstructionsButtonGO.transform.localPosition += new Vector3(0, y, 0);
+            EndTaskButtonGO.transform.localPosition += new Vector3(0, y, 0);
         }
 
 
@@ -240,6 +249,73 @@ namespace USE_UI
 
     }
 
+
+    public class UI_Debugger : MonoBehaviour
+    {
+        public GameObject DebugTextGO;
+        public TextMeshProUGUI DebugText;
+        public RectTransform Rect;
+
+        public State SetActiveOnInitialization;
+        public State SetInactiveOnTermination;
+
+        public void InitDebugger(Canvas parent, string text = null)
+        {
+            DebugTextGO = new GameObject("DebugText");
+            DebugTextGO.transform.SetParent(parent.transform);
+            DebugTextGO.transform.localScale = new Vector3(1, 1, 1);
+            DebugTextGO.transform.localPosition = Vector3.zero;
+
+            Rect = DebugTextGO.AddComponent<RectTransform>();
+            Rect.sizeDelta = new Vector2(750, 100);
+
+            DebugText = DebugTextGO.AddComponent<TextMeshProUGUI>();
+            DebugText.alignment = TextAlignmentOptions.Center;
+            DebugText.color = Color.black;
+            if(text != null)
+                DebugText.text = text;
+
+            DebugTextGO.SetActive(false);
+        }
+
+        public void SetDebugText(string text)
+        {
+            DebugText.text = text;
+        }
+
+        public void SetSize(Vector2 size)
+        {
+            Rect.sizeDelta = size;
+        }
+
+        public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
+        {
+            if (setActiveOnInit != null)
+            {
+                SetActiveOnInitialization = setActiveOnInit;
+                SetActiveOnInitialization.StateInitializationFinished += ActivateOnStateInit;
+            }
+            if (setInactiveOnTerm != null)
+            {
+                SetInactiveOnTermination = setInactiveOnTerm;
+                SetInactiveOnTermination.StateTerminationFinished += InactivateOnStateTerm;
+            }
+        }
+
+        private void ActivateOnStateInit(object sender, EventArgs e)
+        {
+            DebugTextGO.SetActive(true);
+        }
+
+        private void InactivateOnStateTerm(object sender, EventArgs e)
+        {
+            DebugTextGO.SetActive(false);
+        }
+
+        //Example of How to use it:
+        //UI_Debugger.InitDebugger(EC_CanvasGO.GetComponent<Canvas>(), (Screen.width + "x" + Screen.height));
+        //    UI_Debugger.SetVisibilityOnOffStates(ChooseBalloon, ChooseBalloon);
+    }
 
     public class USE_StartButton : MonoBehaviour
 	{

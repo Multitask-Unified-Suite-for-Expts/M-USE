@@ -197,12 +197,12 @@ namespace USE_ExperimentTemplate_Task
                 SetTaskSummaryString();
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTaskStarts"]);
 
-                //Create HumanStartPanel
+                Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
                 if (IsHuman)
                 {
+                    //Create HumanStartPanel
                     HumanStartPanel.SetupDataAndCodes(FrameData, EventCodeManager, SessionEventCodes);
                     HumanStartPanel.SetTaskLevel(this);
-                    Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
                     HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
                 }
             });

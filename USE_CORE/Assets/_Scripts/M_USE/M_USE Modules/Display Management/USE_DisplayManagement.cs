@@ -96,8 +96,12 @@ namespace USE_DisplayManagement {
             LowerLeft_Cm = lowerLeft;
             UpperRight_Cm = upperRight;
             PixelResolution = resolution;
+
             ScreenWidth_Cm = UpperRight_Cm.x - LowerLeft_Cm.x;
+            Debug.Log("SCREEN WIDTH_ CM: " +  ScreenWidth_Cm);
             ScreenHeight_Cm = UpperRight_Cm.y - LowerLeft_Cm.y;
+            Debug.Log("SCREEN HEIGHT_ CM: " + ScreenHeight_Cm);
+
         }
     }
 

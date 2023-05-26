@@ -25,6 +25,7 @@ using Tobii.Research.Unity;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Button = UnityEngine.UI.Button;
 using USE_DisplayManagement;
+using Tobii.Research;
 //using UnityEngine.Windows.WebCam;
 
 
@@ -847,6 +848,12 @@ namespace USE_ExperimentTemplate_Session
 
                 if(ExperimenterDisplayController != null)
                     ExperimenterDisplayController.ResetTask(null, null);
+
+                if(EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
+                {
+                    TobiiEyeTrackerController.Instance.isCalibrating = true;
+                    TobiiEyeTrackerController.Instance.ScreenBasedCalibration.LeaveCalibrationMode();
+                }
 
                 taskCount++;
 

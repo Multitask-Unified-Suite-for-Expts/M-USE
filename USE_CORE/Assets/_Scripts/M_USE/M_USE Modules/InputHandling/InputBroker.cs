@@ -351,8 +351,6 @@ public class InputBroker
 					var combinedGazePoint = new Vector2(
 						(leftGazePoint.x + rightGazePoint.x) / 2f,
 						(leftGazePoint.y + rightGazePoint.y) / 2f);
-					Debug.Log("COMBINED MONITOR ADCS: " +  combinedGazePoint.ToString("F3"));
-					Debug.Log("SCREEN HEIGHT: " + Screen.height + " SCREEN WIDTH: " + Screen.width);
 					screenPoint = new Vector2(Screen.width * combinedGazePoint.x, Screen.height * (1 - combinedGazePoint.y));
                     // Convert the combined gaze point to screen coordinates
                 }
@@ -369,7 +367,6 @@ public class InputBroker
                 }
             }
         }
-		Debug.Log("SCREEN POINT: " + screenPoint.ToString());
 		return screenPoint;
     }
 }

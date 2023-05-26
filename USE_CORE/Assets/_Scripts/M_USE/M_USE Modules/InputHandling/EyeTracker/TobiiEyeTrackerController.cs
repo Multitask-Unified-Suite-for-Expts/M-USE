@@ -16,7 +16,7 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
     public DisplayArea DisplayArea;
     public GameObject TrackBoxGuideGO;
     public Camera Camera;
-
+    public bool isCalibrating;
    
     // Start is called before the first frame update
     private void Awake()
@@ -47,6 +47,8 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
         if (iEyeTracker == null && EyeTrackingOperations.FindAllEyeTrackers().Count > 0)
         {
             iEyeTracker = EyeTrackingOperations.FindAllEyeTrackers()[0];
+            ScreenBasedCalibration = new ScreenBasedCalibration(iEyeTracker);
+
             DisplayArea = iEyeTracker.GetDisplayArea();
         }
 

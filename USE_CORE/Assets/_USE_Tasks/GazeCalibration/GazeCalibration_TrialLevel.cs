@@ -147,8 +147,12 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(()=> (!SpoofGazeWithMouse? (ScreenBasedCalibration != null):true), Init, () =>
         {
             // Only enter Calibration if an eyetracker is being used
-            if (!SpoofGazeWithMouse)
+            if (!SpoofGazeWithMouse && TrialCount_InTask == 0)
+            {
                 ScreenBasedCalibration.EnterCalibrationMode();
+                TobiiEyeTrackerController.Instance.isCalibrating = true;
+            }
+                
         });
         var MouseHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseHover", MouseTracker, Init, ITI);
         if (SpoofGazeWithMouse)
@@ -167,11 +171,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Init.AddUpdateMethod(() =>
         {
-            Debug.Log($"ACTIVE DISPLAY AREA TOP LEFT: {TobiiEyeTrackerController.DisplayArea.TopLeft.ToVector3().ToString("F3")}" +
-                $" BOTTOM LEFT: {TobiiEyeTrackerController.DisplayArea.BottomLeft.ToVector3().ToString("F3")}" +
-                $" BOTTOM TOP RIGHT: {TobiiEyeTrackerController.DisplayArea.TopRight.ToVector3().ToString("F3")}" +
-                $" BOTTOM WIDTH: {TobiiEyeTrackerController.DisplayArea.Width}");
-
             // Define the number of calibration points given the following key codes (Space, 6, 5, 3, 1)
             if (InputBroker.GetKeyUp(KeyCode.Space))
                 numCalibPoints = 9;
@@ -426,14 +425,20 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         ITI.AddInitializationMethod(() =>
         {
             // Leave calibration mode once the user has confirmed all points
-            if(!SpoofGazeWithMouse)
-                ScreenBasedCalibration.LeaveCalibrationMode();
+            // Collects eye tracking data at the current calibration point, computes the calibration settings, and applies them to the eye tracker.
+            if (!SpoofGazeWithMouse)
+            {
+                CalibrationResult = ScreenBasedCalibration.ComputeAndApply();
+                CollectSamplePoints();
+            }
+        });
+
+        ITI.SpecifyTermination(() => true, FinishTrial, ()=>
+        {
             
             // Destroy remaining results on the experimenter display at the end of the trial
             DestroyChildren(ResultContainer);
         });
-
-        ITI.SpecifyTermination(() => true, FinishTrial);
 
     }
 
@@ -552,7 +557,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     public void DetermineCollectDataStatus(NormalizedPoint2D point)
     {
         CalibrationStatus status = ScreenBasedCalibration.CollectData(point);
-        
+        Debug.Log("STATUS: " + status.ToString());
         if (status.Equals(CalibrationStatus.Success))
         {
             // Done calibrating the point if successful
@@ -584,10 +589,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private void CollectSamplePoints()
     {
         Tobii.Research.CalibrationPoint calibPoint = null;
-        
         foreach (var Calib in CalibrationResult.CalibrationPoints)
         {
-            if (Calib.PositionOnDisplayArea.ToVector2() == currentNormPoint.ToVector2())
+            if (Calib.PositionOnDisplayArea.ToVector2() == calibPointsADCS[calibNum].ToVector2())
                 calibPoint = Calib;
         }
         if (calibPoint == null)
@@ -603,11 +607,15 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 // Record the positions of the Left and Right eye for each sample of the calibration point 
                 Vector2 leftSamplePos = (Vector2)CoordinateConverter.GetScreenPixel(sample.LeftEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
                 Vector2 rightSamplePos = (Vector2)CoordinateConverter.GetScreenPixel(sample.RightEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
-
                 LeftSamples.Add(leftSamplePos);
                 RightSamples.Add(rightSamplePos);
 
             }
+
+            CreateSampleLines(LeftSamples, RightSamples, (Vector2)CoordinateConverter.GetScreenPixel(calibPointsADCS[calibNum].ToVector2(), "screenadcs", 60f));
+            LeftSamples.Clear();
+            RightSamples.Clear();
+
         }
     }
 
@@ -652,7 +660,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         currentADCSTarget = calibPointsADCS[calibNum]; // get calib coordinates in screen ADCS space
 
         currentScreenPixelTarget = (Vector2)CoordinateConverter.GetScreenPixel(currentADCSTarget.ToVector2(), "screenadcs", 60); // get calib coordinates in Screen space
-        Debug.Log("#CURRENT screen Pixel TARGET: " + currentScreenPixelTarget.ToString());
 
         CalibCircle.CircleGO.GetComponent<RectTransform>().anchoredPosition = currentScreenPixelTarget;
         CalibCircle.CircleGO.SetActive(true);
@@ -706,7 +713,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         if (EyeTracker == null)
             EyeTracker = TobiiEyeTrackerController.Instance.EyeTracker;
         if (ScreenBasedCalibration == null)
-            ScreenBasedCalibration = new ScreenBasedCalibration(IEyeTracker);
+            ScreenBasedCalibration = TobiiEyeTrackerController.Instance.ScreenBasedCalibration;
         if (DisplayArea == null)
             DisplayArea = TobiiEyeTrackerController.Instance.DisplayArea;
     }

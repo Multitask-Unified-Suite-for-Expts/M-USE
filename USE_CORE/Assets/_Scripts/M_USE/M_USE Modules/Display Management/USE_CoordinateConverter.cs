@@ -240,8 +240,6 @@ public class USE_CoordinateConverter
     {
         ScreenPixel = screenADCS * ScreenDetails.PixelResolution;
         ScreenPixel = new Vector2(((Vector2)ScreenPixel).x, ScreenDetails.PixelResolution.y - ((Vector2)ScreenPixel).y);
-        Debug.Log($"#SCREEN PIXEL: {ScreenPixel} SCREEN ADCS: {screenADCS}");
-
         ScreenCm = ScreenPixel * screenCmPerPixel;
         MonitorPixel = ScreenCmToMonitorPixel(ScreenCm);
         return MonitorPixel;

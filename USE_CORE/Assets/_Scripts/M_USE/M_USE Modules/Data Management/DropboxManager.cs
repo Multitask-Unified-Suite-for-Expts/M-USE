@@ -1,35 +1,79 @@
+using Dropbox.Api;
+using System.Threading.Tasks;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
-//using Dropbox.Api;
-
+using System;
+using UnityEngine;
+using UnityEngine.UI;
+using USE_States;
+using System.Collections;
+using System.Collections.Generic;
+using Dropbox.Api.Files;
+using UnityEditor.PackageManager;
 
 public class DropboxManager
 {
-    //private DropboxClient client;
+    public static DropboxClient Client;
 
-    //public async Task Authenticate()
-    //{
-    //    string accessToken = "sl.BfH-WGNDemLKhSWWuYW1p5eMMs1NDKOxfmZMmUgElpJf9joEcNpzgK1HqFUFpNSre4amJNxCDchV96U30zWZEzPXnNT_ukh55l0A9ZnD9xdEbNH9e8Zx4_27lcr0u1sFuSCJvM0";
+    public static string SessionFolderPath;
 
-    //    var config = new DropboxClientConfig("MUSE_TestData");
-    //    client = new DropboxClient(accessToken, config);
-    //}
 
-    //public async Task WriteFilesToDropbox()
-    //{
-    //    string folderPath = "/Apps/MUSE_TestData/";
+    public DropboxManager()
+    {
+        SessionFolderPath = "/Session_Data_" + DateTime.Now.ToString("MMddyy_HHmmss");
+    }
 
-    //    // Write the file contents
-    //    string fileContent = "TEST CONTENT FOR THE FILE!";
+    public async Task Authenticate()
+    {
+        string accessToken = "sl.BfIxNOA0Sfb1_ofI-QWwZovddNKvcIN7NAuiM6qZpx08FjvCTS9GXyn3VktAT46vmYivOeOJeUxWCI9-7cC9-7ddk-feoBtGswB2YrJj2U_yCWsGX1AwJsX-RiGgscWfvgEWdn0";
 
-    //    byte[] byteArray = Encoding.UTF8.GetBytes(fileContent);
-    //    using (var stream = new MemoryStream(byteArray))
-    //    {
-    //        var response = await client.Files.UploadAsync(
-    //            folderPath + "/TestFile1.txt",
-    //            Dropbox.Api.Files.WriteMode.Overwrite.Instance,
-    //            body: stream);
-    //    }
-    //}
+        var config = new DropboxClientConfig("MUSE_TestData");
+        Client = new DropboxClient(accessToken, config);
+    }
+
+    public async Task CreateFileWithColumnTitles(string fileName, string fileHeaders)
+    {
+        string filePath = SessionFolderPath + "/" + fileName;
+
+        byte[] byteArray = Encoding.UTF8.GetBytes(fileHeaders);
+        using (var stream = new MemoryStream(byteArray))
+        {
+            var response = await Client.Files.UploadAsync(filePath, WriteMode.Overwrite.Instance, body: stream);
+        }
+    }
+
+    public async Task AppendDataToExistingFile(string fileName, string rowData)
+    {
+        string filePath = SessionFolderPath + "/" + fileName;
+
+        try
+        {
+            var fileMetadata = await Client.Files.GetMetadataAsync(filePath);
+
+            var file = await Client.Files.DownloadAsync(filePath);
+            var existingContent = await file.GetContentAsStringAsync();
+
+            string updatedContent = existingContent + "\n" + rowData;
+
+            byte[] byteArray = Encoding.UTF8.GetBytes(updatedContent);
+            using (var stream = new MemoryStream(byteArray))
+            {
+                var response = await Client.Files.UploadAsync(filePath, WriteMode.Overwrite.Instance, body: stream);
+            }
+        }
+        catch (ApiException<GetMetadataError> ex)
+        {
+            string fileContent = rowData;
+
+            byte[] byteArray = Encoding.UTF8.GetBytes(fileContent);
+            using (var stream = new MemoryStream(byteArray))
+            {
+                var response = await Client.Files.UploadAsync(filePath, WriteMode.Overwrite.Instance, body: stream);
+            }
+        }
+    }
+
+
 }
+
+

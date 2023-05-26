@@ -150,7 +150,6 @@ namespace USE_UI
             EndTaskButtonGO.transform.localPosition += new Vector3(0, y, 0);
         }
 
-
         public void HandleEndTask()
         {
             if (TrialLevel != null)
@@ -259,6 +258,28 @@ namespace USE_UI
         public State SetActiveOnInitialization;
         public State SetInactiveOnTermination;
 
+        public void InitDebugger(Canvas parent, string text = null, State activeOnInit = null, State inactiveOnInit = null)
+        {
+            DebugTextGO = new GameObject("DebugText");
+            DebugTextGO.transform.SetParent(parent.transform);
+            DebugTextGO.transform.localScale = new Vector3(1, 1, 1);
+            DebugTextGO.transform.localPosition = Vector3.zero;
+
+            Rect = DebugTextGO.AddComponent<RectTransform>();
+            Rect.sizeDelta = new Vector2(800, 100);
+
+            DebugText = DebugTextGO.AddComponent<TextMeshProUGUI>();
+            DebugText.alignment = TextAlignmentOptions.Center;
+            DebugText.color = Color.black;
+            if (text != null)
+                DebugText.text = text;
+
+            if (activeOnInit != null && inactiveOnInit != null)
+                SetVisibilityOnOffStates(activeOnInit, inactiveOnInit);
+
+            DebugTextGO.SetActive(false);
+        }
+
         public void InitDebugger(Canvas parent, string text = null)
         {
             DebugTextGO = new GameObject("DebugText");
@@ -278,6 +299,44 @@ namespace USE_UI
             DebugTextGO.SetActive(false);
         }
 
+        public void InitDebugger(Canvas parent, Vector2 size, string text = null)
+        {
+            DebugTextGO = new GameObject("DebugText");
+            DebugTextGO.transform.SetParent(parent.transform);
+            DebugTextGO.transform.localScale = new Vector3(1, 1, 1);
+            DebugTextGO.transform.localPosition = Vector3.zero;
+
+            Rect = DebugTextGO.AddComponent<RectTransform>();
+            Rect.sizeDelta = new Vector2(size.x, size.y);
+
+            DebugText = DebugTextGO.AddComponent<TextMeshProUGUI>();
+            DebugText.alignment = TextAlignmentOptions.Center;
+            DebugText.color = Color.black;
+            if (text != null)
+                DebugText.text = text;
+
+            DebugTextGO.SetActive(false);
+        }
+
+        public void InitDebugger(Canvas parent, Vector2 size, Vector2 pos, string text = null)
+        {
+            DebugTextGO = new GameObject("DebugText");
+            DebugTextGO.transform.SetParent(parent.transform);
+            DebugTextGO.transform.localScale = new Vector3(1, 1, 1);
+            DebugTextGO.transform.localPosition = pos;
+
+            Rect = DebugTextGO.AddComponent<RectTransform>();
+            Rect.sizeDelta = new Vector2(size.x, size.y);
+
+            DebugText = DebugTextGO.AddComponent<TextMeshProUGUI>();
+            DebugText.alignment = TextAlignmentOptions.Center;
+            DebugText.color = Color.black;
+            if (text != null)
+                DebugText.text = text;
+
+            DebugTextGO.SetActive(false);
+        }
+
         public void SetDebugText(string text)
         {
             DebugText.text = text;
@@ -286,6 +345,11 @@ namespace USE_UI
         public void SetSize(Vector2 size)
         {
             Rect.sizeDelta = size;
+        }
+
+        public void SetTextColor(Color32 color)
+        {
+            DebugText.color = color;
         }
 
         public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)

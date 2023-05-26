@@ -795,8 +795,6 @@ MonoBehaviour:
   CameraMirrorTexture: {fileID: 0}
   DisplayController: {fileID: 0}
   TaskButtons: {fileID: 0}
-  InstructionsPrefab: {fileID: 7410627627245931914, guid: 5cac0106dc4a64a068e5d4a7d8de1d71,
-    type: 3}
   TaskSelection_Starfield: {fileID: 1391649313}
   TaskSelection_Header: {fileID: 1188617659}
   HumanVersionToggleButton: {fileID: 2071187616}
@@ -804,6 +802,8 @@ MonoBehaviour:
     type: 3}
   TaskSelectionCanvasGO: {fileID: 1551787081}
   ToggleAudioButton: {fileID: 854898248}
+  PauseIconGO: {fileID: 4912152549111720661, guid: eb40d053201ea458f875065b722e0a48,
+    type: 3}
   TaskSelection_HumanAudio: {fileID: 8300000, guid: d0692d04af800462aba5670b8485603c,
     type: 3}
   audioPlaybackSpot: 0

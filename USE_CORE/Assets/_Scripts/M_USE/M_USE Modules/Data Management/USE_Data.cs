@@ -185,8 +185,11 @@ namespace USE_Data
 		public bool DefineManually;
 
 
-        public bool SendDataToDropbox = false;
-        private DropboxManager dropboxManager;
+        public bool SendDataToDropbox;
+        private static DropboxManager dropboxManager;
+
+		public string FileHeaders;
+
 
 
         public void InitDataController(int cap = 100)
@@ -198,7 +201,6 @@ namespace USE_Data
 			heldDataLine = new List<string>();
 		}
 
-		//public virtual void Update()
 
 		void Start()
 		{
@@ -214,6 +216,14 @@ namespace USE_Data
 					OnStart();
 				}
 			}
+
+			#if (UNITY_WEBGL)
+				SendDataToDropbox = true;
+			#endif
+
+            if (SendDataToDropbox && storeData && dropboxManager == null)
+				SetupDropboxManager();
+
 		}
 
 		public void ManuallyDefine(int cap = 100)
@@ -579,38 +589,6 @@ namespace USE_Data
 
 		public event Action OnLogChanged;
 
-		/// <summary>
-		/// Appends current values of all Datums to data buffer.
-		/// </summary>
-		public void AppendData()
-		{
-			if (storeData && Time.frameCount > frameChecker)
-			{
-				string[] currentVals = new string[data.Count];
-				for (int i = 0; i < data.Count; i++)
-				{
-					currentVals[i] = data[i].ValueAsString;
-				}
-				if (!updateDataNextFrame)
-				{
-					dataBuffer.Add(String.Join("\t", currentVals));
-					if (dataBuffer.Count == capacity)
-					{
-						WriteData();
-					}
-				}
-				else if (dataToUpdateNextFrame.Count > 0)
-				{
-					heldDataLine = currentVals.ToList();
-					updateDataNextFrame = true;
-				}
-				frameChecker = Time.frameCount;
-			}
-			if (OnLogChanged != null)
-			{
-				OnLogChanged();
-			}
-		}
 
         public void CreateSQLTable(string databaseAddress)
         {
@@ -625,6 +603,34 @@ namespace USE_Data
             //if not, CreateSQLTable()
         }
 
+		/// <summary>
+		/// Appends current values of all Datums to data buffer.
+		/// </summary>
+		public void AppendData()
+		{
+			if (storeData && Time.frameCount > frameChecker)
+			{
+				string[] currentVals = new string[data.Count];
+				for (int i = 0; i < data.Count; i++)
+					currentVals[i] = data[i].ValueAsString;
+				
+				if (!updateDataNextFrame)
+				{
+					dataBuffer.Add(String.Join("\t", currentVals));
+					if (dataBuffer.Count == capacity)
+						WriteData();
+				}
+				else if (dataToUpdateNextFrame.Count > 0)
+				{
+					heldDataLine = currentVals.ToList();
+					updateDataNextFrame = true;
+				}
+				frameChecker = Time.frameCount;
+			}
+			if (OnLogChanged != null)
+				OnLogChanged();
+		}
+
         /// <summary>
         /// Creates a new data file.
         /// </summary>
@@ -632,19 +638,30 @@ namespace USE_Data
 		{
 			if (storeData && fileName != null)
 			{
-				Directory.CreateDirectory(folderPath);
-				string titleString = "";
+				FileHeaders = "";
 				for (int i = 0; i < data.Count; i++)
 				{
 					if (i > 0)
-					{
-						titleString = titleString + "\t";
-					}
-					titleString = titleString + data[i].Name;
+						FileHeaders += "\t";
+					
+					FileHeaders += data[i].Name;
 				}
-				using (StreamWriter dataStream = File.CreateText(folderPath + Path.DirectorySeparatorChar + fileName))
+
+				if (SendDataToDropbox)
 				{
-					dataStream.Write(titleString);
+					string content = null;
+					if (dataBuffer.Count > 0)
+						content = String.Join("\n", dataBuffer.ToArray());
+
+					HandleDropbox(fileName, FileHeaders, content);
+				}
+				else
+				{
+					Directory.CreateDirectory(folderPath);
+					using (StreamWriter dataStream = File.CreateText(folderPath + Path.DirectorySeparatorChar + fileName))
+					{
+						dataStream.Write(FileHeaders);
+					}
 				}
 			}
 		}
@@ -656,26 +673,43 @@ namespace USE_Data
 		{
 			if (storeData && fileName != null && dataBuffer.Count > 0)
 			{
-				if (!updateDataNextFrame)
+				if (SendDataToDropbox)
 				{
-					using (StreamWriter dataStream = File.AppendText(folderPath + Path.DirectorySeparatorChar + fileName))
-					{
-						dataStream.Write("\n" + String.Join("\n", dataBuffer.ToArray()));
-					}
-					dataBuffer.Clear();
+					string content = String.Join("\n", dataBuffer.ToArray());
+					string headers = null;
+					if (FileHeaders.Length > 1)
+						headers = FileHeaders;
+					HandleDropbox(fileName, headers, content);
 				}
 				else
 				{
-					writeDataNextFrame = true;
+					if (!updateDataNextFrame)
+					{
+						using (StreamWriter dataStream = File.AppendText(folderPath + Path.DirectorySeparatorChar + fileName))
+						{
+							dataStream.Write("\n" + String.Join("\n", dataBuffer.ToArray()));
+						}
+						
+						dataBuffer.Clear();
+					}
+					else
+						writeDataNextFrame = true;
 				}
 			}
 		}
 
-        private async void HandleDropbox()
+		private async void SetupDropboxManager()
+		{
+			dropboxManager = new DropboxManager();
+			await dropboxManager.Authenticate();
+        }
+
+        private async void HandleDropbox(string fileName, string fileHeaders = null, string fileContent = null)
         {
-            //dropboxManager = new DropboxManager();
-            //await dropboxManager.Authenticate();
-            //await dropboxManager.WriteFilesToDropbox();
+			if(fileHeaders != null)
+				await dropboxManager.CreateFileWithColumnTitles(fileName, fileHeaders);
+			if(fileContent != null)
+				await dropboxManager.AppendDataToExistingFile(fileName, fileContent);
         }
 
 

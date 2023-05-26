@@ -92,6 +92,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public GameObject TaskSelectionCanvasGO;
 
         [HideInInspector] public UI_Debugger UI_Debugger;
+        [HideInInspector] public GameObject PauseIconGO;
 
 
 

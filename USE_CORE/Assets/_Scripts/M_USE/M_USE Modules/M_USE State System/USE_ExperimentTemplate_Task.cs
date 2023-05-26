@@ -229,7 +229,9 @@ namespace USE_ExperimentTemplate_Task
                 if(TrialLevel != null)
                 {
                     if(InputBroker.GetKeyUp(KeyCode.P)) //Pause Game:
+                    {
                         Time.timeScale = Time.timeScale == 1 ? 0 : 1;
+                    }
 
                     if (InputBroker.GetKeyUp(KeyCode.E)) //End Task
                     {

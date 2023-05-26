@@ -1,72 +1,115 @@
+using System.Collections.Generic;
 using UnityEngine;
 using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
-using USE_ExperimentTemplate_Classes;
-using USE_StimulusManagement;
 
 namespace WWW_2D_Namespace
 {
-    public class WWW_2D_TaskDef : TaskDef
-    {
-        //Already-existing fields (inherited from TaskDef)      
-        //public DateTime TaskStart_DateTime;
-        //public int TaskStart_Frame;
-        //public float TaskStart_UnityTime;
-        //public string TaskName;
-        //public string ExternalStimFolderPath;
-        //public string PrefabStimFolderPath;
-        //public string ExternalStimExtension;
-        //public List<string[]> FeatureNames;
-        //public string neutralPatternedColorName;
-        //public float? ExternalStimScale;
-    }
-
     public class WWW_2D_BlockDef : BlockDef
     {
-        //Already-existing fields (inherited from BlockDef)
-		//public int BlockCount;
-		//public TrialDef[] TrialDefs;
+        public string BlockName;
+        public string ContextName;
+        public int[] CorrectObjectTouchOrder;
+        public int[] nRepetitionsMinMax;
+        public int[] SearchStimsIndices;
+        public int[] DistractorStimsIndices;
+        public Vector3[] SearchStimsLocations;
+        public Vector3[] DistractorStimsLocations;
+        public int[] SliderGain;
+        public int[] SliderLoss;
+        public int SliderInitial;
+        public bool RandomizedLocations;
+        public string BlockEndType;
+        public float BlockEndThreshold;
+        public int BlockEndWindow;
+        public int NumPulses;
+        public int PulseSize;
+        public bool LeaveFeedbackOn;
+        public int ErrorThreshold;
+
+
+        public override void GenerateTrialDefsFromBlockDef()
+        {
+            //pick # of trials from minmax
+            int num = RandomNumGenerator.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
+            TrialDefs = new List<WWW_2D_TrialDef>().ConvertAll(x => (TrialDef)x);
+            for (int iTrial = 0; iTrial < num; iTrial++)
+            {
+                WWW_2D_TrialDef td = new WWW_2D_TrialDef();
+                td.BlockName = BlockName;
+                td.ContextName = ContextName;
+                td.CorrectObjectTouchOrder = CorrectObjectTouchOrder;
+                td.SearchStimsIndices = SearchStimsIndices;
+                td.DistractorStimsIndices = DistractorStimsIndices;
+                td.SearchStimsLocations = SearchStimsLocations;
+                td.DistractorStimsLocations = DistractorStimsLocations;
+                td.RandomizedLocations = RandomizedLocations;
+                td.SliderGain = SliderGain;
+                td.SliderLoss = SliderLoss;
+                td.SliderInitial = SliderInitial;
+                td.BlockEndType = BlockEndType;
+                td.BlockEndThreshold = BlockEndThreshold;
+                td.BlockEndWindow = BlockEndWindow;
+                td.NumPulses = NumPulses;
+                td.PulseSize = PulseSize;
+                td.LeaveFeedbackOn = LeaveFeedbackOn;
+                td.ErrorThreshold = ErrorThreshold;
+                td.MaxTrials = num;
+                TrialDefs.Add(td);
+            }
+        }
     }
 
     public class WWW_2D_TrialDef : TrialDef
     {
-        //Already-existing fields (inherited from TrialDef)
-		//public int BlockCount, TrialCountInBlock, TrialCountInTask;
-		//public TrialStims TrialStims;
+        public string BlockName;
+        public string ContextName;
+        //ObjectNums refers to items in a list of objects to be loaded from resources folder
+
+        //CorrectObjectOrder is an array of same length as ObjectNums, refers to elements in that array (e.g. {2 3 1 4} refers to 2nd object specified in ObjectNums
+        public int[] CorrectObjectTouchOrder;
+        public int[] nRepetitionsMinMax;
+        public int[] SearchStimsIndices;
+        public int[] DistractorStimsIndices;
+        public Vector3[] SearchStimsLocations;
+        public Vector3[] DistractorStimsLocations;
+        public bool RandomizedLocations;
+        public int[] SliderGain;
+        public int[] SliderLoss;
+        public int SliderInitial;
+        public string BlockEndType;
+        public float BlockEndThreshold;
+        public int BlockEndWindow;
+        public int NumPulses;
+        public int PulseSize;
+        public bool LeaveFeedbackOn;
+        public int ErrorThreshold;
+
+        public int MaxTrials;
     }
 
     public class WWW_2D_StimDef : StimDef
     {
-        //Already-existing fields (inherited from Stim  Def)
-        //public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)
-        //public string StimName;
-        //public string StimPath;
-        //public string PrefabPath;
-        //public string ExternalFilePath;
-        //public string StimFolderPath;
-        //public string StimExtension;
-        //public int StimCode; //optional, for analysis purposes
-        //public string StimID;
-        //public int[] StimDimVals; //only if this is parametrically-defined stim
-        //[System.NonSerialized] //public GameObject StimGameObject; //not in config, generated at runtime
-        //public Vector3 StimLocation; //to be passed in explicitly if trial doesn't include location method
-        //public Vector3 StimRotation; //to be passed in explicitly if trial doesn't include location method
-        //public Vector2 StimScreenLocation; //screen position calculated during trial
-        //public float? StimScale;
-        //public bool StimLocationSet;
-        //public bool StimRotationSet;
-        //public float StimTrialPositiveFbProb; //set to -1 if stim is irrelevant
-        //public float StimTrialRewardMag; //set to -1 if stim is irrelevant
-        //public TokenReward[] TokenRewards;
-        //public int[] BaseTokenGain;
-        //public int[] BaseTokenLoss;
-        //public int TimesUsedInBlock;
-        //public bool isRelevant;
-        //public bool TriggersSonication;
-        //public State SetActiveOnInitialization;
-        //public State SetInactiveOnTermination;
-    
+        //relates to variables to evaluate stimuli
+        public bool IsCurrentTarget;
+        public bool IsDistractor;
     }
+
+    public class WWW_2D_TaskDef : TaskDef
+    {
+        // string ContextExternalFilePath;
+        Vector3 ButtonPosition;
+        Vector3 ButtonScale;
+        Vector3 FBSquarePosition;
+        Vector3 FBSquareScale;
+        Vector3 ButtonColor;
+        string ButtonText;
+        string ContextExternalFilePath;
+        bool StimFacingCamera;
+        string ShadowType;
+        bool NeutralITI;
+    }
+    //Any other custom classes useful for the functioning of the task could be included in this namespace.
 }

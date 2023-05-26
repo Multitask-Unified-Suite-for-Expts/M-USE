@@ -6,6 +6,8 @@ using UnityEngine.UI;
 using Cursor = UnityEngine.Cursor;
 using ConfigDynamicUI;
 using USE_ExperimenterDisplay;
+using UnityEngine.SceneManagement;
+using USE_ExperimentTemplate_Task;
 
 public class HotKeyPanel : ExperimenterDisplayPanel
 {
@@ -170,7 +172,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     //SceneManager.LoadScene(SceneManager.GetActiveScene().name); //Doesn't work. Will load task again but without TaskSelection scene.
                 }
             };
-            //HotKeyList.Add(toggleDisplays);
+            HotKeyList.Add(toggleDisplays);
 
             // Remove Cursor Hot Key
             HotKey toggleCursor = new HotKey
@@ -381,6 +383,31 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 }
             };
             HotKeyList.Add(longReward);
+
+            //Calibrate HotKey:
+            HotKey calibrate = new HotKey
+            {
+                keyDescription = "Tab",
+                actionName = "Calibrate",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.Tab),
+                hotKeyAction = () =>
+                {
+                    // Pause the Trial Level
+                    HkPanel.TrialLevel.AbortCode = 1;
+
+                    //Go to end of trial:
+                    HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial")); //Finish Trial change to
+
+                    //Deactivate Controllers (so that tokenbar not still on screen):
+                    GameObject controllers = GameObject.Find("Controllers");
+                    if (controllers != null)
+                        controllers.SetActive(false);
+                    HkPanel.TrialLevel.LoadGazeCalibration = true;
+                  
+
+                }
+            };
+            HotKeyList.Add(calibrate);
 
             //InstructionsButton visibility HotKey:
             //HotKey instructionsButton = new HotKey

@@ -17,7 +17,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public ContinuousRecognition_TrialDef currentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
     public ContinuousRecognition_TaskLevel currentTask => GetTaskLevel<ContinuousRecognition_TaskLevel>();
 
-    [HideInInspector] public USE_StartButton USE_StartButton;
     [HideInInspector] public GameObject StartButton;
 
     public TextMeshProUGUI TimerText;
@@ -123,8 +122,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    USE_StartButton = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
-                    StartButton = USE_StartButton.StartButtonGO;
+                    //StartButton = USE_StartButton.CreateStartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                    StartButton = USE_StartButton.CreateStartButton(CR_CanvasGO.GetComponent<Canvas>());
                     USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
 
@@ -176,7 +175,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
 
         });
-
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
         {

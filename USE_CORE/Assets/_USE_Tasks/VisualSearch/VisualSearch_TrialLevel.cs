@@ -15,7 +15,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     public VisualSearch_TaskLevel CurrentTaskLevel => GetTaskLevel<VisualSearch_TaskLevel>();
 
     public GameObject VS_CanvasGO;
-    public USE_StartButton USE_StartButton;
     
     // Stimuli Variables
     private StimGroup tStim;
@@ -126,8 +125,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    USE_StartButton = new USE_StartButton(VS_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                    StartButton = USE_StartButton.StartButtonGO;
+                    StartButton = USE_StartButton.CreateSquareStartButton(VS_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                     USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }

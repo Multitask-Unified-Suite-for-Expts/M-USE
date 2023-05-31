@@ -18,7 +18,6 @@ using WorkingMemory_Namespace;
 public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 {
     private GameObject taskCanvas;
-    public USE_StartButton USE_StartButton;
     public USE_StartButton USE_FBSquare;
     public FeatureUncertaintyWM_TrialDef CurrentTrialDef => GetCurrentTrialDef<FeatureUncertaintyWM_TrialDef>();
     public FeatureUncertaintyWM_TaskLevel CurrentTaskLevel => GetTaskLevel<FeatureUncertaintyWM_TaskLevel>();
@@ -169,8 +168,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
             if (StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(taskCanvas.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                StartButton = USE_StartButton.StartButtonGO;
+                StartButton = USE_StartButton.CreateSquareStartButton(taskCanvas.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
             }
 

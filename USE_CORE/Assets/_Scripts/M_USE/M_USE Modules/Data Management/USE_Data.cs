@@ -217,11 +217,11 @@ namespace USE_Data
 				}
 			}
 
-			#if (UNITY_WEBGL)
-				SendDataToDropbox = true;
-			#endif
+#if (UNITY_WEBGL)
+			SendDataToDropbox = true;
+#endif
 
-            if (SendDataToDropbox && storeData && dropboxManager == null)
+			if (SendDataToDropbox && storeData && dropboxManager == null)
 				SetupDropboxManager();
 
 		}

@@ -118,6 +118,7 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public bool IsHuman;
 
         [HideInInspector] public HumanStartPanel HumanStartPanel;
+        [HideInInspector] public USE_StartButton USE_StartButton;
 
         [HideInInspector] public event EventHandler TaskSkyboxSet_Event;
 
@@ -577,6 +578,7 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.ConfigUiVariables = ConfigUiVariables;
             TrialLevel.IsHuman = IsHuman;
             TrialLevel.HumanStartPanel = HumanStartPanel;
+            TrialLevel.USE_StartButton = USE_StartButton;
             TrialLevel.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
 
             TrialLevel.DefineTrialLevel();

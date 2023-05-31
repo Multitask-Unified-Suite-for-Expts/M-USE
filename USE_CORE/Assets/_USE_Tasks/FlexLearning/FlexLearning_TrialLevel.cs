@@ -16,7 +16,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     public FlexLearning_TaskLevel CurrentTaskLevel => GetTaskLevel<FlexLearning_TaskLevel>();
 
     public GameObject FL_CanvasGO;
-    public USE_StartButton USE_StartButton;
 
     // Block End Variables
     public List<int> runningAcc;
@@ -130,8 +129,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    USE_StartButton = new USE_StartButton(FL_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                    StartButton = USE_StartButton.StartButtonGO;
+                    StartButton = USE_StartButton.CreateSquareStartButton(FL_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                     USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }

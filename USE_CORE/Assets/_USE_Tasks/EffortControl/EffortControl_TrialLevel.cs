@@ -27,7 +27,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     public Vector3 OriginalStartButtonPosition;
 
     public GameObject EC_CanvasGO;
-    public USE_StartButton USE_StartButton;
 
     [HideInInspector] public bool MacMainDisplayBuild;
 
@@ -145,8 +144,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    USE_StartButton = new USE_StartButton(EC_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
-                    StartButton = USE_StartButton.StartButtonGO;
+                    StartButton = USE_StartButton.CreateSquareStartButton(EC_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
                     USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }

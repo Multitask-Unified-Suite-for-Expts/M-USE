@@ -89,6 +89,7 @@ namespace USE_ExperimentTemplate_Trial
 
         [HideInInspector] public bool IsHuman;
         [HideInInspector] public HumanStartPanel HumanStartPanel;
+        [HideInInspector] public USE_StartButton USE_StartButton;
         [HideInInspector] public GameObject TaskSelectionCanvasGO;
 
         [HideInInspector] public UI_Debugger UI_Debugger;

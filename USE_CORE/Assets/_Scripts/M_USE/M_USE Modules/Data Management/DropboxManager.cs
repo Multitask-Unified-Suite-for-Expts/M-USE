@@ -9,7 +9,7 @@ using USE_States;
 using System.Collections;
 using System.Collections.Generic;
 using Dropbox.Api.Files;
-using UnityEditor.PackageManager;
+
 
 public class DropboxManager
 {
@@ -25,7 +25,7 @@ public class DropboxManager
 
     public async Task Authenticate()
     {
-        string accessToken = "sl.BfIxNOA0Sfb1_ofI-QWwZovddNKvcIN7NAuiM6qZpx08FjvCTS9GXyn3VktAT46vmYivOeOJeUxWCI9-7cC9-7ddk-feoBtGswB2YrJj2U_yCWsGX1AwJsX-RiGgscWfvgEWdn0";
+        string accessToken = "sl.BfV4K8VNUdApddSdelhFCauQ2L94I7WnhciQzX1pkCGjp3yI3OwWsSBRvZgqoiqRreokac40DHUKu5Q3Wp630TAmMDfo6juU1hHQ500rdfUp82Gpu5eyiVUiAUDsW7K_zFIlCIQ";
 
         var config = new DropboxClientConfig("MUSE_TestData");
         Client = new DropboxClient(accessToken, config);
@@ -48,7 +48,7 @@ public class DropboxManager
 
         try
         {
-            var fileMetadata = await Client.Files.GetMetadataAsync(filePath);
+            Metadata fileMetadata = await Client.Files.GetMetadataAsync(filePath);
 
             var file = await Client.Files.DownloadAsync(filePath);
             var existingContent = await file.GetContentAsStringAsync();

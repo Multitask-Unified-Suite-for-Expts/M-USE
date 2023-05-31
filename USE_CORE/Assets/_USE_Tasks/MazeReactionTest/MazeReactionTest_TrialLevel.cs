@@ -19,7 +19,6 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
 {
     // Generic Task Variables
     public GameObject MRT_CanvasGO;
-    public USE_StartButton USE_StartButton;
     private GameObject StartButton;
     
     // Block Ending Variable
@@ -168,8 +167,7 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.LoadTextMaze();
             if(StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(MRT_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                StartButton = USE_StartButton.StartButtonGO;
+                StartButton = USE_StartButton.CreateSquareStartButton(MRT_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
             }
 

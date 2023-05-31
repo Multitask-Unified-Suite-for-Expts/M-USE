@@ -22,7 +22,6 @@ using VisualSearch_Namespace;
 public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 {
     public GameObject WWW_CanvasGO;
-    public USE_StartButton USE_StartButton;
 
     //This variable is required for most tasks, and is defined as the output of the GetCurrentTrialDef function 
     public WhatWhenWhere_TrialDef CurrentTrialDef => GetCurrentTrialDef<WhatWhenWhere_TrialDef>();
@@ -187,8 +186,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    USE_StartButton = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                    StartButton = USE_StartButton.StartButtonGO;
+                    StartButton = USE_StartButton.CreateSquareStartButton(WWW_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                     USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }

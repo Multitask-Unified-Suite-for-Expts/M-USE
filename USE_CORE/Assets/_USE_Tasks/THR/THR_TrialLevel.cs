@@ -8,6 +8,7 @@ using USE_States;
 using THR_Namespace;
 using UnityEngine.EventSystems;
 using USE_UI;
+using UnityEngine.UI;
 
 public class THR_TrialLevel : ControlLevel_Trial_Template
 {
@@ -16,13 +17,12 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public string MaterialFilePath;
 
-    [HideInInspector] public USE_StartButton USE_SquareGO;
+    private USE_StartButton USE_Square;
     private GameObject SquareGO;
-    [HideInInspector] public USE_StartButton USE_BackdropGO;
+    private USE_Backdrop USE_Backdrop;
     private GameObject BackdropGO;
 
     private GameObject StartButton;
-    private USE_StartButton USE_StartButton;
 
     private Renderer BackdropRenderer;
     private Renderer SquareRenderer;
@@ -97,6 +97,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public float TouchFeedbackDuration;
 
+    [HideInInspector] public SpriteRenderer PlayIconRenderer;
+    [HideInInspector] public Color32 PlayIconOriginalColor;
+
 
 
     public override void DefineControlLevel()
@@ -115,11 +118,12 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             if(SquareGO == null)
             {
-                USE_BackdropGO = new USE_StartButton(THR_CanvasGO.GetComponent<Canvas>(), "BackdropGO", new Color32(209, 190, 168, 255), true);
-                BackdropGO = USE_BackdropGO.StartButtonGO;
-
-                USE_SquareGO = new USE_StartButton(THR_CanvasGO.GetComponent<Canvas>(), "SquareGO");
-                SquareGO = USE_SquareGO.StartButtonGO;
+                USE_Backdrop = new USE_Backdrop();
+                BackdropGO = USE_Backdrop.CreateBackdrop(THR_CanvasGO.GetComponent<Canvas>(), "BackdropGO", new Color32(209, 190, 168, 255));
+                USE_Square = new USE_StartButton();
+                SquareGO = USE_Square.CreateStartButton(THR_CanvasGO.GetComponent<Canvas>(), "SquareGO", false);
+                PlayIconRenderer = SquareGO.transform.Find("PlayIcon").gameObject.GetComponent<SpriteRenderer>();
+                PlayIconOriginalColor = PlayIconRenderer.color;
             }
 
             if(StartButton == null && IsHuman)
@@ -163,17 +167,19 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => true && IsHuman && ShotgunHandler.LastSuccessfulSelectionMatches(StartButton) || StartButton == null, StartWithBlueSquare ? BlueSquare : WhiteSquare);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
-            if (IsHuman && TrialCount_InTask == 0)
-                HumanStartPanel.HumanStartPanelGO.SetActive(false);
-
+            PlayIconRenderer.gameObject.SetActive(true);
             TrialStartTime = Time.time;
         });
+
 
         //WHITE SQUARE state ------------------------------------------------------------------------------------------------------------------------
         WhiteSquare.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes();
-            USE_SquareGO.SetButtonColor(Color.white);
+            if (IsHuman && TrialCount_InTask == 0)
+                HumanStartPanel.HumanStartPanelGO.SetActive(false);
+            PlayIconRenderer.color = Color.white;
+            USE_Square.SetButtonColor(Color.white);
             SquareGO.SetActive(true);
             BackdropGO.SetActive(true);
             WhiteStartTime = Time.time;
@@ -189,7 +195,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 GameObject hitGO = InputBroker.RaycastBoth(InputBroker.mousePosition);
                 if(hitGO != null)
                 {
-                    if(hitGO.name == "SquareGO")
+                    if (hitGO.name == "SquareGO")
                     {
                         WhiteSquareTouches_Trial++;
                         if (WhiteTimeoutTime == 0)
@@ -207,7 +213,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                             BackdropTouchTime = Time.time;
                             WhiteStartTime += currentTrial.TimeoutDuration;
                             Input.ResetInputAxes();
-                            StartCoroutine(USE_BackdropGO.GratedFlash(BackdropStripesTexture, currentTrial.TimeoutDuration));
+                            StartCoroutine(USE_Backdrop.GratedFlash(BackdropStripesTexture, currentTrial.TimeoutDuration));
                             BackdropTouches++;
                             BackdropTouches_Trial++;
                         }
@@ -226,7 +232,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         BlueSquare.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes();
-            USE_SquareGO.SetButtonColor(LightBlueColor);
+            USE_Square.SetButtonColor(LightBlueColor);
+            PlayIconRenderer.color = PlayIconOriginalColor;
             SquareGO.SetActive(true);
             BackdropGO.SetActive(true);
             BlueStartTime = Time.time;
@@ -244,7 +251,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 GameObject hitGO = InputBroker.RaycastBoth(InputBroker.mousePosition);
                 if(hitGO != null)
                 {
-                    if (hitGO.name == "SquareGO" && !USE_SquareGO.IsGrating && !USE_BackdropGO.IsGrating)
+                    if (hitGO.name == "SquareGO" && !USE_Square.IsGrating && !USE_Backdrop.IsGrating)
                     {
                         if (!BlueSquareTouched)
                         {
@@ -254,16 +261,18 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
                         if (currentTrial.RewardTouch)
                         {
-                            USE_SquareGO.SetButtonColor(Color.gray);
+                            PlayIconRenderer.color = Color.gray;
+                            USE_Square.SetButtonColor(Color.gray);
                             BlueSquareTouches_Trial++;
                             GiveTouchReward = true;
                             RewardEarnedTime = Time.time;
                         }
                         else
-                            USE_SquareGO.SetButtonColor(Color.blue);
+                            USE_Square.SetButtonColor(Color.blue);
+                        
 
                     }
-                    if (hitGO.name == "BackdropGO" && !BlueSquareTouched && !USE_BackdropGO.IsGrating && !USE_SquareGO.IsGrating)
+                    if (hitGO.name == "BackdropGO" && !BlueSquareTouched && !USE_Backdrop.IsGrating && !USE_Square.IsGrating)
                     {
                         if (BackdropTouches == 0)
                         {
@@ -271,7 +280,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                             BackdropTouchTime = Time.time;
                             BlueStartTime += currentTrial.TimeoutDuration; //add extra second so it doesn't go straight to white after grating
                             Input.ResetInputAxes();
-                            StartCoroutine(USE_BackdropGO.GratedFlash(BackdropStripesTexture, currentTrial.TimeoutDuration));
+                            StartCoroutine(USE_Backdrop.GratedFlash(BackdropStripesTexture, currentTrial.TimeoutDuration));
                             BackdropTouches++;
                             BackdropTouches_Trial++;
                         }
@@ -315,7 +324,10 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                         //The Else (Greater than MaxDuration) is handled below where I auto stop them for holding for max dur. 
                     }
                     else
-                        USE_SquareGO.SetButtonColor(Color.gray);
+                    {
+                        PlayIconRenderer.color = Color.gray;
+                        USE_Square.SetButtonColor(Color.gray);
+                    }
 
                     BlueSquareReleased = true;
                 }
@@ -337,8 +349,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 BackdropTouchTime = 0;
             }
         });
-        BlueSquare.SpecifyTermination(() => (Time.time - BlueStartTime > currentTrial.BlueSquareDuration) && !InputBroker.GetMouseButton(0) && !BlueSquareReleased && !USE_BackdropGO.IsGrating && !USE_SquareGO.IsGrating, WhiteSquare); //Go back to white square if bluesquare time lapses (and they aren't already holding down)
-        BlueSquare.SpecifyTermination(() => (BlueSquareReleased && !USE_BackdropGO.IsGrating && !USE_SquareGO.IsGrating) || MovedOutside || HeldTooLong || HeldTooShort || TimeRanOut || GiveTouchReward, Feedback); //If rewarding touch and they touched, or click the square and release, or run out of time. 
+        BlueSquare.SpecifyTermination(() => (Time.time - BlueStartTime > currentTrial.BlueSquareDuration) && !InputBroker.GetMouseButton(0) && !BlueSquareReleased && !USE_Backdrop.IsGrating && !USE_Square.IsGrating, WhiteSquare); //Go back to white square if bluesquare time lapses (and they aren't already holding down)
+        BlueSquare.SpecifyTermination(() => (BlueSquareReleased && !USE_Backdrop.IsGrating && !USE_Square.IsGrating) || MovedOutside || HeldTooLong || HeldTooShort || TimeRanOut || GiveTouchReward, Feedback); //If rewarding touch and they touched, or click the square and release, or run out of time. 
         //FEEDBACK state ----------------------------------------------------------------------------------------------------------------------------
         Feedback.AddInitializationMethod(() =>
         {
@@ -350,19 +362,23 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             {
                 AudioFBController.Play("Positive");
                 if (GiveReleaseReward)
-                    USE_SquareGO.SetButtonColor(Color.gray);
+                {
+                    PlayIconRenderer.color = Color.gray;
+                    USE_Square.SetButtonColor(Color.gray);
+                }
             }
             else //held too long, held too short, moved outside, or timeRanOut
             {
                 AudioFBController.Play("Negative");
                 if (currentTrial.ShowNegFb)
                 {
+                    PlayIconRenderer.gameObject.SetActive(false);
                     if (HeldTooShort)
-                        StartCoroutine(USE_SquareGO.GratedFlash(HeldTooShortTexture, currentTrial.TimeoutDuration, SquareGO));
+                        StartCoroutine(USE_Square.GratedFlash(HeldTooShortTexture, currentTrial.TimeoutDuration, SquareGO));
                     else if (HeldTooLong)
-                        StartCoroutine(USE_SquareGO.GratedFlash(HeldTooLongTexture, currentTrial.TimeoutDuration, SquareGO));
+                        StartCoroutine(USE_Square.GratedFlash(HeldTooLongTexture, currentTrial.TimeoutDuration, SquareGO));
                     else if (MovedOutside)
-                        StartCoroutine(USE_SquareGO.GratedFlash(BackdropStripesTexture, currentTrial.TimeoutDuration, SquareGO));
+                        StartCoroutine(USE_Square.GratedFlash(BackdropStripesTexture, currentTrial.TimeoutDuration, SquareGO));
                 }
             }
             AudioPlayed = true;
@@ -379,7 +395,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         });
         Feedback.SpecifyTermination(() => GiveReward, Reward); //If they got right, syncbox isn't null, and timer is met.
         Feedback.SpecifyTermination(() => (GiveTouchReward || GiveReleaseReward) && SyncBoxController == null, ITI); //If they got right, syncbox IS null, don't make them wait.  
-        Feedback.SpecifyTermination(() => !GiveTouchReward && !GiveReleaseReward && AudioPlayed && !USE_BackdropGO.IsGrating && !USE_SquareGO.IsGrating, ITI); //if didn't get right, so no pulses. 
+        Feedback.SpecifyTermination(() => !GiveTouchReward && !GiveReleaseReward && AudioPlayed && !USE_Backdrop.IsGrating && !USE_Square.IsGrating, ITI); //if didn't get right, so no pulses. 
 
         Reward.AddInitializationMethod(() =>
         {
@@ -509,7 +525,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         if (currentTrial.RandomSquareSize && !ConfigValuesChangedInPrevTrial)
         {
             int randomSize = Random.Range(currentTrial.SquareSizeMin, currentTrial.SquareSizeMax);
-            USE_SquareGO.SetButtonSize(randomSize);
+            USE_Square.SetButtonSize(randomSize);
             ConfigUiVariables.get<ConfigNumber>("squareSize").SetValue(randomSize);
             currentTrial.SquareSize = randomSize;
         }

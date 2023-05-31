@@ -11,6 +11,7 @@ using USE_UI;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Trial;
+using static UnityEngine.ParticleSystem;
 
 namespace USE_UI
 {
@@ -109,7 +110,6 @@ namespace USE_UI
 
             StartButtonGO = HumanStartPanelGO.transform.Find("StartButton").gameObject;
             InitialStartButtonPosition = StartButtonGO.transform.localPosition;
-            StartButtonGO.AddComponent<HoverEffect>();
 
             HumanBackgroundGO = HumanStartPanelGO.transform.Find("HumanBackground").gameObject;
             HumanBackgroundGO.transform.localPosition = Task_HumanBackgroundPos_Dict[taskName];
@@ -187,7 +187,6 @@ namespace USE_UI
 
                 if(trialCountInBlock > 0) //Mid block - show only playbutton and instructions
                 {
-                    //TitleTextGO.GetComponent<TextMeshProUGUI>().text = "Trial " + (trialCountInBlock + 1);
                     TitleTextGO.SetActive(false);
                     StartButtonGO.transform.localPosition = new Vector3(InitialStartButtonPosition.x, InitialStartButtonPosition.y + 75f, InitialStartButtonPosition.z);
                 }
@@ -243,8 +242,6 @@ namespace USE_UI
             HumanPanelOn = false;
             EventCodeManager.SendCodeImmediate(SessionEventCodes["HumanStartPanelOff"]);
         }
-
-
 
     }
 
@@ -381,9 +378,54 @@ namespace USE_UI
         //    UI_Debugger.SetVisibilityOnOffStates(ChooseBalloon, ChooseBalloon);
     }
 
+    public class USE_Backdrop
+    {
+        public GameObject BackdropGO;
+        public Color Color = new Color(0, 0, 128, 255);
+        public Image Image;
+        private Color32 originalColor;
+        private Sprite originalSprite;
+        public bool IsGrating = false;
+
+        //For a fullscreen backdrop (for THR):
+        public GameObject CreateBackdrop(Canvas parent, string name, Color32 color)
+        {
+            BackdropGO = new GameObject(name);
+            Image = BackdropGO.AddComponent<Image>();
+            BackdropGO.transform.SetParent(parent.transform, false);
+            Image.rectTransform.anchoredPosition = Vector2.zero;
+            RectTransform canvasRect = parent.GetComponent<RectTransform>();
+            Image.rectTransform.sizeDelta = new Vector2(canvasRect.rect.width, canvasRect.rect.height);
+            Image.color = color;
+
+            BackdropGO.transform.localPosition = Vector3.zero;
+            BackdropGO.SetActive(false);
+
+            return BackdropGO;
+        }
+
+        public IEnumerator GratedFlash(Texture2D newTexture, float duration, GameObject goToDeactivate = null)
+        {
+            IsGrating = true;
+            originalColor = Image.color;
+            originalSprite = Image.sprite;
+            Image.color = new Color32(255, 153, 153, 255);
+            Image.sprite = Sprite.Create(newTexture, new Rect(0, 0, newTexture.width, newTexture.height), Vector2.one / 2f);
+
+            yield return new WaitForSeconds(duration);
+
+            Image.color = originalColor;
+            Image.sprite = originalSprite;
+            IsGrating = false;
+
+            if (goToDeactivate != null)
+                goToDeactivate.SetActive(false);
+        }
+    }
+
     public class USE_StartButton : MonoBehaviour
 	{
-		public GameObject StartButtonGO;
+        public GameObject StartButtonGO;
 		public float ButtonSize = 10f;
 		public Color ButtonColor = new Color(0, 0, 128, 255);
 		public Image Image;
@@ -392,14 +434,39 @@ namespace USE_UI
         private Sprite originalSprite;
         public bool IsGrating = false;
 
+        public static GameObject StartButtonPrefab;
+
         public State SetActiveOnInitialization;
         public State SetInactiveOnTermination;
 
 
-        //--------------------------Constructors----------------------------
+        //---------------------Play Button Prefab Start Buttons--------------
+        public GameObject CreateStartButton(Canvas parent)
+        {
+            StartButtonGO = Instantiate(StartButtonPrefab);
+            StartButtonGO.name = "StartButton";
+            StartButtonGO.transform.SetParent(parent.transform, false);
+            StartButtonGO.transform.localPosition = Vector3.zero;
+            Image = StartButtonGO.GetComponent<Image>();
+            StartButtonGO.SetActive(false);
+            return StartButtonGO;
+        }
 
-        //Main Constructor:
-        public USE_StartButton(Canvas parent, Vector3 localPos, float size)
+        public GameObject CreateStartButton(Canvas parent, string name, bool hover) //Used for THR
+        {
+            StartButtonGO = Instantiate(StartButtonPrefab);
+            StartButtonGO.name = name;
+            StartButtonGO.transform.SetParent(parent.transform, false);
+            StartButtonGO.transform.localPosition = Vector3.zero;
+            Image = StartButtonGO.GetComponent<Image>();
+            if(!hover)
+                Destroy(StartButtonGO.gameObject.GetComponent<HoverEffect>());
+            StartButtonGO.SetActive(false);
+            return StartButtonGO;
+        }
+
+        //--------------------------Square Start Buttons----------------------------
+        public GameObject CreateSquareStartButton(Canvas parent, Vector3 localPos, float size)
         {
             LocalPosition = localPos;
             ButtonSize = size;
@@ -412,9 +479,11 @@ namespace USE_UI
             StartButtonGO.transform.localPosition = LocalPosition;
             StartButtonGO.SetActive(false);
 
+            return StartButtonGO;
+
         }
 
-        public USE_StartButton(Canvas parent)
+        public GameObject CreateSquareStartButton(Canvas parent)
         {
             StartButtonGO = new GameObject("StartButton");
             Image = StartButtonGO.AddComponent<Image>();
@@ -424,40 +493,11 @@ namespace USE_UI
             Image.color = ButtonColor;
             StartButtonGO.transform.localPosition = LocalPosition;
             StartButtonGO.SetActive(false);
+
+            return StartButtonGO;
         }
 
-        //Used by THR:
-        public USE_StartButton(Canvas parent, string name)
-		{
-			StartButtonGO = new GameObject(name);
-			Image = StartButtonGO.AddComponent<Image>();
-            StartButtonGO.transform.SetParent(parent.transform, false);
-            Image.rectTransform.anchoredPosition = Vector2.zero;
-            Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
-			Image.color = ButtonColor;
-            StartButtonGO.transform.localPosition = LocalPosition;
-            StartButtonGO.SetActive(false);
-        }
 
-        //For a fullscreen backdrop (for THR):
-        public USE_StartButton(Canvas parent, string name, Color32 color, bool fullScreen)
-        {
-            StartButtonGO = new GameObject(name);
-            Image = StartButtonGO.AddComponent<Image>();
-            StartButtonGO.transform.SetParent(parent.transform, false);
-            Image.rectTransform.anchoredPosition = Vector2.zero;
-            RectTransform canvasRect = parent.GetComponent<RectTransform>();
-            if (fullScreen)
-                Image.rectTransform.sizeDelta = new Vector2(canvasRect.rect.width, canvasRect.rect.height);
-            else
-                Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
-            Image.color = color;
-            Image.canvas.sortingOrder = -1;
-            StartButtonGO.transform.localPosition = LocalPosition;
-            StartButtonGO.SetActive(false);
-        }
-
-        //----------------------------------------------------------------------
         public void SetButtonPosition(Vector3 pos)
         {
             StartButtonGO.transform.localPosition = pos;
@@ -519,6 +559,7 @@ namespace USE_UI
         }
 
     }
+
 
 
 

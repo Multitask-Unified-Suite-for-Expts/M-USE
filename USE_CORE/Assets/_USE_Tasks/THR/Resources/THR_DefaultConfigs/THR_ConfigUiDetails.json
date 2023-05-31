@@ -22,9 +22,9 @@
 		},
 
 		"squareSize": {
-			"value": 50,
-			"min": 20,
-			"max": 65,
+			"value": 10,
+			"min": 5,
+			"max": 15,
 			"precision": 0,
 			"isRange": true,
 			"name": "SquareSize",

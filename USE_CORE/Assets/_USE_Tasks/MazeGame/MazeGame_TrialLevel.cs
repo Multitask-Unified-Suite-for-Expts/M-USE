@@ -17,7 +17,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 {
     // Generic Task Variables
     public GameObject MG_CanvasGO;
-    public USE_StartButton USE_StartButton;
     private GameObject StartButton;
 
     // Block Ending Variable
@@ -196,8 +195,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    USE_StartButton = new USE_StartButton(MG_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                    StartButton = USE_StartButton.StartButtonGO;
+                    StartButton = USE_StartButton.CreateSquareStartButton(MG_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                     USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }

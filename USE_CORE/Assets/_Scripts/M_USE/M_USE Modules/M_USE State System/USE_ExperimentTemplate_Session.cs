@@ -104,6 +104,7 @@ namespace USE_ExperimentTemplate_Session
         public GameObject HumanStartPanelPrefab;
         public GameObject TaskSelectionCanvasGO;
         public GameObject ToggleAudioButton;
+        public GameObject StartButtonPrefabGO;
         public AudioClip TaskSelection_HumanAudio;
 
         [HideInInspector] public float audioPlaybackSpot;
@@ -111,6 +112,7 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public AudioSource TaskSelection_AudioSource;
 
         [HideInInspector] public HumanStartPanel HumanStartPanel;
+        [HideInInspector] public USE_StartButton USE_StartButton;
 
 
         public override void LoadSettings()
@@ -118,6 +120,9 @@ namespace USE_ExperimentTemplate_Session
             HumanStartPanel = gameObject.AddComponent<HumanStartPanel>();
             HumanStartPanel.SetSessionLevel(this);
             HumanStartPanel.HumanStartPanelPrefab = HumanStartPanelPrefab;
+
+            USE_StartButton = gameObject.AddComponent<USE_StartButton>();
+            USE_StartButton.StartButtonPrefab = StartButtonPrefabGO;
 
             //If using default configs, read in the default Session/EventCode/Display Configs and write them to persistant data path:
             if (UseDefaultConfigs)
@@ -992,6 +997,7 @@ namespace USE_ExperimentTemplate_Session
         ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
             tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
+            tl.USE_StartButton = USE_StartButton;
             tl.HumanStartPanel = HumanStartPanel;
             tl.IsHuman = IsHuman;
             tl.DisplayController = DisplayController;

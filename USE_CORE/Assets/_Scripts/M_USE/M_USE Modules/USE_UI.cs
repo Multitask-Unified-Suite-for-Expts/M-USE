@@ -12,6 +12,7 @@ using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Trial;
 using static UnityEngine.ParticleSystem;
+using UnityEngine.InputSystem.HID;
 
 namespace USE_UI
 {
@@ -20,6 +21,8 @@ namespace USE_UI
         [HideInInspector] public GameObject HumanStartPanelGO;
 
         [HideInInspector] public GameObject StartButtonGO;
+
+        [HideInInspector] public GameObject StartButtonContainerGO;
 
         [HideInInspector] public GameObject InstructionsButtonGO;
         [HideInInspector] public GameObject InstructionsGO;
@@ -79,9 +82,9 @@ namespace USE_UI
         [HideInInspector] public static EventCodeManager EventCodeManager;
         [HideInInspector] public static Dictionary<string, EventCode> SessionEventCodes;
 
-        public ControlLevel_Session_Template SessionLevel;
-        public ControlLevel_Task_Template TaskLevel;
-        public ControlLevel_Trial_Template TrialLevel;
+        [HideInInspector] public ControlLevel_Session_Template SessionLevel;
+        [HideInInspector] public ControlLevel_Task_Template TaskLevel;
+        [HideInInspector] public ControlLevel_Trial_Template TrialLevel;
 
 
 
@@ -108,8 +111,9 @@ namespace USE_UI
             TaskName = TaskNamesDict[taskName];
             TitleTextGO.GetComponent<TextMeshProUGUI>().text = TaskName;
 
-            StartButtonGO = HumanStartPanelGO.transform.Find("StartButton").gameObject;
-            InitialStartButtonPosition = StartButtonGO.transform.localPosition;
+            StartButtonContainerGO = HumanStartPanelGO.transform.Find("StartButtonContainer").gameObject;
+            InitialStartButtonPosition = StartButtonContainerGO.transform.localPosition;
+            StartButtonGO = StartButtonContainerGO.transform.Find("StartButton").gameObject;
 
             HumanBackgroundGO = HumanStartPanelGO.transform.Find("HumanBackground").gameObject;
             HumanBackgroundGO.transform.localPosition = Task_HumanBackgroundPos_Dict[taskName];
@@ -188,11 +192,11 @@ namespace USE_UI
                 if(trialCountInBlock > 0) //Mid block - show only playbutton and instructions
                 {
                     TitleTextGO.SetActive(false);
-                    StartButtonGO.transform.localPosition = new Vector3(InitialStartButtonPosition.x, InitialStartButtonPosition.y + 75f, InitialStartButtonPosition.z);
+                    StartButtonContainerGO.transform.localPosition = new Vector3(InitialStartButtonPosition.x, InitialStartButtonPosition.y + 75f, InitialStartButtonPosition.z);
                 }
                 else if(trialCountInBlock == 0 && trialCountInTask != 0) //"New Game" - show text, playbutton, instructions
                 {
-                    StartButtonGO.transform.localPosition = InitialStartButtonPosition;
+                    StartButtonContainerGO.transform.localPosition = InitialStartButtonPosition;
                     TitleTextGO.GetComponent<TextMeshProUGUI>().text = "Play Again?";
                     TitleTextGO.SetActive(true);
                 }
@@ -380,12 +384,12 @@ namespace USE_UI
 
     public class USE_Backdrop
     {
-        public GameObject BackdropGO;
-        public Color Color = new Color(0, 0, 128, 255);
-        public Image Image;
-        private Color32 originalColor;
-        private Sprite originalSprite;
-        public bool IsGrating = false;
+        [HideInInspector] public GameObject BackdropGO;
+        [HideInInspector] public Color Color = new Color(0, 0, 128, 255);
+        [HideInInspector] public Image Image;
+        [HideInInspector] private Color32 originalColor;
+        [HideInInspector] private Sprite originalSprite;
+        [HideInInspector] public bool IsGrating = false;
 
         //For a fullscreen backdrop (for THR):
         public GameObject CreateBackdrop(Canvas parent, string name, Color32 color)
@@ -424,17 +428,18 @@ namespace USE_UI
     }
 
     public class USE_StartButton : MonoBehaviour
-	{
-        public GameObject StartButtonGO;
-		public float ButtonSize = 10f;
-		public Color ButtonColor = new Color(0, 0, 128, 255);
-		public Image Image;
-        public Vector3 LocalPosition = new Vector3(0, 0, 0);
-        private Color32 originalColor;
-        private Sprite originalSprite;
-        public bool IsGrating = false;
+    {
+        [HideInInspector] public GameObject StartButtonGO;
+        [HideInInspector] public Dictionary<GameObject, Color> StartButtonChildrenAndColors;
+        [HideInInspector] public float ButtonSize = 10f;
+        [HideInInspector] public Color ButtonColor = new Color(0, 0, 128, 255);
+        [HideInInspector] public Image Image;
+        [HideInInspector] public Vector3 LocalPosition = new Vector3(0, 0, 0);
+        [HideInInspector] private Color32 originalColor;
+        [HideInInspector] private Sprite originalSprite;
+        [HideInInspector] public bool IsGrating = false;
 
-        public static GameObject StartButtonPrefab;
+        [HideInInspector] public static GameObject StartButtonPrefab;
 
         public State SetActiveOnInitialization;
         public State SetInactiveOnTermination;
@@ -452,6 +457,7 @@ namespace USE_UI
             return StartButtonGO;
         }
 
+        //NEED TO FIX FOR THR
         public GameObject CreateStartButton(Canvas parent, string name, bool hover) //Used for THR
         {
             StartButtonGO = Instantiate(StartButtonPrefab);
@@ -459,13 +465,24 @@ namespace USE_UI
             StartButtonGO.transform.SetParent(parent.transform, false);
             StartButtonGO.transform.localPosition = Vector3.zero;
             Image = StartButtonGO.GetComponent<Image>();
-            if(!hover)
+            if (!hover)
                 Destroy(StartButtonGO.gameObject.GetComponent<HoverEffect>());
+
+            StartButtonChildrenAndColors = new Dictionary<GameObject, Color>(); //maybe this a dic
+            foreach (Transform child in StartButtonGO.transform)
+            {
+                Image img = child.GetComponent<Image>();
+                if(img != null) //most have image component
+                    StartButtonChildrenAndColors.Add(child.gameObject, child.gameObject.GetComponent<Image>().color);
+                else //PlayIcon has a sprite renderer component
+                    StartButtonChildrenAndColors.Add(child.gameObject, child.gameObject.GetComponent<SpriteRenderer>().color);
+            }
+
             StartButtonGO.SetActive(false);
             return StartButtonGO;
         }
 
-        //--------------------------Square Start Buttons----------------------------
+        //--------------------------Old Square Start Buttons----------------------------
         public GameObject CreateSquareStartButton(Canvas parent, Vector3 localPos, float size)
         {
             LocalPosition = localPos;
@@ -503,9 +520,56 @@ namespace USE_UI
             StartButtonGO.transform.localPosition = pos;
         }
 
+        public void SetColorOfStartButtonChildren(Color color)
+        {
+            foreach (var kvp in StartButtonChildrenAndColors)
+            {
+                Image img = kvp.Key.GetComponent<Image>();
+                if (img != null) //most have image component
+                    img.color = color;
+                else //PlayIcon has a sprite renderer component
+                {
+                    SpriteRenderer rendy = kvp.Key.GetComponent<SpriteRenderer>();
+                    if (rendy != null)
+                        rendy.color = color;
+
+                }
+            }
+        }
+
+        public void ResetColorOfStartButtonChildren()
+        {
+            foreach (var kvp in StartButtonChildrenAndColors)
+            {
+                Image img = kvp.Key.GetComponent<Image>();
+                if (img != null) //most have image component
+                    img.color = kvp.Value;
+                else //PlayIcon has a sprite renderer component
+                {
+                    SpriteRenderer rendy = kvp.Key.GetComponent<SpriteRenderer>();
+                    if (rendy != null)
+                        rendy.color = kvp.Value;
+
+                }
+            }
+        }
+
+        public void ChangeGameObjectsColor(GameObject go, Color color)
+        {
+            Image img = go.GetComponent<Image>();
+            if (img != null) //most have image component
+                img.color = color;
+            else //PlayIcon has a sprite renderer component
+            {
+                SpriteRenderer rendy = go.GetComponent<SpriteRenderer>();
+                if (rendy != null)
+                    rendy.color = color;
+            }
+        }
+
         public void SetButtonColor(Color color)
 		{
-			ButtonColor = color;
+            ButtonColor = color;
 			Image.color = ButtonColor;
 		}
 
@@ -540,18 +604,22 @@ namespace USE_UI
         }
 
 
-        public IEnumerator GratedFlash(Texture2D newTexture, float duration, GameObject goToDeactivate = null)
+        public IEnumerator GratedFlash(GameObject go, Texture2D newTexture, float duration, GameObject goToDeactivate = null)
         {
+            Image image = go.GetComponent<Image>();
+            if (image == null)
+                Debug.LogError($"TRYING TO GRATE THE IMAGE OF A GAMEOBJECT ({go.name}) THAT DOESNT HAVE AN IMAGE COMPONENT!");
+
             IsGrating = true;
-            originalColor = Image.color;
-            originalSprite = Image.sprite;
-            Image.color = new Color32(255, 153, 153, 255);
-            Image.sprite = Sprite.Create(newTexture, new Rect(0, 0, newTexture.width, newTexture.height), Vector2.one / 2f);
+            originalColor = image.color;
+            originalSprite = image.sprite;
+            image.color = new Color32(255, 153, 153, 255);
+            image.sprite = Sprite.Create(newTexture, new Rect(0, 0, newTexture.width, newTexture.height), Vector2.one / 2f);
 
             yield return new WaitForSeconds(duration);
 
-            Image.color = originalColor;
-            Image.sprite = originalSprite;
+            image.color = originalColor;
+            image.sprite = originalSprite;
             IsGrating = false;
 
             if(goToDeactivate != null)
@@ -575,17 +643,20 @@ namespace USE_UI
         private Sprite originalSprite;
         public State SetActiveOnInitialization;
         public State SetInactiveOnTermination;
+
         public USE_Circle(Canvas parent, Vector2 circleLocation, float size, string name)
         {
             CircleGO = new GameObject(name, typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UICircle));
             CircleGO.AddComponent<CanvasRenderer>();
             CircleGO.transform.SetParent(parent.transform, false);
             CircleGO.transform.localScale = new Vector3(size, size, size);
-            CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().Fill = true;
-            CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().Thickness = 2f;
-            CircleGO.GetComponent<RectTransform>().anchorMin = Vector2.zero;
-            CircleGO.GetComponent<RectTransform>().anchorMax = Vector2.zero;
-            CircleGO.GetComponent<RectTransform>().anchoredPosition = circleLocation;
+            UnityEngine.UI.Extensions.UICircle circle = CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>();
+            circle.Fill = true;
+            circle.Thickness = 2f;
+            RectTransform rect = CircleGO.GetComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.zero;
+            rect.anchoredPosition = circleLocation;
             CircleGO.SetActive(false);
         }
         //----------------------------------------------------------------------

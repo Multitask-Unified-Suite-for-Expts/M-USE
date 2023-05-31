@@ -114,9 +114,13 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public HumanStartPanel HumanStartPanel;
         [HideInInspector] public USE_StartButton USE_StartButton;
 
+        [HideInInspector] public ServerManager ServerManager;
+
 
         public override void LoadSettings()
         {
+            //CreateServerManager();
+
             HumanStartPanel = gameObject.AddComponent<HumanStartPanel>();
             HumanStartPanel.SetSessionLevel(this);
             HumanStartPanel.HumanStartPanelPrefab = HumanStartPanelPrefab;
@@ -880,6 +884,27 @@ namespace USE_ExperimentTemplate_Session
                 CurrentTask = null;
             }
         }
+
+
+
+        public void CreateServerManager()
+        {
+            //ServerManager = new ServerManager("/var/www/html/DATA/");
+            //ServerManager = new ServerManager("../DATA/");
+            ServerManager = new ServerManager("/Users/ntraczewski/Desktop");
+            //ServerManager = new ServerManager("/var/www/html/DATA/");
+
+
+            StartCoroutine(WriteTextFileCoroutine(ServerManager, "FileName1", "Test content! woo!"));
+        }
+
+        private IEnumerator WriteTextFileCoroutine(ServerManager serverManager, string fileName, string fileContent)
+        {
+            yield return serverManager.WriteTextFileAsync(fileName, fileContent);
+            Debug.Log("WriteTextFileAsync completed.");
+        }
+
+
 
         public void HandleToggleAudioButtonClick()
         {

@@ -22,9 +22,9 @@
 		},
 
 		"squareSize": {
-			"value": 10,
-			"min": 5,
-			"max": 15,
+			"value": 2.0,
+			"min": 1.0,
+			"max": 2.0,
 			"precision": 0,
 			"isRange": true,
 			"name": "SquareSize",
@@ -42,9 +42,9 @@
 		},
 
 		"positionY": {
-			"value": 0,
-			"min": -200,
-			"max": 200,
+			"value": 125,
+			"min": -75,
+			"max": 350,
 			"precision": 0,
 			"isRange": true,
 			"name": "PositionY",
@@ -52,7 +52,7 @@
 		}, 
 
 		"whiteSquareDuration": {
-			"value": 0.2,
+			"value": 0.15,
 			"min": 0.1,
 			"max": 3,
 			"precision": 0,

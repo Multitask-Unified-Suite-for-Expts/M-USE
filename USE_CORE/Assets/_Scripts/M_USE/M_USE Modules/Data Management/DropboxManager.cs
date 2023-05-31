@@ -25,7 +25,7 @@ public class DropboxManager
 
     public async Task Authenticate()
     {
-        string accessToken = "sl.BfV4K8VNUdApddSdelhFCauQ2L94I7WnhciQzX1pkCGjp3yI3OwWsSBRvZgqoiqRreokac40DHUKu5Q3Wp630TAmMDfo6juU1hHQ500rdfUp82Gpu5eyiVUiAUDsW7K_zFIlCIQ";
+        string accessToken = "sl.BfeZEwSuQOB8iBZxLN48WybyhNN462FRM2e_vkV6ezkwWsxsQFmvzBaQa3r0t-pMXqnezQES0GV0Ys3ge_u4uIIc0o8PHi34bSsEbYsrViAGKUngDVVN0s07CZaBmX3-IBcQmPE";
 
         var config = new DropboxClientConfig("MUSE_TestData");
         Client = new DropboxClient(accessToken, config);

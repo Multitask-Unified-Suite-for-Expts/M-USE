@@ -175,6 +175,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
 
         });
+        InitTrial.AddUpdateMethod(() =>
+        {
+            GameObject hit = InputBroker.RaycastBoth(InputBroker.mousePosition);
+            if (hit != null)
+                Debug.Log("HIT: " + hit.name);
+        });
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
         {

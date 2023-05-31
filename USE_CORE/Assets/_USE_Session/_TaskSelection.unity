@@ -651,7 +651,7 @@ MonoBehaviour:
     type: 3}
   TaskSelectionCanvasGO: {fileID: 1551787081}
   ToggleAudioButton: {fileID: 907834252290271150}
-  StartButtonPrefabGO: {fileID: 6571229421201078138, guid: 7229ee8c46bfe49598bcc6f80886497f,
+  StartButtonPrefabGO: {fileID: 6810560367943004968, guid: 2e385ec78c77a46cc91c52da9fce59b9,
     type: 3}
   TaskSelection_HumanAudio: {fileID: 8300000, guid: d0692d04af800462aba5670b8485603c,
     type: 3}

@@ -404,14 +404,15 @@ MonoBehaviour:
   UseDefaultConfigs: 0
   IsHuman: 0
   HumanStartPanel: {fileID: 0}
+  USE_StartButton: {fileID: 0}
   TaskSelectionCanvasGO: {fileID: 0}
+  UI_Debugger: {fileID: 0}
+  PauseIconGO: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
   THR_BackdropTexture: {fileID: 0}
   MaterialFilePath: 
-  USE_SquareGO: {fileID: 0}
-  USE_BackdropGO: {fileID: 0}
   THR_CanvasGO: {fileID: 186084661}
   ButtonPosition: {x: 0, y: 0, z: 0}
   ButtonScale: 0
@@ -512,6 +513,7 @@ MonoBehaviour:
   TaskSelectionCanvasGO: {fileID: 0}
   IsHuman: 0
   HumanStartPanel: {fileID: 0}
+  USE_StartButton: {fileID: 0}
   CurrentBlockString: 
   BlockStringsAdded: 0
   TrialsCompleted_Task: 0

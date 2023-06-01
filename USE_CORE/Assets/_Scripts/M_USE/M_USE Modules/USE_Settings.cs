@@ -51,6 +51,9 @@ namespace USE_Settings
 				if (typeString.ToLower() == "monitordetails")
 				{
 					AddSetting(key, JsonConvert.DeserializeObject<USE_DisplayManagement.MonitorDetails>(stringValue));
+				}if (typeString.ToLower() == "screendetails")
+				{
+					AddSetting(key, JsonConvert.DeserializeObject<USE_DisplayManagement.ScreenDetails>(stringValue));
 				}
 				// else if (typeString.ToLower() == "exptparameters")
 				// {
@@ -208,6 +211,7 @@ namespace USE_Settings
 			{ "SortedList<string,List<string>>", typeof(SortedList<string, List<string>>) },
 			{ "List<string[]>", typeof(List<string[]>) },
 			{ "MonitorDetails", typeof(USE_DisplayManagement.MonitorDetails) },
+			{ "ScreenDetails", typeof(USE_DisplayManagement.ScreenDetails) },
 			// { "ExptParameters", typeof(FLU_Common_Namespace.ExptParameters) },
 			// { "BlockDef[]", typeof(FLU_Common_Namespace.BlockDef[]) },
 			{ "Vector3", typeof(Vector3) },
@@ -953,6 +957,7 @@ namespace USE_Settings
 			{"SortedList<string,List<string>>",typeof(SortedList<string,List<string>>)},
 			{"List<string[]>",typeof(List<string[]>)},
 			{"MonitorDetails",typeof(USE_DisplayManagement.MonitorDetails)},
+			{"ScreenDetails",typeof(USE_DisplayManagement.ScreenDetails)},
 			// {"ExptParameters",typeof(FLU_Common_Namespace.ExptParameters)},
 			// {"BlockDef[]", typeof(FLU_Common_Namespace.BlockDef[])},
 			{"Vector3", typeof(Vector3) },

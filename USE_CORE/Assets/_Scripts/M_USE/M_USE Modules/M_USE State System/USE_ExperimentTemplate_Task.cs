@@ -144,14 +144,20 @@ namespace USE_ExperimentTemplate_Task
             {
                 ReadSettingsFiles(verifyOnly);
                 ProcessCustomSettingsFiles();
+                FindStims();
             }
             else
             {
                 BlockDefs = new BlockDef[1];
-                BlockDefs[0].GenerateTrialDefsFromBlockDef();
+                for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+                {
+                    if (BlockDefs[iBlock] == null)
+                        BlockDefs[iBlock] = new BlockDef();
+                    BlockDefs[iBlock].BlockCount = iBlock;
+                    BlockDefs[iBlock].GenerateTrialDefsFromBlockDef();
+                }
             }
             
-            FindStims();
             if (verifyOnly) return;
 
             SetupTask = new State("SetupTask");
@@ -186,6 +192,7 @@ namespace USE_ExperimentTemplate_Task
                 #endif
 
                 TaskCam.gameObject.SetActive(true);
+
                 if (EyeTrackerActive && TobiiEyeTrackerController.Instance.TrackBoxGuideGO != null)
                 {
                     TobiiEyeTrackerController.Instance.TrackBoxGuideGO.GetComponent<TrackBoxGuide>()._CanvasTrackBox.GetComponent<Canvas>().worldCamera = TaskCam;

@@ -11,17 +11,6 @@ namespace GazeCalibration_Namespace
 {
     public class GazeCalibration_TaskDef : TaskDef
     {
-        //Already-existing fields (inherited from TaskDef)      
-        //public DateTime TaskStart_DateTime;
-        //public int TaskStart_Frame;
-        //public float TaskStart_UnityTime;
-        //public string TaskName;
-        //public string ExternalStimFolderPath;
-        //public string PrefabStimFolderPath;
-        //public string ExternalStimExtension;
-        //public List<string[]> FeatureNames;
-        //public string neutralPatternedColorName;
-        //public float? ExternalStimScale;
     }
 
     public class GazeCalibration_BlockDef : BlockDef

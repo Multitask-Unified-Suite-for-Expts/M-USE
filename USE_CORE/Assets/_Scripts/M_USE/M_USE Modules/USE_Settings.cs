@@ -51,7 +51,8 @@ namespace USE_Settings
 				if (typeString.ToLower() == "monitordetails")
 				{
 					AddSetting(key, JsonConvert.DeserializeObject<USE_DisplayManagement.MonitorDetails>(stringValue));
-				}if (typeString.ToLower() == "screendetails")
+				}
+				else if (typeString.ToLower() == "screendetails")
 				{
 					AddSetting(key, JsonConvert.DeserializeObject<USE_DisplayManagement.ScreenDetails>(stringValue));
 				}

@@ -122,8 +122,12 @@ namespace USE_ExperimentTemplate_Trial
             Delay = new State("Delay");
             Calibration = new State("Calibration");
             
-            CalibrationTaskLevel = GameObject.Find("Calibration").GetComponent<GazeCalibration_TaskLevel>();
-            Calibration.AddChildLevel(CalibrationTaskLevel);
+            if (EyeTrackerActive)
+            {
+                CalibrationTaskLevel = GameObject.Find("Calibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
+                Calibration.AddChildLevel(CalibrationTaskLevel);
+            }
+            
             AddActiveStates(new List<State> { SetupTrial, FinishTrial, Delay, Calibration });
             // A state that just waits for some time;
             Delay.AddTimer(() => DelayDuration, () => StateAfterDelay);
@@ -198,11 +202,12 @@ namespace USE_ExperimentTemplate_Trial
             });
 
             FinishTrial.AddInitializationMethod(() => EventCodeManager.SendCodeImmediate(SessionEventCodes["FinishTrialStarts"]));
+            FinishTrial.SpecifyTermination(() => runCalibration, () => Calibration);
+
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => CheckForcedBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Count - 1, SetupTrial);
             FinishTrial.SpecifyTermination(() => TrialCount_InBlock == TrialDefs.Count - 1, () => null);
-            FinishTrial.SpecifyTermination(() => runCalibration, () => Calibration);
 
             FinishTrial.AddUniversalTerminationMethod(() =>
             {
@@ -228,6 +233,8 @@ namespace USE_ExperimentTemplate_Trial
             {
                 CalibrationTaskLevel.DefineTaskLevel(false, false);
                 CalibrationTaskLevel.TaskCam = Camera.main;
+                CalibrationTaskLevel.ConfigName = "GazeCalibration";
+
                 GameObject.Find("Calibration_Canvas").SetActive(true);
 
                 CalibrationTaskLevel.CurrentBlockDef.GenerateTrialDefsFromBlockDef();

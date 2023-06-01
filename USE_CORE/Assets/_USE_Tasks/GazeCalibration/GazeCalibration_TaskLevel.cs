@@ -27,33 +27,13 @@ public class GazeCalibration_TaskLevel : ControlLevel_Task_Template
         });
     }
     private void SetSettings()
-    {
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            gcTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else gcTL.ContextExternalFilePath = ContextExternalFilePath;
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "SpoofGazeWithMouse"))
-            gcTL.SpoofGazeWithMouse = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "SpoofGazeWithMouse");
-        else
-            Debug.LogError("Spoof Gaze With Mouse setting not defined in the TaskDef. Default set to TRUE.");
-       
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "CalibPointsInset"))
-            gcTL.CalibPointsInset = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "CalibPointsInset");
-        else
-            Debug.LogError("Calib Points Inset setting not defined in the TaskDef. Default set to [0.1, 0.1]");
-        
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MaxCircleScale"))
-            gcTL.MaxCircleScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "MaxCircleScale");
-        else Debug.LogError("Max Circle Scale setting not defined in the TaskDef");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MinCircleScale"))
-            gcTL.MinCircleScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "MinCircleScale");
-        else Debug.LogError("Min Circle Scale setting not defined in the TaskDef");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShrinkDuration"))
-            gcTL.ShrinkDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ShrinkDuration");
-        else Debug.LogError("Shrink Duration setting not defined in the TaskDef");
+    {   
+        gcTL.ContextExternalFilePath = ContextExternalFilePath;
+        gcTL.SpoofGazeWithMouse = false;
+        gcTL.CalibPointsInset = new float[] {0.15f, 0.15f};
+        gcTL.MaxCircleScale = 0.75f;
+        gcTL.MinCircleScale = 0.15f;
+        gcTL.ShrinkDuration = 1.5f;
     }
 
 }

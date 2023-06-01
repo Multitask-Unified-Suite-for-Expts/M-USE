@@ -470,7 +470,7 @@ namespace USE_ExperimentTemplate_Session
                         loadScene.completed += (_) =>
                         {
                             SessionSettings.Save();
-                            SceneLoaded(configName, true);
+                            SceneLoaded(configName, true, true);
                             SessionSettings.Restore();
                             SceneManager.UnloadSceneAsync(taskName);
                             SceneLoading = false;
@@ -750,7 +750,7 @@ namespace USE_ExperimentTemplate_Session
                 loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
                 loadScene.completed += (_) =>
                 {
-                    SceneLoaded(selectedConfigName, false);
+                    SceneLoaded(selectedConfigName, false, true);
                     CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigName == selectedConfigName);
                     //selectedConfigsList.Add(CurrentTask.ConfigName);  
                 };
@@ -1006,7 +1006,7 @@ namespace USE_ExperimentTemplate_Session
             return path;
         }
 
-        ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
+        public ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly, bool loadSettings)
         {
             tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
             tl.HumanStartPanel = HumanStartPanel;
@@ -1112,8 +1112,7 @@ namespace USE_ExperimentTemplate_Session
                 tl.SonicationActive = (bool)SessionSettings.Get("Session", "SonicationActive");
             else
                 tl.SonicationActive = false;
-
-            tl.DefineTaskLevel(verifyOnly, true);
+            tl.DefineTaskLevel(verifyOnly, loadSettings);
             // ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
             // Don't add task to ActiveTaskLevels if we're just verifying
             if (verifyOnly) return tl;
@@ -1134,25 +1133,25 @@ namespace USE_ExperimentTemplate_Session
         // 	SceneLoading = false;
         // }
 
-        void SceneLoaded(string configName, bool verifyOnly)
+        void SceneLoaded(string configName, bool verifyOnly, bool loadSettings)
         {
             string taskName = (string)TaskMappings[configName];
             var methodInfo = GetType().GetMethod(nameof(this.PrepareTaskLevel));
             
             Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
             MethodInfo prepareTaskLevel = methodInfo.MakeGenericMethod(new Type[] { taskType });
-            prepareTaskLevel.Invoke(this, new object[] { configName, verifyOnly });
+            prepareTaskLevel.Invoke(this, new object[] { configName, verifyOnly, loadSettings });
             // TaskSceneLoaded = true;
             SceneLoading = false;
         }
 
-        public void PrepareTaskLevel<T>(string configName, bool verifyOnly) where T : ControlLevel_Task_Template
+        public void PrepareTaskLevel<T>(string configName, bool verifyOnly, bool loadSettings) where T : ControlLevel_Task_Template
         {
             string taskName = (string)TaskMappings[configName];
             ControlLevel_Task_Template tl = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
             tl.UseDefaultConfigs = UseDefaultConfigs;
             tl.ConfigName = configName;
-            tl = PopulateTaskLevel(tl, verifyOnly);
+            tl = PopulateTaskLevel(tl, verifyOnly, loadSettings);
             if (tl.TaskCam == null)
                 tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
             tl.TaskCam.gameObject.SetActive(false);

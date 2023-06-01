@@ -461,7 +461,6 @@ namespace USE_UI
     public class USE_Backdrop
     {
         [HideInInspector] public GameObject BackdropGO;
-        [HideInInspector] public Color Color = new Color(0, 0, 128, 255);
         [HideInInspector] public Image Image;
         [HideInInspector] private Color32 originalColor;
         [HideInInspector] private Sprite originalSprite;

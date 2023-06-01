@@ -20,12 +20,18 @@ public class DropboxManager
 
     public DropboxManager()
     {
-        SessionFolderPath = "/Session_Data_" + DateTime.Now.ToString("MMddyy_HHmmss");
+        SessionFolderPath = "/SessionData_" + DateTime.Now.ToString("MMddyy_HHmmss");
+        HandleAuthentication();
+    }
+
+    private async void HandleAuthentication()
+    {
+        await Authenticate();
     }
 
     public async Task Authenticate()
     {
-        string accessToken = "sl.BfeZEwSuQOB8iBZxLN48WybyhNN462FRM2e_vkV6ezkwWsxsQFmvzBaQa3r0t-pMXqnezQES0GV0Ys3ge_u4uIIc0o8PHi34bSsEbYsrViAGKUngDVVN0s07CZaBmX3-IBcQmPE";
+        string accessToken = "sl.BfhXsNM70Vxqx8NnQRCJuk3d79kOCU34QSpNbhFQIoTqKU0gc9ZFh3-Ay6c7YjW6rARXBpqN5i06jbw-s7PiQ20bAF0_Tu17HH4QvcghDw5AWA58-NnNmsAtqAN216p0fj9a5qg";
 
         var config = new DropboxClientConfig("MUSE_TestData");
         Client = new DropboxClient(accessToken, config);

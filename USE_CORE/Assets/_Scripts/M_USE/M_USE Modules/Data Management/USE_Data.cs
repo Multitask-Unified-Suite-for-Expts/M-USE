@@ -37,6 +37,7 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using USE_States;
+using static Dropbox.Api.Files.SearchMatchTypeV2;
 
 namespace USE_Data
 {
@@ -185,10 +186,15 @@ namespace USE_Data
 		public bool DefineManually;
 
 
-        public bool SendDataToDropbox;
+		public string FileHeaders;
+
         private static DropboxManager dropboxManager;
 
-		public string FileHeaders;
+		private static ServerManager serverManager;
+
+		public bool SendDataExternally;
+		public string WhereToSendData;
+
 
 
 
@@ -217,16 +223,19 @@ namespace USE_Data
 				}
 			}
 
-#if (UNITY_WEBGL)
-			SendDataToDropbox = true;
-#endif
+			//Handling Data for WebGL Build-------------------------------------
+			#if (UNITY_WEBGL)
+				SendDataExternally = true;
+				WhereToSendData = "teba"; //Can change to TEBA, Dropbox. 
+			#endif
 
-			if (SendDataToDropbox && storeData && dropboxManager == null)
-				SetupDropboxManager();
+			if(storeData && serverManager == null && dropboxManager == null)
+				SetupExternalDataManager();
+            //------------------------------------------------------------------
 
-		}
+        }
 
-		public void ManuallyDefine(int cap = 100)
+        public void ManuallyDefine(int cap = 100)
 		{
 		//everything in Start() should be triggered by init screen Confirm button press
 			if (!Defined)
@@ -647,13 +656,12 @@ namespace USE_Data
 					FileHeaders += data[i].Name;
 				}
 
-				if (SendDataToDropbox)
+				if (SendDataExternally)
 				{
 					string content = null;
 					if (dataBuffer.Count > 0)
 						content = String.Join("\n", dataBuffer.ToArray());
-
-					HandleDropbox(fileName, FileHeaders, content);
+                    HandleExternalData(fileName, FileHeaders, content);
 				}
 				else
 				{
@@ -673,13 +681,13 @@ namespace USE_Data
 		{
 			if (storeData && fileName != null && dataBuffer.Count > 0)
 			{
-				if (SendDataToDropbox)
+				if (SendDataExternally)
 				{
 					string content = String.Join("\n", dataBuffer.ToArray());
 					string headers = null;
 					if (FileHeaders.Length > 1)
 						headers = FileHeaders;
-					HandleDropbox(fileName, headers, content);
+					HandleExternalData(fileName, headers, content);
 				}
 				else
 				{
@@ -689,7 +697,6 @@ namespace USE_Data
 						{
 							dataStream.Write("\n" + String.Join("\n", dataBuffer.ToArray()));
 						}
-						
 						dataBuffer.Clear();
 					}
 					else
@@ -698,18 +705,41 @@ namespace USE_Data
 			}
 		}
 
-		private async void SetupDropboxManager()
+
+		private void SetupExternalDataManager()
 		{
-			dropboxManager = new DropboxManager();
-			await dropboxManager.Authenticate();
+            switch (WhereToSendData.ToLower())
+            {
+                case "teba":
+                    serverManager = new ServerManager("TEBA_API_Address_HERE");
+                    break;
+                case "dropbox":
+                    dropboxManager = new DropboxManager();
+                    break;
+                default:
+                    break;
+            }
         }
 
-        private async void HandleDropbox(string fileName, string fileHeaders = null, string fileContent = null)
+        private async void HandleExternalData(string fileName, string fileHeaders = null, string fileContent = null)
         {
-			if(fileHeaders != null)
-				await dropboxManager.CreateFileWithColumnTitles(fileName, fileHeaders);
-			if(fileContent != null)
-				await dropboxManager.AppendDataToExistingFile(fileName, fileContent);
+            switch (WhereToSendData.ToLower())
+            {
+                case "teba":
+                    if (fileHeaders != null)
+                        await serverManager.CreateFileWithColumnTitles(fileName, fileHeaders);
+                    if (fileContent != null)
+                        await serverManager.AppendDataToExistingFile(fileName, fileContent);
+                    break;
+                case "dropbox":
+                    if (fileHeaders != null)
+                        await dropboxManager.CreateFileWithColumnTitles(fileName, fileHeaders);
+                    if (fileContent != null)
+                        await dropboxManager.AppendDataToExistingFile(fileName, fileContent);
+                    break;
+                default:
+                    break;
+            }
         }
 
 

@@ -77,7 +77,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     private bool MovedOutside;
     private bool ConfigValuesChangedInPrevTrial;
 
-    private Color32 LightBlueColor;
+    private Color32 GreenColor;
 
     private float WhiteTimeoutTime;
     private float WhiteStartTime;
@@ -114,12 +114,12 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            CreateColors();
+            GreenColor = new Color32(0, 175, 0, 255);
 
-            if(SquareGO == null)
+            if (SquareGO == null)
             {
                 USE_Backdrop = new USE_Backdrop();
-                BackdropGO = USE_Backdrop.CreateBackdrop(THR_CanvasGO.GetComponent<Canvas>(), "BackdropGO", new Color32(209, 190, 168, 255));
+                BackdropGO = USE_Backdrop.CreateBackdrop(THR_CanvasGO.GetComponent<Canvas>(), "BackdropGO", new Color32(0, 9, 16, 0));
                 USE_Square = new USE_StartButton();
                 SquareGO = USE_Square.CreateStartButton(THR_CanvasGO.GetComponent<Canvas>(), "SquareGO", false);
                 StartButtonPlayIcon = SquareGO.transform.Find("PlayIcon").gameObject;
@@ -231,6 +231,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         BlueSquare.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes();
+            if (IsHuman && TrialCount_InTask == 0)
+                HumanStartPanel.HumanStartPanelGO.SetActive(false);
             StartButtonPlayIcon.SetActive(true);
             StartButtonCoverCircle.SetActive(false);
             SquareGO.SetActive(true);
@@ -261,7 +263,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                         if (currentTrial.RewardTouch)
                         {
                             StartButtonPlayIcon.SetActive(false);
-                            StartButtonCoverCircle_Image.color = Color.green;
+                            StartButtonCoverCircle_Image.color = GreenColor;
                             StartButtonCoverCircle.SetActive(true);
                             BlueSquareTouches_Trial++;
                             GiveTouchReward = true;
@@ -330,7 +332,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     else
                     {
                         StartButtonPlayIcon.SetActive(false);
-                        StartButtonCoverCircle_Image.color = Color.green;
+                        StartButtonCoverCircle_Image.color = GreenColor;
                         StartButtonCoverCircle.SetActive(true);
                     }
                     BlueSquareReleased = true;
@@ -368,7 +370,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 if (GiveReleaseReward)
                 {
                     StartButtonPlayIcon.SetActive(false);
-                    StartButtonCoverCircle_Image.color = Color.green;
+                    StartButtonCoverCircle_Image.color = GreenColor;
                     StartButtonCoverCircle.SetActive(true);
                 }
             }
@@ -548,10 +550,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             SquareGO.transform.localPosition = new Vector2(currentTrial.PositionX, currentTrial.PositionY);
     }
 
-    private void CreateColors()
-    {
-        LightBlueColor = new Color32(0, 150, 255, 255);
-    }
 
     private void ResetGlobalTrialVariables()
     {

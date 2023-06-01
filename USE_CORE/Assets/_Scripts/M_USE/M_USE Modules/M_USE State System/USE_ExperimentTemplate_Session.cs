@@ -119,8 +119,6 @@ namespace USE_ExperimentTemplate_Session
 
         public override void LoadSettings()
         {
-            //CreateServerManager();
-
             HumanStartPanel = gameObject.AddComponent<HumanStartPanel>();
             HumanStartPanel.SetSessionLevel(this);
             HumanStartPanel.HumanStartPanelPrefab = HumanStartPanelPrefab;
@@ -874,36 +872,7 @@ namespace USE_ExperimentTemplate_Session
             }
 
             SummaryData.Init(StoreData, SessionDataPath);
-
-            void GetTaskLevelFromString<T>()
-                where T : ControlLevel_Task_Template
-            {
-                foreach (ControlLevel_Task_Template taskLevel in ActiveTaskLevels)
-                    if (taskLevel.GetType() == typeof(T))
-                        CurrentTask = taskLevel;
-                CurrentTask = null;
-            }
         }
-
-
-
-        public void CreateServerManager()
-        {
-            //ServerManager = new ServerManager("/var/www/html/DATA/");
-            //ServerManager = new ServerManager("../DATA/");
-            ServerManager = new ServerManager("/Users/ntraczewski/Desktop");
-            //ServerManager = new ServerManager("/var/www/html/DATA/");
-
-
-            StartCoroutine(WriteTextFileCoroutine(ServerManager, "FileName1", "Test content! woo!"));
-        }
-
-        private IEnumerator WriteTextFileCoroutine(ServerManager serverManager, string fileName, string fileContent)
-        {
-            yield return serverManager.WriteTextFileAsync(fileName, fileContent);
-            Debug.Log("WriteTextFileAsync completed.");
-        }
-
 
 
         public void HandleToggleAudioButtonClick()

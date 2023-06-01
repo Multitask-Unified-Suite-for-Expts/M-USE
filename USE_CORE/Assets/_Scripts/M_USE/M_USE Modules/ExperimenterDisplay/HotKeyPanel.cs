@@ -382,6 +382,28 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             };
             HotKeyList.Add(longReward);
 
+            //Calibration HotKey:
+            HotKey calibration = new HotKey
+            {
+                keyDescription = "Tab",
+                actionName = "Calibration",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.Tab),
+                hotKeyAction = () =>
+                {
+                    if (!HkPanel.TrialLevel.runCalibration)
+                    {
+                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+                        HkPanel.TrialLevel.runCalibration = true;
+                    }
+                    else
+                    {
+                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+                        HkPanel.TaskLevel.Terminated = true;
+                        HkPanel.TrialLevel.runCalibration = false;
+                    }
+                }
+            };
+            HotKeyList.Add(calibration);
             //InstructionsButton visibility HotKey:
             //HotKey instructionsButton = new HotKey
             //{

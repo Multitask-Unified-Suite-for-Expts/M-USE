@@ -72,7 +72,7 @@ namespace USE_ExperimentTemplate_Task
         //protected TrialDef[] CurrentBlockTrialDefs;
         protected TaskDef TaskDef;
         protected BlockDef[] BlockDefs;
-        protected BlockDef CurrentBlockDef;
+        public BlockDef CurrentBlockDef;
         protected TrialDef[] AllTrialDefs;
 
         public BlockDef currentBlockDef
@@ -134,14 +134,23 @@ namespace USE_ExperimentTemplate_Task
             StimDefType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].StimDefType;
         }
 
-        public void DefineTaskLevel(bool verifyOnly)
+        public void DefineTaskLevel(bool verifyOnly, bool loadSettings)
         {
             if (UseDefaultConfigs)
                 PrefabPath = "/DefaultResources/Stimuli";
 
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
-            ReadSettingsFiles(verifyOnly);
-            ProcessCustomSettingsFiles();
+            if (loadSettings)
+            {
+                ReadSettingsFiles(verifyOnly);
+                ProcessCustomSettingsFiles();
+            }
+            else
+            {
+                BlockDefs = new BlockDef[1];
+                BlockDefs[0].GenerateTrialDefsFromBlockDef();
+            }
+            
             FindStims();
             if (verifyOnly) return;
 

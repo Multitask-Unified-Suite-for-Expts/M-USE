@@ -262,9 +262,6 @@ namespace USE_ExperimentTemplate_Session
             
             if (SessionSettings.SettingExists("Session", "GuidedTaskSelection"))
                 GuidedTaskSelection = (bool)SessionSettings.Get("Session", "GuidedTaskSelection");
-           
-            if (SessionSettings.SettingExists("Session", "EyeTrackerActive"))
-                EyeTrackerActive = (bool)SessionSettings.Get("Session", "EyeTrackerActive");
             
             if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
                 ContextExternalFilePath = (string)SessionSettings.Get("Session", "ContextExternalFilePath");
@@ -364,11 +361,11 @@ namespace USE_ExperimentTemplate_Session
                     GameObject TobiiEyeTrackerControllerGO = new GameObject("TobiiEyeTrackerController");
                     TobiiEyeTrackerController = TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
                     TobiiEyeTrackerController.MonitorDetails = new MonitorDetails(MonitorDetails.PixelResolution, MonitorDetails.CmSize);
-                    Debug.Log("here;");
                     TobiiEyeTrackerController.ScreenDetails = new ScreenDetails(ScreenDetails.LowerLeft_Cm, ScreenDetails.UpperRight_Cm, ScreenDetails.PixelResolution);
                     TobiiEyeTrackerController.CoordinateConverter = new USE_CoordinateConverter(TobiiEyeTrackerController.MonitorDetails, TobiiEyeTrackerController.ScreenDetails);
                     GameObject TrackBoxGO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"), TobiiEyeTrackerControllerGO.transform);
                     GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
+                    GameObject CalibrationGO = Instantiate(Resources.Load<GameObject>("Calibration"), TobiiEyeTrackerControllerGO.transform);
                 }
             }
 
@@ -851,7 +848,7 @@ namespace USE_ExperimentTemplate_Session
 
                 if(EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
                 {
-                    TobiiEyeTrackerController.Instance.isCalibrating = true;
+                    TobiiEyeTrackerController.Instance.isCalibrating = false;
                     TobiiEyeTrackerController.Instance.ScreenBasedCalibration.LeaveCalibrationMode();
                 }
 
@@ -1116,7 +1113,7 @@ namespace USE_ExperimentTemplate_Session
             else
                 tl.SonicationActive = false;
 
-            tl.DefineTaskLevel(verifyOnly);
+            tl.DefineTaskLevel(verifyOnly, true);
             // ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
             // Don't add task to ActiveTaskLevels if we're just verifying
             if (verifyOnly) return tl;

@@ -17,6 +17,7 @@ using System.IO.Ports;
 using Tobii.Research;
 using Tobii.Research.Unity;
 using USE_DisplayManagement;
+using USE_ExperimentTemplate_Block;
 
 namespace USE_ExperimentTemplate_Trial
 {
@@ -33,7 +34,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public bool StoreData, ForceBlockEnd, SerialPortActive, EyetrackerActive;
         [HideInInspector] public string TaskDataPath, FilePrefix, TrialSummaryString;
 
-        protected State SetupTrial, FinishTrial, Delay;
+        protected State SetupTrial, FinishTrial, Delay, Calibration;
         
         protected State StateAfterDelay = null;
         protected float DelayDuration = 0;
@@ -68,6 +69,8 @@ namespace USE_ExperimentTemplate_Trial
 
         [HideInInspector] public string SelectionType;
         [HideInInspector] public bool EyeTrackerActive;
+        [HideInInspector] public bool runCalibration;
+        private ControlLevel_Task_Template CalibrationTaskLevel;
 
         [HideInInspector] public SerialPortThreaded SerialPortController;
         [HideInInspector] public SyncBoxController SyncBoxController;
@@ -117,7 +120,11 @@ namespace USE_ExperimentTemplate_Trial
             SetupTrial = new State("SetupTrial");
             FinishTrial = new State("FinishTrial");
             Delay = new State("Delay");
-            AddActiveStates(new List<State> { SetupTrial, FinishTrial, Delay });
+            Calibration = new State("Calibration");
+            
+            CalibrationTaskLevel = GameObject.Find("Calibration").GetComponent<GazeCalibration_TaskLevel>();
+            Calibration.AddChildLevel(CalibrationTaskLevel);
+            AddActiveStates(new List<State> { SetupTrial, FinishTrial, Delay, Calibration });
             // A state that just waits for some time;
             Delay.AddTimer(() => DelayDuration, () => StateAfterDelay);
 
@@ -195,6 +202,7 @@ namespace USE_ExperimentTemplate_Trial
             FinishTrial.SpecifyTermination(() => CheckForcedBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Count - 1, SetupTrial);
             FinishTrial.SpecifyTermination(() => TrialCount_InBlock == TrialDefs.Count - 1, () => null);
+            FinishTrial.SpecifyTermination(() => runCalibration, () => Calibration);
 
             FinishTrial.AddUniversalTerminationMethod(() =>
             {
@@ -216,9 +224,25 @@ namespace USE_ExperimentTemplate_Trial
             TrialData.AddStateTimingData(this);
             TrialData.CreateFile();
            // TrialData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
+            Calibration.AddInitializationMethod(() =>
+            {
+                CalibrationTaskLevel.DefineTaskLevel(false, false);
+                CalibrationTaskLevel.TaskCam = Camera.main;
+                GameObject.Find("Calibration_Canvas").SetActive(true);
 
-
+                CalibrationTaskLevel.CurrentBlockDef.GenerateTrialDefsFromBlockDef();
+                
+            });
+           Calibration.SpecifyTermination(() => CalibrationTaskLevel.Terminated, () => SetupTrial, () =>
+           {
+               if(CalibrationTaskLevel.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
+               {
+                   TobiiEyeTrackerController.Instance.isCalibrating = false;
+                   TobiiEyeTrackerController.Instance.ScreenBasedCalibration.LeaveCalibrationMode();
+               }
+           });
         }
+        
 
         protected void SetDelayState(State stateAfterDelay, float duration)
         {

@@ -53,6 +53,7 @@ namespace USE_ExperimentTemplate_Session
         protected SerialSentData SerialSentData;
         protected SerialRecvData SerialRecvData;
         private SessionDataControllers SessionDataControllers;
+        private SessionDataControllers CalibrationDataControllers;
         private bool StoreData;
         private bool MacMainDisplayBuild;
         [HideInInspector] public string SubjectID, SessionID, SessionDataPath, FilePrefix;
@@ -355,10 +356,13 @@ namespace USE_ExperimentTemplate_Session
 
             if (EyeTrackerActive)
             {
+                
+
                 if (GameObject.Find("TobiiEyeTrackerController") == null)
                 {
                     // Technically only gets called once when finding and creating the tobii eye tracker prefabs
                     GameObject TobiiEyeTrackerControllerGO = new GameObject("TobiiEyeTrackerController");
+                    CalibrationDataControllers = new SessionDataControllers(GameObject.Find("TobiiEyeTrackerController"));
                     TobiiEyeTrackerController = TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
                     TobiiEyeTrackerController.MonitorDetails = new MonitorDetails(MonitorDetails.PixelResolution, MonitorDetails.CmSize);
                     TobiiEyeTrackerController.ScreenDetails = new ScreenDetails(ScreenDetails.LowerLeft_Cm, ScreenDetails.UpperRight_Cm, ScreenDetails.PixelResolution);
@@ -373,8 +377,12 @@ namespace USE_ExperimentTemplate_Session
 
 
             // Instantiating Task Selection Frame Data
-            FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection",
-            StoreData, SessionDataPath + Path.DirectorySeparatorChar + "FrameData");
+            // Instantiate data controller for gaze calibration nested in task
+            /*if (CalibrationDataControllers != null)
+                FrameData = (FrameData)CalibrationDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "FrameData");
+            */
+            // Instantiate normal session data controller for all tasks
+            FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "FrameData");
             FrameData.fileName = "TaskSelection__FrameData.txt";
             
             FrameData.InitDataController();
@@ -1013,6 +1021,7 @@ namespace USE_ExperimentTemplate_Session
             tl.IsHuman = IsHuman;
             tl.DisplayController = DisplayController;
             tl.SessionDataControllers = SessionDataControllers;
+            tl.CalibrationDataControllers = CalibrationDataControllers;
             tl.LocateFile = LocateFile;
             tl.SessionDataPath = SessionDataPath;
 

@@ -925,7 +925,7 @@ PrefabInstance:
     - target: {fileID: 1335069052026171274, guid: 2e385ec78c77a46cc91c52da9fce59b9,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -75
       objectReference: {fileID: 0}
     - target: {fileID: 1335069052026171274, guid: 2e385ec78c77a46cc91c52da9fce59b9,
         type: 3}
@@ -945,7 +945,7 @@ PrefabInstance:
     - target: {fileID: 6810560367943004968, guid: 2e385ec78c77a46cc91c52da9fce59b9,
         type: 3}
       propertyPath: m_Name
-      value: StartButtonContainer
+      value: StartButton
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2e385ec78c77a46cc91c52da9fce59b9, type: 3}

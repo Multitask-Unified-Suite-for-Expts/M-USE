@@ -168,7 +168,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
             if (StartButton == null)
             {
-                StartButton = USE_StartButton.CreateSquareStartButton(taskCanvas.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                StartButton = USE_StartButton.CreateStartButton(taskCanvas.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
             }
 
@@ -203,7 +203,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             Handler.MaxDuration = maxObjectTouchDuration.value;
         });
 
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton), DisplaySample, () =>
+        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(USE_StartButton.StartButtonChildren), DisplaySample, () =>
         {
             //Set the token bar settings
             TokenFBController.enabled = true;

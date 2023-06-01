@@ -167,7 +167,7 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.LoadTextMaze();
             if(StartButton == null)
             {
-                StartButton = USE_StartButton.CreateSquareStartButton(MRT_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                StartButton = USE_StartButton.CreateStartButton(MRT_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
             }
 
@@ -193,7 +193,7 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
             SelectionHandler.MinDuration = minObjectTouchDuration.value;
             SelectionHandler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatches(StartButton), Delay, () =>
+        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatches(USE_StartButton.StartButtonChildren), Delay, () =>
         {
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
 

@@ -173,15 +173,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 ShotgunHandler.ClearSelections();
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
-
         });
-        InitTrial.AddUpdateMethod(() =>
-        {
-            GameObject hit = InputBroker.RaycastBoth(InputBroker.mousePosition);
-            if (hit != null)
-                Debug.Log("HIT: " + hit.name);
-        });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), DisplayStims);
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(IsHuman ? HumanStartPanel.StartButtonChildren : USE_StartButton.StartButtonChildren), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
             if (IsHuman)

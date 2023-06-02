@@ -189,10 +189,10 @@ namespace USE_Data
 		public string FileHeaders;
 
         private static DropboxManager dropboxManager;
-
 		private static ServerManager serverManager;
+        private static ServerPHPManager serverPHPManager;
 
-		public bool SendDataExternally;
+        public bool SendDataExternally;
 		public string WhereToSendData;
 
 
@@ -214,22 +214,18 @@ namespace USE_Data
 			{
 				var initScreen = FindObjectOfType<InitScreen>();
 				if (initScreen != null)
-				{
 					initScreen.OnConfirm += OnStart;
-				}
 				else
-				{
 					OnStart();
-				}
 			}
 
 			//Handling Data for WebGL Build-------------------------------------
 			#if (UNITY_WEBGL)
 				SendDataExternally = true;
-				WhereToSendData = "teba"; //Can change to TEBA, Dropbox. 
+				WhereToSendData = "php"; //Can change to PHP, TEBA, Dropbox. 
 			#endif
 
-			if(storeData && serverManager == null && dropboxManager == null)
+			if(storeData && serverManager == null && dropboxManager == null && serverPHPManager == null)
 				SetupExternalDataManager();
             //------------------------------------------------------------------
 
@@ -716,6 +712,9 @@ namespace USE_Data
                 case "dropbox":
                     dropboxManager = new DropboxManager();
                     break;
+                case "javascript":
+                    serverPHPManager = new ServerPHPManager("http://m-use.psy.vanderbilt.edu:8080");
+                    break;
                 default:
                     break;
             }
@@ -737,6 +736,12 @@ namespace USE_Data
                     if (fileContent != null)
                         await dropboxManager.AppendDataToExistingFile(fileName, fileContent);
                     break;
+                case "php":
+					if (fileHeaders != null)
+						StartCoroutine(serverPHPManager.CreateFileWithColumnTitles(fileName, fileHeaders));
+					if (fileContent != null)
+						StartCoroutine(serverPHPManager.AppendDataToExistingFile(fileName, fileContent));
+					break;
                 default:
                     break;
             }

@@ -131,8 +131,8 @@ namespace USE_ExperimentTemplate_Trial
 
             if (IsHuman)
                 HumanStartPanel.SetTrialLevel(this);
-           
-            UI_Debugger = gameObject.AddComponent<UI_Debugger>();
+
+            UI_Debugger = new UI_Debugger();
 
             //DefineTrial();
             Add_ControlLevel_InitializationMethod(() =>

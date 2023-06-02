@@ -694,12 +694,12 @@ namespace USE_ExperimentTemplate_Session
                 Button button = taskButton.GetComponent<Button>();
                 taskButton.GetComponent<HoverEffect>().SetToInitialSize(); //Sets grey'd out button back to normal size
 
-                #if (!UNITY_WEBGL)
+#if (!UNITY_WEBGL)
                     Color darkGrey = new Color(.5f, .5f, .5f, .35f);
                     image.color = darkGrey;
 
                     Destroy(button);
-                #endif
+#endif
 
                 string taskName = (string)TaskMappings[selectedConfigName];
                 loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);

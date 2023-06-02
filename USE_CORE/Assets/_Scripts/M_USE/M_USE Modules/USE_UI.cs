@@ -258,155 +258,64 @@ namespace USE_UI
     public class USE_StartButton : MonoBehaviour
     {
         [HideInInspector] public GameObject StartButtonGO;
+        [HideInInspector] public Image CoverCircle_Image; //Child circle that can be used to "change circle color" by activating overtop startbutton.
+        [HideInInspector] public GameObject PlayIconGO; //Child Play icon
         [HideInInspector] public List<GameObject> StartButtonChildren;
-        [HideInInspector] public Dictionary<GameObject, Color> StartButtonChildrenAndColors;
-        [HideInInspector] public float ButtonSize = 10f;
-        [HideInInspector] public Color ButtonColor = new Color(0, 0, 128, 255);
-        [HideInInspector] public Image Image;
-        [HideInInspector] public Vector3 LocalPosition = new Vector3(0, 0, 0);
-        [HideInInspector] private Color32 originalColor;
-        [HideInInspector] private Sprite originalSprite;
         [HideInInspector] public bool IsGrating = false;
-        [HideInInspector] public RectTransform Rect;
-
         [HideInInspector] public static GameObject StartButtonPrefab;
 
         public State SetActiveOnInitialization;
         public State SetInactiveOnTermination;
 
-
-        //---------------------Play Button Prefab Start Buttons--------------
-        public GameObject CreateStartButton(Canvas parent)
+        public GameObject CreateStartButton(Canvas parent, Vector3? pos, float? scale, bool hover = true, string name = null)
         {
             StartButtonGO = Instantiate(StartButtonPrefab);
-            StartButtonGO.name = "StartButton";
+            StartButtonGO.name = name == null ? "StartButton" : name;
             StartButtonGO.transform.SetParent(parent.transform, false);
-            StartButtonGO.transform.localPosition = Vector3.zero;
-            Rect = StartButtonGO.GetComponent<RectTransform>();
-            SetStartButtonChildren();
-            StartButtonGO.SetActive(false);
-            return StartButtonGO;
-        }
+            StartButtonGO.transform.localPosition = pos.HasValue? pos.Value : Vector3.zero;
+            CoverCircle_Image = StartButtonGO.transform.Find("CoverCircle").gameObject.GetComponent<Image>();
+            PlayIconGO = StartButtonGO.transform.Find("PlayIcon").gameObject;
 
-        public GameObject CreateStartButton(Canvas parent, Vector3 pos, float scale)
-        {
-            StartButtonGO = Instantiate(StartButtonPrefab);
-            StartButtonGO.name = "StartButton";
-            StartButtonGO.transform.SetParent(parent.transform, false);
-            StartButtonGO.transform.localPosition = pos;
-            Rect = StartButtonGO.GetComponent<RectTransform>();
-            Rect.sizeDelta = new Vector2(scale, scale);
-            SetStartButtonChildren();
-            StartButtonGO.SetActive(false);
-            return StartButtonGO;
-        }
+            StartButtonGO.transform.localScale = scale.HasValue ? new Vector3(scale.Value, scale.Value, 1) : new Vector3(1.2f, 1.2f, 0);
 
-        public GameObject CreateStartButton(Canvas parent, string name, bool hover) //Used for THR
-        {
-            StartButtonGO = Instantiate(StartButtonPrefab);
-            StartButtonGO.name = name;
-            StartButtonGO.transform.SetParent(parent.transform, false);
-            StartButtonGO.transform.localPosition = Vector3.zero;
-            Rect = StartButtonGO.GetComponent<RectTransform>();
+            HoverEffect hoverComponent = StartButtonGO.GetComponent<HoverEffect>();
+            if (hover)
+                hoverComponent.originalScale = StartButtonGO.transform.localScale; //update original scale
+            else
+                Destroy(hoverComponent);
 
-            if (!hover)
-                Destroy(StartButtonGO.gameObject.GetComponent<HoverEffect>());
-
-            SetStartButtonChildren();
-
-            StartButtonGO.SetActive(false);
-            return StartButtonGO;
-        }
-
-        public GameObject CreateCoverCircle()
-        {
-            GameObject goToCopy = StartButtonGO.transform.Find("Border").gameObject;
-            GameObject cover = Instantiate(goToCopy);
-            cover.name = "CircleCover";
-            cover.transform.SetParent(StartButtonGO.transform);
-            cover.transform.localScale = goToCopy.gameObject.transform.localScale;
-            cover.transform.localPosition = goToCopy.gameObject.transform.localPosition;
-            cover.GetComponent<Image>().color = Color.blue;
-            cover.SetActive(false);
-            return cover;
-        }
-
-        private void SetStartButtonChildren()
-        {
-            StartButtonChildrenAndColors = new Dictionary<GameObject, Color>();
             StartButtonChildren = new List<GameObject>();
-
             foreach (Transform child in StartButtonGO.transform)
-            {
                 StartButtonChildren.Add(child.gameObject);
+            StartButtonGO.SetActive(false);
 
-                Image img = child.GetComponent<Image>();
-                if (img != null) //most have image component
-                    StartButtonChildrenAndColors.Add(child.gameObject, child.gameObject.GetComponent<Image>().color);
-                else //PlayIcon has a sprite renderer component
-                    StartButtonChildrenAndColors.Add(child.gameObject, child.gameObject.GetComponent<SpriteRenderer>().color);
-            }
+            return StartButtonGO;
         }
 
+        public void ActivateCoverCircle(Color32 color)
+        {
+            CoverCircle_Image.color = color;
+            PlayIconGO.SetActive(false);
+            CoverCircle_Image.gameObject.SetActive(true);
+        }
+
+        public void DeactivateCoverCircle()
+        {
+            PlayIconGO.SetActive(true);
+            CoverCircle_Image.gameObject.SetActive(false);
+        }
 
         public void SetButtonPosition(Vector3 pos)
         {
-            Rect.localPosition = pos;
+            StartButtonGO.transform.localPosition = pos;
         }
 
-        public void SetColorOfStartButtonChildren(Color color)
-        {
-            foreach (var kvp in StartButtonChildrenAndColors)
-            {
-                Image img = kvp.Key.GetComponent<Image>();
-                if (img != null) //most have image component
-                    img.color = color;
-                else //PlayIcon has a sprite renderer component
-                {
-                    SpriteRenderer rendy = kvp.Key.GetComponent<SpriteRenderer>();
-                    if (rendy != null)
-                        rendy.color = color;
-
-                }
-            }
-        }
-
-        public void ResetColorOfStartButtonChildren()
-        {
-            foreach (var kvp in StartButtonChildrenAndColors)
-            {
-                Image img = kvp.Key.GetComponent<Image>();
-                if (img != null) //most have image component
-                    img.color = kvp.Value;
-                else //PlayIcon has a sprite renderer component
-                {
-                    SpriteRenderer rendy = kvp.Key.GetComponent<SpriteRenderer>();
-                    if (rendy != null)
-                        rendy.color = kvp.Value;
-
-                }
-            }
-        }
-
-        public void ChangeGameObjectsColor(GameObject go, Color color)
-        {
-            Image img = go.GetComponent<Image>();
-            if (img != null) //most have image component
-                img.color = color;
-            else //PlayIcon has a sprite renderer component
-            {
-                SpriteRenderer rendy = go.GetComponent<SpriteRenderer>();
-                if (rendy != null)
-                    rendy.color = color;
-                else
-                    Debug.Log($"TRYING TO CHANGE THE COLOR OF GAME OBJECT {go.name}, BUT IT DOESNT HAVE AN IMAGE OR SPRITE RENDERER COMPONENT!");
-            }
-        }
-
-		public void SetButtonSize(float size)
+		public void SetButtonScale(float scale)
 		{
-			ButtonSize = size;
-            Rect.localScale = new Vector2(ButtonSize, ButtonSize);
+            StartButtonGO.transform.localScale = new Vector3(scale, scale, 1);
+            HoverEffect hoverComponent = StartButtonGO.GetComponent<HoverEffect>();
+            if (hoverComponent != null)
+                hoverComponent.originalScale = StartButtonGO.transform.localScale; //update original scale
         }
 
         public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
@@ -441,8 +350,8 @@ namespace USE_UI
                 Debug.LogError($"TRYING TO GRATE THE IMAGE OF A GAMEOBJECT ({go.name}) THAT DOESNT HAVE AN IMAGE COMPONENT!");
 
             IsGrating = true;
-            originalColor = image.color;
-            originalSprite = image.sprite;
+            Color32 originalColor = image.color;
+            Sprite originalSprite = image.sprite;
             image.color = new Color32(255, 153, 153, 255);
             image.sprite = Sprite.Create(newTexture, new Rect(0, 0, newTexture.width, newTexture.height), Vector2.one / 2f);
 
@@ -458,16 +367,12 @@ namespace USE_UI
 
     }
 
-    public class USE_Backdrop
+    public class USE_Backdrop : USE_StartButton
     {
         [HideInInspector] public GameObject BackdropGO;
         [HideInInspector] public Image Image;
-        [HideInInspector] private Color32 originalColor;
-        [HideInInspector] private Sprite originalSprite;
-        [HideInInspector] public bool IsGrating = false;
 
-        //For a fullscreen backdrop (for THR):
-        public GameObject CreateBackdrop(Canvas parent, string name, Color32 color)
+        public GameObject CreateBackdrop(Canvas parent, string name, Color32 color) //Used as backdrop for THR
         {
             BackdropGO = new GameObject(name);
             Image = BackdropGO.AddComponent<Image>();
@@ -476,221 +381,61 @@ namespace USE_UI
             RectTransform canvasRect = parent.GetComponent<RectTransform>();
             Image.rectTransform.sizeDelta = new Vector2(canvasRect.rect.width, canvasRect.rect.height);
             Image.color = color;
-
             BackdropGO.transform.localPosition = Vector3.zero;
             BackdropGO.SetActive(false);
-
             return BackdropGO;
-        }
-
-        public IEnumerator GratedFlash(Texture2D newTexture, float duration, GameObject goToDeactivate = null)
-        {
-            IsGrating = true;
-            originalColor = Image.color;
-            originalSprite = Image.sprite;
-            Image.color = new Color32(255, 153, 153, 255);
-            Image.sprite = Sprite.Create(newTexture, new Rect(0, 0, newTexture.width, newTexture.height), Vector2.one / 2f);
-
-            yield return new WaitForSeconds(duration);
-
-            Image.color = originalColor;
-            Image.sprite = originalSprite;
-            IsGrating = false;
-
-            if (goToDeactivate != null)
-                goToDeactivate.SetActive(false);
         }
     }
 
-    public class USE_Square : MonoBehaviour
+    public class USE_Square : USE_StartButton
     {
-        [HideInInspector] public GameObject StartButtonGO;
-        [HideInInspector] public float ButtonSize = 10f;
-        [HideInInspector] public Color ButtonColor = new Color(0, 0, 128, 255);
+        //*** Inherits StartButtonGO from USE_StartButton ***
         [HideInInspector] public Image Image;
-        [HideInInspector] public Vector3 LocalPosition = new Vector3(0, 0, 0);
-        [HideInInspector] private Color32 originalColor;
-        [HideInInspector] private Sprite originalSprite;
-        [HideInInspector] public bool IsGrating = false;
 
-
-        public State SetActiveOnInitialization;
-        public State SetInactiveOnTermination;
-
-        public GameObject CreateSquareStartButton(Canvas parent, Vector3 localPos, float size)
-        {
-            LocalPosition = localPos;
-            ButtonSize = size;
-            StartButtonGO = new GameObject("StartButton");
-            Image = StartButtonGO.AddComponent<Image>();
-            StartButtonGO.transform.SetParent(parent.transform, false);
-            Image.rectTransform.anchoredPosition = Vector2.zero;
-            Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
-            Image.color = ButtonColor;
-            StartButtonGO.transform.localPosition = LocalPosition;
-            StartButtonGO.SetActive(false);
-
-            return StartButtonGO;
-
-        }
-
-        public GameObject CreateSquareStartButton(Canvas parent)
+        public GameObject CreateSquareStartButton(Canvas parent, Vector3? localPos, float? scale, Color32? color)
         {
             StartButtonGO = new GameObject("StartButton");
             Image = StartButtonGO.AddComponent<Image>();
             StartButtonGO.transform.SetParent(parent.transform, false);
             Image.rectTransform.anchoredPosition = Vector2.zero;
-            Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
-            Image.color = ButtonColor;
-            StartButtonGO.transform.localPosition = LocalPosition;
+            Image.rectTransform.sizeDelta = scale.HasValue? new Vector2(scale.Value, scale.Value) : new Vector2(10f, 10f);
+            StartButtonGO.transform.localPosition = localPos.HasValue ? localPos.Value : Vector3.zero;
+            Image.color = color.HasValue ? color.Value : new Color32(0, 0, 128, 255);
             StartButtonGO.SetActive(false);
-
             return StartButtonGO;
         }
 
         public void SetButtonColor(Color color)
         {
-            ButtonColor = color;
-            Image.color = ButtonColor;
-        }
-
-        public void SetButtonPosition(Vector3 pos)
-        {
-            StartButtonGO.transform.localPosition = pos;
+            Image.color = color;
         }
 
         public void SetButtonSize(float size)
         {
-            ButtonSize = size;
-            Image.rectTransform.localScale = new Vector2(ButtonSize, ButtonSize);
+            Image.rectTransform.sizeDelta = new Vector2(size, size);
         }
 
-        public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
-        {
-            if (setActiveOnInit != null)
-            {
-                SetActiveOnInitialization = setActiveOnInit;
-                SetActiveOnInitialization.StateInitializationFinished += ActivateOnStateInit;
-            }
-            if (setInactiveOnTerm != null)
-            {
-                SetInactiveOnTermination = setInactiveOnTerm;
-                SetInactiveOnTermination.StateTerminationFinished += InactivateOnStateTerm;
-            }
-        }
-
-        private void ActivateOnStateInit(object sender, EventArgs e)
-        {
-            StartButtonGO.SetActive(true);
-        }
-
-        private void InactivateOnStateTerm(object sender, EventArgs e)
-        {
-            StartButtonGO.SetActive(false);
-        }
-
-
-        public IEnumerator GratedFlash(Texture2D newTexture, float duration, GameObject goToDeactivate = null)
-        {
-            IsGrating = true;
-            originalColor = Image.color;
-            originalSprite = Image.sprite;
-            Image.color = new Color32(255, 153, 153, 255);
-            Image.sprite = Sprite.Create(newTexture, new Rect(0, 0, newTexture.width, newTexture.height), Vector2.one / 2f);
-            yield return new WaitForSeconds(duration);
-            Image.color = originalColor;
-            Image.sprite = originalSprite;
-            IsGrating = false;
-            if (goToDeactivate != null)
-                goToDeactivate.SetActive(false);
-        }
     }
 
-    public class UI_Debugger : MonoBehaviour
+    public class UI_Debugger
     {
         public GameObject DebugTextGO;
         public TextMeshProUGUI DebugText;
         public RectTransform Rect;
 
-        public State SetActiveOnInitialization;
-        public State SetInactiveOnTermination;
-
-        public void InitDebugger(Canvas parent, string text = null, State activeOnInit = null, State inactiveOnInit = null)
+        public void InitDebugger(Canvas parent, Vector2? scale, Vector3? pos, string text = null)
         {
             DebugTextGO = new GameObject("DebugText");
             DebugTextGO.transform.SetParent(parent.transform);
-            DebugTextGO.transform.localScale = new Vector3(1, 1, 1);
-            DebugTextGO.transform.localPosition = Vector3.zero;
-
+            DebugTextGO.transform.localScale = Vector3.one;
+            DebugTextGO.transform.localPosition = pos.HasValue? pos.Value : Vector3.zero;
             Rect = DebugTextGO.AddComponent<RectTransform>();
-            Rect.sizeDelta = new Vector2(800, 100);
-
+            Rect.sizeDelta = scale.HasValue? scale.Value : new Vector2(800, 100);
             DebugText = DebugTextGO.AddComponent<TextMeshProUGUI>();
             DebugText.alignment = TextAlignmentOptions.Center;
             DebugText.color = Color.black;
             if (text != null)
                 DebugText.text = text;
-
-            if (activeOnInit != null && inactiveOnInit != null)
-                SetVisibilityOnOffStates(activeOnInit, inactiveOnInit);
-
-            DebugTextGO.SetActive(false);
-        }
-
-        public void InitDebugger(Canvas parent, string text = null)
-        {
-            DebugTextGO = new GameObject("DebugText");
-            DebugTextGO.transform.SetParent(parent.transform);
-            DebugTextGO.transform.localScale = new Vector3(1, 1, 1);
-            DebugTextGO.transform.localPosition = Vector3.zero;
-
-            Rect = DebugTextGO.AddComponent<RectTransform>();
-            Rect.sizeDelta = new Vector2(750, 100);
-
-            DebugText = DebugTextGO.AddComponent<TextMeshProUGUI>();
-            DebugText.alignment = TextAlignmentOptions.Center;
-            DebugText.color = Color.black;
-            if (text != null)
-                DebugText.text = text;
-
-            DebugTextGO.SetActive(false);
-        }
-
-        public void InitDebugger(Canvas parent, Vector2 size, string text = null)
-        {
-            DebugTextGO = new GameObject("DebugText");
-            DebugTextGO.transform.SetParent(parent.transform);
-            DebugTextGO.transform.localScale = new Vector3(1, 1, 1);
-            DebugTextGO.transform.localPosition = Vector3.zero;
-
-            Rect = DebugTextGO.AddComponent<RectTransform>();
-            Rect.sizeDelta = new Vector2(size.x, size.y);
-
-            DebugText = DebugTextGO.AddComponent<TextMeshProUGUI>();
-            DebugText.alignment = TextAlignmentOptions.Center;
-            DebugText.color = Color.black;
-            if (text != null)
-                DebugText.text = text;
-
-            DebugTextGO.SetActive(false);
-        }
-
-        public void InitDebugger(Canvas parent, Vector2 size, Vector2 pos, string text = null)
-        {
-            DebugTextGO = new GameObject("DebugText");
-            DebugTextGO.transform.SetParent(parent.transform);
-            DebugTextGO.transform.localScale = new Vector3(1, 1, 1);
-            DebugTextGO.transform.localPosition = pos;
-
-            Rect = DebugTextGO.AddComponent<RectTransform>();
-            Rect.sizeDelta = new Vector2(size.x, size.y);
-
-            DebugText = DebugTextGO.AddComponent<TextMeshProUGUI>();
-            DebugText.alignment = TextAlignmentOptions.Center;
-            DebugText.color = Color.black;
-            if (text != null)
-                DebugText.text = text;
-
             DebugTextGO.SetActive(false);
         }
 
@@ -708,34 +453,6 @@ namespace USE_UI
         {
             DebugText.color = color;
         }
-
-        public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
-        {
-            if (setActiveOnInit != null)
-            {
-                SetActiveOnInitialization = setActiveOnInit;
-                SetActiveOnInitialization.StateInitializationFinished += ActivateOnStateInit;
-            }
-            if (setInactiveOnTerm != null)
-            {
-                SetInactiveOnTermination = setInactiveOnTerm;
-                SetInactiveOnTermination.StateTerminationFinished += InactivateOnStateTerm;
-            }
-        }
-
-        private void ActivateOnStateInit(object sender, EventArgs e)
-        {
-            DebugTextGO.SetActive(true);
-        }
-
-        private void InactivateOnStateTerm(object sender, EventArgs e)
-        {
-            DebugTextGO.SetActive(false);
-        }
-
-        //Example of How to use it:
-        //UI_Debugger.InitDebugger(EC_CanvasGO.GetComponent<Canvas>(), (Screen.width + "x" + Screen.height));
-        //    UI_Debugger.SetVisibilityOnOffStates(ChooseBalloon, ChooseBalloon);
     }
 
     public class USE_Circle : MonoBehaviour
@@ -850,48 +567,4 @@ namespace USE_UI
 
 
 
-
-
-
-
-
-
-
-
-
-
 }
-
-
-
-
-
-
-
-//Unused constructors:
-
-//public USE_StartButton(Canvas parent, Vector3 localPos)
-//{
-//    LocalPosition = localPos;
-//    StartButtonGO = new GameObject("StartButton");
-//    Image = StartButtonGO.AddComponent<Image>();
-//    StartButtonGO.transform.SetParent(parent.transform, false);
-//    Image.rectTransform.anchoredPosition = Vector2.zero;
-//    Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
-//    Image.color = ButtonColor;
-//    StartButtonGO.transform.localPosition = LocalPosition;
-//    StartButtonGO.SetActive(false);
-//}
-
-//public USE_StartButton(Canvas parent, float size)
-//{
-//    ButtonSize = size;
-//    StartButtonGO = new GameObject("StartButton");
-//    Image = StartButtonGO.AddComponent<Image>();
-//    StartButtonGO.transform.SetParent(parent.transform, false);
-//    Image.rectTransform.anchoredPosition = Vector2.zero;
-//    Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
-//    Image.color = ButtonColor;
-//    StartButtonGO.transform.localPosition = LocalPosition;
-//    StartButtonGO.SetActive(false);
-//}

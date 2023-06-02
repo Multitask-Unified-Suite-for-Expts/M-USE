@@ -1,6 +1,6 @@
 List<string>	FeedbackControllers	["Audio"]
 Vector3	ButtonPosition	(0, 0, 0)
-float	ButtonScale	300
+float	ButtonScale	1.2
 float	TouchFeedbackDuration	0.3
 bool	StartWithBlueSquare	False
 

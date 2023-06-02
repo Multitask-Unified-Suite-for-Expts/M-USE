@@ -51,14 +51,15 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public SessionDataControllers SessionDataControllers;
         [HideInInspector] public SelectionTracker SelectionTracker;
         [HideInInspector] public bool EyeTrackerActive;
-        [HideInInspector] public EyeTracker EyeTracker;
-        [HideInInspector] public IEyeTracker IEyeTracker;
+
+        [HideInInspector] public GazeTracker GazeTracker;
+        [HideInInspector] public MouseTracker MouseTracker;
+        [HideInInspector] public TobiiEyeTrackerController TobiiEyeTrackerController;
         [HideInInspector] public ScreenBasedCalibration ScreenBasedCalibration;
         [HideInInspector] public DisplayArea DisplayArea;
 
         [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive, UseDefaultConfigs;
         [HideInInspector] public string ContextExternalFilePath, SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
-        [HideInInspector] public MonitorDetails MonitorDetails;
         [HideInInspector] public LocateFile LocateFile;
         [HideInInspector] public StringBuilder BlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
         private int TaskStringsAdded = 0;
@@ -94,13 +95,13 @@ namespace USE_ExperimentTemplate_Task
 
         [HideInInspector] public DisplayController DisplayController;
 
-        private GameObject Controllers;
 
         [HideInInspector] public SerialPortThreaded SerialPortController;
         [HideInInspector] public SyncBoxController SyncBoxController;
         [HideInInspector] public EventCodeManager EventCodeManager;
         protected Dictionary<string, EventCode> CustomTaskEventCodes;
-        public Dictionary<string, EventCode> SessionEventCodes;
+        [HideInInspector] public Dictionary<string, EventCode> SessionEventCodes;
+        [HideInInspector] public GameObject Controllers;
 
         public Type TaskLevelType;
         protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
@@ -151,25 +152,11 @@ namespace USE_ExperimentTemplate_Task
             RunBlock.AddChildLevel(TrialLevel);
             AddActiveStates(new List<State> { SetupTask, RunBlock, BlockFeedback, FinishTask });
 
-            if (EyeTrackerActive)
-            {
-               // InitializeEyeTrackerSettings();
-                TrialLevel.EyeTracker = EyeTracker;
-                TrialLevel.IEyeTracker = IEyeTracker;
-                TrialLevel.ScreenBasedCalibration = ScreenBasedCalibration;
-                TrialLevel.DisplayArea = DisplayArea;
-               // GameObject.Find("[TrackBoxGuide]").GetComponent<TrackBoxGuide>().SetCanvasTrackBox(GameObject.Find($"{TaskName}_Canvas"));
-            }
-                TrialLevel.TrialDefType = TrialDefType;
+            TrialLevel.TrialDefType = TrialDefType;
             TrialLevel.StimDefType = StimDefType;
 
             Add_ControlLevel_InitializationMethod(() =>
             {
-                TaskCam.gameObject.SetActive(true);
-                if (TaskCanvasses != null)
-                    foreach (GameObject go in TaskCanvasses)
-                        go.SetActive(true);
-
                 BlockCount = -1;
                 BlockSummaryString = new StringBuilder();
                 PreviousBlockSummaryString = new StringBuilder();
@@ -189,6 +176,16 @@ namespace USE_ExperimentTemplate_Task
 
                 #endif
 
+                TaskCam.gameObject.SetActive(true);
+                if (EyeTrackerActive && TobiiEyeTrackerController.Instance.TrackBoxGuideGO != null)
+                {
+                    TobiiEyeTrackerController.Instance.TrackBoxGuideGO.GetComponent<TrackBoxGuide>()._CanvasTrackBox.GetComponent<Canvas>().worldCamera = TaskCam;
+                }
+
+                if (TaskCanvasses != null)
+                    foreach (GameObject go in TaskCanvasses)
+                        go.SetActive(true);
+
                 Controllers.SetActive(true);
             });
             
@@ -198,6 +195,7 @@ namespace USE_ExperimentTemplate_Task
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTaskStarts"]);
 
                 //Create HumanStartPanel
+
                 if (IsHuman)
                 {
                     HumanStartPanel.SetupDataAndCodes(FrameData, EventCodeManager, SessionEventCodes);
@@ -233,9 +231,6 @@ namespace USE_ExperimentTemplate_Task
 
                     if (InputBroker.GetKeyUp(KeyCode.E)) //End Task
                     {
-                        if (Time.timeScale == 0) //if paused, unpause before ending task
-                            Time.timeScale = 1;
-
                         TrialLevel.AbortCode = 5;
                         TrialLevel.ForceBlockEnd = true;
                         TrialLevel.FinishTrialCleanup();
@@ -245,12 +240,6 @@ namespace USE_ExperimentTemplate_Task
 
                     if (InputBroker.GetKeyUp(KeyCode.N)) //Next Block
                     {
-                        TrialLevel.TokenFBController.animationPhase = TokenFBController.AnimationPhase.None;
-
-                        Time.timeScale = 1;//if paused, unpause before ending block
-
-                       HumanStartPanel.HumanStartPanelGO.SetActive(false);
-
                         if (TrialLevel.AudioFBController.IsPlaying())
                             TrialLevel.AudioFBController.audioSource.Stop();
                         TrialLevel.AbortCode = 3;
@@ -364,7 +353,7 @@ namespace USE_ExperimentTemplate_Task
                     foreach (GameObject go in TaskCanvasses)
                         go.SetActive(false);
 
-                Destroy(Controllers);
+                Destroy(GameObject.Find("FeedbackControllers"));
 
 #if (!UNITY_WEBGL)
                     //Destroy Text on Experimenter Display:
@@ -429,14 +418,11 @@ namespace USE_ExperimentTemplate_Task
             //FrameData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
 
             //AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
-            Controllers = new GameObject("Controllers");
             GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"), Controllers.transform);
-            GameObject inputTrackers = Instantiate(Resources.Load<GameObject>("InputTrackers"), Controllers.transform);
             
             // fbControllers.transform.SetParent(Controllers.transform);
             // inputTrackers.transform.SetParent(Controllers.transform);
-            if (!EyeTrackerActive)
-                inputTrackers.GetComponent<GazeTracker>().enabled = false;
+            
 
 
             // GameObject fbControllers = Instantiate(fbControllersPrefab, Controllers.transform);
@@ -486,7 +472,7 @@ namespace USE_ExperimentTemplate_Task
 
             TrialLevel.UseDefaultConfigs = UseDefaultConfigs;
 
-
+/*
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShotgunRaycastCircleSize_DVA"))
                 TrialLevel.ShotgunRaycastCircleSize_DVA = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ShotgunRaycastCircleSize_DVA");
             else
@@ -501,12 +487,17 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.ShotgunRaycastSpacing_DVA = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ShotgunRaycastSpacing_DVA");
             else
                 TrialLevel.ShotgunRaycastSpacing_DVA = ShotgunRaycastSpacing_DVA;
-
+*/
 
             if (UseDefaultConfigs)
                 TrialLevel.LoadTexturesFromResources();
             else
                 TrialLevel.LoadTextures(ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 
+
+            MouseTracker.Init(FrameData, 0);
+            if (EyeTrackerActive)
+                GazeTracker.Init(FrameData, 0);
+
 
             //Automatically giving TouchFbController;
             TrialLevel.TouchFBController.Init(TrialData, FrameData);
@@ -552,15 +543,13 @@ namespace USE_ExperimentTemplate_Task
                 }
             }
 
-            TrialLevel.MouseTracker = inputTrackers.GetComponent<MouseTracker>();
-            TrialLevel.MouseTracker.Init(FrameData, 0);
-            TrialLevel.MouseTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
+            TrialLevel.MouseTracker = MouseTracker;
             if (EyeTrackerActive)
             {
-                //MAYBE DON'T NEED TO GATE, CHECK - SD
-                TrialLevel.GazeTracker = inputTrackers.GetComponent<GazeTracker>();
-                TrialLevel.GazeTracker.Init(FrameData, 0);
+                TrialLevel.GazeTracker = GazeTracker;
+                TrialLevel.TobiiEyeTrackerController = TobiiEyeTrackerController;
             }
+
             TrialLevel.SelectionType = SelectionType;
 
             Controllers.SetActive(false);
@@ -576,6 +565,8 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.IsHuman = IsHuman;
             TrialLevel.HumanStartPanel = HumanStartPanel;
             TrialLevel.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
+            
+            TrialLevel.EyeTrackerActive = EyeTrackerActive;
 
             TrialLevel.DefineTrialLevel();
         }

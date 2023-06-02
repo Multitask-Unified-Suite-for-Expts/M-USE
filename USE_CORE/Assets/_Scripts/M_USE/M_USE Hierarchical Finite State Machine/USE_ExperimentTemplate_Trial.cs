@@ -16,6 +16,7 @@ using USE_UI;
 using System.IO.Ports;
 using Tobii.Research;
 using Tobii.Research.Unity;
+using USE_DisplayManagement;
 
 namespace USE_ExperimentTemplate_Trial
 {
@@ -61,12 +62,12 @@ namespace USE_ExperimentTemplate_Trial
         // Input Trackers
         [HideInInspector] public MouseTracker MouseTracker;
         [HideInInspector] public GazeTracker GazeTracker;
-        [HideInInspector] public EyeTracker EyeTracker;
-        [HideInInspector] public IEyeTracker IEyeTracker;
+        [HideInInspector] public TobiiEyeTrackerController TobiiEyeTrackerController;
         [HideInInspector] public ScreenBasedCalibration ScreenBasedCalibration;
         [HideInInspector] public DisplayArea DisplayArea;
 
         [HideInInspector] public string SelectionType;
+        [HideInInspector] public bool EyeTrackerActive;
 
         [HideInInspector] public SerialPortThreaded SerialPortController;
         [HideInInspector] public SyncBoxController SyncBoxController;

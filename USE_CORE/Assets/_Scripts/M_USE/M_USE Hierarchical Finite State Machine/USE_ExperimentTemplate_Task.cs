@@ -67,6 +67,7 @@ namespace USE_ExperimentTemplate_Task
         // public string TaskSceneName;
         public Camera TaskCam;
         public GameObject[] TaskCanvasses;
+        public GameObject StimCanvas_2D;
 
         //protected TrialDef[] AllTrialDefs;
         //protected TrialDef[] CurrentBlockTrialDefs;
@@ -993,7 +994,7 @@ namespace USE_ExperimentTemplate_Task
         public void ReadStimDefs<T>(string taskConfigFolder) where T : StimDef
         {
             string stimDefFile;
-            string key = UseDefaultConfigs ? (TaskName + "_PrefabStims") : (TaskName + "_ExternalStimDefs");
+            string settingsName = UseDefaultConfigs ? (TaskName + "_PrefabStims") : (TaskName + "_ExternalStimDefs");
             string defaultStimDefFile = taskConfigFolder + "/" + TaskName + (UseDefaultConfigs ? "_StimDeftdf" : "_StimDeftdf.txt");
 
             PrefabStims = new StimGroup("PrefabStims");
@@ -1007,23 +1008,33 @@ namespace USE_ExperimentTemplate_Task
             if (!string.IsNullOrEmpty(stimDefFile))
             {
                 if (stimDefFile.ToLower().Contains("tdf"))
-                    SessionSettings.ImportSettings_SingleTypeArray<T>(key, stimDefFile);
+                    SessionSettings.ImportSettings_SingleTypeArray<T>(settingsName, stimDefFile);
                 else
-                    SessionSettings.ImportSettings_SingleTypeJSON<T[]>(key, stimDefFile);
+                    SessionSettings.ImportSettings_SingleTypeJSON<T[]>(settingsName, stimDefFile);
 
-                IEnumerable<StimDef> potentials = (T[])SessionSettings.Get(key);
+                IEnumerable<StimDef> potentials = (T[])SessionSettings.Get(settingsName);
                 if (potentials == null || potentials.Count() < 1)
                     return;
                 else
                 {
                     if(UseDefaultConfigs)
                     {
-                        PrefabStims = new StimGroup("PrefabStims", (T[])SessionSettings.Get(key));
+                        PrefabStims = new StimGroup("PrefabStims", (T[])SessionSettings.Get(settingsName));
                         foreach (var stim in PrefabStims.stimDefs)
                             PrefabStimPaths.Add(stim.PrefabPath + "/" + stim.FileName);
                     }
                     else
-                        ExternalStims = new StimGroup("ExternalStims", (T[])SessionSettings.Get(key));                    
+                    {
+                        ExternalStims = new StimGroup("ExternalStims", (T[]) SessionSettings.Get(settingsName));
+                        foreach (StimDef sd in ExternalStims.stimDefs)
+                        {
+                            if (String.IsNullOrEmpty(sd.StimExtension))
+                                sd.StimExtension = Path.GetExtension(sd.FileName);
+                            if(sd.StimExtension.ToLower() == ".png")
+                                sd.CanvasGameObject = GameObject.Find(TaskName + "_Canvas");
+                        }
+                        Debug.Log("external stims: " + ExternalStims.stimDefs.Count + ", " + ExternalStims.stimDefs[0].StimPath);
+                    }
                 }
             }
             else

@@ -49,7 +49,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
     FeatureUncertaintyWM_MultiCompStimDef selectedSD = null;
 
     // Stimuli Variables
-    private StimGroup multiCompStims, sampleComp;
+    private StimGroup multiCompStims, sampleStims;
     private GameObject StartButton;
 
     // Config Loading Variables
@@ -425,7 +425,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             DestroyChildren(GameObject.Find("MainCameraCopy"));
         TokenFBController.enabled = false;
         multiCompStims.ToggleVisibility(false);
-        sampleComp.ToggleVisibility(false);
+        sampleStims.ToggleVisibility(false);
         if (AbortCode == 0)
             CurrentTaskLevel.SetBlockSummaryString();
 
@@ -477,7 +477,7 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
         GameObject mcCompPanel = new GameObject("multiCompPanel");
         mcCompPanel.AddComponent<CanvasRenderer>();
          mcCompPanel.AddComponent<RectTransform>();
-        mcCompPanel.GetComponent<RectTransform>().SetParent(taskCanvas.GetComponent<RectTransform>());
+        mcCompPanel.GetComponent<RectTransform>().SetParent(TaskLevel.StimCanvas_2D.GetComponent<RectTransform>());
         mcCompPanel.GetComponent<RectTransform>().sizeDelta = new Vector2(50, 50);
         //mcCompPanel.transform.SetParent(taskCanvas.transform, true);
 
@@ -541,9 +541,9 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
         //    }
 
         //}
-        Debug.Log(compLocations.Length);
-        Debug.Log(compInds.Max());
-        Debug.Log(permutedCompInds.Max());
+        // Debug.Log(compLocations.Length);
+        // Debug.Log(compInds.Max());
+        // Debug.Log(permutedCompInds.Max());
         counter = 0;
         for (int iComp = 0; iComp < sd.compObjIndices.Length; iComp++)
         {
@@ -557,7 +557,7 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
 
                 compGO.transform.localPosition = compLocations[permutedCompInds[counter]];
                 compGO.transform.localRotation = Quaternion.Euler(0, 0, 0);
-                Debug.Log("Comp Locations are:" + compLocations[permutedCompInds[counter]]);
+                // Debug.Log("Comp Locations are:" + compLocations[permutedCompInds[counter]]);
                 //set parent to canvas
                 compGO.SetActive(true);
                 counter++;
@@ -686,13 +686,14 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
         multiCompStims = new StimGroup("MultiCompStims", GetStateFromName("SearchDisplay"), GetStateFromName("SearchDisplay")); // can add state control of onset/offset
 
         StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+        Debug.Log("stim group info: " + group.stimDefs.Count);
+        Debug.Log("stim group path 0: " + group.stimDefs[0].StimPath);
 
-        sampleComp = new StimGroup("SampleComp", group, CurrentTrialDef.sampleCompIndices);
-        sampleComp.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("SearchDisplay"));
+        sampleStims = new StimGroup("SampleStims", group, CurrentTrialDef.sampleCompIndices);
+        sampleStims.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
         // sampleComp = new StimGroup("SampleComp", ExternalStims, CurrentTrialDef.sampleCompIndices);
 
         // multiCompStims.SetLocations(CurrentTrialDef.multiCompStimLocations);
-        Debug.Log("number of Comps" + sampleComp.stimDefs[0].StimGameObject);
         //for (int iStim = 0; iStim < CurrentTrialDef.sampleCompIndices.Length; iStim++)
         //{
         //    FeatureUncertaintyWM_StimDef sdSample = (FeatureUncertaintyWM_StimDef) sampleComp.stimDefs[iStim];
@@ -735,12 +736,12 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
             sd.StimGameObject.SetActive(false);
             sd.StimLocation = CurrentTrialDef.mcStimLocations[iStim];
             
-            Debug.Log(sd.StimGameObject);
-           // sd.AssignStimDefPointeToObjectHierarchy(multiCompStims.stimDefs[iStim].StimGameObject, sd);
-           // multiCompStims.stimDefs[iStim].AssignStimDefPointeToObjectHierarchy(multiCompStims.stimDefs[iStim].StimGameObject, multiCompStims.stimDefs[iStim]);
-            Debug.Log(sd.StimGameObject.GetComponent<StimDefPointer>());
-            Debug.Log("mcStimLocsd" + sd.StimLocation);
-            Debug.Log("mcstimdef" + multiCompStims.stimDefs[iStim].StimGameObject.GetComponent<StimDefPointer>());
+           //  Debug.Log(sd.StimGameObject);
+           // // sd.AssignStimDefPointeToObjectHierarchy(multiCompStims.stimDefs[iStim].StimGameObject, sd);
+           // // multiCompStims.stimDefs[iStim].AssignStimDefPointeToObjectHierarchy(multiCompStims.stimDefs[iStim].StimGameObject, multiCompStims.stimDefs[iStim]);
+           //  Debug.Log(sd.StimGameObject.GetComponent<StimDefPointer>());
+           //  Debug.Log("mcStimLocsd" + sd.StimLocation);
+           //  Debug.Log("mcstimdef" + multiCompStims.stimDefs[iStim].StimGameObject.GetComponent<StimDefPointer>());
             
         }
 
@@ -749,8 +750,8 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
         Debug.Log("mcStimLoc" + multiCompStims.stimDefs[1].StimLocation);
         Debug.Log("mcStimLoc" + multiCompStims.stimDefs[0].StimLocation);
         TrialStims.Add(multiCompStims);
-        TrialStims.Add(sampleComp);
-        sampleComp.SetLocations(CurrentTrialDef.sampleCompLocations);
+        TrialStims.Add(sampleStims);
+        sampleStims.SetLocations(CurrentTrialDef.sampleCompLocations);
         //sampleComp.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
         // // searchStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback")); MAKING QUADDLES TWITCH BETWEEN STATES
         // //   distractorStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback"));
@@ -806,7 +807,7 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
         FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("StartButtonVisibility", () => StartButton.activeSelf);
         FrameData.AddDatum("SearchStimVisibility", () => multiCompStims.IsActive);
-        FrameData.AddDatum("SampleStimVisibility", () => sampleComp.IsActive);
+        FrameData.AddDatum("SampleStimVisibility", () => sampleStims.IsActive);
     }
     void SetTrialSummaryString()
     {

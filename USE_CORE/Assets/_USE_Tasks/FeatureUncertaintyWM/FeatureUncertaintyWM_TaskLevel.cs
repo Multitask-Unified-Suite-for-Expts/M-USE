@@ -25,6 +25,7 @@ public class FeatureUncertaintyWM_TaskLevel : ControlLevel_Task_Template
     public override void DefineControlLevel()
     {
         fuWMTL = (FeatureUncertaintyWM_TrialLevel)TrialLevel;
+        StimCanvas_2D = GameObject.Find("FeatureUncertaintyWM_Canvas");
 
         SetSettings();
         AssignBlockData();

@@ -29,6 +29,7 @@ namespace USE_StimulusManagement
 		public string StimID;
 		public int[] StimDimVals; //only if this is parametrically-defined stim
 		[System.NonSerialized] public GameObject StimGameObject; //not in config, generated at runtime
+		public GameObject CanvasGameObject;
 		public Vector3 StimLocation; //to be passed in explicitly if trial doesn't include location method
 		public Vector3 StimRotation; //to be passed in explicitly if trial doesn't include location method
 		public Vector2 StimScreenLocation; //screen position calculated during trial
@@ -419,7 +420,10 @@ namespace USE_StimulusManagement
 				case ".png":
 					StimGameObject = new GameObject();//give it name
 					RawImage stimGOImage = StimGameObject.AddComponent<RawImage>();
-					stimGOImage.texture = LoadPNG(stimFilePath);
+					stimGOImage.texture = LoadPNG(FileName);
+					if (this.CanvasGameObject != null)
+						StimGameObject.GetComponent<RectTransform>().SetParent(this.CanvasGameObject.GetComponent<RectTransform>());
+					Debug.Log("PNG: " + FileName);
 					break;
 				default:
 					break;

@@ -3,7 +3,35 @@ guid: 953f399c4118c4aed88b1a62f30d1ec1
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - initScreen: {instanceID: 0}
+  - TrialData: {instanceID: 0}
+  - FrameData: {instanceID: 0}
+  - SerialSentData: {instanceID: 0}
+  - SerialRecvData: {instanceID: 0}
+  - TaskLevel: {instanceID: 0}
+  - ExperimenterDisplayController: {instanceID: 0}
+  - SessionInfoPanel: {instanceID: 0}
+  - TouchFBController: {instanceID: 0}
+  - AudioFBController: {instanceID: 0}
+  - HaloFBController: {instanceID: 0}
+  - TokenFBController: {instanceID: 0}
+  - SliderFBController: {instanceID: 0}
+  - MouseTracker: {instanceID: 0}
+  - GazeTracker: {instanceID: 0}
+  - EyeTracker: {instanceID: 0}
+  - SerialPortController: {instanceID: 0}
+  - EventCodeManager: {instanceID: 0}
+  - DisplayController: {instanceID: 0}
+  - HumanStartPanel: {instanceID: 0}
+  - TaskSelectionCanvasGO: {instanceID: 0}
+  - HeldTooLongTexture: {instanceID: 0}
+  - HeldTooShortTexture: {instanceID: 0}
+  - BackdropStripesTexture: {instanceID: 0}
+  - THR_BackdropTexture: {instanceID: 0}
+  - WWW_2D_CanvasGO: {instanceID: 0}
+  - USE_StartButton: {instanceID: 0}
+  - playerViewText: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

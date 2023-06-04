@@ -20,7 +20,7 @@ using VisualSearch_Namespace;
 
 public class WWW_2D_TrialLevel : ControlLevel_Trial_Template
 {
-    public GameObject WWW_CanvasGO;
+    public GameObject WWW_2D_CanvasGO;
     public USE_StartButton USE_StartButton;
 
     //This variable is required for most tasks, and is defined as the output of the GetCurrentTrialDef function 
@@ -186,7 +186,7 @@ public class WWW_2D_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    USE_StartButton = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                    USE_StartButton = new USE_StartButton(WWW_2D_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                     StartButton = USE_StartButton.StartButtonGO;
                     USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
@@ -195,7 +195,6 @@ public class WWW_2D_TrialLevel : ControlLevel_Trial_Template
             playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
 #endif
         });
-
         SetupTrial.AddInitializationMethod(() =>
         {
             if (!variablesLoaded)
@@ -217,7 +216,7 @@ public class WWW_2D_TrialLevel : ControlLevel_Trial_Template
 
         var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, FinalFeedback);
         
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale, WWW_CanvasGO);
+        TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale, WWW_2D_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {

@@ -114,6 +114,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             PlayerViewPanel = new PlayerViewPanel();
             PlayerViewPanelGO = GameObject.Find("MainCameraCopy");
 
+            GC_CanvasGO = GameObject.Find("Calibration_Canvas");
             // Assign UI Circles for the calib circles if not yet created
             if (CalibCircle == null)
                 CalibCircle = new USE_Circle(GC_CanvasGO.GetComponent<Canvas>(), Vector3.zero, MaxCircleScale, "CalibrationBigCircle");

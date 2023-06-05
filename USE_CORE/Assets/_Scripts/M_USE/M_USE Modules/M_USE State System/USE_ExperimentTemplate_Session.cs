@@ -62,6 +62,7 @@ namespace USE_ExperimentTemplate_Session
 
         protected List<ControlLevel_Task_Template> ActiveTaskLevels;
         private ControlLevel_Task_Template CurrentTask;
+        private ControlLevel_Task_Template CalibrationTaskLevel;
         private OrderedDictionary TaskMappings;
         private string ContextExternalFilePath;
         private string TaskIconsFolderPath;
@@ -353,10 +354,14 @@ namespace USE_ExperimentTemplate_Session
 
 #endif
 
+            // Create the input tracker object
+            Controllers = new GameObject("Controllers");
+            InputTrackers = Instantiate(Resources.Load<GameObject>("InputTrackers"), Controllers.transform);
+            MouseTracker = InputTrackers.GetComponent<MouseTracker>();
+            GazeTracker = InputTrackers.GetComponent<GazeTracker>();
 
             if (EyeTrackerActive)
             {
-                
 
                 if (GameObject.Find("TobiiEyeTrackerController") == null)
                 {
@@ -465,6 +470,14 @@ namespace USE_ExperimentTemplate_Session
                     waitForSerialPort = false;
                 }
 
+                if(CalibrationTaskLevel == null)
+                {
+                    CalibrationTaskLevel = GameObject.Find("Calibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
+                    PopulateTaskLevel(CalibrationTaskLevel, false, false);
+                    CalibrationTaskLevel.gameObject.SetActive(false);
+                }
+               
+            
                 if (iTask < TaskMappings.Count)
                 {
                     if (!SceneLoading)
@@ -503,11 +516,7 @@ namespace USE_ExperimentTemplate_Session
                 #endif
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupSessionEnds"]);
 
-                // Create the input tracker object
-                Controllers = new GameObject("Controllers");
-                InputTrackers = Instantiate(Resources.Load<GameObject>("InputTrackers"), Controllers.transform);
-                MouseTracker = InputTrackers.GetComponent<MouseTracker>();
-                GazeTracker = InputTrackers.GetComponent<GazeTracker>();
+                
 
                 MouseTracker.Init(FrameData, 0);
                 MouseTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
@@ -1128,8 +1137,8 @@ namespace USE_ExperimentTemplate_Session
 
             ActiveTaskLevels.Add(tl);
             if (tl.TaskCanvasses != null)
-                foreach (GameObject go in tl.TaskCanvasses)
-                    go.SetActive(false);
+                foreach (Canvas canvas in tl.TaskCanvasses)
+                    canvas.gameObject.SetActive(true);
             return tl;
         }
         //

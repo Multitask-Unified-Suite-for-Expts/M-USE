@@ -18,6 +18,9 @@ using Tobii.Research;
 using Tobii.Research.Unity;
 using USE_DisplayManagement;
 using USE_ExperimentTemplate_Block;
+using UnityEngine.SceneManagement;
+using System.Linq;
+using UnityEditor.SearchService;
 
 namespace USE_ExperimentTemplate_Trial
 {
@@ -124,10 +127,12 @@ namespace USE_ExperimentTemplate_Trial
             
             if (EyeTrackerActive)
             {
-                CalibrationTaskLevel = GameObject.Find("Calibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
+                CalibrationTaskLevel = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Scripts"). GetComponent<GazeCalibration_TaskLevel>();
                 Calibration.AddChildLevel(CalibrationTaskLevel);
+                CalibrationTaskLevel.TrialLevel.TaskLevel = CalibrationTaskLevel;
+
             }
-            
+
             AddActiveStates(new List<State> { SetupTrial, FinishTrial, Delay, Calibration });
             // A state that just waits for some time;
             Delay.AddTimer(() => DelayDuration, () => StateAfterDelay);
@@ -231,18 +236,31 @@ namespace USE_ExperimentTemplate_Trial
            // TrialData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
             Calibration.AddInitializationMethod(() =>
             {
-                CalibrationTaskLevel.DefineTaskLevel(false, false);
                 CalibrationTaskLevel.TaskCam = Camera.main;
-                CalibrationTaskLevel.ConfigName = "GazeCalibration";
+                CalibrationTaskLevel.ConfigName = "Calibration";
 
-                GameObject.Find("Calibration_Canvas").SetActive(true);
+                UnityEngine.SceneManagement.Scene originalScene = SceneManager.GetSceneByName(TaskLevel.TaskName);
+                GameObject[] rootObjects = originalScene.GetRootGameObjects();
+                TaskLevel.TaskCanvasses = rootObjects.SelectMany(go => go.GetComponentsInChildren<Canvas>(true)).ToArray();
 
-                CalibrationTaskLevel.CurrentBlockDef.GenerateTrialDefsFromBlockDef();
-                
+                foreach (Canvas canvas in TaskLevel.TaskCanvasses)
+                {
+                    canvas.gameObject.SetActive(false);
+                }
+
+                GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Canvas").gameObject.SetActive(true);
+                GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Scripts").gameObject.SetActive(true);
+
+                Debug.Log("CALIBRATION CHILD NAME: " + Calibration.ChildLevel.ControlLevelName);
             });
+
            Calibration.SpecifyTermination(() => CalibrationTaskLevel.Terminated, () => SetupTrial, () =>
            {
-               if(CalibrationTaskLevel.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
+               foreach (Canvas canvas in TaskLevel.TaskCanvasses)
+               {
+                   canvas.gameObject.SetActive(true);
+               }
+               if (CalibrationTaskLevel.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
                {
                    TobiiEyeTrackerController.Instance.isCalibrating = false;
                    TobiiEyeTrackerController.Instance.ScreenBasedCalibration.LeaveCalibrationMode();

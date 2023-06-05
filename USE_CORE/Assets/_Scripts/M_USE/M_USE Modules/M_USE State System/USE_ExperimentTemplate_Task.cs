@@ -66,7 +66,7 @@ namespace USE_ExperimentTemplate_Task
 
         // public string TaskSceneName;
         public Camera TaskCam;
-        public GameObject[] TaskCanvasses;
+        public Canvas[] TaskCanvasses;
 
         //protected TrialDef[] AllTrialDefs;
         //protected TrialDef[] CurrentBlockTrialDefs;
@@ -152,7 +152,7 @@ namespace USE_ExperimentTemplate_Task
                 for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
                 {
                     if (BlockDefs[iBlock] == null)
-                        BlockDefs[iBlock] = new BlockDef();
+                        BlockDefs[iBlock] = new GazeCalibration_Namespace.GazeCalibration_BlockDef();
                     BlockDefs[iBlock].BlockCount = iBlock;
                     BlockDefs[iBlock].GenerateTrialDefsFromBlockDef();
                 }
@@ -199,8 +199,8 @@ namespace USE_ExperimentTemplate_Task
                 }
 
                 if (TaskCanvasses != null)
-                    foreach (GameObject go in TaskCanvasses)
-                        go.SetActive(true);
+                    foreach (Canvas canvas in TaskCanvasses)
+                        canvas.gameObject.SetActive(true);
 
                 Controllers.SetActive(true);
             });
@@ -366,8 +366,8 @@ namespace USE_ExperimentTemplate_Task
                 TaskCam.gameObject.SetActive(false);
 
                 if (TaskCanvasses != null)
-                    foreach (GameObject go in TaskCanvasses)
-                        go.SetActive(false);
+                    foreach (Canvas canvas in TaskCanvasses)
+                        canvas.gameObject.SetActive(false);
 
                 Destroy(GameObject.Find("FeedbackControllers"));
 
@@ -384,40 +384,79 @@ namespace USE_ExperimentTemplate_Task
             SessionDataControllers dataController;
 
             if (loadSettings)
+            {
                 dataController = SessionDataControllers;
+                //====
+                //Setup data management
+                TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
+                FilePrefix = FilePrefix + "_" + ConfigName;
+                BlockData = (BlockData)dataController.InstantiateDataController<BlockData>("BlockData", ConfigName,
+                    StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
+                //InstantiateBlockData(StoreData, ConfigName,
+                //TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
+                BlockData.taskLevel = this;
+                BlockData.fileName = FilePrefix + "__BlockData.txt";
+
+                TrialData = (TrialData)dataController.InstantiateDataController<TrialData>("TrialData", ConfigName,
+                    StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
+                //SessionDataControllers.InstantiateTrialData(StoreData, ConfigName,
+                //TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
+                TrialData.taskLevel = this;
+                TrialData.trialLevel = TrialLevel;
+                TrialLevel.TrialData = TrialData;
+                TrialData.fileName = FilePrefix + "__TrialData.txt";
+
+
+                FrameData = (FrameData)dataController.InstantiateDataController<FrameData>("FrameData", ConfigName,
+                    StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
+
+                //SessionDataControllers.InstantiateFrameData(StoreData, ConfigName,
+                //  TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
+                FrameData.taskLevel = this;
+                FrameData.trialLevel = TrialLevel;
+                TrialLevel.FrameData = FrameData;
+                FrameData.fileName = FilePrefix + "__FrameData_PreTrial.txt";
+                // ====
+
+            }
             else
-                dataController = CalibrationDataControllers;
+            {
+                dataController = SessionDataControllers;
+                ConfigName = "Calib";
+                //Setup data management
+                TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
+                FilePrefix = FilePrefix + "_" + ConfigName;
 
-            //Setup data management
-            TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
-            FilePrefix = FilePrefix + "_" + ConfigName;
-            BlockData = (BlockData)dataController.InstantiateDataController<BlockData>("BlockData", ConfigName,
-                StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
-            //InstantiateBlockData(StoreData, ConfigName,
-            //TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
-            BlockData.taskLevel = this;
-            BlockData.fileName = FilePrefix + "__BlockData.txt";
+                BlockData = (BlockData)dataController.InstantiateDataController<BlockData>("BlockData", ConfigName,
+                    StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
+                //InstantiateBlockData(StoreData, ConfigName,
+                //TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
+                BlockData.taskLevel = this;
+                BlockData.fileName = FilePrefix + "__BlockData.txt";
 
-            TrialData = (TrialData)dataController.InstantiateDataController<TrialData>("TrialData", ConfigName,
-                StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
-            //SessionDataControllers.InstantiateTrialData(StoreData, ConfigName,
-            //TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
-            TrialData.taskLevel = this;
-            TrialData.trialLevel = TrialLevel;
-            TrialLevel.TrialData = TrialData;
-            TrialData.fileName = FilePrefix + "__TrialData.txt";
+                TrialData = (TrialData)dataController.InstantiateDataController<TrialData>("TrialData", ConfigName,
+                    StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
+                //SessionDataControllers.InstantiateTrialData(StoreData, ConfigName,
+                //TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
+                TrialData.taskLevel = this;
+                TrialData.trialLevel = TrialLevel;
+                TrialLevel.TrialData = TrialData;
+                TrialData.fileName = FilePrefix + "__TrialData.txt";
 
 
-            FrameData = (FrameData)dataController.InstantiateDataController<FrameData>("FrameData", ConfigName,
-                StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
+                FrameData = (FrameData)dataController.InstantiateDataController<FrameData>("FrameData", ConfigName,
+                    StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
 
-            //SessionDataControllers.InstantiateFrameData(StoreData, ConfigName,
-            //  TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
-            FrameData.taskLevel = this;
-            FrameData.trialLevel = TrialLevel;
-            TrialLevel.FrameData = FrameData;
-            FrameData.fileName = FilePrefix + "__FrameData_PreTrial.txt";
+                //SessionDataControllers.InstantiateFrameData(StoreData, ConfigName,
+                //  TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
+                FrameData.taskLevel = this;
+                FrameData.trialLevel = TrialLevel;
+                TrialLevel.FrameData = FrameData;
+                FrameData.fileName = FilePrefix + "__FrameData_PreTrial.txt";
 
+            }
+            
+            
 
             BlockData.InitDataController();
             TrialData.InitDataController();

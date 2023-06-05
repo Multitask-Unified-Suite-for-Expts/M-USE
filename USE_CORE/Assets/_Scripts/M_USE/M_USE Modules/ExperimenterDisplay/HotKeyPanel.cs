@@ -394,13 +394,14 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     {
                         HkPanel.TrialLevel.runCalibration = true;
                         HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
-                        HkPanel.SessionLevel.PopulateTaskLevel(GameObject.Find("Calibration_Scripts").GetComponent<GazeCalibration_TaskLevel>(), false, false);
+                        //HkPanel.SessionLevel.PopulateTaskLevel(GameObject.Find("Calibration_Scripts").GetComponent<GazeCalibration_TaskLevel>(), false, false);
                     }
                     else
                     {
                         HkPanel.TaskLevel.Terminated = true;
                         HkPanel.TrialLevel.runCalibration = false;
                         HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+
                     }
                 }
             };

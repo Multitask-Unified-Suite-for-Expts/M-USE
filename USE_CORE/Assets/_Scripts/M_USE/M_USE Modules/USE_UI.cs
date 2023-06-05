@@ -420,7 +420,6 @@ namespace USE_UI
         public USE_Circle(Canvas parent, Vector2 circleLocation, float size, string name)
         {
             CircleGO = new GameObject(name, typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UICircle));
-            CircleGO.AddComponent<CanvasRenderer>();
             CircleGO.transform.SetParent(parent.transform, false);
             CircleGO.transform.localScale = new Vector3(size, size, size);
             CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().Fill = true;

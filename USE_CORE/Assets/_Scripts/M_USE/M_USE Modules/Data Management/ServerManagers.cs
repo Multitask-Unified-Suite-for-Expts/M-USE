@@ -23,7 +23,7 @@ public class ServerPHPManager
 
     public IEnumerator CreateFileWithColumnTitles(string fileName, string fileHeaders)
     {
-        string url = $"{serverUrl}/create-file.php?filename={fileName}";
+        string url = $"{serverUrl}/create-file.php?sessionFolderPath={SessionFolderPath}&filename={fileName}";
 
         using (UnityWebRequest request = UnityWebRequest.Put(url, fileHeaders))
         {
@@ -41,7 +41,7 @@ public class ServerPHPManager
 
     public IEnumerator AppendDataToExistingFile(string fileName, string rowData)
     {
-        string url = $"{serverUrl}/append-data.php?filename={fileName}";
+        string url = $"{serverUrl}/append-data.php?sessionFolderPath={SessionFolderPath}&filename={fileName}";
 
         using (UnityWebRequest request = UnityWebRequest.Post(url, rowData))
         {

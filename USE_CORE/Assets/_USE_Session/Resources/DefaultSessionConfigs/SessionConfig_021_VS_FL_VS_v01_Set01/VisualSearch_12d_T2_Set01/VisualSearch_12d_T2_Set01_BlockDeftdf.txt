@@ -1,0 +1,2 @@
+BlockName	BlockCount	ContextName	NumInitialTokens	NumTokenBar	NumPulses	PulseSize	TokensWithStimOn
+ VisSearch	1	Grass	2	8	3	250	False

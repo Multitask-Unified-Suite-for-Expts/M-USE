@@ -106,6 +106,7 @@ namespace USE_ExperimentTemplate_Session
         public GameObject ToggleAudioButton;
         public GameObject StartButtonPrefabGO;
         public AudioClip TaskSelection_HumanAudio;
+        public GameObject SessionConfig_Dropdown;
 
         [HideInInspector] public float audioPlaybackSpot;
 
@@ -117,6 +118,7 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public ServerManager ServerManager;
 
 
+
         public override void LoadSettings()
         {
             HumanStartPanel = gameObject.AddComponent<HumanStartPanel>();
@@ -126,9 +128,12 @@ namespace USE_ExperimentTemplate_Session
             USE_StartButton = gameObject.AddComponent<USE_StartButton>();
             USE_StartButton.StartButtonPrefab = StartButtonPrefabGO;
 
+
             //If using default configs, read in the default Session/EventCode/Display Configs and write them to persistant data path:
             if (UseDefaultConfigs)
             {
+                string SessionConfigFolder = "SessionConfigs_DEFAULT"; //Default currently, but will be the value the user picks from the session config dropdown. 
+
                 configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
 
                 if (Directory.Exists(configFileFolder))
@@ -141,7 +146,7 @@ namespace USE_ExperimentTemplate_Session
 
                     foreach(string config in configsToWrite)
                     {
-                        byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + config).bytes;
+                        byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + SessionConfigFolder + "/" + config).bytes;
                         System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + config + ".txt", textFileBytes);
                     }
                 } 
@@ -347,7 +352,6 @@ namespace USE_ExperimentTemplate_Session
             setupSession.AddDefaultInitializationMethod(() =>
             {
                 SessionData.CreateFile();
-
 
                 //SessionData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
                 //SessionData.TestConnectionToDB(); //Using to test database connection
@@ -875,6 +879,7 @@ namespace USE_ExperimentTemplate_Session
         }
 
 
+
         public void HandleToggleAudioButtonClick()
         {
             if (TaskSelection_AudioSource.isPlaying)
@@ -990,8 +995,8 @@ namespace USE_ExperimentTemplate_Session
 
         ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
-            tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
             tl.USE_StartButton = USE_StartButton;
+            tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
             tl.HumanStartPanel = HumanStartPanel;
             tl.IsHuman = IsHuman;
             tl.DisplayController = DisplayController;

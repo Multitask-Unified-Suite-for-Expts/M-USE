@@ -712,7 +712,7 @@ namespace USE_Data
                 case "dropbox":
                     dropboxManager = new DropboxManager();
                     break;
-                case "javascript":
+                case "php":
                     serverPHPManager = new ServerPHPManager("http://m-use.psy.vanderbilt.edu:8080");
                     break;
                 default:

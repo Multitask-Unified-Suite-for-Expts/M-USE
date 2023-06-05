@@ -78,7 +78,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     private bool ConfigValuesChangedInPrevTrial;
 
     private Color32 WhiteColor;
-    private Color32 GreenColor;
+    private Color32 LightBlueColor;
 
     private float WhiteTimeoutTime;
     private float WhiteStartTime;
@@ -98,6 +98,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public float TouchFeedbackDuration;
 
+    //Set in inspector:
+    public GameObject PPVolumeGO;
+
 
 
     public override void DefineControlLevel()
@@ -113,7 +116,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         Add_ControlLevel_InitializationMethod(() =>
         {
             WhiteColor = new Color32(236, 238, 242, 255);
-            GreenColor = new Color32(0, 175, 0, 255);
+            LightBlueColor = new Color32(38, 188, 250, 255);
 
             if (SquareGO == null)
             {
@@ -126,6 +129,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             if(StartButton == null && IsHuman)
                 StartButton = HumanStartPanel.StartButtonGO;
 
+            USE_Square.SetPlayIconColor(IsHuman ? new Color32(255, 199, 87, 255) : new Color32(38, 188, 250, 255));
+
             THR_CanvasGO.GetComponent<Canvas>().sortingOrder = 0;
         });
 
@@ -137,6 +142,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
+            PPVolumeGO.SetActive(false);
+
             BackdropGO.SetActive(IsHuman ? false : true);
 
             if (IsHuman && TrialCount_InTask == 0)
@@ -163,7 +170,12 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         });
         InitTrial.SpecifyTermination(() => true && ShotgunHandler.LastSuccessfulSelectionMatches(IsHuman ? HumanStartPanel.StartButtonChildren : USE_Square.StartButtonChildren) || StartButton == null, StartWithBlueSquare ? BlueSquare : WhiteSquare);
-        InitTrial.AddDefaultTerminationMethod(() => TrialStartTime = Time.time);
+        InitTrial.AddDefaultTerminationMethod(() =>
+        {
+            PPVolumeGO.SetActive(true);
+            TrialStartTime = Time.time;
+        });
+
 
 
         //WHITE SQUARE state ------------------------------------------------------------------------------------------------------------------------
@@ -255,7 +267,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
                         if (currentTrial.RewardTouch)
                         {
-                            USE_Square.ActivateCoverCircle(GreenColor);
+                            USE_Square.ActivateCoverCircle(LightBlueColor);
                             BlueSquareTouches_Trial++;
                             GiveTouchReward = true;
                             RewardEarnedTime = Time.time;
@@ -316,7 +328,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                         //The Else (Greater than MaxDuration) is handled below where I auto stop them for holding for max dur. 
                     }
                     else
-                        USE_Square.ActivateCoverCircle(GreenColor);
+                        USE_Square.ActivateCoverCircle(LightBlueColor);
                     
                     BlueSquareReleased = true;
                 }
@@ -352,7 +364,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 AudioFBController.Play("Positive");
 
                 if (GiveReleaseReward)
-                    USE_Square.ActivateCoverCircle(GreenColor);
+                    USE_Square.ActivateCoverCircle(LightBlueColor);
             }
             else //held too long, held too short, moved outside, or timeRanOut
             {

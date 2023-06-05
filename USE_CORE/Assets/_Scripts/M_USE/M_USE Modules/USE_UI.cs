@@ -133,6 +133,8 @@ namespace USE_UI
             InstructionsGO.SetActive(false);
             InstructionsOn = false;
 
+            StartButtonGO.AddComponent<HoverEffect>();
+
             AdjustButtonPositions();
             SetStartButtonChildren();
         }
@@ -258,11 +260,12 @@ namespace USE_UI
     public class USE_StartButton : MonoBehaviour
     {
         [HideInInspector] public GameObject StartButtonGO;
-        [HideInInspector] public Image CoverCircle_Image; //Child circle that can be used to "change circle color" by activating overtop startbutton.
+        [HideInInspector] public Image CoverCircle_Image; //Child circle that can be used to "change circle color" by activating over top of startbutton.
         [HideInInspector] public GameObject PlayIconGO; //Child Play icon
         [HideInInspector] public List<GameObject> StartButtonChildren;
-        [HideInInspector] public bool IsGrating = false;
         [HideInInspector] public static GameObject StartButtonPrefab;
+        [HideInInspector] public bool IsGrating;
+        [HideInInspector] public bool IsHuman;
 
         public State SetActiveOnInitialization;
         public State SetInactiveOnTermination;
@@ -278,11 +281,10 @@ namespace USE_UI
 
             StartButtonGO.transform.localScale = scale.HasValue ? new Vector3(scale.Value, scale.Value, 1) : new Vector3(1.2f, 1.2f, 0);
 
-            HoverEffect hoverComponent = StartButtonGO.GetComponent<HoverEffect>();
             if (hover)
-                hoverComponent.originalScale = StartButtonGO.transform.localScale; //update original scale
-            else
-                Destroy(hoverComponent);
+                StartButtonGO.AddComponent<HoverEffect>();
+
+            PlayIconGO.GetComponent<SpriteRenderer>().color = new Color32(38, 188, 250, 255); //LightBlue PlayIcon for non-human version
 
             StartButtonChildren = new List<GameObject>();
             foreach (Transform child in StartButtonGO.transform)
@@ -308,6 +310,11 @@ namespace USE_UI
         public void SetButtonPosition(Vector3 pos)
         {
             StartButtonGO.transform.localPosition = pos;
+        }
+
+        public void SetPlayIconColor(Color32 color)
+        {
+            PlayIconGO.GetComponent<SpriteRenderer>().color = color;
         }
 
 		public void SetButtonScale(float scale)

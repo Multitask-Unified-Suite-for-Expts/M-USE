@@ -223,7 +223,7 @@ namespace USE_Settings
 
 	public static class SessionSettings
 	{
-		private static Dictionary<string, Settings> allSettings = new Dictionary<string, Settings>();
+		public static Dictionary<string, Settings> allSettings = new Dictionary<string, Settings>();
 		private static Dictionary<string, Settings> savedSettings = new Dictionary<string, Settings>();
 
 		//public static void Reset()

@@ -46,6 +46,7 @@ public class InitScreen : MonoBehaviour {
 
     public DisplayController displayController;
 
+
     void Start()
     {
         displayController = gameObject.AddComponent<DisplayController>();
@@ -56,13 +57,21 @@ public class InitScreen : MonoBehaviour {
         foreach (GameObject g in enableOnStart)
             g.SetActive(true);
 
-        if (GameObject.Find("ControlLevels").GetComponent<M_USE_ControlLevel_Session>().UseDefaultConfigs)
-            StartCoroutine(HandleConfirm());
+        #if (UNITY_WEBGL)
+        {
+            GameObject.Find("NormalBuild_Children").SetActive(false);
+            GameObject.Find("InitScreenCanvas").GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display. 
+            //StartCoroutine(HandleConfirm()); //Skip init screen basically. trying to replace this with the above code. 
+        }
+#else
+            GameObject.Find("WebBuild_Children").SetActive(false);
+#endif
+
     }
 
     IEnumerator HandleConfirm()
     {
-        if(OnLoadSettings != null)
+        if (OnLoadSettings != null)
             OnLoadSettings();
         
         foreach (GameObject g in disableOnConfirm)
@@ -85,6 +94,7 @@ public class InitScreen : MonoBehaviour {
     {
         StartCoroutine(HandleConfirm());
     }
+
 
 }
 

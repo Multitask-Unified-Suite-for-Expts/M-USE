@@ -106,7 +106,6 @@ namespace USE_ExperimentTemplate_Session
         public GameObject ToggleAudioButton;
         public GameObject StartButtonPrefabGO;
         public AudioClip TaskSelection_HumanAudio;
-        public GameObject SessionConfig_Dropdown;
 
         [HideInInspector] public float audioPlaybackSpot;
 
@@ -129,11 +128,14 @@ namespace USE_ExperimentTemplate_Session
             USE_StartButton.StartButtonPrefab = StartButtonPrefabGO;
 
 
+
+
             //If using default configs, read in the default Session/EventCode/Display Configs and write them to persistant data path:
             if (UseDefaultConfigs)
             {
-                string SessionConfigFolder = "SessionConfigs_DEFAULT"; //Default currently, but will be the value the user picks from the session config dropdown. 
-
+                Dropdown dropdown = GameObject.Find("Dropdown").GetComponent<Dropdown>();
+                string SessionConfigFolder = dropdown.options[dropdown.value].text; //User picks from the session config dropdown. 
+                Debug.Log("SCF: " + SessionConfigFolder);
                 configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
 
                 if (Directory.Exists(configFileFolder))
@@ -150,15 +152,21 @@ namespace USE_ExperimentTemplate_Session
                         System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + config + ".txt", textFileBytes);
                     }
                 } 
+                SubjectID = "1"; //TEMPORARY! CHANGE THIS!
+                SessionID = "1"; //TEMPORARY! CHANGE THIS!
             }
             else
+            {
                 configFileFolder = LocateFile.GetPath("Config File Folder");
-            
+                SubjectID = SessionDetails.GetItemValue("SubjectID");
+                SessionID = SessionDetails.GetItemValue("SessionID");
 
-            SubjectID = SessionDetails.GetItemValue("SubjectID");
-            SessionID = SessionDetails.GetItemValue("SessionID");
+            }
+      
             FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" + DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
 
+            if (LocateFile == null)
+                Debug.Log("LOCATE FILE IS NULL!!!");
 
             SessionSettings.ImportSettings_MultipleType("Session",
                 LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));
@@ -314,17 +322,16 @@ namespace USE_ExperimentTemplate_Session
             SessionDataControllers = new SessionDataControllers(GameObject.Find("DataControllers"));
             ActiveTaskLevels = new List<ControlLevel_Task_Template>();//new Dictionary<string, ControlLevel_Task_Template>();
 
-            DisplayController = GameObject.Find("InitializationScreen").GetComponent<DisplayController>();
-
             SessionCam = Camera.main;
 
-            //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
-#if (UNITY_WEBGL)
-            GameObject initCamGO = GameObject.Find("InitCamera");
-                initCamGO.SetActive(false);
-                TaskSelection_Starfield.SetActive(true);
-            #else
+            DisplayController = GameObject.Find("InitializationScreen").GetComponent<DisplayController>();
 
+#if (UNITY_WEBGL)
+            //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
+            //GameObject initCamGO = GameObject.Find("InitCamera");
+            //    initCamGO.SetActive(false);
+            //    TaskSelection_Starfield.SetActive(true);            
+#else
                 TaskSelection_Starfield.SetActive(false);
                 GameObject experimenterDisplay = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
                 experimenterDisplay.name = "ExperimenterDisplay";
@@ -343,7 +350,7 @@ namespace USE_ExperimentTemplate_Session
                 PauseCanvasGO.SetActive(false);
                 PauseCanvas = PauseCanvasGO.GetComponent<Canvas>();
                 PauseCanvas.planeDistance = 1;
-            #endif
+#endif
 
             SelectionTracker = new SelectionTracker();
 
@@ -475,7 +482,7 @@ namespace USE_ExperimentTemplate_Session
                 TaskSelectionCanvasGO.SetActive(true);
                 TaskSelection_Starfield.SetActive(IsHuman ? true : false);
 
-                #if (!UNITY_WEBGL)
+#if (!UNITY_WEBGL)
                     if (DisplayController.SwitchDisplays) //SwitchDisplay stuff doesnt full work yet!
                     {
                         SessionCam.targetDisplay = 1;
@@ -496,7 +503,7 @@ namespace USE_ExperimentTemplate_Session
                         SessionCam.targetTexture = CameraMirrorTexture;
                         mainCameraCopy_Image.texture = CameraMirrorTexture;
                     }
-                #endif
+#endif
 
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SelectTaskStarts"]);
 

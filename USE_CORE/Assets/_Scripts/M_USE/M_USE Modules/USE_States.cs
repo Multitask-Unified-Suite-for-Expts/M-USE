@@ -726,9 +726,10 @@ namespace USE_States
 			//Paused = false;
 			controlLevelTerminationSpecifications = new List<ControlLevelTerminationSpecification>();
 
-			//should be called after Init screen confirm button press
-			//var initScreen = FindObjectOfType<InitScreen>();
-			if (initScreen != null)
+            //should be called after Init screen confirm button press
+            //var initScreen = FindObjectOfType<InitScreen>();
+
+            if (initScreen != null)
 			{
 				initScreen.OnLoadSettings += LoadSettings;
 				initScreen.OnConfirm += () => {

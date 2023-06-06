@@ -21,6 +21,7 @@ using SelectionTracking;
 using Random = UnityEngine.Random;
 using UnityEngine.InputSystem;
 using TMPro;
+using UnityEditor;
 //using UnityEngine.Windows.WebCam;
 
 
@@ -135,7 +136,6 @@ namespace USE_ExperimentTemplate_Session
             {
                 Dropdown dropdown = GameObject.Find("Dropdown").GetComponent<Dropdown>();
                 string SessionConfigFolder = dropdown.options[dropdown.value].text; //User picks from the session config dropdown. 
-                Debug.Log("SCF: " + SessionConfigFolder);
                 configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
 
                 if (Directory.Exists(configFileFolder))
@@ -144,29 +144,31 @@ namespace USE_ExperimentTemplate_Session
                 if (!Directory.Exists(configFileFolder))
                 {
                     Directory.CreateDirectory(configFileFolder);
-                    List<string> configsToWrite = new List<string>() {"SessionConfig", "EventCodeConfig", "DisplayConfig"};
+                    List<string> configsToWrite = new List<string>();
+                    UnityEngine.Object[] subFolderObjects = Resources.LoadAll("DefaultSessionConfigs/" + SessionConfigFolder, typeof(UnityEngine.Object));
+                    for(int i = 0; i < subFolderObjects.Length; i++)
+                    {
+                        string assetPath = AssetDatabase.GetAssetPath(subFolderObjects[i]);
+                        string folderName = assetPath.Split('/')[5].Split('.')[0];
+                        configsToWrite.Add(folderName);
+                    }
 
                     foreach(string config in configsToWrite)
                     {
+                        Debug.Log("PATH: " + ("DefaultSessionConfigs/" + SessionConfigFolder + "/" + config));
                         byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + SessionConfigFolder + "/" + config).bytes;
                         System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + config + ".txt", textFileBytes);
                     }
                 } 
-                SubjectID = "1"; //TEMPORARY! CHANGE THIS!
-                SessionID = "1"; //TEMPORARY! CHANGE THIS!
             }
             else
-            {
                 configFileFolder = LocateFile.GetPath("Config File Folder");
-                SubjectID = SessionDetails.GetItemValue("SubjectID");
-                SessionID = SessionDetails.GetItemValue("SessionID");
 
-            }
+           
+            SubjectID = SessionDetails.GetItemValue("SubjectID");
+            SessionID = SessionDetails.GetItemValue("SessionID");
       
             FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" + DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
-
-            if (LocateFile == null)
-                Debug.Log("LOCATE FILE IS NULL!!!");
 
             SessionSettings.ImportSettings_MultipleType("Session",
                 LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));

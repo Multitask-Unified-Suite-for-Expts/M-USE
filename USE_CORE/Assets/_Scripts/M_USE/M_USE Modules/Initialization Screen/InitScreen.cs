@@ -59,7 +59,8 @@ public class InitScreen : MonoBehaviour {
 
         #if (UNITY_WEBGL)
         {
-            GameObject.Find("NormalBuild_Children").SetActive(false);
+            //GameObject.Find("NormalBuild_Children").SetActive(false);
+            GameObject.Find("LocateFile").SetActive(false);
             GameObject.Find("InitScreenCanvas").GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display. 
             //StartCoroutine(HandleConfirm()); //Skip init screen basically. trying to replace this with the above code. 
         }

@@ -135,8 +135,8 @@ namespace USE_ExperimentTemplate_Session
             {
                 Dropdown dropdown = GameObject.Find("Dropdown").GetComponent<Dropdown>();
 
-                //string SessionConfigFolder = dropdown.options[dropdown.value].text; //User picks from the session config dropdown.
-                string SessionConfigFolder = "SessionConfigs_DEFAULT"; //User picks from the session config dropdown.
+                //string SessionConfigFolder = dropdown.options[dropdown.value].text + "/"; //User picks from the session config dropdown.
+                string SessionConfigFolder = ""; 
 
                 configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
 
@@ -150,8 +150,7 @@ namespace USE_ExperimentTemplate_Session
 
                     foreach (string config in configsToWrite)
                     {
-                        Debug.Log("STRING: " + config);
-                        byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + SessionConfigFolder + "/" + config).bytes;
+                        byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + SessionConfigFolder + config).bytes;
                         System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + config + ".txt", textFileBytes);
                     }
                 }

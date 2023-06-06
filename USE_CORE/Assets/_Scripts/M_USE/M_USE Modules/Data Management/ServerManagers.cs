@@ -2,12 +2,95 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Net.Http;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 using Dropbox.Api;
 using Dropbox.Api.Files;
 using UnityEngine;
 using UnityEngine.Networking;
+using Renci.SshNet;
+
+
+public class SFTP_ServerManager
+{
+    private readonly SftpClient sftpClient;
+
+    private string hostname = "localhost";
+    private string username = "sftpuser";
+    private string password = "Dziadziu21!";
+    private int port = 22;
+
+    private string sessionFolderPath;
+
+    public SFTP_ServerManager()
+    {
+        sftpClient = new SftpClient(hostname, port, username, password);
+        sessionFolderPath = "/SessionData_" + DateTime.Now.ToString("MMddyy_HHmmss");
+    }
+
+    public void Connect()
+    {
+        sftpClient.Connect();
+    }
+
+    public void Disconnect()
+    {
+        sftpClient.Disconnect();
+    }
+
+    public void CreateFileWithColumnTitles(string fileName, string fileHeaders)
+    {
+        string remoteFilePath = $"{sessionFolderPath}/{fileName}";
+
+        try
+        {
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(fileHeaders)))
+            {
+                sftpClient.UploadFile(stream, remoteFilePath);
+            }
+            Debug.Log($"File {fileName} created successfully with column titles!");
+        }
+        catch (Exception e)
+        {
+            Debug.Log($"An error occurred while creating file: {fileName} | ErrorMessage: {e.Message}");
+        }
+    }
+
+    public void AppendDataToExistingFile(string fileName, string rowData)
+    {
+        string remoteFilePath = $"{sessionFolderPath}/{fileName}";
+
+        try
+        {
+            if (sftpClient.Exists(remoteFilePath))
+            {
+                using (var stream = new MemoryStream())
+                {
+                    sftpClient.DownloadFile(remoteFilePath, stream); // Download existing file   //Will ultimately import config files. 
+                    byte[] rowDataBytes = Encoding.UTF8.GetBytes(rowData + "\n");
+                    stream.Write(rowDataBytes, 0, rowDataBytes.Length);
+                    stream.Position = 0; // Reset stream position
+                    sftpClient.UploadFile(stream, remoteFilePath); // Upload modified file
+                }
+                Debug.Log($"Data appended to file {fileName} successfully!");
+            }
+            else // If file doesn't exist, create a new file with the rowData
+            {
+                using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(rowData)))
+                {
+                    sftpClient.UploadFile(stream, remoteFilePath);
+                }
+                Debug.Log($"File {fileName} created and data added successfully!");
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log($"An error occurred while appending data to file: {fileName} | ErrorMessage: {e.Message}");
+        }
+    }
+
+}
 
 
 public class ServerPHPManager
@@ -139,7 +222,7 @@ public class DropboxManager
 
     public async Task Authenticate()
     {
-        string accessToken = "sl.BfiZbnHQneQM9L5wsCX52l676WY6AURssbTzjVcqlme6n86DsKIp2srHvB414CLPbKQB-c2tPi6jzUUZFmCJzS0n_Y8Ft0AD37cRBj72gKQtWNZaDfKwBpnTj-yY_nTs5wqleJE";
+        string accessToken = "sl.Bf3uU_Sl7Ot8TxS77zHLTmT2YHiLw3LMxJHfM7RkuykF9BNpG7FmofYDqTeKXJWZkJxWuWtAkuVFB2O3NkeA9TRidlILXWivsqOkmPwjNmK3nq963OL1fhid8I5QL9hDVhdqfNk";
 
         var config = new DropboxClientConfig("MUSE_TestData");
         Client = new DropboxClient(accessToken, config);

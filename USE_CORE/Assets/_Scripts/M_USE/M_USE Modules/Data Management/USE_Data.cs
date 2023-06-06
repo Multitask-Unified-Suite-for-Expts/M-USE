@@ -191,6 +191,7 @@ namespace USE_Data
         private static DropboxManager dropboxManager;
 		private static ServerManager serverManager;
         private static ServerPHPManager serverPHPManager;
+		private static SFTP_ServerManager sftpServerManager;
 
         public bool SendDataExternally;
 		public string WhereToSendData;
@@ -222,10 +223,10 @@ namespace USE_Data
 			//Handling Data for WebGL Build-------------------------------------
 			#if (UNITY_WEBGL)
 				SendDataExternally = true;
-				WhereToSendData = "php"; //Can change to PHP, TEBA, Dropbox. 
-			#endif
+				WhereToSendData = "sftp"; //Can change to PHP, TEBA, Dropbox. 
+#endif
 
-			if(storeData && serverManager == null && dropboxManager == null && serverPHPManager == null)
+			if(storeData && serverManager == null && dropboxManager == null && serverPHPManager == null && sftpServerManager == null)
 				SetupExternalDataManager();
             //------------------------------------------------------------------
 
@@ -706,6 +707,10 @@ namespace USE_Data
 		{
             switch (WhereToSendData.ToLower())
             {
+                case "sftp":
+                    sftpServerManager = new SFTP_ServerManager();
+					sftpServerManager.Connect();
+                    break;
                 case "teba":
                     serverManager = new ServerManager("TEBA_API_Address_HERE");
                     break;
@@ -724,6 +729,12 @@ namespace USE_Data
         {
             switch (WhereToSendData.ToLower())
             {
+                case "sftp":
+                    if (fileHeaders != null)
+                        sftpServerManager.CreateFileWithColumnTitles(fileName, fileHeaders);
+                    if (fileContent != null)
+                        sftpServerManager.AppendDataToExistingFile(fileName, fileContent);
+                    break;
                 case "teba":
                     if (fileHeaders != null)
                         await serverManager.CreateFileWithColumnTitles(fileName, fileHeaders);

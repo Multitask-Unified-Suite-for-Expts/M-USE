@@ -36,31 +36,31 @@ public class FolderDropdown : MonoBehaviour
         dropdown.AddOptions(options);
     }
 
-    private void LoadFolders() //Wont work for WebGL build cuz AssetDatabase.GetAssetPath
-    {
-        HashSet<string> uniqueFolders = new HashSet<string>();
-        Object[] folderObjects = Resources.LoadAll(folderPath, typeof(Object));
-        List<Dropdown.OptionData> options = new List<Dropdown.OptionData>();
+    //private void LoadFolders() //Wont work for WebGL build cuz AssetDatabase.GetAssetPath
+    //{
+    //    HashSet<string> uniqueFolders = new HashSet<string>();
+    //    Object[] folderObjects = Resources.LoadAll(folderPath, typeof(Object));
+    //    List<Dropdown.OptionData> options = new List<Dropdown.OptionData>();
 
-        for (int i = 0; i < folderObjects.Length; i++)
-        {
-            string assetPath = AssetDatabase.GetAssetPath(folderObjects[i]); //ASSETDATABASE! PATH DOESNT WORK FOR WEB BUILDS!!
-            string folderName = assetPath.Split('/')[4];
+    //    for (int i = 0; i < folderObjects.Length; i++)
+    //    {
+    //        string assetPath = AssetDatabase.GetAssetPath(folderObjects[i]); //ASSETDATABASE! PATH DOESNT WORK FOR WEB BUILDS!!
+    //        string folderName = assetPath.Split('/')[4];
 
-            if (folderName.ToLower().Contains("default"))
-                defaultIndex = i;
+    //        if (folderName.ToLower().Contains("default"))
+    //            defaultIndex = i;
 
-            if (!uniqueFolders.Contains(folderName) && !string.IsNullOrEmpty(folderName))
-            {
-                uniqueFolders.Add(folderName);
-                Dropdown.OptionData option = new Dropdown.OptionData(folderName);
-                options.Add(option);
-            }
-        }
-        dropdown.AddOptions(options);
-        dropdown.value = defaultIndex;
-        dropdown.RefreshShownValue();
-    }
+    //        if (!uniqueFolders.Contains(folderName) && !string.IsNullOrEmpty(folderName))
+    //        {
+    //            uniqueFolders.Add(folderName);
+    //            Dropdown.OptionData option = new Dropdown.OptionData(folderName);
+    //            options.Add(option);
+    //        }
+    //    }
+    //    dropdown.AddOptions(options);
+    //    dropdown.value = defaultIndex;
+    //    dropdown.RefreshShownValue();
+    //}
 
 
 }

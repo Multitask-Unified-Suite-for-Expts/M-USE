@@ -1,0 +1,12 @@
+string	ExternalStimFolderPath	"C:\\Users\\Womelsdorf Lab\\Desktop\\QuaddleRepository_20180515"
+string	ExternalStimExtension	""
+bool	StimFacingCamera	TRUE
+float	ExternalStimScale	0.07
+string	ShadowType	"None"
+Vector3	StartButtonPosition	(0, 0, 0)
+float	StartButtonScale	125
+Vector3	FBSquarePosition	(0, 0, -400)
+float	FBSquareScale	75
+float	TouchFeedbackDuration	0.3
+List<string>	FeedbackControllers	["Audio", "Halo", "Token"]
+bool	NeutralITI	false

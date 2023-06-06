@@ -130,12 +130,14 @@ namespace USE_ExperimentTemplate_Session
 
 
 
-
             //If using default configs, read in the default Session/EventCode/Display Configs and write them to persistant data path:
             if (UseDefaultConfigs)
             {
                 Dropdown dropdown = GameObject.Find("Dropdown").GetComponent<Dropdown>();
-                string SessionConfigFolder = dropdown.options[dropdown.value].text; //User picks from the session config dropdown. 
+
+                //string SessionConfigFolder = dropdown.options[dropdown.value].text; //User picks from the session config dropdown.
+                string SessionConfigFolder = "SessionConfigs_DEFAULT"; //User picks from the session config dropdown.
+
                 configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
 
                 if (Directory.Exists(configFileFolder))
@@ -144,22 +146,15 @@ namespace USE_ExperimentTemplate_Session
                 if (!Directory.Exists(configFileFolder))
                 {
                     Directory.CreateDirectory(configFileFolder);
-                    List<string> configsToWrite = new List<string>();
-                    UnityEngine.Object[] subFolderObjects = Resources.LoadAll("DefaultSessionConfigs/" + SessionConfigFolder, typeof(UnityEngine.Object));
-                    for(int i = 0; i < subFolderObjects.Length; i++)
-                    {
-                        string assetPath = AssetDatabase.GetAssetPath(subFolderObjects[i]);
-                        string folderName = assetPath.Split('/')[5].Split('.')[0];
-                        configsToWrite.Add(folderName);
-                    }
+                    List<string> configsToWrite = new List<string>() { "SessionConfig", "EventCodeConfig", "DisplayConfig" };
 
-                    foreach(string config in configsToWrite)
+                    foreach (string config in configsToWrite)
                     {
-                        Debug.Log("PATH: " + ("DefaultSessionConfigs/" + SessionConfigFolder + "/" + config));
+                        Debug.Log("STRING: " + config);
                         byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + SessionConfigFolder + "/" + config).bytes;
                         System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + config + ".txt", textFileBytes);
                     }
-                } 
+                }
             }
             else
                 configFileFolder = LocateFile.GetPath("Config File Folder");

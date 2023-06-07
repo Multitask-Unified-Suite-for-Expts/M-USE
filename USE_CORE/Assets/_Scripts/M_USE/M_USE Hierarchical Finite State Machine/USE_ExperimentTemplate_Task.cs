@@ -143,7 +143,11 @@ namespace USE_ExperimentTemplate_Task
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
             ReadSettingsFiles(verifyOnly);
             ProcessCustomSettingsFiles();
+            TrialLevel.TrialDefType = TrialDefType;
+            TrialLevel.StimDefType = StimDefType;
+            
             FindStims();
+            
             if (verifyOnly) return;
 
             SetupTask = new State("SetupTask");
@@ -153,47 +157,91 @@ namespace USE_ExperimentTemplate_Task
             RunBlock.AddChildLevel(TrialLevel);
             AddActiveStates(new List<State> { SetupTask, RunBlock, BlockFeedback, FinishTask });
 
-            TrialLevel.TrialDefType = TrialDefType;
-            TrialLevel.StimDefType = StimDefType;
 
             Add_ControlLevel_InitializationMethod(() =>
             {
+                // //initialize block variables
+                // BlockCount = -1;
+                // BlockSummaryString = new StringBuilder();
+                // PreviousBlockSummaryString = new StringBuilder();
+                // CurrentTaskSummaryString = new StringBuilder();
+                //
+                // //set up some experimenter display stuff
+                // #if (!UNITY_WEBGL)
+                //     SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
+                //
+                //     if (configUI == null)
+                //         configUI = FindObjectOfType<ConfigUI>();
+                //     configUI.clear();
+                //     if (ConfigUiVariables != null)
+                //         configUI.store = ConfigUiVariables;
+                //     else
+                //         configUI.store = new ConfigVarStore();
+                //     configUI.GenerateUI();
+                //
+                // #endif
+                //
+                // //initialize camera - this should be a list
+                // TaskCam.gameObject.SetActive(true);
+                //
+                // //initialize eyetracker
+                // if (EyeTrackerActive && TobiiEyeTrackerController.Instance.TrackBoxGuideGO != null)
+                // {
+                //     TobiiEyeTrackerController.Instance.TrackBoxGuideGO.GetComponent<TrackBoxGuide>()._CanvasTrackBox.GetComponent<Canvas>().worldCamera = TaskCam;
+                // }
+                //
+                // //initialize any task canvasses - this should actually be hooked up to something useful
+                // if (TaskCanvasses != null)
+                //     foreach (GameObject go in TaskCanvasses)
+                //         go.SetActive(true);
+                //
+                // Controllers.SetActive(true);
+            });
+            
+            SetupTask.AddInitializationMethod(() =>
+            { 
+                //send task init code
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTaskStarts"]);
+                
+                //initialize block variables
                 BlockCount = -1;
                 BlockSummaryString = new StringBuilder();
                 PreviousBlockSummaryString = new StringBuilder();
                 CurrentTaskSummaryString = new StringBuilder();
 
-                #if (!UNITY_WEBGL)
-                    SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
+                //set up some experimenter display stuff
+#if (!UNITY_WEBGL)
+                SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
 
-                    if (configUI == null)
-                        configUI = FindObjectOfType<ConfigUI>();
-                    configUI.clear();
-                    if (ConfigUiVariables != null)
-                        configUI.store = ConfigUiVariables;
-                    else
-                        configUI.store = new ConfigVarStore();
-                    configUI.GenerateUI();
+                if (configUI == null)
+                    configUI = FindObjectOfType<ConfigUI>();
+                configUI.clear();
+                if (ConfigUiVariables != null)
+                    configUI.store = ConfigUiVariables;
+                else
+                    configUI.store = new ConfigVarStore();
+                configUI.GenerateUI();
 
-                #endif
+#endif
+                SetTaskSummaryString();
 
+                //initialize camera - this should be a list
                 TaskCam.gameObject.SetActive(true);
+                
+                //initialize eyetracker
                 if (EyeTrackerActive && TobiiEyeTrackerController.Instance.TrackBoxGuideGO != null)
                 {
                     TobiiEyeTrackerController.Instance.TrackBoxGuideGO.GetComponent<TrackBoxGuide>()._CanvasTrackBox.GetComponent<Canvas>().worldCamera = TaskCam;
                 }
 
+                //initialize any task canvasses - this should actually be hooked up to something useful
                 if (TaskCanvasses != null)
                     foreach (GameObject go in TaskCanvasses)
                         go.SetActive(true);
 
+                //set fbcontrollers active
                 Controllers.SetActive(true);
-            });
-            
-            SetupTask.AddInitializationMethod(() =>
-            {
-                SetTaskSummaryString();
-                EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTaskStarts"]);
+                
 
                 //Create HumanStartPanel
 
@@ -490,11 +538,13 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.ShotgunRaycastSpacing_DVA = ShotgunRaycastSpacing_DVA;
 */
 
+            //load textures
             if (UseDefaultConfigs)
                 TrialLevel.LoadTexturesFromResources();
             else
                 TrialLevel.LoadTextures(ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 
 
+            //load trackers
             MouseTracker.Init(FrameData, 0);
             if (EyeTrackerActive)
                 GazeTracker.Init(FrameData, 0);

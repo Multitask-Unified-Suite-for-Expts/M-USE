@@ -31,10 +31,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class InitScreen : MonoBehaviour {
-
+public class InitScreen : MonoBehaviour
+{
     public GameObject[] disableOnStart;
     public GameObject[] enableOnStart;
     public GameObject[] disableOnConfirm;
@@ -46,7 +47,6 @@ public class InitScreen : MonoBehaviour {
 
     public DisplayController displayController;
 
-
     void Start()
     {
         displayController = gameObject.AddComponent<DisplayController>();
@@ -57,11 +57,15 @@ public class InitScreen : MonoBehaviour {
         foreach (GameObject g in enableOnStart)
             g.SetActive(true);
 
+
+        SFTP_ServerManager.Init();
+
+
         #if (UNITY_WEBGL)
         {
-            //GameObject.Find("LocateFile").SetActive(false);
-            //GameObject.Find("InitScreenCanvas").GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display. 
-            StartCoroutine(HandleConfirm()); //Used to Skip init screen for web build. 
+            GameObject.Find("LocateFile").SetActive(false);
+            GameObject.Find("InitScreenCanvas").GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display. 
+            //StartCoroutine(HandleConfirm()); //Used to Skip init screen for web build. 
         }
 #else
             GameObject.Find("WebBuild_Children").SetActive(false);
@@ -94,6 +98,9 @@ public class InitScreen : MonoBehaviour {
     {
         StartCoroutine(HandleConfirm());
     }
+
+
+
 
 
 }

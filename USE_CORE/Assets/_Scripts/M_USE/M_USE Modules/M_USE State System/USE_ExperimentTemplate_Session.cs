@@ -121,7 +121,6 @@ namespace USE_ExperimentTemplate_Session
 
         public override void LoadSettings()
         {
-
             HumanStartPanel = gameObject.AddComponent<HumanStartPanel>();
             HumanStartPanel.SetSessionLevel(this);
             HumanStartPanel.HumanStartPanelPrefab = HumanStartPanelPrefab;
@@ -652,7 +651,6 @@ namespace USE_ExperimentTemplate_Session
                     taskButton.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
                     count++;
                 }
-                Debug.Log(TaskButtons.activeInHierarchy ? "BUTTONS ARE ACTIVE!" : "BUTTON NOT ACTIVE!");
 
                 if(IsHuman)
                 {

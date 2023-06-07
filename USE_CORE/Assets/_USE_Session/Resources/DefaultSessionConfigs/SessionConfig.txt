@@ -3,7 +3,7 @@ Dictionary<string,string>	TaskIcons	{ContinuousRecognition: ContinuousRecognitio
 float	TaskSelectionTimeout	1000
 bool	MacMainDisplayBuild	false
 bool	IsHuman	true	
-bool	StoreData	false
+bool	StoreData	true
 bool	EventCodesActive	false
 bool	SyncBoxActive	false
 string	SerialPortAddress	"\\\\.\\COM3"

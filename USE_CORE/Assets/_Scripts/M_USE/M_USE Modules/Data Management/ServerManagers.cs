@@ -13,41 +13,52 @@ using Renci.SshNet;
 using System.Collections.Generic;
 using System.Linq;
 
-public class SFTP_ServerManager
+
+public static class SFTP_ServerManager
 {
-    private readonly SftpClient sftpClient;
+    private static SftpClient sftpClient;
 
-    private string hostname = "localhost";
-    private string username = "ntraczewski";
-    private string password = "dziadziu";
-    private int port = 22;
+    private static string hostname = "localhost";
+    private static string username = "ntraczewski";
+    private static string password = "dziadziu";
+    private static int port = 22;
 
-    private string sessionFolderPath;
+    private static string mainFolderName = "SFTP_TestData";
+    private static string sessionFolderName;
+    private static string sessionFolderPath;
 
-    public SFTP_ServerManager()
+
+    public static void Init()
     {
         sftpClient = new SftpClient(hostname, port, username, password);
-        sessionFolderPath = "SessionData_" + DateTime.Now.ToString("MMddyy_HHmmss");
+        sessionFolderName = "SessionData_" + DateTime.Now.ToString("MMddyy_HHmmss");
+        sessionFolderPath = mainFolderName + "/" + sessionFolderName;
         Connect();
         CreateSessionFolder();
+        HandleServerManager();
     }
 
-    public void Connect()
+    private static async void HandleServerManager()
+    {
+        await SFTP_ServerManager.GetAndSetSessionConfigFolders("SFTP_TestSessionConfigs");
+    }
+
+    public static void Connect()
     {
         sftpClient.Connect();
     }
 
-    public void Disconnect()
+    public static void Disconnect()
     {
         sftpClient.Disconnect();
     }
 
-    private void CreateSessionFolder()
+    private static void CreateSessionFolder()
     {
         try
         {
             sftpClient.CreateDirectory(sessionFolderPath);
-            Debug.Log($"Session folder created: {sessionFolderPath}");
+            Debug.Log($"Session folder created at: {sessionFolderPath}");
         }
         catch (Exception e)
         {
@@ -55,14 +66,15 @@ public class SFTP_ServerManager
         }
     }
 
-    public async Task<string> ReadFileFromServerAsync(string fileName)
+    public static async Task<string> ReadFileFromServerAsync(string folderPath, string fileName)
     {
-        string remoteFilePath = $"{sessionFolderPath}/{fileName}";
+        string remoteFilePath = $"{folderPath}/{fileName}";
 
         try
         {
             if (sftpClient.Exists(remoteFilePath))
             {
+                Debug.Log("EXTERNAL FILE EXISTS AT " + remoteFilePath);
                 using (var stream = new MemoryStream())
                 {
                     await Task.Run(() => sftpClient.DownloadFile(remoteFilePath, stream)); //download file into memory stream
@@ -74,7 +86,7 @@ public class SFTP_ServerManager
                 }
             }
             else
-                Debug.Log($"File {fileName} does not exist on the server!");
+                Debug.Log($"File ({fileName}) does not exist on the server!");
         }
         catch(Exception e)
         {
@@ -84,7 +96,7 @@ public class SFTP_ServerManager
         return string.Empty;
     }
 
-    public async Task CreateFileWithColumnTitles(string fileName, string fileHeaders)
+    public static async Task CreateFileWithColumnTitles(string fileName, string fileHeaders)
     {
         string remoteFilePath = $"{sessionFolderPath}/{fileName}";
 
@@ -94,7 +106,7 @@ public class SFTP_ServerManager
             {
                 await Task.Run(() => sftpClient.UploadFile(stream, remoteFilePath));
             }
-            Debug.Log($"File {fileName} created successfully with column titles!");
+            Debug.Log($"File ({fileName}) created successfully with column titles!");
         }
         catch (Exception e)
         {
@@ -102,7 +114,7 @@ public class SFTP_ServerManager
         }
     }
 
-    public async Task AppendDataToExistingFile(string fileName, string rowData)
+    public static async Task AppendDataToExistingFile(string fileName, string rowData)
     {
         string remoteFilePath = $"{sessionFolderPath}/{fileName}";
 
@@ -135,11 +147,11 @@ public class SFTP_ServerManager
         }
     }
 
-    public async Task<List<string>> GetChildFolders(string sessionConfigFolderName)
+    public static async Task<List<string>> GetAndSetSessionConfigFolders(string sessionConfigFolderName)
     {
         try
         {
-            string path = sessionFolderPath + sessionConfigFolderName;
+            string path = sessionConfigFolderName; // sessionFolderName + "/" + sessionConfigFolderName;
 
             var directoryItems = await Task.Run(() => sftpClient.ListDirectory(path));
             var folders = directoryItems
@@ -147,13 +159,15 @@ public class SFTP_ServerManager
                 .Select(item => item.Name)
                 .ToList();
 
+            FolderDropdown folderDropdown = GameObject.Find("Dropdown").GetComponent<FolderDropdown>();
+            folderDropdown.SetFolders(folders);
+
             return folders;
         }
         catch (Exception e)
         {
             Debug.Log($"An error occurred while getting immediate folders: {e.Message}");
         }
-
         return new List<string>();
     }
 

@@ -189,13 +189,9 @@ namespace USE_Data
 
 		public string FileHeaders;
 
-        private static DropboxManager dropboxManager;
-		private static ServerManager serverManager;
-        private static ServerPHPManager serverPHPManager;
-		private static SFTP_ServerManager sftpServerManager;
 
-        public bool SendDataExternally;
-		public string WhereToSendData;
+		//For webgl build (short term)
+		public bool SendDataExternally;
 
 
 
@@ -221,17 +217,17 @@ namespace USE_Data
 					OnStart();
 			}
 
+
+
 			//Handling Data for WebGL Build-------------------------------------
 #if (UNITY_WEBGL)
-				SendDataExternally = true;
-				WhereToSendData = "sftp"; //Can change to SFTP, PHP, TEBA, Dropbox. 
+
+			SendDataExternally = true;
+
 #endif
+			//------------------------------------------------------------------
 
-			if(storeData && SendDataExternally && serverManager == null && dropboxManager == null && serverPHPManager == null && sftpServerManager == null)
-				SetupExternalDataManager();
-            //------------------------------------------------------------------
-
-        }
+		}
 
         public void ManuallyDefine(int cap = 100)
 		{
@@ -704,58 +700,12 @@ namespace USE_Data
 		}
 
 
-        private void SetupExternalDataManager()
-		{
-			switch (WhereToSendData.ToLower())
-            {
-                case "sftp":
-                    sftpServerManager = new SFTP_ServerManager();
-                    break;
-                case "teba":
-                    serverManager = new ServerManager("TEBA_API_Address_HERE");
-                    break;
-                case "dropbox":
-                    dropboxManager = new DropboxManager();
-                    break;
-                case "php":
-                    serverPHPManager = new ServerPHPManager("http://m-use.psy.vanderbilt.edu:8080");
-                    break;
-                default:
-                    break;
-            }
-        }
-
         private async void HandleExternalData(string fileName, string fileHeaders = null, string fileContent = null)
         {
-            switch (WhereToSendData.ToLower())
-            {
-                case "sftp":
-                    if (fileHeaders != null)
-                        await sftpServerManager.CreateFileWithColumnTitles(fileName, fileHeaders);
-                    if (fileContent != null)
-                        await sftpServerManager.AppendDataToExistingFile(fileName, fileContent);
-                    break;
-                case "teba":
-                    if (fileHeaders != null)
-                        await serverManager.CreateFileWithColumnTitles(fileName, fileHeaders);
-                    if (fileContent != null)
-                        await serverManager.AppendDataToExistingFile(fileName, fileContent);
-                    break;
-                case "dropbox":
-                    if (fileHeaders != null)
-                        await dropboxManager.CreateFileWithColumnTitles(fileName, fileHeaders);
-                    if (fileContent != null)
-                        await dropboxManager.AppendDataToExistingFile(fileName, fileContent);
-                    break;
-                case "php":
-					if (fileHeaders != null)
-						StartCoroutine(serverPHPManager.CreateFileWithColumnTitles(fileName, fileHeaders));
-					if (fileContent != null)
-						StartCoroutine(serverPHPManager.AppendDataToExistingFile(fileName, fileContent));
-					break;
-                default:
-                    break;
-            }
+            if (fileHeaders != null)
+                await SFTP_ServerManager.CreateFileWithColumnTitles(fileName, fileHeaders);
+            if (fileContent != null)
+                await SFTP_ServerManager.AppendDataToExistingFile(fileName, fileContent);
         }
 
 

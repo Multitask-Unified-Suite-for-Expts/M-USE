@@ -248,14 +248,22 @@ namespace USE_ExperimentTemplate_Trial
                     canvas.gameObject.SetActive(false);
                 }
 
-                GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Canvas").gameObject.SetActive(true);
-                GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Scripts").gameObject.SetActive(true);
+                var CalibrationCanvas = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Canvas");
+                var CalibrationScripts = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Scripts");
+                var CalibrationGazeTrail = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_GazeTrail");
 
-                Debug.Log("CALIBRATION CHILD NAME: " + Calibration.ChildLevel.ControlLevelName);
+
+                CalibrationCanvas.GetComponent<Canvas>().worldCamera = Camera.main;
+                CalibrationCanvas.gameObject.SetActive(true);
+                CalibrationGazeTrail.gameObject.SetActive(true);
+                CalibrationScripts.gameObject.SetActive(true);
+
             });
 
            Calibration.SpecifyTermination(() => CalibrationTaskLevel.Terminated, () => SetupTrial, () =>
            {
+               GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Canvas").gameObject.SetActive(false);
+
                foreach (Canvas canvas in TaskLevel.TaskCanvasses)
                {
                    canvas.gameObject.SetActive(true);

@@ -61,7 +61,7 @@ namespace USE_ExperimentTemplate_Session
         public string TaskSelectionSceneName;
 
         protected List<ControlLevel_Task_Template> ActiveTaskLevels;
-        private ControlLevel_Task_Template CurrentTask;
+        public ControlLevel_Task_Template CurrentTask;
         private ControlLevel_Task_Template CalibrationTaskLevel;
         private OrderedDictionary TaskMappings;
         private string ContextExternalFilePath;

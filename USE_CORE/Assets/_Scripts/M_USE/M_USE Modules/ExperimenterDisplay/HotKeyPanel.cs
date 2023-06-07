@@ -400,8 +400,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     {
                         HkPanel.TaskLevel.Terminated = true;
                         HkPanel.TrialLevel.runCalibration = false;
-                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
-
+                        HkPanel.TrialLevel.GetStateFromName("Calibration").ChildLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("Calibration").ChildLevel.GetStateFromName("FinishTrial"));
                     }
                 }
             };

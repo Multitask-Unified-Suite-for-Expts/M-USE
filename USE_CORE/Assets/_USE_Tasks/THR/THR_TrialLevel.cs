@@ -98,7 +98,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public float TouchFeedbackDuration;
 
-    //Set in inspector:
+    //set in inspector:
     public GameObject PPVolumeGO;
 
 
@@ -115,6 +115,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
+            PPVolumeGO.SetActive(false);
+
             WhiteColor = new Color32(236, 238, 242, 255);
             LightBlueColor = new Color32(38, 188, 250, 255);
 
@@ -301,7 +303,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 {
                     if (hitGO.name == "BackdropGO")
                     {
-                        Input.ResetInputAxes();
                         NumTouchesMovedOutside_Trial++;
                         MovedOutside = true;
                     }

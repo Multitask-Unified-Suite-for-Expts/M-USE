@@ -121,6 +121,7 @@ namespace USE_ExperimentTemplate_Session
 
         public override void LoadSettings()
         {
+
             HumanStartPanel = gameObject.AddComponent<HumanStartPanel>();
             HumanStartPanel.SetSessionLevel(this);
             HumanStartPanel.HumanStartPanelPrefab = HumanStartPanelPrefab;
@@ -133,7 +134,7 @@ namespace USE_ExperimentTemplate_Session
             //If using default configs, read in the default Session/EventCode/Display Configs and write them to persistant data path:
             if (UseDefaultConfigs)
             {
-                Dropdown dropdown = GameObject.Find("Dropdown").GetComponent<Dropdown>();
+                //Dropdown dropdown = GameObject.Find("Dropdown").GetComponent<Dropdown>();
 
                 //string SessionConfigFolder = dropdown.options[dropdown.value].text + "/"; //User picks from the session config dropdown.
                 string SessionConfigFolder = ""; 
@@ -323,10 +324,10 @@ namespace USE_ExperimentTemplate_Session
             DisplayController = GameObject.Find("InitializationScreen").GetComponent<DisplayController>();
 
 #if (UNITY_WEBGL)
-            //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
-            //GameObject initCamGO = GameObject.Find("InitCamera");
-            //    initCamGO.SetActive(false);
-            //    TaskSelection_Starfield.SetActive(true);            
+                //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
+                GameObject initCamGO = GameObject.Find("InitCamera");
+                initCamGO.SetActive(false);
+                TaskSelection_Starfield.SetActive(true);
 #else
                 TaskSelection_Starfield.SetActive(false);
                 GameObject experimenterDisplay = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
@@ -514,7 +515,6 @@ namespace USE_ExperimentTemplate_Session
 
                 SessionCam.gameObject.SetActive(true);
 
-
                 // Don't show the task buttons if we encountered an error during setup
                 if (LogPanel.HasError())
                     return;
@@ -652,6 +652,7 @@ namespace USE_ExperimentTemplate_Session
                     taskButton.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
                     count++;
                 }
+                Debug.Log(TaskButtons.activeInHierarchy ? "BUTTONS ARE ACTIVE!" : "BUTTON NOT ACTIVE!");
 
                 if(IsHuman)
                 {

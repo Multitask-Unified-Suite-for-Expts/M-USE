@@ -38,6 +38,7 @@ using System.Linq;
 using System.Collections.Generic;
 using USE_States;
 using static Dropbox.Api.Files.SearchMatchTypeV2;
+using System.Threading.Tasks;
 
 namespace USE_Data
 {
@@ -221,12 +222,12 @@ namespace USE_Data
 			}
 
 			//Handling Data for WebGL Build-------------------------------------
-			#if (UNITY_WEBGL)
+#if (UNITY_WEBGL)
 				SendDataExternally = true;
-				WhereToSendData = "sftp"; //Can change to PHP, TEBA, Dropbox. 
+				WhereToSendData = "sftp"; //Can change to SFTP, PHP, TEBA, Dropbox. 
 #endif
 
-			if(storeData && serverManager == null && dropboxManager == null && serverPHPManager == null && sftpServerManager == null)
+			if(storeData && SendDataExternally && serverManager == null && dropboxManager == null && serverPHPManager == null && sftpServerManager == null)
 				SetupExternalDataManager();
             //------------------------------------------------------------------
 
@@ -703,13 +704,12 @@ namespace USE_Data
 		}
 
 
-		private void SetupExternalDataManager()
+        private void SetupExternalDataManager()
 		{
-            switch (WhereToSendData.ToLower())
+			switch (WhereToSendData.ToLower())
             {
                 case "sftp":
                     sftpServerManager = new SFTP_ServerManager();
-					sftpServerManager.Connect();
                     break;
                 case "teba":
                     serverManager = new ServerManager("TEBA_API_Address_HERE");
@@ -731,9 +731,9 @@ namespace USE_Data
             {
                 case "sftp":
                     if (fileHeaders != null)
-                        sftpServerManager.CreateFileWithColumnTitles(fileName, fileHeaders);
+                        await sftpServerManager.CreateFileWithColumnTitles(fileName, fileHeaders);
                     if (fileContent != null)
-                        sftpServerManager.AppendDataToExistingFile(fileName, fileContent);
+                        await sftpServerManager.AppendDataToExistingFile(fileName, fileContent);
                     break;
                 case "teba":
                     if (fileHeaders != null)

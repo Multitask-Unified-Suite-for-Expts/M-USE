@@ -10,15 +10,16 @@ using Dropbox.Api.Files;
 using UnityEngine;
 using UnityEngine.Networking;
 using Renci.SshNet;
-
+using System.Collections.Generic;
+using System.Linq;
 
 public class SFTP_ServerManager
 {
     private readonly SftpClient sftpClient;
 
     private string hostname = "localhost";
-    private string username = "sftpuser";
-    private string password = "Dziadziu21!";
+    private string username = "ntraczewski";
+    private string password = "dziadziu";
     private int port = 22;
 
     private string sessionFolderPath;
@@ -26,7 +27,9 @@ public class SFTP_ServerManager
     public SFTP_ServerManager()
     {
         sftpClient = new SftpClient(hostname, port, username, password);
-        sessionFolderPath = "/SessionData_" + DateTime.Now.ToString("MMddyy_HHmmss");
+        sessionFolderPath = "SessionData_" + DateTime.Now.ToString("MMddyy_HHmmss");
+        Connect();
+        CreateSessionFolder();
     }
 
     public void Connect()
@@ -39,25 +42,20 @@ public class SFTP_ServerManager
         sftpClient.Disconnect();
     }
 
-    public void CreateFileWithColumnTitles(string fileName, string fileHeaders)
+    private void CreateSessionFolder()
     {
-        string remoteFilePath = $"{sessionFolderPath}/{fileName}";
-
         try
         {
-            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(fileHeaders)))
-            {
-                sftpClient.UploadFile(stream, remoteFilePath);
-            }
-            Debug.Log($"File {fileName} created successfully with column titles!");
+            sftpClient.CreateDirectory(sessionFolderPath);
+            Debug.Log($"Session folder created: {sessionFolderPath}");
         }
         catch (Exception e)
         {
-            Debug.Log($"An error occurred while creating file: {fileName} | ErrorMessage: {e.Message}");
+            Debug.Log($"An error occurred while creating session folder: {e.Message}");
         }
     }
 
-    public void AppendDataToExistingFile(string fileName, string rowData)
+    public async Task<string> ReadFileFromServerAsync(string fileName)
     {
         string remoteFilePath = $"{sessionFolderPath}/{fileName}";
 
@@ -67,11 +65,58 @@ public class SFTP_ServerManager
             {
                 using (var stream = new MemoryStream())
                 {
-                    sftpClient.DownloadFile(remoteFilePath, stream); // Download existing file   //Will ultimately import config files. 
-                    byte[] rowDataBytes = Encoding.UTF8.GetBytes(rowData + "\n");
+                    await Task.Run(() => sftpClient.DownloadFile(remoteFilePath, stream)); //download file into memory stream
+                    stream.Position = 0;
+                    using (var reader = new StreamReader(stream)) //read content of stream 
+                    {
+                        return await reader.ReadToEndAsync();
+                    }
+                }
+            }
+            else
+                Debug.Log($"File {fileName} does not exist on the server!");
+        }
+        catch(Exception e)
+        {
+            Debug.Log($"An error occurred while reading file: {fileName} | ErrorMessage: {e.Message}");
+        }
+
+        return string.Empty;
+    }
+
+    public async Task CreateFileWithColumnTitles(string fileName, string fileHeaders)
+    {
+        string remoteFilePath = $"{sessionFolderPath}/{fileName}";
+
+        try
+        {
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(fileHeaders)))
+            {
+                await Task.Run(() => sftpClient.UploadFile(stream, remoteFilePath));
+            }
+            Debug.Log($"File {fileName} created successfully with column titles!");
+        }
+        catch (Exception e)
+        {
+            Debug.Log($"An error occurred while creating file: {fileName} | ErrorMessage: {e.Message}");
+        }
+    }
+
+    public async Task AppendDataToExistingFile(string fileName, string rowData)
+    {
+        string remoteFilePath = $"{sessionFolderPath}/{fileName}";
+
+        try
+        {
+            if (sftpClient.Exists(remoteFilePath))
+            {
+                using (var stream = new MemoryStream())
+                {
+                    await Task.Run(() => sftpClient.DownloadFile(remoteFilePath, stream)); // Download existing file
+                    byte[] rowDataBytes = Encoding.UTF8.GetBytes("\n" + rowData);
                     stream.Write(rowDataBytes, 0, rowDataBytes.Length);
                     stream.Position = 0; // Reset stream position
-                    sftpClient.UploadFile(stream, remoteFilePath); // Upload modified file
+                    await Task.Run(() => sftpClient.UploadFile(stream, remoteFilePath)); // Upload modified file
                 }
                 Debug.Log($"Data appended to file {fileName} successfully!");
             }
@@ -79,7 +124,7 @@ public class SFTP_ServerManager
             {
                 using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(rowData)))
                 {
-                    sftpClient.UploadFile(stream, remoteFilePath);
+                    await Task.Run(() => sftpClient.UploadFile(stream, remoteFilePath));
                 }
                 Debug.Log($"File {fileName} created and data added successfully!");
             }
@@ -89,6 +134,29 @@ public class SFTP_ServerManager
             Debug.Log($"An error occurred while appending data to file: {fileName} | ErrorMessage: {e.Message}");
         }
     }
+
+    public async Task<List<string>> GetChildFolders(string sessionConfigFolderName)
+    {
+        try
+        {
+            string path = sessionFolderPath + sessionConfigFolderName;
+
+            var directoryItems = await Task.Run(() => sftpClient.ListDirectory(path));
+            var folders = directoryItems
+                .Where(item => item.IsDirectory)
+                .Select(item => item.Name)
+                .ToList();
+
+            return folders;
+        }
+        catch (Exception e)
+        {
+            Debug.Log($"An error occurred while getting immediate folders: {e.Message}");
+        }
+
+        return new List<string>();
+    }
+
 
 }
 

@@ -14,7 +14,7 @@ public class FolderDropdown : MonoBehaviour
     private void Start()
     {
         #if(UNITY_WEBGL)
-            SetFolders();
+            //SetFolders();
         #endif
         //LoadFolders();
     }

@@ -61,7 +61,7 @@ public class InitScreen : MonoBehaviour {
         {
             //GameObject.Find("LocateFile").SetActive(false);
             //GameObject.Find("InitScreenCanvas").GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display. 
-            StartCoroutine(HandleConfirm()); //Skip init screen basically. trying to replace this with the above code. 
+            StartCoroutine(HandleConfirm()); //Used to Skip init screen for web build. 
         }
 #else
             GameObject.Find("WebBuild_Children").SetActive(false);

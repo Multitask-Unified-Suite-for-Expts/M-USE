@@ -183,6 +183,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
                 USE_StartButton = new USE_StartButton(taskCanvas.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                 StartButton = USE_StartButton.StartButtonGO;
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                USE_StartButton.SetButtonColor(color: Color.black);
             }
 
             DeactivateChildren(taskCanvas);
@@ -229,6 +230,10 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.SetBlockSummaryString();
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
+
+            sampleStims.stimDefs[0].StimGameObject.transform.localPosition = new Vector3(0, 0, 0);
+            sampleStims.stimDefs[0].StimGameObject.transform.localRotation = Quaternion.Euler(0, 0, 0);
+            sampleStims.stimDefs[0].StimGameObject.transform.localScale = new Vector3(1, 1, 1);
         });
 
         // Show the target/sample by itself for some time
@@ -236,7 +241,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         {
             StateAfterDelay = SearchDisplay;
             DelayDuration = postSampleDelayDuration.value;
-            
+
         });
 
 
@@ -483,7 +488,7 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
 
         mcCompPanel.transform.localPosition = new Vector3(0, 0, 0);
         mcCompPanel.transform.localRotation = Quaternion.Euler(0, 0, 0);
-        mcCompPanel.transform.localScale = new Vector3(10, 10, 10);
+        mcCompPanel.transform.localScale = new Vector3(20, 20, 20);
         // Getting total number of components, number of component for each object index, number of circles,  radius and angle offset of of circles
         // from the stimDef and assign a location and an object index for each component
 
@@ -752,6 +757,7 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
         TrialStims.Add(multiCompStims);
         TrialStims.Add(sampleStims);
         sampleStims.SetLocations(CurrentTrialDef.sampleCompLocations);
+
         //sampleComp.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
         // // searchStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback")); MAKING QUADDLES TWITCH BETWEEN STATES
         // //   distractorStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback"));

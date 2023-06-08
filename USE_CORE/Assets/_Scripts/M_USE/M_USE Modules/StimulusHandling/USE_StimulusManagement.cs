@@ -411,7 +411,7 @@ namespace USE_StimulusManagement
 			{
 				//parse filename for stimExtension and assign
 			}
-			Debug.Log(StimExtension);
+			
 			switch (StimExtension.ToLower())
 			{
 				case ".fbx":
@@ -423,7 +423,6 @@ namespace USE_StimulusManagement
 					stimGOImage.texture = LoadPNG(FileName);
 					if (this.CanvasGameObject != null)
 						StimGameObject.GetComponent<RectTransform>().SetParent(this.CanvasGameObject.GetComponent<RectTransform>());
-					Debug.Log("PNG: " + FileName);
 					break;
 				default:
 					break;
@@ -509,8 +508,6 @@ namespace USE_StimulusManagement
 
 		private void PositionRotationScale()
 		{
-			Debug.Log(StimGameObject);
-			Debug.Log(StimLocation);
             StimGameObject.transform.position = StimLocation;
 			StimGameObject.transform.rotation = Quaternion.Euler(StimRotation);
 
@@ -817,7 +814,6 @@ namespace USE_StimulusManagement
 			{
 				for (int iL = 0; iL < LocArray.Length; iL++)
 				{
-					Debug.Log("stim " + iL + ", " + LocArray[iL]);
 					stimDefs[iL].StimLocation = LocArray[iL];
 				}
 			}

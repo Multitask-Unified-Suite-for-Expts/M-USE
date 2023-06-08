@@ -254,15 +254,16 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
             choiceMade = false;
-            Handler.HandlerActive = true;
+            // Handler.HandlerActive = true;
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
+            
+            foreach(StimDef sd in multiCompStims.stimDefs)
+                sd.StimGameObject.transform.localRotation = Quaternion.Euler(Vector3.zero);
         });
 
         SearchDisplay.AddUpdateMethod(() =>
         {
-            Handler.HandlerActive = true;
-
             if (Handler.SuccessfulSelections.Count > 0)
             {
 
@@ -570,6 +571,9 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
         }
         
         // sd.StimGameObject = mcCompPanel;
+        mcCompPanel.AddComponent<Rigidbody2D>();
+        // mcCompPanel.GetComponent<Rigidbody2D>().isKinematic = false;
+        mcCompPanel.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
         return mcCompPanel;
         //return new GameObject(); // this line is just here so I don't have to comment out stuff below... the function returns the multiccomp object
     }
@@ -688,11 +692,9 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
         //destroyed at TrialLevel_Finish
         //StimGroup constructor which creates a subset of an already-existing StimGroup 
 
-        multiCompStims = new StimGroup("MultiCompStims", GetStateFromName("SearchDisplay"), GetStateFromName("SearchDisplay")); // can add state control of onset/offset
+        multiCompStims = new StimGroup("MultiCompStims", GetStateFromName("SearchDisplay"), GetStateFromName("SelectionFeedback")); // can add state control of onset/offset
 
         StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
-        Debug.Log("stim group info: " + group.stimDefs.Count);
-        Debug.Log("stim group path 0: " + group.stimDefs[0].StimPath);
 
         sampleStims = new StimGroup("SampleStims", group, CurrentTrialDef.sampleCompIndices);
         sampleStims.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
@@ -751,9 +753,6 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
         }
 
         // multiCompStims.SetLocations(CurrentTrialDef.mcStimLocations);
-        Debug.Log(multiCompStims);
-        Debug.Log("mcStimLoc" + multiCompStims.stimDefs[1].StimLocation);
-        Debug.Log("mcStimLoc" + multiCompStims.stimDefs[0].StimLocation);
         TrialStims.Add(multiCompStims);
         TrialStims.Add(sampleStims);
         sampleStims.SetLocations(CurrentTrialDef.sampleCompLocations);

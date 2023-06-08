@@ -33,12 +33,6 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
 
         while (iEyeTracker == null  || EyeTracker == null || TrackBoxGuideGO == null)
             FindEyeTrackerComponents();
-
-        if (MonitorDetails != null && ScreenDetails != null && CoordinateConverter == null)
-        {
-            InitializeCoordinateConverter();
-        }
-
     }
 
     public override void FindEyeTrackerComponents()
@@ -60,8 +54,4 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
 
     }
 
-    private void InitializeCoordinateConverter()
-    {
-        CoordinateConverter = new USE_CoordinateConverter(MonitorDetails, ScreenDetails);
-    }
 }

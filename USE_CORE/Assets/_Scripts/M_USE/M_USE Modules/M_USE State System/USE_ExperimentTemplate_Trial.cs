@@ -138,7 +138,8 @@ namespace USE_ExperimentTemplate_Trial
             Delay.AddTimer(() => DelayDuration, () => StateAfterDelay);
 
             Cursor.visible = false;
-            TokenFBController.enabled = false;
+            if (TokenFBController != null)
+                TokenFBController.enabled = false;
 
             AddAbortCodeKeys();
 

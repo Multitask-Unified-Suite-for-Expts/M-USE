@@ -99,6 +99,10 @@ namespace USE_DisplayManagement {
 
             ScreenWidth_Cm = UpperRight_Cm.x - LowerLeft_Cm.x;
             ScreenHeight_Cm = UpperRight_Cm.y - LowerLeft_Cm.y;
+            Debug.Log("LOWER LEFT CM: " + lowerLeft.ToString());
+            Debug.Log("UPPER RIGHT CM: " + upperRight.ToString());
+            Debug.Log("SCREEN WIDTH: " + ScreenWidth_Cm);
+            Debug.Log("SCREEN HEIGHT: " + ScreenHeight_Cm);
         }
     }
 

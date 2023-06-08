@@ -93,35 +93,13 @@ public static class USE_CoordinateConverter
     private static Vector2 screenLowerLeftPixels;
     private static Vector2 screenSizeCm;
 
-    public static void SetCoordinateConverter(MonitorDetails monitorDetails, ScreenDetails screenDetails, float eyeDistance = 60f)
-    {
-        MonitorDetails = monitorDetails;
-        ScreenDetails = screenDetails;
-        EyeDistance = eyeDistance;
-
-        // Assign Monitor Constants for Calculation
-        monitorPixelsPerCm = (MonitorDetails.PixelResolution.x / MonitorDetails.CmSize.x + MonitorDetails.PixelResolution.y / MonitorDetails.CmSize.y) / 2;
-        monitorCmPerPixel = (MonitorDetails.CmSize.x / MonitorDetails.PixelResolution.x +MonitorDetails.CmSize.y / MonitorDetails.PixelResolution.y) / 2;
-        pixelsPerDegree = 2 * Mathf.Tan(0.5f / Mathf.Rad2Deg) * EyeDistance;
-        degreesPerPixel = 2 * Mathf.Atan((monitorCmPerPixel / 2) / EyeDistance);
-        cmPerDegree = 1f;
-
-        // Assign Screen Constants for Calculation
-
-        screenPixelsPerCm = ((ScreenDetails.PixelResolution.x / ScreenDetails.ScreenWidth_Cm) +
-                             (ScreenDetails.PixelResolution.y / ScreenDetails.ScreenHeight_Cm)) / 2;
-        screenCmPerPixel = ((ScreenDetails.ScreenWidth_Cm / ScreenDetails.PixelResolution.x) +
-                            (ScreenDetails.ScreenHeight_Cm / ScreenDetails.PixelResolution.y)) / 2;
-        screenLowerLeftPixels = ScreenDetails.LowerLeft_Cm * monitorPixelsPerCm;
-        screenSizeCm = new Vector2(ScreenDetails.ScreenWidth_Cm, ScreenDetails.ScreenHeight_Cm);
-
-    }
-
     public static void SetScreenDetails(ScreenDetails screenDetails)
     {
         ScreenDetails = screenDetails;
 
         // Assign Screen Constants for Calculation
+
+
         screenPixelsPerCm = ((ScreenDetails.PixelResolution.x / ScreenDetails.ScreenWidth_Cm) +
                              (ScreenDetails.PixelResolution.y / ScreenDetails.ScreenHeight_Cm)) / 2;
         screenCmPerPixel = ((ScreenDetails.ScreenWidth_Cm / ScreenDetails.PixelResolution.x) +
@@ -242,6 +220,10 @@ public static class USE_CoordinateConverter
         ScreenPixel = new Vector2(((Vector2)ScreenPixel).x, ScreenDetails.PixelResolution.y - ((Vector2)ScreenPixel).y);
         ScreenCm = ScreenPixel * screenCmPerPixel;
         MonitorPixel = ScreenCmToMonitorPixel(ScreenCm);
+        Debug.Log("SCREEN PIXEL: " + ScreenPixel.ToString());
+        Debug.Log("SCREEN CM: " + ScreenCm.ToString());
+        Debug.Log("SCREEN CM PER PIXEL: " + screenCmPerPixel);
+        Debug.Log("monitor PIXEL: " + MonitorPixel.ToString());
         return MonitorPixel;
     }
     private static Vector2? ScreenPixelToMonitorPixel(Vector2? screenPixel)

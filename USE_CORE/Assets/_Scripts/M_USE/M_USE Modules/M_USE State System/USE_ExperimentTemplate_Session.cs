@@ -53,7 +53,6 @@ namespace USE_ExperimentTemplate_Session
         protected SerialSentData SerialSentData;
         protected SerialRecvData SerialRecvData;
         private SessionDataControllers SessionDataControllers;
-        private SessionDataControllers CalibrationDataControllers;
         private bool StoreData;
         private bool MacMainDisplayBuild;
         [HideInInspector] public string SubjectID, SessionID, SessionDataPath, FilePrefix;
@@ -84,7 +83,7 @@ namespace USE_ExperimentTemplate_Session
         private SyncBoxController SyncBoxController;
         private EventCodeManager EventCodeManager;
         [HideInInspector] public SelectionTracker SelectionTracker;
-        private GameObject Controllers;
+        private GameObject InputManager;
         private MouseTracker MouseTracker;
         private GazeTracker GazeTracker;
         private GameObject InputTrackers;
@@ -295,6 +294,7 @@ namespace USE_ExperimentTemplate_Session
             if (SessionSettings.SettingExists("Session", "ScreenDetails"))
             {
                 ScreenDetails = (ScreenDetails)SessionSettings.Get("Session", "ScreenDetails");
+
             }
 
             if (UseDefaultConfigs)
@@ -355,8 +355,10 @@ namespace USE_ExperimentTemplate_Session
 #endif
 
             // Create the input tracker object
-            Controllers = new GameObject("Controllers");
-            InputTrackers = Instantiate(Resources.Load<GameObject>("InputTrackers"), Controllers.transform);
+            InputManager = new GameObject("InputManager");
+            InputManager.SetActive(true);
+
+            InputTrackers = Instantiate(Resources.Load<GameObject>("InputTrackers"), InputManager.transform);
             MouseTracker = InputTrackers.GetComponent<MouseTracker>();
             GazeTracker = InputTrackers.GetComponent<GazeTracker>();
 
@@ -373,9 +375,14 @@ namespace USE_ExperimentTemplate_Session
                 }
             }
             if (MonitorDetails != null && ScreenDetails != null)
-                USE_CoordinateConverter.SetCoordinateConverter(MonitorDetails, ScreenDetails);
+            {
+                USE_CoordinateConverter.ScreenDetails = new ScreenDetails(ScreenDetails.LowerLeft_Cm, ScreenDetails.UpperRight_Cm, ScreenDetails.PixelResolution);
+                USE_CoordinateConverter.MonitorDetails = new MonitorDetails(MonitorDetails.PixelResolution, MonitorDetails.CmSize);
+                USE_CoordinateConverter.SetMonitorDetails(USE_CoordinateConverter.MonitorDetails);
+                USE_CoordinateConverter.SetScreenDetails(USE_CoordinateConverter.ScreenDetails);
+            }
 
-            
+
 
 
             // Instantiating Task Selection Frame Data
@@ -515,14 +522,18 @@ namespace USE_ExperimentTemplate_Session
 
                 
 
-                MouseTracker.Init(FrameData, 0);
-                MouseTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
-
+                
                 if (EyeTrackerActive)
                 {
                     GazeTracker.Init(FrameData, 0);
                     GazeTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
                     InputTrackers.GetComponent<GazeTracker>().enabled = true;
+                }
+                else
+                {
+                    MouseTracker.Init(FrameData, 0);
+                    MouseTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
+                    InputTrackers.GetComponent<MouseTracker>().enabled = true;
                 }
 
             });
@@ -1027,7 +1038,6 @@ namespace USE_ExperimentTemplate_Session
             tl.IsHuman = IsHuman;
             tl.DisplayController = DisplayController;
             tl.SessionDataControllers = SessionDataControllers;
-            tl.CalibrationDataControllers = CalibrationDataControllers;
             tl.LocateFile = LocateFile;
             tl.SessionDataPath = SessionDataPath;
 
@@ -1089,6 +1099,10 @@ namespace USE_ExperimentTemplate_Session
                 tl.GazeTracker = GazeTracker;
                 tl.TobiiEyeTrackerController = TobiiEyeTrackerController;
             }
+            else
+                tl.MouseTracker = MouseTracker;
+
+            tl.InputManager = InputManager;
 
             if (SessionSettings.SettingExists("Session", "SelectionType"))
                 tl.SelectionType = (string)SessionSettings.Get("Session", "SelectionType");
@@ -1112,11 +1126,6 @@ namespace USE_ExperimentTemplate_Session
             tl.ShotgunRaycastCircleSize_DVA = ShotgunRaycastCircleSize_DVA;
             tl.ShotgunRaycastSpacing_DVA = ShotgunRaycastSpacing_DVA;
             tl.ParticipantDistance_CM = ParticipantDistance_CM;
-
-            tl.MouseTracker = MouseTracker;
-
-            tl.Controllers = Controllers;
-
 
             if (SessionSettings.SettingExists("Session", "RewardPulsesActive"))
                 tl.RewardPulsesActive = (bool)SessionSettings.Get("Session", "RewardPulsesActive");

@@ -101,7 +101,7 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public EventCodeManager EventCodeManager;
         protected Dictionary<string, EventCode> CustomTaskEventCodes;
         [HideInInspector] public Dictionary<string, EventCode> SessionEventCodes;
-        [HideInInspector] public GameObject Controllers;
+        [HideInInspector] public GameObject InputManager;
 
         public Type TaskLevelType;
         protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
@@ -202,7 +202,7 @@ namespace USE_ExperimentTemplate_Task
                     foreach (Canvas canvas in TaskCanvasses)
                         canvas.gameObject.SetActive(true);
 
-                Controllers.SetActive(true);
+                InputManager.SetActive(true);
             });
 
             SetupTask.AddInitializationMethod(() =>
@@ -479,7 +479,7 @@ namespace USE_ExperimentTemplate_Task
 
 
             //AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
-            GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"), Controllers.transform);
+            GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"), InputManager.transform);
 
             // fbControllers.transform.SetParent(Controllers.transform);
             // inputTrackers.transform.SetParent(Controllers.transform);
@@ -533,31 +533,17 @@ namespace USE_ExperimentTemplate_Task
 
             TrialLevel.UseDefaultConfigs = UseDefaultConfigs;
 
-            /*
-                        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShotgunRaycastCircleSize_DVA"))
-                            TrialLevel.ShotgunRaycastCircleSize_DVA = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ShotgunRaycastCircleSize_DVA");
-                        else
-                            TrialLevel.ShotgunRaycastCircleSize_DVA = ShotgunRaycastCircleSize_DVA;
-
-                        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ParticipantDistance_CM"))
-                            TrialLevel.ParticipantDistance_CM = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ParticipantDistance_CM");
-                        else
-                            TrialLevel.ParticipantDistance_CM = ParticipantDistance_CM;
-
-                        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShotgunRaycastSpacing_DVA"))
-                            TrialLevel.ShotgunRaycastSpacing_DVA = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ShotgunRaycastSpacing_DVA");
-                        else
-                            TrialLevel.ShotgunRaycastSpacing_DVA = ShotgunRaycastSpacing_DVA;
-            */
 
             if (UseDefaultConfigs)
                 TrialLevel.LoadTexturesFromResources();
             else
                 TrialLevel.LoadTextures(ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 
 
-            MouseTracker.Init(FrameData, 0);
+            
             if (EyeTrackerActive)
                 GazeTracker.Init(FrameData, 0);
+            else
+                MouseTracker.Init(FrameData, 0);
 
 
             //Automatically giving TouchFbController;
@@ -604,16 +590,18 @@ namespace USE_ExperimentTemplate_Task
                 }
             }
 
-            TrialLevel.MouseTracker = MouseTracker;
+            
             if (EyeTrackerActive)
             {
                 TrialLevel.GazeTracker = GazeTracker;
                 TrialLevel.TobiiEyeTrackerController = TobiiEyeTrackerController;
             }
+            else
+                TrialLevel.MouseTracker = MouseTracker;
 
             TrialLevel.SelectionType = SelectionType;
 
-            Controllers.SetActive(false);
+            InputManager.SetActive(false);
 
             TrialLevel.SessionDataControllers = SessionDataControllers;
             TrialLevel.FilePrefix = FilePrefix;

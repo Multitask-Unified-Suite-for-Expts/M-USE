@@ -35,6 +35,7 @@ namespace USE_ExperimentTemplate_Session
         public Canvas PauseCanvas;
 
         public bool UseDefaultConfigs; //Set true in inspector when gonna create a build with default configs (for website)
+        public bool UseServerConfigs;
 
         private bool IsHuman;
 
@@ -130,14 +131,15 @@ namespace USE_ExperimentTemplate_Session
 
 
 
+            SubjectID = SessionDetails.GetItemValue("SubjectID");
+            SessionID = SessionDetails.GetItemValue("SessionID");
+
+            SFTP_ServerManager.CreateSessionDataFolder(SubjectID, SessionID);
+
+
             //If using default configs, read in the default Session/EventCode/Display Configs and write them to persistant data path:
             if (UseDefaultConfigs)
             {
-                //Dropdown dropdown = GameObject.Find("Dropdown").GetComponent<Dropdown>();
-
-                //string SessionConfigFolder = dropdown.options[dropdown.value].text + "/"; //User picks from the session config dropdown.
-                string SessionConfigFolder = ""; 
-
                 configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
 
                 if (Directory.Exists(configFileFolder))
@@ -150,19 +152,20 @@ namespace USE_ExperimentTemplate_Session
 
                     foreach (string config in configsToWrite)
                     {
-                        byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + SessionConfigFolder + config).bytes;
+                        byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + config).bytes;
                         System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + config + ".txt", textFileBytes);
                     }
                 }
             }
+            else if(UseServerConfigs)
+            {
+                //add code for using server configs.
+                //Dropdown dropdown = GameObject.Find("Dropdown").GetComponent<Dropdown>();
+                //string SessionConfigFolder = dropdown.options[dropdown.value].text + "/"; //User picks from the session config dropdown.
+            }
             else
                 configFileFolder = LocateFile.GetPath("Config File Folder");
 
-           
-            SubjectID = SessionDetails.GetItemValue("SubjectID");
-            SessionID = SessionDetails.GetItemValue("SessionID");
-
-            SFTP_ServerManager.CreateSessionFolder(SubjectID, SessionID);
 
             FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" + DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
 
@@ -1015,8 +1018,11 @@ namespace USE_ExperimentTemplate_Session
 
             if (UseDefaultConfigs)
             {
+                Debug.Log("TASK CONFIG PATH = " + tl.TaskConfigPath);
                 if (!Directory.Exists(tl.TaskConfigPath))
                 {
+                    Debug.Log("CREATING DIRECTORY!");
+
                     Directory.CreateDirectory(tl.TaskConfigPath);
 
                     Dictionary<string, string> configDict = new Dictionary<string, string>
@@ -1031,17 +1037,21 @@ namespace USE_ExperimentTemplate_Session
                         {"MazeDef", "MazeDef.txt"}
                     };
 
-                    TextAsset configFilePath;
+                    TextAsset configTextAsset;
 
                     foreach (var entry in configDict)
                     {
-                        configFilePath = Resources.Load<TextAsset>(tl.TaskName + "_DefaultConfigs/" + tl.TaskName + entry.Key);
+                        configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + tl.TaskName + entry.Key);
 
-                        if (configFilePath == null)//try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
-                            configFilePath = Resources.Load<TextAsset>(tl.TaskName + "_DefaultConfigs/" + entry.Key);
+                        if (configTextAsset == null)//try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
+                        {
+                            configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + entry.Key);
+                            if (configTextAsset == null)
+                                Debug.Log("CONFIG TEXT ASSET IS NULL!");
+                        }
 
-                        if (configFilePath != null)
-                            System.IO.File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + tl.TaskName + entry.Key, configFilePath.bytes);
+                        if (configTextAsset != null)
+                            System.IO.File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + tl.TaskName + entry.Value, configTextAsset.bytes);
                     }
                 }
             }

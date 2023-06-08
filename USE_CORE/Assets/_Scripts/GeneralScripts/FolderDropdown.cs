@@ -30,7 +30,6 @@ public class FolderDropdown : MonoBehaviour
 
             if (folder.Length > 3)
             {
-                Debug.Log("FOLDER OPTION: " + folder);
                 Dropdown.OptionData option = new Dropdown.OptionData(folder);
                 options.Add(option);
             }

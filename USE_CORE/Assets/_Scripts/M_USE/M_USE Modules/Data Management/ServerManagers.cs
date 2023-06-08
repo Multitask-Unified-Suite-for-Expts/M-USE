@@ -24,9 +24,27 @@ public static class SFTP_ServerManager
     private static string password = "dziadziu";
     private static int port = 22;
 
-    private static string mainFolderName = "SFTP_TestData";
-    private static string sessionFolderName; //Unique session data folder name
-    private static string sessionFolderPath; //ends up being "mainFolderName/sessionFolderName"
+    private static string mainDataFolderName = "SFTP_TestData";
+    private static string sessionDataFolderName; //Unique session data folder name
+    public static string sessionDataFolderPath
+    {
+        get
+        {
+            return mainDataFolderName + "/" + sessionDataFolderName;
+        }
+    }
+
+
+
+    private static string mainConfigFolderName = "SFTP_TestSessionConfigs";
+    public static string sessionConfigFolderName;
+    public static string sessionConfigFolderPath
+    {
+        get
+        {
+            return mainConfigFolderName + "/" + sessionConfigFolderName;
+        }
+    }
 
     private static bool sessionFolderCreated;
 
@@ -42,10 +60,11 @@ public static class SFTP_ServerManager
 
     public static void Disconnect()
     {
-        Debug.Log("DISCONNECTING!");
-
         if (sftpClient.IsConnected)
+        {
+            Debug.Log("Disconnecting from SFTP Server!");
             sftpClient.Disconnect();
+        }
         else
             Debug.Log("TRYING TO DISCONNECT FROM SERVER BUT ITS ALREADY DISCONNECTED!");
     }
@@ -79,18 +98,18 @@ public static class SFTP_ServerManager
         return new List<string>();
     }
 
-    public static void CreateSessionFolder(string subjectID, string sessionID)
+    public static void CreateSessionDataFolder(string subjectID, string sessionID)
     {
         if (sessionFolderCreated)
             return;
 
-        sessionFolderName = "DATA__" + "Session_" + sessionID + "__Subject_" + subjectID + "__" + DateTime.Now.ToString("MM-dd-yy__HHmmss");
-        sessionFolderPath = mainFolderName + "/" + sessionFolderName;
+        sessionDataFolderName = "DATA__" + "Session_" + sessionID + "__Subject_" + subjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
+        //sessionDataFolderPath = mainDataFolderName + "/" + sessionDataFolderName;
 
         try
         {
-            sftpClient.CreateDirectory(sessionFolderPath);
-            Debug.Log($"Session folder created at: {sessionFolderPath}");
+            sftpClient.CreateDirectory(sessionDataFolderPath);
+            Debug.Log($"Session folder created at: {sessionDataFolderPath}");
         }
         catch (Exception e)
         {
@@ -102,9 +121,9 @@ public static class SFTP_ServerManager
     public static async Task CreateFileWithColumnTitles(string fileName, string fileHeaders)
     {
         if (!sessionFolderCreated)
-            CreateSessionFolder("Default", "Default");
+            CreateSessionDataFolder("Default", "Default");
         
-        string remoteFilePath = $"{sessionFolderPath}/{fileName}";
+        string remoteFilePath = $"{sessionDataFolderPath}/{fileName}";
 
         try
         {
@@ -123,9 +142,9 @@ public static class SFTP_ServerManager
     public static async Task AppendDataToExistingFile(string fileName, string rowData)
     {
         if (!sessionFolderCreated)
-            CreateSessionFolder("Default", "Default");
+            CreateSessionDataFolder("Default", "Default");
         
-        string remoteFilePath = $"{sessionFolderPath}/{fileName}";
+        string remoteFilePath = $"{sessionDataFolderPath}/{fileName}";
 
         try
         {

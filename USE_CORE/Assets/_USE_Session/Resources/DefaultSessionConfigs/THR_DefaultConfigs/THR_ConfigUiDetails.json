@@ -1,0 +1,78 @@
+{
+	"varsNumber": {
+
+		"minTouchDuration": {
+			"value": 0.005,
+			"min": 0.005,
+			"max": 1,
+			"precision": 1,
+			"isRange": true,
+			"name": "MinTouchDuration",
+			"hidden": false
+		},
+
+		"maxTouchDuration": {
+			"value": 3,
+			"min": 1,
+			"max":	5,
+			"precision": 1,
+			"isRange": true,
+			"name": "MaxTouchDuration",
+			"hidden": false
+		},
+
+		"squareSize": {
+			"value": 1.5,
+			"min": 1.0,
+			"max": 1.5,
+			"precision": 0,
+			"isRange": true,
+			"name": "SquareSize",
+			"hidden": false
+		},
+
+		"positionX": {
+			"value": 0,
+			"min": -650,
+			"max": 650,
+			"precision": 0,
+			"isRange": true,
+			"name": "PositionX",
+			"hidden": false
+		},
+
+		"positionY": {
+			"value": 0,
+			"min": -300,
+			"max": 300,
+			"precision": 0,
+			"isRange": true,
+			"name": "PositionY",
+			"hidden": false
+		}, 
+
+		"whiteSquareDuration": {
+			"value": 0.15,
+			"min": 0.1,
+			"max": 3,
+			"precision": 0,
+			"isRange": true,
+			"name": "WhiteSquareDuration",
+			"hidden": false
+		},
+
+		"blueSquareDuration": {
+			"value": 2,
+			"min": 1,
+			"max": 15,
+			"precision": 0,
+			"isRange": true,
+			"name": "BlueSquareDuration",
+			"hidden": false
+		}
+
+	},
+
+	"varsBoolean": {},
+	"varsString": {}
+}

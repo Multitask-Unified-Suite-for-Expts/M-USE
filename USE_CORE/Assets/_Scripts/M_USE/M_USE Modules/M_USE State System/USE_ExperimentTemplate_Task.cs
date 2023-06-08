@@ -234,7 +234,6 @@ namespace USE_ExperimentTemplate_Task
                 if (BlockCount == 0)
                     TrialLevel.TrialCount_InTask = -1;
                 TrialLevel.TrialDefs = CurrentBlockDef.TrialDefs;
-                Debug.Log("NUMBER OF TRIAL DEFS; " + TrialLevel.TrialDefs.Count);
             });
 
             //Hotkey for WebGL build so we can end task and go to next block

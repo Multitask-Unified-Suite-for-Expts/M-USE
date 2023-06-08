@@ -125,7 +125,7 @@ namespace USE_ExperimentTemplate_Trial
             Delay = new State("Delay");
             Calibration = new State("Calibration");
             
-            if (EyeTrackerActive)
+            if (GameObject.Find("Calibration(Clone)") != null)
             {
                 CalibrationTaskLevel = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Scripts"). GetComponent<GazeCalibration_TaskLevel>();
                 Calibration.AddChildLevel(CalibrationTaskLevel);

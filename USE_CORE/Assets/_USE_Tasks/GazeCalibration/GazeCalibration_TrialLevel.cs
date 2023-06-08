@@ -124,8 +124,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             {
                 CreateResultContainer();
             }
-
-            CoordinateConverter = TobiiEyeTrackerController.CoordinateConverter;
+            
+            if(TobiiEyeTrackerController != null)
+                CoordinateConverter = TobiiEyeTrackerController.CoordinateConverter;
 
         });
 

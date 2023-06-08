@@ -92,6 +92,7 @@ namespace USE_ExperimentTemplate_Session
         private TobiiEyeTrackerController TobiiEyeTrackerController;
         private MonitorDetails MonitorDetails;
         private ScreenDetails ScreenDetails;
+        private bool LoadCalibration;
 
 
         private Camera SessionCam;
@@ -186,6 +187,12 @@ namespace USE_ExperimentTemplate_Session
                 EyeTrackerActive = (bool)SessionSettings.Get("Session", "EyeTrackerActive");
             else
                 EyeTrackerActive = false;
+            if (SessionSettings.SettingExists("Session", "LoadCalibration"))
+                LoadCalibration = (bool)SessionSettings.Get("Session", "LoadCalibration");
+            else if (EyeTrackerActive)
+                LoadCalibration = true;
+            else
+                LoadCalibration = false;
 
             if (SessionSettings.SettingExists("Session", "LongRewardHotKeyPulseSize"))
                 LongRewardHotKeyPulseSize = (int)SessionSettings.Get("Session", "LongRewardHotKeyPulseSize");
@@ -362,20 +369,23 @@ namespace USE_ExperimentTemplate_Session
 
             if (EyeTrackerActive)
             {
-
                 if (GameObject.Find("TobiiEyeTrackerController") == null)
                 {
                     // Technically only gets called once when finding and creating the tobii eye tracker prefabs
                     GameObject TobiiEyeTrackerControllerGO = new GameObject("TobiiEyeTrackerController");
-                    CalibrationDataControllers = new SessionDataControllers(GameObject.Find("TobiiEyeTrackerController"));
                     TobiiEyeTrackerController = TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
                     TobiiEyeTrackerController.MonitorDetails = new MonitorDetails(MonitorDetails.PixelResolution, MonitorDetails.CmSize);
                     TobiiEyeTrackerController.ScreenDetails = new ScreenDetails(ScreenDetails.LowerLeft_Cm, ScreenDetails.UpperRight_Cm, ScreenDetails.PixelResolution);
                     TobiiEyeTrackerController.CoordinateConverter = new USE_CoordinateConverter(TobiiEyeTrackerController.MonitorDetails, TobiiEyeTrackerController.ScreenDetails);
                     GameObject TrackBoxGO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"), TobiiEyeTrackerControllerGO.transform);
                     GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
-                    GameObject CalibrationGO = Instantiate(Resources.Load<GameObject>("Calibration"), TobiiEyeTrackerControllerGO.transform);
                 }
+            }
+
+            if (LoadCalibration)
+            {
+                CalibrationDataControllers = new SessionDataControllers(GameObject.Find("TobiiEyeTrackerController"));
+                GameObject CalibrationGO = Instantiate(Resources.Load<GameObject>("Calibration"));
             }
 
             
@@ -470,7 +480,7 @@ namespace USE_ExperimentTemplate_Session
                     waitForSerialPort = false;
                 }
 
-                if(CalibrationTaskLevel == null)
+                if(LoadCalibration && CalibrationTaskLevel == null)
                 {
                     CalibrationTaskLevel = GameObject.Find("Calibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
                     PopulateTaskLevel(CalibrationTaskLevel, false, false);

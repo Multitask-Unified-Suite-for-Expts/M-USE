@@ -144,8 +144,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
-        // var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, SearchDisplay);
-        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", GazeTracker, InitTrial, SearchDisplay);
+         var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, SearchDisplay);
+       // var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", GazeTracker, InitTrial, SearchDisplay);
         InitTrial.AddInitializationMethod(() =>
         {
             CurrentTaskLevel.SetBlockSummaryString();

@@ -686,7 +686,7 @@ namespace USE_ExperimentTemplate_Task
 
                         if (!File.Exists(filePath))
                         {
-                            var db = Resources.Load<TextAsset>(TaskName + "_DefaultConfigs/" + settingsFileName);
+                            var db = Resources.Load<TextAsset>("DefaultSessionConfigs/" + TaskName + "_DefaultConfigs/" + settingsFileName);
                             byte[] data = db.bytes;
                             System.IO.File.WriteAllBytes(filePath, data);
                         }
@@ -979,7 +979,6 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadBlockDefs<T>(string taskConfigFolder) where T : BlockDef
         {
-
             string blockDefFile = LocateFile.FindFileInExternalFolder(taskConfigFolder, "*" + TaskName + "*BlockDef*");
             if (!string.IsNullOrEmpty(blockDefFile))
             {
@@ -1015,7 +1014,7 @@ namespace USE_ExperimentTemplate_Task
         {
             string stimDefFile;
             string key = UseDefaultConfigs ? (TaskName + "_PrefabStims") : (TaskName + "_ExternalStimDefs");
-            string defaultStimDefFile = taskConfigFolder + "/" + TaskName + (UseDefaultConfigs ? "_StimDeftdf" : "_StimDeftdf.txt");
+            string defaultStimDefFile = taskConfigFolder + "/" + TaskName + "_StimDeftdf.txt";
 
             PrefabStims = new StimGroup("PrefabStims");
             ExternalStims = new StimGroup("ExternalStims");

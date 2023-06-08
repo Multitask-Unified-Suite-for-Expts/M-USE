@@ -71,10 +71,13 @@ public static class SFTP_ServerManager
 
     private static async void HandleSessionConfigFolders()
     {
-        await SFTP_ServerManager.GetAndSetSessionConfigFolders("SFTP_TestSessionConfigs");
+        List<string> folders = await SFTP_ServerManager.GetFolders("SFTP_TestSessionConfigs");
+
+        FolderDropdown folderDropdown = GameObject.Find("Dropdown").GetComponent<FolderDropdown>();
+        folderDropdown.SetFolders(folders);
     }
 
-    public static async Task<List<string>> GetAndSetSessionConfigFolders(string sessionConfigFolderName)
+    public static async Task<List<string>> GetFolders(string sessionConfigFolderName)
     {
         try
         {
@@ -85,9 +88,6 @@ public static class SFTP_ServerManager
                 .Where(item => item.IsDirectory)
                 .Select(item => item.Name)
                 .ToList();
-
-            FolderDropdown folderDropdown = GameObject.Find("Dropdown").GetComponent<FolderDropdown>();
-            folderDropdown.SetFolders(folders);
 
             return folders;
         }

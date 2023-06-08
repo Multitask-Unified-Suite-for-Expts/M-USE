@@ -134,6 +134,9 @@ namespace USE_ExperimentTemplate_Session
             SubjectID = SessionDetails.GetItemValue("SubjectID");
             SessionID = SessionDetails.GetItemValue("SessionID");
 
+            FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" + DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
+
+
             SFTP_ServerManager.CreateSessionDataFolder(SubjectID, SessionID);
 
 
@@ -156,18 +159,30 @@ namespace USE_ExperimentTemplate_Session
                         System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + config + ".txt", textFileBytes);
                     }
                 }
+
+                ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
+                TaskIconsFolderPath = "Assets/_USE_Session/Resources/DefaultResources/TaskIcons";
+
+                SessionDataPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_Data" + "_" + FilePrefix;
             }
-            else if(UseServerConfigs)
+            else if (UseServerConfigs)
             {
-                //add code for using server configs.
                 //Dropdown dropdown = GameObject.Find("Dropdown").GetComponent<Dropdown>();
                 //string SessionConfigFolder = dropdown.options[dropdown.value].text + "/"; //User picks from the session config dropdown.
+
+                ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts"; //may end up changing if loading resources from server!
+                TaskIconsFolderPath = "Assets/_USE_Session/Resources/DefaultResources/TaskIcons"; //may end up changing if loading resources from server!
+
+                SessionDataPath = SFTP_ServerManager.sessionDataFolderPath;
             }
             else
+            {
                 configFileFolder = LocateFile.GetPath("Config File Folder");
+                SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
+            }
 
 
-            FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" + DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
+
 
             SessionSettings.ImportSettings_MultipleType("Session",
                 LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));
@@ -296,17 +311,6 @@ namespace USE_ExperimentTemplate_Session
             if (SessionSettings.SettingExists("Session", "SerialPortActive"))
                 SerialPortActive = (bool)SessionSettings.Get("Session", "SerialPortActive");
 
-
-
-            if (UseDefaultConfigs)
-            {
-                SessionDataPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_Data" + "_" + FilePrefix;
-
-                ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
-                TaskIconsFolderPath = "Assets/_USE_Session/Resources/DefaultResources/TaskIcons";
-            }
-            else
-                SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
 
         }
 
@@ -705,10 +709,9 @@ namespace USE_ExperimentTemplate_Session
                 Button button = taskButton.GetComponent<Button>();
                 taskButton.GetComponent<HoverEffect>().SetToInitialSize(); //Sets grey'd out button back to normal size
 
-#if (!UNITY_WEBGL)
+#if (!UNITY_WEBGL)  //Let patients play same task as many times as they want
                     Color darkGrey = new Color(.5f, .5f, .5f, .35f);
                     image.color = darkGrey;
-
                     Destroy(button);
 #endif
 
@@ -1011,20 +1014,15 @@ namespace USE_ExperimentTemplate_Session
             tl.LocateFile = LocateFile;
             tl.SessionDataPath = SessionDataPath;
 
-            if(UseDefaultConfigs)
-                tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
-            else
-                tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName);
 
             if (UseDefaultConfigs)
             {
-                Debug.Log("TASK CONFIG PATH = " + tl.TaskConfigPath);
+                tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
+
+                //Write Task Config Folder and its files to Persistant data path for Webbuild using default configs---------------------
                 if (!Directory.Exists(tl.TaskConfigPath))
                 {
-                    Debug.Log("CREATING DIRECTORY!");
-
                     Directory.CreateDirectory(tl.TaskConfigPath);
-
                     Dictionary<string, string> configDict = new Dictionary<string, string>
                     {
                         {"_TaskDef", "_TaskDef.txt"},
@@ -1036,26 +1034,21 @@ namespace USE_ExperimentTemplate_Session
                         {"_EventCodeConfig", "_EventCodeConfig.json"},
                         {"MazeDef", "MazeDef.txt"}
                     };
-
                     TextAsset configTextAsset;
-
                     foreach (var entry in configDict)
                     {
                         configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + tl.TaskName + entry.Key);
-
                         if (configTextAsset == null)//try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
-                        {
                             configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + entry.Key);
-                            if (configTextAsset == null)
-                                Debug.Log("CONFIG TEXT ASSET IS NULL!");
-                        }
-
                         if (configTextAsset != null)
                             System.IO.File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + tl.TaskName + entry.Value, configTextAsset.bytes);
                     }
                 }
             }
-            
+            else
+                tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName);
+
+
             tl.FilePrefix = FilePrefix;
             tl.StoreData = StoreData;
             tl.SubjectID = SubjectID;

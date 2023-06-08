@@ -321,6 +321,13 @@ namespace USE_ExperimentTemplate_Task
 
             FinishTask.AddDefaultInitializationMethod(() =>
             {
+                if(TrialLevel.ForceBlockEnd && StoreData) //If they used end task hotkey, still write the block data!
+                {
+                    BlockData.AppendData();
+                    BlockData.WriteData();
+                }
+
+
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["FinishTaskStarts"]);
 
                 //Clear trialsummarystring and Blocksummarystring at end of task:

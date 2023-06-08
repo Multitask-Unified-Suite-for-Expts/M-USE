@@ -32,6 +32,7 @@ SOFTWARE.
 */
 using System.Collections;
 using System.Collections.Generic;
+using Renci.SshNet;
 using UnityEngine;
 
 public class InitScreen : MonoBehaviour
@@ -77,7 +78,7 @@ public class InitScreen : MonoBehaviour
     {
         if (OnLoadSettings != null)
             OnLoadSettings();
-        
+
         foreach (GameObject g in disableOnConfirm)
             g.SetActive(false);
         foreach (GameObject g in enableOnConfirm)

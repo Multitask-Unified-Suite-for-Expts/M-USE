@@ -671,7 +671,7 @@ namespace USE_Data
 		/// <summary>
 		/// Writes the data buffer to file.
 		/// </summary>
-		public void WriteData()
+		public void WriteData(bool disconnectFromServer = false)
 		{
 			if (storeData && fileName != null && dataBuffer.Count > 0)
 			{
@@ -681,7 +681,7 @@ namespace USE_Data
 					string headers = null;
 					if (FileHeaders.Length > 1)
 						headers = FileHeaders;
-					HandleExternalData(fileName, headers, content);
+					HandleExternalData(fileName, headers, content, disconnectFromServer);
 				}
 				else
 				{
@@ -700,12 +700,15 @@ namespace USE_Data
 		}
 
 
-        private async void HandleExternalData(string fileName, string fileHeaders = null, string fileContent = null)
+        private async void HandleExternalData(string fileName, string fileHeaders = null, string fileContent = null, bool disconnectFromServer = false)
         {
             if (fileHeaders != null)
                 await SFTP_ServerManager.CreateFileWithColumnTitles(fileName, fileHeaders);
             if (fileContent != null)
                 await SFTP_ServerManager.AppendDataToExistingFile(fileName, fileContent);
+
+			if(disconnectFromServer)
+				SFTP_ServerManager.Disconnect();
         }
 
 
@@ -773,7 +776,7 @@ namespace USE_Data
 
 		void OnApplicationQuit()
 		{
-			WriteData();
+			WriteData(true);
 		}
 
 	}

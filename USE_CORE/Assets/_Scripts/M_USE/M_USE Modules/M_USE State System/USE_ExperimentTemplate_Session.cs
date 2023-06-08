@@ -161,7 +161,9 @@ namespace USE_ExperimentTemplate_Session
            
             SubjectID = SessionDetails.GetItemValue("SubjectID");
             SessionID = SessionDetails.GetItemValue("SessionID");
-      
+
+            SFTP_ServerManager.CreateSessionFolder(SubjectID, SessionID);
+
             FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" + DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
 
             SessionSettings.ImportSettings_MultipleType("Session",

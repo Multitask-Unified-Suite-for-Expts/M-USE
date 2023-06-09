@@ -175,7 +175,7 @@ namespace USE_ExperimentTemplate_Session
 }
 #endif
 
-
+            Debug.Log("SESSION DATA PATH: " + SessionDataPath);
 
             SessionSettings.ImportSettings_MultipleType("Session",
                 LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));

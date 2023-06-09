@@ -7,7 +7,6 @@ using UnityEditor;
 public class FolderDropdown : MonoBehaviour
 {
     public Dropdown dropdown;
-    //[HideInInspector] public string folderPath = "DefaultSessionConfigs/";
     private int defaultIndex = 0;
 
 

@@ -290,6 +290,12 @@ Transform:
   m_Father: {fileID: 2001982940}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &326972254 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2224978029696949784, guid: f9e5877378f2d47ffaca1acc762aa1d6,
+    type: 3}
+  m_PrefabInstance: {fileID: 329674040}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &329674040
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -452,7 +458,12 @@ PrefabInstance:
     - target: {fileID: 3049737988374563976, guid: f9e5877378f2d47ffaca1acc762aa1d6,
         type: 3}
       propertyPath: m_Options.m_Options.Array.size
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3049737988374563976, guid: f9e5877378f2d47ffaca1acc762aa1d6,
+        type: 3}
+      propertyPath: m_Options.m_Options.Array.data[0].m_Text
+      value: DefaultSessionConfigs
       objectReference: {fileID: 0}
     - target: {fileID: 3049737988374563976, guid: f9e5877378f2d47ffaca1acc762aa1d6,
         type: 3}
@@ -1434,7 +1445,6 @@ MonoBehaviour:
   SessionId_SQL: 0
   PauseCanvasGO: {fileID: 0}
   PauseCanvas: {fileID: 0}
-  UseDefaultConfigs: 1
   ParticipantDistance_CM: 0
   ShotgunRaycastSpacing_DVA: 0
   ShotgunRaycastCircleSize_DVA: 0
@@ -1469,6 +1479,9 @@ MonoBehaviour:
   TaskSelection_AudioSource: {fileID: 0}
   HumanStartPanel: {fileID: 0}
   USE_StartButton: {fileID: 0}
+  UseDefaultConfigs: 1
+  SessionConfigDropdownGO: {fileID: 326972254}
+  SessionConfigDropdown: {fileID: 0}
 --- !u!4 &1375570696
 Transform:
   m_ObjectHideFlags: 0

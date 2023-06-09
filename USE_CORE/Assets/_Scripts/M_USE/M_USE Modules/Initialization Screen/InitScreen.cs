@@ -48,6 +48,7 @@ public class InitScreen : MonoBehaviour
 
     public DisplayController displayController;
 
+
     void Start()
     {
         displayController = gameObject.AddComponent<DisplayController>();
@@ -59,20 +60,20 @@ public class InitScreen : MonoBehaviour
             g.SetActive(true);
 
 
-        SFTP_ServerManager.Init();
-
 
         #if (UNITY_WEBGL)
         {
-            GameObject.Find("LocateFile").SetActive(false);
-            GameObject.Find("InitScreenCanvas").GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display. 
-            //StartCoroutine(HandleConfirm()); //Used to Skip init screen for web build. 
+            //SFTP_ServerManager.Init();
+            //GameObject.Find("LocateFile").SetActive(false);
+            //GameObject.Find("InitScreenCanvas").GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
+            StartCoroutine(HandleConfirm());
         }
 #else
             GameObject.Find("WebBuild_Children").SetActive(false);
 #endif
 
     }
+
 
     IEnumerator HandleConfirm()
     {

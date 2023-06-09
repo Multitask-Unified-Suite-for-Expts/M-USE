@@ -220,16 +220,16 @@ namespace USE_Data
 
 
 			//Handling Data for WebGL Build-------------------------------------
-#if (UNITY_WEBGL)
+//#if (UNITY_WEBGL)
 
-			SendDataExternally = true;
+//			SendDataExternally = true;
 
-#endif
+//#endif
 			//------------------------------------------------------------------
 
 		}
 
-        public void ManuallyDefine(int cap = 100)
+		public void ManuallyDefine(int cap = 100)
 		{
 		//everything in Start() should be triggered by init screen Confirm button press
 			if (!Defined)
@@ -655,7 +655,7 @@ namespace USE_Data
 					string content = null;
 					if (dataBuffer.Count > 0)
 						content = String.Join("\n", dataBuffer.ToArray());
-                    HandleExternalData(fileName, FileHeaders, content);
+					HandleExternalData(fileName, FileHeaders, content);
 				}
 				else
 				{
@@ -671,7 +671,7 @@ namespace USE_Data
 		/// <summary>
 		/// Writes the data buffer to file.
 		/// </summary>
-		public void WriteData(bool disconnectFromServer = false)
+		public void WriteData()
 		{
 			if (storeData && fileName != null && dataBuffer.Count > 0)
 			{
@@ -681,7 +681,7 @@ namespace USE_Data
 					string headers = null;
 					if (FileHeaders.Length > 1)
 						headers = FileHeaders;
-					HandleExternalData(fileName, headers, content, disconnectFromServer);
+					HandleExternalData(fileName, headers, content);
 				}
 				else
 				{
@@ -700,25 +700,22 @@ namespace USE_Data
 		}
 
 
-        private async void HandleExternalData(string fileName, string fileHeaders = null, string fileContent = null, bool disconnectFromServer = false)
-        {
-            if (fileHeaders != null)
-                await SFTP_ServerManager.CreateFileWithColumnTitles(fileName, fileHeaders);
-            if (fileContent != null)
-                await SFTP_ServerManager.AppendDataToExistingFile(fileName, fileContent);
-
-			if(disconnectFromServer)
-				SFTP_ServerManager.Disconnect();
-        }
+		private void HandleExternalData(string fileName, string fileHeaders = null, string fileContent = null)
+		{
+			if (fileHeaders != null)
+				ServerManager.CreateDataFile(fileName, fileHeaders);
+			if (fileContent != null)
+				ServerManager.AppendDataToFile(fileName, fileContent);
+		}
 
 
 
-        /// <summary>
-        /// Adds standardized timing data for the current Control Level's states to be tracked.
-        /// </summary>
-        /// <param name="level">The Control Level whose active states should be tracked.</param>
-        /// <param name="timingTypes">(Optional) List of strings specifying which state timing data to track. Possible values: "StartFrame", "EndFrame", "StartTimeAbsolute", "StartTimeRelative", "EndTimeAbsolute", "EndTimeRelative", "Duration".</param>
-        public void AddStateTimingData(ControlLevel level, IEnumerable<string> timingTypes = null)
+		/// <summary>
+		/// Adds standardized timing data for the current Control Level's states to be tracked.
+		/// </summary>
+		/// <param name="level">The Control Level whose active states should be tracked.</param>
+		/// <param name="timingTypes">(Optional) List of strings specifying which state timing data to track. Possible values: "StartFrame", "EndFrame", "StartTimeAbsolute", "StartTimeRelative", "EndTimeAbsolute", "EndTimeRelative", "Duration".</param>
+		public void AddStateTimingData(ControlLevel level, IEnumerable<string> timingTypes = null)
 		{
 			foreach (State s in level.ActiveStates)
 			{
@@ -776,7 +773,7 @@ namespace USE_Data
 
 		void OnApplicationQuit()
 		{
-			WriteData(true);
+			WriteData();
 		}
 
 	}

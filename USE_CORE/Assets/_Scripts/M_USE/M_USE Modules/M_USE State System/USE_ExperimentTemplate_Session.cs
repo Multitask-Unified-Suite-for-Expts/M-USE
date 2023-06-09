@@ -22,6 +22,7 @@ using Random = UnityEngine.Random;
 using UnityEngine.InputSystem;
 using TMPro;
 using UnityEditor;
+using System.Threading.Tasks;
 //using UnityEngine.Windows.WebCam;
 
 
@@ -33,9 +34,6 @@ namespace USE_ExperimentTemplate_Session
 
         public GameObject PauseCanvasGO;
         public Canvas PauseCanvas;
-
-        public bool UseDefaultConfigs; //Set true in inspector when gonna create a build with default configs (for website)
-        public bool UseServerConfigs;
 
         private bool IsHuman;
 
@@ -116,7 +114,13 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public HumanStartPanel HumanStartPanel;
         [HideInInspector] public USE_StartButton USE_StartButton;
 
-        [HideInInspector] public ServerManager ServerManager;
+        public bool UseDefaultConfigs;
+
+        //Set in inspector:
+        public GameObject SessionConfigDropdownGO;
+
+        public Dropdown SessionConfigDropdown;
+
 
 
 
@@ -137,55 +141,45 @@ namespace USE_ExperimentTemplate_Session
             FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" + DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
 
 
-            SFTP_ServerManager.CreateSessionDataFolder(SubjectID, SessionID);
 
-
-            //If using default configs, read in the default Session/EventCode/Display Configs and write them to persistant data path:
-            if (UseDefaultConfigs)
+#if(UNITY_WEBGL)
             {
-                configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
-
-                if (Directory.Exists(configFileFolder))
-                    Directory.Delete(configFileFolder, true);
-
-                if (!Directory.Exists(configFileFolder))
+                if (UseDefaultConfigs)
                 {
-                    Directory.CreateDirectory(configFileFolder);
-                    List<string> configsToWrite = new List<string>() { "SessionConfig", "EventCodeConfig", "DisplayConfig" };
+                    ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
+                    TaskIconsFolderPath = "Assets/_USE_Session/Resources/DefaultResources/TaskIcons";
+                    
+                    SessionDataPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_Data" + "_" + FilePrefix;
+                    configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
 
-                    foreach (string config in configsToWrite)
+                    if (Directory.Exists(configFileFolder))
+                        Directory.Delete(configFileFolder, true);
+
+                    if (!Directory.Exists(configFileFolder))
                     {
-                        byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + config).bytes;
-                        System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + config + ".txt", textFileBytes);
+                        Directory.CreateDirectory(configFileFolder);
+                        List<string> configsToWrite = new List<string>() { "SessionConfig", "EventCodeConfig", "DisplayConfig" };
+
+                        foreach (string config in configsToWrite)
+                        {
+                            byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + config).bytes;
+                            System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + config + ".txt", textFileBytes);
+                        }
                     }
                 }
-
-                ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
-                TaskIconsFolderPath = "Assets/_USE_Session/Resources/DefaultResources/TaskIcons";
-
-                SessionDataPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_Data" + "_" + FilePrefix;
             }
-            else if (UseServerConfigs)
-            {
-                //Dropdown dropdown = GameObject.Find("Dropdown").GetComponent<Dropdown>();
-                //string SessionConfigFolder = dropdown.options[dropdown.value].text + "/"; //User picks from the session config dropdown.
-
-                ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts"; //may end up changing if loading resources from server!
-                TaskIconsFolderPath = "Assets/_USE_Session/Resources/DefaultResources/TaskIcons"; //may end up changing if loading resources from server!
-
-                SessionDataPath = SFTP_ServerManager.sessionDataFolderPath;
-            }
-            else
-            {
+#else
+{
                 configFileFolder = LocateFile.GetPath("Config File Folder");
                 SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
-            }
-
+}
+#endif
 
 
 
             SessionSettings.ImportSettings_MultipleType("Session",
                 LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));
+
 
 
             if (SessionSettings.SettingExists("Session", "SyncBoxActive"))

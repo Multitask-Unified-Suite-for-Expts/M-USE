@@ -416,6 +416,7 @@ namespace USE_StimulusManagement
 			{
 				case ".fbx":
 					StimGameObject = LoadModel(FileName);
+					PositionRotationScale();
 					break;
 				case ".png":
 					StimGameObject = new GameObject();//give it name
@@ -428,14 +429,13 @@ namespace USE_StimulusManagement
 					break;
 			}
 			
-			PositionRotationScale();
 			if (!string.IsNullOrEmpty(StimName))
 				StimGameObject.name = StimName;
 			AssignStimDefPointeToObjectHierarchy(StimGameObject, this);
 			return StimGameObject;
 		}
 
-		public Texture2D LoadPNG(string filePath)
+		public Texture2D LoadPNG(string filePath, bool visibility = false)
 		{
 			Texture2D tex = null;
 			byte[] fileData;
@@ -445,6 +445,7 @@ namespace USE_StimulusManagement
 				tex = new Texture2D(2, 2);
 				tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
 			}
+			ToggleVisibility(visibility);
 			return tex;
 		}
 		public void Destroy()
@@ -600,7 +601,7 @@ namespace USE_StimulusManagement
 			AddStims(TaskName, stimDefFilePath);
 			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
 		}
-
+		
 		public StimGroup(string groupName, StimGroup sgOrig, IEnumerable<int> stimSubsetIndices, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
 			stimGroupName = groupName;
@@ -610,7 +611,7 @@ namespace USE_StimulusManagement
 		}
 
 
-        public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
+		public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
 			if (setActiveOnInit != null)
 			{

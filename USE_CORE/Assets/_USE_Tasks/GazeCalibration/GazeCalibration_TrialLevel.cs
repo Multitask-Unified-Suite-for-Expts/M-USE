@@ -114,15 +114,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             PlayerViewPanelGO = GameObject.Find("MainCameraCopy");
 
             GC_CanvasGO = GameObject.Find("Calibration_Canvas");
-            // Assign UI Circles for the calib circles if not yet created
-            if (CalibCircle == null)
-                CalibCircle = new USE_Circle(GC_CanvasGO.GetComponent<Canvas>(), Vector3.zero, MaxCircleScale, "CalibrationBigCircle");
             
-            // Create a container for the calibration results
-            if (ResultContainer == null)
-            {
-                CreateResultContainer();
-            }
 
         });
 
@@ -135,24 +127,24 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                                 + "\nPress <b>Space</b> to begin a <b>9</b> point calibration"
                                 + "\nPress <b>6</b>, <b>5</b>, or <b>3</b> to begin the respective point calibration");
             SetTrialSummaryString();
-            
-            CalibCircle.CircleGO.GetComponent<RectTransform>().anchoredPosition = new Vector3 (0,0,0);
-            CalibCircle.CircleGO.SetActive(true);
 
-
-        });
-
-        SetupTrial.SpecifyTermination(()=> (!SpoofGazeWithMouse? (ScreenBasedCalibration != null):true), Init, () =>
-        {
-            // Only enter Calibration if an eyetracker is being used
-            if (!SpoofGazeWithMouse && TrialCount_InTask == 0)
+            // Assign UI Circles for the calib circles if not yet created
+            if (GameObject.Find("Calibration(Clone)").transform.Find("CalibrationCircle") == null)
             {
-                ScreenBasedCalibration.EnterCalibrationMode();
-                TobiiEyeTrackerController.Instance.isCalibrating = true;
+                CalibCircle = new USE_Circle(GC_CanvasGO.GetComponent<Canvas>(), Vector3.zero, MaxCircleScale, "CalibrationCircle");
+                CalibCircle.CircleGO.SetActive(false);
             }
-                
+
+            // Create a container for the calibration results
+            if (ResultContainer == null)
+            {
+                CreateResultContainer();
+            }
         });
-        var MouseHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseHover", MouseTracker, Init, ITI);
+
+
+        SetupTrial.SpecifyTermination(()=> (!SpoofGazeWithMouse? (ScreenBasedCalibration != null):true), Init);
+
         if (SpoofGazeWithMouse)
         {
             SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseHover", MouseTracker, Init, ITI);
@@ -161,11 +153,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "GazeSelection", GazeTracker, Init, ITI);
         }
-
-        Init.AddInitializationMethod(() =>
-        {
-            CalibCircle.CircleGO.SetActive(false);
-        });
 
         Init.AddUpdateMethod(() =>
         {
@@ -184,9 +171,16 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             
             else if (InputBroker.GetKeyUp(KeyCode.Alpha1))
                 numCalibPoints = 1;
-            
+
+            // Only enter Calibration if an eyetracker is being used
+            if (!SpoofGazeWithMouse && !TobiiEyeTrackerController.Instance.isCalibrating)
+            {
+                ScreenBasedCalibration.EnterCalibrationMode();
+                TobiiEyeTrackerController.Instance.isCalibrating = true;
+            }
+
             // **USED FOR DEBUGGING, DELETE ONCE DONE
-           // PlayerTextGO.GetComponent<UnityEngine.UI.Text>().text = SelectionHandler.CurrentInputLocation().ToString();
+            // PlayerTextGO.GetComponent<UnityEngine.UI.Text>().text = SelectionHandler.CurrentInputLocation().ToString();
             //PlayerTextGO.SetActive(true);
             // **
         });
@@ -656,9 +650,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         CalibCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.black;
         CalibCircle.SetCircleScale(MaxCircleScale);
         currentADCSTarget = calibPointsADCS[calibNum]; // get calib coordinates in screen ADCS space
-
         currentScreenPixelTarget = (Vector2)USE_CoordinateConverter.GetScreenPixel(currentADCSTarget.ToVector2(), "screenadcs", 60); // get calib coordinates in Screen space
-
         CalibCircle.CircleGO.GetComponent<RectTransform>().anchoredPosition = currentScreenPixelTarget;
         CalibCircle.CircleGO.SetActive(true);
     }
@@ -699,9 +691,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
-        if(CalibCircle != null)
+        if(GameObject.Find("CalibrationCircle") != null)
             CalibCircle.CircleGO.SetActive(false);
-
         DestroyChildren(ResultContainer);
     }
     public void InitializeEyeTrackerSettings()

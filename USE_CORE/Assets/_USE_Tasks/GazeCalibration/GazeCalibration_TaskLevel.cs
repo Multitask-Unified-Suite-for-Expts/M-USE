@@ -19,12 +19,6 @@ public class GazeCalibration_TaskLevel : ControlLevel_Task_Template
     {
         gcTL = (GazeCalibration_TrialLevel)TrialLevel;
         SetSettings();
-
-        RunBlock.AddInitializationMethod (() =>
-        {
-            // Set the Background image as defined in the BlockDef
-            RenderSettings.skybox = CreateSkybox(gcTL.GetContextNestedFilePath(ContextExternalFilePath, gcBD.ContextName, "LinearDark"), UseDefaultConfigs);
-        });
     }
     private void SetSettings()
     {   

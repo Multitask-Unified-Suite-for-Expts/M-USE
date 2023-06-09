@@ -371,6 +371,14 @@ namespace USE_ExperimentTemplate_Session
                     TobiiEyeTrackerController = TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
                     GameObject TrackBoxGO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"), TobiiEyeTrackerControllerGO.transform);
                     GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
+                /*  //  GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform); 
+                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    cube.transform.SetParent(TobiiEyeTrackerControllerGO.transform, true);
+                    // Position and scale the cube as desired
+                    cube.transform.position = new Vector3(0f, 1f, 60f);
+                    cube.transform.localScale = new Vector3(106f, 62f, 0.1f);
+                    cube.SetActive(false);*/
+                    
                     GameObject CalibrationGO = Instantiate(Resources.Load<GameObject>("Calibration"));
                 }
             }

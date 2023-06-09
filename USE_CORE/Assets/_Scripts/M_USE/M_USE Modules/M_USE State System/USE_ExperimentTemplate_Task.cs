@@ -346,23 +346,26 @@ namespace USE_ExperimentTemplate_Task
                     SessionDataControllers.RemoveDataController("FrameData_" + TaskName);
                 }
 
-
-                int sgNum = TaskStims.AllTaskStimGroups.Count;
-                for (int iSg = 0; iSg < sgNum; iSg++)
+                if (TaskStims != null)
                 {
-                    StimGroup[] taskSgs = new StimGroup[TaskStims.AllTaskStimGroups.Count];
-                    TaskStims.AllTaskStimGroups.Values.CopyTo(taskSgs, 0);
-                    StimGroup sg = taskSgs[0];
-                    while (sg.stimDefs.Count > 0)
+                    int sgNum = TaskStims.AllTaskStimGroups.Count;
+                    for (int iSg = 0; iSg < sgNum; iSg++)
                     {
-                        sg.stimDefs[0].Destroy();
-                        sg.stimDefs.RemoveAt(0);
-                    }
+                        StimGroup[] taskSgs = new StimGroup[TaskStims.AllTaskStimGroups.Count];
+                        TaskStims.AllTaskStimGroups.Values.CopyTo(taskSgs, 0);
+                        StimGroup sg = taskSgs[0];
+                        while (sg.stimDefs.Count > 0)
+                        {
+                            sg.stimDefs[0].Destroy();
+                            sg.stimDefs.RemoveAt(0);
+                        }
 
-                    sg.DestroyStimGroup();
+                        sg.DestroyStimGroup();
+                    }
+                    TaskStims.AllTaskStims.DestroyStimGroup();
+
                 }
 
-                TaskStims.AllTaskStims.DestroyStimGroup();
                 TaskCam.gameObject.SetActive(false);
 
                 if (TaskCanvasses != null)

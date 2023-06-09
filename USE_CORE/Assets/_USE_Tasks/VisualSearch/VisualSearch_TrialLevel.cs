@@ -16,6 +16,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
     public GameObject VS_CanvasGO;
     public USE_StartButton USE_StartButton;
+    public SelectionTracking.SelectionTracker.SelectionHandler ShotgunHandler;
     
     // Stimuli Variables
     private StimGroup tStim;
@@ -100,7 +101,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         Add_ControlLevel_InitializationMethod(() =>
         {
             playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
-            playerViewText = new GameObject();
+           // playerViewText = new GameObject();
             playerViewParent = GameObject.Find("MainCameraCopy");     
             
             // Initialize FB Controller Values
@@ -144,8 +145,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
-         var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, SearchDisplay);
-       // var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", GazeTracker, InitTrial, SearchDisplay);
+        if (!EyeTrackerActive)
+            ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, SearchDisplay);
+        else
+            ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", GazeTracker, InitTrial, SearchDisplay);
+      
         InitTrial.AddInitializationMethod(() =>
         {
             CurrentTaskLevel.SetBlockSummaryString();
@@ -421,7 +425,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         TouchDurationError = false;
         aborted = false;
         choiceMade = false;
-        MouseTracker.ResetClicks();
+        if (MouseTracker != null)
+            MouseTracker.ResetClicks();
     }
     private void AssignTrialData()
     {

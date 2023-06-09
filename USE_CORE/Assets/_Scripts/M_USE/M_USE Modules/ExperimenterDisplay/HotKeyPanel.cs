@@ -6,6 +6,8 @@ using UnityEngine.UI;
 using Cursor = UnityEngine.Cursor;
 using ConfigDynamicUI;
 using USE_ExperimenterDisplay;
+using USE_ExperimentTemplate_Trial;
+using USE_ExperimentTemplate_Task;
 
 public class HotKeyPanel : ExperimenterDisplayPanel
 {
@@ -137,6 +139,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
         {
             List<HotKey> HotKeyList = new List<HotKey>();
             SessionInfoPanel SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
+            ControlLevel_Task_Template OriginalTaskLevel = null;
+            ControlLevel_Trial_Template OriginalTrialLevel = null;
 
             // Toggle Displays HotKey
             HotKey toggleDisplays = new HotKey
@@ -390,21 +394,36 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.Tab),
                 hotKeyAction = () =>
                 {
-                    if (!HkPanel.TrialLevel.runCalibration)
+                    var ExperimenterDisplay = GameObject.Find("ExperimenterDisplay").GetComponent<ExperimenterDisplayController>();
+                    if (OriginalTaskLevel == null)
                     {
                         HkPanel.TrialLevel.runCalibration = true;
                         HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+
+                        OriginalTaskLevel = HkPanel.TaskLevel;
+                        OriginalTrialLevel = HkPanel.TrialLevel;
+
+                        // In the current task, and switching Hk.TrialLevel & Hk.TaskLevel to calibration trial/task
+                        var CalibrationTaskLevel = (ControlLevel_Task_Template)HkPanel.TrialLevel.GetStateFromName("Calibration").ChildLevel;
+                        var CalibrationTrialLevel = (ControlLevel_Trial_Template)CalibrationTaskLevel.GetStateFromName("RunBlock").ChildLevel;
+                        CalibrationTrialLevel.SpecifyCurrentState(CalibrationTrialLevel.GetStateFromName("SetupTrial"));
+                        ExperimenterDisplay.ResetTask(CalibrationTaskLevel, CalibrationTrialLevel);
                         //HkPanel.SessionLevel.PopulateTaskLevel(GameObject.Find("Calibration_Scripts").GetComponent<GazeCalibration_TaskLevel>(), false, false);
                     }
                     else
                     {
+                        HkPanel.TrialLevel.AbortCode = 5;
+                        HkPanel.TrialLevel.ForceBlockEnd = true;
+                        HkPanel.TrialLevel.FinishTrialCleanup();
+                        HkPanel.TrialLevel.ResetTrialVariables();
+                        HkPanel.TrialLevel.ClearActiveTrialHandlers();
+                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+                        
+                        // Resetting the panel's current trial level to the original task
+                        ExperimenterDisplay.ResetTask(OriginalTaskLevel, OriginalTrialLevel);
                         HkPanel.TrialLevel.runCalibration = false;
-                        var CalibrationTaskLevel = HkPanel.TrialLevel.GetStateFromName("Calibration").ChildLevel;
-                        var CalibrationTrialLevel = CalibrationTaskLevel.GetStateFromName("RunBlock").ChildLevel;
-
-                        //GameObject.Find("Calibration_Scripts").GetComponent<GazeCalibration_TrialLevel>().SpecifyCurrentState(GameObject.Find("Calibration_Scripts").GetComponent<GazeCalibration_TrialLevel>().GetStateFromName("FinishTrial"));
-                        CalibrationTrialLevel.SpecifyCurrentState(CalibrationTrialLevel.GetStateFromName("FinishTrial"));
-                        CalibrationTaskLevel.Terminated = true;
+                        OriginalTaskLevel = null;
+                        OriginalTrialLevel = null;
                     }
                 }
             };

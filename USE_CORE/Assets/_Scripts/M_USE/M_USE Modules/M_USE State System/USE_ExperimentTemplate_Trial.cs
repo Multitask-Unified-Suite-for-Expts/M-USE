@@ -208,7 +208,7 @@ namespace USE_ExperimentTemplate_Trial
             });
 
             FinishTrial.AddInitializationMethod(() => EventCodeManager.SendCodeImmediate(SessionEventCodes["FinishTrialStarts"]));
-            FinishTrial.SpecifyTermination(() => runCalibration, () => Calibration);
+            FinishTrial.SpecifyTermination(() => runCalibration && TaskLevel.TaskName != "Calibration", () => Calibration);
 
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => CheckForcedBlockEnd(), () => null);
@@ -230,15 +230,13 @@ namespace USE_ExperimentTemplate_Trial
                 }
                 WriteDataFiles();
             });
-            DefineControlLevel();
-            TrialData.ManuallyDefine();
-            TrialData.AddStateTimingData(this);
-            TrialData.CreateFile();
-           // TrialData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
+            
             Calibration.AddInitializationMethod(() =>
             {
-                CalibrationTaskLevel.TaskCam = Camera.main;
+                CalibrationTaskLevel.TaskCam = TaskLevel.TaskCam;
+
                 CalibrationTaskLevel.ConfigName = "Calibration";
+                CalibrationTaskLevel.TaskName = "Calibration";
 
                 UnityEngine.SceneManagement.Scene originalScene = SceneManager.GetSceneByName(TaskLevel.TaskName);
                 GameObject[] rootObjects = originalScene.GetRootGameObjects();
@@ -251,20 +249,21 @@ namespace USE_ExperimentTemplate_Trial
 
                 var CalibrationCanvas = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Canvas");
                 var CalibrationScripts = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Scripts");
-                var CalibrationGazeTrail = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_GazeTrail");
+              //  var CalibrationGazeTrail = GameObject.Find("TobiiEyeTrackerController").transform.Find("GazeTrail(Clone)");
+              //  var CalibrationCube = GameObject.Find("TobiiEyeTrackerController").transform.Find("Cube");
 
 
                 CalibrationCanvas.GetComponent<Canvas>().worldCamera = Camera.main;
                 CalibrationCanvas.gameObject.SetActive(true);
-                CalibrationGazeTrail.gameObject.SetActive(true);
+             //   CalibrationGazeTrail.gameObject.SetActive(true);
                 CalibrationScripts.gameObject.SetActive(true);
+              //  CalibrationCube.gameObject.SetActive(true);
 
             });
 
-           Calibration.SpecifyTermination(() => CalibrationTaskLevel.Terminated, () => SetupTrial, () =>
+           Calibration.SpecifyTermination(() => !runCalibration, () => SetupTrial, () =>
            {
                GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Canvas").gameObject.SetActive(false);
-
                foreach (Canvas canvas in TaskLevel.TaskCanvasses)
                {
                    canvas.gameObject.SetActive(true);
@@ -275,6 +274,11 @@ namespace USE_ExperimentTemplate_Trial
                    TobiiEyeTrackerController.Instance.ScreenBasedCalibration.LeaveCalibrationMode();
                }
            });
+
+            DefineControlLevel();
+            TrialData.ManuallyDefine();
+            TrialData.AddStateTimingData(this);
+            TrialData.CreateFile();
         }
         
 

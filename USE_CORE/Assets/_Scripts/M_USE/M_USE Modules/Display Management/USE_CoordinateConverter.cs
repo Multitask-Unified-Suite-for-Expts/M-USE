@@ -220,10 +220,6 @@ public static class USE_CoordinateConverter
         ScreenPixel = new Vector2(((Vector2)ScreenPixel).x, ScreenDetails.PixelResolution.y - ((Vector2)ScreenPixel).y);
         ScreenCm = ScreenPixel * screenCmPerPixel;
         MonitorPixel = ScreenCmToMonitorPixel(ScreenCm);
-        Debug.Log("SCREEN PIXEL: " + ScreenPixel.ToString());
-        Debug.Log("SCREEN CM: " + ScreenCm.ToString());
-        Debug.Log("SCREEN CM PER PIXEL: " + screenCmPerPixel);
-        Debug.Log("monitor PIXEL: " + MonitorPixel.ToString());
         return MonitorPixel;
     }
     private static Vector2? ScreenPixelToMonitorPixel(Vector2? screenPixel)

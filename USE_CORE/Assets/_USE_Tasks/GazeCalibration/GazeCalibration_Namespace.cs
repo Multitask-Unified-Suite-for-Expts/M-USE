@@ -18,7 +18,6 @@ namespace GazeCalibration_Namespace
         //Already-existing fields (inherited from BlockDef)
         //public int BlockCount;
         //public TrialDef[] TrialDefs;
-        public string ContextName = "Gray_1";
         public int NumTrials = 5;
         public int NumPulses = 2;
         public int PulseSize = 250;
@@ -30,7 +29,6 @@ namespace GazeCalibration_Namespace
             for (int iTrial = 0; iTrial < NumTrials; iTrial++)
             {
                 GazeCalibration_TrialDef td = new GazeCalibration_TrialDef();
-                td.ContextName = ContextName;
                 td.NumTrials = NumTrials;
                 td.NumPulses = NumPulses;
                 td.PulseSize = PulseSize;

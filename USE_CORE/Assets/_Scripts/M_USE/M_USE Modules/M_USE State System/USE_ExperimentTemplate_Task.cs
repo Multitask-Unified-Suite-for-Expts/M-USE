@@ -545,8 +545,7 @@ namespace USE_ExperimentTemplate_Task
             
             if (EyeTrackerActive)
                 GazeTracker.Init(FrameData, 0);
-            else
-                MouseTracker.Init(FrameData, 0);
+            MouseTracker.Init(FrameData, 0);
 
 
             //Automatically giving TouchFbController;
@@ -599,8 +598,7 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.GazeTracker = GazeTracker;
                 TrialLevel.TobiiEyeTrackerController = TobiiEyeTrackerController;
             }
-            else
-                TrialLevel.MouseTracker = MouseTracker;
+            TrialLevel.MouseTracker = MouseTracker;
 
             TrialLevel.SelectionType = SelectionType;
 

@@ -317,7 +317,8 @@ namespace USE_ExperimentTemplate_Session
             State loadTask = new State("LoadTask");
             State runTask = new State("RunTask");
             State finishSession = new State("FinishSession");
-            AddActiveStates(new List<State> { setupSession, selectTask, loadTask, runTask, finishSession });
+            State calibration = new State("Calibration");
+            AddActiveStates(new List<State> { setupSession, selectTask, loadTask, runTask, finishSession, calibration });
 
             SessionDataControllers = new SessionDataControllers(GameObject.Find("DataControllers"));
             ActiveTaskLevels = new List<ControlLevel_Task_Template>();//new Dictionary<string, ControlLevel_Task_Template>();
@@ -380,6 +381,7 @@ namespace USE_ExperimentTemplate_Session
                     cube.SetActive(false);*/
                     
                     GameObject CalibrationGO = Instantiate(Resources.Load<GameObject>("Calibration"));
+                    
                 }
             }
             if (MonitorDetails != null && ScreenDetails != null)
@@ -394,10 +396,6 @@ namespace USE_ExperimentTemplate_Session
 
 
             // Instantiating Task Selection Frame Data
-            // Instantiate data controller for gaze calibration nested in task
-            /*if (CalibrationDataControllers != null)
-                FrameData = (FrameData)CalibrationDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "FrameData");
-            */
             // Instantiate normal session data controller for all tasks
             FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "FrameData");
             FrameData.fileName = "TaskSelection__FrameData.txt";
@@ -482,10 +480,12 @@ namespace USE_ExperimentTemplate_Session
                     waitForSerialPort = false;
                 }
 
-                if(CalibrationTaskLevel == null)
+                if(EyeTrackerActive && CalibrationTaskLevel == null)
                 {
                     CalibrationTaskLevel = GameObject.Find("Calibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
                     PopulateTaskLevel(CalibrationTaskLevel, false, false);
+                    //Have to add calibration task level as child of calibration state here, because it isn't available prior
+                    calibration.AddChildLevel(CalibrationTaskLevel);
                     CalibrationTaskLevel.gameObject.SetActive(false);
                 }
                
@@ -521,28 +521,23 @@ namespace USE_ExperimentTemplate_Session
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort, selectTask, () =>
             {
                 SessionSettings.Save();
-                #if (!UNITY_WEBGL)
-                    GameObject initCamGO = GameObject.Find("InitCamera");
-                    initCamGO.SetActive(false);
-                    SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
-                #endif
+#if (!UNITY_WEBGL)
+                GameObject initCamGO = GameObject.Find("InitCamera");
+                initCamGO.SetActive(false);
+                SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
+#endif
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupSessionEnds"]);
 
-                
-
-                
                 if (EyeTrackerActive)
                 {
                     GazeTracker.Init(FrameData, 0);
                     GazeTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
                     InputTrackers.GetComponent<GazeTracker>().enabled = true;
                 }
-                else
-                {
-                    MouseTracker.Init(FrameData, 0);
-                    MouseTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
-                    InputTrackers.GetComponent<MouseTracker>().enabled = true;
-                }
+                MouseTracker.Init(FrameData, 0);
+                MouseTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
+                InputTrackers.GetComponent<MouseTracker>().enabled = true;
+
 
             });
 
@@ -1107,8 +1102,7 @@ namespace USE_ExperimentTemplate_Session
                 tl.GazeTracker = GazeTracker;
                 tl.TobiiEyeTrackerController = TobiiEyeTrackerController;
             }
-            else
-                tl.MouseTracker = MouseTracker;
+            tl.MouseTracker = MouseTracker;
 
             tl.InputManager = InputManager;
 

@@ -208,7 +208,7 @@ namespace USE_ExperimentTemplate_Trial
             });
 
             FinishTrial.AddInitializationMethod(() => EventCodeManager.SendCodeImmediate(SessionEventCodes["FinishTrialStarts"]));
-            FinishTrial.SpecifyTermination(() => runCalibration && TaskLevel.TaskName != "Calibration", () => Calibration);
+            FinishTrial.SpecifyTermination(() => runCalibration && TaskLevel.TaskName != "GazeCalibration", () => Calibration);
 
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => CheckForcedBlockEnd(), () => null);

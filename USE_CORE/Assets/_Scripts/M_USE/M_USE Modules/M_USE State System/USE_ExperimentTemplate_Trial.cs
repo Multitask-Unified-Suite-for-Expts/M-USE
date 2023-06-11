@@ -235,8 +235,8 @@ namespace USE_ExperimentTemplate_Trial
             {
                 CalibrationTaskLevel.TaskCam = TaskLevel.TaskCam;
 
-                CalibrationTaskLevel.ConfigName = "Calibration";
-                CalibrationTaskLevel.TaskName = "Calibration";
+                CalibrationTaskLevel.ConfigName = "GazeCalibration";
+                CalibrationTaskLevel.TaskName = "GazeCalibration";
 
                 UnityEngine.SceneManagement.Scene originalScene = SceneManager.GetSceneByName(TaskLevel.TaskName);
                 GameObject[] rootObjects = originalScene.GetRootGameObjects();
@@ -249,10 +249,10 @@ namespace USE_ExperimentTemplate_Trial
 
                 var CalibrationCanvas = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Canvas");
                 var CalibrationScripts = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Scripts");
-              //  var CalibrationGazeTrail = GameObject.Find("TobiiEyeTrackerController").transform.Find("GazeTrail(Clone)");
-              //  var CalibrationCube = GameObject.Find("TobiiEyeTrackerController").transform.Find("Cube");
+                //  var CalibrationGazeTrail = GameObject.Find("TobiiEyeTrackerController").transform.Find("GazeTrail(Clone)");
+                //  var CalibrationCube = GameObject.Find("TobiiEyeTrackerController").transform.Find("Cube");
 
-
+                CalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
                 CalibrationCanvas.GetComponent<Canvas>().worldCamera = Camera.main;
                 CalibrationCanvas.gameObject.SetActive(true);
              //   CalibrationGazeTrail.gameObject.SetActive(true);

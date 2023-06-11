@@ -29,6 +29,7 @@ using Tobii.Research;
 using static UnityEngine.UI.CanvasScaler;
 using static SelectionTracking.SelectionTracker;
 using UnityEngine.UIElements;
+using USE_ExperimentTemplate_Trial;
 //using UnityEngine.Windows.WebCam;
 
 
@@ -369,7 +370,18 @@ namespace USE_ExperimentTemplate_Session
             GazeTracker = InputTrackers.GetComponent<GazeTracker>();
 
             SelectionTracker = new SelectionTracker();
-            
+            if (SelectionType.ToLower().Equals("gaze"))
+            {
+                SelectionHandler = SelectionTracker.SetupSelectionHandler("session", "GazeSelection", GazeTracker, selectTask, loadTask);
+                SelectionHandler.MinDuration = 0.7f;
+            }
+            else
+            {
+                SelectionHandler = SelectionTracker.SetupSelectionHandler("session", "MouseButton0Click", MouseTracker, selectTask, loadTask);
+                SelectionHandler.MinDuration = 0.3f;
+                SelectionHandler.MaxDuration = 2f;
+            }
+
             if (EyeTrackerActive)
             {
                 if (GameObject.Find("TobiiEyeTrackerController") == null)
@@ -485,10 +497,12 @@ namespace USE_ExperimentTemplate_Session
 
                 if(EyeTrackerActive && CalibrationTaskLevel == null)
                 {
+                    //Have to add calibration task level as child of calibration state here, because it isn't available prior
+
                     CalibrationTaskLevel = GameObject.Find("Calibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
                     PopulateTaskLevel(CalibrationTaskLevel, false, false);
-                    //Have to add calibration task level as child of calibration state here, because it isn't available prior
                     calibration.AddChildLevel(CalibrationTaskLevel);
+                    CalibrationTaskLevel.TrialLevel.TaskLevel = CalibrationTaskLevel;
                     CalibrationTaskLevel.gameObject.SetActive(false);
                 }
                
@@ -544,21 +558,34 @@ namespace USE_ExperimentTemplate_Session
                 MouseTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
                 InputTrackers.GetComponent<MouseTracker>().enabled = true;
 
+                
+            });
 
-                if (SelectionType.ToLower().Equals("gaze"))
-                {
-                    SelectionHandler = SelectionTracker.SetupSelectionHandler("session", "GazeSelection", GazeTracker, selectTask, loadTask);
-                    SelectionHandler.MinDuration = 0.7f;
-                }
-                else
-                {
-                    SelectionHandler = SelectionTracker.SetupSelectionHandler("session", "MouseButton0Click", MouseTracker, selectTask, loadTask);
-                    SelectionHandler.MinDuration = 0.3f;
-                    SelectionHandler.MaxDuration = 2f;
-                }
+           // Canvas[] TaskSelectionCanvasses = null;
+            calibration.AddInitializationMethod(() =>
+            {
+                CalibrationTaskLevel.TaskCam = Camera.main;
+                CalibrationTaskLevel.ConfigName = "GazeCalibration";
+                CalibrationTaskLevel.TaskName = "GazeCalibration";
+                CalibrationTaskLevel.TrialLevel.runCalibration = true;
+                ExperimenterDisplayController.ResetTask(CalibrationTaskLevel, (ControlLevel_Trial_Template)CalibrationTaskLevel.TrialLevel);
 
-                if (SelectionHandler.AllSelections.Count > 0)
-                    SelectionHandler.ClearSelections();
+                var CalibrationCanvas = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Canvas");
+                var CalibrationScripts = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Scripts");
+                CalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+                CalibrationCanvas.gameObject.SetActive(true);
+                CalibrationScripts.gameObject.SetActive(true);
+            });
+
+            calibration.SpecifyTermination(() => !CalibrationTaskLevel.TrialLevel.runCalibration, () => selectTask, () =>
+            {
+                GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Canvas").gameObject.SetActive(false);
+                GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Scripts").gameObject.SetActive(false);
+                if (CalibrationTaskLevel.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
+                {
+                    TobiiEyeTrackerController.Instance.isCalibrating = false;
+                    TobiiEyeTrackerController.Instance.ScreenBasedCalibration.LeaveCalibrationMode();
+                }
             });
 
             TaskButtons = null;
@@ -566,7 +593,9 @@ namespace USE_ExperimentTemplate_Session
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
-                
+                if (SelectionHandler.AllSelections.Count > 0)
+                    SelectionHandler.ClearSelections();
+
                 TaskSelectionCanvasGO.SetActive(true);
 
                 TaskSelection_Starfield.SetActive(IsHuman ? true : false);
@@ -757,6 +786,7 @@ namespace USE_ExperimentTemplate_Session
                 if (SelectionHandler.SuccessfulSelections.Count > 0)
                 {
                     SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.GetComponent<Button>()?.onClick.Invoke();
+                    Debug.Log("game object name: " + SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.name);
                 }
             });
             

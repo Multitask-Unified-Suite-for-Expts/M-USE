@@ -26,6 +26,9 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Button = UnityEngine.UI.Button;
 using USE_DisplayManagement;
 using Tobii.Research;
+using static UnityEngine.UI.CanvasScaler;
+using static SelectionTracking.SelectionTracker;
+using UnityEngine.UIElements;
 //using UnityEngine.Windows.WebCam;
 
 
@@ -83,11 +86,14 @@ namespace USE_ExperimentTemplate_Session
         private SyncBoxController SyncBoxController;
         private EventCodeManager EventCodeManager;
         [HideInInspector] public SelectionTracker SelectionTracker;
+        private SelectionTracker.SelectionHandler SelectionHandler;
         private GameObject InputManager;
         private MouseTracker MouseTracker;
         private GazeTracker GazeTracker;
         private GameObject InputTrackers;
         protected FrameData FrameData;
+        
+        // EyeTracker Variables
         private TobiiEyeTrackerController TobiiEyeTrackerController;
         private MonitorDetails MonitorDetails;
         private ScreenDetails ScreenDetails;
@@ -101,7 +107,7 @@ namespace USE_ExperimentTemplate_Session
         private bool TaskSceneLoaded, SceneLoading, GuidedTaskSelection, EyeTrackerActive;
 
         private bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
-        private string EyetrackerType;
+        private string EyetrackerType, SelectionType;
         private Dictionary<string, EventCode> SessionEventCodes;
         private List<string> selectedConfigsList = new List<string>();
         private SessionInfoPanel SessionInfoPanel;
@@ -152,16 +158,15 @@ namespace USE_ExperimentTemplate_Session
                 configFileFolder = LocateFile.GetPath("Config File Folder");
             
 
+            // Set the name of the data file given input into init screen
             SubjectID = SessionDetails.GetItemValue("SubjectID");
             SessionID = SessionDetails.GetItemValue("SessionID");
             FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" + DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
 
-            Debug.Log("CONFIG FILE FOLDER = " + configFileFolder);
-
             SessionSettings.ImportSettings_MultipleType("Session",
                 LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));
 
-
+            // Load Session Config values
             if (SessionSettings.SettingExists("Session", "SyncBoxActive"))
                 SyncBoxActive = (bool)SessionSettings.Get("Session", "SyncBoxActive");
             else
@@ -185,7 +190,10 @@ namespace USE_ExperimentTemplate_Session
                 EyeTrackerActive = (bool)SessionSettings.Get("Session", "EyeTrackerActive");
             else
                 EyeTrackerActive = false;
-
+            if (SessionSettings.SettingExists("Session", "SelectionType"))
+                SelectionType = (string)SessionSettings.Get("Session", "SelectionType");
+            else
+                SelectionType = "mouse";
             if (SessionSettings.SettingExists("Session", "LongRewardHotKeyPulseSize"))
                 LongRewardHotKeyPulseSize = (int)SessionSettings.Get("Session", "LongRewardHotKeyPulseSize");
             else
@@ -205,26 +213,6 @@ namespace USE_ExperimentTemplate_Session
                 RewardHotKeyNumPulses = (int)SessionSettings.Get("Session", "RewardHotKeyNumPulses");
             else
                 RewardHotKeyNumPulses = 1;
-
-
-            //Load the Session Event Code Config file
-            string eventCodeFileString = "";
-
-            eventCodeFileString = LocateFile.FindFileInExternalFolder(configFileFolder, "*EventCode*");
-
-            if (!string.IsNullOrEmpty(eventCodeFileString))
-            {
-                SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
-                SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
-                EventCodesActive = true;
-            }
-            else if (EventCodesActive)
-                Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");
-
-            if (SyncBoxActive)
-                SerialPortActive = true;
-
-
 
             List<string> taskNames;
             if (SessionSettings.SettingExists("Session", "TaskNames"))
@@ -260,10 +248,10 @@ namespace USE_ExperimentTemplate_Session
 
             if (SessionSettings.SettingExists("Session", "TaskIconLocations"))
                 TaskIconLocations = (Vector3[])SessionSettings.Get("Session", "TaskIconLocations");
-            
+
             if (SessionSettings.SettingExists("Session", "GuidedTaskSelection"))
                 GuidedTaskSelection = (bool)SessionSettings.Get("Session", "GuidedTaskSelection");
-            
+
             if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
                 ContextExternalFilePath = (string)SessionSettings.Get("Session", "ContextExternalFilePath");
 
@@ -288,7 +276,7 @@ namespace USE_ExperimentTemplate_Session
 
             if (SessionSettings.SettingExists("Session", "MonitorDetails"))
             {
-                MonitorDetails  = (MonitorDetails)SessionSettings.Get("Session", "MonitorDetails");
+                MonitorDetails = (MonitorDetails)SessionSettings.Get("Session", "MonitorDetails");
             }
 
             if (SessionSettings.SettingExists("Session", "ScreenDetails"))
@@ -297,6 +285,23 @@ namespace USE_ExperimentTemplate_Session
 
             }
 
+            //Load the Session Event Code Config file
+            string eventCodeFileString = "";
+
+            eventCodeFileString = LocateFile.FindFileInExternalFolder(configFileFolder, "*EventCode*");
+
+            if (!string.IsNullOrEmpty(eventCodeFileString))
+            {
+                SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
+                SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
+                EventCodesActive = true;
+            }
+            else if (EventCodesActive)
+                Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");
+
+            if (SyncBoxActive)
+                SerialPortActive = true;
+                     
             if (UseDefaultConfigs)
             {
                 SessionDataPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_Data" + "_" + FilePrefix;
@@ -363,11 +368,13 @@ namespace USE_ExperimentTemplate_Session
             MouseTracker = InputTrackers.GetComponent<MouseTracker>();
             GazeTracker = InputTrackers.GetComponent<GazeTracker>();
 
+            SelectionTracker = new SelectionTracker();
+            
             if (EyeTrackerActive)
             {
                 if (GameObject.Find("TobiiEyeTrackerController") == null)
                 {
-                    // Technically only gets called once when finding and creating the tobii eye tracker prefabs
+                    // gets called once when finding and creating the tobii eye tracker prefabs
                     GameObject TobiiEyeTrackerControllerGO = new GameObject("TobiiEyeTrackerController");
                     TobiiEyeTrackerController = TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
                     GameObject TrackBoxGO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"), TobiiEyeTrackerControllerGO.transform);
@@ -392,9 +399,6 @@ namespace USE_ExperimentTemplate_Session
                 USE_CoordinateConverter.SetScreenDetails(USE_CoordinateConverter.ScreenDetails);
             }
 
-
-
-
             // Instantiating Task Selection Frame Data
             // Instantiate normal session data controller for all tasks
             FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "FrameData");
@@ -406,7 +410,6 @@ namespace USE_ExperimentTemplate_Session
                 FrameData.AddEventCodeColumns();
             FrameData.CreateFile();
 
-            SelectionTracker = new SelectionTracker();
 
             bool waitForSerialPort = false;
             bool taskAutomaticallySelected = false;
@@ -517,8 +520,10 @@ namespace USE_ExperimentTemplate_Session
                 //AppendSerialData();
             });
 
+            setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort, selectTask);
+            setupSession.SpecifyTermination(() => EyeTrackerActive, calibration);
 
-            setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort, selectTask, () =>
+            setupSession.AddDefaultTerminationMethod( () =>
             {
                 SessionSettings.Save();
 #if (!UNITY_WEBGL)
@@ -534,11 +539,26 @@ namespace USE_ExperimentTemplate_Session
                     GazeTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
                     InputTrackers.GetComponent<GazeTracker>().enabled = true;
                 }
+               
                 MouseTracker.Init(FrameData, 0);
                 MouseTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
                 InputTrackers.GetComponent<MouseTracker>().enabled = true;
 
 
+                if (SelectionType.ToLower().Equals("gaze"))
+                {
+                    SelectionHandler = SelectionTracker.SetupSelectionHandler("session", "GazeSelection", GazeTracker, selectTask, loadTask);
+                    SelectionHandler.MinDuration = 0.7f;
+                }
+                else
+                {
+                    SelectionHandler = SelectionTracker.SetupSelectionHandler("session", "MouseButton0Click", MouseTracker, selectTask, loadTask);
+                    SelectionHandler.MinDuration = 0.3f;
+                    SelectionHandler.MaxDuration = 2f;
+                }
+
+                if (SelectionHandler.AllSelections.Count > 0)
+                    SelectionHandler.ClearSelections();
             });
 
             TaskButtons = null;
@@ -697,7 +717,7 @@ namespace USE_ExperimentTemplate_Session
                     if (!GuidedTaskSelection)
                     {
                         Button button = taskButton.AddComponent<Button>();
-                        // Will monitor clicks to all task icons
+                        // Will add listening to monitor clicks to all task icons
                         button.onClick.AddListener(() =>
                         {
                             taskAutomaticallySelected = false;
@@ -715,7 +735,6 @@ namespace USE_ExperimentTemplate_Session
                             {
                                 taskAutomaticallySelected = false;
                                 selectedConfigName = configName;
-                                taskButtonsDict[configName].GetComponent<RawImage>().color = new Color(1f, 1f, 1f, 1f);
                             });
                         }
                         else
@@ -735,6 +754,10 @@ namespace USE_ExperimentTemplate_Session
             selectTask.AddFixedUpdateMethod(() =>
             {
                 SelectionTracker.UpdateActiveSelections();
+                if (SelectionHandler.SuccessfulSelections.Count > 0)
+                {
+                    SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.GetComponent<Button>()?.onClick.Invoke();
+                }
             });
             
             selectTask.AddLateUpdateMethod(() =>
@@ -1105,12 +1128,7 @@ namespace USE_ExperimentTemplate_Session
             tl.MouseTracker = MouseTracker;
 
             tl.InputManager = InputManager;
-
-            if (SessionSettings.SettingExists("Session", "SelectionType"))
-                tl.SelectionType = (string)SessionSettings.Get("Session", "SelectionType");
-            else
-                tl.SelectionType = "";
-
+            tl.SelectionType = SelectionType;
 
             tl.ContextExternalFilePath = ContextExternalFilePath;
             tl.SerialPortActive = SerialPortActive;
@@ -1183,6 +1201,7 @@ namespace USE_ExperimentTemplate_Session
             tl.TaskCam.gameObject.SetActive(false);
 
         }
+
         // public void FindTaskCam<T>(string taskName) where T : ControlLevel_Task_Template
         // {
         // 	ControlLevel_Task_Template tl = GameObject.Find("ControlLevels").GetComponent<T>();

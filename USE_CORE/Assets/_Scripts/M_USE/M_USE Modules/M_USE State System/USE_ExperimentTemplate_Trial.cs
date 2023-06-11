@@ -52,7 +52,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public ConfigVarStore ConfigUiVariables;
         [HideInInspector] public ExperimenterDisplayController ExperimenterDisplayController;
         [HideInInspector] public SessionInfoPanel SessionInfoPanel;
-        public float TrialCompleteTime;
+        [HideInInspector] public float TrialCompleteTime;
 
         [HideInInspector] public SelectionTracker SelectionTracker;
 

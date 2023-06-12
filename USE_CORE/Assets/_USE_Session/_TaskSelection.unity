@@ -868,6 +868,11 @@ PrefabInstance:
       propertyPath: m_FontData.m_FontSize
       value: 24
       objectReference: {fileID: 0}
+    - target: {fileID: 4815276883999523254, guid: f9e5877378f2d47ffaca1acc762aa1d6,
+        type: 3}
+      propertyPath: session
+      value: 
+      objectReference: {fileID: 1375570695}
     - target: {fileID: 4815343781243714004, guid: f9e5877378f2d47ffaca1acc762aa1d6,
         type: 3}
       propertyPath: m_FontData.m_Font
@@ -933,6 +938,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: Confirm
+      objectReference: {fileID: 0}
+    - target: {fileID: 5335210144864399227, guid: f9e5877378f2d47ffaca1acc762aa1d6,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 7416953559981486443, guid: f9e5877378f2d47ffaca1acc762aa1d6,
         type: 3}

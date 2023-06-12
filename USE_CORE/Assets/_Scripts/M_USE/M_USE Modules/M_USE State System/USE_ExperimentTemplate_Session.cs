@@ -172,7 +172,7 @@ namespace USE_ExperimentTemplate_Session
 #if (UNITY_WEBGL)
                 if(UseDefaultConfigs)
                     SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));
-                else
+                else //Using ServerConfigs
                 {
                     string serverSessionConfig = ServerManager.GetFileString("SessionConfig").ToString();
                     SessionSettings.ImportSettings_MultipleType("Session", "ServerPath", serverSessionConfig);

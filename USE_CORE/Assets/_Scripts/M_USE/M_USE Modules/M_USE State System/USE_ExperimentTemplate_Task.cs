@@ -644,7 +644,6 @@ namespace USE_ExperimentTemplate_Task
             readStimDefs.Invoke(this, new object[] { TaskConfigPath });
 
 
-
             string configUIVariableFile = LocateFile.FindFileInExternalFolder(TaskConfigPath, "*" + TaskName + "*ConfigUiDetails*");
             if (!string.IsNullOrEmpty(configUIVariableFile))
             {

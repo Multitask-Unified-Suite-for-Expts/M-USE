@@ -16,14 +16,9 @@ public static class ServerManager //Used with the PHP scripts
 {
     private static readonly string ServerURL = "serverURLGoesHere";
     private static string SessionDataFolder; //Created once after they hit confirm
-    private static string SessionConfigFolder; //Will be whatever they select in the dropdown after hitting confirm
+    public static string SessionConfigFolder; //Will be whatever they select in the dropdown after hitting confirm
 
 
-
-    public static void SetSessionConfigFolder(string sessionconfigFolder)
-    {
-        SessionConfigFolder = sessionconfigFolder;
-    }
 
     public static IEnumerator CreateSessionDataFolder(string subjectID, string sessionID)
     {
@@ -35,6 +30,11 @@ public static class ServerManager //Used with the PHP scripts
         {
             request.method = UnityWebRequest.kHttpVerbPUT;
             yield return request.SendWebRequest();
+            if(request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log("SUCCESS creating session folder!");
+
+            }
             Debug.Log(request.result == UnityWebRequest.Result.Success ? "SUCCESS Creating Session Folder!" : $"FAILED! Error Creating Session Folder! | Error: {request.error}");
         }
     }

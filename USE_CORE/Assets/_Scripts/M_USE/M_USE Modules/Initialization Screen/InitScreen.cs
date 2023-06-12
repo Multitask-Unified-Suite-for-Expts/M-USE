@@ -47,16 +47,17 @@ public class InitScreen : MonoBehaviour
 
     public event System.Action OnConfirm, OnLoadSettings;
 
+    [HideInInspector]
     public DisplayController displayController;
 
+
+    //Set In Inspector
     public M_USE_ControlLevel_Session session;
 
 
 
     void Start()
     {
-        session = GameObject.Find("ControlLevels").GetComponent<M_USE_ControlLevel_Session>();
-
         displayController = gameObject.AddComponent<DisplayController>();
         displayController.HandleDisplays(this);
 
@@ -90,7 +91,7 @@ public class InitScreen : MonoBehaviour
 
         Dropdown dropdown = GameObject.Find("Dropdown").GetComponent<Dropdown>();
         string sessionConfigFolder = dropdown.options[dropdown.value].text;
-        ServerManager.SetSessionConfigFolder(sessionConfigFolder);
+        ServerManager.SessionConfigFolder = sessionConfigFolder;
         if (sessionConfigFolder.ToLower().Contains("default"))
             session.UseDefaultConfigs = true;
         

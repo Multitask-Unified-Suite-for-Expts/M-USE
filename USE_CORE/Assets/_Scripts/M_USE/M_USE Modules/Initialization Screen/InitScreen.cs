@@ -34,6 +34,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Renci.SshNet;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InitScreen : MonoBehaviour
 {
@@ -48,9 +49,14 @@ public class InitScreen : MonoBehaviour
 
     public DisplayController displayController;
 
+    public M_USE_ControlLevel_Session session;
+
+
 
     void Start()
     {
+        session = GameObject.Find("ControlLevels").GetComponent<M_USE_ControlLevel_Session>();
+
         displayController = gameObject.AddComponent<DisplayController>();
         displayController.HandleDisplays(this);
 
@@ -63,10 +69,9 @@ public class InitScreen : MonoBehaviour
 
         #if (UNITY_WEBGL)
         {
-            //SFTP_ServerManager.Init();
-            //GameObject.Find("LocateFile").SetActive(false);
-            //GameObject.Find("InitScreenCanvas").GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
-            StartCoroutine(HandleConfirm());
+            GameObject.Find("LocateFile").SetActive(false);
+            GameObject.Find("InitScreenCanvas").GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
+            //StartCoroutine(HandleConfirm());
         }
 #else
             GameObject.Find("WebBuild_Children").SetActive(false);
@@ -77,6 +82,21 @@ public class InitScreen : MonoBehaviour
 
     IEnumerator HandleConfirm()
     {
+
+#if(UNITY_WEBGL)
+        string subjectID = session.SessionDetails.GetItemValue("SubjectID");
+        string sessionID = session.SessionDetails.GetItemValue("SessionID");
+        ServerManager.CreateSessionDataFolder(subjectID, sessionID);
+
+        Dropdown dropdown = GameObject.Find("Dropdown").GetComponent<Dropdown>();
+        string sessionConfigFolder = dropdown.options[dropdown.value].text;
+        ServerManager.SetSessionConfigFolder(sessionConfigFolder);
+        if (sessionConfigFolder.ToLower().Contains("default"))
+            session.UseDefaultConfigs = true;
+        
+#endif
+
+
         if (OnLoadSettings != null)
             OnLoadSettings();
 

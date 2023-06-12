@@ -116,11 +116,6 @@ namespace USE_ExperimentTemplate_Session
 
         public bool UseDefaultConfigs;
 
-        //Set in inspector:
-        public GameObject SessionConfigDropdownGO;
-
-        public Dropdown SessionConfigDropdown;
-
 
 
 
@@ -134,21 +129,18 @@ namespace USE_ExperimentTemplate_Session
             USE_StartButton.StartButtonPrefab = StartButtonPrefabGO;
 
 
-
             SubjectID = SessionDetails.GetItemValue("SubjectID");
             SessionID = SessionDetails.GetItemValue("SessionID");
 
             FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" + DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
 
-
-
 #if(UNITY_WEBGL)
             {
+                ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
+                TaskIconsFolderPath = "Assets/_USE_Session/Resources/DefaultResources/TaskIcons";
+
                 if (UseDefaultConfigs)
                 {
-                    ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
-                    TaskIconsFolderPath = "Assets/_USE_Session/Resources/DefaultResources/TaskIcons";
-                    
                     SessionDataPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_Data" + "_" + FilePrefix;
                     configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
 
@@ -167,6 +159,7 @@ namespace USE_ExperimentTemplate_Session
                         }
                     }
                 }
+
             }
 #else
 {
@@ -175,10 +168,19 @@ namespace USE_ExperimentTemplate_Session
 }
 #endif
 
-            Debug.Log("SESSION DATA PATH: " + SessionDataPath);
 
-            SessionSettings.ImportSettings_MultipleType("Session",
-                LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));
+#if (UNITY_WEBGL)
+                if(UseDefaultConfigs)
+                    SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));
+                else
+                {
+                    string serverSessionConfig = ServerManager.GetFileString("SessionConfig").ToString();
+                    SessionSettings.ImportSettings_MultipleType("Session", "ServerPath", serverSessionConfig);
+                }
+#else
+            SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));            
+#endif
+
 
 
 

@@ -4,6 +4,7 @@ using UnityEngine;
 using Tobii.Research;
 using Tobii.Research.Unity;
 using USE_DisplayManagement;
+using EyeTrackerData_Namespace;
 
 public class TobiiEyeTrackerController : EyeTrackerController_Base
 {
@@ -17,6 +18,12 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
     public GameObject TrackBoxGuideGO;
     public Camera Camera;
     public bool isCalibrating;
+
+    public TobiiGazeSample mostRecentGazeSample;
+
+    //MOST RECENT GAZE DATA FIELD, OVERWRITTEN 
+
+    //IENUMERAT
    
     // Start is called before the first frame update
     private void Awake()
@@ -54,4 +61,33 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
 
     }
 
+    private void OnGazeDataReceived(object sender, GazeDataEventArgs e)
+    {
+        // Process Left Eye gaze data each frame
+        TobiiGazeSample gazeSample = new TobiiGazeSample();
+
+        // Left Eye Data
+        gazeSample.leftPupilValidity = e.LeftEye.Pupil.Validity.ToString();
+        gazeSample.leftGazeOriginValidity = e.LeftEye.GazeOrigin.Validity.ToString();
+        gazeSample.leftGazePointValidity = e.LeftEye.GazePoint.Validity.ToString();
+        gazeSample.leftGazePointOnDisplayArea = e.LeftEye.GazePoint.PositionOnDisplayArea.ToVector2();
+        gazeSample.leftGazeOriginInUserCoordinateSystem = e.LeftEye.GazeOrigin.PositionInUserCoordinates.ToVector3();
+        gazeSample.leftGazePointInUserCoordinateSystem = e.LeftEye.GazePoint.PositionInUserCoordinates.ToVector3();
+        gazeSample.leftGazeOriginInTrackboxCoordinateSystem = e.LeftEye.GazeOrigin.PositionInTrackBoxCoordinates.ToVector3();
+        gazeSample.leftPupilDiameter = e.LeftEye.Pupil.PupilDiameter;
+
+        // Right Eye Data
+        gazeSample.rightPupilValidity = e.RightEye.Pupil.Validity.ToString();
+        gazeSample.rightGazeOriginValidity = e.RightEye.GazeOrigin.Validity.ToString();
+        gazeSample.rightGazePointValidity = e.RightEye.GazePoint.Validity.ToString();
+        gazeSample.rightGazePointOnDisplayArea = e.RightEye.GazePoint.PositionOnDisplayArea.ToVector2();
+        gazeSample.rightGazeOriginInUserCoordinateSystem = e.RightEye.GazeOrigin.PositionInUserCoordinates.ToVector3();
+        gazeSample.rightGazePointInUserCoordinateSystem = e.RightEye.GazePoint.PositionInUserCoordinates.ToVector3();
+        gazeSample.rightGazeOriginInTrackboxCoordinateSystem = e.RightEye.GazeOrigin.PositionInTrackBoxCoordinates.ToVector3();
+        gazeSample.rightPupilDiameter = e.RightEye.Pupil.PupilDiameter;
+
+        gazeSample.systemTimeStamp = e.SystemTimeStamp; 
+        
+        //GAZEDATA.APPENDDATA()
+    }
 }

@@ -271,7 +271,9 @@ namespace USE_ExperimentTemplate_Data
                 () => sc.BufferToString("received"));
         }
     }
-
+    // INSERT GAZE DATA CONTROLLER WITH GAZE DATA FIELDS, SESSION FIELDS FROM THE SESSION LEVEL
+    // TIME.FRAME 
+    // 
     public class BlockData : USE_Template_DataController
     {
         public override void DefineUSETemplateDataController()
@@ -289,7 +291,7 @@ namespace USE_ExperimentTemplate_Data
         public override void DefineUSETemplateDataController()
         {
             DataControllerName = "TrialData";
-            AddDatum("SubjectID", () => taskLevel.SubjectID);
+            AddDatum("SubjectID", () => taskLevel.SubjectID); //session level instead of task level
             AddDatum("SessionID", () => taskLevel.SessionID);
             AddDatum("TaskName", () => taskLevel.TaskName);
             AddDatum("BlockCount", () => taskLevel.BlockCount + 1);

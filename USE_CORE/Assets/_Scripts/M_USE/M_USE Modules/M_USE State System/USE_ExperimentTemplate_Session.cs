@@ -498,7 +498,7 @@ namespace USE_ExperimentTemplate_Session
                 if(EyeTrackerActive && CalibrationTaskLevel == null)
                 {
                     //Have to add calibration task level as child of calibration state here, because it isn't available prior
-
+                    
                     CalibrationTaskLevel = GameObject.Find("Calibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
                     PopulateTaskLevel(CalibrationTaskLevel, false, false);
                     calibration.AddChildLevel(CalibrationTaskLevel);
@@ -534,8 +534,8 @@ namespace USE_ExperimentTemplate_Session
                 //AppendSerialData();
             });
 
-            setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort, selectTask);
-            setupSession.SpecifyTermination(() => EyeTrackerActive, calibration);
+            setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort && EyeTrackerActive, calibration);
+            setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort && !EyeTrackerActive, selectTask);
 
             setupSession.AddDefaultTerminationMethod( () =>
             {
@@ -786,7 +786,6 @@ namespace USE_ExperimentTemplate_Session
                 if (SelectionHandler.SuccessfulSelections.Count > 0)
                 {
                     SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.GetComponent<Button>()?.onClick.Invoke();
-                    Debug.Log("game object name: " + SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.name);
                 }
             });
             

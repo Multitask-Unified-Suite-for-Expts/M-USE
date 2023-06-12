@@ -395,9 +395,11 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyAction = () =>
                 {
                     var ExperimenterDisplay = GameObject.Find("ExperimenterDisplay").GetComponent<ExperimenterDisplayController>();
-                    Debug.Log("TASK LEVEL NAME: " + HkPanel.TaskLevel.TaskName);
+                    Debug.Log("WHAT IS IT RN: " + HkPanel.TrialLevel.name);
+                    //session level. active task == null, session level is in select task
                     if (OriginalTaskLevel == null && HkPanel.TaskLevel.TaskName != "GazeCalibration")
                     {
+                        // Calibration is not currently running, set up calibration Task & Trial
                         HkPanel.TrialLevel.runCalibration = true;
                         HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
 
@@ -408,11 +410,12 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         CalibrationTaskLevel = (ControlLevel_Task_Template)HkPanel.TrialLevel.GetStateFromName("Calibration").ChildLevel;
                         CalibrationTrialLevel = (ControlLevel_Trial_Template)CalibrationTaskLevel.GetStateFromName("RunBlock").ChildLevel;
                         CalibrationTrialLevel.SpecifyCurrentState(CalibrationTrialLevel.GetStateFromName("SetupTrial"));
-                        ExperimenterDisplay.ResetTask(CalibrationTaskLevel, CalibrationTrialLevel);
+                       //S ExperimenterDisplay.ResetTask(CalibrationTaskLevel, CalibrationTrialLevel);
                         //HkPanel.SessionLevel.PopulateTaskLevel(GameObject.Find("Calibration_Scripts").GetComponent<GazeCalibration_TaskLevel>(), false, false);
                     }
                     else
                     {
+                        // Calibration is currently running, return to former state
                         HkPanel.TrialLevel.AbortCode = 5;
                         HkPanel.TrialLevel.ForceBlockEnd = true;
                         HkPanel.TrialLevel.FinishTrialCleanup();

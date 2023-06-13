@@ -820,7 +820,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private void DisableSceneElements()
     {
         DeactivateChildren(MazeContainer);
-        DeactivateChildren(GameObject.Find("SliderCanvas"));
+        if (GameObject.Find("SliderCanvas") != null)
+            DeactivateChildren(GameObject.Find("SliderCanvas"));
     } 
 
     private void CreateTextOnExperimenterDisplay()

@@ -267,7 +267,6 @@ namespace USE_UI
             Image.color = ButtonColor;
             TaskButtonGO.transform.localPosition = LocalPosition;
             TaskButtonGO.SetActive(true);
-
         }
     }
     public class USE_StartButton : MonoBehaviour

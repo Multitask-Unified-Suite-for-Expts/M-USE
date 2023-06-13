@@ -381,7 +381,7 @@ namespace USE_ExperimentTemplate_Session
             else
             {
                 SelectionHandler = SelectionTracker.SetupSelectionHandler("session", "MouseButton0Click", MouseTracker, selectTask, loadTask);
-                SelectionHandler.MinDuration = 0.3f;
+                SelectionHandler.MinDuration = 0.05f;
                 SelectionHandler.MaxDuration = 2f;
             }
 
@@ -571,7 +571,7 @@ namespace USE_ExperimentTemplate_Session
                 CalibrationTaskLevel.ConfigName = "GazeCalibration";
                 CalibrationTaskLevel.TaskName = "GazeCalibration";
                 CalibrationTaskLevel.TrialLevel.runCalibration = true;
-                ExperimenterDisplayController.ResetTask(CalibrationTaskLevel, (ControlLevel_Trial_Template)CalibrationTaskLevel.TrialLevel);
+                ExperimenterDisplayController.ResetTask(CalibrationTaskLevel, CalibrationTaskLevel.TrialLevel);
 
                 var CalibrationCanvas = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Canvas");
                 var CalibrationScripts = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Scripts");
@@ -661,19 +661,19 @@ namespace USE_ExperimentTemplate_Session
                         foreach (KeyValuePair<string, USE_TaskButton> taskButton in taskButtonsDict)
                         {
                             if (taskButton.Key == key)
-                            { 
-                                taskButton.Value.GetComponent<RawImage>().color = new Color(1f, 1f, 1f, 1f);
-                               // Button button = taskButton.Value.AddComponent<Button>();
-                                
-                                // Add listener to now accept touches for the next task in the Session Config
-                                // button.onClick.AddListener(() =>
-                                // {
-                                //     taskAutomaticallySelected = false;
-                                //     selectedConfigName = taskButton.Key;
-                                // });
+                            {
+                                taskButton.Value.TaskButtonGO.GetComponent<RawImage>().color = new Color(1f, 1f, 1f, 1f);
+                                taskButton.Value.TaskButtonGO.GetComponent<RawImage>().raycastTarget = true;
+                                taskButton.Value.TaskButtonGO.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
                             }
                             else
-                                taskButton.Value.GetComponent<RawImage>().color = new Color(.5f, .5f, .5f, .35f);
+                            {
+                                taskButton.Value.TaskButtonGO.GetComponent<RawImage>().color = new Color(.5f, .5f, .5f, .35f);
+                                taskButton.Value.TaskButtonGO.GetComponent<RawImage>().raycastTarget = false;
+                                HoverEffect hoverEffect = taskButton.Value.TaskButtonGO.GetComponent<HoverEffect>();
+                                if (hoverEffect != null)
+                                    Destroy(hoverEffect);
+                            }
                         }
                     }
                     return;
@@ -725,7 +725,8 @@ namespace USE_ExperimentTemplate_Session
                     string configName = (string)task.Key;
 
                     USE_TaskButton taskButton = new USE_TaskButton(TaskButtonsContainer.transform.parent.GetComponent<Canvas>(),TaskIconLocations[count], buttonSize, configName);
-                  //  string taskName = (string)task.Value;
+                    taskButton.TaskButtonGO.transform.SetParent(TaskButtonsContainer.transform, false);
+                    taskButtonsDict.Add(configName, taskButton);
 
                     string taskFolder = GetConfigFolderPath(configName);
                     if (!Directory.Exists(taskFolder))
@@ -734,51 +735,36 @@ namespace USE_ExperimentTemplate_Session
                         throw new DirectoryNotFoundException($"Task folder for '{configName}' at '{taskFolder}' does not exist.");
                     }
                     
-                  //  GameObject taskButton = new GameObject(configName + "Button");
-                    taskButtonsDict.Add(configName, taskButton);
-                    //taskButton.transform.parent = TaskButtonsContainer.transform;
-
-                    RawImage taskButtonImage = taskButton.TaskButtonGO.GetComponent<RawImage>();
-                    string taskIcon = TaskIcons[configName];
-
                     if (UseDefaultConfigs)
-                        taskButtonImage.texture = Resources.Load<Texture2D>("DefaultResources/TaskIcons/" + taskIcon);
+                        taskButton.TaskButtonGO.GetComponent<RawImage>().texture = Resources.Load<Texture2D>("DefaultResources/TaskIcons/" + TaskIcons[configName]);
                     else
-                        taskButtonImage.texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + taskIcon + ".png");
+                        taskButton.TaskButtonGO.GetComponent<RawImage>().texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + TaskIcons[configName] + ".png");
 
-                    // taskButtonImage.rectTransform.localPosition = TaskIconLocations[count];
-                    // taskButtonImage.rectTransform.localScale = Vector3.one;
-                    // taskButtonImage.rectTransform.sizeDelta = buttonSize * Vector3.one;
                     
-                    if (!GuidedTaskSelection)
+                    if (GuidedTaskSelection)
                     {
-                        //Button button = taskButton.AddComponent<Button>();
-                        // Will add listening to monitor clicks to all task icons
-                       // button.onClick.AddListener(() =>
-                        // {
-                        //     taskAutomaticallySelected = false;
-                        //     selectedConfigName = configName;
-                        // });
-                    }
-                    else
-                    {
+                        // If guided task selection, only make the next icon interactable
                         string key = TaskMappings.Keys.Cast<string>().ElementAt(taskCount);
+
                         RawImage image = taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>();
-                        if (configName != key)
+                        if(configName == key)
                         {
                             image.color = new Color(1f, 1f, 1f, 1f);
+                            taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget = true;
+                            taskButton.TaskButtonGO.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
                         }
-                        //     Button button = taskButton.AddComponent<Button>();
-                        //     button.onClick.AddListener(() =>
-                        //     {
-                        //         taskAutomaticallySelected = false;
-                        //         selectedConfigName = configName;
-                        //     });
-                        // }
-                        // else
-                            
+                        else
+                        {
+                            image.color = new Color(.5f, .5f, .5f, .35f);
+                            taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget = false;
+                        }
                     }
-                    taskButton.TaskButtonGO.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
+                    else
+                    {
+                        // If not guided task selection, make all icons interactable
+                        taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget = true;
+                        taskButton.TaskButtonGO.AddComponent<HoverEffect>();
+                    }
                     count++;
                 }
 
@@ -814,16 +800,14 @@ namespace USE_ExperimentTemplate_Session
                 {
                     foreach (DictionaryEntry task in TaskMappings)
                     {
-                        // FIND THE TASK BUTTON THAT IS INTERACTABLE
-                        
-                        // string configName = (string)task.Key;
-                        // string taskName = (string)task.Value;
-                        // GameObject taskButton = taskButtonsDict[configName];
-                        //
-                        // if (taskButton.GetComponent<Button>() == null) continue;
-                        // taskAutomaticallySelected = true;
-                        // selectedConfigName = configName;
-                        // break;
+                        //Find the next task in the list that is still interactable
+                        string configName = (string)task.Key;
+                        string taskName = (string)task.Value;
+
+                        if (taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget) continue;
+                        taskAutomaticallySelected = true;
+                        selectedConfigName = configName;
+                        break;
                     }
                 });
             }
@@ -831,14 +815,15 @@ namespace USE_ExperimentTemplate_Session
 
             loadTask.AddInitializationMethod(() =>
             {
+                // Make the selected task icon no longer interactable
                 TaskButtonsContainer.SetActive(false);
                 USE_TaskButton taskButton = taskButtonsDict[selectedConfigName];
-                Debug.Log("selected config name: " + selectedConfigName);
                 RawImage image = taskButton.TaskButtonGO.GetComponent<RawImage>();
-              //  Button button = taskButton.GetComponent<Button>();
-                Color darkGrey = new Color(.5f, .5f, .5f, .35f);
-                image.color = darkGrey;
-                //Destroy(button);
+                taskButton.TaskButtonGO.GetComponent<RawImage>().color = new Color(.5f, .5f, .5f, .35f);
+                taskButton.TaskButtonGO.GetComponent<RawImage>().raycastTarget = false;
+                HoverEffect hoverEffect = taskButton.TaskButtonGO.GetComponent<HoverEffect>();
+                if (hoverEffect != null)
+                    Destroy(hoverEffect);
 
                 string taskName = (string)TaskMappings[selectedConfigName];
                 loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);

@@ -96,11 +96,13 @@ namespace USE_ExperimentTemplate_Session
         private GazeTracker GazeTracker;
         private GameObject InputTrackers;
         protected FrameData FrameData;
+        protected USE_ExperimentTemplate_Data.GazeData GazeData;
         
         // EyeTracker Variables
         private TobiiEyeTrackerController TobiiEyeTrackerController;
         private MonitorDetails MonitorDetails;
         private ScreenDetails ScreenDetails;
+        private EyeTrackerData_Namespace.TobiiGazeSample TobiiGazeSample;
 
 
         private Camera SessionCam;
@@ -119,7 +121,7 @@ namespace USE_ExperimentTemplate_Session
 
         public DisplayController DisplayController;
 
-        [FormerlySerializedAs("TaskButtons")] [HideInInspector] public GameObject TaskButtonsContainer;
+        [HideInInspector] public GameObject TaskButtonsContainer;
 
         //Set in inspector
         public GameObject InstructionsPrefab;
@@ -394,16 +396,20 @@ namespace USE_ExperimentTemplate_Session
                     TobiiEyeTrackerController = TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
                     GameObject TrackBoxGO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"), TobiiEyeTrackerControllerGO.transform);
                     GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
-                /*  //  GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform); 
+                    GameObject CalibrationGO = Instantiate(Resources.Load<GameObject>("Calibration"));
+
+                    TobiiGazeSample = new EyeTrackerData_Namespace.TobiiGazeSample();
+                    TobiiEyeTrackerController.mostRecentGazeSample = TobiiGazeSample;
+                    TobiiEyeTrackerController.GazeData = GazeData;
+
+                    /*  //  GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform); 
                     GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.transform.SetParent(TobiiEyeTrackerControllerGO.transform, true);
                     // Position and scale the cube as desired
                     cube.transform.position = new Vector3(0f, 1f, 60f);
                     cube.transform.localScale = new Vector3(106f, 62f, 0.1f);
                     cube.SetActive(false);*/
-                    
-                    GameObject CalibrationGO = Instantiate(Resources.Load<GameObject>("Calibration"));
-                    
+
                 }
             }
             if (MonitorDetails != null && ScreenDetails != null)
@@ -425,6 +431,15 @@ namespace USE_ExperimentTemplate_Session
                 FrameData.AddEventCodeColumns();
             FrameData.CreateFile();
 
+            if (EyeTrackerActive)
+            {
+                GazeData = (USE_ExperimentTemplate_Data.GazeData)SessionDataControllers.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", "TaskSelection", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "GazeData");
+
+                GazeData.fileName = "TaskSelection__GazeData.txt";
+                GazeData.InitDataController();
+                GazeData.ManuallyDefine();
+                GazeData.CreateFile();
+            }
 
             bool waitForSerialPort = false;
             bool taskAutomaticallySelected = false;
@@ -1152,6 +1167,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 tl.GazeTracker = GazeTracker;
                 tl.TobiiEyeTrackerController = TobiiEyeTrackerController;
+                tl.TobiiGazeSample = TobiiGazeSample;
             }
             tl.MouseTracker = MouseTracker;
 
@@ -1397,6 +1413,10 @@ namespace USE_ExperimentTemplate_Session
                     FrameData.AppendData();
                     FrameData.WriteData();
                 }*/
+
+                if (TobiiEyeTrackerController?.iEyeTracker != null)
+                    TobiiEyeTrackerController.iEyeTracker.GazeDataReceived -= TobiiEyeTrackerController.OnGazeDataReceived;
+
             }
         }
         public void OnGUI()

@@ -410,14 +410,13 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         CalibrationTaskLevel = (ControlLevel_Task_Template)HkPanel.TrialLevel.GetStateFromName("Calibration").ChildLevel;
                         CalibrationTrialLevel = (ControlLevel_Trial_Template)CalibrationTaskLevel.GetStateFromName("RunBlock").ChildLevel;
                         CalibrationTrialLevel.SpecifyCurrentState(CalibrationTrialLevel.GetStateFromName("SetupTrial"));
-                       //S ExperimenterDisplay.ResetTask(CalibrationTaskLevel, CalibrationTrialLevel);
+                        ExperimenterDisplay.ResetTask(CalibrationTaskLevel, CalibrationTrialLevel);
                         //HkPanel.SessionLevel.PopulateTaskLevel(GameObject.Find("Calibration_Scripts").GetComponent<GazeCalibration_TaskLevel>(), false, false);
                     }
                     else
                     {
                         // Calibration is currently running, return to former state
                         HkPanel.TrialLevel.AbortCode = 5;
-                        HkPanel.TrialLevel.ForceBlockEnd = true;
                         HkPanel.TrialLevel.FinishTrialCleanup();
                         HkPanel.TrialLevel.ResetTrialVariables();
                         HkPanel.TrialLevel.ClearActiveTrialHandlers();
@@ -430,6 +429,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                             ExperimenterDisplay.ResetTask(OriginalTaskLevel, OriginalTrialLevel);
                         }
                         HkPanel.TrialLevel.runCalibration = false;
+                        Debug.Log("CONTROL LEVEL NAME: " + HkPanel.TrialLevel.ControlLevelName);
                         OriginalTaskLevel = null;
                         OriginalTrialLevel = null;
                     }

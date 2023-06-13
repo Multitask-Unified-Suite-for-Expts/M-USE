@@ -45,6 +45,7 @@ namespace USE_ExperimentTemplate_Task
         protected BlockData BlockData;
         protected FrameData FrameData;
         protected TrialData TrialData;
+        protected USE_ExperimentTemplate_Data.GazeData GazeData;
         [HideInInspector] public SerialSentData SerialSentData;
         [HideInInspector] public SerialRecvData SerialRecvData;
 
@@ -55,6 +56,7 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public GazeTracker GazeTracker;
         [HideInInspector] public MouseTracker MouseTracker;
         [HideInInspector] public TobiiEyeTrackerController TobiiEyeTrackerController;
+        [HideInInspector] public EyeTrackerData_Namespace.TobiiGazeSample TobiiGazeSample;
         [HideInInspector] public ScreenBasedCalibration ScreenBasedCalibration;
         [HideInInspector] public DisplayArea DisplayArea;
 
@@ -344,6 +346,8 @@ namespace USE_ExperimentTemplate_Task
                     SessionDataControllers.RemoveDataController("BlockData_" + TaskName);
                     SessionDataControllers.RemoveDataController("TrialData_" + TaskName);
                     SessionDataControllers.RemoveDataController("FrameData_" + TaskName);
+                    if (EyeTrackerActive)
+                        SessionDataControllers.RemoveDataController("GazeData_" + TaskName);
                 }
 
                 if (TaskStims != null)
@@ -419,6 +423,18 @@ namespace USE_ExperimentTemplate_Task
                 FrameData.trialLevel = TrialLevel;
                 TrialLevel.FrameData = FrameData;
                 FrameData.fileName = FilePrefix + "__FrameData_PreTrial.txt";
+
+                if (EyeTrackerActive)
+                {
+                    GazeData = (USE_ExperimentTemplate_Data.GazeData)dataController.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", ConfigName,
+                    StoreData, TaskDataPath + Path.DirectorySeparatorChar + "GazeData");
+
+                    GazeData.taskLevel = this;
+                    GazeData.trialLevel = TrialLevel;
+                    TrialLevel.GazeData = GazeData;
+                    GazeData.fileName = FilePrefix + "__GazeData_PreTrial.txt";
+                }
+                
                 // ====
 
             }
@@ -457,6 +473,17 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.FrameData = FrameData;
                 FrameData.fileName = FilePrefix + "__FrameData_PreTrial.txt";
 
+
+                if (EyeTrackerActive)
+                {
+                    GazeData = (USE_ExperimentTemplate_Data.GazeData)dataController.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", ConfigName,
+                    StoreData, TaskDataPath + Path.DirectorySeparatorChar + "GazeData");
+
+                    GazeData.taskLevel = this;
+                    GazeData.trialLevel = TrialLevel;
+                    TrialLevel.GazeData = GazeData;
+                    GazeData.fileName = FilePrefix + "__GazeData_PreTrial.txt";
+                }
             }
             
             
@@ -464,9 +491,11 @@ namespace USE_ExperimentTemplate_Task
             BlockData.InitDataController();
             TrialData.InitDataController();
             FrameData.InitDataController();
+            GazeData.InitDataController();
 
             BlockData.ManuallyDefine();
             FrameData.ManuallyDefine();
+            GazeData.ManuallyDefine();
 
             if (EventCodesActive)
                 FrameData.AddEventCodeColumns();
@@ -478,6 +507,7 @@ namespace USE_ExperimentTemplate_Task
             BlockData.CreateFile();
             //BlockData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
             FrameData.CreateFile();
+            GazeData.CreateFile();
             //FrameData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
 
 
@@ -617,6 +647,7 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
 
             TrialLevel.EyeTrackerActive = EyeTrackerActive;
+            TrialLevel.TobiiGazeSample = TobiiGazeSample;
 
             TrialLevel.DefineTrialLevel();
         }
@@ -1132,6 +1163,11 @@ namespace USE_ExperimentTemplate_Task
             {
                 FrameData.AppendData();
                 FrameData.WriteData();
+            }
+
+            if (GazeData != null)
+            {
+                GazeData.WriteData();
             }
         }
         

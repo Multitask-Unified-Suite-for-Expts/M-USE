@@ -279,10 +279,10 @@ namespace USE_ExperimentTemplate_Data
         public override void DefineUSETemplateDataController()
         {
             DataControllerName = "BlockData";
-            AddDatum("SubjectID", () => taskLevel.SubjectID);
-            AddDatum("SessionID", () => taskLevel.SessionID);
-            AddDatum("TaskName", () => taskLevel.TaskName);
-            AddDatum("BlockCount", () => taskLevel.BlockCount + 1);
+            AddDatum("SubjectID", () => sessionLevel.SubjectID);
+            AddDatum("SessionID", () => sessionLevel.SessionID);
+            AddDatum("TaskName", () => taskLevel != null ? taskLevel.TaskName : "NoTaskActive");
+            AddDatum("BlockCount", () => taskLevel != null ? (taskLevel.BlockCount + 1).ToString() : "NoTaskActive");
         }
     }
 
@@ -291,13 +291,13 @@ namespace USE_ExperimentTemplate_Data
         public override void DefineUSETemplateDataController()
         {
             DataControllerName = "TrialData";
-            AddDatum("SubjectID", () => taskLevel.SubjectID); //session level instead of task level
-            AddDatum("SessionID", () => taskLevel.SessionID);
-            AddDatum("TaskName", () => taskLevel.TaskName);
-            AddDatum("BlockCount", () => taskLevel.BlockCount + 1);
-            AddDatum("TrialCount_InTask", () => trialLevel.TrialCount_InTask + 1);
-            AddDatum("TrialCount_InBlock", () => trialLevel.TrialCount_InBlock + 1);
-            AddDatum("AbortCode", () => trialLevel.AbortCode);
+            AddDatum("SubjectID", () => sessionLevel.SubjectID); //session level instead of task level
+            AddDatum("SessionID", () => sessionLevel.SessionID);
+            AddDatum("TaskName", () => taskLevel != null? taskLevel.TaskName:"NoTaskActive");
+            AddDatum("BlockCount", () => taskLevel != null ? (taskLevel.BlockCount + 1).ToString():"NoTaskActive");
+            AddDatum("TrialCount_InTask", () => trialLevel != null ? (trialLevel.TrialCount_InTask + 1).ToString() : "NoTaskActive");
+            AddDatum("TrialCount_InBlock", () => trialLevel != null ? (trialLevel.TrialCount_InBlock + 1).ToString() : "NoTaskActive");
+            AddDatum("AbortCode", () => trialLevel != null ? (trialLevel.AbortCode).ToString() : "NoTaskActive");
         }
     }
 
@@ -306,22 +306,59 @@ namespace USE_ExperimentTemplate_Data
         public override void DefineUSETemplateDataController()
         {
             DataControllerName = "FrameData";
-            AddDatum("SubjectID", () => taskLevel.SubjectID);
-            AddDatum("SessionID", () => taskLevel.SessionID);
-            AddDatum("TaskName", () => taskLevel.TaskName);
-            AddDatum("BlockCount", () => taskLevel.BlockCount + 1);
-            AddDatum("TrialCount_InTask", () => trialLevel.TrialCount_InTask + 1);
-            AddDatum("TrialCount_InBlock", () => trialLevel.TrialCount_InBlock + 1);
-            AddDatum("CurrentTrialState", () => trialLevel.CurrentState.StateName);
+            AddDatum("SubjectID", () => sessionLevel.SubjectID);
+            AddDatum("SessionID", () => sessionLevel.SessionID);
+            AddDatum("TaskName", () => taskLevel != null ? taskLevel.TaskName : "NoTaskActive");
+            AddDatum("BlockCount", () => taskLevel != null ? (taskLevel.BlockCount + 1).ToString() : "NoTaskActive");
+            AddDatum("TrialCount_InTask", () => trialLevel != null ? (trialLevel.TrialCount_InTask + 1).ToString() : "NoTaskActive");
+            AddDatum("TrialCount_InBlock", () => trialLevel != null ? (trialLevel.TrialCount_InBlock + 1).ToString() : "NoTaskActive");
+            AddDatum("CurrentTrialState", () => trialLevel != null ? trialLevel.CurrentState.StateName : "NoTaskActive");
             AddDatum("Frame", () => Time.frameCount);
             AddDatum("FrameStartUnity", () => Time.time);
         }
 
         public void AddEventCodeColumns()
         {
-            AddDatum("EventCodes", () => string.Join(",", taskLevel.EventCodeManager.GetBuffer("sent")));
-            AddDatum("SplitEventCodes", () => string.Join(",", taskLevel.EventCodeManager.GetBuffer("split")));
-            AddDatum("PreSplitEventCodes", () => string.Join(",", taskLevel.EventCodeManager.GetBuffer("presplit")));
+            AddDatum("EventCodes", () => taskLevel != null ? string.Join(",", taskLevel.EventCodeManager.GetBuffer("sent")) : "NoTaskActive");
+            AddDatum("SplitEventCodes", () => taskLevel != null ? string.Join(",", taskLevel.EventCodeManager.GetBuffer("split")) : "NoTaskActive");
+            AddDatum("PreSplitEventCodes", () => taskLevel != null ? string.Join(",", taskLevel.EventCodeManager.GetBuffer("presplit")) : "NoTaskActive");
+        }
+    }
+
+    public class GazeData : USE_Template_DataController
+    {
+        public override void DefineUSETemplateDataController()
+        {
+            DataControllerName = "GazeData";
+            AddDatum("SubjectID", () => sessionLevel.SubjectID);
+            AddDatum("SessionID", () => sessionLevel.SessionID);
+            AddDatum("TaskName", () => taskLevel != null ? taskLevel.TaskName : "NoTaskActive");
+            AddDatum("BlockCount", () => taskLevel != null ? (taskLevel.BlockCount + 1).ToString() : "NoTaskActive");
+            AddDatum("TrialCount_InTask", () => trialLevel != null ? (trialLevel.TrialCount_InTask + 1).ToString() : "NoTaskActive");
+            AddDatum("TrialCount_InBlock", () => trialLevel != null ? (trialLevel.TrialCount_InBlock + 1).ToString() : "NoTaskActive");
+            AddDatum("CurrentTrialState", () => trialLevel != null ? trialLevel.CurrentState.StateName : "NoTaskActive");
+            AddDatum("Frame", () => Time.frameCount);
+            AddDatum("FrameStartUnity", () => Time.time);
+
+            AddDatum("LeftPupilValidity", () => trialLevel.TobiiGazeSample.leftPupilValidity);
+            AddDatum("LeftGazeOriginValidity", () => trialLevel.TobiiGazeSample.leftGazeOriginValidity);
+            AddDatum("LeftGazePointValidity", () => trialLevel.TobiiGazeSample.leftGazePointValidity);
+            AddDatum("LeftGazePointOnDisplayArea", () => trialLevel.TobiiGazeSample.leftGazePointOnDisplayArea);
+            AddDatum("LeftGazeOriginInUserCoordinateSystem", () => trialLevel.TobiiGazeSample.leftGazeOriginInUserCoordinateSystem);
+            AddDatum("LeftGazePointInUserCoordinateSystem", () => trialLevel.TobiiGazeSample.leftGazePointInUserCoordinateSystem);
+            AddDatum("LeftGazeOriginInTrackboxCoordinateSystem", () => trialLevel.TobiiGazeSample.leftGazeOriginInTrackboxCoordinateSystem);
+            AddDatum("LeftPupilDiameter", () => trialLevel.TobiiGazeSample.leftPupilDiameter);
+            
+            AddDatum("RightPupilValidity", () => trialLevel.TobiiGazeSample.rightPupilValidity);
+            AddDatum("RightGazeOriginValidity", () => trialLevel.TobiiGazeSample.rightGazeOriginValidity);
+            AddDatum("RightGazePointValidity", () => trialLevel.TobiiGazeSample.rightGazePointValidity);
+            AddDatum("RightGazePointOnDisplayArea", () => trialLevel.TobiiGazeSample.rightGazePointOnDisplayArea);
+            AddDatum("RightGazeOriginInUserCoordinateSystem", () => trialLevel.TobiiGazeSample.rightGazeOriginInUserCoordinateSystem);
+            AddDatum("RightGazePointInUserCoordinateSystem", () => trialLevel.TobiiGazeSample.rightGazePointInUserCoordinateSystem);
+            AddDatum("RightGazeOriginInTrackboxCoordinateSystem", () => trialLevel.TobiiGazeSample.rightGazeOriginInTrackboxCoordinateSystem);
+            AddDatum("RightPupilDiameter", () => trialLevel.TobiiGazeSample.rightPupilDiameter);
+
+            AddDatum("TobiiSystemTimeStamp", () => trialLevel.TobiiGazeSample.systemTimeStamp);
         }
     }
 

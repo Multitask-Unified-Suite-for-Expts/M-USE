@@ -28,6 +28,7 @@ namespace USE_ExperimentTemplate_Trial
     {
         [HideInInspector] public TrialData TrialData;
         [HideInInspector] public FrameData FrameData;
+        [HideInInspector] public USE_ExperimentTemplate_Data.GazeData GazeData;
         [HideInInspector] public SerialSentData SerialSentData;
         [HideInInspector] public SerialRecvData SerialRecvData;
         [HideInInspector] public int BlockCount, TrialCount_InTask, TrialCount_InBlock, AbortCode;
@@ -72,6 +73,7 @@ namespace USE_ExperimentTemplate_Trial
 
         [HideInInspector] public string SelectionType;
         [HideInInspector] public bool EyeTrackerActive;
+        [HideInInspector] public EyeTrackerData_Namespace.TobiiGazeSample TobiiGazeSample;
         [HideInInspector] public bool runCalibration;
         private ControlLevel_Task_Template CalibrationTaskLevel;
 

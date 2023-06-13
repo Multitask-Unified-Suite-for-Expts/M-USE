@@ -8,9 +8,7 @@ using EyeTrackerData_Namespace;
 
 public class TobiiEyeTrackerController : EyeTrackerController_Base
 {
-    public static TobiiEyeTrackerController Instance { get; private set; }
-    private IEyeTracker cachedEyeTracker = null;
-
+    public static TobiiEyeTrackerController Instance { get; private set; } 
     public IEyeTracker iEyeTracker;
     public EyeTracker EyeTracker;
     public ScreenBasedCalibration ScreenBasedCalibration;
@@ -20,6 +18,7 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
     public bool isCalibrating;
 
     public TobiiGazeSample mostRecentGazeSample;
+    public USE_ExperimentTemplate_Data.GazeData GazeData;
 
     //MOST RECENT GAZE DATA FIELD, OVERWRITTEN 
 
@@ -50,6 +49,7 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
             iEyeTracker = EyeTrackingOperations.FindAllEyeTrackers()[0];
             ScreenBasedCalibration = new ScreenBasedCalibration(iEyeTracker);
 
+            iEyeTracker.GazeDataReceived += OnGazeDataReceived;
             DisplayArea = iEyeTracker.GetDisplayArea();
         }
 
@@ -61,7 +61,7 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
 
     }
 
-    private void OnGazeDataReceived(object sender, GazeDataEventArgs e)
+    public void OnGazeDataReceived(object sender, GazeDataEventArgs e)
     {
         // Process Left Eye gaze data each frame
         TobiiGazeSample gazeSample = new TobiiGazeSample();
@@ -86,8 +86,9 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
         gazeSample.rightGazeOriginInTrackboxCoordinateSystem = e.RightEye.GazeOrigin.PositionInTrackBoxCoordinates.ToVector3();
         gazeSample.rightPupilDiameter = e.RightEye.Pupil.PupilDiameter;
 
-        gazeSample.systemTimeStamp = e.SystemTimeStamp; 
-        
+        gazeSample.systemTimeStamp = e.SystemTimeStamp;
+
+        GazeData.AppendData();
         //GAZEDATA.APPENDDATA()
     }
 }

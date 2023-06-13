@@ -175,7 +175,7 @@ namespace USE_ExperimentTemplate_Session
                     SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));
                 else //Using ServerConfigs
                 {
-                    string serverSessionConfig = ServerManager.GetFileStringAsync("SessionConfig").ToString();
+                    string serverSessionConfig = ServerManager.GetConfigFileStringAsync("SessionConfig").ToString();
                     SessionSettings.ImportSettings_MultipleType("Session", "ServerPath", serverSessionConfig);
                 }
 #else
@@ -844,7 +844,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 SessionData.AppendData();
                 SessionData.WriteData();
-           
+
                 AppendSerialData();
                 if(SerialPortActive)
                 {

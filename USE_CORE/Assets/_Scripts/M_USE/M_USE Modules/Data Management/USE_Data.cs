@@ -40,6 +40,7 @@ using USE_States;
 using static Dropbox.Api.Files.SearchMatchTypeV2;
 using System.Threading.Tasks;
 using System.Collections;
+using static Dropbox.Api.Files.SearchMatchType;
 
 namespace USE_Data
 {
@@ -172,9 +173,9 @@ namespace USE_Data
 		public int capacity { get; set; }
 
 		//list of data to store
-		protected List<IDatum> data;
+		public List<IDatum> data;
 		//string to write to file
-		private List<string> dataBuffer;
+		public List<string> dataBuffer;
 		//records frame when data is appended (to prevent double-writing)
 		private int frameChecker = 0;
 
@@ -188,8 +189,7 @@ namespace USE_Data
 		public bool DefineManually;
 
 
-		public string FileHeaders;
-
+		public string fileHeaders;
 
 		//For webgl build (short term)
 		public bool SendDataExternally;
@@ -220,12 +220,11 @@ namespace USE_Data
 
 
 
-#if (UNITY_WEBGL)
+			#if (UNITY_WEBGL)
 
-			SendDataExternally = true;
+				SendDataExternally = true;
 
-#endif
-
+			#endif
 
 		}
 
@@ -606,6 +605,7 @@ namespace USE_Data
             //if not, CreateSQLTable()
         }
 
+
 		/// <summary>
 		/// Appends current values of all Datums to data buffer.
 		/// </summary>
@@ -639,15 +639,15 @@ namespace USE_Data
         /// </summary>
         public void CreateFile()
 		{
-			if (storeData && fileName != null)
+            if (storeData && fileName != null)
 			{
-				FileHeaders = "";
+				fileHeaders = "";
 				for (int i = 0; i < data.Count; i++)
 				{
 					if (i > 0)
-						FileHeaders += "\t";
+						fileHeaders += "\t";
 					
-					FileHeaders += data[i].Name;
+					fileHeaders += data[i].Name;
 				}
 
 				if (SendDataExternally)
@@ -655,14 +655,14 @@ namespace USE_Data
 					string content = null;
 					if (dataBuffer.Count > 0)
 						content = String.Join("\n", dataBuffer.ToArray());
-					StartCoroutine(SendDataToExternalServer(fileName, FileHeaders, content));
+					StartCoroutine(SendDataToExternalServer(fileHeaders, content));
 				}
 				else
 				{
 					Directory.CreateDirectory(folderPath);
 					using (StreamWriter dataStream = File.CreateText(folderPath + Path.DirectorySeparatorChar + fileName))
 					{
-						dataStream.Write(FileHeaders);
+						dataStream.Write(fileHeaders);
 					}
 				}
 			}
@@ -679,9 +679,9 @@ namespace USE_Data
 				{
 					string content = String.Join("\n", dataBuffer.ToArray());
 					string headers = null;
-					if (FileHeaders.Length > 1)
-						headers = FileHeaders;
-					StartCoroutine(SendDataToExternalServer(fileName, headers, content));
+					if (fileHeaders.Length > 1)
+						headers = fileHeaders;
+					StartCoroutine(SendDataToExternalServer(headers, content));
 				}
 				else
 				{
@@ -700,19 +700,21 @@ namespace USE_Data
 		}
 
 
-		private IEnumerator SendDataToExternalServer(string fileName, string fileHeaders = null, string fileContent = null)
+        private IEnumerator SendDataToExternalServer(string fileHeaders = null, string fileContent = null)
 		{
-			Debug.Log("---------------------------------------------------");
-			Debug.Log("FILE NAME: " + fileName);
-            Debug.Log("FILE HEADERS NULL? " + fileHeaders == null ? "NULL!" : "NOT NULL!");
-			Debug.Log("FILE CONTENT NULL? " + fileContent == null ? "NULL!" : "NOT NULL!");
-            Debug.Log("---------------------------------------------------");
+			string content = fileContent == null ? fileHeaders : (fileHeaders + '\n' + fileContent);
+            yield return ServerManager.CreateDataFileAsync(fileName, content);
 
-            if (fileHeaders != null)
-                yield return ServerManager.CreateDataFileAsync(fileName, fileHeaders);
-            if (fileContent != null)
-                yield return ServerManager.AppendDataToFileAsync(fileName, fileContent);
-        }
+			//if (fileHeaders != null && fileContent != null)
+			//	yield return ServerManager.CreateDataFileWithHeadersAsync(fileName, fileHeaders + '\n' + fileContent);
+			//else
+			//{
+			//	if (fileHeaders != null)
+			//		yield return ServerManager.CreateDataFileWithHeadersAsync(fileName, fileHeaders);
+			//	if (fileContent != null)
+			//		yield return ServerManager.AppendDataToFileAsync(fileName, fileContent);
+			//}
+		}
 
 
 
@@ -777,6 +779,7 @@ namespace USE_Data
 				}
 			}
 		}
+
 
 		void OnApplicationQuit()
 		{

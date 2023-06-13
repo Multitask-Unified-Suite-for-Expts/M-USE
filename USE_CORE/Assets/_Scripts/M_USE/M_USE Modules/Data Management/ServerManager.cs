@@ -22,8 +22,6 @@ public static class ServerManager //Used with the PHP scripts
 
     public static IEnumerator CreateSessionDataFolder(string subjectID, string sessionID) //WORKS!
     {
-        Debug.Log("CREATING SESSION DATA FOLDER!");
-
         SessionDataFolder = "DATA__" + "Session_" + sessionID + "__Subject_" + subjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
         string path = $"DATA/{SessionDataFolder}";
         string url = $"{ServerURL}/createFolder.php?path={path}";
@@ -38,11 +36,8 @@ public static class ServerManager //Used with the PHP scripts
         }
     }
 
-
     public static List<string> GetSessionFolderNames() //WORKS!
     {
-        Debug.Log("GETTING SESSION FOLDER NAMES!");
-
         string path = "CONFIGS";
         string url = $"{ServerURL}/getFolderNames.php?directoryPath={path}";
         List<string> folderNames = new List<string>();
@@ -68,17 +63,87 @@ public static class ServerManager //Used with the PHP scripts
         return folderNames;
     }
 
-
-    public static IEnumerator<string> GetFileStringAsync(string searchString, string subFolder = null)
+    public static IEnumerator CreateDataFileAsync(string fileName, string fileHeaders) //WAs working
     {
-        Debug.Log("GETTING FILE STRING ASYNC!");
+        Debug.Log("CREATING DATA FILE: " + fileName);
 
+        string path = $"DATA/{SessionDataFolder}/{fileName}";
+        string url = $"{ServerURL}/createFile.php?path={path}";
+
+        using (UnityWebRequest request = UnityWebRequest.Put(url, fileHeaders))
+        {
+            request.method = UnityWebRequest.kHttpVerbPUT;
+            request.SetRequestHeader("Content-Type", "text/plain");
+            yield return request.SendWebRequest();
+            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"SUCCESS! Created/replaced file: {fileName}" : $"FAILED! Error creating/replacing file: {fileName} | Error: {request.error}");
+        }
+    }
+
+    //public static IEnumerator AppendDataToFileAsync(string fileName, string rowData)
+    //{
+    //    Debug.Log("APPENDING DATA TO FILE: " + fileName);
+
+    //    IEnumerator<string> getFileStringCoroutine = GetDataFileStringAsync(fileName);
+    //    yield return CoroutineHelper.StartCoroutine(getFileStringCoroutine);
+
+    //    string originalFileContents = getFileStringCoroutine.Current;
+    //    if (originalFileContents != null)
+    //    {
+    //        string updatedFileContents = originalFileContents + "\n" + rowData;
+
+    //        string path = $"DATA/{SessionDataFolder}/{fileName}";
+    //        string url = $"{ServerURL}/updateFile.php?path={path}";
+
+    //        WWWForm formData = new WWWForm();
+    //        formData.AddField("data", updatedFileContents);
+
+    //        using (UnityWebRequest request = UnityWebRequest.Post(url, formData))
+    //        {
+    //            request.SetRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    //            yield return request.SendWebRequest();
+
+    //            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"SUCCESS! Appended to {fileName}" : $"FAILED! Error appending to {fileName} | Error: {request.error}");
+    //        }
+    //    }
+    //}
+
+    //public static IEnumerator<string> GetDataFileStringAsync(string searchString)
+    //{
+    //    Debug.Log("GETTING FILE STRING ASYNC!");
+
+    //    string path = $"DATA/{SessionDataFolder}";
+    //    string url = $"{ServerURL}/getFile.php?path={path}&searchString={searchString}";
+
+    //    using (UnityWebRequest request = UnityWebRequest.Get(url))
+    //    {
+    //        var operation = request.SendWebRequest();
+
+    //        while (!operation.isDone)
+    //            yield return null;
+
+    //        if (request.result == UnityWebRequest.Result.Success)
+    //        {
+    //            string configFileContents = request.downloadHandler.text;
+    //            Debug.Log($"File containing '{searchString}' found. Contents: {configFileContents}");
+    //            yield return configFileContents;
+    //        }
+    //        else
+    //        {
+    //            Debug.Log($"An error occurred while searching for file containing '{searchString}'. Error: {request.error}");
+    //            yield return null;
+    //        }
+    //    }
+    //}
+
+
+
+    public static IEnumerator<string> GetConfigFileStringAsync(string searchString, string subFolder = null)
+    {
         string path = subFolder == null ? $"/CONFIGS/{SessionConfigFolder}" : $"/CONFIGS/{SessionConfigFolder}/{subFolder}";
         string url = $"{ServerURL}/getFile.php?path={path}&searchString={searchString}";
 
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
-            Debug.Log("INSIDE THE OP!");
             var operation = request.SendWebRequest();
 
             while (!operation.isDone)
@@ -99,41 +164,42 @@ public static class ServerManager //Used with the PHP scripts
     }
 
 
-    public static IEnumerator CreateDataFileAsync(string fileName, string fileHeaders)
-    {
-        Debug.Log("CREATING DATA FILE: " + fileName);
-
-        string path = $"DATA/{SessionDataFolder}/{fileName}";
-        string url = $"{ServerURL}/createFile.php?path={path}";
-
-        using (UnityWebRequest request = UnityWebRequest.Put(url, fileHeaders))
-        {
-            request.method = UnityWebRequest.kHttpVerbPUT;
-            request.SetRequestHeader("Content-Type", "text/plain");
-            yield return request.SendWebRequest();
-            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"SUCCESS! Created file: {fileName}" : $"FAILED! Error creating file: {fileName} | Error: {request.error}");
-        }
-    }
-
-    public static IEnumerator AppendDataToFileAsync(string fileName, string rowData)
-    {
-        Debug.Log("APPENDING DATA TO FILE: " + fileName);
-
-        string path = $"DATA/{SessionConfigFolder}/{fileName}";
-        string url = $"{ServerURL}/appendData.php?path={path}";
-
-        using (UnityWebRequest request = UnityWebRequest.Post(url, rowData))
-        {
-            request.SetRequestHeader("Content-Type", "text/plain");
-            yield return request.SendWebRequest();
-            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"SUCCESS! Appended to {fileName}" : $"FAILED! Error appending to {fileName} | Error: {request.error}");
-        }
-    }
-
 }
 
 
 
+public static class CoroutineHelper
+{
+    private class CoroutineHolder : MonoBehaviour { }
+
+    private static CoroutineHolder holder;
+
+    private static CoroutineHolder Holder
+    {
+        get
+        {
+            if (holder == null)
+            {
+                holder = new GameObject("CoroutineHolder").AddComponent<CoroutineHolder>();
+                UnityEngine.Object.DontDestroyOnLoad(holder.gameObject);
+            }
+            return holder;
+        }
+    }
+
+    public static Coroutine StartCoroutine(IEnumerator coroutine)
+    {
+        return Holder.StartCoroutine(coroutine);
+    }
+
+    public static void StopCoroutine(Coroutine coroutine)
+    {
+        if (coroutine != null)
+        {
+            Holder.StopCoroutine(coroutine);
+        }
+    }
+}
 
 
 //public static class SFTP_ServerManager

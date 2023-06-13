@@ -53,7 +53,12 @@ public class InitScreen : MonoBehaviour
 
     //Set In Inspector
     public M_USE_ControlLevel_Session session;
-
+    public GameObject initScreenCanvasGO;
+    public GameObject confirmButtonGO;
+    public GameObject locateFileGO;
+    public GameObject buttonsParentGO;
+    public GameObject webBuildChildrenGO;
+    public GameObject dropdownGO;
 
 
     void Start()
@@ -67,16 +72,16 @@ public class InitScreen : MonoBehaviour
             g.SetActive(true);
 
 
-
         #if (UNITY_WEBGL)
         {
-            GameObject.Find("LocateFile").SetActive(false);
-            GameObject.Find("InitScreenCanvas").GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
-            //StartCoroutine(HandleConfirm());
+            confirmButtonGO.SetActive(true);
+            webBuildChildrenGO.SetActive(true);
+            buttonsParentGO.SetActive(false);
+            initScreenCanvasGO.GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
         }
-#else
-            GameObject.Find("WebBuild_Children").SetActive(false);
-#endif
+        #else
+            buttonsParentGO.SetActive(true);
+        #endif
 
     }
 
@@ -84,18 +89,17 @@ public class InitScreen : MonoBehaviour
     IEnumerator HandleConfirm()
     {
 
-#if(UNITY_WEBGL)
-        string subjectID = session.SessionDetails.GetItemValue("SubjectID");
-        string sessionID = session.SessionDetails.GetItemValue("SessionID");
-        ServerManager.CreateSessionDataFolder(subjectID, sessionID);
+        #if(UNITY_WEBGL)
+            string subjectID = session.SessionDetails.GetItemValue("SubjectID");
+            string sessionID = session.SessionDetails.GetItemValue("SessionID");
+            ServerManager.CreateSessionDataFolder(subjectID, sessionID);
 
-        Dropdown dropdown = GameObject.Find("Dropdown").GetComponent<Dropdown>();
-        string sessionConfigFolder = dropdown.options[dropdown.value].text;
-        ServerManager.SessionConfigFolder = sessionConfigFolder;
-        if (sessionConfigFolder.ToLower().Contains("default"))
-            session.UseDefaultConfigs = true;
-        
-#endif
+            Dropdown dropdown = dropdownGO.GetComponent<Dropdown>();
+            string sessionConfigFolder = dropdown.options[dropdown.value].text;
+            ServerManager.SessionConfigFolder = sessionConfigFolder;
+            if (sessionConfigFolder.ToLower().Contains("default"))
+                session.UseDefaultConfigs = true;
+        #endif
 
 
         if (OnLoadSettings != null)
@@ -120,6 +124,20 @@ public class InitScreen : MonoBehaviour
     public void Confirm()
     {
         StartCoroutine(HandleConfirm());
+    }
+
+
+    public void OnConfigButtonPress()
+    {
+        buttonsParentGO.SetActive(false);
+       
+        if(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name.ToLower().Contains("default"))
+            Confirm();
+        else
+        {
+            locateFileGO.SetActive(true);
+            confirmButtonGO.SetActive(true);
+        }
     }
 
 

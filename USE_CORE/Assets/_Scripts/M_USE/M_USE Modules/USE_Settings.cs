@@ -504,6 +504,7 @@ namespace USE_Settings
 			Settings settings = new Settings(settingsCategory, settingsPath);
 
 			string[] lines;
+
 			if(serverFileString != null)
 				lines = serverFileString.Split('\n');
 			else

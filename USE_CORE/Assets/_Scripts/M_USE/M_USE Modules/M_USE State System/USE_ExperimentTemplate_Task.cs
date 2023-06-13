@@ -56,7 +56,6 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public GazeTracker GazeTracker;
         [HideInInspector] public MouseTracker MouseTracker;
         [HideInInspector] public TobiiEyeTrackerController TobiiEyeTrackerController;
-        [HideInInspector] public EyeTrackerData_Namespace.TobiiGazeSample TobiiGazeSample;
         [HideInInspector] public ScreenBasedCalibration ScreenBasedCalibration;
         [HideInInspector] public DisplayArea DisplayArea;
 
@@ -647,7 +646,6 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
 
             TrialLevel.EyeTrackerActive = EyeTrackerActive;
-            TrialLevel.TobiiGazeSample = TobiiGazeSample;
 
             TrialLevel.DefineTrialLevel();
         }

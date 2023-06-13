@@ -340,25 +340,25 @@ namespace USE_ExperimentTemplate_Data
             AddDatum("Frame", () => Time.frameCount);
             AddDatum("FrameStartUnity", () => Time.time);
 
-            AddDatum("LeftPupilValidity", () => trialLevel.TobiiGazeSample.leftPupilValidity);
-            AddDatum("LeftGazeOriginValidity", () => trialLevel.TobiiGazeSample.leftGazeOriginValidity);
-            AddDatum("LeftGazePointValidity", () => trialLevel.TobiiGazeSample.leftGazePointValidity);
-            AddDatum("LeftGazePointOnDisplayArea", () => trialLevel.TobiiGazeSample.leftGazePointOnDisplayArea);
-            AddDatum("LeftGazeOriginInUserCoordinateSystem", () => trialLevel.TobiiGazeSample.leftGazeOriginInUserCoordinateSystem);
-            AddDatum("LeftGazePointInUserCoordinateSystem", () => trialLevel.TobiiGazeSample.leftGazePointInUserCoordinateSystem);
-            AddDatum("LeftGazeOriginInTrackboxCoordinateSystem", () => trialLevel.TobiiGazeSample.leftGazeOriginInTrackboxCoordinateSystem);
-            AddDatum("LeftPupilDiameter", () => trialLevel.TobiiGazeSample.leftPupilDiameter);
+            AddDatum("LeftPupilValidity", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.leftPupilValidity);
+            AddDatum("LeftGazeOriginValidity", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.leftGazeOriginValidity);
+            AddDatum("LeftGazePointValidity", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.leftGazePointValidity);
+            AddDatum("LeftGazePointOnDisplayArea", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.leftGazePointOnDisplayArea);
+            AddDatum("LeftGazeOriginInUserCoordinateSystem", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.leftGazeOriginInUserCoordinateSystem);
+            AddDatum("LeftGazePointInUserCoordinateSystem", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.leftGazePointInUserCoordinateSystem);
+            AddDatum("LeftGazeOriginInTrackboxCoordinateSystem", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.leftGazeOriginInTrackboxCoordinateSystem);
+            AddDatum("LeftPupilDiameter", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.leftPupilDiameter);
             
-            AddDatum("RightPupilValidity", () => trialLevel.TobiiGazeSample.rightPupilValidity);
-            AddDatum("RightGazeOriginValidity", () => trialLevel.TobiiGazeSample.rightGazeOriginValidity);
-            AddDatum("RightGazePointValidity", () => trialLevel.TobiiGazeSample.rightGazePointValidity);
-            AddDatum("RightGazePointOnDisplayArea", () => trialLevel.TobiiGazeSample.rightGazePointOnDisplayArea);
-            AddDatum("RightGazeOriginInUserCoordinateSystem", () => trialLevel.TobiiGazeSample.rightGazeOriginInUserCoordinateSystem);
-            AddDatum("RightGazePointInUserCoordinateSystem", () => trialLevel.TobiiGazeSample.rightGazePointInUserCoordinateSystem);
-            AddDatum("RightGazeOriginInTrackboxCoordinateSystem", () => trialLevel.TobiiGazeSample.rightGazeOriginInTrackboxCoordinateSystem);
-            AddDatum("RightPupilDiameter", () => trialLevel.TobiiGazeSample.rightPupilDiameter);
+            AddDatum("RightPupilValidity", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.rightPupilValidity);
+            AddDatum("RightGazeOriginValidity", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.rightGazeOriginValidity);
+            AddDatum("RightGazePointValidity", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.rightGazePointValidity);
+            AddDatum("RightGazePointOnDisplayArea", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.rightGazePointOnDisplayArea);
+            AddDatum("RightGazeOriginInUserCoordinateSystem", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.rightGazeOriginInUserCoordinateSystem);
+            AddDatum("RightGazePointInUserCoordinateSystem", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.rightGazePointInUserCoordinateSystem);
+            AddDatum("RightGazeOriginInTrackboxCoordinateSystem", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.rightGazeOriginInTrackboxCoordinateSystem);
+            AddDatum("RightPupilDiameter", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.rightPupilDiameter);
 
-            AddDatum("TobiiSystemTimeStamp", () => trialLevel.TobiiGazeSample.systemTimeStamp);
+            AddDatum("TobiiSystemTimeStamp", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.systemTimeStamp);
         }
     }
 

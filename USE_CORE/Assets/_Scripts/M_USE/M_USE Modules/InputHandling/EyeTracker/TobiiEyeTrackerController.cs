@@ -63,30 +63,27 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
 
     public void OnGazeDataReceived(object sender, GazeDataEventArgs e)
     {
-        // Process Left Eye gaze data each frame
-        TobiiGazeSample gazeSample = new TobiiGazeSample();
-
         // Left Eye Data
-        gazeSample.leftPupilValidity = e.LeftEye.Pupil.Validity.ToString();
-        gazeSample.leftGazeOriginValidity = e.LeftEye.GazeOrigin.Validity.ToString();
-        gazeSample.leftGazePointValidity = e.LeftEye.GazePoint.Validity.ToString();
-        gazeSample.leftGazePointOnDisplayArea = e.LeftEye.GazePoint.PositionOnDisplayArea.ToVector2();
-        gazeSample.leftGazeOriginInUserCoordinateSystem = e.LeftEye.GazeOrigin.PositionInUserCoordinates.ToVector3();
-        gazeSample.leftGazePointInUserCoordinateSystem = e.LeftEye.GazePoint.PositionInUserCoordinates.ToVector3();
-        gazeSample.leftGazeOriginInTrackboxCoordinateSystem = e.LeftEye.GazeOrigin.PositionInTrackBoxCoordinates.ToVector3();
-        gazeSample.leftPupilDiameter = e.LeftEye.Pupil.PupilDiameter;
+        mostRecentGazeSample.leftPupilValidity = e.LeftEye.Pupil.Validity.ToString();
+        mostRecentGazeSample.leftGazeOriginValidity = e.LeftEye.GazeOrigin.Validity.ToString();
+        mostRecentGazeSample.leftGazePointValidity = e.LeftEye.GazePoint.Validity.ToString();
+        mostRecentGazeSample.leftGazePointOnDisplayArea = e.LeftEye.GazePoint.PositionOnDisplayArea.ToVector2();
+        mostRecentGazeSample.leftGazeOriginInUserCoordinateSystem = e.LeftEye.GazeOrigin.PositionInUserCoordinates.ToVector3();
+        mostRecentGazeSample.leftGazePointInUserCoordinateSystem = e.LeftEye.GazePoint.PositionInUserCoordinates.ToVector3();
+        mostRecentGazeSample.leftGazeOriginInTrackboxCoordinateSystem = e.LeftEye.GazeOrigin.PositionInTrackBoxCoordinates.ToVector3();
+        mostRecentGazeSample.leftPupilDiameter = e.LeftEye.Pupil.PupilDiameter;
 
         // Right Eye Data
-        gazeSample.rightPupilValidity = e.RightEye.Pupil.Validity.ToString();
-        gazeSample.rightGazeOriginValidity = e.RightEye.GazeOrigin.Validity.ToString();
-        gazeSample.rightGazePointValidity = e.RightEye.GazePoint.Validity.ToString();
-        gazeSample.rightGazePointOnDisplayArea = e.RightEye.GazePoint.PositionOnDisplayArea.ToVector2();
-        gazeSample.rightGazeOriginInUserCoordinateSystem = e.RightEye.GazeOrigin.PositionInUserCoordinates.ToVector3();
-        gazeSample.rightGazePointInUserCoordinateSystem = e.RightEye.GazePoint.PositionInUserCoordinates.ToVector3();
-        gazeSample.rightGazeOriginInTrackboxCoordinateSystem = e.RightEye.GazeOrigin.PositionInTrackBoxCoordinates.ToVector3();
-        gazeSample.rightPupilDiameter = e.RightEye.Pupil.PupilDiameter;
+        mostRecentGazeSample.rightPupilValidity = e.RightEye.Pupil.Validity.ToString();
+        mostRecentGazeSample.rightGazeOriginValidity = e.RightEye.GazeOrigin.Validity.ToString();
+        mostRecentGazeSample.rightGazePointValidity = e.RightEye.GazePoint.Validity.ToString();
+        mostRecentGazeSample.rightGazePointOnDisplayArea = e.RightEye.GazePoint.PositionOnDisplayArea.ToVector2();
+        mostRecentGazeSample.rightGazeOriginInUserCoordinateSystem = e.RightEye.GazeOrigin.PositionInUserCoordinates.ToVector3();
+        mostRecentGazeSample.rightGazePointInUserCoordinateSystem = e.RightEye.GazePoint.PositionInUserCoordinates.ToVector3();
+        mostRecentGazeSample.rightGazeOriginInTrackboxCoordinateSystem = e.RightEye.GazeOrigin.PositionInTrackBoxCoordinates.ToVector3();
+        mostRecentGazeSample.rightPupilDiameter = e.RightEye.Pupil.PupilDiameter;
 
-        gazeSample.systemTimeStamp = e.SystemTimeStamp;
+        mostRecentGazeSample.systemTimeStamp = e.SystemTimeStamp;
 
         GazeData.AppendData();
         //GAZEDATA.APPENDDATA()

@@ -114,8 +114,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             PlayerViewPanelGO = GameObject.Find("MainCameraCopy");
 
             GC_CanvasGO = GameObject.Find("Calibration_Canvas");
-            
-
         });
 
         SetupTrial.AddInitializationMethod(() =>
@@ -172,12 +170,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             else if (InputBroker.GetKeyUp(KeyCode.Alpha1))
                 numCalibPoints = 1;
 
-            // Only enter Calibration if an eyetracker is being used
-            if (!SpoofGazeWithMouse && !TobiiEyeTrackerController.Instance.isCalibrating)
-            {
-                ScreenBasedCalibration.EnterCalibrationMode();
-                TobiiEyeTrackerController.Instance.isCalibrating = true;
-            }
+           
 
             // **USED FOR DEBUGGING, DELETE ONCE DONE
             // PlayerTextGO.GetComponent<UnityEngine.UI.Text>().text = SelectionHandler.CurrentInputLocation().ToString();
@@ -185,7 +178,15 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             // **
         });
         
-        Init.SpecifyTermination(() => numCalibPoints != 0, Blink);
+        Init.SpecifyTermination(() => numCalibPoints != 0, Blink, () =>
+        {
+            // Only enter Calibration if an eyetracker is being used
+            if (!SpoofGazeWithMouse && !TobiiEyeTrackerController.Instance.isCalibrating)
+            {
+                ScreenBasedCalibration.EnterCalibrationMode();
+                TobiiEyeTrackerController.Instance.isCalibrating = true;
+            }
+        });
         
         Init.AddDefaultTerminationMethod(() =>
         {

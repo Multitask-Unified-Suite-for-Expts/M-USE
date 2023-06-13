@@ -99,13 +99,14 @@ namespace USE_ExperimentTemplate_Session
         protected USE_ExperimentTemplate_Data.GazeData GazeData;
         
         // EyeTracker Variables
-        private TobiiEyeTrackerController TobiiEyeTrackerController;
+        public TobiiEyeTrackerController TobiiEyeTrackerController;
         private MonitorDetails MonitorDetails;
         private ScreenDetails ScreenDetails;
-        private EyeTrackerData_Namespace.TobiiGazeSample TobiiGazeSample;
+    //    public EyeTrackerData_Namespace.TobiiGazeSample TobiiGazeSample;
 
 
         private Camera SessionCam;
+        private Camera MirrorCam;
         private ExperimenterDisplayController ExperimenterDisplayController;
         [HideInInspector] public RenderTexture CameraMirrorTexture;
 
@@ -353,9 +354,9 @@ namespace USE_ExperimentTemplate_Session
                 ExperimenterDisplayController.InitializeExperimenterDisplay(this, experimenterDisplay);
 
                 GameObject mirrorCamGO = new GameObject("MirrorCamera");
-                Camera mirrorCam = mirrorCamGO.AddComponent<Camera>();
-                mirrorCam.CopyFrom(Camera.main);
-                mirrorCam.cullingMask = 0;
+                Camera MirrorCam = mirrorCamGO.AddComponent<Camera>();
+                MirrorCam.CopyFrom(Camera.main);
+                MirrorCam.cullingMask = 0;
 
                 RawImage mainCameraCopy_Image = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
 
@@ -398,8 +399,6 @@ namespace USE_ExperimentTemplate_Session
                     GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
                     GameObject CalibrationGO = Instantiate(Resources.Load<GameObject>("Calibration"));
 
-                    TobiiGazeSample = new EyeTrackerData_Namespace.TobiiGazeSample();
-                    TobiiEyeTrackerController.mostRecentGazeSample = TobiiGazeSample;
                     TobiiEyeTrackerController.GazeData = GazeData;
 
                     /*  //  GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform); 
@@ -591,6 +590,9 @@ namespace USE_ExperimentTemplate_Session
                 var CalibrationCanvas = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Canvas");
                 var CalibrationScripts = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Scripts");
                 CalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+              //  CalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
+                //CalibrationCanvas.GetComponent<Canvas>().worldCamera = Camera.main;
+
                 CalibrationCanvas.gameObject.SetActive(true);
                 CalibrationScripts.gameObject.SetActive(true);
             });
@@ -1167,7 +1169,6 @@ namespace USE_ExperimentTemplate_Session
             {
                 tl.GazeTracker = GazeTracker;
                 tl.TobiiEyeTrackerController = TobiiEyeTrackerController;
-                tl.TobiiGazeSample = TobiiGazeSample;
             }
             tl.MouseTracker = MouseTracker;
 

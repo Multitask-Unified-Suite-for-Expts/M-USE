@@ -680,7 +680,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         if (DisplayArea == null)
             DisplayArea = TobiiEyeTrackerController.Instance.DisplayArea;
 
-        EyeTracker.SubscribeToGazeData
     }
 
     private string CalculateSampleStatistics(List<float> samples)

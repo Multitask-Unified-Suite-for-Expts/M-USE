@@ -114,7 +114,8 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public HumanStartPanel HumanStartPanel;
         [HideInInspector] public USE_StartButton USE_StartButton;
 
-        public bool UseDefaultConfigs;
+
+        [HideInInspector] public bool UseDefaultConfigs;
 
 
 
@@ -174,7 +175,7 @@ namespace USE_ExperimentTemplate_Session
                     SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));
                 else //Using ServerConfigs
                 {
-                    string serverSessionConfig = ServerManager.GetFileString("SessionConfig").ToString();
+                    string serverSessionConfig = ServerManager.GetFileStringAsync("SessionConfig").ToString();
                     SessionSettings.ImportSettings_MultipleType("Session", "ServerPath", serverSessionConfig);
                 }
 #else

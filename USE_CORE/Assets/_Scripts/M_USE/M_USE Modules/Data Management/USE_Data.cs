@@ -39,6 +39,7 @@ using System.Collections.Generic;
 using USE_States;
 using static Dropbox.Api.Files.SearchMatchTypeV2;
 using System.Threading.Tasks;
+using System.Collections;
 
 namespace USE_Data
 {
@@ -219,13 +220,12 @@ namespace USE_Data
 
 
 
-			//Handling Data for WebGL Build-------------------------------------
-//#if (UNITY_WEBGL)
+#if (UNITY_WEBGL)
 
-//			SendDataExternally = true;
+			SendDataExternally = true;
 
-//#endif
-			//------------------------------------------------------------------
+#endif
+
 
 		}
 
@@ -655,7 +655,7 @@ namespace USE_Data
 					string content = null;
 					if (dataBuffer.Count > 0)
 						content = String.Join("\n", dataBuffer.ToArray());
-					HandleExternalData(fileName, FileHeaders, content);
+					StartCoroutine(SendDataToExternalServer(fileName, FileHeaders, content));
 				}
 				else
 				{
@@ -681,7 +681,7 @@ namespace USE_Data
 					string headers = null;
 					if (FileHeaders.Length > 1)
 						headers = FileHeaders;
-					HandleExternalData(fileName, headers, content);
+					StartCoroutine(SendDataToExternalServer(fileName, headers, content));
 				}
 				else
 				{
@@ -700,13 +700,20 @@ namespace USE_Data
 		}
 
 
-		private void HandleExternalData(string fileName, string fileHeaders = null, string fileContent = null)
+		private IEnumerator SendDataToExternalServer(string fileName, string fileHeaders = null, string fileContent = null)
 		{
-			if (fileHeaders != null)
-				ServerManager.CreateDataFile(fileName, fileHeaders);
-			if (fileContent != null)
-				ServerManager.AppendDataToFile(fileName, fileContent);
-		}
+			Debug.Log("---------------------------------------------------");
+			Debug.Log("FILE NAME: " + fileName);
+            Debug.Log("FILE HEADERS NULL? " + fileHeaders == null ? "NULL!" : "NOT NULL!");
+			Debug.Log("FILE CONTENT NULL? " + fileContent == null ? "NULL!" : "NOT NULL!");
+            Debug.Log("---------------------------------------------------");
+
+            if (fileHeaders != null)
+                yield return ServerManager.CreateDataFileAsync(fileName, fileHeaders);
+            if (fileContent != null)
+                yield return ServerManager.AppendDataToFileAsync(fileName, fileContent);
+        }
+
 
 
 

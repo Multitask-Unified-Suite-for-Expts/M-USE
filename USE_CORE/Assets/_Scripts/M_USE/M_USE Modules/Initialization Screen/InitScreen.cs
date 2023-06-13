@@ -60,11 +60,17 @@ public class InitScreen : MonoBehaviour
     public GameObject webBuildChildrenGO;
     public GameObject dropdownGO;
 
+    private FolderDropdown folderDropdown;
+    private Dropdown dropdown;
+
 
     void Start()
     {
         displayController = gameObject.AddComponent<DisplayController>();
         displayController.HandleDisplays(this);
+
+        folderDropdown = dropdownGO.GetComponent<FolderDropdown>();
+        dropdown = dropdownGO.GetComponent<Dropdown>();
 
         foreach (GameObject g in disableOnStart)
             g.SetActive(false);
@@ -74,6 +80,9 @@ public class InitScreen : MonoBehaviour
 
         #if (UNITY_WEBGL)
         {
+            List<string> folders = ServerManager.GetSessionFolderNames();
+            folderDropdown.SetFolders(folders);
+
             confirmButtonGO.SetActive(true);
             webBuildChildrenGO.SetActive(true);
             buttonsParentGO.SetActive(false);
@@ -88,19 +97,19 @@ public class InitScreen : MonoBehaviour
 
     IEnumerator HandleConfirm()
     {
-
         #if(UNITY_WEBGL)
             string subjectID = session.SessionDetails.GetItemValue("SubjectID");
             string sessionID = session.SessionDetails.GetItemValue("SessionID");
-            ServerManager.CreateSessionDataFolder(subjectID, sessionID);
 
-            Dropdown dropdown = dropdownGO.GetComponent<Dropdown>();
+            yield return ServerManager.CreateSessionDataFolder(subjectID, sessionID);
+
             string sessionConfigFolder = dropdown.options[dropdown.value].text;
             ServerManager.SessionConfigFolder = sessionConfigFolder;
             if (sessionConfigFolder.ToLower().Contains("default"))
                 session.UseDefaultConfigs = true;
+            else
+                session.UseDefaultConfigs = false;
         #endif
-
 
         if (OnLoadSettings != null)
             OnLoadSettings();
@@ -127,14 +136,18 @@ public class InitScreen : MonoBehaviour
     }
 
 
-    public void OnConfigButtonPress()
+    public void OnConfigButtonPress() //Used by Normal Build for user to select Default or Local configs. 
     {
         buttonsParentGO.SetActive(false);
        
         if(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name.ToLower().Contains("default"))
+        {
+            session.UseDefaultConfigs = true;
             Confirm();
+        }
         else
         {
+            session.UseDefaultConfigs = false;
             locateFileGO.SetActive(true);
             confirmButtonGO.SetActive(true);
         }

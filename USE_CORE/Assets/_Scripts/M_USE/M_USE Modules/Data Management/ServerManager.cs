@@ -14,62 +14,71 @@ using UnityEngine.Networking;
 
 public static class ServerManager //Used with the PHP scripts
 {
-    private static readonly string ServerURL = "serverURLGoesHere";
+    private static readonly string ServerURL = "http://localhost:8888/";
     private static string SessionDataFolder; //Created once after they hit confirm
     public static string SessionConfigFolder; //Will be whatever they select in the dropdown after hitting confirm
 
 
 
-    public static IEnumerator CreateSessionDataFolder(string subjectID, string sessionID)
+    public static IEnumerator CreateSessionDataFolder(string subjectID, string sessionID) //WORKS!
     {
+        Debug.Log("CREATING SESSION DATA FOLDER!");
+
         SessionDataFolder = "DATA__" + "Session_" + sessionID + "__Subject_" + subjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
-        string path = $"/DATA/{SessionDataFolder}";
+        string path = $"DATA/{SessionDataFolder}";
         string url = $"{ServerURL}/createFolder.php?path={path}";
 
-        using (UnityWebRequest request = UnityWebRequest.Put(url, string.Empty)) //empty body will create a folder
-        {
-            request.method = UnityWebRequest.kHttpVerbPUT;
-            yield return request.SendWebRequest();
-            if(request.result == UnityWebRequest.Result.Success)
-            {
-                Debug.Log("SUCCESS creating session folder!");
+        WWWForm formData = new WWWForm();
+        formData.AddField("path", path);
 
-            }
+        using (UnityWebRequest request = UnityWebRequest.Post(url, formData)) //empty body will create a folder
+        {
+            yield return request.SendWebRequest();
             Debug.Log(request.result == UnityWebRequest.Result.Success ? "SUCCESS Creating Session Folder!" : $"FAILED! Error Creating Session Folder! | Error: {request.error}");
         }
     }
 
 
-    public static IEnumerator<List<string>> GetFolderNames(string directoryPath)
+    public static List<string> GetSessionFolderNames() //WORKS!
     {
-        string url = $"{ServerURL}/getFolderNames.php?directoryPath={directoryPath}";
+        Debug.Log("GETTING SESSION FOLDER NAMES!");
+
+        string path = "CONFIGS";
+        string url = $"{ServerURL}/getFolderNames.php?directoryPath={path}";
+        List<string> folderNames = new List<string>();
 
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
             var operation = request.SendWebRequest();
 
             while (!operation.isDone)
-                yield return null;
+                continue;
 
             if (request.result == UnityWebRequest.Result.Success)
             {
                 Debug.Log("Successfully got the folder names from the server!");
-                string jsonResponse = request.downloadHandler.text;
-                List<string> folderNames = JsonUtility.FromJson<List<string>>(jsonResponse);
-                yield return folderNames;
+                string plainTextResponse = request.downloadHandler.text;
+                string[] folderNameArray = plainTextResponse.Split(',');
+
+                folderNames.AddRange(folderNameArray);
             }
             else
                 Debug.Log($"An error occurred while getting folder names. Error: {request.error}");
         }
+        return folderNames;
     }
 
-    public static IEnumerator<string> GetFileString(string searchString, string subFolder = null)
+
+    public static IEnumerator<string> GetFileStringAsync(string searchString, string subFolder = null)
     {
+        Debug.Log("GETTING FILE STRING ASYNC!");
+
         string path = subFolder == null ? $"/CONFIGS/{SessionConfigFolder}" : $"/CONFIGS/{SessionConfigFolder}/{subFolder}";
         string url = $"{ServerURL}/getFile.php?path={path}&searchString={searchString}";
 
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
+            Debug.Log("INSIDE THE OP!");
             var operation = request.SendWebRequest();
 
             while (!operation.isDone)
@@ -90,9 +99,11 @@ public static class ServerManager //Used with the PHP scripts
     }
 
 
-    public static IEnumerator CreateDataFile(string fileName, string fileHeaders)
+    public static IEnumerator CreateDataFileAsync(string fileName, string fileHeaders)
     {
-        string path = $"/DATA/{SessionConfigFolder}/{fileName}";
+        Debug.Log("CREATING DATA FILE: " + fileName);
+
+        string path = $"DATA/{SessionDataFolder}/{fileName}";
         string url = $"{ServerURL}/createFile.php?path={path}";
 
         using (UnityWebRequest request = UnityWebRequest.Put(url, fileHeaders))
@@ -104,9 +115,11 @@ public static class ServerManager //Used with the PHP scripts
         }
     }
 
-    public static IEnumerator AppendDataToFile(string fileName, string rowData)
+    public static IEnumerator AppendDataToFileAsync(string fileName, string rowData)
     {
-        string path = $"/DATA/{SessionConfigFolder}/{fileName}";
+        Debug.Log("APPENDING DATA TO FILE: " + fileName);
+
+        string path = $"DATA/{SessionConfigFolder}/{fileName}";
         string url = $"{ServerURL}/appendData.php?path={path}";
 
         using (UnityWebRequest request = UnityWebRequest.Post(url, rowData))
@@ -116,6 +129,7 @@ public static class ServerManager //Used with the PHP scripts
             Debug.Log(request.result == UnityWebRequest.Result.Success ? $"SUCCESS! Appended to {fileName}" : $"FAILED! Error appending to {fileName} | Error: {request.error}");
         }
     }
+
 }
 
 

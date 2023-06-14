@@ -395,7 +395,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyAction = () =>
                 {
                     var ExperimenterDisplay = GameObject.Find("ExperimenterDisplay").GetComponent<ExperimenterDisplayController>();
-                    Debug.Log("WHAT IS IT RN: " + HkPanel.TrialLevel.name);
                     //session level. active task == null, session level is in select task
                     if (OriginalTaskLevel == null && HkPanel.TaskLevel.TaskName != "GazeCalibration")
                     {
@@ -429,7 +428,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                             ExperimenterDisplay.ResetTask(OriginalTaskLevel, OriginalTrialLevel);
                         }
                         HkPanel.TrialLevel.runCalibration = false;
-                        Debug.Log("CONTROL LEVEL NAME: " + HkPanel.TrialLevel.ControlLevelName);
                         OriginalTaskLevel = null;
                         OriginalTrialLevel = null;
                     }

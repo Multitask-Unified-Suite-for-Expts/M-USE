@@ -39,6 +39,7 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
 
         while (iEyeTracker == null  || EyeTracker == null || TrackBoxGuideGO == null)
             FindEyeTrackerComponents();
+
     }
 
     public override void FindEyeTrackerComponents()
@@ -54,7 +55,11 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
         }
 
         if (EyeTracker == null && GameObject.Find("EyeTracker(Clone)") != null)
+        {
             EyeTracker = GameObject.Find("EyeTracker(Clone)").GetComponent<EyeTracker>();
+            EyeTracker.SubscribeToGazeData = true;
+
+        }
 
         if (TrackBoxGuideGO == null && GameObject.Find("TrackBoxGuide(Clone)") != null)
             TrackBoxGuideGO = GameObject.Find("TrackBoxGuide(Clone)");
@@ -85,6 +90,8 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
 
         mostRecentGazeSample.systemTimeStamp = e.SystemTimeStamp;
 
+        Debug.Log("like im in here!!!");
+        Debug.Log("GAZE DATA NAME??? " + GazeData.fileName);
         GazeData.AppendData();
         //GAZEDATA.APPENDDATA()
     }

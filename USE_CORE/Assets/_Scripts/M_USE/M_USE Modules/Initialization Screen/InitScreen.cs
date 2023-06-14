@@ -80,7 +80,7 @@ public class InitScreen : MonoBehaviour
 
         #if (UNITY_WEBGL)
         {
-            List<string> folders = ServerManager.GetSessionFolderNames();
+            List<string> folders = ServerManager.GetSessionConfigFolderNames();
             folderDropdown.SetFolders(folders);
 
             confirmButtonGO.SetActive(true);

@@ -178,7 +178,7 @@ namespace USE_ExperimentTemplate_Trial
 
                 // FrameData.fileName =
                 //     FilePrefix + "__FrameData_Trial_" + FrameData.GetNiceIntegers(4, TrialCount_InTask + 1);
-                // FrameData.CreateFile();
+                //FrameData.CreateFile();
                 DefineTrialStims();
                 ResetRelativeStartTime();
 
@@ -220,6 +220,7 @@ namespace USE_ExperimentTemplate_Trial
             DefineControlLevel();
             TrialData.ManuallyDefine();
             TrialData.AddStateTimingData(this);
+            Debug.Log("ABOUT TO CREATE TRIAL DATA!!!!!!!!!!!");
             TrialData.CreateFile();
            // TrialData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
 
@@ -258,14 +259,14 @@ namespace USE_ExperimentTemplate_Trial
 
         public void WriteDataFiles()
         {
-            TrialData.AppendData();
-            TrialData.WriteData();
-            FrameData.AppendData();
-            FrameData.WriteData();
+            TrialData.AppendDataToBuffer();
+            TrialData.AppendDataToFile();
+            FrameData.AppendDataToBuffer();
+            FrameData.AppendDataToFile();
             if (SerialPortActive)
             {
-                SerialRecvData.WriteData();
-                SerialSentData.WriteData();
+                SerialRecvData.AppendDataToFile();
+                SerialSentData.AppendDataToFile();
             }
         }
         
@@ -294,8 +295,8 @@ namespace USE_ExperimentTemplate_Trial
         {
             if (TrialData != null)
             {
-                TrialData.AppendData();
-                TrialData.WriteData();
+                TrialData.AppendDataToBuffer();
+                TrialData.AppendDataToFile();
             }
         }
 

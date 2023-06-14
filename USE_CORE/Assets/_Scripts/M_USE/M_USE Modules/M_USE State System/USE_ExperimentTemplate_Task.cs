@@ -267,7 +267,7 @@ namespace USE_ExperimentTemplate_Task
 
             RunBlock.AddLateUpdateMethod(() =>
             {
-                FrameData.AppendData();
+                FrameData.AppendDataToBuffer();
                 EventCodeManager.EventCodeLateUpdate();
             });
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
@@ -298,24 +298,18 @@ namespace USE_ExperimentTemplate_Task
             BlockFeedback.AddLateUpdateMethod(() =>
             {
                 if (StoreData)
-                    FrameData.AppendData();
+                    FrameData.AppendDataToBuffer();
 
                 EventCodeManager.EventCodeLateUpdate();
             });
-            BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock, () =>
+            BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock);
+            BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask);
+            BlockFeedback.AddDefaultTerminationMethod(() =>
             {
                 if (StoreData)
                 {
-                    BlockData.AppendData();
-                    BlockData.WriteData();
-                }
-            });
-            BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask, () =>
-            {
-                if (StoreData)
-                {
-                    BlockData.AppendData();
-                    BlockData.WriteData();
+                    BlockData.AppendDataToBuffer();
+                    BlockData.AppendDataToFile();
                 }
             });
 
@@ -323,8 +317,8 @@ namespace USE_ExperimentTemplate_Task
             {
                 if(TrialLevel.ForceBlockEnd && StoreData) //If they used end task hotkey, still write the block data!
                 {
-                    BlockData.AppendData();
-                    BlockData.WriteData();
+                    BlockData.AppendDataToBuffer();
+                    BlockData.AppendDataToFile();
                 }
 
 
@@ -345,7 +339,7 @@ namespace USE_ExperimentTemplate_Task
 
             AddDefaultTerminationMethod(() =>
             {
-                if(SessionDataControllers != null)
+                if (SessionDataControllers != null)
                 {
                     SessionDataControllers.RemoveDataController("BlockData_" + TaskName);
                     SessionDataControllers.RemoveDataController("TrialData_" + TaskName);
@@ -435,9 +429,7 @@ namespace USE_ExperimentTemplate_Task
 
             BlockData.AddStateTimingData(this);
             BlockData.CreateFile();
-            //BlockData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
             FrameData.CreateFile();
-            //FrameData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
 
             //AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
             Controllers = new GameObject("Controllers");
@@ -1093,14 +1085,14 @@ namespace USE_ExperimentTemplate_Task
         {
             if (BlockData != null)
             {
-                BlockData.AppendData();
-                BlockData.WriteData();
+                BlockData.AppendDataToBuffer();
+                BlockData.AppendDataToFile();
             }
 
             if (FrameData != null)
             {
-                FrameData.AppendData();
-                FrameData.WriteData();
+                FrameData.AppendDataToBuffer();
+                FrameData.AppendDataToFile();
             }
         }
         

@@ -1,5 +1,5 @@
-OrderedDictionary<string,string>	TaskMappings	{ContinuousRecognition: ContinuousRecognition}
-Dictionary<string,string>	TaskIcons	{ContinuousRecognition: ContinuousRecognition}
+OrderedDictionary<string,string>	TaskMappings	{ContinuousRecognition: ContinuousRecognition, EffortControl:EffortControl}
+Dictionary<string,string>	TaskIcons	{ContinuousRecognition: ContinuousRecognition, EffortControl:EffortControl}
 float	TaskSelectionTimeout	1000
 bool	MacMainDisplayBuild	false
 bool	IsHuman	true	

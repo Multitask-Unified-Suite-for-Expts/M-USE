@@ -217,6 +217,7 @@ namespace USE_ExperimentTemplate_Data
 
         public void CreateNewTrialIndexedFile(int trialCount, string filePrefix)
         {
+            fileCreated = false;
             fileName = filePrefix + "__" + DataControllerName + "_Trial_" + GetNiceIntegers(4, trialCount) + ".txt";
             CreateFile();
         }

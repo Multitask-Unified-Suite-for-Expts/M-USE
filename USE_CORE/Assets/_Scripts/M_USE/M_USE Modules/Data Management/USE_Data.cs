@@ -37,10 +37,8 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using USE_States;
-using static Dropbox.Api.Files.SearchMatchTypeV2;
-using System.Threading.Tasks;
 using System.Collections;
-using static Dropbox.Api.Files.SearchMatchType;
+
 
 namespace USE_Data
 {
@@ -191,13 +189,19 @@ namespace USE_Data
 
 		public string fileHeaders;
 
+		public bool fileCreated;
+
 		//For webgl build (short term)
-		public bool SendDataExternally;
+		#if (UNITY_WEBGL)
+			public bool SendDataExternally = true;
+		#else
+			public bool SendDataExternally = false;
+		#endif
 
 
 
 
-        public void InitDataController(int cap = 100)
+		public void InitDataController(int cap = 10000)
 		{
 			capacity = cap;
 			data = new List<IDatum>();
@@ -217,15 +221,6 @@ namespace USE_Data
 				else
 					OnStart();
 			}
-
-
-
-			#if (UNITY_WEBGL)
-
-				SendDataExternally = true;
-
-			#endif
-
 		}
 
 		public void ManuallyDefine(int cap = 100)
@@ -261,7 +256,7 @@ namespace USE_Data
 				updateDataNextFrame = false;
 				if (dataBuffer.Count == capacity | writeDataNextFrame)
 				{
-					WriteData();
+					AppendDataToFile();
 				}
 				writeDataNextFrame = false;
 			}
@@ -606,10 +601,12 @@ namespace USE_Data
         }
 
 
+
+
 		/// <summary>
 		/// Appends current values of all Datums to data buffer.
 		/// </summary>
-		public void AppendData()
+		public void AppendDataToBuffer()
 		{
 			if (storeData && Time.frameCount > frameChecker)
 			{
@@ -621,7 +618,8 @@ namespace USE_Data
 				{
 					dataBuffer.Add(String.Join("\t", currentVals));
 					if (dataBuffer.Count == capacity)
-						WriteData();
+						AppendDataToFile();
+					
 				}
 				else if (dataToUpdateNextFrame.Count > 0)
 				{
@@ -639,31 +637,28 @@ namespace USE_Data
         /// </summary>
         public void CreateFile()
 		{
-            if (storeData && fileName != null)
+			if (storeData && fileName != null)
 			{
 				fileHeaders = "";
 				for (int i = 0; i < data.Count; i++)
 				{
 					if (i > 0)
 						fileHeaders += "\t";
-					
 					fileHeaders += data[i].Name;
 				}
 
-				if (SendDataExternally)
+				if (SendDataExternally) //Create File With Headers
 				{
-					string content = null;
-					if (dataBuffer.Count > 0)
-						content = String.Join("\n", dataBuffer.ToArray());
-					StartCoroutine(SendDataToExternalServer(fileHeaders, content));
+					if (!fileCreated)
+						StartCoroutine(CreateExternalFileWithHeaders());
 				}
 				else
 				{
 					Directory.CreateDirectory(folderPath);
-					using (StreamWriter dataStream = File.CreateText(folderPath + Path.DirectorySeparatorChar + fileName))
-					{
-						dataStream.Write(fileHeaders);
-					}
+					using StreamWriter dataStream = File.CreateText(folderPath + Path.DirectorySeparatorChar + fileName);
+					dataStream.Write(fileHeaders);
+
+					fileCreated = true;
 				}
 			}
 		}
@@ -671,49 +666,37 @@ namespace USE_Data
 		/// <summary>
 		/// Writes the data buffer to file.
 		/// </summary>
-		public void WriteData()
+		public void AppendDataToFile()
 		{
 			if (storeData && fileName != null && dataBuffer.Count > 0)
 			{
-				if (SendDataExternally)
-				{
-					string content = String.Join("\n", dataBuffer.ToArray());
-					string headers = null;
-					if (fileHeaders.Length > 1)
-						headers = fileHeaders;
-					StartCoroutine(SendDataToExternalServer(headers, content));
-				}
+				string content = String.Join("\n", dataBuffer.ToArray());
+
+                if (SendDataExternally)
+					StartCoroutine(AppendDataToExternalFile(content));
 				else
 				{
 					if (!updateDataNextFrame)
 					{
-						using (StreamWriter dataStream = File.AppendText(folderPath + Path.DirectorySeparatorChar + fileName))
-						{
-							dataStream.Write("\n" + String.Join("\n", dataBuffer.ToArray()));
-						}
-						dataBuffer.Clear();
+						using StreamWriter dataStream = File.AppendText(folderPath + Path.DirectorySeparatorChar + fileName);
+						dataStream.Write("\n" + content);
 					}
 					else
 						writeDataNextFrame = true;
 				}
+				dataBuffer.Clear();
 			}
 		}
 
-
-        private IEnumerator SendDataToExternalServer(string fileHeaders = null, string fileContent = null)
+		private IEnumerator CreateExternalFileWithHeaders()
 		{
-			string content = fileContent == null ? fileHeaders : (fileHeaders + '\n' + fileContent);
-            yield return ServerManager.CreateDataFileAsync(fileName, content);
+            yield return ServerManager.CreateDataFileAsync(fileName, fileHeaders);
+            fileCreated = true;   
+        }
 
-			//if (fileHeaders != null && fileContent != null)
-			//	yield return ServerManager.CreateDataFileWithHeadersAsync(fileName, fileHeaders + '\n' + fileContent);
-			//else
-			//{
-			//	if (fileHeaders != null)
-			//		yield return ServerManager.CreateDataFileWithHeadersAsync(fileName, fileHeaders);
-			//	if (fileContent != null)
-			//		yield return ServerManager.AppendDataToFileAsync(fileName, fileContent);
-			//}
+        private IEnumerator AppendDataToExternalFile(string fileContent)
+		{
+			yield return ServerManager.AppendDataToFileAsync(fileName, fileContent);	
 		}
 
 
@@ -783,7 +766,7 @@ namespace USE_Data
 
 		void OnApplicationQuit()
 		{
-			WriteData();
+			AppendDataToFile();
 		}
 
 	}

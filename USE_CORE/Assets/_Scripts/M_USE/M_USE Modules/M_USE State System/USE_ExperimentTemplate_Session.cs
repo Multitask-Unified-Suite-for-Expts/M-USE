@@ -753,8 +753,8 @@ namespace USE_ExperimentTemplate_Session
                 if (SerialPortActive)
                 {
                     AppendSerialData();
-                    SerialRecvData.WriteData();
-                    SerialSentData.WriteData();
+                    SerialRecvData.AppendDataToFile();
+                    SerialSentData.AppendDataToFile();
                     SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionDataPath, "SerialRecvData", CurrentTask.TaskName);
                     SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionDataPath, "SerialSentData", CurrentTask.TaskName);
                 }
@@ -805,8 +805,9 @@ namespace USE_ExperimentTemplate_Session
                     PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
 
                 SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
-                SessionData.AppendData();
-                SessionData.WriteData();
+
+                SessionData.AppendDataToBuffer();
+                SessionData.AppendDataToFile();
 
                 SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
@@ -826,7 +827,7 @@ namespace USE_ExperimentTemplate_Session
                     SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataPath, "SerialRecvData", "TaskSelection");                    
                     SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataPath, "SerialSentData", "TaskSelection");
 
-                    SerialRecvData.fileName = FilePrefix + "__SerialRecvData" + SerialRecvData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "TaskSelection.txt";  
+                    SerialRecvData.fileName = FilePrefix + "__SerialRecvData" + SerialRecvData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "TaskSelection.txt";
                     SerialSentData.fileName = FilePrefix + "__SerialSentData" + SerialSentData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "TaskSelection.txt";
                 }
                 //     SessionDataPath + Path.DirectorySeparatorChar +
@@ -842,14 +843,14 @@ namespace USE_ExperimentTemplate_Session
 
             finishSession.SpecifyTermination(() => true, () => null, () =>
             {
-                SessionData.AppendData();
-                SessionData.WriteData();
+                SessionData.AppendDataToBuffer();
+                SessionData.AppendDataToFile();
 
                 AppendSerialData();
                 if(SerialPortActive)
                 {
-                    SerialSentData.WriteData();
-                    SerialRecvData.WriteData();
+                    SerialSentData.AppendDataToFile();
+                    SerialRecvData.AppendDataToFile();
                 }
             });
 
@@ -948,7 +949,7 @@ namespace USE_ExperimentTemplate_Session
                         // Debug.Log("sentdata.sc: " + SerialSentData.sc);
                         // Debug.Log("sentdata.sc: " + SerialSentData.sc.BufferCount("sent"));
                         // Debug.Log("sentdata.sc: " + SerialSentData.sc.BufferToString("sent"));
-                        SerialSentData.AppendData();
+                        SerialSentData.AppendDataToBuffer();
                     }
                     catch (Exception e)
                     {
@@ -964,7 +965,7 @@ namespace USE_ExperimentTemplate_Session
                         // Debug.Log("recvdata.sc: " + SerialRecvData.sc);
                         // Debug.Log("recvdata.sc: " + SerialRecvData.sc.BufferCount("received"));
                         // Debug.Log("recvdata.sc: " + SerialRecvData.sc.BufferToString("received"));
-                        SerialRecvData.AppendData();
+                        SerialRecvData.AppendDataToBuffer();
                     }
                     catch (Exception e)
                     {

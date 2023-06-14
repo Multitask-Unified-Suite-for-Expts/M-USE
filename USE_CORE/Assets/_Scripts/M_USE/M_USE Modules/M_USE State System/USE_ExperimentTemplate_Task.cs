@@ -24,6 +24,7 @@ using Tobii.Research;
 using static UnityEngine.EventSystems.EventTrigger;
 using MazeGame_Namespace;
 using UnityEngine.UIElements;
+using System.Collections;
 
 namespace USE_ExperimentTemplate_Task
 {
@@ -381,37 +382,36 @@ namespace USE_ExperimentTemplate_Task
             });
 
 
-
+            
 
             //Setup data management
             TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
+
+            StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
+
             FilePrefix = FilePrefix + "_" + ConfigName;
-            BlockData = (BlockData) SessionDataControllers.InstantiateDataController<BlockData>("BlockData", ConfigName,
-                StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
-                //InstantiateBlockData(StoreData, ConfigName,
-                //TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
+
+            string subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "BlockData";
+            BlockData = (BlockData) SessionDataControllers.InstantiateDataController<BlockData>("BlockData", ConfigName, StoreData, subFolderPath);
             BlockData.taskLevel = this;
             BlockData.fileName = FilePrefix + "__BlockData.txt";
 
-            TrialData = (TrialData) SessionDataControllers.InstantiateDataController<TrialData>("TrialData", ConfigName,
-                StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
-                //SessionDataControllers.InstantiateTrialData(StoreData, ConfigName,
-                //TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
+            subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "TrialData";
+            TrialData = (TrialData) SessionDataControllers.InstantiateDataController<TrialData>("TrialData", ConfigName, StoreData, subFolderPath);
             TrialData.taskLevel = this;
             TrialData.trialLevel = TrialLevel;
             TrialLevel.TrialData = TrialData;
             TrialData.fileName = FilePrefix + "__TrialData.txt";
 
-
-            FrameData = (FrameData) SessionDataControllers.InstantiateDataController<FrameData>("FrameData", ConfigName,
-                StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
+            subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "FrameData";
+            FrameData = (FrameData) SessionDataControllers.InstantiateDataController<FrameData>("FrameData", ConfigName, StoreData, subFolderPath);
 
             //SessionDataControllers.InstantiateFrameData(StoreData, ConfigName,
               //  TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
             FrameData.taskLevel = this;
             FrameData.trialLevel = TrialLevel;
             TrialLevel.FrameData = FrameData;
-            FrameData.fileName = FilePrefix + "__FrameData_PreTrial.txt";
+            //FrameData.fileName = FilePrefix + "__FrameData_PreTrial.txt"; //Commenting out. Is just creating empty framedata file with a couple headers.
 
 
             BlockData.InitDataController();
@@ -584,7 +584,13 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.DefineTrialLevel();
         }
 
-        
+
+        public static IEnumerator HandleCreateExternalFolder(string configName)
+        {
+            yield return ServerManager.CreateFolder(configName);
+        }
+
+
         public void ClearActiveTaskHandlers()
         {
             if (SelectionTracker.TaskHandlerNames.Count > 0)

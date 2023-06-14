@@ -220,7 +220,6 @@ namespace USE_ExperimentTemplate_Trial
             DefineControlLevel();
             TrialData.ManuallyDefine();
             TrialData.AddStateTimingData(this);
-            Debug.Log("ABOUT TO CREATE TRIAL DATA!!!!!!!!!!!");
             TrialData.CreateFile();
            // TrialData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
 

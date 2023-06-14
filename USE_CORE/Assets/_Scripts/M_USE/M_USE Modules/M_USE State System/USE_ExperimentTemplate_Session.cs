@@ -119,7 +119,6 @@ namespace USE_ExperimentTemplate_Session
 
 
 
-
         public override void LoadSettings()
         {
             HumanStartPanel = gameObject.AddComponent<HumanStartPanel>();
@@ -130,10 +129,12 @@ namespace USE_ExperimentTemplate_Session
             USE_StartButton.StartButtonPrefab = StartButtonPrefabGO;
 
 
+
             SubjectID = SessionDetails.GetItemValue("SubjectID");
             SessionID = SessionDetails.GetItemValue("SessionID");
 
             FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" + DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
+
 
 #if(UNITY_WEBGL)
             {
@@ -142,7 +143,8 @@ namespace USE_ExperimentTemplate_Session
 
                 if (UseDefaultConfigs)
                 {
-                    SessionDataPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_Data" + "_" + FilePrefix;
+                    SessionDataPath = ServerManager.SessionDataFolderPath;
+                    //SessionDataPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_Data" + "_" + FilePrefix;
                     configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
 
                     if (Directory.Exists(configFileFolder))
@@ -156,9 +158,15 @@ namespace USE_ExperimentTemplate_Session
                         foreach (string config in configsToWrite)
                         {
                             byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + config).bytes;
-                            System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + config + ".txt", textFileBytes);
+                            File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + config + ".txt", textFileBytes);
                         }
                     }
+                }
+                else //Using Server Configs
+                {
+                    Debug.Log("USING SERVER CONFIGS!");
+                    SessionDataPath = ServerManager.GetSessionDataFolderName(); //make sure is correct
+                    configFileFolder = ServerManager.GetSessionConfigFolderName(); // make sure is correct
                 }
 
             }

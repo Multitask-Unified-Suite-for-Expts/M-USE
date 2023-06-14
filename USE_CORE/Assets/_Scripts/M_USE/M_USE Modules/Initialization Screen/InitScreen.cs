@@ -97,18 +97,15 @@ public class InitScreen : MonoBehaviour
 
     IEnumerator HandleConfirm()
     {
-        #if(UNITY_WEBGL)
-            string subjectID = session.SessionDetails.GetItemValue("SubjectID");
-            string sessionID = session.SessionDetails.GetItemValue("SessionID");
+#if (UNITY_WEBGL)
+        string subjectID = session.SessionDetails.GetItemValue("SubjectID");
+        string sessionID = session.SessionDetails.GetItemValue("SessionID");
 
-            yield return ServerManager.CreateSessionDataFolder(subjectID, sessionID);
+        yield return ServerManager.CreateSessionDataFolder(subjectID, sessionID);
 
-            string sessionConfigFolder = dropdown.options[dropdown.value].text;
-            ServerManager.SessionConfigFolder = sessionConfigFolder;
-            if (sessionConfigFolder.ToLower().Contains("default"))
-                session.UseDefaultConfigs = true;
-            else
-                session.UseDefaultConfigs = false;
+        string sessionConfigFolder = dropdown.options[dropdown.value].text;
+            ServerManager.SetSessionConfigFolderName(sessionConfigFolder);
+            session.UseDefaultConfigs = sessionConfigFolder.ToLower().Contains("default") ? true : false;
         #endif
 
         if (OnLoadSettings != null)

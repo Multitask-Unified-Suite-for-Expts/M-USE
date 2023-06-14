@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Collections;
-using System;
 using System.IO;
 using UnityEngine;
 using USE_Data;
@@ -9,10 +8,9 @@ using USE_States;
 using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
-using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
-//using MySql.Data.MySqlClient;
+
 
 namespace USE_ExperimentTemplate_Data
 {
@@ -27,7 +25,7 @@ namespace USE_ExperimentTemplate_Data
             SummaryData.folderPath = Path.Combine(folderPath, "SummaryData");
             if (storeData)
             {
-                System.IO.Directory.CreateDirectory(SummaryData.folderPath);
+                Directory.CreateDirectory(SummaryData.folderPath);
             }
         }
 

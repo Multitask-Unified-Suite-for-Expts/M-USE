@@ -2,12 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Threading.Tasks;
-using System.Linq;
-using System.Text;
-//using System.Net.Http;
-//using UnityEditor.PackageManager.Requests;
-//using Renci.SshNet;
 using UnityEngine.Networking;
 
 
@@ -15,9 +9,52 @@ using UnityEngine.Networking;
 public static class ServerManager //Used with the PHP scripts
 {
     private static readonly string ServerURL = "http://localhost:8888/";
+    private static readonly string RootDataFolderPath = "DATA";
     private static string SessionDataFolder; //Created once after they hit confirm
-    public static string SessionConfigFolder; //Will be whatever they select in the dropdown after hitting confirm
+    public static string SessionDataFolderPath
+    {
+        get
+        {
+            return $"{RootDataFolderPath}/{SessionDataFolder}";
+        }
+    }
 
+    private static readonly string RootConfigFolderPath = "CONFIGS";
+    private static string SessionConfigFolder; //Will be whatever they select in the dropdown after hitting confirm
+    public static string SessionConfigFolderPath
+    {
+        get
+        {
+            return $"{RootConfigFolderPath}/{SessionConfigFolder}";
+        }
+    }
+
+    private static List<string> folderList = new List<string>();
+
+
+
+    public static bool FolderCreated(string folderPath)
+    {
+        return folderList.Contains(folderPath);
+    }
+
+    public static IEnumerator CreateSessionDataFolder(string subjectID, string sessionID)
+    {
+        SessionDataFolder = "DATA__" + "Session_" + sessionID + "__Subject_" + subjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
+        yield return CreateFolder(SessionDataFolderPath);
+    }
+
+    public static IEnumerator CreateFolder(string folderPath)
+    {
+        string url = $"{ServerURL}/createFolder.php?path={folderPath}";
+
+        WWWForm formData = new WWWForm();
+        formData.AddField("path", folderPath);
+        using UnityWebRequest request = UnityWebRequest.Post(url, formData);
+        yield return request.SendWebRequest();
+        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"SUCCESS CREATING FOLDER AT {folderPath}." : $"FAILED! Error Creating Folder! | Error: {request.error}");
+        folderList.Add(folderPath);
+    }
 
 
     public static List<string> GetSessionConfigFolderNames() //WORKS!
@@ -62,55 +99,28 @@ public static class ServerManager //Used with the PHP scripts
         Debug.Log(request.result == UnityWebRequest.Result.Success ? $"FILE CONTAINING '{searchString}' FOUND." : $"ERROR SEARCHING FOR FILE CONTAINING: '{searchString}'. | ERROR: {request.error}");
     }
 
-    public static IEnumerator CreateSessionDataFolder(string subjectID, string sessionID) //WORKS!
+
+    public static IEnumerator CreateFileAsync(string path, string fileName, string fileHeaders) //Will also replace existing file on server if exists. 
     {
-        SessionDataFolder = "DATA__" + "Session_" + sessionID + "__Subject_" + subjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
-        string path = $"DATA/{SessionDataFolder}";
-        string url = $"{ServerURL}/createFolder.php?path={path}";
-
-        WWWForm formData = new WWWForm();
-        formData.AddField("path", path);
-        using UnityWebRequest request = UnityWebRequest.Post(url, formData);
-        yield return request.SendWebRequest();
-        Debug.Log(request.result == UnityWebRequest.Result.Success ? "SUCCESS Creating Session Folder!" : $"FAILED! Error Creating Session Folder! | Error: {request.error}");
-    }
-
-    public static IEnumerator CreateDataSubFolder(string subFolderName)
-    {
-        string path = $"DATA/{SessionDataFolder}/{subFolderName}";
-        string url = $"{ServerURL}/createFolder.php?path={path}";
-
-        WWWForm formData = new WWWForm();
-        formData.AddField("path", path);
-        using UnityWebRequest request = UnityWebRequest.Post(url, formData);
-        yield return request.SendWebRequest();
-        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"SUCCESS CREATING SUB FOLDER {subFolderName}." : $"FAILED! Error Creating Sub Folder! | Error: {request.error}");
-
-    }
-
-    public static IEnumerator CreateDataFileAsync(string fileName, string fileHeaders) //Will also replace existing file on server if exists. 
-    {
-        string path = $"DATA/{SessionDataFolder}/{fileName}";
         string url = $"{ServerURL}/createFile.php?path={path}";
 
         using UnityWebRequest request = UnityWebRequest.Put(url, fileHeaders);
         request.method = UnityWebRequest.kHttpVerbPUT;
         request.SetRequestHeader("Content-Type", "text/plain");
         yield return request.SendWebRequest();
-        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"SUCCESS! Created/replaced file: {fileName}" : $"FAILED! Error creating/replacing file: {fileName} | Error: {request.error}");
+        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"SUCCESS! Created file: {fileName}" : $"FAILED! Error creating file: {fileName} | Error: {request.error}");
     }
 
 
-
-    public static IEnumerator AppendDataToFileAsync(string fileName, string rowData)
+    public static IEnumerator AppendToFileAsync(string folderPath, string fileName, string rowData)
     {
-        IEnumerator<string> getFileStringCoroutine = GetDataFileStringAsync(fileName);
+        IEnumerator<string> getFileStringCoroutine = GetFileAsync(folderPath, fileName);
         yield return CoroutineHelper.StartCoroutine(getFileStringCoroutine);
         string originalFileContents = getFileStringCoroutine.Current;
 
         if (originalFileContents != null)
         {
-            string path = $"DATA/{SessionDataFolder}/{fileName}";
+            string path = $"{folderPath}/{fileName}";
             string url = $"{ServerURL}/updateFile.php?path={path}";
 
             string updatedFileContents = originalFileContents + "\n" + rowData;
@@ -120,13 +130,12 @@ public static class ServerManager //Used with the PHP scripts
             using UnityWebRequest request = UnityWebRequest.Post(url, formData);
             request.SetRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             yield return request.SendWebRequest();
-            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"SUCCESS! Appended to {fileName}" : $"FAILED! Error appending to {fileName} | Error: {request.error}");
+            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"SUCCESS! Appended to file at {fileName}" : $"FAILED! Error appending to {fileName} | Error: {request.error}");
         }
     }
 
-    public static IEnumerator<string> GetDataFileStringAsync(string searchString)
+    public static IEnumerator<string> GetFileAsync(string path, string searchString)
     {
-        string path = $"DATA/{SessionDataFolder}";
         string url = $"{ServerURL}/getFile.php?path={path}&searchString={searchString}";
 
         using UnityWebRequest request = UnityWebRequest.Get(url);
@@ -139,6 +148,45 @@ public static class ServerManager //Used with the PHP scripts
         Debug.Log(request.result == UnityWebRequest.Result.Success ? $"FILE CONTAINING '{searchString}' FOUND." : $"ERROR SEARCHING FOR FILE CONTAINING: '{searchString}'. | ERROR: {request.error}");
     }
 
+
+    public static string GetSessionDataFolderName()
+    {
+        return SessionDataFolder;
+    }
+
+    public static string GetSessionConfigFolderName()
+    {
+        return SessionConfigFolder;
+    }
+
+    public static void SetSessionConfigFolderName(string sessionConfigFolderName)
+    {
+        SessionConfigFolder = sessionConfigFolderName;
+    }
+
+    //public static IEnumerator CreateDataFolder(string folderPath)
+    //{
+    //    string path = $"DATA/{folderPath}";
+    //    string url = $"{ServerURL}/createFolder.php?path={path}";
+
+    //    WWWForm formData = new WWWForm();
+    //    formData.AddField("path", path);
+    //    using UnityWebRequest request = UnityWebRequest.Post(url, formData);
+    //    yield return request.SendWebRequest();
+    //    Debug.Log(request.result == UnityWebRequest.Result.Success ? "SUCCESS Creating Data Folder!" : $"FAILED! Error Creating Data Folder! | Error: {request.error}");
+    //}
+
+    //public static IEnumerator CreateConfigFolder(string folderPath)
+    //{
+    //    string path = $"CONFIGS/{folderPath}";
+    //    string url = $"{ServerURL}/createFolder.php?path={path}";
+
+    //    WWWForm formData = new WWWForm();
+    //    formData.AddField("path", path);
+    //    using UnityWebRequest request = UnityWebRequest.Post(url, formData);
+    //    yield return request.SendWebRequest();
+    //    Debug.Log(request.result == UnityWebRequest.Result.Success ? "SUCCESS Creating Config Folder!" : $"FAILED! Error Creating Config Folder! | Error: {request.error}");
+    //}
 
 
 }

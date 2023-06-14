@@ -193,9 +193,9 @@ namespace USE_Data
 
 		//For webgl build (short term)
 		#if (UNITY_WEBGL)
-			public bool SendDataExternally = true;
+			public static bool SendDataExternally = true;
 		#else
-			public bool SendDataExternally = false;
+			public static bool SendDataExternally = false;
 		#endif
 
 
@@ -649,6 +649,11 @@ namespace USE_Data
 
 				if (SendDataExternally) //Create File With Headers
 				{
+					Debug.Log("FOLDERPATH: " + folderPath + " | FILENAME: " + fileName);
+
+					if (!ServerManager.FolderCreated(folderPath))
+						StartCoroutine(CreateExternalFolder(folderPath));
+
 					if (!fileCreated)
 						StartCoroutine(CreateExternalFileWithHeaders());
 				}
@@ -690,24 +695,32 @@ namespace USE_Data
 
 		private IEnumerator CreateExternalFileWithHeaders()
 		{
-            yield return ServerManager.CreateDataFileAsync(fileName, fileHeaders);
+			string path = $"{folderPath}/{fileName}";
+            yield return ServerManager.CreateFileAsync(path, fileName, fileHeaders);
             fileCreated = true;   
         }
 
         private IEnumerator AppendDataToExternalFile(string fileContent)
 		{
-			yield return ServerManager.AppendDataToFileAsync(fileName, fileContent);	
+            yield return ServerManager.AppendToFileAsync(folderPath, fileName, fileContent);	
 		}
 
 
+        private IEnumerator CreateExternalFolder(string folderName)
+        {
+            yield return ServerManager.CreateFolder(folderName);
+        }
 
 
-		/// <summary>
-		/// Adds standardized timing data for the current Control Level's states to be tracked.
-		/// </summary>
-		/// <param name="level">The Control Level whose active states should be tracked.</param>
-		/// <param name="timingTypes">(Optional) List of strings specifying which state timing data to track. Possible values: "StartFrame", "EndFrame", "StartTimeAbsolute", "StartTimeRelative", "EndTimeAbsolute", "EndTimeRelative", "Duration".</param>
-		public void AddStateTimingData(ControlLevel level, IEnumerable<string> timingTypes = null)
+
+
+
+        /// <summary>
+        /// Adds standardized timing data for the current Control Level's states to be tracked.
+        /// </summary>
+        /// <param name="level">The Control Level whose active states should be tracked.</param>
+        /// <param name="timingTypes">(Optional) List of strings specifying which state timing data to track. Possible values: "StartFrame", "EndFrame", "StartTimeAbsolute", "StartTimeRelative", "EndTimeAbsolute", "EndTimeRelative", "Duration".</param>
+        public void AddStateTimingData(ControlLevel level, IEnumerable<string> timingTypes = null)
 		{
 			foreach (State s in level.ActiveStates)
 			{

@@ -234,6 +234,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             sampleStims.stimDefs[0].StimGameObject.transform.localPosition = new Vector3(0, 0, 0);
             sampleStims.stimDefs[0].StimGameObject.transform.localRotation = Quaternion.Euler(0, 0, 0);
             sampleStims.stimDefs[0].StimGameObject.transform.localScale = new Vector3(1, 1, 1);
+            sampleStims.stimDefs[0].StimGameObject.GetComponent<RawImage>().raycastTarget = false;
         });
 
         // Show the target/sample by itself for some time
@@ -267,7 +268,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             if (Handler.SuccessfulSelections.Count > 0)
             {
 
-                selectedGO = Handler.LastSuccessfulSelection.SelectedGameObject;
+                selectedGO = Handler.LastSuccessfulSelection.SelectedGameObject.GetComponent<StimDefPointer>().StimDef.StimGameObject;
                 Debug.Log("selected stim" + selectedGO);
                 selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<FeatureUncertaintyWM_MultiCompStimDef>();
                 Handler.ClearSelections();
@@ -325,9 +326,19 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
 
             if (CorrectSelection)
-                HaloFBController.ShowPositive(selectedGO);
+            {
+                HaloFBController.ShowPositive(selectedGO, 10);
+                // HaloFBController.PositiveHaloPrefab.transform.SetParent(null);
+                // // Vector3 goWorldPos = TaskLevel.TaskCam.WorldToScreenPoint(selectedGO.transform.position);
+                // HaloFBController.PositiveHaloPrefab.transform.position = selectedGO.transform.position;
+            }
             else
-                HaloFBController.ShowNegative(selectedGO);
+            {
+                HaloFBController.ShowNegative(selectedGO, 10);
+                // HaloFBController.NegativeHaloPrefab.transform.SetParent(null);
+                // // Vector3 goWorldPos = TaskLevel.TaskCam.WorldToScreenPoint(selectedGO.transform.position);
+                // HaloFBController.NegativeHaloPrefab.transform.position = selectedGO.transform.position;
+            }
         });
 
         SelectionFeedback.AddTimer(() => selectionFbDuration.value, TokenFeedback, () =>
@@ -484,7 +495,7 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
         mcCompPanel.AddComponent<CanvasRenderer>();
          mcCompPanel.AddComponent<RectTransform>();
         mcCompPanel.GetComponent<RectTransform>().SetParent(TaskLevel.StimCanvas_2D.GetComponent<RectTransform>());
-        mcCompPanel.GetComponent<RectTransform>().sizeDelta = new Vector2(50, 50);
+        mcCompPanel.GetComponent<RectTransform>().sizeDelta = new Vector2(5, 5);
         //mcCompPanel.transform.SetParent(taskCanvas.transform, true);
 
         mcCompPanel.transform.localPosition = new Vector3(0, 0, 0);

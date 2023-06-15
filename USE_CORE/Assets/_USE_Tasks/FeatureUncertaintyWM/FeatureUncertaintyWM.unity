@@ -283,8 +283,9 @@ MonoBehaviour:
   SliderFBController: {fileID: 0}
   MouseTracker: {fileID: 0}
   GazeTracker: {fileID: 0}
-  EyeTracker: {fileID: 0}
+  TobiiEyeTrackerController: {fileID: 0}
   SelectionType: 
+  EyeTrackerActive: 0
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   DisplayController: {fileID: 0}
@@ -448,7 +449,9 @@ MonoBehaviour:
   SerialSentData: {fileID: 0}
   SerialRecvData: {fileID: 0}
   EyeTrackerActive: 0
-  EyeTracker: {fileID: 0}
+  GazeTracker: {fileID: 0}
+  MouseTracker: {fileID: 0}
+  TobiiEyeTrackerController: {fileID: 0}
   StoreData: 0
   SerialPortActive: 0
   SyncBoxActive: 0
@@ -468,6 +471,7 @@ MonoBehaviour:
   LocateFile: {fileID: 0}
   TaskCam: {fileID: 0}
   TaskCanvasses: []
+  StimCanvas_2D: {fileID: 0}
   PreloadedStims:
     stimGroupName: 
     IsActive: 0
@@ -487,6 +491,7 @@ MonoBehaviour:
   DisplayController: {fileID: 0}
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
+  Controllers: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
   TaskSelectionCanvasGO: {fileID: 0}
   IsHuman: 0
@@ -563,9 +568,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_UiScaleMode: 1
-  m_ReferencePixelsPerUnit: 100
+  m_ReferencePixelsPerUnit: 1
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3

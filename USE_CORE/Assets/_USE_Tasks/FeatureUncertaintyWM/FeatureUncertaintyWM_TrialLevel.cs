@@ -484,7 +484,7 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
         mcCompPanel.AddComponent<CanvasRenderer>();
          mcCompPanel.AddComponent<RectTransform>();
         mcCompPanel.GetComponent<RectTransform>().SetParent(TaskLevel.StimCanvas_2D.GetComponent<RectTransform>());
-        mcCompPanel.GetComponent<RectTransform>().sizeDelta = new Vector2(50, 50);
+        mcCompPanel.GetComponent<RectTransform>().sizeDelta = new Vector2(5, 5);
         //mcCompPanel.transform.SetParent(taskCanvas.transform, true);
 
         mcCompPanel.transform.localPosition = new Vector3(0, 0, 0);

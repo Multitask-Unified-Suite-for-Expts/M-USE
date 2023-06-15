@@ -1415,9 +1415,6 @@ namespace USE_ExperimentTemplate_Session
                     FrameData.WriteData();
                 }*/
 
-                if (TobiiEyeTrackerController?.iEyeTracker != null)
-                    TobiiEyeTrackerController.iEyeTracker.GazeDataReceived -= TobiiEyeTrackerController.OnGazeDataReceived;
-
             }
         }
         public void OnGUI()

@@ -29,6 +29,7 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
     {
         Instance = this;
         base.Awake();
+        mostRecentGazeSample = new TobiiGazeSample();
 
     }
 
@@ -50,14 +51,15 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
             iEyeTracker = EyeTrackingOperations.FindAllEyeTrackers()[0];
             ScreenBasedCalibration = new ScreenBasedCalibration(iEyeTracker);
 
-            iEyeTracker.GazeDataReceived += OnGazeDataReceived;
+      //      iEyeTracker.GazeDataReceived += OnGazeDataReceived;
             DisplayArea = iEyeTracker.GetDisplayArea();
+
         }
 
         if (EyeTracker == null && GameObject.Find("EyeTracker(Clone)") != null)
         {
             EyeTracker = GameObject.Find("EyeTracker(Clone)").GetComponent<EyeTracker>();
-            EyeTracker.SubscribeToGazeData = true;
+        //    EyeTracker.SubscribeToGazeData = true;
 
         }
 
@@ -66,7 +68,7 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
 
     }
 
-    public void OnGazeDataReceived(object sender, GazeDataEventArgs e)
+    public void OnGazeDataReceived(GazeDataEventArgs e)
     {
         // Left Eye Data
         mostRecentGazeSample.leftPupilValidity = e.LeftEye.Pupil.Validity.ToString();
@@ -90,9 +92,13 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
 
         mostRecentGazeSample.systemTimeStamp = e.SystemTimeStamp;
 
-        Debug.Log("like im in here!!!");
         Debug.Log("GAZE DATA NAME??? " + GazeData.fileName);
+       
         GazeData.AppendData();
         //GAZEDATA.APPENDDATA()
     }
+
+    // AppendEyeTrackingData()
+    // {PumpData}
+    //
 }

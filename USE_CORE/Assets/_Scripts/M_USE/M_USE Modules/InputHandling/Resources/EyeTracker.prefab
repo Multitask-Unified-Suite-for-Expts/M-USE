@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4988019072819320}
   - component: {fileID: 114537430229600514}
+  - component: {fileID: 2813390287119975243}
   m_Layer: 0
   m_Name: EyeTracker
   m_TagString: Untagged
@@ -46,3 +47,15 @@ MonoBehaviour:
   _subscribeToGaze: 1
   _connectToFirst: 1
   _eyeTrackerSerialStart: IS
+--- !u!114 &2813390287119975243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1300086531141916}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2dd06695087a724293ec628c915f70c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

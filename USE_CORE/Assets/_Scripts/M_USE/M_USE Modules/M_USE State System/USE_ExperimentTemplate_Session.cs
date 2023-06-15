@@ -399,8 +399,8 @@ namespace USE_ExperimentTemplate_Session
                     GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
                     GameObject CalibrationGO = Instantiate(Resources.Load<GameObject>("Calibration"));
 
-                    TobiiEyeTrackerController.GazeData = GazeData;
-
+                    TobiiEyeTrackerController.GazeDataSubscription.GazeData = GazeData;
+                    
                     /*  //  GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform); 
                     GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.transform.SetParent(TobiiEyeTrackerControllerGO.transform, true);
@@ -806,6 +806,7 @@ namespace USE_ExperimentTemplate_Session
             selectTask.AddLateUpdateMethod(() =>
             {
                 AppendSerialData();
+                TobiiEyeTrackerController.AppendGazeData();
             });
 
             selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask);
@@ -860,6 +861,7 @@ namespace USE_ExperimentTemplate_Session
             loadTask.AddLateUpdateMethod(() =>
             {
                 AppendSerialData();
+                TobiiEyeTrackerController.AppendGazeData();
             });
             
             loadTask.SpecifyTermination(() => !SceneLoading, runTask, () =>
@@ -884,6 +886,9 @@ namespace USE_ExperimentTemplate_Session
                     SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionDataPath, "SerialRecvData", CurrentTask.TaskName);
                     SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionDataPath, "SerialSentData", CurrentTask.TaskName);
                 }
+                
+                TobiiEyeTrackerController.AppendGazeData();
+
             });
 
             //automatically finish tasks after running one - placeholder for proper selection
@@ -921,6 +926,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 SelectionTracker.UpdateActiveSelections();
                 AppendSerialData();
+                TobiiEyeTrackerController.AppendGazeData();
             });
             
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
@@ -973,7 +979,8 @@ namespace USE_ExperimentTemplate_Session
             {
                 SessionData.AppendData();
                 SessionData.WriteData();
-           
+                TobiiEyeTrackerController.AppendGazeData();
+
                 AppendSerialData();
                 if(SerialPortActive)
                 {

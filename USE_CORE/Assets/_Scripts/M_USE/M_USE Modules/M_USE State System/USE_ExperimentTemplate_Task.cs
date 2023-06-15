@@ -426,7 +426,7 @@ namespace USE_ExperimentTemplate_Task
                 if (EyeTrackerActive)
                 {
                     // Set the Gaze data in the controller to be appending to the task data
-                    TobiiEyeTrackerController.GazeData = GazeData;
+                    TobiiEyeTrackerController.GazeDataSubscription.GazeData = GazeData;
                     GazeData = (USE_ExperimentTemplate_Data.GazeData)dataController.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", ConfigName,
                     StoreData, TaskDataPath + Path.DirectorySeparatorChar + "GazeData");
 
@@ -478,7 +478,7 @@ namespace USE_ExperimentTemplate_Task
                 if (EyeTrackerActive)
                 {
                     // Set the Gaze data in the controller to be appending to the calib data
-                    TobiiEyeTrackerController.GazeData = GazeData;
+                    TobiiEyeTrackerController.GazeDataSubscription.GazeData = GazeData;
                     GazeData = (USE_ExperimentTemplate_Data.GazeData)dataController.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", ConfigName,
                     StoreData, TaskDataPath + Path.DirectorySeparatorChar + "GazeData");
 

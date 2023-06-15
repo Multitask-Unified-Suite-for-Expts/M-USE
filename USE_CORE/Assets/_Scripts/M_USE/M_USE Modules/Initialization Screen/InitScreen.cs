@@ -68,6 +68,7 @@ public class InitScreen : MonoBehaviour
     {
         displayController = gameObject.AddComponent<DisplayController>();
         displayController.HandleDisplays(this);
+        session.DisplayController = displayController;
 
         folderDropdown = dropdownGO.GetComponent<FolderDropdown>();
         dropdown = dropdownGO.GetComponent<Dropdown>();
@@ -80,9 +81,10 @@ public class InitScreen : MonoBehaviour
 
         #if (UNITY_WEBGL)
         {
-            List<string> folders = ServerManager.GetSessionConfigFolderNames();
-            folderDropdown.SetFolders(folders);
+            //StartCoroutine(ServerManager.GetSessionConfigFolderNames(folders => folderDropdown.SetFolders(folders)));
 
+            if (!Application.isEditor)
+                confirmButtonGO.transform.localPosition += new Vector3(0, 75f, 0);
             confirmButtonGO.SetActive(true);
             webBuildChildrenGO.SetActive(true);
             buttonsParentGO.SetActive(false);
@@ -97,13 +99,13 @@ public class InitScreen : MonoBehaviour
 
     IEnumerator HandleConfirm()
     {
-#if (UNITY_WEBGL)
-        string subjectID = session.SessionDetails.GetItemValue("SubjectID");
-        string sessionID = session.SessionDetails.GetItemValue("SessionID");
+        #if (UNITY_WEBGL)
+            string subjectID = session.SessionDetails.GetItemValue("SubjectID");
+            string sessionID = session.SessionDetails.GetItemValue("SessionID");
 
-        yield return ServerManager.CreateSessionDataFolder(subjectID, sessionID);
+            yield return ServerManager.CreateSessionDataFolder(subjectID, sessionID);
 
-        string sessionConfigFolder = dropdown.options[dropdown.value].text;
+            string sessionConfigFolder = dropdown.options[dropdown.value].text;
             ServerManager.SetSessionConfigFolderName(sessionConfigFolder);
             session.UseDefaultConfigs = sessionConfigFolder.ToLower().Contains("default") ? true : false;
         #endif

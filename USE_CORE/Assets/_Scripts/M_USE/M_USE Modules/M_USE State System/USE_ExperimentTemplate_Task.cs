@@ -387,7 +387,8 @@ namespace USE_ExperimentTemplate_Task
             //Setup data management
             TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
 
-            StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
+            if(StoreData)
+                StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
 
             FilePrefix = FilePrefix + "_" + ConfigName;
 

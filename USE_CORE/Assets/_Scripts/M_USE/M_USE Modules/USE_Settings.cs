@@ -500,9 +500,7 @@ namespace USE_Settings
         public static void ImportSettings_MultipleType(string settingsCategory, string settingsPath, string serverFileString = null, char delimiter = '\t')
 		{
             Debug.Log("Attempting to load settings file " + settingsPath + ".");
-
 			Settings settings = new Settings(settingsCategory, settingsPath);
-
 			string[] lines;
 
 			if(serverFileString != null)

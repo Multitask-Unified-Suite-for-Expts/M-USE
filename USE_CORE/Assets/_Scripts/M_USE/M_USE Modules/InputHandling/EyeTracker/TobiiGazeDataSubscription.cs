@@ -8,13 +8,18 @@ namespace Tobii.Research.Unity.CodeExamples
     // the events in the SDK are called on a thread internal to the SDK. That thread can not safely set values
     // that are to be read on the main thread. The simplest way to make it safe is to enqueue the date, and dequeue it
     // on the main thread, e.g. via Update() in a MonoBehaviour.
-    class TobiiGazeDataSubscription : MonoBehaviour
+    public class TobiiGazeDataSubscription : MonoBehaviour
     {
+        public static TobiiGazeDataSubscription Instance { get; private set; }
+
         private IEyeTracker _eyeTracker;
         private Queue<GazeDataEventArgs> _queue = new Queue<GazeDataEventArgs>();
+        public USE_ExperimentTemplate_Data.GazeData GazeData;
 
         void Awake()
         {
+            Instance = this;
+
             var trackers = EyeTrackingOperations.FindAllEyeTrackers();
             foreach (IEyeTracker eyeTracker in trackers)
             {
@@ -72,6 +77,7 @@ namespace Tobii.Research.Unity.CodeExamples
         {
             lock (_queue)
             {
+                Debug.Log("QUEUE COUNT: " + _queue.Count);
                 return _queue.Count > 0 ? _queue.Dequeue() : null;
             }
         }
@@ -81,6 +87,7 @@ namespace Tobii.Research.Unity.CodeExamples
             var next = GetNextGazeData();
             while (next != null)
             {
+                Debug.Log("IN HERE ");
                 HandleGazeData(next);
                 next = GetNextGazeData();
             }
@@ -89,10 +96,7 @@ namespace Tobii.Research.Unity.CodeExamples
         // This method will be called on the main Unity thread
         private void HandleGazeData(GazeDataEventArgs e)
         {
-            var TobiiEyeTrackerController = GameObject.Find("TobiiEyeTrackerController").GetComponent<TobiiEyeTrackerController>();
-            var mostRecentGazeSample = TobiiEyeTrackerController.mostRecentGazeSample;
-            var GazeData = TobiiEyeTrackerController.GazeData;
-
+            var mostRecentGazeSample = TobiiEyeTrackerController.Instance.mostRecentGazeSample;
             // Left Eye Data
             mostRecentGazeSample.leftPupilValidity = e.LeftEye.Pupil.Validity.ToString();
             mostRecentGazeSample.leftGazeOriginValidity = e.LeftEye.GazeOrigin.Validity.ToString();
@@ -114,10 +118,16 @@ namespace Tobii.Research.Unity.CodeExamples
             mostRecentGazeSample.rightPupilDiameter = e.RightEye.Pupil.PupilDiameter;
 
             mostRecentGazeSample.systemTimeStamp = e.SystemTimeStamp;
-           
+
+            var dataController = GameObject.Find("DataControllers");
+            foreach (var child in dataController.transform)
+            {
+
+            }
+            Debug.Log("MOST RECENT GAZE: " + mostRecentGazeSample.leftGazePointOnDisplayArea);
             if (GazeData != null)
             {
-                GazeData.AppendData();
+                TobiiEyeTrackerController.Instance.GazeData.AppendData();
                 Debug.Log("GAZE DATA NAME??? " + GazeData.fileName);
             }
         }

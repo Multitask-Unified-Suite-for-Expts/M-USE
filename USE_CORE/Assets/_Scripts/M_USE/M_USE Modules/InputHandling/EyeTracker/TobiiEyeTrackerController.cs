@@ -5,6 +5,7 @@ using Tobii.Research;
 using Tobii.Research.Unity;
 using USE_DisplayManagement;
 using EyeTrackerData_Namespace;
+using Tobii.Research.Unity.CodeExamples;
 
 public class TobiiEyeTrackerController : EyeTrackerController_Base
 {
@@ -18,6 +19,8 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
     public bool isCalibrating;
 
     public TobiiGazeSample mostRecentGazeSample;
+  //  public USE_ExperimentTemplate_Data.GazeData GazeData;
+    public TobiiGazeDataSubscription GazeDataSubscription;
     public USE_ExperimentTemplate_Data.GazeData GazeData;
 
     //MOST RECENT GAZE DATA FIELD, OVERWRITTEN 
@@ -59,6 +62,7 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
         if (EyeTracker == null && GameObject.Find("EyeTracker(Clone)") != null)
         {
             EyeTracker = GameObject.Find("EyeTracker(Clone)").GetComponent<EyeTracker>();
+            GazeDataSubscription = GameObject.Find("EyeTracker(Clone)").GetComponent<TobiiGazeDataSubscription>();
         //    EyeTracker.SubscribeToGazeData = true;
 
         }
@@ -92,9 +96,9 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
 
         mostRecentGazeSample.systemTimeStamp = e.SystemTimeStamp;
 
-        Debug.Log("GAZE DATA NAME??? " + GazeData.fileName);
-       
-        GazeData.AppendData();
+        //Debug.Log("GAZE DATA NAME??? " + GazeData.fileName);
+     //  
+       // GazeData.AppendData();
         //GAZEDATA.APPENDDATA()
     }
 

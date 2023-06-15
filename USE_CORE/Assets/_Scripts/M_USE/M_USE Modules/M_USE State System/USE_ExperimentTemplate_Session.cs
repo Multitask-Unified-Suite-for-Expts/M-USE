@@ -32,6 +32,7 @@ using static SelectionTracking.SelectionTracker;
 using UnityEngine.UIElements;
 using USE_ExperimentTemplate_Trial;
 using Image = UnityEngine.UI.Image;
+using Tobii.Research.Unity.CodeExamples;
 
 //using UnityEngine.Windows.WebCam;
 
@@ -399,7 +400,7 @@ namespace USE_ExperimentTemplate_Session
                     GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
                     GameObject CalibrationGO = Instantiate(Resources.Load<GameObject>("Calibration"));
 
-                    TobiiEyeTrackerController.GazeData = GazeData;
+                    TobiiEyeTrackerController.Instance.GazeData = GazeData;
 
                     /*  //  GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform); 
                     GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);

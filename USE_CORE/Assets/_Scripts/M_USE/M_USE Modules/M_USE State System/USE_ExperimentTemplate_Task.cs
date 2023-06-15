@@ -426,7 +426,7 @@ namespace USE_ExperimentTemplate_Task
                 if (EyeTrackerActive)
                 {
                     // Set the Gaze data in the controller to be appending to the task data
-                    TobiiEyeTrackerController.GazeData = GazeData;
+                    TobiiEyeTrackerController.Instance.GazeData = GazeData;
                     GazeData = (USE_ExperimentTemplate_Data.GazeData)dataController.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", ConfigName,
                     StoreData, TaskDataPath + Path.DirectorySeparatorChar + "GazeData");
 
@@ -478,7 +478,8 @@ namespace USE_ExperimentTemplate_Task
                 if (EyeTrackerActive)
                 {
                     // Set the Gaze data in the controller to be appending to the calib data
-                    TobiiEyeTrackerController.GazeData = GazeData;
+                    if(TobiiEyeTrackerController != null)
+                        TobiiEyeTrackerController.Instance.GazeData = GazeData;
                     GazeData = (USE_ExperimentTemplate_Data.GazeData)dataController.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", ConfigName,
                     StoreData, TaskDataPath + Path.DirectorySeparatorChar + "GazeData");
 
@@ -494,11 +495,13 @@ namespace USE_ExperimentTemplate_Task
             BlockData.InitDataController();
             TrialData.InitDataController();
             FrameData.InitDataController();
-            GazeData.InitDataController();
+            if (EyeTrackerActive)
+                GazeData.InitDataController();
 
             BlockData.ManuallyDefine();
             FrameData.ManuallyDefine();
-            GazeData.ManuallyDefine();
+            if (EyeTrackerActive)
+                GazeData.ManuallyDefine();
 
             if (EventCodesActive)
                 FrameData.AddEventCodeColumns();
@@ -510,7 +513,8 @@ namespace USE_ExperimentTemplate_Task
             BlockData.CreateFile();
             //BlockData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
             FrameData.CreateFile();
-            GazeData.CreateFile();
+            if(EyeTrackerActive)
+                GazeData.CreateFile();
             //FrameData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
 
 

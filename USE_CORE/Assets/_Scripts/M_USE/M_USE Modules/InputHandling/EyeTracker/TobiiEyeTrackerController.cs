@@ -59,15 +59,20 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
 
         }
 
-        if (EyeTracker == null && GameObject.Find("EyeTracker(Clone)") != null)
+        else if (EyeTracker == null && GameObject.Find("EyeTracker(Clone)") != null)
         {
             EyeTracker = GameObject.Find("EyeTracker(Clone)").GetComponent<EyeTracker>();
             GazeDataSubscription = GameObject.Find("EyeTracker(Clone)").GetComponent<TobiiGazeDataSubscription>();
-        //    EyeTracker.SubscribeToGazeData = true;
+            GazeDataSubscription._eyeTracker = iEyeTracker;
+            Debug.Log("IS IEYETRACKER NULL? " + (iEyeTracker == null ? "YES" : "NO"));
+            Debug.Log("IS GAZEDATASUBSCRIPTION NULL? " + (GazeDataSubscription == null ? "YES" : "NO"));
+            iEyeTracker.GazeDataReceived += GazeDataSubscription.EnqueueEyeData;
+            GazeDataSubscription.TobiiEyeTrackerController = this;
+            //    EyeTracker.SubscribeToGazeData = true;
 
         }
 
-        if (TrackBoxGuideGO == null && GameObject.Find("TrackBoxGuide(Clone)") != null)
+        else if (TrackBoxGuideGO == null && GameObject.Find("TrackBoxGuide(Clone)") != null)
             TrackBoxGuideGO = GameObject.Find("TrackBoxGuide(Clone)");
 
     }

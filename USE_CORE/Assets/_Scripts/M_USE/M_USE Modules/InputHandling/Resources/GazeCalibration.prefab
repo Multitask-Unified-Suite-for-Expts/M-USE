@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 287273562805883295}
   m_Layer: 0
-  m_Name: Calibration
+  m_Name: GazeCalibration
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -47,7 +47,7 @@ GameObject:
   - component: {fileID: 2451499688461286605}
   - component: {fileID: 5744839587775911777}
   m_Layer: 5
-  m_Name: Calibration_Canvas
+  m_Name: GazeCalibration_Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -183,7 +183,7 @@ GameObject:
   - component: {fileID: 4333728071008300758}
   - component: {fileID: 4445937192520635212}
   m_Layer: 0
-  m_Name: Calibration_Scripts
+  m_Name: GazeCalibration_Scripts
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -225,6 +225,7 @@ MonoBehaviour:
   Paused: 1
   TrialData: {fileID: 0}
   FrameData: {fileID: 0}
+  GazeData: {fileID: 0}
   SerialSentData: {fileID: 0}
   SerialRecvData: {fileID: 0}
   BlockCount: 0
@@ -322,6 +323,8 @@ MonoBehaviour:
   TaskProjectFolder: 
   BlockCount: 0
   TrialLevel: {fileID: 4333728071008300758}
+  SessionLevel: {fileID: 0}
+  GazeData: {fileID: 0}
   SerialSentData: {fileID: 0}
   SerialRecvData: {fileID: 0}
   EyeTrackerActive: 0

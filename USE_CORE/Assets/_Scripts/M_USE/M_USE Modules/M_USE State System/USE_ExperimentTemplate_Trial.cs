@@ -38,7 +38,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public bool StoreData, ForceBlockEnd, SerialPortActive, EyetrackerActive;
         [HideInInspector] public string TaskDataPath, FilePrefix, TrialSummaryString;
 
-        protected State SetupTrial, FinishTrial, Delay, Calibration;
+        protected State SetupTrial, FinishTrial, Delay, GazeCalibration;
         
         protected State StateAfterDelay = null;
         protected float DelayDuration = 0;
@@ -75,7 +75,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public bool EyeTrackerActive;
         [HideInInspector] public EyeTrackerData_Namespace.TobiiGazeSample TobiiGazeSample;
         [HideInInspector] public bool runCalibration;
-        private ControlLevel_Task_Template CalibrationTaskLevel;
+        private ControlLevel_Task_Template GazeCalibrationTaskLevel;
 
         [HideInInspector] public SerialPortThreaded SerialPortController;
         [HideInInspector] public SyncBoxController SyncBoxController;
@@ -125,17 +125,17 @@ namespace USE_ExperimentTemplate_Trial
             SetupTrial = new State("SetupTrial");
             FinishTrial = new State("FinishTrial");
             Delay = new State("Delay");
-            Calibration = new State("Calibration");
+            GazeCalibration = new State("Calibration");
             
             if (GameObject.Find("Calibration(Clone)") != null)
             {
-                CalibrationTaskLevel = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Scripts"). GetComponent<GazeCalibration_TaskLevel>();
-                Calibration.AddChildLevel(CalibrationTaskLevel);
-                CalibrationTaskLevel.TrialLevel.TaskLevel = CalibrationTaskLevel;
+                GazeCalibrationTaskLevel = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Scripts"). GetComponent<GazeCalibration_TaskLevel>();
+                GazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
+                GazeCalibrationTaskLevel.TrialLevel.TaskLevel = GazeCalibrationTaskLevel;
 
             }
 
-            AddActiveStates(new List<State> { SetupTrial, FinishTrial, Delay, Calibration });
+            AddActiveStates(new List<State> { SetupTrial, FinishTrial, Delay, GazeCalibration });
             // A state that just waits for some time;
             Delay.AddTimer(() => DelayDuration, () => StateAfterDelay);
 
@@ -212,7 +212,7 @@ namespace USE_ExperimentTemplate_Trial
             });
 
             FinishTrial.AddInitializationMethod(() => EventCodeManager.SendCodeImmediate(SessionEventCodes["FinishTrialStarts"]));
-            FinishTrial.SpecifyTermination(() => runCalibration && TaskLevel.TaskName != "GazeCalibration", () => Calibration);
+            FinishTrial.SpecifyTermination(() => runCalibration && TaskLevel.TaskName != "GazeCalibration", () => GazeCalibration);
 
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => CheckForcedBlockEnd(), () => null);
@@ -235,12 +235,12 @@ namespace USE_ExperimentTemplate_Trial
                 WriteDataFiles();
             });
             
-            Calibration.AddInitializationMethod(() =>
+            GazeCalibration.AddInitializationMethod(() =>
             {
-                CalibrationTaskLevel.TaskCam = TaskLevel.TaskCam;
+                GazeCalibrationTaskLevel.TaskCam = TaskLevel.TaskCam;
 
-                CalibrationTaskLevel.ConfigName = "GazeCalibration";
-                CalibrationTaskLevel.TaskName = "GazeCalibration";
+                GazeCalibrationTaskLevel.ConfigName = "GazeCalibration";
+                GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
 
                 UnityEngine.SceneManagement.Scene originalScene = SceneManager.GetSceneByName(TaskLevel.TaskName);
                 GameObject[] rootObjects = originalScene.GetRootGameObjects();
@@ -251,28 +251,28 @@ namespace USE_ExperimentTemplate_Trial
                     canvas.gameObject.SetActive(false);
                 }
 
-                var CalibrationCanvas = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Canvas");
-                var CalibrationScripts = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Scripts");
+                var GazeCalibrationCanvas = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas");
+                var GazeCalibrationScripts = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts");
                 //  var CalibrationGazeTrail = GameObject.Find("TobiiEyeTrackerController").transform.Find("GazeTrail(Clone)");
                 //  var CalibrationCube = GameObject.Find("TobiiEyeTrackerController").transform.Find("Cube");
 
-                CalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
-                CalibrationCanvas.GetComponent<Canvas>().worldCamera = Camera.main;
-                CalibrationCanvas.gameObject.SetActive(true);
+                GazeCalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
+                GazeCalibrationCanvas.GetComponent<Canvas>().worldCamera = Camera.main;
+                GazeCalibrationCanvas.gameObject.SetActive(true);
              //   CalibrationGazeTrail.gameObject.SetActive(true);
-                CalibrationScripts.gameObject.SetActive(true);
+                GazeCalibrationScripts.gameObject.SetActive(true);
               //  CalibrationCube.gameObject.SetActive(true);
 
             });
 
-           Calibration.SpecifyTermination(() => !runCalibration, () => SetupTrial, () =>
+           GazeCalibration.SpecifyTermination(() => !runCalibration, () => SetupTrial, () =>
            {
-               GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Canvas").gameObject.SetActive(false);
+               GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas").gameObject.SetActive(false);
                foreach (Canvas canvas in TaskLevel.TaskCanvasses)
                {
                    canvas.gameObject.SetActive(true);
                }
-               if (CalibrationTaskLevel.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
+               if (GazeCalibrationTaskLevel.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
                {
                    TobiiEyeTrackerController.Instance.isCalibrating = false;
                    TobiiEyeTrackerController.Instance.ScreenBasedCalibration.LeaveCalibrationMode();

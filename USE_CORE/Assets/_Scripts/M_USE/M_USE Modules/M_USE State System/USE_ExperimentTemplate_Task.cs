@@ -24,6 +24,8 @@ using Tobii.Research;
 using static UnityEngine.EventSystems.EventTrigger;
 using MazeGame_Namespace;
 using UnityEngine.UIElements;
+using USE_ExperimentTemplate_Session;
+using static System.Collections.Specialized.BitVector32;
 
 namespace USE_ExperimentTemplate_Task
 {
@@ -42,10 +44,11 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public int BlockCount;
         protected int NumBlocksInTask;
         public ControlLevel_Trial_Template TrialLevel;
+        public ControlLevel_Session_Template SessionLevel;
         protected BlockData BlockData;
         protected FrameData FrameData;
         protected TrialData TrialData;
-        protected USE_ExperimentTemplate_Data.GazeData GazeData;
+        public USE_ExperimentTemplate_Data.GazeData GazeData;
         [HideInInspector] public SerialSentData SerialSentData;
         [HideInInspector] public SerialRecvData SerialRecvData;
 
@@ -149,6 +152,7 @@ namespace USE_ExperimentTemplate_Task
             }
             else
             {
+                // Creating the BlockDef for Calibration
                 BlockDefs = new BlockDef[1];
                 for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
                 {
@@ -345,8 +349,8 @@ namespace USE_ExperimentTemplate_Task
                     SessionDataControllers.RemoveDataController("BlockData_" + TaskName);
                     SessionDataControllers.RemoveDataController("TrialData_" + TaskName);
                     SessionDataControllers.RemoveDataController("FrameData_" + TaskName);
-                    if (EyeTrackerActive)
-                        SessionDataControllers.RemoveDataController("GazeData_" + TaskName);
+                    /*if (EyeTrackerActive)
+                        SessionDataControllers.RemoveDataController("GazeData_" + TaskName);*/
                 }
 
                 if (TaskStims != null)
@@ -420,31 +424,34 @@ namespace USE_ExperimentTemplate_Task
                 //  TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
                 FrameData.taskLevel = this;
                 FrameData.trialLevel = TrialLevel;
+                FrameData.sessionLevel = SessionLevel;
+
                 TrialLevel.FrameData = FrameData;
                 FrameData.fileName = FilePrefix + "__FrameData_PreTrial.txt";
 
                 if (EyeTrackerActive)
                 {
-                    // Set the Gaze data in the controller to be appending to the task data
+                   /* // Set the Gaze data in the controller to be appending to the task data
                     TobiiEyeTrackerController.Instance.GazeData = GazeData;
                     GazeData = (USE_ExperimentTemplate_Data.GazeData)dataController.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", ConfigName,
                     StoreData, TaskDataPath + Path.DirectorySeparatorChar + "GazeData");
 
                     GazeData.taskLevel = this;
-                    GazeData.trialLevel = TrialLevel;
-                    TrialLevel.GazeData = GazeData;
+                    GazeData.trialLevel = TrialLevel;*/
                     GazeData.fileName = FilePrefix + "__GazeData_PreTrial.txt";
+                    GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
+
                 }
-                
+
                 // ====
 
             }
             else
             {
                 dataController = SessionDataControllers;
-                ConfigName = "Calib";
-                //Setup data management
-                TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
+               // if (this.ParentState.ParentLevel)
+               if (TaskDataPath == null)
+                    TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
                 FilePrefix = FilePrefix + "_" + ConfigName;
 
                 BlockData = (BlockData)dataController.InstantiateDataController<BlockData>("BlockData", ConfigName,
@@ -471,22 +478,26 @@ namespace USE_ExperimentTemplate_Task
                 //  TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
                 FrameData.taskLevel = this;
                 FrameData.trialLevel = TrialLevel;
+                FrameData.sessionLevel = SessionLevel;
                 TrialLevel.FrameData = FrameData;
                 FrameData.fileName = FilePrefix + "__FrameData_PreTrial.txt";
 
 
                 if (EyeTrackerActive)
-                {
+                {/*
+                    GazeData = ses
+                    //TobiiEyeTrackerController.GazeData = 
                     // Set the Gaze data in the controller to be appending to the calib data
-                    if(TobiiEyeTrackerController != null)
+                    if (TobiiEyeTrackerController != null)
                         TobiiEyeTrackerController.Instance.GazeData = GazeData;
                     GazeData = (USE_ExperimentTemplate_Data.GazeData)dataController.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", ConfigName,
                     StoreData, TaskDataPath + Path.DirectorySeparatorChar + "GazeData");
 
                     GazeData.taskLevel = this;
-                    GazeData.trialLevel = TrialLevel;
-                    TrialLevel.GazeData = GazeData;
+                    GazeData.trialLevel = TrialLevel;*/
                     GazeData.fileName = FilePrefix + "__GazeData_PreTrial.txt";
+                    GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
+
                 }
             }
             
@@ -494,9 +505,9 @@ namespace USE_ExperimentTemplate_Task
 
             BlockData.InitDataController();
             TrialData.InitDataController();
-            FrameData.InitDataController();
+            FrameData.InitDataController();/*
             if (EyeTrackerActive)
-                GazeData.InitDataController();
+                GazeData.InitDataController();*/
 
             BlockData.ManuallyDefine();
             FrameData.ManuallyDefine();
@@ -557,6 +568,7 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.SerialRecvData = SerialRecvData;
             TrialLevel.SerialSentData = SerialSentData;
             TrialLevel.SyncBoxController = SyncBoxController;
+            TrialLevel.GazeData = GazeData;
 
             TrialLevel.DisplayController = DisplayController;
 

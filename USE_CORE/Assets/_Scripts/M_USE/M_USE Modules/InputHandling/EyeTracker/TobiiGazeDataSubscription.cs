@@ -1,3 +1,4 @@
+using EyeTrackerData_Namespace;
 using System.Collections.Generic;
 using System.Linq;
 using Tobii.Research;
@@ -10,21 +11,13 @@ namespace Tobii.Research.Unity.CodeExamples
     // on the main thread, e.g. via Update() in a MonoBehaviour.
     public class TobiiGazeDataSubscription : MonoBehaviour
     {
-        public static TobiiGazeDataSubscription Instance { get; private set; }
-
-        private IEyeTracker _eyeTracker;
+        public IEyeTracker _eyeTracker;
         private Queue<GazeDataEventArgs> _queue = new Queue<GazeDataEventArgs>();
         public USE_ExperimentTemplate_Data.GazeData GazeData;
+        public TobiiEyeTrackerController TobiiEyeTrackerController;
 
         void Awake()
-        {
-            Instance = this;
-
-            var trackers = EyeTrackingOperations.FindAllEyeTrackers();
-            foreach (IEyeTracker eyeTracker in trackers)
-            {
-                Debug.Log(string.Format("{0}, {1}, {2}, {3}, {4}", eyeTracker.Address, eyeTracker.DeviceName, eyeTracker.Model, eyeTracker.SerialNumber, eyeTracker.FirmwareVersion));
-            }
+        {/*
             _eyeTracker = trackers.FirstOrDefault(s => (s.DeviceCapabilities & Capabilities.HasGazeData) != 0);
             if (_eyeTracker == null)
             {
@@ -33,7 +26,7 @@ namespace Tobii.Research.Unity.CodeExamples
             else
             {
                 Debug.Log("Selected eye tracker with serial number {0}" + _eyeTracker.SerialNumber);
-            }
+            }*/
         }
 
         void Update()
@@ -41,14 +34,14 @@ namespace Tobii.Research.Unity.CodeExamples
             PumpGazeData();
         }
 
-        void OnEnable()
+        /*void OnEnable()
         {
             if (_eyeTracker != null)
             {
                 Debug.Log("Calling OnEnable with eyetracker: " + _eyeTracker.DeviceName);
                 _eyeTracker.GazeDataReceived += EnqueueEyeData;
             }
-        }
+        }*/
 
         void OnDisable()
         {
@@ -62,10 +55,14 @@ namespace Tobii.Research.Unity.CodeExamples
         {
             EyeTrackingOperations.Terminate();
         }
+        void OnApplicationQuit()
+        {
+            EyeTrackingOperations.Terminate();
+        }
 
         // This method will be called on a thread belonging to the SDK, and can not safely change values
         // that will be read from the main thread.
-        private void EnqueueEyeData(object sender, GazeDataEventArgs e)
+        public void EnqueueEyeData(object sender, GazeDataEventArgs e)
         {
             lock (_queue)
             {
@@ -77,7 +74,6 @@ namespace Tobii.Research.Unity.CodeExamples
         {
             lock (_queue)
             {
-                Debug.Log("QUEUE COUNT: " + _queue.Count);
                 return _queue.Count > 0 ? _queue.Dequeue() : null;
             }
         }
@@ -87,7 +83,6 @@ namespace Tobii.Research.Unity.CodeExamples
             var next = GetNextGazeData();
             while (next != null)
             {
-                Debug.Log("IN HERE ");
                 HandleGazeData(next);
                 next = GetNextGazeData();
             }
@@ -96,7 +91,7 @@ namespace Tobii.Research.Unity.CodeExamples
         // This method will be called on the main Unity thread
         private void HandleGazeData(GazeDataEventArgs e)
         {
-            var mostRecentGazeSample = TobiiEyeTrackerController.Instance.mostRecentGazeSample;
+            TobiiGazeSample mostRecentGazeSample = new TobiiGazeSample();
             // Left Eye Data
             mostRecentGazeSample.leftPupilValidity = e.LeftEye.Pupil.Validity.ToString();
             mostRecentGazeSample.leftGazeOriginValidity = e.LeftEye.GazeOrigin.Validity.ToString();
@@ -119,16 +114,11 @@ namespace Tobii.Research.Unity.CodeExamples
 
             mostRecentGazeSample.systemTimeStamp = e.SystemTimeStamp;
 
-            var dataController = GameObject.Find("DataControllers");
-            foreach (var child in dataController.transform)
+            TobiiEyeTrackerController.mostRecentGazeSample = mostRecentGazeSample;
+            
+            if (TobiiEyeTrackerController.GazeData != null)
             {
-
-            }
-            Debug.Log("MOST RECENT GAZE: " + mostRecentGazeSample.leftGazePointOnDisplayArea);
-            if (GazeData != null)
-            {
-                TobiiEyeTrackerController.Instance.GazeData.AppendData();
-                Debug.Log("GAZE DATA NAME??? " + GazeData.fileName);
+                TobiiEyeTrackerController.GazeData.AppendData();
             }
         }
     }

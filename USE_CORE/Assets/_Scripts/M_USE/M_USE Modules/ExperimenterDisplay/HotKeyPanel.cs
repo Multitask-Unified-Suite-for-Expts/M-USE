@@ -139,8 +139,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
         {
             List<HotKey> HotKeyList = new List<HotKey>();
             SessionInfoPanel SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
-            ControlLevel_Task_Template OriginalTaskLevel = null, CalibrationTaskLevel = null;
-            ControlLevel_Trial_Template OriginalTrialLevel = null, CalibrationTrialLevel = null;
+            ControlLevel_Task_Template OriginalTaskLevel = null, GazeCalibrationTaskLevel = null;
+            ControlLevel_Trial_Template OriginalTrialLevel = null, GazeCalibrationTrialLevel = null;
 
             // Toggle Displays HotKey
             HotKey toggleDisplays = new HotKey
@@ -406,10 +406,10 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         OriginalTrialLevel = HkPanel.TrialLevel;
 
                         // In the current task, and switching Hk.TrialLevel & Hk.TaskLevel to calibration trial/task
-                        CalibrationTaskLevel = (ControlLevel_Task_Template)HkPanel.TrialLevel.GetStateFromName("Calibration").ChildLevel;
-                        CalibrationTrialLevel = (ControlLevel_Trial_Template)CalibrationTaskLevel.GetStateFromName("RunBlock").ChildLevel;
-                        CalibrationTrialLevel.SpecifyCurrentState(CalibrationTrialLevel.GetStateFromName("SetupTrial"));
-                        ExperimenterDisplay.ResetTask(CalibrationTaskLevel, CalibrationTrialLevel);
+                        GazeCalibrationTaskLevel = (ControlLevel_Task_Template)HkPanel.TrialLevel.GetStateFromName("GazeCalibration").ChildLevel;
+                        GazeCalibrationTrialLevel = (ControlLevel_Trial_Template)GazeCalibrationTaskLevel.GetStateFromName("RunBlock").ChildLevel;
+                        GazeCalibrationTrialLevel.SpecifyCurrentState(GazeCalibrationTrialLevel.GetStateFromName("SetupTrial"));
+                        ExperimenterDisplay.ResetTask(GazeCalibrationTaskLevel, GazeCalibrationTrialLevel);
                         //HkPanel.SessionLevel.PopulateTaskLevel(GameObject.Find("Calibration_Scripts").GetComponent<GazeCalibration_TaskLevel>(), false, false);
                     }
                     else

@@ -69,7 +69,7 @@ namespace USE_ExperimentTemplate_Session
 
         protected List<ControlLevel_Task_Template> ActiveTaskLevels;
         public ControlLevel_Task_Template CurrentTask;
-        private ControlLevel_Task_Template CalibrationTaskLevel;
+        private ControlLevel_Task_Template GazeCalibrationTaskLevel;
         private OrderedDictionary TaskMappings;
         private string ContextExternalFilePath;
         private string TaskIconsFolderPath;
@@ -330,8 +330,8 @@ namespace USE_ExperimentTemplate_Session
             State loadTask = new State("LoadTask");
             State runTask = new State("RunTask");
             State finishSession = new State("FinishSession");
-            State calibration = new State("Calibration");
-            AddActiveStates(new List<State> { setupSession, selectTask, loadTask, runTask, finishSession, calibration });
+            State gazeCalibration = new State("GazeCalibration");
+            AddActiveStates(new List<State> { setupSession, selectTask, loadTask, runTask, finishSession, gazeCalibration });
 
             SessionDataControllers = new SessionDataControllers(GameObject.Find("DataControllers"));
             ActiveTaskLevels = new List<ControlLevel_Task_Template>();//new Dictionary<string, ControlLevel_Task_Template>();
@@ -398,9 +398,8 @@ namespace USE_ExperimentTemplate_Session
                     TobiiEyeTrackerController = TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
                     GameObject TrackBoxGO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"), TobiiEyeTrackerControllerGO.transform);
                     GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
-                    GameObject CalibrationGO = Instantiate(Resources.Load<GameObject>("Calibration"));
+                    GameObject CalibrationGO = Instantiate(Resources.Load<GameObject>("GazeCalibration"));
 
-                    TobiiEyeTrackerController.Instance.GazeData = GazeData;
 
                     /*  //  GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform); 
                     GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -422,9 +421,12 @@ namespace USE_ExperimentTemplate_Session
 
             // Instantiating Task Selection Frame Data
             // Instantiate normal session data controller for all tasks
-            FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "FrameData");
-            FrameData.fileName = "TaskSelection__FrameData.txt";
-            
+            string SessionLevelDataPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel";
+            FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection", StoreData,  SessionLevelDataPath + Path.DirectorySeparatorChar + "FrameData");
+            FrameData.fileName = "SessionLevel__FrameData.txt";
+
+            FrameData.sessionLevel = this;
+
             FrameData.InitDataController();
             FrameData.ManuallyDefine();
             if (EventCodesActive)
@@ -433,12 +435,16 @@ namespace USE_ExperimentTemplate_Session
 
             if (EyeTrackerActive)
             {
-                GazeData = (USE_ExperimentTemplate_Data.GazeData)SessionDataControllers.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", "TaskSelection", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "GazeData");
+                GazeData = (USE_ExperimentTemplate_Data.GazeData)SessionDataControllers.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", "TaskSelection", StoreData, SessionLevelDataPath + Path.DirectorySeparatorChar + "GazeData");
 
-                GazeData.fileName = "TaskSelection__GazeData.txt";
+                GazeData.fileName = "SessionLevel__GazeData.txt";
+                GazeData.sessionLevel = this;
+
                 GazeData.InitDataController();
                 GazeData.ManuallyDefine();
                 GazeData.CreateFile();
+                TobiiEyeTrackerController.GazeData = GazeData;
+
             }
 
             bool waitForSerialPort = false;
@@ -513,15 +519,15 @@ namespace USE_ExperimentTemplate_Session
                     waitForSerialPort = false;
                 }
 
-                if(EyeTrackerActive && CalibrationTaskLevel == null)
+                if(EyeTrackerActive && GazeCalibrationTaskLevel == null)
                 {
                     //Have to add calibration task level as child of calibration state here, because it isn't available prior
                     
-                    CalibrationTaskLevel = GameObject.Find("Calibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
-                    PopulateTaskLevel(CalibrationTaskLevel, false, false);
-                    calibration.AddChildLevel(CalibrationTaskLevel);
-                    CalibrationTaskLevel.TrialLevel.TaskLevel = CalibrationTaskLevel;
-                    CalibrationTaskLevel.gameObject.SetActive(false);
+                    GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
+                    PopulateTaskLevel(GazeCalibrationTaskLevel, false, false);
+                    gazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
+                    GazeCalibrationTaskLevel.TrialLevel.TaskLevel = GazeCalibrationTaskLevel;
+                    GazeCalibrationTaskLevel.gameObject.SetActive(false);
                 }
                
             
@@ -552,7 +558,7 @@ namespace USE_ExperimentTemplate_Session
                 //AppendSerialData();
             });
 
-            setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort && EyeTrackerActive, calibration);
+            setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort && EyeTrackerActive, gazeCalibration);
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort && !EyeTrackerActive, selectTask);
 
             setupSession.AddDefaultTerminationMethod( () =>
@@ -580,29 +586,29 @@ namespace USE_ExperimentTemplate_Session
             });
 
            // Canvas[] TaskSelectionCanvasses = null;
-            calibration.AddInitializationMethod(() =>
+            gazeCalibration.AddInitializationMethod(() =>
             {
-                CalibrationTaskLevel.TaskCam = Camera.main;
-                CalibrationTaskLevel.ConfigName = "GazeCalibration";
-                CalibrationTaskLevel.TaskName = "GazeCalibration";
-                CalibrationTaskLevel.TrialLevel.runCalibration = true;
-                ExperimenterDisplayController.ResetTask(CalibrationTaskLevel, CalibrationTaskLevel.TrialLevel);
+                GazeCalibrationTaskLevel.TaskCam = Camera.main;
+                GazeCalibrationTaskLevel.ConfigName = "GazeCalibration";
+                GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
+                GazeCalibrationTaskLevel.TrialLevel.runCalibration = true;
+                ExperimenterDisplayController.ResetTask(GazeCalibrationTaskLevel, GazeCalibrationTaskLevel.TrialLevel);
 
-                var CalibrationCanvas = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Canvas");
-                var CalibrationScripts = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Scripts");
-                CalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+                var GazeCalibrationCanvas = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas");
+                var GazeCalibrationScripts = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts");
+                GazeCalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
               //  CalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
                 //CalibrationCanvas.GetComponent<Canvas>().worldCamera = Camera.main;
 
-                CalibrationCanvas.gameObject.SetActive(true);
-                CalibrationScripts.gameObject.SetActive(true);
+                GazeCalibrationCanvas.gameObject.SetActive(true);
+                GazeCalibrationScripts.gameObject.SetActive(true);
             });
 
-            calibration.SpecifyTermination(() => !CalibrationTaskLevel.TrialLevel.runCalibration, () => selectTask, () =>
+            gazeCalibration.SpecifyTermination(() => !GazeCalibrationTaskLevel.TrialLevel.runCalibration, () => selectTask, () =>
             {
-                GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Canvas").gameObject.SetActive(false);
-                GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Scripts").gameObject.SetActive(false);
-                if (CalibrationTaskLevel.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
+                GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas").gameObject.SetActive(false);
+                GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts").gameObject.SetActive(false);
+                if (GazeCalibrationTaskLevel.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
                 {
                     TobiiEyeTrackerController.Instance.isCalibrating = false;
                     TobiiEyeTrackerController.Instance.ScreenBasedCalibration.LeaveCalibrationMode();
@@ -885,6 +891,7 @@ namespace USE_ExperimentTemplate_Session
                     SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionDataPath, "SerialRecvData", CurrentTask.TaskName);
                     SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionDataPath, "SerialSentData", CurrentTask.TaskName);
                 }
+
             });
 
             //automatically finish tasks after running one - placeholder for proper selection
@@ -1105,6 +1112,7 @@ namespace USE_ExperimentTemplate_Session
 
         public ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly, bool loadSettings)
         {
+            tl.SessionLevel = this;
             tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
             tl.HumanStartPanel = HumanStartPanel;
             tl.IsHuman = IsHuman;
@@ -1161,6 +1169,7 @@ namespace USE_ExperimentTemplate_Session
             tl.SessionID = SessionID;
             tl.SerialRecvData = SerialRecvData;
             tl.SerialSentData = SerialSentData;
+            tl.GazeData = GazeData;
 
             tl.SelectionTracker = SelectionTracker;
             
@@ -1202,6 +1211,10 @@ namespace USE_ExperimentTemplate_Session
                 tl.SonicationActive = (bool)SessionSettings.Get("Session", "SonicationActive");
             else
                 tl.SonicationActive = false;
+
+            if (CurrentState.StateName == "SetupSession" && GazeCalibrationTaskLevel != null)
+                tl.TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + "TaskSelection" + Path.DirectorySeparatorChar + "GazeCalibration";
+
             tl.DefineTaskLevel(verifyOnly, loadSettings);
             // ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
             // Don't add task to ActiveTaskLevels if we're just verifying

@@ -530,17 +530,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 5a7b2a49053ba484a9f482ce1b36c1c4,
-        type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 1629199882258123878, guid: 8ab2440bf55fe4159ac347f7402abb1a,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 1.05
+      value: 1.025
       objectReference: {fileID: 0}
     - target: {fileID: 1629199882258123878, guid: 8ab2440bf55fe4159ac347f7402abb1a,
         type: 3}
       propertyPath: m_LocalScale.y
       value: 1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1650949877097022744, guid: 8ab2440bf55fe4159ac347f7402abb1a,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 400
       objectReference: {fileID: 0}
     - target: {fileID: 2188224903015744102, guid: 8ab2440bf55fe4159ac347f7402abb1a,
         type: 3}
@@ -566,6 +570,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Options.m_Options.Array.size
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3629090499349059758, guid: 8ab2440bf55fe4159ac347f7402abb1a,
+        type: 3}
+      propertyPath: m_Options.m_Options.Array.data[0].m_Text
+      value: Default_SessionConfig
       objectReference: {fileID: 0}
     - target: {fileID: 3881102231957996370, guid: 8ab2440bf55fe4159ac347f7402abb1a,
         type: 3}
@@ -846,6 +855,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: InitializationScreen
+      objectReference: {fileID: 0}
+    - target: {fileID: 9142740353603167565, guid: 8ab2440bf55fe4159ac347f7402abb1a,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -525
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 4564965058748299814, guid: 8ab2440bf55fe4159ac347f7402abb1a, type: 3}
@@ -1149,6 +1163,7 @@ MonoBehaviour:
   HumanStartPanel: {fileID: 0}
   USE_StartButton: {fileID: 0}
   UseDefaultConfigs: 1
+  WebBuild: 0
 --- !u!4 &1375570696
 Transform:
   m_ObjectHideFlags: 0

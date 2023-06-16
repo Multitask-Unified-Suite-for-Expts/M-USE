@@ -116,6 +116,8 @@ namespace USE_ExperimentTemplate_Session
 
         [HideInInspector] public bool UseDefaultConfigs; //Set by InitScreen.cs when they click confirm (it checks if they picked default configs)
 
+        [HideInInspector] public bool WebBuild;
+
 
 
         public override void LoadSettings()
@@ -128,14 +130,13 @@ namespace USE_ExperimentTemplate_Session
             USE_StartButton.StartButtonPrefab = StartButtonPrefabGO;
 
 
-
             SubjectID = SessionDetails.GetItemValue("SubjectID");
             SessionID = SessionDetails.GetItemValue("SessionID");
 
             FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" + DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
 
 
-#if(UNITY_WEBGL)
+            if(WebBuild)
             {
                 SessionDataPath = ServerManager.SessionDataFolderPath;
 
@@ -146,164 +147,32 @@ namespace USE_ExperimentTemplate_Session
                 {
                     configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
                     WriteSessionConfigsToPersistantDataPath();
-                    SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));
+                    SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFilePathInExternalFolder(configFileFolder, "*SessionConfig*"));
+                    LoadSessionConfigSettings();
                 }
                 else //Using Server Configs
                 {
                     configFileFolder = ServerManager.SessionConfigFolderPath;
-                    //StartCoroutine(ServerManager.GetFileAsync(ServerManager.SessionConfigFolderPath, "SessionConfig", result =>
-                    //{
-                    //    SessionSettings.ImportSettings_MultipleType("Session", configFileFolder, result);
-                    //}));
-
+                    StartCoroutine(ServerManager.GetFileAsync(ServerManager.SessionConfigFolderPath, "SessionConfig", result =>
+                    {
+                        Debug.Log("SESSION CONFIG RESULT: " + result);
+                        SessionSettings.ImportSettings_MultipleType("Session", configFileFolder, result);
+                        LoadSessionConfigSettings();
+                    }));
                 }
-
             }
-#else
+            else
             {
                 configFileFolder = LocateFile.GetPath("Config File Folder");
                 SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
-                SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));            
+                SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFilePathInExternalFolder(configFileFolder, "*SessionConfig*"));
+                LoadSessionConfigSettings();
             }
-#endif
 
-
-
-
-            if (SessionSettings.SettingExists("Session", "SyncBoxActive"))
-                SyncBoxActive = (bool)SessionSettings.Get("Session", "SyncBoxActive");
-            else
-                SyncBoxActive = false;
-
-            if (SessionSettings.SettingExists("Session", "EventCodesActive"))
-                EventCodesActive = (bool)SessionSettings.Get("Session", "EventCodesActive");
-            else
-                EventCodesActive = false;
-
-            if (SessionSettings.SettingExists("Session", "RewardPulsesActive"))
-                RewardPulsesActive = (bool)SessionSettings.Get("Session", "RewardPulsesActive");
-            else
-                RewardPulsesActive = false;
-
-            if (SessionSettings.SettingExists("Session", "SonicationActive"))
-                SonicationActive = (bool)SessionSettings.Get("Session", "SonicationActive");
-            else
-                SonicationActive = false;
-
-            if (SessionSettings.SettingExists("Session", "LongRewardHotKeyPulseSize"))
-                LongRewardHotKeyPulseSize = (int)SessionSettings.Get("Session", "LongRewardHotKeyPulseSize");
-            else
-                LongRewardHotKeyPulseSize = 500;
-
-            if (SessionSettings.SettingExists("Session", "LongRewardHotKeyNumPulses"))
-                LongRewardHotKeyNumPulses = (int)SessionSettings.Get("Session", "LongRewardHotKeyNumPulses");
-            else
-                LongRewardHotKeyNumPulses = 1;
-
-            if (SessionSettings.SettingExists("Session", "RewardHotKeyPulseSize"))
-                RewardHotKeyPulseSize = (int)SessionSettings.Get("Session", "RewardHotKeyPulseSize");
-            else
-                RewardHotKeyPulseSize = 250;
-
-            if (SessionSettings.SettingExists("Session", "RewardHotKeyNumPulses"))
-                RewardHotKeyNumPulses = (int)SessionSettings.Get("Session", "RewardHotKeyNumPulses");
-            else
-                RewardHotKeyNumPulses = 1;
-
-
-
-
-            //Load the Session Event Code Config file
-            string eventCodeFileString = "";
-
-            #if (UNITY_WEBGL)                
-                eventCodeFileString = LocateFile.FindFileInExternalFolder(Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs", "*EventCode*");
-            #else
-                eventCodeFileString = LocateFile.FindFileInExternalFolder(configFileFolder, "*EventCode*");
-            #endif
-
-
-
-            if (!string.IsNullOrEmpty(eventCodeFileString))
-            {
-                SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
-                SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
-                EventCodesActive = true;
-            }
-            else if (EventCodesActive)
-                Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");
-
-            if (SyncBoxActive)
-                SerialPortActive = true;
-
-
-
-
-            List<string> taskNames;
-            if (SessionSettings.SettingExists("Session", "TaskNames"))
-            {
-                taskNames = (List<string>)SessionSettings.Get("Session", "TaskNames");
-                TaskMappings = new OrderedDictionary();
-                taskNames.ForEach((taskName) => TaskMappings.Add(taskName, taskName));
-            }
-            else if (SessionSettings.SettingExists("Session", "TaskMappings"))
-                TaskMappings = (OrderedDictionary)SessionSettings.Get("Session", "TaskMappings");
-            else if (TaskMappings.Count == 0)
-                Debug.LogError("No task names or task mappings specified in Session config file or by other means.");
-
-
-            if (SessionSettings.SettingExists("Session", "ShotgunRaycastCircleSize_DVA"))
-                ShotgunRaycastCircleSize_DVA = (float)SessionSettings.Get("Session", "ShotgunRaycastCircleSize_DVA");
-            else
-                ShotgunRaycastCircleSize_DVA = 1.25f;
-
-            if (SessionSettings.SettingExists("Session", "ParticipantDistance_CM"))
-                ParticipantDistance_CM = (float)SessionSettings.Get("Session", "ParticipantDistance_CM");
-            else
-                ParticipantDistance_CM = 60f;
-
-            if (SessionSettings.SettingExists("Session", "ShotgunRaycastSpacing_DVA"))
-                ShotgunRaycastSpacing_DVA = (float)SessionSettings.Get("Session", "ShotgunRaycastSpacing_DVA");
-            else
-                ShotgunRaycastSpacing_DVA = .3f;
-
-
-            if (SessionSettings.SettingExists("Session", "IsHuman"))
-                IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");
-
-            if (SessionSettings.SettingExists("Session", "TaskIconLocations"))
-                TaskIconLocations = (Vector3[])SessionSettings.Get("Session", "TaskIconLocations");
-            
-            if (SessionSettings.SettingExists("Session", "GuidedTaskSelection"))
-                GuidedTaskSelection = (bool)SessionSettings.Get("Session", "GuidedTaskSelection");
-           
-            if (SessionSettings.SettingExists("Session", "EyeTrackerActive"))
-                EyeTrackerActive = (bool)SessionSettings.Get("Session", "EyeTrackerActive");
-            
-            if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
-                ContextExternalFilePath = (string)SessionSettings.Get("Session", "ContextExternalFilePath");
-
-            if (SessionSettings.SettingExists("Session", "TaskIconsFolderPath"))
-                TaskIconsFolderPath = (string)SessionSettings.Get("Session", "TaskIconsFolderPath");
-
-            if (SessionSettings.SettingExists("Session", "TaskIcons"))
-                TaskIcons = (Dictionary<string, string>)SessionSettings.Get("Session", "TaskIcons");
-
-            if (SessionSettings.SettingExists("Session", "StoreData"))
-                StoreData = (bool)SessionSettings.Get("Session", "StoreData");
-
-            if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
-                MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
-
-            if (SessionSettings.SettingExists("Session", "TaskSelectionTimeout"))
-                TaskSelectionTimeout = (float)SessionSettings.Get("Session", "TaskSelectionTimeout");
-
-
-            if (SessionSettings.SettingExists("Session", "SerialPortActive"))
-                SerialPortActive = (bool)SessionSettings.Get("Session", "SerialPortActive");
 
 
         }
+
 
         public override void DefineControlLevel()
         {
@@ -879,7 +748,141 @@ namespace USE_ExperimentTemplate_Session
 
 
 
+        private void LoadSessionConfigSettings()
+        {
 
+            if (SessionSettings.SettingExists("Session", "SyncBoxActive"))
+                SyncBoxActive = (bool)SessionSettings.Get("Session", "SyncBoxActive");
+            else
+                SyncBoxActive = false;
+
+            if (SessionSettings.SettingExists("Session", "EventCodesActive"))
+                EventCodesActive = (bool)SessionSettings.Get("Session", "EventCodesActive");
+            else
+                EventCodesActive = false;
+
+            if (SessionSettings.SettingExists("Session", "RewardPulsesActive"))
+                RewardPulsesActive = (bool)SessionSettings.Get("Session", "RewardPulsesActive");
+            else
+                RewardPulsesActive = false;
+
+            if (SessionSettings.SettingExists("Session", "SonicationActive"))
+                SonicationActive = (bool)SessionSettings.Get("Session", "SonicationActive");
+            else
+                SonicationActive = false;
+
+            if (SessionSettings.SettingExists("Session", "LongRewardHotKeyPulseSize"))
+                LongRewardHotKeyPulseSize = (int)SessionSettings.Get("Session", "LongRewardHotKeyPulseSize");
+            else
+                LongRewardHotKeyPulseSize = 500;
+
+            if (SessionSettings.SettingExists("Session", "LongRewardHotKeyNumPulses"))
+                LongRewardHotKeyNumPulses = (int)SessionSettings.Get("Session", "LongRewardHotKeyNumPulses");
+            else
+                LongRewardHotKeyNumPulses = 1;
+
+            if (SessionSettings.SettingExists("Session", "RewardHotKeyPulseSize"))
+                RewardHotKeyPulseSize = (int)SessionSettings.Get("Session", "RewardHotKeyPulseSize");
+            else
+                RewardHotKeyPulseSize = 250;
+
+            if (SessionSettings.SettingExists("Session", "RewardHotKeyNumPulses"))
+                RewardHotKeyNumPulses = (int)SessionSettings.Get("Session", "RewardHotKeyNumPulses");
+            else
+                RewardHotKeyNumPulses = 1;
+
+
+            //MAKE SURE SYNCBOX INACTIVE FOR WEB BUILD
+            if(WebBuild)
+                SyncBoxActive = false;
+
+
+            //Load the Session Event Code Config file
+            string eventCodeFileString = "";
+
+            if(WebBuild)
+                eventCodeFileString = LocateFile.FindFilePathInExternalFolder(Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs", "*EventCode*"); //Should add logic for default configs AND server configs 
+            else
+                eventCodeFileString = LocateFile.FindFilePathInExternalFolder(configFileFolder, "*EventCode*");
+
+
+            if (!string.IsNullOrEmpty(eventCodeFileString))
+            {
+                SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
+                SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
+                EventCodesActive = true;
+            }
+            else if (EventCodesActive)
+                Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");
+
+            if (SyncBoxActive)
+                SerialPortActive = true;
+            
+
+            List<string> taskNames;
+            if (SessionSettings.SettingExists("Session", "TaskNames"))
+            {
+                taskNames = (List<string>)SessionSettings.Get("Session", "TaskNames");
+                TaskMappings = new OrderedDictionary();
+                taskNames.ForEach((taskName) => TaskMappings.Add(taskName, taskName));
+            }
+            else if (SessionSettings.SettingExists("Session", "TaskMappings"))
+                TaskMappings = (OrderedDictionary)SessionSettings.Get("Session", "TaskMappings");
+            else if (TaskMappings.Count == 0)
+                Debug.LogError("No task names or task mappings specified in Session config file or by other means.");
+
+
+            if (SessionSettings.SettingExists("Session", "ShotgunRaycastCircleSize_DVA"))
+                ShotgunRaycastCircleSize_DVA = (float)SessionSettings.Get("Session", "ShotgunRaycastCircleSize_DVA");
+            else
+                ShotgunRaycastCircleSize_DVA = 1.25f;
+
+            if (SessionSettings.SettingExists("Session", "ParticipantDistance_CM"))
+                ParticipantDistance_CM = (float)SessionSettings.Get("Session", "ParticipantDistance_CM");
+            else
+                ParticipantDistance_CM = 60f;
+
+            if (SessionSettings.SettingExists("Session", "ShotgunRaycastSpacing_DVA"))
+                ShotgunRaycastSpacing_DVA = (float)SessionSettings.Get("Session", "ShotgunRaycastSpacing_DVA");
+            else
+                ShotgunRaycastSpacing_DVA = .3f;
+
+
+            if (SessionSettings.SettingExists("Session", "IsHuman"))
+                IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");
+
+            if (SessionSettings.SettingExists("Session", "TaskIconLocations"))
+                TaskIconLocations = (Vector3[])SessionSettings.Get("Session", "TaskIconLocations");
+
+            if (SessionSettings.SettingExists("Session", "GuidedTaskSelection"))
+                GuidedTaskSelection = (bool)SessionSettings.Get("Session", "GuidedTaskSelection");
+
+            if (SessionSettings.SettingExists("Session", "EyeTrackerActive"))
+                EyeTrackerActive = (bool)SessionSettings.Get("Session", "EyeTrackerActive");
+
+            if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
+                ContextExternalFilePath = (string)SessionSettings.Get("Session", "ContextExternalFilePath");
+
+            if (SessionSettings.SettingExists("Session", "TaskIconsFolderPath"))
+                TaskIconsFolderPath = (string)SessionSettings.Get("Session", "TaskIconsFolderPath");
+
+            if (SessionSettings.SettingExists("Session", "TaskIcons"))
+                TaskIcons = (Dictionary<string, string>)SessionSettings.Get("Session", "TaskIcons");
+
+            if (SessionSettings.SettingExists("Session", "StoreData"))
+                StoreData = (bool)SessionSettings.Get("Session", "StoreData");
+
+            if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
+                MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
+
+            if (SessionSettings.SettingExists("Session", "TaskSelectionTimeout"))
+                TaskSelectionTimeout = (float)SessionSettings.Get("Session", "TaskSelectionTimeout");
+
+
+            if (SessionSettings.SettingExists("Session", "SerialPortActive"))
+                SerialPortActive = (bool)SessionSettings.Get("Session", "SerialPortActive");
+
+        }
 
         private void WriteSessionConfigsToPersistantDataPath()
         {
@@ -1011,6 +1014,7 @@ namespace USE_ExperimentTemplate_Session
 
         ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
+            tl.WebBuild = WebBuild;
             tl.USE_StartButton = USE_StartButton;
             tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
             tl.HumanStartPanel = HumanStartPanel;
@@ -1103,7 +1107,10 @@ namespace USE_ExperimentTemplate_Session
             else
                 tl.SonicationActive = false;
 
+
             tl.DefineTaskLevel(verifyOnly);
+
+
             // ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
             // Don't add task to ActiveTaskLevels if we're just verifying
             if (verifyOnly) return tl;
@@ -1124,6 +1131,8 @@ namespace USE_ExperimentTemplate_Session
         // 	// TaskSceneLoaded = true;
         // 	SceneLoading = false;
         // }
+
+
 
         void SceneLoaded(string configName, bool verifyOnly)
         {

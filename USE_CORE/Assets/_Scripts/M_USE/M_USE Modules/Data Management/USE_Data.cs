@@ -31,18 +31,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using UnityEngine;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
+using UnityEngine;
 using USE_States;
-using System.Collections;
 
 
 namespace USE_Data
 {
-	public interface IDatum
+    public interface IDatum
 	{
 		string Name { get; }
 		string ValueAsString { get; }
@@ -649,13 +649,11 @@ namespace USE_Data
 
 				if (SendDataExternally) //Create File With Headers
 				{
-					Debug.Log("FOLDERPATH: " + folderPath + " | FILENAME: " + fileName);
-
 					if (!ServerManager.FolderCreated(folderPath))
-						StartCoroutine(CreateExternalFolder(folderPath));
+						StartCoroutine(CreateServerFolder(folderPath));
 
 					if (!fileCreated)
-						StartCoroutine(CreateExternalFileWithHeaders());
+						StartCoroutine(CreateServerFileWithHeaders());
 				}
 				else
 				{
@@ -678,7 +676,7 @@ namespace USE_Data
 				string content = String.Join("\n", dataBuffer.ToArray());
 
                 if (SendDataExternally)
-					StartCoroutine(AppendDataToExternalFile(content));
+					StartCoroutine(AppendDataToServerFile(content));
 				else
 				{
 					if (!updateDataNextFrame)
@@ -693,20 +691,20 @@ namespace USE_Data
 			}
 		}
 
-		private IEnumerator CreateExternalFileWithHeaders()
+		private IEnumerator CreateServerFileWithHeaders()
 		{
 			string path = $"{folderPath}/{fileName}";
             yield return ServerManager.CreateFileAsync(path, fileName, fileHeaders);
             fileCreated = true;   
         }
 
-        private IEnumerator AppendDataToExternalFile(string fileContent)
+        private IEnumerator AppendDataToServerFile(string fileContent)
 		{
             yield return ServerManager.AppendToFileAsync(folderPath, fileName, fileContent);	
 		}
 
 
-        private IEnumerator CreateExternalFolder(string folderName)
+        private IEnumerator CreateServerFolder(string folderName)
         {
             yield return ServerManager.CreateFolder(folderName);
         }

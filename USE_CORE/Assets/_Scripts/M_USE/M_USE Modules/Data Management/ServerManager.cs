@@ -46,12 +46,12 @@ public static class ServerManager //Used with the PHP scripts
         formData.AddField("path", folderPath);
         using UnityWebRequest request = UnityWebRequest.Post(url, formData);
         yield return request.SendWebRequest();
-        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"SUCCESS CREATING FOLDER AT {folderPath}." : $"FAILED! Error Creating Folder! | Error: {request.error}");
+        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Success creating folder at: {folderPath}." : $"FAILED! Error Creating Folder! | Error: {request.error}");
         foldersCreatedList.Add(folderPath);
     }
 
 
-    public static IEnumerator GetSessionConfigFolderNames(Action<List<string>> callback)
+    public static IEnumerator GetSessionConfigFolders(Action<List<string>> callback)
     {
         string url = $"{ServerURL}/getFolderNames.php?directoryPath=CONFIGS";
 
@@ -87,29 +87,40 @@ public static class ServerManager //Used with the PHP scripts
         Debug.Log(request.result == UnityWebRequest.Result.Success ? $"SUCCESS! Created file: {fileName}" : $"FAILED! Error creating file: {fileName} | Error: {request.error}");
     }
 
+
+
+
     public static IEnumerator AppendToFileAsync(string folderPath, string fileName, string rowData)
     {
-        IEnumerator<string> getFileStringCoroutine = GetFileAsync(folderPath, fileName);
-        yield return CoroutineHelper.StartCoroutine(getFileStringCoroutine);
-        string originalFileContents = getFileStringCoroutine.Current;
-
-        if (originalFileContents != null)
+        yield return GetFileAsync(folderPath, fileName, originalFileContents =>
         {
-            string path = $"{folderPath}/{fileName}";
-            string url = $"{ServerURL}/updateFile.php?path={path}";
+            if (originalFileContents != null)
+            {
+                string path = $"{folderPath}/{fileName}";
+                string url = $"{ServerURL}/updateFile.php?path={path}";
 
-            string updatedFileContents = originalFileContents + "\n" + rowData;
-            WWWForm formData = new WWWForm();
-            formData.AddField("data", updatedFileContents);
+                string updatedFileContents = originalFileContents + "\n" + rowData;
+                WWWForm formData = new WWWForm();
+                formData.AddField("data", updatedFileContents);
 
-            using UnityWebRequest request = UnityWebRequest.Post(url, formData);
+                IEnumerator appendCoroutine = AppendToFileCoroutine(url, formData, fileName);
+                CoroutineHelper.StartCoroutine(appendCoroutine);
+            }
+        });
+    }
+
+    private static IEnumerator AppendToFileCoroutine(string url, WWWForm formData, string fileName)
+    {
+        using (UnityWebRequest request = UnityWebRequest.Post(url, formData))
+        {
             request.SetRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             yield return request.SendWebRequest();
             Debug.Log(request.result == UnityWebRequest.Result.Success ? $"SUCCESS! Appended to file at {fileName}" : $"FAILED! Error appending to {fileName} | Error: {request.error}");
         }
     }
 
-    public static IEnumerator<string> GetFileAsync(string path, string searchString)
+
+    public static IEnumerator GetFileAsync(string path, string searchString, Action<string> callback)
     {
         string url = $"{ServerURL}/getFile.php?path={path}&searchString={searchString}";
 
@@ -119,8 +130,10 @@ public static class ServerManager //Used with the PHP scripts
         while (!operation.isDone)
             yield return null;
 
-        yield return request.result == UnityWebRequest.Result.Success ? request.downloadHandler.text : null;
+        string result = request.result == UnityWebRequest.Result.Success ? request.downloadHandler.text : null;
         Debug.Log(request.result == UnityWebRequest.Result.Success ? $"FILE CONTAINING '{searchString}' FOUND." : $"ERROR SEARCHING FOR FILE CONTAINING: '{searchString}'. | ERROR: {request.error}");
+
+        callback?.Invoke(result);
     }
 
 

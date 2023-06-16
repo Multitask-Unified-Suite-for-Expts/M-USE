@@ -95,6 +95,8 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public UI_Debugger UI_Debugger;
         [HideInInspector] public GameObject PauseIconGO;
 
+        [HideInInspector] public bool WebBuild;
+
 
 
         // Texture Variables

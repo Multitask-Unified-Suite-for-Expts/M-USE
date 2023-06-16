@@ -66,6 +66,10 @@ public class InitScreen : MonoBehaviour
 
     void Start()
     {
+        #if (UNITY_WEBGL)
+            session.WebBuild = true;
+        #endif
+
         displayController = gameObject.AddComponent<DisplayController>();
         displayController.HandleDisplays(this);
         session.DisplayController = displayController;
@@ -79,9 +83,9 @@ public class InitScreen : MonoBehaviour
             g.SetActive(true);
 
 
-        #if (UNITY_WEBGL)
+        if (session.WebBuild)
         {
-            //StartCoroutine(ServerManager.GetSessionConfigFolderNames(folders => folderDropdown.SetFolders(folders)));
+            StartCoroutine(ServerManager.GetSessionConfigFolders(folders => folderDropdown.SetFolders(folders))); //UN COMMENT ONCE GET SERVER CONFIGS WORKING!
 
             if (!Application.isEditor)
                 confirmButtonGO.transform.localPosition += new Vector3(0, 75f, 0);
@@ -90,16 +94,16 @@ public class InitScreen : MonoBehaviour
             buttonsParentGO.SetActive(false);
             initScreenCanvasGO.GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
         }
-        #else
+        else
             buttonsParentGO.SetActive(true);
-        #endif
 
     }
 
 
     IEnumerator HandleConfirm()
     {
-        #if (UNITY_WEBGL)
+        if(session.WebBuild)
+        {
             string subjectID = session.SessionDetails.GetItemValue("SubjectID");
             string sessionID = session.SessionDetails.GetItemValue("SessionID");
 
@@ -108,7 +112,7 @@ public class InitScreen : MonoBehaviour
             string sessionConfigFolder = dropdown.options[dropdown.value].text;
             ServerManager.SetSessionConfigFolderName(sessionConfigFolder);
             session.UseDefaultConfigs = sessionConfigFolder.ToLower().Contains("default") ? true : false;
-        #endif
+        }
 
         if (OnLoadSettings != null)
             OnLoadSettings();

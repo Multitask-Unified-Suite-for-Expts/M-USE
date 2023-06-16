@@ -390,62 +390,72 @@ namespace USE_ExperimentTemplate_Task
 #endif
             });
 
-
-            SessionDataControllers dataController;
-
-            if (loadSettings)
+            //if (loadSettings)
+            //{
+            //Setup data management
+            if (SessionLevel.CurrentState.StateName == "SetupSession" && SessionLevel.GazeCalibrationTaskLevel != null)
             {
-                dataController = SessionDataControllers;
-                //====
-                //Setup data management
+                TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel" + Path.DirectorySeparatorChar + "GazeCalibration";
+            }
+            else
+            {
                 TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
-                FilePrefix = FilePrefix + "_" + ConfigName;
-                BlockData = (BlockData)dataController.InstantiateDataController<BlockData>("BlockData", ConfigName,
-                    StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
-                //InstantiateBlockData(StoreData, ConfigName,
-                //TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
-                BlockData.taskLevel = this;
-                BlockData.fileName = FilePrefix + "__BlockData.txt";
-
-                TrialData = (TrialData)dataController.InstantiateDataController<TrialData>("TrialData", ConfigName,
-                    StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
-                //SessionDataControllers.InstantiateTrialData(StoreData, ConfigName,
-                //TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
-                TrialData.taskLevel = this;
-                TrialData.trialLevel = TrialLevel;
-                TrialLevel.TrialData = TrialData;
-                TrialData.fileName = FilePrefix + "__TrialData.txt";
+            }
+            
 
 
-                FrameData = (FrameData)dataController.InstantiateDataController<FrameData>("FrameData", ConfigName,
-                    StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
+            FilePrefix = FilePrefix + "_" + ConfigName;
+            BlockData = (BlockData)SessionDataControllers.InstantiateDataController<BlockData>("BlockData", ConfigName,
+                StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
 
-                //SessionDataControllers.InstantiateFrameData(StoreData, ConfigName,
-                //  TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
-                FrameData.taskLevel = this;
-                FrameData.trialLevel = TrialLevel;
-                FrameData.sessionLevel = SessionLevel;
+            BlockData.taskLevel = this;
+            BlockData.fileName = FilePrefix + "__BlockData.txt";
 
-                TrialLevel.FrameData = FrameData;
-                FrameData.fileName = FilePrefix + "__FrameData_PreTrial.txt";
+            TrialData = (TrialData)SessionDataControllers.InstantiateDataController<TrialData>("TrialData", ConfigName,
+                StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
 
-                if (EyeTrackerActive)
-                {
-                   /* // Set the Gaze data in the controller to be appending to the task data
-                    TobiiEyeTrackerController.Instance.GazeData = GazeData;
-                    GazeData = (USE_ExperimentTemplate_Data.GazeData)dataController.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", ConfigName,
-                    StoreData, TaskDataPath + Path.DirectorySeparatorChar + "GazeData");
+            TrialData.taskLevel = this;
+            TrialData.trialLevel = TrialLevel;
+            TrialLevel.TrialData = TrialData;
+            TrialData.fileName = FilePrefix + "__TrialData.txt";
 
-                    GazeData.taskLevel = this;
-                    GazeData.trialLevel = TrialLevel;*/
-                    GazeData.fileName = FilePrefix + "__GazeData_PreTrial.txt";
-                    GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
 
-                }
+            FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", ConfigName,
+                StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
 
-                // ====
+
+            FrameData.taskLevel = this;
+            FrameData.trialLevel = TrialLevel;
+            FrameData.sessionLevel = SessionLevel;
+
+            TrialLevel.FrameData = FrameData;
+            FrameData.fileName = FilePrefix + "__FrameData_PreTrial.txt";
+
+            if (EyeTrackerActive)
+            {
+                /* // Set the Gaze data in the controller to be appending to the task data
+                 TobiiEyeTrackerController.Instance.GazeData = GazeData;
+                 GazeData = (USE_ExperimentTemplate_Data.GazeData)dataController.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", ConfigName,
+                 StoreData, TaskDataPath + Path.DirectorySeparatorChar + "GazeData");
+
+                 GazeData.taskLevel = this;
+                 GazeData.trialLevel = TrialLevel;*/
+                GazeData.taskLevel = this;
+                GazeData.trialLevel = TrialLevel;
+                GazeData.fileName = FilePrefix + "__GazeData_PreTrial.txt";
+                GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
 
             }
+            // ==== probably delete below -sd ===
+
+            //InstantiateBlockData(StoreData, ConfigName,
+            //TaskDataPath + Path.DirectorySeparatorChar + "BlockData");
+            //SessionDataControllers.InstantiateTrialData(StoreData, ConfigName,
+            //TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
+            //SessionDataControllers.InstantiateFrameData(StoreData, ConfigName,
+            //  TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
+            //}
+            /*
             else
             {
                 dataController = SessionDataControllers;
@@ -484,7 +494,7 @@ namespace USE_ExperimentTemplate_Task
 
 
                 if (EyeTrackerActive)
-                {/*
+                {*//*
                     GazeData = ses
                     //TobiiEyeTrackerController.GazeData = 
                     // Set the Gaze data in the controller to be appending to the calib data
@@ -494,14 +504,14 @@ namespace USE_ExperimentTemplate_Task
                     StoreData, TaskDataPath + Path.DirectorySeparatorChar + "GazeData");
 
                     GazeData.taskLevel = this;
-                    GazeData.trialLevel = TrialLevel;*/
+                    GazeData.trialLevel = TrialLevel;*//*
                     GazeData.fileName = FilePrefix + "__GazeData_PreTrial.txt";
                     GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
 
                 }
-            }
-            
-            
+            }*/
+
+
 
             BlockData.InitDataController();
             TrialData.InitDataController();
@@ -524,22 +534,19 @@ namespace USE_ExperimentTemplate_Task
             BlockData.CreateFile();
             //BlockData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
             FrameData.CreateFile();
-            if(EyeTrackerActive)
+            if (EyeTrackerActive)
                 GazeData.CreateFile();
             //FrameData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
 
 
             //AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
-            GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"), InputManager.transform);
 
             // fbControllers.transform.SetParent(Controllers.transform);
             // inputTrackers.transform.SetParent(Controllers.transform);
-
-
-
             // GameObject fbControllers = Instantiate(fbControllersPrefab, Controllers.transform);
             // GameObject inputTrackers = Instantiate(inputTrackersPrefab, Controllers.transform);
 
+            GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"), InputManager.transform);
 
             List<string> fbControllersList = new List<string>();
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FeedbackControllers"))
@@ -591,7 +598,7 @@ namespace USE_ExperimentTemplate_Task
             else
                 TrialLevel.LoadTextures(ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 
 
-            
+
             if (EyeTrackerActive)
                 GazeTracker.Init(FrameData, 0);
             MouseTracker.Init(FrameData, 0);
@@ -641,7 +648,7 @@ namespace USE_ExperimentTemplate_Task
                 }
             }
 
-            
+
             if (EyeTrackerActive)
             {
                 TrialLevel.GazeTracker = GazeTracker;

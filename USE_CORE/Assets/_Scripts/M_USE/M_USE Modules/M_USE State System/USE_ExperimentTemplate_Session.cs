@@ -69,7 +69,7 @@ namespace USE_ExperimentTemplate_Session
 
         protected List<ControlLevel_Task_Template> ActiveTaskLevels;
         public ControlLevel_Task_Template CurrentTask;
-        private ControlLevel_Task_Template GazeCalibrationTaskLevel;
+        public ControlLevel_Task_Template GazeCalibrationTaskLevel;
         private OrderedDictionary TaskMappings;
         private string ContextExternalFilePath;
         private string TaskIconsFolderPath;
@@ -422,7 +422,7 @@ namespace USE_ExperimentTemplate_Session
             // Instantiating Task Selection Frame Data
             // Instantiate normal session data controller for all tasks
             string SessionLevelDataPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel";
-            FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection", StoreData,  SessionLevelDataPath + Path.DirectorySeparatorChar + "FrameData");
+            FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "SessionLevel", StoreData,  SessionLevelDataPath + Path.DirectorySeparatorChar + "FrameData");
             FrameData.fileName = "SessionLevel__FrameData.txt";
 
             FrameData.sessionLevel = this;
@@ -435,7 +435,7 @@ namespace USE_ExperimentTemplate_Session
 
             if (EyeTrackerActive)
             {
-                GazeData = (USE_ExperimentTemplate_Data.GazeData)SessionDataControllers.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", "TaskSelection", StoreData, SessionLevelDataPath + Path.DirectorySeparatorChar + "GazeData");
+                GazeData = (USE_ExperimentTemplate_Data.GazeData)SessionDataControllers.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", "SessionLevel", StoreData, SessionLevelDataPath + Path.DirectorySeparatorChar + "GazeData");
 
                 GazeData.fileName = "SessionLevel__GazeData.txt";
                 GazeData.sessionLevel = this;
@@ -589,7 +589,7 @@ namespace USE_ExperimentTemplate_Session
             gazeCalibration.AddInitializationMethod(() =>
             {
                 GazeCalibrationTaskLevel.TaskCam = Camera.main;
-                GazeCalibrationTaskLevel.ConfigName = "GazeCalibration";
+               // GazeCalibrationTaskLevel.ConfigName = "GazeCalibration";
                 GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
                 GazeCalibrationTaskLevel.TrialLevel.runCalibration = true;
                 ExperimenterDisplayController.ResetTask(GazeCalibrationTaskLevel, GazeCalibrationTaskLevel.TrialLevel);
@@ -960,11 +960,11 @@ namespace USE_ExperimentTemplate_Session
 
                 if (SerialPortActive)
                 {                 
-                    SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataPath, "SerialRecvData", "TaskSelection");                    
-                    SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataPath, "SerialSentData", "TaskSelection");
+                    SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataPath, "SerialRecvData", "SessionLevel");                    
+                    SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataPath, "SerialSentData", "SessionLevel");
 
-                    SerialRecvData.fileName = FilePrefix + "__SerialRecvData" + SerialRecvData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "TaskSelection.txt";  
-                    SerialSentData.fileName = FilePrefix + "__SerialSentData" + SerialSentData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "TaskSelection.txt";
+                    SerialRecvData.fileName = FilePrefix + "__SerialRecvData" + SerialRecvData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";  
+                    SerialSentData.fileName = FilePrefix + "__SerialSentData" + SerialSentData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
                 }
                 //     SessionDataPath + Path.DirectorySeparatorChar +
                 //                             SerialRecvData.GetNiceIntegers(4, taskCount + 1 * 2 - 1) + "_TaskSelection";
@@ -1004,16 +1004,16 @@ namespace USE_ExperimentTemplate_Session
             {
                 SerialSentData = (SerialSentData) SessionDataControllers.InstantiateDataController<SerialSentData>
                     ("SerialSentData", StoreData, SessionDataPath + Path.DirectorySeparatorChar +  "SerialSentData" 
-                                                  + Path.DirectorySeparatorChar + "0001_TaskSelection");
-                SerialSentData.fileName = FilePrefix + "__SerialSentData_0001_TaskSelection.txt";
+                                                  + Path.DirectorySeparatorChar + "0001_SessionLevel");
+                SerialSentData.fileName = FilePrefix + "__SerialSentData_0001_SessionLevel.txt";
                 SerialSentData.sessionLevel = this;
                 SerialSentData.InitDataController();
                 SerialSentData.ManuallyDefine();
 
                 SerialRecvData = (SerialRecvData) SessionDataControllers.InstantiateDataController<SerialRecvData>
                     ("SerialRecvData", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "SerialRecvData" 
-                                                  + Path.DirectorySeparatorChar + "0001_TaskSelection");
-                SerialRecvData.fileName = FilePrefix + "__SerialRecvData_0001_TaskSelection.txt";
+                                                  + Path.DirectorySeparatorChar + "0001_SessionLevel");
+                SerialRecvData.fileName = FilePrefix + "__SerialRecvData_0001_SessionLevel.txt";
                 SerialRecvData.sessionLevel = this;
                 SerialRecvData.InitDataController();
                 SerialRecvData.ManuallyDefine();
@@ -1209,11 +1209,8 @@ namespace USE_ExperimentTemplate_Session
 
             if (SessionSettings.SettingExists("Session", "SonicationActive"))
                 tl.SonicationActive = (bool)SessionSettings.Get("Session", "SonicationActive");
-            else
+            else;
                 tl.SonicationActive = false;
-
-            if (CurrentState.StateName == "SetupSession" && GazeCalibrationTaskLevel != null)
-                tl.TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + "TaskSelection" + Path.DirectorySeparatorChar + "GazeCalibration";
 
             tl.DefineTaskLevel(verifyOnly, loadSettings);
             // ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);

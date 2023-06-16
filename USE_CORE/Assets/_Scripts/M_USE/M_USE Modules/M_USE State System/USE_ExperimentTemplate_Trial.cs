@@ -125,11 +125,11 @@ namespace USE_ExperimentTemplate_Trial
             SetupTrial = new State("SetupTrial");
             FinishTrial = new State("FinishTrial");
             Delay = new State("Delay");
-            GazeCalibration = new State("Calibration");
+            GazeCalibration = new State("GazeCalibration");
             
-            if (GameObject.Find("Calibration(Clone)") != null)
+            if (GameObject.Find("GazeCalibration(Clone)") != null)
             {
-                GazeCalibrationTaskLevel = GameObject.Find("Calibration(Clone)").transform.Find("Calibration_Scripts"). GetComponent<GazeCalibration_TaskLevel>();
+                GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts"). GetComponent<GazeCalibration_TaskLevel>();
                 GazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
                 GazeCalibrationTaskLevel.TrialLevel.TaskLevel = GazeCalibrationTaskLevel;
 

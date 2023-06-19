@@ -183,7 +183,8 @@ namespace USE_ExperimentTemplate_Trial
                 TrialCount_InTask++;
                 TrialCount_InBlock++;
                 FrameData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
-                GazeData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
+                if(EyeTrackerActive)
+                    GazeData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
                 // DO THIS FOR THE GAZE DATA!!!!
                 if (TaskLevel.SerialPortActive)
                 {
@@ -322,8 +323,9 @@ namespace USE_ExperimentTemplate_Trial
             TrialData.WriteData();
             FrameData.AppendData();
             FrameData.WriteData();
-            GazeData.WriteData();
-            // ADD WRITE AND APPEND GAZE DATA
+            if (EyeTrackerActive)
+                GazeData.WriteData();
+           
             if (SerialPortActive)
             {
                 SerialRecvData.WriteData();

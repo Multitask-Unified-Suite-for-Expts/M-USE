@@ -330,6 +330,7 @@ namespace USE_ExperimentTemplate_Data
         public override void DefineUSETemplateDataController()
         {
             DataControllerName = "GazeData";
+
             AddDatum("SubjectID", () => sessionLevel.SubjectID);
             AddDatum("SessionID", () => sessionLevel.SessionID);
             AddDatum("TaskName", () => taskLevel != null ? taskLevel.TaskName : "NoTaskActive");

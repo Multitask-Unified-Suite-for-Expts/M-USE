@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
@@ -571,6 +572,7 @@ namespace USE_Settings
 		{
 			return string.Join("", ReadSettingsFile(settingsPath, commentPrefix, continueSuffix));
 		}
+
 
 		public static void StoreSettings(string dataPath)
 		{

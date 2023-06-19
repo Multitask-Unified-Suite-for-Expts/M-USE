@@ -30,12 +30,14 @@ public static class ServerManager //Used with the PHP scripts
 
     private static List<string> foldersCreatedList = new List<string>();
 
+    public static bool SessionDataFolderCreated;
 
 
     public static IEnumerator CreateSessionDataFolder(string subjectID, string sessionID)
     {
         SessionDataFolder = "DATA__" + "Session_" + sessionID + "__Subject_" + subjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
         yield return CreateFolder(SessionDataFolderPath);
+        SessionDataFolderCreated = true;
     }
 
     public static IEnumerator CreateFolder(string folderPath)
@@ -76,11 +78,11 @@ public static class ServerManager //Used with the PHP scripts
         }
     }
 
-    public static IEnumerator CreateFileAsync(string path, string fileName, string fileHeaders) 
+    public static IEnumerator CreateFileAsync(string path, string fileName, string content) 
     {
         string url = $"{ServerURL}/createFile.php?path={path}";
 
-        using UnityWebRequest request = UnityWebRequest.Put(url, fileHeaders);
+        using UnityWebRequest request = UnityWebRequest.Put(url, content);
         request.method = UnityWebRequest.kHttpVerbPUT;
         request.SetRequestHeader("Content-Type", "text/plain");
         yield return request.SendWebRequest();
@@ -103,19 +105,19 @@ public static class ServerManager //Used with the PHP scripts
                 WWWForm formData = new WWWForm();
                 formData.AddField("data", updatedFileContents);
 
-                IEnumerator appendCoroutine = AppendToFileCoroutine(url, formData, fileName);
+                IEnumerator appendCoroutine = WriteFileCoroutine(url, formData);
                 CoroutineHelper.StartCoroutine(appendCoroutine);
             }
         });
     }
 
-    private static IEnumerator AppendToFileCoroutine(string url, WWWForm formData, string fileName)
+    private static IEnumerator WriteFileCoroutine(string url, WWWForm formData)
     {
         using (UnityWebRequest request = UnityWebRequest.Post(url, formData))
         {
             request.SetRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             yield return request.SendWebRequest();
-            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"SUCCESS! Appended to file at {fileName}" : $"FAILED! Error appending to {fileName} | Error: {request.error}");
+            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"SUCCESS writing file!" : $"FAILED writing file! | Error: {request.error}");
         }
     }
 
@@ -137,6 +139,36 @@ public static class ServerManager //Used with the PHP scripts
     }
 
 
+
+    public static IEnumerator CopyFolder(string sourcePath, string destinationPath)
+    {
+        string url = $"{ServerURL}/copyFolder.php?sourcePath={sourcePath}&destinationPath={destinationPath}";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"FOLDER COPIED SUCCESSFULLY!" : $"FAILED TO COPY FOLDER! ERROR: {request.error}");
+        }
+    }
+
+    public static IEnumerator CopyFileAsync(string currentPath, string newPath, string fileName) //not being used i dont think
+    {
+        yield return GetFileAsync(currentPath, fileName, fileContents =>
+        {
+            if (fileContents != null)
+            {
+                string url = $"{ServerURL}/createFile.php?path={newPath}";
+                WWWForm formData = new WWWForm();
+                formData.AddField("data", fileContents);
+                IEnumerator writeFileCoroutine = WriteFileCoroutine(url, formData);
+                CoroutineHelper.StartCoroutine(writeFileCoroutine);
+            }
+            else
+                Debug.Log("FILE CONTENTS NULL AFTER TRYING TO GET FILE ASYNC!");
+        });
+    }
+
+
     public static void SetSessionConfigFolderName(string sessionConfigFolderName) //Used to Set Session Config folder name based on what they picked in dropdown!
     {
         SessionConfigFolder = sessionConfigFolderName;
@@ -149,6 +181,8 @@ public static class ServerManager //Used with the PHP scripts
 
 
 }
+
+
 
 
 

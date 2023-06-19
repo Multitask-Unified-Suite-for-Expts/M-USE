@@ -169,7 +169,9 @@ namespace USE_ExperimentTemplate_Session
                 LoadSessionConfigSettings();
             }
 
-
+            //Create SessionSettings folder inside data folder
+            string sessionSettingsFolderPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
+            StartCoroutine(CreateFolderOnServer(sessionSettingsFolderPath));
 
         }
 
@@ -189,9 +191,10 @@ namespace USE_ExperimentTemplate_Session
 
             SessionCam = Camera.main;
 
+
 #if (UNITY_WEBGL)
-                //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
-                GameObject initCamGO = GameObject.Find("InitCamera");
+            //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
+            GameObject initCamGO = GameObject.Find("InitCamera");
                 initCamGO.SetActive(false);
                 TaskSelection_Starfield.SetActive(true);
 #else
@@ -1222,9 +1225,9 @@ namespace USE_ExperimentTemplate_Session
             //		udpManager.CloseUDP();
             //	}
             //	//Save EditorLog and Player Log files
+
             if (StoreData)
             {
-                System.IO.Directory.CreateDirectory(SessionDataPath + Path.DirectorySeparatorChar + "LogFile");
                 string symlinkLocation = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + "LatestSession";
 #if UNITY_STANDALONE_WIN
                 uint GENERIC_READ = 0x80000000;
@@ -1281,46 +1284,66 @@ namespace USE_ExperimentTemplate_Session
 
                 CloseHandle(dirHandle);
 #endif
-                string logPath = "";
-                if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX |
-                    SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux)
+                //Create Log Folder & Files: ---------------------------------------------------------------------------------------------------------------
+                if (!WebBuild) //Web Build log folder & file creation already handled in the WebBuildLogWriter.cs class
                 {
-                    if (Application.isEditor)
-                        logPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) +
-                                  "/Library/Logs/Unity/Editor.log";
-                    else
-                        logPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) +
-                                  "/Library/Logs/Unity/Player.log";
-                }
-                else if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Windows)
-                {
-                    if (Application.isEditor)
+                    System.IO.Directory.CreateDirectory(SessionDataPath + Path.DirectorySeparatorChar + "LogFile");
+
+                    string logPath = "";
+                    if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX | SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux)
                     {
-                        logPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) +
-                                  "\\Unity\\Editor\\Editor.log";
+                        string pathName = Application.isEditor ? "/Library/Logs/Unity/Editor.log" : "/Library/Logs/Unity/Player.log";
+                        logPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + pathName;
                     }
-                    else
+                    else if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Windows)
                     {
-                        logPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low\\" +
-                                  Application.companyName + "\\" + Application.productName + "\\Player.log";
+                        string pathName = Application.isEditor ? "\\Unity\\Editor\\Editor.log" : ("Low\\" + Application.companyName + "\\" + Application.productName + "\\Player.log");
+                        logPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + pathName;
                     }
+
+                    string logFileName = Application.isEditor ? "Editor.log" : "Player.log";
+                    File.Copy(logPath, SessionDataPath + Path.DirectorySeparatorChar + "LogFile" + Path.DirectorySeparatorChar + logFileName);
                 }
 
-                if (Application.isEditor)
-                    File.Copy(logPath,
-                        SessionDataPath + Path.DirectorySeparatorChar + "LogFile" + Path.DirectorySeparatorChar +
-                        "Editor.log");
+
+                string sessionSettingsFolderPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
+                Debug.Log("SSFP: " + sessionSettingsFolderPath);
+
+                if (WebBuild)
+                {
+                    //First, create SessionSettings Folder (I Already created SessionSettings Folder at start of loadsettings)
+                    //Next, write the settings files to Server:
+                    
+
+                    //MAKE A METHOD THAT COPIES THE ENTIRE CONFIG FOLDER TO THE DATAFOLDER/SESSIONSETTINGS !!! //wasnt working!
+                    //StartCoroutine(CopySessionSettingsToDataFolder());
+
+                }
                 else
-                    File.Copy(logPath,
-                        SessionDataPath + Path.DirectorySeparatorChar + "LogFile" + Path.DirectorySeparatorChar +
-                        "Player.log");
+                {
+                    System.IO.Directory.CreateDirectory(sessionSettingsFolderPath);
+                    SessionSettings.StoreSettings(sessionSettingsFolderPath + Path.DirectorySeparatorChar);
+                }
 
-                System.IO.Directory.CreateDirectory(SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings");
-
-                SessionSettings.StoreSettings(SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings" +
-                                              Path.DirectorySeparatorChar);
             }
         }
+
+
+
+        private IEnumerator CreateFolderOnServer(string folderPath)
+        {
+            yield return ServerManager.CreateFolder(folderPath);
+        }
+
+        private IEnumerator CopySessionSettingsToDataFolder()
+        {
+            string sourcePath = ServerManager.SessionConfigFolderPath;
+            string destinationPath = $"{ServerManager.SessionDataFolderPath}/SessionSettings";
+            yield return ServerManager.CopyFolder(sourcePath, destinationPath);
+        }
+
+
+
         public void OnGUI()
         {
             if (CameraMirrorTexture == null) return;

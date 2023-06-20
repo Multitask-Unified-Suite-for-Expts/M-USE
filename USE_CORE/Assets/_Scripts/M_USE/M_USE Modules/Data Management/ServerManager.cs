@@ -117,7 +117,7 @@ public static class ServerManager //Used with the PHP scripts
         {
             request.SetRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             yield return request.SendWebRequest();
-            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"SUCCESS writing file!" : $"FAILED writing file! | Error: {request.error}");
+            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Success writing file" : $"FAILED writing file! | Error: {request.error}");
         }
     }
 
@@ -133,7 +133,7 @@ public static class ServerManager //Used with the PHP scripts
             yield return null;
 
         string result = request.result == UnityWebRequest.Result.Success ? request.downloadHandler.text : null;
-        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"FILE CONTAINING '{searchString}' FOUND." : $"ERROR SEARCHING FOR FILE CONTAINING: '{searchString}'. | ERROR: {request.error}");
+        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"File Found: {searchString}" : $"ERROR FINDING FILE: {searchString} | ERROR: {request.error}");
 
         callback?.Invoke(result);
     }
@@ -147,7 +147,7 @@ public static class ServerManager //Used with the PHP scripts
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
             yield return request.SendWebRequest();
-            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"FOLDER COPIED SUCCESSFULLY!" : $"FAILED TO COPY FOLDER! ERROR: {request.error}");
+            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Folder copied successfully!" : $"FAILED TO COPY FOLDER! ERROR: {request.error}");
         }
     }
 
@@ -170,9 +170,7 @@ public static class ServerManager //Used with the PHP scripts
 
     public static IEnumerator LoadTextureFromServer(string filePath, Action<Texture2D> callback)
     {
-        Debug.Log("LOADING PNG FROM SERVER AT FILEPATH: " + filePath);
         string url = $"{ServerURL}/{filePath}";
-        Debug.Log("FULL URL: " + url);
 
         using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(url))
         {

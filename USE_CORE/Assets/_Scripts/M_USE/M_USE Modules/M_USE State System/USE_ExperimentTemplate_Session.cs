@@ -177,6 +177,7 @@ namespace USE_ExperimentTemplate_Session
                 LoadSessionConfigSettings();
             }
 
+
         }
 
 
@@ -309,13 +310,14 @@ namespace USE_ExperimentTemplate_Session
                         //AsyncOperation loadScene;
                         SceneLoading = true;
                         taskName = (string)TaskMappings[iTask];
+                        Debug.Log("TASK NAME: " + taskName);
                         loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
                         string configName = TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
                         // Unload it after memory because this loads the assets into memory but destroys the objects
                         loadScene.completed += (_) =>
                         {
                             SessionSettings.Save();
-                            SceneLoaded(configName, true);
+                            OnSceneLoaded(configName, true);
                             SessionSettings.Restore();
                             SceneManager.UnloadSceneAsync(taskName);
                             SceneLoading = false;
@@ -612,7 +614,7 @@ namespace USE_ExperimentTemplate_Session
                 loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
                 loadScene.completed += (_) =>
                 {
-                    SceneLoaded(selectedConfigName, false);
+                    OnSceneLoaded(selectedConfigName, false);
                     CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigName == selectedConfigName);
                     //selectedConfigsList.Add(CurrentTask.ConfigName);  
                 };
@@ -1157,23 +1159,25 @@ namespace USE_ExperimentTemplate_Session
                 tl.SonicationActive = false;
 
 
-            tl.DefineTaskLevel(verifyOnly);
+            StartCoroutine(tl.DefineTaskLevel(verifyOnly));
 
 
-            // ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
+            //ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
             // Don't add task to ActiveTaskLevels if we're just verifying
-            if (verifyOnly) return tl;
-
+            if (verifyOnly)
+                return tl;
+            
             ActiveTaskLevels.Add(tl);
 
             if (tl.TaskCanvasses != null)
                 foreach (GameObject go in tl.TaskCanvasses)
                     go.SetActive(false);
+
             return tl;
         }
 
 
-        void SceneLoaded(string configName, bool verifyOnly)
+        void OnSceneLoaded(string configName, bool verifyOnly)
         {
             string taskName = (string)TaskMappings[configName];
             var methodInfo = GetType().GetMethod(nameof(this.PrepareTaskLevel));

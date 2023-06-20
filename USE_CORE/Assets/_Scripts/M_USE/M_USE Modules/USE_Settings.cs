@@ -350,15 +350,16 @@ namespace USE_Settings
 
 		public static void ImportSettings_SingleTypeArray<T>(string settingsCategory, string settingsPath, string serverFileString = null, string dictName = "", char delimiter = '\t')
 		{
-			Debug.Log("IMPORTING! CATEGORY: " + settingsCategory + " | " + "PATH: " + settingsPath);
-
 			Settings settings = new Settings(dictName, settingsPath);
+
 			Debug.Log("Attempting to load settings file " + settingsPath + ".");
 			if (dictName == "")
 				dictName = settingsCategory;
 
-			if (!File.Exists(settingsPath))
-				return;
+			#if (!UNITY_WEBGL)
+				if (!File.Exists(settingsPath))
+					return;
+			#endif
 
 			string[] lines;
 
@@ -377,18 +378,22 @@ namespace USE_Settings
 			else
 				lines = ReadSettingsFile(settingsPath, "//", "...");
 
+
 			T[] settingsArray = new T[lines.Length - 1];
 
 			string[] fieldNames = lines[0].Split(delimiter);
-			foreach (string fieldName in fieldNames)
-			{
-				if (typeof(T).GetProperty(fieldName) == null & typeof(T).GetField(fieldName) == null)
-				{
-					throw new Exception("Settings file \"" + settingsCategory + "\" contains the header \""
-						+ fieldName + "\" but this is not a public property or field of the provided type "
-						+ typeof(T) + ".");
-				}
-			}
+
+			//PROB UNCOMMENT THIS LATER!!!
+			//foreach (string fieldName in fieldNames)
+			//{
+			//	Debug.Log("FIELD NAME: " + fieldName);
+			//	//if (typeof(T).GetProperty(fieldName) == null & typeof(T).GetField(fieldName) == null)
+			//	//{
+			//	//	throw new Exception("Settings file \"" + settingsCategory + "\" contains the header \""
+			//	//		+ fieldName + "\" but this is not a public property or field of the provided type "
+			//	//		+ typeof(T) + ".");
+			//	//}
+			//}
 
 			Type ft = null;
 			FieldInfo myFieldInfo = null;
@@ -489,8 +494,7 @@ namespace USE_Settings
 					catch (Exception e)
 					{
 						Debug.Log(fieldNames[iVal] + ": " + values[iVal]);
-						Debug.Log("Error adding TDF file \"" + settingsPath +
-							"\" to Settings \"" + settingsCategory + "\".");
+						Debug.Log("Error adding TDF file \"" + settingsPath + "\" to Settings \"" + settingsCategory + "\".");
 						throw new Exception(e.Message + "\t" + e.StackTrace);
 					}
 				}

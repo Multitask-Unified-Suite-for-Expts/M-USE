@@ -273,9 +273,7 @@ namespace USE_StimulusManagement
 
 		public GameObject Load()
 		{
-			Debug.Log("LOADING STIM!");
-			Debug.Log("PREFAB PATH = " + PrefabPath);
-			Debug.Log("FILENAME: " + FileName);
+			Debug.Log("LOADING STIM! PATH: " + PrefabPath + " | " + "FILE: " + FileName);
 
 			if (PrefabPath != null && PrefabPath.Length > 2)
 				StimGameObject = LoadPrefabFromResources(PrefabPath);
@@ -344,6 +342,7 @@ namespace USE_StimulusManagement
 		
 		public GameObject LoadPrefabFromResources(string prefabPath = "")
 		{
+			Debug.Log("LOADING STIM PREFAB FROM RESOURCES!");
 			if (prefabPath.Length > 2)
 				PrefabPath = prefabPath;
 
@@ -366,6 +365,7 @@ namespace USE_StimulusManagement
 
 		public GameObject LoadExternalStimFromFile(string stimFilePath = "")
 		{
+			Debug.Log("LOADING EXTERNAL STIM FROM FILE!");
 			//add StimExtesion to file path if it doesn't already contain it
 			if (!string.IsNullOrEmpty(StimExtension) && !FileName.EndsWith(StimExtension))
 			{

@@ -70,7 +70,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             string contextFilePath;
-            if (UseDefaultConfigs)
+            if (WebBuild) //Changed from UseDefaultConfigs to WebBuild. May need to do the same for all tasks. Though, eventually, will read contexts from server
                 contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + currentBlock.ContextName;
             else
                 contextFilePath = trialLevel.GetContextNestedFilePath(trialLevel.MaterialFilePath, currentBlock.ContextName, "LinearDark");
@@ -88,7 +88,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddInitializationMethod(() =>
         {
-            #if (!UNITY_WEBGL)
+            if(!WebBuild)
+            {
                 CalculateBlockAverages();
                 CalculateStanDev();
                 AddBlockValuesToTaskValues();
@@ -100,7 +101,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
                     PreviousBlocksString.Insert(0, CurrentBlockString); //Add current block string to full list of previous blocks. 
                     blocksAdded++;
                 }
-            #endif
+            }
         });        
     }
 
@@ -117,6 +118,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         }
         else
             CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
+        
     }
 
     public void AddBlockValuesToTaskValues()
@@ -212,15 +214,15 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         if (blocksAdded > 1) //If atleast 2 blocks to average, set Averages string and add to BlockSummaryString:
         {
             BlockAveragesString = "-------------------------------------------------" +
-                              "\n" +
-                              "\n<b>Block Averages (" + blocksAdded + " blocks):" + "</b>" +
-                              "\nAvg Correct: " + AvgNumCorrect.ToString("0.00") +
-                              "\nAvg TbCompletions: " + AvgNumTbCompletions.ToString("0.00") +
-                              "\nAvg TimeToChoice: " + AvgTimeToChoice.ToString("0.00") + "s" +
-                              "\nAvg TimeToCompletion: " + AvgTimeToCompletion.ToString("0.00") + "s" +
-                              "\nAvg Rewards: " + AvgNumRewards.ToString("0.00") +
-                              "\nAvg NonStimTouches: " + AvgNonStimTouches_Task.ToString("0.00") +
-                              "\nStandard Deviation: " + StanDev.ToString("0.00");
+                                "\n" +
+                                "\n<b>Block Averages (" + blocksAdded + " blocks):" + "</b>" +
+                                "\nAvg Correct: " + AvgNumCorrect.ToString("0.00") +
+                                "\nAvg TbCompletions: " + AvgNumTbCompletions.ToString("0.00") +
+                                "\nAvg TimeToChoice: " + AvgTimeToChoice.ToString("0.00") + "s" +
+                                "\nAvg TimeToCompletion: " + AvgTimeToCompletion.ToString("0.00") + "s" +
+                                "\nAvg Rewards: " + AvgNumRewards.ToString("0.00") +
+                                "\nAvg NonStimTouches: " + AvgNonStimTouches_Task.ToString("0.00") +
+                                "\nStandard Deviation: " + StanDev.ToString("0.00");
 
             BlockSummaryString.AppendLine(BlockAveragesString.ToString());
         }
@@ -230,6 +232,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         {
             BlockSummaryString.AppendLine("\n" + PreviousBlocksString.ToString());
         }
+
+        
     }
 
     void ClearStrings()

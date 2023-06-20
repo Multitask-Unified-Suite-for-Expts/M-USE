@@ -410,12 +410,15 @@ namespace USE_ExperimentTemplate_Task
 
             BlockData.taskLevel = this;
             BlockData.fileName = FilePrefix + "__BlockData.txt";
+            BlockData.sessionLevel = SessionLevel;
 
             TrialData = (TrialData)SessionDataControllers.InstantiateDataController<TrialData>("TrialData", ConfigName,
                 StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
 
             TrialData.taskLevel = this;
             TrialData.trialLevel = TrialLevel;
+            TrialData.sessionLevel = SessionLevel;
+
             TrialLevel.TrialData = TrialData;
             TrialData.fileName = FilePrefix + "__TrialData.txt";
 

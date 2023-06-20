@@ -20,7 +20,6 @@ using USE_DisplayManagement;
 using USE_ExperimentTemplate_Block;
 using UnityEngine.SceneManagement;
 using System.Linq;
-using UnityEditor.SearchService;
 
 namespace USE_ExperimentTemplate_Trial
 {

@@ -64,7 +64,7 @@ namespace USE_ExperimentTemplate_Session
         private bool StoreData;
         private bool MacMainDisplayBuild;
         [HideInInspector] public string SubjectID, SessionID, SessionDataPath, FilePrefix;
-        
+        private string SessionLevelDataPath;
         public string TaskSelectionSceneName;
 
         protected List<ControlLevel_Task_Template> ActiveTaskLevels;
@@ -421,31 +421,7 @@ namespace USE_ExperimentTemplate_Session
 
             // Instantiating Task Selection Frame Data
             // Instantiate normal session data controller for all tasks
-            string SessionLevelDataPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel";
-            FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "SessionLevel", StoreData,  SessionLevelDataPath + Path.DirectorySeparatorChar + "FrameData");
-            FrameData.fileName = "SessionLevel__FrameData.txt";
-
-            FrameData.sessionLevel = this;
-
-            FrameData.InitDataController();
-            FrameData.ManuallyDefine();
-            if (EventCodesActive)
-                FrameData.AddEventCodeColumns();
-            FrameData.CreateFile();
-
-            if (EyeTrackerActive)
-            {
-                GazeData = (USE_ExperimentTemplate_Data.GazeData)SessionDataControllers.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", "SessionLevel", StoreData, SessionLevelDataPath + Path.DirectorySeparatorChar + "GazeData");
-
-                GazeData.fileName = "SessionLevel__GazeData.txt";
-                GazeData.sessionLevel = this;
-
-                GazeData.InitDataController();
-                GazeData.ManuallyDefine();
-                GazeData.CreateFile();
-                TobiiEyeTrackerController.GazeData = GazeData;
-
-            }
+            
 
             bool waitForSerialPort = false;
             bool taskAutomaticallySelected = false;
@@ -656,7 +632,14 @@ namespace USE_ExperimentTemplate_Session
                     SerialSentData.CreateFile();
                     SerialRecvData.CreateFile();
                 }
-                
+
+                if (EyeTrackerActive)
+                {
+                    GazeData.CreateFile();
+                }
+
+                FrameData.CreateFile();
+
                 SessionSettings.Restore();
                 selectedConfigName = null;
                 taskAutomaticallySelected = false; // gives another chance to select even if previous task loading was due to timeout
@@ -828,7 +811,8 @@ namespace USE_ExperimentTemplate_Session
                         string configName = (string)task.Key;
                         string taskName = (string)task.Value;
 
-                        if (taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget) continue;
+                        // If the next task button in the task mappings is not interactable, skip until the next available config is found
+                        if (!(taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget)) continue;
                         taskAutomaticallySelected = true;
                         selectedConfigName = configName;
                         break;
@@ -970,6 +954,17 @@ namespace USE_ExperimentTemplate_Session
                 //                             SerialRecvData.GetNiceIntegers(4, taskCount + 1 * 2 - 1) + "_TaskSelection";
                 // SerialSentData.folderPath = SessionDataPath + Path.DirectorySeparatorChar +
                 //                             SerialSentData.GetNiceIntegers(4, taskCount + 1 * 2 - 1) + "_TaskSelection";
+
+
+                if (EyeTrackerActive)
+                {
+                    GazeData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionLevelDataPath, "GazeData", "SessionLevel");
+                    GazeData.fileName = FilePrefix + "__GazeData" + GazeData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
+                }
+
+                FrameData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionLevelDataPath, "FrameData", "SessionLevel");
+                FrameData.fileName = FilePrefix + "__FrameData" + FrameData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
+
             });
 
             finishSession.AddInitializationMethod(() =>
@@ -988,6 +983,12 @@ namespace USE_ExperimentTemplate_Session
                     SerialSentData.WriteData();
                     SerialRecvData.WriteData();
                 }
+
+                if (EyeTrackerActive)
+                    GazeData.WriteData();
+
+                FrameData.AppendData();
+                FrameData.WriteData();
             });
 
             SessionData = (SessionData) SessionDataControllers.InstantiateDataController<SessionData>
@@ -1020,6 +1021,27 @@ namespace USE_ExperimentTemplate_Session
             }
 
             SummaryData.Init(StoreData, SessionDataPath);
+
+            SessionLevelDataPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel";
+            FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "SessionLevel", StoreData, SessionLevelDataPath + Path.DirectorySeparatorChar + "FrameData");
+            FrameData.fileName = "SessionLevel__FrameData.txt";
+            FrameData.sessionLevel = this;
+            FrameData.InitDataController();
+            FrameData.ManuallyDefine();
+            
+            if (EventCodesActive)
+                FrameData.AddEventCodeColumns();
+
+            if (EyeTrackerActive)
+            {
+                GazeData = (USE_ExperimentTemplate_Data.GazeData)SessionDataControllers.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", "SessionLevel", StoreData, SessionLevelDataPath + Path.DirectorySeparatorChar + "GazeData");
+
+                GazeData.fileName = "SessionLevel__GazeData.txt";
+                GazeData.sessionLevel = this;
+                GazeData.InitDataController();
+                GazeData.ManuallyDefine();
+                TobiiEyeTrackerController.GazeData = GazeData;
+            }
 
             void GetTaskLevelFromString<T>()
                 where T : ControlLevel_Task_Template

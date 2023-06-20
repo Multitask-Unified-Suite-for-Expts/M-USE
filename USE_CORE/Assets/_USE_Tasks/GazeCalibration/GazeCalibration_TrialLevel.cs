@@ -433,7 +433,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private void OnApplicationQuit()
     {
-        if (!SpoofGazeWithMouse)
+        if (TobiiEyeTrackerController.isCalibrating)
             ScreenBasedCalibration.LeaveCalibrationMode();
     }
 

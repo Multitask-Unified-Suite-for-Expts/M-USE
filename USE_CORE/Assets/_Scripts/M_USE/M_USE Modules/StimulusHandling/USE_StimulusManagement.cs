@@ -273,6 +273,10 @@ namespace USE_StimulusManagement
 
 		public GameObject Load()
 		{
+			Debug.Log("LOADING STIM!");
+			Debug.Log("PREFAB PATH = " + PrefabPath);
+			Debug.Log("FILENAME: " + FileName);
+
 			if (PrefabPath != null && PrefabPath.Length > 2)
 				StimGameObject = LoadPrefabFromResources(PrefabPath);
 			else

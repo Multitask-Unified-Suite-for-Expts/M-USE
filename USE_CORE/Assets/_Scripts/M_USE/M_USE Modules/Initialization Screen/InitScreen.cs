@@ -85,7 +85,7 @@ public class InitScreen : MonoBehaviour
 
         if (session.WebBuild)
         {
-            StartCoroutine(ServerManager.GetSessionConfigFolders(folders => folderDropdown.SetFolders(folders))); //UN COMMENT ONCE GET SERVER CONFIGS WORKING!
+            StartCoroutine(ServerManager.GetSessionConfigFolders(folders => folderDropdown.SetFolders(folders)));
 
             if (!Application.isEditor)
                 confirmButtonGO.transform.localPosition += new Vector3(0, 75f, 0);

@@ -8,7 +8,7 @@ using UnityEngine.Networking;
 
 public static class ServerManager //Used with the PHP scripts
 {
-    private static readonly string ServerURL = "http://m-use.psy.vanderbilt.edu:8080/";
+    private static readonly string ServerURL = "http://m-use.psy.vanderbilt.edu:8080";
 
     private static string SessionDataFolder; //Set once they hit InitScreen Confirm button
     public static string SessionDataFolderPath
@@ -78,7 +78,7 @@ public static class ServerManager //Used with the PHP scripts
         }
     }
 
-    public static IEnumerator CreateFileAsync(string path, string fileName, string content) 
+    public static IEnumerator CreateFileAsync(string path, string fileName, string content)
     {
         string url = $"{ServerURL}/createFile.php?path={path}";
 
@@ -168,6 +168,34 @@ public static class ServerManager //Used with the PHP scripts
         });
     }
 
+    public static IEnumerator LoadTextureFromServer(string filePath, Action<Texture2D> callback)
+    {
+        Debug.Log("LOADING PNG FROM SERVER AT FILEPATH: " + filePath);
+        string url = $"{ServerURL}/{filePath}";
+        Debug.Log("FULL URL: " + url);
+
+        using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Texture2D tex = DownloadHandlerTexture.GetContent(request);
+                callback?.Invoke(tex);
+            }
+            else
+            {
+                Debug.Log($"Failed to load PNG file. Error: {request.error}");
+                callback?.Invoke(null);
+            }
+        }
+    }
+
+
+    public static string GetSessionDataFolder()
+    {
+        return SessionDataFolder;
+    }
 
     public static void SetSessionConfigFolderName(string sessionConfigFolderName) //Used to Set Session Config folder name based on what they picked in dropdown!
     {

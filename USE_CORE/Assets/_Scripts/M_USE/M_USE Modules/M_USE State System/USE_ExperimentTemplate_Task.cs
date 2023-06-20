@@ -146,6 +146,7 @@ namespace USE_ExperimentTemplate_Task
 
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
             ReadSettingsFiles(verifyOnly);
+            Debug.Log("AFTER READ SETTINGS FILE CALL!");
             ProcessCustomSettingsFiles();
             FindStims();
 
@@ -167,7 +168,7 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.DisplayArea = DisplayArea;
                // GameObject.Find("[TrackBoxGuide]").GetComponent<TrackBoxGuide>().SetCanvasTrackBox(GameObject.Find($"{TaskName}_Canvas"));
             }
-                TrialLevel.TrialDefType = TrialDefType;
+            TrialLevel.TrialDefType = TrialDefType;
             TrialLevel.StimDefType = StimDefType;
 
             Add_ControlLevel_InitializationMethod(() =>
@@ -182,7 +183,8 @@ namespace USE_ExperimentTemplate_Task
                 PreviousBlockSummaryString = new StringBuilder();
                 CurrentTaskSummaryString = new StringBuilder();
 
-                #if (!UNITY_WEBGL)
+                if(!WebBuild)
+                {
                     SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
 
                     if (configUI == null)
@@ -193,8 +195,7 @@ namespace USE_ExperimentTemplate_Task
                     else
                         configUI.store = new ConfigVarStore();
                     configUI.GenerateUI();
-
-                #endif
+                }
 
                 Controllers.SetActive(true);
             });
@@ -229,47 +230,49 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.TrialDefs = CurrentBlockDef.TrialDefs;
             });
 
-        //Hotkey for WebGL build so we can end task and go to next block
-        #if(UNITY_WEBGL)
-            RunBlock.AddUpdateMethod(() =>
+            //Hotkey for WebGL build so we can end task and go to next block
+            if(WebBuild)
             {
-                if(TrialLevel != null)
+                RunBlock.AddUpdateMethod(() =>
                 {
-                    if(InputBroker.GetKeyUp(KeyCode.P)) //Pause Game:
+                    if (TrialLevel != null)
                     {
-                        Time.timeScale = Time.timeScale == 1 ? 0 : 1;
+                        if (InputBroker.GetKeyUp(KeyCode.P)) //Pause Game:
+                        {
+                            Time.timeScale = Time.timeScale == 1 ? 0 : 1;
+                        }
+
+                        if (InputBroker.GetKeyUp(KeyCode.E)) //End Task
+                        {
+                            if (Time.timeScale == 0) //if paused, unpause before ending task
+                                Time.timeScale = 1;
+
+                            TrialLevel.AbortCode = 5;
+                            TrialLevel.ForceBlockEnd = true;
+                            TrialLevel.FinishTrialCleanup();
+                            TrialLevel.ClearActiveTrialHandlers();
+                            SpecifyCurrentState(FinishTask);
+                        }
+
+                        if (InputBroker.GetKeyUp(KeyCode.N)) //Next Block
+                        {
+                            TrialLevel.TokenFBController.animationPhase = TokenFBController.AnimationPhase.None;
+
+                            Time.timeScale = 1;//if paused, unpause before ending block
+
+                            if (HumanStartPanel.HumanStartPanelGO != null)
+                                HumanStartPanel.HumanStartPanelGO.SetActive(false);
+
+                            if (TrialLevel.AudioFBController.IsPlaying())
+                                TrialLevel.AudioFBController.audioSource.Stop();
+                            TrialLevel.AbortCode = 3;
+                            TrialLevel.ForceBlockEnd = true;
+                            TrialLevel.SpecifyCurrentState(TrialLevel.GetStateFromName("FinishTrial"));
+                        }
                     }
+                });
+            }
 
-                    if (InputBroker.GetKeyUp(KeyCode.E)) //End Task
-                    {
-                        if (Time.timeScale == 0) //if paused, unpause before ending task
-                            Time.timeScale = 1;
-
-                        TrialLevel.AbortCode = 5;
-                        TrialLevel.ForceBlockEnd = true;
-                        TrialLevel.FinishTrialCleanup();
-                        TrialLevel.ClearActiveTrialHandlers();
-                        SpecifyCurrentState(FinishTask);
-                    }
-
-                    if (InputBroker.GetKeyUp(KeyCode.N)) //Next Block
-                    {
-                        TrialLevel.TokenFBController.animationPhase = TokenFBController.AnimationPhase.None;
-
-                        Time.timeScale = 1;//if paused, unpause before ending block
-
-                        if(HumanStartPanel.HumanStartPanelGO != null)
-                            HumanStartPanel.HumanStartPanelGO.SetActive(false);
-
-                        if (TrialLevel.AudioFBController.IsPlaying())
-                            TrialLevel.AudioFBController.audioSource.Stop();
-                        TrialLevel.AbortCode = 3;
-                        TrialLevel.ForceBlockEnd = true;
-                        TrialLevel.SpecifyCurrentState(TrialLevel.GetStateFromName("FinishTrial"));
-                    }
-                }
-            });
-        #endif
 
             RunBlock.AddLateUpdateMethod(() =>
             {
@@ -654,30 +657,66 @@ namespace USE_ExperimentTemplate_Task
             readStimDefs.Invoke(this, new object[] { TaskConfigPath });
 
 
-            //BREAKS HERE BECAUSE ITS NOT DONE LOADING THE ASYNC SETTINGS BEFORE MOVING ON TO BELOW!!!!
+            //BASICALLY I NEED EVERYTHING ABOVE TO FINISH BEFORE STARTING EVERYTHING BELOW!!
 
-            string configUIVariableFile = LocateFile.FindFilePathInExternalFolder(TaskConfigPath, "*" + TaskName + "*ConfigUiDetails*");
-            if (!string.IsNullOrEmpty(configUIVariableFile))
+            LoadTaskEventCodeAndConfigUIFiles();
+
+            HandleCustomSettings();
+
+            HandleTrialAndBlockDefs(verifyOnly);
+
+            Debug.Log("END OF READ SETTINGS FILES METHOD!");
+        }
+
+        public void LoadTaskEventCodeAndConfigUIFiles()
+        {
+            if (WebBuild && !UseDefaultConfigs)
             {
-                SessionSettings.ImportSettings_SingleTypeJSON<ConfigVarStore>(TaskName + "_ConfigUiDetails", configUIVariableFile);
-                ConfigUiVariables = (ConfigVarStore)SessionSettings.Get(TaskName + "_ConfigUiDetails");
-            }
+                string path = $"{ServerManager.SessionConfigFolderPath}/{TaskName}";
+                StartCoroutine(ServerManager.GetFileAsync(path, "ConfigUi", result =>
+                {
+                    Debug.Log("TASK CONFIG UI RESULT: " + result);
+                    SessionSettings.ImportSettings_SingleTypeJSON<ConfigVarStore>(TaskName + "_ConfigUiDetails", path, result);
+                    ConfigUiVariables = (ConfigVarStore)SessionSettings.Get(TaskName + "_ConfigUiDetails");
+                    Debug.Log("CONFIG UI VARIABLES SET!!!!!!");
 
-            string eventCodeFile = LocateFile.FindFilePathInExternalFolder(TaskConfigPath, "*" + TaskName + "*EventCodeConfig*");
-            if (!string.IsNullOrEmpty(eventCodeFile))
+                }));
+                StartCoroutine(ServerManager.GetFileAsync(path, "EventCode", result =>
+                {
+                    Debug.Log("TASK EVENT CODE RESULT: " + result);
+                    SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig", result);
+                    CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
+                    Debug.Log("EVENT CODE VARIABLES SET!!!!!!");
+                }));
+            }
+            else
             {
-                SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig", eventCodeFile);
-                CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
-                EventCodesActive = true;
-            }
-        
+                string configUIVariableFile = LocateFile.FindFilePathInExternalFolder(TaskConfigPath, "*" + TaskName + "*ConfigUiDetails*");
+                if (!string.IsNullOrEmpty(configUIVariableFile))
+                {
+                    SessionSettings.ImportSettings_SingleTypeJSON<ConfigVarStore>(TaskName + "_ConfigUiDetails", configUIVariableFile);
+                    ConfigUiVariables = (ConfigVarStore)SessionSettings.Get(TaskName + "_ConfigUiDetails");
+                }
 
-            //---------------------------------------------------------------------------------------------------------------------------------------
+                string eventCodeFile = LocateFile.FindFilePathInExternalFolder(TaskConfigPath, "*" + TaskName + "*EventCodeConfig*");
+                if (!string.IsNullOrEmpty(eventCodeFile))
+                {
+                    SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig", eventCodeFile);
+                    CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
+                    EventCodesActive = true;
+                }
+            }
+        }
+
+        public void HandleCustomSettings()
+        {
             Dictionary<string, string> customSettings = new Dictionary<string, string>();
             string settingsFilePath;
 
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "CustomSettings"))
                 customSettings = (Dictionary<string, string>)SessionSettings.Get(TaskName + "_TaskSettings", "CustomSettings");
+            else
+                customSettings = null;
 
             if (customSettings != null)
             {
@@ -691,7 +730,7 @@ namespace USE_ExperimentTemplate_Task
                         string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + TaskName + "_DefaultConfigs";
                         filePath = folderPath + Path.DirectorySeparatorChar + settingsFileName;
 
-                        if(!Directory.Exists(folderPath))
+                        if (!Directory.Exists(folderPath))
                             Directory.CreateDirectory(folderPath);
 
                         if (!File.Exists(filePath))
@@ -702,16 +741,16 @@ namespace USE_ExperimentTemplate_Task
                         }
                         else
                             settingsFilePath = LocateFile.FindFilePathInExternalFolder(TaskConfigPath, "*" + TaskName + "*" + settingsFileName + "*");
-                        
+
                     }
 
                     Type settingsType = GetTaskCustomSettingsType(settingsFileName);
-               
+
                     switch (customSettings[key].ToLower())
                     {
                         case ("singletypearray"):
                             MethodInfo readCustomSingleTypeArray = GetType().GetMethod(nameof(this.ReadCustomSingleTypeArray)).MakeGenericMethod(new Type[] { settingsType });
-                            readCustomSingleTypeArray.Invoke(this, new object[] { filePath, settingsFileName});
+                            readCustomSingleTypeArray.Invoke(this, new object[] { filePath, settingsFileName });
                             break;
                         case ("singletypejson"):
                             MethodInfo readCustomSingleTypeJson = GetType().GetMethod(nameof(this.ReadCustomSingleTypeJson)).MakeGenericMethod(new Type[] { settingsType });
@@ -727,81 +766,84 @@ namespace USE_ExperimentTemplate_Task
                     }
                 }
                 //--------------------------------------------------------------------------------------------------------------------------------------
+            }
+        }
 
 
-                //handling of block and trial defs so that each BlockDef contains a TrialDef[] array
-
-                if (AllTrialDefs == null) //no trialDefs have been imported from settings files
+        public void HandleTrialAndBlockDefs(bool verifyOnly)
+        {
+            //handling of block and trial defs so that each BlockDef contains a TrialDef[] array
+            if (AllTrialDefs == null) //no trialDefs have been imported from settings files
+            {
+                if (BlockDefs == null)
+                    Debug.LogError("Neither BlockDef nor TrialDef config files provided in " + TaskName +
+                                    " folder, no trials generated as a result.");
+                else
                 {
-                    if (BlockDefs == null)
-                        Debug.LogError("Neither BlockDef nor TrialDef config files provided in " + TaskName +
-                                       " folder, no trials generated as a result.");
+                    if (!verifyOnly)
+                    {
+                        for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+                        {
+                            BlockDefs[iBlock].RandomNumGenerator = new System.Random((int)DateTime.Now.Ticks + iBlock);
+                            BlockDefs[iBlock].GenerateTrialDefsFromBlockDef();
+                        }
+                    }
+                }
+
+            }
+            else //trialDefs imported from settings files
+            {
+                if (BlockDefs == null) //no blockDef file, trialdefs should be complete
+                {
+                    Debug.Log("TrialDef config file provided without BlockDef config file in " + TaskName +
+                                " folder, BlockDefs will be generated with default values for all fields from TrialDefs.");
+                    if (AllTrialDefs[AllTrialDefs.Length - 1].BlockCount != 0)
+                    {
+                        if (AllTrialDefs[0].BlockCount == 0)
+                            BlockDefs = new BlockDef[AllTrialDefs[AllTrialDefs.Length - 1].BlockCount];
+                        else if (AllTrialDefs[0].BlockCount == 1)
+                            BlockDefs = new BlockDef[AllTrialDefs[AllTrialDefs.Length - 1].BlockCount - 1];
+                        else
+                            Debug.LogError("TrialDef config file in " + TaskName +
+                                            " folder includes BlockCounts that are neither 0- nor 1-indexed.");
+                    }
                     else
                     {
-                        if (!verifyOnly)
-                        {
-                            for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
-                            {
-                                BlockDefs[iBlock].RandomNumGenerator = new System.Random((int)DateTime.Now.Ticks + iBlock);
-                                BlockDefs[iBlock].GenerateTrialDefsFromBlockDef();
-                            }
-                        }
+                        Debug.Log("TrialDef config file in " + TaskName +
+                                    " folder only generates a single block (this is not a problem if you do not intend to use a block structure in your experiment).");
+                        BlockDefs = new BlockDef[1];
                     }
 
+                    //add trialDef[] for each block;
+                    if (!verifyOnly)
+                    {
+                        for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+                        {
+                            if (BlockDefs[iBlock] == null)
+                                BlockDefs[iBlock] = new BlockDef();
+                            BlockDefs[iBlock].BlockCount = iBlock;
+                            BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock, AllTrialDefs);
+                        }
+                    }
                 }
-                else //trialDefs imported from settings files
+                else //there is a blockDef file, its information may need to be added to TrialDefs
                 {
-                    if (BlockDefs == null) //no blockDef file, trialdefs should be complete
-                    {
-                        Debug.Log("TrialDef config file provided without BlockDef config file in " + TaskName +
-                                  " folder, BlockDefs will be generated with default values for all fields from TrialDefs.");
-                        if (AllTrialDefs[AllTrialDefs.Length - 1].BlockCount != 0)
-                        {
-                            if (AllTrialDefs[0].BlockCount == 0)
-                                BlockDefs = new BlockDef[AllTrialDefs[AllTrialDefs.Length - 1].BlockCount];
-                            else if (AllTrialDefs[0].BlockCount == 1)
-                                BlockDefs = new BlockDef[AllTrialDefs[AllTrialDefs.Length - 1].BlockCount - 1];
-                            else
-                                Debug.LogError("TrialDef config file in " + TaskName +
-                                               " folder includes BlockCounts that are neither 0- nor 1-indexed.");
-                        }
-                        else
-                        {
-                            Debug.Log("TrialDef config file in " + TaskName +
-                                      " folder only generates a single block (this is not a problem if you do not intend to use a block structure in your experiment).");
-                            BlockDefs = new BlockDef[1];
-                        }
 
-                        //add trialDef[] for each block;
-                        if (!verifyOnly)
+                    //add trialDef[] for each block;
+                    if (!verifyOnly)
+                    {
+                        for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
                         {
-                            for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
-                            {
-                                if (BlockDefs[iBlock] == null)
-                                    BlockDefs[iBlock] = new BlockDef();
-                                BlockDefs[iBlock].BlockCount = iBlock;
-                                BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock, AllTrialDefs);
-                            }
+                            BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock + 1, AllTrialDefs);
+                            BlockDefs[iBlock].RandomNumGenerator = new System.Random((int)DateTime.Now.Ticks + iBlock);
+                            BlockDefs[iBlock].AddToTrialDefsFromBlockDef();
                         }
                     }
-                    else //there is a blockDef file, its information may need to be added to TrialDefs
-                    {
 
-                        //add trialDef[] for each block;
-                        if (!verifyOnly)
-                        {
-                            for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
-                            {
-                                BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock + 1, AllTrialDefs);
-                                BlockDefs[iBlock].RandomNumGenerator = new System.Random((int)DateTime.Now.Ticks + iBlock);
-                                BlockDefs[iBlock].AddToTrialDefsFromBlockDef();
-                            }
-                        }
-
-                    }
                 }
             }
         }
+
 
         public virtual Type GetTaskCustomSettingsType(string typeName)
         {
@@ -953,7 +995,7 @@ namespace USE_ExperimentTemplate_Task
                 }
                 else
                 {
-                    //if ExternalFilePath already contains the StimFolerPath string, do not change it,
+                    //if ExternalFilePath already contains the StimFolderPath string, do not change it,
                     //but should also have method to check this file exists
                 }
 
@@ -985,65 +1027,63 @@ namespace USE_ExperimentTemplate_Task
                 StartCoroutine(ServerManager.GetFileAsync(taskConfigFolder, "TaskDef", result =>
                 {
                     Debug.Log("READ TASK RESULT: " + result);
-                    if (!string.IsNullOrEmpty(result))
-                        SessionSettings.ImportSettings_MultipleType(TaskName + "_TaskSettings", result);
-                    else
-                        Debug.Log("No taskdef file in server config folder (this may not be a problem)");
-
-                    Debug.Log("END OF READ TASK COROUTINE!");
+                    ImportTaskDef<T>(result);
                 }));
             }
             else
             {
                 string taskDefFilePath = LocateFile.FindFilePathInExternalFolder(taskConfigFolder, "*" + TaskName + "*Task*");
-                Debug.Log("TASK DEF FILE PATH: " + taskDefFilePath);
-                if (!string.IsNullOrEmpty(taskDefFilePath))
-                    SessionSettings.ImportSettings_MultipleType(TaskName + "_TaskSettings", taskDefFilePath);
-                else
-                    Debug.Log("No taskdef file in config folder (this may not be a problem).");
+                ImportTaskDef<T>(taskDefFilePath);
             }
-
         }
+
+        public void ImportTaskDef<T>(string taskDefFilePath) where T : TaskDef //Little helper method to simplify duplicate code in ReadTaskDef
+        {
+            if (!string.IsNullOrEmpty(taskDefFilePath))
+                SessionSettings.ImportSettings_MultipleType(TaskName + "_TaskSettings", taskDefFilePath);
+            else
+                Debug.Log("No taskdef file in config folder (this may not be a problem).");
+        }
+
 
 
 
         public void ReadBlockDefs<T>(string taskConfigFolder) where T : BlockDef
         {
+            Debug.Log("READING BLOCK DEFS FOR " + TaskName);
+
             if(WebBuild && !UseDefaultConfigs)
             {
                 StartCoroutine(ServerManager.GetFileAsync(taskConfigFolder, "BlockDef", result =>
                 {
                     Debug.Log("READ BLOCK DEF RESULT: " + result);
-
-                    if (!string.IsNullOrEmpty(result))
-                    { //might still need to trim?
-                        if (result.ToLower().Contains("tdf"))
-                            SessionSettings.ImportSettings_SingleTypeArray<T>("blockDefs", result);
-                        else
-                            SessionSettings.ImportSettings_SingleTypeJSON<T[]>("blockDefs", result);
-                        BlockDefs = (T[])SessionSettings.Get("blockDefs");
-                    }
-                    else
-                        Debug.Log("No blockdef file in server config folder (this may not be a problem).");
-
+                    ImportBlockDefs<T>(result);
                 }));
             }
             else
             {
                 string blockDefFile = LocateFile.FindFilePathInExternalFolder(taskConfigFolder, "*" + TaskName + "*BlockDef*");
-                if (!string.IsNullOrEmpty(blockDefFile))
-                {
-                    string blockDefText = File.ReadAllText(blockDefFile).Trim();
-                    if (blockDefFile.ToLower().Contains("tdf"))
-                        SessionSettings.ImportSettings_SingleTypeArray<T>("blockDefs", blockDefFile);
-                    else
-                        SessionSettings.ImportSettings_SingleTypeJSON<T[]>("blockDefs", blockDefFile);
-                    BlockDefs = (T[])SessionSettings.Get("blockDefs");
-                }
-                else
-                    Debug.Log("No blockdef file in config folder (this may not be a problem).");
+                ImportBlockDefs<T>(blockDefFile);
             }
         }
+
+        public void ImportBlockDefs<T>(string blockDefFile) where T : BlockDef //Little helper method to simplify duplicate code in ReadBlockDefs
+        {
+            if (!string.IsNullOrEmpty(blockDefFile))
+            {
+                string blockDefText = File.ReadAllText(blockDefFile).Trim();
+                if (blockDefFile.ToLower().Contains("tdf"))
+                    SessionSettings.ImportSettings_SingleTypeArray<T>("blockDefs", blockDefFile);
+                else
+                    SessionSettings.ImportSettings_SingleTypeJSON<T[]>("blockDefs", blockDefFile);
+                BlockDefs = (T[])SessionSettings.Get("blockDefs");
+                Debug.Log("BLOCK DEFS COUNT = " + BlockDefs.Count());
+            }
+            else
+                Debug.Log("No blockdef file in config folder (this may not be a problem).");
+        }
+
+
 
         public void ReadTrialDefs<T>(string taskConfigFolder) where T : TrialDef
         {
@@ -1052,40 +1092,36 @@ namespace USE_ExperimentTemplate_Task
                 StartCoroutine(ServerManager.GetFileAsync(taskConfigFolder, "TrialDef", result =>
                 {
                     Debug.Log("READ TRIAL RESULT: " + result);
-                    if (!string.IsNullOrEmpty(result))
-                    {
-                        if (result.ToLower().Contains("tdf"))
-                            SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_TrialDefs", result);
-                        else
-                            SessionSettings.ImportSettings_SingleTypeJSON<T[]>(TaskName + "_TrialDefs", result);
-                        AllTrialDefs = (T[])SessionSettings.Get(TaskName + "_TrialDefs");
-                    }
-                    else
-                        Debug.Log("No taskdef file in server config folder (this may not be a problem).");
+                    ImportTrialDefs<T>(result);
                 }));
             }
             else
             {
                 string trialDefFile = LocateFile.FindFilePathInExternalFolder(taskConfigFolder, "*" + TaskName + "*TrialDef*");
-                if (!string.IsNullOrEmpty(trialDefFile))
-                {
-                    if (trialDefFile.ToLower().Contains("tdf"))
-                        SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_TrialDefs", trialDefFile);
-                    else
-                        SessionSettings.ImportSettings_SingleTypeJSON<T[]>(TaskName + "_TrialDefs", trialDefFile);
-                    AllTrialDefs = (T[])SessionSettings.Get(TaskName + "_TrialDefs");
-                }
-                else
-                    Debug.Log("No trialdef file in config folder (this may not be a problem).");
+                ImportTrialDefs<T>(trialDefFile);
             }
+        }
+
+        public void ImportTrialDefs<T>(string trialDefFile) where T : TrialDef //Little helper method to simplify duplicate code in ReadTrialDefs
+        {
+            if (!string.IsNullOrEmpty(trialDefFile))
+            {
+                if (trialDefFile.ToLower().Contains("tdf"))
+                    SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_TrialDefs", trialDefFile);
+                else
+                    SessionSettings.ImportSettings_SingleTypeJSON<T[]>(TaskName + "_TrialDefs", trialDefFile);
+                AllTrialDefs = (T[])SessionSettings.Get(TaskName + "_TrialDefs");
+            }
+            else
+                Debug.Log("No taskdef file in server config folder (this may not be a problem).");
         }
 
 
 
         public void ReadStimDefs<T>(string taskConfigFolder) where T : StimDef
         {
-            string key = TaskName + ((WebBuild || UseDefaultConfigs) ? "_PrefabStims" : "_ExternalStimDefs"); //eventually change once web build uses external stims
-
+            Debug.Log("READING STIM DEFS!!!!!!!");
+            string key = TaskName + (UseDefaultConfigs ? "_PrefabStims" : "_ExternalStimDefs"); 
             PrefabStims = new StimGroup("PrefabStims");
             ExternalStims = new StimGroup("ExternalStims");
 
@@ -1094,26 +1130,26 @@ namespace USE_ExperimentTemplate_Task
                 if(UseDefaultConfigs)
                 {
                     string defaultStimDefFilePath = taskConfigFolder + "/" + TaskName + "_StimDeftdf.txt";
-                    ImportStimDefs<T>(key, defaultStimDefFilePath, WebBuild);
+                    ImportStimDefs<T>(key, defaultStimDefFilePath);
                 }
                 else
                 {
                     StartCoroutine(ServerManager.GetFileAsync(taskConfigFolder, "StimDef", result =>
                     {
                         Debug.Log("STIM RESULT: " + result);
-                        ImportStimDefs<T>(key, result, WebBuild);
+                        ImportStimDefs<T>(key, result);
                     }));
                 }
             }
             else
             {
                 string stimDefFilePath = LocateFile.FindFilePathInExternalFolder(taskConfigFolder, "*" + TaskName + "*StimDef*");
-                ImportStimDefs<T>(key, stimDefFilePath, WebBuild);
+                ImportStimDefs<T>(key, stimDefFilePath);
             }
 
         }
 
-        private void ImportStimDefs<T>(string key, string stimDefFilePath, bool webBuild) where T : StimDef
+        private void ImportStimDefs<T>(string key, string stimDefFilePath) where T : StimDef
         {
             if (!string.IsNullOrEmpty(stimDefFilePath))
             {
@@ -1127,14 +1163,19 @@ namespace USE_ExperimentTemplate_Task
                     return;
                 else
                 {
-                    if (webBuild || UseDefaultConfigs)
+                    Debug.Log("POTENTIALS COUNT: " + potentials.Count());
+
+                    if (UseDefaultConfigs)
                     {
                         PrefabStims = new StimGroup("PrefabStims", (T[])SessionSettings.Get(key));
                         foreach (var stim in PrefabStims.stimDefs)
                             PrefabStimPaths.Add(stim.PrefabPath + "/" + stim.FileName);
                     }
                     else
+                    {
+                        Debug.Log("KEY: " + key);
                         ExternalStims = new StimGroup("ExternalStims", (T[])SessionSettings.Get(key));
+                    }
                 }
             }
             else

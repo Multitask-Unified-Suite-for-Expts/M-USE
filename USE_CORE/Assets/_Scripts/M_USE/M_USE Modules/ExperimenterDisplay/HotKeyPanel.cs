@@ -317,11 +317,10 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 {
                     if (!HkPanel.TrialLevel.Paused) 
                     {
-                        HkPanel.SessionLevel.PauseCanvasGO.SetActive(true);
                         HkPanel.TrialLevel.AbortCode = 1;
 
                         //Go to end of trial:
-                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial")); //Finish Trial change to
+                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
 
                         //Deactivate Controllers (so that tokenbar not still on screen):
                         GameObject controllers = GameObject.Find("Controllers");
@@ -336,7 +335,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         GameObject controllers = GameObject.Find("Controllers");
                         if (controllers == null)
                             HkPanel.SessionLevel.FindInactiveGameObjectByName("Controllers").SetActive(true);
-                        HkPanel.SessionLevel.PauseCanvasGO.SetActive(false);
                     }
                 }
             };

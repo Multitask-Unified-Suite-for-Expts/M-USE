@@ -350,6 +350,8 @@ namespace USE_Settings
 
 		public static void ImportSettings_SingleTypeArray<T>(string settingsCategory, string settingsPath, string serverFileString = null, string dictName = "", char delimiter = '\t')
 		{
+			Debug.Log("IMPORTING! CATEGORY: " + settingsCategory + " | " + "PATH: " + settingsPath);
+
 			Settings settings = new Settings(dictName, settingsPath);
 			Debug.Log("Attempting to load settings file " + settingsPath + ".");
 			if (dictName == "")

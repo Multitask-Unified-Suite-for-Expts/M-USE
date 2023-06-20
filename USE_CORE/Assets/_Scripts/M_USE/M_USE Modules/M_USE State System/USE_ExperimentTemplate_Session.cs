@@ -23,6 +23,8 @@ using UnityEngine.InputSystem;
 using TMPro;
 using UnityEditor;
 using System.Threading.Tasks;
+using Renci.SshNet;
+using ConfigDynamicUI;
 //using UnityEngine.Windows.WebCam;
 
 
@@ -31,9 +33,6 @@ namespace USE_ExperimentTemplate_Session
     public class ControlLevel_Session_Template : ControlLevel
     {
         [HideInInspector] public int SessionId_SQL;
-
-        public GameObject PauseCanvasGO;
-        public Canvas PauseCanvas;
 
         private bool IsHuman;
 
@@ -133,45 +132,50 @@ namespace USE_ExperimentTemplate_Session
             SubjectID = SessionDetails.GetItemValue("SubjectID");
             SessionID = SessionDetails.GetItemValue("SessionID");
 
-            FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" + DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
+            string sessionDataFolder = ServerManager.GetSessionDataFolder();
+            if(!string.IsNullOrEmpty(sessionDataFolder))
+                FilePrefix = sessionDataFolder.Split(new string[] { "__" }, 2, StringSplitOptions.None)[1];
+            else
+                FilePrefix = "Session_" + SessionID + "__Subject_" + SubjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
 
 
-            if(WebBuild)
+            if (WebBuild)
             {
-                SessionDataPath = ServerManager.SessionDataFolderPath;
-
-                ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts"; //may eventually want to change for using server configs
-                TaskIconsFolderPath = "Assets/_USE_Session/Resources/DefaultResources/TaskIcons"; //May eventually want to change for using server configs
+                SessionDataPath = ServerManager.SessionDataFolderPath; //may need to be different for use default configs
 
                 if (UseDefaultConfigs)
                 {
+                    ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts"; //may eventually want to change for using server configs
+                    TaskIconsFolderPath = "Assets/_USE_Session/Resources/DefaultResources/TaskIcons"; //May eventually want to change for using server configs
                     configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
                     WriteSessionConfigsToPersistantDataPath();
                     SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFilePathInExternalFolder(configFileFolder, "*SessionConfig*"));
                     LoadSessionConfigSettings();
                 }
-                else //Using Server Configs
+                else //Using Server Configs:
                 {
+                    ContextExternalFilePath = "Resources/Contexts"; //path from root server folder
+                    TaskIconsFolderPath = "Resources/TaskIcons"; //path from root server folder
                     configFileFolder = ServerManager.SessionConfigFolderPath;
                     StartCoroutine(ServerManager.GetFileAsync(ServerManager.SessionConfigFolderPath, "SessionConfig", result =>
                     {
-                        Debug.Log("SESSION CONFIG RESULT: " + result);
-                        SessionSettings.ImportSettings_MultipleType("Session", configFileFolder, result);
-                        LoadSessionConfigSettings();
+                        if (!string.IsNullOrEmpty(result))
+                        {
+                            SessionSettings.ImportSettings_MultipleType("Session", configFileFolder, result);
+                            LoadSessionConfigSettings();
+                        }
+                        else
+                            Debug.Log("SESSION CONFIG COROUTINE RESULT IS EMPTY!!!");
                     }));
                 }
             }
-            else
+            else //Normal Build:
             {
                 configFileFolder = LocateFile.GetPath("Config File Folder");
                 SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
                 SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFilePathInExternalFolder(configFileFolder, "*SessionConfig*"));
                 LoadSessionConfigSettings();
             }
-
-            //Create SessionSettings folder inside data folder
-            string sessionSettingsFolderPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
-            StartCoroutine(CreateFolderOnServer(sessionSettingsFolderPath));
 
         }
 
@@ -193,8 +197,8 @@ namespace USE_ExperimentTemplate_Session
 
 
 #if (UNITY_WEBGL)
-            //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
-            GameObject initCamGO = GameObject.Find("InitCamera");
+                //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
+                GameObject initCamGO = GameObject.Find("InitCamera");
                 initCamGO.SetActive(false);
                 TaskSelection_Starfield.SetActive(true);
 #else
@@ -212,10 +216,6 @@ namespace USE_ExperimentTemplate_Session
 
                 RawImage mainCameraCopy_Image = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
 
-                PauseCanvasGO = GameObject.Find("PauseCanvas");
-                PauseCanvasGO.SetActive(false);
-                PauseCanvas = PauseCanvasGO.GetComponent<Canvas>();
-                PauseCanvas.planeDistance = 1;
 #endif
 
             SelectionTracker = new SelectionTracker();
@@ -226,8 +226,20 @@ namespace USE_ExperimentTemplate_Session
             {
                 SessionData.CreateFile();
 
-                //SessionData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
-                //SessionData.TestConnectionToDB(); //Using to test database connection
+                //Create Session Settings folder inside Data Folder: ----------------------------------------------------------------------------------------
+                if (WebBuild)
+                {
+                    StartCoroutine(CreateFolderOnServer(SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings", () =>
+                    {
+                        StartCoroutine(CopySessionConfigFolderToDataFolder()); //Copy Session Config folder to Data folder so that the settings are stored:
+                    }));
+                }
+                else
+                {
+                    string sessionSettingsFolderPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
+                    System.IO.Directory.CreateDirectory(sessionSettingsFolderPath);
+                    SessionSettings.StoreSettings(sessionSettingsFolderPath + Path.DirectorySeparatorChar);
+                }
 
                 EventCodeManager = GameObject.Find("MiscScripts").GetComponent<EventCodeManager>(); //new EventCodeManager();
                 if (SerialPortActive)
@@ -321,12 +333,13 @@ namespace USE_ExperimentTemplate_Session
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort, selectTask, () =>
             {
                 SessionSettings.Save();
-#if (!UNITY_WEBGL)
+                if(!WebBuild)
+                {
                     GameObject initCamGO = GameObject.Find("InitCamera");
                     initCamGO.SetActive(false);
                     SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
-#endif
-                    EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupSessionEnds"]);
+                }
+                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupSessionEnds"]);
             });
 
             TaskButtons = null;
@@ -465,27 +478,47 @@ namespace USE_ExperimentTemplate_Session
                 foreach (DictionaryEntry task in TaskMappings)
                 {
                     // Assigns configName and taskName according to Session Config Task Mappings
-                    string configName = (string)task.Key;
+                    string taskConfigName = (string)task.Key;
                     string taskName = (string)task.Value;
 
-                    string taskFolder = GetConfigFolderPath(configName);
-                    if (!Directory.Exists(taskFolder))
+                    string taskFolderPath = GetConfigFolderPath(taskConfigName);
+                    if(!WebBuild)
                     {
-                        Destroy(TaskButtons);
-                        throw new DirectoryNotFoundException($"Task folder for '{configName}' at '{taskFolder}' does not exist.");
+                        if (!Directory.Exists(taskFolderPath))
+                        {
+                            Destroy(TaskButtons);
+                            throw new DirectoryNotFoundException($"Task folder for '{taskConfigName}' at '{taskFolderPath}' does not exist.");
+                        }
                     }
 
-                    GameObject taskButton = new GameObject(configName + "Button");
-                    taskButtonsDict.Add(configName, taskButton);
+                    GameObject taskButton = new GameObject(taskConfigName + "Button");
+                    taskButtonsDict.Add(taskConfigName, taskButton);
                     taskButton.transform.parent = TaskButtons.transform;
 
                     RawImage taskButtonImage = taskButton.AddComponent<RawImage>();
-                    string taskIcon = TaskIcons[configName];
+                    string taskIcon = TaskIcons[taskConfigName];
 
-                    if (UseDefaultConfigs)
-                        taskButtonImage.texture = Resources.Load<Texture2D>("DefaultResources/TaskIcons/" + taskIcon);
+                    if(WebBuild)
+                    {
+                        if(UseDefaultConfigs)
+                        {
+                            taskButtonImage.texture = Resources.Load<Texture2D>("DefaultResources/TaskIcons/" + taskIcon);
+                        }
+                        else
+                        {
+                            string iconPath = $"{TaskIconsFolderPath}/{taskIcon}.png";
+                            StartCoroutine(ServerManager.LoadTextureFromServer(iconPath, tex =>
+                            {
+                                if (tex != null)
+                                    taskButtonImage.texture = tex;
+                                else
+                                    Debug.Log("TRIED TO LOAD THE TASK ICON FROM SERVER BUT THE RESULTING TEX IS NULL!");
+                            }));
+                        }
+                    }
                     else
                         taskButtonImage.texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + taskIcon + ".png");
+
 
                     taskButtonImage.rectTransform.localPosition = TaskIconLocations[count];
                     taskButtonImage.rectTransform.localScale = Vector3.one;
@@ -498,21 +531,21 @@ namespace USE_ExperimentTemplate_Session
                         button.onClick.AddListener(() =>
                         {
                             taskAutomaticallySelected = false;
-                            selectedConfigName = configName;
+                            selectedConfigName = taskConfigName;
                         });
                     }
                     else
                     {
                         string key = TaskMappings.Keys.Cast<string>().ElementAt(taskCount);
-                        RawImage image = taskButtonsDict[configName].GetComponent<RawImage>();
-                        if (configName == key)
+                        RawImage image = taskButtonsDict[taskConfigName].GetComponent<RawImage>();
+                        if (taskConfigName == key)
                         {
                             Button button = taskButton.AddComponent<Button>();
                             button.onClick.AddListener(() =>
                             {
                                 taskAutomaticallySelected = false;
-                                selectedConfigName = configName;
-                                taskButtonsDict[configName].GetComponent<RawImage>().color = new Color(1f, 1f, 1f, 1f);
+                                selectedConfigName = taskConfigName;
+                                taskButtonsDict[taskConfigName].GetComponent<RawImage>().color = new Color(1f, 1f, 1f, 1f);
                             });
                         }
                         else
@@ -643,8 +676,6 @@ namespace USE_ExperimentTemplate_Session
                     mainCameraCopy_Image.texture = CameraMirrorTexture;
                 }
 
-                PauseCanvas.renderMode = RenderMode.ScreenSpaceCamera;
-                PauseCanvas.worldCamera = CurrentTask.TaskCam;
 #endif
 
             });
@@ -753,7 +784,6 @@ namespace USE_ExperimentTemplate_Session
 
         private void LoadSessionConfigSettings()
         {
-
             if (SessionSettings.SettingExists("Session", "SyncBoxActive"))
                 SyncBoxActive = (bool)SessionSettings.Get("Session", "SyncBoxActive");
             else
@@ -795,32 +825,43 @@ namespace USE_ExperimentTemplate_Session
                 RewardHotKeyNumPulses = 1;
 
 
-            //MAKE SURE SYNCBOX INACTIVE FOR WEB BUILD
+            //MAKE SURE SYNCBOX INACTIVE FOR WEB BUILD (Can eventually remove this once thilo provides web build session configs with it marked false)
             if(WebBuild)
                 SyncBoxActive = false;
 
 
-            //Load the Session Event Code Config file
-            string eventCodeFileString = "";
-
-            if(WebBuild)
-                eventCodeFileString = LocateFile.FindFilePathInExternalFolder(Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs", "*EventCode*"); //Should add logic for default configs AND server configs 
-            else
-                eventCodeFileString = LocateFile.FindFilePathInExternalFolder(configFileFolder, "*EventCode*");
-
-
-            if (!string.IsNullOrEmpty(eventCodeFileString))
-            {
-                SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
-                SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
-                EventCodesActive = true;
-            }
-            else if (EventCodesActive)
-                Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");
-
             if (SyncBoxActive)
                 SerialPortActive = true;
-            
+
+
+
+            //Load the Session Event Code Config file --------------------------------------------------------------------------------------------------
+            string eventCodeFileString = "";
+
+            if(WebBuild && !UseDefaultConfigs)
+            {
+                StartCoroutine(ServerManager.GetFileAsync(ServerManager.SessionConfigFolderPath, "EventCode", result =>
+                {
+                    SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", configFileFolder, result);
+                    SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
+                }));
+            }
+            else
+            {
+                string path = UseDefaultConfigs ? (Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs") : configFileFolder;
+                eventCodeFileString = LocateFile.FindFilePathInExternalFolder(configFileFolder, "*EventCode*");
+                if (!string.IsNullOrEmpty(eventCodeFileString))
+                {
+                    SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
+                    SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
+                    //EventCodesActive = true;
+                }
+                else if (EventCodesActive)
+                    Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");
+            }
+
+
+           
 
             List<string> taskNames;
             if (SessionSettings.SettingExists("Session", "TaskNames"))
@@ -828,6 +869,7 @@ namespace USE_ExperimentTemplate_Session
                 taskNames = (List<string>)SessionSettings.Get("Session", "TaskNames");
                 TaskMappings = new OrderedDictionary();
                 taskNames.ForEach((taskName) => TaskMappings.Add(taskName, taskName));
+                Debug.Log("NUM TASKS = " + TaskMappings.Count);
             }
             else if (SessionSettings.SettingExists("Session", "TaskMappings"))
                 TaskMappings = (OrderedDictionary)SessionSettings.Get("Session", "TaskMappings");
@@ -993,16 +1035,20 @@ namespace USE_ExperimentTemplate_Session
         {
             string path;
 
-            if(UseDefaultConfigs)
-                path = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
+            if(WebBuild)
+            {
+                if (UseDefaultConfigs)
+                    path = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
+                else
+                    path = $"{ServerManager.SessionConfigFolderPath}/{configName}";
+            }
             else
             {
                 if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))
                     return configFileFolder + Path.DirectorySeparatorChar + configName;
                 else
                 {
-                    List<string> configFolders =
-                        (List<string>)SessionSettings.Get("Session", "ConfigFolderNames");
+                    List<string> configFolders = (List<string>)SessionSettings.Get("Session", "ConfigFolderNames");
                     int index = 0;
                     foreach (string k in TaskMappings.Keys)
                     {
@@ -1125,16 +1171,6 @@ namespace USE_ExperimentTemplate_Session
                     go.SetActive(false);
             return tl;
         }
-        //
-        // void SceneLoaded(string sceneName)
-        // {
-        // 	var methodInfo = GetType().GetMethod(nameof(this.FindTaskCam));
-        // 	MethodInfo findTaskCam = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[sceneName]});
-        // 	findTaskCam.Invoke(this, new object[] {sceneName});
-        // 	// TaskSceneLoaded = true;
-        // 	SceneLoading = false;
-        // }
-
 
 
         void SceneLoaded(string configName, bool verifyOnly)
@@ -1161,12 +1197,6 @@ namespace USE_ExperimentTemplate_Session
             tl.TaskCam.gameObject.SetActive(false);
         }
 
-        // public void FindTaskCam<T>(string taskName) where T : ControlLevel_Task_Template
-        // {
-        // 	ControlLevel_Task_Template tl = GameObject.Find("ControlLevels").GetComponent<T>();
-        // 	tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
-        // 	tl.TaskCam.gameObject.SetActive(false);
-        // }
 
 #if UNITY_STANDALONE_WIN
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
@@ -1284,7 +1314,7 @@ namespace USE_ExperimentTemplate_Session
 
                 CloseHandle(dirHandle);
 #endif
-                //Create Log Folder & Files: ---------------------------------------------------------------------------------------------------------------
+                //Create Log Folder & Files for Normal Build: -----------------------------------------------------------------------------------------------
                 if (!WebBuild) //Web Build log folder & file creation already handled in the WebBuildLogWriter.cs class
                 {
                     System.IO.Directory.CreateDirectory(SessionDataPath + Path.DirectorySeparatorChar + "LogFile");
@@ -1306,38 +1336,21 @@ namespace USE_ExperimentTemplate_Session
                 }
 
 
-                string sessionSettingsFolderPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
-                Debug.Log("SSFP: " + sessionSettingsFolderPath);
-
-                if (WebBuild)
-                {
-                    //First, create SessionSettings Folder (I Already created SessionSettings Folder at start of loadsettings)
-                    //Next, write the settings files to Server:
-                    
-
-                    //MAKE A METHOD THAT COPIES THE ENTIRE CONFIG FOLDER TO THE DATAFOLDER/SESSIONSETTINGS !!! //wasnt working!
-                    //StartCoroutine(CopySessionSettingsToDataFolder());
-
-                }
-                else
-                {
-                    System.IO.Directory.CreateDirectory(sessionSettingsFolderPath);
-                    SessionSettings.StoreSettings(sessionSettingsFolderPath + Path.DirectorySeparatorChar);
-                }
-
             }
         }
 
 
 
-        private IEnumerator CreateFolderOnServer(string folderPath)
+        private IEnumerator CreateFolderOnServer(string folderPath, Action callback)
         {
             yield return ServerManager.CreateFolder(folderPath);
+            callback?.Invoke();
         }
 
-        private IEnumerator CopySessionSettingsToDataFolder()
+        private IEnumerator CopySessionConfigFolderToDataFolder()
         {
-            string sourcePath = ServerManager.SessionConfigFolderPath;
+            //string sourcePath = ServerManager.SessionConfigFolderPath; //UN COMMENT THIS LATER!
+            string sourcePath = "CONFIGS/SessionConfig_021_VS_FL_VS_v01_Set05_STIM"; //TEMPORARY!!!!!
             string destinationPath = $"{ServerManager.SessionDataFolderPath}/SessionSettings";
             yield return ServerManager.CopyFolder(sourcePath, destinationPath);
         }

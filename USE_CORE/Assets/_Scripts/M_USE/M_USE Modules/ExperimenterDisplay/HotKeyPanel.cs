@@ -405,6 +405,10 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         OriginalTaskLevel = HkPanel.TaskLevel;
                         OriginalTrialLevel = HkPanel.TrialLevel;
 
+                        OriginalTaskLevel.FrameData.gameObject.SetActive(false);
+                        OriginalTaskLevel.BlockData.gameObject.SetActive(false);
+                        OriginalTaskLevel.TrialData.gameObject.SetActive(false);
+                        
                         // In the current task, and switching Hk.TrialLevel & Hk.TaskLevel to calibration trial/task
                         GazeCalibrationTaskLevel = (ControlLevel_Task_Template)HkPanel.TrialLevel.GetStateFromName("GazeCalibration").ChildLevel;
                         GazeCalibrationTrialLevel = (ControlLevel_Trial_Template)GazeCalibrationTaskLevel.GetStateFromName("RunBlock").ChildLevel;
@@ -422,10 +426,25 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
                         HkPanel.TrialLevel.runCalibration = false;
 
+                        if (HkPanel.TaskLevel.SessionDataControllers != null)
+                        {
+                            /*if (EyeTrackerActive)
+                                SessionDataControllers.RemoveDataController("GazeData_" + TaskName);*/
+
+                        }
                         // Resetting the panel's current trial level to the original task
                         if (OriginalTaskLevel != null)
                         {
                             ExperimenterDisplay.ResetTask(OriginalTaskLevel, OriginalTrialLevel);
+                            OriginalTaskLevel.FrameData.gameObject.SetActive(true);
+                            OriginalTaskLevel.BlockData.gameObject.SetActive(true);
+                            OriginalTaskLevel.TrialData.gameObject.SetActive(true);
+                        }
+                        else
+                        {
+                            HkPanel.TaskLevel.SessionDataControllers.RemoveDataController("BlockData_" + HkPanel.TaskLevel.TaskName);
+                            HkPanel.TaskLevel.SessionDataControllers.RemoveDataController("TrialData_" + HkPanel.TaskLevel.TaskName);
+                            HkPanel.TaskLevel.SessionDataControllers.RemoveDataController("FrameData_" + HkPanel.TaskLevel.TaskName);
                         }
                         HkPanel.TrialLevel.runCalibration = false;
                         OriginalTaskLevel = null;

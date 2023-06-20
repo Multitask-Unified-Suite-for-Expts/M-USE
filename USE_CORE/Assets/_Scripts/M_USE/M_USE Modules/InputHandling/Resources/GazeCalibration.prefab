@@ -318,8 +318,8 @@ MonoBehaviour:
   ShotgunRaycastSpacing_DVA: 0
   ParticipantDistance_CM: 0
   PrefabPath: 
-  ConfigName: 
-  TaskName: 
+  ConfigName: GazeCalibration
+  TaskName: GazeCalibration
   TaskProjectFolder: 
   BlockCount: 0
   TrialLevel: {fileID: 4333728071008300758}
@@ -339,7 +339,8 @@ MonoBehaviour:
   SonicationActive: 0
   UseDefaultConfigs: 0
   ContextExternalFilePath: 
-  SessionDataPath: 
+  SessionLevelDataPath: 
+  SessionDataFolderPath: 
   TaskConfigPath: 
   TaskDataPath: 
   SubjectID: 

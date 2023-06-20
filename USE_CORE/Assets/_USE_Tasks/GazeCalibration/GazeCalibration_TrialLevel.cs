@@ -601,7 +601,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private void AssignCalibPositions()
     {
-        Debug.Log("this is getting assigned");
         allCalibPoints = new NormalizedPoint2D[]
         {
             new NormalizedPoint2D(CalibPointsInset[0], CalibPointsInset[1]),

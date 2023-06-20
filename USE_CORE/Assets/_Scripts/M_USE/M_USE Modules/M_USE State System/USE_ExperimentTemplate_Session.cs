@@ -63,8 +63,8 @@ namespace USE_ExperimentTemplate_Session
         private SessionDataControllers SessionDataControllers;
         private bool StoreData;
         private bool MacMainDisplayBuild;
-        [HideInInspector] public string SubjectID, SessionID, SessionDataPath, FilePrefix;
-        private string SessionLevelDataPath;
+        [HideInInspector] public string SubjectID, SessionID, SessionDataFolderPath, FilePrefix;
+        public string SessionLevelDataPath;
         public string TaskSelectionSceneName;
 
         protected List<ControlLevel_Task_Template> ActiveTaskLevels;
@@ -312,13 +312,13 @@ namespace USE_ExperimentTemplate_Session
                      
             if (UseDefaultConfigs)
             {
-                SessionDataPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_Data" + "_" + FilePrefix;
+                SessionDataFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_Data" + "_" + FilePrefix;
 
                 ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
                 TaskIconsFolderPath = "Assets/_USE_Session/Resources/DefaultResources/TaskIcons";
             }
             else
-                SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
+                SessionDataFolderPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
 
         }
 
@@ -375,6 +375,9 @@ namespace USE_ExperimentTemplate_Session
             InputTrackers = Instantiate(Resources.Load<GameObject>("InputTrackers"), InputManager.transform);
             MouseTracker = InputTrackers.GetComponent<MouseTracker>();
             GazeTracker = InputTrackers.GetComponent<GazeTracker>();
+
+            
+
 
             SelectionTracker = new SelectionTracker();
             if (SelectionType.ToLower().Equals("gaze"))
@@ -564,9 +567,10 @@ namespace USE_ExperimentTemplate_Session
            // Canvas[] TaskSelectionCanvasses = null;
             gazeCalibration.AddInitializationMethod(() =>
             {
+                FrameData.gameObject.SetActive(false);
+
                 GazeCalibrationTaskLevel.TaskCam = Camera.main;
                // GazeCalibrationTaskLevel.ConfigName = "GazeCalibration";
-                GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
                 GazeCalibrationTaskLevel.TrialLevel.runCalibration = true;
                 ExperimenterDisplayController.ResetTask(GazeCalibrationTaskLevel, GazeCalibrationTaskLevel.TrialLevel);
 
@@ -589,6 +593,9 @@ namespace USE_ExperimentTemplate_Session
                     TobiiEyeTrackerController.Instance.isCalibrating = false;
                     TobiiEyeTrackerController.Instance.ScreenBasedCalibration.LeaveCalibrationMode();
                 }
+
+                GazeData.folderPath = SessionLevelDataPath + Path.DirectorySeparatorChar + "GazeData";
+                FrameData.gameObject.SetActive(true);
             });
 
             TaskButtonsContainer = null;
@@ -796,6 +803,7 @@ namespace USE_ExperimentTemplate_Session
             selectTask.AddLateUpdateMethod(() =>
             {
                 AppendSerialData();
+                FrameData.AppendData();
             });
 
             selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask);
@@ -833,6 +841,8 @@ namespace USE_ExperimentTemplate_Session
                 if (hoverEffect != null)
                     Destroy(hoverEffect);
 
+                FrameData.gameObject.SetActive(false);
+
                 string taskName = (string)TaskMappings[selectedConfigName];
                 loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
                 loadScene.completed += (_) =>
@@ -851,6 +861,7 @@ namespace USE_ExperimentTemplate_Session
             loadTask.AddLateUpdateMethod(() =>
             {
                 AppendSerialData();
+                FrameData.AppendData();
             });
             
             loadTask.SpecifyTermination(() => !SceneLoading, runTask, () =>
@@ -872,10 +883,11 @@ namespace USE_ExperimentTemplate_Session
                     AppendSerialData();
                     SerialRecvData.WriteData();
                     SerialSentData.WriteData();
-                    SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionDataPath, "SerialRecvData", CurrentTask.TaskName);
-                    SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionDataPath, "SerialSentData", CurrentTask.TaskName);
+                    SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionDataFolderPath, "SerialRecvData", CurrentTask.TaskName);
+                    SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionDataFolderPath, "SerialSentData", CurrentTask.TaskName);
                 }
 
+                
             });
 
             //automatically finish tasks after running one - placeholder for proper selection
@@ -944,8 +956,8 @@ namespace USE_ExperimentTemplate_Session
 
                 if (SerialPortActive)
                 {                 
-                    SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataPath, "SerialRecvData", "SessionLevel");                    
-                    SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataPath, "SerialSentData", "SessionLevel");
+                    SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataFolderPath, "SerialRecvData", "SessionLevel");                    
+                    SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataFolderPath, "SerialSentData", "SessionLevel");
 
                     SerialRecvData.fileName = FilePrefix + "__SerialRecvData" + SerialRecvData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";  
                     SerialSentData.fileName = FilePrefix + "__SerialSentData" + SerialSentData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
@@ -965,6 +977,7 @@ namespace USE_ExperimentTemplate_Session
                 FrameData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionLevelDataPath, "FrameData", "SessionLevel");
                 FrameData.fileName = FilePrefix + "__FrameData" + FrameData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
 
+                FrameData.gameObject.SetActive(true);
             });
 
             finishSession.AddInitializationMethod(() =>
@@ -987,12 +1000,11 @@ namespace USE_ExperimentTemplate_Session
                 if (EyeTrackerActive)
                     GazeData.WriteData();
 
-                FrameData.AppendData();
                 FrameData.WriteData();
             });
 
             SessionData = (SessionData) SessionDataControllers.InstantiateDataController<SessionData>
-                ("SessionData", StoreData, SessionDataPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionDataPath);
+                ("SessionData", StoreData, SessionDataFolderPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionDataPath);
             SessionData.fileName = FilePrefix + "__SessionData.txt";
             SessionData.sessionLevel = this;
             SessionData.InitDataController();
@@ -1004,7 +1016,7 @@ namespace USE_ExperimentTemplate_Session
             if (SerialPortActive)
             {
                 SerialSentData = (SerialSentData) SessionDataControllers.InstantiateDataController<SerialSentData>
-                    ("SerialSentData", StoreData, SessionDataPath + Path.DirectorySeparatorChar +  "SerialSentData" 
+                    ("SerialSentData", StoreData, SessionDataFolderPath + Path.DirectorySeparatorChar +  "SerialSentData" 
                                                   + Path.DirectorySeparatorChar + "0001_SessionLevel");
                 SerialSentData.fileName = FilePrefix + "__SerialSentData_0001_SessionLevel.txt";
                 SerialSentData.sessionLevel = this;
@@ -1012,7 +1024,7 @@ namespace USE_ExperimentTemplate_Session
                 SerialSentData.ManuallyDefine();
 
                 SerialRecvData = (SerialRecvData) SessionDataControllers.InstantiateDataController<SerialRecvData>
-                    ("SerialRecvData", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "SerialRecvData" 
+                    ("SerialRecvData", StoreData, SessionDataFolderPath + Path.DirectorySeparatorChar + "SerialRecvData" 
                                                   + Path.DirectorySeparatorChar + "0001_SessionLevel");
                 SerialRecvData.fileName = FilePrefix + "__SerialRecvData_0001_SessionLevel.txt";
                 SerialRecvData.sessionLevel = this;
@@ -1020,9 +1032,9 @@ namespace USE_ExperimentTemplate_Session
                 SerialRecvData.ManuallyDefine();
             }
 
-            SummaryData.Init(StoreData, SessionDataPath);
+            SummaryData.Init(StoreData, SessionDataFolderPath);
 
-            SessionLevelDataPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel";
+            SessionLevelDataPath = SessionDataFolderPath + Path.DirectorySeparatorChar + "SessionLevel";
             FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "SessionLevel", StoreData, SessionLevelDataPath + Path.DirectorySeparatorChar + "FrameData");
             FrameData.fileName = "SessionLevel__FrameData.txt";
             FrameData.sessionLevel = this;
@@ -1042,6 +1054,10 @@ namespace USE_ExperimentTemplate_Session
                 GazeData.ManuallyDefine();
                 TobiiEyeTrackerController.GazeData = GazeData;
             }
+
+            if (EyeTrackerActive)
+                GazeTracker.Init(FrameData, 0);
+            MouseTracker.Init(FrameData, 0);
 
             void GetTaskLevelFromString<T>()
                 where T : ControlLevel_Task_Template
@@ -1141,7 +1157,8 @@ namespace USE_ExperimentTemplate_Session
             tl.DisplayController = DisplayController;
             tl.SessionDataControllers = SessionDataControllers;
             tl.LocateFile = LocateFile;
-            tl.SessionDataPath = SessionDataPath;
+            tl.SessionDataFolderPath = SessionDataFolderPath;
+            tl.SessionLevelDataPath = SessionLevelDataPath;
 
 //#if (UNITY_WEBGL)
 //            tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
@@ -1346,7 +1363,7 @@ namespace USE_ExperimentTemplate_Session
             //	//Save EditorLog and Player Log files
             if (StoreData)
             {
-                System.IO.Directory.CreateDirectory(SessionDataPath + Path.DirectorySeparatorChar + "LogFile");
+                System.IO.Directory.CreateDirectory(SessionDataFolderPath + Path.DirectorySeparatorChar + "LogFile");
                 string symlinkLocation = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + "LatestSession";
 #if UNITY_STANDALONE_WIN
                 uint GENERIC_READ = 0x80000000;
@@ -1372,7 +1389,7 @@ namespace USE_ExperimentTemplate_Session
 
                 // \??\ indicates that the path should be non-interpreted
                 string prefix = @"\??\";
-                string substituteName = prefix + SessionDataPath;
+                string substituteName = prefix + SessionDataFolderPath;
                 // char is 2 bytes because strings are UTF-16
                 int substituteByteLen = substituteName.Length * sizeof(char);
                 ReparseDataBuffer rdb = new ReparseDataBuffer
@@ -1430,16 +1447,16 @@ namespace USE_ExperimentTemplate_Session
 
                 if (Application.isEditor)
                     File.Copy(logPath,
-                        SessionDataPath + Path.DirectorySeparatorChar + "LogFile" + Path.DirectorySeparatorChar +
+                        SessionDataFolderPath + Path.DirectorySeparatorChar + "LogFile" + Path.DirectorySeparatorChar +
                         "Editor.log");
                 else
                     File.Copy(logPath,
-                        SessionDataPath + Path.DirectorySeparatorChar + "LogFile" + Path.DirectorySeparatorChar +
+                        SessionDataFolderPath + Path.DirectorySeparatorChar + "LogFile" + Path.DirectorySeparatorChar +
                         "Player.log");
 
-                System.IO.Directory.CreateDirectory(SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings");
+                System.IO.Directory.CreateDirectory(SessionDataFolderPath + Path.DirectorySeparatorChar + "SessionSettings");
 
-                SessionSettings.StoreSettings(SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings" +
+                SessionSettings.StoreSettings(SessionDataFolderPath + Path.DirectorySeparatorChar + "SessionSettings" +
                                               Path.DirectorySeparatorChar);
 
                 /*if (FrameData != null)

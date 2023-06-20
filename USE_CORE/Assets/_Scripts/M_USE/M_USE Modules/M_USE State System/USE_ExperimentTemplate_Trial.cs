@@ -125,13 +125,26 @@ namespace USE_ExperimentTemplate_Trial
             FinishTrial = new State("FinishTrial");
             Delay = new State("Delay");
             GazeCalibration = new State("GazeCalibration");
-            
-            if (GameObject.Find("GazeCalibration(Clone)") != null)
+
+
+            if (GameObject.Find("GazeCalibration(Clone)") != null)// && TaskLevel.TaskName != "GazeCalibration")
             {
                 GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts"). GetComponent<GazeCalibration_TaskLevel>();
+                GazeCalibrationTaskLevel.ConfigName = TaskLevel.TaskName;
                 GazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
                 GazeCalibrationTaskLevel.TrialLevel.TaskLevel = GazeCalibrationTaskLevel;
+                
+                if (TaskLevel.TaskName != "GazeCalibration")
+                {
+                    GazeCalibrationTaskLevel.DefineTaskLevel(false, false);
+                    GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(false);
+                    GazeCalibrationTaskLevel.FrameData.gameObject.SetActive(false);
+                    GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(false);
+                }
 
+                
+                // Set the GazeData path back to the current config folder
+                GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar +  "GazeData";
             }
 
             AddActiveStates(new List<State> { SetupTrial, FinishTrial, Delay, GazeCalibration });
@@ -184,7 +197,7 @@ namespace USE_ExperimentTemplate_Trial
                 FrameData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
                 if(EyeTrackerActive)
                     GazeData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
-                // DO THIS FOR THE GAZE DATA!!!!
+
                 if (TaskLevel.SerialPortActive)
                 {
                     SerialRecvData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
@@ -261,8 +274,14 @@ namespace USE_ExperimentTemplate_Trial
                 GazeCalibrationCanvas.gameObject.SetActive(true);
              //   CalibrationGazeTrail.gameObject.SetActive(true);
                 GazeCalibrationScripts.gameObject.SetActive(true);
-              //  CalibrationCube.gameObject.SetActive(true);
+                //  CalibrationCube.gameObject.SetActive(true);
 
+                GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(true);
+                GazeCalibrationTaskLevel.FrameData.gameObject.SetActive(true);
+                GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(true);
+
+                // Set the GazeDataPath to be inside the GazeCalibration Folder
+                GazeData.folderPath = GazeCalibrationTaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
             });
 
            GazeCalibration.SpecifyTermination(() => !runCalibration, () => SetupTrial, () =>
@@ -277,6 +296,14 @@ namespace USE_ExperimentTemplate_Trial
                    TobiiEyeTrackerController.Instance.isCalibrating = false;
                    TobiiEyeTrackerController.Instance.ScreenBasedCalibration.LeaveCalibrationMode();
                }
+
+               GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(false);
+               GazeCalibrationTaskLevel.FrameData.gameObject.SetActive(false);
+               GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(false);
+
+               // Set the Gaze Data Path back to the outer level task folder
+               GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
+
            });
 
             DefineControlLevel();

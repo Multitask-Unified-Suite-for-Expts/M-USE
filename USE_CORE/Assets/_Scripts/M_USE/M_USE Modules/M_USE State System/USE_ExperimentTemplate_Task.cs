@@ -45,9 +45,9 @@ namespace USE_ExperimentTemplate_Task
         protected int NumBlocksInTask;
         public ControlLevel_Trial_Template TrialLevel;
         public ControlLevel_Session_Template SessionLevel;
-        protected BlockData BlockData;
-        protected FrameData FrameData;
-        protected TrialData TrialData;
+        public BlockData BlockData;
+        public FrameData FrameData;
+        public TrialData TrialData;
         public USE_ExperimentTemplate_Data.GazeData GazeData;
         [HideInInspector] public SerialSentData SerialSentData;
         [HideInInspector] public SerialRecvData SerialRecvData;
@@ -63,7 +63,7 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public DisplayArea DisplayArea;
 
         [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive, UseDefaultConfigs;
-        [HideInInspector] public string ContextExternalFilePath, SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
+        [HideInInspector] public string ContextExternalFilePath, SessionLevelDataPath, SessionDataFolderPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
         [HideInInspector] public LocateFile LocateFile;
         [HideInInspector] public StringBuilder BlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
         private int TaskStringsAdded = 0;
@@ -349,8 +349,12 @@ namespace USE_ExperimentTemplate_Task
                     SessionDataControllers.RemoveDataController("BlockData_" + TaskName);
                     SessionDataControllers.RemoveDataController("TrialData_" + TaskName);
                     SessionDataControllers.RemoveDataController("FrameData_" + TaskName);
-                    /*if (EyeTrackerActive)
-                        SessionDataControllers.RemoveDataController("GazeData_" + TaskName);*/
+                    if (EyeTrackerActive)
+                    {
+                        SessionDataControllers.RemoveDataController("BlockData_GazeCalibration");
+                        SessionDataControllers.RemoveDataController("FrameData_GazeCalibration");
+                        SessionDataControllers.RemoveDataController("TrialData_GazeCalibration");
+                    }
                 }
 
                 if (TaskStims != null)
@@ -393,13 +397,24 @@ namespace USE_ExperimentTemplate_Task
             //if (loadSettings)
             //{
             //Setup data management
-            if (SessionLevel.CurrentState.StateName == "SetupSession" && SessionLevel.GazeCalibrationTaskLevel != null)
+
+
+            if (SessionLevel.CurrentState.StateName == "SetupSession" && TaskName == "GazeCalibration")
             {
-                TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel" + Path.DirectorySeparatorChar + "GazeCalibration";
+                // Store Data in the Session Level / Gaze Calibration folder if running at the session level
+                TaskDataPath = SessionLevelDataPath + Path.DirectorySeparatorChar + "PreTask_GazeCalibration";
+                ConfigName = "GazeCalibration";
+            }
+            else if (TaskName == "GazeCalibration")
+            {
+                // Store Data in the Task / Gaze Calibration folder if not running at the session level
+                TaskDataPath = SessionDataFolderPath + Path.DirectorySeparatorChar + ConfigName +  Path.DirectorySeparatorChar + "InTask_GazeCalibration";
+                ConfigName = "GazeCalibration";
             }
             else
             {
-                TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
+                // Store Data in the Task folder 
+                TaskDataPath = SessionDataFolderPath + Path.DirectorySeparatorChar + ConfigName;
             }
             
 
@@ -676,7 +691,7 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
 
             TrialLevel.EyeTrackerActive = EyeTrackerActive;
-
+            TrialLevel.TaskLevel = this;
             TrialLevel.DefineTrialLevel();
         }
 

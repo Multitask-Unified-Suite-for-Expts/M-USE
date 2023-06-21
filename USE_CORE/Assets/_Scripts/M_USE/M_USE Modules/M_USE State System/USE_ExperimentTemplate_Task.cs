@@ -127,6 +127,8 @@ namespace USE_ExperimentTemplate_Task
 
         [HideInInspector] public bool WebBuild;
 
+        [HideInInspector] public bool TaskLevelDefined;
+
         private bool TaskDefImported;
         private bool BlockDefImported;
         private bool TrialDefImported;
@@ -156,6 +158,8 @@ namespace USE_ExperimentTemplate_Task
 
         public IEnumerator DefineTaskLevel(bool verifyOnly)
         {
+            TaskLevelDefined = false;
+
             if (UseDefaultConfigs) //WILL EVENTUALLY CHANGE FOR SERVER CONFIGS
                 PrefabPath = "/DefaultResources/Stimuli";
 
@@ -168,7 +172,6 @@ namespace USE_ExperimentTemplate_Task
             {
                 yield return new WaitForEndOfFrame();
             }
-
             TrialDefImported = false;
             BlockDefImported = false;
             TaskDefImported = false;
@@ -182,19 +185,14 @@ namespace USE_ExperimentTemplate_Task
             TrialAndBlockDefsHandled = false;
 
             FindStims();
-
             while (!StimsHandled)
             {
                 yield return new WaitForEndOfFrame();
             }
             StimsHandled = false;
 
-            Debug.Log("RIGHT BEFORE VERIFY ONLY YIELD BREAK!");
-
             if (verifyOnly)
                 yield break;
-
-            Debug.Log("AFTER YIELD ONLY BREAK! (verify only is " + verifyOnly + ")");
             
             SetupTask = new State("SetupTask");
             RunBlock = new State("RunBlock");
@@ -217,13 +215,11 @@ namespace USE_ExperimentTemplate_Task
 
             Add_ControlLevel_InitializationMethod(() =>
             {
-                Debug.Log("INITIALIZING CONTROL LEVEL FOR " + TaskName);
                 TaskCam.gameObject.SetActive(true);
                 if (TaskCanvasses != null)
                     foreach (GameObject go in TaskCanvasses)
                         go.SetActive(true);
 
-                Debug.Log("INITIALIZING BLOCK SUMMARY STRINGS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 BlockCount = -1;
                 BlockSummaryString = new StringBuilder();
                 PreviousBlockSummaryString = new StringBuilder();
@@ -434,8 +430,6 @@ namespace USE_ExperimentTemplate_Task
                     }
 #endif
             });
-
-
             
 
             //Setup data management
@@ -648,6 +642,8 @@ namespace USE_ExperimentTemplate_Task
 
             TrialLevel.DefineTrialLevel();
 
+            TaskLevelDefined = true;
+
             yield return null;
         }
 
@@ -734,6 +730,7 @@ namespace USE_ExperimentTemplate_Task
                 }));
                 StartCoroutine(ServerManager.GetFileAsync(path, "EventCode", result =>
                 {
+                    Debug.Log("EVENT CODE RESULT: " + result);
                     if (!string.IsNullOrEmpty(result))
                     {
                         SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig", path, result);
@@ -827,7 +824,7 @@ namespace USE_ExperimentTemplate_Task
         public void HandleTrialAndBlockDefs(bool verifyOnly)
         {
             //handling of block and trial defs so that each BlockDef contains a TrialDef[] array
-            if (AllTrialDefs == null) //no trialDefs have been imported from settings files
+            if (AllTrialDefs == null || AllTrialDefs.Count() == 0) //no trialDefs have been imported from settings files
             {
                 if (BlockDefs == null)
                     Debug.LogError("Neither BlockDef nor TrialDef config files provided in " + TaskName + " folder, no trials generated as a result.");
@@ -842,7 +839,6 @@ namespace USE_ExperimentTemplate_Task
                         }
                     }
                 }
-
             }
             else //trialDefs imported from settings files
             {
@@ -1144,6 +1140,7 @@ namespace USE_ExperimentTemplate_Task
             {
                 StartCoroutine(ServerManager.GetFileAsync(taskConfigFolder, "TrialDef", result =>
                 {
+                    Debug.Log("RESULT OF TRIAL DEF FROM SERVER: " + result);
                     if (!string.IsNullOrEmpty(result))
                         ImportTrialDefs<T>(taskConfigFolder, result);
                     else

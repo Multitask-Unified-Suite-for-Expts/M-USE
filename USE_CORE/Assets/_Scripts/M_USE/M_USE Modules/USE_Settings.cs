@@ -352,7 +352,7 @@ namespace USE_Settings
 		{
 			Settings settings = new Settings(dictName, settingsPath);
 
-			Debug.Log("Attempting to load settings file " + settingsPath + ".");
+			Debug.Log("Attempting to load settings file " + settingsPath + " | " + serverFileString + ".");
 			if (dictName == "")
 				dictName = settingsCategory;
 
@@ -383,17 +383,18 @@ namespace USE_Settings
 
 			string[] fieldNames = lines[0].Split(delimiter);
 
-			//UNCOMMENT THIS LATER!!!
-			//foreach (string fieldName in fieldNames)
-			//{
-			//	Debug.Log("FIELD NAME: " + fieldName);
-			//	//if (typeof(T).GetProperty(fieldName) == null & typeof(T).GetField(fieldName) == null)
-			//	//{
-			//	//	throw new Exception("Settings file \"" + settingsCategory + "\" contains the header \""
-			//	//		+ fieldName + "\" but this is not a public property or field of the provided type "
-			//	//		+ typeof(T) + ".");
-			//	//}
-			//}
+
+			string tempFieldName = "";
+			foreach (string fieldName in fieldNames)
+			{
+				tempFieldName = fieldName.Trim();
+				if (typeof(T).GetProperty(tempFieldName) == null & typeof(T).GetField(tempFieldName) == null)
+				{
+					throw new Exception("Settings file \"" + settingsCategory + "\" contains the header \""
+						+ tempFieldName + "\" but this is not a public property or field of the provided type "
+						+ typeof(T) + ".");
+				}
+			}
 
 			Type ft = null;
 			FieldInfo myFieldInfo = null;
@@ -403,14 +404,11 @@ namespace USE_Settings
 				string[] values = lines[iLine].Split(delimiter);
 				for (int iVal = 0; iVal < fieldNames.Length; iVal++)
 				{
-					string fieldName = fieldNames[iVal];
+					string fieldName = fieldNames[iVal].Trim();
 					try
 					{
 						if (typeof(T).GetProperty(fieldName) != null)
-						{
-							Debug.Log("kldsfh");
-							//settingsArray[iLine-1].GetProperty(fieldName) = Convert.ChangeType(values[iVal], typeof(T));
-						}
+							Debug.Log("TypeOf GetProperty of " + fieldName + "is not null!");
 						else if (typeof(T).GetField(fieldName) != null)
 						{
 							myFieldInfo = typeof(T).GetField(fieldName);

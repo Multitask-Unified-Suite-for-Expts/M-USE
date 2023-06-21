@@ -69,6 +69,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
+            Debug.Log("CONTEXT EXT FILE PATH: " + ContextExternalFilePath);
             string contextFilePath;
             if (WebBuild) //Changed from UseDefaultConfigs to WebBuild. May need to do the same for all tasks. Though, eventually, will read contexts from server
                 contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + currentBlock.ContextName;

@@ -611,7 +611,7 @@ namespace USE_ExperimentTemplate_Session
                 AppendSerialData();
             });
             
-            loadTask.SpecifyTermination(() => !SceneLoading, runTask, () =>
+            loadTask.SpecifyTermination(() => CurrentTask != null && CurrentTask.TaskLevelDefined, runTask, () =>
             {
                 //if(IsHuman)
                 //{

@@ -69,14 +69,13 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
-            Debug.Log("CONTEXT EXT FILE PATH: " + ContextExternalFilePath);
             string contextFilePath;
-            if (WebBuild) //Changed from UseDefaultConfigs to WebBuild. May need to do the same for all tasks. Though, eventually, will read contexts from server
-                contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + currentBlock.ContextName;
+            if (WebBuild)
+                contextFilePath = $"{ContextExternalFilePath}/{TaskName}_Contexts/{currentBlock.ContextName}";
             else
                 contextFilePath = trialLevel.GetContextNestedFilePath(trialLevel.MaterialFilePath, currentBlock.ContextName, "LinearDark");
 
-            RenderSettings.skybox = CreateSkybox(contextFilePath, UseDefaultConfigs);
+            RenderSettings.skybox = CreateSkybox(contextFilePath, WebBuild); //changed from usedefaultconfigs to webbuild. if keep, may need to do for all tasks
 
             trialLevel.ContextActive = true;
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);

@@ -143,10 +143,11 @@ namespace USE_ExperimentTemplate_Session
             {
                 SessionDataPath = ServerManager.SessionDataFolderPath;
                 TaskIconsFolderPath = "DefaultResources/TaskIcons"; //Currently having web build use in house task icons instead of loading from server. 
+                ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
 
                 if (UseDefaultConfigs)
                 {
-                    ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts"; //may eventually want to change for using server configs
+                    //ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
                     configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
                     WriteSessionConfigsToPersistantDataPath();
                     SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFilePathInExternalFolder(configFileFolder, "*SessionConfig*"));
@@ -154,7 +155,7 @@ namespace USE_ExperimentTemplate_Session
                 }
                 else //Using Server Configs:
                 {
-                    ContextExternalFilePath = "Resources/Contexts"; //path from root server folder
+                    //ContextExternalFilePath = "Resources/Contexts"; //path from root server folder
                     //TaskIconsFolderPath = "Resources/TaskIcons"; //un comment if end up wanting to load from server instead (and also remove the one above)
                     configFileFolder = ServerManager.SessionConfigFolderPath;
                     StartCoroutine(ServerManager.GetFileAsync(ServerManager.SessionConfigFolderPath, "SessionConfig", result =>

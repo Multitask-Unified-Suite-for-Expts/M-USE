@@ -1075,6 +1075,8 @@ namespace USE_ExperimentTemplate_Task
                 {
                     if (!string.IsNullOrEmpty(result))
                         SessionSettings.ImportSettings_MultipleType(TaskName + "_TaskSettings", taskConfigFolder, result);
+                    else
+                        Debug.Log("No TaskDef file in server config folder (THIS COULD DEFINITELY BE A PROBLEM!).");
                     TaskDefImported = true;
                 }));
             }
@@ -1083,6 +1085,8 @@ namespace USE_ExperimentTemplate_Task
                 string taskDefFilePath = LocateFile.FindFilePathInExternalFolder(taskConfigFolder, "*" + TaskName + "*Task*");
                 if (!string.IsNullOrEmpty(taskDefFilePath))
                     SessionSettings.ImportSettings_MultipleType(TaskName + "_TaskSettings", taskDefFilePath);
+                else
+                    Debug.Log("No TaskDef file in config folder (THIS COULD DEFINITELY BE A PROBLEM!).");
                 TaskDefImported = true;
             }
         }
@@ -1130,7 +1134,6 @@ namespace USE_ExperimentTemplate_Task
                     SessionSettings.ImportSettings_SingleTypeJSON<T[]>("blockDefs", blockDefPath);
             }
             BlockDefs = (T[])SessionSettings.Get("blockDefs");
-            Debug.Log("NUM BLOCK DEFS: " + BlockDefs.Count());
         }
 
 
@@ -1140,7 +1143,6 @@ namespace USE_ExperimentTemplate_Task
             {
                 StartCoroutine(ServerManager.GetFileAsync(taskConfigFolder, "TrialDef", result =>
                 {
-                    Debug.Log("RESULT OF TRIAL DEF FROM SERVER: " + result);
                     if (!string.IsNullOrEmpty(result))
                         ImportTrialDefs<T>(taskConfigFolder, result);
                     else
@@ -1189,7 +1191,6 @@ namespace USE_ExperimentTemplate_Task
                 {
                     StartCoroutine(ServerManager.GetFileAsync(taskConfigFolder, "StimDef", result =>
                     {
-                        Debug.Log("STIM RESULT: " + result);
                         if (!string.IsNullOrEmpty(result))
                             ImportStimDefs<T>(key, taskConfigFolder, result);
                         else

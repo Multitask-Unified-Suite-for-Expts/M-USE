@@ -11,6 +11,9 @@ using TriLib;
 using USE_States;
 using Object = UnityEngine.Object;
 using USE_ExperimentTemplate_Classes;
+using System.Collections;
+using USE_ExperimentTemplate_Session;
+using System.Threading.Tasks;
 
 namespace USE_StimulusManagement
 {
@@ -45,6 +48,7 @@ namespace USE_StimulusManagement
 		public bool TriggersSonication;
 		public State SetActiveOnInitialization;
 		public State SetInactiveOnTermination;
+
 
 		public StimDef()
 		{
@@ -271,52 +275,60 @@ namespace USE_StimulusManagement
 				RemoveFromStimGroup(name);
 		}
 
-		public GameObject Load()
-		{
-			Debug.Log("LOADING STIM! PATH: " + PrefabPath + " | " + "FILE: " + FileName);
 
-			if (PrefabPath != null && PrefabPath.Length > 2)
-				StimGameObject = LoadPrefabFromResources(PrefabPath);
-			else
-			{
-				if (!string.IsNullOrEmpty(FileName))
-				{
-					StimGameObject = LoadExternalStimFromFile();
-				}
-				else if (StimDimVals != null)
-				{
-					FileName = FilePathFromDims("placeholder1", new List<string[]>(), "placeholder3");
-					StimGameObject = LoadExternalStimFromFile();
-				}
-				else if (!string.IsNullOrEmpty(PrefabPath))
-					StimGameObject = Resources.Load<GameObject>(PrefabPath);
-				else
-				{
-					Debug.LogWarning("Attempting to load stimulus " + StimName + ", but no Unity Resources path, external file path, or dimensional values have been provided.");
-					return null;
-				}
 
-				if (!string.IsNullOrEmpty(StimName))
-					StimGameObject.name = StimName;
-				else
-				{
-					string[] FileNameStrings;
-					if (FileName.Contains("\\"))
-						FileNameStrings = FileName.Split('\\');
+        public GameObject Load(bool useDefaultConfigs, bool loadFromServer)
+        {
+            Debug.Log("LOADING STIM | FILE: " + FileName);
+
+            if (useDefaultConfigs)
+                StimGameObject = LoadPrefabFromResources(PrefabPath);
+            else
+            {
+                if (!string.IsNullOrEmpty(FileName))
+                {
+					if (loadFromServer)
+					{
+						StimGameObject = LoadExternalStimFromServer();
+					}
 					else
-						FileNameStrings = FileName.Split('/');
+						StimGameObject = LoadExternalStimFromFile();
+                }
+                else if (StimDimVals != null)
+                {
+                    FileName = FilePathFromDims("placeholder1", new List<string[]>(), "placeholder3");
+                    StimGameObject = LoadExternalStimFromFile();
+                }
+                else if (!string.IsNullOrEmpty(PrefabPath))
+                    StimGameObject = Resources.Load<GameObject>(PrefabPath);
+                else
+                {
+                    Debug.LogWarning("Attempting to load stimulus " + StimName + ", but no Unity Resources path, external file path, or dimensional values have been provided.");
+                    return null;
+                }
 
-					string splitString = FileNameStrings[FileNameStrings.Length - 1];
-					StimGameObject.name = splitString.Split('.')[0];
-				}
 
-			}
+                if (!string.IsNullOrEmpty(StimName))
+                    StimGameObject.name = StimName;
+                else
+                {
+                    string[] FileNameStrings;
+                    if (FileName.Contains("\\"))
+                        FileNameStrings = FileName.Split('\\');
+                    else
+                        FileNameStrings = FileName.Split('/');
+
+                    string splitString = FileNameStrings[FileNameStrings.Length - 1];
+                    StimGameObject.name = splitString.Split('.')[0];
+                }
+
+            }
+
+            return StimGameObject;
+        }
 
 
-			return StimGameObject;
-		}
-
-		private List<GameObject> GetAllChildren(GameObject parentObject)
+        private List<GameObject> GetAllChildren(GameObject parentObject)
 		{
 			List<GameObject> children = new List<GameObject>();
 			children.Add(parentObject);
@@ -363,9 +375,21 @@ namespace USE_StimulusManagement
 			return StimGameObject;
 		}
 
+		public GameObject LoadExternalStimFromServer()
+		{
+			Debug.Log("LOADING A STIM FROM SERVER"!);
+			
+			//WHAT DO I DO HERE?
+
+
+			return StimGameObject; //temp
+
+		}
+
 		public GameObject LoadExternalStimFromFile(string stimFilePath = "")
 		{
 			Debug.Log("LOADING EXTERNAL STIM FROM FILE!");
+
 			//add StimExtesion to file path if it doesn't already contain it
 			if (!string.IsNullOrEmpty(StimExtension) && !FileName.EndsWith(StimExtension))
 			{
@@ -404,7 +428,7 @@ namespace USE_StimulusManagement
 				//if ExternalFilePath already contains the StimFolerPath string, do not change it,
 				//but should also have method to check this file exists
 			}
-
+			Debug.Log("FILE NAME BEFORE LOADMODEL: " + FileName);
 			StimGameObject = LoadModel(FileName);
 			PositionRotationScale();
 			if (!string.IsNullOrEmpty(StimName))
@@ -461,7 +485,6 @@ namespace USE_StimulusManagement
 				}
 				catch (System.Exception e)
 				{
-					Debug.Log("STIM FILE NAME AFTER ERROR: " + FileName);
 					Debug.LogError(e.ToString());
 					return null;
 				}
@@ -707,9 +730,14 @@ namespace USE_StimulusManagement
 
 		public void LoadStims()
 		{
-			foreach(StimDef sd in stimDefs)
+			M_USE_ControlLevel_Session session = GameObject.Find("ControlLevels").GetComponent<M_USE_ControlLevel_Session>();
+			if (session == null)
+				Debug.LogError("TRIED TO FIND SESSION GAMEOBJECT FROM LOAD STIM METHOD BUT ITS NULL!");
+			bool loadFromServer = session.WebBuild && !session.UseDefaultConfigs;
+
+			foreach (StimDef sd in stimDefs)
 			{
-				sd.Load();
+				sd.Load(session.UseDefaultConfigs, loadFromServer);
 			}
 		}
 

@@ -451,18 +451,10 @@ namespace USE_ExperimentTemplate_Task
 
             if (EyeTrackerActive)
             {
-                /* // Set the Gaze data in the controller to be appending to the task data
-                 TobiiEyeTrackerController.Instance.GazeData = GazeData;
-                 GazeData = (USE_ExperimentTemplate_Data.GazeData)dataController.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", ConfigName,
-                 StoreData, TaskDataPath + Path.DirectorySeparatorChar + "GazeData");
-
-                 GazeData.taskLevel = this;
-                 GazeData.trialLevel = TrialLevel;*/
                 GazeData.taskLevel = this;
                 GazeData.trialLevel = TrialLevel;
                 GazeData.fileName = FilePrefix + "__GazeData_PreTrial.txt";
                 GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
-
             }
             // ==== probably delete below -sd ===
 
@@ -533,9 +525,7 @@ namespace USE_ExperimentTemplate_Task
 
             BlockData.InitDataController();
             TrialData.InitDataController();
-            FrameData.InitDataController();/*
-            if (EyeTrackerActive)
-                GazeData.InitDataController();*/
+            FrameData.InitDataController();
 
             BlockData.ManuallyDefine();
             FrameData.ManuallyDefine();
@@ -550,11 +540,9 @@ namespace USE_ExperimentTemplate_Task
 
             BlockData.AddStateTimingData(this);
             BlockData.CreateFile();
-            //BlockData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
             FrameData.CreateFile();
             if (EyeTrackerActive)
                 GazeData.CreateFile();
-            //FrameData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
 
 
             //AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");

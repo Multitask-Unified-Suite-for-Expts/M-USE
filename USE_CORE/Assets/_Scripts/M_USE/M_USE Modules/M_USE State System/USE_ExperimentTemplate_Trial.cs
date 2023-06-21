@@ -131,11 +131,11 @@ namespace USE_ExperimentTemplate_Trial
             {
                 GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts"). GetComponent<GazeCalibration_TaskLevel>();
                 GazeCalibrationTaskLevel.ConfigName = TaskLevel.TaskName;
-                GazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
                 GazeCalibrationTaskLevel.TrialLevel.TaskLevel = GazeCalibrationTaskLevel;
                 
                 if (TaskLevel.TaskName != "GazeCalibration")
                 {
+                    GazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
                     GazeCalibrationTaskLevel.DefineTaskLevel(false, false);
                     GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(false);
                     GazeCalibrationTaskLevel.FrameData.gameObject.SetActive(false);

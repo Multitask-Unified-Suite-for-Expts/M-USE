@@ -132,22 +132,10 @@ public static class ServerManager //Used with the PHP scripts
         while (!operation.isDone)
             yield return null;
 
-        string result = "";
-        if (request.result == UnityWebRequest.Result.Success)
-        {
-            if (result == "File not found")
-            {
-                result = null;
-                Debug.Log("GetFileAsync Server method worked, but the file was not found! File: " + searchString);
-            }
-            else
-            {
-                result = request.downloadHandler.text;
-                Debug.Log("Found file: " + searchString);
-            }
-        }
-        else
-            Debug.Log($"ERROR FINDING FILE: {searchString} | ERROR: {request.error}");
+        string result = request.result == UnityWebRequest.Result.Success ? request.downloadHandler.text : null;
+        if (result == "File not found")
+            result = null;
+        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"File Found: {searchString}" : $"ERROR FINDING FILE: {searchString} | ERROR: {request.error}");
 
         callback?.Invoke(result);
     }

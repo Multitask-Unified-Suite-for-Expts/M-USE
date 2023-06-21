@@ -383,7 +383,7 @@ namespace USE_Settings
 
 			string[] fieldNames = lines[0].Split(delimiter);
 
-			//PROB UNCOMMENT THIS LATER!!!
+			//UNCOMMENT THIS LATER!!!
 			//foreach (string fieldName in fieldNames)
 			//{
 			//	Debug.Log("FIELD NAME: " + fieldName);

@@ -461,6 +461,7 @@ namespace USE_StimulusManagement
 				}
 				catch (System.Exception e)
 				{
+					Debug.Log("STIM FILE NAME AFTER ERROR: " + FileName);
 					Debug.LogError(e.ToString());
 					return null;
 				}

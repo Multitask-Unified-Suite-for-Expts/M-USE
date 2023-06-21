@@ -141,12 +141,12 @@ namespace USE_ExperimentTemplate_Session
 
             if (WebBuild)
             {
-                SessionDataPath = ServerManager.SessionDataFolderPath; //may need to be different for use default configs
+                SessionDataPath = ServerManager.SessionDataFolderPath;
+                TaskIconsFolderPath = "DefaultResources/TaskIcons"; //Currently having web build use in house task icons instead of loading from server. 
 
                 if (UseDefaultConfigs)
                 {
                     ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts"; //may eventually want to change for using server configs
-                    TaskIconsFolderPath = "Assets/_USE_Session/Resources/DefaultResources/TaskIcons"; //May eventually want to change for using server configs
                     configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
                     WriteSessionConfigsToPersistantDataPath();
                     SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFilePathInExternalFolder(configFileFolder, "*SessionConfig*"));
@@ -155,7 +155,7 @@ namespace USE_ExperimentTemplate_Session
                 else //Using Server Configs:
                 {
                     ContextExternalFilePath = "Resources/Contexts"; //path from root server folder
-                    TaskIconsFolderPath = "Resources/TaskIcons"; //path from root server folder
+                    //TaskIconsFolderPath = "Resources/TaskIcons"; //un comment if end up wanting to load from server instead (and also remove the one above)
                     configFileFolder = ServerManager.SessionConfigFolderPath;
                     StartCoroutine(ServerManager.GetFileAsync(ServerManager.SessionConfigFolderPath, "SessionConfig", result =>
                     {
@@ -176,8 +176,6 @@ namespace USE_ExperimentTemplate_Session
                 SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFilePathInExternalFolder(configFileFolder, "*SessionConfig*"));
                 LoadSessionConfigSettings();
             }
-
-
         }
 
 
@@ -310,7 +308,6 @@ namespace USE_ExperimentTemplate_Session
                         //AsyncOperation loadScene;
                         SceneLoading = true;
                         taskName = (string)TaskMappings[iTask];
-                        Debug.Log("TASK NAME: " + taskName);
                         loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
                         string configName = TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
                         // Unload it after memory because this loads the assets into memory but destroys the objects
@@ -501,23 +498,7 @@ namespace USE_ExperimentTemplate_Session
                     string taskIcon = TaskIcons[taskConfigName];
 
                     if(WebBuild)
-                    {
-                        if(UseDefaultConfigs)
-                        {
-                            taskButtonImage.texture = Resources.Load<Texture2D>("DefaultResources/TaskIcons/" + taskIcon);
-                        }
-                        else
-                        {
-                            string iconPath = $"{TaskIconsFolderPath}/{taskIcon}.png";
-                            StartCoroutine(ServerManager.LoadTextureFromServer(iconPath, tex =>
-                            {
-                                if (tex != null)
-                                    taskButtonImage.texture = tex;
-                                else
-                                    Debug.Log("TRIED TO LOAD THE TASK ICON FROM SERVER BUT THE RESULTING TEX IS NULL!");
-                            }));
-                        }
-                    }
+                        taskButtonImage.texture = Resources.Load<Texture2D>(TaskIconsFolderPath + "/" + taskIcon);
                     else
                         taskButtonImage.texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + taskIcon + ".png");
 

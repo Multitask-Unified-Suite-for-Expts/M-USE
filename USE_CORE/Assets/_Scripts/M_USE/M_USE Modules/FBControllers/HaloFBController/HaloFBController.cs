@@ -35,16 +35,23 @@ public class HaloFBController : MonoBehaviour
     {
         LeaveFBOn = true;
     }
-    public void ShowPositive(GameObject gameObj)
+    public void ShowPositive(GameObject gameObj, float? depth = null)
     {
         state = State.Positive;
-        Show(PositiveHaloPrefab, gameObj);
+        if (depth == null)
+            Show(PositiveHaloPrefab, gameObj);
+        else
+            Show2D(PositiveHaloPrefab, gameObj, depth.Value);
     }
     
-    public void ShowNegative(GameObject gameObj)
+    public void ShowNegative(GameObject gameObj, float? depth = null)
     {
         state = State.Negative;
-        Show(NegativeHaloPrefab, gameObj);
+        if(depth == null)
+            Show(NegativeHaloPrefab, gameObj);
+        else
+            Show2D(NegativeHaloPrefab, gameObj, depth.Value);
+
     }
 
     private void Show(GameObject haloPrefab, GameObject gameObj)
@@ -67,7 +74,27 @@ public class HaloFBController : MonoBehaviour
         Vector3 behindPos = rootObj.transform.position - rootObj.transform.forward * distanceBehind;
         instantiated.transform.position = behindPos;
     }
-    
+
+    public void Show2D(GameObject haloPrefab, GameObject gameObj, float depth = 10)
+    {
+        if (instantiated != null)
+        {
+            if (!LeaveFBOn)
+            {
+                Debug.LogWarning("Trying to show HaloFB but one is already being shown");
+                Destroy(instantiated);
+            }
+        }
+        GameObject rootObj = gameObj.transform.root.gameObject;
+        instantiated = Instantiate(haloPrefab, null);
+        EventCodeManager.SendCodeImmediate(SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
+        Vector3 pos3d = gameObj.transform.position;
+        Vector2 pos2d = Camera.main.WorldToScreenPoint(pos3d);
+        Debug.Log("2d: " + pos2d + ", 3d: " + pos3d);
+        Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(pos2d.x, pos2d.y, depth));
+        instantiated.transform.position = worldPos;
+    }
+
 
     public void Destroy()
     {

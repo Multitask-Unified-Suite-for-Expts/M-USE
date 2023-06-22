@@ -67,7 +67,7 @@ public class InitScreen : MonoBehaviour
     void Start()
     {
         #if (UNITY_WEBGL)
-            session.WebBuild = true;
+            SessionValues.WebBuild = true;
         #endif
 
         displayController = gameObject.AddComponent<DisplayController>();
@@ -83,7 +83,7 @@ public class InitScreen : MonoBehaviour
             g.SetActive(true);
 
 
-        if (session.WebBuild)
+        if (SessionValues.WebBuild)
         {
             StartCoroutine(ServerManager.GetSessionConfigFolders(folders => folderDropdown.SetFolders(folders)));
 
@@ -96,13 +96,16 @@ public class InitScreen : MonoBehaviour
         }
         else
             buttonsParentGO.SetActive(true);
-
     }
 
+    public void Confirm()
+    {
+        StartCoroutine(HandleConfirm());
+    }
 
     IEnumerator HandleConfirm()
     {
-        if(session.WebBuild)
+        if(SessionValues.WebBuild)
         {
             string subjectID = session.SessionDetails.GetItemValue("SubjectID");
             string sessionID = session.SessionDetails.GetItemValue("SessionID");
@@ -111,7 +114,8 @@ public class InitScreen : MonoBehaviour
 
             string sessionConfigFolder = dropdown.options[dropdown.value].text;
             ServerManager.SetSessionConfigFolderName(sessionConfigFolder);
-            session.UseDefaultConfigs = sessionConfigFolder.ToLower().Contains("default") ? true : false;
+            if (sessionConfigFolder.ToLower().Contains("default"))
+                SessionValues.UseDefaultConfigs = true;
         }
 
         if (OnLoadSettings != null)
@@ -133,24 +137,17 @@ public class InitScreen : MonoBehaviour
         yield return 0;
     }
 
-    public void Confirm()
-    {
-        StartCoroutine(HandleConfirm());
-    }
-
-
     public void OnConfigButtonPress() //Used by Normal Build for user to select Default or Local configs. 
     {
         buttonsParentGO.SetActive(false);
        
         if(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name.ToLower().Contains("default"))
         {
-            session.UseDefaultConfigs = true;
+            SessionValues.UseDefaultConfigs = true;
             Confirm();
         }
         else
         {
-            session.UseDefaultConfigs = false;
             locateFileGO.SetActive(true);
             confirmButtonGO.SetActive(true);
         }

@@ -352,14 +352,19 @@ namespace USE_Settings
 		{
 			Settings settings = new Settings(dictName, settingsPath);
 
-			Debug.Log("Attempting to load settings file " + settingsPath + " | " + serverFileString + ".");
+			Debug.Log("Attempting to load settings file " + settingsPath);
 			if (dictName == "")
 				dictName = settingsCategory;
 
-			#if (!UNITY_WEBGL)
+
+			//THIS WAS BREAKING SOME STUFF. MIGHT NEED TO BE CHANGED/FINALIZED!
+			if(serverFileString == null)
+			//if (!SessionValues.WebBuild)
+			{
 				if (!File.Exists(settingsPath))
 					return;
-			#endif
+			}
+
 
 			string[] lines;
 
@@ -382,7 +387,6 @@ namespace USE_Settings
 			T[] settingsArray = new T[lines.Length - 1];
 
 			string[] fieldNames = lines[0].Split(delimiter);
-
 
 			string tempFieldName = "";
 			foreach (string fieldName in fieldNames)

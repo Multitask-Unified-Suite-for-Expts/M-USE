@@ -153,7 +153,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.SetHaloSize(5);
 
 
-            if (UseDefaultConfigs && !Application.isEditor)
+            //Added OR WebBuild, but this entire thing likely gonna break something. Need to fine tune it. 
+            if ((SessionValues.UseDefaultConfigs && !Application.isEditor) || SessionValues.WebBuild)
             {
                 tileTex = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/" + TileTexture);
                 mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/" + MazeBackgroundTextureName);
@@ -239,9 +240,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             InstantiateCurrMaze();
             tiles.ToggleVisibility(true);
 
-            #if (!UNITY_WEBGL)
+            if (!SessionValues.WebBuild)
                 CreateTextOnExperimenterDisplay();
-            #endif
 
             mazeStartTime = Time.unscaledTime;
 
@@ -418,16 +418,15 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         ITI.AddInitializationMethod(() =>
         {
             DisableSceneElements();
-            #if (!UNITY_WEBGL)
-            DestroyChildren(playerViewParent);
-            #endif
+            if (!SessionValues.WebBuild)
+                DestroyChildren(playerViewParent);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOff"]);
             if (finishedMaze)
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderFbController_SliderCompleteFbOff"]);
             if (NeutralITI)
             {
                 contextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage"), UseDefaultConfigs);
+                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage"));
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);

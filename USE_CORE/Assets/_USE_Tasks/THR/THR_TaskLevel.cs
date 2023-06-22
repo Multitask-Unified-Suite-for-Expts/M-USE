@@ -73,12 +73,13 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddInitializationMethod(() =>
         {
-            #if (!UNITY_WEBGL)
+            if(!SessionValues.WebBuild)
+            {
                 if (BlockStringsAdded > 0)
                     CurrentBlockString += "\n";
                 BlockStringsAdded++;
                 PreviousBlocksString.Insert(0, CurrentBlockString);
-            #endif
+            }
 
             TrialsCompleted_Task += trialLevel.TrialsCompleted_Block;
             TrialsCorrect_Task += trialLevel.TrialsCorrect_Block;

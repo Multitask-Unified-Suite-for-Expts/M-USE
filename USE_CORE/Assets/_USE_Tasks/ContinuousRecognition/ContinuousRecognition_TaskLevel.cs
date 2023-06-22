@@ -70,12 +70,12 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             string contextFilePath;
-            if (WebBuild)
+            if (SessionValues.WebBuild)
                 contextFilePath = $"{ContextExternalFilePath}/{TaskName}_Contexts/{currentBlock.ContextName}";
             else
-                contextFilePath = trialLevel.GetContextNestedFilePath(trialLevel.MaterialFilePath, currentBlock.ContextName, "LinearDark");
+                contextFilePath = trialLevel.GetContextNestedFilePath(ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
 
-            RenderSettings.skybox = CreateSkybox(contextFilePath, WebBuild); //changed from usedefaultconfigs to webbuild. if keep, may need to do for all tasks
+            RenderSettings.skybox = CreateSkybox(contextFilePath);
 
             trialLevel.ContextActive = true;
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
@@ -88,7 +88,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddInitializationMethod(() =>
         {
-            if(!WebBuild)
+            if(!SessionValues.WebBuild)
             {
                 CalculateBlockAverages();
                 CalculateStanDev();

@@ -261,10 +261,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddInitializationMethod(() =>
         {
-            #if (!UNITY_WEBGL)
+            if(!SessionValues.WebBuild)
+            {
                 if (playerViewParent.transform.childCount != 0)
                     DestroyChildren(playerViewParent);
-            #endif
+            }
 
             if (selectedSD.StimTokenRewardMag > 0)
             {
@@ -303,7 +304,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath,"itiImage"), UseDefaultConfigs);
+                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath,"itiImage"));
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOff"]);
             }
         });
@@ -323,10 +324,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     }
     public override void FinishTrialCleanup()
     {
-        #if (!UNITY_WEBGL)
+        if(!SessionValues.WebBuild)
+        {
             if (playerViewParent.transform.childCount != 0)
                 DestroyChildren(playerViewParent);
-        #endif
+        }
 
         tStim.ToggleVisibility(false);
         
@@ -365,7 +367,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
 
-        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
 
         tStim = new StimGroup("SearchStimuli", group, CurrentTrialDef.TrialStimIndices);
         if(TokensWithStimOn?? false)

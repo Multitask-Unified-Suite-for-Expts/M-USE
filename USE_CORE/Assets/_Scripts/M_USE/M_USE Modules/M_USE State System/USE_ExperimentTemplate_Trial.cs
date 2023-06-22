@@ -16,6 +16,7 @@ using USE_UI;
 using System.IO.Ports;
 using Tobii.Research;
 using Tobii.Research.Unity;
+using System.Collections;
 
 namespace USE_ExperimentTemplate_Trial
 {
@@ -32,7 +33,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public bool StoreData, ForceBlockEnd, SerialPortActive, EyetrackerActive;
         [HideInInspector] public string TaskDataPath, FilePrefix, TrialSummaryString;
 
-        protected State SetupTrial, FinishTrial, Delay;
+        protected State LoadTrialStims, SetupTrial, FinishTrial, Delay;
         
         protected State StateAfterDelay = null;
         protected float DelayDuration = 0;
@@ -85,8 +86,6 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public float ParticipantDistance_CM;
         [HideInInspector] public float ShotgunRaycastCircleSize_DVA;
 
-        [HideInInspector] public bool UseDefaultConfigs;
-
         [HideInInspector] public bool IsHuman;
         [HideInInspector] public HumanStartPanel HumanStartPanel;
         [HideInInspector] public USE_StartButton USE_StartButton;
@@ -95,7 +94,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public UI_Debugger UI_Debugger;
         [HideInInspector] public GameObject PauseIconGO;
 
-        [HideInInspector] public bool WebBuild;
+        [HideInInspector] public bool TrialStimsLoaded;
 
 
 
@@ -119,10 +118,11 @@ namespace USE_ExperimentTemplate_Trial
 
         public void DefineTrialLevel()
         {
+            LoadTrialStims = new State("LoadTrialStims");
             SetupTrial = new State("SetupTrial");
             FinishTrial = new State("FinishTrial");
             Delay = new State("Delay");
-            AddActiveStates(new List<State> { SetupTrial, FinishTrial, Delay });
+            AddActiveStates(new List<State> { LoadTrialStims, SetupTrial, FinishTrial, Delay });
             // A state that just waits for some time;
             Delay.AddTimer(() => DelayDuration, () => StateAfterDelay);
 
@@ -139,9 +139,8 @@ namespace USE_ExperimentTemplate_Trial
             //DefineTrial();
             Add_ControlLevel_InitializationMethod(() =>
             {
-#if (!UNITY_WEBGL)
-                        SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
-#endif
+                if(!SessionValues.WebBuild)
+                    SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
 
                 TrialCount_InBlock = -1;
                 TrialStims = new List<StimGroup>();
@@ -149,25 +148,14 @@ namespace USE_ExperimentTemplate_Trial
                 //DetermineNumTrialsInBlock();
             });
 
-            SetupTrial.AddUniversalInitializationMethod(() =>
+            LoadTrialStims.AddUniversalInitializationMethod(() =>
             {
-                TokenFBController.RecalculateTokenBox(); //recalculate tokenbox incase they switch to fullscreen mode
-
-                TaskSelectionCanvasGO.SetActive(false);
-
-                EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTrialStarts"]);
-
-                Input.ResetInputAxes();
-
                 AbortCode = 0;
 
-                #if (!UNITY_WEBGL)
-                    SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials",1));
-                #endif
-
-                #if (UNITY_WEBGL)
+                if (SessionValues.WebBuild)
                     Cursor.visible = true;
-                #endif
+                else
+                    SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials", 1));
 
                 TrialCount_InTask++;
                 TrialCount_InBlock++;
@@ -178,16 +166,19 @@ namespace USE_ExperimentTemplate_Trial
                     SerialSentData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
                 }
 
-                // FrameData.fileName =
-                //     FilePrefix + "__FrameData_Trial_" + FrameData.GetNiceIntegers(4, TrialCount_InTask + 1);
-                //FrameData.CreateFile();
                 DefineTrialStims();
-                ResetRelativeStartTime();
+                StartCoroutine(HandleLoadingStims());
+            });
+            LoadTrialStims.SpecifyTermination(() => TrialStimsLoaded, SetupTrial, () => TrialStimsLoaded = false);
 
-                foreach (StimGroup sg in TrialStims)
-                {
-                    sg.LoadStims();
-                }
+            SetupTrial.AddUniversalInitializationMethod(() =>
+            {
+                TokenFBController.RecalculateTokenBox(); //recalculate tokenbox incase they switch to fullscreen mode
+                TaskSelectionCanvasGO.SetActive(false);
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTrialStarts"]);
+                Input.ResetInputAxes();
+
+                ResetRelativeStartTime();
 
                 ResetTrialVariables();
             });
@@ -195,13 +186,12 @@ namespace USE_ExperimentTemplate_Trial
             {
                 if (IsHuman)
                     HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
-                
             });
 
             FinishTrial.AddInitializationMethod(() => EventCodeManager.SendCodeImmediate(SessionEventCodes["FinishTrialStarts"]));
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => CheckForcedBlockEnd(), () => null);
-            FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Count - 1, SetupTrial);
+            FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Count - 1, LoadTrialStims);
             FinishTrial.SpecifyTermination(() => TrialCount_InBlock == TrialDefs.Count - 1, () => null);
 
             FinishTrial.AddUniversalTerminationMethod(() =>
@@ -223,10 +213,20 @@ namespace USE_ExperimentTemplate_Trial
             TrialData.ManuallyDefine();
             TrialData.AddStateTimingData(this);
             TrialData.CreateFile();
-           // TrialData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
-
 
         }
+
+
+        private IEnumerator HandleLoadingStims()
+        {
+            foreach (StimGroup sg in TrialStims)
+            {
+                yield return StartCoroutine(sg.LoadStims());
+            }
+            Debug.Log("SETTING TRIAL STIMS LOADED TO TRUE! at " + Time.time);
+            TrialStimsLoaded = true;
+        }
+
 
         protected void SetDelayState(State stateAfterDelay, float duration)
         {
@@ -236,6 +236,7 @@ namespace USE_ExperimentTemplate_Trial
 
         public virtual void FinishTrialCleanup()
         {
+
         }
 
         public void ClearActiveTrialHandlers()

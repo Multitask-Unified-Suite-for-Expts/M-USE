@@ -354,7 +354,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName), true);
+                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName));
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOff"]);
             }
 

@@ -113,11 +113,6 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public USE_StartButton USE_StartButton;
 
 
-        [HideInInspector] public bool UseDefaultConfigs; //Set by InitScreen.cs when they click confirm (it checks if they picked default configs)
-
-        [HideInInspector] public bool WebBuild;
-
-
 
         public override void LoadSettings()
         {
@@ -139,13 +134,13 @@ namespace USE_ExperimentTemplate_Session
                 FilePrefix = "Session_" + SessionID + "__Subject_" + SubjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
 
 
-            if (WebBuild)
+            if (SessionValues.WebBuild)
             {
                 SessionDataPath = ServerManager.SessionDataFolderPath;
                 TaskIconsFolderPath = "DefaultResources/TaskIcons"; //Currently having web build use in house task icons instead of loading from server. 
                 ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
 
-                if (UseDefaultConfigs)
+                if (SessionValues.UseDefaultConfigs)
                 {
                     //ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
                     configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
@@ -158,7 +153,7 @@ namespace USE_ExperimentTemplate_Session
                     //ContextExternalFilePath = "Resources/Contexts"; //path from root server folder
                     //TaskIconsFolderPath = "Resources/TaskIcons"; //un comment if end up wanting to load from server instead (and also remove the one above)
                     configFileFolder = ServerManager.SessionConfigFolderPath;
-                    StartCoroutine(ServerManager.GetFileAsync(ServerManager.SessionConfigFolderPath, "SessionConfig", result =>
+                    StartCoroutine(ServerManager.GetFileStringAsync(ServerManager.SessionConfigFolderPath, "SessionConfig", result =>
                     {
                         if (!string.IsNullOrEmpty(result))
                         {
@@ -227,7 +222,7 @@ namespace USE_ExperimentTemplate_Session
                 SessionData.CreateFile();
 
                 //Create Session Settings folder inside Data Folder: ----------------------------------------------------------------------------------------
-                if (WebBuild)
+                if (SessionValues.WebBuild)
                 {
                     StartCoroutine(CreateFolderOnServer(SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings", () =>
                     {
@@ -333,7 +328,7 @@ namespace USE_ExperimentTemplate_Session
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort, selectTask, () =>
             {
                 SessionSettings.Save();
-                if(!WebBuild)
+                if(!SessionValues.WebBuild)
                 {
                     GameObject initCamGO = GameObject.Find("InitCamera");
                     initCamGO.SetActive(false);
@@ -482,7 +477,7 @@ namespace USE_ExperimentTemplate_Session
                     string taskName = (string)task.Value;
 
                     string taskFolderPath = GetConfigFolderPath(taskConfigName);
-                    if(!WebBuild)
+                    if(!SessionValues.WebBuild)
                     {
                         if (!Directory.Exists(taskFolderPath))
                         {
@@ -498,7 +493,7 @@ namespace USE_ExperimentTemplate_Session
                     RawImage taskButtonImage = taskButton.AddComponent<RawImage>();
                     string taskIcon = TaskIcons[taskConfigName];
 
-                    if(WebBuild)
+                    if(SessionValues.WebBuild)
                         taskButtonImage.texture = Resources.Load<Texture2D>(TaskIconsFolderPath + "/" + taskIcon);
                     else
                         taskButtonImage.texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + taskIcon + ".png");
@@ -586,11 +581,12 @@ namespace USE_ExperimentTemplate_Session
                 Button button = taskButton.GetComponent<Button>();
                 taskButton.GetComponent<HoverEffect>().SetToInitialSize(); //Sets grey'd out button back to normal size
 
-#if (!UNITY_WEBGL)  //Let patients play same task as many times as they want
+                if(!SessionValues.WebBuild) //Let patients play same task as many times as they want
+                {
                     Color darkGrey = new Color(.5f, .5f, .5f, .35f);
                     image.color = darkGrey;
                     Destroy(button);
-#endif
+                }
 
                 string taskName = (string)TaskMappings[selectedConfigName];
                 loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
@@ -810,21 +806,19 @@ namespace USE_ExperimentTemplate_Session
 
 
             //MAKE SURE SYNCBOX INACTIVE FOR WEB BUILD (Can eventually remove this once thilo provides web build session configs with it marked false)
-            if(WebBuild)
+            if(SessionValues.WebBuild)
                 SyncBoxActive = false;
-
 
             if (SyncBoxActive)
                 SerialPortActive = true;
 
 
-
             //Load the Session Event Code Config file --------------------------------------------------------------------------------------------------
             string eventCodeFileString = "";
 
-            if(WebBuild && !UseDefaultConfigs)
+            if(SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
             {
-                StartCoroutine(ServerManager.GetFileAsync(ServerManager.SessionConfigFolderPath, "EventCode", result =>
+                StartCoroutine(ServerManager.GetFileStringAsync(ServerManager.SessionConfigFolderPath, "EventCode", result =>
                 {
                     SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", configFileFolder, result);
                     SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
@@ -832,7 +826,7 @@ namespace USE_ExperimentTemplate_Session
             }
             else
             {
-                string path = UseDefaultConfigs ? (Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs") : configFileFolder;
+                string path = SessionValues.UseDefaultConfigs ? (Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs") : configFileFolder;
                 eventCodeFileString = LocateFile.FindFilePathInExternalFolder(configFileFolder, "*EventCode*");
                 if (!string.IsNullOrEmpty(eventCodeFileString))
                 {
@@ -853,7 +847,6 @@ namespace USE_ExperimentTemplate_Session
                 taskNames = (List<string>)SessionSettings.Get("Session", "TaskNames");
                 TaskMappings = new OrderedDictionary();
                 taskNames.ForEach((taskName) => TaskMappings.Add(taskName, taskName));
-                Debug.Log("NUM TASKS = " + TaskMappings.Count);
             }
             else if (SessionSettings.SettingExists("Session", "TaskMappings"))
                 TaskMappings = (OrderedDictionary)SessionSettings.Get("Session", "TaskMappings");
@@ -1019,9 +1012,9 @@ namespace USE_ExperimentTemplate_Session
         {
             string path;
 
-            if(WebBuild)
+            if(SessionValues.WebBuild)
             {
-                if (UseDefaultConfigs)
+                if (SessionValues.UseDefaultConfigs)
                     path = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
                 else
                     path = $"{ServerManager.SessionConfigFolderPath}/{configName}";
@@ -1047,7 +1040,6 @@ namespace USE_ExperimentTemplate_Session
 
         ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
-            tl.WebBuild = WebBuild;
             tl.USE_StartButton = USE_StartButton;
             tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
             tl.HumanStartPanel = HumanStartPanel;
@@ -1058,7 +1050,7 @@ namespace USE_ExperimentTemplate_Session
             tl.SessionDataPath = SessionDataPath;
 
 
-            if (UseDefaultConfigs)
+            if (SessionValues.UseDefaultConfigs)
             {
                 tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
 
@@ -1167,7 +1159,6 @@ namespace USE_ExperimentTemplate_Session
             Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
             MethodInfo prepareTaskLevel = methodInfo.MakeGenericMethod(new Type[] { taskType });
             prepareTaskLevel.Invoke(this, new object[] { configName, verifyOnly });
-            // TaskSceneLoaded = true;
             SceneLoading = false;
         }
 
@@ -1175,7 +1166,6 @@ namespace USE_ExperimentTemplate_Session
         {
             string taskName = (string)TaskMappings[configName];
             ControlLevel_Task_Template tl = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
-            tl.UseDefaultConfigs = UseDefaultConfigs;
             tl.ConfigName = configName;
             tl = PopulateTaskLevel(tl, verifyOnly);
             if (tl.TaskCam == null)
@@ -1210,37 +1200,6 @@ namespace USE_ExperimentTemplate_Session
 
         void OnApplicationQuit()
         {
-            //	performancetext.AppendData();
-            //	performancetext.WriteData();
-
-            //	if (exptParameters.ContextMaterials != null)
-            //	{
-            //		foreach (var o in exptParameters.ContextMaterials)
-            //		{
-            //			Resources.UnloadAsset(o);
-            //		}
-            //	}
-
-            //	if (eyeTrackType == 2)
-            //	{
-            //		if (calibLevel.calibrationUnfinished == true)
-            //			udpManager.SendString("ET###leave_calibration");
-            //		udpManager.SendString("ET###unsubscribe_eyetracker");
-            //	}
-            //	if (eventCodeManager.codesActive)
-            //	{
-            //		serialPortController.ClosePort();
-            //	}
-            //	trialLevel.WriteTrialData();
-            //	blockData.AppendData();
-            //	blockData.WriteData();
-            //	//WriteFrameByFrameData();
-            //	if (eyeTrackType == 2)
-            //	{
-            //		udpManager.SendString("DATA###clear_data");
-            //		udpManager.CloseUDP();
-            //	}
-            //	//Save EditorLog and Player Log files
 
             if (StoreData)
             {
@@ -1301,7 +1260,7 @@ namespace USE_ExperimentTemplate_Session
                 CloseHandle(dirHandle);
 #endif
                 //Create Log Folder & Files for Normal Build: -----------------------------------------------------------------------------------------------
-                if (!WebBuild) //Web Build log folder & file creation already handled in the WebBuildLogWriter.cs class
+                if (!SessionValues.WebBuild) //Web Build log folder & file creation already handled in the WebBuildLogWriter.cs class
                 {
                     System.IO.Directory.CreateDirectory(SessionDataPath + Path.DirectorySeparatorChar + "LogFile");
 

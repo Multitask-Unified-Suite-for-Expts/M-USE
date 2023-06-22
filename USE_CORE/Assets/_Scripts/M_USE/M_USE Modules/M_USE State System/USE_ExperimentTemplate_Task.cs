@@ -59,7 +59,7 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public ScreenBasedCalibration ScreenBasedCalibration;
         [HideInInspector] public DisplayArea DisplayArea;
 
-        [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive, UseDefaultConfigs;
+        [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         [HideInInspector] public string ContextExternalFilePath, SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
         [HideInInspector] public MonitorDetails MonitorDetails;
         [HideInInspector] public LocateFile LocateFile;
@@ -125,8 +125,6 @@ namespace USE_ExperimentTemplate_Task
 
         [HideInInspector] public event EventHandler TaskSkyboxSet_Event;
 
-        [HideInInspector] public bool WebBuild;
-
         [HideInInspector] public bool TaskLevelDefined;
 
         private bool TaskDefImported;
@@ -160,18 +158,20 @@ namespace USE_ExperimentTemplate_Task
         {
             TaskLevelDefined = false;
 
-            if (UseDefaultConfigs) //WILL EVENTUALLY CHANGE FOR SERVER CONFIGS
+            if (SessionValues.UseDefaultConfigs) //WILL EVENTUALLY CHANGE FOR SERVER CONFIGS
                 PrefabPath = "/DefaultResources/Stimuli";
 
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
-
 
             ReadSettingsFiles();
 
             while(!AllDefsImported)
             {
+                Debug.Log("TrialsImported? " + TrialDefImported + " BlocksImported? " + BlockDefImported + " TaskDefImported? " + TaskDefImported);
                 yield return new WaitForEndOfFrame();
             }
+            Debug.Log("AFTER LOOP: " + " TrialsImported? " + TrialDefImported + " BlocksImported? " + BlockDefImported + " TaskDefImported? " + TaskDefImported);
+
             TrialDefImported = false;
             BlockDefImported = false;
             TaskDefImported = false;
@@ -225,7 +225,7 @@ namespace USE_ExperimentTemplate_Task
                 PreviousBlockSummaryString = new StringBuilder();
                 CurrentTaskSummaryString = new StringBuilder();
 
-                if(!WebBuild)
+                if(!SessionValues.WebBuild)
                 {
                     SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
 
@@ -247,9 +247,9 @@ namespace USE_ExperimentTemplate_Task
                 SetTaskSummaryString();
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTaskStarts"]);
 
-                Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
                 if (IsHuman)
                 {
+                    Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
                     //Create HumanStartPanel
                     HumanStartPanel.SetupDataAndCodes(FrameData, EventCodeManager, SessionEventCodes);
                     HumanStartPanel.SetTaskLevel(this);
@@ -273,7 +273,7 @@ namespace USE_ExperimentTemplate_Task
             });
 
             //Hotkey for WebGL build so we can end task and go to next block
-            if(WebBuild)
+            if(SessionValues.WebBuild)
             {
                 RunBlock.AddUpdateMethod(() =>
                 {
@@ -397,7 +397,6 @@ namespace USE_ExperimentTemplate_Task
                     SessionDataControllers.RemoveDataController("FrameData_" + TaskName);
                 }
 
-
                 int sgNum = TaskStims.AllTaskStimGroups.Count;
                 for (int iSg = 0; iSg < sgNum; iSg++)
                 {
@@ -409,7 +408,6 @@ namespace USE_ExperimentTemplate_Task
                         sg.stimDefs[0].Destroy();
                         sg.stimDefs.RemoveAt(0);
                     }
-
                     sg.DestroyStimGroup();
                 }
 
@@ -422,13 +420,11 @@ namespace USE_ExperimentTemplate_Task
 
                 Destroy(Controllers);
 
-#if (!UNITY_WEBGL)
-                    //Destroy Text on Experimenter Display:
+                if(!SessionValues.WebBuild)
+                {
                     foreach (Transform child in GameObject.Find("MainCameraCopy").transform)
-                    {
                         Destroy(child.gameObject);
-                    }
-#endif
+                }
             });
             
 
@@ -536,10 +532,6 @@ namespace USE_ExperimentTemplate_Task
             if (SessionEventCodes != null)
                 TrialLevel.SessionEventCodes = SessionEventCodes;
 
-            TrialLevel.UseDefaultConfigs = UseDefaultConfigs;
-
-            TrialLevel.WebBuild = WebBuild;
-
 
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShotgunRaycastCircleSize_DVA"))
                 TrialLevel.ShotgunRaycastCircleSize_DVA = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ShotgunRaycastCircleSize_DVA");
@@ -557,9 +549,9 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.ShotgunRaycastSpacing_DVA = ShotgunRaycastSpacing_DVA;
 
 
-            if(WebBuild)
+            if(SessionValues.WebBuild)
             {
-                if (UseDefaultConfigs)
+                if (SessionValues.UseDefaultConfigs)
                     TrialLevel.LoadTexturesFromResources();
                 else
                 {
@@ -715,10 +707,10 @@ namespace USE_ExperimentTemplate_Task
 
         public void LoadTaskEventCodeAndConfigUIFiles()
         {
-            if (WebBuild && !UseDefaultConfigs)
+            if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
             {
                 string path = $"{ServerManager.SessionConfigFolderPath}/{TaskName}";
-                StartCoroutine(ServerManager.GetFileAsync(path, "ConfigUi", result =>
+                StartCoroutine(ServerManager.GetFileStringAsync(path, "ConfigUi", result =>
                 {
                     if (!string.IsNullOrEmpty(result))
                     {
@@ -728,9 +720,8 @@ namespace USE_ExperimentTemplate_Task
                     else
                         Debug.Log("TASK CONFIG UI RESULT IS NULL!");
                 }));
-                StartCoroutine(ServerManager.GetFileAsync(path, "EventCode", result =>
+                StartCoroutine(ServerManager.GetFileStringAsync(path, "EventCode", result =>
                 {
-                    Debug.Log("EVENT CODE RESULT: " + result);
                     if (!string.IsNullOrEmpty(result))
                     {
                         SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig", path, result);
@@ -776,7 +767,7 @@ namespace USE_ExperimentTemplate_Task
                     string filePath = TaskConfigPath + Path.DirectorySeparatorChar + key; //initially set for not default configs, then changed below for UseDefaultConfigs
                     string settingsFileName = key.Split('.')[0];
 
-                    if (UseDefaultConfigs)
+                    if (SessionValues.UseDefaultConfigs)
                     {
                         string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + TaskName + "_DefaultConfigs";
                         filePath = folderPath + Path.DirectorySeparatorChar + settingsFileName;
@@ -1069,9 +1060,9 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadTaskDef<T>(string taskConfigFolder) where T : TaskDef
         {
-            if (WebBuild && !UseDefaultConfigs)
+            if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
             {
-                StartCoroutine(ServerManager.GetFileAsync(taskConfigFolder, "TaskDef", result =>
+                StartCoroutine(ServerManager.GetFileStringAsync(taskConfigFolder, "TaskDef", result =>
                 {
                     if (!string.IsNullOrEmpty(result))
                         SessionSettings.ImportSettings_MultipleType(TaskName + "_TaskSettings", taskConfigFolder, result);
@@ -1094,9 +1085,9 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadBlockDefs<T>(string taskConfigFolder) where T : BlockDef
         {
-            if (WebBuild && !UseDefaultConfigs)
+            if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
             {
-                StartCoroutine(ServerManager.GetFileAsync(taskConfigFolder, "BlockDef", serverBlockDefFile =>
+                StartCoroutine(ServerManager.GetFileStringAsync(taskConfigFolder, "BlockDef", serverBlockDefFile =>
                 {
                     if (!string.IsNullOrEmpty(serverBlockDefFile))
                         ImportBlockDefs<T>(taskConfigFolder, serverBlockDefFile);
@@ -1139,9 +1130,9 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadTrialDefs<T>(string taskConfigFolder) where T : TrialDef
         {
-            if (WebBuild && !UseDefaultConfigs)
+            if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
             {
-                StartCoroutine(ServerManager.GetFileAsync(taskConfigFolder, "TrialDef", result =>
+                StartCoroutine(ServerManager.GetFileStringAsync(taskConfigFolder, "TrialDef", result =>
                 {
                     if (!string.IsNullOrEmpty(result))
                         ImportTrialDefs<T>(taskConfigFolder, result);
@@ -1175,13 +1166,13 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadStimDefs<T>(string taskConfigFolder) where T : StimDef
         {
-            string key = TaskName + (UseDefaultConfigs ? "_PrefabStims" : "_ExternalStimDefs");
+            string key = TaskName + (SessionValues.UseDefaultConfigs ? "_PrefabStims" : "_ExternalStimDefs");
             PrefabStims = new StimGroup("PrefabStims");
             ExternalStims = new StimGroup("ExternalStims");
 
-            if (WebBuild)
+            if (SessionValues.WebBuild)
             {
-                if (UseDefaultConfigs)
+                if (SessionValues.UseDefaultConfigs)
                 {
                     string defaultStimDefFilePath = taskConfigFolder + "/" + TaskName + "_StimDeftdf.txt";
                     ImportStimDefs<T>(key, defaultStimDefFilePath);
@@ -1189,7 +1180,7 @@ namespace USE_ExperimentTemplate_Task
                 }
                 else
                 {
-                    StartCoroutine(ServerManager.GetFileAsync(taskConfigFolder, "StimDef", result =>
+                    StartCoroutine(ServerManager.GetFileStringAsync(taskConfigFolder, "StimDef", result =>
                     {
                         if (!string.IsNullOrEmpty(result))
                             ImportStimDefs<T>(key, taskConfigFolder, result);
@@ -1220,18 +1211,24 @@ namespace USE_ExperimentTemplate_Task
 
             IEnumerable<StimDef> potentials = (T[])SessionSettings.Get(key);
 
+            GameObject canvasGO = GameObject.Find(TaskName + "_Canvas");
+
             if (potentials == null || potentials.Count() < 1)
                 return;
             else
             {
-                if (UseDefaultConfigs)
+                if (SessionValues.UseDefaultConfigs)
                 {
                     PrefabStims = new StimGroup("PrefabStims", (T[])SessionSettings.Get(key));
                     foreach (var stim in PrefabStims.stimDefs)
                         PrefabStimPaths.Add(stim.PrefabPath + "/" + stim.FileName);
                 }
                 else
+                {
                     ExternalStims = new StimGroup("ExternalStims", (T[])SessionSettings.Get(key));
+                    foreach (StimDef stim in ExternalStims.stimDefs)
+                        stim.CanvasGameObject = canvasGO;
+                }
                 Debug.Log("PREFAB STIMS: " + PrefabStims.stimDefs.Count + " | " + "EXTERNAL STIMS: " + ExternalStims.stimDefs.Count);
             }
         }

@@ -86,7 +86,7 @@ public static class ServerManager //Used with the PHP scripts
         request.method = UnityWebRequest.kHttpVerbPUT;
         request.SetRequestHeader("Content-Type", "text/plain");
         yield return request.SendWebRequest();
-        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"SUCCESS! Created file: {fileName}" : $"FAILED! Error creating file: {fileName} | Error: {request.error}");
+        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Successfully created file: {fileName}" : $"ERROR CREATING FILE: {fileName} | Error: {request.error}");
     }
 
 
@@ -94,7 +94,7 @@ public static class ServerManager //Used with the PHP scripts
 
     public static IEnumerator AppendToFileAsync(string folderPath, string fileName, string rowData)
     {
-        yield return GetFileAsync(folderPath, fileName, originalFileContents =>
+        yield return GetFileStringAsync(folderPath, fileName, originalFileContents =>
         {
             if (originalFileContents != null)
             {
@@ -117,12 +117,12 @@ public static class ServerManager //Used with the PHP scripts
         {
             request.SetRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             yield return request.SendWebRequest();
-            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Success writing file" : $"FAILED writing file! | Error: {request.error}");
+            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Success writing file to server!" : $"FAILED writing file! | Error: {request.error}");
         }
     }
 
 
-    public static IEnumerator GetFileAsync(string path, string searchString, Action<string> callback)
+    public static IEnumerator GetFileStringAsync(string path, string searchString, Action<string> callback)
     {
         string url = $"{ServerURL}/getFile.php?path={path}&searchString={searchString}";
 
@@ -136,7 +136,7 @@ public static class ServerManager //Used with the PHP scripts
         if(request.result == UnityWebRequest.Result.Success)
         {
             result = request.downloadHandler.text;
-            Debug.Log(result == "File not found" ? ("File Not Found on Server: " + searchString) : ("Found File: " + searchString));
+            Debug.Log(result == "File not found" ? ("File NOT Found on Server: " + searchString) : ("Found File On Server: " + searchString));
             if (result == "File not found")
                 result = null;
         }
@@ -149,6 +149,29 @@ public static class ServerManager //Used with the PHP scripts
         callback?.Invoke(result);
     }
 
+    public static IEnumerator GetFileBytesAsync(string path, string searchString, Action<byte[]> callback)
+    {
+        string url = $"{ServerURL}/getFile.php?path={path}&searchString={searchString}";
+
+        using UnityWebRequest request = UnityWebRequest.Get(url);
+        var operation = request.SendWebRequest();
+
+        while (!operation.isDone)
+            yield return null;
+
+        byte[] result = null;
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            result = request.downloadHandler.data;
+            Debug.Log(result.Length == 0 ? ("File Not Found on Server: " + searchString) : ("Found File On Server: " + searchString));
+        }
+        else
+        {
+            Debug.Log($"ERROR FINDING FILE: {searchString} | ERROR: {request.error}");
+        }
+
+        callback?.Invoke(result);
+    }
 
 
     public static IEnumerator CopyFolder(string sourcePath, string destinationPath)
@@ -164,7 +187,7 @@ public static class ServerManager //Used with the PHP scripts
 
     public static IEnumerator CopyFileAsync(string currentPath, string newPath, string fileName) //not being used i dont think
     {
-        yield return GetFileAsync(currentPath, fileName, fileContents =>
+        yield return GetFileStringAsync(currentPath, fileName, fileContents =>
         {
             if (fileContents != null)
             {

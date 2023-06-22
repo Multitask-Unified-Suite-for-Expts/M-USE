@@ -125,11 +125,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     StartButton = USE_StartButton.CreateStartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
                     USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
-
             }
-            #if (!UNITY_WEBGL)
+
+            if(!SessionValues.WebBuild)
                 playerViewParent = GameObject.Find("MainCameraCopy").transform;
-            #endif
         });
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
@@ -207,9 +206,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
         ChooseStim.AddInitializationMethod(() =>
         {
-            #if (!UNITY_WEBGL)
+            if (!SessionValues.WebBuild)
                 CreateTextOnExperimenterDisplay();
-            #endif
 
             ChosenGO = null;
             ChosenStim = null;
@@ -221,8 +219,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
         });
-
-
 
         ChooseStim.AddUpdateMethod(() =>
         {
@@ -314,9 +310,19 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 return;
 
             if (currentTrial.GotTrialCorrect)
-                HaloFBController.ShowPositive(ChosenGO);
+            {
+                if (SessionValues.Using2DStim)
+                    HaloFBController.ShowPositive(ChosenGO, 10f);
+                else
+                    HaloFBController.ShowPositive(ChosenGO);
+            }
             else
-                HaloFBController.ShowNegative(ChosenGO);
+            {
+                if(SessionValues.Using2DStim)
+                    HaloFBController.ShowNegative(ChosenGO, 10);
+                else
+                    HaloFBController.ShowNegative(ChosenGO);
+            }
         });
         TouchFeedback.AddTimer(() => touchFbDuration.value, TokenUpdate);
         TouchFeedback.SpecifyTermination(() => !StimIsChosen, TokenUpdate);
@@ -850,7 +856,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         NumNew_Trial = 0;
         NumPNC_Trial = 0;
 
-        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
 
 
         if (TrialCount_InBlock == 0)
@@ -981,7 +987,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         Starfield.SetActive(false);
         TokenFBController.enabled = false;
 
-        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
 
         if (!StimIsChosen && ChosenStimIndices.Count < 1)
             return;
@@ -1033,7 +1039,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     {
         TrialStims.Add(group);
         group.SetLocations(locations);
-        group.LoadStims();
+        StartCoroutine(group.LoadStims());
         group.ToggleVisibility(true);
     }
 

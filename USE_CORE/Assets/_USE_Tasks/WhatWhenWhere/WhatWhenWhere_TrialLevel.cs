@@ -456,15 +456,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     CurrentTaskLevel.LearningSpeed = TrialCount_InBlock;
             }
 
-            #if (!UNITY_WEBGL)
+            if(!SessionValues.WebBuild)
+            {
                 if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
                     DestroyChildren(GameObject.Find("MainCameraCopy"));
-            #endif
+            }
             
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png", UseDefaultConfigs);
+                RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
             }
 
             GenerateAccuracyLog();
@@ -485,10 +486,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     }
     public override void FinishTrialCleanup()
     {
-        #if (!UNITY_WEBGL)
+        if(!SessionValues.WebBuild)
+        {
             if (playerViewParent.transform.childCount != 0)
                 DestroyChildren(GameObject.Find("MainCameraCopy"));
-        #endif
+        }
 
         searchStims.ToggleVisibility(false);
         distractorStims.ToggleVisibility(false);
@@ -653,7 +655,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //-----------------------------------------------------DEFINE QUADDLES-------------------------------------------------------------------------------------
     protected override void DefineTrialStims()
     {
-        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
 
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish

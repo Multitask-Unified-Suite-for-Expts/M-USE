@@ -151,9 +151,12 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
                             RawImage compGOImage = compGO.AddComponent<RawImage>();
                             string stimPath = ExternalStims.stimDefs[compStimIndex].FileName;
                             compGOImage.texture = LoadPNG(stimPath);
-                            compGOImage.rectTransform.localScale = new Vector3(0.01f, 0.01f, 0.01f); //add the var in the config later                      
+                            compGOImage.rectTransform.localScale = new Vector3(0.05f, 0.05f, 0.05f); //add the var in the config later                      
+                            compGO.GetComponent<RawImage>().raycastTarget = false;
                             compStimCopies.Add(compGO);
                             compStimCopies[iComp].SetActive(false);
+                            
+
                         }
                         mcComponentGameObjs.Add(compStimCopies);
                     }
@@ -231,7 +234,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
 
-            sampleStims.stimDefs[0].StimGameObject.transform.localPosition = new Vector3(0, 0, 0);
+            sampleStims.stimDefs[0].StimGameObject.transform.localPosition = CurrentTrialDef.sampleCompLocations[0];
             sampleStims.stimDefs[0].StimGameObject.transform.localRotation = Quaternion.Euler(0, 0, 0);
             sampleStims.stimDefs[0].StimGameObject.transform.localScale = new Vector3(1, 1, 1);
             sampleStims.stimDefs[0].StimGameObject.GetComponent<RawImage>().raycastTarget = false;
@@ -582,9 +585,12 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
         }
         
         // sd.StimGameObject = mcCompPanel;
-        mcCompPanel.AddComponent<Rigidbody2D>();
+        //mcCompPanel.AddComponent<Rigidbody2D>();
         // mcCompPanel.GetComponent<Rigidbody2D>().isKinematic = false;
-        mcCompPanel.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
+        //mcCompPanel.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
+        Image imageComponent = mcCompPanel.AddComponent<Image>();
+        imageComponent.color = Color.clear;
+        // To make an image transparent, we set its color to clear
         return mcCompPanel;
         //return new GameObject(); // this line is just here so I don't have to comment out stuff below... the function returns the multiccomp object
     }

@@ -259,6 +259,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.N),
                 hotKeyAction = () =>
                 {
+                    HkPanel.TrialLevel.TokenFBController.animationPhase = TokenFBController.AnimationPhase.None;
+
                     if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
                         HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
                     HkPanel.TrialLevel.AbortCode = 3;
@@ -320,17 +322,15 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 {
                     if (!HkPanel.TrialLevel.Paused) 
                     {
-                        HkPanel.SessionLevel.PauseCanvasGO.SetActive(true);
                         HkPanel.TrialLevel.AbortCode = 1;
 
                         //Go to end of trial:
-                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial")); //Finish Trial change to
+                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
 
                         //Deactivate Controllers (so that tokenbar not still on screen):
                         GameObject controllers = GameObject.Find("InputManager");
                         if (controllers != null)
                             controllers.SetActive(false);
-                        
 
                         HkPanel.TrialLevel.Paused = true;
                     }
@@ -339,8 +339,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         HkPanel.TrialLevel.Paused = false;
                         GameObject controllers = GameObject.Find("InputManager");
                         if (controllers == null)
-                            HkPanel.SessionLevel.FindInactiveGameObjectByName("InputManager").SetActive(true);
-                        HkPanel.SessionLevel.PauseCanvasGO.SetActive(false);
+                            HkPanel.SessionLevel.FindInactiveGameObjectByName("Controllers").SetActive(true);
                     }
                 }
             };

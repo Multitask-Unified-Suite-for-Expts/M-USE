@@ -5,12 +5,10 @@ using USE_UI;
 
 public class HoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    private RawImage image;
-    private Vector3 originalScale;
+    public Vector3 originalScale;
 
     private void Awake()
     {
-        image = GetComponent<RawImage>();
         originalScale = transform.localScale;
     }
 
@@ -23,4 +21,10 @@ public class HoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     {
         transform.localScale = originalScale;
     }
+
+    public void SetToInitialSize() //Used by sessionLevel to reset square size after grey'd out. 
+    {
+        transform.localScale = originalScale;
+    }
+
 }

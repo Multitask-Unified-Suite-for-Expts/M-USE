@@ -74,6 +74,10 @@ namespace ContinuousRecognition_Namespace
                 BlockStimLocations = StimLocations;
 
             //Calculate FeedbackLocations;
+            if (X_FbLocations == null)
+                Debug.Log("X FB LOCATIONS NULL!");
+            if (Y_FbLocations == null)
+                Debug.Log("Y FB LOCATIONS NULL!");
             BlockFeedbackLocations = new Vector3[X_FbLocations.Length * Y_FbLocations.Length];
             index = 0;
             for (int i = 0; i < Y_FbLocations.Length; i++)

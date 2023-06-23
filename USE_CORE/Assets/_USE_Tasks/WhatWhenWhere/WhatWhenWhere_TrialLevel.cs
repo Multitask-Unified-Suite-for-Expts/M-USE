@@ -22,7 +22,6 @@ using VisualSearch_Namespace;
 public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 {
     public GameObject WWW_CanvasGO;
-    public USE_StartButton USE_StartButton;
 
     //This variable is required for most tasks, and is defined as the output of the GetCurrentTrialDef function 
     public WhatWhenWhere_TrialDef CurrentTrialDef => GetCurrentTrialDef<WhatWhenWhere_TrialDef>();
@@ -187,8 +186,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    USE_StartButton = new USE_StartButton(WWW_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                    StartButton = USE_StartButton.StartButtonGO;
+                    StartButton = USE_StartButton.CreateStartButton(WWW_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                     USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
@@ -234,10 +232,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
 
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), ChooseStimulusDelay, ()=>
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(IsHuman ? HumanStartPanel.StartButtonChildren : USE_StartButton.StartButtonChildren), ChooseStimulusDelay, ()=>
         {
             CalculateSliderSteps();
-            SliderFBController.ConfigureSlider(new Vector3(0,180,0), sliderSize.value, CurrentTrialDef.SliderInitial*(1f/sliderGainSteps));
+            SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrialDef.SliderInitial*(1f/sliderGainSteps));
             SliderFBController.SliderGO.SetActive(true);
 
             //numNonStimSelections_InBlock += mouseHandler.UpdateNumNonStimSelection(); //NT: Commented this out. not yet sure where we're gonna implement nonstim touches. Current method doesnt exist in new selection tracker.  
@@ -458,15 +456,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     CurrentTaskLevel.LearningSpeed = TrialCount_InBlock;
             }
 
-            #if (!UNITY_WEBGL)
+            if(!SessionValues.WebBuild)
+            {
                 if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
                     DestroyChildren(GameObject.Find("MainCameraCopy"));
-            #endif
+            }
             
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png", UseDefaultConfigs);
+                RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
             }
 
             GenerateAccuracyLog();
@@ -487,10 +486,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     }
     public override void FinishTrialCleanup()
     {
-        #if (!UNITY_WEBGL)
+        if(!SessionValues.WebBuild)
+        {
             if (playerViewParent.transform.childCount != 0)
                 DestroyChildren(GameObject.Find("MainCameraCopy"));
-        #endif
+        }
 
         searchStims.ToggleVisibility(false);
         distractorStims.ToggleVisibility(false);
@@ -655,7 +655,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //-----------------------------------------------------DEFINE QUADDLES-------------------------------------------------------------------------------------
     protected override void DefineTrialStims()
     {
-        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
 
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish

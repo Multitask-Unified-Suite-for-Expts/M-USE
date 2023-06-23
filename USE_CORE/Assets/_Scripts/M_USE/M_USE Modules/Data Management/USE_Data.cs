@@ -31,16 +31,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using UnityEngine;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
+using UnityEngine;
 using USE_States;
+
 
 namespace USE_Data
 {
-	public interface IDatum
+    public interface IDatum
 	{
 		string Name { get; }
 		string ValueAsString { get; }
@@ -169,9 +171,9 @@ namespace USE_Data
 		public int capacity { get; set; }
 
 		//list of data to store
-		protected List<IDatum> data;
+		public List<IDatum> data;
 		//string to write to file
-		private List<string> dataBuffer;
+		public List<string> dataBuffer;
 		//records frame when data is appended (to prevent double-writing)
 		private int frameChecker = 0;
 
@@ -184,7 +186,22 @@ namespace USE_Data
 		private bool Defined = false;
 		public bool DefineManually;
 
-		public void InitDataController(int cap = 100)
+
+		public string fileHeaders;
+
+		public bool fileCreated;
+
+		//For webgl build (short term)
+		#if (UNITY_WEBGL)
+			public static bool SendDataExternally = true;
+		#else
+			public static bool SendDataExternally = false;
+		#endif
+
+
+
+
+		public void InitDataController(int cap = 10000)
 		{
 			capacity = cap;
 			data = new List<IDatum>();
@@ -193,7 +210,6 @@ namespace USE_Data
 			heldDataLine = new List<string>();
 		}
 
-		//public virtual void Update()
 
 		void Start()
 		{
@@ -201,13 +217,9 @@ namespace USE_Data
 			{
 				var initScreen = FindObjectOfType<InitScreen>();
 				if (initScreen != null)
-				{
 					initScreen.OnConfirm += OnStart;
-				}
 				else
-				{
 					OnStart();
-				}
 			}
 		}
 
@@ -244,7 +256,7 @@ namespace USE_Data
 				updateDataNextFrame = false;
 				if (dataBuffer.Count == capacity | writeDataNextFrame)
 				{
-					WriteData();
+					AppendDataToFile();
 				}
 				writeDataNextFrame = false;
 			}
@@ -574,25 +586,40 @@ namespace USE_Data
 
 		public event Action OnLogChanged;
 
+
+        public void CreateSQLTable(string databaseAddress)
+        {
+            //connect to database
+            //create empty table with DataController name
+            //loop through DataController.Data, add column to table for each datum
+        }
+
+        public void CreateSQLTableIfNecessary(string databaseAddess)
+        {
+            //check if table exists in database
+            //if not, CreateSQLTable()
+        }
+
+
+
+
 		/// <summary>
 		/// Appends current values of all Datums to data buffer.
 		/// </summary>
-		public void AppendData()
+		public void AppendDataToBuffer()
 		{
 			if (storeData && Time.frameCount > frameChecker)
 			{
 				string[] currentVals = new string[data.Count];
 				for (int i = 0; i < data.Count; i++)
-				{
 					currentVals[i] = data[i].ValueAsString;
-				}
+				
 				if (!updateDataNextFrame)
 				{
 					dataBuffer.Add(String.Join("\t", currentVals));
 					if (dataBuffer.Count == capacity)
-					{
-						WriteData();
-					}
+						AppendDataToFile();
+					
 				}
 				else if (dataToUpdateNextFrame.Count > 0)
 				{
@@ -602,76 +629,96 @@ namespace USE_Data
 				frameChecker = Time.frameCount;
 			}
 			if (OnLogChanged != null)
-			{
 				OnLogChanged();
-			}
 		}
 
-		/// <summary>
-		/// Creates a new data file.
-		/// </summary>
-		public void CreateFile()
+        /// <summary>
+        /// Creates a new data file.
+        /// </summary>
+        public void CreateFile()
 		{
 			if (storeData && fileName != null)
 			{
-				Directory.CreateDirectory(folderPath);
-				string titleString = "";
+				fileHeaders = "";
 				for (int i = 0; i < data.Count; i++)
 				{
 					if (i > 0)
-					{
-						titleString = titleString + "\t";
-					}
-					titleString = titleString + data[i].Name;
+						fileHeaders += "\t";
+					fileHeaders += data[i].Name;
 				}
-				using (StreamWriter dataStream = File.CreateText(folderPath + Path.DirectorySeparatorChar + fileName))
+
+				if (SendDataExternally) //Create File With Headers
 				{
-					dataStream.Write(titleString);
+					if (!ServerManager.FolderCreated(folderPath))
+						StartCoroutine(CreateServerFolder(folderPath));
+
+					if (!fileCreated)
+						StartCoroutine(CreateServerFileWithHeaders());
+				}
+				else
+				{
+					Directory.CreateDirectory(folderPath);
+					using StreamWriter dataStream = File.CreateText(folderPath + Path.DirectorySeparatorChar + fileName);
+					dataStream.Write(fileHeaders);
+
+					fileCreated = true;
 				}
 			}
-		}
-
-		public void CreateSQLTable(string databaseAddress)
-		{
-			//connect to database
-			//create empty table with DataController name
-			//loop through DataController.Data, add column to table for each datum
-		}
-
-		public void CreateSQLTableIfNecessary(string databaseAddess)
-		{
-			//check if table exists in database
-			//if not, CreateSQLTable()
 		}
 
 		/// <summary>
 		/// Writes the data buffer to file.
 		/// </summary>
-		public void WriteData()
+		public void AppendDataToFile()
 		{
 			if (storeData && fileName != null && dataBuffer.Count > 0)
 			{
-				if (!updateDataNextFrame)
-				{
-					using (StreamWriter dataStream = File.AppendText(folderPath + Path.DirectorySeparatorChar + fileName))
-					{
-						dataStream.Write("\n" + String.Join("\n", dataBuffer.ToArray()));
-					}
-					dataBuffer.Clear();
-				}
+				string content = String.Join("\n", dataBuffer.ToArray());
+
+                if (SendDataExternally)
+					StartCoroutine(AppendDataToServerFile(content));
 				else
 				{
-					writeDataNextFrame = true;
+					if (!updateDataNextFrame)
+					{
+						using StreamWriter dataStream = File.AppendText(folderPath + Path.DirectorySeparatorChar + fileName);
+						dataStream.Write("\n" + content);
+					}
+					else
+						writeDataNextFrame = true;
 				}
+				dataBuffer.Clear();
 			}
 		}
 
-		/// <summary>
-		/// Adds standardized timing data for the current Control Level's states to be tracked.
-		/// </summary>
-		/// <param name="level">The Control Level whose active states should be tracked.</param>
-		/// <param name="timingTypes">(Optional) List of strings specifying which state timing data to track. Possible values: "StartFrame", "EndFrame", "StartTimeAbsolute", "StartTimeRelative", "EndTimeAbsolute", "EndTimeRelative", "Duration".</param>
-		public void AddStateTimingData(ControlLevel level, IEnumerable<string> timingTypes = null)
+		private IEnumerator CreateServerFileWithHeaders()
+		{
+			string path = $"{folderPath}/{fileName}";
+            yield return ServerManager.CreateFileAsync(path, fileName, fileHeaders);
+            fileCreated = true;   
+        }
+
+        private IEnumerator AppendDataToServerFile(string fileContent)
+		{
+            yield return ServerManager.AppendToFileAsync(folderPath, fileName, fileContent);	
+		}
+
+
+        private IEnumerator CreateServerFolder(string folderName)
+        {
+            yield return ServerManager.CreateFolder(folderName);
+        }
+
+
+
+
+
+        /// <summary>
+        /// Adds standardized timing data for the current Control Level's states to be tracked.
+        /// </summary>
+        /// <param name="level">The Control Level whose active states should be tracked.</param>
+        /// <param name="timingTypes">(Optional) List of strings specifying which state timing data to track. Possible values: "StartFrame", "EndFrame", "StartTimeAbsolute", "StartTimeRelative", "EndTimeAbsolute", "EndTimeRelative", "Duration".</param>
+        public void AddStateTimingData(ControlLevel level, IEnumerable<string> timingTypes = null)
 		{
 			foreach (State s in level.ActiveStates)
 			{
@@ -727,9 +774,10 @@ namespace USE_Data
 			}
 		}
 
+
 		void OnApplicationQuit()
 		{
-			WriteData();
+			AppendDataToFile();
 		}
 
 	}

@@ -32,7 +32,7 @@ public class FeatureUncertaintyWM_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             fuWMTL.ContextName = fuWMBD.ContextName;
-            RenderSettings.skybox = CreateSkybox(fuWMTL.GetContextNestedFilePath(ContextExternalFilePath, fuWMTL.ContextName, "LinearDark"), true);
+            RenderSettings.skybox = CreateSkybox(fuWMTL.GetContextNestedFilePath(ContextExternalFilePath, fuWMTL.ContextName, "LinearDark"));
 
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]); fuWMTL.ResetBlockVariables();
             fuWMTL.TokenFBController.SetTotalTokensNum(fuWMBD.NumTokenBar);

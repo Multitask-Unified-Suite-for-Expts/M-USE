@@ -33,12 +33,12 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
             wmTL.ContextName = wmBD.ContextName;
 
             string contextFilePath;
-            if (UseDefaultConfigs)
-                contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + wmBD.ContextName;
+            if (SessionValues.WebBuild)
+                contextFilePath = $"{ContextExternalFilePath}/{TaskName}_Contexts/{wmBD.ContextName}";
             else
                 contextFilePath = wmTL.GetContextNestedFilePath(ContextExternalFilePath, wmBD.ContextName, "LinearDark");
 
-            RenderSettings.skybox = CreateSkybox(contextFilePath, UseDefaultConfigs);
+            RenderSettings.skybox = CreateSkybox(contextFilePath);
 
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
             wmTL.ResetBlockVariables();

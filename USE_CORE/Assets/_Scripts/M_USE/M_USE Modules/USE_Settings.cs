@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
@@ -7,6 +8,8 @@ using System.Reflection;
 using Newtonsoft.Json;
 using UnityEngine;
 using USE_ExperimentTemplate_Classes;
+//using static Dropbox.Api.Files.PathOrLink; //NT: whats this being used for??
+
 
 namespace USE_Settings
 {
@@ -228,7 +231,7 @@ namespace USE_Settings
 
 	public static class SessionSettings
 	{
-		private static Dictionary<string, Settings> allSettings = new Dictionary<string, Settings>();
+		public static Dictionary<string, Settings> allSettings = new Dictionary<string, Settings>();
 		private static Dictionary<string, Settings> savedSettings = new Dictionary<string, Settings>();
 
 		//public static void Reset()
@@ -323,70 +326,98 @@ namespace USE_Settings
 				return allSettings[key].FilePath;
 		}
 
-		public static void ImportSettings_SingleTypeJSON<T>(string settingsName, string settingsPath, string dictName = "")
+
+
+
+
+		public static void ImportSettings_SingleTypeJSON<T>(string settingsCategory, string settingsPath, string serverFileString = null, string dictName = "")
 		{
 			Debug.Log("Attempting to load settings file " + settingsPath + ".");
 			if (dictName == "")
-				dictName = settingsName;
-			string ext = Path.GetExtension(settingsPath);
+				dictName = settingsCategory;
 
 			Settings settings = new Settings(dictName, settingsPath);
-			string dataAsJson = File.ReadAllText(settingsPath);
-			try
-			{
-				settings.AddSetting(settingsName, JsonConvert.DeserializeObject<T>(dataAsJson));
-			}
-			catch (Exception e)
-			{
-				Debug.Log("Error adding JSON file \"" + settingsPath +
-					"\" to Settings \"" + settingsName + "\".");
-				Debug.Log(dataAsJson);
-				throw new Exception(e.Message + "\t" + e.StackTrace);
-			}
 
+			string dataAsJsonString = serverFileString == null ? File.ReadAllText(settingsPath) : serverFileString;
+
+            try
+            {
+                settings.AddSetting(settingsCategory, JsonConvert.DeserializeObject<T>(dataAsJsonString));
+            }
+            catch (Exception e)
+            {
+                Debug.Log("Error adding JSON file \"" + settingsPath + "\" to Settings \"" + settingsCategory + "\".");
+                throw new Exception(e.Message + "\t" + e.StackTrace);
+            }
 			allSettings.Add(dictName, settings);
 		}
 
-		public static void ImportSettings_SingleTypeArray<T>(string settingsName, string settingsPath, string dictName = "", char delimiter = '\t')
+
+		public static void ImportSettings_SingleTypeArray<T>(string settingsCategory, string settingsPath, string serverFileString = null, string dictName = "", char delimiter = '\t')
 		{
 			Settings settings = new Settings(dictName, settingsPath);
-			Debug.Log("Attempting to load settings file " + settingsPath + ".");
+
+			Debug.Log("Attempting to load settings file " + settingsPath);
 			if (dictName == "")
-				dictName = settingsName;
+				dictName = settingsCategory;
 
-			if (!File.Exists(settingsPath))
-				return;
 
-			string[] lineList = ReadSettingsFile(settingsPath, "//", "...");
-			T[] settingsArray = new T[lineList.Length - 1];
+			//THIS WAS BREAKING SOME STUFF. MIGHT NEED TO BE CHANGED/FINALIZED!
+			if(serverFileString == null)
+			//if (!SessionValues.WebBuild)
+			{
+				if (!File.Exists(settingsPath))
+					return;
+			}
 
-			string[] fieldNames = lineList[0].Split(delimiter);
+
+			string[] lines;
+
+			if(serverFileString != null)
+			{
+				string[] splitLines = serverFileString.Split('\n');
+				List<string> stringList = new List<string>();
+				foreach(var line in splitLines)
+				{
+                    if (string.IsNullOrEmpty(line.Trim()) || line.Trim().StartsWith("//", StringComparison.Ordinal)) //Skip empty and/or commented out lines
+                        continue;
+					stringList.Add(line);
+                }
+				lines = stringList.ToArray();
+            }
+			else
+				lines = ReadSettingsFile(settingsPath, "//", "...");
+
+
+			T[] settingsArray = new T[lines.Length - 1];
+
+			string[] fieldNames = lines[0].Split(delimiter);
+
+			string tempFieldName = "";
 			foreach (string fieldName in fieldNames)
 			{
-				if (typeof(T).GetProperty(fieldName) == null & typeof(T).GetField(fieldName) == null)
+				tempFieldName = fieldName.Trim();
+				if (typeof(T).GetProperty(tempFieldName) == null & typeof(T).GetField(tempFieldName) == null)
 				{
-					throw new Exception("Settings file \"" + settingsName + "\" contains the header \""
-						+ fieldName + "\" but this is not a public property or field of the provided type "
+					throw new Exception("Settings file \"" + settingsCategory + "\" contains the header \""
+						+ tempFieldName + "\" but this is not a public property or field of the provided type "
 						+ typeof(T) + ".");
 				}
 			}
 
 			Type ft = null;
 			FieldInfo myFieldInfo = null;
-			for (int iLine = 1; iLine < lineList.Length; iLine++)
+			for (int iLine = 1; iLine < lines.Length; iLine++)
 			{
 				settingsArray[iLine - 1] = (T)Activator.CreateInstance(typeof(T));
-				string[] values = lineList[iLine].Split(delimiter);
+				string[] values = lines[iLine].Split(delimiter);
 				for (int iVal = 0; iVal < fieldNames.Length; iVal++)
 				{
-					string fieldName = fieldNames[iVal];
+					string fieldName = fieldNames[iVal].Trim();
 					try
 					{
 						if (typeof(T).GetProperty(fieldName) != null)
-						{
-							Debug.Log("kldsfh");
-							//settingsArray[iLine-1].GetProperty(fieldName) = Convert.ChangeType(values[iVal], typeof(T));
-						}
+							Debug.Log("TypeOf GetProperty of " + fieldName + "is not null!");
 						else if (typeof(T).GetField(fieldName) != null)
 						{
 							myFieldInfo = typeof(T).GetField(fieldName);
@@ -470,38 +501,43 @@ namespace USE_Settings
 					catch (Exception e)
 					{
 						Debug.Log(fieldNames[iVal] + ": " + values[iVal]);
-						Debug.Log("Error adding TDF file \"" + settingsPath +
-							"\" to Settings \"" + settingsName + "\".");
+						Debug.Log("Error adding TDF file \"" + settingsPath + "\" to Settings \"" + settingsCategory + "\".");
 						throw new Exception(e.Message + "\t" + e.StackTrace);
 					}
 				}
 			}
-			settings.AddSetting(settingsName, settingsArray);
+			settings.AddSetting(settingsCategory, settingsArray);
 			allSettings.Add(dictName, settings);
 		}
 
-		public static void ImportSettings_MultipleType(string settingsName, string settingsPath, char delimiter = '\t')
+
+        public static void ImportSettings_MultipleType(string settingsCategory, string settingsPath, string serverFileString = null, char delimiter = '\t')
 		{
-			Debug.Log("Attempting to load settings file " + settingsPath + ".");
-			string[] lineList = ReadSettingsFile(settingsPath, "//", "...");
+            Debug.Log("Attempting to load settings file " + settingsPath + ".");
+			Settings settings = new Settings(settingsCategory, settingsPath);
+			string[] lines;
 
-			Settings settings = new Settings(settingsName, settingsPath);
-
-			foreach (string line in lineList)
+			if(serverFileString != null)
+				lines = serverFileString.Split('\n');
+			else
+				lines = ReadSettingsFile(settingsPath, "//", "...");
+            
+			foreach(string line in lines)
 			{
-				string[] splitString = line.Split(delimiter);
-				try
-				{
-					settings.AddSetting(splitString[0], splitString[1], splitString[2]);
-				}
-				catch(Exception e)
-				{
-					Debug.Log("Attempted to import Settings file \"" + settingsPath +
-						"\" but line \"" + line + "\" has " + line.Length + " entries, 3 expected.");
-					throw new Exception(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			allSettings.Add(settingsName, settings);
+                if (string.IsNullOrEmpty(line.Trim()) || line.Trim().StartsWith("//", StringComparison.Ordinal)) //Skip empty and/or commented out lines
+                    continue;                
+                string[] splitString = line.Split(delimiter);
+                try
+                {
+                    settings.AddSetting(splitString[0], splitString[1], splitString[2]);
+                }
+                catch (Exception e)
+                {
+                    Debug.Log("Attempted to import Settings file \"" + settingsPath + "\" but line \"" + line + "\" has " + line.Length + " entries, 3 expected.");
+                    throw new Exception(e.Message + "\t" + e.StackTrace);
+                }
+            }
+			allSettings.Add(settingsCategory, settings);
 		}
 
 		private static string[] ReadSettingsFile(string settingsPath, string commentPrefix = "", string continueSuffix = "")
@@ -537,31 +573,19 @@ namespace USE_Settings
 						}
 						line = line + newLine;
 					}
-
-                    //if (!(line.Trim().StartsWith("//", StringComparison.Ordinal) || String.IsNullOrEmpty(line)))
-                    //{ //ignore commented out lines
-                    //line = line.Trim();
-                    //while (line.EndsWith("...", StringComparison.Ordinal))
-                    //{
-                    //	line = line.Remove(line.Length - 3);
-                    //	string newLine = textFile.ReadLine().Trim();
-                    //	while (newLine.StartsWith("//", StringComparison.Ordinal) || String.IsNullOrEmpty(newLine))
-                    //	{
-                    //		newLine = textFile.ReadLine().Trim();
-                    //	}
-                    //	line = line + newLine;
-                    //}
-
 					outputList.Add(line);
 				}
 			}
 			return outputList.ToArray();
 		}
 
+
+
 		public static string ReadSettingsFileAsString(string settingsPath, string commentPrefix = "", string continueSuffix = "")
 		{
 			return string.Join("", ReadSettingsFile(settingsPath, commentPrefix, continueSuffix));
 		}
+
 
 		public static void StoreSettings(string dataPath)
 		{

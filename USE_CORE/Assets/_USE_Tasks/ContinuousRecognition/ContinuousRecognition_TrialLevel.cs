@@ -10,14 +10,14 @@ using USE_ExperimentTemplate_Trial;
 using System.Linq;
 using TMPro;
 using USE_UI;
-
+using UnityEngine.UI;
+using System.Collections;
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
     public ContinuousRecognition_TrialDef currentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
     public ContinuousRecognition_TaskLevel currentTask => GetTaskLevel<ContinuousRecognition_TaskLevel>();
 
-    [HideInInspector] public USE_StartButton USE_StartButton;
     [HideInInspector] public GameObject StartButton;
 
     public TextMeshProUGUI TimerText;
@@ -91,6 +91,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector]
     public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, displayStimDuration, chooseStimDuration, itiDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration;
 
+
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
@@ -122,15 +123,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    USE_StartButton = new USE_StartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
-                    StartButton = USE_StartButton.StartButtonGO;
+                    StartButton = USE_StartButton.CreateStartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
                     USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
-
             }
-            #if (!UNITY_WEBGL)
+
+            if(!SessionValues.WebBuild)
                 playerViewParent = GameObject.Find("MainCameraCopy").transform;
-            #endif
         });
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
@@ -139,14 +138,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, ChooseStim);
-
         TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, ButtonScale, CR_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
-#if (UNITY_WEBGL)
-            TokenFBController.tokenSize = 110;
-#endif
+            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
+                AdjustTextPosForMac();
 
             NumFeedbackRows = 0;
 
@@ -159,12 +156,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (TrialCount_InTask != 0)
                 currentTask.SetTaskSummaryString();
-
-            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
-            {
-                AdjustTextPosForMac();
-                AdjustedPositionsForMac = true;
-            }
 
             if (currentTrial.UseStarfield)
                 Starfield.SetActive(true);
@@ -181,10 +172,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 ShotgunHandler.ClearSelections();
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
-
         });
-
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), DisplayStims);
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(IsHuman ? HumanStartPanel.StartButtonChildren : USE_StartButton.StartButtonChildren), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
             if (IsHuman)
@@ -218,9 +207,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
         ChooseStim.AddInitializationMethod(() =>
         {
-            #if (!UNITY_WEBGL)
+            if (!SessionValues.WebBuild)
                 CreateTextOnExperimenterDisplay();
-            #endif
 
             ChosenGO = null;
             ChosenStim = null;
@@ -323,9 +311,19 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 return;
 
             if (currentTrial.GotTrialCorrect)
-                HaloFBController.ShowPositive(ChosenGO);
+            {
+                if (SessionValues.Using2DStim)
+                    HaloFBController.ShowPositive(ChosenGO, 10f);
+                else
+                    HaloFBController.ShowPositive(ChosenGO);
+            }
             else
-                HaloFBController.ShowNegative(ChosenGO);
+            {
+                if(SessionValues.Using2DStim)
+                    HaloFBController.ShowNegative(ChosenGO, 10);
+                else
+                    HaloFBController.ShowNegative(ChosenGO);
+            }
         });
         TouchFeedback.AddTimer(() => touchFbDuration.value, TokenUpdate);
         TouchFeedback.SpecifyTermination(() => !StimIsChosen, TokenUpdate);
@@ -560,14 +558,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     void AdjustTextPosForMac() //When running a build instead of hitting play in editor:
     {
-        Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
-        TokenFBController.transform.localScale = biggerScale;
-        TokenFBController.tokenSize = 200;
-        TokenFBController.RecalculateTokenBox();
+        TokenFBController.AdjustTokenBarSizing(200);
 
         Vector3 Pos = OriginalTimerPosition;
         Pos.y -= .02f;
         TimerBackdropGO.transform.position = Pos;
+
+        AdjustedPositionsForMac = true;
     }
 
     float GetOffsetY()
@@ -860,7 +857,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         NumNew_Trial = 0;
         NumPNC_Trial = 0;
 
-        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
 
 
         if (TrialCount_InBlock == 0)
@@ -991,7 +988,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         Starfield.SetActive(false);
         TokenFBController.enabled = false;
 
-        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
 
         if (!StimIsChosen && ChosenStimIndices.Count < 1)
             return;
@@ -1003,11 +1000,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             FeedbackLocations = CenterFeedbackLocations(currentTrial.TrialFeedbackLocations, FeedbackLocations.Length);
 
             RightGroup = new StimGroup("Right", group, ChosenStimIndices);
-            GenerateFeedbackStim(RightGroup, FeedbackLocations);
-            GenerateFeedbackBorders(RightGroup);
+            StartCoroutine(GenerateFeedbackStim(RightGroup, FeedbackLocations, result =>
+            {
+                GenerateFeedbackBorders(RightGroup);
 
-            if (currentTrial.StimFacingCamera)
-                MakeStimsFaceCamera(RightGroup);
+                if (currentTrial.StimFacingCamera)
+                    MakeStimsFaceCamera(RightGroup);
+            }));
         }
         else
         {
@@ -1016,20 +1015,24 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             FeedbackLocations = CenterFeedbackLocations(currentTrial.TrialFeedbackLocations, FeedbackLocations.Length);
 
             RightGroup = new StimGroup("Right", group, ChosenStimIndices);
-            GenerateFeedbackStim(RightGroup, FeedbackLocations.Take(FeedbackLocations.Length - 1).ToArray());
-            GenerateFeedbackBorders(RightGroup);
+            StartCoroutine(GenerateFeedbackStim(RightGroup, FeedbackLocations.Take(FeedbackLocations.Length - 1).ToArray(), result =>
+            {
+                GenerateFeedbackBorders(RightGroup);
 
-            if (currentTrial.StimFacingCamera)
-                MakeStimsFaceCamera(RightGroup);
+                if (currentTrial.StimFacingCamera)
+                    MakeStimsFaceCamera(RightGroup);
+            }));
 
             WrongGroup = new StimGroup("Wrong");
             StimDef wrongStim = group.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(WrongGroup);
             wrongStim.StimGameObject = null;
-            GenerateFeedbackStim(WrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length - 1).Take(1).ToArray());
-            GenerateFeedbackBorders(WrongGroup);
+            StartCoroutine(GenerateFeedbackStim(WrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length - 1).Take(1).ToArray(), result =>
+            {
+                GenerateFeedbackBorders(WrongGroup);
 
-            if (currentTrial.StimFacingCamera)
-                wrongStim.StimGameObject.AddComponent<FaceCamera>();
+                if (currentTrial.StimFacingCamera)
+                    wrongStim.StimGameObject.AddComponent<FaceCamera>();
+            }));
         }
     }
 
@@ -1039,12 +1042,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             stim.StimGameObject.AddComponent<FaceCamera>();
     }
 
-    void GenerateFeedbackStim(StimGroup group, Vector3[] locations)
+    IEnumerator GenerateFeedbackStim(StimGroup group, Vector3[] locations, Action<VoidDelegate> callback)
     {
         TrialStims.Add(group);
         group.SetLocations(locations);
-        group.LoadStims();
+        yield return StartCoroutine(group.LoadStims());
         group.ToggleVisibility(true);
+        callback?.Invoke(null);
     }
 
     void GenerateFeedbackBorders(StimGroup group)

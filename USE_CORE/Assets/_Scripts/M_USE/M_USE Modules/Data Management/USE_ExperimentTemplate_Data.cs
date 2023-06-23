@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Collections;
-using System;
 using System.IO;
 using UnityEngine;
 using USE_Data;
@@ -9,11 +8,9 @@ using USE_States;
 using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
-using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Data.SqlClient;
-//using MySql.Data.MySqlClient;
+
 
 namespace USE_ExperimentTemplate_Data
 {
@@ -28,7 +25,7 @@ namespace USE_ExperimentTemplate_Data
             SummaryData.folderPath = Path.Combine(folderPath, "SummaryData");
             if (storeData)
             {
-                System.IO.Directory.CreateDirectory(SummaryData.folderPath);
+                Directory.CreateDirectory(SummaryData.folderPath);
             }
         }
 
@@ -56,16 +53,38 @@ namespace USE_ExperimentTemplate_Data
         public ControlLevel_Task_Template taskLevel;
         public ControlLevel_Trial_Template trialLevel;
 
+        private readonly string ConnectionString = "Server=localhost;Database=MUSE;Uid=root;Pwd=attention;";
 
-        private readonly string ConnectionString = "server=localhost;port=3306;database=USE_Test;uid=MUSE_User;password=Dziadziu21!;";
+        //public MySqlConnection Connection
+        //{
+        //    get
+        //    {
+        //        return new MySqlConnection(ConnectionString);
+        //    }
+        //}
 
-        public SqlConnection Connection
-        {
-            get
-            {
-                return new SqlConnection(ConnectionString);
-            }
-        }
+        //public void TestConnectionToDB()
+        //{
+        //    using (var conn = Connection)
+        //    {
+        //        Debug.Log("INSIDE CONNECTION!");
+        //        conn.Open();
+        //        Debug.Log("AFTER IT OPENED!");
+        //        using (var cmd = conn.CreateCommand())
+        //        {
+        //            cmd.CommandText = @"SELECT * FROM Task;";
+
+        //            using (MySqlDataReader reader = cmd.ExecuteReader())
+        //            {
+        //                while (reader.Read())
+        //                {
+        //                    Debug.Log((int)reader["Id"]);
+        //                    Debug.Log((reader.GetString(reader.GetOrdinal("Name"))));
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
 
 
@@ -109,26 +128,7 @@ namespace USE_ExperimentTemplate_Data
             }
         }
 
-        public void TestConnectionToDB()
-        {
-            using (var conn = Connection)
-            {
-                conn.Open();
-                using (var cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @"SELECT * FROM Task;";
 
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            Debug.Log((int)reader["Id"]);
-                            Debug.Log((reader.GetString(reader.GetOrdinal("Name"))));
-                        }
-                    }
-                }
-            }
-        }
 
         //public bool DoesSQLTableExist()
         //{
@@ -215,6 +215,7 @@ namespace USE_ExperimentTemplate_Data
 
         public void CreateNewTrialIndexedFile(int trialCount, string filePrefix)
         {
+            fileCreated = false;
             fileName = filePrefix + "__" + DataControllerName + "_Trial_" + GetNiceIntegers(4, trialCount) + ".txt";
             CreateFile();
         }
@@ -430,9 +431,10 @@ namespace USE_ExperimentTemplate_Data
             }
             else
             {
-                Debug.LogError("Attempted to add data controller container named " + st +
+                Debug.Log("Attempted to add data controller container named " + st +
                 " to DataControllers but a container with the same name has already been created.");
-                return null;
+                return DataContainer.transform.Find(st).gameObject;
+                //return null;
             }
         }
 

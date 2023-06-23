@@ -17,7 +17,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 {
     // Generic Task Variables
     public GameObject MG_CanvasGO;
-    public USE_StartButton USE_StartButton;
     private GameObject StartButton;
 
     // Block Ending Variable
@@ -154,7 +153,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.SetHaloSize(5);
 
 
-            if (UseDefaultConfigs && !Application.isEditor)
+            //Added OR WebBuild, but this entire thing likely gonna break something. Need to fine tune it. 
+            if ((SessionValues.UseDefaultConfigs && !Application.isEditor) || SessionValues.WebBuild)
             {
                 tileTex = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/" + TileTexture);
                 mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/" + MazeBackgroundTextureName);
@@ -196,8 +196,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    USE_StartButton = new USE_StartButton(MG_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                    StartButton = USE_StartButton.StartButtonGO;
+                    StartButton = USE_StartButton.CreateStartButton(MG_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                     USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
@@ -227,23 +226,22 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SelectionHandler.MaxDuration = maxObjectTouchDuration.value;
         });
 
-        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatches(StartButton), Delay, () =>
+        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatches(IsHuman ? HumanStartPanel.StartButtonChildren : USE_StartButton.StartButtonChildren), Delay, () =>
         {
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
 
             StateAfterDelay = ChooseTile;
             DelayDuration = mazeOnsetDelay.value;
             
-            SliderFBController.ConfigureSlider(new Vector3(0,209,0), sliderSize.value);
+            SliderFBController.ConfigureSlider(sliderSize.value);
             SliderFBController.SliderGO.SetActive(true);
             SetTrialSummaryString();
 
             InstantiateCurrMaze();
             tiles.ToggleVisibility(true);
 
-            #if (!UNITY_WEBGL)
+            if (!SessionValues.WebBuild)
                 CreateTextOnExperimenterDisplay();
-            #endif
 
             mazeStartTime = Time.unscaledTime;
 
@@ -420,16 +418,15 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         ITI.AddInitializationMethod(() =>
         {
             DisableSceneElements();
-            #if (!UNITY_WEBGL)
-            DestroyChildren(playerViewParent);
-            #endif
+            if (!SessionValues.WebBuild)
+                DestroyChildren(playerViewParent);
             EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOff"]);
             if (finishedMaze)
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderFbController_SliderCompleteFbOff"]);
             if (NeutralITI)
             {
                 contextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage"), UseDefaultConfigs);
+                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage"));
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);

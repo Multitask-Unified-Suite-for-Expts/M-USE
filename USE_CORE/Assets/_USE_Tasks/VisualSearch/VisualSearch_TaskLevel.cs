@@ -46,12 +46,12 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             vsTL.ContextName = vsBD.ContextName;
 
             string contextFilePath;
-            if (UseDefaultConfigs)
-                contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + vsBD.ContextName;
+            if (SessionValues.WebBuild)
+                contextFilePath = $"{ContextExternalFilePath}/{TaskName}_Contexts/{vsBD.ContextName}";
             else
                 contextFilePath = vsTL.GetContextNestedFilePath(ContextExternalFilePath, vsBD.ContextName, "LinearDark");
 
-            RenderSettings.skybox = CreateSkybox(contextFilePath, UseDefaultConfigs);
+            RenderSettings.skybox = CreateSkybox(contextFilePath);
 
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
 
@@ -64,13 +64,13 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         });
         BlockFeedback.AddInitializationMethod(() =>
         {
-            #if (!UNITY_WEBGL)
+            if(!SessionValues.WebBuild)
+            {
                 if (BlockStringsAdded > 0)
                     CurrentBlockString += "\n";
                 BlockStringsAdded++;
                 PreviousBlocksString.Insert(0, CurrentBlockString);
-            #endif
-
+            }
             vsTL.SearchDurationsList.Clear();
         });
         AssignBlockData();

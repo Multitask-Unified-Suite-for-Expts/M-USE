@@ -34,6 +34,10 @@ using USE_ExperimentTemplate_Trial;
 using Image = UnityEngine.UI.Image;
 using Tobii.Research.Unity.CodeExamples;
 
+using UnityEditor;
+using System.Threading.Tasks;
+using Renci.SshNet;
+using ConfigDynamicUI;
 //using UnityEngine.Windows.WebCam;
 
 
@@ -42,11 +46,6 @@ namespace USE_ExperimentTemplate_Session
     public class ControlLevel_Session_Template : ControlLevel
     {
         [HideInInspector] public int SessionId_SQL;
-
-        public GameObject PauseCanvasGO;
-        public Canvas PauseCanvas;
-
-        public bool UseDefaultConfigs; //Set true in inspector when gonna create a build with default configs (for website)
 
         private bool IsHuman;
 
@@ -126,14 +125,21 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public GameObject TaskButtonsContainer;
 
         //Set in inspector
-        public GameObject InstructionsPrefab;
         public GameObject TaskSelection_Starfield;
-        public GameObject TaskSelection_Header;
         public GameObject HumanVersionToggleButton;
         public GameObject HumanStartPanelPrefab;
         public GameObject TaskSelectionCanvasGO;
+        public GameObject ToggleAudioButton;
+        public GameObject StartButtonPrefabGO;
+        public AudioClip TaskSelection_HumanAudio;
+
+        [HideInInspector] public float audioPlaybackSpot;
+
+        [HideInInspector] public AudioSource TaskSelection_AudioSource;
 
         [HideInInspector] public HumanStartPanel HumanStartPanel;
+        [HideInInspector] public USE_StartButton USE_StartButton;
+
 
 
         public override void LoadSettings()
@@ -142,184 +148,59 @@ namespace USE_ExperimentTemplate_Session
             HumanStartPanel.SetSessionLevel(this);
             HumanStartPanel.HumanStartPanelPrefab = HumanStartPanelPrefab;
 
-            //If using default configs, read in the default Session/EventCode/Display Configs and write them to persistant data path:
-            if (UseDefaultConfigs)
-            {
-                configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
+            USE_StartButton = gameObject.AddComponent<USE_StartButton>();
+            USE_StartButton.StartButtonPrefab = StartButtonPrefabGO;
 
-                if (Directory.Exists(configFileFolder))
-                    Directory.Delete(configFileFolder, true);
-
-                if (!Directory.Exists(configFileFolder))
-                {
-                    Directory.CreateDirectory(configFileFolder);
-                    List<string> configsToWrite = new List<string>() {"SessionConfig", "EventCodeConfig", "DisplayConfig"};
-
-                    foreach(string config in configsToWrite)
-                    {
-                        byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + config).bytes;
-                        System.IO.File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + config + ".txt", textFileBytes);
-                    }
-                } 
-            }
-            else
-                configFileFolder = LocateFile.GetPath("Config File Folder");
-            
 
             // Set the name of the data file given input into init screen
             SubjectID = SessionDetails.GetItemValue("SubjectID");
             SessionID = SessionDetails.GetItemValue("SessionID");
-            FilePrefix = "Subject_" + SubjectID + "__Session_" + SessionID + "__" + DateTime.Today.ToString("dd_MM_yyyy") + "__" + DateTime.Now.ToString("HH_mm_ss");
 
-            SessionSettings.ImportSettings_MultipleType("Session",
-                LocateFile.FindFileInExternalFolder(configFileFolder, "*SessionConfig*"));
+            string sessionDataFolder = ServerManager.GetSessionDataFolder();
+            if(!string.IsNullOrEmpty(sessionDataFolder))
+                FilePrefix = sessionDataFolder.Split(new string[] { "__" }, 2, StringSplitOptions.None)[1];
+            else
+                FilePrefix = "Session_" + SessionID + "__Subject_" + SubjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
 
-            // Load Session Config values
-            if (SessionSettings.SettingExists("Session", "SyncBoxActive"))
-                SyncBoxActive = (bool)SessionSettings.Get("Session", "SyncBoxActive");
-            else
-                SyncBoxActive = false;
 
-            if (SessionSettings.SettingExists("Session", "EventCodesActive"))
-                EventCodesActive = (bool)SessionSettings.Get("Session", "EventCodesActive");
-            else
-                EventCodesActive = false;
-
-            if (SessionSettings.SettingExists("Session", "RewardPulsesActive"))
-                RewardPulsesActive = (bool)SessionSettings.Get("Session", "RewardPulsesActive");
-            else
-                RewardPulsesActive = false;
-
-            if (SessionSettings.SettingExists("Session", "SonicationActive"))
-                SonicationActive = (bool)SessionSettings.Get("Session", "SonicationActive");
-            else
-                SonicationActive = false;
-            if (SessionSettings.SettingExists("Session", "EyeTrackerActive"))
-                EyeTrackerActive = (bool)SessionSettings.Get("Session", "EyeTrackerActive");
-            else
-                EyeTrackerActive = false;
-            if (SessionSettings.SettingExists("Session", "SelectionType"))
-                SelectionType = (string)SessionSettings.Get("Session", "SelectionType");
-            else
-                SelectionType = "mouse";
-            if (SessionSettings.SettingExists("Session", "LongRewardHotKeyPulseSize"))
-                LongRewardHotKeyPulseSize = (int)SessionSettings.Get("Session", "LongRewardHotKeyPulseSize");
-            else
-                LongRewardHotKeyPulseSize = 500;
-
-            if (SessionSettings.SettingExists("Session", "LongRewardHotKeyNumPulses"))
-                LongRewardHotKeyNumPulses = (int)SessionSettings.Get("Session", "LongRewardHotKeyNumPulses");
-            else
-                LongRewardHotKeyNumPulses = 1;
-
-            if (SessionSettings.SettingExists("Session", "RewardHotKeyPulseSize"))
-                RewardHotKeyPulseSize = (int)SessionSettings.Get("Session", "RewardHotKeyPulseSize");
-            else
-                RewardHotKeyPulseSize = 250;
-
-            if (SessionSettings.SettingExists("Session", "RewardHotKeyNumPulses"))
-                RewardHotKeyNumPulses = (int)SessionSettings.Get("Session", "RewardHotKeyNumPulses");
-            else
-                RewardHotKeyNumPulses = 1;
-
-            List<string> taskNames;
-            if (SessionSettings.SettingExists("Session", "TaskNames"))
+            if (SessionValues.WebBuild)
             {
-                taskNames = (List<string>)SessionSettings.Get("Session", "TaskNames");
-                TaskMappings = new OrderedDictionary();
-                taskNames.ForEach((taskName) => TaskMappings.Add(taskName, taskName));
+                SessionDataPath = ServerManager.SessionDataFolderPath;
+                TaskIconsFolderPath = "DefaultResources/TaskIcons"; //Currently having web build use in house task icons instead of loading from server. 
+                ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
+
+                if (SessionValues.UseDefaultConfigs)
+                {
+                    //ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
+                    configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
+                    WriteSessionConfigsToPersistantDataPath();
+                    SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFilePathInExternalFolder(configFileFolder, "*SessionConfig*"));
+                    LoadSessionConfigSettings();
+                }
+                else //Using Server Configs:
+                {
+                    //ContextExternalFilePath = "Resources/Contexts"; //path from root server folder
+                    //TaskIconsFolderPath = "Resources/TaskIcons"; //un comment if end up wanting to load from server instead (and also remove the one above)
+                    configFileFolder = ServerManager.SessionConfigFolderPath;
+                    StartCoroutine(ServerManager.GetFileStringAsync(ServerManager.SessionConfigFolderPath, "SessionConfig", result =>
+                    {
+                        if (!string.IsNullOrEmpty(result))
+                        {
+                            SessionSettings.ImportSettings_MultipleType("Session", configFileFolder, result);
+                            LoadSessionConfigSettings();
+                        }
+                        else
+                            Debug.Log("SESSION CONFIG COROUTINE RESULT IS EMPTY!!!");
+                    }));
+                }
             }
-            else if (SessionSettings.SettingExists("Session", "TaskMappings"))
-                TaskMappings = (OrderedDictionary)SessionSettings.Get("Session", "TaskMappings");
-            else if (TaskMappings.Count == 0)
-                Debug.LogError("No task names or task mappings specified in Session config file or by other means.");
-
-
-            if (SessionSettings.SettingExists("Session", "ShotgunRaycastCircleSize_DVA"))
-                ShotgunRaycastCircleSize_DVA = (float)SessionSettings.Get("Session", "ShotgunRaycastCircleSize_DVA");
-            else
-                ShotgunRaycastCircleSize_DVA = 1.25f;
-
-            if (SessionSettings.SettingExists("Session", "ParticipantDistance_CM"))
-                ParticipantDistance_CM = (float)SessionSettings.Get("Session", "ParticipantDistance_CM");
-            else
-                ParticipantDistance_CM = 60f;
-
-            if (SessionSettings.SettingExists("Session", "ShotgunRaycastSpacing_DVA"))
-                ShotgunRaycastSpacing_DVA = (float)SessionSettings.Get("Session", "ShotgunRaycastSpacing_DVA");
-            else
-                ShotgunRaycastSpacing_DVA = .3f;
-
-
-            if (SessionSettings.SettingExists("Session", "IsHuman"))
-                IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");
-
-            if (SessionSettings.SettingExists("Session", "TaskIconLocations"))
-                TaskIconLocations = (Vector3[])SessionSettings.Get("Session", "TaskIconLocations");
-
-            if (SessionSettings.SettingExists("Session", "GuidedTaskSelection"))
-                GuidedTaskSelection = (bool)SessionSettings.Get("Session", "GuidedTaskSelection");
-
-            if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
-                ContextExternalFilePath = (string)SessionSettings.Get("Session", "ContextExternalFilePath");
-
-            if (SessionSettings.SettingExists("Session", "TaskIconsFolderPath"))
-                TaskIconsFolderPath = (string)SessionSettings.Get("Session", "TaskIconsFolderPath");
-
-            if (SessionSettings.SettingExists("Session", "TaskIcons"))
-                TaskIcons = (Dictionary<string, string>)SessionSettings.Get("Session", "TaskIcons");
-
-            if (SessionSettings.SettingExists("Session", "StoreData"))
-                StoreData = (bool)SessionSettings.Get("Session", "StoreData");
-
-            if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
-                MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
-
-            if (SessionSettings.SettingExists("Session", "TaskSelectionTimeout"))
-                TaskSelectionTimeout = (float)SessionSettings.Get("Session", "TaskSelectionTimeout");
-
-
-            if (SessionSettings.SettingExists("Session", "SerialPortActive"))
-                SerialPortActive = (bool)SessionSettings.Get("Session", "SerialPortActive");
-
-            if (SessionSettings.SettingExists("Session", "MonitorDetails"))
+            else //Normal Build:
             {
-                MonitorDetails = (MonitorDetails)SessionSettings.Get("Session", "MonitorDetails");
+                configFileFolder = LocateFile.GetPath("Config Folder");
+                SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
+                SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFilePathInExternalFolder(configFileFolder, "*SessionConfig*"));
+                LoadSessionConfigSettings();
             }
-
-            if (SessionSettings.SettingExists("Session", "ScreenDetails"))
-            {
-                ScreenDetails = (ScreenDetails)SessionSettings.Get("Session", "ScreenDetails");
-
-            }
-
-            //Load the Session Event Code Config file
-            string eventCodeFileString = "";
-
-            eventCodeFileString = LocateFile.FindFileInExternalFolder(configFileFolder, "*EventCode*");
-
-            if (!string.IsNullOrEmpty(eventCodeFileString))
-            {
-                SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
-                SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
-                EventCodesActive = true;
-            }
-            else if (EventCodesActive)
-                Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");
-
-            if (SyncBoxActive)
-                SerialPortActive = true;
-                     
-            if (UseDefaultConfigs)
-            {
-                SessionDataFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_Data" + "_" + FilePrefix;
-
-                ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
-                TaskIconsFolderPath = "Assets/_USE_Session/Resources/DefaultResources/TaskIcons";
-            }
-            else
-                SessionDataFolderPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
-
         }
 
         public override void DefineControlLevel()
@@ -336,12 +217,11 @@ namespace USE_ExperimentTemplate_Session
             SessionDataControllers = new SessionDataControllers(GameObject.Find("DataControllers"));
             ActiveTaskLevels = new List<ControlLevel_Task_Template>();//new Dictionary<string, ControlLevel_Task_Template>();
 
-            DisplayController = GameObject.Find("InitializationScreen").GetComponent<DisplayController>();
-
             SessionCam = Camera.main;
 
-            //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
-            #if (UNITY_WEBGL)
+
+#if (UNITY_WEBGL)
+                //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
                 GameObject initCamGO = GameObject.Find("InitCamera");
                 initCamGO.SetActive(false);
                 TaskSelection_Starfield.SetActive(true);
@@ -360,11 +240,6 @@ namespace USE_ExperimentTemplate_Session
                 MirrorCam.cullingMask = 0;
 
                 RawImage mainCameraCopy_Image = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
-
-                PauseCanvasGO = GameObject.Find("PauseCanvas");
-                PauseCanvasGO.SetActive(false);
-                PauseCanvas = PauseCanvasGO.GetComponent<Canvas>();
-                PauseCanvas.planeDistance = 1;
 
 #endif
 
@@ -432,9 +307,23 @@ namespace USE_ExperimentTemplate_Session
             {
                 SessionData.CreateFile();
 
-                
-                //SessionData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
-                //SessionData.TestConnectionToDB(); //Using to test database connection
+                //Create Session Settings folder inside Data Folder: ----------------------------------------------------------------------------------------
+                if (SessionValues.WebBuild)
+                {
+                    if(!Application.isEditor) //DOESNT CURRENTLY WORK FOR DEFAULT CONFIGS CUZ THATS NOT A CONFIG ON THE SERVER, so it cant find it to copy from
+                    {
+                        StartCoroutine(CreateFolderOnServer(SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings", () =>
+                        {
+                            StartCoroutine(CopySessionConfigFolderToDataFolder()); //Copy Session Config folder to Data folder so that the settings are stored:
+                        }));
+                    }
+                }
+                else
+                {
+                    string sessionSettingsFolderPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
+                    System.IO.Directory.CreateDirectory(sessionSettingsFolderPath);
+                    SessionSettings.StoreSettings(sessionSettingsFolderPath + Path.DirectorySeparatorChar);
+                }
 
                 EventCodeManager = GameObject.Find("MiscScripts").GetComponent<EventCodeManager>(); //new EventCodeManager();
                 if (SerialPortActive)
@@ -523,7 +412,7 @@ namespace USE_ExperimentTemplate_Session
                         loadScene.completed += (_) =>
                         {
                             SessionSettings.Save();
-                            SceneLoaded(configName, true, true);
+                            OnSceneLoaded(configName, true);
                             SessionSettings.Restore();
                             SceneManager.UnloadSceneAsync(taskName);
                             SceneLoading = false;
@@ -543,25 +432,13 @@ namespace USE_ExperimentTemplate_Session
             setupSession.AddDefaultTerminationMethod( () =>
             {
                 SessionSettings.Save();
-#if (!UNITY_WEBGL)
-                GameObject initCamGO = GameObject.Find("InitCamera");
-                initCamGO.SetActive(false);
-                SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
-#endif
-                EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupSessionEnds"]);
-
-                if (EyeTrackerActive)
+                if(!SessionValues.WebBuild)
                 {
-                    GazeTracker.Init(FrameData, 0);
-                    GazeTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
-                    InputTrackers.GetComponent<GazeTracker>().enabled = true;
+                    GameObject initCamGO = GameObject.Find("InitCamera");
+                    initCamGO.SetActive(false);
+                    SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
                 }
-               
-                MouseTracker.Init(FrameData, 0);
-                MouseTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
-                InputTrackers.GetComponent<MouseTracker>().enabled = true;
-
-                
+                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupSessionEnds"]);
             });
 
            // Canvas[] TaskSelectionCanvasses = null;
@@ -603,9 +480,6 @@ namespace USE_ExperimentTemplate_Session
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
-                if (SelectionHandler.AllSelections.Count > 0)
-                    SelectionHandler.ClearSelections();
-
                 TaskSelectionCanvasGO.SetActive(true);
 
                 TaskSelection_Starfield.SetActive(IsHuman ? true : false);
@@ -652,7 +526,7 @@ namespace USE_ExperimentTemplate_Session
                 taskAutomaticallySelected = false; // gives another chance to select even if previous task loading was due to timeout
 
                 SessionCam.gameObject.SetActive(true);
-                
+
 
                 // Don't show the task buttons if we encountered an error during setup
                 if (LogPanel.HasError())
@@ -717,8 +591,8 @@ namespace USE_ExperimentTemplate_Session
                 float buttonStartX = (buttonSize - buttonsWidth) / 2;
 
                 float buttonY = 0f;
-                if(IsHuman)
-                    buttonY = -125f;
+                //if(IsHuman)
+                //    buttonY = -125f;
 
                 if(TaskIconLocations.Count() != numTasks) //If user didn't specify in config, Generate default locations:
                 {
@@ -737,35 +611,54 @@ namespace USE_ExperimentTemplate_Session
                 {
                     // Assigns configName and taskName according to Session Config Task Mappings
                     string configName = (string)task.Key;
-
-                    USE_TaskButton taskButton = new USE_TaskButton(TaskButtonsContainer.transform.parent.GetComponent<Canvas>(),TaskIconLocations[count], buttonSize, configName);
-                    taskButton.TaskButtonGO.transform.SetParent(TaskButtonsContainer.transform, false);
-                    taskButtonsDict.Add(configName, taskButton);
+                    string taskName = (string)task.Value;
 
                     string taskFolder = GetConfigFolderPath(configName);
                     if (!Directory.Exists(taskFolder))
                     {
-                        Destroy(TaskButtonsContainer);
+                        Destroy(TaskButtons);
                         throw new DirectoryNotFoundException($"Task folder for '{configName}' at '{taskFolder}' does not exist.");
                     }
-                    
+
+                    GameObject taskButton = new GameObject(configName + "Button");
+                    taskButtonsDict.Add(configName, taskButton);
+                    taskButton.transform.parent = TaskButtons.transform;
+
+                    RawImage taskButtonImage = taskButton.AddComponent<RawImage>();
+                    string taskIcon = TaskIcons[configName];
+
                     if (UseDefaultConfigs)
-                        taskButton.TaskButtonGO.GetComponent<RawImage>().texture = Resources.Load<Texture2D>("DefaultResources/TaskIcons/" + TaskIcons[configName]);
+                        taskButtonImage.texture = Resources.Load<Texture2D>("DefaultResources/TaskIcons/" + taskIcon);
                     else
                         taskButton.TaskButtonGO.GetComponent<RawImage>().texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + TaskIcons[configName] + ".png");
 
+                    taskButtonImage.rectTransform.localPosition = TaskIconLocations[count];
+                    taskButtonImage.rectTransform.localScale = Vector3.one;
+                    taskButtonImage.rectTransform.sizeDelta = buttonSize * Vector3.one;
                     
                     if (GuidedTaskSelection)
                     {
-                        // If guided task selection, only make the next icon interactable
-                        string key = TaskMappings.Keys.Cast<string>().ElementAt(taskCount);
-
-                        RawImage image = taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>();
-                        if(configName == key)
+                        Button button = taskButton.AddComponent<Button>();
+                        // Will monitor clicks to all task icons
+                        button.onClick.AddListener(() =>
                         {
-                            image.color = new Color(1f, 1f, 1f, 1f);
-                            taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget = true;
-                            taskButton.TaskButtonGO.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
+                            taskAutomaticallySelected = false;
+                            selectedConfigName = configName;
+                        });
+                    }
+                    else
+                    {
+                        string key = TaskMappings.Keys.Cast<string>().ElementAt(taskCount);
+                        RawImage image = taskButtonsDict[configName].GetComponent<RawImage>();
+                        if (configName == key)
+                        {
+                            Button button = taskButton.AddComponent<Button>();
+                            button.onClick.AddListener(() =>
+                            {
+                                taskAutomaticallySelected = false;
+                                selectedConfigName = configName;
+                                taskButtonsDict[configName].GetComponent<RawImage>().color = new Color(1f, 1f, 1f, 1f);
+                            });
                         }
                         else
                         {
@@ -784,8 +677,8 @@ namespace USE_ExperimentTemplate_Session
 
                 if(IsHuman)
                 {
-                    TaskSelection_Header.SetActive(true);
                     HumanVersionToggleButton.SetActive(true);
+                    //ToggleAudioButton.SetActive(true);
                 }
             });
             
@@ -841,13 +734,18 @@ namespace USE_ExperimentTemplate_Session
                 if (hoverEffect != null)
                     Destroy(hoverEffect);
 
-                FrameData.gameObject.SetActive(false);
+                if(!SessionValues.WebBuild) //Let patients play same task as many times as they want
+                {
+                    Color darkGrey = new Color(.5f, .5f, .5f, .35f);
+                    image.color = darkGrey;
+                    Destroy(button);
+                }
 
                 string taskName = (string)TaskMappings[selectedConfigName];
                 loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
                 loadScene.completed += (_) =>
                 {
-                    SceneLoaded(selectedConfigName, false, true);
+                    OnSceneLoaded(selectedConfigName, false);
                     CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigName == selectedConfigName);
                     //selectedConfigsList.Add(CurrentTask.ConfigName);  
                 };
@@ -864,15 +762,19 @@ namespace USE_ExperimentTemplate_Session
                 FrameData.AppendData();
             });
             
-            loadTask.SpecifyTermination(() => !SceneLoading, runTask, () =>
+            loadTask.SpecifyTermination(() => CurrentTask != null && CurrentTask.TaskLevelDefined, runTask, () =>
             {
-                //TaskSelectionCanvasGO.SetActive(false);
+                //if(IsHuman)
+                //{
+                //    TaskSelection_AudioSource.Stop();
+                //    Destroy(GetComponent<AudioListener>());
+                //}
+
                 TaskSelection_Starfield.SetActive(false);
 
                 runTask.AddChildLevel(CurrentTask);
                 if(CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
-                SessionCam.gameObject.SetActive(false);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
                 CurrentTask.TrialLevel.TaskLevel = CurrentTask;
                 if(ExperimenterDisplayController != null)
@@ -881,19 +783,19 @@ namespace USE_ExperimentTemplate_Session
                 if (SerialPortActive)
                 {
                     AppendSerialData();
-                    SerialRecvData.WriteData();
-                    SerialSentData.WriteData();
-                    SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionDataFolderPath, "SerialRecvData", CurrentTask.TaskName);
-                    SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionDataFolderPath, "SerialSentData", CurrentTask.TaskName);
+                    SerialRecvData.AppendDataToFile();
+                    SerialSentData.AppendDataToFile();
+                    SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionDataPath, "SerialRecvData", CurrentTask.TaskName);
+                    SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionDataPath, "SerialSentData", CurrentTask.TaskName);
                 }
-
-                
             });
 
             //automatically finish tasks after running one - placeholder for proper selection
             //runTask.AddLateUpdateMethod
             runTask.AddUniversalInitializationMethod(() =>
             {
+                SessionCam.gameObject.SetActive(false);
+
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["RunTaskStarts"]);
 
 #if (!UNITY_WEBGL)
@@ -908,8 +810,6 @@ namespace USE_ExperimentTemplate_Session
                         mainCameraCopy_Image.texture = CameraMirrorTexture;
                     }
 
-                    PauseCanvas.renderMode = RenderMode.ScreenSpaceCamera;
-                    PauseCanvas.worldCamera = CurrentTask.TaskCam;
 #endif
 
             });
@@ -933,12 +833,14 @@ namespace USE_ExperimentTemplate_Session
                     PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
 
                 SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
-                SessionData.AppendData();
-                SessionData.WriteData();
 
+                SessionData.AppendDataToBuffer();
+                SessionData.AppendDataToFile();
 
                 SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
+
+                ActiveTaskLevels.Remove(CurrentTask);
 
                 if(CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
@@ -959,8 +861,7 @@ namespace USE_ExperimentTemplate_Session
                     SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataFolderPath, "SerialRecvData", "SessionLevel");                    
                     SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataFolderPath, "SerialSentData", "SessionLevel");
 
-                    SerialRecvData.fileName = FilePrefix + "__SerialRecvData" + SerialRecvData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";  
-                    SerialSentData.fileName = FilePrefix + "__SerialSentData" + SerialSentData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
+                    
                 }
                 //     SessionDataPath + Path.DirectorySeparatorChar +
                 //                             SerialRecvData.GetNiceIntegers(4, taskCount + 1 * 2 - 1) + "_TaskSelection";
@@ -987,14 +888,14 @@ namespace USE_ExperimentTemplate_Session
 
             finishSession.SpecifyTermination(() => true, () => null, () =>
             {
-                SessionData.AppendData();
-                SessionData.WriteData();
-           
+                SessionData.AppendDataToBuffer();
+                SessionData.AppendDataToFile();
+
                 AppendSerialData();
                 if(SerialPortActive)
                 {
-                    SerialSentData.WriteData();
-                    SerialRecvData.WriteData();
+                    SerialSentData.AppendDataToFile();
+                    SerialRecvData.AppendDataToFile();
                 }
 
                 if (EyeTrackerActive)
@@ -1004,7 +905,7 @@ namespace USE_ExperimentTemplate_Session
             });
 
             SessionData = (SessionData) SessionDataControllers.InstantiateDataController<SessionData>
-                ("SessionData", StoreData, SessionDataFolderPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionDataPath);
+                ("SessionData", StoreData, SessionDataPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionDataPath);
             SessionData.fileName = FilePrefix + "__SessionData.txt";
             SessionData.sessionLevel = this;
             SessionData.InitDataController();
@@ -1016,23 +917,23 @@ namespace USE_ExperimentTemplate_Session
             if (SerialPortActive)
             {
                 SerialSentData = (SerialSentData) SessionDataControllers.InstantiateDataController<SerialSentData>
-                    ("SerialSentData", StoreData, SessionDataFolderPath + Path.DirectorySeparatorChar +  "SerialSentData" 
-                                                  + Path.DirectorySeparatorChar + "0001_SessionLevel");
-                SerialSentData.fileName = FilePrefix + "__SerialSentData_0001_SessionLevel.txt";
+                    ("SerialSentData", StoreData, SessionDataPath + Path.DirectorySeparatorChar +  "SerialSentData" 
+                                                  + Path.DirectorySeparatorChar + "0001_TaskSelection");
+                SerialSentData.fileName = FilePrefix + "__SerialSentData_0001_TaskSelection.txt";
                 SerialSentData.sessionLevel = this;
                 SerialSentData.InitDataController();
                 SerialSentData.ManuallyDefine();
 
                 SerialRecvData = (SerialRecvData) SessionDataControllers.InstantiateDataController<SerialRecvData>
-                    ("SerialRecvData", StoreData, SessionDataFolderPath + Path.DirectorySeparatorChar + "SerialRecvData" 
-                                                  + Path.DirectorySeparatorChar + "0001_SessionLevel");
-                SerialRecvData.fileName = FilePrefix + "__SerialRecvData_0001_SessionLevel.txt";
+                    ("SerialRecvData", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "SerialRecvData" 
+                                                  + Path.DirectorySeparatorChar + "0001_TaskSelection");
+                SerialRecvData.fileName = FilePrefix + "__SerialRecvData_0001_TaskSelection.txt";
                 SerialRecvData.sessionLevel = this;
                 SerialRecvData.InitDataController();
                 SerialRecvData.ManuallyDefine();
             }
 
-            SummaryData.Init(StoreData, SessionDataFolderPath);
+            SummaryData.Init(StoreData, SessionDataPath);
 
             SessionLevelDataPath = SessionDataFolderPath + Path.DirectorySeparatorChar + "SessionLevel";
             FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "SessionLevel", StoreData, SessionLevelDataPath + Path.DirectorySeparatorChar + "FrameData");
@@ -1044,22 +945,198 @@ namespace USE_ExperimentTemplate_Session
             if (EventCodesActive)
                 FrameData.AddEventCodeColumns();
 
-            if (EyeTrackerActive)
+           if (EyeTrackerActive)
             {
                 GazeData = (USE_ExperimentTemplate_Data.GazeData)SessionDataControllers.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", "SessionLevel", StoreData, SessionLevelDataPath + Path.DirectorySeparatorChar + "GazeData");
-
-                GazeData.fileName = "SessionLevel__GazeData.txt";
+		
+  GazeData.fileName = "SessionLevel__GazeData.txt";
                 GazeData.sessionLevel = this;
                 GazeData.InitDataController();
                 GazeData.ManuallyDefine();
                 TobiiEyeTrackerController.GazeData = GazeData;
-            }
-
-            if (EyeTrackerActive)
+}
+if (EyeTrackerActive)
                 GazeTracker.Init(FrameData, 0);
             MouseTracker.Init(FrameData, 0);
 
-            void GetTaskLevelFromString<T>()
+
+        private void LoadSessionConfigSettings()
+        {
+            if (SessionSettings.SettingExists("Session", "SyncBoxActive"))
+                SyncBoxActive = (bool)SessionSettings.Get("Session", "SyncBoxActive");
+            else
+                SyncBoxActive = false;
+
+            if (SessionSettings.SettingExists("Session", "EventCodesActive"))
+                EventCodesActive = (bool)SessionSettings.Get("Session", "EventCodesActive");
+            else
+                EventCodesActive = false;
+
+            if (SessionSettings.SettingExists("Session", "RewardPulsesActive"))
+                RewardPulsesActive = (bool)SessionSettings.Get("Session", "RewardPulsesActive");
+            else
+                RewardPulsesActive = false;
+
+            if (SessionSettings.SettingExists("Session", "SonicationActive"))
+                SonicationActive = (bool)SessionSettings.Get("Session", "SonicationActive");
+            else
+                SonicationActive = false;
+
+            if (SessionSettings.SettingExists("Session", "LongRewardHotKeyPulseSize"))
+                LongRewardHotKeyPulseSize = (int)SessionSettings.Get("Session", "LongRewardHotKeyPulseSize");
+            else
+                LongRewardHotKeyPulseSize = 500;
+
+            if (SessionSettings.SettingExists("Session", "LongRewardHotKeyNumPulses"))
+                LongRewardHotKeyNumPulses = (int)SessionSettings.Get("Session", "LongRewardHotKeyNumPulses");
+            else
+                LongRewardHotKeyNumPulses = 1;
+
+            if (SessionSettings.SettingExists("Session", "RewardHotKeyPulseSize"))
+                RewardHotKeyPulseSize = (int)SessionSettings.Get("Session", "RewardHotKeyPulseSize");
+            else
+                RewardHotKeyPulseSize = 250;
+
+            if (SessionSettings.SettingExists("Session", "RewardHotKeyNumPulses"))
+                RewardHotKeyNumPulses = (int)SessionSettings.Get("Session", "RewardHotKeyNumPulses");
+            else
+                RewardHotKeyNumPulses = 1;
+
+
+            //MAKE SURE SYNCBOX INACTIVE FOR WEB BUILD (Can eventually remove this once thilo provides web build session configs with it marked false)
+            if(SessionValues.WebBuild)
+                SyncBoxActive = false;
+
+            if (SyncBoxActive)
+                SerialPortActive = true;
+
+
+            //Load the Session Event Code Config file --------------------------------------------------------------------------------------------------
+            string eventCodeFileString = "";
+
+            if(SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
+            {
+                StartCoroutine(ServerManager.GetFileStringAsync(ServerManager.SessionConfigFolderPath, "EventCode", result =>
+                {
+                    SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", configFileFolder, result);
+                    SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
+                }));
+            }
+            else
+            {
+                string path = SessionValues.UseDefaultConfigs ? (Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs") : configFileFolder;
+                eventCodeFileString = LocateFile.FindFilePathInExternalFolder(configFileFolder, "*EventCode*");
+                if (!string.IsNullOrEmpty(eventCodeFileString))
+                {
+                    SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
+                    SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
+                    //EventCodesActive = true;
+                }
+                else if (EventCodesActive)
+                    Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");
+            }
+
+
+           
+
+            List<string> taskNames;
+            if (SessionSettings.SettingExists("Session", "TaskNames"))
+            {
+                taskNames = (List<string>)SessionSettings.Get("Session", "TaskNames");
+                TaskMappings = new OrderedDictionary();
+                taskNames.ForEach((taskName) => TaskMappings.Add(taskName, taskName));
+            }
+            else if (SessionSettings.SettingExists("Session", "TaskMappings"))
+                TaskMappings = (OrderedDictionary)SessionSettings.Get("Session", "TaskMappings");
+            else if (TaskMappings.Count == 0)
+                Debug.LogError("No task names or task mappings specified in Session config file or by other means.");
+
+
+            if (SessionSettings.SettingExists("Session", "ShotgunRaycastCircleSize_DVA"))
+                ShotgunRaycastCircleSize_DVA = (float)SessionSettings.Get("Session", "ShotgunRaycastCircleSize_DVA");
+            else
+                ShotgunRaycastCircleSize_DVA = 1.25f;
+
+            if (SessionSettings.SettingExists("Session", "ParticipantDistance_CM"))
+                ParticipantDistance_CM = (float)SessionSettings.Get("Session", "ParticipantDistance_CM");
+            else
+                ParticipantDistance_CM = 60f;
+
+            if (SessionSettings.SettingExists("Session", "ShotgunRaycastSpacing_DVA"))
+                ShotgunRaycastSpacing_DVA = (float)SessionSettings.Get("Session", "ShotgunRaycastSpacing_DVA");
+            else
+                ShotgunRaycastSpacing_DVA = .3f;
+
+
+            if (SessionSettings.SettingExists("Session", "IsHuman"))
+                IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");
+
+            if (SessionSettings.SettingExists("Session", "TaskIconLocations"))
+                TaskIconLocations = (Vector3[])SessionSettings.Get("Session", "TaskIconLocations");
+
+            if (SessionSettings.SettingExists("Session", "GuidedTaskSelection"))
+                GuidedTaskSelection = (bool)SessionSettings.Get("Session", "GuidedTaskSelection");
+
+            if (SessionSettings.SettingExists("Session", "EyeTrackerActive"))
+                EyeTrackerActive = (bool)SessionSettings.Get("Session", "EyeTrackerActive");
+
+            if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
+                ContextExternalFilePath = (string)SessionSettings.Get("Session", "ContextExternalFilePath");
+
+            if (SessionSettings.SettingExists("Session", "TaskIconsFolderPath"))
+                TaskIconsFolderPath = (string)SessionSettings.Get("Session", "TaskIconsFolderPath");
+
+            if (SessionSettings.SettingExists("Session", "TaskIcons"))
+                TaskIcons = (Dictionary<string, string>)SessionSettings.Get("Session", "TaskIcons");
+
+            if (SessionSettings.SettingExists("Session", "StoreData"))
+                StoreData = (bool)SessionSettings.Get("Session", "StoreData");
+
+            if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
+                MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
+
+            if (SessionSettings.SettingExists("Session", "TaskSelectionTimeout"))
+                TaskSelectionTimeout = (float)SessionSettings.Get("Session", "TaskSelectionTimeout");
+
+
+            if (SessionSettings.SettingExists("Session", "SerialPortActive"))
+                SerialPortActive = (bool)SessionSettings.Get("Session", "SerialPortActive");
+
+        }
+
+        private void WriteSessionConfigsToPersistantDataPath()
+        {
+            if (Directory.Exists(configFileFolder))
+                Directory.Delete(configFileFolder, true);
+
+            if (!Directory.Exists(configFileFolder))
+            {
+                Directory.CreateDirectory(configFileFolder);
+                List<string> configsToWrite = new List<string>() { "SessionConfig", "EventCodeConfig", "DisplayConfig" };
+                foreach (string config in configsToWrite)
+                {
+                    byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + config).bytes;
+                    File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + config + ".txt", textFileBytes);
+                }
+            }
+        }
+
+        public void HandleToggleAudioButtonClick()
+        {
+            if (TaskSelection_AudioSource.isPlaying)
+            {
+                audioPlaybackSpot = TaskSelection_AudioSource.time;
+                TaskSelection_AudioSource.Stop();
+                ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
+            }
+            else
+            {
+                TaskSelection_AudioSource.time = audioPlaybackSpot;
+                TaskSelection_AudioSource.Play();
+                ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(false);
+            
+        }
+void GetTaskLevelFromString<T>()
                 where T : ControlLevel_Task_Template
             {
                 foreach (ControlLevel_Task_Template taskLevel in ActiveTaskLevels)
@@ -1067,20 +1144,32 @@ namespace USE_ExperimentTemplate_Session
                         CurrentTask = taskLevel;
                 CurrentTask = null;
             }
-        }
-
         public void HandleHumanVersionToggleButtonClick()
         {
             IsHuman = !IsHuman;
 
+            //if(IsHuman)
+            //{
+            //    gameObject.AddComponent<AudioListener>();
+            //    TaskSelection_AudioSource = gameObject.AddComponent<AudioSource>();
+            //    TaskSelection_AudioSource.clip = TaskSelection_HumanAudio;
+            //    TaskSelection_AudioSource.loop = true;
+            //    TaskSelection_AudioSource.time = audioPlaybackSpot;
+            //    TaskSelection_AudioSource.Play();
+            //}
+            //else
+            //{
+            //    audioPlaybackSpot = TaskSelection_AudioSource.time;
+            //    TaskSelection_AudioSource.Stop();
+            //    Destroy(GetComponent<AudioListener>());
+            //}
+
             //Change text on button:
             HumanVersionToggleButton.GetComponentInChildren<TextMeshProUGUI>().text = IsHuman ? "Human Version" : "Primate Version";
-            //Toggle Header:
-            TaskSelection_Header.SetActive(TaskSelection_Header.activeInHierarchy ? false : true);
             //Toggle Starfield:
             TaskSelection_Starfield.SetActive(TaskSelection_Starfield.activeInHierarchy ? false : true);
             //push task buttons up to 0 Y for humans, or back to -100 Y for monkeys
-            TaskButtonsContainer.transform.localPosition = new Vector3(TaskButtonsContainer.transform.localPosition.x, TaskButtonsContainer.transform.localPosition.y + (IsHuman ? -125f : 125f), TaskButtonsContainer.transform.localPosition.z);
+            TaskButtons.transform.localPosition = new Vector3(TaskButtons.transform.localPosition.x, TaskButtons.transform.localPosition.y + (IsHuman ? -125f : 125f), TaskButtons.transform.localPosition.z);
 
         }
 
@@ -1096,7 +1185,7 @@ namespace USE_ExperimentTemplate_Session
                         // Debug.Log("sentdata.sc: " + SerialSentData.sc);
                         // Debug.Log("sentdata.sc: " + SerialSentData.sc.BufferCount("sent"));
                         // Debug.Log("sentdata.sc: " + SerialSentData.sc.BufferToString("sent"));
-                        SerialSentData.AppendData();
+                        SerialSentData.AppendDataToBuffer();
                     }
                     catch (Exception e)
                     {
@@ -1112,7 +1201,7 @@ namespace USE_ExperimentTemplate_Session
                         // Debug.Log("recvdata.sc: " + SerialRecvData.sc);
                         // Debug.Log("recvdata.sc: " + SerialRecvData.sc.BufferCount("received"));
                         // Debug.Log("recvdata.sc: " + SerialRecvData.sc.BufferToString("received"));
-                        SerialRecvData.AppendData();
+                        SerialRecvData.AppendDataToBuffer();
                     }
                     catch (Exception e)
                     {
@@ -1126,8 +1215,13 @@ namespace USE_ExperimentTemplate_Session
         {
             string path;
 
-            if(UseDefaultConfigs)
-                path = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
+            if(SessionValues.WebBuild)
+            {
+                if (SessionValues.UseDefaultConfigs)
+                    path = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
+                else
+                    path = $"{ServerManager.SessionConfigFolderPath}/{configName}";
+            }
             else
             {
                 if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))
@@ -1150,7 +1244,7 @@ namespace USE_ExperimentTemplate_Session
 
         public ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly, bool loadSettings)
         {
-            tl.SessionLevel = this;
+            tl.USE_StartButton = USE_StartButton;
             tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
             tl.HumanStartPanel = HumanStartPanel;
             tl.IsHuman = IsHuman;
@@ -1160,17 +1254,12 @@ namespace USE_ExperimentTemplate_Session
             tl.SessionDataFolderPath = SessionDataFolderPath;
             tl.SessionLevelDataPath = SessionLevelDataPath;
 
-//#if (UNITY_WEBGL)
-//            tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
-//#else
-            if(UseDefaultConfigs)
-                tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
-            else
-                tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName);
-//#endif
 
-            if (UseDefaultConfigs)
+            if (SessionValues.UseDefaultConfigs)
             {
+                tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
+
+                //Write Task Config Folder and its files to Persistant data path for Webbuild using default configs---------------------
                 if (!Directory.Exists(tl.TaskConfigPath))
                 {
                     Directory.CreateDirectory(tl.TaskConfigPath);
@@ -1186,22 +1275,21 @@ namespace USE_ExperimentTemplate_Session
                         {"_EventCodeConfig", "_EventCodeConfig.json"},
                         {"MazeDef", "MazeDef.txt"}
                     };
-
-                    TextAsset configFilePath;
-
+                    TextAsset configTextAsset;
                     foreach (var entry in configDict)
                     {
-                        configFilePath = Resources.Load<TextAsset>(tl.TaskName + "_DefaultConfigs/" + tl.TaskName + entry.Key);
-
-                        if (configFilePath == null)//try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
-                            configFilePath = Resources.Load<TextAsset>(tl.TaskName + "_DefaultConfigs/" + entry.Key);
-
-                        if (configFilePath != null)
-                            System.IO.File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + tl.TaskName + entry.Key, configFilePath.bytes);
+                        configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + tl.TaskName + entry.Key);
+                        if (configTextAsset == null)//try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
+                            configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + entry.Key);
+                        if (configTextAsset != null)
+                            File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + tl.TaskName + entry.Value, configTextAsset.bytes);
                     }
                 }
             }
-            
+            else
+                tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName);
+
+
             tl.FilePrefix = FilePrefix;
             tl.StoreData = StoreData;
             tl.SubjectID = SubjectID;
@@ -1241,6 +1329,7 @@ namespace USE_ExperimentTemplate_Session
             tl.ShotgunRaycastSpacing_DVA = ShotgunRaycastSpacing_DVA;
             tl.ParticipantDistance_CM = ParticipantDistance_CM;
 
+
             if (SessionSettings.SettingExists("Session", "RewardPulsesActive"))
                 tl.RewardPulsesActive = (bool)SessionSettings.Get("Session", "RewardPulsesActive");
             else
@@ -1251,8 +1340,11 @@ namespace USE_ExperimentTemplate_Session
             else;
                 tl.SonicationActive = false;
 
-            tl.DefineTaskLevel(verifyOnly, loadSettings);
-            // ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
+
+            StartCoroutine(tl.DefineTaskLevel(verifyOnly));
+
+
+            //ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
             // Don't add task to ActiveTaskLevels if we're just verifying
             if (verifyOnly) return tl;
 
@@ -1262,41 +1354,30 @@ namespace USE_ExperimentTemplate_Session
                     canvas.gameObject.SetActive(true);
             return tl;
         }
-        //
-        // void SceneLoaded(string sceneName)
-        // {
-        // 	var methodInfo = GetType().GetMethod(nameof(this.FindTaskCam));
-        // 	MethodInfo findTaskCam = methodInfo.MakeGenericMethod(new Type[] {ActiveTaskTypes[sceneName]});
-        // 	findTaskCam.Invoke(this, new object[] {sceneName});
-        // 	// TaskSceneLoaded = true;
-        // 	SceneLoading = false;
-        // }
 
-        void SceneLoaded(string configName, bool verifyOnly, bool loadSettings)
+
+        void OnSceneLoaded(string configName, bool verifyOnly)
         {
             string taskName = (string)TaskMappings[configName];
             var methodInfo = GetType().GetMethod(nameof(this.PrepareTaskLevel));
             
             Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
             MethodInfo prepareTaskLevel = methodInfo.MakeGenericMethod(new Type[] { taskType });
-            prepareTaskLevel.Invoke(this, new object[] { configName, verifyOnly, loadSettings });
+            prepareTaskLevel.Invoke(this, new object[] { configName, verifyOnly });
             // TaskSceneLoaded = true;
             SceneLoading = false;
         }
 
-        public void PrepareTaskLevel<T>(string configName, bool verifyOnly, bool loadSettings) where T : ControlLevel_Task_Template
+        public void PrepareTaskLevel<T>(string configName, bool verifyOnly) where T : ControlLevel_Task_Template
         {
             string taskName = (string)TaskMappings[configName];
             ControlLevel_Task_Template tl = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
-            tl.UseDefaultConfigs = UseDefaultConfigs;
             tl.ConfigName = configName;
-            tl = PopulateTaskLevel(tl, verifyOnly, loadSettings);
+            tl = PopulateTaskLevel(tl, verifyOnly);
             if (tl.TaskCam == null)
                 tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
             tl.TaskCam.gameObject.SetActive(false);
-
         }
-
         // public void FindTaskCam<T>(string taskName) where T : ControlLevel_Task_Template
         // {
         // 	ControlLevel_Task_Template tl = GameObject.Find("ControlLevels").GetComponent<T>();
@@ -1330,40 +1411,9 @@ namespace USE_ExperimentTemplate_Session
 
         void OnApplicationQuit()
         {
-            //	performancetext.AppendData();
-            //	performancetext.WriteData();
 
-            //	if (exptParameters.ContextMaterials != null)
-            //	{
-            //		foreach (var o in exptParameters.ContextMaterials)
-            //		{
-            //			Resources.UnloadAsset(o);
-            //		}
-            //	}
-
-            //	if (eyeTrackType == 2)
-            //	{
-            //		if (calibLevel.calibrationUnfinished == true)
-            //			udpManager.SendString("ET###leave_calibration");
-            //		udpManager.SendString("ET###unsubscribe_eyetracker");
-            //	}
-            //	if (eventCodeManager.codesActive)
-            //	{
-            //		serialPortController.ClosePort();
-            //	}
-            //	trialLevel.WriteTrialData();
-            //	blockData.AppendData();
-            //	blockData.WriteData();
-            //	//WriteFrameByFrameData();
-            //	if (eyeTrackType == 2)
-            //	{
-            //		udpManager.SendString("DATA###clear_data");
-            //		udpManager.CloseUDP();
-            //	}
-            //	//Save EditorLog and Player Log files
             if (StoreData)
             {
-                System.IO.Directory.CreateDirectory(SessionDataFolderPath + Path.DirectorySeparatorChar + "LogFile");
                 string symlinkLocation = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + "LatestSession";
 #if UNITY_STANDALONE_WIN
                 uint GENERIC_READ = 0x80000000;
@@ -1389,7 +1439,7 @@ namespace USE_ExperimentTemplate_Session
 
                 // \??\ indicates that the path should be non-interpreted
                 string prefix = @"\??\";
-                string substituteName = prefix + SessionDataFolderPath;
+                string substituteName = prefix + SessionDataPath;
                 // char is 2 bytes because strings are UTF-16
                 int substituteByteLen = substituteName.Length * sizeof(char);
                 ReparseDataBuffer rdb = new ReparseDataBuffer
@@ -1420,52 +1470,45 @@ namespace USE_ExperimentTemplate_Session
 
                 CloseHandle(dirHandle);
 #endif
-                string logPath = "";
-                if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX |
-                    SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux)
+                //Create Log Folder & Files for Normal Build: -----------------------------------------------------------------------------------------------
+                if (!SessionValues.WebBuild) //Web Build log folder & file creation already handled in the WebBuildLogWriter.cs class
                 {
-                    if (Application.isEditor)
-                        logPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) +
-                                  "/Library/Logs/Unity/Editor.log";
-                    else
-                        logPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) +
-                                  "/Library/Logs/Unity/Player.log";
-                }
-                else if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Windows)
-                {
-                    if (Application.isEditor)
+                    System.IO.Directory.CreateDirectory(SessionDataPath + Path.DirectorySeparatorChar + "LogFile");
+
+                    string logPath = "";
+                    if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX | SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux)
                     {
-                        logPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) +
-                                  "\\Unity\\Editor\\Editor.log";
+                        string pathName = Application.isEditor ? "/Library/Logs/Unity/Editor.log" : "/Library/Logs/Unity/Player.log";
+                        logPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + pathName;
                     }
-                    else
+                    else if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Windows)
                     {
-                        logPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low\\" +
-                                  Application.companyName + "\\" + Application.productName + "\\Player.log";
+                        string pathName = Application.isEditor ? "\\Unity\\Editor\\Editor.log" : ("Low\\" + Application.companyName + "\\" + Application.productName + "\\Player.log");
+                        logPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + pathName;
                     }
+
+                    string logFileName = Application.isEditor ? "Editor.log" : "Player.log";
+                    File.Copy(logPath, SessionDataPath + Path.DirectorySeparatorChar + "LogFile" + Path.DirectorySeparatorChar + logFileName);
                 }
 
-                if (Application.isEditor)
-                    File.Copy(logPath,
-                        SessionDataFolderPath + Path.DirectorySeparatorChar + "LogFile" + Path.DirectorySeparatorChar +
-                        "Editor.log");
-                else
-                    File.Copy(logPath,
-                        SessionDataFolderPath + Path.DirectorySeparatorChar + "LogFile" + Path.DirectorySeparatorChar +
-                        "Player.log");
-
-                System.IO.Directory.CreateDirectory(SessionDataFolderPath + Path.DirectorySeparatorChar + "SessionSettings");
-
-                SessionSettings.StoreSettings(SessionDataFolderPath + Path.DirectorySeparatorChar + "SessionSettings" +
-                                              Path.DirectorySeparatorChar);
-
-                /*if (FrameData != null)
-                {
-                    FrameData.AppendData();
-                    FrameData.WriteData();
-                }*/
 
             }
+        }
+
+
+
+        private IEnumerator CreateFolderOnServer(string folderPath, Action callback)
+        {
+            yield return ServerManager.CreateFolder(folderPath);
+            callback?.Invoke();
+        }
+
+        private IEnumerator CopySessionConfigFolderToDataFolder()
+        {
+            string sourcePath = ServerManager.SessionConfigFolderPath; //UN COMMENT THIS LATER!
+            //string sourcePath = "CONFIGS/SessionConfig_021_VS_FL_VS_v01_Set05_STIM"; // Just used to test!
+            string destinationPath = $"{ServerManager.SessionDataFolderPath}/SessionSettings";
+            yield return ServerManager.CopyFolder(sourcePath, destinationPath);
         }
         public void OnGUI()
         {

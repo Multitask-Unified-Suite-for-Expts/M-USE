@@ -110,12 +110,12 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             string contextFilePath;
-            if (UseDefaultConfigs)
-                contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + mgBD.ContextName;
+            if (SessionValues.WebBuild)
+                contextFilePath = $"{ContextExternalFilePath}/{TaskName}_Contexts/{mgBD.ContextName}";
             else
                 contextFilePath = mgTL.GetContextNestedFilePath(ContextExternalFilePath, mgBD.ContextName, "LinearDark");
 
-            RenderSettings.skybox = CreateSkybox(contextFilePath, UseDefaultConfigs);
+            RenderSettings.skybox = CreateSkybox(contextFilePath);
 
 
             FindMaze();
@@ -316,7 +316,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         else mgTL.ContextExternalFilePath = ContextExternalFilePath;
 
         
-        if(UseDefaultConfigs)
+        if(SessionValues.UseDefaultConfigs)
         {
             if (Application.isEditor)
             {
@@ -495,7 +495,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         string mazeFilePath = "";
         string jsonString = "";
 
-        if (UseDefaultConfigs && !Application.isEditor)
+        if (SessionValues.UseDefaultConfigs && !Application.isEditor)
         {
             TextAsset textAsset = Resources.Load<TextAsset>(mgTL.MazeFilePath + "/" + mgTL.mazeDefName);
             if (textAsset != null)

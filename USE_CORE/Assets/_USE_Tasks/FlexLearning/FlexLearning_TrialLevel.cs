@@ -8,6 +8,7 @@ using USE_UI;
 using System.Linq;
 using ConfigDynamicUI;
 using USE_ExperimentTemplate_Task;
+using TMPro;
 
 public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 {
@@ -15,7 +16,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     public FlexLearning_TaskLevel CurrentTaskLevel => GetTaskLevel<FlexLearning_TaskLevel>();
 
     public GameObject FL_CanvasGO;
-    public USE_StartButton USE_StartButton;
 
     // Block End Variables
     public List<int> runningAcc;
@@ -85,7 +85,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int PreSearch_TouchFbErrorCount;
 
     [HideInInspector] public bool MacMainDisplayBuild;
-    [HideInInspector] public bool AdjustedPositionsForMac;
 
 
     public override void DefineControlLevel()
@@ -130,8 +129,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    USE_StartButton = new USE_StartButton(FL_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                    StartButton = USE_StartButton.StartButtonGO;
+                    StartButton = USE_StartButton.CreateStartButton(FL_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                     USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
@@ -155,22 +153,16 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-            CurrentTaskLevel.SetBlockSummaryString();
-            if (TrialCount_InTask != 0)
-                CurrentTaskLevel.SetTaskSummaryString();
-
-            if (MacMainDisplayBuild & !UnityEngine.Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
-            {
-                Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
-                TokenFBController.transform.localScale = biggerScale;
-                TokenFBController.tokenSize = 200;
-                TokenFBController.RecalculateTokenBox();
-                AdjustedPositionsForMac = true;
-            }
+            if (MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
+                TokenFBController.AdjustTokenBarSizing(200);
 
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
+
+            CurrentTaskLevel.SetBlockSummaryString();
+            if (TrialCount_InTask != 0)
+                CurrentTaskLevel.SetTaskSummaryString();
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
@@ -179,7 +171,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
 
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), SearchDisplayDelay, () =>
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(IsHuman ? HumanStartPanel.StartButtonChildren : USE_StartButton.StartButtonChildren), SearchDisplayDelay, () =>
         {
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
         });
@@ -193,9 +185,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             Input.ResetInputAxes(); //reset input in case they holding down
             TokenFBController.enabled = true;
-            #if (!UNITY_WEBGL)
+#if (!UNITY_WEBGL)
                 ActivateChildren(playerViewParent);
-            #endif
+#endif
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
 
@@ -284,9 +276,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddInitializationMethod(() =>
         {
-            #if (!UNITY_WEBGL)
+#if (!UNITY_WEBGL)
                 DestroyTextOnExperimenterDisplay();
-            #endif
+#endif
 
             if (selectedSD.StimTokenRewardMag > 0)
             {
@@ -325,7 +317,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage"), UseDefaultConfigs);
+                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage"));
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOff"]);
             }
         });
@@ -334,6 +326,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         AssignTrialData();
         AssignFrameData();
     }
+
+
     public void MakeStimFaceCamera()
     {
         foreach (StimGroup group in TrialStims)
@@ -345,9 +339,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     public override void FinishTrialCleanup()
     {
         // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
-        #if (!UNITY_WEBGL)
+        if (!SessionValues.WebBuild)
             DestroyTextOnExperimenterDisplay();
-        #endif
 
         tStim.ToggleVisibility(false);
         
@@ -372,7 +365,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
 
-        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
 
         int temp = 0;
         tStim = new StimGroup("SearchStimuli", group, CurrentTrialDef.TrialStimIndices);

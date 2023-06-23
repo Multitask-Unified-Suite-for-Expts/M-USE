@@ -7,6 +7,7 @@ using USE_StimulusManagement;
 using USE_ExperimentTemplate_Trial;
 using VisualSearch_Namespace;
 using USE_UI;
+using TMPro;
 using Tobii.Research.Unity;
 
 public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
@@ -83,8 +84,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int PreSearch_TouchFbErrorCount;
 
     [HideInInspector] public bool MacMainDisplayBuild;
-    [HideInInspector] public bool AdjustedPositionsForMac;
-
 
 
     public override void DefineControlLevel()
@@ -107,8 +106,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             // Initialize FB Controller Values
             HaloFBController.SetHaloSize(5f);
             HaloFBController.SetHaloIntensity(5);
-
-            });
+        });
         
         SetupTrial.AddInitializationMethod(() =>
         {
@@ -130,8 +128,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    USE_StartButton = new USE_StartButton(VS_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                    StartButton = USE_StartButton.StartButtonGO;
+                    StartButton = USE_StartButton.CreateStartButton(VS_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                     USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
@@ -140,7 +137,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 LoadConfigUIVariables();
             
             SetTrialSummaryString();
-
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -153,18 +149,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
+            if (MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
+                TokenFBController.AdjustTokenBarSizing(200);
+
             CurrentTaskLevel.SetBlockSummaryString();
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
-
-            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
-            {
-                Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
-                TokenFBController.transform.localScale = biggerScale;
-                TokenFBController.tokenSize = 200;
-                TokenFBController.RecalculateTokenBox();
-                AdjustedPositionsForMac = true;
-            }
 
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
@@ -176,7 +166,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton),
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(IsHuman ? HumanStartPanel.StartButtonChildren : USE_StartButton.StartButtonChildren),
             SearchDisplayDelay, () => 
             {
                 choiceMade = false;
@@ -278,10 +268,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddInitializationMethod(() =>
         {
-            #if (!UNITY_WEBGL)
+            if(!SessionValues.WebBuild)
+            {
                 if (playerViewParent.transform.childCount != 0)
                     DestroyChildren(playerViewParent);
-            #endif
+            }
 
             if (selectedSD.StimTokenRewardMag > 0)
             {
@@ -320,7 +311,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath,"itiImage"), UseDefaultConfigs);
+                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath,"itiImage"));
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOff"]);
             }
         });
@@ -339,10 +330,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     }
     public override void FinishTrialCleanup()
     {
-        #if (!UNITY_WEBGL)
+        if(!SessionValues.WebBuild)
+        {
             if (playerViewParent.transform.childCount != 0)
                 DestroyChildren(playerViewParent);
-        #endif
+        }
 
         tStim.ToggleVisibility(false);
         
@@ -381,7 +373,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
 
-        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
 
         tStim = new StimGroup("SearchStimuli", group, CurrentTrialDef.TrialStimIndices);
         if(TokensWithStimOn?? false)

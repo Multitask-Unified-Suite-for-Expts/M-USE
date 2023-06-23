@@ -31,7 +31,7 @@ public class TobiiGaze_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.AddInitializationMethod(() =>
         { 
-            RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "DarkGrey"), false);
+            RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "DarkGrey"));
             
             // auto set save data true every trial, can turn off before calibration starts
             screenBasedSaveData.SaveData = true;

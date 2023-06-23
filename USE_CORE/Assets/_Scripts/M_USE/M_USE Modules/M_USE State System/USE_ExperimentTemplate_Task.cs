@@ -167,10 +167,8 @@ namespace USE_ExperimentTemplate_Task
 
             while(!AllDefsImported)
             {
-                Debug.Log("TrialsImported? " + TrialDefImported + " BlocksImported? " + BlockDefImported + " TaskDefImported? " + TaskDefImported);
                 yield return new WaitForEndOfFrame();
             }
-            Debug.Log("AFTER LOOP: " + " TrialsImported? " + TrialDefImported + " BlocksImported? " + BlockDefImported + " TaskDefImported? " + TaskDefImported);
 
             TrialDefImported = false;
             BlockDefImported = false;
@@ -1074,6 +1072,7 @@ namespace USE_ExperimentTemplate_Task
             else
             {
                 string taskDefFilePath = LocateFile.FindFilePathInExternalFolder(taskConfigFolder, "*" + TaskName + "*Task*");
+                Debug.Log("GONNA READ TASK DEF FROM: " + taskDefFilePath);
                 if (!string.IsNullOrEmpty(taskDefFilePath))
                     SessionSettings.ImportSettings_MultipleType(TaskName + "_TaskSettings", taskDefFilePath);
                 else

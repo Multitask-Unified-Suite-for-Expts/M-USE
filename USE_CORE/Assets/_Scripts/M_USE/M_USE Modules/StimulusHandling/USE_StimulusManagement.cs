@@ -282,7 +282,6 @@ namespace USE_StimulusManagement
         public IEnumerator Load(Action<GameObject> callback)
         {
 			SessionValues.Using2DStim = FileName.Contains("png") ? true : false;
-			Debug.Log(SessionValues.Using2DStim ? "USING 2D STIM!" : "USING 3D STIM!");
 
 			bool loadFromServer = SessionValues.WebBuild && !SessionValues.UseDefaultConfigs;
 
@@ -401,13 +400,19 @@ namespace USE_StimulusManagement
             string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "Stimuli";
 
             if (!Directory.Exists(folderPath))
+			{
                 Directory.CreateDirectory(folderPath);
+				Debug.Log("AFTER CREATING DIRECTORY AT PERSISTANT DATA PATH!");
+			}
 
             string stimPath = folderPath + Path.DirectorySeparatorChar + FileName;
 			if(!File.Exists(stimPath))
 			{
                 Debug.Log("WRITING STIM TO PERSISTANT DATA PATH!");
                 File.WriteAllBytes(stimPath, stimFileBytes);
+				Debug.Log("DONE WRITING BYTES TO PERSISTANT DATA PATH!");
+				if (File.Exists(stimPath))
+					Debug.Log("AND NOW THE FILE EXISTS ON THE PERSISTANT DATA PATH!");
             }
 
             return stimPath;
@@ -435,11 +440,17 @@ namespace USE_StimulusManagement
                     }
 					else //Using 3D stim from server, so write file to persistant data path and pass the path into LoadModel
 					{
-                        string stimPath = WriteStimToPersistantDataPath(byteResult);
-                        StimGameObject = LoadModel(stimPath);
-                    }
+						string stimPath = WriteStimToPersistantDataPath(byteResult);
+						Debug.Log("ABOUT TO LOAD MODEL FROM PERSISTANT DATA PATH!");
+						StimGameObject = LoadModel(stimPath);
+						Debug.Log("AFTER LOADING MODEL FROM PERSISTANT DATA PATH! (doubt it makes it here)");
 
-                    PositionRotationScale();
+						//Another trilib way to try:
+						//AssetLoader loader = new AssetLoader();
+						//GameObject loadedObject = loader.LoadFromMemory(byteResult, FileName);
+					}
+
+					PositionRotationScale();
 					if (!string.IsNullOrEmpty(StimName))
 						StimGameObject.name = StimName;
 					AssignStimDefPointeToObjectHierarchy(StimGameObject, this);
@@ -500,7 +511,7 @@ namespace USE_StimulusManagement
 			return StimGameObject;
 		}
 
-
+		
 		public GameObject LoadModel(string filePath, bool loadFromResources = false, bool visibiility = false)
 		{
 			using (var assetLoader = new AssetLoader())

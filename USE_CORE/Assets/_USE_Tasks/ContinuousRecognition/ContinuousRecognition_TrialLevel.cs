@@ -11,6 +11,7 @@ using System.Linq;
 using TMPro;
 using USE_UI;
 using UnityEngine.UI;
+using System.Collections;
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
@@ -999,11 +1000,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             FeedbackLocations = CenterFeedbackLocations(currentTrial.TrialFeedbackLocations, FeedbackLocations.Length);
 
             RightGroup = new StimGroup("Right", group, ChosenStimIndices);
-            GenerateFeedbackStim(RightGroup, FeedbackLocations);
-            GenerateFeedbackBorders(RightGroup);
+            StartCoroutine(GenerateFeedbackStim(RightGroup, FeedbackLocations, result =>
+            {
+                GenerateFeedbackBorders(RightGroup);
 
-            if (currentTrial.StimFacingCamera)
-                MakeStimsFaceCamera(RightGroup);
+                if (currentTrial.StimFacingCamera)
+                    MakeStimsFaceCamera(RightGroup);
+            }));
         }
         else
         {
@@ -1012,20 +1015,24 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             FeedbackLocations = CenterFeedbackLocations(currentTrial.TrialFeedbackLocations, FeedbackLocations.Length);
 
             RightGroup = new StimGroup("Right", group, ChosenStimIndices);
-            GenerateFeedbackStim(RightGroup, FeedbackLocations.Take(FeedbackLocations.Length - 1).ToArray());
-            GenerateFeedbackBorders(RightGroup);
+            StartCoroutine(GenerateFeedbackStim(RightGroup, FeedbackLocations.Take(FeedbackLocations.Length - 1).ToArray(), result =>
+            {
+                GenerateFeedbackBorders(RightGroup);
 
-            if (currentTrial.StimFacingCamera)
-                MakeStimsFaceCamera(RightGroup);
+                if (currentTrial.StimFacingCamera)
+                    MakeStimsFaceCamera(RightGroup);
+            }));
 
             WrongGroup = new StimGroup("Wrong");
             StimDef wrongStim = group.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(WrongGroup);
             wrongStim.StimGameObject = null;
-            GenerateFeedbackStim(WrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length - 1).Take(1).ToArray());
-            GenerateFeedbackBorders(WrongGroup);
+            StartCoroutine(GenerateFeedbackStim(WrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length - 1).Take(1).ToArray(), result =>
+            {
+                GenerateFeedbackBorders(WrongGroup);
 
-            if (currentTrial.StimFacingCamera)
-                wrongStim.StimGameObject.AddComponent<FaceCamera>();
+                if (currentTrial.StimFacingCamera)
+                    wrongStim.StimGameObject.AddComponent<FaceCamera>();
+            }));
         }
     }
 
@@ -1035,12 +1042,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             stim.StimGameObject.AddComponent<FaceCamera>();
     }
 
-    void GenerateFeedbackStim(StimGroup group, Vector3[] locations)
+    IEnumerator GenerateFeedbackStim(StimGroup group, Vector3[] locations, Action<VoidDelegate> callback)
     {
         TrialStims.Add(group);
         group.SetLocations(locations);
-        StartCoroutine(group.LoadStims());
+        yield return StartCoroutine(group.LoadStims());
         group.ToggleVisibility(true);
+        callback?.Invoke(null);
     }
 
     void GenerateFeedbackBorders(StimGroup group)

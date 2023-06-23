@@ -223,7 +223,6 @@ namespace USE_ExperimentTemplate_Trial
             {
                 yield return StartCoroutine(sg.LoadStims());
             }
-            Debug.Log("SETTING TRIAL STIMS LOADED TO TRUE! at " + Time.time);
             TrialStimsLoaded = true;
         }
 

@@ -915,7 +915,6 @@ namespace USE_ExperimentTemplate_Session
             {
                 Directory.CreateDirectory(configFileFolder);
                 List<string> configsToWrite = new List<string>() { "SessionConfig", "EventCodeConfig", "DisplayConfig" };
-
                 foreach (string config in configsToWrite)
                 {
                     byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + config).bytes;
@@ -1076,7 +1075,7 @@ namespace USE_ExperimentTemplate_Session
                         if (configTextAsset == null)//try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
                             configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + entry.Key);
                         if (configTextAsset != null)
-                            System.IO.File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + tl.TaskName + entry.Value, configTextAsset.bytes);
+                            File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + tl.TaskName + entry.Value, configTextAsset.bytes);
                     }
                 }
             }

@@ -95,7 +95,12 @@ public class InitScreen : MonoBehaviour
             initScreenCanvasGO.GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
         }
         else
-            buttonsParentGO.SetActive(true);
+        {
+            webBuildChildrenGO.SetActive(false);
+            locateFileGO.SetActive(true); //comment out if want them to pick between default and local configs
+            //confirmButtonGO.SetActive(false); //uncomment if want them to pick between default and local configs
+            //buttonsParentGO.SetActive(true); //uncomment if want them to pick between default and local configs
+        }
     }
 
     public void Confirm()
@@ -137,7 +142,7 @@ public class InitScreen : MonoBehaviour
         yield return 0;
     }
 
-    public void OnConfigButtonPress() //Used by Normal Build for user to select Default or Local configs. 
+    public void OnConfigButtonPress() //Used by Normal Build for user to select Default or Local configs. (not using yet)
     {
         buttonsParentGO.SetActive(false);
        

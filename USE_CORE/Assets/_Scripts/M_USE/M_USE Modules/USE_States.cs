@@ -1395,10 +1395,8 @@ namespace USE_States
 			if (SessionValues.WebBuild) //maybe useDefaultConfigs instead?
 				tex = Resources.Load<Texture2D>(filePath);
 			else
-			{
-				Debug.Log("LOADING PNG INSTEAD!!!!");
 				tex = LoadPNG(filePath); // load the texture from a PNG -> Texture2D
-			}
+
 
 			//Set the textures of the skybox to that of the PNG
 			materialSkybox.SetTexture("_FrontTex", tex);

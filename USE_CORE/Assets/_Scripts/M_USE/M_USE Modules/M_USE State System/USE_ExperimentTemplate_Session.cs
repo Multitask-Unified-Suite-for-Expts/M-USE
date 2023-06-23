@@ -167,7 +167,7 @@ namespace USE_ExperimentTemplate_Session
             }
             else //Normal Build:
             {
-                configFileFolder = LocateFile.GetPath("Config File Folder");
+                configFileFolder = LocateFile.GetPath("Config Folder");
                 SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
                 SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFilePathInExternalFolder(configFileFolder, "*SessionConfig*"));
                 LoadSessionConfigSettings();
@@ -224,7 +224,7 @@ namespace USE_ExperimentTemplate_Session
                 //Create Session Settings folder inside Data Folder: ----------------------------------------------------------------------------------------
                 if (SessionValues.WebBuild)
                 {
-                    if(!Application.isEditor)
+                    if(!Application.isEditor) //DOESNT CURRENTLY WORK FOR DEFAULT CONFIGS CUZ THATS NOT A CONFIG ON THE SERVER, so it cant find it to copy from
                     {
                         StartCoroutine(CreateFolderOnServer(SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings", () =>
                         {
@@ -374,17 +374,18 @@ namespace USE_ExperimentTemplate_Session
                     }
                     else
                     {
-                        CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
-                        CameraMirrorTexture.Create();
-                        SessionCam.targetTexture = CameraMirrorTexture;
-                        mainCameraCopy_Image.texture = CameraMirrorTexture;
-                    }
+                    CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
+                    CameraMirrorTexture.Create();
+                    SessionCam.targetTexture = CameraMirrorTexture;
+                    mainCameraCopy_Image.texture = CameraMirrorTexture;
+                }
 
 #endif
+
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SelectTaskStarts"]);
 
-
-                if (SerialPortActive){
+                if (SerialPortActive)
+                {
                     SerialSentData.CreateFile();
                     SerialRecvData.CreateFile();
                 }
@@ -394,6 +395,7 @@ namespace USE_ExperimentTemplate_Session
                 taskAutomaticallySelected = false; // gives another chance to select even if previous task loading was due to timeout
 
                 SessionCam.gameObject.SetActive(true);
+
 
                 // Don't show the task buttons if we encountered an error during setup
                 if (LogPanel.HasError())
@@ -509,7 +511,7 @@ namespace USE_ExperimentTemplate_Session
                     if (!GuidedTaskSelection)
                     {
                         Button button = taskButton.AddComponent<Button>();
-                        // Will monitor clicks to all task icons
+                        Debug.Log("ABOUT TO ADD ON CLICK EVENT!");
                         button.onClick.AddListener(() =>
                         {
                             taskAutomaticallySelected = false;
@@ -551,7 +553,8 @@ namespace USE_ExperimentTemplate_Session
             
             selectTask.AddLateUpdateMethod(() =>
             {
-                AppendSerialData();
+                if(StoreData)
+                    AppendSerialData();
             });
 
             selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask);

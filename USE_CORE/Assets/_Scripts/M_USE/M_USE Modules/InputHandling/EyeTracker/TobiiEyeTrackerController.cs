@@ -19,13 +19,8 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
     public bool isCalibrating;
 
     public TobiiGazeSample mostRecentGazeSample;
-  //  public USE_ExperimentTemplate_Data.GazeData GazeData;
     public TobiiGazeDataSubscription GazeDataSubscription;
     public USE_ExperimentTemplate_Data.GazeData GazeData;
-
-    //MOST RECENT GAZE DATA FIELD, OVERWRITTEN 
-
-    //IENUMERAT
    
     // Start is called before the first frame update
     private void Awake()
@@ -49,12 +44,15 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
     public override void FindEyeTrackerComponents()
     {
         // An eyetracker is connected and on
-        if (iEyeTracker == null && EyeTrackingOperations.FindAllEyeTrackers().Count > 0)
+
+        if (EyeTrackingOperations.FindAllEyeTrackers().Count == 0)
+            return;
+
+        if (iEyeTracker == null)
         {
             iEyeTracker = EyeTrackingOperations.FindAllEyeTrackers()[0];
             ScreenBasedCalibration = new ScreenBasedCalibration(iEyeTracker);
 
-      //      iEyeTracker.GazeDataReceived += OnGazeDataReceived;
             DisplayArea = iEyeTracker.GetDisplayArea();
 
         }
@@ -64,8 +62,8 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
             EyeTracker = GameObject.Find("EyeTracker(Clone)").GetComponent<EyeTracker>();
             GazeDataSubscription = GameObject.Find("EyeTracker(Clone)").GetComponent<TobiiGazeDataSubscription>();
             GazeDataSubscription._eyeTracker = iEyeTracker;
-            Debug.Log("IS IEYETRACKER NULL? " + (iEyeTracker == null ? "YES" : "NO"));
-            Debug.Log("IS GAZEDATASUBSCRIPTION NULL? " + (GazeDataSubscription == null ? "YES" : "NO"));
+
+            Debug.Log("is iEYE TRACKER NULL: " + (iEyeTracker == null ? "Yes" : "No"));
             iEyeTracker.GazeDataReceived += GazeDataSubscription.EnqueueEyeData;
             GazeDataSubscription.TobiiEyeTrackerController = this;
             //    EyeTracker.SubscribeToGazeData = true;
@@ -76,7 +74,7 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
             TrackBoxGuideGO = GameObject.Find("TrackBoxGuide(Clone)");
 
     }
-
+/*
     public void OnGazeDataReceived(GazeDataEventArgs e)
     {
         // Left Eye Data
@@ -101,13 +99,6 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
 
         mostRecentGazeSample.systemTimeStamp = e.SystemTimeStamp;
 
-        //Debug.Log("GAZE DATA NAME??? " + GazeData.fileName);
-     //  
-       // GazeData.AppendData();
-        //GAZEDATA.APPENDDATA()
     }
-
-    // AppendEyeTrackingData()
-    // {PumpData}
-    //
+*/
 }

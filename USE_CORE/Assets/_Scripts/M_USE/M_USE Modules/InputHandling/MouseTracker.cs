@@ -72,10 +72,8 @@ public class MouseTracker : InputTracker
 
             ShotgunModalTarget = ShotgunRaycast.ModalShotgunTarget(proportions);
 
-
             //Find Current Target and return it if found:
-            SimpleRaycastTarget = InputBroker.RaycastBoth(CurrentInputScreenPosition.Value);
-        }
+            SimpleRaycastTarget = InputBroker.RaycastBoth(CurrentInputScreenPosition.Value);        }
     }
 
 }

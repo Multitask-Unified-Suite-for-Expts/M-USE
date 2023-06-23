@@ -36,7 +36,6 @@ using Tobii.Research.Unity.CodeExamples;
 
 using UnityEditor;
 using System.Threading.Tasks;
-using Renci.SshNet;
 using ConfigDynamicUI;
 //using UnityEngine.Windows.WebCam;
 
@@ -62,7 +61,7 @@ namespace USE_ExperimentTemplate_Session
         private SessionDataControllers SessionDataControllers;
         private bool StoreData;
         private bool MacMainDisplayBuild;
-        [HideInInspector] public string SubjectID, SessionID, SessionDataFolderPath, FilePrefix;
+        [HideInInspector] public string SubjectID, SessionID, SessionDataPath, FilePrefix;
         public string SessionLevelDataPath;
         public string TaskSelectionSceneName;
 
@@ -225,21 +224,21 @@ namespace USE_ExperimentTemplate_Session
                 GameObject initCamGO = GameObject.Find("InitCamera");
                 initCamGO.SetActive(false);
                 TaskSelection_Starfield.SetActive(true);
-            #else
+#else
 
-                TaskSelection_Starfield.SetActive(false);
-                GameObject experimenterDisplay = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
-                experimenterDisplay.name = "ExperimenterDisplay";
-                ExperimenterDisplayController = experimenterDisplay.AddComponent<ExperimenterDisplayController>();
-                experimenterDisplay.AddComponent<PreserveObject>();
-                ExperimenterDisplayController.InitializeExperimenterDisplay(this, experimenterDisplay);
+            TaskSelection_Starfield.SetActive(false);
+            GameObject experimenterDisplay = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
+            experimenterDisplay.name = "ExperimenterDisplay";
+            ExperimenterDisplayController = experimenterDisplay.AddComponent<ExperimenterDisplayController>();
+            experimenterDisplay.AddComponent<PreserveObject>();
+            ExperimenterDisplayController.InitializeExperimenterDisplay(this, experimenterDisplay);
 
-                GameObject mirrorCamGO = new GameObject("MirrorCamera");
-                Camera MirrorCam = mirrorCamGO.AddComponent<Camera>();
-                MirrorCam.CopyFrom(Camera.main);
-                MirrorCam.cullingMask = 0;
+            GameObject mirrorCamGO = new GameObject("MirrorCamera");
+            Camera MirrorCam = mirrorCamGO.AddComponent<Camera>();
+            MirrorCam.CopyFrom(Camera.main);
+            MirrorCam.cullingMask = 0;
 
-                RawImage mainCameraCopy_Image = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
+            RawImage mainCameraCopy_Image = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
 
 #endif
 
@@ -251,7 +250,7 @@ namespace USE_ExperimentTemplate_Session
             MouseTracker = InputTrackers.GetComponent<MouseTracker>();
             GazeTracker = InputTrackers.GetComponent<GazeTracker>();
 
-            
+
 
 
             SelectionTracker = new SelectionTracker();
@@ -263,7 +262,8 @@ namespace USE_ExperimentTemplate_Session
             else
             {
                 SelectionHandler = SelectionTracker.SetupSelectionHandler("session", "MouseButton0Click", MouseTracker, selectTask, loadTask);
-                SelectionHandler.MinDuration = 0.05f;
+                MouseTracker.enabled = true;
+                SelectionHandler.MinDuration = 0.01f;
                 SelectionHandler.MaxDuration = 2f;
             }
 
@@ -277,6 +277,7 @@ namespace USE_ExperimentTemplate_Session
                     GameObject TrackBoxGO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"), TobiiEyeTrackerControllerGO.transform);
                     GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
                     GameObject CalibrationGO = Instantiate(Resources.Load<GameObject>("GazeCalibration"));
+                    GazeTracker.enabled = true;
 
 
                     /*  //  GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform); 
@@ -299,7 +300,7 @@ namespace USE_ExperimentTemplate_Session
 
             // Instantiating Task Selection Frame Data
             // Instantiate normal session data controller for all tasks
-            
+
 
             bool waitForSerialPort = false;
             bool taskAutomaticallySelected = false;
@@ -310,7 +311,7 @@ namespace USE_ExperimentTemplate_Session
                 //Create Session Settings folder inside Data Folder: ----------------------------------------------------------------------------------------
                 if (SessionValues.WebBuild)
                 {
-                    if(!Application.isEditor) //DOESNT CURRENTLY WORK FOR DEFAULT CONFIGS CUZ THATS NOT A CONFIG ON THE SERVER, so it cant find it to copy from
+                    if (!Application.isEditor) //DOESNT CURRENTLY WORK FOR DEFAULT CONFIGS CUZ THATS NOT A CONFIG ON THE SERVER, so it cant find it to copy from
                     {
                         StartCoroutine(CreateFolderOnServer(SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings", () =>
                         {
@@ -328,7 +329,7 @@ namespace USE_ExperimentTemplate_Session
                 EventCodeManager = GameObject.Find("MiscScripts").GetComponent<EventCodeManager>(); //new EventCodeManager();
                 if (SerialPortActive)
                 {
-        
+
                     SerialPortController = new SerialPortThreaded();
                     if (SyncBoxActive)
                     {
@@ -365,7 +366,7 @@ namespace USE_ExperimentTemplate_Session
                     }
 
                     SerialPortController.Initialize();
-                    
+
                 }
             });
 
@@ -381,24 +382,24 @@ namespace USE_ExperimentTemplate_Session
                         if (SessionSettings.SettingExists("Session", "SyncBoxInitCommands"))
                         {
                             SyncBoxController.SendCommand(
-                                (List<string>) SessionSettings.Get("Session", "SyncBoxInitCommands"));
+                                (List<string>)SessionSettings.Get("Session", "SyncBoxInitCommands"));
                         }
 
                     waitForSerialPort = false;
                 }
 
-                if(EyeTrackerActive && GazeCalibrationTaskLevel == null)
+                if (EyeTrackerActive && GazeCalibrationTaskLevel == null)
                 {
                     //Have to add calibration task level as child of calibration state here, because it isn't available prior
-                    
+
                     GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
-                    PopulateTaskLevel(GazeCalibrationTaskLevel, false, false);
+                    PopulateTaskLevel(GazeCalibrationTaskLevel, false);
                     gazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
                     GazeCalibrationTaskLevel.TrialLevel.TaskLevel = GazeCalibrationTaskLevel;
                     GazeCalibrationTaskLevel.gameObject.SetActive(false);
                 }
-               
-            
+
+
                 if (iTask < TaskMappings.Count)
                 {
                     if (!SceneLoading)
@@ -429,32 +430,32 @@ namespace USE_ExperimentTemplate_Session
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort && EyeTrackerActive, gazeCalibration);
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort && !EyeTrackerActive, selectTask);
 
-            setupSession.AddDefaultTerminationMethod( () =>
+            setupSession.AddDefaultTerminationMethod(() =>
             {
                 SessionSettings.Save();
-                if(!SessionValues.WebBuild)
+                if (!SessionValues.WebBuild)
                 {
                     GameObject initCamGO = GameObject.Find("InitCamera");
                     initCamGO.SetActive(false);
                     SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
                 }
-                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupSessionEnds"]);
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupSessionEnds"]);
             });
 
-           // Canvas[] TaskSelectionCanvasses = null;
+            // Canvas[] TaskSelectionCanvasses = null;
             gazeCalibration.AddInitializationMethod(() =>
             {
                 FrameData.gameObject.SetActive(false);
 
                 GazeCalibrationTaskLevel.TaskCam = Camera.main;
-               // GazeCalibrationTaskLevel.ConfigName = "GazeCalibration";
+                // GazeCalibrationTaskLevel.ConfigName = "GazeCalibration";
                 GazeCalibrationTaskLevel.TrialLevel.runCalibration = true;
                 ExperimenterDisplayController.ResetTask(GazeCalibrationTaskLevel, GazeCalibrationTaskLevel.TrialLevel);
 
                 var GazeCalibrationCanvas = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas");
                 var GazeCalibrationScripts = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts");
                 GazeCalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
-              //  CalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
+                //  CalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
                 //CalibrationCanvas.GetComponent<Canvas>().worldCamera = Camera.main;
 
                 GazeCalibrationCanvas.gameObject.SetActive(true);
@@ -480,36 +481,38 @@ namespace USE_ExperimentTemplate_Session
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
+                if (SelectionHandler.AllSelections.Count > 0)
+                    SelectionHandler.ClearSelections();
                 TaskSelectionCanvasGO.SetActive(true);
 
                 TaskSelection_Starfield.SetActive(IsHuman ? true : false);
 
-                #if (!UNITY_WEBGL)
-                    if (DisplayController.SwitchDisplays) //SwitchDisplay stuff doesnt full work yet!
-                    {
-                        SessionCam.targetDisplay = 1;
+#if (!UNITY_WEBGL)
+                if (DisplayController.SwitchDisplays) //SwitchDisplay stuff doesnt full work yet!
+                {
+                    SessionCam.targetDisplay = 1;
 
-                        Canvas experimenterCanvas = GameObject.Find("ExperimenterCanvas").GetComponent<Canvas>();
-                        experimenterCanvas.targetDisplay = 0;
-                        foreach (Transform child in experimenterDisplay.transform)
-                        {
-                            Camera cam = child.GetComponent<Camera>();
-                            if (cam != null)
-                                cam.targetDisplay = 1 - cam.targetDisplay;
-                        }
-                    }
-                    else
+                    Canvas experimenterCanvas = GameObject.Find("ExperimenterCanvas").GetComponent<Canvas>();
+                    experimenterCanvas.targetDisplay = 0;
+                    foreach (Transform child in experimenterDisplay.transform)
                     {
-                        CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
-                        CameraMirrorTexture.Create();
-                        SessionCam.targetTexture = CameraMirrorTexture;
-                        mainCameraCopy_Image.texture = CameraMirrorTexture;
+                        Camera cam = child.GetComponent<Camera>();
+                        if (cam != null)
+                            cam.targetDisplay = 1 - cam.targetDisplay;
                     }
-                #endif
+                }
+                else
+                {
+                    CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
+                    CameraMirrorTexture.Create();
+                    SessionCam.targetTexture = CameraMirrorTexture;
+                    mainCameraCopy_Image.texture = CameraMirrorTexture;
+                }
+#endif
 
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SelectTaskStarts"]);
 
-                if (SerialPortActive){
+                if (SerialPortActive) {
                     SerialSentData.CreateFile();
                     SerialRecvData.CreateFile();
                 }
@@ -571,7 +574,7 @@ namespace USE_ExperimentTemplate_Session
                 TaskButtonsContainer.transform.parent = GameObject.Find("TaskSelectionCanvas").transform;
                 TaskButtonsContainer.transform.localPosition = Vector3.zero;
                 TaskButtonsContainer.transform.localScale = Vector3.one * 1.06f;
-                
+
                 // We'll use height for the calculations because it is generally smaller than the width
                 int numTasks = TaskMappings.Count;
                 float buttonSize;
@@ -594,10 +597,10 @@ namespace USE_ExperimentTemplate_Session
                 //if(IsHuman)
                 //    buttonY = -125f;
 
-                if(TaskIconLocations.Count() != numTasks) //If user didn't specify in config, Generate default locations:
+                if (TaskIconLocations.Count() != numTasks) //If user didn't specify in config, Generate default locations:
                 {
                     TaskIconLocations = new Vector3[numTasks];
-                    for(int i = 0; i < numTasks; i++)
+                    for (int i = 0; i < numTasks; i++)
                     {
                         TaskIconLocations[i] = new Vector3(buttonStartX, buttonY, 0);
                         buttonStartX += buttonSize + buttonSpacing;
@@ -605,7 +608,7 @@ namespace USE_ExperimentTemplate_Session
                 }
 
                 int count = 0;
-                
+
                 //Create each individual task icon
                 foreach (DictionaryEntry task in TaskMappings)
                 {
@@ -613,52 +616,39 @@ namespace USE_ExperimentTemplate_Session
                     string configName = (string)task.Key;
                     string taskName = (string)task.Value;
 
-                    string taskFolder = GetConfigFolderPath(configName);
-                    if (!Directory.Exists(taskFolder))
+                    USE_TaskButton taskButton = new USE_TaskButton(TaskButtonsContainer.transform.parent.GetComponent<Canvas>(), TaskIconLocations[count], buttonSize, configName);
+                    taskButton.TaskButtonGO.transform.SetParent(TaskButtonsContainer.transform, false);
+                    taskButtonsDict.Add(configName, taskButton);
+
+                    string taskFolderPath = GetConfigFolderPath(configName);
+
+                    if (!SessionValues.WebBuild)
                     {
-                        Destroy(TaskButtons);
-                        throw new DirectoryNotFoundException($"Task folder for '{configName}' at '{taskFolder}' does not exist.");
+                        if (!Directory.Exists(taskFolderPath))
+                        {
+                            Destroy(taskButton);
+                            throw new DirectoryNotFoundException($"Task folder for '{configName}' at '{taskFolderPath}' does not exist.");
+                        }
                     }
 
-                    GameObject taskButton = new GameObject(configName + "Button");
-                    taskButtonsDict.Add(configName, taskButton);
-                    taskButton.transform.parent = TaskButtons.transform;
+                    RawImage image = taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>();
 
-                    RawImage taskButtonImage = taskButton.AddComponent<RawImage>();
-                    string taskIcon = TaskIcons[configName];
-
-                    if (UseDefaultConfigs)
-                        taskButtonImage.texture = Resources.Load<Texture2D>("DefaultResources/TaskIcons/" + taskIcon);
+                    if (SessionValues.WebBuild)
+                        image.texture = Resources.Load<Texture2D>(TaskIconsFolderPath + "/" + taskName);
                     else
-                        taskButton.TaskButtonGO.GetComponent<RawImage>().texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + TaskIcons[configName] + ".png");
+                        image.texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + taskName + ".png");
 
-                    taskButtonImage.rectTransform.localPosition = TaskIconLocations[count];
-                    taskButtonImage.rectTransform.localScale = Vector3.one;
-                    taskButtonImage.rectTransform.sizeDelta = buttonSize * Vector3.one;
-                    
                     if (GuidedTaskSelection)
                     {
-                        Button button = taskButton.AddComponent<Button>();
-                        // Will monitor clicks to all task icons
-                        button.onClick.AddListener(() =>
-                        {
-                            taskAutomaticallySelected = false;
-                            selectedConfigName = configName;
-                        });
-                    }
-                    else
-                    {
+                        // If guided task selection, only make the next icon interactable
                         string key = TaskMappings.Keys.Cast<string>().ElementAt(taskCount);
-                        RawImage image = taskButtonsDict[configName].GetComponent<RawImage>();
+                        
+
                         if (configName == key)
                         {
-                            Button button = taskButton.AddComponent<Button>();
-                            button.onClick.AddListener(() =>
-                            {
-                                taskAutomaticallySelected = false;
-                                selectedConfigName = configName;
-                                taskButtonsDict[configName].GetComponent<RawImage>().color = new Color(1f, 1f, 1f, 1f);
-                            });
+                            image.color = new Color(1f, 1f, 1f, 1f);
+                            taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget = true;
+                            taskButton.TaskButtonGO.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
                         }
                         else
                         {
@@ -671,32 +661,34 @@ namespace USE_ExperimentTemplate_Session
                         // If not guided task selection, make all icons interactable
                         taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget = true;
                         taskButton.TaskButtonGO.AddComponent<HoverEffect>();
+                        
                     }
                     count++;
                 }
 
-                if(IsHuman)
+                if (IsHuman)
                 {
                     HumanVersionToggleButton.SetActive(true);
-                    //ToggleAudioButton.SetActive(true);
                 }
             });
-            
+
             selectTask.AddFixedUpdateMethod(() =>
             {
                 SelectionTracker.UpdateActiveSelections();
+
                 if (SelectionHandler.SuccessfulSelections.Count > 0)
                 {
                     selectedConfigName = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.GetComponent<USE_TaskButton>()?.configName;
+                    Debug.Log("SELECTED CONFIGNAME: " + selectedConfigName);
                     if (selectedConfigName != null)
                         taskAutomaticallySelected = false;
                 }
             });
-            
+
             selectTask.AddLateUpdateMethod(() =>
             {
                 AppendSerialData();
-                FrameData.AppendData();
+                FrameData.AppendDataToBuffer();
             });
 
             selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask);
@@ -728,17 +720,15 @@ namespace USE_ExperimentTemplate_Session
                 TaskButtonsContainer.SetActive(false);
                 USE_TaskButton taskButton = taskButtonsDict[selectedConfigName];
                 RawImage image = taskButton.TaskButtonGO.GetComponent<RawImage>();
-                taskButton.TaskButtonGO.GetComponent<RawImage>().color = new Color(.5f, .5f, .5f, .35f);
-                taskButton.TaskButtonGO.GetComponent<RawImage>().raycastTarget = false;
-                HoverEffect hoverEffect = taskButton.TaskButtonGO.GetComponent<HoverEffect>();
-                if (hoverEffect != null)
-                    Destroy(hoverEffect);
+                
 
-                if(!SessionValues.WebBuild) //Let patients play same task as many times as they want
+                if (!SessionValues.WebBuild) //Let patients play same task as many times as they want
                 {
-                    Color darkGrey = new Color(.5f, .5f, .5f, .35f);
-                    image.color = darkGrey;
-                    Destroy(button);
+                    taskButton.TaskButtonGO.GetComponent<RawImage>().color = new Color(.5f, .5f, .5f, .35f);
+                    taskButton.TaskButtonGO.GetComponent<RawImage>().raycastTarget = false;
+                    HoverEffect hoverEffect = taskButton.TaskButtonGO.GetComponent<HoverEffect>();
+                    if (hoverEffect != null)
+                        Destroy(hoverEffect);
                 }
 
                 string taskName = (string)TaskMappings[selectedConfigName];
@@ -750,18 +740,18 @@ namespace USE_ExperimentTemplate_Session
                     //selectedConfigsList.Add(CurrentTask.ConfigName);  
                 };
             });
-            
+
             loadTask.AddFixedUpdateMethod(() =>
             {
                 SelectionTracker.UpdateActiveSelections();
             });
-            
+
             loadTask.AddLateUpdateMethod(() =>
             {
                 AppendSerialData();
-                FrameData.AppendData();
+                FrameData.AppendDataToBuffer();
             });
-            
+
             loadTask.SpecifyTermination(() => CurrentTask != null && CurrentTask.TaskLevelDefined, runTask, () =>
             {
                 //if(IsHuman)
@@ -773,11 +763,11 @@ namespace USE_ExperimentTemplate_Session
                 TaskSelection_Starfield.SetActive(false);
 
                 runTask.AddChildLevel(CurrentTask);
-                if(CameraMirrorTexture != null)
+                if (CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
                 CurrentTask.TrialLevel.TaskLevel = CurrentTask;
-                if(ExperimenterDisplayController != null)
+                if (ExperimenterDisplayController != null)
                     ExperimenterDisplayController.ResetTask(CurrentTask, CurrentTask.TrialLevel);
 
                 if (SerialPortActive)
@@ -800,15 +790,15 @@ namespace USE_ExperimentTemplate_Session
 
 #if (!UNITY_WEBGL)
 
-                    if (DisplayController.SwitchDisplays)
-                        CurrentTask.TaskCam.targetDisplay = 1;
-                    else
-                    {
-                        CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
-                        CameraMirrorTexture.Create();
-                        CurrentTask.TaskCam.targetTexture = CameraMirrorTexture;
-                        mainCameraCopy_Image.texture = CameraMirrorTexture;
-                    }
+                if (DisplayController.SwitchDisplays)
+                    CurrentTask.TaskCam.targetDisplay = 1;
+                else
+                {
+                    CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
+                    CameraMirrorTexture.Create();
+                    CurrentTask.TaskCam.targetTexture = CameraMirrorTexture;
+                    mainCameraCopy_Image.texture = CameraMirrorTexture;
+                }
 
 #endif
 
@@ -819,17 +809,17 @@ namespace USE_ExperimentTemplate_Session
                 runTask.AddFixedUpdateMethod(() => EventCodeManager.EventCodeFixedUpdate());
                 // runTask.AddLateUpdateMethod(() => EventCodeManager.EventCodeLateUpdate());
             }
-            
-            
+
+
             runTask.AddLateUpdateMethod(() =>
             {
                 SelectionTracker.UpdateActiveSelections();
                 AppendSerialData();
             });
-            
+
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
             {
-                if(PreviousTaskSummaryString != null && CurrentTask.CurrentTaskSummaryString != null)
+                if (PreviousTaskSummaryString != null && CurrentTask.CurrentTaskSummaryString != null)
                     PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
 
                 SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
@@ -842,13 +832,13 @@ namespace USE_ExperimentTemplate_Session
 
                 ActiveTaskLevels.Remove(CurrentTask);
 
-                if(CameraMirrorTexture != null)
+                if (CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
 
-                if(ExperimenterDisplayController != null)
+                if (ExperimenterDisplayController != null)
                     ExperimenterDisplayController.ResetTask(null, null);
 
-                if(EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
+                if (EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
                 {
                     TobiiEyeTrackerController.Instance.isCalibrating = false;
                     TobiiEyeTrackerController.Instance.ScreenBasedCalibration.LeaveCalibrationMode();
@@ -857,11 +847,11 @@ namespace USE_ExperimentTemplate_Session
                 taskCount++;
 
                 if (SerialPortActive)
-                {                 
-                    SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataFolderPath, "SerialRecvData", "SessionLevel");                    
-                    SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataFolderPath, "SerialSentData", "SessionLevel");
+                {
+                    SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataPath, "SerialRecvData", "SessionLevel");
+                    SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataPath, "SerialSentData", "SessionLevel");
 
-                    
+
                 }
                 //     SessionDataPath + Path.DirectorySeparatorChar +
                 //                             SerialRecvData.GetNiceIntegers(4, taskCount + 1 * 2 - 1) + "_TaskSelection";
@@ -892,19 +882,19 @@ namespace USE_ExperimentTemplate_Session
                 SessionData.AppendDataToFile();
 
                 AppendSerialData();
-                if(SerialPortActive)
+                if (SerialPortActive)
                 {
                     SerialSentData.AppendDataToFile();
                     SerialRecvData.AppendDataToFile();
                 }
 
                 if (EyeTrackerActive)
-                    GazeData.WriteData();
+                    GazeData.AppendDataToFile();
 
-                FrameData.WriteData();
+                FrameData.AppendDataToFile();
             });
 
-            SessionData = (SessionData) SessionDataControllers.InstantiateDataController<SessionData>
+            SessionData = (SessionData)SessionDataControllers.InstantiateDataController<SessionData>
                 ("SessionData", StoreData, SessionDataPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionDataPath);
             SessionData.fileName = FilePrefix + "__SessionData.txt";
             SessionData.sessionLevel = this;
@@ -916,16 +906,16 @@ namespace USE_ExperimentTemplate_Session
 
             if (SerialPortActive)
             {
-                SerialSentData = (SerialSentData) SessionDataControllers.InstantiateDataController<SerialSentData>
-                    ("SerialSentData", StoreData, SessionDataPath + Path.DirectorySeparatorChar +  "SerialSentData" 
+                SerialSentData = (SerialSentData)SessionDataControllers.InstantiateDataController<SerialSentData>
+                    ("SerialSentData", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "SerialSentData"
                                                   + Path.DirectorySeparatorChar + "0001_TaskSelection");
                 SerialSentData.fileName = FilePrefix + "__SerialSentData_0001_TaskSelection.txt";
                 SerialSentData.sessionLevel = this;
                 SerialSentData.InitDataController();
                 SerialSentData.ManuallyDefine();
 
-                SerialRecvData = (SerialRecvData) SessionDataControllers.InstantiateDataController<SerialRecvData>
-                    ("SerialRecvData", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "SerialRecvData" 
+                SerialRecvData = (SerialRecvData)SessionDataControllers.InstantiateDataController<SerialRecvData>
+                    ("SerialRecvData", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "SerialRecvData"
                                                   + Path.DirectorySeparatorChar + "0001_TaskSelection");
                 SerialRecvData.fileName = FilePrefix + "__SerialRecvData_0001_TaskSelection.txt";
                 SerialRecvData.sessionLevel = this;
@@ -935,30 +925,30 @@ namespace USE_ExperimentTemplate_Session
 
             SummaryData.Init(StoreData, SessionDataPath);
 
-            SessionLevelDataPath = SessionDataFolderPath + Path.DirectorySeparatorChar + "SessionLevel";
+            SessionLevelDataPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel";
             FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "SessionLevel", StoreData, SessionLevelDataPath + Path.DirectorySeparatorChar + "FrameData");
             FrameData.fileName = "SessionLevel__FrameData.txt";
             FrameData.sessionLevel = this;
             FrameData.InitDataController();
             FrameData.ManuallyDefine();
-            
+
             if (EventCodesActive)
                 FrameData.AddEventCodeColumns();
 
-           if (EyeTrackerActive)
+            if (EyeTrackerActive)
             {
                 GazeData = (USE_ExperimentTemplate_Data.GazeData)SessionDataControllers.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", "SessionLevel", StoreData, SessionLevelDataPath + Path.DirectorySeparatorChar + "GazeData");
-		
-  GazeData.fileName = "SessionLevel__GazeData.txt";
+
+                GazeData.fileName = "SessionLevel__GazeData.txt";
                 GazeData.sessionLevel = this;
                 GazeData.InitDataController();
                 GazeData.ManuallyDefine();
                 TobiiEyeTrackerController.GazeData = GazeData;
-}
-if (EyeTrackerActive)
                 GazeTracker.Init(FrameData, 0);
-            MouseTracker.Init(FrameData, 0);
 
+            }
+            MouseTracker.Init(FrameData, 0);
+        }
 
         private void LoadSessionConfigSettings()
         {
@@ -1001,10 +991,17 @@ if (EyeTrackerActive)
                 RewardHotKeyNumPulses = (int)SessionSettings.Get("Session", "RewardHotKeyNumPulses");
             else
                 RewardHotKeyNumPulses = 1;
-
+            if (SessionSettings.SettingExists("Session", "EyeTrackerActive"))
+                EyeTrackerActive = (bool)SessionSettings.Get("Session", "EyeTrackerActive");
+            else
+                EyeTrackerActive = false;
+            if (SessionSettings.SettingExists("Session", "SelectionType"))
+                SelectionType = (string)SessionSettings.Get("Session", "SelectionType");
+            else
+                SelectionType = "mouse";
 
             //MAKE SURE SYNCBOX INACTIVE FOR WEB BUILD (Can eventually remove this once thilo provides web build session configs with it marked false)
-            if(SessionValues.WebBuild)
+            if (SessionValues.WebBuild)
                 SyncBoxActive = false;
 
             if (SyncBoxActive)
@@ -1134,16 +1131,16 @@ if (EyeTrackerActive)
                 TaskSelection_AudioSource.time = audioPlaybackSpot;
                 TaskSelection_AudioSource.Play();
                 ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(false);
-            
+
+            }
         }
-void GetTaskLevelFromString<T>()
-                where T : ControlLevel_Task_Template
+       /* void GetTaskLevelFromString<T>() where T : ControlLevel_Task_Template
             {
                 foreach (ControlLevel_Task_Template taskLevel in ActiveTaskLevels)
                     if (taskLevel.GetType() == typeof(T))
                         CurrentTask = taskLevel;
                 CurrentTask = null;
-            }
+            }*/
         public void HandleHumanVersionToggleButtonClick()
         {
             IsHuman = !IsHuman;
@@ -1169,7 +1166,7 @@ void GetTaskLevelFromString<T>()
             //Toggle Starfield:
             TaskSelection_Starfield.SetActive(TaskSelection_Starfield.activeInHierarchy ? false : true);
             //push task buttons up to 0 Y for humans, or back to -100 Y for monkeys
-            TaskButtons.transform.localPosition = new Vector3(TaskButtons.transform.localPosition.x, TaskButtons.transform.localPosition.y + (IsHuman ? -125f : 125f), TaskButtons.transform.localPosition.z);
+            TaskButtonsContainer.transform.localPosition = new Vector3(TaskButtonsContainer.transform.localPosition.x, TaskButtonsContainer.transform.localPosition.y + (IsHuman ? -125f : 125f), TaskButtonsContainer.transform.localPosition.z);
 
         }
 
@@ -1242,7 +1239,7 @@ void GetTaskLevelFromString<T>()
             return path;
         }
 
-        public ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly, bool loadSettings)
+        public ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
             tl.USE_StartButton = USE_StartButton;
             tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
@@ -1251,7 +1248,7 @@ void GetTaskLevelFromString<T>()
             tl.DisplayController = DisplayController;
             tl.SessionDataControllers = SessionDataControllers;
             tl.LocateFile = LocateFile;
-            tl.SessionDataFolderPath = SessionDataFolderPath;
+            tl.SessionDataPath = SessionDataPath;
             tl.SessionLevelDataPath = SessionLevelDataPath;
 
 

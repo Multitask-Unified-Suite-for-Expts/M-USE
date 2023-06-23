@@ -142,7 +142,7 @@ namespace USE_ExperimentTemplate_Trial
                 if (TaskLevel.TaskName != "GazeCalibration")
                 {
                     GazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
-                    GazeCalibrationTaskLevel.DefineTaskLevel(false, false);
+                    GazeCalibrationTaskLevel.DefineTaskLevel(false);
                     GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(false);
                     GazeCalibrationTaskLevel.FrameData.gameObject.SetActive(false);
                     GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(false);
@@ -361,7 +361,7 @@ private IEnumerator HandleLoadingStims()
             FrameData.AppendDataToBuffer();
             FrameData.AppendDataToFile();
 	if (EyeTrackerActive)
-                GazeData.WriteData();
+                GazeData.AppendDataToFile();
             if (SerialPortActive)
             {
                 SerialRecvData.AppendDataToFile();

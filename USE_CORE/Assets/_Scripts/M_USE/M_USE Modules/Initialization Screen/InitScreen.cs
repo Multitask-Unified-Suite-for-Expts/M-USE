@@ -32,7 +32,6 @@ SOFTWARE.
 */
 using System.Collections;
 using System.Collections.Generic;
-using Renci.SshNet;
 using UnityEngine;
 using UnityEngine.UI;
 

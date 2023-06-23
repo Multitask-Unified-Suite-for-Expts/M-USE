@@ -336,8 +336,11 @@ namespace SelectionTracking
             {
                 if (CurrentInputLocation == null)
                 {
-                    if (OngoingSelection != null) // the previous frame was a selection
+                    if (OngoingSelection != null)
+                    {
+                        // the previous frame was a selection
                         CheckTermination();
+                    } 
                     return;
                 }
                 
@@ -388,6 +391,7 @@ namespace SelectionTracking
                 bool? init = CheckAllConditions(InitConditions); //returning TRUE
                 string? initErrors = CheckAllErrorTriggers("init");
 
+                Debug.Log("INIT: " + init);
                 if (init != null && init.Value) // intialization condition is true (e.g. mouse button is down)
                 {
                     if (initErrors == null)

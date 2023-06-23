@@ -118,7 +118,7 @@ namespace Tobii.Research.Unity.CodeExamples
             
             if (TobiiEyeTrackerController.GazeData != null)
             {
-                TobiiEyeTrackerController.GazeData.AppendData();
+                TobiiEyeTrackerController.GazeData.AppendDataToBuffer();
             }
         }
     }

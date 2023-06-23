@@ -150,15 +150,13 @@ namespace USE_ExperimentTemplate_Trial
 
             LoadTrialStims.AddUniversalInitializationMethod(() =>
             {
-                AbortCode = 0;
+                TaskSelectionCanvasGO.SetActive(false);
 
-                if (SessionValues.WebBuild)
-                    Cursor.visible = true;
-                else
-                    SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials", 1));
+                AbortCode = 0;
 
                 TrialCount_InTask++;
                 TrialCount_InBlock++;
+
                 FrameData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
                 if (TaskLevel.SerialPortActive)
                 {
@@ -173,10 +171,13 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
+                if (SessionValues.WebBuild)
+                    Cursor.visible = true;
+                else
+                    SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials", 1));
+
                 TokenFBController.RecalculateTokenBox(); //recalculate tokenbox incase they switch to fullscreen mode
-                TaskSelectionCanvasGO.SetActive(false);
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTrialStarts"]);
-                Input.ResetInputAxes();
 
                 ResetRelativeStartTime();
 
@@ -184,6 +185,7 @@ namespace USE_ExperimentTemplate_Trial
             });
             SetupTrial.AddDefaultTerminationMethod(() =>
             {
+                Input.ResetInputAxes();
                 if (IsHuman)
                     HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
             });

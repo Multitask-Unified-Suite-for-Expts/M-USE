@@ -400,19 +400,14 @@ namespace USE_StimulusManagement
             string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "Stimuli";
 
             if (!Directory.Exists(folderPath))
-			{
-                Directory.CreateDirectory(folderPath);
-				Debug.Log("AFTER CREATING DIRECTORY AT PERSISTANT DATA PATH!");
-			}
-
+				Directory.CreateDirectory(folderPath);
+			
             string stimPath = folderPath + Path.DirectorySeparatorChar + FileName;
 			if(!File.Exists(stimPath))
 			{
                 Debug.Log("WRITING STIM TO PERSISTANT DATA PATH!");
                 File.WriteAllBytes(stimPath, stimFileBytes);
 				Debug.Log("DONE WRITING BYTES TO PERSISTANT DATA PATH!");
-				if (File.Exists(stimPath))
-					Debug.Log("AND NOW THE FILE EXISTS ON THE PERSISTANT DATA PATH!");
             }
 
             return stimPath;

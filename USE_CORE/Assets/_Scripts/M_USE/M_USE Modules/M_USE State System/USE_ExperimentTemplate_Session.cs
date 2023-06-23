@@ -224,10 +224,13 @@ namespace USE_ExperimentTemplate_Session
                 //Create Session Settings folder inside Data Folder: ----------------------------------------------------------------------------------------
                 if (SessionValues.WebBuild)
                 {
-                    StartCoroutine(CreateFolderOnServer(SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings", () =>
+                    if(!Application.isEditor)
                     {
-                        StartCoroutine(CopySessionConfigFolderToDataFolder()); //Copy Session Config folder to Data folder so that the settings are stored:
-                    }));
+                        StartCoroutine(CreateFolderOnServer(SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings", () =>
+                        {
+                            StartCoroutine(CopySessionConfigFolderToDataFolder()); //Copy Session Config folder to Data folder so that the settings are stored:
+                        }));
+                    }
                 }
                 else
                 {
@@ -1293,8 +1296,8 @@ namespace USE_ExperimentTemplate_Session
 
         private IEnumerator CopySessionConfigFolderToDataFolder()
         {
-            //string sourcePath = ServerManager.SessionConfigFolderPath; //UN COMMENT THIS LATER!
-            string sourcePath = "CONFIGS/SessionConfig_021_VS_FL_VS_v01_Set05_STIM"; //TEMPORARY!!!!!
+            string sourcePath = ServerManager.SessionConfigFolderPath; //UN COMMENT THIS LATER!
+            //string sourcePath = "CONFIGS/SessionConfig_021_VS_FL_VS_v01_Set05_STIM"; // Just used to test!
             string destinationPath = $"{ServerManager.SessionDataFolderPath}/SessionSettings";
             yield return ServerManager.CopyFolder(sourcePath, destinationPath);
         }

@@ -549,13 +549,14 @@ namespace USE_ExperimentTemplate_Task
 
             if(SessionValues.WebBuild)
             {
-                if (SessionValues.UseDefaultConfigs)
-                    TrialLevel.LoadTexturesFromResources();
-                else
-                {
-                    //need to load the images from the server!!!!!!
-                    TrialLevel.LoadTexturesFromResources(); //LOADING FROM RESOURCES FOR NOW BUT WILL NEED TO LOAD FROM SERVER!!!!!!!!!!!
-                }
+                TrialLevel.LoadTexturesFromResources();
+
+                //if (SessionValues.UseDefaultConfigs)
+                //    TrialLevel.LoadTexturesFromResources();
+                //else
+                //{
+                //    //need to load the images from the server!!!!!!
+                //}
             }
             else
                 TrialLevel.LoadTextures(ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 

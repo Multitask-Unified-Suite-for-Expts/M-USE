@@ -74,7 +74,7 @@ public class TouchFBController : MonoBehaviour
         if (HeldTooShort_Prefab == null) //If null, create the prefabs
             CreatePrefabs();
         else //If not null, check if existing prefab's size is same as new size. If not, update the prefab size
-            if (HeldTooShort_Prefab.GetComponent<Image>().rectTransform.sizeDelta != new Vector2(fbSize, fbSize))
+            if (HeldTooShort_Prefab.transform.localScale != new Vector3(fbSize, fbSize, 1f))
                 SetPrefabSizes(FeedbackSize);
 
         Handler.TouchErrorFeedback += OnTouchErrorFeedback; //Subscribe to event
@@ -210,7 +210,7 @@ public class TouchFBController : MonoBehaviour
         if (PrefabList.Count > 0)
         {
             foreach (GameObject prefab in PrefabList)
-                prefab.GetComponent<Image>().rectTransform.sizeDelta = new Vector2(size, size);
+                prefab.transform.localScale = new Vector3(size, size, 1f);
         }
         else
             Debug.Log("Trying to change the prefab sizes, but the prefablist only has " + PrefabList.Count + " items!");

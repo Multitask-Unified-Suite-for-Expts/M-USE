@@ -145,7 +145,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, SearchDisplay);
         else
             ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", GazeTracker, InitTrial, SearchDisplay);
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, 0.3f, StartButtonScale*10, VS_CanvasGO);
+        TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale*10, VS_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {

@@ -391,7 +391,6 @@ namespace SelectionTracking
                 bool? init = CheckAllConditions(InitConditions); //returning TRUE
                 string? initErrors = CheckAllErrorTriggers("init");
 
-                Debug.Log("INIT: " + init);
                 if (init != null && init.Value) // intialization condition is true (e.g. mouse button is down)
                 {
                     if (initErrors == null)

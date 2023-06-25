@@ -166,7 +166,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", MouseTracker, InitTrial, InflateBalloon);
-        TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, ButtonScale, EC_CanvasGO);
+        TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, ButtonScale*10, EC_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {

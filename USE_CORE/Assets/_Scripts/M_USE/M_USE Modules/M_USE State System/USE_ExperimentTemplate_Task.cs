@@ -362,6 +362,9 @@ namespace USE_ExperimentTemplate_Task
 
             FinishTask.AddDefaultInitializationMethod(() =>
             {
+                if (TrialLevel.TokenFBController.enabled)
+                    TrialLevel.TokenFBController.enabled = false;
+
                 if (TrialLevel.ForceBlockEnd && StoreData) //If they used end task hotkey, still write the block data!
                 {
                     BlockData.AppendDataToBuffer();
@@ -471,6 +474,7 @@ namespace USE_ExperimentTemplate_Task
             string subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "BlockData";
             BlockData = (BlockData)SessionDataControllers.InstantiateDataController<BlockData>("BlockData", ConfigName, StoreData, subFolderPath);
             BlockData.taskLevel = this;
+            BlockData.sessionLevel = SessionLevel;
             BlockData.fileName = FilePrefix + "__BlockData.txt";
 
             subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "TrialData";

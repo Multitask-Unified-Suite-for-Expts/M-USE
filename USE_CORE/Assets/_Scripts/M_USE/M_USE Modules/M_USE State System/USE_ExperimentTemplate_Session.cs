@@ -1239,6 +1239,7 @@ namespace USE_ExperimentTemplate_Session
 
         public ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
+            tl.SessionLevel = this;
             tl.USE_StartButton = USE_StartButton;
             tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
             tl.HumanStartPanel = HumanStartPanel;

@@ -672,14 +672,12 @@ namespace USE_ExperimentTemplate_Session
                 }
             });
 
-            selectTask.AddFixedUpdateMethod(() =>
+            selectTask.AddUpdateMethod(() =>
             {
                 SelectionTracker.UpdateActiveSelections();
-
                 if (SelectionHandler.SuccessfulSelections.Count > 0)
                 {
                     selectedConfigName = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.GetComponent<USE_TaskButton>()?.configName;
-                    Debug.Log("SELECTED CONFIGNAME: " + selectedConfigName);
                     if (selectedConfigName != null)
                         taskAutomaticallySelected = false;
                 }

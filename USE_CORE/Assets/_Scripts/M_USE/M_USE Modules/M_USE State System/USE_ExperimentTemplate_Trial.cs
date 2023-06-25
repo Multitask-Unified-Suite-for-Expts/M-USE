@@ -217,6 +217,7 @@ namespace USE_ExperimentTemplate_Trial
 
                 ResetTrialVariables();
             });
+
             SetupTrial.AddDefaultTerminationMethod(() =>
             {
                 Input.ResetInputAxes();
@@ -224,6 +225,7 @@ namespace USE_ExperimentTemplate_Trial
                     HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
                 
             });
+
 
             FinishTrial.AddInitializationMethod(() => EventCodeManager.SendCodeImmediate(SessionEventCodes["FinishTrialStarts"]));
             FinishTrial.SpecifyTermination(() => runCalibration && TaskLevel.TaskName != "GazeCalibration", () => GazeCalibration);
@@ -315,7 +317,7 @@ namespace USE_ExperimentTemplate_Trial
 
 
         }
-private IEnumerator HandleLoadingStims()
+        private IEnumerator HandleLoadingStims()
         {
             foreach (StimGroup sg in TrialStims)
             {

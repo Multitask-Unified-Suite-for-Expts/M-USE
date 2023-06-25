@@ -16,7 +16,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     public VisualSearch_TaskLevel CurrentTaskLevel => GetTaskLevel<VisualSearch_TaskLevel>();
 
     public GameObject VS_CanvasGO;
-    public USE_StartButton USE_StartButton;
     public SelectionTracking.SelectionTracker.SelectionHandler ShotgunHandler;
     
     // Stimuli Variables
@@ -107,19 +106,19 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.SetHaloSize(5f);
             HaloFBController.SetHaloIntensity(5);
         });
-        
+
         SetupTrial.AddInitializationMethod(() =>
         {
             ResetTrialVariables();
             TokenFBController.ResetTokenBarFull();
             //Set the context for the upcoming trial with the Start Button visible
-         
+
             //Set the Stimuli Light/Shadow settings
             SetShadowType(ShadowType, "VisualSearch_DirectionalLight");
             if (StimFacingCamera)
                 MakeStimFaceCamera();
 
-            if(StartButton == null)
+            if (StartButton == null)
             {
                 if (IsHuman)
                 {
@@ -132,12 +131,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                     USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
-            
-            if (!configUIVariablesLoaded) 
+
+            if (!configUIVariablesLoaded)
                 LoadConfigUIVariables();
-            
+
             SetTrialSummaryString();
         });
+        
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
@@ -145,7 +145,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, SearchDisplay);
         else
             ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", GazeTracker, InitTrial, SearchDisplay);
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, .3f, StartButtonScale, VS_CanvasGO);
+        TouchFBController.EnableTouchFeedback(ShotgunHandler, 0.3f, StartButtonScale*10, VS_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -166,6 +166,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
+
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(IsHuman ? HumanStartPanel.StartButtonChildren : USE_StartButton.StartButtonChildren),
             SearchDisplayDelay, () => 
             {

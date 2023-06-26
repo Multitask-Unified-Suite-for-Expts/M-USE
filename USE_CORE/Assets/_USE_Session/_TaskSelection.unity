@@ -735,9 +735,6 @@ MonoBehaviour:
   DebugActive: 1
   Paused: 0
   SessionId_SQL: 0
-  PauseCanvasGO: {fileID: 0}
-  PauseCanvas: {fileID: 0}
-  UseDefaultConfigs: 1
   ParticipantDistance_CM: 0
   ShotgunRaycastSpacing_DVA: 0
   ShotgunRaycastCircleSize_DVA: 0
@@ -746,7 +743,10 @@ MonoBehaviour:
   SessionID: 
   SessionDataPath: 
   FilePrefix: 
+  SessionLevelDataPath: 
   TaskSelectionSceneName: _TaskSelection
+  CurrentTask: {fileID: 0}
+  GazeCalibrationTaskLevel: {fileID: 0}
   TaskIconLocations: []
   LongRewardHotKeyPulseSize: 0
   LongRewardHotKeyNumPulses: 0
@@ -754,9 +754,10 @@ MonoBehaviour:
   RewardHotKeyNumPulses: 0
   SessionDetails: {fileID: 6547187748213169738}
   LocateFile: {fileID: 6547614361441596608}
+  TobiiEyeTrackerController: {fileID: 0}
   CameraMirrorTexture: {fileID: 0}
   DisplayController: {fileID: 0}
-  TaskButtons: {fileID: 0}
+  TaskButtonsContainer: {fileID: 0}
   TaskSelection_Starfield: {fileID: 1391649313}
   HumanVersionToggleButton: {fileID: 2071187616}
   HumanStartPanelPrefab: {fileID: 7569599706748818137, guid: e3a91289f22a4401bbc1f44baba80e22,
@@ -765,10 +766,10 @@ MonoBehaviour:
   ToggleAudioButton: {fileID: 907834252290271150}
   StartButtonPrefabGO: {fileID: 6810560367943004968, guid: 2e385ec78c77a46cc91c52da9fce59b9,
     type: 3}
-  TaskSelection_HumanAudio: {fileID: 8300000, guid: d0692d04af800462aba5670b8485603c,
+  BackgroundMusic_AudioClip: {fileID: 8300000, guid: d0692d04af800462aba5670b8485603c,
     type: 3}
   audioPlaybackSpot: 0
-  TaskSelection_AudioSource: {fileID: 0}
+  BackgroundMusic_AudioSource: {fileID: 0}
   HumanStartPanel: {fileID: 0}
   USE_StartButton: {fileID: 0}
 --- !u!4 &1375570696

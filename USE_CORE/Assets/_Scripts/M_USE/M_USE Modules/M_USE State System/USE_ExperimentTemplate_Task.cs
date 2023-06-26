@@ -1131,7 +1131,6 @@ namespace USE_ExperimentTemplate_Task
             else
             {
                 string taskDefFilePath = LocateFile.FindFilePathInExternalFolder(taskConfigFolder, "*" + TaskName + "*Task*");
-                Debug.Log("GONNA READ TASK DEF FROM: " + taskDefFilePath);
                 if (!string.IsNullOrEmpty(taskDefFilePath))
                     SessionSettings.ImportSettings_MultipleType(TaskName + "_TaskSettings", taskDefFilePath);
                 else

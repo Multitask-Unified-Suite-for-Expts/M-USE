@@ -441,7 +441,7 @@ namespace USE_ExperimentTemplate_Task
             //Setup data management
             TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
 
-            if (StoreData)
+            if (SessionValues.WebBuild && StoreData)
                 StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
 
             if (EyeTrackerActive)
@@ -458,11 +458,6 @@ namespace USE_ExperimentTemplate_Task
                     // Store Data in the Task / Gaze Calibration folder if not running at the session level
                     TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName + Path.DirectorySeparatorChar + "InTask_GazeCalibration";
                     ConfigName = "GazeCalibration";
-                }
-                else
-                {
-                    // Store Data in the Task folder 
-                    TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
                 }
             }
             
@@ -1131,7 +1126,6 @@ namespace USE_ExperimentTemplate_Task
             else
             {
                 string taskDefFilePath = LocateFile.FindFilePathInExternalFolder(taskConfigFolder, "*" + TaskName + "*Task*");
-                Debug.Log("GONNA READ TASK DEF FROM: " + taskDefFilePath);
                 if (!string.IsNullOrEmpty(taskDefFilePath))
                     SessionSettings.ImportSettings_MultipleType(TaskName + "_TaskSettings", taskDefFilePath);
                 else

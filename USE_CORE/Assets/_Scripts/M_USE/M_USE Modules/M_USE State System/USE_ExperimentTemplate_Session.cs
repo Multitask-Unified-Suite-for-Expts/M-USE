@@ -33,7 +33,6 @@ using UnityEngine.UIElements;
 using USE_ExperimentTemplate_Trial;
 using Image = UnityEngine.UI.Image;
 using Tobii.Research.Unity.CodeExamples;
-
 using UnityEditor;
 using System.Threading.Tasks;
 using ConfigDynamicUI;
@@ -130,11 +129,11 @@ namespace USE_ExperimentTemplate_Session
         public GameObject TaskSelectionCanvasGO;
         public GameObject ToggleAudioButton;
         public GameObject StartButtonPrefabGO;
-        public AudioClip TaskSelection_HumanAudio;
+        public AudioClip BackgroundMusic_AudioClip;
 
         [HideInInspector] public float audioPlaybackSpot;
 
-        [HideInInspector] public AudioSource TaskSelection_AudioSource;
+        [HideInInspector] public AudioSource BackgroundMusic_AudioSource;
 
         [HideInInspector] public HumanStartPanel HumanStartPanel;
         [HideInInspector] public USE_StartButton USE_StartButton;
@@ -249,8 +248,6 @@ namespace USE_ExperimentTemplate_Session
             InputTrackers = Instantiate(Resources.Load<GameObject>("InputTrackers"), InputManager.transform);
             MouseTracker = InputTrackers.GetComponent<MouseTracker>();
             GazeTracker = InputTrackers.GetComponent<GazeTracker>();
-
-
 
 
             SelectionTracker = new SelectionTracker();
@@ -481,8 +478,12 @@ namespace USE_ExperimentTemplate_Session
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
+                if (IsHuman && BackgroundMusic_AudioSource == null) //Background music!
+                    SetupBackgroundMusic();
+
                 if (SelectionHandler.AllSelections.Count > 0)
                     SelectionHandler.ClearSelections();
+
                 TaskSelectionCanvasGO.SetActive(true);
 
                 TaskSelection_Starfield.SetActive(IsHuman ? true : false);
@@ -639,7 +640,15 @@ namespace USE_ExperimentTemplate_Session
                     RawImage image = taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>();
 
                     if (SessionValues.WebBuild)
-                        image.texture = Resources.Load<Texture2D>(TaskIconsFolderPath + "/" + taskName);
+                    {
+                        if(SessionValues.UseDefaultConfigs)
+                            image.texture = Resources.Load<Texture2D>(TaskIconsFolderPath + "/" + taskName);
+                        else
+                        {
+                            //LOAD THE ICONS FROM THE SERVER!
+                            image.texture = Resources.Load<Texture2D>(TaskIconsFolderPath + "/" + taskName); //REMOVE THIS
+                        }
+                    }
                     else
                         image.texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + taskName + ".png");
 
@@ -676,6 +685,7 @@ namespace USE_ExperimentTemplate_Session
                 if (IsHuman)
                 {
                     HumanVersionToggleButton.SetActive(true);
+                    ToggleAudioButton.SetActive(true);
                 }
             });
 
@@ -759,12 +769,6 @@ namespace USE_ExperimentTemplate_Session
 
             loadTask.SpecifyTermination(() => CurrentTask != null && CurrentTask.TaskLevelDefined, runTask, () =>
             {
-                //if(IsHuman)
-                //{
-                //    TaskSelection_AudioSource.Stop();
-                //    Destroy(GetComponent<AudioListener>());
-                //}
-
                 TaskSelection_Starfield.SetActive(false);
 
                 runTask.AddChildLevel(CurrentTask);
@@ -931,6 +935,16 @@ namespace USE_ExperimentTemplate_Session
             SummaryData.Init(StoreData, SessionDataPath);
 
             SessionLevelDataPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel";
+
+            //if web build, create the SessionLevelDataFolder:
+            if(SessionValues.WebBuild)
+            {
+                StartCoroutine(CreateFolderOnServer(SessionLevelDataPath, () =>
+                {
+                    Debug.Log("Done creating SessionLevel sub-folder at: " + SessionLevelDataPath);
+                }));
+            }
+
             FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "SessionLevel", StoreData, SessionLevelDataPath + Path.DirectorySeparatorChar + "FrameData");
             FrameData.fileName = "SessionLevel__FrameData.txt";
             FrameData.sessionLevel = this;
@@ -1123,56 +1137,58 @@ namespace USE_ExperimentTemplate_Session
             }
         }
 
+        private void SetupBackgroundMusic()
+        {
+            BackgroundMusic_AudioSource = gameObject.AddComponent<AudioSource>();
+            BackgroundMusic_AudioSource.clip = BackgroundMusic_AudioClip;
+            BackgroundMusic_AudioSource.loop = true;
+            BackgroundMusic_AudioSource.volume = .5f;
+            BackgroundMusic_AudioSource.Play();
+        }
+
         public void HandleToggleAudioButtonClick()
         {
-            if (TaskSelection_AudioSource.isPlaying)
+            if (BackgroundMusic_AudioSource.isPlaying)
             {
-                audioPlaybackSpot = TaskSelection_AudioSource.time;
-                TaskSelection_AudioSource.Stop();
+                audioPlaybackSpot = BackgroundMusic_AudioSource.time;
+                BackgroundMusic_AudioSource.Stop();
                 ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
             }
             else
             {
-                TaskSelection_AudioSource.time = audioPlaybackSpot;
-                TaskSelection_AudioSource.Play();
+                BackgroundMusic_AudioSource.time = audioPlaybackSpot;
+                BackgroundMusic_AudioSource.Play();
                 ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(false);
 
             }
         }
-       /* void GetTaskLevelFromString<T>() where T : ControlLevel_Task_Template
-            {
-                foreach (ControlLevel_Task_Template taskLevel in ActiveTaskLevels)
-                    if (taskLevel.GetType() == typeof(T))
-                        CurrentTask = taskLevel;
-                CurrentTask = null;
-            }*/
+
         public void HandleHumanVersionToggleButtonClick()
         {
             IsHuman = !IsHuman;
 
-            //if(IsHuman)
-            //{
-            //    gameObject.AddComponent<AudioListener>();
-            //    TaskSelection_AudioSource = gameObject.AddComponent<AudioSource>();
-            //    TaskSelection_AudioSource.clip = TaskSelection_HumanAudio;
-            //    TaskSelection_AudioSource.loop = true;
-            //    TaskSelection_AudioSource.time = audioPlaybackSpot;
-            //    TaskSelection_AudioSource.Play();
-            //}
-            //else
-            //{
-            //    audioPlaybackSpot = TaskSelection_AudioSource.time;
-            //    TaskSelection_AudioSource.Stop();
-            //    Destroy(GetComponent<AudioListener>());
-            //}
+            if (IsHuman)
+            {
+                ToggleAudioButton.SetActive(true);
+                BackgroundMusic_AudioSource = gameObject.AddComponent<AudioSource>();
+                BackgroundMusic_AudioSource.clip = BackgroundMusic_AudioClip;
+                BackgroundMusic_AudioSource.loop = true;
+                BackgroundMusic_AudioSource.time = audioPlaybackSpot;
+                BackgroundMusic_AudioSource.Play();
+            }
+            else
+            {
+                audioPlaybackSpot = BackgroundMusic_AudioSource.time;
+                BackgroundMusic_AudioSource.Stop();
+                ToggleAudioButton.SetActive(false);
+            }
 
             //Change text on button:
             HumanVersionToggleButton.GetComponentInChildren<TextMeshProUGUI>().text = IsHuman ? "Human Version" : "Primate Version";
             //Toggle Starfield:
             TaskSelection_Starfield.SetActive(TaskSelection_Starfield.activeInHierarchy ? false : true);
             //push task buttons up to 0 Y for humans, or back to -100 Y for monkeys
-            TaskButtonsContainer.transform.localPosition = new Vector3(TaskButtonsContainer.transform.localPosition.x, TaskButtonsContainer.transform.localPosition.y + (IsHuman ? -125f : 125f), TaskButtonsContainer.transform.localPosition.z);
-
+            //TaskButtonsContainer.transform.localPosition = new Vector3(TaskButtonsContainer.transform.localPosition.x, TaskButtonsContainer.transform.localPosition.y + (IsHuman ? -125f : 125f), TaskButtonsContainer.transform.localPosition.z);
         }
 
         private void AppendSerialData()
@@ -1340,7 +1356,7 @@ namespace USE_ExperimentTemplate_Session
 
             if (SessionSettings.SettingExists("Session", "SonicationActive"))
                 tl.SonicationActive = (bool)SessionSettings.Get("Session", "SonicationActive");
-            else;
+            else
                 tl.SonicationActive = false;
 
 

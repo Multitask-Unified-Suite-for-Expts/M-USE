@@ -370,6 +370,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         searchStims = new StimGroup("SearchStims", group, CurrentTrialDef.SearchStimIndices);
         //searchStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
         searchStims.SetLocations(CurrentTrialDef.SearchStimLocations);
+        TrialStims.Add(searchStims);
 
         List<StimDef> rewardedStimdefs = new List<StimDef>();
 
@@ -387,11 +388,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             } 
             else sd.IsTarget = false;
         }
-        
+
         // for (int iT)
         sampleStim.SetLocations(CurrentTrialDef.TargetSampleLocation);
         sampleStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
-        TrialStims.Add(searchStims);
         TrialStims.Add(sampleStim);
 
         postSampleDistractorStims = new StimGroup("DisplayDistractors", group, CurrentTrialDef.PostSampleDistractorIndices);

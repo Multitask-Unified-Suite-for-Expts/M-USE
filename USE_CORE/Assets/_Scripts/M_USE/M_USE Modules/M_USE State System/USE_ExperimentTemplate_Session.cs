@@ -635,7 +635,15 @@ namespace USE_ExperimentTemplate_Session
                     RawImage image = taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>();
 
                     if (SessionValues.WebBuild)
-                        image.texture = Resources.Load<Texture2D>(TaskIconsFolderPath + "/" + taskName);
+                    {
+                        if(SessionValues.UseDefaultConfigs)
+                            image.texture = Resources.Load<Texture2D>(TaskIconsFolderPath + "/" + taskName);
+                        else
+                        {
+                            //LOAD THE ICONS FROM THE SERVER!
+                            image.texture = Resources.Load<Texture2D>(TaskIconsFolderPath + "/" + taskName); //REMOVE THIS
+                        }
+                    }
                     else
                         image.texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + taskName + ".png");
 
@@ -920,6 +928,16 @@ namespace USE_ExperimentTemplate_Session
             SummaryData.Init(StoreData, SessionDataPath);
 
             SessionLevelDataPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel";
+
+            //if web build, create the SessionLevelDataFolder:
+            if(SessionValues.WebBuild)
+            {
+                StartCoroutine(CreateFolderOnServer(SessionLevelDataPath, () =>
+                {
+                    Debug.Log("Done creating SessionLevel sub-folder at: " + SessionLevelDataPath);
+                }));
+            }
+
             FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "SessionLevel", StoreData, SessionLevelDataPath + Path.DirectorySeparatorChar + "FrameData");
             FrameData.fileName = "SessionLevel__FrameData.txt";
             FrameData.sessionLevel = this;
@@ -1137,13 +1155,7 @@ namespace USE_ExperimentTemplate_Session
 
             }
         }
-       /* void GetTaskLevelFromString<T>() where T : ControlLevel_Task_Template
-            {
-                foreach (ControlLevel_Task_Template taskLevel in ActiveTaskLevels)
-                    if (taskLevel.GetType() == typeof(T))
-                        CurrentTask = taskLevel;
-                CurrentTask = null;
-            }*/
+
         public void HandleHumanVersionToggleButtonClick()
         {
             IsHuman = !IsHuman;

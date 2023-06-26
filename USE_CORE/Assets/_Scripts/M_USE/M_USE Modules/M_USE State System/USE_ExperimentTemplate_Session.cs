@@ -327,7 +327,7 @@ namespace USE_ExperimentTemplate_Session
                 //AppendSerialData();
             });
 
-
+            
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort, selectTask, () =>
             {
                 SessionSettings.Save();

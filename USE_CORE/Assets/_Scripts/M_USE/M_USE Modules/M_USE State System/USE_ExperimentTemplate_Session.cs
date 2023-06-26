@@ -555,15 +555,20 @@ namespace USE_ExperimentTemplate_Session
                             {
                                 taskButton.Value.TaskButtonGO.GetComponent<RawImage>().color = new Color(1f, 1f, 1f, 1f);
                                 taskButton.Value.TaskButtonGO.GetComponent<RawImage>().raycastTarget = true;
-                                taskButton.Value.TaskButtonGO.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
+                                if (IsHuman)
+                                    taskButton.Value.TaskButtonGO.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
                             }
                             else
                             {
                                 taskButton.Value.TaskButtonGO.GetComponent<RawImage>().color = new Color(.5f, .5f, .5f, .35f);
                                 taskButton.Value.TaskButtonGO.GetComponent<RawImage>().raycastTarget = false;
-                                HoverEffect hoverEffect = taskButton.Value.TaskButtonGO.GetComponent<HoverEffect>();
-                                if (hoverEffect != null)
-                                    Destroy(hoverEffect);
+                                if (IsHuman)
+                                {
+                                    HoverEffect hoverEffect = taskButton.Value.TaskButtonGO.GetComponent<HoverEffect>();
+                                    if (hoverEffect != null)
+                                        Destroy(hoverEffect);
+                                }
+                                
                             }
                         }
                     }
@@ -648,7 +653,8 @@ namespace USE_ExperimentTemplate_Session
                         {
                             image.color = new Color(1f, 1f, 1f, 1f);
                             taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget = true;
-                            taskButton.TaskButtonGO.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
+                            if(IsHuman)
+                                taskButton.TaskButtonGO.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
                         }
                         else
                         {
@@ -660,7 +666,8 @@ namespace USE_ExperimentTemplate_Session
                     {
                         // If not guided task selection, make all icons interactable
                         taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget = true;
-                        taskButton.TaskButtonGO.AddComponent<HoverEffect>();
+                        if(IsHuman)
+                            taskButton.TaskButtonGO.AddComponent<HoverEffect>();
                         
                     }
                     count++;

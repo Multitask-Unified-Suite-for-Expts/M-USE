@@ -298,7 +298,7 @@ namespace USE_UI
         public State SetActiveOnInitialization;
         public State SetInactiveOnTermination;
 
-        public GameObject CreateStartButton(Canvas parent, Vector3? pos, float? scale, bool hover = true, string name = null)
+        public GameObject CreateStartButton(Canvas parent, Vector3? pos, float? scale, bool hover = false, string name = null)
         {
             StartButtonGO = Instantiate(StartButtonPrefab);
             StartButtonGO.name = name == null ? "StartButton" : name;

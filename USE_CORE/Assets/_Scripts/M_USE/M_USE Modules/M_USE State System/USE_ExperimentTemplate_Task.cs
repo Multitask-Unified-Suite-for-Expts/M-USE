@@ -323,7 +323,7 @@ namespace USE_ExperimentTemplate_Task
 
             BlockFeedback.AddUniversalInitializationMethod(() =>
             {
-                if (BlockSummaryString != null)
+                /*if (BlockSummaryString != null)
                 {
                     int trialsCompleted = (TrialLevel.AbortCode == 0 || TrialLevel.AbortCode == 6) ? TrialLevel.TrialCount_InBlock + 1 : TrialLevel.TrialCount_InBlock;
                     string blockTitle = $"<b>\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" +
@@ -332,7 +332,7 @@ namespace USE_ExperimentTemplate_Task
 
                     PreviousBlockSummaryString.Insert(0, BlockSummaryString); //Add current block string to full list of previous blocks. 
                     PreviousBlockSummaryString.Insert(0, blockTitle);
-                }
+                }*/
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["BlockFeedbackStarts"]);
             });
             BlockFeedback.AddUpdateMethod(() =>

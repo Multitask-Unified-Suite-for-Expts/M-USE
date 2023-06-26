@@ -99,13 +99,13 @@ public class DisplayController : MonoBehaviour
 
     public string FindFileInFolder(string keyToFolder, string stringPattern)
     {
-        string[] possibleFiles = Directory.GetFiles(keyToFolder, stringPattern);
+        /*string[] possibleFiles = Directory.GetFiles(keyToFolder, stringPattern);
         if (possibleFiles.Length == 1)
             return possibleFiles[0];
         else if (possibleFiles.Length == 0)
             Debug.Log("No file following pattern " + stringPattern + " is found at path " + keyToFolder + ".");
         else
-            Debug.Log("More than one file following pattern " + stringPattern + " is found at path " + keyToFolder + ".");
+            Debug.Log("More than one file following pattern " + stringPattern + " is found at path " + keyToFolder + ".");*/
         return "";
     }
 

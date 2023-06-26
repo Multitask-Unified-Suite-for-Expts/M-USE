@@ -187,7 +187,9 @@ MonoBehaviour:
   SerialSentData: {fileID: 0}
   SerialRecvData: {fileID: 0}
   EyeTrackerActive: 0
-  EyeTracker: {fileID: 0}
+  GazeTracker: {fileID: 0}
+  MouseTracker: {fileID: 0}
+  TobiiEyeTrackerController: {fileID: 0}
   StoreData: 0
   SerialPortActive: 0
   SyncBoxActive: 0
@@ -202,6 +204,7 @@ MonoBehaviour:
   SubjectID: 
   SessionID: 
   FilePrefix: 
+  EyetrackerType: 
   SelectionType: 
   LocateFile: {fileID: 0}
   TaskCam: {fileID: 0}
@@ -222,9 +225,14 @@ MonoBehaviour:
   PrefabStimPaths: []
   ExperimenterDisplayController: {fileID: 0}
   SessionInfoPanel: {fileID: 0}
+  DisplayController: {fileID: 0}
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
+  Controllers: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
+  TaskSelectionCanvasGO: {fileID: 0}
+  IsHuman: 0
+  HumanStartPanel: {fileID: 0}
 --- !u!114 &376477138
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -284,15 +292,20 @@ MonoBehaviour:
   SliderFBController: {fileID: 0}
   MouseTracker: {fileID: 0}
   GazeTracker: {fileID: 0}
-  EyeTracker: {fileID: 0}
+  TobiiEyeTrackerController: {fileID: 0}
   SelectionType: 
+  EyeTrackerActive: 0
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
+  DisplayController: {fileID: 0}
   InitialTokenAmount: 0
   ShotgunRaycastSpacing_DVA: 0
   ParticipantDistance_CM: 0
   ShotgunRaycastCircleSize_DVA: 0
   UseDefaultConfigs: 0
+  IsHuman: 0
+  HumanStartPanel: {fileID: 0}
+  TaskSelectionCanvasGO: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
@@ -412,6 +425,10 @@ PrefabInstance:
     - target: {fileID: 1300086531141916, guid: 2c899a56a2dccaf4184601eaee3fe739, type: 3}
       propertyPath: m_Name
       value: '[EyeTracker]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 1300086531141916, guid: 2c899a56a2dccaf4184601eaee3fe739, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4988019072819320, guid: 2c899a56a2dccaf4184601eaee3fe739, type: 3}
       propertyPath: m_RootOrder
@@ -579,6 +596,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: '[TrackBoxGuide]'
       objectReference: {fileID: 0}
+    - target: {fileID: 1419862592565626, guid: ec70104fc575fcd4e94c30b58721bce6, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4332768817695138, guid: ec70104fc575fcd4e94c30b58721bce6, type: 3}
       propertyPath: m_RootOrder
       value: 4
@@ -671,7 +692,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!65 &1445590752
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -843,7 +864,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1587741923530980, guid: 98f9dcb9f02165c45b532126e853b0e1, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4778905533313762, guid: 98f9dcb9f02165c45b532126e853b0e1, type: 3}
       propertyPath: m_RootOrder

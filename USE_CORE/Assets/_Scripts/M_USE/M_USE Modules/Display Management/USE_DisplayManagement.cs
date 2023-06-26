@@ -88,11 +88,17 @@ namespace USE_DisplayManagement {
 
         public Vector2 PixelResolution { get; set; }
 
+        public float ScreenWidth_Cm { get; set; }
+        public float ScreenHeight_Cm { get; set; }
+
         public ScreenDetails(Vector2 lowerLeft, Vector2 upperRight, Vector2 resolution)
         {
             LowerLeft_Cm = lowerLeft;
             UpperRight_Cm = upperRight;
             PixelResolution = resolution;
+
+            ScreenWidth_Cm = UpperRight_Cm.x - LowerLeft_Cm.x;
+            ScreenHeight_Cm = UpperRight_Cm.y - LowerLeft_Cm.y;
         }
     }
 
@@ -110,27 +116,27 @@ namespace USE_DisplayManagement {
         /// Gets the coordinate in pixels from lower left of the monitor.
         /// </summary>
         /// <value>The pixel coordinate.</value>
-        public Vector2 MonitorPixel;
+        public Vector2? MonitorPixel;
         /// <summary>
         /// Gets the coordinate as a proportion of total monitor size from lower left of the monitor.
         /// </summary>
         /// <value>The coordinate as a proportion.</value>
-        public Vector2 MonitorProportion;
+        public Vector2? MonitorProportion;
         /// <summary>
         /// Gets the coordinate as centimetres from lower left of the monitor.
         /// </summary>
         /// <value>The coordinate in cm.</value>
-        public Vector2 MonitorCm;
+        public Vector2? MonitorCm;
         /// <summary>
         /// Gets the coordinate as degrees visual angle from lower left of the monitor.
         /// </summary>
         /// <value>The coordinate as DVA.</value>
-        public Vector2 MonitorDVA;
-        public Vector2 ScreenPixel;
-        public Vector2 ScreenProportion;
-        public Vector2 ScreenCm;
-        public Vector2 ScreenDVA;
-        public Vector2 ACDS;
+        public Vector2? MonitorDVA;
+        public Vector2? ScreenPixel;
+        public Vector2? ScreenProportion;
+        public Vector2? ScreenCm;
+        public Vector2? ScreenDVA;
+        public Vector2? ACDS;
 
         private MonitorDetails MonitorDetails;
         private ScreenDetails ScreenDetails;
@@ -145,86 +151,88 @@ namespace USE_DisplayManagement {
         {
             MonitorDetails = monitorDetails;
             ScreenDetails = new ScreenDetails(new Vector2(0, 0), monitorDetails.CmSize, monitorDetails.PixelResolution);
-            CalculateCoordinates(coord, coord_type, 60f);
+            CalculateCoordinates(coord, coord_type);
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="T:USE_DisplayManagement.DisplayCoordinate"/> class.
         /// </summary>
-        /// <param name="coord">Coordinate.</param>
-        /// <param name="coord_type">Coordinate type.</param>
         /// <param name="monitorDetails">Monitor details.</param>
         /// <param name="screenDetails">Screen details.</param>
         public DisplayCoordinate(Vector2 coord, string coord_type, MonitorDetails monitorDetails, ScreenDetails screenDetails)
         {
             MonitorDetails = monitorDetails;
             ScreenDetails = screenDetails;
-            CalculateCoordinates(coord, coord_type, 60f);
+            CalculateCoordinates(coord, coord_type);
         }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:USE_DisplayManagement.DisplayCoordinate"/> class.
-        /// </summary>
-        /// <param name="coord">Coordinate.</param>
-        /// <param name="coord_type">Coordinate type.</param>
-        /// <param name="monitorDetails">Monitor details.</param>
-        /// <param name="eyeDist">Distance of the eye from the monitor, in cm.</param>
-        public DisplayCoordinate(Vector2 coord, string coord_type, MonitorDetails monitorDetails, float eyeDist)
-        {
-            MonitorDetails = monitorDetails;
-            ScreenDetails = new ScreenDetails(new Vector2(0, 0), monitorDetails.CmSize, monitorDetails.PixelResolution);
-            CalculateCoordinates(coord, coord_type, eyeDist);
-        }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:USE_DisplayManagement.DisplayCoordinate"/> class.
-        /// </summary>
-        /// <param name="coord">Coordinate.</param>
-        /// <param name="coord_type">Coordinate type.</param>
-        /// <param name="monitorDetails">Monitor details.</param>
-        /// <param name="screenDetails">Screen details.</param>
-        /// <param name="eyeDist">Distance of the eye from the monitor, in cm.</param>
-        public DisplayCoordinate(Vector2 coord, string coord_type, MonitorDetails monitorDetails, ScreenDetails screenDetails, float eyeDist)
-        {
-            MonitorDetails = monitorDetails;
-            ScreenDetails = screenDetails;
-            CalculateCoordinates(coord, coord_type, eyeDist);
-        }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:USE_DisplayManagement.DisplayCoordinate"/> class.
-        /// </summary>
-        /// <param name="coord">Coordinate.</param>
-        /// <param name="coord_type">Coordinate type.</param>
-        /// <param name="monitorDetails">Monitor details.</param>
-        /// <param name="eyeDist">Distance of the eye from the monitor, in cm.</param>
-        /// <param name="screenDetails">Screen details.</param>
-        public DisplayCoordinate(Vector2 coord, string coord_type, MonitorDetails monitorDetails, float eyeDist, ScreenDetails screenDetails)
-        {
-            MonitorDetails = monitorDetails;
-            ScreenDetails = screenDetails;
-            CalculateCoordinates(coord, coord_type, eyeDist);
-        }
+        /* /// <summary>
+         /// Initializes a new instance of the <see cref="T:USE_DisplayManagement.DisplayCoordinate"/> class.
+         /// </summary>
+         /// <param name="coord">Coordinate.</param>
+         /// <param name="coord_type">Coordinate type.</param>
+         /// <param name="monitorDetails">Monitor details.</param>
+         /// <param name="eyeDist">Distance of the eye from the monitor, in cm.</param>
+         public DisplayCoordinate(Vector2 coord, string coord_type, MonitorDetails monitorDetails, float eyeDist)
+         {
+             MonitorDetails = monitorDetails;
+             ScreenDetails = new ScreenDetails(new Vector2(0, 0), monitorDetails.CmSize, monitorDetails.PixelResolution);
+             CalculateCoordinates(coord, coord_type, eyeDist);
+         }
+         /// <summary>
+         /// Initializes a new instance of the <see cref="T:USE_DisplayManagement.DisplayCoordinate"/> class.
+         /// </summary>
+         /// <param name="coord">Coordinate.</param>
+         /// <param name="coord_type">Coordinate type.</param>
+         /// <param name="monitorDetails">Monitor details.</param>
+         /// <param name="screenDetails">Screen details.</param>
+         /// <param name="eyeDist">Distance of the eye from the monitor, in cm.</param>
+         public DisplayCoordinate(Vector2 coord, string coord_type, MonitorDetails monitorDetails, ScreenDetails screenDetails, float eyeDist)
+         {
+             MonitorDetails = monitorDetails;
+             ScreenDetails = screenDetails;
+             CalculateCoordinates(coord, coord_type, eyeDist);
+         }
+         /// <summary>
+         /// Initializes a new instance of the <see cref="T:USE_DisplayManagement.DisplayCoordinate"/> class.
+         /// </summary>
+         /// <param name="coord">Coordinate.</param>
+         /// <param name="coord_type">Coordinate type.</param>
+         /// <param name="monitorDetails">Monitor details.</param>
+         /// <param name="eyeDist">Distance of the eye from the monitor, in cm.</param>
+         /// <param name="screenDetails">Screen details.</param>
+         public DisplayCoordinate(Vector2 coord, string coord_type, MonitorDetails monitorDetails, float eyeDist, ScreenDetails screenDetails)
+         {
+             MonitorDetails = monitorDetails;
+             ScreenDetails = screenDetails;
+             CalculateCoordinates(coord, coord_type, eyeDist);
+         }*/
 
-        private void CalculateCoordinates(Vector2 coord, string coord_type, float eyeDist)
+        private void CalculateCoordinates(Vector2 coord, string coord_type, float eyeDist = 60f)
         {
-            //this is poor code probably but we need default values for everything
-            MonitorPixel = new Vector2(-9999, -9999);
-            MonitorProportion = new Vector2(-9999, -9999);
-            MonitorCm = new Vector2(-9999, -9999);
-            MonitorDVA = new Vector2(-9999, -9999);
-            ScreenPixel = new Vector2(-9999, -9999);
-            ScreenProportion = new Vector2(-9999, -9999);
-            ScreenCm = new Vector2(-9999, -9999);
-            ScreenDVA = new Vector2(-9999, -9999);
-            ACDS = new Vector2(-9999, -9999);
+            MonitorPixel = null;
+            MonitorProportion = null;
+            MonitorCm = null;
+            MonitorDVA = null;
+            ScreenPixel = null;
+            ScreenProportion = null;
+            ScreenCm = null;
+            ScreenDVA = null;
+            ACDS = null;
 
             //constants
-            float pixelsPerCm = (MonitorDetails.PixelResolution.x / MonitorDetails.CmSize.x + MonitorDetails.PixelResolution.y / MonitorDetails.CmSize.y) / 2;
-            float cmPerPixel = (MonitorDetails.CmSize.x / MonitorDetails.PixelResolution.x + MonitorDetails.CmSize.y / MonitorDetails.PixelResolution.y) / 2;
+            float monitorPixelsPerCm = (MonitorDetails.PixelResolution.x / MonitorDetails.CmSize.x + MonitorDetails.PixelResolution.y / MonitorDetails.CmSize.y) / 2;
+            float monitorCmPerPixel = (MonitorDetails.CmSize.x / MonitorDetails.PixelResolution.x + MonitorDetails.CmSize.y / MonitorDetails.PixelResolution.y) / 2;
             float pixelsPerDegree = 2 * Mathf.Tan(0.5f / Mathf.Rad2Deg) * eyeDist;
-            float degreesPerPixel = 2 * Mathf.Atan((cmPerPixel / 2) / eyeDist);
+            float degreesPerPixel = 2 * Mathf.Atan((monitorCmPerPixel / 2) / eyeDist);
             float cmPerDegree = 1f;
-            Vector2 screenSizeCm = ScreenDetails.UpperRight_Cm - ScreenDetails.UpperRight_Cm;
-            Vector2 screenLowerLeftPixels = ScreenDetails.LowerLeft_Cm * pixelsPerCm;
 
-            float EPSILON = 0.000001f;
+            // screen constants
+
+            float screenPixelsPerCm = ((ScreenDetails.PixelResolution.x / ScreenDetails.ScreenWidth_Cm) + (ScreenDetails.PixelResolution.y / ScreenDetails.ScreenHeight_Cm))/2;
+            float screenCmPerPixel = ((ScreenDetails.ScreenWidth_Cm / ScreenDetails.PixelResolution.x) + (ScreenDetails.ScreenHeight_Cm / ScreenDetails.PixelResolution.y))/2;
+            Vector2 screenLowerLeftPixels = ScreenDetails.LowerLeft_Cm * monitorPixelsPerCm;
+            Vector2 screenSizeCm = new Vector2(ScreenDetails.ScreenWidth_Cm, ScreenDetails.ScreenHeight_Cm);
+
+           // float EPSILON = 0.000001f;
 
             switch (coord_type.ToLower())
             {
@@ -233,11 +241,11 @@ namespace USE_DisplayManagement {
                     break;
                 case "monitorproportion":
                     MonitorProportion = coord;
-                    MonitorPixel = Vector2.Scale(MonitorProportion, MonitorDetails.PixelResolution);
+                    MonitorPixel = Vector2.Scale((Vector2)MonitorProportion, MonitorDetails.PixelResolution);
                     break;
                 case "monitorcm":
                     MonitorCm = coord;
-                    MonitorPixel = MonitorCm * pixelsPerCm;
+                    MonitorPixel = MonitorCm * monitorPixelsPerCm;
                     break;
                 case "monitordva":
                     MonitorDVA = coord;
@@ -245,66 +253,70 @@ namespace USE_DisplayManagement {
                     break;
                 case "screenpixel":
                     ScreenPixel = coord;
-                    MonitorPixel = ScreenPixel + screenLowerLeftPixels;
+                    ScreenCm = coord * screenCmPerPixel;
+                    MonitorCm = ScreenDetails.LowerLeft_Cm + ScreenCm;
+                    MonitorPixel = MonitorCm * monitorPixelsPerCm;
                     break;
                 case "screenproportion":
                     ScreenProportion = coord;
-                    ScreenCm = Vector2.Scale(screenSizeCm, ScreenProportion);
+                    ScreenCm = Vector2.Scale(screenSizeCm, (Vector2)ScreenProportion);
                     MonitorCm = ScreenDetails.LowerLeft_Cm + ScreenCm;
-                    MonitorPixel = MonitorCm * pixelsPerCm;
+                    MonitorPixel = MonitorCm * monitorPixelsPerCm;
                     break;
                 case "screencm":
                     ScreenCm = coord;
                     MonitorCm = ScreenDetails.LowerLeft_Cm + ScreenCm;
-                    MonitorPixel = MonitorCm * pixelsPerCm;
+                    MonitorPixel = MonitorCm * monitorPixelsPerCm;
                     break;
                 case "screendva":
                     ScreenDVA = coord;
                     ScreenCm = ScreenDVA * cmPerDegree;
                     MonitorCm = ScreenDetails.LowerLeft_Cm + ScreenCm;
-                    MonitorPixel = MonitorCm * pixelsPerCm;
+                    MonitorPixel = MonitorCm * monitorPixelsPerCm;
                     break;
                 case "acds":
                     ACDS = coord;
-                    MonitorProportion = new Vector2(ACDS.x, 1 - ACDS.y);
-                    MonitorPixel = Vector2.Scale(MonitorProportion, MonitorDetails.PixelResolution);
+                    MonitorProportion = new Vector2(((Vector2)ACDS).x, 1 - ((Vector2)ACDS).y);
+                    MonitorPixel = Vector2.Scale((Vector2)MonitorProportion, MonitorDetails.PixelResolution);
                     break;
                 default:
                     Debug.LogError("Unknown display coordinate type \"" + coord_type + "\" specified in DisplayCoordinate creation.");
                     break;
             }
 
-            if (System.Math.Abs(MonitorProportion.x - -9999) < EPSILON)
+            if (MonitorProportion == null)
             {
-                MonitorProportion = new Vector2(MonitorPixel.x / MonitorDetails.PixelResolution.x, MonitorPixel.y / MonitorDetails.PixelResolution.y);
+                MonitorProportion = new Vector2(((Vector2)MonitorPixel).x / MonitorDetails.PixelResolution.x, ((Vector2)MonitorPixel).y / MonitorDetails.PixelResolution.y);
             }
-            if (System.Math.Abs(MonitorCm.x - -9999) < EPSILON)
+            if (MonitorProportion == null)
             {
-                MonitorCm = Vector2.Scale(MonitorProportion, MonitorDetails.CmSize);
+                MonitorCm = Vector2.Scale((Vector2)MonitorProportion, MonitorDetails.CmSize);
             }
-            if(System.Math.Abs(MonitorDVA.x - -9999) < EPSILON)
+            if (MonitorDVA == null)
             {
                 MonitorDVA = MonitorPixel * degreesPerPixel;
             }
-            if (System.Math.Abs(ScreenPixel.x - -9999) < EPSILON)
+            if (ScreenPixel == null)
             {
-                ScreenPixel = MonitorPixel - screenLowerLeftPixels;
+                MonitorCm = MonitorPixel * monitorCmPerPixel;
+                ScreenCm = MonitorCm - ScreenDetails.LowerLeft_Cm;
+                ScreenPixel = ScreenCm * screenPixelsPerCm;
             }
-            if (System.Math.Abs(ScreenProportion.x - -9999) < EPSILON)
+            if (ScreenProportion == null)
             {
-                ScreenProportion = new Vector2(ScreenPixel.x / ScreenDetails.PixelResolution.x, ScreenPixel.y / ScreenDetails.PixelResolution.y);
+                ScreenProportion = new Vector2(((Vector2)ScreenPixel).x / ScreenDetails.PixelResolution.x, ((Vector2)ScreenPixel).y / ScreenDetails.PixelResolution.y);
             }
-            if (System.Math.Abs(ScreenCm.x - -9999) < EPSILON)
+            if (ScreenCm == null)
             {
-                ScreenCm = Vector2.Scale(ScreenProportion, screenSizeCm);
+                ScreenCm = Vector2.Scale(((Vector2)ScreenProportion), screenSizeCm);
             }
-            if (System.Math.Abs(ScreenDVA.x - -9999) < EPSILON)
+            if (ScreenDVA == null)
             {
                 ScreenDVA = MonitorDVA - screenLowerLeftPixels * degreesPerPixel;
             }
-            if (System.Math.Abs(ACDS.x - -9999) < EPSILON)
+            if (ACDS == null)
             {
-                ACDS = new Vector2(MonitorProportion.x, 1 - MonitorProportion.y);
+                ACDS = new Vector2(((Vector2)MonitorProportion).x, 1 - ((Vector2)MonitorProportion).y);
             }
         }
     }

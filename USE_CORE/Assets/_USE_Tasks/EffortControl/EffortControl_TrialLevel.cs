@@ -166,7 +166,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", MouseTracker, InitTrial, InflateBalloon);
-        TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, ButtonScale, EC_CanvasGO);
+        TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, ButtonScale*10, EC_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -248,6 +248,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseBalloon.SpecifyTermination(() => SideChoice != null, CenterSelection, () =>
         {
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
             EventCodeManager.SendCodeImmediate(TaskEventCodes["BalloonChosen"]);
 
             DestroyChildren(SideChoice == "Left" ? RewardContainerRight : RewardContainerLeft);
@@ -377,6 +378,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
                         Handler.HandlerActive = false;
                         NumInflations++;
+                        EventCodeManager.SendCodeNextFrame(SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                        EventCodeManager.SendCodeNextFrame(SessionEventCodes["CorrectResponse"]);
                         CalculateInflation(); //Sets Inflate to TRUE at end of func
                         InflateAudioPlayed = false;
                     }
@@ -446,14 +449,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 if (SyncBoxController != null)
                 {
                     GiveReward();
-                    EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]);
+                    EventCodeManager.SendCodeNextFrame(SessionEventCodes["SyncBoxController_RewardPulseSent"]);
                 }
 
                 Completions_Block++;
                 AddTokenInflateAudioPlayed = true;
             }
-            else
-                EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
+          //  else
+               // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
         });
         Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI);
         Feedback.SpecifyTermination(() => true && Response != 1, ITI);

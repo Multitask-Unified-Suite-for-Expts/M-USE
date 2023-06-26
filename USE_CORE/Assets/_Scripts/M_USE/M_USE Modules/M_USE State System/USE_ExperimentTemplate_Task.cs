@@ -25,8 +25,9 @@ using static UnityEngine.EventSystems.EventTrigger;
 using MazeGame_Namespace;
 using UnityEngine.UIElements;
 using System.Collections;
-using Renci.SshNet.Security;
 using UnityEngine.SceneManagement;
+using USE_ExperimentTemplate_Session;
+using static System.Collections.Specialized.BitVector32;
 
 namespace USE_ExperimentTemplate_Task
 {
@@ -42,24 +43,29 @@ namespace USE_ExperimentTemplate_Task
         public string ConfigName;
         public string TaskName;
         public string TaskProjectFolder;
+        public string SessionLevelDataPath;
         [HideInInspector] public int BlockCount;
         protected int NumBlocksInTask;
         public ControlLevel_Trial_Template TrialLevel;
-        protected BlockData BlockData;
-        protected FrameData FrameData;
-        protected TrialData TrialData;
+        public ControlLevel_Session_Template SessionLevel;
+        public BlockData BlockData;
+        public FrameData FrameData;
+        public TrialData TrialData;
+        public USE_ExperimentTemplate_Data.GazeData GazeData;
         [HideInInspector] public SerialSentData SerialSentData;
         [HideInInspector] public SerialRecvData SerialRecvData;
 
-        [HideInInspector] public SessionDataControllers SessionDataControllers;
+        [HideInInspector] public SessionDataControllers SessionDataControllers, CalibrationDataControllers;
         [HideInInspector] public SelectionTracker SelectionTracker;
         [HideInInspector] public bool EyeTrackerActive;
-        [HideInInspector] public EyeTracker EyeTracker;
-        [HideInInspector] public IEyeTracker IEyeTracker;
+
+        [HideInInspector] public GazeTracker GazeTracker;
+        [HideInInspector] public MouseTracker MouseTracker;
+        [HideInInspector] public TobiiEyeTrackerController TobiiEyeTrackerController;
         [HideInInspector] public ScreenBasedCalibration ScreenBasedCalibration;
         [HideInInspector] public DisplayArea DisplayArea;
 
-        [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
+        [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive, UseDefaultConfigs;
         [HideInInspector] public string ContextExternalFilePath, SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
         [HideInInspector] public MonitorDetails MonitorDetails;
         [HideInInspector] public LocateFile LocateFile;
@@ -68,13 +74,13 @@ namespace USE_ExperimentTemplate_Task
 
         // public string TaskSceneName;
         public Camera TaskCam;
-        public GameObject[] TaskCanvasses;
+        public Canvas[] TaskCanvasses;
 
         //protected TrialDef[] AllTrialDefs;
         //protected TrialDef[] CurrentBlockTrialDefs;
         protected TaskDef TaskDef;
         protected BlockDef[] BlockDefs;
-        protected BlockDef CurrentBlockDef;
+        public BlockDef CurrentBlockDef;
         protected TrialDef[] AllTrialDefs;
 
         public BlockDef currentBlockDef
@@ -97,13 +103,13 @@ namespace USE_ExperimentTemplate_Task
 
         [HideInInspector] public DisplayController DisplayController;
 
-        private GameObject Controllers;
 
         [HideInInspector] public SerialPortThreaded SerialPortController;
         [HideInInspector] public SyncBoxController SyncBoxController;
         [HideInInspector] public EventCodeManager EventCodeManager;
         protected Dictionary<string, EventCode> CustomTaskEventCodes;
-        public Dictionary<string, EventCode> SessionEventCodes;
+        [HideInInspector] public Dictionary<string, EventCode> SessionEventCodes;
+        [HideInInspector] public GameObject InputManager;
 
         public Type TaskLevelType;
         protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
@@ -165,7 +171,7 @@ namespace USE_ExperimentTemplate_Task
 
             ReadSettingsFiles();
 
-            while(!AllDefsImported)
+            while (!AllDefsImported)
             {
                 yield return new WaitForEndOfFrame();
             }
@@ -191,7 +197,7 @@ namespace USE_ExperimentTemplate_Task
 
             if (verifyOnly)
                 yield break;
-            
+
             SetupTask = new State("SetupTask");
             RunBlock = new State("RunBlock");
             BlockFeedback = new State("BlockFeedback");
@@ -199,31 +205,17 @@ namespace USE_ExperimentTemplate_Task
             RunBlock.AddChildLevel(TrialLevel);
             AddActiveStates(new List<State> { SetupTask, RunBlock, BlockFeedback, FinishTask });
 
-            if (EyeTrackerActive)
-            {
-               // InitializeEyeTrackerSettings();
-                TrialLevel.EyeTracker = EyeTracker;
-                TrialLevel.IEyeTracker = IEyeTracker;
-                TrialLevel.ScreenBasedCalibration = ScreenBasedCalibration;
-                TrialLevel.DisplayArea = DisplayArea;
-               // GameObject.Find("[TrackBoxGuide]").GetComponent<TrackBoxGuide>().SetCanvasTrackBox(GameObject.Find($"{TaskName}_Canvas"));
-            }
             TrialLevel.TrialDefType = TrialDefType;
             TrialLevel.StimDefType = StimDefType;
 
             Add_ControlLevel_InitializationMethod(() =>
             {
-                TaskCam.gameObject.SetActive(true);
-                if (TaskCanvasses != null)
-                    foreach (GameObject go in TaskCanvasses)
-                        go.SetActive(true);
-
                 BlockCount = -1;
                 BlockSummaryString = new StringBuilder();
                 PreviousBlockSummaryString = new StringBuilder();
                 CurrentTaskSummaryString = new StringBuilder();
 
-                if(!SessionValues.WebBuild)
+                if (!SessionValues.WebBuild)
                 {
                     SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
 
@@ -237,9 +229,15 @@ namespace USE_ExperimentTemplate_Task
                     configUI.GenerateUI();
                 }
 
-                Controllers.SetActive(true);
+
+                TaskCam.gameObject.SetActive(true);
+                if (TaskCanvasses != null)
+                    foreach (Canvas canvas in TaskCanvasses)
+                        canvas.gameObject.SetActive(true);
+
+                InputManager.SetActive(true);
             });
-            
+
             SetupTask.AddInitializationMethod(() =>
             {
                 SetTaskSummaryString();
@@ -271,7 +269,7 @@ namespace USE_ExperimentTemplate_Task
             });
 
             //Hotkey for WebGL build so we can end task and go to next block
-            if(SessionValues.WebBuild)
+            if (SessionValues.WebBuild)
             {
                 RunBlock.AddUpdateMethod(() =>
                 {
@@ -320,12 +318,12 @@ namespace USE_ExperimentTemplate_Task
                 EventCodeManager.EventCodeLateUpdate();
             });
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
-            
+
 
 
             BlockFeedback.AddUniversalInitializationMethod(() =>
             {
-                if(BlockSummaryString != null)
+                if (BlockSummaryString != null)
                 {
                     int trialsCompleted = (TrialLevel.AbortCode == 0 || TrialLevel.AbortCode == 6) ? TrialLevel.TrialCount_InBlock + 1 : TrialLevel.TrialCount_InBlock;
                     string blockTitle = $"<b>\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" +
@@ -364,7 +362,10 @@ namespace USE_ExperimentTemplate_Task
 
             FinishTask.AddDefaultInitializationMethod(() =>
             {
-                if(TrialLevel.ForceBlockEnd && StoreData) //If they used end task hotkey, still write the block data!
+                if (TrialLevel.TokenFBController.enabled)
+                    TrialLevel.TokenFBController.enabled = false;
+
+                if (TrialLevel.ForceBlockEnd && StoreData) //If they used end task hotkey, still write the block data!
                 {
                     BlockData.AppendDataToBuffer();
                     BlockData.AppendDataToFile();
@@ -374,7 +375,7 @@ namespace USE_ExperimentTemplate_Task
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["FinishTaskStarts"]);
 
                 //Clear trialsummarystring and Blocksummarystring at end of task:
-                if(TrialLevel.TrialSummaryString != null && BlockSummaryString != null)
+                if (TrialLevel.TrialSummaryString != null && BlockSummaryString != null)
                 {
                     TrialLevel.TrialSummaryString = "";
                     BlockSummaryString.Clear();
@@ -393,68 +394,135 @@ namespace USE_ExperimentTemplate_Task
                     SessionDataControllers.RemoveDataController("BlockData_" + TaskName);
                     SessionDataControllers.RemoveDataController("TrialData_" + TaskName);
                     SessionDataControllers.RemoveDataController("FrameData_" + TaskName);
-                }
-
-                int sgNum = TaskStims.AllTaskStimGroups.Count;
-                for (int iSg = 0; iSg < sgNum; iSg++)
-                {
-                    StimGroup[] taskSgs = new StimGroup[TaskStims.AllTaskStimGroups.Count];
-                    TaskStims.AllTaskStimGroups.Values.CopyTo(taskSgs, 0);
-                    StimGroup sg = taskSgs[0];
-                    while (sg.stimDefs.Count > 0)
+                    if (EyeTrackerActive)
                     {
-                        sg.stimDefs[0].Destroy();
-                        sg.stimDefs.RemoveAt(0);
+                        SessionDataControllers.RemoveDataController("BlockData_GazeCalibration");
+                        SessionDataControllers.RemoveDataController("FrameData_GazeCalibration");
+                        SessionDataControllers.RemoveDataController("TrialData_GazeCalibration");
                     }
-                    sg.DestroyStimGroup();
                 }
 
-                TaskStims.AllTaskStims.DestroyStimGroup();
+                if (TaskStims != null)
+                {
+                    int sgNum = TaskStims.AllTaskStimGroups.Count;
+                    for (int iSg = 0; iSg < sgNum; iSg++)
+                    {
+                        StimGroup[] taskSgs = new StimGroup[TaskStims.AllTaskStimGroups.Count];
+                        TaskStims.AllTaskStimGroups.Values.CopyTo(taskSgs, 0);
+                        StimGroup sg = taskSgs[0];
+                        while (sg.stimDefs.Count > 0)
+                        {
+                            sg.stimDefs[0].Destroy();
+                            sg.stimDefs.RemoveAt(0);
+                        }
+
+                        sg.DestroyStimGroup();
+                    }
+                    TaskStims.AllTaskStims.DestroyStimGroup();
+
+                }
+
                 TaskCam.gameObject.SetActive(false);
 
                 if (TaskCanvasses != null)
-                    foreach (GameObject go in TaskCanvasses)
-                        go.SetActive(false);
+                    foreach (Canvas canvas in TaskCanvasses)
+                        canvas.gameObject.SetActive(false);
 
-                Destroy(Controllers);
+                Destroy(GameObject.Find("FeedbackControllers"));
 
-                if(!SessionValues.WebBuild)
+                if (!SessionValues.WebBuild)
                 {
                     foreach (Transform child in GameObject.Find("MainCameraCopy").transform)
                         Destroy(child.gameObject);
                 }
             });
-            
+
 
             //Setup data management
             TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
 
-            if(StoreData)
+            if (StoreData)
                 StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
+
+            if (EyeTrackerActive)
+            {
+                //Setup data management
+                if (SessionLevel.CurrentState.StateName == "SetupSession" && TaskName == "GazeCalibration")
+                {
+                    // Store Data in the Session Level / Gaze Calibration folder if running at the session level
+                    TaskDataPath = SessionLevelDataPath + Path.DirectorySeparatorChar + "PreTask_GazeCalibration";
+                    ConfigName = "GazeCalibration";
+                }
+                else if (TaskName == "GazeCalibration")
+                {
+                    // Store Data in the Task / Gaze Calibration folder if not running at the session level
+                    TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName + Path.DirectorySeparatorChar + "InTask_GazeCalibration";
+                    ConfigName = "GazeCalibration";
+                }
+                else
+                {
+                    // Store Data in the Task folder 
+                    TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
+                }
+            }
+            
+
+
 
             FilePrefix = FilePrefix + "_" + ConfigName;
 
             string subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "BlockData";
-            BlockData = (BlockData) SessionDataControllers.InstantiateDataController<BlockData>("BlockData", ConfigName, StoreData, subFolderPath);
+            BlockData = (BlockData)SessionDataControllers.InstantiateDataController<BlockData>("BlockData", ConfigName, StoreData, subFolderPath);
             BlockData.taskLevel = this;
+            BlockData.sessionLevel = SessionLevel;
             BlockData.fileName = FilePrefix + "__BlockData.txt";
 
             subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "TrialData";
-            TrialData = (TrialData) SessionDataControllers.InstantiateDataController<TrialData>("TrialData", ConfigName, StoreData, subFolderPath);
+            TrialData = (TrialData)SessionDataControllers.InstantiateDataController<TrialData>("TrialData", ConfigName,
+                           StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
+
+
             TrialData.taskLevel = this;
             TrialData.trialLevel = TrialLevel;
+            TrialData.sessionLevel = SessionLevel;
+
             TrialLevel.TrialData = TrialData;
             TrialData.fileName = FilePrefix + "__TrialData.txt";
 
             subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "FrameData";
-            FrameData = (FrameData) SessionDataControllers.InstantiateDataController<FrameData>("FrameData", ConfigName, StoreData, subFolderPath);
+            FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", ConfigName,
+                StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
 
+            FrameData.taskLevel = this;
+            FrameData.trialLevel = TrialLevel;
+            FrameData.sessionLevel = SessionLevel;
+
+            TrialLevel.FrameData = FrameData;
+            FrameData.fileName = FilePrefix + "__FrameData_PreTrial.txt";
+
+            if (EyeTrackerActive)
+            {
+                GazeData.taskLevel = this;
+                GazeData.trialLevel = TrialLevel;
+                GazeData.fileName = FilePrefix + "__GazeData_PreTrial.txt";
+                GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
+            }
             //SessionDataControllers.InstantiateFrameData(StoreData, ConfigName,
-              //  TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
+            //  TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
             FrameData.taskLevel = this;
             FrameData.trialLevel = TrialLevel;
             TrialLevel.FrameData = FrameData;
-            //FrameData.fileName = FilePrefix + "__FrameData_PreTrial.txt"; //Commenting out. Is just creating empty framedata file with a couple headers.
+            FrameData.fileName = FilePrefix + "__FrameData_PreTrial.txt";
+
+
+            if (EyeTrackerActive)
+            {
+                GazeData.fileName = FilePrefix + "__GazeData_PreTrial.txt";
+                GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
+
+            }
+        
+
 
 
             BlockData.InitDataController();
@@ -463,6 +531,8 @@ namespace USE_ExperimentTemplate_Task
 
             BlockData.ManuallyDefine();
             FrameData.ManuallyDefine();
+            if (EyeTrackerActive)
+                GazeData.ManuallyDefine();
 
             if (EventCodesActive)
                 FrameData.AddEventCodeColumns();
@@ -473,21 +543,18 @@ namespace USE_ExperimentTemplate_Task
             BlockData.AddStateTimingData(this);
             BlockData.CreateFile();
             FrameData.CreateFile();
+            if (EyeTrackerActive)
+                GazeData.CreateFile();
+
 
             //AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
-            Controllers = new GameObject("Controllers");
-            GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"), Controllers.transform);
-            GameObject inputTrackers = Instantiate(Resources.Load<GameObject>("InputTrackers"), Controllers.transform);
-            
+
             // fbControllers.transform.SetParent(Controllers.transform);
             // inputTrackers.transform.SetParent(Controllers.transform);
-            if (!EyeTrackerActive)
-                inputTrackers.GetComponent<GazeTracker>().enabled = false;
-
-
             // GameObject fbControllers = Instantiate(fbControllersPrefab, Controllers.transform);
             // GameObject inputTrackers = Instantiate(inputTrackersPrefab, Controllers.transform);
 
+            GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"), InputManager.transform);
 
             List<string> fbControllersList = new List<string>();
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FeedbackControllers"))
@@ -516,6 +583,7 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.SerialRecvData = SerialRecvData;
             TrialLevel.SerialSentData = SerialSentData;
             TrialLevel.SyncBoxController = SyncBoxController;
+            TrialLevel.GazeData = GazeData;
 
             TrialLevel.DisplayController = DisplayController; 
 
@@ -531,20 +599,10 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.SessionEventCodes = SessionEventCodes;
 
 
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShotgunRaycastCircleSize_DVA"))
-                TrialLevel.ShotgunRaycastCircleSize_DVA = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ShotgunRaycastCircleSize_DVA");
-            else
-                TrialLevel.ShotgunRaycastCircleSize_DVA = ShotgunRaycastCircleSize_DVA;
 
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ParticipantDistance_CM"))
-                TrialLevel.ParticipantDistance_CM = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ParticipantDistance_CM");
-            else
-                TrialLevel.ParticipantDistance_CM = ParticipantDistance_CM;
-
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShotgunRaycastSpacing_DVA"))
-                TrialLevel.ShotgunRaycastSpacing_DVA = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ShotgunRaycastSpacing_DVA");
-            else
-                TrialLevel.ShotgunRaycastSpacing_DVA = ShotgunRaycastSpacing_DVA;
+            if (EyeTrackerActive)
+                GazeTracker.Init(FrameData, 0);
+            MouseTracker.Init(FrameData, 0);
 
 
             if(SessionValues.WebBuild)
@@ -605,18 +663,17 @@ namespace USE_ExperimentTemplate_Task
                 }
             }
 
-            TrialLevel.MouseTracker = inputTrackers.GetComponent<MouseTracker>();
-            TrialLevel.MouseTracker.Init(FrameData, 0);
-            TrialLevel.MouseTracker.ShotgunRaycast.SetShotgunVariables(ShotgunRaycastCircleSize_DVA, ParticipantDistance_CM, ShotgunRaycastSpacing_DVA);
+
             if (EyeTrackerActive)
             {
-                //MAYBE DON'T NEED TO GATE, CHECK - SD
-                TrialLevel.GazeTracker = inputTrackers.GetComponent<GazeTracker>();
-                TrialLevel.GazeTracker.Init(FrameData, 0);
+                TrialLevel.GazeTracker = GazeTracker;
+                TrialLevel.TobiiEyeTrackerController = TobiiEyeTrackerController;
             }
+            TrialLevel.MouseTracker = MouseTracker;
+
             TrialLevel.SelectionType = SelectionType;
 
-            Controllers.SetActive(false);
+            InputManager.SetActive(false);
 
             TrialLevel.SessionDataControllers = SessionDataControllers;
             TrialLevel.FilePrefix = FilePrefix;
@@ -631,6 +688,8 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.USE_StartButton = USE_StartButton;
             TrialLevel.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
 
+            TrialLevel.EyeTrackerActive = EyeTrackerActive;
+            TrialLevel.TaskLevel = this;
             TrialLevel.DefineTrialLevel();
 
             TaskLevelDefined = true;
@@ -644,7 +703,7 @@ namespace USE_ExperimentTemplate_Task
             yield return ServerManager.CreateFolder(configName);
         }
 
-
+        
         public void ClearActiveTaskHandlers()
         {
             if (SelectionTracker.TaskHandlerNames.Count > 0)
@@ -687,14 +746,14 @@ namespace USE_ExperimentTemplate_Task
 
             MethodInfo readTaskDef = GetType().GetMethod(nameof(this.ReadTaskDef)).MakeGenericMethod(new Type[] { TaskDefType });
             readTaskDef.Invoke(this, new object[] { TaskConfigPath });
-
-            MethodInfo readBlockDefs = GetType().GetMethod(nameof(this.ReadBlockDefs)).MakeGenericMethod(new Type[] { BlockDefType });
+            MethodInfo readBlockDefs = GetType().GetMethod(nameof(this.ReadBlockDefs))
+                .MakeGenericMethod(new Type[] { BlockDefType });
             readBlockDefs.Invoke(this, new object[] { TaskConfigPath });
-
-            MethodInfo readTrialDefs = GetType().GetMethod(nameof(this.ReadTrialDefs)).MakeGenericMethod(new Type[] { TrialDefType });
+            MethodInfo readTrialDefs = GetType().GetMethod(nameof(this.ReadTrialDefs))
+                .MakeGenericMethod(new Type[] { TrialDefType });
             readTrialDefs.Invoke(this, new object[] { TaskConfigPath });
-
-            MethodInfo readStimDefs = GetType().GetMethod(nameof(this.ReadStimDefs)).MakeGenericMethod(new Type[] { StimDefType });
+            MethodInfo readStimDefs = GetType().GetMethod(nameof(this.ReadStimDefs))
+                .MakeGenericMethod(new Type[] { StimDefType });
             readStimDefs.Invoke(this, new object[] { TaskConfigPath });
 
 
@@ -771,7 +830,7 @@ namespace USE_ExperimentTemplate_Task
                         string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + TaskName + "_DefaultConfigs";
                         filePath = folderPath + Path.DirectorySeparatorChar + settingsFileName;
 
-                        if (!Directory.Exists(folderPath))
+                        if(!Directory.Exists(folderPath))
                             Directory.CreateDirectory(folderPath);
 
                         if (!File.Exists(filePath))
@@ -786,12 +845,12 @@ namespace USE_ExperimentTemplate_Task
                     }
 
                     Type settingsType = GetTaskCustomSettingsType(settingsFileName);
-
+               
                     switch (customSettings[key].ToLower())
                     {
                         case ("singletypearray"):
                             MethodInfo readCustomSingleTypeArray = GetType().GetMethod(nameof(this.ReadCustomSingleTypeArray)).MakeGenericMethod(new Type[] { settingsType });
-                            readCustomSingleTypeArray.Invoke(this, new object[] { filePath, settingsFileName });
+                            readCustomSingleTypeArray.Invoke(this, new object[] { filePath, settingsFileName});
                             break;
                         case ("singletypejson"):
                             MethodInfo readCustomSingleTypeJson = GetType().GetMethod(nameof(this.ReadCustomSingleTypeJson)).MakeGenericMethod(new Type[] { settingsType });
@@ -879,7 +938,6 @@ namespace USE_ExperimentTemplate_Task
             TrialAndBlockDefsHandled = true;
         }
 
-
         public virtual Type GetTaskCustomSettingsType(string typeName)
         {
             return null;
@@ -897,7 +955,8 @@ namespace USE_ExperimentTemplate_Task
 
         public void FindStims()
         {
-            MethodInfo addTaskStimDefsToTaskStimGroup = GetType().GetMethod(nameof(this.AddTaskStimDefsToTaskStimGroup)).MakeGenericMethod(new Type[] { StimDefType });
+            MethodInfo addTaskStimDefsToTaskStimGroup = GetType().GetMethod(nameof(this.AddTaskStimDefsToTaskStimGroup))
+                .MakeGenericMethod(new Type[] { StimDefType });
 
             //PreloadedStims = GameObjects in scene prior to build
             PreloadedStims = new StimGroup("PreloadedStims");
@@ -1031,7 +1090,7 @@ namespace USE_ExperimentTemplate_Task
                 }
                 else
                 {
-                    //if ExternalFilePath already contains the StimFolderPath string, do not change it,
+                    //if ExternalFilePath already contains the StimFolerPath string, do not change it,
                     //but should also have method to check this file exists
                 }
 
@@ -1054,7 +1113,6 @@ namespace USE_ExperimentTemplate_Task
         {
             SessionSettings.ImportSettings_SingleTypeJSON<T>(settingsName, filePath);
         }
-
 
 
         public void ReadTaskDef<T>(string taskConfigFolder) where T : TaskDef
@@ -1081,7 +1139,6 @@ namespace USE_ExperimentTemplate_Task
                 TaskDefImported = true;
             }
         }
-
 
         public void ReadBlockDefs<T>(string taskConfigFolder) where T : BlockDef
         {
@@ -1310,6 +1367,11 @@ namespace USE_ExperimentTemplate_Task
                 FrameData.AppendDataToBuffer();
                 FrameData.AppendDataToFile();
             }
+
+            if (GazeData != null)
+            {
+                GazeData.AppendDataToFile();
+            }
         }
         
         
@@ -1322,6 +1384,8 @@ namespace USE_ExperimentTemplate_Task
         {
             CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
         }
+
+
     }
 
 

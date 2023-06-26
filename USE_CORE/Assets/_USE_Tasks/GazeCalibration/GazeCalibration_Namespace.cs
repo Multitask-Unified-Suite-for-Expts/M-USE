@@ -11,17 +11,6 @@ namespace GazeCalibration_Namespace
 {
     public class GazeCalibration_TaskDef : TaskDef
     {
-        //Already-existing fields (inherited from TaskDef)      
-        //public DateTime TaskStart_DateTime;
-        //public int TaskStart_Frame;
-        //public float TaskStart_UnityTime;
-        //public string TaskName;
-        //public string ExternalStimFolderPath;
-        //public string PrefabStimFolderPath;
-        //public string ExternalStimExtension;
-        //public List<string[]> FeatureNames;
-        //public string neutralPatternedColorName;
-        //public float? ExternalStimScale;
     }
 
     public class GazeCalibration_BlockDef : BlockDef
@@ -29,11 +18,9 @@ namespace GazeCalibration_Namespace
         //Already-existing fields (inherited from BlockDef)
         //public int BlockCount;
         //public TrialDef[] TrialDefs;
-        public int BlockID;
-        public string ContextName;
-        public int NumTrials;
-        public int NumPulses;
-        public int PulseSize;
+        public int NumTrials = 5;
+        public int NumPulses = 2;
+        public int PulseSize = 250;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -42,8 +29,6 @@ namespace GazeCalibration_Namespace
             for (int iTrial = 0; iTrial < NumTrials; iTrial++)
             {
                 GazeCalibration_TrialDef td = new GazeCalibration_TrialDef();
-                td.BlockID = BlockID;
-                td.ContextName = ContextName;
                 td.NumTrials = NumTrials;
                 td.NumPulses = NumPulses;
                 td.PulseSize = PulseSize;

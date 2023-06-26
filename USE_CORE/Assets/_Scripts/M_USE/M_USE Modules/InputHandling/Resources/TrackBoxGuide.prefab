@@ -250,7 +250,7 @@ GameObject:
   - component: {fileID: 4332768817695138}
   - component: {fileID: 114747867459378556}
   m_Layer: 0
-  m_Name: '[TrackBoxGuide]'
+  m_Name: TrackBoxGuide
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -284,7 +284,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _trackBoxGuideActive: 0
-  _toggleKey: 0
+  _toggleKey: 273
   _CanvasTrackBox: {fileID: 1462190301454078}
 --- !u!1 &1462190301454078
 GameObject:
@@ -338,7 +338,7 @@ Canvas:
   m_GameObject: {fileID: 1462190301454078}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
+  m_RenderMode: 1
   m_Camera: {fileID: 0}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
@@ -348,7 +348,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 4
   m_TargetDisplay: 0
 --- !u!114 &114316194415802378
 MonoBehaviour:

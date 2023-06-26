@@ -52,6 +52,7 @@ namespace USE_ExperimenterDisplay
 
         public void ResetTask(ControlLevel_Task_Template taskLevel, ControlLevel_Trial_Template trialLevel)
         {
+
             TaskLevel = taskLevel;
             TrialLevel = trialLevel;
             foreach (ExperimenterDisplayPanel panel in TaskPanels)

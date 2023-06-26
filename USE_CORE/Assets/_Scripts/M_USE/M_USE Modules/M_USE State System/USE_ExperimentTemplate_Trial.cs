@@ -16,6 +16,10 @@ using USE_UI;
 using System.IO.Ports;
 using Tobii.Research;
 using Tobii.Research.Unity;
+using USE_DisplayManagement;
+using USE_ExperimentTemplate_Block;
+using UnityEngine.SceneManagement;
+using System.Linq;
 using System.Collections;
 
 namespace USE_ExperimentTemplate_Trial
@@ -24,6 +28,7 @@ namespace USE_ExperimentTemplate_Trial
     {
         [HideInInspector] public TrialData TrialData;
         [HideInInspector] public FrameData FrameData;
+        [HideInInspector] public USE_ExperimentTemplate_Data.GazeData GazeData;
         [HideInInspector] public SerialSentData SerialSentData;
         [HideInInspector] public SerialRecvData SerialRecvData;
         [HideInInspector] public int BlockCount, TrialCount_InTask, TrialCount_InBlock, AbortCode;
@@ -33,7 +38,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public bool StoreData, ForceBlockEnd, SerialPortActive, EyetrackerActive;
         [HideInInspector] public string TaskDataPath, FilePrefix, TrialSummaryString;
 
-        protected State LoadTrialStims, SetupTrial, FinishTrial, Delay;
+        protected State LoadTrialStims, SetupTrial, FinishTrial, Delay, GazeCalibration;
         
         protected State StateAfterDelay = null;
         protected float DelayDuration = 0;
@@ -48,7 +53,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public ConfigVarStore ConfigUiVariables;
         [HideInInspector] public ExperimenterDisplayController ExperimenterDisplayController;
         [HideInInspector] public SessionInfoPanel SessionInfoPanel;
-        public float TrialCompleteTime;
+        [HideInInspector] public float TrialCompleteTime;
 
         [HideInInspector] public SelectionTracker SelectionTracker;
 
@@ -62,12 +67,15 @@ namespace USE_ExperimentTemplate_Trial
         // Input Trackers
         [HideInInspector] public MouseTracker MouseTracker;
         [HideInInspector] public GazeTracker GazeTracker;
-        [HideInInspector] public EyeTracker EyeTracker;
-        [HideInInspector] public IEyeTracker IEyeTracker;
+        [HideInInspector] public TobiiEyeTrackerController TobiiEyeTrackerController;
         [HideInInspector] public ScreenBasedCalibration ScreenBasedCalibration;
         [HideInInspector] public DisplayArea DisplayArea;
 
         [HideInInspector] public string SelectionType;
+        [HideInInspector] public bool EyeTrackerActive;
+        [HideInInspector] public EyeTrackerData_Namespace.TobiiGazeSample TobiiGazeSample;
+        [HideInInspector] public bool runCalibration;
+        private ControlLevel_Task_Template GazeCalibrationTaskLevel;
 
         [HideInInspector] public SerialPortThreaded SerialPortController;
         [HideInInspector] public SyncBoxController SyncBoxController;
@@ -122,12 +130,36 @@ namespace USE_ExperimentTemplate_Trial
             SetupTrial = new State("SetupTrial");
             FinishTrial = new State("FinishTrial");
             Delay = new State("Delay");
-            AddActiveStates(new List<State> { LoadTrialStims, SetupTrial, FinishTrial, Delay });
+            GazeCalibration = new State("GazeCalibration");
+
+
+            if (GameObject.Find("GazeCalibration(Clone)") != null)// && TaskLevel.TaskName != "GazeCalibration")
+            {
+                GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts"). GetComponent<GazeCalibration_TaskLevel>();
+                GazeCalibrationTaskLevel.ConfigName = TaskLevel.TaskName;
+                GazeCalibrationTaskLevel.TrialLevel.TaskLevel = GazeCalibrationTaskLevel;
+                
+                if (TaskLevel.TaskName != "GazeCalibration")
+                {
+                    GazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
+                    GazeCalibrationTaskLevel.DefineTaskLevel(false);
+                    GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(false);
+                    GazeCalibrationTaskLevel.FrameData.gameObject.SetActive(false);
+                    GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(false);
+                }
+
+                
+                // Set the GazeData path back to the current config folder
+                GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar +  "GazeData";
+            }
+
+            AddActiveStates(new List<State> { LoadTrialStims, SetupTrial, FinishTrial, Delay, GazeCalibration });
             // A state that just waits for some time;
             Delay.AddTimer(() => DelayDuration, () => StateAfterDelay);
 
             Cursor.visible = false;
-            TokenFBController.enabled = false;
+            if (TokenFBController != null)
+                TokenFBController.enabled = false;
 
             AddAbortCodeKeys();
 
@@ -156,8 +188,10 @@ namespace USE_ExperimentTemplate_Trial
 
                 TrialCount_InTask++;
                 TrialCount_InBlock++;
-
                 FrameData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
+                if(EyeTrackerActive)
+                    GazeData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
+
                 if (TaskLevel.SerialPortActive)
                 {
                     SerialRecvData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
@@ -183,14 +217,19 @@ namespace USE_ExperimentTemplate_Trial
 
                 ResetTrialVariables();
             });
+
             SetupTrial.AddDefaultTerminationMethod(() =>
             {
                 Input.ResetInputAxes();
                 if (IsHuman)
                     HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
+                
             });
 
+
             FinishTrial.AddInitializationMethod(() => EventCodeManager.SendCodeImmediate(SessionEventCodes["FinishTrialStarts"]));
+            FinishTrial.SpecifyTermination(() => runCalibration && TaskLevel.TaskName != "GazeCalibration", () => GazeCalibration);
+
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => CheckForcedBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Count - 1, LoadTrialStims);
@@ -211,14 +250,73 @@ namespace USE_ExperimentTemplate_Trial
                 }
                 WriteDataFiles();
             });
+            
+            GazeCalibration.AddInitializationMethod(() =>
+            {
+                GazeCalibrationTaskLevel.TaskCam = TaskLevel.TaskCam;
+
+                GazeCalibrationTaskLevel.ConfigName = "GazeCalibration";
+                GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
+
+                UnityEngine.SceneManagement.Scene originalScene = SceneManager.GetSceneByName(TaskLevel.TaskName);
+                GameObject[] rootObjects = originalScene.GetRootGameObjects();
+                TaskLevel.TaskCanvasses = rootObjects.SelectMany(go => go.GetComponentsInChildren<Canvas>(true)).ToArray();
+
+                foreach (Canvas canvas in TaskLevel.TaskCanvasses)
+                {
+                    canvas.gameObject.SetActive(false);
+                }
+
+                var GazeCalibrationCanvas = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas");
+                var GazeCalibrationScripts = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts");
+                //  var CalibrationGazeTrail = GameObject.Find("TobiiEyeTrackerController").transform.Find("GazeTrail(Clone)");
+                //  var CalibrationCube = GameObject.Find("TobiiEyeTrackerController").transform.Find("Cube");
+
+                GazeCalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
+                GazeCalibrationCanvas.GetComponent<Canvas>().worldCamera = Camera.main;
+                GazeCalibrationCanvas.gameObject.SetActive(true);
+             //   CalibrationGazeTrail.gameObject.SetActive(true);
+                GazeCalibrationScripts.gameObject.SetActive(true);
+                //  CalibrationCube.gameObject.SetActive(true);
+
+                GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(true);
+                GazeCalibrationTaskLevel.FrameData.gameObject.SetActive(true);
+                GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(true);
+
+                // Set the GazeDataPath to be inside the GazeCalibration Folder
+                GazeData.folderPath = GazeCalibrationTaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
+            });
+
+           GazeCalibration.SpecifyTermination(() => !runCalibration, () => SetupTrial, () =>
+           {
+               GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas").gameObject.SetActive(false);
+               foreach (Canvas canvas in TaskLevel.TaskCanvasses)
+               {
+                   canvas.gameObject.SetActive(true);
+               }
+               if (GazeCalibrationTaskLevel.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
+               {
+                   TobiiEyeTrackerController.Instance.isCalibrating = false;
+                   TobiiEyeTrackerController.Instance.ScreenBasedCalibration.LeaveCalibrationMode();
+               }
+
+               GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(false);
+               GazeCalibrationTaskLevel.FrameData.gameObject.SetActive(false);
+               GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(false);
+
+               // Set the Gaze Data Path back to the outer level task folder
+               GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
+
+           });
+
             DefineControlLevel();
             TrialData.ManuallyDefine();
             TrialData.AddStateTimingData(this);
             TrialData.CreateFile();
+           // TrialData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
+
 
         }
-
-
         private IEnumerator HandleLoadingStims()
         {
             foreach (StimGroup sg in TrialStims)
@@ -228,7 +326,6 @@ namespace USE_ExperimentTemplate_Trial
             TrialStimsLoaded = true;
         }
 
-
         protected void SetDelayState(State stateAfterDelay, float duration)
         {
             StateAfterDelay = stateAfterDelay;
@@ -237,7 +334,6 @@ namespace USE_ExperimentTemplate_Trial
 
         public virtual void FinishTrialCleanup()
         {
-
         }
 
         public void ClearActiveTrialHandlers()
@@ -266,6 +362,8 @@ namespace USE_ExperimentTemplate_Trial
             TrialData.AppendDataToFile();
             FrameData.AppendDataToBuffer();
             FrameData.AppendDataToFile();
+	if (EyeTrackerActive)
+                GazeData.AppendDataToFile();
             if (SerialPortActive)
             {
                 SerialRecvData.AppendDataToFile();

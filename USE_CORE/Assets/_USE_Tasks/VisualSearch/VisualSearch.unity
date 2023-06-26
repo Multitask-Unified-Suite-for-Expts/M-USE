@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311915, g: 0.3807396, b: 0.35872662, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311953, g: 0.38074014, b: 0.3587274, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -355,6 +355,7 @@ MonoBehaviour:
   Paused: 1
   TrialData: {fileID: 0}
   FrameData: {fileID: 0}
+  GazeData: {fileID: 0}
   SerialSentData: {fileID: 0}
   SerialRecvData: {fileID: 0}
   BlockCount: 0
@@ -392,7 +393,10 @@ MonoBehaviour:
   SliderFBController: {fileID: 0}
   MouseTracker: {fileID: 0}
   GazeTracker: {fileID: 0}
+  TobiiEyeTrackerController: {fileID: 0}
   SelectionType: 
+  EyeTrackerActive: 0
+  runCalibration: 0
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   DisplayController: {fileID: 0}
@@ -400,9 +404,12 @@ MonoBehaviour:
   ShotgunRaycastSpacing_DVA: 0
   ParticipantDistance_CM: 0
   ShotgunRaycastCircleSize_DVA: 0
-  UseDefaultConfigs: 0
   IsHuman: 0
   HumanStartPanel: {fileID: 0}
+  USE_StartButton: {fileID: 0}
+  TaskSelectionCanvasGO: {fileID: 0}
+  PauseIconGO: {fileID: 0}
+  TrialStimsLoaded: 0
   HeldTooLongTexture: {fileID: 2800000, guid: 47b4a2dd1c0432a469c082a17ab4256a, type: 3}
   HeldTooShortTexture: {fileID: 2800000, guid: 386006c0d81ea3442b946e37d70067af, type: 3}
   BackdropStripesTexture: {fileID: 0}
@@ -509,7 +516,6 @@ MonoBehaviour:
   TouchFeedbackDuration: 0
   PreSearch_TouchFbErrorCount: 0
   MacMainDisplayBuild: 0
-  AdjustedPositionsForMac: 0
 --- !u!114 &1441289829
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -537,10 +543,20 @@ MonoBehaviour:
   ConfigName: 
   TaskName: VisualSearch
   TaskProjectFolder: 
+  SessionLevelDataPath: 
   BlockCount: 0
   TrialLevel: {fileID: 1441289828}
+  SessionLevel: {fileID: 0}
+  BlockData: {fileID: 0}
+  FrameData: {fileID: 0}
+  TrialData: {fileID: 0}
+  GazeData: {fileID: 0}
   SerialSentData: {fileID: 0}
   SerialRecvData: {fileID: 0}
+  EyeTrackerActive: 0
+  GazeTracker: {fileID: 0}
+  MouseTracker: {fileID: 0}
+  TobiiEyeTrackerController: {fileID: 0}
   StoreData: 0
   SerialPortActive: 0
   SyncBoxActive: 0
@@ -579,9 +595,13 @@ MonoBehaviour:
   DisplayController: {fileID: 0}
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
+  InputManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
+  TaskSelectionCanvasGO: {fileID: 0}
   IsHuman: 0
   HumanStartPanel: {fileID: 0}
+  USE_StartButton: {fileID: 0}
+  TaskLevelDefined: 0
   NumRewardPulses_InTask: 0
   NumTokenBarFull_InTask: 0
   TotalTokensCollected_InTask: 0

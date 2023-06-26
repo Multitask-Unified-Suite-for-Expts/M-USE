@@ -6,6 +6,8 @@ using UnityEngine.UI;
 using Cursor = UnityEngine.Cursor;
 using ConfigDynamicUI;
 using USE_ExperimenterDisplay;
+using USE_ExperimentTemplate_Trial;
+using USE_ExperimentTemplate_Task;
 
 public class HotKeyPanel : ExperimenterDisplayPanel
 {
@@ -137,6 +139,9 @@ public class HotKeyPanel : ExperimenterDisplayPanel
         {
             List<HotKey> HotKeyList = new List<HotKey>();
             SessionInfoPanel SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
+            ControlLevel_Task_Template OriginalTaskLevel = null, GazeCalibrationTaskLevel = null;
+            ControlLevel_Trial_Template OriginalTrialLevel = null, GazeCalibrationTrialLevel = null;
+            ExperimenterDisplayController ExperimenterDisplay = GameObject.Find("ExperimenterDisplay").GetComponent<ExperimenterDisplayController>();
 
             // Toggle Displays HotKey
             HotKey toggleDisplays = new HotKey
@@ -323,7 +328,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
 
                         //Deactivate Controllers (so that tokenbar not still on screen):
-                        GameObject controllers = GameObject.Find("Controllers");
+                        GameObject controllers = GameObject.Find("InputManager");
                         if (controllers != null)
                             controllers.SetActive(false);
 
@@ -332,7 +337,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     else
                     {
                         HkPanel.TrialLevel.Paused = false;
-                        GameObject controllers = GameObject.Find("Controllers");
+                        GameObject controllers = GameObject.Find("InputManager");
                         if (controllers == null)
                             HkPanel.SessionLevel.FindInactiveGameObjectByName("Controllers").SetActive(true);
                     }
@@ -382,6 +387,71 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             };
             HotKeyList.Add(longReward);
 
+            //Calibration HotKey:
+            HotKey calibration = new HotKey
+            {
+                keyDescription = "Tab",
+                actionName = "Calibration",
+                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.Tab),
+                hotKeyAction = () =>
+                {
+                    GazeCalibrationTaskLevel = HkPanel.SessionLevel.GazeCalibrationTaskLevel;
+                    GazeCalibrationTrialLevel = (ControlLevel_Trial_Template)GazeCalibrationTaskLevel.GetStateFromName("RunBlock").ChildLevel;
+
+                    //IF NOT IN CALIBRATION
+                    if (HkPanel.TaskLevel?.TaskName != "GazeCalibration")
+                    {
+                        //If at Task Level
+                        if (HkPanel.TaskLevel != null)
+                        {
+                            HkPanel.TrialLevel.runCalibration = true;
+                            HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+
+                            OriginalTaskLevel = HkPanel.TaskLevel;
+                            OriginalTrialLevel = HkPanel.TrialLevel;
+
+                            OriginalTaskLevel.FrameData.gameObject.SetActive(false);
+                            OriginalTaskLevel.BlockData.gameObject.SetActive(false);
+                            OriginalTaskLevel.TrialData.gameObject.SetActive(false);
+                        }
+
+                        GazeCalibrationTrialLevel.SpecifyCurrentState(GazeCalibrationTrialLevel.GetStateFromName("SetupTrial"));
+                        ExperimenterDisplay.ResetTask(GazeCalibrationTaskLevel, GazeCalibrationTrialLevel);
+                        GazeCalibrationTaskLevel.FrameData.gameObject.SetActive(false);
+                        GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(false);
+                        GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(false);
+
+                    }
+                    else
+                    {
+                        HkPanel.TrialLevel.AbortCode = 5;
+                        HkPanel.TrialLevel.FinishTrialCleanup();
+                        HkPanel.TrialLevel.ResetTrialVariables();
+                        HkPanel.TrialLevel.ClearActiveTrialHandlers();
+                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+                        HkPanel.TrialLevel.runCalibration = false;
+
+                        //Only toggle calibration data off
+                        HkPanel.TaskLevel.FrameData.gameObject.SetActive(false);
+                        HkPanel.TaskLevel.BlockData.gameObject.SetActive(false);
+                        HkPanel.TaskLevel.TrialData.gameObject.SetActive(false);
+
+                        if (OriginalTaskLevel != null)
+                        {
+                            //turn back on the data controllers for the task 
+                            ExperimenterDisplay.ResetTask(OriginalTaskLevel, OriginalTrialLevel);
+                            OriginalTaskLevel.FrameData.gameObject.SetActive(true);
+                            OriginalTaskLevel.BlockData.gameObject.SetActive(true);
+                            OriginalTaskLevel.TrialData.gameObject.SetActive(true);
+                        }
+                        else
+                        {
+                            HkPanel.TaskLevel = null;
+                        }
+                    }
+                }
+            };
+            HotKeyList.Add(calibration);
             //InstructionsButton visibility HotKey:
             //HotKey instructionsButton = new HotKey
             //{

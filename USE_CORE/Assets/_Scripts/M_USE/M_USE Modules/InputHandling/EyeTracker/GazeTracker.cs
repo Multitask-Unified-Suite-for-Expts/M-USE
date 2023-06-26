@@ -10,7 +10,7 @@ public class GazeTracker : InputTracker
 {
     public override void AddFieldsToFrameData(DataController frameData)
     {
-        frameData.AddDatum("GazePosition", () => CurrentInputScreenPosition);
+        frameData.AddDatum("GazePosition", () => InputBroker.gazePosition != null ? InputBroker.gazePosition : new Vector2(float.NaN, float.NaN));
         frameData.AddDatum("SimpleRaycastTarget", () => SimpleRaycastTarget != null ? SimpleRaycastTarget.name : null);
         frameData.AddDatum("ShotgunModalTarget", () => ShotgunModalTarget != null ? ShotgunModalTarget.name : null);
     }

@@ -257,6 +257,34 @@ namespace USE_UI
 
     }
 
+    public class USE_TaskButton : MonoBehaviour
+    {
+        public GameObject TaskButtonGO;
+        public float ButtonSize = 10f;
+        public Color ButtonColor = new Color(1f, 1f, 1f, 1f);
+        public RawImage Image;
+        public Vector3 LocalPosition = new Vector3(0, 0, 0);
+        private Color32 originalColor;
+        private Sprite originalSprite;
+        public string configName;
+        public string taskName;
+        
+        public USE_TaskButton(Canvas parent, Vector3 localPos, float size, string configName)
+        {
+            LocalPosition = localPos;
+            ButtonSize = size;
+            TaskButtonGO = new GameObject(configName + "Button");
+            TaskButtonGO.AddComponent<USE_TaskButton>();
+            TaskButtonGO.GetComponent<USE_TaskButton>().configName = configName;
+            Image = TaskButtonGO.AddComponent<RawImage>();
+            TaskButtonGO.transform.SetParent(parent.transform, false);
+            Image.rectTransform.anchoredPosition = Vector2.zero;
+            Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
+            Image.color = ButtonColor;
+            TaskButtonGO.transform.localPosition = LocalPosition;
+            TaskButtonGO.SetActive(true);
+        }
+    }
     public class USE_StartButton : MonoBehaviour
     {
         [HideInInspector] public GameObject StartButtonGO;
@@ -478,7 +506,6 @@ namespace USE_UI
         public USE_Circle(Canvas parent, Vector2 circleLocation, float size, string name)
         {
             CircleGO = new GameObject(name, typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UICircle));
-            CircleGO.AddComponent<CanvasRenderer>();
             CircleGO.transform.SetParent(parent.transform, false);
             CircleGO.transform.localScale = new Vector3(size, size, size);
             UnityEngine.UI.Extensions.UICircle circle = CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>();

@@ -43,7 +43,7 @@ public class MouseTracker : InputTracker
 
     public override void AddFieldsToFrameData(DataController frameData)
     {
-        frameData.AddDatum("MousePosition", () => InputBroker.mousePosition);
+        frameData.AddDatum("MousePosition", () => InputBroker.mousePosition != null ? InputBroker.mousePosition : new Vector3(float.NaN, float.NaN, float.NaN));
         frameData.AddDatum("MouseButtonStatus", () => "[" + string.Join(",",ButtonStatus) + "]");
         frameData.AddDatum("SimpleRaycastTarget", ()=> SimpleRaycastTarget != null ? SimpleRaycastTarget.name : null);
         frameData.AddDatum("ShotgunModalTarget", ()=> ShotgunModalTarget != null ? ShotgunModalTarget.name : null);
@@ -72,10 +72,8 @@ public class MouseTracker : InputTracker
 
             ShotgunModalTarget = ShotgunRaycast.ModalShotgunTarget(proportions);
 
-
             //Find Current Target and return it if found:
-            SimpleRaycastTarget = InputBroker.RaycastBoth(CurrentInputScreenPosition.Value);
-        }
+            SimpleRaycastTarget = InputBroker.RaycastBoth(CurrentInputScreenPosition.Value);        }
     }
 
 }

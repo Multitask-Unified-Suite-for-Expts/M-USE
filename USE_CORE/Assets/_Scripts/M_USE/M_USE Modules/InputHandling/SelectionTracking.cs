@@ -336,8 +336,11 @@ namespace SelectionTracking
             {
                 if (CurrentInputLocation == null)
                 {
-                    if (OngoingSelection != null) // the previous frame was a selection
+                    if (OngoingSelection != null)
+                    {
+                        // the previous frame was a selection
                         CheckTermination();
+                    } 
                     return;
                 }
                 

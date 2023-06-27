@@ -70,7 +70,7 @@ public static class SessionValues
             // tl.SyncBoxController = SyncBoxController;
         }
     }
- public static void ImportSettings_SingleTypeArray<T>(string settingsCategory, string settingsPath, string serverFileString = null, char delimiter = '\t')
+ public static T[] ImportSettings_SingleTypeArray<T>(string settingsCategory, string settingsPath, string serverFileString = null, char delimiter = '\t')
 {
     //Settings settings = new Settings(settingsCategory, settingsPath);
 
@@ -79,7 +79,7 @@ public static class SessionValues
     if (serverFileString == null)
     {
         if (!File.Exists(settingsPath))
-            return;
+            return null;
     }
 
     string[] lines;
@@ -108,7 +108,6 @@ public static class SessionValues
     foreach (string fieldName in fieldNames)
     {
         string tempFieldName = fieldName.Trim();
-        Debug.Log("field name: " + tempFieldName);
         if (typeof(T).GetProperty(tempFieldName) == null && typeof(T).GetField(tempFieldName) == null)
         {
             throw new Exception("Settings file \"" + settingsCategory + "\" contains the header \""
@@ -154,22 +153,24 @@ public static class SessionValues
                 throw new Exception(e.Message + "\t" + e.StackTrace);
             }
         }
-
-        // Checking that the values in each instance and related fields are sensible
-        var type = settingsArray[iLine - 1].GetType();
-        var fields = type.GetFields();
-
-        foreach (var field in fields)
-        {
-            var fieldName = field.Name;
-            var fieldValue = field.GetValue(settingsArray[iLine - 1]);
-
-            Debug.Log($"BlockNum {iLine}: {fieldName} = {fieldValue}");
-        }
+        //
+        // // Checking that the values in each instance and related fields are sensible
+        // var type = settingsArray[iLine - 1].GetType();
+        // var fields = type.GetFields();
+        //
+        // foreach (var field in fields)
+        // {
+        //     var fieldName = field.Name;
+        //     var fieldValue = field.GetValue(settingsArray[iLine - 1]);
+        //
+        //     Debug.Log($"BlockNum {iLine}: {fieldName} = {fieldValue}");
+        // }
     }
 
+    return settingsArray;
+
     // settings.AddSetting(settingsCategory, settingsArray);
-   // allSettings.Add(settingsCategory, settings);
+    // allSettings.Add(settingsCategory, settings);
 }
  private static string[] ReadSettingsFile(string settingsPath, string commentPrefix = "", string continueSuffix = "")
  {

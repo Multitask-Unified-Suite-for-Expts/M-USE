@@ -1196,11 +1196,11 @@ namespace USE_ExperimentTemplate_Task
             {
                 string fileText = File.ReadAllText(blockDefPath).Trim();
                 if (FileStringContainsTabs(fileText))
-                    SessionSettings.ImportSettings_SingleTypeArray<T>("blockDefs", blockDefPath);
+                    BlockDefs = (T[])SessionValues.ImportSettings_SingleTypeArray<T>("blockDefs", blockDefPath);
                 else
                     SessionSettings.ImportSettings_SingleTypeJSON<T[]>("blockDefs", blockDefPath);
             }
-            BlockDefs = (T[])SessionSettings.Get("blockDefs");
+            //BlockDefs = (T[])SessionSettings.Get("blockDefs");
         }
 
 

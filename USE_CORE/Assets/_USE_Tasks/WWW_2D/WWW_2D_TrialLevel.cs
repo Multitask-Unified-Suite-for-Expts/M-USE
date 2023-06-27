@@ -186,8 +186,7 @@ public class WWW_2D_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    USE_StartButton = new USE_StartButton(WWW_2D_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                    StartButton = USE_StartButton.StartButtonGO;
+                    StartButton = USE_StartButton.CreateStartButton(WWW_2D_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);;
                     USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
@@ -235,7 +234,7 @@ public class WWW_2D_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), ChooseStimulusDelay, () =>
         {
             CalculateSliderSteps();
-            SliderFBController.ConfigureSlider(new Vector3(0, 180, 0), sliderSize.value, CurrentTrialDef.SliderInitial * (1f / sliderGainSteps));
+            SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrialDef.SliderInitial * (1f / sliderGainSteps));
             SliderFBController.SliderGO.SetActive(true);
 
             //numNonStimSelections_InBlock += mouseHandler.UpdateNumNonStimSelection(); //NT: Commented this out. not yet sure where we're gonna implement nonstim touches. Current method doesnt exist in new selection tracker.  
@@ -464,7 +463,7 @@ public class WWW_2D_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png", UseDefaultConfigs);
+                RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
             }
 
             GenerateAccuracyLog();
@@ -653,7 +652,7 @@ public class WWW_2D_TrialLevel : ControlLevel_Trial_Template
     //-----------------------------------------------------DEFINE QUADDLES-------------------------------------------------------------------------------------
     protected override void DefineTrialStims()
     {
-        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
 
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish

@@ -28,7 +28,7 @@ using System.Collections;
 using UnityEngine.SceneManagement;
 using USE_ExperimentTemplate_Session;
 using static System.Collections.Specialized.BitVector32;
-using Renci.SshNet.Security;
+
 
 namespace USE_ExperimentTemplate_Task
 {
@@ -75,7 +75,7 @@ namespace USE_ExperimentTemplate_Task
 
         // public string TaskSceneName;
         public Camera TaskCam;
-        public GameObject[] TaskCanvasses;
+        public Canvas[] TaskCanvasses;
         public GameObject StimCanvas_2D;
 
         //protected TrialDef[] AllTrialDefs;

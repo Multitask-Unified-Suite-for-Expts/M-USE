@@ -184,7 +184,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             {
                 StartButton = USE_StartButton.CreateStartButton(taskCanvas.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
-                USE_StartButton.SetButtonColor(color: Color.black);
+                // USE_StartButton.SetButtonColor(color: Color.black);
             }
 
             DeactivateChildren(taskCanvas);
@@ -709,7 +709,7 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
 
         multiCompStims = new StimGroup("MultiCompStims", GetStateFromName("SearchDisplay"), GetStateFromName("SelectionFeedback")); // can add state control of onset/offset
 
-        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
 
         sampleStims = new StimGroup("SampleStims", group, CurrentTrialDef.sampleCompIndices);
         sampleStims.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));

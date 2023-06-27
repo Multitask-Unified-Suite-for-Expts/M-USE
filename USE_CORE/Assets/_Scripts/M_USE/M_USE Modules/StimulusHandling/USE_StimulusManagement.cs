@@ -566,12 +566,6 @@ namespace USE_StimulusManagement
 		}
 
 
-		public void AddMesh()
-		{
-			foreach (var m in StimGameObject.transform.GetComponentsInChildren<MeshRenderer>())
-				m.gameObject.AddComponent(typeof(MeshCollider));
-		}
-
 		public GameObject LoadModel(string filePath, bool loadFromResources = false, bool visibiility = false)
 		{
 			using (var assetLoader = new AssetLoader())
@@ -616,33 +610,13 @@ namespace USE_StimulusManagement
 		}
 
 
-        public void Destroy()
-        {
-            StimGroup[] sgs = StimGroups.Values.ToArray();
-            for (int iG = 0; iG < sgs.Length; iG++)
-                RemoveFromStimGroup(sgs[iG]);
-
-            Object.Destroy(StimGameObject);
-            if (SetActiveOnInitialization != null)
-            {
-                SetActiveOnInitialization.StateInitializationFinished -= ActivateOnStateInit;
-                SetActiveOnInitialization = null;
-            }
-
-            if (SetInactiveOnTermination != null)
-            {
-                SetInactiveOnTermination.StateTerminationFinished -= InactivateOnStateTerm;
-                SetInactiveOnTermination = null;
-            }
-        }
-
 
         public void AddMesh()
         {
             foreach (var m in StimGameObject.transform.GetComponentsInChildren<MeshRenderer>())
                 m.gameObject.AddComponent(typeof(MeshCollider));
         }
-
+        
 
         public string FilePathFromDims(string folderPath, IEnumerable<string[]> featureNames, string neutralPatternedColorName)
 		{

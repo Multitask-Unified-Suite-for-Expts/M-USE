@@ -22,7 +22,9 @@ using Random = UnityEngine.Random;
 using UnityEngine.InputSystem;
 using TMPro;
 using Tobii.Research.Unity;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+#if (!UNITY_WEBGL)
+    using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+#endif
 using Button = UnityEngine.UI.Button;
 using USE_DisplayManagement;
 using Tobii.Research;
@@ -251,7 +253,6 @@ namespace USE_ExperimentTemplate_Session
             InputTrackers = Instantiate(Resources.Load<GameObject>("InputTrackers"), InputManager.transform);
             MouseTracker = InputTrackers.GetComponent<MouseTracker>();
             GazeTracker = InputTrackers.GetComponent<GazeTracker>();
-
 
             SelectionTracker = new SelectionTracker();
             if (SelectionType.ToLower().Equals("gaze"))
@@ -575,7 +576,7 @@ namespace USE_ExperimentTemplate_Session
                 }
                 // Container for all the task buttons
                 TaskButtonsContainer = new GameObject("TaskButtons");
-                TaskButtonsContainer.transform.parent = GameObject.Find("TaskSelectionCanvas").transform;
+                TaskButtonsContainer.transform.parent = TaskSelectionCanvasGO.transform;
                 TaskButtonsContainer.transform.localPosition = Vector3.zero;
                 TaskButtonsContainer.transform.localScale = Vector3.one * 1.06f;
 
@@ -598,8 +599,6 @@ namespace USE_ExperimentTemplate_Session
                 float buttonStartX = (buttonSize - buttonsWidth) / 2;
 
                 float buttonY = 0f;
-                //if(IsHuman)
-                //    buttonY = -125f;
 
                 if (TaskIconLocations.Count() != numTasks) //If user didn't specify in config, Generate default locations:
                 {
@@ -639,19 +638,15 @@ namespace USE_ExperimentTemplate_Session
 
                     if (SessionValues.WebBuild)
                     {
-                        string imagePath = TaskIconsFolderPath + "/" + taskName;
                         if(SessionValues.UseDefaultConfigs)
-                            image.texture = Resources.Load<Texture2D>(imagePath);
+                            image.texture = Resources.Load<Texture2D>($"{TaskIconsFolderPath}/{taskName}");
                         else
                         {
                             //LOAD THE ICONS FROM THE SERVER!
-                            StartCoroutine(ServerManager.LoadTextureFromServer(imagePath, imageResult =>
+                            StartCoroutine(ServerManager.LoadTextureFromServer($"{TaskIconsFolderPath}/{taskName}.png", imageResult =>
                             {
                                 if (imageResult != null)
-                                {
-                                    Debug.Log("Got the Texture Image from the Server!");
                                     image.texture = imageResult;
-                                }
                                 else
                                     Debug.Log("NULL GETTING TEXTURE FROM SERVER!");
                             }));
@@ -1052,7 +1047,6 @@ namespace USE_ExperimentTemplate_Session
                 {
                     SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
                     SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
-                    //EventCodesActive = true;
                 }
                 else if (EventCodesActive)
                     Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");

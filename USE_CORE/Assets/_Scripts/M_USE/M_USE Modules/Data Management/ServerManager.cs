@@ -184,23 +184,6 @@ public static class ServerManager //Used with the PHP scripts
         }
     }
 
-    public static IEnumerator CopyFileAsync(string currentPath, string newPath, string fileName) //not being used i dont think
-    {
-        yield return GetFileStringAsync(currentPath, fileName, fileContents =>
-        {
-            if (fileContents != null)
-            {
-                string url = $"{ServerURL}/createFile.php?path={newPath}";
-                WWWForm formData = new WWWForm();
-                formData.AddField("data", fileContents);
-                IEnumerator writeFileCoroutine = WriteFileCoroutine(url, formData);
-                CoroutineHelper.StartCoroutine(writeFileCoroutine);
-            }
-            else
-                Debug.Log("FILE CONTENTS NULL AFTER TRYING TO GET FILE ASYNC!");
-        });
-    }
-
     public static IEnumerator LoadTextureFromServer(string filePath, Action<Texture2D> callback)
     {
         string url = $"{ServerURL}/{filePath}";
@@ -216,7 +199,7 @@ public static class ServerManager //Used with the PHP scripts
             }
             else
             {
-                Debug.Log($"Failed to load PNG file. Error: {request.error}");
+                Debug.Log($"FAILED TO LOAD PNG FILE | ERROR: {request.error}");
                 callback?.Invoke(null);
             }
         }
@@ -240,8 +223,6 @@ public static class ServerManager //Used with the PHP scripts
 
 
 }
-
-
 
 
 

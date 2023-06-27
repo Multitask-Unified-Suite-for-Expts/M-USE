@@ -28,6 +28,7 @@ using System.Collections;
 using UnityEngine.SceneManagement;
 using USE_ExperimentTemplate_Session;
 using static System.Collections.Specialized.BitVector32;
+using Renci.SshNet.Security;
 
 namespace USE_ExperimentTemplate_Task
 {
@@ -65,7 +66,7 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public ScreenBasedCalibration ScreenBasedCalibration;
         [HideInInspector] public DisplayArea DisplayArea;
 
-        [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive, UseDefaultConfigs;
+        [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         [HideInInspector] public string ContextExternalFilePath, SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
         [HideInInspector] public MonitorDetails MonitorDetails;
         [HideInInspector] public LocateFile LocateFile;
@@ -164,7 +165,7 @@ namespace USE_ExperimentTemplate_Task
         {
             TaskLevelDefined = false;
 
-            if (SessionValues.UseDefaultConfigs) //WILL EVENTUALLY CHANGE FOR SERVER CONFIGS
+            if (SessionValues.UseDefaultConfigs)
                 PrefabPath = "/DefaultResources/Stimuli";
 
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
@@ -172,27 +173,22 @@ namespace USE_ExperimentTemplate_Task
             ReadSettingsFiles();
 
             while (!AllDefsImported)
-            {
                 yield return new WaitForEndOfFrame();
-            }
-
             TrialDefImported = false;
             BlockDefImported = false;
             TaskDefImported = false;
 
-            HandleTrialAndBlockDefs(verifyOnly);
+            HandleCustomSettings();
 
+            HandleTrialAndBlockDefs(verifyOnly);
             while (!TrialAndBlockDefsHandled)
-            {
                 yield return new WaitForEndOfFrame();
-            }
             TrialAndBlockDefsHandled = false;
 
             FindStims();
             while (!StimsHandled)
-            {
                 yield return new WaitForEndOfFrame();
-            }
+            
             StimsHandled = false;
 
             if (verifyOnly)
@@ -438,6 +434,7 @@ namespace USE_ExperimentTemplate_Task
             });
 
 
+
             //Setup data management
             TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
 
@@ -462,8 +459,6 @@ namespace USE_ExperimentTemplate_Task
             }
             
 
-
-
             FilePrefix = FilePrefix + "_" + ConfigName;
 
             string subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "BlockData";
@@ -473,10 +468,7 @@ namespace USE_ExperimentTemplate_Task
             BlockData.fileName = FilePrefix + "__BlockData.txt";
 
             subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "TrialData";
-            TrialData = (TrialData)SessionDataControllers.InstantiateDataController<TrialData>("TrialData", ConfigName,
-                           StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
-
-
+            TrialData = (TrialData)SessionDataControllers.InstantiateDataController<TrialData>("TrialData", ConfigName, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
             TrialData.taskLevel = this;
             TrialData.trialLevel = TrialLevel;
             TrialData.sessionLevel = SessionLevel;
@@ -485,9 +477,7 @@ namespace USE_ExperimentTemplate_Task
             TrialData.fileName = FilePrefix + "__TrialData.txt";
 
             subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "FrameData";
-            FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", ConfigName,
-                StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
-
+            FrameData = (FrameData)SessionDataControllers.InstantiateDataController<FrameData>("FrameData", ConfigName, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
             FrameData.taskLevel = this;
             FrameData.trialLevel = TrialLevel;
             FrameData.sessionLevel = SessionLevel;
@@ -753,9 +743,6 @@ namespace USE_ExperimentTemplate_Task
 
 
             LoadTaskEventCodeAndConfigUIFiles();
-            HandleCustomSettings();
-            ProcessCustomSettingsFiles();
-
         }
 
         public void LoadTaskEventCodeAndConfigUIFiles()
@@ -825,7 +812,7 @@ namespace USE_ExperimentTemplate_Task
                         string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + TaskName + "_DefaultConfigs";
                         filePath = folderPath + Path.DirectorySeparatorChar + settingsFileName;
 
-                        if(!Directory.Exists(folderPath))
+                        if (!Directory.Exists(folderPath))
                             Directory.CreateDirectory(folderPath);
 
                         if (!File.Exists(filePath))
@@ -839,29 +826,48 @@ namespace USE_ExperimentTemplate_Task
 
                     }
 
-                    Type settingsType = GetTaskCustomSettingsType(settingsFileName);
-               
-                    switch (customSettings[key].ToLower())
+                    string customSettingsValue = customSettings[key].ToLower();
+
+                    if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
                     {
-                        case ("singletypearray"):
-                            MethodInfo readCustomSingleTypeArray = GetType().GetMethod(nameof(this.ReadCustomSingleTypeArray)).MakeGenericMethod(new Type[] { settingsType });
-                            readCustomSingleTypeArray.Invoke(this, new object[] { filePath, settingsFileName});
-                            break;
-                        case ("singletypejson"):
-                            MethodInfo readCustomSingleTypeJson = GetType().GetMethod(nameof(this.ReadCustomSingleTypeJson)).MakeGenericMethod(new Type[] { settingsType });
-                            readCustomSingleTypeJson.Invoke(this, new object[] { filePath, settingsFileName });
-                            break;
-                        case ("multipletype"):
-                            MethodInfo readCustomMultipleTypes = GetType().GetMethod(nameof(this.ReadCustomMultipleTypes)).MakeGenericMethod(new Type[] { settingsType });
-                            readCustomMultipleTypes.Invoke(this, new object[] { filePath, settingsFileName });
-                            break;
-                        default:
-                            Debug.LogError("DEFAULT CUSTOM SETTINGS SWITCH STATEMENT");
-                            break;
+                        StartCoroutine(ServerManager.GetFileStringAsync(TaskConfigPath, key, result =>
+                        {
+                            if (!string.IsNullOrEmpty(result))
+                                ImportCustomSetting(customSettingsValue, TaskConfigPath, settingsFileName, result);
+                            else
+                                Debug.Log("CUSTOM SETTINGS RESULT IS NULL!!!!!");
+                        }));
                     }
+                    else
+                        ImportCustomSetting(customSettingsValue, filePath, settingsFileName);
                 }
-                //--------------------------------------------------------------------------------------------------------------------------------------
             }
+        }
+
+        private void ImportCustomSetting(string customSettingsValue, string filePath, string settingsFileName, string serverFileString = null)
+        {
+            Type settingsType = GetTaskCustomSettingsType(settingsFileName);
+
+            switch (customSettingsValue)
+            {
+                case ("singletypearray"):
+                    MethodInfo readCustomSingleTypeArray = GetType().GetMethod(nameof(this.ReadCustomSingleTypeArray)).MakeGenericMethod(new Type[] { settingsType });
+                    readCustomSingleTypeArray.Invoke(this, new object[] { filePath, settingsFileName, serverFileString });
+                    break;
+                case ("singletypejson"):
+                    MethodInfo readCustomSingleTypeJson = GetType().GetMethod(nameof(this.ReadCustomSingleTypeJson)).MakeGenericMethod(new Type[] { settingsType });
+                    readCustomSingleTypeJson.Invoke(this, new object[] { filePath, settingsFileName, serverFileString });
+                    break;
+                case ("multipletype"):
+                    MethodInfo readCustomMultipleTypes = GetType().GetMethod(nameof(this.ReadCustomMultipleTypes)).MakeGenericMethod(new Type[] { settingsType });
+                    readCustomMultipleTypes.Invoke(this, new object[] { filePath, settingsFileName, serverFileString });
+                    break;
+                default:
+                    Debug.LogError("DEFAULT CUSTOM SETTINGS SWITCH STATEMENT");
+                    break;
+            }
+
+            ProcessCustomSettingsFiles();
         }
 
 
@@ -1094,19 +1100,31 @@ namespace USE_ExperimentTemplate_Task
 
 
 
-        public void ReadCustomSingleTypeArray<T>(string filePath, string settingsName) where T : CustomSettingsType
+        public void ReadCustomSingleTypeArray<T>(string filePath, string settingsName, string serverFileString = null) where T : CustomSettingsType
         {
-            SessionSettings.ImportSettings_SingleTypeArray<T>(settingsName, filePath);
+            SessionSettings.ImportSettings_SingleTypeArray<T>(settingsName, filePath, serverFileString);
+            //if (serverFileString != null)
+            //    SessionSettings.ImportSettings_SingleTypeArray<T>(settingsName, filePath, serverFileString);
+            //else
+            //    SessionSettings.ImportSettings_SingleTypeArray<T>(settingsName, filePath);
         }
 
-        public void ReadCustomMultipleTypes<T>(string filePath, string settingsName) where T : CustomSettingsType
+        public void ReadCustomMultipleTypes<T>(string filePath, string settingsName, string serverFileString = null) where T : CustomSettingsType
         {
-            SessionSettings.ImportSettings_MultipleType(settingsName, filePath);
+            SessionSettings.ImportSettings_MultipleType(settingsName, filePath, serverFileString);
+            //if (serverFileString != null)
+            //    SessionSettings.ImportSettings_MultipleType(settingsName, filePath, serverFileString);
+            //else
+            //    SessionSettings.ImportSettings_MultipleType(settingsName, filePath);
         }
 
-        public void ReadCustomSingleTypeJson<T>(string filePath, string settingsName) where T : CustomSettingsType
+        public void ReadCustomSingleTypeJson<T>(string filePath, string settingsName, string serverFileString = null) where T : CustomSettingsType
         {
-            SessionSettings.ImportSettings_SingleTypeJSON<T>(settingsName, filePath);
+            SessionSettings.ImportSettings_SingleTypeJSON<T>(settingsName, filePath, serverFileString);
+            //if (serverFileString != null)
+            //    SessionSettings.ImportSettings_SingleTypeJSON<T>(settingsName, filePath, serverFileString);
+            //else
+            //    SessionSettings.ImportSettings_SingleTypeJSON<T>(settingsName, filePath);
         }
 
 
@@ -1262,7 +1280,6 @@ namespace USE_ExperimentTemplate_Task
 
             IEnumerable<StimDef> potentials = (T[])SessionSettings.Get(key);
 
-            GameObject canvasGO = GameObject.Find(TaskName + "_Canvas");
 
             if (potentials == null || potentials.Count() < 1)
                 return;
@@ -1277,10 +1294,10 @@ namespace USE_ExperimentTemplate_Task
                 else
                 {
                     ExternalStims = new StimGroup("ExternalStims", (T[])SessionSettings.Get(key));
+                    GameObject canvasGO = GameObject.Find(TaskName + "_Canvas");
                     foreach (StimDef stim in ExternalStims.stimDefs)
                         stim.CanvasGameObject = canvasGO;
                 }
-                Debug.Log("PREFAB STIMS: " + PrefabStims.stimDefs.Count + " | " + "EXTERNAL STIMS: " + ExternalStims.stimDefs.Count);
             }
         }
 

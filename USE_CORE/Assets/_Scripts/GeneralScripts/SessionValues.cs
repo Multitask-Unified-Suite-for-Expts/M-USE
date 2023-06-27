@@ -13,15 +13,15 @@ using USE_UI;
 
 public static class SessionValues
 {
-    public static bool WebBuild = false;
-    public static bool UseDefaultConfigs = false;
-    public static bool Using2DStim = false;
-    public static bool IsHuman = false;
-    public static bool StoreData = false;
-    public static bool EyeTrackerActive = false;
-    public static bool SerialPortActive = false;
-    public static bool SyncBoxActive = false;
-    public static bool EventCodesActive = false;
+    public static bool WebBuild;
+    public static bool UseDefaultConfigs;
+    public static bool Using2DStim;
+    public static bool IsHuman;
+    public static bool StoreData;
+    public static bool EyeTrackerActive;
+    public static bool SerialPortActive;
+    public static bool SyncBoxActive;
+    public static bool EventCodesActive;
 
     public static ControlLevel_Session_Template SessionLevel;
     public static USE_StartButton USE_StartButton;

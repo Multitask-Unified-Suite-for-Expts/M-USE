@@ -154,8 +154,8 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
                         "\nChoseSameEffort: " + trialLevel.NumSameEffortChosen_Block +
                         "\n");
         BlockSummaryString.AppendLine(CurrentBlockString).ToString();
-        if (PreviousBlocksString.Length > 0)
-            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
+        /*if (PreviousBlocksString.Length > 0)
+            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());*/
     }
 
     void SetupBlockData()

@@ -103,8 +103,8 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
                                       "\nNum Token Bar Filled: " + vsTL.NumTokenBarFull_InBlock +
                                       "\nTotal Tokens Collected: " + vsTL.TotalTokensCollected_InBlock);
         BlockSummaryString.AppendLine(CurrentBlockString);
-        if (PreviousBlocksString.Length > 0)
-            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
+        /*if (PreviousBlocksString.Length > 0)
+            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());*/
     }
 
     public override void SetTaskSummaryString()

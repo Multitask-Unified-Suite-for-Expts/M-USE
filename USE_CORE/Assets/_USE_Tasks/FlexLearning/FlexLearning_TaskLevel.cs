@@ -153,8 +153,8 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
                                       "\nNum Token Bar Filled: " + flTL.NumTokenBarFull_InBlock +
                                       "\nTotal Tokens Collected: " + flTL.TotalTokensCollected_InBlock);
         BlockSummaryString.AppendLine(CurrentBlockString).ToString();
-        if (PreviousBlocksString.Length > 0)
-            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
+        /*if (PreviousBlocksString.Length > 0)
+            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());*/
     }
     public override void SetTaskSummaryString()
     {

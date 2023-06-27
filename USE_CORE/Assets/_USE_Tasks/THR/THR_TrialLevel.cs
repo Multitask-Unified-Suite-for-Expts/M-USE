@@ -98,10 +98,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public float TouchFeedbackDuration;
 
-    //set in inspector:
-    public GameObject PPVolumeGO;
-
-
 
     public override void DefineControlLevel()
     {
@@ -115,8 +111,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            PPVolumeGO.SetActive(false);
-
             WhiteColor = new Color32(236, 238, 242, 255);
             LightBlueColor = new Color32(38, 188, 250, 255);
 
@@ -144,8 +138,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-            PPVolumeGO.SetActive(false);
-
             BackdropGO.SetActive(IsHuman ? false : true);
 
             if (IsHuman && TrialCount_InTask == 0)
@@ -172,13 +164,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         });
         InitTrial.SpecifyTermination(() => true && ShotgunHandler.LastSuccessfulSelectionMatches(IsHuman ? HumanStartPanel.StartButtonChildren : USE_Square.StartButtonChildren) || StartButton == null, StartWithBlueSquare ? BlueSquare : WhiteSquare);
-        InitTrial.AddDefaultTerminationMethod(() =>
-        {
-            PPVolumeGO.SetActive(true);
-            TrialStartTime = Time.time;
-        });
-
-
+        InitTrial.AddDefaultTerminationMethod(() => TrialStartTime = Time.time);
 
         //WHITE SQUARE state ------------------------------------------------------------------------------------------------------------------------
         WhiteSquare.AddInitializationMethod(() =>

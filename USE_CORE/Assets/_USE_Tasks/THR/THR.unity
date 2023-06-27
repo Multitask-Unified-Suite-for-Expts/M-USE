@@ -315,54 +315,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!1 &690222434
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 690222435}
-  - component: {fileID: 690222436}
-  m_Layer: 6
-  m_Name: PPVolume
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &690222435
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 690222434}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &690222436
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 690222434}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b9a305e18de0c04dbd257a21cd47087, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sharedProfile: {fileID: 11400000, guid: 9a2b9270ae8244145adfe5fb904e4d7a, type: 2}
-  isGlobal: 1
-  blendDistance: 0
-  weight: 1
-  priority: 0
 --- !u!1 &900455549
 GameObject:
   m_ObjectHideFlags: 0
@@ -403,6 +355,7 @@ MonoBehaviour:
   Paused: 1
   TrialData: {fileID: 0}
   FrameData: {fileID: 0}
+  GazeData: {fileID: 0}
   SerialSentData: {fileID: 0}
   SerialRecvData: {fileID: 0}
   BlockCount: 0
@@ -440,8 +393,10 @@ MonoBehaviour:
   SliderFBController: {fileID: 0}
   MouseTracker: {fileID: 0}
   GazeTracker: {fileID: 0}
-  EyeTracker: {fileID: 0}
+  TobiiEyeTrackerController: {fileID: 0}
   SelectionType: 
+  EyeTrackerActive: 0
+  runCalibration: 0
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   DisplayController: {fileID: 0}
@@ -449,12 +404,12 @@ MonoBehaviour:
   ShotgunRaycastSpacing_DVA: 0
   ParticipantDistance_CM: 0
   ShotgunRaycastCircleSize_DVA: 0
-  UseDefaultConfigs: 0
   IsHuman: 0
   HumanStartPanel: {fileID: 0}
   USE_StartButton: {fileID: 0}
   TaskSelectionCanvasGO: {fileID: 0}
   PauseIconGO: {fileID: 0}
+  TrialStimsLoaded: 0
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
@@ -485,7 +440,7 @@ MonoBehaviour:
   PerfThresholdMet: 0
   StartWithBlueSquare: 0
   TouchFeedbackDuration: 0
-  PPVolumeGO: {fileID: 690222434}
+  PPVolumeGO: {fileID: 0}
 --- !u!114 &900455551
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -513,19 +468,26 @@ MonoBehaviour:
   ConfigName: 
   TaskName: THR
   TaskProjectFolder: 
+  SessionLevelDataPath: 
   BlockCount: 0
   TrialLevel: {fileID: 900455550}
+  SessionLevel: {fileID: 0}
+  BlockData: {fileID: 0}
+  FrameData: {fileID: 0}
+  TrialData: {fileID: 0}
+  GazeData: {fileID: 0}
   SerialSentData: {fileID: 0}
   SerialRecvData: {fileID: 0}
   EyeTrackerActive: 0
-  EyeTracker: {fileID: 0}
+  GazeTracker: {fileID: 0}
+  MouseTracker: {fileID: 0}
+  TobiiEyeTrackerController: {fileID: 0}
   StoreData: 0
   SerialPortActive: 0
   SyncBoxActive: 0
   EventCodesActive: 0
   RewardPulsesActive: 0
   SonicationActive: 0
-  UseDefaultConfigs: 0
   ContextExternalFilePath: 
   SessionDataPath: 
   TaskConfigPath: 
@@ -557,11 +519,13 @@ MonoBehaviour:
   DisplayController: {fileID: 0}
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
+  InputManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
   TaskSelectionCanvasGO: {fileID: 0}
   IsHuman: 0
   HumanStartPanel: {fileID: 0}
   USE_StartButton: {fileID: 0}
+  TaskLevelDefined: 0
   CurrentBlockString: 
   BlockStringsAdded: 0
   TrialsCompleted_Task: 0
@@ -600,7 +564,6 @@ GameObject:
   - component: {fileID: 1081779817}
   - component: {fileID: 1081779816}
   - component: {fileID: 1081779815}
-  - component: {fileID: 1081779818}
   m_Layer: 0
   m_Name: THR_Camera
   m_TagString: MainCamera
@@ -673,63 +636,3 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1081779818
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1081779814}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 948f4100a11a5c24981795d21301da5c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  volumeTrigger: {fileID: 1081779817}
-  volumeLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  stopNaNPropagation: 1
-  finalBlitToCameraTarget: 0
-  antialiasingMode: 0
-  temporalAntialiasing:
-    jitterSpread: 0.75
-    sharpness: 0.25
-    stationaryBlending: 0.95
-    motionBlending: 0.85
-  subpixelMorphologicalAntialiasing:
-    quality: 2
-  fastApproximateAntialiasing:
-    fastMode: 0
-    keepAlpha: 0
-  fog:
-    enabled: 1
-    excludeSkybox: 1
-  debugLayer:
-    lightMeter:
-      width: 512
-      height: 256
-      showCurves: 1
-    histogram:
-      width: 512
-      height: 256
-      channel: 3
-    waveform:
-      exposure: 0.12
-      height: 256
-    vectorscope:
-      size: 256
-      exposure: 0.12
-    overlaySettings:
-      linearDepth: 0
-      motionColorIntensity: 4
-      motionGridSize: 64
-      colorBlindnessType: 0
-      colorBlindnessStrength: 1
-  m_Resources: {fileID: 11400000, guid: d82512f9c8e5d4a4d938b575d47f88d4, type: 2}
-  m_ShowToolkit: 0
-  m_ShowCustomSorter: 0
-  breakBeforeColorGrading: 0
-  m_BeforeTransparentBundles: []
-  m_BeforeStackBundles: []
-  m_AfterStackBundles: []

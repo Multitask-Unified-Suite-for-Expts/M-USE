@@ -377,22 +377,16 @@ namespace USE_ExperimentTemplate_Session
             AsyncOperation loadScene = null;
             setupSession.AddUpdateMethod(() =>
             {
-                if (waitForSerialPort && Time.time - StartTimeAbsolute > SerialPortController.initTimeout / 1000 + 0.5f)
+                if (waitForSerialPort && Time.time - StartTimeAbsolute > SerialPortController.initTimeout / 1000f + 0.5f)
                 {
-                    if (SyncBoxActive)
-                        if (SessionSettings.SettingExists("Session", "SyncBoxInitCommands"))
-                        {
-                            SyncBoxController.SendCommand(
-                                (List<string>)SessionSettings.Get("Session", "SyncBoxInitCommands"));
-                        }
-
+                    if (SyncBoxActive && SessionSettings.SettingExists("Session", "SyncBoxInitCommands"))
+                        SyncBoxController.SendCommand((List<string>)SessionSettings.Get("Session", "SyncBoxInitCommands"));
                     waitForSerialPort = false;
                 }
 
                 if (EyeTrackerActive && GazeCalibrationTaskLevel == null)
                 {
                     //Have to add calibration task level as child of calibration state here, because it isn't available prior
-
                     GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
                     PopulateTaskLevel(GazeCalibrationTaskLevel, false);
                     gazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
@@ -423,10 +417,8 @@ namespace USE_ExperimentTemplate_Session
                     }
                 }
             });
-            setupSession.AddLateUpdateMethod(() =>
-            {
-                //AppendSerialData();
-            });
+            //setupSession.AddLateUpdateMethod(() => AppendSerialData());
+
 
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort && EyeTrackerActive, gazeCalibration);
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort && !EyeTrackerActive, selectTask);
@@ -718,10 +710,10 @@ namespace USE_ExperimentTemplate_Session
                     {
                         //Find the next task in the list that is still interactable
                         string configName = (string)task.Key;
-                        string taskName = (string)task.Value;
 
                         // If the next task button in the task mappings is not interactable, skip until the next available config is found
-                        if (!(taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget)) continue;
+                        if (!(taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget))
+                            continue;
                         taskAutomaticallySelected = true;
                         selectedConfigName = configName;
                         break;
@@ -832,7 +824,8 @@ namespace USE_ExperimentTemplate_Session
                 if (PreviousTaskSummaryString != null && CurrentTask.CurrentTaskSummaryString != null)
                     PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
 
-                SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
+                if(!SessionValues.WebBuild)
+                    SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
 
                 SessionData.AppendDataToBuffer();
                 SessionData.AppendDataToFile();
@@ -933,7 +926,8 @@ namespace USE_ExperimentTemplate_Session
                 SerialRecvData.ManuallyDefine();
             }
 
-            SummaryData.Init(StoreData, SessionDataPath);
+            if(!SessionValues.WebBuild)
+                SummaryData.Init(StoreData, SessionDataPath);
 
             SessionLevelDataPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel";
 
@@ -1512,7 +1506,6 @@ namespace USE_ExperimentTemplate_Session
 
             }
         }
-
 
 
         private IEnumerator CreateFolderOnServer(string folderPath, Action callback)

@@ -171,7 +171,6 @@ namespace USE_ExperimentTemplate_Task
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
 
             ReadSettingsFiles();
-
             while (!AllDefsImported)
                 yield return new WaitForEndOfFrame();
             TrialDefImported = false;
@@ -592,7 +591,7 @@ namespace USE_ExperimentTemplate_Task
 
             if(SessionValues.WebBuild)
             {
-                TrialLevel.LoadTexturesFromResources();
+                TrialLevel.LoadTexturesFromResources(); //delete this when uncomment below
 
                 //if (SessionValues.UseDefaultConfigs)
                 //    TrialLevel.LoadTexturesFromResources();
@@ -1103,28 +1102,16 @@ namespace USE_ExperimentTemplate_Task
         public void ReadCustomSingleTypeArray<T>(string filePath, string settingsName, string serverFileString = null) where T : CustomSettingsType
         {
             SessionSettings.ImportSettings_SingleTypeArray<T>(settingsName, filePath, serverFileString);
-            //if (serverFileString != null)
-            //    SessionSettings.ImportSettings_SingleTypeArray<T>(settingsName, filePath, serverFileString);
-            //else
-            //    SessionSettings.ImportSettings_SingleTypeArray<T>(settingsName, filePath);
         }
 
         public void ReadCustomMultipleTypes<T>(string filePath, string settingsName, string serverFileString = null) where T : CustomSettingsType
         {
             SessionSettings.ImportSettings_MultipleType(settingsName, filePath, serverFileString);
-            //if (serverFileString != null)
-            //    SessionSettings.ImportSettings_MultipleType(settingsName, filePath, serverFileString);
-            //else
-            //    SessionSettings.ImportSettings_MultipleType(settingsName, filePath);
         }
 
         public void ReadCustomSingleTypeJson<T>(string filePath, string settingsName, string serverFileString = null) where T : CustomSettingsType
         {
             SessionSettings.ImportSettings_SingleTypeJSON<T>(settingsName, filePath, serverFileString);
-            //if (serverFileString != null)
-            //    SessionSettings.ImportSettings_SingleTypeJSON<T>(settingsName, filePath, serverFileString);
-            //else
-            //    SessionSettings.ImportSettings_SingleTypeJSON<T>(settingsName, filePath);
         }
 
 
@@ -1223,14 +1210,9 @@ namespace USE_ExperimentTemplate_Task
 
         public void ImportTrialDefs<T>(string trialDefPath, string serverTrialDefFile = null) where T : TrialDef //Little helper method to simplify duplicate code in ReadTrialDefs
         {
-            if (serverTrialDefFile != null)
-                SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_TrialDefs", trialDefPath, serverTrialDefFile);
-            else
-                SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_TrialDefs", trialDefPath);
-
+            SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_TrialDefs", trialDefPath, serverTrialDefFile);
             AllTrialDefs = (T[])SessionSettings.Get(TaskName + "_TrialDefs");
         }
-
 
 
         public void ReadStimDefs<T>(string taskConfigFolder) where T : StimDef
@@ -1273,13 +1255,9 @@ namespace USE_ExperimentTemplate_Task
 
         private void ImportStimDefs<T>(string key, string stimDefFilePath, string serverStimDefFile = null) where T : StimDef
         {
-            if (serverStimDefFile != null)
-                SessionSettings.ImportSettings_SingleTypeArray<T>(key, stimDefFilePath, serverStimDefFile);
-            else
-                SessionSettings.ImportSettings_SingleTypeArray<T>(key, stimDefFilePath);
+            SessionSettings.ImportSettings_SingleTypeArray<T>(key, stimDefFilePath, serverStimDefFile);
 
             IEnumerable<StimDef> potentials = (T[])SessionSettings.Get(key);
-
 
             if (potentials == null || potentials.Count() < 1)
                 return;
@@ -1300,6 +1278,7 @@ namespace USE_ExperimentTemplate_Task
                 }
             }
         }
+
 
 
         public bool FileStringContainsTabs(string fileContent)

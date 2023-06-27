@@ -1,0 +1,6 @@
+float	ExternalStimScale	.8
+Vector3	ButtonPosition	(0,0,0)
+float	ButtonScale	1.2
+bool	MakeStimPopOut	false
+float	TouchFeedbackDuration	0.3
+List<string>	FeedbackControllers	["Audio", "Halo", "Token"]

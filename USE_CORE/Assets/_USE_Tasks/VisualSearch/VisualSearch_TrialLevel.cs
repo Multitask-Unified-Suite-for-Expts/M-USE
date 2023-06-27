@@ -8,6 +8,7 @@ using USE_ExperimentTemplate_Trial;
 using VisualSearch_Namespace;
 using USE_UI;
 using TMPro;
+using Tobii.Research.Unity;
 
 public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 {
@@ -15,7 +16,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     public VisualSearch_TaskLevel CurrentTaskLevel => GetTaskLevel<VisualSearch_TaskLevel>();
 
     public GameObject VS_CanvasGO;
-    public USE_StartButton USE_StartButton;
+    public SelectionTracking.SelectionTracker.SelectionHandler ShotgunHandler;
     
     // Stimuli Variables
     private StimGroup tStim;
@@ -98,26 +99,26 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         Add_ControlLevel_InitializationMethod(() =>
         {
             playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
-            playerViewText = new GameObject();
+           // playerViewText = new GameObject();
             playerViewParent = GameObject.Find("MainCameraCopy");     
             
             // Initialize FB Controller Values
             HaloFBController.SetHaloSize(5f);
             HaloFBController.SetHaloIntensity(5);
         });
-        
+
         SetupTrial.AddInitializationMethod(() =>
         {
             ResetTrialVariables();
             TokenFBController.ResetTokenBarFull();
             //Set the context for the upcoming trial with the Start Button visible
-         
+
             //Set the Stimuli Light/Shadow settings
             SetShadowType(ShadowType, "VisualSearch_DirectionalLight");
             if (StimFacingCamera)
                 MakeStimFaceCamera();
 
-            if(StartButton == null)
+            if (StartButton == null)
             {
                 if (IsHuman)
                 {
@@ -126,21 +127,25 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    USE_StartButton = new USE_StartButton(VS_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                    StartButton = USE_StartButton.StartButtonGO;
+                    StartButton = USE_StartButton.CreateStartButton(VS_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                     USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
-            
-            if (!configUIVariablesLoaded) 
+
+            if (!configUIVariablesLoaded)
                 LoadConfigUIVariables();
-            
+
             SetTrialSummaryString();
         });
+        
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
-        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, SearchDisplay);
+        if (!EyeTrackerActive)
+            ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, SearchDisplay);
+        else
+            ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", GazeTracker, InitTrial, SearchDisplay);
+        TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale*10, VS_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -161,7 +166,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton),
+
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(IsHuman ? HumanStartPanel.StartButtonChildren : USE_StartButton.StartButtonChildren),
             SearchDisplayDelay, () => 
             {
                 choiceMade = false;
@@ -263,10 +269,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddInitializationMethod(() =>
         {
-            #if (!UNITY_WEBGL)
+            if(!SessionValues.WebBuild)
+            {
                 if (playerViewParent.transform.childCount != 0)
                     DestroyChildren(playerViewParent);
-            #endif
+            }
 
             if (selectedSD.StimTokenRewardMag > 0)
             {
@@ -305,7 +312,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath,"itiImage"), UseDefaultConfigs);
+                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath,"itiImage"));
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOff"]);
             }
         });
@@ -314,7 +321,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         AssignTrialData();
         AssignFrameData();
     }
-
     public void MakeStimFaceCamera()
     {
         foreach (StimGroup group in TrialStims)
@@ -325,10 +331,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     }
     public override void FinishTrialCleanup()
     {
-        #if (!UNITY_WEBGL)
+        if(!SessionValues.WebBuild)
+        {
             if (playerViewParent.transform.childCount != 0)
                 DestroyChildren(playerViewParent);
-        #endif
+        }
 
         tStim.ToggleVisibility(false);
         
@@ -367,7 +374,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
 
-        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
 
         tStim = new StimGroup("SearchStimuli", group, CurrentTrialDef.TrialStimIndices);
         if(TokensWithStimOn?? false)
@@ -412,7 +419,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         TouchDurationError = false;
         aborted = false;
         choiceMade = false;
-        MouseTracker.ResetClicks();
+        if (MouseTracker != null)
+            MouseTracker.ResetClicks();
     }
     private void AssignTrialData()
     {
@@ -423,7 +431,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("CorrectSelection", () => CorrectSelection ? 1 : 0);
         TrialData.AddDatum("SearchDuration", ()=> SearchDuration);
         TrialData.AddDatum("RewardGiven", ()=> RewardGiven? 1 : 0);
-        TrialData.AddDatum("TotalClicks", ()=> MouseTracker.GetClickCount());
+        TrialData.AddDatum("TotalClicks", ()=> MouseTracker.GetClickCount()[0]);
         TrialData.AddDatum("AbortedTrial", ()=> aborted);
     }
     private void AssignFrameData()

@@ -54,28 +54,28 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             trialLevel.ResetBlockVariables();
-            ContextName = currentBlock.ContextName;
 
             string contextFilePath;
-            if (UseDefaultConfigs)
-                contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + ContextName;
+            if (SessionValues.WebBuild)
+                contextFilePath = $"{ContextExternalFilePath}/{TaskName}_Contexts/{currentBlock.ContextName}";
             else
-                contextFilePath = trialLevel.GetContextNestedFilePath(ContextExternalFilePath, ContextName, "LinearDark");
+                contextFilePath = trialLevel.GetContextNestedFilePath(ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
 
-            RenderSettings.skybox = CreateSkybox(contextFilePath, UseDefaultConfigs);
+            RenderSettings.skybox = CreateSkybox(contextFilePath);
 
             EventCodeManager.SendCodeImmediate(SessionEventCodes["ContextOn"]);
         });
 
         BlockFeedback.AddInitializationMethod(() =>
         {
-            #if (!UNITY_WEBGL)
+            if(!SessionValues.WebBuild)
+            {
                 if (BlockStringsAdded > 0)
                     CurrentBlockString += "\n";
                 PreviousBlocksString.Insert(0, CurrentBlockString);
                 AddBlockValuesToTaskValues();
                 BlockStringsAdded++;
-            #endif
+            }
         });
     }
 
@@ -197,7 +197,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
                                             $"\n% Chose Left: {percentChoseLeft}%" +
                                             $"\n% Chose Higher Reward: {percentChoseHigherReward}% (Same Reward: {percentChoseSameReward}%)" + 
                                             $"\n% Chose Higher Effort: {percentChoseHigherEffort}% (Same Effort: {percentChoseSameEffort}%)");
-
         }
         else
         {

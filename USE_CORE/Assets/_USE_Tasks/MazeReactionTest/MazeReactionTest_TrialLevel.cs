@@ -19,7 +19,6 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
 {
     // Generic Task Variables
     public GameObject MRT_CanvasGO;
-    public USE_StartButton USE_StartButton;
     private GameObject StartButton;
     
     // Block Ending Variable
@@ -168,8 +167,7 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.LoadTextMaze();
             if(StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(MRT_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                StartButton = USE_StartButton.StartButtonGO;
+                StartButton = USE_StartButton.CreateStartButton(MRT_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
             }
 
@@ -195,14 +193,14 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
             SelectionHandler.MinDuration = minObjectTouchDuration.value;
             SelectionHandler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatches(StartButton), Delay, () =>
+        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatches(USE_StartButton.StartButtonChildren), Delay, () =>
         {
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
 
             StateAfterDelay = TileFlash;
             DelayDuration = mazeOnsetDelay.value;
             
-            SliderFBController.ConfigureSlider(new Vector3(0,209,0), sliderSize.value);
+            SliderFBController.ConfigureSlider(sliderSize.value);
             SliderFBController.SliderGO.SetActive(true);
             SetTrialSummaryString();
             
@@ -370,7 +368,7 @@ public class MazeReactionTest_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 contextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage"), UseDefaultConfigs);
+                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage"));
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);

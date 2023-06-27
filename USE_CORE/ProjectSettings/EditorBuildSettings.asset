@@ -44,7 +44,7 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/_USE_Tasks/MazeReactionTest/MazeReactionTest.unity
     guid: d33ffa443a8948f44843e5e19199e612
-  - enabled: 1
+  - enabled: 0
     path: Assets/_USE_Tasks/FeatureUncertaintyWM/FeatureUncertaintyWM.unity
     guid: cee0eaf9eb6ba496189bfd870161f1fa
   - enabled: 0

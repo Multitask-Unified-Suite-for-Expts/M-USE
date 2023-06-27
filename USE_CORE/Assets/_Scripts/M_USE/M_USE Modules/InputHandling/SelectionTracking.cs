@@ -303,6 +303,19 @@ namespace SelectionTracking
                 LastUnsuccessfulSelection = new USE_Selection(null);
             }
 
+            public bool LastSuccessfulSelectionMatches(List<GameObject> gameObjects) //Used for startbutton since it has 3 children GO's
+            {
+                if (gameObjects != null && LastSuccessfulSelection.SelectedGameObject != null)
+                {
+                    foreach (GameObject go in gameObjects)
+                    {
+                        if (ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go))
+                            return true;
+                    }
+                }
+                return false;
+            }
+
             public bool LastSuccessfulSelectionMatches(GameObject go)
             {
                 return ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go);
@@ -323,8 +336,11 @@ namespace SelectionTracking
             {
                 if (CurrentInputLocation == null)
                 {
-                    if (OngoingSelection != null) // the previous frame was a selection
+                    if (OngoingSelection != null)
+                    {
+                        // the previous frame was a selection
                         CheckTermination();
+                    } 
                     return;
                 }
                 

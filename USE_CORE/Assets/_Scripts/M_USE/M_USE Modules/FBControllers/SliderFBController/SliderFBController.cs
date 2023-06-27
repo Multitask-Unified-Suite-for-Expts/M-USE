@@ -60,14 +60,12 @@ public class SliderFBController : MonoBehaviour
         EventCodeManager = new EventCodeManager();
     }
 
-    public void ConfigureSlider(Vector3 sliderPosition, float sliderSize, float sliderInitialValue = 0)
+    public void ConfigureSlider(float sliderSize, float sliderInitialValue = 0)
     {
         SliderHaloImage = SliderHaloGO.GetComponent<Image>();
         Slider = SliderGO.GetComponent<Slider>();
         Slider.value = 0;
         Slider.value += sliderInitialValue;
-        SliderGO.transform.localPosition = sliderPosition;
-        SliderHaloGO.transform.localPosition = sliderPosition;
         Slider.transform.localScale = new Vector3(sliderSize / 10f, sliderSize / 10f, 1f);
         SliderHaloGO.transform.localScale = new Vector3(sliderSize/ 10f, sliderSize / 10f, 1f);
 

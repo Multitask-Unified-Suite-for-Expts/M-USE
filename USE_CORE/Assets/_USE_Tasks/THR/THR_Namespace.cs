@@ -48,9 +48,9 @@ namespace THR_Namespace
         public float MaxTouchDuration;
         public float TouchToRewardDelay;
         public float ReleaseToRewardDelay;
-        public int SquareSize;
-        public int SquareSizeMin;
-        public int SquareSizeMax;
+        public float SquareSize;
+        public float SquareSizeMin;
+        public float SquareSizeMax;
         public int PositionX;
         public int PositionX_Min;
         public int PositionX_Max;
@@ -141,9 +141,9 @@ namespace THR_Namespace
         public float MaxTouchDuration;
         public float TouchToRewardDelay;
         public float ReleaseToRewardDelay;
-        public int SquareSize;
-        public int SquareSizeMin;
-        public int SquareSizeMax;
+        public float SquareSize;
+        public float SquareSizeMin;
+        public float SquareSizeMax;
         public int PositionX;
         public int PositionX_Min;
         public int PositionX_Max;

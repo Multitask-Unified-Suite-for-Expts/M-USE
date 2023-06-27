@@ -8,6 +8,7 @@ using ConfigDynamicUI;
 using USE_UI;
 using SelectionTracking;
 using UnityEngine.UI;
+using TMPro;
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 {
@@ -26,7 +27,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     public Vector3 OriginalStartButtonPosition;
 
     public GameObject EC_CanvasGO;
-    public USE_StartButton USE_StartButton;
 
     [HideInInspector] public bool MacMainDisplayBuild;
 
@@ -112,6 +112,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public float TouchFeedbackDuration;
 
+    [HideInInspector] public GameObject debugTextGO;
+    [HideInInspector] public TextMeshProUGUI debugText;
 
     public override void DefineControlLevel()
     {
@@ -125,7 +127,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            if(TokenFBController != null)
+            Camera.main.transform.position = new Vector3(0, .6f, Screen.fullScreen && Screen.width != 1920 ? -2.5f : -2.18f);
+
+            if (TokenFBController != null)
                 SetTokenVariables();
 
             if (AudioFBController != null)
@@ -140,8 +144,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    USE_StartButton = new USE_StartButton(EC_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
-                    StartButton = USE_StartButton.StartButtonGO;
+                    StartButton = USE_StartButton.CreateStartButton(EC_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
                     USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
@@ -163,7 +166,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", MouseTracker, InitTrial, InflateBalloon);
-        TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, ButtonScale, EC_CanvasGO);
+        TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, ButtonScale*10, EC_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -184,9 +187,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if(Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
             Handler.MinDuration = minObjectTouchDuration.value;
-            Handler.MaxDuration = maxObjectTouchDuration.value;
+            Handler.MaxDuration = maxObjectTouchDuration.value;           
         });
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton), Delay, () =>
+        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(IsHuman ? HumanStartPanel.StartButtonChildren : USE_StartButton.StartButtonChildren), Delay, () =>
         {
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
@@ -245,6 +248,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseBalloon.SpecifyTermination(() => SideChoice != null, CenterSelection, () =>
         {
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
             EventCodeManager.SendCodeImmediate(TaskEventCodes["BalloonChosen"]);
 
             DestroyChildren(SideChoice == "Left" ? RewardContainerRight : RewardContainerLeft);
@@ -260,7 +264,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             Wrapper = new GameObject();
             Wrapper.name = "Wrapper";
-            CenteredPos = new Vector3((SideChoice == "Left" ? 1f : -1f), 0, 0);
+
+            float xValue = .98f;
+            if (Screen.fullScreen && Screen.width > 1920)
+                xValue = Screen.width > 3000 ? .96f : .88f; //test the .95 its for mac
+
+            CenteredPos = new Vector3((SideChoice == "Left" ? xValue : -xValue), 0, 0);
 
             MiddleBarrier.SetActive(false);
 
@@ -289,7 +298,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             StateAfterDelay = InflateBalloon;
             DelayDuration = choiceToTouchDelay.value;
-            
+
             RemoveParents(Wrapper, RemoveParentList);
 
             if (SideChoice == "Left")
@@ -369,6 +378,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
                         Handler.HandlerActive = false;
                         NumInflations++;
+                        EventCodeManager.SendCodeNextFrame(SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                        EventCodeManager.SendCodeNextFrame(SessionEventCodes["CorrectResponse"]);
                         CalculateInflation(); //Sets Inflate to TRUE at end of func
                         InflateAudioPlayed = false;
                     }
@@ -438,14 +449,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 if (SyncBoxController != null)
                 {
                     GiveReward();
-                    EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]);
+                    EventCodeManager.SendCodeNextFrame(SessionEventCodes["SyncBoxController_RewardPulseSent"]);
                 }
 
                 Completions_Block++;
                 AddTokenInflateAudioPlayed = true;
             }
-            else
-                EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
+          //  else
+               // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
         });
         Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI);
         Feedback.SpecifyTermination(() => true && Response != 1, ITI);
@@ -597,13 +608,24 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void SetTokenVariables()
     {
-        TokenFBController.tokenSize = (MacMainDisplayBuild && !Application.isEditor ? 210 : 105);
-        TokenFBController.tokenBoxYOffset = (MacMainDisplayBuild && !Application.isEditor ? 45 : 22);
+        float tokenSize = MacMainDisplayBuild && !Application.isEditor ? 212 : 106;
+        float yOffset = MacMainDisplayBuild && !Application.isEditor ? 45 : 22;
 
-        #if (UNITY_WEBGL && !UNITY_EDITOR)
-                TokenFBController.tokenSize = 115;
-                TokenFBController.tokenBoxYOffset = 25; 
-        #endif
+#if (UNITY_WEBGL && !UNITY_EDITOR)
+
+        tokenSize = 116;
+        yOffset = 25;
+
+        if (Screen.fullScreen && Screen.width > 1920)
+        {
+            tokenSize = Screen.width > 3000 ? 103 : 121;
+            yOffset = Screen.width > 3000 ? 98 : 120;
+        }
+
+#endif
+
+        TokenFBController.tokenSize = tokenSize;
+        TokenFBController.tokenBoxYOffset = yOffset;
 
         TokenFBController.SetFlashingTime(1.5f);
         TokenFBController.tokenSpacing = -(Screen.width * .009375f);
@@ -731,19 +753,25 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         CreateMiddleBarrier();
 
+
+        float wrapperXpos = .14f; //for normal 1920 x 1080
+        if(Screen.fullScreen && Screen.width != 1920)
+            wrapperXpos = Screen.width > 3000 ? .125f : .05f; //.05 for ipad fullscreen, .08 for mac fullscreen
+
         //Wrap Left side objects in container and Center to left side:
         GameObject leftWrapper = new GameObject();
         leftWrapper.name = "LeftWrapper";
         List<GameObject> leftList = new List<GameObject>() { BalloonContainerLeft, RewardContainerLeft, StimLeft };
         SetParents(leftWrapper, leftList);
-        leftWrapper.transform.position = new Vector3(-.16f, -.05f, 0); //Centering on left half of screen. 
+        leftWrapper.transform.position = new Vector3(-wrapperXpos, -.05f, 0); //Centering on left half of screen. 
 
         //Wrap Right side objects in container and Center to right side:
         GameObject rightWrapper = new GameObject();
         rightWrapper.name = "RightWrapper";
         List<GameObject> rightList = new List<GameObject>() { BalloonContainerRight, RewardContainerRight, StimRight };
         SetParents(rightWrapper, rightList);
-        rightWrapper.transform.position = new Vector3(.16f, -.05f, 0); //Centering on right half of screen. 
+        rightWrapper.transform.position = new Vector3(wrapperXpos, -.05f, 0); //Centering on right half of screen. 
+
 
         LeftContainerOriginalPosition = BalloonContainerLeft.transform.position;
         RightContainerOriginalPosition = BalloonContainerRight.transform.position;
@@ -761,6 +789,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Reward.SetActive(false);
 
         ObjectsCreated = true;
+    }
+
+    void MakeObjectsFaceCamera(GameObject parent)
+    {
+        foreach(Transform child in parent.transform)
+            child.LookAt(Camera.main.transform);
     }
 
     void CreateMiddleBarrier()

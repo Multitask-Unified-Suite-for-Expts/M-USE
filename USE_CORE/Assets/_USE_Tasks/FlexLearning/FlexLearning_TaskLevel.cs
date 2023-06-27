@@ -51,12 +51,12 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             flTL.ContextName = flBD.ContextName;
 
             string contextFilePath;
-            if (UseDefaultConfigs)
-                contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + flBD.ContextName;
+            if (SessionValues.WebBuild)
+                contextFilePath = $"{ContextExternalFilePath}/{TaskName}_Contexts/{flBD.ContextName}";
             else
                 contextFilePath = flTL.GetContextNestedFilePath(ContextExternalFilePath, flBD.ContextName, "LinearDark");
 
-            RenderSettings.skybox = CreateSkybox(contextFilePath, UseDefaultConfigs);
+            RenderSettings.skybox = CreateSkybox(contextFilePath);
 
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
             
@@ -68,12 +68,13 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         });
         BlockFeedback.AddInitializationMethod(() =>
         {
-            #if (!UNITY_WEBGL)
+            if(!SessionValues.WebBuild)
+            {
                 if (BlockStringsAdded > 0)
                     CurrentBlockString += "\n";
                 BlockStringsAdded++;
                 PreviousBlocksString.Insert(0, CurrentBlockString);
-            #endif
+            }
         });
         AssignBlockData();
     }

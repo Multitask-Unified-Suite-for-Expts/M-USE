@@ -47,10 +47,11 @@ public class HaloFBController : MonoBehaviour
     public void ShowNegative(GameObject gameObj, float? depth = null)
     {
         state = State.Negative;
-        if (depth == null)
+        if(depth == null)
             Show(NegativeHaloPrefab, gameObj);
         else
             Show2D(NegativeHaloPrefab, gameObj, depth.Value);
+
     }
 
     private void Show(GameObject haloPrefab, GameObject gameObj)
@@ -87,16 +88,13 @@ public class HaloFBController : MonoBehaviour
         GameObject rootObj = gameObj.transform.root.gameObject;
         instantiated = Instantiate(haloPrefab, null);
         EventCodeManager.SendCodeImmediate(SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
-
-        // Position the haloPrefab behind the game object
-        // float distanceBehind = 1.5f; // Set the distance behind the gameObj
-        // Vector3 behindPos = rootObj.transform.position - rootObj.transform.forward * distanceBehind;
         Vector3 pos3d = gameObj.transform.position;
         Vector2 pos2d = Camera.main.WorldToScreenPoint(pos3d);
         Debug.Log("2d: " + pos2d + ", 3d: " + pos3d);
         Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(pos2d.x, pos2d.y, depth));
         instantiated.transform.position = worldPos;
     }
+
 
     public void Destroy()
     {

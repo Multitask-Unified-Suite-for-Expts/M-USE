@@ -10,7 +10,6 @@ using USE_UI;
 public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 {
     public GameObject WM_CanvasGO;
-    public USE_StartButton USE_StartButton;
 
     public WorkingMemory_TrialDef CurrentTrialDef => GetCurrentTrialDef<WorkingMemory_TrialDef>();
     public WorkingMemory_TaskLevel CurrentTaskLevel => GetTaskLevel<WorkingMemory_TaskLevel>();
@@ -116,8 +115,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    USE_StartButton = new USE_StartButton(WM_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                    StartButton = USE_StartButton.StartButtonGO;
+                    StartButton = USE_StartButton.CreateStartButton(WM_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                     USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
@@ -149,7 +147,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
 
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), DisplaySample, () =>
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(IsHuman ? HumanStartPanel.StartButtonChildren : USE_StartButton.StartButtonChildren), DisplaySample, () =>
         {
             //Set the token bar settings
             TokenFBController.enabled = true;
@@ -303,7 +301,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName), UseDefaultConfigs);
+                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName));
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOff"]);
             }
         });
@@ -326,10 +324,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     public override void FinishTrialCleanup()
     {
         // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
-        #if (!UNITY_WEBGL)
+        if(!SessionValues.WebBuild)
+        {
             if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
                 DestroyChildren(GameObject.Find("MainCameraCopy"));
-        #endif
+        }
 
         TokenFBController.enabled = false;
         searchStims.ToggleVisibility(false);
@@ -366,11 +365,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
 
-        StimGroup group = UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
 
         searchStims = new StimGroup("SearchStims", group, CurrentTrialDef.SearchStimIndices);
         //searchStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
         searchStims.SetLocations(CurrentTrialDef.SearchStimLocations);
+        TrialStims.Add(searchStims);
 
         List<StimDef> rewardedStimdefs = new List<StimDef>();
 
@@ -388,11 +388,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             } 
             else sd.IsTarget = false;
         }
-        
+
         // for (int iT)
         sampleStim.SetLocations(CurrentTrialDef.TargetSampleLocation);
         sampleStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
-        TrialStims.Add(searchStims);
         TrialStims.Add(sampleStim);
 
         postSampleDistractorStims = new StimGroup("DisplayDistractors", group, CurrentTrialDef.PostSampleDistractorIndices);

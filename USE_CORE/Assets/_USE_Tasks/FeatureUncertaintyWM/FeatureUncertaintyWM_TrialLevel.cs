@@ -21,7 +21,6 @@ using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCou
 public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 {
     private GameObject taskCanvas;
-    public USE_StartButton USE_StartButton;
     public USE_StartButton USE_FBSquare;
     public FeatureUncertaintyWM_TrialDef CurrentTrialDef => GetCurrentTrialDef<FeatureUncertaintyWM_TrialDef>();
     public FeatureUncertaintyWM_TaskLevel CurrentTaskLevel => GetTaskLevel<FeatureUncertaintyWM_TaskLevel>();
@@ -183,8 +182,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
             if (StartButton == null)
             {
-                USE_StartButton = new USE_StartButton(taskCanvas.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                StartButton = USE_StartButton.StartButtonGO;
+                StartButton = USE_StartButton.CreateStartButton(taskCanvas.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
                 USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 USE_StartButton.SetButtonColor(color: Color.black);
             }
@@ -220,7 +218,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             Handler.MaxDuration = maxObjectTouchDuration.value;
         });
 
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(StartButton), DisplaySample, () =>
+        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(USE_StartButton.StartButtonChildren), DisplaySample, () =>
         {
             //Set the token bar settings
             TokenFBController.enabled = true;
@@ -392,7 +390,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName), true);
+                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName));
                 EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOff"]);
             }
 

@@ -11,8 +11,6 @@ public abstract class EyeTrackerController_Base : MonoBehaviour
     public ScreenDetails ScreenDetails;
     public float EyeDistance;
 
-    public USE_CoordinateConverter CoordinateConverter;
-
     public void Awake()
     {
         CalibrateEyeTracker();

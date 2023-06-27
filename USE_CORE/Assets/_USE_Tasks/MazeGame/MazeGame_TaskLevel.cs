@@ -110,12 +110,12 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             string contextFilePath;
-            if (UseDefaultConfigs)
-                contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + mgBD.ContextName;
+            if (SessionValues.WebBuild)
+                contextFilePath = $"{ContextExternalFilePath}/{TaskName}_Contexts/{mgBD.ContextName}";
             else
                 contextFilePath = mgTL.GetContextNestedFilePath(ContextExternalFilePath, mgBD.ContextName, "LinearDark");
 
-            RenderSettings.skybox = CreateSkybox(contextFilePath, UseDefaultConfigs);
+            RenderSettings.skybox = CreateSkybox(contextFilePath);
 
 
             FindMaze();
@@ -315,18 +315,17 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             mgTL.ContextExternalFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
         else mgTL.ContextExternalFilePath = ContextExternalFilePath;
 
-        
-        if(UseDefaultConfigs)
+        if(SessionValues.WebBuild)
         {
-            if (Application.isEditor)
-            {
-                mgTL.MazeFilePath = "Assets/_USE_Session/Resources/DefaultResources/Mazes";
-                mazeKeyFilePath = "Assets/_USE_Tasks/MazeGame/Resources/MazeGame_DefaultConfigs/MazeDef.txt";
-            }
-            else
+            if (SessionValues.UseDefaultConfigs)
             {
                 mgTL.MazeFilePath = "DefaultResources/Mazes";
-                mazeKeyFilePath = "MazeGame_DefaultConfigs/MazeDef.txt";
+                mazeKeyFilePath = "DefaultSessionConfigs/MazeGame_DefaultConfigs/MazeDef.txt";
+            }
+            else //Using server configs:
+            {
+                mgTL.MazeFilePath = "Resources/Mazes";
+                mazeKeyFilePath = $"{ServerManager.SessionConfigFolderPath}/{TaskName}/MazeDef.txt";
             }
         }
         else
@@ -338,6 +337,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                 mgTL.MazeFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeFilePath");
             else Debug.LogError("Maze File Path not defined in the TaskDef");
         }
+        
+
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
             mgTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
@@ -495,11 +496,28 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         string mazeFilePath = "";
         string jsonString = "";
 
-        if (UseDefaultConfigs && !Application.isEditor)
+        if(SessionValues.WebBuild)
         {
-            TextAsset textAsset = Resources.Load<TextAsset>(mgTL.MazeFilePath + "/" + mgTL.mazeDefName);
-            if (textAsset != null)
-                jsonString = textAsset.text;
+            if(SessionValues.UseDefaultConfigs) //will need to check if this works for non editor!!
+            {
+                TextAsset textAsset = Resources.Load<TextAsset>(mgTL.MazeFilePath + "/" + mgTL.mazeDefName);
+                if (textAsset != null)
+                    jsonString = textAsset.text;
+                currMaze = new Maze(jsonString);
+            }
+            else //Using server configs:
+            {
+                StartCoroutine(ServerManager.GetFileStringAsync(mgTL.MazeFilePath, mgTL.mazeDefName, result =>
+                {
+                    if (!string.IsNullOrEmpty(result))
+                    {
+                        jsonString = result;
+                        currMaze = new Maze(jsonString);
+                    }
+                    else
+                        Debug.Log("MAZE RESULT IS NULL!!!!!");
+                }));
+            }
         }
         else
         {
@@ -511,8 +529,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                 Debug.LogError($"Maze not found within the given file path ({mazeFilePath}) or in any nested folders");
 
             jsonString = File.ReadAllLines(mazeFilePath)[0];
+            currMaze = new Maze(jsonString);
         }
-
-        currMaze = new Maze(jsonString);
     }
 }

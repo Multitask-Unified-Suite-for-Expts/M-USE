@@ -31,10 +31,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class InitScreen : MonoBehaviour {
-
+public class InitScreen : MonoBehaviour
+{
     public GameObject[] disableOnStart;
     public GameObject[] enableOnStart;
     public GameObject[] disableOnConfirm;
@@ -44,27 +46,85 @@ public class InitScreen : MonoBehaviour {
 
     public event System.Action OnConfirm, OnLoadSettings;
 
+    [HideInInspector]
     public DisplayController displayController;
+
+
+    //Set In Inspector
+    public M_USE_ControlLevel_Session session;
+    public GameObject initScreenCanvasGO;
+    public GameObject confirmButtonGO;
+    public GameObject locateFileGO;
+    public GameObject buttonsParentGO;
+    public GameObject webBuildChildrenGO;
+    public GameObject dropdownGO;
+
+    private FolderDropdown folderDropdown;
+    private Dropdown dropdown;
+
 
     void Start()
     {
+        #if (UNITY_WEBGL)
+            SessionValues.WebBuild = true;
+        #endif
+
         displayController = gameObject.AddComponent<DisplayController>();
         displayController.HandleDisplays(this);
+        session.DisplayController = displayController;
+
+        folderDropdown = dropdownGO.GetComponent<FolderDropdown>();
+        dropdown = dropdownGO.GetComponent<Dropdown>();
 
         foreach (GameObject g in disableOnStart)
             g.SetActive(false);
         foreach (GameObject g in enableOnStart)
             g.SetActive(true);
 
-        if (GameObject.Find("ControlLevels").GetComponent<M_USE_ControlLevel_Session>().UseDefaultConfigs)
-            StartCoroutine(HandleConfirm());
+
+        if (SessionValues.WebBuild)
+        {
+            StartCoroutine(ServerManager.GetSessionConfigFolders(folders => folderDropdown.SetFolders(folders)));
+
+            if (!Application.isEditor)
+                confirmButtonGO.transform.localPosition += new Vector3(0, 75f, 0);
+            confirmButtonGO.SetActive(true);
+            webBuildChildrenGO.SetActive(true);
+            buttonsParentGO.SetActive(false);
+            initScreenCanvasGO.GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
+        }
+        else
+        {
+            webBuildChildrenGO.SetActive(false);
+            locateFileGO.SetActive(true); //comment out if want them to pick between default and local configs
+            //confirmButtonGO.SetActive(false); //uncomment if want them to pick between default and local configs
+            //buttonsParentGO.SetActive(true); //uncomment if want them to pick between default and local configs
+        }
+    }
+
+    public void Confirm()
+    {
+        StartCoroutine(HandleConfirm());
     }
 
     IEnumerator HandleConfirm()
     {
-        if(OnLoadSettings != null)
+        if(SessionValues.WebBuild)
+        {
+            string subjectID = session.SessionDetails.GetItemValue("SubjectID");
+            string sessionID = session.SessionDetails.GetItemValue("SessionID");
+
+            yield return ServerManager.CreateSessionDataFolder(subjectID, sessionID);
+
+            string sessionConfigFolder = dropdown.options[dropdown.value].text;
+            ServerManager.SetSessionConfigFolderName(sessionConfigFolder);
+            if (sessionConfigFolder.ToLower().Contains("default"))
+                SessionValues.UseDefaultConfigs = true;
+        }
+
+        if (OnLoadSettings != null)
             OnLoadSettings();
-        
+
         foreach (GameObject g in disableOnConfirm)
             g.SetActive(false);
         foreach (GameObject g in enableOnConfirm)
@@ -81,10 +141,25 @@ public class InitScreen : MonoBehaviour {
         yield return 0;
     }
 
-    public void Confirm()
+    public void OnConfigButtonPress() //Used by Normal Build for user to select Default or Local configs. (not using yet)
     {
-        StartCoroutine(HandleConfirm());
+        buttonsParentGO.SetActive(false);
+       
+        if(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name.ToLower().Contains("default"))
+        {
+            SessionValues.UseDefaultConfigs = true;
+            Confirm();
+        }
+        else
+        {
+            locateFileGO.SetActive(true);
+            confirmButtonGO.SetActive(true);
+        }
     }
+
+
+
+
 
 }
 

@@ -726,9 +726,10 @@ namespace USE_States
 			//Paused = false;
 			controlLevelTerminationSpecifications = new List<ControlLevelTerminationSpecification>();
 
-			//should be called after Init screen confirm button press
-			//var initScreen = FindObjectOfType<InitScreen>();
-			if (initScreen != null)
+            //should be called after Init screen confirm button press
+            //var initScreen = FindObjectOfType<InitScreen>();
+
+            if (initScreen != null)
 			{
 				initScreen.OnLoadSettings += LoadSettings;
 				initScreen.OnConfirm += () => {
@@ -1386,15 +1387,16 @@ namespace USE_States
             return tex;
         }
 
-        public static Material CreateSkybox(string filePath, bool useDefaultConfigs)
+        public static Material CreateSkybox(string filePath)
         {
 			Material materialSkybox = new Material(Shader.Find("Skybox/6 Sided"));
 			Texture2D tex = null;
 
-			if (useDefaultConfigs)
+			if (SessionValues.WebBuild) //maybe useDefaultConfigs instead?
 				tex = Resources.Load<Texture2D>(filePath);
 			else
 				tex = LoadPNG(filePath); // load the texture from a PNG -> Texture2D
+
 
 			//Set the textures of the skybox to that of the PNG
 			materialSkybox.SetTexture("_FrontTex", tex);

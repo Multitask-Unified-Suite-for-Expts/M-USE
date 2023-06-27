@@ -74,7 +74,7 @@ public class TouchFBController : MonoBehaviour
         if (HeldTooShort_Prefab == null) //If null, create the prefabs
             CreatePrefabs();
         else //If not null, check if existing prefab's size is same as new size. If not, update the prefab size
-            if (HeldTooShort_Prefab.GetComponent<Image>().rectTransform.sizeDelta != new Vector2(fbSize, fbSize))
+            if (HeldTooShort_Prefab.transform.localScale != new Vector3(fbSize, fbSize, 1f))
                 SetPrefabSizes(FeedbackSize);
 
         Handler.TouchErrorFeedback += OnTouchErrorFeedback; //Subscribe to event
@@ -123,6 +123,8 @@ public class TouchFBController : MonoBehaviour
 
         touchFb.Prefab.SetActive(true);
         InstantiatedGO = Instantiate(touchFb.Prefab, TaskCanvasGO.transform);
+        touchFb.Prefab.SetActive(false);
+
         InstantiatedGO.name = "TouchFeedback_GO";
         InstantiatedGO.GetComponent<RectTransform>().anchoredPosition = touchFb.PosOnCanvas;
         EventCodeManager.SendCodeImmediate(SessionEventCodes["TouchFBController_FeedbackOn"]);
@@ -170,10 +172,18 @@ public class TouchFBController : MonoBehaviour
     {
         GameObject go = new GameObject(name);
         go.AddComponent<RectTransform>();
-        Image image = go.AddComponent<Image>();
-        image.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
-        image.color = new Color32(224, 78, 92, 235);
-        image.rectTransform.sizeDelta = new Vector2(FeedbackSize, FeedbackSize);
+
+        SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
+        renderer.sortingOrder = 2;
+        renderer.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
+        renderer.color = new Color32(224, 78, 92, 235);
+
+        go.transform.localScale = new Vector3(FeedbackSize, FeedbackSize, 1f);
+        //Image image = go.AddComponent<Image>();
+        //image.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
+        //image.color = new Color32(224, 78, 92, 235);
+        //image.rectTransform.sizeDelta = new Vector2(FeedbackSize, FeedbackSize);
+        
         go.SetActive(false);
         PrefabList.Add(go); 
         return go;
@@ -200,7 +210,7 @@ public class TouchFBController : MonoBehaviour
         if (PrefabList.Count > 0)
         {
             foreach (GameObject prefab in PrefabList)
-                prefab.GetComponent<Image>().rectTransform.sizeDelta = new Vector2(size, size);
+                prefab.transform.localScale = new Vector3(size, size, 1f);
         }
         else
             Debug.Log("Trying to change the prefab sizes, but the prefablist only has " + PrefabList.Count + " items!");

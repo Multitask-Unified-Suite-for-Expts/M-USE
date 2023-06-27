@@ -22,7 +22,9 @@ using Random = UnityEngine.Random;
 using UnityEngine.InputSystem;
 using TMPro;
 using Tobii.Research.Unity;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+#if (!UNITY_WEBGL)
+    using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+#endif
 using Button = UnityEngine.UI.Button;
 using USE_DisplayManagement;
 using Tobii.Research;
@@ -123,6 +125,7 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public GameObject TaskButtonsContainer;
 
         //Set in inspector
+        public GameObject InstructionsPrefab;
         public GameObject TaskSelection_Starfield;
         public GameObject HumanVersionToggleButton;
         public GameObject HumanStartPanelPrefab;
@@ -149,6 +152,9 @@ namespace USE_ExperimentTemplate_Session
             USE_StartButton = gameObject.AddComponent<USE_StartButton>();
             USE_StartButton.StartButtonPrefab = StartButtonPrefabGO;
 
+            if (!SessionValues.WebBuild)
+                HumanVersionToggleButton.SetActive(false);
+
 
             // Set the name of the data file given input into init screen
             SubjectID = SessionDetails.GetItemValue("SubjectID");
@@ -164,12 +170,12 @@ namespace USE_ExperimentTemplate_Session
             if (SessionValues.WebBuild)
             {
                 SessionDataPath = ServerManager.SessionDataFolderPath;
-                TaskIconsFolderPath = "DefaultResources/TaskIcons"; //Currently having web build use in house task icons instead of loading from server. 
                 ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
 
                 if (SessionValues.UseDefaultConfigs)
                 {
                     //ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
+                    TaskIconsFolderPath = "DefaultResources/TaskIcons"; //Currently having web build use in house task icons instead of loading from server. 
                     configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
                     WriteSessionConfigsToPersistantDataPath();
                     SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFilePathInExternalFolder(configFileFolder, "*SessionConfig*"));
@@ -178,7 +184,7 @@ namespace USE_ExperimentTemplate_Session
                 else //Using Server Configs:
                 {
                     //ContextExternalFilePath = "Resources/Contexts"; //path from root server folder
-                    //TaskIconsFolderPath = "Resources/TaskIcons"; //un comment if end up wanting to load from server instead (and also remove the one above)
+                    TaskIconsFolderPath = "Resources/TaskIcons"; //un comment if end up wanting to load from server instead (and also remove the one above)
                     configFileFolder = ServerManager.SessionConfigFolderPath;
                     StartCoroutine(ServerManager.GetFileStringAsync(ServerManager.SessionConfigFolderPath, "SessionConfig", result =>
                     {
@@ -248,7 +254,6 @@ namespace USE_ExperimentTemplate_Session
             InputTrackers = Instantiate(Resources.Load<GameObject>("InputTrackers"), InputManager.transform);
             MouseTracker = InputTrackers.GetComponent<MouseTracker>();
             GazeTracker = InputTrackers.GetComponent<GazeTracker>();
-
 
             SelectionTracker = new SelectionTracker();
             if (SelectionType.ToLower().Equals("gaze"))
@@ -577,7 +582,7 @@ namespace USE_ExperimentTemplate_Session
                 }
                 // Container for all the task buttons
                 TaskButtonsContainer = new GameObject("TaskButtons");
-                TaskButtonsContainer.transform.parent = GameObject.Find("TaskSelectionCanvas").transform;
+                TaskButtonsContainer.transform.parent = TaskSelectionCanvasGO.transform;
                 TaskButtonsContainer.transform.localPosition = Vector3.zero;
                 TaskButtonsContainer.transform.localScale = Vector3.one * 1.06f;
 
@@ -600,8 +605,6 @@ namespace USE_ExperimentTemplate_Session
                 float buttonStartX = (buttonSize - buttonsWidth) / 2;
 
                 float buttonY = 0f;
-                //if(IsHuman)
-                //    buttonY = -125f;
 
                 if (TaskIconLocations.Count() != numTasks) //If user didn't specify in config, Generate default locations:
                 {
@@ -642,11 +645,17 @@ namespace USE_ExperimentTemplate_Session
                     if (SessionValues.WebBuild)
                     {
                         if(SessionValues.UseDefaultConfigs)
-                            image.texture = Resources.Load<Texture2D>(TaskIconsFolderPath + "/" + taskName);
+                            image.texture = Resources.Load<Texture2D>($"{TaskIconsFolderPath}/{taskName}");
                         else
                         {
                             //LOAD THE ICONS FROM THE SERVER!
-                            image.texture = Resources.Load<Texture2D>(TaskIconsFolderPath + "/" + taskName); //REMOVE THIS
+                            StartCoroutine(ServerManager.LoadTextureFromServer($"{TaskIconsFolderPath}/{taskName}.png", imageResult =>
+                            {
+                                if (imageResult != null)
+                                    image.texture = imageResult;
+                                else
+                                    Debug.Log("NULL GETTING TEXTURE FROM SERVER!");
+                            }));
                         }
                     }
                     else
@@ -774,6 +783,7 @@ namespace USE_ExperimentTemplate_Session
                 runTask.AddChildLevel(CurrentTask);
                 if (CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
+                SessionCam.gameObject.SetActive(false);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
                 CurrentTask.TrialLevel.TaskLevel = CurrentTask;
                 if (ExperimenterDisplayController != null)
@@ -793,8 +803,6 @@ namespace USE_ExperimentTemplate_Session
             //runTask.AddLateUpdateMethod
             runTask.AddUniversalInitializationMethod(() =>
             {
-                SessionCam.gameObject.SetActive(false);
-
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["RunTaskStarts"]);
 
 #if (!UNITY_WEBGL)
@@ -835,6 +843,7 @@ namespace USE_ExperimentTemplate_Session
 
                 SessionData.AppendDataToBuffer();
                 SessionData.AppendDataToFile();
+
 
                 SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
@@ -1046,7 +1055,6 @@ namespace USE_ExperimentTemplate_Session
                 {
                     SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
                     SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
-                    //EventCodesActive = true;
                 }
                 else if (EventCodesActive)
                     Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");
@@ -1117,7 +1125,6 @@ namespace USE_ExperimentTemplate_Session
 
             if (SessionSettings.SettingExists("Session", "SerialPortActive"))
                 SerialPortActive = (bool)SessionSettings.Get("Session", "SerialPortActive");
-
         }
 
         private void WriteSessionConfigsToPersistantDataPath()

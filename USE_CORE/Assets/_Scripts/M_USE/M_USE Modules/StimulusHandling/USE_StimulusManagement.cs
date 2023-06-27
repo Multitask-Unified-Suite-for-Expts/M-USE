@@ -8,6 +8,7 @@ using JetBrains.Annotations;
 using UnityEngine;
 using USE_Settings;
 using TriLib;
+using UnityEngine.UI;
 using USE_States;
 using Object = UnityEngine.Object;
 using USE_ExperimentTemplate_Classes;
@@ -469,8 +470,11 @@ namespace USE_StimulusManagement
 				else
 					FileName = FileName + StimExtension;
 			}
-			
-			//by default stimFilePath argument is empty, and files are found using StimFolderPath + ExternalFilePath
+			if(string.IsNullOrEmpty(StimExtension))
+
+			{
+				StimExtension = Path.GetExtension(FileName);
+			}			//by default stimFilePath argument is empty, and files are found using StimFolderPath + ExternalFilePath
 			//so usually this first if statement is never called - used for cases where we might want to find a file in an unusual location
 			if (!string.IsNullOrEmpty(stimFilePath))
 			{
@@ -498,15 +502,70 @@ namespace USE_StimulusManagement
 				//if ExternalFilePath already contains the StimFolerPath string, do not change it,
 				//but should also have method to check this file exists
 			}
-			StimGameObject = LoadModel(FileName);
-			PositionRotationScale();
+			
+			//switch case based on StimDef filetype
+			if (String.IsNullOrEmpty(StimExtension))
+			{
+				//parse filename for stimExtension and assign
+			}
+			
+			switch (StimExtension.ToLower())
+			{
+				case ".fbx":
+					StimGameObject = LoadModel(FileName);
+					PositionRotationScale();
+					break;
+				case ".png":
+					StimGameObject = new GameObject();//give it name
+					RawImage stimGOImage = StimGameObject.AddComponent<RawImage>();
+					stimGOImage.texture = LoadPNG(FileName);
+					if (this.CanvasGameObject != null)
+						StimGameObject.GetComponent<RectTransform>().SetParent(this.CanvasGameObject.GetComponent<RectTransform>());
+					break;
+				default:
+					break;
+			}
+			
 			if (!string.IsNullOrEmpty(StimName))
 				StimGameObject.name = StimName;
 			AssignStimDefPointeToObjectHierarchy(StimGameObject, this);
 			return StimGameObject;
 		}
 
-		
+		public Texture2D LoadPNG(string filePath, bool visibility = false)
+		{
+			Texture2D tex = null;
+			byte[] fileData;
+			if (File.Exists(filePath))
+			{
+				fileData = File.ReadAllBytes(filePath);
+				tex = new Texture2D(2, 2);
+				tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
+			}
+			ToggleVisibility(visibility);
+			return tex;
+		}
+		public void Destroy()
+		{
+			StimGroup[] sgs = StimGroups.Values.ToArray();
+			for (int iG = 0; iG < sgs.Length; iG++)
+				RemoveFromStimGroup(sgs[iG]);
+
+			Object.Destroy(StimGameObject);
+			if (SetActiveOnInitialization != null)
+			{
+				SetActiveOnInitialization.StateInitializationFinished -= ActivateOnStateInit;
+				SetActiveOnInitialization = null;
+			}
+
+			if (SetInactiveOnTermination != null)
+			{
+				SetInactiveOnTermination.StateTerminationFinished -= InactivateOnStateTerm;
+				SetInactiveOnTermination = null;
+			}
+		}
+
+
 		public GameObject LoadModel(string filePath, bool loadFromResources = false, bool visibiility = false)
 		{
 			using (var assetLoader = new AssetLoader())
@@ -551,33 +610,13 @@ namespace USE_StimulusManagement
 		}
 
 
-        public void Destroy()
-        {
-            StimGroup[] sgs = StimGroups.Values.ToArray();
-            for (int iG = 0; iG < sgs.Length; iG++)
-                RemoveFromStimGroup(sgs[iG]);
-
-            Object.Destroy(StimGameObject);
-            if (SetActiveOnInitialization != null)
-            {
-                SetActiveOnInitialization.StateInitializationFinished -= ActivateOnStateInit;
-                SetActiveOnInitialization = null;
-            }
-
-            if (SetInactiveOnTermination != null)
-            {
-                SetInactiveOnTermination.StateTerminationFinished -= InactivateOnStateTerm;
-                SetInactiveOnTermination = null;
-            }
-        }
-
 
         public void AddMesh()
         {
             foreach (var m in StimGameObject.transform.GetComponentsInChildren<MeshRenderer>())
                 m.gameObject.AddComponent(typeof(MeshCollider));
         }
-
+        
 
         public string FilePathFromDims(string folderPath, IEnumerable<string[]> featureNames, string neutralPatternedColorName)
 		{
@@ -660,7 +699,7 @@ namespace USE_StimulusManagement
 			AddStims(TaskName, stimDefFilePath);
 			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
 		}
-
+		
 		public StimGroup(string groupName, StimGroup sgOrig, IEnumerable<int> stimSubsetIndices, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
 			stimGroupName = groupName;
@@ -670,7 +709,7 @@ namespace USE_StimulusManagement
 		}
 
 
-        public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
+		public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
 			if (setActiveOnInit != null)
 			{

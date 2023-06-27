@@ -25,6 +25,7 @@ public class FeatureUncertaintyWM_TaskLevel : ControlLevel_Task_Template
     public override void DefineControlLevel()
     {
         fuWMTL = (FeatureUncertaintyWM_TrialLevel)TrialLevel;
+        StimCanvas_2D = GameObject.Find("FeatureUncertaintyWM_Canvas");
 
         SetSettings();
         AssignBlockData();
@@ -32,8 +33,7 @@ public class FeatureUncertaintyWM_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             fuWMTL.ContextName = fuWMBD.ContextName;
-            RenderSettings.skybox = CreateSkybox(fuWMTL.GetContextNestedFilePath(ContextExternalFilePath, fuWMTL.ContextName, "LinearDark"));
-
+            RenderSettings.skybox = CreateSkybox(fuWMTL.GetContextNestedFilePath(ContextExternalFilePath, fuWMTL.ContextName));
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]); fuWMTL.ResetBlockVariables();
             fuWMTL.TokenFBController.SetTotalTokensNum(fuWMBD.NumTokenBar);
             fuWMTL.TokenFBController.SetTokenBarValue(fuWMBD.NumInitialTokens);

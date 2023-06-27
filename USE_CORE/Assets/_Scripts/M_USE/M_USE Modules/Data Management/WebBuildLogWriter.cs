@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class WebBuildLogWriter : MonoBehaviour
 {
+    private bool StoreLog;
+
     private List<string> logMessages = new List<string>();
 
     public bool logFolderCreated;
@@ -15,16 +17,17 @@ public class WebBuildLogWriter : MonoBehaviour
     {
         Application.logMessageReceived += HandleLogMessage;
         Application.quitting += OnApplicationQuit;
-    }
 
-    private void OnDestroy()
-    {
-        Application.logMessageReceived -= HandleLogMessage;
-        Application.quitting -= OnApplicationQuit;
+        #if (UNITY_WEBGL)
+            StoreLog = true;
+        #endif
     }
 
     private void HandleLogMessage(string logMessage, string stackTrace, LogType type)
     {
+        if (!StoreLog)
+            return;
+
         if (ServerManager.SessionDataFolderCreated && !logFolderCreated) //Create log folder once session data folder created.
             StartCoroutine(CreateLogFolder());
 
@@ -41,6 +44,9 @@ public class WebBuildLogWriter : MonoBehaviour
 
     private void OnApplicationQuit()
     {
+        if (!StoreLog)
+            return;
+
         if (logFileCreated)
             StartCoroutine(AppendDataToLogFile());
         else
@@ -68,5 +74,11 @@ public class WebBuildLogWriter : MonoBehaviour
         yield return ServerManager.AppendToFileAsync($"{ServerManager.SessionDataFolderPath}/LogFile", "Player.log", content);
     }
 
+
+    private void OnDestroy()
+    {
+        Application.logMessageReceived -= HandleLogMessage;
+        Application.quitting -= OnApplicationQuit;
+    }
 
 }

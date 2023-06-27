@@ -43,21 +43,21 @@ namespace FeatureUncertaintyWM_Namespace
         public bool StimFacingCamera;
         public string ContextName;
 
-        public override void GenerateTrialDefsFromBlockDef()
-        {
-            //pick # of trials from minmax
-            System.Random rnd = new System.Random();
-            int num = rnd.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
+        //public override void GenerateTrialDefsFromBlockDef()
+        //{
+        //    //pick # of trials from minmax
+        //    System.Random rnd = new System.Random();
+        //    int num = rnd.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
 
-            TrialDefs = new List<FeatureUncertaintyWM_TrialDef>().ConvertAll(x => (TrialDef)x);
-            for (int iTrial = 0; iTrial < num; iTrial++)
-            {
-                FeatureUncertaintyWM_TrialDef td = new FeatureUncertaintyWM_TrialDef();
-                td.numMcStim = numMcStim;
-                TrialDefs.Add(td);
-            }
+        //    TrialDefs = new List<FeatureUncertaintyWM_TrialDef>().ConvertAll(x => (TrialDef)x);
+        //    for (int iTrial = 0; iTrial < num; iTrial++)
+        //    {
+        //        FeatureUncertaintyWM_TrialDef td = new FeatureUncertaintyWM_TrialDef();
+        //        td.numMcStim = numMcStim;
+        //        TrialDefs.Add(td);
+        //    }
 
-        }
+        //}
 
         public override void AddToTrialDefsFromBlockDef()
         {
@@ -140,6 +140,7 @@ namespace FeatureUncertaintyWM_Namespace
     {
         public int numCircles, totalObjectCount;
         public int[]  compObjNumber, compObjIndices, angleOffset;
+        public int mcStimInd;
         //componentObjIndices= {57, 10, 23}
         public float[] radius;
         public bool IsTarget;

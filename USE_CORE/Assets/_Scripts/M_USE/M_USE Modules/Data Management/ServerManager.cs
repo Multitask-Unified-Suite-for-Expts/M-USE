@@ -166,9 +166,8 @@ public static class ServerManager //Used with the PHP scripts
             Debug.Log(result.Length == 0 ? ("File Not Found on Server: " + searchString) : ("Found File On Server: " + searchString));
         }
         else
-        {
             Debug.Log($"ERROR FINDING FILE: {searchString} | ERROR: {request.error}");
-        }
+        
 
         callback?.Invoke(result);
     }

@@ -149,6 +149,9 @@ namespace USE_ExperimentTemplate_Session
             USE_StartButton = gameObject.AddComponent<USE_StartButton>();
             USE_StartButton.StartButtonPrefab = StartButtonPrefabGO;
 
+            if (!SessionValues.WebBuild)
+                HumanVersionToggleButton.SetActive(false);
+
 
             // Set the name of the data file given input into init screen
             SubjectID = SessionDetails.GetItemValue("SubjectID");
@@ -164,12 +167,12 @@ namespace USE_ExperimentTemplate_Session
             if (SessionValues.WebBuild)
             {
                 SessionDataPath = ServerManager.SessionDataFolderPath;
-                TaskIconsFolderPath = "DefaultResources/TaskIcons"; //Currently having web build use in house task icons instead of loading from server. 
                 ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
 
                 if (SessionValues.UseDefaultConfigs)
                 {
                     //ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
+                    TaskIconsFolderPath = "DefaultResources/TaskIcons"; //Currently having web build use in house task icons instead of loading from server. 
                     configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
                     WriteSessionConfigsToPersistantDataPath();
                     SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFilePathInExternalFolder(configFileFolder, "*SessionConfig*"));
@@ -178,7 +181,7 @@ namespace USE_ExperimentTemplate_Session
                 else //Using Server Configs:
                 {
                     //ContextExternalFilePath = "Resources/Contexts"; //path from root server folder
-                    //TaskIconsFolderPath = "Resources/TaskIcons"; //un comment if end up wanting to load from server instead (and also remove the one above)
+                    TaskIconsFolderPath = "Resources/TaskIcons"; //un comment if end up wanting to load from server instead (and also remove the one above)
                     configFileFolder = ServerManager.SessionConfigFolderPath;
                     StartCoroutine(ServerManager.GetFileStringAsync(ServerManager.SessionConfigFolderPath, "SessionConfig", result =>
                     {
@@ -636,12 +639,22 @@ namespace USE_ExperimentTemplate_Session
 
                     if (SessionValues.WebBuild)
                     {
+                        string imagePath = TaskIconsFolderPath + "/" + taskName;
                         if(SessionValues.UseDefaultConfigs)
-                            image.texture = Resources.Load<Texture2D>(TaskIconsFolderPath + "/" + taskName);
+                            image.texture = Resources.Load<Texture2D>(imagePath);
                         else
                         {
                             //LOAD THE ICONS FROM THE SERVER!
-                            image.texture = Resources.Load<Texture2D>(TaskIconsFolderPath + "/" + taskName); //REMOVE THIS
+                            StartCoroutine(ServerManager.LoadTextureFromServer(imagePath, imageResult =>
+                            {
+                                if (imageResult != null)
+                                {
+                                    Debug.Log("Got the Texture Image from the Server!");
+                                    image.texture = imageResult;
+                                }
+                                else
+                                    Debug.Log("NULL GETTING TEXTURE FROM SERVER!");
+                            }));
                         }
                     }
                     else
@@ -1110,7 +1123,6 @@ namespace USE_ExperimentTemplate_Session
 
             if (SessionSettings.SettingExists("Session", "SerialPortActive"))
                 SerialPortActive = (bool)SessionSettings.Get("Session", "SerialPortActive");
-
         }
 
         private void WriteSessionConfigsToPersistantDataPath()

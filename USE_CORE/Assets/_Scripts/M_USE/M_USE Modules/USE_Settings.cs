@@ -396,7 +396,6 @@ namespace USE_Settings
 			foreach (string fieldName in fieldNames)
 			{
 				tempFieldName = fieldName.Trim();
-				Debug.Log("field name: " + tempFieldName);
 				if (typeof(T).GetProperty(tempFieldName) == null & typeof(T).GetField(tempFieldName) == null)
 				{
 					throw new Exception("Settings file \"" + settingsCategory + "\" contains the header \""

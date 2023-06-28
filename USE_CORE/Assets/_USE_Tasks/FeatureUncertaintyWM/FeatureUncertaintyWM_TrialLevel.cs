@@ -161,7 +161,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
                     }
                     allMcComponentGameObjs.Add(mcComponentGameObjs);
                 }
-                LoadTextures(ContextExternalFilePath);
+                //LoadTextures(ContextExternalFilePath); //done at USE_TrialLevel, no longer needed here
                 // Initialize FB Controller Values
                 HaloFBController.SetHaloSize(5f);
                 HaloFBController.SetHaloIntensity(5);

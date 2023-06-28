@@ -242,15 +242,12 @@ namespace USE_ExperimentTemplate_Task
                 if (IsHuman)
                 {
                     Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
-                    //Create HumanStartPanel
                     HumanStartPanel.SetupDataAndCodes(FrameData, EventCodeManager, SessionEventCodes);
                     HumanStartPanel.SetTaskLevel(this);
                     HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
                 }
             });
-
             SetupTask.SpecifyTermination(() => true, RunBlock);
-
 
             RunBlock.AddUniversalInitializationMethod(() =>
             {
@@ -590,28 +587,16 @@ namespace USE_ExperimentTemplate_Task
             MouseTracker.Init(FrameData, 0);
 
 
-            if(SessionValues.WebBuild)
-            {
-                TrialLevel.LoadTexturesFromResources(); //delete this when uncomment below
+            StartCoroutine(TrialLevel.LoadTexturesAndInitTouchFbController(ContextExternalFilePath, TrialData, FrameData));
 
-                //if (SessionValues.UseDefaultConfigs)
-                //    TrialLevel.LoadTexturesFromResources();
-                //else
-                //{
-                //    //need to load the images from the server!!!!!!
-                //}
-            }
-            else
-                TrialLevel.LoadTextures(ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 
+            //Automatically giving TouchFbController;
+            //TrialLevel.TouchFBController.Init(TrialData, FrameData); //MOVING INTO THE LOADTEXTURE METHOD TO SEE IF FIXES ASYNC ISSUE
+
 
             //load trackers
             MouseTracker.Init(FrameData, 0);
             if (EyeTrackerActive)
                 GazeTracker.Init(FrameData, 0);
-
-
-            //Automatically giving TouchFbController;
-            TrialLevel.TouchFBController.Init(TrialData, FrameData);
 
             bool audioInited = false;
             foreach (string fbController in fbControllersList)
@@ -687,6 +672,9 @@ namespace USE_ExperimentTemplate_Task
 
             yield return null;
         }
+
+
+
 
 
         public static IEnumerator HandleCreateExternalFolder(string configName)

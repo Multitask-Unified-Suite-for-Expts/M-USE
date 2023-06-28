@@ -21,6 +21,7 @@ using USE_ExperimentTemplate_Block;
 using UnityEngine.SceneManagement;
 using System.Linq;
 using System.Collections;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace USE_ExperimentTemplate_Trial
 {
@@ -38,7 +39,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public bool StoreData, ForceBlockEnd, SerialPortActive, EyetrackerActive;
         [HideInInspector] public string TaskDataPath, FilePrefix, TrialSummaryString;
 
-        protected State LoadTrialStims, SetupTrial, FinishTrial, Delay, GazeCalibration;
+        protected State LoadTrialStims, LoadTextures, SetupTrial, FinishTrial, Delay, GazeCalibration;
         
         protected State StateAfterDelay = null;
         protected float DelayDuration = 0;
@@ -104,6 +105,7 @@ namespace USE_ExperimentTemplate_Trial
 
         [HideInInspector] public bool TrialStimsLoaded;
 
+        [HideInInspector] public bool SharedTexturesLoaded;
 
 
         // Texture Variables
@@ -127,6 +129,7 @@ namespace USE_ExperimentTemplate_Trial
         public void DefineTrialLevel()
         {
             LoadTrialStims = new State("LoadTrialStims");
+            LoadTextures = new State("LoadTextures");
             SetupTrial = new State("SetupTrial");
             FinishTrial = new State("FinishTrial");
             Delay = new State("Delay");
@@ -153,7 +156,7 @@ namespace USE_ExperimentTemplate_Trial
                 GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar +  "GazeData";
             }
 
-            AddActiveStates(new List<State> { LoadTrialStims, SetupTrial, FinishTrial, Delay, GazeCalibration });
+            AddActiveStates(new List<State> { LoadTrialStims, LoadTextures, SetupTrial, FinishTrial, Delay, GazeCalibration });
             // A state that just waits for some time;
             Delay.AddTimer(() => DelayDuration, () => StateAfterDelay);
 
@@ -201,7 +204,11 @@ namespace USE_ExperimentTemplate_Trial
                 DefineTrialStims();
                 StartCoroutine(HandleLoadingStims());
             });
-            LoadTrialStims.SpecifyTermination(() => TrialStimsLoaded, SetupTrial, () => TrialStimsLoaded = false);
+            LoadTrialStims.SpecifyTermination(() => TrialStimsLoaded, LoadTextures, () => TrialStimsLoaded = false);
+
+
+            LoadTextures.SpecifyTermination(() => SharedTexturesLoaded, SetupTrial);
+
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
@@ -218,12 +225,12 @@ namespace USE_ExperimentTemplate_Trial
                 ResetTrialVariables();
             });
 
+
             SetupTrial.AddDefaultTerminationMethod(() =>
             {
                 Input.ResetInputAxes();
                 if (IsHuman)
                     HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
-                
             });
 
 
@@ -605,29 +612,66 @@ namespace USE_ExperimentTemplate_Trial
             return contextPath;
         }
 
-        public void LoadTexturesFromResources()
+        public IEnumerator LoadTexturesAndInitTouchFbController(string contextPath, TrialData trialData, FrameData frameData)
         {
-            HeldTooLongTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/HorizontalStripes");
-            HeldTooShortTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/VerticalStripes");
-            BackdropStripesTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/bg");
-            THR_BackdropTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/Concrete4");
+            if(SessionValues.WebBuild)
+            {
+                if(SessionValues.UseDefaultConfigs)
+                {
+                    HeldTooLongTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/HorizontalStripes");
+                    HeldTooShortTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/VerticalStripes");
+                    BackdropStripesTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/bg");
+                    THR_BackdropTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/Concrete4");
+                }
+                else
+                {
+                    yield return StartCoroutine(ServerManager.LoadTextureFromServer($"Resources/Contexts/HorizontalStripes.png", resultingTex =>
+                    {
+                        if (resultingTex != null)
+                            HeldTooLongTexture = resultingTex;
+                        else
+                            Debug.Log("NULL! Trield to Get HTL Texture from Server but it's null!");
+                    }));
+                    yield return StartCoroutine(ServerManager.LoadTextureFromServer($"Resources/Contexts/VerticalStripes.png", resultingTex =>
+                    {
+                        if (resultingTex != null)
+                            HeldTooShortTexture = resultingTex;
+                        else
+                            Debug.Log("NULL! Trield to Get HTS Texture from Server but it's null!");
+                    }));
+                    yield return StartCoroutine(ServerManager.LoadTextureFromServer($"Resources/Contexts/bg.png", resultingTex =>
+                    {
+                        if (resultingTex != null)
+                            BackdropStripesTexture = resultingTex;
+                        else
+                            Debug.Log("NULL! Trield to Get BackdropStripes Texture from Server but it's null!");
+                    }));
+                    yield return StartCoroutine(ServerManager.LoadTextureFromServer($"Resources/Contexts/Concrete4.png", resultingTex =>
+                    {
+                        if (resultingTex != null)
+                            THR_BackdropTexture = resultingTex;
+                        else
+                            Debug.Log("NULL! Trield to Get THR_Backdrop Texture from Server but it's null!");
+                    }));
+                    Debug.Log("DONE LOADING SHARED TEXTURES FROM SERVER!");
+                }
+            }
+            else
+            {
+                HeldTooLongTexture = LoadPNG(GetContextNestedFilePath(contextPath, "HorizontalStripes.png"));
+                HeldTooShortTexture = LoadPNG(GetContextNestedFilePath(contextPath, "VerticalStripes.png"));
+                BackdropStripesTexture = LoadPNG(GetContextNestedFilePath(contextPath, "bg.png"));
+                THR_BackdropTexture = LoadPNG(GetContextNestedFilePath(contextPath, "Concrete4.png"));
+            }
 
             TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
             TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
             TouchFBController.MovedTooFar_Texture = BackdropStripesTexture;
+
+            TouchFBController.Init(trialData, frameData);
+            SharedTexturesLoaded = true;
         }
 
-        public void LoadTextures(String ContextExternalFilePath)
-        {
-            HeldTooLongTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "HorizontalStripes.png"));
-            HeldTooShortTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "VerticalStripes.png"));
-            BackdropStripesTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "bg.png"));
-            THR_BackdropTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "Concrete4.png"));
-
-            TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
-            TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
-            TouchFBController.MovedTooFar_Texture = BackdropStripesTexture;
-        }
 
         public virtual void ResetTrialVariables()
         {

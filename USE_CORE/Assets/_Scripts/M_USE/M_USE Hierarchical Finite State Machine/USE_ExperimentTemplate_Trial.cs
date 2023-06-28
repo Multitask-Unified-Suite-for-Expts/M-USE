@@ -617,7 +617,7 @@ namespace USE_ExperimentTemplate_Trial
             TouchFBController.MovedTooFar_Texture = BackdropStripesTexture;
         }
 
-        public void LoadTextures(String ContextExternalFilePath)
+        public void LoadTextures(string ContextExternalFilePath)
         {
             HeldTooLongTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "HorizontalStripes.png"));
             HeldTooShortTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "VerticalStripes.png"));

@@ -175,32 +175,31 @@ public static class ServerManager //Used with the PHP scripts
     {
         string url = $"{ServerURL}/copyFolder.php?sourcePath={sourcePath}&destinationPath={destinationPath}";
 
-        using (UnityWebRequest request = UnityWebRequest.Get(url))
-        {
-            yield return request.SendWebRequest();
-            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Folder copied successfully!" : $"FAILED TO COPY FOLDER! ERROR: {request.error}");
-        }
+        using UnityWebRequest request = UnityWebRequest.Get(url);
+
+        yield return request.SendWebRequest();
+        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Folder copied successfully!" : $"FAILED TO COPY FOLDER! ERROR: {request.error}");
     }
 
     public static IEnumerator LoadTextureFromServer(string filePath, Action<Texture2D> callback)
     {
         string url = $"{ServerURL}/{filePath}";
 
-        using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(url))
-        {
-            yield return request.SendWebRequest();
+        using UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
 
-            if (request.result == UnityWebRequest.Result.Success)
-            {
-                Texture2D tex = DownloadHandlerTexture.GetContent(request);
-                callback?.Invoke(tex);
-            }
-            else
-            {
-                Debug.Log($"FAILED TO LOAD PNG FILE | ERROR: {request.error}");
-                callback?.Invoke(null);
-            }
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Texture2D tex = DownloadHandlerTexture.GetContent(request);
+            callback?.Invoke(tex);
         }
+        else
+        {
+            Debug.Log($"FAILED TO LOAD PNG FILE | ERROR: {request.error}");
+            callback?.Invoke(null);
+        }
+        
     }
 
 

@@ -587,10 +587,22 @@ namespace USE_ExperimentTemplate_Task
             MouseTracker.Init(FrameData, 0);
 
 
-            StartCoroutine(TrialLevel.LoadTexturesAndInitTouchFbController(ContextExternalFilePath, TrialData, FrameData));
+            if (SessionValues.WebBuild)
+            {
+                TrialLevel.LoadTexturesFromResources(); //delete this when uncomment below
+
+                //if (SessionValues.UseDefaultConfigs)
+                //    TrialLevel.LoadTexturesFromResources();
+                //else
+                //{
+                //    //need to load the images from the server!!!!!!
+                //}
+            }
+            else
+                TrialLevel.LoadTextures(ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 
 
             //Automatically giving TouchFbController;
-            //TrialLevel.TouchFBController.Init(TrialData, FrameData); //MOVING INTO THE LOADTEXTURE METHOD TO SEE IF FIXES ASYNC ISSUE
+            TrialLevel.TouchFBController.Init(TrialData, FrameData); 
 
 
             //load trackers

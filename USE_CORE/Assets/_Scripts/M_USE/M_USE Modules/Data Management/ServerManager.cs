@@ -52,7 +52,6 @@ public static class ServerManager //Used with the PHP scripts
         foldersCreatedList.Add(folderPath);
     }
 
-
     public static IEnumerator GetSessionConfigFolders(Action<List<string>> callback)
     {
         string url = $"{ServerURL}/getFolderNames.php?directoryPath=CONFIGS";
@@ -89,9 +88,6 @@ public static class ServerManager //Used with the PHP scripts
         Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Successfully created file: {fileName}" : $"ERROR CREATING FILE: {fileName} | Error: {request.error}");
     }
 
-
-
-
     public static IEnumerator AppendToFileAsync(string folderPath, string fileName, string rowData)
     {
         yield return GetFileStringAsync(folderPath, fileName, originalFileContents =>
@@ -118,7 +114,6 @@ public static class ServerManager //Used with the PHP scripts
         yield return request.SendWebRequest();
         Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Success writing file to server!" : $"FAILED writing file! | Error: {request.error}");
     }
-
 
     public static IEnumerator GetFileStringAsync(string path, string searchString, Action<string> callback)
     {

@@ -28,6 +28,7 @@ using System.Collections;
 using UnityEngine.SceneManagement;
 using USE_ExperimentTemplate_Session;
 using static System.Collections.Specialized.BitVector32;
+using USE_Def_Namespace;
 
 
 namespace USE_ExperimentTemplate_Task
@@ -1624,21 +1625,21 @@ namespace USE_ExperimentTemplate_Task
     }
 
 
-    public class TaskDef
-    {
-        public string TaskName;
-        public string ExternalStimFolderPath;
-        public string PrefabStimFolderPath;
-        public string ExternalStimExtension;
-        public List<string[]> FeatureNames;
-        public string neutralPatternedColorName;
-        public float? ExternalStimScale;
-        public List<string[]> FeedbackControllers;
-        public int? TotalTokensNum;
-        public bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
-        public string SelectionType;
-        public Dictionary<string, string> CustomSettings;
-
-    }
+    // public class TaskDef
+    // {
+    //     public string TaskName;
+    //     public string ExternalStimFolderPath;
+    //     public string PrefabStimFolderPath;
+    //     public string ExternalStimExtension;
+    //     public List<string[]> FeatureNames;
+    //     public string neutralPatternedColorName;
+    //     public float? ExternalStimScale;
+    //     public List<string[]> FeedbackControllers;
+    //     public int? TotalTokensNum;
+    //     public bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
+    //     public string SelectionType;
+    //     public Dictionary<string, string> CustomSettings;
+    //
+    // }
 
 }

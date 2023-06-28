@@ -21,6 +21,7 @@ using USE_ExperimentTemplate_Block;
 using UnityEngine.SceneManagement;
 using System.Linq;
 using System.Collections;
+using USE_Def_Namespace;
 
 namespace USE_ExperimentTemplate_Trial
 {
@@ -641,11 +642,11 @@ namespace USE_ExperimentTemplate_Trial
     }
 
 
-    public abstract class TrialDef
-    {
-        public int BlockCount, TrialCountInBlock, TrialCountInTask;
-        public TrialStims TrialStims;
-    }
+    // public abstract class TrialDef
+    // {
+    //     public int BlockCount, TrialCountInBlock, TrialCountInTask;
+    //     public TrialStims TrialStims;
+    // }
 
     public class TrialLevel_Methods
     {

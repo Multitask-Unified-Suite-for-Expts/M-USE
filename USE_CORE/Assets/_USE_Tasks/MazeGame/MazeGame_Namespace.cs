@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using USE_ExperimentTemplate_Block;
+using USE_Def_Namespace;
 using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
-using HiddenMaze;
+
 namespace MazeGame_Namespace
 {
     public class MazeGame_TaskDef : TaskDef

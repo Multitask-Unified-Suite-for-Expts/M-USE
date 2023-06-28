@@ -147,7 +147,6 @@ namespace USE_ExperimentTemplate_Trial
                     GazeCalibrationTaskLevel.FrameData.gameObject.SetActive(false);
                     GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(false);
                 }
-
                 
                 // Set the GazeData path back to the current config folder
                 GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar +  "GazeData";

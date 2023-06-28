@@ -113,12 +113,10 @@ public static class ServerManager //Used with the PHP scripts
 
     private static IEnumerator WriteFileCoroutine(string url, WWWForm formData)
     {
-        using (UnityWebRequest request = UnityWebRequest.Post(url, formData))
-        {
-            request.SetRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            yield return request.SendWebRequest();
-            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Success writing file to server!" : $"FAILED writing file! | Error: {request.error}");
-        }
+        using UnityWebRequest request = UnityWebRequest.Post(url, formData);
+        request.SetRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        yield return request.SendWebRequest();
+        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Success writing file to server!" : $"FAILED writing file! | Error: {request.error}");
     }
 
 

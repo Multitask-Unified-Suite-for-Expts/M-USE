@@ -138,7 +138,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, ChooseStim);
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, ButtonScale, CR_CanvasGO);
+
+        if (SharedTexturesLoaded) //MAKE SURE THIS STILL ENABLES IT!!!!!!!!
+            TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, ButtonScale, CR_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {

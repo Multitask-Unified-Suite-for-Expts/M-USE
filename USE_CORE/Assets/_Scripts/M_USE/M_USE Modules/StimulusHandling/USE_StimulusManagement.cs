@@ -309,7 +309,9 @@ namespace USE_StimulusManagement
 						}));
 					}
 					else
+					{
 						StimGameObject = LoadExternalStimFromFile();
+					}
                 }
                 else if (StimDimVals != null)
                 {
@@ -341,7 +343,9 @@ namespace USE_StimulusManagement
                 }
 
 				callback?.Invoke(StimGameObject);
+
             }
+            //return StimGameObject;
         }
 
 
@@ -433,7 +437,9 @@ namespace USE_StimulusManagement
 					else //Using 3D stim from server, so write file to persistant data path and pass the path into LoadModel
 					{
 						string stimPath = WriteStimToPersistantDataPath(byteResult);
+						Debug.Log("ABOUT TO LOAD MODEL FROM PERSISTANT DATA PATH!");
 						StimGameObject = LoadModel(stimPath);
+						Debug.Log("AFTER LOADING MODEL FROM PERSISTANT DATA PATH! (doubt it makes it here)");
 
 						//Another trilib way to try:
 						//AssetLoader loader = new AssetLoader();
@@ -465,6 +471,7 @@ namespace USE_StimulusManagement
 					FileName = FileName + StimExtension;
 			}
 			if(string.IsNullOrEmpty(StimExtension))
+
 			{
 				StimExtension = Path.GetExtension(FileName);
 			}			//by default stimFilePath argument is empty, and files are found using StimFolderPath + ExternalFilePath
@@ -512,8 +519,9 @@ namespace USE_StimulusManagement
 					StimGameObject = new GameObject();//give it name
 					RawImage stimGOImage = StimGameObject.AddComponent<RawImage>();
 					stimGOImage.texture = LoadPNG(FileName);
-					if (CanvasGameObject != null)
-						StimGameObject.GetComponent<RectTransform>().SetParent(CanvasGameObject.GetComponent<RectTransform>());
+					if (this.CanvasGameObject != null)
+						StimGameObject.GetComponent<RectTransform>().SetParent(this.CanvasGameObject.GetComponent<RectTransform>());
+					PositionRotationScale();
 					break;
 				default:
 					break;
@@ -535,10 +543,10 @@ namespace USE_StimulusManagement
 				tex = new Texture2D(2, 2);
 				tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
 			}
+			PositionRotationScale();
 			ToggleVisibility(visibility);
 			return tex;
 		}
-
 		public void Destroy()
 		{
 			StimGroup[] sgs = StimGroups.Values.ToArray();
@@ -578,7 +586,7 @@ namespace USE_StimulusManagement
                     else
 						StimGameObject = assetLoader.LoadFromFile(filePath);
 				}
-				catch (Exception e)
+				catch (System.Exception e)
 				{
 					Debug.LogError(e.ToString());
 					return null;

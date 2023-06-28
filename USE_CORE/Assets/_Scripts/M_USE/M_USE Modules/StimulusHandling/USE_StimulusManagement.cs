@@ -521,6 +521,7 @@ namespace USE_StimulusManagement
 					stimGOImage.texture = LoadPNG(FileName);
 					if (this.CanvasGameObject != null)
 						StimGameObject.GetComponent<RectTransform>().SetParent(this.CanvasGameObject.GetComponent<RectTransform>());
+					PositionRotationScale();
 					break;
 				default:
 					break;
@@ -542,6 +543,7 @@ namespace USE_StimulusManagement
 				tex = new Texture2D(2, 2);
 				tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
 			}
+			PositionRotationScale();
 			ToggleVisibility(visibility);
 			return tex;
 		}

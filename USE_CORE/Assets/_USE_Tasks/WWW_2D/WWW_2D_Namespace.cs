@@ -15,8 +15,8 @@ namespace WWW_2D_Namespace
         public int[] nRepetitionsMinMax;
         public int[] SearchStimsIndices;
         public int[] DistractorStimsIndices;
-        public Vector3[] SearchStimsLocations;
-        public Vector3[] DistractorStimsLocations;
+        public Vector3[] SearchStims_LocalPosition;
+        public Vector3[] DistractorStims_LocalPosition;
         public int[] SliderGain;
         public int[] SliderLoss;
         public int SliderInitial;
@@ -43,8 +43,8 @@ namespace WWW_2D_Namespace
                 td.CorrectObjectTouchOrder = CorrectObjectTouchOrder;
                 td.SearchStimsIndices = SearchStimsIndices;
                 td.DistractorStimsIndices = DistractorStimsIndices;
-                td.SearchStimsLocations = SearchStimsLocations;
-                td.DistractorStimsLocations = DistractorStimsLocations;
+                td.SearchStimsLocations = SearchStims_LocalPosition;
+                td.DistractorStimsLocations = DistractorStims_LocalPosition;
                 td.RandomizedLocations = RandomizedLocations;
                 td.SliderGain = SliderGain;
                 td.SliderLoss = SliderLoss;

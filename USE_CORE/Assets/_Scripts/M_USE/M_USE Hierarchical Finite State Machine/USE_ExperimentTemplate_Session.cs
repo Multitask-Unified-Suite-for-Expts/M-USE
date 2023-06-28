@@ -420,7 +420,6 @@ namespace USE_ExperimentTemplate_Session
             });
             //setupSession.AddLateUpdateMethod(() => AppendSerialData());
 
-
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort && EyeTrackerActive, gazeCalibration);
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort && !EyeTrackerActive, selectTask);
 
@@ -636,19 +635,22 @@ namespace USE_ExperimentTemplate_Session
 
                     if (SessionValues.WebBuild)
                     {
-                        if(SessionValues.UseDefaultConfigs)
-                            image.texture = Resources.Load<Texture2D>($"{TaskIconsFolderPath}/{taskName}");
-                        else
-                        {
-                            //LOAD THE ICONS FROM THE SERVER!
-                            StartCoroutine(ServerManager.LoadTextureFromServer($"{TaskIconsFolderPath}/{taskName}.png", imageResult =>
-                            {
-                                if (imageResult != null)
-                                    image.texture = imageResult;
-                                else
-                                    Debug.Log("NULL GETTING TEXTURE FROM SERVER!");
-                            }));
-                        }
+                        image.texture = Resources.Load<Texture2D>($"{TaskIconsFolderPath}/{taskName}"); //DELETE THIS LINE WHEN WANT TO LOAD FROM SERVER
+
+                        //UNCOMMENT WHEN WANT TO LOAD FROM SERVER:
+                        //if (SessionValues.UseDefaultConfigs)
+                        //    image.texture = Resources.Load<Texture2D>($"{TaskIconsFolderPath}/{taskName}");
+                        //else
+                        //{
+                        //    //LOAD THE ICONS FROM THE SERVER!
+                        //    StartCoroutine(ServerManager.LoadTextureFromServer($"{TaskIconsFolderPath}/{taskName}.png", imageResult =>
+                        //    {
+                        //        if (imageResult != null)
+                        //            image.texture = imageResult;
+                        //        else
+                        //            Debug.Log("NULL GETTING TEXTURE FROM SERVER!");
+                        //    }));
+                        //}
                     }
                     else
                         image.texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + taskName + ".png");
@@ -678,7 +680,6 @@ namespace USE_ExperimentTemplate_Session
                         taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget = true;
                         if(IsHuman)
                             taskButton.TaskButtonGO.AddComponent<HoverEffect>();
-                        
                     }
                     count++;
                 }
@@ -695,19 +696,19 @@ namespace USE_ExperimentTemplate_Session
                 SelectionTracker.UpdateActiveSelections();
                 if (SelectionHandler.SuccessfulSelections.Count > 0)
                 {
-                    selectedConfigName = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.GetComponent<USE_TaskButton>()?.configName;
+                    USE_TaskButton selectedButton = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.GetComponent<USE_TaskButton>();
+                    selectedConfigName = selectedButton.configName;
                     if (selectedConfigName != null)
                         taskAutomaticallySelected = false;
                 }
             });
-
             selectTask.AddLateUpdateMethod(() =>
             {
                 AppendSerialData();
                 FrameData.AppendDataToBuffer();
             });
+            selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask, () => ResetSelectedTaskButtonSize());
 
-            selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask);
 
             // Don't have automatic task selection if we encountered an error during setup
             if (TaskSelectionTimeout >= 0 && !LogPanel.HasError())
@@ -720,7 +721,7 @@ namespace USE_ExperimentTemplate_Session
                         string configName = (string)task.Key;
 
                         // If the next task button in the task mappings is not interactable, skip until the next available config is found
-                        if (!(taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget))
+                        if (!taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget)
                             continue;
                         taskAutomaticallySelected = true;
                         selectedConfigName = configName;
@@ -1136,6 +1137,19 @@ namespace USE_ExperimentTemplate_Session
                     File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + config + ".txt", textFileBytes);
                 }
             }
+        }
+
+        private void ResetSelectedTaskButtonSize()
+        {
+            if (SelectionHandler.SuccessfulSelections.Count > 0)
+            {
+                if (SelectionHandler.LastSuccessfulSelection.SelectedGameObject.TryGetComponent(out HoverEffect hoverComponent))
+                    hoverComponent.SetToInitialSize();
+                else
+                    Debug.Log("HoverEffect component not found on selected TaskButton, so not resetting its size.");
+            }
+            else
+                Debug.Log("No successfulSelection from which to get the taskButton GameObject from (so we can reset its size)");
         }
 
         private void SetupBackgroundMusic()

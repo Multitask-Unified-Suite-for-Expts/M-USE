@@ -120,12 +120,11 @@ namespace USE_ExperimentTemplate_Session
         private SessionInfoPanel SessionInfoPanel;
         public StringBuilder PreviousTaskSummaryString = new StringBuilder();
 
-        public DisplayController DisplayController;
+        [HideInInspector] public DisplayController DisplayController;
 
         [HideInInspector] public GameObject TaskButtonsContainer;
 
         //Set in inspector
-        public GameObject InstructionsPrefab;
         public GameObject TaskSelection_Starfield;
         public GameObject HumanVersionToggleButton;
         public GameObject HumanStartPanelPrefab;
@@ -324,7 +323,7 @@ namespace USE_ExperimentTemplate_Session
                 else
                 {
                     string sessionSettingsFolderPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
-                    System.IO.Directory.CreateDirectory(sessionSettingsFolderPath);
+                    Directory.CreateDirectory(sessionSettingsFolderPath);
                     SessionSettings.StoreSettings(sessionSettingsFolderPath + Path.DirectorySeparatorChar);
                 }
 
@@ -635,25 +634,23 @@ namespace USE_ExperimentTemplate_Session
 
                     if (SessionValues.WebBuild)
                     {
-                        image.texture = Resources.Load<Texture2D>($"{TaskIconsFolderPath}/{taskName}"); //DELETE THIS LINE WHEN WANT TO LOAD FROM SERVER
-
-                        //UNCOMMENT WHEN WANT TO LOAD FROM SERVER:
-                        //if (SessionValues.UseDefaultConfigs)
-                        //    image.texture = Resources.Load<Texture2D>($"{TaskIconsFolderPath}/{taskName}");
-                        //else
-                        //{
-                        //    //LOAD THE ICONS FROM THE SERVER!
-                        //    StartCoroutine(ServerManager.LoadTextureFromServer($"{TaskIconsFolderPath}/{taskName}.png", imageResult =>
-                        //    {
-                        //        if (imageResult != null)
-                        //            image.texture = imageResult;
-                        //        else
-                        //            Debug.Log("NULL GETTING TEXTURE FROM SERVER!");
-                        //    }));
-                        //}
+                        if (SessionValues.UseDefaultConfigs)
+                            image.texture = Resources.Load<Texture2D>($"{TaskIconsFolderPath}/{taskName}");
+                        else
+                        {
+                            //LOAD THE ICONS FROM THE SERVER!
+                            StartCoroutine(ServerManager.LoadTextureFromServer($"{TaskIconsFolderPath}/{taskName}.png", imageResult =>
+                            {
+                                if (imageResult != null)
+                                    image.texture = imageResult;
+                                else
+                                    Debug.Log("NULL GETTING TASK ICON TEXTURE FROM SERVER!");
+                            }));
+                        }
                     }
                     else
                         image.texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + taskName + ".png");
+
 
                     if (GuidedTaskSelection)
                     {
@@ -696,8 +693,7 @@ namespace USE_ExperimentTemplate_Session
                 SelectionTracker.UpdateActiveSelections();
                 if (SelectionHandler.SuccessfulSelections.Count > 0)
                 {
-                    USE_TaskButton selectedButton = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.GetComponent<USE_TaskButton>();
-                    selectedConfigName = selectedButton.configName;
+                    selectedConfigName = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.GetComponent<USE_TaskButton>().configName;
                     if (selectedConfigName != null)
                         taskAutomaticallySelected = false;
                 }
@@ -1538,8 +1534,7 @@ namespace USE_ExperimentTemplate_Session
 
         private IEnumerator CopySessionConfigFolderToDataFolder()
         {
-            string sourcePath = ServerManager.SessionConfigFolderPath; //UN COMMENT THIS LATER!
-            //string sourcePath = "CONFIGS/SessionConfig_021_VS_FL_VS_v01_Set05_STIM"; // Just used to test!
+            string sourcePath = ServerManager.SessionConfigFolderPath;
             string destinationPath = $"{ServerManager.SessionDataFolderPath}/SessionSettings";
             yield return ServerManager.CopyFolder(sourcePath, destinationPath);
         }

@@ -11,7 +11,7 @@ public class WebBuildLogWriter : MonoBehaviour
 
     public bool logFolderCreated;
     public bool logFileCreated;
-    private int capacity = 25;
+    private int capacity = 50;
 
     private void Start()
     {

@@ -498,8 +498,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a20a247e197cc49c48f04849aba52095, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  logFolderCreated: 0
-  logFileCreated: 0
+  LogFolderCreated: 0
+  LogFileCreated: 0
 --- !u!1 &1213845836
 GameObject:
   m_ObjectHideFlags: 0
@@ -628,7 +628,6 @@ MonoBehaviour:
   TasksFinished: 0
   SubjectID: 
   SessionID: 
-  SessionDataPath: 
   FilePrefix: 
   SessionLevelDataPath: 
   TaskSelectionSceneName: _TaskSelection
@@ -659,6 +658,7 @@ MonoBehaviour:
   BackgroundMusic_AudioSource: {fileID: 0}
   HumanStartPanel: {fileID: 0}
   USE_StartButton: {fileID: 0}
+  LogWriter: {fileID: 1017469093}
 --- !u!4 &1375570696
 Transform:
   m_ObjectHideFlags: 0

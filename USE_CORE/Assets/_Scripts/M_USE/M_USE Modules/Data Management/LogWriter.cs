@@ -4,7 +4,7 @@ using System.IO;
 using UnityEngine;
 
 
-public class LogWriter : MonoBehaviour
+public class LogWriter : MonoBehaviour //Class is a component attached to "MiscScripts" GameObject. 
 {
     private List<string> LogMessages = new List<string>();
 
@@ -68,6 +68,8 @@ public class LogWriter : MonoBehaviour
         }
     }
 
+    [HideInInspector] public bool StoreData; //Set by SessionLevel
+
 
     private void Start()
     {
@@ -77,6 +79,9 @@ public class LogWriter : MonoBehaviour
 
     private void HandleLogMessage(string logMessage, string stackTrace, LogType type)
     {
+        if (!StoreData)
+            return;
+
         if(!LogFolderCreated)
             StartCoroutine(CreateLogFolder());
 
@@ -150,6 +155,9 @@ public class LogWriter : MonoBehaviour
 
     private void OnApplicationQuit()
     {
+        if (!StoreData)
+            return;
+
         if (LogFileCreated)
             StartCoroutine(AppendDataToLogFile());
         else

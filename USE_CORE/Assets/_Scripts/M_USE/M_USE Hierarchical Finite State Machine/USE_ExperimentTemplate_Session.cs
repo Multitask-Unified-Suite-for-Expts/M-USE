@@ -140,6 +140,8 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public HumanStartPanel HumanStartPanel;
         [HideInInspector] public USE_StartButton USE_StartButton;
 
+        public LogWriter LogWriter;
+
 
 
         public override void LoadSettings()
@@ -1107,6 +1109,8 @@ namespace USE_ExperimentTemplate_Session
             if (SessionSettings.SettingExists("Session", "StoreData"))
                 StoreData = (bool)SessionSettings.Get("Session", "StoreData");
 
+            LogWriter.StoreData = StoreData;
+
             if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
                 MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
 
@@ -1438,91 +1442,6 @@ namespace USE_ExperimentTemplate_Session
         static extern bool CloseHandle(IntPtr hObject);
 #endif
 
-        void OnApplicationQuit()
-        {
-
-            if (StoreData)
-            {
-                string symlinkLocation = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + "LatestSession";
-#if UNITY_STANDALONE_WIN
-                uint GENERIC_READ = 0x80000000;
-                uint GENERIC_WRITE = 0x40000000;
-                uint FILE_SHARE_READ = 0x00000001;
-                uint OPEN_EXISTING = 3;
-                uint FILE_FLAG_BACKUP_SEMANTICS = 0x02000000;
-                uint FILE_FLAG_OPEN_REPARSE_POINT = 0x00200000;
-                uint FSCTL_SET_REPARSE_POINT = 0x900A4;
-                uint IO_REPARSE_TAG_MOUNT_POINT = 0xA0000003;
-                Directory.CreateDirectory(symlinkLocation);
-
-                // Open the file with the correct perms
-                IntPtr dirHandle = CreateFile(
-                    symlinkLocation,
-                    GENERIC_READ | GENERIC_WRITE,
-                    FILE_SHARE_READ,
-                    IntPtr.Zero,
-                    OPEN_EXISTING,
-                    FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT,
-                    IntPtr.Zero
-                );
-
-                // \??\ indicates that the path should be non-interpreted
-                string prefix = @"\??\";
-                string substituteName = prefix + SessionValues.SessionDataPath;
-                // char is 2 bytes because strings are UTF-16
-                int substituteByteLen = substituteName.Length * sizeof(char);
-                ReparseDataBuffer rdb = new ReparseDataBuffer
-                {
-                    ReparseTag = IO_REPARSE_TAG_MOUNT_POINT,
-                    // 12 bytes is the byte length from SubstituteNameOffset to
-                    // before PathBuffer
-                    ReparseDataLength = (ushort)(substituteByteLen + 12),
-                    SubstituteNameOffset = 0,
-                    SubstituteNameLength = (ushort)substituteByteLen,
-                    // Needs to be at least 2 ahead (accounting for nonexistent null-terminator)
-                    PrintNameOffset = (ushort)(substituteByteLen + 2),
-                    PrintNameLength = 0,
-                    PathBuffer = substituteName
-                };
-
-                var result = DeviceIoControl(
-                    dirHandle,
-                    FSCTL_SET_REPARSE_POINT,
-                    ref rdb,
-                    // 20 bytes is the byte length for everything but the PathBuffer
-                    (uint)(substituteName.Length * sizeof(char) + 20),
-                    IntPtr.Zero,
-                    0,
-                    IntPtr.Zero,
-                    IntPtr.Zero
-                );
-
-                CloseHandle(dirHandle);
-#endif
-                //Create Log Folder & Files for Normal Build: -----------------------------------------------------------------------------------------------
-                if (!SessionValues.WebBuild) //Web Build log folder & file creation already handled in the WebBuildLogWriter.cs class
-                {
-                    Directory.CreateDirectory(SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "LogFile");
-
-                    string logPath = "";
-                    if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX | SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux)
-                    {
-                        string pathName = Application.isEditor ? "/Library/Logs/Unity/Editor.log" : "/Library/Logs/Unity/Player.log";
-                        logPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + pathName;
-                    }
-                    else if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Windows)
-                    {
-                        string pathName = Application.isEditor ? "\\Unity\\Editor\\Editor.log" : ("Low\\" + Application.companyName + "\\" + Application.productName + "\\Player.log");
-                        logPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + pathName;
-                    }
-
-                    string logFileName = Application.isEditor ? "Editor.log" : "Player.log";
-                    File.Copy(logPath, SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "LogFile" + Path.DirectorySeparatorChar + logFileName);
-                }
-
-
-            }
-        }
 
 
         private IEnumerator CreateFolderOnServer(string folderPath, Action callback)

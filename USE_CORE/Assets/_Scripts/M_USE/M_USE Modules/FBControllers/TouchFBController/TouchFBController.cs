@@ -6,6 +6,7 @@ using SelectionTracking;
 using System;
 using UnityEngine.UI;
 using System.Linq;
+using System.Collections;
 
 public class TouchFBController : MonoBehaviour
 {
@@ -71,7 +72,7 @@ public class TouchFBController : MonoBehaviour
         TaskCanvasGO = taskCanvasGO;
         TaskCanvas = TaskCanvasGO.GetComponent<Canvas>();
 
-        if (HeldTooShort_Prefab == null) //If null, create the prefabs
+        if (HeldTooShort_Prefab == null || HeldTooLong_Prefab == null || MovedTooFar_Prefab == null) //If null, create the prefabs
             CreatePrefabs();
         else //If not null, check if existing prefab's size is same as new size. If not, update the prefab size
             if (HeldTooShort_Prefab.transform.localScale != new Vector3(fbSize, fbSize, 1f))
@@ -153,14 +154,12 @@ public class TouchFBController : MonoBehaviour
                 prefab.SetActive(false);
     }
 
-    private void DestroyPrefabs()
-    {
-        foreach (var prefab in PrefabList)
-            Destroy(prefab);
-    }
 
     private void CreatePrefabs()
     {
+        if (HeldTooLong_Texture == null || HeldTooShort_Texture == null || MovedTooFar_Texture == null)
+            Debug.Log("ABOUT TO CREATE PREFABS BUT THE TEXTURES ARE STILL NULL!");
+
         PrefabList = new List<GameObject>();
 
         HeldTooLong_Prefab = CreatePrefab("HeldTooLongGO", HeldTooLong_Texture);

@@ -62,7 +62,7 @@ namespace USE_ExperimentTemplate_Session
         private SessionDataControllers SessionDataControllers;
         private bool StoreData;
         private bool MacMainDisplayBuild;
-        [HideInInspector] public string SubjectID, SessionID, SessionDataPath, FilePrefix;
+        [HideInInspector] public string SubjectID, SessionID, FilePrefix;
         public string SessionLevelDataPath;
         public string TaskSelectionSceneName;
 
@@ -168,13 +168,13 @@ namespace USE_ExperimentTemplate_Session
 
             if (SessionValues.WebBuild)
             {
-                SessionDataPath = ServerManager.SessionDataFolderPath;
+                SessionValues.SessionDataPath = ServerManager.SessionDataFolderPath;
                 ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
 
                 if (SessionValues.UseDefaultConfigs)
                 {
                     //ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
-                    TaskIconsFolderPath = "DefaultResources/TaskIcons"; //Currently having web build use in house task icons instead of loading from server. 
+                    TaskIconsFolderPath = "DefaultResources/TaskIcons";
                     configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
                     WriteSessionConfigsToPersistantDataPath();
                     SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFilePathInExternalFolder(configFileFolder, "*SessionConfig*"));
@@ -183,7 +183,7 @@ namespace USE_ExperimentTemplate_Session
                 else //Using Server Configs:
                 {
                     //ContextExternalFilePath = "Resources/Contexts"; //path from root server folder
-                    TaskIconsFolderPath = "Resources/TaskIcons"; //un comment if end up wanting to load from server instead (and also remove the one above)
+                    TaskIconsFolderPath = "Resources/TaskIcons";
                     configFileFolder = ServerManager.SessionConfigFolderPath;
                     StartCoroutine(ServerManager.GetFileStringAsync(ServerManager.SessionConfigFolderPath, "SessionConfig", result =>
                     {
@@ -200,7 +200,7 @@ namespace USE_ExperimentTemplate_Session
             else //Normal Build:
             {
                 configFileFolder = LocateFile.GetPath("Config Folder");
-                SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
+                SessionValues.SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
                 SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFilePathInExternalFolder(configFileFolder, "*SessionConfig*"));
                 LoadSessionConfigSettings();
             }
@@ -314,7 +314,7 @@ namespace USE_ExperimentTemplate_Session
                 {
                     if (!Application.isEditor) //DOESNT CURRENTLY WORK FOR DEFAULT CONFIGS CUZ THATS NOT A CONFIG ON THE SERVER, so it cant find it to copy from
                     {
-                        StartCoroutine(CreateFolderOnServer(SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings", () =>
+                        StartCoroutine(CreateFolderOnServer(SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings", () =>
                         {
                             StartCoroutine(CopySessionConfigFolderToDataFolder()); //Copy Session Config folder to Data folder so that the settings are stored:
                         }));
@@ -322,7 +322,7 @@ namespace USE_ExperimentTemplate_Session
                 }
                 else
                 {
-                    string sessionSettingsFolderPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
+                    string sessionSettingsFolderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
                     Directory.CreateDirectory(sessionSettingsFolderPath);
                     SessionSettings.StoreSettings(sessionSettingsFolderPath + Path.DirectorySeparatorChar);
                 }
@@ -783,8 +783,8 @@ namespace USE_ExperimentTemplate_Session
                     AppendSerialData();
                     SerialRecvData.AppendDataToFile();
                     SerialSentData.AppendDataToFile();
-                    SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionDataPath, "SerialRecvData", CurrentTask.TaskName);
-                    SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionDataPath, "SerialSentData", CurrentTask.TaskName);
+                    SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialRecvData", CurrentTask.TaskName);
+                    SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialSentData", CurrentTask.TaskName);
                 }
             });
 
@@ -856,14 +856,14 @@ namespace USE_ExperimentTemplate_Session
 
                 if (SerialPortActive)
                 {
-                    SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataPath, "SerialRecvData", "SessionLevel");
-                    SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataPath, "SerialSentData", "SessionLevel");
+                    SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.SessionDataPath, "SerialRecvData", "SessionLevel");
+                    SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.SessionDataPath, "SerialSentData", "SessionLevel");
 
 
                 }
-                //     SessionDataPath + Path.DirectorySeparatorChar +
+                //     SessionValues.SessionDataPath + Path.DirectorySeparatorChar +
                 //                             SerialRecvData.GetNiceIntegers(4, taskCount + 1 * 2 - 1) + "_TaskSelection";
-                // SerialSentData.folderPath = SessionDataPath + Path.DirectorySeparatorChar +
+                // SerialSentData.folderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar +
                 //                             SerialSentData.GetNiceIntegers(4, taskCount + 1 * 2 - 1) + "_TaskSelection";
 
 
@@ -903,7 +903,7 @@ namespace USE_ExperimentTemplate_Session
             });
 
             SessionData = (SessionData)SessionDataControllers.InstantiateDataController<SessionData>
-                ("SessionData", StoreData, SessionDataPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionDataPath);
+                ("SessionData", StoreData, SessionValues.SessionDataPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionValues.SessionDataPath);
             SessionData.fileName = FilePrefix + "__SessionData.txt";
             SessionData.sessionLevel = this;
             SessionData.InitDataController();
@@ -915,7 +915,7 @@ namespace USE_ExperimentTemplate_Session
             if (SerialPortActive)
             {
                 SerialSentData = (SerialSentData)SessionDataControllers.InstantiateDataController<SerialSentData>
-                    ("SerialSentData", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "SerialSentData"
+                    ("SerialSentData", StoreData, SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SerialSentData"
                                                   + Path.DirectorySeparatorChar + "0001_TaskSelection");
                 SerialSentData.fileName = FilePrefix + "__SerialSentData_0001_TaskSelection.txt";
                 SerialSentData.sessionLevel = this;
@@ -923,7 +923,7 @@ namespace USE_ExperimentTemplate_Session
                 SerialSentData.ManuallyDefine();
 
                 SerialRecvData = (SerialRecvData)SessionDataControllers.InstantiateDataController<SerialRecvData>
-                    ("SerialRecvData", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "SerialRecvData"
+                    ("SerialRecvData", StoreData, SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SerialRecvData"
                                                   + Path.DirectorySeparatorChar + "0001_TaskSelection");
                 SerialRecvData.fileName = FilePrefix + "__SerialRecvData_0001_TaskSelection.txt";
                 SerialRecvData.sessionLevel = this;
@@ -932,9 +932,9 @@ namespace USE_ExperimentTemplate_Session
             }
 
             if(!SessionValues.WebBuild)
-                SummaryData.Init(StoreData, SessionDataPath);
+                SummaryData.Init(StoreData, SessionValues.SessionDataPath);
 
-            SessionLevelDataPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel";
+            SessionLevelDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel";
 
             //if web build, create the SessionLevelDataFolder:
             if(SessionValues.WebBuild)
@@ -1281,7 +1281,6 @@ namespace USE_ExperimentTemplate_Session
             tl.DisplayController = DisplayController;
             tl.SessionDataControllers = SessionDataControllers;
             tl.LocateFile = LocateFile;
-            tl.SessionDataPath = SessionDataPath;
             tl.SessionLevelDataPath = SessionLevelDataPath;
 
 
@@ -1469,7 +1468,7 @@ namespace USE_ExperimentTemplate_Session
 
                 // \??\ indicates that the path should be non-interpreted
                 string prefix = @"\??\";
-                string substituteName = prefix + SessionDataPath;
+                string substituteName = prefix + SessionValues.SessionDataPath;
                 // char is 2 bytes because strings are UTF-16
                 int substituteByteLen = substituteName.Length * sizeof(char);
                 ReparseDataBuffer rdb = new ReparseDataBuffer
@@ -1503,7 +1502,7 @@ namespace USE_ExperimentTemplate_Session
                 //Create Log Folder & Files for Normal Build: -----------------------------------------------------------------------------------------------
                 if (!SessionValues.WebBuild) //Web Build log folder & file creation already handled in the WebBuildLogWriter.cs class
                 {
-                    System.IO.Directory.CreateDirectory(SessionDataPath + Path.DirectorySeparatorChar + "LogFile");
+                    Directory.CreateDirectory(SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "LogFile");
 
                     string logPath = "";
                     if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX | SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux)
@@ -1518,7 +1517,7 @@ namespace USE_ExperimentTemplate_Session
                     }
 
                     string logFileName = Application.isEditor ? "Editor.log" : "Player.log";
-                    File.Copy(logPath, SessionDataPath + Path.DirectorySeparatorChar + "LogFile" + Path.DirectorySeparatorChar + logFileName);
+                    File.Copy(logPath, SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "LogFile" + Path.DirectorySeparatorChar + logFileName);
                 }
 
 

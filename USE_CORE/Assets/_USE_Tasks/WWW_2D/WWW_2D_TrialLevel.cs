@@ -354,7 +354,7 @@ public class WWW_2D_TrialLevel : ControlLevel_Trial_Template
             if (CorrectSelection)
             {
                 consecutiveError = 0;
-                HaloFBController.ShowPositive(selectedGO);
+                HaloFBController.ShowPositive(selectedGO, 50);
                 SliderFBController.UpdateSliderValue(CurrentTrialDef.SliderGain[numTouchedStims] * (1f / sliderGainSteps));
                 numTouchedStims += 1;
                 if (numTouchedStims == CurrentTrialDef.CorrectObjectTouchOrder.Length)
@@ -365,7 +365,7 @@ public class WWW_2D_TrialLevel : ControlLevel_Trial_Template
             else //Chose Incorrect
             {
                 consecutiveError++;
-                HaloFBController.ShowNegative(selectedGO);
+                HaloFBController.ShowNegative(selectedGO, 50);
                 if (distractorSlotError)
                     stimIdx = Array.IndexOf(CurrentTrialDef.DistractorStimsIndices, selectedSD.StimIndex); // used to index through the arrays in the config file/mapping different columns
                 else

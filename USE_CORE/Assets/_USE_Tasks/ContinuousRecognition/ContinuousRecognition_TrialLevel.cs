@@ -28,10 +28,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public GameObject ScoreTextGO;
     public GameObject NumTrialsTextGO;
     public GameObject TimerBackdropGO;
-    public GameObject GreenBorderPrefab;
-    public GameObject RedBorderPrefab;
+    //public GameObject GreenBorderPrefab;
+    //public GameObject RedBorderPrefab;
     public GameObject Starfield;
-    [HideInInspector] public List<GameObject> BorderPrefabList;
+    //[HideInInspector] public List<GameObject> BorderPrefabList;
 
     [HideInInspector] public bool CompletedAllTrials;
     [HideInInspector] public bool EndBlock;
@@ -479,7 +479,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     {
         DeactivatePlayerViewText();
         DeactivateTextObjects();
-        DestroyFeedbackBorders();
+        //DestroyFeedbackBorders();
         ContextActive = false;
     }
 
@@ -1002,7 +1002,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             RightGroup = new StimGroup("Right", group, ChosenStimIndices);
             StartCoroutine(GenerateFeedbackStim(RightGroup, FeedbackLocations, result =>
             {
-                GenerateFeedbackBorders(RightGroup);
+                //GenerateFeedbackBorders(RightGroup);
 
                 if (currentTrial.StimFacingCamera)
                     MakeStimsFaceCamera(RightGroup);
@@ -1017,7 +1017,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             RightGroup = new StimGroup("Right", group, ChosenStimIndices);
             StartCoroutine(GenerateFeedbackStim(RightGroup, FeedbackLocations.Take(FeedbackLocations.Length - 1).ToArray(), result =>
             {
-                GenerateFeedbackBorders(RightGroup);
+                //GenerateFeedbackBorders(RightGroup);
 
                 if (currentTrial.StimFacingCamera)
                     MakeStimsFaceCamera(RightGroup);
@@ -1028,7 +1028,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             wrongStim.StimGameObject = null;
             StartCoroutine(GenerateFeedbackStim(WrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length - 1).Take(1).ToArray(), result =>
             {
-                GenerateFeedbackBorders(WrongGroup);
+                //GenerateFeedbackBorders(WrongGroup);
 
                 if (currentTrial.StimFacingCamera)
                     wrongStim.StimGameObject.AddComponent<FaceCamera>();
@@ -1051,7 +1051,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         callback?.Invoke(null);
     }
 
-    void GenerateFeedbackBorders(StimGroup group)
+    /*void GenerateFeedbackBorders(StimGroup group)
     {
         if (BorderPrefabList.Count == 0)
             BorderPrefabList = new List<GameObject>();
@@ -1070,9 +1070,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
         }
 
-    }
+    }*/
 
-    void DestroyFeedbackBorders()
+    /*void DestroyFeedbackBorders()
     {
         foreach (GameObject border in BorderPrefabList)
         {
@@ -1080,7 +1080,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 Destroy(border);
         }
         BorderPrefabList.Clear();
-    }
+    }*/
 
     void HandleTokenUpdate()
     {

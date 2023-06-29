@@ -15,19 +15,11 @@ using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Trial;
-using USE_ExperimentTemplate_Block;
 using SelectionTracking;
-using UnityEngine.InputSystem;
 using USE_DisplayManagement;
-using Tobii.Research.Unity;
 using Tobii.Research;
-using static UnityEngine.EventSystems.EventTrigger;
-using MazeGame_Namespace;
-using UnityEngine.UIElements;
 using System.Collections;
-using UnityEngine.SceneManagement;
 using USE_ExperimentTemplate_Session;
-using static System.Collections.Specialized.BitVector32;
 using USE_Def_Namespace;
 
 

@@ -7,6 +7,7 @@ using System.Text;
 using Newtonsoft.Json;
 using SelectionTracking;
 using UnityEngine;
+using USE_Def_Namespace;
 using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Session;
@@ -15,6 +16,7 @@ using USE_UI;
 
 public static class SessionValues
 {
+    public static SessionDef SessionDef;
     public static bool WebBuild = false;
     public static bool UseDefaultConfigs = false;
     public static bool Using2DStim = false;

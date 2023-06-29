@@ -18,26 +18,12 @@ using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Task;
 using SelectionTracking;
-using Random = UnityEngine.Random;
-using UnityEngine.InputSystem;
 using TMPro;
-using Tobii.Research.Unity;
+using USE_Def_Namespace;
 #if (!UNITY_WEBGL)
     using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 #endif
-using Button = UnityEngine.UI.Button;
 using USE_DisplayManagement;
-using Tobii.Research;
-using UnityEngine.Serialization;
-using static UnityEngine.UI.CanvasScaler;
-using static SelectionTracking.SelectionTracker;
-using UnityEngine.UIElements;
-using USE_ExperimentTemplate_Trial;
-using Image = UnityEngine.UI.Image;
-using Tobii.Research.Unity.CodeExamples;
-using UnityEditor;
-using System.Threading.Tasks;
-using ConfigDynamicUI;
 //using UnityEngine.Windows.WebCam;
 
 
@@ -48,7 +34,7 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public int SessionId_SQL;
 
         private bool IsHuman;
-
+        private SessionDef SessionDef;
         [HideInInspector] public float ParticipantDistance_CM;
         [HideInInspector] public float ShotgunRaycastSpacing_DVA;
         [HideInInspector] public float ShotgunRaycastCircleSize_DVA;
@@ -203,7 +189,7 @@ namespace USE_ExperimentTemplate_Session
                 configFileFolder = LocateFile.GetPath("Config Folder");
                 SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
                 SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFilePathInExternalFolder(configFileFolder, "*SessionConfig*"));
-                LoadSessionConfigSettings();
+                LoadSessionConfigSettings(); 
             }
         }
 
@@ -1053,8 +1039,8 @@ namespace USE_ExperimentTemplate_Session
                 eventCodeFileString = LocateFile.FindFilePathInExternalFolder(configFileFolder, "*EventCode*");
                 if (!string.IsNullOrEmpty(eventCodeFileString))
                 {
-                    SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
-                    SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
+                    SessionEventCodes = SessionValues.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
+                //    SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
                 }
                 else if (EventCodesActive)
                     Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");
@@ -1543,14 +1529,5 @@ namespace USE_ExperimentTemplate_Session
         }
     }
 
-    public class SessionDef
-    {
-        public string Subject;
-        public DateTime SessionStart_DateTime;
-        public int SessionStart_Frame;
-        public float SessionStart_UnityTime;
-        public string SessionID;
-        public bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
-        public string EyetrackerType, SelectionType;
-    }
+    
 }

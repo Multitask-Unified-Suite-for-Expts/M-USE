@@ -277,6 +277,7 @@ namespace USE_StimulusManagement
 
         public IEnumerator Load(Action<GameObject> callback)
         {
+	        Debug.Log(FileName);
 			SessionValues.Using2DStim = FileName.Contains("png") ? true : false;
 
 			bool loadFromServer = SessionValues.WebBuild && !SessionValues.UseDefaultConfigs;
@@ -838,13 +839,15 @@ namespace USE_StimulusManagement
 		{
 			foreach (StimDef sd in stimDefs)
 			{
-				yield return CoroutineHelper.StartCoroutine(sd.Load(stimResultGO =>
-				{
-					if (stimResultGO != null)
-						sd.StimGameObject = stimResultGO;
-					else
-						Debug.Log("LOAD COROUTINE - STIM RESULT GAMEOBJECT IS NULL!!!!!!!!!!!!");
-				}));
+				if (sd.StimGameObject == null){
+					yield return CoroutineHelper.StartCoroutine(sd.Load(stimResultGO =>
+					{
+						if (stimResultGO != null)
+							sd.StimGameObject = stimResultGO;
+						else
+							Debug.Log("LOAD COROUTINE - STIM RESULT GAMEOBJECT IS NULL!!!!!!!!!!!!");
+					}));
+				}
 			}
 		}
 

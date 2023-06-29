@@ -7,12 +7,9 @@ using System.Collections.Generic;
 using TMPro;
 using USE_Data;
 using USE_ExperimentTemplate_Classes;
-using USE_UI;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Trial;
-using static UnityEngine.ParticleSystem;
-using UnityEngine.InputSystem.HID;
 
 namespace USE_UI
 {

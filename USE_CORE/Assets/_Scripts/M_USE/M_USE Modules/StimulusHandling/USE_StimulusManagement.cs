@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-//using System.Security.Policy;
-using JetBrains.Annotations;
 using UnityEngine;
 using USE_Settings;
 using TriLib;
@@ -13,9 +10,7 @@ using USE_States;
 using Object = UnityEngine.Object;
 using USE_ExperimentTemplate_Classes;
 using System.Collections;
-using USE_ExperimentTemplate_Session;
-using System.Threading.Tasks;
-using UnityEngine.UI;
+
 
 namespace USE_StimulusManagement
 {
@@ -521,6 +516,7 @@ namespace USE_StimulusManagement
 					stimGOImage.texture = LoadPNG(FileName);
 					if (this.CanvasGameObject != null)
 						StimGameObject.GetComponent<RectTransform>().SetParent(this.CanvasGameObject.GetComponent<RectTransform>());
+					PositionRotationScale();
 					break;
 				default:
 					break;
@@ -542,6 +538,7 @@ namespace USE_StimulusManagement
 				tex = new Texture2D(2, 2);
 				tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
 			}
+			PositionRotationScale();
 			ToggleVisibility(visibility);
 			return tex;
 		}

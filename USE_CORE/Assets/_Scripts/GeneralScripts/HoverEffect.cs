@@ -1,7 +1,6 @@
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using USE_UI;
+
 
 public class HoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {

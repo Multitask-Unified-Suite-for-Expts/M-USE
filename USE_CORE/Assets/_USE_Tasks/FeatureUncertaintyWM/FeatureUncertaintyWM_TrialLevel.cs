@@ -1,22 +1,14 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using USE_States;
-using USE_Settings;
 using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
 using FeatureUncertaintyWM_Namespace;
-using System;
-using Newtonsoft.Json.Linq;
-using System.Reflection;
 using USE_UI;
 using UnityEngine.UI;
 using ConfigDynamicUI;
-using WorkingMemory_Namespace;
-using UnityEditor.PackageManager.UI;
-using WhatWhenWhere_Namespace;
-using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
+
 
 public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 {
@@ -161,7 +153,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
                     }
                     allMcComponentGameObjs.Add(mcComponentGameObjs);
                 }
-                LoadTextures(ContextExternalFilePath);
+                //LoadTextures(ContextExternalFilePath); //done at USE_TrialLevel, no longer needed here
                 // Initialize FB Controller Values
                 HaloFBController.SetHaloSize(5f);
                 HaloFBController.SetHaloIntensity(5);

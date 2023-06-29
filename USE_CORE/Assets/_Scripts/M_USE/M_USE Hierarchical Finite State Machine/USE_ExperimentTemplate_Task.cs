@@ -17,17 +17,11 @@ using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Trial;
 using USE_ExperimentTemplate_Block;
 using SelectionTracking;
-using UnityEngine.InputSystem;
 using USE_DisplayManagement;
 using Tobii.Research.Unity;
 using Tobii.Research;
-using static UnityEngine.EventSystems.EventTrigger;
-using MazeGame_Namespace;
-using UnityEngine.UIElements;
 using System.Collections;
-using UnityEngine.SceneManagement;
 using USE_ExperimentTemplate_Session;
-using static System.Collections.Specialized.BitVector32;
 
 
 namespace USE_ExperimentTemplate_Task
@@ -67,7 +61,7 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public DisplayArea DisplayArea;
 
         [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
-        [HideInInspector] public string ContextExternalFilePath, SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
+        [HideInInspector] public string ContextExternalFilePath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
         [HideInInspector] public MonitorDetails MonitorDetails;
         [HideInInspector] public LocateFile LocateFile;
         [HideInInspector] public StringBuilder BlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
@@ -242,15 +236,12 @@ namespace USE_ExperimentTemplate_Task
                 if (IsHuman)
                 {
                     Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
-                    //Create HumanStartPanel
                     HumanStartPanel.SetupDataAndCodes(FrameData, EventCodeManager, SessionEventCodes);
                     HumanStartPanel.SetTaskLevel(this);
                     HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
                 }
             });
-
             SetupTask.SpecifyTermination(() => true, RunBlock);
-
 
             RunBlock.AddUniversalInitializationMethod(() =>
             {
@@ -436,7 +427,7 @@ namespace USE_ExperimentTemplate_Task
 
 
             //Setup data management
-            TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
+            TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
 
             if (SessionValues.WebBuild && StoreData)
                 StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
@@ -453,7 +444,7 @@ namespace USE_ExperimentTemplate_Task
                 else if (TaskName == "GazeCalibration")
                 {
                     // Store Data in the Task / Gaze Calibration folder if not running at the session level
-                    TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName + Path.DirectorySeparatorChar + "InTask_GazeCalibration";
+                    TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigName + Path.DirectorySeparatorChar + "InTask_GazeCalibration";
                     ConfigName = "GazeCalibration";
                 }
             }
@@ -590,7 +581,7 @@ namespace USE_ExperimentTemplate_Task
             MouseTracker.Init(FrameData, 0);
 
 
-            if(SessionValues.WebBuild)
+            if (SessionValues.WebBuild)
             {
                 TrialLevel.LoadTexturesFromResources(); //delete this when uncomment below
 
@@ -604,14 +595,14 @@ namespace USE_ExperimentTemplate_Task
             else
                 TrialLevel.LoadTextures(ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 
 
+            //Automatically giving TouchFbController;
+            TrialLevel.TouchFBController.Init(TrialData, FrameData); 
+
+
             //load trackers
             MouseTracker.Init(FrameData, 0);
             if (EyeTrackerActive)
                 GazeTracker.Init(FrameData, 0);
-
-
-            //Automatically giving TouchFbController;
-            TrialLevel.TouchFBController.Init(TrialData, FrameData);
 
             bool audioInited = false;
             foreach (string fbController in fbControllersList)
@@ -687,6 +678,9 @@ namespace USE_ExperimentTemplate_Task
 
             yield return null;
         }
+
+
+
 
 
         public static IEnumerator HandleCreateExternalFolder(string configName)

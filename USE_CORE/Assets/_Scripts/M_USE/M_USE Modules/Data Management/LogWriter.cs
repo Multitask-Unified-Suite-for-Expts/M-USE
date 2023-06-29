@@ -4,12 +4,13 @@ using System.IO;
 using UnityEngine;
 
 
-public class LogWriter : MonoBehaviour //Class is a component attached to "MiscScripts" GameObject. 
+public class LogWriter : MonoBehaviour
 {
     private List<string> LogMessages = new List<string>();
-
-    public bool LogFolderCreated;
-    public bool LogFileCreated;
+    [HideInInspector] public bool StoreData; //Set by SessionLevel
+    private bool StoreDataIsSet;
+    private bool LogFolderCreated;
+    private bool LogFileCreated;
     private readonly int Capacity = 100;
 
     private string ServerLogFolderPath
@@ -68,7 +69,6 @@ public class LogWriter : MonoBehaviour //Class is a component attached to "MiscS
         }
     }
 
-    [HideInInspector] public bool StoreData; //Set by SessionLevel
 
 
     private void Start()
@@ -77,15 +77,27 @@ public class LogWriter : MonoBehaviour //Class is a component attached to "MiscS
         Application.quitting += OnApplicationQuit;
     }
 
+    public void SetStoreData(bool storeData)
+    {
+        StoreData = storeData;
+        StoreDataIsSet = true;
+    }
+
     private void HandleLogMessage(string logMessage, string stackTrace, LogType type)
     {
-        if (!StoreData)
+        LogMessages.Add(logMessage);
+
+        if (!StoreDataIsSet)
             return;
+
+        if (!StoreData)
+        {
+            LogMessages.Clear();
+            return;
+        }
 
         if(!LogFolderCreated)
             StartCoroutine(CreateLogFolder());
-
-        LogMessages.Add(logMessage);
 
         if (LogMessages.Count >= Capacity)
         {
@@ -96,6 +108,15 @@ public class LogWriter : MonoBehaviour //Class is a component attached to "MiscS
         }
     }
 
+    private void WriteLogMessagesLocally(StreamWriter writer)
+    {
+        if (LogMessages.Count > 0)
+        {
+            foreach (string message in LogMessages)
+                writer.WriteLine(message);
+            LogMessages.Clear();
+        }
+    }
 
     private IEnumerator CreateLogFolder()
     {
@@ -111,17 +132,6 @@ public class LogWriter : MonoBehaviour //Class is a component attached to "MiscS
         LogFolderCreated = true;
     }
 
-    private void WriteLogMessages(StreamWriter writer)
-    {
-        if (LogMessages.Count > 0)
-        {
-            foreach (string message in LogMessages)
-                writer.WriteLine(message);
-            LogMessages.Clear();
-        }
-    }
-
-
     private IEnumerator CreateLogFile()
     {
         if (SessionValues.WebBuild)
@@ -133,7 +143,7 @@ public class LogWriter : MonoBehaviour //Class is a component attached to "MiscS
         else
         {
             using StreamWriter createFileWriter = File.CreateText(LocalLogFilePath);
-            WriteLogMessages(createFileWriter);
+            WriteLogMessagesLocally(createFileWriter);
         }
         LogFileCreated = true;
     }
@@ -149,9 +159,10 @@ public class LogWriter : MonoBehaviour //Class is a component attached to "MiscS
         else
         {
             using StreamWriter appendFileWriter = File.AppendText(LocalLogFilePath);
-            WriteLogMessages(appendFileWriter);
+            WriteLogMessagesLocally(appendFileWriter);
         }
     }
+
 
     private void OnApplicationQuit()
     {

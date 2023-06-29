@@ -77,8 +77,6 @@ namespace USE_ExperimentTemplate_Session
         protected int taskCount;
         private float TaskSelectionTimeout;
 
-        [HideInInspector] public int LongRewardHotKeyPulseSize;
-        [HideInInspector] public int LongRewardHotKeyNumPulses;
         [HideInInspector] public int RewardHotKeyPulseSize;
         [HideInInspector] public int RewardHotKeyNumPulses;
 
@@ -90,7 +88,7 @@ namespace USE_ExperimentTemplate_Session
         private SyncBoxController SyncBoxController;
         private EventCodeManager EventCodeManager;
         [HideInInspector] public SelectionTracker SelectionTracker;
-        private SelectionTracker.SelectionHandler SelectionHandler;
+        private SelectionHandler SelectionHandler;
         private GameObject InputManager;
         private MouseTracker MouseTracker;
         private GazeTracker GazeTracker;
@@ -139,8 +137,6 @@ namespace USE_ExperimentTemplate_Session
 
         [HideInInspector] public HumanStartPanel HumanStartPanel;
         [HideInInspector] public USE_StartButton USE_StartButton;
-
-        public LogWriter LogWriter;
 
 
 
@@ -993,16 +989,6 @@ namespace USE_ExperimentTemplate_Session
             else
                 SonicationActive = false;
 
-            if (SessionSettings.SettingExists("Session", "LongRewardHotKeyPulseSize"))
-                LongRewardHotKeyPulseSize = (int)SessionSettings.Get("Session", "LongRewardHotKeyPulseSize");
-            else
-                LongRewardHotKeyPulseSize = 500;
-
-            if (SessionSettings.SettingExists("Session", "LongRewardHotKeyNumPulses"))
-                LongRewardHotKeyNumPulses = (int)SessionSettings.Get("Session", "LongRewardHotKeyNumPulses");
-            else
-                LongRewardHotKeyNumPulses = 1;
-
             if (SessionSettings.SettingExists("Session", "RewardHotKeyPulseSize"))
                 RewardHotKeyPulseSize = (int)SessionSettings.Get("Session", "RewardHotKeyPulseSize");
             else
@@ -1052,9 +1038,6 @@ namespace USE_ExperimentTemplate_Session
                 else if (EventCodesActive)
                     Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");
             }
-
-
-           
 
             List<string> taskNames;
             if (SessionSettings.SettingExists("Session", "TaskNames"))
@@ -1109,7 +1092,8 @@ namespace USE_ExperimentTemplate_Session
             if (SessionSettings.SettingExists("Session", "StoreData"))
                 StoreData = (bool)SessionSettings.Get("Session", "StoreData");
 
-            LogWriter.StoreData = StoreData;
+            //Set LogWriter StoreData variable:
+            GameObject.Find("MiscScripts").GetComponent<LogWriter>().SetStoreData(StoreData);
 
             if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
                 MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");

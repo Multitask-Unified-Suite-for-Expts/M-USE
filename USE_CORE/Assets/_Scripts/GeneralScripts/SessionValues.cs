@@ -17,7 +17,7 @@ public static class SessionValues
     public static bool UseDefaultConfigs;
     public static bool Using2DStim;
     public static bool IsHuman;
-    public static bool StoreData;
+    public static bool StoreData; //Set by sessionLevel after reading in config. 
     public static bool EyeTrackerActive;
     public static bool SerialPortActive;
     public static bool SyncBoxActive;

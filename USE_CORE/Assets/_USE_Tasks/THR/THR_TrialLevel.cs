@@ -444,6 +444,23 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         NumTouchesMovedOutside_Block += NumTouchesMovedOutside_Trial;
     }
 
+    public override void ResetTrialVariables()
+    {
+        TrialCompletionList.Clear();
+        TrialsCompleted_Block = 0;
+        TrialsCorrect_Block = 0;
+        BackdropTouches_Block = 0;
+        BlueSquareTouches_Block = 0;
+        WhiteSquareTouches_Block = 0;
+        NumItiTouches_Block = 0;
+        NumTouchRewards_Block = 0;
+        NumReleaseRewards_Block = 0;
+        NumReleasedEarly_Block = 0;
+        NumReleasedLate_Block = 0;
+        NumTouchesMovedOutside_Block = 0;
+        PerfThresholdMet = false;
+    }
+
     private void SetTrialSummaryString()
     {
         TrialSummaryString = "Rewarding: " + (currentTrial.RewardTouch ? "Touch" : "Release") +

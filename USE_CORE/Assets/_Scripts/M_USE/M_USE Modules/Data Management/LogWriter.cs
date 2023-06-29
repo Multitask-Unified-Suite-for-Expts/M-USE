@@ -7,8 +7,7 @@ using UnityEngine;
 public class LogWriter : MonoBehaviour
 {
     private List<string> LogMessages = new List<string>();
-    [HideInInspector] public bool StoreData; //Set by SessionLevel
-    private bool StoreDataIsSet;
+    public bool StoreDataIsSet; //turned true by sessionLevel script when it sets SessionValues.StoreData's value
     private bool LogFolderCreated;
     private bool LogFileCreated;
     private readonly int Capacity = 100;
@@ -77,12 +76,6 @@ public class LogWriter : MonoBehaviour
         Application.quitting += OnApplicationQuit;
     }
 
-    public void SetStoreData(bool storeData)
-    {
-        StoreData = storeData;
-        StoreDataIsSet = true;
-    }
-
     private void HandleLogMessage(string logMessage, string stackTrace, LogType type)
     {
         LogMessages.Add(logMessage);
@@ -90,7 +83,7 @@ public class LogWriter : MonoBehaviour
         if (!StoreDataIsSet)
             return;
 
-        if (!StoreData)
+        if (!SessionValues.StoreData)
         {
             LogMessages.Clear();
             return;
@@ -166,7 +159,7 @@ public class LogWriter : MonoBehaviour
 
     private void OnApplicationQuit()
     {
-        if (!StoreData)
+        if (!SessionValues.StoreData)
             return;
 
         if (LogFileCreated)

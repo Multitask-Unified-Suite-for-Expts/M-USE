@@ -66,12 +66,14 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     }
     public override OrderedDictionary GetSummaryData()
     {
-        OrderedDictionary data = new OrderedDictionary();
-        data["Trial Count In Task"] = wwwTL.TrialCount_InTask;
-        data["Num Reward Pulses"] = NumRewardPulses_InTask;
-        data["Slider Bar Full"] = NumSliderBarFilled_InTask;
-        data["Aborted Trials In Task"] = AbortedTrials_InTask;
-        if(SearchDurations_InTask.Count > 0)
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trial Count In Task"] = wwwTL.TrialCount_InTask,
+            ["Num Reward Pulses"] = NumRewardPulses_InTask,
+            ["Slider Bar Full"] = NumSliderBarFilled_InTask,
+            ["Aborted Trials In Task"] = AbortedTrials_InTask
+        };
+        if (SearchDurations_InTask.Count > 0)
             data["Average Search Duration"] = SearchDurations_InTask.Average();
         
         return data;

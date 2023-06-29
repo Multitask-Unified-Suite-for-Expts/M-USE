@@ -5,7 +5,6 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,26 +17,13 @@ using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Task;
 using SelectionTracking;
-using Random = UnityEngine.Random;
-using UnityEngine.InputSystem;
 using TMPro;
 using Tobii.Research.Unity;
 #if (!UNITY_WEBGL)
     using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 #endif
-using Button = UnityEngine.UI.Button;
 using USE_DisplayManagement;
-using Tobii.Research;
-using UnityEngine.Serialization;
-using static UnityEngine.UI.CanvasScaler;
 using static SelectionTracking.SelectionTracker;
-using UnityEngine.UIElements;
-using USE_ExperimentTemplate_Trial;
-using Image = UnityEngine.UI.Image;
-using Tobii.Research.Unity.CodeExamples;
-using UnityEditor;
-using System.Threading.Tasks;
-using ConfigDynamicUI;
 //using UnityEngine.Windows.WebCam;
 
 
@@ -572,21 +558,21 @@ namespace USE_ExperimentTemplate_Session
                 TaskButtonsContainer = new GameObject("TaskButtons");
                 TaskButtonsContainer.transform.parent = TaskSelectionCanvasGO.transform;
                 TaskButtonsContainer.transform.localPosition = Vector3.zero;
-                TaskButtonsContainer.transform.localScale = Vector3.one * 1.06f;
+                TaskButtonsContainer.transform.localScale = Vector3.one;
 
-                // We'll use height for the calculations because it is generally smaller than the width
                 int numTasks = TaskMappings.Count;
+
                 float buttonSize;
                 float buttonSpacing;
                 if (MacMainDisplayBuild && !Application.isEditor)
                 {
-                    buttonSize = 249f;
-                    buttonSpacing = 28.5f;
+                    buttonSize = 264f;
+                    buttonSpacing = 30f;
                 }
                 else
                 {
-                    buttonSize = 188f;
-                    buttonSpacing = 18f;
+                    buttonSize = 199f;
+                    buttonSpacing = 19f;
                 }
 
                 float buttonsWidth = numTasks * buttonSize + (numTasks - 1) * buttonSpacing;
@@ -826,8 +812,9 @@ namespace USE_ExperimentTemplate_Session
                 if (PreviousTaskSummaryString != null && CurrentTask.CurrentTaskSummaryString != null)
                     PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
 
-                if(!SessionValues.WebBuild)
-                    SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
+
+                SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
+                
 
                 SessionData.AppendDataToBuffer();
                 SessionData.AppendDataToFile();
@@ -929,8 +916,7 @@ namespace USE_ExperimentTemplate_Session
                 SerialRecvData.ManuallyDefine();
             }
 
-            if(!SessionValues.WebBuild)
-                SummaryData.Init(StoreData, SessionValues.SessionDataPath);
+            SummaryData.Init();
 
             SessionLevelDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel";
 
@@ -1092,8 +1078,8 @@ namespace USE_ExperimentTemplate_Session
             if (SessionSettings.SettingExists("Session", "StoreData"))
                 StoreData = (bool)SessionSettings.Get("Session", "StoreData");
 
-            //Set LogWriter StoreData variable:
-            GameObject.Find("MiscScripts").GetComponent<LogWriter>().SetStoreData(StoreData);
+            SessionValues.StoreData = StoreData;
+            GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
 
             if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
                 MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");

@@ -78,12 +78,13 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 
     public override OrderedDictionary GetSummaryData()
     {
-        OrderedDictionary data = new OrderedDictionary();
-
-        data["Reward Pulses"] = NumRewardPulses_InTask;
-        data["Token Bar Full"] = NumTokenBarFull_InTask;
-        data["Total Tokens Collected"] = TotalTokensCollected_InTask;
-        if(SearchDurationsList_InTask.Count > 0)
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Reward Pulses"] = NumRewardPulses_InTask,
+            ["Token Bar Full"] = NumTokenBarFull_InTask,
+            ["Total Tokens Collected"] = TotalTokensCollected_InTask
+        };
+        if (SearchDurationsList_InTask.Count > 0)
             data["Average Search Duration"] = SearchDurationsList_InTask.Average();
         if(vsTL.TrialCount_InTask != 0)
             data["Accuracy"] = decimal.Divide(NumCorrect_InTask, (vsTL.TrialCount_InTask));

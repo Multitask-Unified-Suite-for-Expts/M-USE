@@ -4,13 +4,9 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using ContinuousRecognition_Namespace;
 using UnityEngine;
-using UnityEngine.UI;
 using USE_Settings;
-using USE_StimulusManagement;
 using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Block;
 using System.Linq;
-using System.IO;
 
 public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 {
@@ -88,19 +84,16 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddInitializationMethod(() =>
         {
-            if(!SessionValues.WebBuild)
-            {
-                CalculateBlockAverages();
-                CalculateStanDev();
-                AddBlockValuesToTaskValues();
+            CalculateBlockAverages();
+            CalculateStanDev();
+            AddBlockValuesToTaskValues();
 
-                if (trialLevel.AbortCode == 0)
-                {
-                    CurrentBlockString += "\n" + "\n";
-                    CurrentBlockString = CurrentBlockString.Replace("Current Block", $"Block {blocksAdded + 1}");
-                    PreviousBlocksString.Insert(0, CurrentBlockString); //Add current block string to full list of previous blocks. 
-                    blocksAdded++;
-                }
+            if(!SessionValues.WebBuild && trialLevel.AbortCode == 0)
+            {
+                CurrentBlockString += "\n" + "\n";
+                CurrentBlockString = CurrentBlockString.Replace("Current Block", $"Block {blocksAdded + 1}");
+                PreviousBlocksString.Insert(0, CurrentBlockString); //Add current block string to full list of previous blocks. 
+                blocksAdded++;  
             }
         });        
     }
@@ -125,7 +118,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     {
         NonStimTouches_Task.Add(trialLevel.NonStimTouches_Block);
         TrialsCompleted_Task.Add(trialLevel.NumTrials_Block);
-        TrialsCorrect_Task.Add(trialLevel.NumCorrect_Block); //at end of each block, add block's NumCorrect to task List;
+        TrialsCorrect_Task.Add(trialLevel.NumCorrect_Block);
         TokenBarCompletions_Task.Add(trialLevel.NumTbCompletions_Block);
         TimeToChoice_Task.Add(trialLevel.AvgTimeToChoice_Block);
         TimeToCompletion_Task.Add(trialLevel.TimeToCompletion_Block);
@@ -164,18 +157,14 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     public override OrderedDictionary GetSummaryData()
     {
-        OrderedDictionary data = new OrderedDictionary();
-
-        if(NonStimTouches_Task.Count > 0)
-            data["Non Stim Touches"] = NonStimTouches_Task.AsQueryable().Sum();
-        if (TrialsCompleted_Task.Count > 0)
-            data["Trials Completed"] = TrialsCompleted_Task.AsQueryable().Sum();
-        if (TrialsCorrect_Task.Count > 0)
-            data["Trials Correct"] = TrialsCorrect_Task.AsQueryable().Sum();
-        if (TokenBarCompletions_Task.Count > 0)
-            data["TokenBar Completions"] = TokenBarCompletions_Task.AsQueryable().Sum();
-        if (TotalRewards_Task.Count > 0)
-            data["Total Rewards"] = TotalRewards_Task.AsQueryable().Sum();
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Non Stim Touches"] = NonStimTouches_Task.AsQueryable().Sum(),
+            ["Trials Completed"] = TrialsCompleted_Task.AsQueryable().Sum(),
+            ["Trials Correct"] = TrialsCorrect_Task.AsQueryable().Sum(),
+            ["TokenBar Completions"] = TokenBarCompletions_Task.AsQueryable().Sum(),
+            ["Total Rewards"] = TotalRewards_Task.AsQueryable().Sum()
+        };
         return data;
     }
 

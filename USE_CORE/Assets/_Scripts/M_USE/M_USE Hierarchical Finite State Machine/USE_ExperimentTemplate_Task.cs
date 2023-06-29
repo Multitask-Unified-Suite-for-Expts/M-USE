@@ -22,7 +22,7 @@ using Tobii.Research.Unity;
 using Tobii.Research;
 using System.Collections;
 using USE_ExperimentTemplate_Session;
-
+using USE_Def_Namespace;
 
 namespace USE_ExperimentTemplate_Task
 {
@@ -1596,7 +1596,7 @@ namespace USE_ExperimentTemplate_Task
 
     }
 
-
+/*
     public class TaskDef
     {
         public string TaskName;
@@ -1613,5 +1613,5 @@ namespace USE_ExperimentTemplate_Task
         public Dictionary<string, string> CustomSettings;
 
     }
-
+*/
 }

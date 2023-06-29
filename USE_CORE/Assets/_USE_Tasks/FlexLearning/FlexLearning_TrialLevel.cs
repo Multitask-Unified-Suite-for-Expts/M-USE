@@ -423,7 +423,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("CorrectSelection", () => CorrectSelection ? 1 : 0);
         TrialData.AddDatum("SearchDuration", ()=> SearchDuration);
         TrialData.AddDatum("RewardGiven", ()=> RewardGiven? 1 : 0);
-        TrialData.AddDatum("TotalClicks", ()=> MouseTracker.GetClickCount());
+        TrialData.AddDatum("TotalClicks", ()=> MouseTracker.GetClickCount()[0]);
         TrialData.AddDatum("AbortedTrial", ()=> aborted);
     }
     private void AssignFrameData()

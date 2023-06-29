@@ -261,8 +261,6 @@ namespace USE_UI
         public Color ButtonColor = new Color(1f, 1f, 1f, 1f);
         public RawImage Image;
         public Vector3 LocalPosition = new Vector3(0, 0, 0);
-        private Color32 originalColor;
-        private Sprite originalSprite;
         public string configName;
         public string taskName;
         
@@ -282,6 +280,7 @@ namespace USE_UI
             TaskButtonGO.SetActive(true);
         }
     }
+
     public class USE_StartButton : MonoBehaviour
     {
         [HideInInspector] public GameObject StartButtonGO;

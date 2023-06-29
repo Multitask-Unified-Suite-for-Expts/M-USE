@@ -22,7 +22,6 @@ using System.Collections;
 using USE_ExperimentTemplate_Session;
 using USE_Def_Namespace;
 
-
 namespace USE_ExperimentTemplate_Task
 {
 
@@ -60,7 +59,7 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public DisplayArea DisplayArea;
 
         [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
-        [HideInInspector] public string ContextExternalFilePath, SessionDataPath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
+        [HideInInspector] public string ContextExternalFilePath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
         [HideInInspector] public MonitorDetails MonitorDetails;
         [HideInInspector] public LocateFile LocateFile;
         [HideInInspector] public StringBuilder BlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
@@ -165,7 +164,6 @@ namespace USE_ExperimentTemplate_Task
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
 
             ReadSettingsFiles();
-
             while (!AllDefsImported)
                 yield return new WaitForEndOfFrame();
             TrialDefImported = false;
@@ -236,15 +234,12 @@ namespace USE_ExperimentTemplate_Task
                 if (IsHuman)
                 {
                     Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
-                    //Create HumanStartPanel
                     HumanStartPanel.SetupDataAndCodes(FrameData, EventCodeManager, SessionEventCodes);
                     HumanStartPanel.SetTaskLevel(this);
                     HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
                 }
             });
-
             SetupTask.SpecifyTermination(() => true, RunBlock);
-
 
             RunBlock.AddUniversalInitializationMethod(() =>
             {
@@ -430,7 +425,7 @@ namespace USE_ExperimentTemplate_Task
 
 
             //Setup data management
-            TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
+            TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
 
             if (SessionValues.WebBuild && StoreData)
                 StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
@@ -447,7 +442,7 @@ namespace USE_ExperimentTemplate_Task
                 else if (TaskName == "GazeCalibration")
                 {
                     // Store Data in the Task / Gaze Calibration folder if not running at the session level
-                    TaskDataPath = SessionDataPath + Path.DirectorySeparatorChar + ConfigName + Path.DirectorySeparatorChar + "InTask_GazeCalibration";
+                    TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigName + Path.DirectorySeparatorChar + "InTask_GazeCalibration";
                     ConfigName = "GazeCalibration";
                 }
             }
@@ -584,9 +579,9 @@ namespace USE_ExperimentTemplate_Task
             MouseTracker.Init(FrameData, 0);
 
 
-            if(SessionValues.WebBuild)
+            if (SessionValues.WebBuild)
             {
-                TrialLevel.LoadTexturesFromResources();
+                TrialLevel.LoadTexturesFromResources(); //delete this when uncomment below
 
                 //if (SessionValues.UseDefaultConfigs)
                 //    TrialLevel.LoadTexturesFromResources();
@@ -598,14 +593,14 @@ namespace USE_ExperimentTemplate_Task
             else
                 TrialLevel.LoadTextures(ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 
 
+            //Automatically giving TouchFbController;
+            TrialLevel.TouchFBController.Init(TrialData, FrameData); 
+
+
             //load trackers
             MouseTracker.Init(FrameData, 0);
             if (EyeTrackerActive)
                 GazeTracker.Init(FrameData, 0);
-
-
-            //Automatically giving TouchFbController;
-            TrialLevel.TouchFBController.Init(TrialData, FrameData);
 
             bool audioInited = false;
             foreach (string fbController in fbControllersList)
@@ -681,6 +676,9 @@ namespace USE_ExperimentTemplate_Task
 
             yield return null;
         }
+
+
+
 
 
         public static IEnumerator HandleCreateExternalFolder(string configName)
@@ -1103,28 +1101,16 @@ namespace USE_ExperimentTemplate_Task
         public void ReadCustomSingleTypeArray<T>(string filePath, string settingsName, string serverFileString = null) where T : CustomSettingsType
         {
             SessionSettings.ImportSettings_SingleTypeArray<T>(settingsName, filePath, serverFileString);
-            //if (serverFileString != null)
-            //    SessionSettings.ImportSettings_SingleTypeArray<T>(settingsName, filePath, serverFileString);
-            //else
-            //    SessionSettings.ImportSettings_SingleTypeArray<T>(settingsName, filePath);
         }
 
         public void ReadCustomMultipleTypes<T>(string filePath, string settingsName, string serverFileString = null) where T : CustomSettingsType
         {
             SessionSettings.ImportSettings_MultipleType(settingsName, filePath, serverFileString);
-            //if (serverFileString != null)
-            //    SessionSettings.ImportSettings_MultipleType(settingsName, filePath, serverFileString);
-            //else
-            //    SessionSettings.ImportSettings_MultipleType(settingsName, filePath);
         }
 
         public void ReadCustomSingleTypeJson<T>(string filePath, string settingsName, string serverFileString = null) where T : CustomSettingsType
         {
             SessionSettings.ImportSettings_SingleTypeJSON<T>(settingsName, filePath, serverFileString);
-            //if (serverFileString != null)
-            //    SessionSettings.ImportSettings_SingleTypeJSON<T>(settingsName, filePath, serverFileString);
-            //else
-            //    SessionSettings.ImportSettings_SingleTypeJSON<T>(settingsName, filePath);
         }
 
 
@@ -1189,11 +1175,11 @@ namespace USE_ExperimentTemplate_Task
             {
                 string fileText = File.ReadAllText(blockDefPath).Trim();
                 if (FileStringContainsTabs(fileText))
-                    BlockDefs = (T[])SessionValues.ImportSettings_SingleTypeArray<T>("blockDefs", blockDefPath);
+                    SessionSettings.ImportSettings_SingleTypeArray<T>("blockDefs", blockDefPath);
                 else
                     SessionSettings.ImportSettings_SingleTypeJSON<T[]>("blockDefs", blockDefPath);
             }
-            //BlockDefs = (T[])SessionSettings.Get("blockDefs");
+            BlockDefs = (T[])SessionSettings.Get("blockDefs");
         }
 
 
@@ -1223,14 +1209,9 @@ namespace USE_ExperimentTemplate_Task
 
         public void ImportTrialDefs<T>(string trialDefPath, string serverTrialDefFile = null) where T : TrialDef //Little helper method to simplify duplicate code in ReadTrialDefs
         {
-            if (serverTrialDefFile != null)
-                SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_TrialDefs", trialDefPath, serverTrialDefFile);
-            else
-                SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_TrialDefs", trialDefPath);
-
+            SessionSettings.ImportSettings_SingleTypeArray<T>(TaskName + "_TrialDefs", trialDefPath, serverTrialDefFile);
             AllTrialDefs = (T[])SessionSettings.Get(TaskName + "_TrialDefs");
         }
-
 
 
         public void ReadStimDefs<T>(string taskConfigFolder) where T : StimDef
@@ -1273,13 +1254,9 @@ namespace USE_ExperimentTemplate_Task
 
         private void ImportStimDefs<T>(string key, string stimDefFilePath, string serverStimDefFile = null) where T : StimDef
         {
-            if (serverStimDefFile != null)
-                SessionSettings.ImportSettings_SingleTypeArray<T>(key, stimDefFilePath, serverStimDefFile);
-            else
-                SessionSettings.ImportSettings_SingleTypeArray<T>(key, stimDefFilePath);
+            SessionSettings.ImportSettings_SingleTypeArray<T>(key, stimDefFilePath, serverStimDefFile);
 
             IEnumerable<StimDef> potentials = (T[])SessionSettings.Get(key);
-
 
             if (potentials == null || potentials.Count() < 1)
                 return;
@@ -1300,6 +1277,7 @@ namespace USE_ExperimentTemplate_Task
                 }
             }
         }
+
 
 
         public bool FileStringContainsTabs(string fileContent)
@@ -1616,22 +1594,22 @@ namespace USE_ExperimentTemplate_Task
 
     }
 
+/*
+    public class TaskDef
+    {
+        public string TaskName;
+        public string ExternalStimFolderPath;
+        public string PrefabStimFolderPath;
+        public string ExternalStimExtension;
+        public List<string[]> FeatureNames;
+        public string neutralPatternedColorName;
+        public float? ExternalStimScale;
+        public List<string[]> FeedbackControllers;
+        public int? TotalTokensNum;
+        public bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
+        public string SelectionType;
+        public Dictionary<string, string> CustomSettings;
 
-    // public class TaskDef
-    // {
-    //     public string TaskName;
-    //     public string ExternalStimFolderPath;
-    //     public string PrefabStimFolderPath;
-    //     public string ExternalStimExtension;
-    //     public List<string[]> FeatureNames;
-    //     public string neutralPatternedColorName;
-    //     public float? ExternalStimScale;
-    //     public List<string[]> FeedbackControllers;
-    //     public int? TotalTokensNum;
-    //     public bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
-    //     public string SelectionType;
-    //     public Dictionary<string, string> CustomSettings;
-    //
-    // }
-
+    }
+*/
 }

@@ -1,21 +1,26 @@
 using UnityEngine;
-using UnityEngine.UI;
 using System.Collections.Generic;
-using UnityEditor;
+using TMPro;
 
 
 public class FolderDropdown : MonoBehaviour
 {
-    public Dropdown dropdown;
+    private TMP_Dropdown dropdown;
 
+    private void Start()
+    {
+        dropdown = GetComponent<TMP_Dropdown>();
+        if (dropdown == null)
+            Debug.Log("DROPDOWN IS NULL!");
+    }
 
     public void SetFolders(List<string> sessionConfigFolders)
     {
-        List<Dropdown.OptionData> options = new List<Dropdown.OptionData>();
+        List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
 
         foreach(string folder in sessionConfigFolders)
         {
-            Dropdown.OptionData option = new Dropdown.OptionData(folder);
+            TMP_Dropdown.OptionData option = new TMP_Dropdown.OptionData(folder);
             options.Add(option);
         }
         dropdown.AddOptions(options);

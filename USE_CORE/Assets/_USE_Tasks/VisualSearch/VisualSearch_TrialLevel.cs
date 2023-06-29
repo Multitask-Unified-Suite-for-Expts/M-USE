@@ -8,7 +8,6 @@ using USE_ExperimentTemplate_Trial;
 using VisualSearch_Namespace;
 using USE_UI;
 using TMPro;
-using Tobii.Research.Unity;
 
 public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 {

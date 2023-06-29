@@ -48,7 +48,7 @@ namespace USE_ExperimentTemplate_Session
         private SessionDataControllers SessionDataControllers;
         private bool StoreData;
         private bool MacMainDisplayBuild;
-        [HideInInspector] public string SubjectID, SessionID, SessionDataPath, FilePrefix;
+        [HideInInspector] public string SubjectID, SessionID, FilePrefix;
         public string SessionLevelDataPath;
         public string TaskSelectionSceneName;
 
@@ -106,12 +106,11 @@ namespace USE_ExperimentTemplate_Session
         private SessionInfoPanel SessionInfoPanel;
         public StringBuilder PreviousTaskSummaryString = new StringBuilder();
 
-        public DisplayController DisplayController;
+        [HideInInspector] public DisplayController DisplayController;
 
         [HideInInspector] public GameObject TaskButtonsContainer;
 
         //Set in inspector
-        public GameObject InstructionsPrefab;
         public GameObject TaskSelection_Starfield;
         public GameObject HumanVersionToggleButton;
         public GameObject HumanStartPanelPrefab;
@@ -126,6 +125,8 @@ namespace USE_ExperimentTemplate_Session
 
         [HideInInspector] public HumanStartPanel HumanStartPanel;
         [HideInInspector] public USE_StartButton USE_StartButton;
+
+        public LogWriter LogWriter;
 
 
 
@@ -155,13 +156,13 @@ namespace USE_ExperimentTemplate_Session
 
             if (SessionValues.WebBuild)
             {
-                SessionDataPath = ServerManager.SessionDataFolderPath;
+                SessionValues.SessionDataPath = ServerManager.SessionDataFolderPath;
                 ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
 
                 if (SessionValues.UseDefaultConfigs)
                 {
                     //ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
-                    TaskIconsFolderPath = "DefaultResources/TaskIcons"; //Currently having web build use in house task icons instead of loading from server. 
+                    TaskIconsFolderPath = "DefaultResources/TaskIcons";
                     configFileFolder = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
                     WriteSessionConfigsToPersistantDataPath();
                     SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFilePathInExternalFolder(configFileFolder, "*SessionConfig*"));
@@ -170,7 +171,7 @@ namespace USE_ExperimentTemplate_Session
                 else //Using Server Configs:
                 {
                     //ContextExternalFilePath = "Resources/Contexts"; //path from root server folder
-                    TaskIconsFolderPath = "Resources/TaskIcons"; //un comment if end up wanting to load from server instead (and also remove the one above)
+                    TaskIconsFolderPath = "Resources/TaskIcons";
                     configFileFolder = ServerManager.SessionConfigFolderPath;
                     StartCoroutine(ServerManager.GetFileStringAsync(ServerManager.SessionConfigFolderPath, "SessionConfig", result =>
                     {
@@ -187,7 +188,7 @@ namespace USE_ExperimentTemplate_Session
             else //Normal Build:
             {
                 configFileFolder = LocateFile.GetPath("Config Folder");
-                SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
+                SessionValues.SessionDataPath = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + FilePrefix;
                 SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFilePathInExternalFolder(configFileFolder, "*SessionConfig*"));
                 LoadSessionConfigSettings(); 
             }
@@ -301,7 +302,7 @@ namespace USE_ExperimentTemplate_Session
                 {
                     if (!Application.isEditor) //DOESNT CURRENTLY WORK FOR DEFAULT CONFIGS CUZ THATS NOT A CONFIG ON THE SERVER, so it cant find it to copy from
                     {
-                        StartCoroutine(CreateFolderOnServer(SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings", () =>
+                        StartCoroutine(CreateFolderOnServer(SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings", () =>
                         {
                             StartCoroutine(CopySessionConfigFolderToDataFolder()); //Copy Session Config folder to Data folder so that the settings are stored:
                         }));
@@ -309,8 +310,8 @@ namespace USE_ExperimentTemplate_Session
                 }
                 else
                 {
-                    string sessionSettingsFolderPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
-                    System.IO.Directory.CreateDirectory(sessionSettingsFolderPath);
+                    string sessionSettingsFolderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
+                    Directory.CreateDirectory(sessionSettingsFolderPath);
                     SessionSettings.StoreSettings(sessionSettingsFolderPath + Path.DirectorySeparatorChar);
                 }
 
@@ -364,22 +365,16 @@ namespace USE_ExperimentTemplate_Session
             AsyncOperation loadScene = null;
             setupSession.AddUpdateMethod(() =>
             {
-                if (waitForSerialPort && Time.time - StartTimeAbsolute > SerialPortController.initTimeout / 1000 + 0.5f)
+                if (waitForSerialPort && Time.time - StartTimeAbsolute > SerialPortController.initTimeout / 1000f + 0.5f)
                 {
-                    if (SyncBoxActive)
-                        if (SessionSettings.SettingExists("Session", "SyncBoxInitCommands"))
-                        {
-                            SyncBoxController.SendCommand(
-                                (List<string>)SessionSettings.Get("Session", "SyncBoxInitCommands"));
-                        }
-
+                    if (SyncBoxActive && SessionSettings.SettingExists("Session", "SyncBoxInitCommands"))
+                        SyncBoxController.SendCommand((List<string>)SessionSettings.Get("Session", "SyncBoxInitCommands"));
                     waitForSerialPort = false;
                 }
 
                 if (EyeTrackerActive && GazeCalibrationTaskLevel == null)
                 {
                     //Have to add calibration task level as child of calibration state here, because it isn't available prior
-
                     GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
                     PopulateTaskLevel(GazeCalibrationTaskLevel, false);
                     gazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
@@ -410,10 +405,7 @@ namespace USE_ExperimentTemplate_Session
                     }
                 }
             });
-            setupSession.AddLateUpdateMethod(() =>
-            {
-                //AppendSerialData();
-            });
+            //setupSession.AddLateUpdateMethod(() => AppendSerialData());
 
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort && EyeTrackerActive, gazeCalibration);
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort && !EyeTrackerActive, selectTask);
@@ -630,7 +622,7 @@ namespace USE_ExperimentTemplate_Session
 
                     if (SessionValues.WebBuild)
                     {
-                        if(SessionValues.UseDefaultConfigs)
+                        if (SessionValues.UseDefaultConfigs)
                             image.texture = Resources.Load<Texture2D>($"{TaskIconsFolderPath}/{taskName}");
                         else
                         {
@@ -640,12 +632,13 @@ namespace USE_ExperimentTemplate_Session
                                 if (imageResult != null)
                                     image.texture = imageResult;
                                 else
-                                    Debug.Log("NULL GETTING TEXTURE FROM SERVER!");
+                                    Debug.Log("NULL GETTING TASK ICON TEXTURE FROM SERVER!");
                             }));
                         }
                     }
                     else
                         image.texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + taskName + ".png");
+
 
                     if (GuidedTaskSelection)
                     {
@@ -672,7 +665,6 @@ namespace USE_ExperimentTemplate_Session
                         taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget = true;
                         if(IsHuman)
                             taskButton.TaskButtonGO.AddComponent<HoverEffect>();
-                        
                     }
                     count++;
                 }
@@ -689,19 +681,18 @@ namespace USE_ExperimentTemplate_Session
                 SelectionTracker.UpdateActiveSelections();
                 if (SelectionHandler.SuccessfulSelections.Count > 0)
                 {
-                    selectedConfigName = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.GetComponent<USE_TaskButton>()?.configName;
+                    selectedConfigName = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.GetComponent<USE_TaskButton>().configName;
                     if (selectedConfigName != null)
                         taskAutomaticallySelected = false;
                 }
             });
-
             selectTask.AddLateUpdateMethod(() =>
             {
                 AppendSerialData();
                 FrameData.AppendDataToBuffer();
             });
+            selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask, () => ResetSelectedTaskButtonSize());
 
-            selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask);
 
             // Don't have automatic task selection if we encountered an error during setup
             if (TaskSelectionTimeout >= 0 && !LogPanel.HasError())
@@ -712,10 +703,10 @@ namespace USE_ExperimentTemplate_Session
                     {
                         //Find the next task in the list that is still interactable
                         string configName = (string)task.Key;
-                        string taskName = (string)task.Value;
 
                         // If the next task button in the task mappings is not interactable, skip until the next available config is found
-                        if (!(taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget)) continue;
+                        if (!taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget)
+                            continue;
                         taskAutomaticallySelected = true;
                         selectedConfigName = configName;
                         break;
@@ -780,8 +771,8 @@ namespace USE_ExperimentTemplate_Session
                     AppendSerialData();
                     SerialRecvData.AppendDataToFile();
                     SerialSentData.AppendDataToFile();
-                    SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionDataPath, "SerialRecvData", CurrentTask.TaskName);
-                    SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionDataPath, "SerialSentData", CurrentTask.TaskName);
+                    SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialRecvData", CurrentTask.TaskName);
+                    SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialSentData", CurrentTask.TaskName);
                 }
             });
 
@@ -825,7 +816,8 @@ namespace USE_ExperimentTemplate_Session
                 if (PreviousTaskSummaryString != null && CurrentTask.CurrentTaskSummaryString != null)
                     PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
 
-                SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
+                if(!SessionValues.WebBuild)
+                    SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
 
                 SessionData.AppendDataToBuffer();
                 SessionData.AppendDataToFile();
@@ -852,14 +844,14 @@ namespace USE_ExperimentTemplate_Session
 
                 if (SerialPortActive)
                 {
-                    SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataPath, "SerialRecvData", "SessionLevel");
-                    SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionDataPath, "SerialSentData", "SessionLevel");
+                    SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.SessionDataPath, "SerialRecvData", "SessionLevel");
+                    SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.SessionDataPath, "SerialSentData", "SessionLevel");
 
 
                 }
-                //     SessionDataPath + Path.DirectorySeparatorChar +
+                //     SessionValues.SessionDataPath + Path.DirectorySeparatorChar +
                 //                             SerialRecvData.GetNiceIntegers(4, taskCount + 1 * 2 - 1) + "_TaskSelection";
-                // SerialSentData.folderPath = SessionDataPath + Path.DirectorySeparatorChar +
+                // SerialSentData.folderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar +
                 //                             SerialSentData.GetNiceIntegers(4, taskCount + 1 * 2 - 1) + "_TaskSelection";
 
 
@@ -899,7 +891,7 @@ namespace USE_ExperimentTemplate_Session
             });
 
             SessionData = (SessionData)SessionDataControllers.InstantiateDataController<SessionData>
-                ("SessionData", StoreData, SessionDataPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionDataPath);
+                ("SessionData", StoreData, SessionValues.SessionDataPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionValues.SessionDataPath);
             SessionData.fileName = FilePrefix + "__SessionData.txt";
             SessionData.sessionLevel = this;
             SessionData.InitDataController();
@@ -911,7 +903,7 @@ namespace USE_ExperimentTemplate_Session
             if (SerialPortActive)
             {
                 SerialSentData = (SerialSentData)SessionDataControllers.InstantiateDataController<SerialSentData>
-                    ("SerialSentData", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "SerialSentData"
+                    ("SerialSentData", StoreData, SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SerialSentData"
                                                   + Path.DirectorySeparatorChar + "0001_TaskSelection");
                 SerialSentData.fileName = FilePrefix + "__SerialSentData_0001_TaskSelection.txt";
                 SerialSentData.sessionLevel = this;
@@ -919,7 +911,7 @@ namespace USE_ExperimentTemplate_Session
                 SerialSentData.ManuallyDefine();
 
                 SerialRecvData = (SerialRecvData)SessionDataControllers.InstantiateDataController<SerialRecvData>
-                    ("SerialRecvData", StoreData, SessionDataPath + Path.DirectorySeparatorChar + "SerialRecvData"
+                    ("SerialRecvData", StoreData, SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SerialRecvData"
                                                   + Path.DirectorySeparatorChar + "0001_TaskSelection");
                 SerialRecvData.fileName = FilePrefix + "__SerialRecvData_0001_TaskSelection.txt";
                 SerialRecvData.sessionLevel = this;
@@ -927,9 +919,10 @@ namespace USE_ExperimentTemplate_Session
                 SerialRecvData.ManuallyDefine();
             }
 
-            SummaryData.Init(StoreData, SessionDataPath);
+            if(!SessionValues.WebBuild)
+                SummaryData.Init(StoreData, SessionValues.SessionDataPath);
 
-            SessionLevelDataPath = SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel";
+            SessionLevelDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel";
 
             //if web build, create the SessionLevelDataFolder:
             if(SessionValues.WebBuild)
@@ -1102,6 +1095,8 @@ namespace USE_ExperimentTemplate_Session
             if (SessionSettings.SettingExists("Session", "StoreData"))
                 StoreData = (bool)SessionSettings.Get("Session", "StoreData");
 
+            LogWriter.StoreData = StoreData;
+
             if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
                 MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
 
@@ -1128,6 +1123,19 @@ namespace USE_ExperimentTemplate_Session
                     File.WriteAllBytes(configFileFolder + Path.DirectorySeparatorChar + config + ".txt", textFileBytes);
                 }
             }
+        }
+
+        private void ResetSelectedTaskButtonSize()
+        {
+            if (SelectionHandler.SuccessfulSelections.Count > 0)
+            {
+                if (SelectionHandler.LastSuccessfulSelection.SelectedGameObject.TryGetComponent(out HoverEffect hoverComponent))
+                    hoverComponent.SetToInitialSize();
+                else
+                    Debug.Log("HoverEffect component not found on selected TaskButton, so not resetting its size.");
+            }
+            else
+                Debug.Log("No successfulSelection from which to get the taskButton GameObject from (so we can reset its size)");
         }
 
         private void SetupBackgroundMusic()
@@ -1263,7 +1271,6 @@ namespace USE_ExperimentTemplate_Session
             tl.DisplayController = DisplayController;
             tl.SessionDataControllers = SessionDataControllers;
             tl.LocateFile = LocateFile;
-            tl.SessionDataPath = SessionDataPath;
             tl.SessionLevelDataPath = SessionLevelDataPath;
 
 
@@ -1421,92 +1428,6 @@ namespace USE_ExperimentTemplate_Session
         static extern bool CloseHandle(IntPtr hObject);
 #endif
 
-        void OnApplicationQuit()
-        {
-
-            if (StoreData)
-            {
-                string symlinkLocation = LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + "LatestSession";
-#if UNITY_STANDALONE_WIN
-                uint GENERIC_READ = 0x80000000;
-                uint GENERIC_WRITE = 0x40000000;
-                uint FILE_SHARE_READ = 0x00000001;
-                uint OPEN_EXISTING = 3;
-                uint FILE_FLAG_BACKUP_SEMANTICS = 0x02000000;
-                uint FILE_FLAG_OPEN_REPARSE_POINT = 0x00200000;
-                uint FSCTL_SET_REPARSE_POINT = 0x900A4;
-                uint IO_REPARSE_TAG_MOUNT_POINT = 0xA0000003;
-                Directory.CreateDirectory(symlinkLocation);
-
-                // Open the file with the correct perms
-                IntPtr dirHandle = CreateFile(
-                    symlinkLocation,
-                    GENERIC_READ | GENERIC_WRITE,
-                    FILE_SHARE_READ,
-                    IntPtr.Zero,
-                    OPEN_EXISTING,
-                    FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT,
-                    IntPtr.Zero
-                );
-
-                // \??\ indicates that the path should be non-interpreted
-                string prefix = @"\??\";
-                string substituteName = prefix + SessionDataPath;
-                // char is 2 bytes because strings are UTF-16
-                int substituteByteLen = substituteName.Length * sizeof(char);
-                ReparseDataBuffer rdb = new ReparseDataBuffer
-                {
-                    ReparseTag = IO_REPARSE_TAG_MOUNT_POINT,
-                    // 12 bytes is the byte length from SubstituteNameOffset to
-                    // before PathBuffer
-                    ReparseDataLength = (ushort)(substituteByteLen + 12),
-                    SubstituteNameOffset = 0,
-                    SubstituteNameLength = (ushort)substituteByteLen,
-                    // Needs to be at least 2 ahead (accounting for nonexistent null-terminator)
-                    PrintNameOffset = (ushort)(substituteByteLen + 2),
-                    PrintNameLength = 0,
-                    PathBuffer = substituteName
-                };
-
-                var result = DeviceIoControl(
-                    dirHandle,
-                    FSCTL_SET_REPARSE_POINT,
-                    ref rdb,
-                    // 20 bytes is the byte length for everything but the PathBuffer
-                    (uint)(substituteName.Length * sizeof(char) + 20),
-                    IntPtr.Zero,
-                    0,
-                    IntPtr.Zero,
-                    IntPtr.Zero
-                );
-
-                CloseHandle(dirHandle);
-#endif
-                //Create Log Folder & Files for Normal Build: -----------------------------------------------------------------------------------------------
-                if (!SessionValues.WebBuild) //Web Build log folder & file creation already handled in the WebBuildLogWriter.cs class
-                {
-                    System.IO.Directory.CreateDirectory(SessionDataPath + Path.DirectorySeparatorChar + "LogFile");
-
-                    string logPath = "";
-                    if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX | SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux)
-                    {
-                        string pathName = Application.isEditor ? "/Library/Logs/Unity/Editor.log" : "/Library/Logs/Unity/Player.log";
-                        logPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + pathName;
-                    }
-                    else if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Windows)
-                    {
-                        string pathName = Application.isEditor ? "\\Unity\\Editor\\Editor.log" : ("Low\\" + Application.companyName + "\\" + Application.productName + "\\Player.log");
-                        logPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + pathName;
-                    }
-
-                    string logFileName = Application.isEditor ? "Editor.log" : "Player.log";
-                    File.Copy(logPath, SessionDataPath + Path.DirectorySeparatorChar + "LogFile" + Path.DirectorySeparatorChar + logFileName);
-                }
-
-
-            }
-        }
-
 
 
         private IEnumerator CreateFolderOnServer(string folderPath, Action callback)
@@ -1517,8 +1438,7 @@ namespace USE_ExperimentTemplate_Session
 
         private IEnumerator CopySessionConfigFolderToDataFolder()
         {
-            string sourcePath = ServerManager.SessionConfigFolderPath; //UN COMMENT THIS LATER!
-            //string sourcePath = "CONFIGS/SessionConfig_021_VS_FL_VS_v01_Set05_STIM"; // Just used to test!
+            string sourcePath = ServerManager.SessionConfigFolderPath;
             string destinationPath = $"{ServerManager.SessionDataFolderPath}/SessionSettings";
             yield return ServerManager.CopyFolder(sourcePath, destinationPath);
         }

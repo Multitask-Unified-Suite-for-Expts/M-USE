@@ -21,7 +21,6 @@ using VisualSearch_Namespace;
 public class WWW_2D_TrialLevel : ControlLevel_Trial_Template
 {
     public GameObject WWW_2D_CanvasGO;
-    public USE_StartButton USE_StartButton;
 
     //This variable is required for most tasks, and is defined as the output of the GetCurrentTrialDef function 
     public WWW_2D_TrialDef CurrentTrialDef => GetCurrentTrialDef<WWW_2D_TrialDef>();
@@ -89,7 +88,7 @@ public class WWW_2D_TrialLevel : ControlLevel_Trial_Template
 
 
     //data logging variables
-    private string touchedObjectsCodes, touchDurationTimes, searchDurationTimes, touchedPositions, searchStimsLocations, distractorStimsLocations;
+    private string touchedObjectsCodes, touchDurationTimes, searchDurationTimes, touchedPositions, searchStims_LocalPosition, distractorStims_LocalPosition;
     public string accuracyLog_InSession, accuracyLog_InBlock, accuracyLog_InTrial = "";
 
     private float touchDuration, searchDuration, sbDelay = 0;
@@ -231,7 +230,8 @@ public class WWW_2D_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
 
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(StartButton), ChooseStimulusDelay, () =>
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(IsHuman ? HumanStartPanel.StartButtonChildren : USE_StartButton.StartButtonChildren), ChooseStimulusDelay);
+        InitTrial.AddDefaultTerminationMethod(() =>
         {
             CalculateSliderSteps();
             SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrialDef.SliderInitial * (1f / sliderGainSteps));
@@ -242,6 +242,7 @@ public class WWW_2D_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderFbController_SliderReset"]);
         });
+        
         ChooseStimulusDelay.AddTimer(() => chooseStimOnsetDelay.value, ChooseStimulus, () =>
         {
             searchStims.ToggleVisibility(true);
@@ -564,8 +565,8 @@ public class WWW_2D_TrialLevel : ControlLevel_Trial_Template
     {
         TrialData.AddDatum("TrialID", () => CurrentTrialDef.BlockName);
         TrialData.AddDatum("Context", () => CurrentTrialDef.ContextName);
-        TrialData.AddDatum("SearchStimsLocations", () => searchStimsLocations);
-        TrialData.AddDatum("DistractorStimsLocations", () => distractorStimsLocations);
+        TrialData.AddDatum("SearchStims_LocalPosition", () => searchStims_LocalPosition);
+        TrialData.AddDatum("DistractorStimsLocations", () => distractorStims_LocalPosition);
         TrialData.AddDatum("TouchedObjects", () => String.Join(",", touchedObjects));
         TrialData.AddDatum("SearchDurations", () => String.Join(",", searchDurations));
         TrialData.AddDatum("TrialProgress", () => trialProgress);
@@ -687,8 +688,8 @@ public class WWW_2D_TrialLevel : ControlLevel_Trial_Template
             distractorStims.SetLocations(CurrentTrialDef.DistractorStimsLocations);
         }
 
-        searchStimsLocations = String.Join(",", searchStims.stimDefs.Select(s => s.StimLocation));
-        distractorStimsLocations = String.Join(",", distractorStims.stimDefs.Select(d => d.StimLocation));
+        searchStims_LocalPosition = String.Join(",", searchStims.stimDefs.Select(s => s.StimLocation));
+        distractorStims_LocalPosition = String.Join(",", distractorStims.stimDefs.Select(d => d.StimLocation));
     }
 
     //-------------------------------------------------------------MISCELLANEOUS METHODS--------------------------------------------------------------------------

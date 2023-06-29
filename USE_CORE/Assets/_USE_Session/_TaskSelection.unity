@@ -498,8 +498,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a20a247e197cc49c48f04849aba52095, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LogFolderCreated: 0
-  LogFileCreated: 0
+  StoreData: 0
 --- !u!1 &1213845836
 GameObject:
   m_ObjectHideFlags: 0
@@ -634,8 +633,6 @@ MonoBehaviour:
   CurrentTask: {fileID: 0}
   GazeCalibrationTaskLevel: {fileID: 0}
   TaskIconLocations: []
-  LongRewardHotKeyPulseSize: 0
-  LongRewardHotKeyNumPulses: 0
   RewardHotKeyPulseSize: 0
   RewardHotKeyNumPulses: 0
   SessionDetails: {fileID: 454535789}

@@ -74,7 +74,7 @@ namespace USE_ExperimentTemplate_Session
         private SyncBoxController SyncBoxController;
         private EventCodeManager EventCodeManager;
         [HideInInspector] public SelectionTracker SelectionTracker;
-        private SelectionHandler SelectionHandler;
+        private SelectionTracker.SelectionHandler SelectionHandler;
         private GameObject InputManager;
         private MouseTracker MouseTracker;
         private GazeTracker GazeTracker;
@@ -677,7 +677,7 @@ namespace USE_ExperimentTemplate_Session
                 SelectionTracker.UpdateActiveSelections();
                 if (SelectionHandler.SuccessfulSelections.Count > 0)
                 {
-                    selectedConfigName = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.GetComponent<USE_TaskButton>().configName;
+                    selectedConfigName = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.GetComponent<USE_TaskButton>()?.configName;
                     if (selectedConfigName != null)
                         taskAutomaticallySelected = false;
                 }
@@ -1018,8 +1018,10 @@ namespace USE_ExperimentTemplate_Session
                 eventCodeFileString = LocateFile.FindFilePathInExternalFolder(configFileFolder, "*EventCode*");
                 if (!string.IsNullOrEmpty(eventCodeFileString))
                 {
-                    SessionEventCodes = SessionValues.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
-                //    SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
+                    SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
+
+                //    SessionEventCodes = SessionValues.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
+                    SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
                 }
                 else if (EventCodesActive)
                     Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");

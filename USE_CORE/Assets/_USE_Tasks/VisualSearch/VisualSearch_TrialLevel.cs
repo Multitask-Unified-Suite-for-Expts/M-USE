@@ -258,9 +258,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
             
             if (CorrectSelection) 
-                HaloFBController.ShowPositive(selectedGO);
+                HaloFBController.ShowPositive(selectedGO, 50);
             else 
-                HaloFBController.ShowNegative(selectedGO);
+                HaloFBController.ShowNegative(selectedGO, 50);
         });
 
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () => HaloFBController.Destroy());
@@ -385,11 +385,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             VisualSearch_StimDef sd = (VisualSearch_StimDef)tStim.stimDefs[i];
             sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.TrialStimTokenReward[i]);
-           
-            if (sd.StimTokenRewardMag > 0) 
+
+            if (sd.StimTokenRewardMag > 0) {
                 sd.IsTarget = true; //ONLY HOLDS TRUE IF POSITIVE REWARD GIVEN TO TARGET
-            else 
+            }
+            else {
                 sd.IsTarget = false;
+            }
         }
 
         if (CurrentTrialDef.RandomizedLocations)

@@ -248,9 +248,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
             
             if (CorrectSelection) 
-                HaloFBController.ShowPositive(selectedGO);
+                HaloFBController.ShowPositive(selectedGO, 50);
             else 
-                HaloFBController.ShowNegative(selectedGO);
+                HaloFBController.ShowNegative(selectedGO, 50);
         });
         SelectionFeedback.AddTimer(() => selectionFbDuration.value, TokenFeedback, () => 
         {

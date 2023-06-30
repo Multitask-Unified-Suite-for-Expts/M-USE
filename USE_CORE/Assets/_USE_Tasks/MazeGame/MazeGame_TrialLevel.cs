@@ -56,7 +56,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private float tileScale;
 
     // Trial Data Tracking Variables
-    private float mazeDuration;
+    public float mazeDuration;
     private float mazeStartTime;
     private float choiceDuration;
     private float choiceStartTime;

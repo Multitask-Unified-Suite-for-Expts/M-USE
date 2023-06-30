@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using UnityEngine;
@@ -79,7 +80,21 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
             wmTL.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
         else
             wmTL.MacMainDisplayBuild = false;
-    }    
+    }
+
+
+    public override OrderedDictionary GetBlockResultsData()
+    {
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trials Completed"] = wmTL.TrialCount_InBlock + 1,
+            ["Trials Correct"] = wmTL.NumCorrect_InBlock,
+            ["Errors"] = wmTL.NumErrors_InBlock,
+            ["Avg Search Duration"] = wmTL.AverageSearchDuration_InBlock.ToString("0.00") + "s",
+        };
+        return data;
+    }
+
 
     public void SetBlockSummaryString()
     {

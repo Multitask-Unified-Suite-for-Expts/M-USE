@@ -109,6 +109,8 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public GameObject TaskButtonsContainer;
 
         //Set in inspector
+        public GameObject BlockResults_GridElementPrefab;
+        public GameObject BlockResultsPrefab;
         public GameObject TaskSelection_Starfield;
         public GameObject HumanVersionToggleButton;
         public GameObject HumanStartPanelPrefab;
@@ -128,6 +130,7 @@ namespace USE_ExperimentTemplate_Session
 
         public override void LoadSettings()
         {
+
             HumanStartPanel = gameObject.AddComponent<HumanStartPanel>();
             HumanStartPanel.SetSessionLevel(this);
             HumanStartPanel.HumanStartPanelPrefab = HumanStartPanelPrefab;
@@ -813,7 +816,7 @@ namespace USE_ExperimentTemplate_Session
                     PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
 
 
-                SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
+                SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetTaskSummaryData());
                 
 
                 SessionData.AppendDataToBuffer();
@@ -1256,6 +1259,9 @@ namespace USE_ExperimentTemplate_Session
             tl.SessionDataControllers = SessionDataControllers;
             tl.LocateFile = LocateFile;
             tl.SessionLevelDataPath = SessionLevelDataPath;
+
+            tl.BlockResultsPrefab = BlockResultsPrefab;
+            tl.BlockResults_GridElementPrefab = BlockResults_GridElementPrefab;
 
 
             if (SessionValues.UseDefaultConfigs)

@@ -2,15 +2,12 @@ using FlexLearning_Namespace;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 using USE_Settings;
 using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Block;
-using USE_ExperimentTemplate_Trial;
-using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
+
 
 public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 {
@@ -125,7 +122,21 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         flTL.NumTokenBarFull_InBlock = 0;
         flTL.TotalTokensCollected_InBlock = 0;
     }
-    public override OrderedDictionary GetSummaryData()
+
+    public override OrderedDictionary GetBlockResultsData()
+    {
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trials Completed"] = flTL.TrialCount_InBlock + 1,
+            ["Trials Correct"] = flTL.NumCorrect_InBlock,
+            ["Accuracy"] = flTL.Accuracy_InBlock.ToString("0.00") + "%",
+            ["Errors"] = flTL.NumErrors_InBlock,
+            ["TokenBar Completions"] = flTL.NumTokenBarFull_InBlock,
+        };
+        return data;
+    }
+
+    public override OrderedDictionary GetTaskSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary();
 

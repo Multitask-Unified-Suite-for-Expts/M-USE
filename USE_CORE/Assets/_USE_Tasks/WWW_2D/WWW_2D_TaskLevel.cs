@@ -64,7 +64,7 @@ public class WWW_2D_TaskLevel : ControlLevel_Task_Template
             SetBlockSummaryString();
         });
     }
-    public override OrderedDictionary GetSummaryData()
+    public override OrderedDictionary GetTaskSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary();
         data["Trial Count In Task"] = wwwTL.TrialCount_InTask;

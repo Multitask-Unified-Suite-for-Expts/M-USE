@@ -111,7 +111,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
     }
 
-    public void AddBlockValuesToTaskValues()
+    public override void AddBlockValuesToTaskValues()
     {
         TrialsCompleted_Task += trialLevel.TrialsCompleted_Block;
         TrialsCorrect_Task += trialLevel.TrialsCorrect_Block;
@@ -126,7 +126,22 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         TouchesMovedOutside_Task += trialLevel.NumTouchesMovedOutside_Block;
     }
 
-    public override OrderedDictionary GetSummaryData()
+    public override OrderedDictionary GetBlockResultsData()
+    {
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trials Completed"] = trialLevel.TrialsCompleted_Block,
+            ["Trials Correct"] = trialLevel.TrialsCorrect_Block,
+            //["Start Button Touches"] = trialLevel.BlueSquareTouches_Block,
+            //["White Circle Touches"] = trialLevel.WhiteSquareTouches_Block,
+            ["Touches Released Early"] = trialLevel.NumReleasedEarly_Block,
+            ["Touches Released Late"] = trialLevel.NumReleasedLate_Block,
+            ["Touches Moved Outside"] = trialLevel.NumTouchesMovedOutside_Block
+        };
+        return data;
+    }
+
+    public override OrderedDictionary GetTaskSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary
         {

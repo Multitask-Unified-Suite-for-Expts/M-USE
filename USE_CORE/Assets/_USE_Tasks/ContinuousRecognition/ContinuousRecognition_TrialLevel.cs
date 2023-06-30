@@ -10,8 +10,8 @@ using USE_ExperimentTemplate_Trial;
 using System.Linq;
 using TMPro;
 using USE_UI;
-using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Specialized;
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
@@ -971,7 +971,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         trialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenUpdate"));
     }
 
-    void CalculateBlockAvgTimeToChoice()
+    public void CalculateBlockAvgTimeToChoice()
     {
         if (TimeToChoice_Block.Count == 0)
             AvgTimeToChoice_Block = 0;

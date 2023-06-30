@@ -86,7 +86,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         {
             CalculateBlockAverages();
             CalculateStanDev();
-            AddBlockValuesToTaskValues();
+            //AddBlockValuesToTaskValues(); called by template now. 
 
             if(!SessionValues.WebBuild && trialLevel.AbortCode == 0)
             {
@@ -114,7 +114,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         
     }
 
-    public void AddBlockValuesToTaskValues()
+    public override void AddBlockValuesToTaskValues()
     {
         NonStimTouches_Task.Add(trialLevel.NonStimTouches_Block);
         TrialsCompleted_Task.Add(trialLevel.NumTrials_Block);
@@ -155,15 +155,30 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.TouchFeedbackDuration = .3f;
     }
 
-    public override OrderedDictionary GetSummaryData()
+
+    public override OrderedDictionary GetBlockResultsData()
+    {
+        trialLevel.CalculateBlockAvgTimeToChoice(); //upate AvgTimeToChoice before returning data
+
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trials Completed"] = trialLevel.NumTrials_Block,
+            ["Trials Correct"] = trialLevel.NumCorrect_Block,
+            ["TokenBar Completions"] = trialLevel.NumTbCompletions_Block,
+            ["Avg TimeToChoice"] = trialLevel.AvgTimeToChoice_Block.ToString("0.00") + "s",
+            ["Completion Time"] = trialLevel.TimeToCompletion_Block.ToString("0.00") + "s"
+        };
+        return data;
+    }
+
+    public override OrderedDictionary GetTaskSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary
         {
-            ["Non Stim Touches"] = NonStimTouches_Task.AsQueryable().Sum(),
             ["Trials Completed"] = TrialsCompleted_Task.AsQueryable().Sum(),
             ["Trials Correct"] = TrialsCorrect_Task.AsQueryable().Sum(),
             ["TokenBar Completions"] = TokenBarCompletions_Task.AsQueryable().Sum(),
-            ["Total Rewards"] = TotalRewards_Task.AsQueryable().Sum()
+            ["Total Rewards"] = TotalRewards_Task.AsQueryable().Sum(),
         };
         return data;
     }

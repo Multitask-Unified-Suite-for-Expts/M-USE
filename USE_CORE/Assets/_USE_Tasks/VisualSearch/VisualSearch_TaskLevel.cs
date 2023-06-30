@@ -76,7 +76,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         AssignBlockData();
     }
 
-    public override OrderedDictionary GetSummaryData()
+    public override OrderedDictionary GetTaskSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary
         {

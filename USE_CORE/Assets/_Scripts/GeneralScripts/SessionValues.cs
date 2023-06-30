@@ -25,7 +25,7 @@ public static class SessionValues
 
     public static ControlLevel_Session_Template SessionLevel;
     public static USE_StartButton USE_StartButton;
-    public static GameObject TaskSelectionCanvasGO;
+    //public static GameObject TaskSelectionCanvasGO;
     public static HumanStartPanel HumanStartPanel;
     public static DisplayController DisplayController;
     public static SessionDataControllers SessionDataControllers;
@@ -49,6 +49,7 @@ public static class SessionValues
     public static float ShotgunRayCastCircleSize_DVA;
     public static float ShotgunRaycastSpacing_DVA;
     public static float ParticipantDistance_CM;
+
 
     static SessionValues()
     {

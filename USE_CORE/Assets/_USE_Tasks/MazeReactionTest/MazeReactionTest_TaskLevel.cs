@@ -320,7 +320,7 @@ public class MazeReactionTest_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("MaxTrials", () => mrtBD.MinMaxTrials[0]);
         BlockData.AddDatum("MinTrials", () => mrtBD.MaxTrials);
     }
-    public override OrderedDictionary GetSummaryData()
+    public override OrderedDictionary GetTaskSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary();
         data["Trial Count In Task"] = mrtTL.TrialCount_InTask;

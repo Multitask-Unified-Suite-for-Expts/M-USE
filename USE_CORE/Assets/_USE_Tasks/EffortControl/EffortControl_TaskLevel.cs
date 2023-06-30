@@ -105,7 +105,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             trialLevel.MacMainDisplayBuild = false;
     }
 
-    public void AddBlockValuesToTaskValues()
+    public override void AddBlockValuesToTaskValues()
     {
         RewardPulses_Task += trialLevel.RewardPulses_Block;
         Completions_Task += trialLevel.Completions_Block;
@@ -121,21 +121,36 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         NumAborted_Task += trialLevel.NumAborted_Block;
     }
 
-    public override OrderedDictionary GetSummaryData()
+    public override OrderedDictionary GetBlockResultsData()
     {
-        OrderedDictionary data = new OrderedDictionary();
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trials Completed"] = trialLevel.Completions_Block,
+            ["Total Touches"] = trialLevel.TotalTouches_Block,
+            ["Chose Higher Effort"] = trialLevel.NumHigherEffortChosen_Block,
+            ["Chose Lower Effort"] = trialLevel.NumLowerEffortChosen_Block,
+            ["Chose Higher Reward"] = trialLevel.NumHigherRewardChosen_Block,
+            ["Chose Lower Reward"] = trialLevel.NumLowerRewardChosen_Block
+        };
+        return data;
+    }
 
-        data["Completions"] = Completions_Task;
-        data["Reward Pulses"] = RewardPulses_Task;
-        data["Touches"] = Touches_Task;
-        data["Chose Left"] = NumChosenLeft_Task;
-        data["Chose Right"] = NumChosenRight_Task;
-        data["Chose Higher Reward"] = NumHigherRewardChosen_Task;
-        data["Chose Lower Reward"] = NumLowerRewardChosen_Task;
-        data["Chose Same Reward"] = NumSameRewardChosen_Task;
-        data["Chose Higher Effort"] = NumHigherEffortChosen_Task;
-        data["Chose Lower Effort"] = NumLowerEffortChosen_Task;
-        data["Chose Same Effort"] = NumSameEffortChosen_Task;
+    public override OrderedDictionary GetTaskSummaryData()
+    {
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Completions"] = Completions_Task,
+            ["Reward Pulses"] = RewardPulses_Task,
+            ["Touches"] = Touches_Task,
+            ["Chose Left"] = NumChosenLeft_Task,
+            ["Chose Right"] = NumChosenRight_Task,
+            ["Chose Higher Reward"] = NumHigherRewardChosen_Task,
+            ["Chose Lower Reward"] = NumLowerRewardChosen_Task,
+            ["Chose Same Reward"] = NumSameRewardChosen_Task,
+            ["Chose Higher Effort"] = NumHigherEffortChosen_Task,
+            ["Chose Lower Effort"] = NumLowerEffortChosen_Task,
+            ["Chose Same Effort"] = NumSameEffortChosen_Task
+        };
 
         return data;
     }

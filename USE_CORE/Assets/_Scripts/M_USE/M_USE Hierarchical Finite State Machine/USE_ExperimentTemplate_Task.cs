@@ -22,7 +22,8 @@ using Tobii.Research.Unity;
 using Tobii.Research;
 using System.Collections;
 using USE_ExperimentTemplate_Session;
-
+using System.Collections.Specialized;
+using TMPro;
 
 namespace USE_ExperimentTemplate_Task
 {
@@ -143,6 +144,12 @@ namespace USE_ExperimentTemplate_Task
 
         private bool TrialAndBlockDefsHandled;
         private bool StimsHandled;
+
+        //Passed by sessionLevel
+        [HideInInspector] public GameObject BlockResultsPrefab;
+        [HideInInspector] public GameObject BlockResults_GridElementPrefab;
+
+        [HideInInspector] public GameObject BlockResultsGO;
 
 
         public virtual void SpecifyTypes()
@@ -310,6 +317,14 @@ namespace USE_ExperimentTemplate_Task
 
             BlockFeedback.AddUniversalInitializationMethod(() =>
             {
+                AddBlockValuesToTaskValues();
+
+                if(IsHuman)
+                {
+                    DisplayBlockResults();
+                }
+
+
                 /*if (BlockSummaryString != null)
                 {
                     int trialsCompleted = (TrialLevel.AbortCode == 0 || TrialLevel.AbortCode == 6) ? TrialLevel.TrialCount_InBlock + 1 : TrialLevel.TrialCount_InBlock;
@@ -321,6 +336,7 @@ namespace USE_ExperimentTemplate_Task
                     PreviousBlockSummaryString.Insert(0, blockTitle);
                 }*/
                 EventCodeManager.SendCodeImmediate(SessionEventCodes["BlockFeedbackStarts"]);
+
             });
             BlockFeedback.AddUpdateMethod(() =>
             {
@@ -340,6 +356,9 @@ namespace USE_ExperimentTemplate_Task
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask);
             BlockFeedback.AddDefaultTerminationMethod(() =>
             {
+                if (IsHuman && BlockResultsGO != null)
+                    BlockResultsGO.SetActive(false);
+
                 if (StoreData)
                 {
                     BlockData.AppendDataToBuffer();
@@ -679,6 +698,47 @@ namespace USE_ExperimentTemplate_Task
             yield return null;
         }
 
+
+
+        public virtual void AddBlockValuesToTaskValues()
+        {
+
+        }
+
+
+        private void DisplayBlockResults()
+        {
+            OrderedDictionary taskBlockResults = GetBlockResultsData();
+            if (taskBlockResults != null && taskBlockResults.Count > 0)
+            {
+                GameObject taskCanvas = GameObject.Find(TaskName + "_Canvas");
+                if (taskCanvas != null)
+                {
+                    BlockResultsGO = Instantiate(BlockResultsPrefab);
+                    BlockResultsGO.name = "BlockResults";
+                    BlockResultsGO.transform.SetParent(taskCanvas.transform);
+                    BlockResultsGO.transform.localScale = Vector3.one;
+                    BlockResultsGO.transform.localPosition = Vector3.zero;
+
+                    Transform gridParent = BlockResultsGO.transform.Find("Grid");
+
+                    int count = 0;
+                    foreach (DictionaryEntry entry in taskBlockResults)
+                    {
+                        GameObject gridItem = Instantiate(BlockResults_GridElementPrefab, gridParent);
+                        gridItem.name = "GridElement" + count;
+                        TextMeshProUGUI itemText = gridItem.GetComponentInChildren<TextMeshProUGUI>();
+                        itemText.text = $"{entry.Key}: <b>{entry.Value}</b>";
+                        count++;
+                    }
+                    BlockFbSimpleDuration = 8f; //default for now
+                }
+                else
+                    Debug.Log("DIDNT FIND A TASK CANVAS NAMED: " + TaskName + "_Canvas");
+            }
+            else
+                Debug.Log("Not going to display block results because there's no task data!");
+        }
 
 
 

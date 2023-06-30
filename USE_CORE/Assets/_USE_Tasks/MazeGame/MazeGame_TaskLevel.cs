@@ -177,23 +177,40 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     //         .ToList();
     //     Debug.Log("MAZE DURATIONS IN TASK: " + string.Join(",", allDurations));
     // }
-    public override OrderedDictionary GetSummaryData()
+
+
+    public override OrderedDictionary GetBlockResultsData()
     {
-        OrderedDictionary data = new OrderedDictionary();
-        data["Trial Count In Task"] = mgTL.TrialCount_InTask;
-        data["Num Reward Pulses"] = numRewardPulses_InTask;
-        data["Total Errors"] = totalErrors_InTask;
-        data["Correct Touches"] = correctTouches_InTask;
-        data["Retouch Correct"] = retouchCorrect_InTask;
-        data["Retouch Erroneous"] = retouchErroneous_InTask;
-        data["Perseverative Errors"] = perseverativeErrors_InTask;
-        data["Backtrack Errors"] = backtrackErrors_InTask;
-        data["Rule-Abiding Errors"] = ruleAbidingErrors_InTask;
-        data["Rule-Breaking Errors"] = ruleBreakingErrors_InTask;
-        data["Num Aborted Trials"] = numAbortedTrials_InTask;
-        data["Num Slider Bar Full"] = numSliderBarFull_InTask;
-        data["Average Maze Durations"] = mazeDurationsList_InTask.Average();
-        data["Average Choice Duration"] = choiceDurationsList_InTask.Average();
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Correct Touches"] = correctTouches_InBlock,
+            ["Total Errors"] = totalErrors_InBlock.Sum(),
+            ["Retouched Correct"] = retouchCorrect_InBlock.Sum(),
+            ["Retouched Erroneous"] = retouchErroneous_InBlock.Sum(),
+            ["Maze Duration"] = mgTL.mazeDuration.ToString("0.00") + "s",
+        };
+        return data;
+    }
+
+    public override OrderedDictionary GetTaskSummaryData()
+    {
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trial Count In Task"] = mgTL.TrialCount_InTask,
+            ["Num Reward Pulses"] = numRewardPulses_InTask,
+            ["Total Errors"] = totalErrors_InTask,
+            ["Correct Touches"] = correctTouches_InTask,
+            ["Retouch Correct"] = retouchCorrect_InTask,
+            ["Retouch Erroneous"] = retouchErroneous_InTask,
+            ["Perseverative Errors"] = perseverativeErrors_InTask,
+            ["Backtrack Errors"] = backtrackErrors_InTask,
+            ["Rule-Abiding Errors"] = ruleAbidingErrors_InTask,
+            ["Rule-Breaking Errors"] = ruleBreakingErrors_InTask,
+            ["Num Aborted Trials"] = numAbortedTrials_InTask,
+            ["Num Slider Bar Full"] = numSliderBarFull_InTask,
+            ["Average Maze Durations"] = mazeDurationsList_InTask.Average(),
+            ["Average Choice Duration"] = choiceDurationsList_InTask.Average()
+        };
         return data;
     }
     private void ResetBlockVariables()

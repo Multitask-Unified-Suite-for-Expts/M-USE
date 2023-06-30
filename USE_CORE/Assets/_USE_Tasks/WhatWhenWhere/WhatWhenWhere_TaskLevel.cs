@@ -2,14 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityEngine.Serialization;
 using USE_Settings;
 using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Block;
 
 public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 {
@@ -64,7 +61,19 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
             SetBlockSummaryString();
         });
     }
-    public override OrderedDictionary GetSummaryData()
+
+    public override OrderedDictionary GetBlockResultsData()
+    {
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trials Completed"] = wwwTL.TrialCount_InBlock + 1,
+            ["Trials Correct"] = wwwTL.numCorrect_InBlock.Sum(),
+            ["Errors"] = wwwTL.numErrors_InBlock.Sum()
+        };
+        return data;
+    }
+
+    public override OrderedDictionary GetTaskSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary
         {

@@ -172,6 +172,7 @@ namespace USE_ExperimentTemplate_Session
                     //ContextExternalFilePath = "Resources/Contexts"; //path from root server folder
                     TaskIconsFolderPath = "Resources/TaskIcons";
                     configFileFolder = ServerManager.SessionConfigFolderPath;
+
                     StartCoroutine(ServerManager.GetFileStringAsync(ServerManager.SessionConfigFolderPath, "SessionConfig", result =>
                     {
                         if (!string.IsNullOrEmpty(result))
@@ -182,6 +183,8 @@ namespace USE_ExperimentTemplate_Session
                         else
                             Debug.Log("SESSION CONFIG COROUTINE RESULT IS EMPTY!!!");
                     }));
+                    
+                    
                 }
             }
             else //Normal Build:

@@ -158,14 +158,11 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     public override OrderedDictionary GetBlockResultsData()
     {
-        trialLevel.CalculateBlockAvgTimeToChoice(); //upate AvgTimeToChoice before returning data
-
         OrderedDictionary data = new OrderedDictionary
         {
             ["Trials Completed"] = trialLevel.NumTrials_Block,
             ["Trials Correct"] = trialLevel.NumCorrect_Block,
             ["TokenBar Completions"] = trialLevel.NumTbCompletions_Block,
-            ["Avg TimeToChoice"] = trialLevel.AvgTimeToChoice_Block.ToString("0.00") + "s",
             ["Completion Time"] = trialLevel.TimeToCompletion_Block.ToString("0.00") + "s"
         };
         return data;

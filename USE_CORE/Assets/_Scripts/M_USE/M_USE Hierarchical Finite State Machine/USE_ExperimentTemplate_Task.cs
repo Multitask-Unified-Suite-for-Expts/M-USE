@@ -604,6 +604,7 @@ namespace USE_ExperimentTemplate_Task
             {
                 TrialLevel.LoadTexturesFromResources(); //delete this when uncomment below
 
+                //UnCOMMENT BELOW WHEN WE WANT TO LOAD TEXTURES FROM SERVER!
                 //if (SessionValues.UseDefaultConfigs)
                 //    TrialLevel.LoadTexturesFromResources();
                 //else
@@ -731,7 +732,7 @@ namespace USE_ExperimentTemplate_Task
                         itemText.text = $"{entry.Key}: <b>{entry.Value}</b>";
                         count++;
                     }
-                    BlockFbSimpleDuration = 8f; //default for now
+                    BlockFbSimpleDuration = 7f; //default for now
                 }
                 else
                     Debug.Log("DIDNT FIND A TASK CANVAS NAMED: " + TaskName + "_Canvas");

@@ -51,6 +51,7 @@ public static class SessionValues
     public static float ParticipantDistance_CM;
 
 
+
     static SessionValues()
     {
         // Perform actions when certain values are true

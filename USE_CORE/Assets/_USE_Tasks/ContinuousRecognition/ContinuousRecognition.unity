@@ -359,6 +359,7 @@ RectTransform:
   - {fileID: 208675866}
   - {fileID: 1932148020}
   - {fileID: 999783759}
+  - {fileID: 1888232561}
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -975,21 +976,27 @@ MonoBehaviour:
   ConfigName: 
   TaskName: ContinuousRecognition
   TaskProjectFolder: 
+  SessionLevelDataPath: 
   BlockCount: 0
   TrialLevel: {fileID: 1101764165}
+  SessionLevel: {fileID: 0}
+  BlockData: {fileID: 0}
+  FrameData: {fileID: 0}
+  TrialData: {fileID: 0}
+  GazeData: {fileID: 0}
   SerialSentData: {fileID: 0}
   SerialRecvData: {fileID: 0}
   EyeTrackerActive: 0
-  EyeTracker: {fileID: 0}
+  GazeTracker: {fileID: 0}
+  MouseTracker: {fileID: 0}
+  TobiiEyeTrackerController: {fileID: 0}
   StoreData: 0
   SerialPortActive: 0
   SyncBoxActive: 0
   EventCodesActive: 0
   RewardPulsesActive: 0
   SonicationActive: 0
-  UseDefaultConfigs: 0
   ContextExternalFilePath: 
-  SessionDataPath: 
   TaskConfigPath: 
   TaskDataPath: 
   SubjectID: 
@@ -1000,6 +1007,7 @@ MonoBehaviour:
   LocateFile: {fileID: 0}
   TaskCam: {fileID: 0}
   TaskCanvasses: []
+  StimCanvas_2D: {fileID: 0}
   PreloadedStims:
     stimGroupName: 
     IsActive: 0
@@ -1019,10 +1027,16 @@ MonoBehaviour:
   DisplayController: {fileID: 0}
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
+  InputManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
   TaskSelectionCanvasGO: {fileID: 0}
   IsHuman: 0
   HumanStartPanel: {fileID: 0}
+  USE_StartButton: {fileID: 0}
+  TaskLevelDefined: 0
+  BlockResultsPrefab: {fileID: 0}
+  BlockResults_GridElementPrefab: {fileID: 0}
+  BlockResultsGO: {fileID: 0}
   TrialsCompleted_Task: 
   TrialsCorrect_Task: 
   AvgNumCorrect: 0
@@ -1061,6 +1075,7 @@ MonoBehaviour:
   Paused: 1
   TrialData: {fileID: 0}
   FrameData: {fileID: 0}
+  GazeData: {fileID: 0}
   SerialSentData: {fileID: 0}
   SerialRecvData: {fileID: 0}
   BlockCount: 0
@@ -1098,8 +1113,10 @@ MonoBehaviour:
   SliderFBController: {fileID: 0}
   MouseTracker: {fileID: 0}
   GazeTracker: {fileID: 0}
-  EyeTracker: {fileID: 0}
+  TobiiEyeTrackerController: {fileID: 0}
   SelectionType: 
+  EyeTrackerActive: 0
+  runCalibration: 0
   SerialPortController: {fileID: 0}
   EventCodeManager: {fileID: 0}
   DisplayController: {fileID: 0}
@@ -1107,15 +1124,16 @@ MonoBehaviour:
   ShotgunRaycastSpacing_DVA: 0
   ParticipantDistance_CM: 0
   ShotgunRaycastCircleSize_DVA: 0
-  UseDefaultConfigs: 0
   IsHuman: 0
   HumanStartPanel: {fileID: 0}
+  USE_StartButton: {fileID: 0}
   TaskSelectionCanvasGO: {fileID: 0}
+  PauseIconGO: {fileID: 0}
+  TrialStimsLoaded: 0
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
   THR_BackdropTexture: {fileID: 0}
-  USE_StartButton: {fileID: 0}
   StartButton: {fileID: 0}
   TimerText: {fileID: 0}
   TimerTextGO: {fileID: 368680574}
@@ -1128,6 +1146,10 @@ MonoBehaviour:
   GreenBorderPrefab: {fileID: 692447127116707221, guid: 56d1b38cf705cfa458909624e6058ac2,
     type: 3}
   RedBorderPrefab: {fileID: 692447127116707221, guid: 6a4556600160f504593546f8cfa56286,
+    type: 3}
+  GreenBorderPrefab_2D: {fileID: 7499204894043194965, guid: 7b157a98c9fa843f081fda1b1002ff6e,
+    type: 3}
+  RedBorderPrefab_2D: {fileID: 5876775579091019932, guid: 14f8f76018a7f4e30ad3ebc039e4796f,
     type: 3}
   Starfield: {fileID: 307568974}
   BorderPrefabList: []
@@ -1366,6 +1388,136 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1268475002}
   m_CullTransparentMesh: 1
+--- !u!1001 &1888232560
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 321374840}
+    m_Modifications:
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6952099139267227724, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_Name
+      value: CR_DisplayResults
+      objectReference: {fileID: 0}
+    - target: {fileID: 6952099139267227724, guid: ae1e52e2927e84518974acd1de632ca2,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ae1e52e2927e84518974acd1de632ca2, type: 3}
+--- !u!224 &1888232561 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 2658996496129379348, guid: ae1e52e2927e84518974acd1de632ca2,
+    type: 3}
+  m_PrefabInstance: {fileID: 1888232560}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1932148019
 GameObject:
   m_ObjectHideFlags: 0

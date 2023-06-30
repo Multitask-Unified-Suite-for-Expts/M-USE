@@ -130,7 +130,6 @@ namespace USE_ExperimentTemplate_Session
 
         public override void LoadSettings()
         {
-
             HumanStartPanel = gameObject.AddComponent<HumanStartPanel>();
             HumanStartPanel.SetSessionLevel(this);
             HumanStartPanel.HumanStartPanelPrefab = HumanStartPanelPrefab;

@@ -296,7 +296,6 @@ namespace USE_StimulusManagement
 						{
 							if (returnedStimGO != null)
 							{
-								Debug.Log("Stim returned from LoadExternalStimFromServer coroutine! Woo!");
 								StimGameObject = returnedStimGO;
 							}
 							else
@@ -319,7 +318,6 @@ namespace USE_StimulusManagement
                 {
                     Debug.LogWarning("Attempting to load stimulus " + StimName + ", but no Unity Resources path, external file path, or dimensional values have been provided.");
 					callback?.Invoke(null);
-					//return null;
                 }
 
 
@@ -340,7 +338,6 @@ namespace USE_StimulusManagement
 				callback?.Invoke(StimGameObject);
 
             }
-            //return StimGameObject;
         }
 
 

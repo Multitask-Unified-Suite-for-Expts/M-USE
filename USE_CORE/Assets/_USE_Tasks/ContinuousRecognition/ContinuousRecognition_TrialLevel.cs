@@ -11,7 +11,7 @@ using System.Linq;
 using TMPro;
 using USE_UI;
 using System.Collections;
-using System.Collections.Specialized;
+
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
@@ -28,10 +28,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public GameObject ScoreTextGO;
     public GameObject NumTrialsTextGO;
     public GameObject TimerBackdropGO;
-    //public GameObject GreenBorderPrefab;
-    //public GameObject RedBorderPrefab;
+    public GameObject GreenBorderPrefab;
+    public GameObject RedBorderPrefab;
+    public GameObject GreenBorderPrefab_2D;
+    public GameObject RedBorderPrefab_2D;
     public GameObject Starfield;
-    //[HideInInspector] public List<GameObject> BorderPrefabList;
+    [HideInInspector] public List<GameObject> BorderPrefabList;
 
     [HideInInspector] public bool CompletedAllTrials;
     [HideInInspector] public bool EndBlock;
@@ -478,7 +480,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     {
         DeactivatePlayerViewText();
         DeactivateTextObjects();
-        //DestroyFeedbackBorders();
+        if(!SessionValues.Using2DStim)
+            DestroyFeedbackBorders();
         ContextActive = false;
     }
 
@@ -982,7 +985,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         AvgTimeToChoice_Block = sum / TimeToChoice_Block.Count;
     }
 
-    void GenerateBlockFeedback()
+    private void GenerateBlockFeedback()
     {
         Starfield.SetActive(false);
         TokenFBController.enabled = false;
@@ -1001,7 +1004,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             RightGroup = new StimGroup("Right", group, ChosenStimIndices);
             StartCoroutine(GenerateFeedbackStim(RightGroup, FeedbackLocations, result =>
             {
-                //GenerateFeedbackBorders(RightGroup);
+                if (!SessionValues.Using2DStim)
+                    GenerateFeedbackBorders(RightGroup);
 
                 if (currentTrial.StimFacingCamera)
                     MakeStimsFaceCamera(RightGroup);
@@ -1016,7 +1020,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             RightGroup = new StimGroup("Right", group, ChosenStimIndices);
             StartCoroutine(GenerateFeedbackStim(RightGroup, FeedbackLocations.Take(FeedbackLocations.Length - 1).ToArray(), result =>
             {
-                //GenerateFeedbackBorders(RightGroup);
+                if(!SessionValues.Using2DStim)
+                    GenerateFeedbackBorders(RightGroup);
 
                 if (currentTrial.StimFacingCamera)
                     MakeStimsFaceCamera(RightGroup);
@@ -1027,7 +1032,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             wrongStim.StimGameObject = null;
             StartCoroutine(GenerateFeedbackStim(WrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length - 1).Take(1).ToArray(), result =>
             {
-                //GenerateFeedbackBorders(WrongGroup);
+                if (!SessionValues.Using2DStim)
+                    GenerateFeedbackBorders(WrongGroup);
 
                 if (currentTrial.StimFacingCamera)
                     wrongStim.StimGameObject.AddComponent<FaceCamera>();
@@ -1035,13 +1041,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    void MakeStimsFaceCamera(StimGroup stims)
+    private void MakeStimsFaceCamera(StimGroup stims)
     {
         foreach (var stim in stims.stimDefs)
             stim.StimGameObject.AddComponent<FaceCamera>();
     }
 
-    IEnumerator GenerateFeedbackStim(StimGroup group, Vector3[] locations, Action<VoidDelegate> callback)
+    private IEnumerator GenerateFeedbackStim(StimGroup group, Vector3[] locations, Action<VoidDelegate> callback)
     {
         TrialStims.Add(group);
         group.SetLocations(locations);
@@ -1050,7 +1056,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         callback?.Invoke(null);
     }
 
-    /*void GenerateFeedbackBorders(StimGroup group)
+    private void GenerateFeedbackBorders(StimGroup group)
     {
         if (BorderPrefabList.Count == 0)
             BorderPrefabList = new List<GameObject>();
@@ -1059,19 +1065,19 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             if (stim.StimIndex == currentTrial.WrongStimIndex)
             {
-                GameObject redBorder = Instantiate(RedBorderPrefab, (stim.StimGameObject.transform.position + new Vector3(0, .1f, 0)), Quaternion.identity);
-                BorderPrefabList.Add(redBorder); //Add each to list so I can destroy them together
+                GameObject redBorder = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position + new Vector3(0, .1f, 0), Quaternion.identity);
+                BorderPrefabList.Add(redBorder);
             }
             else
             {
-                GameObject greenBorder = Instantiate(GreenBorderPrefab, (stim.StimGameObject.transform.position + new Vector3(0, .1f, 0)), Quaternion.identity);
+                GameObject greenBorder = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position + new Vector3(0, .1f, 0), Quaternion.identity);
                 BorderPrefabList.Add(greenBorder);
             }
         }
 
-    }*/
+    }
 
-    /*void DestroyFeedbackBorders()
+    private void DestroyFeedbackBorders()
     {
         foreach (GameObject border in BorderPrefabList)
         {
@@ -1079,9 +1085,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 Destroy(border);
         }
         BorderPrefabList.Clear();
-    }*/
+    }
 
-    void HandleTokenUpdate()
+    private void HandleTokenUpdate()
     {
         if(TokenFBController.isTokenBarFull())
         {
@@ -1097,7 +1103,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    List<int> ShuffleList(List<int> list)
+    private List<int> ShuffleList(List<int> list)
     {
         if (list.Count == 1)
             return list;
@@ -1122,7 +1128,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         return EndBlock;
     }
 
-    void SetStimStrings()
+    private void SetStimStrings()
     {
         //Locations String;
         string s = "";
@@ -1190,7 +1196,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     }
 
-    void DefineTrialData()
+    private void DefineTrialData()
     {
         TrialData.AddDatum("Context", () => currentTrial.ContextName);
         TrialData.AddDatum("Starfield", () => currentTrial.UseStarfield);
@@ -1204,7 +1210,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("PC_Percentage", () => currentTrial.PC_Percentage_String);
     }
 
-    void DefineFrameData()
+    private void DefineFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
         FrameData.AddDatum("ContextActive", () => ContextActive);
@@ -1213,7 +1219,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("StarfieldActive", () => Starfield.activeInHierarchy);
     }
 
-    void ClearCurrentTrialStimLists()
+    private void ClearCurrentTrialStimLists()
     {
         ChosenStimIndices.Clear();
         currentTrial.TrialStimIndices.Clear();
@@ -1224,7 +1230,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     }
 
-    float[] GetStimRatioPercentages(int[] ratioArray)
+    private float[] GetStimRatioPercentages(int[] ratioArray)
     {
         //Takes the initial stim ratio (ex: 2PC, 1New, 2PNC), and
         //outputs their percentages of the total 
@@ -1239,7 +1245,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         return stimPercentages;
     }
 
-    int[] GetStimNumbers(float[] stimPercentages)
+    private int[] GetStimNumbers(float[] stimPercentages)
     {
         //Function to calculate the correct num of stim for a trial.
         //Starts by understating each num, then it makes sure there are enough available (some ratios could overstate the stim),
@@ -1290,7 +1296,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         return new[] { PC_Num, New_Num, PNC_Num };
     }
 
-    void LoadConfigUIVariables()
+    private void LoadConfigUIVariables()
     {
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
@@ -1304,7 +1310,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         VariablesLoaded = true;
     }
 
-    void SetTokenFeedbackTimes()
+    private void SetTokenFeedbackTimes()
     {
         TokenFBController.SetRevealTime(tokenRevealDuration.value);
         TokenFBController.SetUpdateTime(tokenUpdateDuration.value);

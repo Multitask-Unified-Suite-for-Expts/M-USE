@@ -281,7 +281,7 @@ namespace USE_StimulusManagement
 
 			bool loadFromServer = SessionValues.WebBuild && !SessionValues.UseDefaultConfigs;
 
-            if (SessionValues.UseDefaultConfigs)
+			if (SessionValues.UseDefaultConfigs)
 			{
                 StimGameObject = LoadPrefabFromResources(PrefabPath);
 				callback?.Invoke(StimGameObject);

@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using UnityEngine;
+using USE_DisplayManagement;
 using USE_ExperimentTemplate_Trial;
 
 namespace USE_Def_Namespace
@@ -13,24 +15,43 @@ namespace USE_Def_Namespace
         // public int SessionStart_Frame;
         // public float SessionStart_UnityTime;
         // public string SessionID;
+
+        public OrderedDictionary TaskMappings;
+        public OrderedDictionary TaskIcons;
+
+        public string ContextExternalFilePath;
+        public string TaskIconsFolderPath;
+        public Vector3[] TaskIconLocations;
         
+        public float TaskSelectionTimeout;
+        public bool MacMainDisplayBuild;
         public bool IsHuman;
         public bool StoreData;
-        public bool EyeTrackerActive;
-        public bool SerialPortActive;
-        public bool SyncBoxActive;
         public bool EventCodesActive;
-        public string SelectionType;
+        public bool SyncBoxActive;
+        public bool SerialPortActive;
+        public string SerialPortAddress;
+        public int SerialPortSpeed;
+        public List<string> SyncBoxInitCommands;
+        public int SplitBytes;
         
-        public bool RewardPulsesActive;
-        public bool SonicationActive;
         public string EyetrackerType;
-        public string ContextExternalFilePath;
-
-        public float ShotgunRayCastCircleSize_DVA;
-        public float ShotgunRaycastSpacing_DVA;
-        public float ParticipantDistance_CM;
+        public bool EyeTrackerActive;
+        public string SelectionType = "mouse";
+        public MonitorDetails MonitorDetails;
+        public ScreenDetails ScreenDetails;
         
+        public bool SonicationActive;
+
+        public float ShotgunRayCastCircleSize_DVA = 1.25f;
+        public float ShotgunRaycastSpacing_DVA = 0.3f;
+        public float ParticipantDistance_CM = 60f;
+
+        public int RewardHotKeyNumPulses = 1;
+        public int RewardHotKeyPulseSize = 250;
+
+        public bool GuidedTaskSelection;
+
     }
     public class TaskDef
     {

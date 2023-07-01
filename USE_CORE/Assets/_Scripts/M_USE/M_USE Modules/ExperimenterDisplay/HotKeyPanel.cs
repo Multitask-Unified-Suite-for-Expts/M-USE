@@ -367,8 +367,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         if (HkPanel.TrialLevel.SyncBoxController != null)
                         {
                             HkPanel.TrialLevel.AudioFBController.Play("Positive");
-                            HkPanel.TrialLevel.SyncBoxController.SendRewardPulses(HkPanel.SessionLevel.RewardHotKeyNumPulses, HkPanel.SessionLevel.RewardHotKeyPulseSize);
-                            SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",HkPanel.SessionLevel.RewardHotKeyNumPulses));
+                            HkPanel.TrialLevel.SyncBoxController.SendRewardPulses(SessionValues.SessionDef.RewardHotKeyNumPulses, SessionValues.SessionDef.RewardHotKeyPulseSize);
+                            SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",SessionValues.SessionDef.RewardHotKeyNumPulses));
 
                         }
                         else

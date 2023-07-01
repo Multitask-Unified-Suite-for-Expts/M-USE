@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using Newtonsoft.Json;
@@ -42,55 +43,122 @@ public static class SessionValues
     public static SerialRecvData SerialRecvData;
     public static SerialSentData SerialSentData;
     public static GazeData GazeData;
-    public static SelectionTracker SelectionTracker;
     public static MouseTracker MouseTracker;
+    public static GazeTracker GazeTracker;
+    public static TobiiEyeTrackerController TobiiEyeTrackerController;
     public static GameObject InputManager;
+
     // public static string SelectionType;
     // public static string ContextExternalFilePath;
     public static EventCodeManager EventCodeManager;
     public static Dictionary<string, EventCode> SessionEventCodes;
+    
+    public static string ConfigAccessType;
+    public static string ConfigFolderPath;
+
+    public static SyncBoxController SyncBoxController;
+    public static SerialPortThreaded SerialPortController;
+
+
+    public static SelectionTracker SelectionTracker;
+    public static SelectionTracker.SelectionHandler SelectionHandler;
+    static SessionValues() // idk about this???
+    {
+        // Perform actions when certain values are true
+
+        // if (SessionDef.SyncBoxActive)
+        // {
+        //     SyncBoxController = new SyncBoxController();
+        //     SyncBoxController.serialPortController = SerialPortController;
+        //     SerialSentData.sc = SerialPortController;
+        //     SerialRecvData.sc = SerialPortController;
+        //     SyncBoxController.SessionEventCodes = SessionEventCodes;
+        //     // SyncBoxController.SessionEventCodes = SessionEventCodes;
+        //     // tl.SyncBoxController = SyncBoxController;
+        // }
+    }
     //
     // public static float ShotgunRayCastCircleSize_DVA;
     // public static float ShotgunRaycastSpacing_DVA;
     // public static float ParticipantDistance_CM;
-
-    static SessionValues() // idk about this???
+    public static IEnumerator GetFileContentString(string fileName, Action<string> callback)
     {
-        // Perform actions when certain values are true
-        //if (EyeTrackerActive)
+        string fileContent;
+        if (ConfigAccessType == "Default")
         {
-            // tl.GazeTracker = GazeTracker;
-            // tl.TobiiEyeTrackerController = TobiiEyeTrackerController;
+            fileContent = File.ReadAllText(Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + fileName);
+            callback(fileContent);
+        }
+        else if (ConfigAccessType == "Server")
+        {
+            ServerManager.GetFileStringAsync(ServerManager.SessionConfigFolderPath, "SessionConfig", result =>
+            {
+                callback(result);
+            });
+        }
+        else if (ConfigAccessType == "Local")
+        {
+            fileContent = File.ReadAllText(LocateFile.FindFilePathInExternalFolder(ConfigFolderPath, $"*{fileName}*"));
+            callback(fileContent);
+        }
+        else
+        {
+            callback(null);
         }
 
-        // if (SerialPortActive)
-        {
-            // tl.SerialPortController = SerialPortController;
-        }
-
-        //  if (SyncBoxActive)
-        {
-            // SyncBoxController.SessionEventCodes = SessionEventCodes;
-            // tl.SyncBoxController = SyncBoxController;
-        }
+        yield break;
     }
-    public static T[] ImportSettings_SingleTypeArray<T>(string settingsCategory, string settingsPath, string serverFileString = null, char delimiter = '\t')
+
+
+    
+    public static IEnumerator BetterReadSettingsFile<T>(string fileName, string fileType, Action<T[]> callback)
+    {
+        yield return GetFileContentString(fileName, result =>
+        {
+            if (result != null)
+            {
+                T[] settingsArray = null;
+                if (fileType == "SingleTypeArray")
+                    settingsArray = ImportSettings_SingleTypeArray<T>(fileType, result);
+                else if (fileType == "SingleTypeJSON")
+                    settingsArray = ImportSettings_SingleTypeJSON<T>(fileType, result);
+                else if (fileType == "SingleTypeDelimited")
+                    settingsArray = ImportSettings_SingleTypeDelimited<T>(fileType, result);
+                else
+                {
+                    Debug.Log("Failed to read Settings File. This is a problem.");
+                    callback(null);
+                    return;
+                }
+
+                callback(settingsArray);
+            }
+            else
+            {
+                Debug.LogError("Error retrieving file content.");
+                callback(null);
+            }
+        });
+    }
+
+    
+    public static T[] ImportSettings_SingleTypeArray<T>(string settingsCategory, string fileContentString, char delimiter = '\t')
     {
         //Settings settings = new Settings(settingsCategory, settingsPath);
 
-        Debug.Log("Attempting to load settings file " + settingsPath);
-
-        if (serverFileString == null)
-        {
-            if (!File.Exists(settingsPath))
-                return null;
-        }
+        Debug.Log("Attempting to load settings file " + settingsCategory);
+        //
+        // if (serverFileString == null)
+        // {
+        //     if (!File.Exists(settingsPath))
+        //         return null;
+        // }
 
         string[] lines;
 
-        if (serverFileString != null)
+        if (ConfigAccessType == "Server")
         {
-            string[] splitLines = serverFileString.Split('\n');
+            string[] splitLines = fileContentString.Split('\n');
             List<string> stringList = new List<string>();
             foreach (var line in splitLines)
             {
@@ -99,11 +167,27 @@ public static class SessionValues
                 stringList.Add(line);
             }
             lines = stringList.ToArray();
-        } 
+        }
         else
         {
-            lines = ReadSettingsFile(settingsPath, "//", "...");
+            lines = new[] { "idk" };
         }
+        // if (serverFileString != null)
+        // {
+        //     string[] splitLines = serverFileString.Split('\n');
+        //     List<string> stringList = new List<string>();
+        //     foreach (var line in splitLines)
+        //     {
+        //         if (string.IsNullOrEmpty(line.Trim()) || line.Trim().StartsWith("//", StringComparison.Ordinal)) // Skip empty and/or commented out lines
+        //             continue;
+        //         stringList.Add(line);
+        //     }
+        //     lines = stringList.ToArray();
+        // } 
+        // else
+        // {
+        //     lines = ReadSettingsFile(settingsPath, "//", "...");
+        // }
 
         T[] settingsArray = new T[lines.Length - 1];
 
@@ -153,7 +237,7 @@ public static class SessionValues
                 catch (Exception e)
                 {
                     Debug.Log(fieldNames[iVal] + ": " + values[iVal]);
-                    Debug.Log("Error adding TDF file \"" + settingsPath + "\" to Settings \"" + settingsCategory + "\".");
+                    Debug.Log("Error adding TDF file \"" + settingsCategory + "\" to Settings \"" + settingsCategory + "\".");
                     throw new Exception(e.Message + "\t" + e.StackTrace);
                 }
             }
@@ -162,53 +246,36 @@ public static class SessionValues
         return settingsArray;
 
     }
-    public static T ImportSettings_SingleTypeJSON<T>(string settingsCategory, string settingsPath, string serverFileString = null, string dictName = "")
+   // public static T[] ImportSettings_SingleTypeJSON<T>(string settingsCategory, string settingsPath, string serverFileString = null, string dictName = "")
+    public static T[] ImportSettings_SingleTypeJSON<T>(string settingsCategory, string fileContentString, string dictName = "")
     {
-        Debug.Log("Attempting to load settings file " + settingsPath + ".");
-        if (dictName == "")
-            dictName = settingsCategory;
-
-        string dataAsJsonString = serverFileString == null ? File.ReadAllText(settingsPath) : serverFileString;
+        Debug.Log("Attempting to load settings file " + settingsCategory + ".");
+        // if (dictName == "")
+        //     dictName = settingsCategory;
+        //
+        // string dataAsJsonString = serverFileString == null ? File.ReadAllText(settingsPath) : serverFileString;
         T settingsInstance = Activator.CreateInstance<T>();
         try
         {
-            settingsInstance = JsonConvert.DeserializeObject<T>(dataAsJsonString);
+            settingsInstance = JsonConvert.DeserializeObject<T>(fileContentString);
         }
         catch (Exception e)
         {
-            Debug.Log("Error adding JSON file \"" + settingsPath + "\" to Settings \"" + settingsCategory + "\".");
+            Debug.Log("Error adding JSON file \"" + settingsCategory + "\" to Settings \"" + settingsCategory + "\".");
             throw new Exception(e.Message + "\t" + e.StackTrace);
-        }
-        if (settingsInstance is IDictionary dictionary)
-        {
-            foreach (DictionaryEntry entry in dictionary)
-            {
-                var key = entry.Key;
-                var value = entry.Value;
-                Debug.Log($"{key} = {value}");
-            }
-        }
-        else
-        {
-            Debug.Log("settingsInstance is not a dictionary.");
-        }
-        return settingsInstance;
+         }
+
+        T[] settingsArray = new T[] { settingsInstance };
+        return settingsArray;
     }
-    public static T ImportSettings_MultipleType<T>(string settingsCategory, string settingsPath, string serverFileString = null, char delimiter = '\t')
+  //  public static T ImportSettings_SingleTypeDelimited<T>(string settingsCategory, string settingsPath, string serverFileString = null, char delimiter = '\t')
+    public static T[] ImportSettings_SingleTypeDelimited<T>(string settingsCategory, string fileContentString, char delimiter = '\t')
     {
-        Debug.Log("Attempting to load settings file " + settingsPath);
-
+        Debug.Log("Attempting to load settings file " + settingsCategory);
+        
         string[] lines;
-
-        if (serverFileString != null)
-        {
-            lines = serverFileString.Split('\n');
-        }
-        else
-        {
-            lines = ReadSettingsFile(settingsPath, "//", "...");
-        }
-
+        lines = fileContentString.Split('\n');
+        
         T settingsInstance = Activator.CreateInstance<T>();
 
         foreach(string line in lines)
@@ -219,30 +286,42 @@ public static class SessionValues
             try
             {
                 string fieldName = splitString[1];
-                string stringValue = splitString[2];
+                string fieldValue = splitString[2];
+                
+                AssignFieldValue(fieldName, fieldValue, settingsInstance);
             
-                FieldInfo fieldInfo = typeof(T).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                PropertyInfo propertyInfo = typeof(T).GetProperty(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            
-                if (propertyInfo != null)
-                {
-                    Type propertyType = propertyInfo.PropertyType;
-                    propertyInfo.SetValue(settingsInstance, Convert.ChangeType(stringValue, propertyType));
-                }
-                else if (fieldInfo != null)
-                {
-                    Type fieldType = fieldInfo.FieldType;
-                    fieldInfo.SetValue(settingsInstance, Convert.ChangeType(stringValue, fieldType));
-                }
+                // FieldInfo fieldInfo = typeof(T).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                // PropertyInfo propertyInfo = typeof(T).GetProperty(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                //
+                // if (propertyInfo != null)
+                // {
+                //     Type propertyType = propertyInfo.PropertyType;
+                //     propertyInfo.SetValue(settingsInstance, Convert.ChangeType(stringValue, propertyType));
+                // }
+                // else if (fieldInfo != null)
+                // {
+                //     Type fieldType = fieldInfo.FieldType;
+                //     fieldInfo.SetValue(settingsInstance, Convert.ChangeType(stringValue, fieldType));
+                // }
             }
             catch (Exception e)
             {
-                Debug.Log("Attempted to import Settings file \"" + settingsPath + "\" but line \"" + line + "\" has " + line.Length + " entries, 3 expected.");
+                Debug.Log("Attempted to import Settings file \"" + settingsCategory + "\" but line \"" + line + "\" has " + line.Length + " entries, 3 expected.");
                 throw new Exception(e.Message + "\t" + e.StackTrace);
             }
         }
-    
-        return settingsInstance;
+
+        // Need to be returning an array for the callback method to be consistent across all three
+        T[] settingsArray = new T[] { settingsInstance };
+        // FieldInfo[] fields = typeof(T).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        //
+        // foreach (FieldInfo field in fields)
+        // {
+        //     object value = field.GetValue(settingsInstance);
+        //     Debug.Log($"Field: {field.Name}, Value: {value}");
+        // }
+        //
+        return settingsArray;
     }
 
 
@@ -277,13 +356,28 @@ public static class SessionValues
                     {
                         newLine = textFile.ReadLine().Trim();
                     }
-                    line = line + newLine;
+                    line += newLine;
                 }
                 outputList.Add(line);
             }
         }
         return outputList.ToArray();
     }
-    
-    
+
+    private static void AssignFieldValue<T>(string fieldName, string fieldValue, T settingsInstance)
+    {
+        FieldInfo fieldInfo = typeof(T).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        PropertyInfo propertyInfo = typeof(T).GetProperty(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            
+        if (propertyInfo != null)
+        {
+            Type propertyType = propertyInfo.PropertyType;
+            propertyInfo.SetValue(settingsInstance, Convert.ChangeType(fieldValue, propertyType));
+        }
+        else if (fieldInfo != null)
+        {
+            Type fieldType = fieldInfo.FieldType;
+            fieldInfo.SetValue(settingsInstance, Convert.ChangeType(fieldValue, fieldType));
+        }
+    }
 }

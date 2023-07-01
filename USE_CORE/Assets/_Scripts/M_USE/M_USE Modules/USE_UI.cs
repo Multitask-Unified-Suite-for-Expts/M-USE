@@ -287,7 +287,7 @@ namespace USE_UI
         [HideInInspector] public Image CoverCircle_Image; //Child circle that can be used to "change circle color" by activating over top of startbutton.
         [HideInInspector] public GameObject PlayIconGO; //Child Play icon
         [HideInInspector] public List<GameObject> StartButtonChildren;
-        [HideInInspector] public static GameObject StartButtonPrefab;
+        [HideInInspector] public GameObject StartButtonPrefab;
         [HideInInspector] public bool IsGrating;
         [HideInInspector] public bool IsHuman;
 

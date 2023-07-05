@@ -94,6 +94,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector]
     public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, displayStimDuration, chooseStimDuration, itiDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration;
 
+    public GameObject DisplayResultsContainerGO;
+
 
     public override void DefineControlLevel()
     {
@@ -383,7 +385,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (EndBlock)
             {
-                GenerateBlockFeedback();
+                StartCoroutine(GenerateBlockFeedback());
 
                 if (IsHuman)
                 {
@@ -411,6 +413,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         DisplayResults.SpecifyTermination(() => !EndBlock && !CompletedAllTrials, ITI);
         DisplayResults.AddDefaultTerminationMethod(() =>
         {
+            DisplayResultsContainerGO.SetActive(false);
+
             if(currentTrial.ShakeStim)
                 RemoveShakeStimScript(trialStims);
 
@@ -631,8 +635,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                              "\nNew_Stim: " + NumNew_Trial +
                              "\nPNC_Stim: " + NumPNC_Trial;
     }
-
-
 
     Vector3[] CenterFeedbackLocations(Vector3[] locations, int numLocations)
     {
@@ -864,6 +866,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         return currentLoc;
     }
 
+
     protected override void DefineTrialStims()
     {
         NumPC_Trial = 0;
@@ -996,112 +999,123 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         AvgTimeToChoice_Block = sum / TimeToChoice_Block.Count;
     }
 
-    private void GenerateBlockFeedback()
+    private IEnumerator GenerateBlockFeedback()
     {
         Starfield.SetActive(false);
         TokenFBController.enabled = false;
 
+        if (!StimIsChosen && ChosenStimIndices.Count < 1)
+            yield break;
+
         StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
 
-        if (!StimIsChosen && ChosenStimIndices.Count < 1)
-            return;
+        DisplayResultsContainerGO.SetActive(true);
+        Transform gridParent = DisplayResultsContainerGO.transform.Find("Grid");
 
         if (CompletedAllTrials || !StimIsChosen) //!stimchosen means time ran out. 
         {
+            RightGroup = new StimGroup("Right", group, ChosenStimIndices);
             Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count];
             FeedbackLocations = CenterFeedbackLocations(currentTrial.TrialFeedbackLocations, FeedbackLocations.Length);
-            RightGroup = new StimGroup("Right", group, ChosenStimIndices);
-            StartCoroutine(GenerateFeedbackStim(RightGroup, FeedbackLocations, result =>
-            {
-                if (!SessionValues.Using2DStim)
-                    GenerateFeedbackBorders(RightGroup);
 
-                if (currentTrial.StimFacingCamera)
-                    MakeStimsFaceCamera(RightGroup);
-            }));
+            if(SessionValues.Using2DStim)
+                yield return StartCoroutine(LoadGridStims(RightGroup, gridParent));
+            else
+                yield return StartCoroutine(Load3DStims(RightGroup, FeedbackLocations));
         }
         else
         {
+            RightGroup = new StimGroup("Right", group, ChosenStimIndices);
             Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count + 1];
             FeedbackLocations = CenterFeedbackLocations(currentTrial.TrialFeedbackLocations, FeedbackLocations.Length);
-            RightGroup = new StimGroup("Right", group, ChosenStimIndices);
-            StartCoroutine(GenerateFeedbackStim(RightGroup, FeedbackLocations.Take(FeedbackLocations.Length - 1).ToArray(), result =>
-            {
-                //if(!SessionValues.Using2DStim)
-                    GenerateFeedbackBorders(RightGroup);
 
-                if (currentTrial.StimFacingCamera)
-                    MakeStimsFaceCamera(RightGroup);
-            }));
+            if (SessionValues.Using2DStim)
+                yield return StartCoroutine(LoadGridStims(RightGroup, gridParent));
+            else
+                yield return StartCoroutine(Load3DStims(RightGroup, FeedbackLocations.Take(FeedbackLocations.Length - 1).ToArray()));
 
+            
             WrongGroup = new StimGroup("Wrong");
-            StimDef wrongStim = group.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(WrongGroup);
-            StartCoroutine(GenerateFeedbackStim(WrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length - 1).Take(1).ToArray(), result =>
-            {
-                //if (!SessionValues.Using2DStim)
-                    GenerateFeedbackBorders(WrongGroup);
-
-                if (currentTrial.StimFacingCamera)
-                    wrongStim.StimGameObject.AddComponent<FaceCamera>();
-            }));
+            group.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(WrongGroup); //copy wrong stim into WrongGroup
+            if(SessionValues.Using2DStim)
+                yield return StartCoroutine(LoadGridStims(WrongGroup, gridParent));
+            else
+                yield return StartCoroutine(Load3DStims(WrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length - 1).Take(1).ToArray()));
         }
+
     }
 
-    private IEnumerator GenerateFeedbackStim(StimGroup group, Vector3[] locations, Action<VoidDelegate> callback)
+    private IEnumerator LoadGridStims(StimGroup group, Transform gridParent)
+    {
+        TrialStims.Add(group);
+        yield return StartCoroutine(group.LoadStims());
+        foreach (var stim in group.stimDefs)
+            CreateGridItem(gridParent, stim);
+        if (currentTrial.StimFacingCamera)
+            MakeStimsFaceCamera(group);
+        group.ToggleVisibility(true);
+    }
+
+    private IEnumerator Load3DStims(StimGroup group, Vector3[] locations)
     {
         TrialStims.Add(group);
         group.SetLocations(locations);
         yield return StartCoroutine(group.LoadStims());
+        Generate3DBorders(group);
+        if (currentTrial.StimFacingCamera)
+            MakeStimsFaceCamera(group);
         group.ToggleVisibility(true);
-        callback?.Invoke(null);
     }
 
-    private void MakeStimsFaceCamera(StimGroup stims)
-    {
-        foreach (var stim in stims.stimDefs)
-            stim.StimGameObject.AddComponent<FaceCamera>();
-    }
-
-    private GameObject Create2DBorder(StimDef stim, bool useRedPrefab)
-    {
-        GameObject border = Instantiate(useRedPrefab ? RedBorderPrefab_2D : GreenBorderPrefab_2D, stim.StimGameObject.transform.position, Quaternion.identity);
-        border.name = useRedPrefab ? $"RedBorder_{stim.StimIndex}" : $"GreenBorder_{stim.StimIndex}";
-        border.transform.parent = CR_CanvasGO.transform;
-        border.transform.localPosition = stim.StimGameObject.transform.localPosition;
-        border.transform.localScale = Vector3.one;
-        stim.StimGameObject.transform.parent = border.transform;
-
-        return border;
-    }
-
-    private void GenerateFeedbackBorders(StimGroup group)
+    private void Generate3DBorders(StimGroup group)
     {
         if (BorderPrefabList.Count == 0)
             BorderPrefabList = new List<GameObject>();
 
         foreach (var stim in group.stimDefs)
         {
-            GameObject redBorder;
-            GameObject greenBorder;
-
             if (stim.StimIndex == currentTrial.WrongStimIndex)
             {
-                if (SessionValues.Using2DStim)
-                    redBorder = Create2DBorder(stim, true);
-                else
-                    redBorder = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position + new Vector3(0, .1f, 0), Quaternion.identity);
+                GameObject redBorder = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position + new Vector3(0, .1f, 0), Quaternion.identity);
                 BorderPrefabList.Add(redBorder);
             }
             else
             {
-                if(SessionValues.Using2DStim)
-                    greenBorder = Create2DBorder(stim, false);
-                else
-                    greenBorder = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position + new Vector3(0, .1f, 0), Quaternion.identity);
+                GameObject greenBorder = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position + new Vector3(0, .1f, 0), Quaternion.identity);
                 BorderPrefabList.Add(greenBorder);
             }
         }
+    }
 
+    private void CreateGridItem(Transform gridParent, StimDef stim)
+    {
+        GameObject gridItem = Create2DBorder(stim);
+        gridItem.name = $"GridItem_" + stim.StimIndex;
+        gridItem.transform.parent = gridParent;
+        gridItem.transform.localScale = Vector3.one;
+        gridItem.transform.localPosition = new Vector3(gridItem.transform.localPosition.x, gridItem.transform.localPosition.y, 0);
+
+        GameObject gridStim = stim.StimGameObject;
+        gridStim.name = "Stim_Index_ " + stim.StimIndex;
+        gridStim.transform.parent = gridItem.transform;
+        gridStim.transform.localPosition = Vector3.zero;
+    }
+
+    private GameObject Create2DBorder(StimDef stim)
+    {
+        GameObject border;
+        if (stim.StimIndex == currentTrial.WrongStimIndex)
+            border = Instantiate(RedBorderPrefab_2D);
+        else
+            border = Instantiate(GreenBorderPrefab_2D);
+        BorderPrefabList.Add(border);
+        return border;
+    }
+
+    private void MakeStimsFaceCamera(StimGroup stims)
+    {
+        foreach (var stim in stims.stimDefs)
+            stim.StimGameObject.AddComponent<FaceCamera>();
     }
 
     private void DestroyFeedbackBorders()

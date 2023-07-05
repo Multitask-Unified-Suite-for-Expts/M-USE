@@ -200,7 +200,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
 
-            //if(MakeStimPopOut)
+            if (MakeStimPopOut)
                 PopStimOut();
         });
 
@@ -407,7 +407,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-        //DisplayResults.AddTimer(() => displayResultsDuration.value, ITI);
+        DisplayResults.AddTimer(() => displayResultsDuration.value, ITI);
         DisplayResults.SpecifyTermination(() => !EndBlock && !CompletedAllTrials, ITI);
         DisplayResults.AddDefaultTerminationMethod(() =>
         {
@@ -486,8 +486,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if(playerViewTextList != null && playerViewTextList.Count > 0)
             DeactivatePlayerViewText();
         Debug.Log("AFTER PVT");
-        if(!SessionValues.Using2DStim)
-            DestroyFeedbackBorders();
+        DestroyFeedbackBorders();
         Debug.Log("AFTER DFB!");
         ContextActive = false;
 
@@ -1063,6 +1062,18 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             stim.StimGameObject.AddComponent<FaceCamera>();
     }
 
+    private GameObject Create2DBorder(StimDef stim, bool useRedPrefab)
+    {
+        GameObject border = Instantiate(useRedPrefab ? RedBorderPrefab_2D : GreenBorderPrefab_2D, stim.StimGameObject.transform.position, Quaternion.identity);
+        border.name = useRedPrefab ? $"RedBorder_{stim.StimIndex}" : $"GreenBorder_{stim.StimIndex}";
+        border.transform.parent = CR_CanvasGO.transform;
+        border.transform.localPosition = stim.StimGameObject.transform.localPosition;
+        border.transform.localScale = Vector3.one;
+        stim.StimGameObject.transform.parent = border.transform;
+
+        return border;
+    }
+
     private void GenerateFeedbackBorders(StimGroup group)
     {
         if (BorderPrefabList.Count == 0)
@@ -1070,39 +1081,24 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         foreach (var stim in group.stimDefs)
         {
+            GameObject redBorder;
+            GameObject greenBorder;
+
             if (stim.StimIndex == currentTrial.WrongStimIndex)
             {
-                if(SessionValues.Using2DStim)
-                {
-                    GameObject redBorder = Instantiate(RedBorderPrefab_2D, stim.StimGameObject.transform.position, Quaternion.identity);
-                    redBorder.name = $"RedBorder_{stim.StimIndex}";
-                    redBorder.transform.parent = CR_CanvasGO.transform;
-                    redBorder.transform.localPosition = stim.StimGameObject.transform.localPosition;
-                    redBorder.transform.localScale = Vector3.one;
-                    stim.StimGameObject.transform.parent = redBorder.transform;
-                }
+                if (SessionValues.Using2DStim)
+                    redBorder = Create2DBorder(stim, true);
                 else
-                {
-                    GameObject redBorder = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position + new Vector3(0, .1f, 0), Quaternion.identity);
-                    BorderPrefabList.Add(redBorder);
-                }
+                    redBorder = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position + new Vector3(0, .1f, 0), Quaternion.identity);
+                BorderPrefabList.Add(redBorder);
             }
             else
             {
                 if(SessionValues.Using2DStim)
-                {
-                    GameObject greenBorder = Instantiate(GreenBorderPrefab_2D, stim.StimGameObject.transform.position, Quaternion.identity);
-                    greenBorder.name = $"GreenBorder_{stim.StimIndex}";
-                    greenBorder.transform.parent = CR_CanvasGO.transform;
-                    greenBorder.transform.localPosition = stim.StimGameObject.transform.localPosition;
-                    greenBorder.transform.localScale = Vector3.one;
-                    stim.StimGameObject.transform.parent = greenBorder.transform;
-                }
+                    greenBorder = Create2DBorder(stim, false);
                 else
-                {
-                    GameObject greenBorder = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position + new Vector3(0, .1f, 0), Quaternion.identity);
-                    BorderPrefabList.Add(greenBorder);
-                }
+                    greenBorder = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position + new Vector3(0, .1f, 0), Quaternion.identity);
+                BorderPrefabList.Add(greenBorder);
             }
         }
 

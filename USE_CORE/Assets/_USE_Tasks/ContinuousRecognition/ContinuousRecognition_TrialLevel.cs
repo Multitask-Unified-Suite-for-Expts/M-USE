@@ -11,6 +11,7 @@ using System.Linq;
 using TMPro;
 using USE_UI;
 using System.Collections;
+using UnityEngine.Profiling;
 
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
@@ -199,7 +200,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
 
-            if(MakeStimPopOut)
+            //if(MakeStimPopOut)
                 PopStimOut();
         });
 
@@ -406,7 +407,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-        DisplayResults.AddTimer(() => displayResultsDuration.value, ITI);
+        //DisplayResults.AddTimer(() => displayResultsDuration.value, ITI);
         DisplayResults.SpecifyTermination(() => !EndBlock && !CompletedAllTrials, ITI);
         DisplayResults.AddDefaultTerminationMethod(() =>
         {
@@ -478,11 +479,19 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
-        DeactivatePlayerViewText();
+        Debug.Log("START OF CR FINISH TRIAL CLEANUP!");
+
         DeactivateTextObjects();
+        Debug.Log("AFTER DEACTIVATE TEXT OBJECTS!");
+        if(playerViewTextList != null && playerViewTextList.Count > 0)
+            DeactivatePlayerViewText();
+        Debug.Log("AFTER PVT");
         if(!SessionValues.Using2DStim)
             DestroyFeedbackBorders();
+        Debug.Log("AFTER DFB!");
         ContextActive = false;
+
+        Debug.Log("END OF CR FINISH TRIAL CLEANUP!");
     }
 
     public void ResetBlockVariables()
@@ -505,7 +514,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.SetFlashingTime(1f);
         HaloFBController.SetPositiveHaloColor(Color.yellow);
         HaloFBController.SetNegativeHaloColor(Color.gray);
-        HaloFBController.SetHaloSize(1.1f);
+        HaloFBController.SetHaloSize(1.05f);
     }
 
     void RemoveShakeStimScript(StimGroup stimGroup)
@@ -830,16 +839,20 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         float shiftDownNeeded = (topMargin + bottomMargin) / 2;
         float shiftDownAmount = shiftDownNeeded - topMargin;
 
-        if (IsHuman && NumFeedbackRows > 1) //shift down more if human playing cuz text above stim 
-        {
-            for (int i = 0; i < FinalLocations.Length; i++)
-                FinalLocations[i].y -= (shiftDownAmount + .25f);
-        }
-        else
-        {
-            for (int i = 0; i < FinalLocations.Length; i++)
-                FinalLocations[i].y -= shiftDownAmount;
-        }
+        //delete this for loop if uncomment below
+        for (int i = 0; i < FinalLocations.Length; i++)
+            FinalLocations[i].y -= shiftDownAmount;
+
+        //if (IsHuman && NumFeedbackRows > 1) //shift down more if human playing cuz text above stim 
+        //{
+        //for (int i = 0; i < FinalLocations.Length; i++)
+        //    FinalLocations[i].y -= (shiftDownAmount + .25f);
+        //}
+        //else
+        //{
+        //for (int i = 0; i < FinalLocations.Length; i++)
+        //        FinalLocations[i].y -= shiftDownAmount;
+        //}
 
         return FinalLocations;
     }
@@ -852,7 +865,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         return currentLoc;
     }
 
-    //Generate the correct number of New, PC, and PNC stim for each trial. Called when the trial is defined!
     protected override void DefineTrialStims()
     {
         NumPC_Trial = 0;
@@ -997,10 +1009,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         if (CompletedAllTrials || !StimIsChosen) //!stimchosen means time ran out. 
         {
-            RightGroup = new StimGroup("Right");
             Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count];
             FeedbackLocations = CenterFeedbackLocations(currentTrial.TrialFeedbackLocations, FeedbackLocations.Length);
-
             RightGroup = new StimGroup("Right", group, ChosenStimIndices);
             StartCoroutine(GenerateFeedbackStim(RightGroup, FeedbackLocations, result =>
             {
@@ -1013,14 +1023,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
         else
         {
-            RightGroup = new StimGroup("Right");
             Vector3[] FeedbackLocations = new Vector3[ChosenStimIndices.Count + 1];
             FeedbackLocations = CenterFeedbackLocations(currentTrial.TrialFeedbackLocations, FeedbackLocations.Length);
-
             RightGroup = new StimGroup("Right", group, ChosenStimIndices);
             StartCoroutine(GenerateFeedbackStim(RightGroup, FeedbackLocations.Take(FeedbackLocations.Length - 1).ToArray(), result =>
             {
-                if(!SessionValues.Using2DStim)
+                //if(!SessionValues.Using2DStim)
                     GenerateFeedbackBorders(RightGroup);
 
                 if (currentTrial.StimFacingCamera)
@@ -1029,22 +1037,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             WrongGroup = new StimGroup("Wrong");
             StimDef wrongStim = group.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(WrongGroup);
-            wrongStim.StimGameObject = null;
             StartCoroutine(GenerateFeedbackStim(WrongGroup, FeedbackLocations.Skip(FeedbackLocations.Length - 1).Take(1).ToArray(), result =>
             {
-                if (!SessionValues.Using2DStim)
+                //if (!SessionValues.Using2DStim)
                     GenerateFeedbackBorders(WrongGroup);
 
                 if (currentTrial.StimFacingCamera)
                     wrongStim.StimGameObject.AddComponent<FaceCamera>();
             }));
         }
-    }
-
-    private void MakeStimsFaceCamera(StimGroup stims)
-    {
-        foreach (var stim in stims.stimDefs)
-            stim.StimGameObject.AddComponent<FaceCamera>();
     }
 
     private IEnumerator GenerateFeedbackStim(StimGroup group, Vector3[] locations, Action<VoidDelegate> callback)
@@ -1056,6 +1057,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         callback?.Invoke(null);
     }
 
+    private void MakeStimsFaceCamera(StimGroup stims)
+    {
+        foreach (var stim in stims.stimDefs)
+            stim.StimGameObject.AddComponent<FaceCamera>();
+    }
+
     private void GenerateFeedbackBorders(StimGroup group)
     {
         if (BorderPrefabList.Count == 0)
@@ -1065,13 +1072,37 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             if (stim.StimIndex == currentTrial.WrongStimIndex)
             {
-                GameObject redBorder = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position + new Vector3(0, .1f, 0), Quaternion.identity);
-                BorderPrefabList.Add(redBorder);
+                if(SessionValues.Using2DStim)
+                {
+                    GameObject redBorder = Instantiate(RedBorderPrefab_2D, stim.StimGameObject.transform.position, Quaternion.identity);
+                    redBorder.name = $"RedBorder_{stim.StimIndex}";
+                    redBorder.transform.parent = CR_CanvasGO.transform;
+                    redBorder.transform.localPosition = stim.StimGameObject.transform.localPosition;
+                    redBorder.transform.localScale = Vector3.one;
+                    stim.StimGameObject.transform.parent = redBorder.transform;
+                }
+                else
+                {
+                    GameObject redBorder = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position + new Vector3(0, .1f, 0), Quaternion.identity);
+                    BorderPrefabList.Add(redBorder);
+                }
             }
             else
             {
-                GameObject greenBorder = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position + new Vector3(0, .1f, 0), Quaternion.identity);
-                BorderPrefabList.Add(greenBorder);
+                if(SessionValues.Using2DStim)
+                {
+                    GameObject greenBorder = Instantiate(GreenBorderPrefab_2D, stim.StimGameObject.transform.position, Quaternion.identity);
+                    greenBorder.name = $"GreenBorder_{stim.StimIndex}";
+                    greenBorder.transform.parent = CR_CanvasGO.transform;
+                    greenBorder.transform.localPosition = stim.StimGameObject.transform.localPosition;
+                    greenBorder.transform.localScale = Vector3.one;
+                    stim.StimGameObject.transform.parent = greenBorder.transform;
+                }
+                else
+                {
+                    GameObject greenBorder = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position + new Vector3(0, .1f, 0), Quaternion.identity);
+                    BorderPrefabList.Add(greenBorder);
+                }
             }
         }
 

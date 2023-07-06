@@ -135,7 +135,8 @@ public class TokenFBController : MonoBehaviour
     {
         RenderTexture oldTexture = RenderTexture.active;
         if (Camera.main != null)
-            RenderTexture.active = Camera.main.targetTexture;
+            if (Camera.main.targetTexture != null)
+                RenderTexture.active = Camera.main.targetTexture;
 
         if (totalTokensNum < 0)
             return;

@@ -409,7 +409,7 @@ namespace USE_ExperimentTemplate_Task
                         StimGroup sg = taskSgs[0];
                         while (sg.stimDefs.Count > 0)
                         {
-                            sg.stimDefs[0].Destroy();
+                            sg.stimDefs[0].DestroyStimGameObject();
                             sg.stimDefs.RemoveAt(0);
                         }
 

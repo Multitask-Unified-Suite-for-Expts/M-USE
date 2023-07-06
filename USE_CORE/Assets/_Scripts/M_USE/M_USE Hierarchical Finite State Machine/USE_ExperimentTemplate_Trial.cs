@@ -362,7 +362,7 @@ namespace USE_ExperimentTemplate_Trial
             TrialData.AppendDataToFile();
             FrameData.AppendDataToBuffer();
             FrameData.AppendDataToFile();
-	if (EyeTrackerActive)
+            if (EyeTrackerActive)
                 GazeData.AppendDataToFile();
             if (SerialPortActive)
             {

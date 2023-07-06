@@ -227,13 +227,15 @@ public void RemoveStims(StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)
 		{
 			foreach (StimDef sd in stimDefs)
 			{
-				yield return CoroutineHelper.StartCoroutine(sd.Load(stimResultGO =>
-				{
-					if (stimResultGO != null)
-						sd.StimGameObject = stimResultGO;
-					else
-						Debug.Log("LOAD COROUTINE - STIM RESULT GAMEOBJECT IS NULL!!!!!!!!!!!!");
-				}));
+				if (sd.StimGameObject == null){
+					yield return CoroutineHelper.StartCoroutine(sd.Load(stimResultGO =>
+					{
+						if (stimResultGO != null)
+							sd.StimGameObject = stimResultGO;
+						else
+							Debug.Log("LOAD COROUTINE - STIM RESULT GAMEOBJECT IS NULL!!!!!!!!!!!!");
+					}));
+				}
 			}
 		}
 

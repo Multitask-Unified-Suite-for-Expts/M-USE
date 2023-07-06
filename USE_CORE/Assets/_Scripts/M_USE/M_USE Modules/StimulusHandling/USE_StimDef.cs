@@ -358,27 +358,28 @@ namespace USE_StimulusManagement
 		}
 
 
-		private List<GameObject> GetAllChildren(GameObject parentObject)
+		private List<GameObject> GetAllObjectsInHierarchy(GameObject parentObject)
 		{
-			List<GameObject> children = new List<GameObject>();
-			children.Add(parentObject);
+			List<GameObject> objects = new List<GameObject>();
+			objects.Add(parentObject);
 			foreach (Transform child in parentObject.transform)
 			{
-				children.Add(child.gameObject);
-				List<GameObject> childChildren = GetAllChildren(child.gameObject);
-				children.AddRange(childChildren);
+				// objects.Add(child.gameObject);
+				List<GameObject> childChildren = GetAllObjectsInHierarchy(child.gameObject);
+				objects.AddRange(childChildren);
 			}
 
-			return children;
+			return objects;
 		}
 
 		public void AssignStimDefPointeToObjectHierarchy(GameObject parentObject, StimDef sd)
 		{
-			List<GameObject> objectChildren = GetAllChildren(parentObject);
-			foreach (GameObject child in objectChildren)
+			List<GameObject> objectsInHierarchy = GetAllObjectsInHierarchy(parentObject);
+			foreach (GameObject obj in objectsInHierarchy)
+
 			{
-				child.AddComponent<StimDefPointer>();
-				child.GetComponent<StimDefPointer>().StimDef = this;
+				obj.AddComponent<StimDefPointer>();
+				obj.GetComponent<StimDefPointer>().StimDef = this;
 			}
 		}
 
@@ -561,19 +562,17 @@ namespace USE_StimulusManagement
 				tex = new Texture2D(2, 2);
 				tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
 			}
-
 			PositionRotationScale();
 			ToggleVisibility(visibility);
 			return tex;
 		}
 
-		public void Destroy()
+		public void DestroyStimGameObject()
 		{
 			StimGroup[] sgs = StimGroups.Values.ToArray();
 			for (int iG = 0; iG < sgs.Length; iG++)
 				RemoveFromStimGroup(sgs[iG]);
-
-			Object.Destroy(StimGameObject);
+			
 			if (SetActiveOnInitialization != null)
 			{
 				SetActiveOnInitialization.StateInitializationFinished -= ActivateOnStateInit;
@@ -585,6 +584,127 @@ namespace USE_StimulusManagement
 				SetInactiveOnTermination.StateTerminationFinished -= InactivateOnStateTerm;
 				SetInactiveOnTermination = null;
 			}
+						if (StimGameObject != null)
+			{
+				DestroyRecursive(StimGameObject);
+			}
+
+			StimGameObject = null;
+		}
+
+		public void DestroyRecursive(GameObject go)
+		{
+			Debug.Log(go.name);
+			if (go.transform.childCount > 0)
+				for(int iChild = 0; iChild < go.transform.childCount; iChild++)
+					DestroyRecursive(go.transform.GetChild(iChild).gameObject);
+
+			if (go.GetComponent<Texture>() != null)
+			{
+				GameObject.Destroy(go.GetComponent<Texture>());
+				Debug.Log(go.name + " Texture");
+			}
+			if (go.GetComponent<Texture2D>() != null)
+			{
+				GameObject.Destroy(go.GetComponent<Texture2D>());
+				Debug.Log(go.name + " Texture2D");
+			}
+
+			Material mat = go.GetComponent<Material>();
+			if (mat != null)
+			{
+				if (mat.shader != null)
+				{
+					GameObject.Destroy(mat.shader);
+					Debug.Log(go.name + " Material Shader");
+				}
+				if (mat.mainTexture != null)
+				{
+					GameObject.Destroy(mat.mainTexture);
+					Debug.Log(go.name + " Material Main Texture");
+				}
+				GameObject.Destroy(go.GetComponent<Material>());
+				Debug.Log(go.name + " Material");
+			}
+
+			
+			MeshRenderer mr = go.GetComponent<MeshRenderer>();
+			if (mr != null)
+			{
+				Debug.Log(go.name + " Mesh Renderer Exists");
+				foreach (Material material in mr.materials)
+				{
+					if (material.mainTexture != null)
+					{
+						GameObject.Destroy(material.mainTexture);
+						Debug.Log(go.name + " Mesh Renderer Material " + material.name + " Main Texture");
+					}
+				}
+				foreach (Material material in mr.sharedMaterials)
+				{
+					if (material.mainTexture != null)
+					{
+						GameObject.Destroy(material.mainTexture);
+						Debug.Log(go.name + " Mesh Renderer  Material " + material.name + " Main Texture");
+					}
+				}
+			}
+			
+			Renderer renderer = go.GetComponent<Renderer>();
+			if (renderer != null)
+			{
+				Debug.Log(go.name + " Plain Renderer Exists");
+				foreach (Material material in renderer.materials)
+				{
+					if (material.mainTexture != null)
+					{
+						GameObject.Destroy(material.mainTexture);
+						//Debug.Log(go.name + " Plain Renderer Material " + material.name + " Main Texture");
+						GameObject.Destroy(material);
+					}
+				}
+				foreach (Material material in renderer.sharedMaterials)
+				{
+					if (material.mainTexture != null)
+					{
+						GameObject.Destroy(material.mainTexture);
+						//Debug.Log(go.name + " Plain Renderer Material " + material.name + " Main Texture");
+						GameObject.Destroy(material);
+					}
+				}
+			}
+
+			MeshCollider mc = go.GetComponent<MeshCollider>();
+			if (mc != null)
+			{
+				Debug.Log(go.name + "Mesh Collider");
+				if (mc.material != null)
+				{
+					GameObject.Destroy(mc.material);
+					Debug.Log(go.name + " Mesh Collider Material " + mc.material.name);
+				}
+				GameObject.Destroy(mc);
+			}
+
+			MeshFilter mf = go.GetComponent<MeshFilter>();
+			if (mf != null)
+			{
+				Debug.Log(go.name + "Mesh Filter");
+				if (mf.mesh != null)
+				{
+					GameObject.Destroy(mf.mesh);
+					Debug.Log(go.name + " MeshFilter Mesh " + mf.mesh.name);
+				}
+				GameObject.Destroy(mf);
+			}
+
+			if (go.GetComponent<StimDefPointer>() != null)
+			{
+				GameObject.Destroy(go.GetComponent<StimDefPointer>());
+				Debug.Log(go.name + " StimDefPointer");
+			}
+
+			GameObject.Destroy(go);
 		}
 
 

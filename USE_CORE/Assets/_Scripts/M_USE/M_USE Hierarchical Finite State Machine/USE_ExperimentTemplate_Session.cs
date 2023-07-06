@@ -19,8 +19,9 @@ using USE_ExperimentTemplate_Task;
 using SelectionTracking;
 using TMPro;
 using USE_Def_Namespace;
+using System.Runtime.InteropServices;
 #if (!UNITY_WEBGL)
-    using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 #endif
 using USE_DisplayManagement;
 //using UnityEngine.Windows.WebCam;
@@ -178,6 +179,8 @@ namespace USE_ExperimentTemplate_Session
 
                     //SessionSettings.ImportSettings_MultipleType("Session", SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath , "*SessionConfig*"));
                     LoadSessionConfigSettings();
+                    GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
+
                 }
                 else //Using Server Configs:
                 {
@@ -196,6 +199,8 @@ namespace USE_ExperimentTemplate_Session
                                 SessionValues.SessionDef = settingsArray[0];
                             }));
                             LoadSessionConfigSettings();
+                            GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
+
                         }
                         else
                             Debug.Log("SESSION CONFIG COROUTINE RESULT IS EMPTY!!!");
@@ -213,8 +218,12 @@ namespace USE_ExperimentTemplate_Session
                    SessionValues.SessionDef = settingsArray[0];
                }));
  
-                LoadSessionConfigSettings(); 
+                LoadSessionConfigSettings();
+                GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
+
             }
+
+
         }
 
         public override void DefineControlLevel()
@@ -1113,7 +1122,6 @@ namespace USE_ExperimentTemplate_Session
             //     StoreData = (bool)SessionSettings.Get("Session", "StoreData");
 
             //Set LogWriter StoreData variable:
-            GameObject.Find("MiscScripts").GetComponent<LogWriter>().SetStoreData(StoreData);
 
             //
             // if (SessionSettings.SettingExists("Session", "SerialPortActive"))
@@ -1276,15 +1284,15 @@ namespace USE_ExperimentTemplate_Session
         public ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
 	    tl.GridItem_AudioClip = GridItem_AudioClip;
-            tl.SessionLevel = this;
-            tl.USE_StartButton = USE_StartButton;
-            tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
-            tl.HumanStartPanel = HumanStartPanel;
-            tl.IsHuman = IsHuman;
-            tl.DisplayController = DisplayController;
-            tl.SessionDataControllers = SessionDataControllers;
-            tl.LocateFile = LocateFile;
-            tl.SessionLevelDataPath = SessionLevelDataPath;
+            SessionValues.SessionLevel = this;
+            //tl.USE_StartButton = USE_StartButton;
+            //tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
+            //tl.HumanStartPanel = HumanStartPanel;
+           // tl.IsHuman = IsHuman;
+           // tl.DisplayController = DisplayController;
+           // tl.SessionDataControllers = SessionDataControllers;
+           // tl.LocateFile = LocateFile;
+           // tl.SessionLevelDataPath = SessionLevelDataPath;
 
             tl.BlockResultsPrefab = BlockResultsPrefab;
             tl.BlockResults_GridElementPrefab = BlockResults_GridElementPrefab;

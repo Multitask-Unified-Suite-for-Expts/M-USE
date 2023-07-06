@@ -116,10 +116,10 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 SquareGO = USE_Square.CreateStartButton(THR_CanvasGO.GetComponent<Canvas>(), null, null, false, "SquareGO");
             }
 
-            if(StartButton == null && IsHuman)
-                StartButton = HumanStartPanel.StartButtonGO;
+            if(StartButton == null && SessionValues.SessionDef.IsHuman)
+                StartButton = SessionValues.HumanStartPanel.StartButtonGO;
 
-            USE_Square.SetPlayIconColor(IsHuman ? new Color32(255, 199, 87, 255) : new Color32(38, 188, 250, 255));
+            USE_Square.SetPlayIconColor(SessionValues.SessionDef.IsHuman ? new Color32(255, 199, 87, 255) : new Color32(38, 188, 250, 255));
 
             THR_CanvasGO.GetComponent<Canvas>().sortingOrder = 0;
         });
@@ -128,14 +128,14 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT TRIAL state --------------------------------------------------------------------------------------------------------------------------
-        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", MouseTracker, InitTrial, InitTrial);
+        var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, InitTrial);
 
         InitTrial.AddInitializationMethod(() =>
         {
-            BackdropGO.SetActive(!IsHuman);
+            BackdropGO.SetActive(!SessionValues.SessionDef.IsHuman);
 
-            if (IsHuman && TrialCount_InTask == 0)
-                HumanStartPanel.HumanStartPanelGO.SetActive(true);
+            if (SessionValues.SessionDef.IsHuman && TrialCount_InTask == 0)
+                SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(true);
             else
                 StartButton = null;
 
@@ -157,15 +157,15 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 ShotgunHandler.ClearSelections();
 
         });
-        InitTrial.SpecifyTermination(() => true && ShotgunHandler.LastSuccessfulSelectionMatches(IsHuman ? HumanStartPanel.StartButtonChildren : USE_Square.StartButtonChildren) || StartButton == null, StartWithBlueSquare ? BlueSquare : WhiteSquare);
+        InitTrial.SpecifyTermination(() => true && ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : USE_Square.StartButtonChildren) || StartButton == null, StartWithBlueSquare ? BlueSquare : WhiteSquare);
         InitTrial.AddDefaultTerminationMethod(() => TrialStartTime = Time.time);
 
         //WHITE SQUARE state ------------------------------------------------------------------------------------------------------------------------
         WhiteSquare.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes();
-            if (IsHuman && TrialCount_InTask == 0)
-                HumanStartPanel.HumanStartPanelGO.SetActive(false);
+            if (SessionValues.SessionDef.IsHuman && TrialCount_InTask == 0)
+                SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(false);
             USE_Square.ActivateCoverCircle(WhiteColor);
             SquareGO.SetActive(true);
             BackdropGO.SetActive(true);
@@ -219,8 +219,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         BlueSquare.AddInitializationMethod(() =>
         {
             Input.ResetInputAxes();
-            if (IsHuman && TrialCount_InTask == 0)
-                HumanStartPanel.HumanStartPanelGO.SetActive(false);
+            if (SessionValues.SessionDef.IsHuman && TrialCount_InTask == 0)
+                SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(false);
             USE_Square.DeactivateCoverCircle();
             SquareGO.SetActive(true);
             BackdropGO.SetActive(true);
@@ -364,7 +364,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         }));
         Feedback.AddUpdateMethod(() =>
         {
-            if((GiveTouchReward || GiveReleaseReward) && SyncBoxController != null)
+            if((GiveTouchReward || GiveReleaseReward) && SessionValues.SyncBoxController != null)
             {
                 if (RewardTimer < (GiveTouchReward ? currentTrial.TouchToRewardDelay : currentTrial.ReleaseToRewardDelay))
                     RewardTimer += Time.deltaTime;
@@ -373,20 +373,20 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             }
         });
         Feedback.SpecifyTermination(() => GiveReward, Reward); //If they got right, syncbox isn't null, and timer is met.
-        Feedback.SpecifyTermination(() => (GiveTouchReward || GiveReleaseReward) && SyncBoxController == null, ITI); //If they got right, syncbox IS null, don't make them wait.  
+        Feedback.SpecifyTermination(() => (GiveTouchReward || GiveReleaseReward) && SessionValues.SyncBoxController == null, ITI); //If they got right, syncbox IS null, don't make them wait.  
         Feedback.SpecifyTermination(() => !GiveTouchReward && !GiveReleaseReward && AudioPlayed && !USE_Backdrop.IsGrating && !USE_Square.IsGrating, ITI); //if didn't get right, so no pulses. 
 
         Reward.AddInitializationMethod(() =>
         {
-            if (GiveReleaseReward && SyncBoxController != null)
+            if (GiveReleaseReward && SessionValues.SyncBoxController != null)
             {
-                SyncBoxController.SendRewardPulses(currentTrial.NumReleasePulses, currentTrial.PulseSize);
+                SessionValues.SyncBoxController.SendRewardPulses(currentTrial.NumReleasePulses, currentTrial.PulseSize);
                 ReleaseRewards_Trial += currentTrial.NumReleasePulses;
                 SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumReleasePulses));
             }
-            if (GiveTouchReward && SyncBoxController != null)
+            if (GiveTouchReward && SessionValues.SyncBoxController != null)
             {
-                SyncBoxController.SendRewardPulses(currentTrial.NumTouchPulses, currentTrial.PulseSize);
+                SessionValues.SyncBoxController.SendRewardPulses(currentTrial.NumTouchPulses, currentTrial.PulseSize);
                 TouchRewards_Trial += currentTrial.NumTouchPulses;
                 SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumReleasePulses));
             }

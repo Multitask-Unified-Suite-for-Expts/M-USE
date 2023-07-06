@@ -112,9 +112,9 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         {
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{ContextExternalFilePath}/{mgBD.ContextName}";
+                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{mgBD.ContextName}";
             else
-                contextFilePath = mgTL.GetContextNestedFilePath(ContextExternalFilePath, mgBD.ContextName, "LinearDark");
+                contextFilePath = mgTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, mgBD.ContextName, "LinearDark");
 
             RenderSettings.skybox = CreateSkybox(contextFilePath);
 
@@ -123,7 +123,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
             mgTL.contextName = mgBD.ContextName;
             mgTL.MinTrials = mgBD.MinMaxTrials[0];
-            EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
+            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOn"]);
             
             ResetBlockVariables();
             CalculateBlockSummaryString();
@@ -332,7 +332,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     {
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             mgTL.ContextExternalFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else mgTL.ContextExternalFilePath = ContextExternalFilePath;
+        else mgTL.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
 
         if(SessionValues.WebBuild)
         {

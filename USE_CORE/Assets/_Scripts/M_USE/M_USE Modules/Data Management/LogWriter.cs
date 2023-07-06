@@ -83,7 +83,7 @@ public class LogWriter : MonoBehaviour
         if (!StoreDataIsSet)
             return;
 
-        if (!SessionValues.StoreData)
+        if (!SessionValues.SessionDef.StoreData)
         {
             LogMessages.Clear();
             return;
@@ -159,7 +159,7 @@ public class LogWriter : MonoBehaviour
 
     private void OnApplicationQuit()
     {
-        if (!SessionValues.StoreData)
+        if (!SessionValues.SessionDef.StoreData)
             return;
 
         if (LogFileCreated)

@@ -109,7 +109,6 @@ namespace USE_StimulusManagement
 		public StimDef CopyStimDef()
 		{
 			StimDef sd = new StimDef();
-
 			if (StimName != null)
 				sd.StimName = StimName;
 			if (StimPath != null)
@@ -122,20 +121,14 @@ namespace USE_StimulusManagement
 				sd.StimFolderPath = StimFolderPath;
 			if (StimExtension != null)
 				sd.StimExtension = StimExtension;
+			if (StimCode != null)
+				sd.StimCode = StimCode;
 			if (StimID != null)
 				sd.StimID = StimID;
 			if (StimDimVals != null)
 				sd.StimDimVals = StimDimVals;
-
-			if (CanvasGameObject != null)
-				sd.CanvasGameObject = CanvasGameObject;
-
-            //if (StimGameObject != null)
-            //{
-            //	sd.StimGameObject = Object.Instantiate(StimGameObject);
-            //}
-
-            sd.StimCode = StimCode;
+			// if (StimGameObject != null)
+			// 	sd.StimGameObject = StimGameObject; // this is bad, we should be copying this
 			sd.StimLocation = StimLocation;
 			sd.StimRotation = StimRotation;
 			sd.StimScreenLocation = StimScreenLocation;
@@ -178,17 +171,14 @@ namespace USE_StimulusManagement
 				sd.StimFolderPath = StimFolderPath;
 			if (StimExtension != null)
 				sd.StimExtension = StimExtension;
+			if (StimCode != null)
+				sd.StimCode = StimCode;
 			if (StimID != null)
 				sd.StimID = StimID;
 			if (StimDimVals != null)
 				sd.StimDimVals = StimDimVals;
-
-            //if (StimGameObject != null)
-            //{
-            //	sd.StimGameObject = Object.Instantiate(StimGameObject);
-            //}
-
-            sd.StimCode = StimCode;
+			// if (StimGameObject != null)
+			// 	sd.StimGameObject = StimGameObject; // this is bad, we should be copying this
 			sd.StimLocation = StimLocation;
 			sd.StimRotation = StimRotation;
 			sd.StimScreenLocation = StimScreenLocation;
@@ -206,7 +196,6 @@ namespace USE_StimulusManagement
 				sd.BaseTokenLoss = BaseTokenLoss;
 			sd.TimesUsedInBlock = TimesUsedInBlock;
 			sd.isRelevant = isRelevant;
-
 			return sd;
 		}
 
@@ -308,6 +297,7 @@ namespace USE_StimulusManagement
 						{
 							if (returnedStimGO != null)
 							{
+								Debug.Log("Stim returned from LoadExternalStimFromServer coroutine! Woo!");
 								StimGameObject = returnedStimGO;
 							}
 							else
@@ -315,7 +305,9 @@ namespace USE_StimulusManagement
 						}));
 					}
 					else
+					{
 						StimGameObject = LoadExternalStimFromFile();
+					}
                 }
                 else if (StimDimVals != null)
                 {
@@ -328,6 +320,7 @@ namespace USE_StimulusManagement
                 {
                     Debug.LogWarning("Attempting to load stimulus " + StimName + ", but no Unity Resources path, external file path, or dimensional values have been provided.");
 					callback?.Invoke(null);
+					//return null;
                 }
 
 
@@ -346,7 +339,9 @@ namespace USE_StimulusManagement
                 }
 
 				callback?.Invoke(StimGameObject);
+
             }
+            //return StimGameObject;
         }
 
 
@@ -438,7 +433,9 @@ namespace USE_StimulusManagement
 					else //Using 3D stim from server, so write file to persistant data path and pass the path into LoadModel
 					{
 						string stimPath = WriteStimToPersistantDataPath(byteResult);
+						Debug.Log("ABOUT TO LOAD MODEL FROM PERSISTANT DATA PATH!");
 						StimGameObject = LoadModel(stimPath);
+						Debug.Log("AFTER LOADING MODEL FROM PERSISTANT DATA PATH! (doubt it makes it here)");
 
 						//Another trilib way to try:
 						//AssetLoader loader = new AssetLoader();
@@ -572,7 +569,7 @@ namespace USE_StimulusManagement
 			StimGameObject = null;
 		}
 
-        /*public void DestroyRecursive(GameObject go)
+		public void DestroyRecursive(GameObject go)
 		{
 			Debug.Log(go.name);
 
@@ -686,9 +683,9 @@ namespace USE_StimulusManagement
 			}
 
 			GameObject.Destroy(go);
-		}*/
+		}
 
-        public void DestroyRecursive(GameObject go)
+		/*public void DestroyRecursive(GameObject go)
         {
             Debug.Log(go.name);
             if (go.GetComponent<Texture>() != null)
@@ -737,15 +734,21 @@ namespace USE_StimulusManagement
                         Debug.Log(go.name + " Material " + material.name);
                         GameObject.DestroyImmediate(material, true);
                     }
+                    if (material.mainTexture != null)
+                    {
+                        GameObject.Destroy(material.mainTexture);
+                        Debug.Log(go.name + " Plain Renderer Material " + material.name + " Main Texture");
+                        GameObject.Destroy(material);
+                    }
                 }
                 renderer.sharedMaterials = new Material[materials.Length];
             }
 
             // Destroy GameObject
             GameObject.DestroyImmediate(go);
-        }
+        }*/
 
-        public GameObject LoadModel(string filePath, bool loadFromResources = false, bool visibiility = false)
+		public GameObject LoadModel(string filePath, bool loadFromResources = false, bool visibiility = false)
 		{
 			using (var assetLoader = new AssetLoader())
 			{
@@ -763,7 +766,7 @@ namespace USE_StimulusManagement
                     else
 						StimGameObject = assetLoader.LoadFromFile(filePath);
 				}
-				catch (Exception e)
+				catch (System.Exception e)
 				{
 					Debug.LogError(e.ToString());
 					return null;

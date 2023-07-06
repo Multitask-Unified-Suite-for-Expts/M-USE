@@ -31,7 +31,7 @@ namespace USE_ExperimentTemplate_Task
     {
         /*public float ShotgunRaycastCircleSize_DVA;
         public float ShotgunRaycastSpacing_DVA;
-        public float ParticipantDistance_CM;
+        public float ParticipantDistance_CM;*/
 
         public string PrefabPath;
 
@@ -318,7 +318,7 @@ namespace USE_ExperimentTemplate_Task
 
             BlockFeedback.AddUniversalInitializationMethod(() =>
             {                
-                if(IsHuman)
+                if(SessionValues.SessionDef.IsHuman)
                 {
                     OrderedDictionary taskBlockResults = GetBlockResultsData();
                     if(taskBlockResults != null && taskBlockResults.Count > 0)
@@ -1673,6 +1673,6 @@ namespace USE_ExperimentTemplate_Task
         public string SelectionType;
         public Dictionary<string, string> CustomSettings;
 
-    }
+    }*/
 
 }

@@ -21,7 +21,7 @@ namespace USE_ExperimentTemplate_Data
 
         public static void Init()
         {
-            if (!SessionValues.StoreData)
+            if (!SessionValues.SessionDef.StoreData)
                 return;
 
             Separator = SessionValues.WebBuild ? '/' : Path.DirectorySeparatorChar;
@@ -36,7 +36,7 @@ namespace USE_ExperimentTemplate_Data
 
         public static IEnumerator AddTaskRunData(string ConfigName, ControlLevel state, OrderedDictionary data)
         {
-            if (!SessionValues.StoreData)
+            if (!SessionValues.SessionDef.StoreData)
                 yield break;
             
             data["Start Time"] = state.StartTimeAbsolute;

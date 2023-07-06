@@ -67,14 +67,14 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         {
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{ContextExternalFilePath}/{currentBlock.ContextName}";
+                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{currentBlock.ContextName}";
             else
-                contextFilePath = trialLevel.GetContextNestedFilePath(ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
+                contextFilePath = trialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
 
             RenderSettings.skybox = CreateSkybox(contextFilePath);
 
             trialLevel.ContextActive = true;
-            EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
+            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOn"]);
 
             trialLevel.TokenFBController.SetTotalTokensNum(currentBlock.NumTokenBar);
             trialLevel.TokenFBController.SetTokenBarValue(currentBlock.InitialTokenAmount);
@@ -130,7 +130,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     public void SetSettings()
     {
-        trialLevel.MaterialFilePath = ContextExternalFilePath;
+        trialLevel.MaterialFilePath = SessionValues.SessionDef.ContextExternalFilePath;
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MakeStimPopOut"))
             trialLevel.MakeStimPopOut = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "MakeStimPopOut");

@@ -2,13 +2,12 @@ using VisualSearch_Namespace;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 using USE_Settings;
 using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Block;
+
 
 public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 {
@@ -47,13 +46,13 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{TaskName}_Contexts/{vsBD.ContextName}";
+                contextFilePath = $"{ContextExternalFilePath}/{vsBD.ContextName}";
             else
-                contextFilePath = vsTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, vsBD.ContextName, "LinearDark");
+                contextFilePath = vsTL.GetContextNestedFilePath(ContextExternalFilePath, vsBD.ContextName, "LinearDark");
 
             RenderSettings.skybox = CreateSkybox(contextFilePath);
 
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOn"]);
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
 
             vsTL.TokensWithStimOn = vsBD.TokensWithStimOn;
             vsTL.ResetBlockVariables();
@@ -76,14 +75,15 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         AssignBlockData();
     }
 
-    public override OrderedDictionary GetSummaryData()
+    public override OrderedDictionary GetTaskSummaryData()
     {
-        OrderedDictionary data = new OrderedDictionary();
-
-        data["Reward Pulses"] = NumRewardPulses_InTask;
-        data["Token Bar Full"] = NumTokenBarFull_InTask;
-        data["Total Tokens Collected"] = TotalTokensCollected_InTask;
-        if(SearchDurationsList_InTask.Count > 0)
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Reward Pulses"] = NumRewardPulses_InTask,
+            ["Token Bar Full"] = NumTokenBarFull_InTask,
+            ["Total Tokens Collected"] = TotalTokensCollected_InTask
+        };
+        if (SearchDurationsList_InTask.Count > 0)
             data["Average Search Duration"] = SearchDurationsList_InTask.Average();
         if(vsTL.TrialCount_InTask != 0)
             data["Accuracy"] = decimal.Divide(NumCorrect_InTask, (vsTL.TrialCount_InTask));
@@ -134,7 +134,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     {
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             vsTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else vsTL.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
+        else vsTL.ContextExternalFilePath = ContextExternalFilePath;
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
             vsTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");

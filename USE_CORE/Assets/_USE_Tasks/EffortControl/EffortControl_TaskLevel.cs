@@ -5,7 +5,7 @@ using USE_ExperimentTemplate_Task;
 using System.Collections.Specialized;
 using System.Text;
 using EffortControl_Namespace;
-using UnityEngine.Serialization;
+
 
 public class EffortControl_TaskLevel : ControlLevel_Task_Template
 {
@@ -57,13 +57,13 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{TaskName}_Contexts/{currentBlock.ContextName}";
+                contextFilePath = $"{ContextExternalFilePath}/{currentBlock.ContextName}";
             else
-                contextFilePath = trialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
+                contextFilePath = trialLevel.GetContextNestedFilePath(ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
 
             RenderSettings.skybox = CreateSkybox(contextFilePath);
 
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["ContextOn"]);
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["ContextOn"]);
         });
 
         BlockFeedback.AddInitializationMethod(() =>
@@ -73,7 +73,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
                 if (BlockStringsAdded > 0)
                     CurrentBlockString += "\n";
                 PreviousBlocksString.Insert(0, CurrentBlockString);
-                AddBlockValuesToTaskValues();
                 BlockStringsAdded++;
             }
         });
@@ -81,7 +80,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
     public void SetSettings()
     {
-        trialLevel.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
+        trialLevel.ContextExternalFilePath = ContextExternalFilePath;
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
         {
@@ -104,6 +103,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             trialLevel.MacMainDisplayBuild = false;
     }
 
+
     public void AddBlockValuesToTaskValues()
     {
         RewardPulses_Task += trialLevel.RewardPulses_Block;
@@ -118,23 +118,38 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         NumLowerRewardChosen_Task += trialLevel.NumLowerRewardChosen_Block;
         NumSameRewardChosen_Task += trialLevel.NumSameRewardChosen_Block;
         NumAborted_Task += trialLevel.NumAborted_Block;
+
     }
 
-    public override OrderedDictionary GetSummaryData()
+    public override OrderedDictionary GetBlockResultsData()
     {
-        OrderedDictionary data = new OrderedDictionary();
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Total Touches"] = trialLevel.TotalTouches_Block,
+            ["Chose Higher Effort"] = trialLevel.NumHigherEffortChosen_Block,
+            ["Chose Lower Effort"] = trialLevel.NumLowerEffortChosen_Block,
+            ["Chose Higher Reward"] = trialLevel.NumHigherRewardChosen_Block,
+            ["Chose Lower Reward"] = trialLevel.NumLowerRewardChosen_Block
+        };
+        return data;
+    }
 
-        data["Completions"] = Completions_Task;
-        data["Reward Pulses"] = RewardPulses_Task;
-        data["Touches"] = Touches_Task;
-        data["Chose Left"] = NumChosenLeft_Task;
-        data["Chose Right"] = NumChosenRight_Task;
-        data["Chose Higher Reward"] = NumHigherRewardChosen_Task;
-        data["Chose Lower Reward"] = NumLowerRewardChosen_Task;
-        data["Chose Same Reward"] = NumSameRewardChosen_Task;
-        data["Chose Higher Effort"] = NumHigherEffortChosen_Task;
-        data["Chose Lower Effort"] = NumLowerEffortChosen_Task;
-        data["Chose Same Effort"] = NumSameEffortChosen_Task;
+    public override OrderedDictionary GetTaskSummaryData()
+    {
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Completions"] = Completions_Task,
+            ["Reward Pulses"] = RewardPulses_Task,
+            ["Touches"] = Touches_Task,
+            ["Chose Left"] = NumChosenLeft_Task,
+            ["Chose Right"] = NumChosenRight_Task,
+            ["Chose Higher Reward"] = NumHigherRewardChosen_Task,
+            ["Chose Lower Reward"] = NumLowerRewardChosen_Task,
+            ["Chose Same Reward"] = NumSameRewardChosen_Task,
+            ["Chose Higher Effort"] = NumHigherEffortChosen_Task,
+            ["Chose Lower Effort"] = NumLowerEffortChosen_Task,
+            ["Chose Same Effort"] = NumSameEffortChosen_Task
+        };
 
         return data;
     }

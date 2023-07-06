@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Collections.Specialized;
 using System.Linq;
 using UnityEngine;
-using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
 using USE_Settings;
 using WorkingMemory_Namespace;
@@ -34,13 +33,13 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
 
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{TaskName}_Contexts/{wmBD.ContextName}";
+                contextFilePath = $"{ContextExternalFilePath}/{wmBD.ContextName}";
             else
-                contextFilePath = wmTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, wmBD.ContextName, "LinearDark");
+                contextFilePath = wmTL.GetContextNestedFilePath(ContextExternalFilePath, wmBD.ContextName, "LinearDark");
 
             RenderSettings.skybox = CreateSkybox(contextFilePath);
 
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOn"]);
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
             wmTL.ResetBlockVariables();
             wmTL.TokenFBController.SetTotalTokensNum(wmBD.NumTokenBar);
             wmTL.TokenFBController.SetTokenBarValue(wmBD.NumInitialTokens);
@@ -52,7 +51,7 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
     {
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             wmTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else wmTL.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
+        else wmTL.ContextExternalFilePath = ContextExternalFilePath;
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
             wmTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
         else Debug.LogError("Start Button Position settings not defined in the TaskDef");
@@ -79,7 +78,21 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
             wmTL.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
         else
             wmTL.MacMainDisplayBuild = false;
-    }    
+    }
+
+
+    public override OrderedDictionary GetBlockResultsData()
+    {
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trials Completed"] = wmTL.TrialCount_InBlock + 1,
+            ["Trials Correct"] = wmTL.NumCorrect_InBlock,
+            ["Errors"] = wmTL.NumErrors_InBlock,
+            ["Avg Search Duration"] = wmTL.AverageSearchDuration_InBlock.ToString("0.00") + "s",
+        };
+        return data;
+    }
+
 
     public void SetBlockSummaryString()
     {

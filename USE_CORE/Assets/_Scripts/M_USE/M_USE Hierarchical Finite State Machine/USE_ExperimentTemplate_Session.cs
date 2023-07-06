@@ -5,7 +5,6 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
@@ -112,6 +111,8 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public GameObject TaskButtonsContainer;
 
         //Set in inspector
+        public GameObject BlockResults_GridElementPrefab;
+        public GameObject BlockResultsPrefab;
         public GameObject TaskSelection_Starfield;
         public GameObject HumanVersionToggleButton;
         public GameObject HumanStartPanelPrefab;
@@ -119,6 +120,7 @@ namespace USE_ExperimentTemplate_Session
         public GameObject ToggleAudioButton;
         public GameObject StartButtonPrefabGO;
         public AudioClip BackgroundMusic_AudioClip;
+        public AudioClip GridItem_AudioClip;
 
         [HideInInspector] public float audioPlaybackSpot;
 
@@ -497,7 +499,7 @@ namespace USE_ExperimentTemplate_Session
 
                 SessionValues.TaskSelectionCanvasGO.SetActive(true);
 
-                TaskSelection_Starfield.SetActive(SessionValues.SessionDef.IsHuman ? true : false);
+                TaskSelection_Starfield.SetActive(SessionValues.SessionDef.IsHuman);
 
 #if (!UNITY_WEBGL)
                 if (SessionValues.DisplayController.SwitchDisplays) //SwitchDisplay stuff doesnt full work yet!
@@ -590,7 +592,7 @@ namespace USE_ExperimentTemplate_Session
                 TaskButtonsContainer = new GameObject("TaskButtons");
                 TaskButtonsContainer.transform.parent = SessionValues.TaskSelectionCanvasGO.transform;
                 TaskButtonsContainer.transform.localPosition = Vector3.zero;
-                TaskButtonsContainer.transform.localScale = Vector3.one * 1.06f;
+                TaskButtonsContainer.transform.localScale = Vector3.one;
 
                 // We'll use height for the calculations because it is generally smaller than the width
                 int numTasks = SessionValues.SessionDef.TaskMappings.Count;
@@ -598,13 +600,13 @@ namespace USE_ExperimentTemplate_Session
                 float buttonSpacing;
                 if (SessionValues.SessionDef.MacMainDisplayBuild && !Application.isEditor)
                 {
-                    buttonSize = 249f;
-                    buttonSpacing = 28.5f;
+                    buttonSize = 264f;
+                    buttonSpacing = 30f;
                 }
                 else
                 {
-                    buttonSize = 188f;
-                    buttonSpacing = 18f;
+                    buttonSize = 199f;
+                    buttonSpacing = 19f;
                 }
 
                 float buttonsWidth = numTasks * buttonSize + (numTasks - 1) * buttonSpacing;
@@ -844,8 +846,7 @@ namespace USE_ExperimentTemplate_Session
                 if (PreviousTaskSummaryString != null && CurrentTask.CurrentTaskSummaryString != null)
                     PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
 
-                if(!SessionValues.WebBuild)
-                    SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetSummaryData());
+                StartCoroutine(SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetTaskSummaryData()));
 
                 SessionData.AppendDataToBuffer();
                 SessionData.AppendDataToFile();
@@ -947,8 +948,7 @@ namespace USE_ExperimentTemplate_Session
                 SessionValues.SerialRecvData.ManuallyDefine();
             }
 
-            if(!SessionValues.WebBuild)
-                SummaryData.Init(SessionValues.SessionDef.StoreData, SessionValues.SessionDataPath);
+            SummaryData.Init();
 
             SessionValues.SessionLevelDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel";
 
@@ -1113,13 +1113,7 @@ namespace USE_ExperimentTemplate_Session
             //     StoreData = (bool)SessionSettings.Get("Session", "StoreData");
 
             //Set LogWriter StoreData variable:
-            GameObject.Find("MiscScripts").GetComponent<LogWriter>().SetStoreData(SessionValues.SessionDef.StoreData);
-            //
-            // if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
-            //     MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
-            //
-            // if (SessionSettings.SettingExists("Session", "TaskSelectionTimeout"))
-            //     TaskSelectionTimeout = (float)SessionSettings.Get("Session", "TaskSelectionTimeout");
+            GameObject.Find("MiscScripts").GetComponent<LogWriter>().SetStoreData(StoreData);
 
             //
             // if (SessionSettings.SettingExists("Session", "SerialPortActive"))
@@ -1281,16 +1275,19 @@ namespace USE_ExperimentTemplate_Session
 
         public ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
-            SessionValues.SessionLevel = this;
-           // tl.SessionLevel = this;
-          //  tl.USE_StartButton = USE_StartButton;
-           // tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
-            //tl.HumanStartPanel = HumanStartPanel;
-          //  tl.IsHuman = IsHuman;
-           // tl.DisplayController = DisplayController;
-          //  tl.SessionDataControllers = SessionDataControllers;
-            //tl.LocateFile = LocateFile;
-        //    tl.SessionLevelDataPath = SessionLevelDataPath;
+	    tl.GridItem_AudioClip = GridItem_AudioClip;
+            tl.SessionLevel = this;
+            tl.USE_StartButton = USE_StartButton;
+            tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
+            tl.HumanStartPanel = HumanStartPanel;
+            tl.IsHuman = IsHuman;
+            tl.DisplayController = DisplayController;
+            tl.SessionDataControllers = SessionDataControllers;
+            tl.LocateFile = LocateFile;
+            tl.SessionLevelDataPath = SessionLevelDataPath;
+
+            tl.BlockResultsPrefab = BlockResultsPrefab;
+            tl.BlockResults_GridElementPrefab = BlockResults_GridElementPrefab;
 
 
             if (SessionValues.UseDefaultConfigs)

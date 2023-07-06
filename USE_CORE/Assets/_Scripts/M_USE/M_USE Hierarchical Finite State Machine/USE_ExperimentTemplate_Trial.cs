@@ -13,11 +13,8 @@ using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Task;
 using SelectionTracking;
 using USE_UI;
-using System.IO.Ports;
 using Tobii.Research;
 using Tobii.Research.Unity;
-using USE_DisplayManagement;
-using USE_ExperimentTemplate_Block;
 using UnityEngine.SceneManagement;
 using System.Linq;
 using System.Collections;
@@ -604,10 +601,10 @@ namespace USE_ExperimentTemplate_Trial
 
         public void LoadTexturesFromResources()
         {
-            HeldTooLongTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/HorizontalStripes");
-            HeldTooShortTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/VerticalStripes");
-            BackdropStripesTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/bg");
-            THR_BackdropTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/Concrete4");
+            HeldTooLongTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/HorizontalStripes");
+            HeldTooShortTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/VerticalStripes");
+            BackdropStripesTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/bg");
+            THR_BackdropTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/Concrete4");
 
             TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
             TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;

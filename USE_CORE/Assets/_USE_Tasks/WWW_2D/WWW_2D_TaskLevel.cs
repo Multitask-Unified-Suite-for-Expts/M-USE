@@ -2,14 +2,11 @@ using WWW_2D_Namespace;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityEngine.Serialization;
 using USE_Settings;
 using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Block;
 
 public class WWW_2D_TaskLevel : ControlLevel_Task_Template
 {
@@ -50,7 +47,7 @@ public class WWW_2D_TaskLevel : ControlLevel_Task_Template
 
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + wwwBD.ContextName;
+                contextFilePath = contextFilePath = $"{ContextExternalFilePath}/{wwwBD.ContextName}";
             else
                 contextFilePath = wwwTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, wwwBD.ContextName, "LinearDark");
 
@@ -64,13 +61,27 @@ public class WWW_2D_TaskLevel : ControlLevel_Task_Template
             SetBlockSummaryString();
         });
     }
-    public override OrderedDictionary GetSummaryData()
+
+    public override OrderedDictionary GetBlockResultsData()
     {
-        OrderedDictionary data = new OrderedDictionary();
-        data["Trial Count In Task"] = wwwTL.TrialCount_InTask;
-        data["Num Reward Pulses"] = NumRewardPulses_InTask;
-        data["Slider Bar Full"] = NumSliderBarFilled_InTask;
-        data["Aborted Trials In Task"] = AbortedTrials_InTask;
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trials Completed"] = wwwTL.TrialCount_InBlock + 1,
+            ["Trials Correct"] = wwwTL.numCorrect_InBlock.Sum(),
+            ["Errors"] = wwwTL.numErrors_InBlock.Sum()
+        };
+        return data;
+    }
+
+    public override OrderedDictionary GetTaskSummaryData()
+    {
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trial Count In Task"] = wwwTL.TrialCount_InTask,
+            ["Num Reward Pulses"] = NumRewardPulses_InTask,
+            ["Slider Bar Full"] = NumSliderBarFilled_InTask,
+            ["Aborted Trials In Task"] = AbortedTrials_InTask
+        };
         if (SearchDurations_InTask.Count > 0)
             data["Average Search Duration"] = SearchDurations_InTask.Average();
 

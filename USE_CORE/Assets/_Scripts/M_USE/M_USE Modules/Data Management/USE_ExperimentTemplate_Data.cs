@@ -16,33 +16,48 @@ namespace USE_ExperimentTemplate_Data
 {
     public class SummaryData
     {
-        private static string folderPath;
-        private static bool storeData;
+        private static string FolderPath;
+        private static char Separator;
 
-        public static void Init(bool storeData, string folderPath)
+        public static void Init()
         {
-            SummaryData.storeData = storeData;
-            SummaryData.folderPath = Path.Combine(folderPath, "SummaryData");
-            if (storeData)
-            {
-                Directory.CreateDirectory(SummaryData.folderPath);
-            }
+            if (!SessionValues.StoreData)
+                return;
+
+            Separator = SessionValues.WebBuild ? '/' : Path.DirectorySeparatorChar;
+            FolderPath = SessionValues.SessionDataPath + Separator + "SummaryData";
+
+            if(SessionValues.WebBuild)
+                CoroutineHelper.StartCoroutine(ServerManager.CreateFolder(FolderPath));
+            else
+                Directory.CreateDirectory(FolderPath);
+            
         }
 
-        public static void AddTaskRunData(string ConfigName, ControlLevel state, OrderedDictionary data)
+        public static IEnumerator AddTaskRunData(string ConfigName, ControlLevel state, OrderedDictionary data)
         {
-            if (!storeData)
-                return;
+            if (!SessionValues.StoreData)
+                yield break;
             
             data["Start Time"] = state.StartTimeAbsolute;
             data["Duration"] = state.Duration;
 
-            string filePath = Path.Combine(folderPath, ConfigName + ".txt");
-            using (StreamWriter dataStream = File.AppendText(filePath))
+            string filePath = FolderPath + Separator + ConfigName + ".txt";
+
+            if(SessionValues.WebBuild)
             {
+                string content = "";
+                foreach (DictionaryEntry entry in data)
+                    content += $"{entry.Key}:\t{entry.Value}\n";
+                yield return CoroutineHelper.StartCoroutine(ServerManager.CreateFileAsync(filePath, ConfigName + ".txt", content));
+            }
+            else
+            {
+                using StreamWriter dataStream = File.AppendText(filePath);
                 foreach (DictionaryEntry entry in data)
                     dataStream.Write($"{entry.Key}:\t{entry.Value}\n");
             }
+            
         }
     }
 
@@ -67,9 +82,7 @@ namespace USE_ExperimentTemplate_Data
         //{
         //    using (var conn = Connection)
         //    {
-        //        Debug.Log("INSIDE CONNECTION!");
         //        conn.Open();
-        //        Debug.Log("AFTER IT OPENED!");
         //        using (var cmd = conn.CreateCommand())
         //        {
         //            cmd.CommandText = @"SELECT * FROM Task;";
@@ -127,8 +140,6 @@ namespace USE_ExperimentTemplate_Data
                 Debug.Log("---------------------------");
             }
         }
-
-
 
         //public bool DoesSQLTableExist()
         //{

@@ -156,6 +156,9 @@ namespace USE_UI
         {
             if (TrialLevel != null)
             {
+                if (Time.timeScale == 0) //if paused, unpause before ending task
+                    Time.timeScale = 1;
+
                 TrialLevel.AbortCode = 5;
                 TrialLevel.ForceBlockEnd = true;
                 TrialLevel.FinishTrialCleanup();

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657815, g: 0.49641192, b: 0.57481617, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -498,7 +498,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a20a247e197cc49c48f04849aba52095, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  StoreData: 0
+  StoreDataIsSet: 0
 --- !u!1 &1213845836
 GameObject:
   m_ObjectHideFlags: 0
@@ -621,14 +621,30 @@ MonoBehaviour:
   DebugActive: 1
   Paused: 0
   SessionId_SQL: 0
+  ParticipantDistance_CM: 0
+  ShotgunRaycastSpacing_DVA: 0
+  ShotgunRaycastCircleSize_DVA: 0
   TasksFinished: 0
+  SubjectID: 
+  SessionID: 
+  FilePrefix: 
+  SessionLevelDataPath: 
   TaskSelectionSceneName: _TaskSelection
   CurrentTask: {fileID: 0}
   GazeCalibrationTaskLevel: {fileID: 0}
+  TaskIconLocations: []
+  RewardHotKeyPulseSize: 0
+  RewardHotKeyNumPulses: 0
   SessionDetails: {fileID: 454535789}
   LocateFile: {fileID: 1481219466}
+  TobiiEyeTrackerController: {fileID: 0}
   CameraMirrorTexture: {fileID: 0}
+  DisplayController: {fileID: 0}
   TaskButtonsContainer: {fileID: 0}
+  BlockResults_GridElementPrefab: {fileID: 5967809598972882644, guid: 90c035b644de74843b8c74cca60656b2,
+    type: 3}
+  BlockResultsPrefab: {fileID: 6952099139267227724, guid: 3574b70e8d31c4f6fa0cf373241c135f,
+    type: 3}
   TaskSelection_Starfield: {fileID: 1391649313}
   HumanVersionToggleButton: {fileID: 2071187616}
   HumanStartPanelPrefab: {fileID: 7569599706748818137, guid: e3a91289f22a4401bbc1f44baba80e22,
@@ -639,8 +655,11 @@ MonoBehaviour:
     type: 3}
   BackgroundMusic_AudioClip: {fileID: 8300000, guid: d0692d04af800462aba5670b8485603c,
     type: 3}
+  GridItem_AudioClip: {fileID: 8300000, guid: 92013ced391bb4bcf80c3af683286242, type: 3}
   audioPlaybackSpot: 0
   BackgroundMusic_AudioSource: {fileID: 0}
+  HumanStartPanel: {fileID: 0}
+  USE_StartButton: {fileID: 0}
 --- !u!4 &1375570696
 Transform:
   m_ObjectHideFlags: 0

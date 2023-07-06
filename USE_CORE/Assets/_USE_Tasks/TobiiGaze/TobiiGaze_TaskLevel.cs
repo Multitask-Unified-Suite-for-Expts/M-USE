@@ -1,8 +1,6 @@
 using System;
 using USE_Settings;
-using USE_StimulusManagement;
 using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Block;
 using TobiiGaze_Namespace;
 
 public class TobiiGaze_TaskLevel : ControlLevel_Task_Template

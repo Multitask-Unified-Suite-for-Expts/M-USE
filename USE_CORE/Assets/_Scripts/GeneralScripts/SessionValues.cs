@@ -185,7 +185,7 @@ public static class SessionValues
         //         return null;
         // }
 
-        string[] lines;
+    string[] lines;
 
         if (ConfigAccessType == "Server")
         {
@@ -220,9 +220,9 @@ public static class SessionValues
         //     lines = ReadSettingsFile(settingsPath, "//", "...");
         // }
 
-        T[] settingsArray = new T[lines.Length - 1];
+    T[] settingsArray = new T[lines.Length - 1];
 
-        string[] fieldNames = lines[0].Split(delimiter);
+    string[] fieldNames = lines[0].Split(delimiter);
 
         foreach (string fieldName in fieldNames)
         {
@@ -235,32 +235,32 @@ public static class SessionValues
             }
         }
 
-        FieldInfo[] fieldInfos = typeof(T).GetFields();
+    FieldInfo[] fieldInfos = typeof(T).GetFields();
 
-        for (int iLine = 1; iLine < lines.Length; iLine++)
-        {
-            // Creates an instance for the entire line (ie. BlockDef)
-            settingsArray[iLine - 1] = Activator.CreateInstance<T>();
+    for (int iLine = 1; iLine < lines.Length; iLine++)
+    {
+        // Creates an instance for the entire line (ie. BlockDef)
+        settingsArray[iLine - 1] = Activator.CreateInstance<T>();
         
-            // Splits the separate fields for the single instance (ie. fields of BlockDef)
-            string[] values = lines[iLine].Split(delimiter);
-            for (int iVal = 0; iVal < fieldNames.Length; iVal++)
+        // Splits the separate fields for the single instance (ie. fields of BlockDef)
+        string[] values = lines[iLine].Split(delimiter);
+        for (int iVal = 0; iVal < fieldNames.Length; iVal++)
+        {
+            string fieldName = fieldNames[iVal].Trim();
+            try
             {
-                string fieldName = fieldNames[iVal].Trim();
-                try
-                {
-                    PropertyInfo propertyInfo = typeof(T).GetProperty(fieldName);
-                    FieldInfo fieldInfo = typeof(T).GetField(fieldName);
+                PropertyInfo propertyInfo = typeof(T).GetProperty(fieldName);
+                FieldInfo fieldInfo = typeof(T).GetField(fieldName);
                 
-                    // Checks if the value is a Field or Property of the type T, and sets the value 
-                    if (propertyInfo != null)
-                    {
-                        Type propertyType = propertyInfo.PropertyType;
-                        propertyInfo.SetValue(settingsArray[iLine - 1], Convert.ChangeType(values[iVal], propertyType));
-                    }
-                    else if (fieldInfo != null)
-                    {
-                        Type fieldType = fieldInfo.FieldType;
+                // Checks if the value is a Field or Property of the type T, and sets the value 
+                if (propertyInfo != null)
+                {
+                    Type propertyType = propertyInfo.PropertyType;
+                    propertyInfo.SetValue(settingsArray[iLine - 1], Convert.ChangeType(values[iVal], propertyType));
+                }
+                else if (fieldInfo != null)
+                {
+                    Type fieldType = fieldInfo.FieldType;
 
                         fieldInfo.SetValue(settingsArray[iLine - 1], Convert.ChangeType(values[iVal], fieldType));
                     }

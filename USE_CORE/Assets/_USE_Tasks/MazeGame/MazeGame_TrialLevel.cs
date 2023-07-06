@@ -5,8 +5,6 @@ using ConfigDynamicUI;
 using HiddenMaze;
 using MazeGame_Namespace;
 using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.UI;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using USE_States;
@@ -56,7 +54,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private float tileScale;
 
     // Trial Data Tracking Variables
-    private float mazeDuration;
+    public float mazeDuration;
     private float mazeStartTime;
     private float choiceDuration;
     private float choiceStartTime;
@@ -153,11 +151,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.SetHaloSize(5);
 
 
-            //Added OR WebBuild, but this entire thing likely gonna break something. Need to fine tune it. 
-            if ((SessionValues.UseDefaultConfigs && !Application.isEditor) || SessionValues.WebBuild)
+            //THIS WILL EVENTUALLY NEED TO BE ADJUSTED IF START LOADING CONTEXTS/MAZES FROM SERVER!!
+            if (SessionValues.WebBuild)
             {
-                tileTex = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/" + TileTexture);
-                mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/" + MazeBackgroundTextureName);
+                tileTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + TileTexture);
+                mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + MazeBackgroundTextureName);
             }
             else
             {
@@ -171,23 +169,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (MazeBackground == null)
                 MazeBackground = CreateSquare("MazeBackground", mazeBgTex, new Vector3(0, 0.42f, 0),
                     new Vector3(5, 5, 5));
-         
-            //intantiate array
-            ruleAbidingErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
-            ruleBreakingErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
-            backtrackErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
-            perseverativeErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
-            totalErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
-            retouchErroneous_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
-            retouchCorrect_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
-            
             
             //player view variables
             playerViewParent = GameObject.Find("MainCameraCopy");
         });
         SetupTrial.AddInitializationMethod(() =>
         {
-            if(StartButton == null)
+            if (StartButton == null)
             {
                 if (SessionValues.SessionDef.IsHuman)
                 {
@@ -203,9 +191,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             if (!configVariablesLoaded)
                 LoadConfigVariables();
-            
+
             // Load Maze at the start of every trial to keep the mNextStep consistent
-            CurrentTaskLevel.LoadTextMaze();
+            StartCoroutine(CurrentTaskLevel.LoadTextMaze());
             CurrentTaskLevel.SetTaskSummaryString();
             CurrentTaskLevel.CalculateBlockSummaryString();
             
@@ -433,6 +421,18 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         DefineTrialData();
         DefineFrameData();
     }
+
+    public void InitializeTrialArrays()
+    {
+        ruleAbidingErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
+        ruleBreakingErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
+        backtrackErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
+        perseverativeErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
+        totalErrors_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
+        retouchErroneous_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
+        retouchCorrect_InTrial = new int[CurrentTaskLevel.currMaze.mNumSquares];
+    }
+
     protected override bool CheckBlockEnd()
     {
         TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
@@ -655,8 +655,16 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
                 ErroneousReturnToLast = true;
 
+                Debug.Log("PPI: " + pathProgressIndex);
+
+                Debug.Log("TRIAL ERRONEOUS LENGTH: " + retouchErroneous_InTrial.Length);
+
                 retouchErroneous_InTrial[pathProgressIndex + 1] += 1;
+
+                Debug.Log("BLOCK ERRONEOUS LENGTH: " + CurrentTaskLevel.retouchErroneous_InBlock.Length);
+
                 CurrentTaskLevel.retouchErroneous_InBlock[pathProgressIndex + 1] += 1;
+
                 CurrentTaskLevel.retouchErroneous_InTask++;
 
                 consecutiveErrors = 0;

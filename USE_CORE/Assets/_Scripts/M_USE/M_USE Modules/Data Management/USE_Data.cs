@@ -186,18 +186,8 @@ namespace USE_Data
 		private bool Defined = false;
 		public bool DefineManually;
 
-
 		public string fileHeaders;
-
 		public bool fileCreated;
-
-		//For webgl build (short term)
-		#if (UNITY_WEBGL)
-			public static bool SendDataExternally = true;
-		#else
-			public static bool SendDataExternally = false;
-		#endif
-
 
 
 
@@ -209,7 +199,6 @@ namespace USE_Data
 			dataToUpdateNextFrame = new List<IHeldDatum>();
 			heldDataLine = new List<string>();
 		}
-
 
 		void Start()
 		{
@@ -647,7 +636,7 @@ namespace USE_Data
 					fileHeaders += data[i].Name;
 				}
 
-				if (SendDataExternally) //Create File With Headers
+				if (SessionValues.WebBuild) //Create File With Headers
 				{
 					if (!ServerManager.FolderCreated(folderPath))
 						StartCoroutine(CreateServerFolder(folderPath));
@@ -675,7 +664,7 @@ namespace USE_Data
 			{
 				string content = String.Join("\n", dataBuffer.ToArray());
 
-                if (SendDataExternally)
+                if (SessionValues.WebBuild)
 					StartCoroutine(AppendDataToServerFile(content));
 				else
 				{

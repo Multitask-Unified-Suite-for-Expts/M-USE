@@ -54,22 +54,11 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
-            trialLevel.TrialCompletionList.Clear();
-            trialLevel.TrialsCompleted_Block = 0;
-            trialLevel.TrialsCorrect_Block = 0;
-            trialLevel.BackdropTouches_Block = 0;
-            trialLevel.BlueSquareTouches_Block = 0;
-            trialLevel.WhiteSquareTouches_Block = 0;
-            trialLevel.NumItiTouches_Block = 0;
-            trialLevel.NumTouchRewards_Block = 0;
-            trialLevel.NumReleaseRewards_Block = 0;
-            trialLevel.NumReleasedEarly_Block = 0;
-            trialLevel.NumReleasedLate_Block = 0;
-            trialLevel.NumTouchesMovedOutside_Block = 0;
-            trialLevel.PerfThresholdMet = false;
+            trialLevel.ResetBlockVariables();
 
             CalculateBlockSummaryString();
         });
+        RunBlock.AddDefaultTerminationMethod(() => AddBlockValuesToTaskValues());
 
         BlockFeedback.AddInitializationMethod(() =>
         {
@@ -80,18 +69,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
                 BlockStringsAdded++;
                 PreviousBlocksString.Insert(0, CurrentBlockString);
             }
-
-            TrialsCompleted_Task += trialLevel.TrialsCompleted_Block;
-            TrialsCorrect_Task += trialLevel.TrialsCorrect_Block;
-            BlueSquareTouches_Task += trialLevel.BlueSquareTouches_Block;
-            WhiteSquareTouches_Task += trialLevel.WhiteSquareTouches_Block;
-            BackdropTouches_Task += trialLevel.BackdropTouches_Block;
-            ItiTouches_Task += trialLevel.NumItiTouches_Block;
-            TouchRewards_Task += trialLevel.NumTouchRewards_Block;
-            ReleaseRewards_Task += trialLevel.NumReleaseRewards_Block;
-            ReleasedEarly_Task += trialLevel.NumReleasedEarly_Block;
-            ReleasedLate_Task += trialLevel.NumReleasedLate_Block;
-            TouchesMovedOutside_Task += trialLevel.NumTouchesMovedOutside_Block;
         });
     }
 
@@ -133,21 +110,56 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
     }
 
-    public override OrderedDictionary GetSummaryData()
+    public void AddBlockValuesToTaskValues()
     {
-        OrderedDictionary data = new OrderedDictionary();
+        Debug.Log("THR: ADDING BLOCK VALUES TO TASK VALUES!");
 
-        data["Trials Completed"] = TrialsCompleted_Task;
-        data["Trials Correct"] = TrialsCorrect_Task;
-        data["Blue Square Touches"] = BlueSquareTouches_Task;
-        data["White Square Touches"] = WhiteSquareTouches_Task;
-        data["Non Square Touches"] = BackdropTouches_Task;
-        data["ITI Touches"] = ItiTouches_Task;
-        data["Touch Rewards"] = TouchRewards_Task;
-        data["Release Rewards"] = ReleaseRewards_Task;
-        data["Released Early"] = ReleasedEarly_Task;
-        data["Released Late"] = ReleasedLate_Task;
-        data["Touches Moved Outside"] = TouchesMovedOutside_Task;
+        TrialsCompleted_Task += trialLevel.TrialsCompleted_Block;
+        TrialsCorrect_Task += trialLevel.TrialsCorrect_Block;
+        BlueSquareTouches_Task += trialLevel.BlueSquareTouches_Block;
+        WhiteSquareTouches_Task += trialLevel.WhiteSquareTouches_Block;
+        BackdropTouches_Task += trialLevel.BackdropTouches_Block;
+        ItiTouches_Task += trialLevel.NumItiTouches_Block;
+        TouchRewards_Task += trialLevel.NumTouchRewards_Block;
+        ReleaseRewards_Task += trialLevel.NumReleaseRewards_Block;
+        ReleasedEarly_Task += trialLevel.NumReleasedEarly_Block;
+        ReleasedLate_Task += trialLevel.NumReleasedLate_Block;
+        TouchesMovedOutside_Task += trialLevel.NumTouchesMovedOutside_Block;
+
+        Debug.Log("THR DONE ADDING!");
+    }
+
+    public override OrderedDictionary GetBlockResultsData()
+    {
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trials Completed"] = trialLevel.TrialCount_InBlock + 1,
+            ["Trials Correct"] = trialLevel.TrialsCorrect_Block,
+            //["Start Button Touches"] = trialLevel.BlueSquareTouches_Block,
+            //["White Circle Touches"] = trialLevel.WhiteSquareTouches_Block,
+            ["Touches Released Early"] = trialLevel.NumReleasedEarly_Block,
+            ["Touches Released Late"] = trialLevel.NumReleasedLate_Block,
+            ["Touches Moved Outside"] = trialLevel.NumTouchesMovedOutside_Block
+        };
+        return data;
+    }
+
+    public override OrderedDictionary GetTaskSummaryData()
+    {
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trials Completed"] = TrialsCompleted_Task,
+            ["Trials Correct"] = TrialsCorrect_Task,
+            ["Blue Square Touches"] = BlueSquareTouches_Task,
+            ["White Square Touches"] = WhiteSquareTouches_Task,
+            ["Non Square Touches"] = BackdropTouches_Task,
+            ["ITI Touches"] = ItiTouches_Task,
+            ["Touch Rewards"] = TouchRewards_Task,
+            ["Release Rewards"] = ReleaseRewards_Task,
+            ["Released Early"] = ReleasedEarly_Task,
+            ["Released Late"] = ReleasedLate_Task,
+            ["Touches Moved Outside"] = TouchesMovedOutside_Task
+        };
         return data;
     }
 

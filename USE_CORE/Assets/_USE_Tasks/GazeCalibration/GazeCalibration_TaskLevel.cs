@@ -1,15 +1,7 @@
 using GazeCalibration_Namespace;
-using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.IO;
-using System.Linq;
-using System.Text;
 using UnityEngine;
-using USE_Settings;
 using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Block;
-using USE_ExperimentTemplate_Trial;
+
 
 public class GazeCalibration_TaskLevel : ControlLevel_Task_Template
 {

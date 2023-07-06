@@ -2,14 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityEngine.Serialization;
 using USE_Settings;
 using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Block;
 
 public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 {
@@ -50,13 +47,13 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{TaskName}_Contexts/{wwwBD.ContextName}";
+                contextFilePath = $"{ContextExternalFilePath}/{wwwBD.ContextName}";
             else
-                contextFilePath = wwwTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, wwwBD.ContextName, "LinearDark");
+                contextFilePath = wwwTL.GetContextNestedFilePath(ContextExternalFilePath, wwwBD.ContextName, "LinearDark");
 
             RenderSettings.skybox = CreateSkybox(contextFilePath);
 
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOn"]);
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
 
             ErrorType_InTask.Add(string.Join(",",wwwTL.ErrorType_InBlock));
             wwwTL.ResetBlockVariables();
@@ -64,14 +61,28 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
             SetBlockSummaryString();
         });
     }
-    public override OrderedDictionary GetSummaryData()
+
+    public override OrderedDictionary GetBlockResultsData()
     {
-        OrderedDictionary data = new OrderedDictionary();
-        data["Trial Count In Task"] = wwwTL.TrialCount_InTask;
-        data["Num Reward Pulses"] = NumRewardPulses_InTask;
-        data["Slider Bar Full"] = NumSliderBarFilled_InTask;
-        data["Aborted Trials In Task"] = AbortedTrials_InTask;
-        if(SearchDurations_InTask.Count > 0)
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trials Completed"] = wwwTL.TrialCount_InBlock + 1,
+            ["Trials Correct"] = wwwTL.numCorrect_InBlock.Sum(),
+            ["Errors"] = wwwTL.numErrors_InBlock.Sum()
+        };
+        return data;
+    }
+
+    public override OrderedDictionary GetTaskSummaryData()
+    {
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trial Count In Task"] = wwwTL.TrialCount_InTask,
+            ["Num Reward Pulses"] = NumRewardPulses_InTask,
+            ["Slider Bar Full"] = NumSliderBarFilled_InTask,
+            ["Aborted Trials In Task"] = AbortedTrials_InTask
+        };
+        if (SearchDurations_InTask.Count > 0)
             data["Average Search Duration"] = SearchDurations_InTask.Average();
         
         return data;
@@ -139,7 +150,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     {
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             wwwTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else wwwTL.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
+        else wwwTL.ContextExternalFilePath = ContextExternalFilePath;
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
             wwwTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
         else Debug.LogError("Start Button Position settings not defined in the TaskDef");

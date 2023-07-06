@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
@@ -111,34 +112,35 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         {
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{TaskName}_Contexts/{mgBD.ContextName}";
+                contextFilePath = $"{ContextExternalFilePath}/{mgBD.ContextName}";
             else
-                contextFilePath = mgTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, mgBD.ContextName, "LinearDark");
+                contextFilePath = mgTL.GetContextNestedFilePath(ContextExternalFilePath, mgBD.ContextName, "LinearDark");
 
             RenderSettings.skybox = CreateSkybox(contextFilePath);
 
-
             FindMaze();
-            LoadTextMaze(); // need currMaze here to set all the arrays
-
+            StartCoroutine(LoadTextMaze()); // need currMaze here to set all the arrays
 
             mgTL.contextName = mgBD.ContextName;
             mgTL.MinTrials = mgBD.MinMaxTrials[0];
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOn"]);
-            
-            //instantiate arrays
-            ruleAbidingErrors_InBlock = new int[currMaze.mNumSquares];
-            ruleBreakingErrors_InBlock = new int[currMaze.mNumSquares];
-            backtrackErrors_InBlock = new int[currMaze.mNumSquares];
-            perseverativeErrors_InBlock = new int[currMaze.mNumSquares];
-            retouchCorrect_InBlock = new int[currMaze.mNumSquares];
-            retouchErroneous_InBlock = new int[currMaze.mNumSquares];
-            totalErrors_InBlock = new int[currMaze.mNumSquares];
+            EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
             
             ResetBlockVariables();
             CalculateBlockSummaryString();
         });
     }
+
+    private void InitializeBlockArrays()
+    {
+        ruleAbidingErrors_InBlock = new int[currMaze.mNumSquares];
+        ruleBreakingErrors_InBlock = new int[currMaze.mNumSquares];
+        backtrackErrors_InBlock = new int[currMaze.mNumSquares];
+        perseverativeErrors_InBlock = new int[currMaze.mNumSquares];
+        retouchCorrect_InBlock = new int[currMaze.mNumSquares];
+        retouchErroneous_InBlock = new int[currMaze.mNumSquares];
+        totalErrors_InBlock = new int[currMaze.mNumSquares];
+    }
+
     public void AssignBlockData()
     {
         BlockData.AddDatum("TotalErrors", () => $"[{string.Join(", ", totalErrors_InBlock)}]");
@@ -177,23 +179,40 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     //         .ToList();
     //     Debug.Log("MAZE DURATIONS IN TASK: " + string.Join(",", allDurations));
     // }
-    public override OrderedDictionary GetSummaryData()
+
+
+    public override OrderedDictionary GetBlockResultsData()
     {
-        OrderedDictionary data = new OrderedDictionary();
-        data["Trial Count In Task"] = mgTL.TrialCount_InTask;
-        data["Num Reward Pulses"] = numRewardPulses_InTask;
-        data["Total Errors"] = totalErrors_InTask;
-        data["Correct Touches"] = correctTouches_InTask;
-        data["Retouch Correct"] = retouchCorrect_InTask;
-        data["Retouch Erroneous"] = retouchErroneous_InTask;
-        data["Perseverative Errors"] = perseverativeErrors_InTask;
-        data["Backtrack Errors"] = backtrackErrors_InTask;
-        data["Rule-Abiding Errors"] = ruleAbidingErrors_InTask;
-        data["Rule-Breaking Errors"] = ruleBreakingErrors_InTask;
-        data["Num Aborted Trials"] = numAbortedTrials_InTask;
-        data["Num Slider Bar Full"] = numSliderBarFull_InTask;
-        data["Average Maze Durations"] = mazeDurationsList_InTask.Average();
-        data["Average Choice Duration"] = choiceDurationsList_InTask.Average();
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Correct Touches"] = correctTouches_InBlock,
+            ["Total Errors"] = totalErrors_InBlock.Sum(),
+            ["Retouched Correct"] = retouchCorrect_InBlock.Sum(),
+            ["Retouched Erroneous"] = retouchErroneous_InBlock.Sum(),
+            ["Maze Duration"] = mgTL.mazeDuration.ToString("0.0") + "s",
+        };
+        return data;
+    }
+
+    public override OrderedDictionary GetTaskSummaryData()
+    {
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trial Count In Task"] = mgTL.TrialCount_InTask,
+            ["Num Reward Pulses"] = numRewardPulses_InTask,
+            ["Total Errors"] = totalErrors_InTask,
+            ["Correct Touches"] = correctTouches_InTask,
+            ["Retouch Correct"] = retouchCorrect_InTask,
+            ["Retouch Erroneous"] = retouchErroneous_InTask,
+            ["Perseverative Errors"] = perseverativeErrors_InTask,
+            ["Backtrack Errors"] = backtrackErrors_InTask,
+            ["Rule-Abiding Errors"] = ruleAbidingErrors_InTask,
+            ["Rule-Breaking Errors"] = ruleBreakingErrors_InTask,
+            ["Num Aborted Trials"] = numAbortedTrials_InTask,
+            ["Num Slider Bar Full"] = numSliderBarFull_InTask,
+            ["Average Maze Durations"] = mazeDurationsList_InTask.Average(),
+            ["Average Choice Duration"] = choiceDurationsList_InTask.Average()
+        };
         return data;
     }
     private void ResetBlockVariables()
@@ -313,7 +332,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     {
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             mgTL.ContextExternalFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else mgTL.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
+        else mgTL.ContextExternalFilePath = ContextExternalFilePath;
 
         if(SessionValues.WebBuild)
         {
@@ -439,7 +458,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         if (MazeDefs == null)
             Debug.LogError("MAZE DEFS ARE NULL!");
 
-
         MazeDims = new Vector2[MazeDefs.Length];
         MazeNumSquares = new int[MazeDefs.Length];
         MazeNumTurns = new int[MazeDefs.Length];
@@ -491,7 +509,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         mgTL.mazeDefName = MazeName[mIndex];
     }
 
-    public void LoadTextMaze()
+    public IEnumerator LoadTextMaze()
     {
         string mazeFilePath = "";
         string jsonString = "";
@@ -503,11 +521,12 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                 TextAsset textAsset = Resources.Load<TextAsset>(mgTL.MazeFilePath + "/" + mgTL.mazeDefName);
                 if (textAsset != null)
                     jsonString = textAsset.text;
+
                 currMaze = new Maze(jsonString);
             }
             else //Using server configs:
             {
-                StartCoroutine(ServerManager.GetFileStringAsync(mgTL.MazeFilePath, mgTL.mazeDefName, result =>
+                yield return StartCoroutine(ServerManager.GetFileStringAsync(mgTL.MazeFilePath, mgTL.mazeDefName, result =>
                 {
                     if (!string.IsNullOrEmpty(result))
                     {
@@ -531,5 +550,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             jsonString = File.ReadAllLines(mazeFilePath)[0];
             currMaze = new Maze(jsonString);
         }
+        mgTL.InitializeTrialArrays();
+        InitializeBlockArrays();
     }
 }

@@ -21,6 +21,8 @@ using Tobii.Research;
 using System.Collections;
 using USE_ExperimentTemplate_Session;
 using USE_Def_Namespace;
+using System.Collections.Specialized;
+using TMPro;
 
 namespace USE_ExperimentTemplate_Task
 {
@@ -29,7 +31,7 @@ namespace USE_ExperimentTemplate_Task
     {
         /*public float ShotgunRaycastCircleSize_DVA;
         public float ShotgunRaycastSpacing_DVA;
-        public float ParticipantDistance_CM;*/
+        public float ParticipantDistance_CM;
 
         public string PrefabPath;
 
@@ -142,6 +144,16 @@ namespace USE_ExperimentTemplate_Task
         private bool TrialAndBlockDefsHandled;
         private bool StimsHandled;
 
+        //Passed by sessionLevel
+        [HideInInspector] public GameObject BlockResultsPrefab;
+        [HideInInspector] public GameObject BlockResults_GridElementPrefab;
+        [HideInInspector] public AudioClip GridItem_AudioClip;
+
+        [HideInInspector] public GameObject BlockResultsGO;
+
+        private bool ContinueButtonClicked;
+
+
 
         public virtual void SpecifyTypes()
         {
@@ -165,11 +177,7 @@ namespace USE_ExperimentTemplate_Task
 
             ReadSettingsFiles();
             while (!AllDefsImported)
-            {
-                Debug.Log("!AllDefsImported: " + Time.frameCount);
-
                 yield return new WaitForEndOfFrame();
-            }
             TrialDefImported = false;
             BlockDefImported = false;
             TaskDefImported = false;
@@ -178,21 +186,13 @@ namespace USE_ExperimentTemplate_Task
 
             HandleTrialAndBlockDefs(verifyOnly);
             while (!TrialAndBlockDefsHandled)
-            {
-                Debug.Log("!TrialAndBlockDefsHandled: " + Time.frameCount);
                 yield return new WaitForEndOfFrame();
-            }
             TrialAndBlockDefsHandled = false;
 
             FindStims();
             while (!StimsHandled)
-            {
-                Debug.Log("!StimsHandled: " + Time.frameCount);
                 yield return new WaitForEndOfFrame();
-            }
-
-            Debug.Log("DONE WITH DEFINE TASK LEVEL COROUTINES!!!");
-
+            
             StimsHandled = false;
 
             if (verifyOnly)
@@ -317,7 +317,17 @@ namespace USE_ExperimentTemplate_Task
 
 
             BlockFeedback.AddUniversalInitializationMethod(() =>
-            {
+            {                
+                if(IsHuman)
+                {
+                    OrderedDictionary taskBlockResults = GetBlockResultsData();
+                    if(taskBlockResults != null && taskBlockResults.Count > 0)
+                    {
+                        StartCoroutine(DisplayBlockResults(taskBlockResults));
+                        BlockFbSimpleDuration = 10f; //also gets increased in the coroutine (to account for animation time) 
+                    }
+                }
+
                 /*if (BlockSummaryString != null)
                 {
                     int trialsCompleted = (TrialLevel.AbortCode == 0 || TrialLevel.AbortCode == 6) ? TrialLevel.TrialCount_InBlock + 1 : TrialLevel.TrialCount_InBlock;
@@ -332,7 +342,7 @@ namespace USE_ExperimentTemplate_Task
             });
             BlockFeedback.AddUpdateMethod(() =>
             {
-                if (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= BlockFbSimpleDuration)
+                if (ContinueButtonClicked || (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= BlockFbSimpleDuration))
                     BlockFbFinished = true;
                 else
                     BlockFbFinished = false;
@@ -348,6 +358,12 @@ namespace USE_ExperimentTemplate_Task
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask);
             BlockFeedback.AddDefaultTerminationMethod(() =>
             {
+                if (ContinueButtonClicked)
+                    ContinueButtonClicked = false;
+
+                if (SessionValues.SessionDef.IsHuman && BlockResultsGO != null)
+                    BlockResultsGO.SetActive(false);
+
                 if (SessionValues.SessionDef.StoreData)
                 {
                     BlockData.AppendDataToBuffer();
@@ -584,6 +600,7 @@ namespace USE_ExperimentTemplate_Task
             {
                 TrialLevel.LoadTexturesFromResources(); //delete this when uncomment below
 
+                //UnCOMMENT BELOW WHEN WE WANT TO LOAD TEXTURES FROM SERVER!
                 //if (SessionValues.UseDefaultConfigs)
                 //    TrialLevel.LoadTexturesFromResources();
                 //else
@@ -673,6 +690,53 @@ namespace USE_ExperimentTemplate_Task
             yield return null;
         }
 
+        private void HandleContinueButtonClick()
+        {
+            ContinueButtonClicked = true;
+        }
+
+        private IEnumerator DisplayBlockResults(OrderedDictionary taskBlockResults)
+        {
+            GameObject taskCanvas = GameObject.Find(TaskName + "_Canvas");
+            if (taskCanvas != null)
+            {
+                BlockResultsGO = Instantiate(BlockResultsPrefab);
+                BlockResultsGO.name = "BlockResults";
+                BlockResultsGO.transform.SetParent(taskCanvas.transform);
+                BlockResultsGO.transform.localScale = Vector3.one;
+                BlockResultsGO.transform.localPosition = Vector3.zero;
+
+                GameObject continueButtonGO = BlockResultsGO.transform.Find("ContinueButton").gameObject;
+                if (continueButtonGO != null)
+                    continueButtonGO.AddComponent<Button>().onClick.AddListener(HandleContinueButtonClick);
+                    
+                AudioSource gridItem_AudioSource = gameObject.AddComponent<AudioSource>();
+                gridItem_AudioSource.clip = GridItem_AudioClip;
+
+                Transform gridParent = BlockResultsGO.transform.Find("Grid");
+
+                float startTime = Time.time;
+                int count = 1;
+                foreach (DictionaryEntry entry in taskBlockResults)
+                {
+                    if (count == 1)
+                        yield return new WaitForSeconds(.35f); //wait a little for the first one
+                        
+                    gridItem_AudioSource.Play();
+
+                    GameObject gridItem = Instantiate(BlockResults_GridElementPrefab, gridParent);
+                    gridItem.name = "GridElement" + count;
+                    TextMeshProUGUI itemText = gridItem.GetComponentInChildren<TextMeshProUGUI>();
+                    itemText.text = $"{entry.Key}: <b>{entry.Value}</b>";
+                    if(count < taskBlockResults.Count)
+                        yield return new WaitForSeconds(.75f);
+                    count++;
+                }
+                BlockFbSimpleDuration += Time.time - startTime; //increase state duration so that it doesnt start until coroutine done.
+            }
+            else
+                Debug.Log("Didn't find a Task Canvas named: " + TaskName + "_Canvas");
+        }
 
 
 
@@ -1610,5 +1674,5 @@ namespace USE_ExperimentTemplate_Task
         public Dictionary<string, string> CustomSettings;
 
     }
-*/
+
 }

@@ -90,7 +90,6 @@ public class HaloFBController : MonoBehaviour
         EventCodeManager.SendCodeImmediate(SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
         Vector3 pos3d = gameObj.transform.position;
         Vector2 pos2d = Camera.main.WorldToScreenPoint(pos3d);
-        Debug.Log("2d: " + pos2d + ", 3d: " + pos3d);
         Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(pos2d.x, pos2d.y, depth));
         instantiated.transform.position = worldPos;
     }

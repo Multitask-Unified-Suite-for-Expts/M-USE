@@ -6,6 +6,7 @@ using USE_StimulusManagement;
 using Random = UnityEngine.Random;
 using USE_Def_Namespace;
 
+
 namespace ContinuousRecognition_Namespace
 {
     public class ContinuousRecognition_TaskDef : TaskDef

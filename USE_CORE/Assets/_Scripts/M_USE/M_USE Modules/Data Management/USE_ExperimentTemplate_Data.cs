@@ -34,10 +34,10 @@ namespace USE_ExperimentTemplate_Data
             
         }
 
-        public static void AddTaskRunData(string ConfigName, ControlLevel state, OrderedDictionary data)
+        public static IEnumerator AddTaskRunData(string ConfigName, ControlLevel state, OrderedDictionary data)
         {
             if (!SessionValues.StoreData)
-                return;
+                yield break;
             
             data["Start Time"] = state.StartTimeAbsolute;
             data["Duration"] = state.Duration;
@@ -49,7 +49,7 @@ namespace USE_ExperimentTemplate_Data
                 string content = "";
                 foreach (DictionaryEntry entry in data)
                     content += $"{entry.Key}:\t{entry.Value}\n";
-                CoroutineHelper.StartCoroutine(ServerManager.CreateFileAsync(filePath, ConfigName + ".txt", content));
+                yield return CoroutineHelper.StartCoroutine(ServerManager.CreateFileAsync(filePath, ConfigName + ".txt", content));
             }
             else
             {
@@ -82,9 +82,7 @@ namespace USE_ExperimentTemplate_Data
         //{
         //    using (var conn = Connection)
         //    {
-        //        Debug.Log("INSIDE CONNECTION!");
         //        conn.Open();
-        //        Debug.Log("AFTER IT OPENED!");
         //        using (var cmd = conn.CreateCommand())
         //        {
         //            cmd.CommandText = @"SELECT * FROM Task;";

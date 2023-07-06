@@ -47,7 +47,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{ContextExternalFilePath}/{TaskName}_Contexts/{wwwBD.ContextName}";
+                contextFilePath = $"{ContextExternalFilePath}/{wwwBD.ContextName}";
             else
                 contextFilePath = wwwTL.GetContextNestedFilePath(ContextExternalFilePath, wwwBD.ContextName, "LinearDark");
 

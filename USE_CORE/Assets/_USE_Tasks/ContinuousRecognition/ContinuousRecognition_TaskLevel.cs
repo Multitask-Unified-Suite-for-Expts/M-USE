@@ -67,7 +67,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         {
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{ContextExternalFilePath}/{TaskName}_Contexts/{currentBlock.ContextName}";
+                contextFilePath = $"{ContextExternalFilePath}/{currentBlock.ContextName}";
             else
                 contextFilePath = trialLevel.GetContextNestedFilePath(ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
 
@@ -81,6 +81,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.ResetBlockVariables();
             CalculateBlockSummaryString();
         });
+        RunBlock.AddDefaultTerminationMethod(() => AddBlockValuesToTaskValues());
 
         BlockFeedback.AddInitializationMethod(() =>
         {
@@ -116,7 +117,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         
     }
 
-    public override void AddBlockValuesToTaskValues()
+    public void AddBlockValuesToTaskValues()
     {
         NonStimTouches_Task.Add(trialLevel.NonStimTouches_Block);
         TrialsCompleted_Task.Add(trialLevel.NumTrials_Block);
@@ -174,10 +175,10 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary
         {
-            ["Trials Completed"] = TrialsCompleted_Task.AsQueryable().Sum(),
-            ["Trials Correct"] = TrialsCorrect_Task.AsQueryable().Sum(),
-            ["TokenBar Completions"] = TokenBarCompletions_Task.AsQueryable().Sum(),
-            ["Total Rewards"] = TotalRewards_Task.AsQueryable().Sum(),
+            ["Trials Completed"] = TrialsCompleted_Task.Sum(),
+            ["Trials Correct"] = TrialsCorrect_Task.Sum(),
+            ["TokenBar Completions"] = TokenBarCompletions_Task.Sum(),
+            ["Total Rewards"] = TotalRewards_Task.Sum(),
         };
         return data;
     }

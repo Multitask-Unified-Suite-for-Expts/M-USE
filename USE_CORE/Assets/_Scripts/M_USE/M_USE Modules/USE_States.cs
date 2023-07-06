@@ -1394,14 +1394,19 @@ namespace USE_States
 
         public static Material CreateSkybox(string filePath)
         {
-			Material materialSkybox = new Material(Shader.Find("Skybox/6 Sided"));
-			Texture2D tex = null;
+			filePath = filePath.Trim();
 
-			if (SessionValues.WebBuild) //maybe useDefaultConfigs instead?
+			Material materialSkybox = new Material(Shader.Find("Skybox/6 Sided"));
+
+            Texture2D tex;
+
+            if (SessionValues.WebBuild) 
 				tex = Resources.Load<Texture2D>(filePath);
 			else
 				tex = LoadPNG(filePath); // load the texture from a PNG -> Texture2D
 
+			if (tex == null)
+				Debug.Log("TEX IS NULL WHEN TRYING TO CREATE SKYBOX!");
 
 			//Set the textures of the skybox to that of the PNG
 			materialSkybox.SetTexture("_FrontTex", tex);

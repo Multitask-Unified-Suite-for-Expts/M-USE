@@ -11,7 +11,6 @@ using System.Linq;
 using TMPro;
 using USE_UI;
 using System.Collections;
-using UnityEngine.Profiling;
 
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
@@ -483,18 +482,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
-        Debug.Log("START OF CR FINISH TRIAL CLEANUP!");
-
         DeactivateTextObjects();
-        Debug.Log("AFTER DEACTIVATE TEXT OBJECTS!");
         if(playerViewTextList != null && playerViewTextList.Count > 0)
             DeactivatePlayerViewText();
-        Debug.Log("AFTER PVT");
         DestroyFeedbackBorders();
-        Debug.Log("AFTER DFB!");
         ContextActive = false;
-
-        Debug.Log("END OF CR FINISH TRIAL CLEANUP!");
     }
 
     public void ResetBlockVariables()
@@ -1009,7 +1001,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
 
-        DisplayResultsContainerGO.SetActive(true);
+        if(SessionValues.Using2DStim)
+            DisplayResultsContainerGO.SetActive(true);
         Transform gridParent = DisplayResultsContainerGO.transform.Find("Grid");
 
         if (CompletedAllTrials || !StimIsChosen) //!stimchosen means time ran out. 

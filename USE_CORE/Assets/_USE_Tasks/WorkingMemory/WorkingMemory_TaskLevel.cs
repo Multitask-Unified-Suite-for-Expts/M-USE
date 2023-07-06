@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.IO;
 using System.Linq;
 using UnityEngine;
-using USE_ExperimentTemplate_Block;
 using USE_ExperimentTemplate_Task;
 using USE_Settings;
 using WorkingMemory_Namespace;
@@ -35,7 +33,7 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
 
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{ContextExternalFilePath}/{TaskName}_Contexts/{wmBD.ContextName}";
+                contextFilePath = $"{ContextExternalFilePath}/{wmBD.ContextName}";
             else
                 contextFilePath = wmTL.GetContextNestedFilePath(ContextExternalFilePath, wmBD.ContextName, "LinearDark");
 

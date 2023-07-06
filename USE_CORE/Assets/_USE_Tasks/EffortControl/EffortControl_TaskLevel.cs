@@ -5,7 +5,7 @@ using USE_ExperimentTemplate_Task;
 using System.Collections.Specialized;
 using System.Text;
 using EffortControl_Namespace;
-using UnityEngine.Serialization;
+
 
 public class EffortControl_TaskLevel : ControlLevel_Task_Template
 {
@@ -57,7 +57,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{ContextExternalFilePath}/{TaskName}_Contexts/{currentBlock.ContextName}";
+                contextFilePath = $"{ContextExternalFilePath}/{currentBlock.ContextName}";
             else
                 contextFilePath = trialLevel.GetContextNestedFilePath(ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
 
@@ -68,8 +68,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddInitializationMethod(() =>
         {
-            AddBlockValuesToTaskValues();
-
             if(!SessionValues.WebBuild)
             {
                 if (BlockStringsAdded > 0)
@@ -105,8 +103,11 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             trialLevel.MacMainDisplayBuild = false;
     }
 
-    public override void AddBlockValuesToTaskValues()
+
+    public void AddBlockValuesToTaskValues()
     {
+        Debug.Log("ADDING THR BLOCK VALUES TO TASK!");
+
         RewardPulses_Task += trialLevel.RewardPulses_Block;
         Completions_Task += trialLevel.Completions_Block;
         Touches_Task += trialLevel.TotalTouches_Block;
@@ -119,6 +120,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         NumLowerRewardChosen_Task += trialLevel.NumLowerRewardChosen_Block;
         NumSameRewardChosen_Task += trialLevel.NumSameRewardChosen_Block;
         NumAborted_Task += trialLevel.NumAborted_Block;
+
     }
 
     public override OrderedDictionary GetBlockResultsData()

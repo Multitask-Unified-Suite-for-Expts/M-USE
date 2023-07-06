@@ -54,10 +54,11 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
-            trialLevel.ResetTrialVariables();
+            trialLevel.ResetBlockVariables();
 
             CalculateBlockSummaryString();
         });
+        RunBlock.AddDefaultTerminationMethod(() => AddBlockValuesToTaskValues());
 
         BlockFeedback.AddInitializationMethod(() =>
         {
@@ -68,8 +69,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
                 BlockStringsAdded++;
                 PreviousBlocksString.Insert(0, CurrentBlockString);
             }
-
-            AddBlockValuesToTaskValues();
         });
     }
 
@@ -111,8 +110,10 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
     }
 
-    public override void AddBlockValuesToTaskValues()
+    public void AddBlockValuesToTaskValues()
     {
+        Debug.Log("THR: ADDING BLOCK VALUES TO TASK VALUES!");
+
         TrialsCompleted_Task += trialLevel.TrialsCompleted_Block;
         TrialsCorrect_Task += trialLevel.TrialsCorrect_Block;
         BlueSquareTouches_Task += trialLevel.BlueSquareTouches_Block;
@@ -124,13 +125,15 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         ReleasedEarly_Task += trialLevel.NumReleasedEarly_Block;
         ReleasedLate_Task += trialLevel.NumReleasedLate_Block;
         TouchesMovedOutside_Task += trialLevel.NumTouchesMovedOutside_Block;
+
+        Debug.Log("THR DONE ADDING!");
     }
 
     public override OrderedDictionary GetBlockResultsData()
     {
         OrderedDictionary data = new OrderedDictionary
         {
-            ["Trials Completed"] = trialLevel.TrialsCompleted_Block,
+            ["Trials Completed"] = trialLevel.TrialCount_InBlock + 1,
             ["Trials Correct"] = trialLevel.TrialsCorrect_Block,
             //["Start Button Touches"] = trialLevel.BlueSquareTouches_Block,
             //["White Circle Touches"] = trialLevel.WhiteSquareTouches_Block,

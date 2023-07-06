@@ -155,7 +155,7 @@ namespace USE_ExperimentTemplate_Session
             if (SessionValues.WebBuild)
             {
                 SessionValues.SessionDataPath = ServerManager.SessionDataFolderPath;
-                ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
+                ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAULT CONTEXTS
 
                 if (SessionValues.UseDefaultConfigs)
                 {
@@ -470,7 +470,7 @@ namespace USE_ExperimentTemplate_Session
 
                 TaskSelectionCanvasGO.SetActive(true);
 
-                TaskSelection_Starfield.SetActive(IsHuman ? true : false);
+                TaskSelection_Starfield.SetActive(IsHuman);
 
 #if (!UNITY_WEBGL)
                 if (DisplayController.SwitchDisplays) //SwitchDisplay stuff doesnt full work yet!
@@ -817,13 +817,10 @@ namespace USE_ExperimentTemplate_Session
                 if (PreviousTaskSummaryString != null && CurrentTask.CurrentTaskSummaryString != null)
                     PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
 
-
-                SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetTaskSummaryData());
-                
+                StartCoroutine(SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetTaskSummaryData()));
 
                 SessionData.AppendDataToBuffer();
                 SessionData.AppendDataToFile();
-
 
                 SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));

@@ -47,7 +47,7 @@ public class WWW_2D_TaskLevel : ControlLevel_Task_Template
 
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = "DefaultResources/Contexts/" + TaskName + "_Contexts/" + wwwBD.ContextName;
+                contextFilePath = contextFilePath = $"{ContextExternalFilePath}/{wwwBD.ContextName}";
             else
                 contextFilePath = wwwTL.GetContextNestedFilePath(ContextExternalFilePath, wwwBD.ContextName, "LinearDark");
 

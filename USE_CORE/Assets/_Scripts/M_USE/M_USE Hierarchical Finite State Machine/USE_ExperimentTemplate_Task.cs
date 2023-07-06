@@ -316,11 +316,10 @@ namespace USE_ExperimentTemplate_Task
 
 
             BlockFeedback.AddUniversalInitializationMethod(() =>
-            {
-                AddBlockValuesToTaskValues();
-
+            {                
                 if(IsHuman)
                 {
+                    Debug.Log("ABOUT TO DISPLAY BLOCK RESULTS!");
                     DisplayBlockResults();
                 }
 
@@ -699,12 +698,6 @@ namespace USE_ExperimentTemplate_Task
             yield return null;
         }
 
-
-
-        public virtual void AddBlockValuesToTaskValues()
-        {
-
-        }
 
 
         private void DisplayBlockResults()

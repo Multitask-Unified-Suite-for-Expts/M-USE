@@ -111,7 +111,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         {
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{ContextExternalFilePath}/{TaskName}_Contexts/{mgBD.ContextName}";
+                contextFilePath = $"{ContextExternalFilePath}/{mgBD.ContextName}";
             else
                 contextFilePath = mgTL.GetContextNestedFilePath(ContextExternalFilePath, mgBD.ContextName, "LinearDark");
 

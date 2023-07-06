@@ -2,13 +2,11 @@ using UnityEngine;
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
 using ConfigDynamicUI;
-using System.Collections;
 using USE_ExperimentTemplate_Trial;
 using USE_States;
 using THR_Namespace;
-using UnityEngine.EventSystems;
 using USE_UI;
-using UnityEngine.UI;
+
 
 public class THR_TrialLevel : ControlLevel_Trial_Template
 {
@@ -24,10 +22,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     private GameObject StartButton;
 
-    private Renderer BackdropRenderer;
-    private Renderer SquareRenderer;
-    private Texture SquareTexture;
-    private Material SquareMaterial;
     public GameObject THR_CanvasGO;
 
     private float TrialStartTime;
@@ -138,7 +132,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-            BackdropGO.SetActive(IsHuman ? false : true);
+            BackdropGO.SetActive(!IsHuman);
 
             if (IsHuman && TrialCount_InTask == 0)
                 HumanStartPanel.HumanStartPanelGO.SetActive(true);
@@ -417,9 +411,12 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 TrialCompletionList.Insert(0, 1);
             else
                 TrialCompletionList.Insert(0, 0);
-            
-            AddTrialTouchNumsToBlock();
+
+            Debug.Log("INCREMENTING TRIALS COMPLETED IN BLOCK!");
             TrialsCompleted_Block++;
+            Debug.Log("COMPLETED IN BLOCK: " + TrialsCompleted_Block);
+            AddTrialTouchNumsToBlock();
+
             currentTask.CalculateBlockSummaryString();
 
             CheckIfBlockShouldEnd();
@@ -444,7 +441,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         NumTouchesMovedOutside_Block += NumTouchesMovedOutside_Trial;
     }
 
-    public override void ResetTrialVariables()
+    public void ResetBlockVariables()
     {
         TrialCompletionList.Clear();
         TrialsCompleted_Block = 0;
@@ -459,6 +456,24 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         NumReleasedLate_Block = 0;
         NumTouchesMovedOutside_Block = 0;
         PerfThresholdMet = false;
+    }
+
+    public override void ResetTrialVariables()
+    {
+        HeldTooLong = false;
+        HeldTooShort = false;
+        GiveReleaseReward = false;
+        GiveTouchReward = false;
+        TimeRanOut = false;
+        BackdropTouches_Trial = 0;
+        BlueSquareTouches_Trial = 0;
+        WhiteSquareTouches_Trial = 0;
+        NumTouchesMovedOutside_Trial = 0;
+        ItiTouches_Trial = 0;
+        TouchStartTime = 0;
+        HeldDuration = 0;
+        TouchRewards_Trial = 0;
+        ReleaseRewards_Trial = 0;
     }
 
     private void SetTrialSummaryString()

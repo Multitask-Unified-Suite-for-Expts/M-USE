@@ -7,12 +7,9 @@ using System.Collections.Generic;
 using TMPro;
 using USE_Data;
 using USE_ExperimentTemplate_Classes;
-using USE_UI;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Trial;
-using static UnityEngine.ParticleSystem;
-using UnityEngine.InputSystem.HID;
 
 namespace USE_UI
 {
@@ -159,6 +156,9 @@ namespace USE_UI
         {
             if (TrialLevel != null)
             {
+                if (Time.timeScale == 0) //if paused, unpause before ending task
+                    Time.timeScale = 1;
+
                 TrialLevel.AbortCode = 5;
                 TrialLevel.ForceBlockEnd = true;
                 TrialLevel.FinishTrialCleanup();

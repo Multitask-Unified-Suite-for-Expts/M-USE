@@ -2,13 +2,12 @@ using VisualSearch_Namespace;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 using USE_Settings;
 using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Block;
+
 
 public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 {
@@ -47,7 +46,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{ContextExternalFilePath}/{TaskName}_Contexts/{vsBD.ContextName}";
+                contextFilePath = $"{ContextExternalFilePath}/{vsBD.ContextName}";
             else
                 contextFilePath = vsTL.GetContextNestedFilePath(ContextExternalFilePath, vsBD.ContextName, "LinearDark");
 

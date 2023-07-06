@@ -520,6 +520,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                 TextAsset textAsset = Resources.Load<TextAsset>(mgTL.MazeFilePath + "/" + mgTL.mazeDefName);
                 if (textAsset != null)
                     jsonString = textAsset.text;
+
                 currMaze = new Maze(jsonString);
             }
             else //Using server configs:

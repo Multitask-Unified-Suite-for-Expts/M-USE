@@ -5,8 +5,6 @@ using ConfigDynamicUI;
 using HiddenMaze;
 using MazeGame_Namespace;
 using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.UI;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 using USE_States;
@@ -153,11 +151,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.SetHaloSize(5);
 
 
-            //Added OR WebBuild, but this entire thing likely gonna break something. Need to fine tune it. 
-            if ((SessionValues.UseDefaultConfigs && !Application.isEditor) || SessionValues.WebBuild)
+            //THIS WILL EVENTUALLY NEED TO BE ADJUSTED IF START LOADING CONTEXTS/MAZES FROM SERVER!!
+            if (SessionValues.WebBuild)
             {
-                tileTex = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/" + TileTexture);
-                mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/TaskRelatedImages/" + MazeBackgroundTextureName);
+                tileTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + TileTexture);
+                mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + MazeBackgroundTextureName);
             }
             else
             {

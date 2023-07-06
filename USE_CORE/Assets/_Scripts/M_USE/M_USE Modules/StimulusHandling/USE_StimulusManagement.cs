@@ -569,14 +569,14 @@ namespace USE_StimulusManagement
 			StimGameObject = null;
 		}
 
-		public void DestroyRecursive(GameObject go)
+        /*public void DestroyRecursive(GameObject go)
 		{
 			Debug.Log(go.name);
-			
+
 			if (go.transform.childCount > 0)
-				for(int iChild = 0; iChild < go.transform.childCount; iChild++)
+				for (int iChild = 0; iChild < go.transform.childCount; iChild++)
 					DestroyRecursive(go.transform.GetChild(iChild).gameObject);
-	
+
 
 			if (go.GetComponent<Texture>() != null)
 			{
@@ -628,7 +628,7 @@ namespace USE_StimulusManagement
 					}
 				}
 			}
-			
+
 			Renderer renderer = go.GetComponent<Renderer>();
 			if (renderer != null)
 			{
@@ -683,10 +683,66 @@ namespace USE_StimulusManagement
 			}
 
 			GameObject.Destroy(go);
-		}
+		}*/
 
+        public void DestroyRecursive(GameObject go)
+        {
+            Debug.Log(go.name);
+            if (go.GetComponent<Texture>() != null)
+            {
+                GameObject.Destroy(go.GetComponent<Texture>());
+                Debug.Log(go.name + " Texture");
+            }
+            if (go.GetComponent<Texture2D>() != null)
+            {
+                GameObject.Destroy(go.GetComponent<Texture2D>());
+                Debug.Log(go.name + " Texture2D");
+            }
+            // Destroy MeshFilters and their associated Meshes
+            MeshFilter[] meshFilters = go.GetComponentsInChildren<MeshFilter>();
+            foreach (MeshFilter meshFilter in meshFilters)
+            {
+                if (meshFilter.sharedMesh != null)
+                {
+                    Debug.Log(go.name + " MeshFilter Mesh " + meshFilter.sharedMesh.name);
+                    GameObject.DestroyImmediate(meshFilter.sharedMesh, true);
+                }
+                GameObject.DestroyImmediate(meshFilter);
+            }
 
-		public GameObject LoadModel(string filePath, bool loadFromResources = false, bool visibiility = false)
+            // Destroy SkinnedMeshRenderers and their associated Meshes
+            SkinnedMeshRenderer[] skinnedMeshRenderers = go.GetComponentsInChildren<SkinnedMeshRenderer>();
+            foreach (SkinnedMeshRenderer skinnedMeshRenderer in skinnedMeshRenderers)
+            {
+                if (skinnedMeshRenderer.sharedMesh != null)
+                {
+                    Debug.Log(go.name + " SkinnedMeshRenderer Mesh " + skinnedMeshRenderer.sharedMesh.name);
+                    GameObject.DestroyImmediate(skinnedMeshRenderer.sharedMesh, true);
+                }
+                GameObject.DestroyImmediate(skinnedMeshRenderer);
+            }
+
+            // Destroy Textures and Materials
+            Renderer[] renderers = go.GetComponentsInChildren<Renderer>();
+            foreach (Renderer renderer in renderers)
+            {
+                Material[] materials = renderer.sharedMaterials;
+                foreach (Material material in materials)
+                {
+                    if (material != null)
+                    {
+                        Debug.Log(go.name + " Material " + material.name);
+                        GameObject.DestroyImmediate(material, true);
+                    }
+                }
+                renderer.sharedMaterials = new Material[materials.Length];
+            }
+
+            // Destroy GameObject
+            GameObject.DestroyImmediate(go);
+        }
+
+        public GameObject LoadModel(string filePath, bool loadFromResources = false, bool visibiility = false)
 		{
 			using (var assetLoader = new AssetLoader())
 			{

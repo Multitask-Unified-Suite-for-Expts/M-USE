@@ -321,6 +321,7 @@ public static class SessionValues
                 
                 if(SurroundedByQuotes(fieldValue))
                     fieldValue = fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
+
                 AssignFieldValue(fieldName, fieldValue, settingsInstance);
             
                 // FieldInfo fieldInfo = typeof(T).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
@@ -438,7 +439,6 @@ public static class SessionValues
                     sArray[sCount] = sArray[sCount].Replace("\"", "");
                     sArray[sCount] = sArray[sCount].Trim();
                     string[] sArray2 = sArray[sCount].Split(':');
-                    Debug.Log("FIRST: " + sArray2[0].Trim() + " SECOND: " + sArray2[1].Trim());
                     pairs.Add(sArray2[0].Trim(), sArray2[1].Trim());
                 }
                 fieldInfo.SetValue(settingsInstance, pairs);

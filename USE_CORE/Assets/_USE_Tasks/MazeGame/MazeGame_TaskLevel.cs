@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
@@ -117,28 +118,29 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
             RenderSettings.skybox = CreateSkybox(contextFilePath);
 
-
             FindMaze();
-            LoadTextMaze(); // need currMaze here to set all the arrays
-
+            StartCoroutine(LoadTextMaze()); // need currMaze here to set all the arrays
 
             mgTL.contextName = mgBD.ContextName;
             mgTL.MinTrials = mgBD.MinMaxTrials[0];
             EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
             
-            //instantiate arrays
-            ruleAbidingErrors_InBlock = new int[currMaze.mNumSquares];
-            ruleBreakingErrors_InBlock = new int[currMaze.mNumSquares];
-            backtrackErrors_InBlock = new int[currMaze.mNumSquares];
-            perseverativeErrors_InBlock = new int[currMaze.mNumSquares];
-            retouchCorrect_InBlock = new int[currMaze.mNumSquares];
-            retouchErroneous_InBlock = new int[currMaze.mNumSquares];
-            totalErrors_InBlock = new int[currMaze.mNumSquares];
-            
             ResetBlockVariables();
             CalculateBlockSummaryString();
         });
     }
+
+    private void InitializeBlockArrays()
+    {
+        ruleAbidingErrors_InBlock = new int[currMaze.mNumSquares];
+        ruleBreakingErrors_InBlock = new int[currMaze.mNumSquares];
+        backtrackErrors_InBlock = new int[currMaze.mNumSquares];
+        perseverativeErrors_InBlock = new int[currMaze.mNumSquares];
+        retouchCorrect_InBlock = new int[currMaze.mNumSquares];
+        retouchErroneous_InBlock = new int[currMaze.mNumSquares];
+        totalErrors_InBlock = new int[currMaze.mNumSquares];
+    }
+
     public void AssignBlockData()
     {
         BlockData.AddDatum("TotalErrors", () => $"[{string.Join(", ", totalErrors_InBlock)}]");
@@ -187,7 +189,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             ["Total Errors"] = totalErrors_InBlock.Sum(),
             ["Retouched Correct"] = retouchCorrect_InBlock.Sum(),
             ["Retouched Erroneous"] = retouchErroneous_InBlock.Sum(),
-            ["Maze Duration"] = mgTL.mazeDuration.ToString("0.00") + "s",
+            ["Maze Duration"] = mgTL.mazeDuration.ToString("0.0") + "s",
         };
         return data;
     }
@@ -456,7 +458,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         if (MazeDefs == null)
             Debug.LogError("MAZE DEFS ARE NULL!");
 
-
         MazeDims = new Vector2[MazeDefs.Length];
         MazeNumSquares = new int[MazeDefs.Length];
         MazeNumTurns = new int[MazeDefs.Length];
@@ -508,7 +509,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         mgTL.mazeDefName = MazeName[mIndex];
     }
 
-    public void LoadTextMaze()
+    public IEnumerator LoadTextMaze()
     {
         string mazeFilePath = "";
         string jsonString = "";
@@ -525,7 +526,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             }
             else //Using server configs:
             {
-                StartCoroutine(ServerManager.GetFileStringAsync(mgTL.MazeFilePath, mgTL.mazeDefName, result =>
+                yield return StartCoroutine(ServerManager.GetFileStringAsync(mgTL.MazeFilePath, mgTL.mazeDefName, result =>
                 {
                     if (!string.IsNullOrEmpty(result))
                     {
@@ -549,5 +550,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             jsonString = File.ReadAllLines(mazeFilePath)[0];
             currMaze = new Maze(jsonString);
         }
+        mgTL.InitializeTrialArrays();
+        InitializeBlockArrays();
     }
 }

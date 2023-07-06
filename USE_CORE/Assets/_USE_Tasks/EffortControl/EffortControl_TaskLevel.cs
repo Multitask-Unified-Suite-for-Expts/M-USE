@@ -106,8 +106,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
     public void AddBlockValuesToTaskValues()
     {
-        Debug.Log("ADDING THR BLOCK VALUES TO TASK!");
-
         RewardPulses_Task += trialLevel.RewardPulses_Block;
         Completions_Task += trialLevel.Completions_Block;
         Touches_Task += trialLevel.TotalTouches_Block;
@@ -127,7 +125,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary
         {
-            ["Trials Completed"] = trialLevel.Completions_Block,
             ["Total Touches"] = trialLevel.TotalTouches_Block,
             ["Chose Higher Effort"] = trialLevel.NumHigherEffortChosen_Block,
             ["Chose Lower Effort"] = trialLevel.NumLowerEffortChosen_Block,

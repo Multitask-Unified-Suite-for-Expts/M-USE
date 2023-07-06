@@ -148,8 +148,12 @@ namespace USE_ExperimentTemplate_Task
         //Passed by sessionLevel
         [HideInInspector] public GameObject BlockResultsPrefab;
         [HideInInspector] public GameObject BlockResults_GridElementPrefab;
+        [HideInInspector] public AudioClip GridItem_AudioClip;
 
         [HideInInspector] public GameObject BlockResultsGO;
+
+        private bool ContinueButtonClicked;
+
 
 
         public virtual void SpecifyTypes()
@@ -319,10 +323,13 @@ namespace USE_ExperimentTemplate_Task
             {                
                 if(IsHuman)
                 {
-                    Debug.Log("ABOUT TO DISPLAY BLOCK RESULTS!");
-                    DisplayBlockResults();
+                    OrderedDictionary taskBlockResults = GetBlockResultsData();
+                    if(taskBlockResults != null && taskBlockResults.Count > 0)
+                    {
+                        StartCoroutine(DisplayBlockResults(taskBlockResults));
+                        BlockFbSimpleDuration = 10f; //also gets increased in the coroutine (to account for animation time) 
+                    }
                 }
-
 
                 /*if (BlockSummaryString != null)
                 {
@@ -334,12 +341,12 @@ namespace USE_ExperimentTemplate_Task
                     PreviousBlockSummaryString.Insert(0, BlockSummaryString); //Add current block string to full list of previous blocks. 
                     PreviousBlockSummaryString.Insert(0, blockTitle);
                 }*/
-                EventCodeManager.SendCodeImmediate(SessionEventCodes["BlockFeedbackStarts"]);
 
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["BlockFeedbackStarts"]);
             });
             BlockFeedback.AddUpdateMethod(() =>
             {
-                if (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= BlockFbSimpleDuration)
+                if (ContinueButtonClicked || (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= BlockFbSimpleDuration))
                     BlockFbFinished = true;
                 else
                     BlockFbFinished = false;
@@ -355,6 +362,9 @@ namespace USE_ExperimentTemplate_Task
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask);
             BlockFeedback.AddDefaultTerminationMethod(() =>
             {
+                if (ContinueButtonClicked)
+                    ContinueButtonClicked = false;
+
                 if (IsHuman && BlockResultsGO != null)
                     BlockResultsGO.SetActive(false);
 
@@ -698,40 +708,52 @@ namespace USE_ExperimentTemplate_Task
             yield return null;
         }
 
-
-
-        private void DisplayBlockResults()
+        private void HandleContinueButtonClick()
         {
-            OrderedDictionary taskBlockResults = GetBlockResultsData();
-            if (taskBlockResults != null && taskBlockResults.Count > 0)
+            ContinueButtonClicked = true;
+        }
+
+        private IEnumerator DisplayBlockResults(OrderedDictionary taskBlockResults)
+        {
+            GameObject taskCanvas = GameObject.Find(TaskName + "_Canvas");
+            if (taskCanvas != null)
             {
-                GameObject taskCanvas = GameObject.Find(TaskName + "_Canvas");
-                if (taskCanvas != null)
+                BlockResultsGO = Instantiate(BlockResultsPrefab);
+                BlockResultsGO.name = "BlockResults";
+                BlockResultsGO.transform.SetParent(taskCanvas.transform);
+                BlockResultsGO.transform.localScale = Vector3.one;
+                BlockResultsGO.transform.localPosition = Vector3.zero;
+
+                GameObject continueButtonGO = BlockResultsGO.transform.Find("ContinueButton").gameObject;
+                if (continueButtonGO != null)
+                    continueButtonGO.AddComponent<Button>().onClick.AddListener(HandleContinueButtonClick);
+                    
+                AudioSource gridItem_AudioSource = gameObject.AddComponent<AudioSource>();
+                gridItem_AudioSource.clip = GridItem_AudioClip;
+
+                Transform gridParent = BlockResultsGO.transform.Find("Grid");
+
+                float startTime = Time.time;
+                int count = 1;
+                foreach (DictionaryEntry entry in taskBlockResults)
                 {
-                    BlockResultsGO = Instantiate(BlockResultsPrefab);
-                    BlockResultsGO.name = "BlockResults";
-                    BlockResultsGO.transform.SetParent(taskCanvas.transform);
-                    BlockResultsGO.transform.localScale = Vector3.one;
-                    BlockResultsGO.transform.localPosition = Vector3.zero;
+                    if (count == 1)
+                        yield return new WaitForSeconds(.35f); //wait a little for the first one
+                        
+                    gridItem_AudioSource.Play();
 
-                    Transform gridParent = BlockResultsGO.transform.Find("Grid");
-
-                    int count = 0;
-                    foreach (DictionaryEntry entry in taskBlockResults)
-                    {
-                        GameObject gridItem = Instantiate(BlockResults_GridElementPrefab, gridParent);
-                        gridItem.name = "GridElement" + count;
-                        TextMeshProUGUI itemText = gridItem.GetComponentInChildren<TextMeshProUGUI>();
-                        itemText.text = $"{entry.Key}: <b>{entry.Value}</b>";
-                        count++;
-                    }
-                    BlockFbSimpleDuration = 7f; //default for now
+                    GameObject gridItem = Instantiate(BlockResults_GridElementPrefab, gridParent);
+                    gridItem.name = "GridElement" + count;
+                    TextMeshProUGUI itemText = gridItem.GetComponentInChildren<TextMeshProUGUI>();
+                    itemText.text = $"{entry.Key}: <b>{entry.Value}</b>";
+                    if(count < taskBlockResults.Count)
+                        yield return new WaitForSeconds(.75f);
+                    count++;
                 }
-                else
-                    Debug.Log("DIDNT FIND A TASK CANVAS NAMED: " + TaskName + "_Canvas");
+                BlockFbSimpleDuration += Time.time - startTime; //increase state duration so that it doesnt start until coroutine done.
             }
             else
-                Debug.Log("Not going to display block results because there's no task data!");
+                Debug.Log("Didn't find a Task Canvas named: " + TaskName + "_Canvas");
         }
 
 

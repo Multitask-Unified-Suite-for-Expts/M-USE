@@ -118,6 +118,7 @@ namespace USE_ExperimentTemplate_Session
         public GameObject ToggleAudioButton;
         public GameObject StartButtonPrefabGO;
         public AudioClip BackgroundMusic_AudioClip;
+        public AudioClip GridItem_AudioClip;
 
         [HideInInspector] public float audioPlaybackSpot;
 
@@ -1249,6 +1250,7 @@ namespace USE_ExperimentTemplate_Session
 
         public ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
+            tl.GridItem_AudioClip = GridItem_AudioClip;
             tl.SessionLevel = this;
             tl.USE_StartButton = USE_StartButton;
             tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;

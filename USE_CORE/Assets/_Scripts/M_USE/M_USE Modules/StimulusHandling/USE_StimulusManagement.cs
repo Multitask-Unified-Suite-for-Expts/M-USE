@@ -571,11 +571,12 @@ namespace USE_StimulusManagement
 
 		public void DestroyRecursive(GameObject go)
 		{
+			Debug.Log(go.name);
+			
 			if (go.transform.childCount > 0)
 				for(int iChild = 0; iChild < go.transform.childCount; iChild++)
 					DestroyRecursive(go.transform.GetChild(iChild).gameObject);
 	
-			Debug.Log(go.name);
 
 			if (go.GetComponent<Texture>() != null)
 			{
@@ -622,8 +623,8 @@ namespace USE_StimulusManagement
 				{
 					if (material.mainTexture != null)
 					{
-						// GameObject.Destroy(material.mainTexture);
-						// Debug.Log(go.name + " Mesh Renderer  Material " + material.name + " Shared Texture");
+						GameObject.Destroy(material.mainTexture);
+						Debug.Log(go.name + " Mesh Renderer  Material " + material.name + " Shared Texture");
 					}
 				}
 			}
@@ -645,8 +646,8 @@ namespace USE_StimulusManagement
 				{
 					if (material.mainTexture != null)
 					{
-						// GameObject.Destroy(material.mainTexture);
-						// Debug.Log(go.name + " Plain Renderer Material " + material.name + " Shared Texture");
+						GameObject.Destroy(material.mainTexture);
+						Debug.Log(go.name + " Plain Renderer Material " + material.name + " Shared Texture");
 					}
 				}
 			}
@@ -654,7 +655,7 @@ namespace USE_StimulusManagement
 			MeshCollider mc = go.GetComponent<MeshCollider>();
 			if (mc != null)
 			{
-				Debug.Log(go.name + "Mesh Collider exists");
+				Debug.Log(go.name + "Mesh Collider");
 				if (mc.material != null)
 				{
 					GameObject.Destroy(mc.material);
@@ -666,7 +667,7 @@ namespace USE_StimulusManagement
 			MeshFilter mf = go.GetComponent<MeshFilter>();
 			if (mf != null)
 			{
-				Debug.Log(go.name + "Mesh Collider exists");
+				Debug.Log(go.name + "Mesh Filter");
 				if (mf.mesh != null)
 				{
 					GameObject.Destroy(mf.mesh);

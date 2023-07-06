@@ -116,15 +116,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (StartButton == null)
             {
-                if (IsHuman)
+                if (SessionValues.SessionDef.IsHuman)
                 {
-                    StartButton = HumanStartPanel.StartButtonGO;
-                    HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                    StartButton = SessionValues.HumanStartPanel.StartButtonGO;
+                    SessionValues.HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
                 else
                 {
-                    StartButton = USE_StartButton.CreateStartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
-                    USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                    StartButton = SessionValues.USE_StartButton.CreateStartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                    SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
 
@@ -137,7 +137,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
-        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, ChooseStim);
+        var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", SessionValues.MouseTracker, InitTrial, ChooseStim);
         TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, ButtonScale, CR_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
@@ -173,10 +173,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(IsHuman ? HumanStartPanel.StartButtonChildren : USE_StartButton.StartButtonChildren), DisplayStims);
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
-            if (IsHuman)
+            if (SessionValues.SessionDef.IsHuman)
             {
                 CR_CanvasGO.SetActive(true);
                 SetScoreAndTrialsText();
@@ -194,8 +194,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if(currentTrial.ShakeStim)
                 AddShakeStimScript(trialStims);
 
-            EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
-            EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
+            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
+            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOn"]);
 
             if(MakeStimPopOut)
                 PopStimOut();
@@ -242,7 +242,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 {
                     currentTrial.GotTrialCorrect = true;
 
-                    EventCodeManager.SendCodeImmediate(SessionEventCodes["CorrectResponse"]);
+                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["CorrectResponse"]);
 
                     //If chose a PNC Stim, remove it from PNC list.
                     if (currentTrial.PNC_Stim.Contains(ChosenStim.StimIndex))
@@ -279,7 +279,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 {
                     currentTrial.WrongStimIndex = ChosenStim.StimIndex; //identifies the stim they got wrong for Block FB purposes. 
                     TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
-                    EventCodeManager.SendCodeImmediate(SessionEventCodes["IncorrectResponse"]);
+                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["IncorrectResponse"]);
                 }
             }
 
@@ -299,7 +299,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             AudioFBController.Play("Negative");
             EndBlock = true;
-            EventCodeManager.SendCodeImmediate(SessionEventCodes["NoChoice"]);
+            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["NoChoice"]);
             AbortCode = 6;
         });
 
@@ -363,13 +363,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (currentTrial.ShakeStim)
                 RemoveShakeStimScript(trialStims);
 
-            if (IsHuman)
+            if (SessionValues.SessionDef.IsHuman)
             {
                 TimerBackdropGO.SetActive(false);
                 ScoreTextGO.SetActive(false);
                 NumTrialsTextGO.SetActive(false);
             }
-            EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOff"]);
+            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOff"]);
 
         });
         //DISPLAY RESULTS state --------------------------------------------------------------------------------------------------------
@@ -382,7 +382,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 GenerateBlockFeedback();
 
-                if (IsHuman)
+                if (SessionValues.SessionDef.IsHuman)
                 {
                     float Y_Offset = GetOffsetY();
 
@@ -431,7 +431,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
 
         //FinishTrial State (default state) ----------------------------------------------------------------------------------------------------------------------
-        FinishTrial.AddDefaultTerminationMethod(() => EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOff"]));
+        FinishTrial.AddDefaultTerminationMethod(() => SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOff"]));
 
         //----------------------------------------------------------------------------------------------------------------------
         DefineTrialData();
@@ -827,7 +827,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         float shiftDownNeeded = (topMargin + bottomMargin) / 2;
         float shiftDownAmount = shiftDownNeeded - topMargin;
 
-        if (IsHuman && NumFeedbackRows > 1) //shift down more if human playing cuz text above stim 
+        if (SessionValues.SessionDef.IsHuman && NumFeedbackRows > 1) //shift down more if human playing cuz text above stim 
         {
             for (int i = 0; i < FinalLocations.Length; i++)
                 FinalLocations[i].y -= (shiftDownAmount + .25f);
@@ -1089,10 +1089,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             NumRewards_Block += currentTrial.NumRewardPulses;
             TokenFBController.ResetTokenBarFull();
 
-            if (SyncBoxController != null)
+            if (SessionValues.SyncBoxController != null)
             {
-                SyncBoxController.SendRewardPulses(currentTrial.NumRewardPulses, currentTrial.PulseSize);
-                SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumRewardPulses));
+                SessionValues.SyncBoxController.SendRewardPulses(currentTrial.NumRewardPulses, currentTrial.PulseSize);
+            //    SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumRewardPulses));
             }
         }
     }

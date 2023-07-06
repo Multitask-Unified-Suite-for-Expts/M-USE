@@ -77,10 +77,10 @@ public class MazeReactionTest_TaskLevel : ControlLevel_Task_Template
             FindMaze();
             LoadTextMaze(); // need currMaze here to set all the arrays
                 
-            RenderSettings.skybox = CreateSkybox(mrtTL.GetContextNestedFilePath(ContextExternalFilePath, mrtBD.ContextName, "LinearDark"));
+            RenderSettings.skybox = CreateSkybox(mrtTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, mrtBD.ContextName, "LinearDark"));
             mrtTL.contextName = mrtBD.ContextName;
             mrtTL.MinTrials = mrtBD.MinMaxTrials[0];
-            EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
+            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOn"]);
             
             //instantiate arrays
             totalErrors_InBlock = new int[currMaze.mNumSquares];
@@ -150,7 +150,7 @@ public class MazeReactionTest_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             mrtTL.ContextExternalFilePath =
                 (string)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else mrtTL.ContextExternalFilePath = ContextExternalFilePath;
+        else mrtTL.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeKeyFilePath"))
             mazeKeyFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeKeyFilePath");

@@ -17,7 +17,8 @@ namespace USE_Def_Namespace
         // public string SessionID;
 
         public OrderedDictionary TaskMappings;
-        public OrderedDictionary TaskIcons;
+        public List<string> TaskNames;
+        public Dictionary<string, string> TaskIcons;
 
         public string ContextExternalFilePath;
         public string TaskIconsFolderPath;

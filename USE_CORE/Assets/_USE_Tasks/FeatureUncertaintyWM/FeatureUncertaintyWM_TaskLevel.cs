@@ -33,8 +33,8 @@ public class FeatureUncertaintyWM_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             fuWMTL.ContextName = fuWMBD.ContextName;
-            RenderSettings.skybox = CreateSkybox(fuWMTL.GetContextNestedFilePath(ContextExternalFilePath, fuWMTL.ContextName));
-            EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]); fuWMTL.ResetBlockVariables();
+            RenderSettings.skybox = CreateSkybox(fuWMTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, fuWMTL.ContextName));
+            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOn"]); fuWMTL.ResetBlockVariables();
             fuWMTL.TokenFBController.SetTotalTokensNum(fuWMBD.NumTokenBar);
             fuWMTL.TokenFBController.SetTokenBarValue(fuWMBD.NumInitialTokens);
             SetBlockSummaryString();
@@ -45,7 +45,7 @@ public class FeatureUncertaintyWM_TaskLevel : ControlLevel_Task_Template
     {
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             fuWMTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else fuWMTL.ContextExternalFilePath = ContextExternalFilePath;
+        else fuWMTL.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
             fuWMTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
         else Debug.LogError("Start Button Position settings not defined in the TaskDef");

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -8,31 +9,31 @@ using System.Text;
 using Newtonsoft.Json;
 using SelectionTracking;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using USE_Def_Namespace;
+using USE_DisplayManagement;
+using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Session;
+using USE_Settings;
 using USE_UI;
+using static UnityEditor.ShaderData;
 
 
 public static class SessionValues
 {
-    public static SessionDef SessionDef;
     public static bool WebBuild = false;
     public static bool UseDefaultConfigs = false;
     public static bool Using2DStim = false;
-    // public static bool IsHuman = false;
-    // public static bool StoreData = false;
-    // public static bool EyeTrackerActive = false;
-    // public static bool SerialPortActive = false;
-    // public static bool SyncBoxActive = false;
-    // public static bool EventCodesActive = false;
-
+    
     public static ControlLevel_Session_Template SessionLevel;
+    public static SessionInfoPanel SessionInfoPanel;
     public static USE_StartButton USE_StartButton;
     public static GameObject TaskSelectionCanvasGO;
     public static HumanStartPanel HumanStartPanel;
     public static DisplayController DisplayController;
+    public static ExperimenterDisplayController ExperimenterDisplayController;
     public static SessionDataControllers SessionDataControllers;
     public static LocateFile LocateFile;
     public static string SessionDataPath;
@@ -48,8 +49,6 @@ public static class SessionValues
     public static TobiiEyeTrackerController TobiiEyeTrackerController;
     public static GameObject InputManager;
 
-    // public static string SelectionType;
-    // public static string ContextExternalFilePath;
     public static EventCodeManager EventCodeManager;
     public static Dictionary<string, EventCode> SessionEventCodes;
     
@@ -62,6 +61,40 @@ public static class SessionValues
 
     public static SelectionTracker SelectionTracker;
     public static SelectionTracker.SelectionHandler SelectionHandler;
+
+    public static SessionDef SessionDef;
+    // ===== FIELDS OF SESSIONDEF =====
+    // public OrderedDictionary TaskMappings;
+    // public List<string> TaskNames;
+    // public Dictionary<string, string> TaskIcons;
+    // public string ContextExternalFilePath;
+    // public string TaskIconsFolderPath;
+    // public Vector3[] TaskIconLocations;
+    // public float TaskSelectionTimeout;
+    // public bool MacMainDisplayBuild;
+    // public bool IsHuman;
+    // public bool StoreData;
+    // public bool EventCodesActive;
+    // public bool SyncBoxActive;
+    // public bool SerialPortActive;
+    // public string SerialPortAddress;
+    // public int SerialPortSpeed;
+    // public List<string> SyncBoxInitCommands;
+    // public int SplitBytes;
+    // public string EyetrackerType;
+    // public bool EyeTrackerActive;
+    // public string SelectionType = "mouse";
+    // public MonitorDetails MonitorDetails;
+    // public ScreenDetails ScreenDetails;
+    // public bool SonicationActive;
+    // public float ShotgunRayCastCircleSize_DVA = 1.25f;
+    // public float ShotgunRaycastSpacing_DVA = 0.3f;
+    // public float ParticipantDistance_CM = 60f;
+    // public int RewardHotKeyNumPulses = 1;
+    // public int RewardHotKeyPulseSize = 250;
+    // public bool GuidedTaskSelection;
+
+
     static SessionValues() // idk about this???
     {
         // Perform actions when certain values are true
@@ -278,15 +311,15 @@ public static class SessionValues
         
         T settingsInstance = Activator.CreateInstance<T>();
 
-        foreach(string line in lines)
+        foreach (string line in lines)
         {
             if (string.IsNullOrEmpty(line.Trim()) || line.Trim().StartsWith("//", StringComparison.Ordinal)) //Skip empty and/or commented out lines
-                continue;                
+                continue;
             string[] splitString = line.Split(delimiter);
             try
             {
-                string fieldName = splitString[1];
-                string fieldValue = splitString[2];
+                string fieldName = splitString[1].Trim();
+                string fieldValue = splitString[2].Trim();
                 
                 AssignFieldValue(fieldName, fieldValue, settingsInstance);
             
@@ -325,7 +358,7 @@ public static class SessionValues
     }
 
 
-    private static string[] ReadSettingsFile(string settingsPath, string commentPrefix = "", string continueSuffix = "")
+    /*private static string[] ReadSettingsFile(string settingsPath, string commentPrefix = "", string continueSuffix = "")
     {
         List<string> outputList = new List<string>();
         //read the file
@@ -362,13 +395,13 @@ public static class SessionValues
             }
         }
         return outputList.ToArray();
-    }
+    }*/
 
     private static void AssignFieldValue<T>(string fieldName, string fieldValue, T settingsInstance)
     {
         FieldInfo fieldInfo = typeof(T).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
         PropertyInfo propertyInfo = typeof(T).GetProperty(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            
+
         if (propertyInfo != null)
         {
             Type propertyType = propertyInfo.PropertyType;
@@ -377,7 +410,93 @@ public static class SessionValues
         else if (fieldInfo != null)
         {
             Type fieldType = fieldInfo.FieldType;
-            fieldInfo.SetValue(settingsInstance, Convert.ChangeType(fieldValue, fieldType));
+            if (fieldType.Equals(typeof(OrderedDictionary)))
+            {
+                if (StartsOrEndsWithBrackets(fieldValue.Trim()))
+                {
+                    fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
+                }
+                string[] sArray = fieldValue.Split(',');
+                OrderedDictionary pairs = new OrderedDictionary();
+                for (int sCount = 0; sCount < sArray.Length; sCount++)
+                {
+                    sArray[sCount] = sArray[sCount].Replace("\"", "");
+                    sArray[sCount] = sArray[sCount].Trim();
+                    string[] sArray2 = sArray[sCount].Split(':');
+                    pairs.Add(sArray2[0].Trim(), sArray2[1].Trim());
+                }
+                fieldInfo.SetValue(settingsInstance, pairs);
+            }
+            else if (fieldType.Equals(typeof(Dictionary<string, string>)))
+            {
+                if (StartsOrEndsWithBrackets(fieldValue))
+                    fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
+                string[] sArray = fieldValue.Split(',');
+                Dictionary<string, string> pairs = new Dictionary<string, string>();
+                for (int sCount = 0; sCount < sArray.Length; sCount++)
+                {
+                    sArray[sCount] = sArray[sCount].Replace("\"", "");
+                    sArray[sCount] = sArray[sCount].Trim();
+                    string[] sArray2 = sArray[sCount].Split(':');
+                    Debug.Log("FIRST: " + sArray2[0].Trim() + " SECOND: " + sArray2[1].Trim());
+                    pairs.Add(sArray2[0].Trim(), sArray2[1].Trim());
+                }
+                fieldInfo.SetValue(settingsInstance, pairs);
+            }
+            else if (fieldType.Equals(typeof(Vector3[])))
+            {
+                string[][] sArray = (string[][])JsonConvert.DeserializeObject(fieldValue, typeof(string[][]));
+                Vector3[] finalArray = new Vector3[sArray.Length];
+                for (int iVal = 0; iVal < sArray.Length; iVal++)
+                {
+                    finalArray[iVal] = new Vector3(float.Parse(sArray[iVal][0]), float.Parse(sArray[iVal][1]), float.Parse(sArray[iVal][2]));
+                }
+                fieldInfo.SetValue(settingsInstance, finalArray);
+            }
+
+            else if (fieldType.Equals(typeof(List<string>)))
+            {
+                if (StartsOrEndsWithBrackets(fieldValue))
+                    fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
+                string[] sArray = fieldValue.Split(',');
+                List<string> valuesList = new List<string>();
+                for (int sCount = 0; sCount < sArray.Length; sCount++)
+                {
+                    sArray[sCount] = sArray[sCount].Replace("\"", "");
+                    sArray[sCount] = sArray[sCount].Trim();
+                    valuesList.Add(sArray[sCount]);
+                }
+                fieldInfo.SetValue(settingsInstance, valuesList);
+            }
+            else if (fieldType.Equals(typeof(MonitorDetails)))
+            {
+                var deserializedValue = JsonConvert.DeserializeObject<MonitorDetails>(fieldValue);
+                fieldInfo.SetValue(settingsInstance, deserializedValue);
+            }
+            else if (fieldType.Equals(typeof(ScreenDetails)))
+            {
+                var deserializedValue = JsonConvert.DeserializeObject<ScreenDetails>(fieldValue);
+                fieldInfo.SetValue(settingsInstance, deserializedValue);
+            }
+            else
+            {
+                fieldInfo.SetValue(settingsInstance, Convert.ChangeType(fieldValue, fieldType));
+            }
         }
+    }
+
+    public static bool StartsOrEndsWithBrackets(string s)
+    {
+        if (s.StartsWith("(", StringComparison.Ordinal) &&
+            s.EndsWith(")", StringComparison.Ordinal) ||
+            s.StartsWith("{", StringComparison.Ordinal) &&
+            s.EndsWith("}", StringComparison.Ordinal) ||
+            s.StartsWith("[", StringComparison.Ordinal) &&
+            s.EndsWith("]", StringComparison.Ordinal))
+        {
+            return true;
+        }
+        else
+            return false;
     }
 }

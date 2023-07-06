@@ -122,15 +122,15 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             
             if (StartButton == null)
             {
-                if (IsHuman)
+                if (SessionValues.SessionDef.IsHuman)
                 {
-                    StartButton = HumanStartPanel.StartButtonGO;
-                    HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                    StartButton = SessionValues.HumanStartPanel.StartButtonGO;
+                    SessionValues.HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
                 else
                 {
-                    StartButton = USE_StartButton.CreateStartButton(FL_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                    USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                    StartButton = SessionValues.USE_StartButton.CreateStartButton(FL_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                    SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
 
@@ -148,7 +148,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
-        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, SearchDisplay);
+        var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", SessionValues.MouseTracker, InitTrial, SearchDisplay);
         TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale*10, FL_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
@@ -171,9 +171,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
 
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(IsHuman ? HumanStartPanel.StartButtonChildren : USE_StartButton.StartButtonChildren), SearchDisplayDelay, () =>
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), SearchDisplayDelay, () =>
         {
-            EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
+            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
         });
 
 
@@ -188,8 +188,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 #if (!UNITY_WEBGL)
                 ActivateChildren(playerViewParent);
 #endif
-            EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
-            EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenBarVisible"]);
+            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOn"]);
+            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["TokenBarVisible"]);
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
@@ -220,16 +220,16 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
                 runningAcc.Add(1);
-                EventCodeManager.SendCodeNextFrame(SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-                EventCodeManager.SendCodeNextFrame(SessionEventCodes["CorrectResponse"]);
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["CorrectResponse"]);
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
                 runningAcc.Add(0);
-                EventCodeManager.SendCodeNextFrame(SessionEventCodes["Button0PressedOnDistractorObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-                EventCodeManager.SendCodeNextFrame(SessionEventCodes["IncorrectResponse"]);
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnDistractorObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["IncorrectResponse"]);
             }
 
             if (selectedGO != null)
@@ -249,7 +249,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             AbortCode = 6;
             aborted = true;  
             SetTrialSummaryString();
-            EventCodeManager.SendCodeNextFrame(SessionEventCodes["NoChoice"]);
+            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["NoChoice"]);
         });
         
         // SELECTION FEEDBACK STATE ---------------------------------------------------------------------------------------   
@@ -300,11 +300,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 NumTokenBarFull_InBlock++;
                 CurrentTaskLevel.NumTokenBarFull_InTask++;
 
-                if (SyncBoxController != null)
+                if (SessionValues.SyncBoxController != null)
                 {
                     int NumPulses = chooseReward(CurrentTrialDef.PulseReward);
-                    SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
-                    SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
+                    SessionValues.SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
+                    //SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses)); moved to syncbox class
                     NumRewardPulses_InBlock += NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
                     RewardGiven = true;
@@ -318,7 +318,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             {
                 ContextName = "itiImage";
                 RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage"));
-                EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOff"]);
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOff"]);
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
@@ -412,7 +412,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         RewardGiven = false;
         TouchDurationError = false;
         aborted = false;
-        MouseTracker.ResetClicks();
+        SessionValues.MouseTracker.ResetClicks();
     }
     private void AssignTrialData()
     {
@@ -423,7 +423,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("CorrectSelection", () => CorrectSelection ? 1 : 0);
         TrialData.AddDatum("SearchDuration", ()=> SearchDuration);
         TrialData.AddDatum("RewardGiven", ()=> RewardGiven? 1 : 0);
-        TrialData.AddDatum("TotalClicks", ()=> MouseTracker.GetClickCount()[0]);
+        TrialData.AddDatum("TotalClicks", ()=> SessionValues.MouseTracker.GetClickCount()[0]);
         TrialData.AddDatum("AbortedTrial", ()=> aborted);
     }
     private void AssignFrameData()

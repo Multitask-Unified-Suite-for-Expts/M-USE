@@ -141,15 +141,15 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         });
 
 
-        SetupTrial.SpecifyTermination(()=> (!SpoofGazeWithMouse? (ScreenBasedCalibration != null):true), Init);
+        SetupTrial.SpecifyTermination(()=> (!SpoofGazeWithMouse? (SessionValues.TobiiEyeTrackerController.ScreenBasedCalibration != null):true), Init);
 
         if (SpoofGazeWithMouse)
         {
-            SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "MouseHover", MouseTracker, Init, ITI);
+            SelectionHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseHover", SessionValues.MouseTracker, Init, ITI);
         }
         else
         {
-            SelectionHandler = SelectionTracker.SetupSelectionHandler("trial", "GazeSelection", GazeTracker, Init, ITI);
+            SelectionHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "GazeSelection", SessionValues.GazeTracker, Init, ITI);
         }
 
         Init.AddUpdateMethod(() =>
@@ -181,10 +181,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         Init.SpecifyTermination(() => numCalibPoints != 0, Blink, () =>
         {
             // Only enter Calibration if an eyetracker is being used
-            if (!SpoofGazeWithMouse && !TobiiEyeTrackerController.Instance.isCalibrating)
+            if (!SpoofGazeWithMouse && !SessionValues.TobiiEyeTrackerController)
             {
-                ScreenBasedCalibration.EnterCalibrationMode();
-                TobiiEyeTrackerController.Instance.isCalibrating = true;
+                SessionValues.TobiiEyeTrackerController.ScreenBasedCalibration.EnterCalibrationMode();
+                SessionValues.TobiiEyeTrackerController.isCalibrating = true;
             }
             // Assign the correct calibration points given the User's selection
             DefineCalibPoints(numCalibPoints);
@@ -292,7 +292,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             // Collects eye tracking data at the current calibration point, computes the calibration settings, and applies them to the eye tracker.
             if (!SpoofGazeWithMouse)
             {
-                CalibrationResult = ScreenBasedCalibration.ComputeAndApply();
+                CalibrationResult = SessionValues.TobiiEyeTrackerController.ScreenBasedCalibration.ComputeAndApply();
             }
 
             currentCalibrationPointFinished = false;
@@ -339,10 +339,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
             SetTrialSummaryString();
 
-            if (SyncBoxController != null)
+            if (SessionValues.SyncBoxController != null)
             {
                 // Provide reward during the Confirm state based off values in the BlockDef
-                SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+                SessionValues.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
             }
         });
 
@@ -360,7 +360,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             {
                 // User selected to recalibrate current point, sample data is discarded and return to Blink
                 if(!SpoofGazeWithMouse)
-                    ScreenBasedCalibration.DiscardData(currentNormPoint);
+                    SessionValues.TobiiEyeTrackerController.ScreenBasedCalibration.DiscardData(currentNormPoint);
                 recalibPoint = true;
                 RecalibCount[calibNum] += 1;
             }
@@ -417,7 +417,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             // Collects eye tracking data at the current calibration point, computes the calibration settings, and applies them to the eye tracker.
             if (!SpoofGazeWithMouse)
             {
-                CalibrationResult = ScreenBasedCalibration.ComputeAndApply();
+                CalibrationResult = SessionValues.TobiiEyeTrackerController.ScreenBasedCalibration.ComputeAndApply();
                 CollectSamplePoints();
             }
         });
@@ -433,8 +433,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private void OnApplicationQuit()
     {
-        if (TobiiEyeTrackerController.isCalibrating)
-            ScreenBasedCalibration.LeaveCalibrationMode();
+        if (SessionValues.TobiiEyeTrackerController.isCalibrating)
+            SessionValues.TobiiEyeTrackerController.ScreenBasedCalibration.LeaveCalibrationMode();
     }
 
     // ---------------------------------------------------------- METHODS ----------------------------------------------------------
@@ -519,7 +519,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     public void DetermineCollectDataStatus(NormalizedPoint2D point)
     {
-        CalibrationStatus status = ScreenBasedCalibration.CollectData(point);
+        CalibrationStatus status = SessionValues.TobiiEyeTrackerController.ScreenBasedCalibration.CollectData(point);
         Debug.Log("STATUS: " + status.ToString());
         if (status.Equals(CalibrationStatus.Success))
         {
@@ -671,11 +671,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         if (IEyeTracker == null)
             IEyeTracker = TobiiEyeTrackerController.Instance.iEyeTracker;
         if (EyeTracker == null)
-            EyeTracker = TobiiEyeTrackerController.Instance.EyeTracker;
+            EyeTracker = TobiiEyeTrackerController.Instance.EyeTracker;/*
         if (ScreenBasedCalibration == null)
             ScreenBasedCalibration = TobiiEyeTrackerController.Instance.ScreenBasedCalibration;
         if (DisplayArea == null)
-            DisplayArea = TobiiEyeTrackerController.Instance.DisplayArea;
+            DisplayArea = TobiiEyeTrackerController.Instance.DisplayArea;*/
 
     }
 

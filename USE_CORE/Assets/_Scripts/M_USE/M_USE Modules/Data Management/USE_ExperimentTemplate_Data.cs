@@ -320,9 +320,9 @@ namespace USE_ExperimentTemplate_Data
 
         public void AddEventCodeColumns()
         {
-            AddDatum("EventCodes", () => taskLevel != null ? string.Join(",", taskLevel.EventCodeManager.GetBuffer("sent")) : "NoTaskActive");
-            AddDatum("SplitEventCodes", () => taskLevel != null ? string.Join(",", taskLevel.EventCodeManager.GetBuffer("split")) : "NoTaskActive");
-            AddDatum("PreSplitEventCodes", () => taskLevel != null ? string.Join(",", taskLevel.EventCodeManager.GetBuffer("presplit")) : "NoTaskActive");
+            AddDatum("EventCodes", () => taskLevel != null ? string.Join(",", SessionValues.EventCodeManager.GetBuffer("sent")) : "NoTaskActive");
+            AddDatum("SplitEventCodes", () => taskLevel != null ? string.Join(",", SessionValues.EventCodeManager.GetBuffer("split")) : "NoTaskActive");
+            AddDatum("PreSplitEventCodes", () => taskLevel != null ? string.Join(",", SessionValues.EventCodeManager.GetBuffer("presplit")) : "NoTaskActive");
         }
     }
 

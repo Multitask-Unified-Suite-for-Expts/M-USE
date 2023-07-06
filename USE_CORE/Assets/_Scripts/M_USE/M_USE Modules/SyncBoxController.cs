@@ -47,6 +47,8 @@ public class SyncBoxController
         {
             serialPortController.AddToSend("RWD " + pulseSize);//values less than 20 don't consistently work so use between 20-100 (# in 0.1 ms increments)
             EventCodeManager.SendCodeImmediate(SessionEventCodes["SyncBoxController_RewardPulseSent"]);
+            SessionValues.SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", numPulses));
+
             MsBetweenRewardPulses = 200;
             Thread.Sleep(MsBetweenRewardPulses + pulseSize/10);
         }

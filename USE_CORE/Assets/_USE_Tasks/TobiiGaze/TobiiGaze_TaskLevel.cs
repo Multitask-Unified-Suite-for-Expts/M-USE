@@ -16,7 +16,7 @@ public class TobiiGaze_TaskLevel : ControlLevel_Task_Template
         
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             tgTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else tgTL.ContextExternalFilePath = ContextExternalFilePath;
+        else tgTL.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
 
     }
 

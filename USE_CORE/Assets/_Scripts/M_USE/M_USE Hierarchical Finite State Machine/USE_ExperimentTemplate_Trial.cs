@@ -29,16 +29,17 @@ namespace USE_ExperimentTemplate_Trial
     {
         [HideInInspector] public TrialData TrialData;
         [HideInInspector] public FrameData FrameData;
-        [HideInInspector] public USE_ExperimentTemplate_Data.GazeData GazeData;
-        [HideInInspector] public SerialSentData SerialSentData;
-        [HideInInspector] public SerialRecvData SerialRecvData;
+        //[HideInInspector] public USE_ExperimentTemplate_Data.GazeData GazeData;
+       // [HideInInspector] public SerialSentData SerialSentData;
+       // [HideInInspector] public SerialRecvData SerialRecvData;
         [HideInInspector] public int BlockCount, TrialCount_InTask, TrialCount_InBlock, AbortCode;
         protected int NumTrialsInBlock;
-        [HideInInspector] public SessionDataControllers SessionDataControllers;
+        //[HideInInspector] public SessionDataControllers SessionDataControllers;
 
-        [HideInInspector] public bool StoreData, ForceBlockEnd, SerialPortActive, EyetrackerActive;
-        [HideInInspector] public string TaskDataPath, FilePrefix, TrialSummaryString;
-
+        [HideInInspector] public bool ForceBlockEnd;
+        //[HideInInspector] public bool StoreData, ForceBlockEnd, SerialPortActive;
+        [HideInInspector] public string TaskDataPath, TrialSummaryString;
+        //[HideInInspector] public string FilePrefix;
         protected State LoadTrialStims, SetupTrial, FinishTrial, Delay, GazeCalibration;
         
         protected State StateAfterDelay = null;
@@ -52,11 +53,11 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public List<StimGroup> TrialStims;
 
         [HideInInspector] public ConfigVarStore ConfigUiVariables;
-        [HideInInspector] public ExperimenterDisplayController ExperimenterDisplayController;
+      //  [HideInInspector] public ExperimenterDisplayController ExperimenterDisplayController;
         [HideInInspector] public SessionInfoPanel SessionInfoPanel;
         [HideInInspector] public float TrialCompleteTime;
 
-        [HideInInspector] public SelectionTracker SelectionTracker;
+       // [HideInInspector] public SelectionTracker SelectionTracker;
 
         // Feedback Controllers
         [HideInInspector] public TouchFBController TouchFBController;
@@ -66,39 +67,36 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public SliderFBController SliderFBController;
         
         // Input Trackers
-        [HideInInspector] public MouseTracker MouseTracker;
-        [HideInInspector] public GazeTracker GazeTracker;
-        [HideInInspector] public TobiiEyeTrackerController TobiiEyeTrackerController;
-        [HideInInspector] public ScreenBasedCalibration ScreenBasedCalibration;
-        [HideInInspector] public DisplayArea DisplayArea;
+        //[HideInInspector] public MouseTracker MouseTracker;
+        //[HideInInspector] public GazeTracker GazeTracker;
+        //[HideInInspector] public TobiiEyeTrackerController TobiiEyeTrackerController;
 
-        [HideInInspector] public string SelectionType;
-        [HideInInspector] public bool EyeTrackerActive;
-        [HideInInspector] public EyeTrackerData_Namespace.TobiiGazeSample TobiiGazeSample;
+        //[HideInInspector] public string SelectionType;
+        //[HideInInspector] public bool EyeTrackerActive;
         [HideInInspector] public bool runCalibration;
         private ControlLevel_Task_Template GazeCalibrationTaskLevel;
 
-        [HideInInspector] public SerialPortThreaded SerialPortController;
-        [HideInInspector] public SyncBoxController SyncBoxController;
-        [HideInInspector] public EventCodeManager EventCodeManager;
+        //[HideInInspector] public SerialPortThreaded SerialPortController;
+        //[HideInInspector] public SyncBoxController SyncBoxController;
+        //[HideInInspector] public EventCodeManager EventCodeManager;
         [HideInInspector] public Dictionary<string, EventCode> TaskEventCodes;
-        [HideInInspector] public Dictionary<string, EventCode> SessionEventCodes;
+        //[HideInInspector] public Dictionary<string, EventCode> SessionEventCodes;
 
-        [HideInInspector] public DisplayController DisplayController;
+      //  [HideInInspector] public DisplayController DisplayController;
 
 
         [HideInInspector] public int InitialTokenAmount;
 
         [HideInInspector] public Dictionary<string, int> AbortCodeDict;
 
-        [HideInInspector] public float ShotgunRaycastSpacing_DVA;
+        /*[HideInInspector] public float ShotgunRaycastSpacing_DVA;
         [HideInInspector] public float ParticipantDistance_CM;
-        [HideInInspector] public float ShotgunRaycastCircleSize_DVA;
+        [HideInInspector] public float ShotgunRaycastCircleSize_DVA;*/
 
-        [HideInInspector] public bool IsHuman;
-        [HideInInspector] public HumanStartPanel HumanStartPanel;
-        [HideInInspector] public USE_StartButton USE_StartButton;
-        [HideInInspector] public GameObject TaskSelectionCanvasGO;
+        //[HideInInspector] public bool IsHuman;
+        //[HideInInspector] public HumanStartPanel HumanStartPanel;
+        //[HideInInspector] public USE_StartButton USE_StartButton;
+        //[HideInInspector] public GameObject TaskSelectionCanvasGO;
 
         [HideInInspector] public UI_Debugger UI_Debugger;
         [HideInInspector] public GameObject PauseIconGO;
@@ -150,7 +148,7 @@ namespace USE_ExperimentTemplate_Trial
                 }
                 
                 // Set the GazeData path back to the current config folder
-                GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar +  "GazeData";
+                SessionValues.GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar +  "GazeData";
             }
 
             AddActiveStates(new List<State> { LoadTrialStims, SetupTrial, FinishTrial, Delay, GazeCalibration });
@@ -163,17 +161,14 @@ namespace USE_ExperimentTemplate_Trial
 
             AddAbortCodeKeys();
 
-            if (IsHuman)
-                HumanStartPanel.SetTrialLevel(this);
+            if (SessionValues.SessionDef.IsHuman)
+                SessionValues.HumanStartPanel.SetTrialLevel(this);
 
             UI_Debugger = new UI_Debugger();
 
             //DefineTrial();
             Add_ControlLevel_InitializationMethod(() =>
             {
-                if(!SessionValues.WebBuild)
-                    SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
-
                 TrialCount_InBlock = -1;
                 TrialStims = new List<StimGroup>();
                 AudioFBController.UpdateAudioSource();
@@ -182,20 +177,20 @@ namespace USE_ExperimentTemplate_Trial
 
             LoadTrialStims.AddUniversalInitializationMethod(() =>
             {
-                TaskSelectionCanvasGO.SetActive(false);
+                SessionValues.TaskSelectionCanvasGO.SetActive(false);
 
                 AbortCode = 0;
 
                 TrialCount_InTask++;
                 TrialCount_InBlock++;
-                FrameData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
-                if(EyeTrackerActive)
-                    GazeData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
+                FrameData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, SessionValues.FilePrefix);
+                if(SessionValues.SessionDef.EyeTrackerActive)
+                    SessionValues.GazeData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, SessionValues.FilePrefix);
 
-                if (TaskLevel.SerialPortActive)
+                if (SessionValues.SessionDef.SerialPortActive)
                 {
-                    SerialRecvData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
-                    SerialSentData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, FilePrefix);
+                    SessionValues.SerialRecvData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, SessionValues.FilePrefix);
+                    SessionValues.SerialSentData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, SessionValues.FilePrefix);
                 }
 
                 DefineTrialStims();
@@ -208,10 +203,10 @@ namespace USE_ExperimentTemplate_Trial
                 if (SessionValues.WebBuild)
                     Cursor.visible = true;
                 else
-                    SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials", 1));
+                    SessionValues.SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials", 1));
 
                 TokenFBController.RecalculateTokenBox(); //recalculate tokenbox incase they switch to fullscreen mode
-                EventCodeManager.SendCodeImmediate(SessionEventCodes["SetupTrialStarts"]);
+                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["SetupTrialStarts"]);
 
                 ResetRelativeStartTime();
 
@@ -221,13 +216,13 @@ namespace USE_ExperimentTemplate_Trial
             SetupTrial.AddDefaultTerminationMethod(() =>
             {
                 Input.ResetInputAxes();
-                if (IsHuman)
-                    HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
+                if (SessionValues.SessionDef.IsHuman)
+                    SessionValues.HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
                 
             });
 
 
-            FinishTrial.AddInitializationMethod(() => EventCodeManager.SendCodeImmediate(SessionEventCodes["FinishTrialStarts"]));
+            FinishTrial.AddInitializationMethod(() => SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["FinishTrialStarts"]));
             FinishTrial.SpecifyTermination(() => runCalibration && TaskLevel.TaskName != "GazeCalibration", () => GazeCalibration);
 
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
@@ -284,7 +279,7 @@ namespace USE_ExperimentTemplate_Trial
                 GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(true);
 
                 // Set the GazeDataPath to be inside the GazeCalibration Folder
-                GazeData.folderPath = GazeCalibrationTaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
+                SessionValues.GazeData.folderPath = GazeCalibrationTaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
             });
 
            GazeCalibration.SpecifyTermination(() => !runCalibration, () => SetupTrial, () =>
@@ -294,7 +289,7 @@ namespace USE_ExperimentTemplate_Trial
                {
                    canvas.gameObject.SetActive(true);
                }
-               if (GazeCalibrationTaskLevel.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
+               if (SessionValues.SessionDef.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
                {
                    TobiiEyeTrackerController.Instance.isCalibrating = false;
                    TobiiEyeTrackerController.Instance.ScreenBasedCalibration.LeaveCalibrationMode();
@@ -305,7 +300,7 @@ namespace USE_ExperimentTemplate_Trial
                GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(false);
 
                // Set the Gaze Data Path back to the outer level task folder
-               GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
+               SessionValues.GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
 
            });
 
@@ -338,21 +333,21 @@ namespace USE_ExperimentTemplate_Trial
 
         public void ClearActiveTrialHandlers()
         {
-            if (SelectionTracker.TrialHandlerNames.Count > 0)
+            if (SessionValues.SelectionTracker.TrialHandlerNames.Count > 0)
             {
                 List<string> toRemove = new List<string>();
 
-                foreach (string handlerName in SelectionTracker.TrialHandlerNames)
+                foreach (string handlerName in SessionValues.SelectionTracker.TrialHandlerNames)
                 {
-                    if (SelectionTracker.ActiveSelectionHandlers.ContainsKey(handlerName))
+                    if (SessionValues.SelectionTracker.ActiveSelectionHandlers.ContainsKey(handlerName))
                     {
-                        SelectionTracker.ActiveSelectionHandlers.Remove(handlerName);
+                        SessionValues.SelectionTracker.ActiveSelectionHandlers.Remove(handlerName);
                         toRemove.Add(handlerName);
                     }
                 }
 
                 foreach (string handlerName in toRemove)
-                    SelectionTracker.TrialHandlerNames.Remove(handlerName);
+                    SessionValues.SelectionTracker.TrialHandlerNames.Remove(handlerName);
             }
         }
 
@@ -362,12 +357,12 @@ namespace USE_ExperimentTemplate_Trial
             TrialData.AppendDataToFile();
             FrameData.AppendDataToBuffer();
             FrameData.AppendDataToFile();
-            if (EyeTrackerActive)
-                GazeData.AppendDataToFile();
-            if (SerialPortActive)
+            if (SessionValues.SessionDef.EyeTrackerActive)
+                SessionValues.GazeData.AppendDataToFile();
+            if (SessionValues.SessionDef.SerialPortActive)
             {
-                SerialRecvData.AppendDataToFile();
-                SerialSentData.AppendDataToFile();
+                SessionValues.SerialRecvData.AppendDataToFile();
+                SessionValues.SerialSentData.AppendDataToFile();
             }
         }
         
@@ -592,6 +587,8 @@ namespace USE_ExperimentTemplate_Trial
         public string GetContextNestedFilePath(string MaterialFilePath, string contextName, [CanBeNull] string backupContextName = null)
         {
             string contextPath = "";
+            Debug.Log("MATERIAL FILE PATH: " + MaterialFilePath);
+            Debug.Log("CONTEXT NAME: " + contextName);
             string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
 
             if (filePaths.Length >= 1)

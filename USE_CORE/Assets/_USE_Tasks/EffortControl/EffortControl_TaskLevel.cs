@@ -57,13 +57,13 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{ContextExternalFilePath}/{TaskName}_Contexts/{currentBlock.ContextName}";
+                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{TaskName}_Contexts/{currentBlock.ContextName}";
             else
-                contextFilePath = trialLevel.GetContextNestedFilePath(ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
+                contextFilePath = trialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
 
             RenderSettings.skybox = CreateSkybox(contextFilePath);
 
-            EventCodeManager.SendCodeImmediate(SessionEventCodes["ContextOn"]);
+            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["ContextOn"]);
         });
 
         BlockFeedback.AddInitializationMethod(() =>
@@ -81,7 +81,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
     public void SetSettings()
     {
-        trialLevel.ContextExternalFilePath = ContextExternalFilePath;
+        trialLevel.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
         {

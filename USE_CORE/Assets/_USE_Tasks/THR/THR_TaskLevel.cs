@@ -43,7 +43,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
     {
         trialLevel = (THR_TrialLevel)TrialLevel;
 
-        trialLevel.MaterialFilePath = ContextExternalFilePath;
+        trialLevel.MaterialFilePath = SessionValues.SessionDef.ContextExternalFilePath;
 
         SetSettings();
 

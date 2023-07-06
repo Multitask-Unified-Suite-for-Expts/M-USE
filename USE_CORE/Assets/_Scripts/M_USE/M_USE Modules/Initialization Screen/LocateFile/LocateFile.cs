@@ -70,7 +70,6 @@ public class LocateFile : MonoBehaviour
 	public string FindFilePathInExternalFolder(string keyToFolder, string stringPattern)
 	{
 		string[] possibleFiles = Directory.GetFiles(keyToFolder, stringPattern);
-
 		if (possibleFiles.Length == 1)
 			return possibleFiles[0];
 		else if (possibleFiles.Length == 0)

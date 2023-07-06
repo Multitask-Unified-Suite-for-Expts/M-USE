@@ -76,7 +76,7 @@ namespace USE_ExperimentTemplate_Session
         private Dictionary<string, string> TaskIcons;
         protected int taskCount;
         private float TaskSelectionTimeout;
-        
+
         [HideInInspector] public int RewardHotKeyPulseSize;
         [HideInInspector] public int RewardHotKeyNumPulses;
 
@@ -123,7 +123,6 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public GameObject TaskButtonsContainer;
 
         //Set in inspector
-        public GameObject InstructionsPrefab;
         public GameObject TaskSelection_Starfield;
         public GameObject HumanVersionToggleButton;
         public GameObject HumanStartPanelPrefab;
@@ -418,7 +417,6 @@ namespace USE_ExperimentTemplate_Session
             });
             //setupSession.AddLateUpdateMethod(() => AppendSerialData());
 
-
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort && EyeTrackerActive, gazeCalibration);
             setupSession.SpecifyTermination(() => iTask >= TaskMappings.Count && !waitForSerialPort && !EyeTrackerActive, selectTask);
 
@@ -651,6 +649,7 @@ namespace USE_ExperimentTemplate_Session
                     else
                         image.texture = LoadPNG(TaskIconsFolderPath + Path.DirectorySeparatorChar + taskName + ".png");
 
+
                     if (GuidedTaskSelection)
                     {
                         // If guided task selection, only make the next icon interactable
@@ -676,7 +675,6 @@ namespace USE_ExperimentTemplate_Session
                         taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget = true;
                         if(IsHuman)
                             taskButton.TaskButtonGO.AddComponent<HoverEffect>();
-                        
                     }
                     count++;
                 }
@@ -698,14 +696,13 @@ namespace USE_ExperimentTemplate_Session
                         taskAutomaticallySelected = false;
                 }
             });
-
             selectTask.AddLateUpdateMethod(() =>
             {
                 AppendSerialData();
                 FrameData.AppendDataToBuffer();
             });
-
             selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask, () => ResetSelectedTaskButtonSize());
+
 
             // Don't have automatic task selection if we encountered an error during setup
             if (TaskSelectionTimeout >= 0 && !LogPanel.HasError())
@@ -916,7 +913,7 @@ namespace USE_ExperimentTemplate_Session
             if (SerialPortActive)
             {
                 SerialSentData = (SerialSentData)SessionDataControllers.InstantiateDataController<SerialSentData>
-                ("SerialSentData", StoreData, SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SerialSentData"
+                    ("SerialSentData", StoreData, SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SerialSentData"
                                                   + Path.DirectorySeparatorChar + "0001_TaskSelection");
                 SerialSentData.fileName = FilePrefix + "__SerialSentData_0001_TaskSelection.txt";
                 SerialSentData.sessionLevel = this;
@@ -924,7 +921,7 @@ namespace USE_ExperimentTemplate_Session
                 SerialSentData.ManuallyDefine();
 
                 SerialRecvData = (SerialRecvData)SessionDataControllers.InstantiateDataController<SerialRecvData>
-                ("SerialRecvData", StoreData, SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SerialRecvData"
+                    ("SerialRecvData", StoreData, SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SerialRecvData"
                                                   + Path.DirectorySeparatorChar + "0001_TaskSelection");
                 SerialRecvData.fileName = FilePrefix + "__SerialRecvData_0001_TaskSelection.txt";
                 SerialRecvData.sessionLevel = this;
@@ -1042,9 +1039,6 @@ namespace USE_ExperimentTemplate_Session
                     Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");
             }
 
-
-           
-
             List<string> taskNames;
             if (SessionSettings.SettingExists("Session", "TaskNames"))
             {
@@ -1100,7 +1094,7 @@ namespace USE_ExperimentTemplate_Session
 
             //Set LogWriter StoreData variable:
             GameObject.Find("MiscScripts").GetComponent<LogWriter>().SetStoreData(StoreData);
-            
+
             if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
                 MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
 
@@ -1431,7 +1425,7 @@ namespace USE_ExperimentTemplate_Session
         [DllImport("Kernel32.dll")]
         static extern bool CloseHandle(IntPtr hObject);
 #endif
-        
+
 
 
         private IEnumerator CreateFolderOnServer(string folderPath, Action callback)

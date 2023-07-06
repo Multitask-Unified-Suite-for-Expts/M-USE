@@ -290,8 +290,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (InputBroker.GetMouseButtonDown(0))
             {
                 Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
-                RaycastHit hit;
-                if (!Physics.Raycast(ray, out hit))
+                if (!Physics.Raycast(ray, out RaycastHit hit))
                     NonStimTouches_Block++;
             }
         });

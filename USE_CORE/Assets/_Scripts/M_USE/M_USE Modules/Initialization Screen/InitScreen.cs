@@ -31,9 +31,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class InitScreen : MonoBehaviour
 {
@@ -60,7 +60,7 @@ public class InitScreen : MonoBehaviour
     public GameObject dropdownGO;
 
     private FolderDropdown folderDropdown;
-    private Dropdown dropdown;
+    private TMP_Dropdown dropdown;
 
 
     void Start()
@@ -74,7 +74,7 @@ public class InitScreen : MonoBehaviour
         session.DisplayController = displayController;
 
         folderDropdown = dropdownGO.GetComponent<FolderDropdown>();
-        dropdown = dropdownGO.GetComponent<Dropdown>();
+        dropdown = dropdownGO.GetComponent<TMP_Dropdown>();
 
         foreach (GameObject g in disableOnStart)
             g.SetActive(false);

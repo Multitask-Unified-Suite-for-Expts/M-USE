@@ -378,29 +378,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             };
             HotKeyList.Add(reward);
 
-            //Long-Reward HotKey:
-            HotKey longReward = new HotKey
-            {
-                keyDescription = "L",
-                actionName = "LongReward",
-                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.L),
-                hotKeyAction = () =>
-                {
-                    if(HkPanel.TrialLevel != null)
-                    {
-                        if (HkPanel.TrialLevel.SyncBoxController != null)
-                        {
-                            HkPanel.TrialLevel.AudioFBController.Play("Positive");
-                            HkPanel.TrialLevel.SyncBoxController.SendRewardPulses(HkPanel.SessionLevel.LongRewardHotKeyNumPulses, HkPanel.SessionLevel.LongRewardHotKeyPulseSize);
-                            SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",HkPanel.SessionLevel.LongRewardHotKeyNumPulses));
-                        }
-                        else
-                            Debug.Log("Tried to send LongReward but SyncBoxController is null!");
-                    }
-                }
-            };
-            HotKeyList.Add(longReward);
-
             //Calibration HotKey:
             HotKey calibration = new HotKey
             {

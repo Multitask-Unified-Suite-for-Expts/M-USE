@@ -142,8 +142,6 @@ public static class SessionValues
         yield break;
     }
 
-
-    
     public static IEnumerator BetterReadSettingsFile<T>(string fileName, string fileType, Action<T[]> callback)
     {
         yield return GetFileContentString(fileName, result =>
@@ -321,6 +319,8 @@ public static class SessionValues
                 string fieldName = splitString[1].Trim();
                 string fieldValue = splitString[2].Trim();
                 
+                if(SurroundedByQuotes(fieldValue))
+                    fieldValue = fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
                 AssignFieldValue(fieldName, fieldValue, settingsInstance);
             
                 // FieldInfo fieldInfo = typeof(T).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
@@ -498,5 +498,13 @@ public static class SessionValues
         }
         else
             return false;
+    }
+
+    public static bool SurroundedByQuotes(string s)
+    {
+        if(s.StartsWith("\"", StringComparison.Ordinal) &&
+            s.EndsWith("\"", StringComparison.Ordinal))
+            return true;
+        else return false;
     }
 }

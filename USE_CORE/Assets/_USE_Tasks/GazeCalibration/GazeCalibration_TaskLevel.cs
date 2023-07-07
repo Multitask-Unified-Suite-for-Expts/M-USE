@@ -1,15 +1,7 @@
 using GazeCalibration_Namespace;
-using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.IO;
-using System.Linq;
-using System.Text;
 using UnityEngine;
-using USE_Settings;
 using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Block;
-using USE_ExperimentTemplate_Trial;
+
 
 public class GazeCalibration_TaskLevel : ControlLevel_Task_Template
 {
@@ -23,12 +15,12 @@ public class GazeCalibration_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod (() =>
         {
             // Set the Background image as defined in the BlockDef
-            RenderSettings.skybox = CreateSkybox(gcTL.GetContextNestedFilePath(ContextExternalFilePath, "Gray_1", "LinearDark"));
+            RenderSettings.skybox = CreateSkybox(gcTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "Gray_1", "LinearDark"));
         });
     }
     private void SetSettings()
     {   
-        gcTL.ContextExternalFilePath = ContextExternalFilePath;
+        gcTL.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
         gcTL.SpoofGazeWithMouse = false;
         gcTL.CalibPointsInset = new float[] {0.15f, 0.15f};
         gcTL.MaxCircleScale = 0.75f;

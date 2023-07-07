@@ -2,15 +2,12 @@ using FlexLearning_Namespace;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 using USE_Settings;
 using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Block;
-using USE_ExperimentTemplate_Trial;
-using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
+
 
 public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 {
@@ -43,7 +40,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
-            
             flTL.MinTrials = flBD.MinMaxTrials[0];
             flTL.TokensWithStimOn = flBD.TokensWithStimOn;
             
@@ -52,13 +48,13 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{ContextExternalFilePath}/{TaskName}_Contexts/{flBD.ContextName}";
+                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{flBD.ContextName}";
             else
-                contextFilePath = flTL.GetContextNestedFilePath(ContextExternalFilePath, flBD.ContextName, "LinearDark");
+                contextFilePath = flTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, flBD.ContextName, "LinearDark");
 
             RenderSettings.skybox = CreateSkybox(contextFilePath);
 
-            EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOn"]);
+            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOn"]);
             
             //Set the Initial Token Values for the Block
             flTL.TokenFBController.SetTotalTokensNum(flBD.NumTokenBar);
@@ -83,7 +79,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     {
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             flTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else flTL.ContextExternalFilePath = ContextExternalFilePath;
+        else flTL.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
             flTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
         else
@@ -126,7 +122,21 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         flTL.NumTokenBarFull_InBlock = 0;
         flTL.TotalTokensCollected_InBlock = 0;
     }
-    public override OrderedDictionary GetSummaryData()
+
+    public override OrderedDictionary GetBlockResultsData()
+    {
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trials Completed"] = flTL.TrialCount_InBlock + 1,
+            ["Trials Correct"] = flTL.NumCorrect_InBlock,
+            ["Accuracy"] = flTL.Accuracy_InBlock.ToString("0.00") + "%",
+            ["Errors"] = flTL.NumErrors_InBlock,
+            ["TokenBar Completions"] = flTL.NumTokenBarFull_InBlock,
+        };
+        return data;
+    }
+
+    public override OrderedDictionary GetTaskSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary();
 

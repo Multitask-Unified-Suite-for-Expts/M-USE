@@ -16,33 +16,48 @@ namespace USE_ExperimentTemplate_Data
 {
     public class SummaryData
     {
-        private static string folderPath;
-        private static bool storeData;
+        private static string FolderPath;
+        private static char Separator;
 
-        public static void Init(bool storeData, string folderPath)
+        public static void Init()
         {
-            SummaryData.storeData = storeData;
-            SummaryData.folderPath = Path.Combine(folderPath, "SummaryData");
-            if (storeData)
-            {
-                Directory.CreateDirectory(SummaryData.folderPath);
-            }
+            if (!SessionValues.SessionDef.StoreData)
+                return;
+
+            Separator = SessionValues.WebBuild ? '/' : Path.DirectorySeparatorChar;
+            FolderPath = SessionValues.SessionDataPath + Separator + "SummaryData";
+
+            if(SessionValues.WebBuild)
+                CoroutineHelper.StartCoroutine(ServerManager.CreateFolder(FolderPath));
+            else
+                Directory.CreateDirectory(FolderPath);
+            
         }
 
-        public static void AddTaskRunData(string ConfigName, ControlLevel state, OrderedDictionary data)
+        public static IEnumerator AddTaskRunData(string ConfigName, ControlLevel state, OrderedDictionary data)
         {
-            if (!storeData)
-                return;
+            if (!SessionValues.SessionDef.StoreData)
+                yield break;
             
             data["Start Time"] = state.StartTimeAbsolute;
             data["Duration"] = state.Duration;
 
-            string filePath = Path.Combine(folderPath, ConfigName + ".txt");
-            using (StreamWriter dataStream = File.AppendText(filePath))
+            string filePath = FolderPath + Separator + ConfigName + ".txt";
+
+            if(SessionValues.WebBuild)
             {
+                string content = "";
+                foreach (DictionaryEntry entry in data)
+                    content += $"{entry.Key}:\t{entry.Value}\n";
+                yield return CoroutineHelper.StartCoroutine(ServerManager.CreateFileAsync(filePath, ConfigName + ".txt", content));
+            }
+            else
+            {
+                using StreamWriter dataStream = File.AppendText(filePath);
                 foreach (DictionaryEntry entry in data)
                     dataStream.Write($"{entry.Key}:\t{entry.Value}\n");
             }
+            
         }
     }
 
@@ -67,9 +82,7 @@ namespace USE_ExperimentTemplate_Data
         //{
         //    using (var conn = Connection)
         //    {
-        //        Debug.Log("INSIDE CONNECTION!");
         //        conn.Open();
-        //        Debug.Log("AFTER IT OPENED!");
         //        using (var cmd = conn.CreateCommand())
         //        {
         //            cmd.CommandText = @"SELECT * FROM Task;";
@@ -127,8 +140,6 @@ namespace USE_ExperimentTemplate_Data
                 Debug.Log("---------------------------");
             }
         }
-
-
 
         //public bool DoesSQLTableExist()
         //{
@@ -244,8 +255,8 @@ namespace USE_ExperimentTemplate_Data
         public override void DefineUSETemplateDataController()
         {
             DataControllerName = "SessionData";
-            AddDatum("SubjectID", () => sessionLevel.SubjectID);
-            AddDatum("SessionID", () => sessionLevel.SessionID);
+            AddDatum("SubjectID", () => SessionValues.SubjectID);
+            AddDatum("SessionID", () => SessionValues.SessionID);
             AddStateTimingData(sessionLevel);
         }
     }
@@ -280,8 +291,8 @@ namespace USE_ExperimentTemplate_Data
         public override void DefineUSETemplateDataController()
         {
             DataControllerName = "BlockData";
-            AddDatum("SubjectID", () => sessionLevel.SubjectID);
-            AddDatum("SessionID", () => sessionLevel.SessionID);
+            AddDatum("SubjectID", () => SessionValues.SubjectID);
+            AddDatum("SessionID", () => SessionValues.SessionID);
             AddDatum("TaskName", () => taskLevel != null ? taskLevel.TaskName : "NoTaskActive");
             AddDatum("BlockCount", () => taskLevel != null ? (taskLevel.BlockCount + 1).ToString() : "NoTaskActive");
         }
@@ -292,8 +303,8 @@ namespace USE_ExperimentTemplate_Data
         public override void DefineUSETemplateDataController()
         {
             DataControllerName = "TrialData";
-            AddDatum("SubjectID", () => sessionLevel.SubjectID); //session level instead of task level
-            AddDatum("SessionID", () => sessionLevel.SessionID);
+            AddDatum("SubjectID", () => SessionValues.SubjectID); //session level instead of task level
+            AddDatum("SessionID", () => SessionValues.SessionID);
             AddDatum("TaskName", () => taskLevel != null? taskLevel.TaskName:"NoTaskActive");
             AddDatum("BlockCount", () => taskLevel != null ? (taskLevel.BlockCount + 1).ToString():"NoTaskActive");
             AddDatum("TrialCount_InTask", () => trialLevel != null ? (trialLevel.TrialCount_InTask + 1).ToString() : "NoTaskActive");
@@ -307,8 +318,8 @@ namespace USE_ExperimentTemplate_Data
         public override void DefineUSETemplateDataController()
         {
             DataControllerName = "FrameData";
-            AddDatum("SubjectID", () => sessionLevel.SubjectID);
-            AddDatum("SessionID", () => sessionLevel.SessionID);
+            AddDatum("SubjectID", () => SessionValues.SubjectID);
+            AddDatum("SessionID", () => SessionValues.SessionID);
             AddDatum("TaskName", () => taskLevel != null ? taskLevel.TaskName : "NoTaskActive");
             AddDatum("BlockCount", () => taskLevel != null ? (taskLevel.BlockCount + 1).ToString() : "NoTaskActive");
             AddDatum("TrialCount_InTask", () => trialLevel != null ? (trialLevel.TrialCount_InTask + 1).ToString() : "NoTaskActive");
@@ -320,9 +331,9 @@ namespace USE_ExperimentTemplate_Data
 
         public void AddEventCodeColumns()
         {
-            AddDatum("EventCodes", () => taskLevel != null ? string.Join(",", taskLevel.EventCodeManager.GetBuffer("sent")) : "NoTaskActive");
-            AddDatum("SplitEventCodes", () => taskLevel != null ? string.Join(",", taskLevel.EventCodeManager.GetBuffer("split")) : "NoTaskActive");
-            AddDatum("PreSplitEventCodes", () => taskLevel != null ? string.Join(",", taskLevel.EventCodeManager.GetBuffer("presplit")) : "NoTaskActive");
+            AddDatum("EventCodes", () => taskLevel != null ? string.Join(",", SessionValues.EventCodeManager.GetBuffer("sent")) : "NoTaskActive");
+            AddDatum("SplitEventCodes", () => taskLevel != null ? string.Join(",", SessionValues.EventCodeManager.GetBuffer("split")) : "NoTaskActive");
+            AddDatum("PreSplitEventCodes", () => taskLevel != null ? string.Join(",", SessionValues.EventCodeManager.GetBuffer("presplit")) : "NoTaskActive");
         }
     }
 
@@ -332,8 +343,8 @@ namespace USE_ExperimentTemplate_Data
         {
             DataControllerName = "GazeData";
 
-            AddDatum("SubjectID", () => sessionLevel.SubjectID);
-            AddDatum("SessionID", () => sessionLevel.SessionID);
+            AddDatum("SubjectID", () => SessionValues.SubjectID);
+            AddDatum("SessionID", () => SessionValues.SessionID);
             AddDatum("TaskName", () => taskLevel != null ? taskLevel.TaskName : "NoTaskActive");
             AddDatum("BlockCount", () => taskLevel != null ? (taskLevel.BlockCount + 1).ToString() : "NoTaskActive");
             AddDatum("TrialCount_InTask", () => trialLevel != null ? (trialLevel.TrialCount_InTask + 1).ToString() : "NoTaskActive");
@@ -342,25 +353,25 @@ namespace USE_ExperimentTemplate_Data
             AddDatum("Frame", () => Time.frameCount);
             AddDatum("FrameStartUnity", () => Time.time);
 
-            AddDatum("LeftPupilValidity", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.leftPupilValidity);
-            AddDatum("LeftGazeOriginValidity", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.leftGazeOriginValidity);
-            AddDatum("LeftGazePointValidity", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.leftGazePointValidity);
-            AddDatum("LeftGazePointOnDisplayArea", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.leftGazePointOnDisplayArea);
-            AddDatum("LeftGazeOriginInUserCoordinateSystem", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.leftGazeOriginInUserCoordinateSystem);
-            AddDatum("LeftGazePointInUserCoordinateSystem", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.leftGazePointInUserCoordinateSystem);
-            AddDatum("LeftGazeOriginInTrackboxCoordinateSystem", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.leftGazeOriginInTrackboxCoordinateSystem);
-            AddDatum("LeftPupilDiameter", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.leftPupilDiameter);
+            AddDatum("LeftPupilValidity", () => SessionValues.TobiiEyeTrackerController.mostRecentGazeSample.leftPupilValidity);
+            AddDatum("LeftGazeOriginValidity", () => SessionValues.TobiiEyeTrackerController.mostRecentGazeSample.leftGazeOriginValidity);
+            AddDatum("LeftGazePointValidity", () => SessionValues.TobiiEyeTrackerController.mostRecentGazeSample.leftGazePointValidity);
+            AddDatum("LeftGazePointOnDisplayArea", () => SessionValues.TobiiEyeTrackerController.mostRecentGazeSample.leftGazePointOnDisplayArea);
+            AddDatum("LeftGazeOriginInUserCoordinateSystem", () => SessionValues.TobiiEyeTrackerController.mostRecentGazeSample.leftGazeOriginInUserCoordinateSystem);
+            AddDatum("LeftGazePointInUserCoordinateSystem", () => SessionValues.TobiiEyeTrackerController.mostRecentGazeSample.leftGazePointInUserCoordinateSystem);
+            AddDatum("LeftGazeOriginInTrackboxCoordinateSystem", () => SessionValues.TobiiEyeTrackerController.mostRecentGazeSample.leftGazeOriginInTrackboxCoordinateSystem);
+            AddDatum("LeftPupilDiameter", () => SessionValues.TobiiEyeTrackerController.mostRecentGazeSample.leftPupilDiameter);
             
-            AddDatum("RightPupilValidity", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.rightPupilValidity);
-            AddDatum("RightGazeOriginValidity", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.rightGazeOriginValidity);
-            AddDatum("RightGazePointValidity", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.rightGazePointValidity);
-            AddDatum("RightGazePointOnDisplayArea", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.rightGazePointOnDisplayArea);
-            AddDatum("RightGazeOriginInUserCoordinateSystem", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.rightGazeOriginInUserCoordinateSystem);
-            AddDatum("RightGazePointInUserCoordinateSystem", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.rightGazePointInUserCoordinateSystem);
-            AddDatum("RightGazeOriginInTrackboxCoordinateSystem", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.rightGazeOriginInTrackboxCoordinateSystem);
-            AddDatum("RightPupilDiameter", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.rightPupilDiameter);
+            AddDatum("RightPupilValidity", () => SessionValues.TobiiEyeTrackerController.mostRecentGazeSample.rightPupilValidity);
+            AddDatum("RightGazeOriginValidity", () => SessionValues.TobiiEyeTrackerController.mostRecentGazeSample.rightGazeOriginValidity);
+            AddDatum("RightGazePointValidity", () => SessionValues.TobiiEyeTrackerController.mostRecentGazeSample.rightGazePointValidity);
+            AddDatum("RightGazePointOnDisplayArea", () => SessionValues.TobiiEyeTrackerController.mostRecentGazeSample.rightGazePointOnDisplayArea);
+            AddDatum("RightGazeOriginInUserCoordinateSystem", () => SessionValues.TobiiEyeTrackerController.mostRecentGazeSample.rightGazeOriginInUserCoordinateSystem);
+            AddDatum("RightGazePointInUserCoordinateSystem", () => SessionValues.TobiiEyeTrackerController.mostRecentGazeSample.rightGazePointInUserCoordinateSystem);
+            AddDatum("RightGazeOriginInTrackboxCoordinateSystem", () => SessionValues.TobiiEyeTrackerController.mostRecentGazeSample.rightGazeOriginInTrackboxCoordinateSystem);
+            AddDatum("RightPupilDiameter", () => SessionValues.TobiiEyeTrackerController.mostRecentGazeSample.rightPupilDiameter);
 
-            AddDatum("TobiiSystemTimeStamp", () => sessionLevel.TobiiEyeTrackerController.mostRecentGazeSample.systemTimeStamp);
+            AddDatum("TobiiSystemTimeStamp", () => SessionValues.TobiiEyeTrackerController.mostRecentGazeSample.systemTimeStamp);
         }
     }
 

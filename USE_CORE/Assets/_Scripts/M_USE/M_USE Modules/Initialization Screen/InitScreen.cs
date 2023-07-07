@@ -71,7 +71,7 @@ public class InitScreen : MonoBehaviour
 
         displayController = gameObject.AddComponent<DisplayController>();
         displayController.HandleDisplays(this);
-        session.DisplayController = displayController;
+        SessionValues.DisplayController = displayController;
 
         folderDropdown = dropdownGO.GetComponent<FolderDropdown>();
         dropdown = dropdownGO.GetComponent<TMP_Dropdown>();
@@ -109,6 +109,8 @@ public class InitScreen : MonoBehaviour
 
     IEnumerator HandleConfirm()
     {
+        SessionValues.LocateFile = locateFileGO.GetComponent<LocateFile>();
+            
         if(SessionValues.WebBuild)
         {
             string subjectID = session.SessionDetails.GetItemValue("SubjectID");

@@ -1,21 +1,16 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-//using System.Reflection;
-//using System.Security.Policy;
-//using JetBrains.Annotations;
 using UnityEngine;
-//using USE_Settings;
+using USE_Settings;
 using TriLib;
 using UnityEngine.UI;
 using USE_States;
 using Object = UnityEngine.Object;
 using USE_ExperimentTemplate_Classes;
 using System.Collections;
-//using USE_ExperimentTemplate_Session;
-//using System.Threading.Tasks;
-//using UnityEngine.UI;
+using UnityEditor;
 
 namespace USE_StimulusManagement
 {
@@ -60,10 +55,8 @@ namespace USE_StimulusManagement
 
 		public StimDef(StimGroup sg, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
-			if (!(string.IsNullOrEmpty(PrefabPath) | string.IsNullOrWhiteSpace(PrefabPath)) &&
-			    !(string.IsNullOrEmpty(FileName) | string.IsNullOrWhiteSpace(PrefabPath)))
-				Debug.LogWarning("StimDef for stimulus " + StimName +
-				                 " is being specified with both an external file path and a prefab path. Only the external filepath will be checked.");
+			if (!(string.IsNullOrEmpty(PrefabPath) | string.IsNullOrWhiteSpace(PrefabPath))  && !(string.IsNullOrEmpty(FileName) | string.IsNullOrWhiteSpace(PrefabPath)))
+				Debug.LogWarning("StimDef for stimulus " + StimName + " is being specified with both an external file path and a prefab path. Only the external filepath will be checked.");
 			sg.stimDefs.Add(this);
 			StimGroups = new Dictionary<string, StimGroup>();
 			StimGroups.Add(sg.stimGroupName, sg);
@@ -96,7 +89,6 @@ namespace USE_StimulusManagement
 				SetActiveOnInitialization = setActiveOnInit;
 				SetActiveOnInitialization.StateInitializationFinished += ActivateOnStateInit;
 			}
-
 			if (setInactiveOnTerm != null)
 			{
 				SetInactiveOnTermination = setInactiveOnTerm;
@@ -156,7 +148,7 @@ namespace USE_StimulusManagement
 			sd.isRelevant = isRelevant;
 			return sd;
 		}
-
+		
 		public StimDef CopyStimDef(StimGroup sg)
 		{
 			StimDef sd = CopyStimDef();
@@ -233,16 +225,13 @@ namespace USE_StimulusManagement
 			}
 		}
 
-		/* UNUSED
-		 public void AddToStimGroup(IEnumerable<StimGroup> stimGroups)
+		public void AddToStimGroup(IEnumerable<StimGroup> stimGroups)
 		{
 			foreach (StimGroup sg in stimGroups)
 			{
 				AddToStimGroup(sg);
 			}
 		}
-		*/
-
 
 		public void RemoveFromStimGroup(StimGroup sg)
 		{
@@ -272,7 +261,6 @@ namespace USE_StimulusManagement
 			}
 		}
 
-		/* UNUSED
 		public void RemoveFromStimGroup(IEnumerable<StimGroup> sgs)
 		{
 			foreach (StimGroup sg in sgs)
@@ -284,25 +272,25 @@ namespace USE_StimulusManagement
 			foreach (string name in sgnames)
 				RemoveFromStimGroup(name);
 		}
-		*/
 
 
 
-		public IEnumerator Load(Action<GameObject> callback)
-		{
+        public IEnumerator Load(Action<GameObject> callback)
+        {
+	        Debug.Log(FileName);
 			SessionValues.Using2DStim = FileName.Contains("png") ? true : false;
 
 			bool loadFromServer = SessionValues.WebBuild && !SessionValues.UseDefaultConfigs;
 
 			if (SessionValues.UseDefaultConfigs)
 			{
-				StimGameObject = LoadPrefabFromResources(PrefabPath);
+                StimGameObject = LoadPrefabFromResources(PrefabPath);
 				callback?.Invoke(StimGameObject);
 			}
-			else
-			{
-				if (!string.IsNullOrEmpty(FileName))
-				{
+            else
+            {
+                if (!string.IsNullOrEmpty(FileName))
+                {
 					if (loadFromServer)
 					{
 						yield return CoroutineHelper.StartCoroutine(LoadExternalStimFromServer(returnedStimGO =>
@@ -320,45 +308,44 @@ namespace USE_StimulusManagement
 					{
 						StimGameObject = LoadExternalStimFromFile();
 					}
-				}
-				else if (StimDimVals != null)
-				{
-					FileName = FilePathFromDims("placeholder1", new List<string[]>(), "placeholder3");
-					StimGameObject = LoadExternalStimFromFile();
-				}
-				else if (!string.IsNullOrEmpty(PrefabPath)) //this one neccessary?
+                }
+                else if (StimDimVals != null)
+                {
+                    FileName = FilePathFromDims("placeholder1", new List<string[]>(), "placeholder3");
+                    StimGameObject = LoadExternalStimFromFile();
+                }
+                else if (!string.IsNullOrEmpty(PrefabPath)) //this one neccessary?
 					StimGameObject = Resources.Load<GameObject>(PrefabPath);
-				else
-				{
-					Debug.LogWarning("Attempting to load stimulus " + StimName +
-					                 ", but no Unity Resources path, external file path, or dimensional values have been provided.");
+                else
+                {
+                    Debug.LogWarning("Attempting to load stimulus " + StimName + ", but no Unity Resources path, external file path, or dimensional values have been provided.");
 					callback?.Invoke(null);
 					//return null;
-				}
+                }
 
 
-				if (!string.IsNullOrEmpty(StimName))
-					StimGameObject.name = StimName;
-				else
-				{
-					string[] FileNameStrings;
-					if (FileName.Contains("\\"))
-						FileNameStrings = FileName.Split('\\');
-					else
-						FileNameStrings = FileName.Split('/');
+                if (!string.IsNullOrEmpty(StimName))
+                    StimGameObject.name = StimName;
+                else
+                {
+                    string[] FileNameStrings;
+                    if (FileName.Contains("\\"))
+                        FileNameStrings = FileName.Split('\\');
+                    else
+                        FileNameStrings = FileName.Split('/');
 
-					string splitString = FileNameStrings[FileNameStrings.Length - 1];
-					StimGameObject.name = splitString.Split('.')[0];
-				}
+                    string splitString = FileNameStrings[FileNameStrings.Length - 1];
+                    StimGameObject.name = splitString.Split('.')[0];
+                }
 
 				callback?.Invoke(StimGameObject);
 
-			}
-			//return StimGameObject;
-		}
+            }
+            //return StimGameObject;
+        }
 
 
-		private List<GameObject> GetAllObjectsInHierarchy(GameObject parentObject)
+        private List<GameObject> GetAllObjectsInHierarchy(GameObject parentObject)
 		{
 			List<GameObject> objects = new List<GameObject>();
 			objects.Add(parentObject);
@@ -368,7 +355,6 @@ namespace USE_StimulusManagement
 				List<GameObject> childChildren = GetAllObjectsInHierarchy(child.gameObject);
 				objects.AddRange(childChildren);
 			}
-
 			return objects;
 		}
 
@@ -376,14 +362,13 @@ namespace USE_StimulusManagement
 		{
 			List<GameObject> objectsInHierarchy = GetAllObjectsInHierarchy(parentObject);
 			foreach (GameObject obj in objectsInHierarchy)
-
 			{
 				obj.AddComponent<StimDefPointer>();
 				obj.GetComponent<StimDefPointer>().StimDef = this;
 			}
 		}
-
-
+		
+		
 		public GameObject LoadPrefabFromResources(string prefabPath = "")
 		{
 			if (prefabPath.Length > 2)
@@ -397,7 +382,6 @@ namespace USE_StimulusManagement
 				string splitFileName = FileName.Split('.')[0];
 				path = PrefabPath + "/" + splitFileName;
 			}
-
 			StimGameObject = LoadModel(path, true);
 
 			PositionRotationScale();
@@ -408,70 +392,68 @@ namespace USE_StimulusManagement
 		}
 
 
-		private string WriteStimToPersistantDataPath(byte[] stimFileBytes)
-		{
-			string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "Stimuli";
+        private string WriteStimToPersistantDataPath(byte[] stimFileBytes)
+        {
+            string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "Stimuli";
 
-			if (!Directory.Exists(folderPath))
+            if (!Directory.Exists(folderPath))
 				Directory.CreateDirectory(folderPath);
-
-			string stimPath = folderPath + Path.DirectorySeparatorChar + FileName;
-			if (!File.Exists(stimPath))
+			
+            string stimPath = folderPath + Path.DirectorySeparatorChar + FileName;
+			if(!File.Exists(stimPath))
 			{
-				Debug.Log("WRITING STIM TO PERSISTANT DATA PATH!");
-				File.WriteAllBytes(stimPath, stimFileBytes);
+                Debug.Log("WRITING STIM TO PERSISTANT DATA PATH!");
+                File.WriteAllBytes(stimPath, stimFileBytes);
 				Debug.Log("DONE WRITING BYTES TO PERSISTANT DATA PATH!");
-			}
+            }
 
-			return stimPath;
-		}
+            return stimPath;
+        }
 
-		public IEnumerator LoadExternalStimFromServer(Action<GameObject> callback)
+        public IEnumerator LoadExternalStimFromServer(Action<GameObject> callback)
 		{
 			string stimServerPath = $"Resources/Stimuli/";
 
 			//Fetch the .fbx file from the server as a byte array:
-			yield return CoroutineHelper.StartCoroutine(ServerManager.GetFileBytesAsync(stimServerPath, FileName,
-				byteResult =>
+            yield return CoroutineHelper.StartCoroutine(ServerManager.GetFileBytesAsync(stimServerPath, FileName, byteResult =>
+			{
+				if(byteResult != null)
 				{
-					if (byteResult != null)
+					if(SessionValues.Using2DStim) //If 2D: use the byte array 
 					{
-						if (SessionValues.Using2DStim) //If 2D: use the byte array 
-						{
-							StimGameObject = new GameObject();
-							StimGameObject.SetActive(false);
-							RawImage image = StimGameObject.AddComponent<RawImage>();
-							Texture2D tex = new Texture2D(2, 2);
-							tex.LoadImage(byteResult);
-							image.texture = tex;
-							if (CanvasGameObject != null)
-								StimGameObject.GetComponent<RectTransform>()
-									.SetParent(CanvasGameObject.GetComponent<RectTransform>());
-						}
-						else //Using 3D stim from server, so write file to persistant data path and pass the path into LoadModel
-						{
-							string stimPath = WriteStimToPersistantDataPath(byteResult);
-							Debug.Log("ABOUT TO LOAD MODEL FROM PERSISTANT DATA PATH!");
-							StimGameObject = LoadModel(stimPath);
-							Debug.Log("AFTER LOADING MODEL FROM PERSISTANT DATA PATH! (doubt it makes it here)");
-
-							//Another trilib way to try:
-							//AssetLoader loader = new AssetLoader();
-							//GameObject loadedObject = loader.LoadFromMemory(byteResult, FileName);
-						}
-
-						PositionRotationScale();
-						if (!string.IsNullOrEmpty(StimName))
-							StimGameObject.name = StimName;
-						AssignStimDefPointeToObjectHierarchy(StimGameObject, this);
-						callback?.Invoke(StimGameObject);
-					}
-					else
+						StimGameObject = new GameObject();
+						StimGameObject.SetActive(false);
+						RawImage image = StimGameObject.AddComponent<RawImage>();
+                        Texture2D tex = new Texture2D(2, 2);
+                        tex.LoadImage(byteResult);
+						image.texture = tex;
+						if (CanvasGameObject != null)
+							StimGameObject.GetComponent<RectTransform>().SetParent(CanvasGameObject.GetComponent<RectTransform>());
+                    }
+					else //Using 3D stim from server, so write file to persistant data path and pass the path into LoadModel
 					{
-						Debug.Log("STIM BYTE RESULT IS NULL!!!!!!!!!!!!!!!!!!!!!!!!!");
-						callback?.Invoke(null);
+						string stimPath = WriteStimToPersistantDataPath(byteResult);
+						Debug.Log("ABOUT TO LOAD MODEL FROM PERSISTANT DATA PATH!");
+						StimGameObject = LoadModel(stimPath);
+						Debug.Log("AFTER LOADING MODEL FROM PERSISTANT DATA PATH! (doubt it makes it here)");
+
+						//Another trilib way to try:
+						//AssetLoader loader = new AssetLoader();
+						//GameObject loadedObject = loader.LoadFromMemory(byteResult, FileName);
 					}
-				}));
+
+					PositionRotationScale();
+					if (!string.IsNullOrEmpty(StimName))
+						StimGameObject.name = StimName;
+					AssignStimDefPointeToObjectHierarchy(StimGameObject, this);
+					callback?.Invoke(StimGameObject);
+				}
+				else
+				{
+					Debug.Log("STIM BYTE RESULT IS NULL!!!!!!!!!!!!!!!!!!!!!!!!!");
+					callback?.Invoke(null);
+				}
+			}));
 		}
 
 		public GameObject LoadExternalStimFromFile(string stimFilePath = "")
@@ -484,13 +466,11 @@ namespace USE_StimulusManagement
 				else
 					FileName = FileName + StimExtension;
 			}
-
-			if (string.IsNullOrEmpty(StimExtension))
+			if(string.IsNullOrEmpty(StimExtension))
 
 			{
 				StimExtension = Path.GetExtension(FileName);
-			} //by default stimFilePath argument is empty, and files are found using StimFolderPath + ExternalFilePath
-
+			}			//by default stimFilePath argument is empty, and files are found using StimFolderPath + ExternalFilePath
 			//so usually this first if statement is never called - used for cases where we might want to find a file in an unusual location
 			if (!string.IsNullOrEmpty(stimFilePath))
 			{
@@ -499,7 +479,7 @@ namespace USE_StimulusManagement
 			}
 			//we will only use StimFolderPath if ExternalFilePath doesn't already contain it
 			else if (!string.IsNullOrEmpty(StimFolderPath) && !FileName.StartsWith(StimFolderPath))
-			{
+			{				
 				//this checking needs to be done during task setup - check each stim exists at start of session instead of at start of each trial
 				List<string> filenames = RecursiveFileFinder.FindFile(StimFolderPath, FileName, StimExtension);
 				if (filenames.Count == 1)
@@ -507,26 +487,24 @@ namespace USE_StimulusManagement
 					FileName = filenames[0];
 				}
 				else if (filenames.Count == 0)
-					Debug.LogError("Attempted to load stimulus " + FileName + " in folder " +
-					               StimFolderPath +
-					               "but no file matching this pattern was found in this folder or subdirectories.");
+					Debug.LogError("Attempted to load stimulus " + FileName + " in folder " + 
+					               StimFolderPath + "but no file matching this pattern was found in this folder or subdirectories.");
 				else
-					Debug.LogError("Attempted to load stimulus " + FileName + " in folder " +
-					               StimFolderPath +
-					               "but multiple files matching this pattern were found in this folder or subdirectories.");
+					Debug.LogError("Attempted to load stimulus " + FileName + " in folder " + 
+					               StimFolderPath + "but multiple files matching this pattern were found in this folder or subdirectories.");
 			}
 			else
 			{
 				//if ExternalFilePath already contains the StimFolerPath string, do not change it,
 				//but should also have method to check this file exists
 			}
-
+			
 			//switch case based on StimDef filetype
 			if (String.IsNullOrEmpty(StimExtension))
 			{
 				//parse filename for stimExtension and assign
 			}
-
+			
 			switch (StimExtension.ToLower())
 			{
 				case ".fbx":
@@ -534,18 +512,17 @@ namespace USE_StimulusManagement
 					PositionRotationScale();
 					break;
 				case ".png":
-					StimGameObject = new GameObject(); //give it name
+					StimGameObject = new GameObject();//give it name
 					RawImage stimGOImage = StimGameObject.AddComponent<RawImage>();
 					stimGOImage.texture = LoadPNG(FileName);
 					if (this.CanvasGameObject != null)
-						StimGameObject.GetComponent<RectTransform>()
-							.SetParent(this.CanvasGameObject.GetComponent<RectTransform>());
+						StimGameObject.GetComponent<RectTransform>().SetParent(this.CanvasGameObject.GetComponent<RectTransform>());
 					PositionRotationScale();
 					break;
 				default:
 					break;
 			}
-
+			
 			if (!string.IsNullOrEmpty(StimName))
 				StimGameObject.name = StimName;
 			AssignStimDefPointeToObjectHierarchy(StimGameObject, this);
@@ -566,7 +543,6 @@ namespace USE_StimulusManagement
 			ToggleVisibility(visibility);
 			return tex;
 		}
-
 		public void DestroyStimGameObject()
 		{
 			StimGroup[] sgs = StimGroups.Values.ToArray();
@@ -584,131 +560,83 @@ namespace USE_StimulusManagement
 				SetInactiveOnTermination.StateTerminationFinished -= InactivateOnStateTerm;
 				SetInactiveOnTermination = null;
 			}
-						if (StimGameObject != null)
+
+			if (StimGameObject != null)
 			{
 				DestroyRecursive(StimGameObject);
 			}
 
 			StimGameObject = null;
 		}
+        public void DestroyRecursive(GameObject go)
+        {
+            Debug.Log(go.name);
 
-		public void DestroyRecursive(GameObject go)
-		{
-			Debug.Log(go.name);
-			if (go.transform.childCount > 0)
-				for(int iChild = 0; iChild < go.transform.childCount; iChild++)
-					DestroyRecursive(go.transform.GetChild(iChild).gameObject);
+            // Destroy MeshFilters and their associated Meshes
+            MeshFilter[] meshFilters = go.GetComponentsInChildren<MeshFilter>();
+            foreach (MeshFilter meshFilter in meshFilters)
+            {
+                if (meshFilter.sharedMesh != null)
+                {
+                    Debug.Log(go.name + " MeshFilter Mesh " + meshFilter.sharedMesh.name);
+                    GameObject.DestroyImmediate(meshFilter.sharedMesh, false);
+                }
+                GameObject.DestroyImmediate(meshFilter);
+            }
 
-			if (go.GetComponent<Texture>() != null)
-			{
-				GameObject.Destroy(go.GetComponent<Texture>());
-				Debug.Log(go.name + " Texture");
-			}
-			if (go.GetComponent<Texture2D>() != null)
-			{
-				GameObject.Destroy(go.GetComponent<Texture2D>());
-				Debug.Log(go.name + " Texture2D");
-			}
+            // Destroy SkinnedMeshRenderers and their associated Meshes
+            SkinnedMeshRenderer[] skinnedMeshRenderers = go.GetComponentsInChildren<SkinnedMeshRenderer>();
+            foreach (SkinnedMeshRenderer skinnedMeshRenderer in skinnedMeshRenderers)
+            {
+                if (skinnedMeshRenderer.sharedMesh != null)
+                {
+                    Debug.Log(go.name + " SkinnedMeshRenderer Mesh " + skinnedMeshRenderer.sharedMesh.name);
+                    GameObject.DestroyImmediate(skinnedMeshRenderer.sharedMesh, false);
+                }
+                GameObject.DestroyImmediate(skinnedMeshRenderer);
+            }
 
-			Material mat = go.GetComponent<Material>();
-			if (mat != null)
-			{
-				if (mat.shader != null)
-				{
-					GameObject.Destroy(mat.shader);
-					Debug.Log(go.name + " Material Shader");
-				}
-				if (mat.mainTexture != null)
-				{
-					GameObject.Destroy(mat.mainTexture);
-					Debug.Log(go.name + " Material Main Texture");
-				}
-				GameObject.Destroy(go.GetComponent<Material>());
-				Debug.Log(go.name + " Material");
-			}
+            // Destroy Textures and Materials
+            Renderer[] renderers = go.GetComponentsInChildren<Renderer>();
+            foreach (Renderer renderer in renderers)
+            {
+                Material[] materials = renderer.sharedMaterials;
+                foreach (Material material in materials)
+                {
+                    if (material != null)
+                    {
+                        Debug.Log(go.name + " Material " + material.name);
 
-			
-			MeshRenderer mr = go.GetComponent<MeshRenderer>();
-			if (mr != null)
-			{
-				Debug.Log(go.name + " Mesh Renderer Exists");
-				foreach (Material material in mr.materials)
-				{
-					if (material.mainTexture != null)
-					{
-						GameObject.Destroy(material.mainTexture);
-						Debug.Log(go.name + " Mesh Renderer Material " + material.name + " Main Texture");
-					}
-				}
-				foreach (Material material in mr.sharedMaterials)
-				{
-					if (material.mainTexture != null)
-					{
-						GameObject.Destroy(material.mainTexture);
-						Debug.Log(go.name + " Mesh Renderer  Material " + material.name + " Main Texture");
-					}
-				}
-			}
-			
-			Renderer renderer = go.GetComponent<Renderer>();
-			if (renderer != null)
-			{
-				Debug.Log(go.name + " Plain Renderer Exists");
-				foreach (Material material in renderer.materials)
-				{
-					if (material.mainTexture != null)
-					{
-						GameObject.Destroy(material.mainTexture);
-						//Debug.Log(go.name + " Plain Renderer Material " + material.name + " Main Texture");
-						GameObject.Destroy(material);
-					}
-				}
-				foreach (Material material in renderer.sharedMaterials)
-				{
-					if (material.mainTexture != null)
-					{
-						GameObject.Destroy(material.mainTexture);
-						//Debug.Log(go.name + " Plain Renderer Material " + material.name + " Main Texture");
-						GameObject.Destroy(material);
-					}
-				}
-			}
+                        // Destroy Textures
+                        if (material.mainTexture != null)
+                        {
+                            if (material.mainTexture is Texture2D)
+                            {
+                                Debug.Log(go.name + " Texture2D " + material.mainTexture.name + " (Attached to: " + go.name + ")");
+                                GameObject.DestroyImmediate(material.mainTexture, false);
+                            }
+                            else
+                            {
+                                Debug.Log(go.name + " Texture " + material.mainTexture.name + " (Attached to: " + go.name + ")");
+                                GameObject.DestroyImmediate(material.mainTexture, false);
+                            }
+                        }
 
-			MeshCollider mc = go.GetComponent<MeshCollider>();
-			if (mc != null)
-			{
-				Debug.Log(go.name + "Mesh Collider");
-				if (mc.material != null)
-				{
-					GameObject.Destroy(mc.material);
-					Debug.Log(go.name + " Mesh Collider Material " + mc.material.name);
-				}
-				GameObject.Destroy(mc);
-			}
+                        GameObject.DestroyImmediate(material, false);
+                    }
+                }
+                renderer.sharedMaterials = new Material[materials.Length];
+            }
 
-			MeshFilter mf = go.GetComponent<MeshFilter>();
-			if (mf != null)
-			{
-				Debug.Log(go.name + "Mesh Filter");
-				if (mf.mesh != null)
-				{
-					GameObject.Destroy(mf.mesh);
-					Debug.Log(go.name + " MeshFilter Mesh " + mf.mesh.name);
-				}
-				GameObject.Destroy(mf);
-			}
+            // Destroy GameObject
+            GameObject.DestroyImmediate(go);
 
-			if (go.GetComponent<StimDefPointer>() != null)
-			{
-				GameObject.Destroy(go.GetComponent<StimDefPointer>());
-				Debug.Log(go.name + " StimDefPointer");
-			}
-
-			GameObject.Destroy(go);
-		}
+        }
 
 
-		public GameObject LoadModel(string filePath, bool loadFromResources = false, bool visibiility = false)
+
+
+        public GameObject LoadModel(string filePath, bool loadFromResources = false, bool visibiility = false)
 		{
 			using (var assetLoader = new AssetLoader())
 			{
@@ -718,12 +646,12 @@ namespace USE_StimulusManagement
 					assetLoaderOptions.AutoPlayAnimations = true;
 					assetLoaderOptions.AddAssetUnloader = true;
 
-					if (loadFromResources)
+					if(loadFromResources)
 					{
 						string path = (PrefabPath + "/" + FileName).Split('.')[0];
 						StimGameObject = Object.Instantiate(Resources.Load(path) as GameObject);
-					}
-					else
+                    }
+                    else
 						StimGameObject = assetLoader.LoadFromFile(filePath);
 				}
 				catch (System.Exception e)
@@ -732,7 +660,6 @@ namespace USE_StimulusManagement
 					return null;
 				}
 			}
-
 			PositionRotationScale();
 			AddMesh();
 			ToggleVisibility(visibiility);
@@ -741,28 +668,27 @@ namespace USE_StimulusManagement
 
 		private void PositionRotationScale()
 		{
-			StimGameObject.transform.localPosition = StimLocation;
+            StimGameObject.transform.localPosition = StimLocation;
 
-			if (StimRotation != null)
-				StimGameObject.transform.rotation = Quaternion.Euler(StimRotation);
+            if (StimRotation != null)
+                StimGameObject.transform.rotation = Quaternion.Euler(StimRotation);
 
-			if (StimScale == null)
-				StimScale = 1;
+            if (StimScale == null)
+                StimScale = 1;
 
-			StimGameObject.transform.localScale = new Vector3(StimScale.Value, StimScale.Value, StimScale.Value);
+            StimGameObject.transform.localScale = new Vector3(StimScale.Value, StimScale.Value, StimScale.Value);
 		}
 
 
 
-		public void AddMesh()
-		{
-			foreach (var m in StimGameObject.transform.GetComponentsInChildren<MeshRenderer>())
-				m.gameObject.AddComponent(typeof(MeshCollider));
-		}
+        public void AddMesh()
+        {
+            foreach (var m in StimGameObject.transform.GetComponentsInChildren<MeshRenderer>())
+                m.gameObject.AddComponent(typeof(MeshCollider));
+        }
+        
 
-
-		public string FilePathFromDims(string folderPath, IEnumerable<string[]> featureNames,
-			string neutralPatternedColorName)
+        public string FilePathFromDims(string folderPath, IEnumerable<string[]> featureNames, string neutralPatternedColorName)
 		{
 			//UnityEngine.Debug.Log(featureVals);
 			string filename = "";
@@ -794,6 +720,292 @@ namespace USE_StimulusManagement
 			//return CheckFileName(folderPath, filename);
 		}
 	}
-}
-	
 
+
+	[System.Serializable]
+	public class StimGroup
+	{
+		public List<StimDef> stimDefs;
+		public string stimGroupName;
+		public State SetActiveOnInitialization;
+		public State SetInactiveOnTermination;
+		public bool IsActive;
+
+		public StimGroup(string groupName, State setActiveOnInit = null, State setInactiveOnTerm = null)
+		{
+			stimGroupName = groupName;
+			stimDefs = new List<StimDef>();
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
+		}
+		
+		public StimGroup(string groupName, IEnumerable<StimDef> stims, State setActiveOnInit = null, State setInactiveOnTerm = null)
+		{
+			stimGroupName = groupName;
+			stimDefs = new List<StimDef>();
+			AddStims(stims);
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
+		}
+
+		public StimGroup(string groupName, IEnumerable<GameObject> gos, State setActiveOnInit = null, State setInactiveOnTerm = null)
+		{
+			stimGroupName = groupName;
+			stimDefs = new List<StimDef>();
+			AddStims(gos);
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
+		}
+
+		public StimGroup(string groupName, IEnumerable<int[]> dimValGroup, string folderPath, IEnumerable<string[]> featureNames, string neutralPatternedColorName, Camera cam, float scale = 1, State setActiveOnInit = null, State setInactiveOnTerm = null) 
+		{
+			stimGroupName = groupName;
+			stimDefs = new List<StimDef>();
+			AddStims(dimValGroup);
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
+		}
+
+		public StimGroup(string groupName, string TaskName, string stimDefFilePath, State setActiveOnInit = null, State setInactiveOnTerm = null)
+		{
+			stimGroupName = groupName;
+			stimDefs = new List<StimDef>();
+			AddStims(TaskName, stimDefFilePath);
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
+		}
+		
+		public StimGroup(string groupName, StimGroup sgOrig, IEnumerable<int> stimSubsetIndices, State setActiveOnInit = null, State setInactiveOnTerm = null)
+		{
+			stimGroupName = groupName;
+			stimDefs = new List<StimDef>();
+			AddStims(sgOrig, stimSubsetIndices);
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
+		}
+
+
+		public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
+		{
+			if (setActiveOnInit != null)
+			{
+				SetActiveOnInitialization = setActiveOnInit;
+				SetActiveOnInitialization.StateInitializationFinished += ActivateOnStateInit;
+			}
+			if (setInactiveOnTerm != null)
+			{
+				SetInactiveOnTermination = setInactiveOnTerm;
+				SetInactiveOnTermination.StateTerminationFinished += InactivateOnStateTerm;
+			}
+		}
+
+		private void ActivateOnStateInit(object sender, EventArgs e)
+		{
+			ToggleVisibility(true);
+		}
+
+		private void InactivateOnStateTerm(object sender, EventArgs e)
+		{
+			ToggleVisibility(false);
+		}
+
+		public void AddStims(StimDef stim)
+		{
+			stim.AddToStimGroup(this);
+			// stim.ToggleVisibility(false);
+		}
+
+		public void AddStims(IEnumerable<StimDef> stims)
+		{
+			foreach (StimDef stim in stims)
+			{
+				stim.AddToStimGroup(this);
+				// stim.ToggleVisibility(false);
+			}
+		}
+
+		public void AddStims(GameObject go)
+		{
+			StimDef stim = new StimDef(this, go);
+		}
+		public void AddStims(IEnumerable<GameObject> gos)
+		{
+			foreach (GameObject go in gos)
+			{
+				StimDef stim = new StimDef(this, go);
+			}
+		}
+
+		public void AddStims(int[] dimVals)
+		{
+			StimDef stim = new StimDef(this, dimVals);
+			// stim.ToggleVisibility(false);
+		}
+
+		public void AddStims(IEnumerable<int[]> dimValGroup)
+		{
+			foreach (int[] dimVals in dimValGroup)
+			{
+				StimDef stim = new StimDef(this, dimVals);
+				// stim.ToggleVisibility(false);
+			}
+		}
+
+		public void AddStims(string TaskName, string stimDefFilePath)
+		{
+			SessionSettings.ImportSettings_SingleTypeArray<StimDef>(TaskName + "_StimDefs", stimDefFilePath);
+			List<StimDef> sds = (List<StimDef>)SessionSettings.Get(TaskName + "_StimDefs");
+			foreach (StimDef sd in sds)
+				sd.AddToStimGroup(this);			
+		}
+
+		public void AddStims(StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)
+		{
+			foreach (int index in stimSubsetIndices)
+			{
+				sgOrig.stimDefs[index].AddToStimGroup(this);
+				if (sgOrig.stimDefs[index].StimIndex != index)
+					Debug.LogError("Stim at StimDef index " + index + " does not correspond to the listed StimIndex: " + sgOrig.stimDefs[index].StimIndex);
+			}
+		}
+
+		public void RemoveStims(StimDef stim)
+		{
+			stim.RemoveFromStimGroup(this);
+		}
+		
+		public void RemoveStims(IEnumerable<StimDef> stims)
+		{
+			foreach (StimDef stim in stims)
+			{
+				stim.RemoveFromStimGroup(this);
+			}
+		}
+		
+		
+		public void RemoveStims(int[] dimVals)
+		{
+			foreach (StimDef sd in stimDefs)
+			{
+				if (sd.StimDimVals == dimVals)
+				{
+					sd.RemoveFromStimGroup(this);
+					return;
+				}
+			}
+			Debug.LogWarning("Attempted to remove StimDef with dimensional values " + dimVals + " from StimGroup " + stimGroupName + 
+			                 ", but this StimGroup does not include a StimDef with these dimensional values.");
+		}
+
+		public void RemoveStims(IEnumerable<int[]> dimValGroup)
+		{
+			foreach (int[] dimVals in dimValGroup)
+			{
+				RemoveStims(dimVals);
+			}
+		}
+
+		public void RemoveStims(StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)
+		{
+			foreach (int index in stimSubsetIndices)
+			{
+				sgOrig.stimDefs[index].RemoveFromStimGroup(this);
+			}
+		}
+
+		public IEnumerator LoadStims()
+		{
+			foreach (StimDef sd in stimDefs)
+			{
+				if (sd.StimGameObject == null){
+					yield return CoroutineHelper.StartCoroutine(sd.Load(stimResultGO =>
+					{
+						if (stimResultGO != null)
+							sd.StimGameObject = stimResultGO;
+						else
+							Debug.Log("LOAD COROUTINE - STIM RESULT GAMEOBJECT IS NULL!!!!!!!!!!!!");
+					}));
+				}
+			}
+		}
+
+		public void LoadPrefabStimFromResources()
+		{
+			foreach (StimDef sd in stimDefs)
+				sd.LoadPrefabFromResources();
+		}
+
+		public void LoadExternalStims()
+		{
+			foreach (StimDef sd in stimDefs)
+				sd.LoadExternalStimFromFile();
+		}
+
+		public void DestroyStimGroup()
+		{
+			int nStims = stimDefs.Count;
+			for (int iS = 0; iS < nStims; iS++)
+			{
+				StimDef sd = stimDefs[0];
+				sd.RemoveFromStimGroup(this);
+				if (sd.SetActiveOnInitialization != null)
+				{
+					sd.SetActiveOnInitialization.StateInitializationFinished -= sd.ActivateOnStateInit;
+					sd.SetActiveOnInitialization = null;
+				}
+
+				if (sd.SetInactiveOnTermination != null)
+				{
+					sd.SetInactiveOnTermination.StateTerminationFinished -= sd.InactivateOnStateTerm;
+					sd.SetInactiveOnTermination = null;
+				}
+
+				stimDefs.RemoveAt(0);
+				sd.DestroyStimGameObject();
+				// GameObject tempGo = sd.StimGameObject;
+				// sd.StimGameObject = null;
+				// foreach (Transform child in tempGo.transform)
+				// 	GameObject.Destroy(child.gameObject);
+				// GameObject.Destroy(tempGo);
+			}
+		}
+
+		public void ToggleVisibility(bool visibility)
+		{
+			foreach (StimDef stim in stimDefs)
+			{
+				stim.ToggleVisibility(visibility);
+			}
+
+			IsActive = visibility;
+		}
+
+		public void SetLocations(IEnumerable<Vector3> locs)
+		{
+			Vector3[] LocArray = locs.ToArray();
+			if (LocArray.Length == stimDefs.Count)
+			{
+				for (int iL = 0; iL < LocArray.Length; iL++)
+				{
+					stimDefs[iL].StimLocation = LocArray[iL];
+				}
+			}
+			else
+			{
+				Debug.LogError("Attempted to set the locations of stims in StimGroup " + stimGroupName +
+				               ", but there are " + stimDefs.Count + " stimuli in this group and " + LocArray.Length +
+				               " locations were given.");
+			}
+		}
+		public void SetRotations(IEnumerable<Vector3> rots)
+		{
+			Vector3[] rotArray = rots.ToArray();
+			if (rotArray.Length == stimDefs.Count)
+			{
+				for (int iL = 0; iL < rotArray.Length; iL++)
+					stimDefs[iL].StimLocation = rotArray[iL];
+			}
+			else
+			{
+				Debug.LogError("Attempted to set the rotations of stims in StimGroup " + stimGroupName +
+				               ", but there are " + stimDefs.Count + " stimuli in this group and " + rotArray.Length +
+				               " rotations were given.");
+			}
+		}
+		
+	}
+}

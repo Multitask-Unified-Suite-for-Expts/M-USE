@@ -1,10 +1,6 @@
-using System.Collections.Generic;
 using UnityEngine;
-using USE_ExperimentTemplate_Block;
-using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Trial;
+using USE_Def_Namespace;
 using USE_StimulusManagement;
-using WorkingMemory_Namespace;
 using USE_ExperimentTemplate_Classes;
 
 namespace FeatureUncertaintyWM_Namespace

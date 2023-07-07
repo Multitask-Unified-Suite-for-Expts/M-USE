@@ -137,15 +137,15 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if (StartButton == null)
             {
-                if (IsHuman)
+                if (SessionValues.SessionDef.IsHuman)
                 {
-                    StartButton = HumanStartPanel.StartButtonGO;
-                    HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                    StartButton = SessionValues.HumanStartPanel.StartButtonGO;
+                    SessionValues.HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
                 else
                 {
-                    StartButton = USE_StartButton.CreateStartButton(EC_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
-                    USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                    StartButton = SessionValues.USE_StartButton.CreateStartButton(EC_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                    SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
 
@@ -165,7 +165,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
-        var Handler = SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", MouseTracker, InitTrial, InflateBalloon);
+        var Handler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, InflateBalloon);
         TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, ButtonScale*10, EC_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
@@ -189,11 +189,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;           
         });
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(IsHuman ? HumanStartPanel.StartButtonChildren : USE_StartButton.StartButtonChildren), Delay, () =>
+        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), Delay, () =>
         {
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
-            EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
+            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
         });
 
 
@@ -248,8 +248,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseBalloon.SpecifyTermination(() => SideChoice != null, CenterSelection, () =>
         {
-            EventCodeManager.SendCodeImmediate(SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-            EventCodeManager.SendCodeImmediate(TaskEventCodes["BalloonChosen"]);
+            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["BalloonChosen"]);
 
             DestroyChildren(SideChoice == "Left" ? RewardContainerRight : RewardContainerLeft);
             InflationsNeeded = (SideChoice == "Left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
@@ -324,7 +324,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             Flashing = false;
             InflateAudioPlayed = false;
             ScaleTimer = 0;
-            MouseTracker.ResetClicks();
+            SessionValues.MouseTracker.ResetClicks();
             clickTimings = new List<float>();
             timeTracker = 0;
 
@@ -378,8 +378,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
                         Handler.HandlerActive = false;
                         NumInflations++;
-                        EventCodeManager.SendCodeNextFrame(SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-                        EventCodeManager.SendCodeNextFrame(SessionEventCodes["CorrectResponse"]);
+                        SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                        SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["CorrectResponse"]);
                         CalculateInflation(); //Sets Inflate to TRUE at end of func
                         InflateAudioPlayed = false;
                     }
@@ -421,7 +421,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             
             if (Response == 1)
             {
-                if(IsHuman)
+                if(SessionValues.SessionDef.IsHuman)
                     AudioFBController.Play("EC_HarshPop"); //better for humans
                 else
                     AudioFBController.Play("EC_NicePop"); //better for monkeys
@@ -431,7 +431,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 NumAborted_Block++;
                 AudioFBController.Play("TimeRanOut");
                 TokenFBController.enabled = false;
-                EventCodeManager.SendCodeImmediate(SessionEventCodes["NoChoice"]);
+                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["NoChoice"]);
             }
             TrialStim.SetActive(false);
         });
@@ -446,10 +446,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 TokenFBController.AddTokens(CenteredGO, SideChoice == "Left" ? currentTrial.NumCoinsLeft : currentTrial.NumCoinsRight);
                 Destroy(CenteredGO);
 
-                if (SyncBoxController != null)
+                if (SessionValues.SyncBoxController != null)
                 {
                     GiveReward();
-                    EventCodeManager.SendCodeNextFrame(SessionEventCodes["SyncBoxController_RewardPulseSent"]);
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["SyncBoxController_RewardPulseSent"]);
                 }
 
                 Completions_Block++;
@@ -668,16 +668,16 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     {
         if (SideChoice == "Left")
         {
-            SyncBoxController.SendRewardPulses(currentTrial.NumPulsesLeft, currentTrial.PulseSizeLeft);
-            SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumPulsesLeft));
+            SessionValues.SyncBoxController.SendRewardPulses(currentTrial.NumPulsesLeft, currentTrial.PulseSizeLeft);
+           // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumPulsesLeft));
             RewardPulses_Block += currentTrial.NumPulsesLeft;
             currentTask.RewardPulses_Task += currentTrial.NumPulsesLeft;
 
         }
         else
         {
-            SyncBoxController.SendRewardPulses(currentTrial.NumPulsesRight, currentTrial.PulseSizeRight);
-            SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumPulsesRight));
+            SessionValues.SyncBoxController.SendRewardPulses(currentTrial.NumPulsesRight, currentTrial.PulseSizeRight);
+           // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumPulsesRight));
             RewardPulses_Block += currentTrial.NumPulsesRight;
             currentTask.RewardPulses_Task += currentTrial.NumPulsesRight;
         }

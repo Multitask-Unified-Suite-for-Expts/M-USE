@@ -179,15 +179,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.SetHaloIntensity(2);
             if (StartButton == null)
             {
-                if (IsHuman)
+                if (SessionValues.SessionDef.IsHuman)
                 {
-                    StartButton = HumanStartPanel.StartButtonGO;
-                    HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                    StartButton = SessionValues.HumanStartPanel.StartButtonGO;
+                    SessionValues.HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
                 else
                 {
-                    StartButton = USE_StartButton.CreateStartButton(WWW_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                    USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                    StartButton = SessionValues.USE_StartButton.CreateStartButton(WWW_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                    SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
             #if (!UNITY_WEBGL)
@@ -214,7 +214,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.AddTimer(()=> sbDelay, InitTrial);
 
-        var ShotgunHandler = SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", MouseTracker, InitTrial, FinalFeedback);
+        var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", SessionValues.MouseTracker, InitTrial, FinalFeedback);
 
         TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale, WWW_CanvasGO);
 
@@ -232,16 +232,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
 
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(IsHuman ? HumanStartPanel.StartButtonChildren : USE_StartButton.StartButtonChildren), ChooseStimulusDelay, ()=>
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), ChooseStimulusDelay, ()=>
         {
             CalculateSliderSteps();
             SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrialDef.SliderInitial*(1f/sliderGainSteps));
             SliderFBController.SliderGO.SetActive(true);
 
             //numNonStimSelections_InBlock += mouseHandler.UpdateNumNonStimSelection(); //NT: Commented this out. not yet sure where we're gonna implement nonstim touches. Current method doesnt exist in new selection tracker.  
-            EventCodeManager.SendCodeImmediate(SessionEventCodes["StartButtonSelected"]);
-            EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOn"]);
-            EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderFbController_SliderReset"]);
+            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
+            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOn"]);
+            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["SliderFbController_SliderReset"]);
         });
         ChooseStimulusDelay.AddTimer(() => chooseStimOnsetDelay.value, ChooseStimulus, ()=>
         {
@@ -288,21 +288,21 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 UpdateCounters_Correct();
                 isSliderValueIncrease = true;
-                EventCodeManager.SendCodeImmediate(SessionEventCodes["CorrectResponse"]);
+                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["CorrectResponse"]);
             }
             else
             {
                 runningAcc.Add(0);
                 UpdateCounters_Incorrect(correctIndex);
                 isSliderValueIncrease = false;
-                EventCodeManager.SendCodeImmediate(SessionEventCodes["IncorrectResponse"]);
+                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["IncorrectResponse"]);
 
                 //Repetition Error
                 if (touchedObjects.Contains(selectedSD.StimIndex))
                 {
                     repetitionErrorCount_InBlock++;
                     repetitionError = true;
-                    EventCodeManager.SendCodeImmediate(TaskEventCodes["RepetitionError"]);
+                    SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["RepetitionError"]);
                 }
                 // Slot Errors
                 else
@@ -313,14 +313,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         touchedObjects.Add(selectedSD.StimIndex);
                         distractorSlotErrorCount_InBlock++;
                         distractorSlotError = true;
-                        EventCodeManager.SendCodeImmediate(SessionEventCodes["Button0PressedOnDistractorObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                        SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["Button0PressedOnDistractorObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                     }
                     //Stimuli Slot error
                     else
                     {
                         slotErrorCount_InBlock++;
                         slotError = true;
-                        EventCodeManager.SendCodeImmediate(TaskEventCodes["SlotError"]);
+                        SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["SlotError"]);
                     }
                 }
             }
@@ -350,11 +350,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.SetUpdateDuration(fbDuration.value);
             SliderFBController.SetFlashingDuration(flashingFbDuration.value);
 
-            
+            int? depth = SessionValues.Using2DStim ? 50 : (int?)null;
+
             if (CorrectSelection)
             {
                 consecutiveError = 0;
-                HaloFBController.ShowPositive(selectedGO);
+                HaloFBController.ShowPositive(selectedGO, depth);
                 SliderFBController.UpdateSliderValue(CurrentTrialDef.SliderGain[numTouchedStims]*(1f/sliderGainSteps));
                 numTouchedStims += 1;
                 if (numTouchedStims == CurrentTrialDef.CorrectObjectTouchOrder.Length)
@@ -365,7 +366,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             else //Chose Incorrect
             {
                 consecutiveError++;
-                HaloFBController.ShowNegative(selectedGO);
+                HaloFBController.ShowNegative(selectedGO, depth);
                 if (distractorSlotError)
                     stimIdx = Array.IndexOf(CurrentTrialDef.DistractorStimsIndices, selectedSD.StimIndex); // used to index through the arrays in the config file/mapping different columns
                 else
@@ -422,13 +423,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             runningAcc.Add(1);
             NumSliderBarFilled += 1;
             CurrentTaskLevel.NumSliderBarFilled_InTask++;
-            EventCodeManager.SendCodeNextFrame(SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
-            EventCodeManager.SendCodeNextFrame(SessionEventCodes["StimOff"]);
+            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
+            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOff"]);
             
-            if (SyncBoxController != null)
+            if (SessionValues.SyncBoxController != null)
             {
-                SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize); 
-                SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses));
+                SessionValues.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize); 
+               // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses)); //moved to syncbox class
                 numRewardGiven_InBlock += CurrentTrialDef.NumPulses;
                 CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
             }
@@ -436,8 +437,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         FinalFeedback.AddTimer(() => flashingFbDuration.value, ITI, () =>
         {
-            EventCodeManager.SendCodeImmediate(SessionEventCodes["SliderFbController_SliderCompleteFbOff"]);
-            EventCodeManager.SendCodeNextFrame(SessionEventCodes["ContextOff"]);
+            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["SliderFbController_SliderCompleteFbOff"]);
+            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOff"]);
             CurrentTaskLevel.SetBlockSummaryString();
         });
 

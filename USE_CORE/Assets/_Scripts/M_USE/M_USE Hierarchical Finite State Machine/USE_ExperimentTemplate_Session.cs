@@ -157,37 +157,40 @@ namespace USE_ExperimentTemplate_Session
                 SessionValues.FilePrefix = sessionDataFolder.Split(new string[] { "__" }, 2, StringSplitOptions.None)[1];
             else
                 SessionValues.FilePrefix = "Session_" + SessionValues.SessionID + "__Subject_" + SessionValues.SubjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
-            ;
+            
             
             if (SessionValues.WebBuild)
             {
                 SessionValues.SessionDataPath = ServerManager.SessionDataFolderPath;
-                SessionValues.SessionDef.ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
 
                 if (SessionValues.UseDefaultConfigs)
                 {
-                    //ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
                     SessionValues.ConfigAccessType = "Default";
-                    SessionValues.SessionDef.TaskIconsFolderPath = "DefaultResources/TaskIcons";
                     SessionValues.ConfigFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
+
                     StartCoroutine(SessionValues.BetterReadSettingsFile<SessionDef>("SessionConfig", "SingleTypeDelimited", settingsArray =>
                     {
-                        SessionValues.SessionDef = settingsArray[0];
+                        if (settingsArray != null)
+                        {
+                            SessionValues.SessionDef = settingsArray[0];
+
+                            SessionValues.SessionDef.ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
+                            //ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
+                            SessionValues.SessionDef.TaskIconsFolderPath = "DefaultResources/TaskIcons";
+                            WriteSessionConfigsToPersistantDataPath();
+                            //SessionSettings.ImportSettings_MultipleType("Session", SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath , "*SessionConfig*"));
+                            LoadSessionConfigSettings();
+                            GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
+                        }
+                        else
+                            Debug.Log("TRIED TO READ SESSION CONFIG BUT THE COROUTINE RESULT IS NULL!");
                     }));
-                    WriteSessionConfigsToPersistantDataPath();
-
-
-                    //SessionSettings.ImportSettings_MultipleType("Session", SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath , "*SessionConfig*"));
-                    LoadSessionConfigSettings();
-                    GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
 
                 }
                 else //Using Server Configs:
                 {
-                    //ContextExternalFilePath = "Resources/Contexts"; //path from root server folder
                     SessionValues.ConfigAccessType = "Server";
-                    SessionValues.SessionDef.TaskIconsFolderPath = "Resources/TaskIcons";
-                    SessionValues.ConfigFolderPath  = ServerManager.SessionConfigFolderPath;
+                    SessionValues.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
 
                     StartCoroutine(ServerManager.GetFileStringAsync(ServerManager.SessionConfigFolderPath, "SessionConfig", result =>
                     {
@@ -197,10 +200,13 @@ namespace USE_ExperimentTemplate_Session
                             StartCoroutine(SessionValues.BetterReadSettingsFile<SessionDef>("SessionConfig", "SingleTypeDelimited", settingsArray =>
                             {
                                 SessionValues.SessionDef = settingsArray[0];
-                            }));
-                            LoadSessionConfigSettings();
-                            GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
 
+                                SessionValues.SessionDef.ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
+                                //ContextExternalFilePath = "Resources/Contexts"; //path from root server folder
+                                SessionValues.SessionDef.TaskIconsFolderPath = "Resources/TaskIcons";
+                                LoadSessionConfigSettings();
+                                GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
+                            }));
                         }
                         else
                             Debug.Log("SESSION CONFIG COROUTINE RESULT IS EMPTY!!!");
@@ -217,12 +223,9 @@ namespace USE_ExperimentTemplate_Session
                {
                    SessionValues.SessionDef = settingsArray[0];
                }));
- 
                 LoadSessionConfigSettings();
                 GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
-
             }
-
 
         }
 

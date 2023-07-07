@@ -114,6 +114,7 @@ public static class SessionValues
     // public static float ShotgunRayCastCircleSize_DVA;
     // public static float ShotgunRaycastSpacing_DVA;
     // public static float ParticipantDistance_CM;
+
     public static IEnumerator GetFileContentString(string fileName, Action<string> callback)
     {
         string fileContent;

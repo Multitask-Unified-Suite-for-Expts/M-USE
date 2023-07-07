@@ -1091,7 +1091,7 @@ namespace USE_ExperimentTemplate_Session
 
             if (SessionSettings.SettingExists("Session", "StoreData"))
                 StoreData = (bool)SessionSettings.Get("Session", "StoreData");
-
+            Debug.LogError(GameObject.Find("MiscScripts").GetComponent<LogWriter>());
             //Set LogWriter StoreData variable:
             GameObject.Find("MiscScripts").GetComponent<LogWriter>().SetStoreData(StoreData);
 

@@ -133,12 +133,11 @@ public static class SessionValues
         else
             callback(null);
 
-        yield break;
     }
 
     public static IEnumerator BetterReadSettingsFile<T>(string fileName, string fileType, Action<T[]> callback)
     {
-        yield return GetFileContentString(fileName, result =>
+        yield return CoroutineHelper.StartCoroutine(GetFileContentString(fileName, result =>
         {
             if (result != null)
             {
@@ -155,7 +154,6 @@ public static class SessionValues
                     callback(null);
                     return;
                 }
-
                 callback(settingsArray);
             }
             else
@@ -163,7 +161,7 @@ public static class SessionValues
                 Debug.LogError("Error retrieving file content.");
                 callback(null);
             }
-        });
+        }));
     }
 
     

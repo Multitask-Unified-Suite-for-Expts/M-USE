@@ -130,9 +130,6 @@ namespace USE_ExperimentTemplate_Session
         //[HideInInspector] public HumanStartPanel HumanStartPanel;
         // [HideInInspector] public USE_StartButton USE_StartButton;
 
-        [HideInInspector] public bool SettingsLoaded;
-
-
 
         public override void LoadSettings()
         {
@@ -182,8 +179,6 @@ namespace USE_ExperimentTemplate_Session
                             SessionValues.SessionDef.TaskIconsFolderPath = "DefaultResources/TaskIcons";
                             LoadSessionConfigSettings();
                             GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
-
-                            SettingsLoaded = true;
                         }
                         else
                             Debug.Log("TRIED TO READ SESSION CONFIG BUT THE COROUTINE RESULT IS NULL!");
@@ -206,6 +201,7 @@ namespace USE_ExperimentTemplate_Session
                                 if (settingsArray != null)
                                 {
                                     Debug.Log("GOT THE SETTINGS ARRAY!");
+
                                     SessionValues.SessionDef = settingsArray[0];
 
                                     SessionValues.SessionDef.ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
@@ -213,8 +209,6 @@ namespace USE_ExperimentTemplate_Session
                                     SessionValues.SessionDef.TaskIconsFolderPath = "Resources/TaskIcons";
                                     LoadSessionConfigSettings();
                                     GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
-
-                                    SettingsLoaded = true;
                                 }
                                 else
                                     Debug.Log("SETTINGS ARRAY IS NULL!");
@@ -236,18 +230,9 @@ namespace USE_ExperimentTemplate_Session
 
                     LoadSessionConfigSettings();
                     GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
-                    SettingsLoaded = true;
                 }));
             }
 
-        }
-
-        private IEnumerator WaitForSettingsLoaded()
-        {
-            while (!SettingsLoaded)
-                yield return null;
-
-            Debug.Log("SETTINGS HAVE FINISHED LOADING! WOO!");
         }
 
 
@@ -1021,43 +1006,6 @@ namespace USE_ExperimentTemplate_Session
 
         private void LoadSessionConfigSettings()
         {
-            // if (SessionSettings.SettingExists("Session", "SyncBoxActive"))
-            //     SyncBoxActive = (bool)SessionSettings.Get("Session", "SyncBoxActive");
-            // else
-            //     SyncBoxActive = false;
-
-            // if (SessionSettings.SettingExists("Session", "EventCodesActive"))
-            //     EventCodesActive = (bool)SessionSettings.Get("Session", "EventCodesActive");
-            // else
-            //     EventCodesActive = false;
-            //
-            // if (SessionSettings.SettingExists("Session", "RewardPulsesActive"))
-            //     RewardPulsesActive = (bool)SessionSettings.Get("Session", "RewardPulsesActive");
-            // else
-            //     RewardPulsesActive = false;
-
-            // if (SessionSettings.SettingExists("Session", "SonicationActive"))
-            //     SonicationActive = (bool)SessionSettings.Get("Session", "SonicationActive");
-            // else
-            //     SonicationActive = false;
-
-            // if (SessionSettings.SettingExists("Session", "RewardHotKeyPulseSize"))
-            //     RewardHotKeyPulseSize = (int)SessionSettings.Get("Session", "RewardHotKeyPulseSize");
-            // else
-            //     RewardHotKeyPulseSize = 250;
-            //
-            // if (SessionSettings.SettingExists("Session", "RewardHotKeyNumPulses"))
-            //     RewardHotKeyNumPulses = (int)SessionSettings.Get("Session", "RewardHotKeyNumPulses");
-            // else
-            //     RewardHotKeyNumPulses = 1;
-            // if (SessionSettings.SettingExists("Session", "EyeTrackerActive"))
-            //     EyeTrackerActive = (bool)SessionSettings.Get("Session", "EyeTrackerActive");
-            // else
-            //     EyeTrackerActive = false;
-            // if (SessionSettings.SettingExists("Session", "SelectionType"))
-            //     SelectionType = (string)SessionSettings.Get("Session", "SelectionType");
-            // else
-            //     SelectionType = "mouse";
 
             //MAKE SURE SYNCBOX INACTIVE FOR WEB BUILD (Can eventually remove this once thilo provides web build session configs with it marked false)
             if (SessionValues.WebBuild)
@@ -1105,52 +1053,6 @@ namespace USE_ExperimentTemplate_Session
             else if (SessionValues.SessionDef.TaskMappings.Count == 0)
                 Debug.LogError("No task names or task mappings specified in Session config file or by other means.");
 
-
-            // if (SessionSettings.SettingExists("Session", "ShotgunRaycastCircleSize_DVA"))
-            //     ShotgunRaycastCircleSize_DVA = (float)SessionSettings.Get("Session", "ShotgunRaycastCircleSize_DVA");
-            // else
-            //     ShotgunRaycastCircleSize_DVA = 1.25f;
-            //
-            // if (SessionSettings.SettingExists("Session", "ParticipantDistance_CM"))
-            //     ParticipantDistance_CM = (float)SessionSettings.Get("Session", "ParticipantDistance_CM");
-            // else
-            //     ParticipantDistance_CM = 60f;
-            //
-            // if (SessionSettings.SettingExists("Session", "ShotgunRaycastSpacing_DVA"))
-            //     ShotgunRaycastSpacing_DVA = (float)SessionSettings.Get("Session", "ShotgunRaycastSpacing_DVA");
-            // else
-            //     ShotgunRaycastSpacing_DVA = .3f;
-
-
-            // if (SessionSettings.SettingExists("Session", "IsHuman"))
-            //     IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");
-            //
-            // if (SessionSettings.SettingExists("Session", "TaskIconLocations"))
-            //     TaskIconLocations = (Vector3[])SessionSettings.Get("Session", "TaskIconLocations");
-            //
-            // if (SessionSettings.SettingExists("Session", "GuidedTaskSelection"))
-            //     GuidedTaskSelection = (bool)SessionSettings.Get("Session", "GuidedTaskSelection");
-            //
-            // if (SessionSettings.SettingExists("Session", "EyeTrackerActive"))
-            //     EyeTrackerActive = (bool)SessionSettings.Get("Session", "EyeTrackerActive");
-
-            // if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
-            //     ContextExternalFilePath = (string)SessionSettings.Get("Session", "ContextExternalFilePath");
-
-            // if (SessionSettings.SettingExists("Session", "TaskIconsFolderPath"))
-            //     TaskIconsFolderPath = (string)SessionSettings.Get("Session", "TaskIconsFolderPath");
-            //
-            // if (SessionSettings.SettingExists("Session", "TaskIcons"))
-            //     TaskIcons = (Dictionary<string, string>)SessionSettings.Get("Session", "TaskIcons");
-
-            // if (SessionSettings.SettingExists("Session", "StoreData"))
-            //     StoreData = (bool)SessionSettings.Get("Session", "StoreData");
-
-            //Set LogWriter StoreData variable:
-
-            //
-            // if (SessionSettings.SettingExists("Session", "SerialPortActive"))
-            //     SerialPortActive = (bool)SessionSettings.Get("Session", "SerialPortActive");
         }
 
         private void WriteSessionConfigsToPersistantDataPath()

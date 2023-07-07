@@ -1052,8 +1052,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private IEnumerator Load3DStims(StimGroup group, Vector3[] locations)
     {
         TrialStims.Add(group);
-        group.SetLocations(locations);
+        group.SetLocations(locations); //sets the stimLocation but they dont seem to spawn there
         yield return StartCoroutine(group.LoadStims());
+        foreach (var stim in group.stimDefs)
+            stim.StimGameObject.transform.localPosition = stim.StimLocation; //Manually setting pos since stimLocation isn't doing anything
         Generate3DBorders(group);
         if (currentTrial.StimFacingCamera)
             MakeStimsFaceCamera(group);

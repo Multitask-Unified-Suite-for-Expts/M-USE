@@ -571,118 +571,116 @@ namespace USE_StimulusManagement
 
 		public void DestroyRecursive(GameObject go)
 		{
-			Debug.Log(go.name);
-
-			if (go.transform.childCount > 0)
-				for (int iChild = 0; iChild < go.transform.childCount; iChild++)
-					DestroyRecursive(go.transform.GetChild(iChild).gameObject);
+			//if (go.transform.childCount > 0)
+			//	for (int iChild = 0; iChild < go.transform.childCount; iChild++)
+			//		DestroyRecursive(go.transform.GetChild(iChild).gameObject);
 
 
-			if (go.GetComponent<Texture>() != null)
-			{
-				GameObject.Destroy(go.GetComponent<Texture>());
-				Debug.Log(go.name + " Texture");
-			}
-			if (go.GetComponent<Texture2D>() != null)
-			{
-				GameObject.Destroy(go.GetComponent<Texture2D>());
-				Debug.Log(go.name + " Texture2D");
-			}
+			//if (go.GetComponent<Texture>() != null)
+			//{
+   //             Object.Destroy(go.GetComponent<Texture>());
+			//	Debug.Log(go.name + " Texture");
+			//}
+			//if (go.GetComponent<Texture2D>() != null)
+			//{
+   //             Object.Destroy(go.GetComponent<Texture2D>());
+			//	Debug.Log(go.name + " Texture2D");
+			//}
 
-			Material mat = go.GetComponent<Material>();
-			if (mat != null)
-			{
-				if (mat.shader != null)
-				{
-					GameObject.Destroy(mat.shader);
-					Debug.Log(go.name + " Material Shader");
-				}
-				if (mat.mainTexture != null)
-				{
-					GameObject.Destroy(mat.mainTexture);
-					Debug.Log(go.name + " Material Main Texture");
-				}
-				GameObject.Destroy(go.GetComponent<Material>());
-				Debug.Log(go.name + " Material");
-			}
+			//Material mat = go.GetComponent<Material>();
+			//if (mat != null)
+			//{
+			//	if (mat.shader != null)
+			//	{
+   //                 Object.Destroy(mat.shader);
+			//		Debug.Log(go.name + " Material Shader");
+			//	}
+			//	if (mat.mainTexture != null)
+			//	{
+   //                 Object.Destroy(mat.mainTexture);
+			//		Debug.Log(go.name + " Material Main Texture");
+			//	}
+   //             Object.Destroy(go.GetComponent<Material>());
+			//	Debug.Log(go.name + " Material");
+			//}
 
-			MeshRenderer mr = go.GetComponent<MeshRenderer>();
-			if (mr != null)
-			{
-				Debug.Log(go.name + " Mesh Renderer Exists");
-				foreach (Material material in mr.materials)
-				{
-					if (material.mainTexture != null)
-					{
-						GameObject.Destroy(material.mainTexture);
-						Debug.Log(go.name + " Mesh Renderer Material " + material.name + " Main Texture");
-						GameObject.Destroy(material);
-					}
-				}
-				foreach (Material material in mr.sharedMaterials)
-				{
-					if (material.mainTexture != null)
-					{
-						GameObject.Destroy(material.mainTexture);
-						Debug.Log(go.name + " Mesh Renderer  Material " + material.name + " Shared Texture");
-					}
-				}
-			}
+			//MeshRenderer mr = go.GetComponent<MeshRenderer>();
+			//if (mr != null)
+			//{
+			//	Debug.Log(go.name + " Mesh Renderer Exists");
+			//	foreach (Material material in mr.materials)
+			//	{
+			//		if (material.mainTexture != null)
+			//		{
+   //                     Object.Destroy(material.mainTexture);
+			//			Debug.Log(go.name + " Mesh Renderer Material " + material.name + " Main Texture");
+   //                     Object.Destroy(material);
+			//		}
+			//	}
+			//	foreach (Material material in mr.sharedMaterials)
+			//	{
+			//		if (material.mainTexture != null)
+			//		{
+   //                     Object.Destroy(material.mainTexture);
+			//			Debug.Log(go.name + " Mesh Renderer  Material " + material.name + " Shared Texture");
+			//		}
+			//	}
+			//}
 
-			Renderer renderer = go.GetComponent<Renderer>();
-			if (renderer != null)
-			{
-				Debug.Log(go.name + " Plain Renderer Exists");
-				foreach (Material material in renderer.materials)
-				{
-					if (material.mainTexture != null)
-					{
-						GameObject.Destroy(material.mainTexture);
-						Debug.Log(go.name + " Plain Renderer Material " + material.name + " Main Texture");
-						GameObject.Destroy(material);
-					}
-				}
-				foreach (Material material in renderer.sharedMaterials)
-				{
-					if (material.mainTexture != null)
-					{
-						GameObject.Destroy(material.mainTexture);
-						Debug.Log(go.name + " Plain Renderer Material " + material.name + " Shared Texture");
-					}
-				}
-			}
+			//Renderer renderer = go.GetComponent<Renderer>();
+			//if (renderer != null)
+			//{
+			//	Debug.Log(go.name + " Plain Renderer Exists");
+			//	foreach (Material material in renderer.materials)
+			//	{
+			//		if (material.mainTexture != null)
+			//		{
+   //                     Object.Destroy(material.mainTexture);
+			//			Debug.Log(go.name + " Plain Renderer Material " + material.name + " Main Texture");
+   //                     Object.Destroy(material);
+			//		}
+			//	}
+			//	foreach (Material material in renderer.sharedMaterials)
+			//	{
+			//		if (material.mainTexture != null)
+			//		{
+   //                     Object.Destroy(material.mainTexture);
+			//			Debug.Log(go.name + " Plain Renderer Material " + material.name + " Shared Texture");
+			//		}
+			//	}
+			//}
 
-			MeshCollider mc = go.GetComponent<MeshCollider>();
-			if (mc != null)
-			{
-				Debug.Log(go.name + "Mesh Collider");
-				if (mc.material != null)
-				{
-					GameObject.Destroy(mc.material);
-					Debug.Log(go.name + " Mesh Collider Material " + mc.material.name);
-				}
-				GameObject.Destroy(mc);
-			}
+			//MeshCollider mc = go.GetComponent<MeshCollider>();
+			//if (mc != null)
+			//{
+			//	Debug.Log(go.name + "Mesh Collider");
+			//	if (mc.material != null)
+			//	{
+   //                 Object.Destroy(mc.material);
+			//		Debug.Log(go.name + " Mesh Collider Material " + mc.material.name);
+			//	}
+   //             Object.Destroy(mc);
+			//}
 
-			MeshFilter mf = go.GetComponent<MeshFilter>();
-			if (mf != null)
-			{
-				Debug.Log(go.name + "Mesh Filter");
-				if (mf.mesh != null)
-				{
-					GameObject.Destroy(mf.mesh);
-					Debug.Log(go.name + " MeshFilter Mesh " + mf.mesh.name);
-				}
-				GameObject.Destroy(mf);
-			}
+			//MeshFilter mf = go.GetComponent<MeshFilter>();
+			//if (mf != null)
+			//{
+			//	Debug.Log(go.name + "Mesh Filter");
+			//	if (mf.mesh != null)
+			//	{
+   //                 Object.Destroy(mf.mesh);
+			//		Debug.Log(go.name + " MeshFilter Mesh " + mf.mesh.name);
+			//	}
+   //             Object.Destroy(mf);
+			//}
 
-			if (go.GetComponent<StimDefPointer>() != null)
-			{
-				GameObject.Destroy(go.GetComponent<StimDefPointer>());
-				Debug.Log(go.name + " StimDefPointer");
-			}
+			//if (go.GetComponent<StimDefPointer>() != null)
+			//{
+   //             Object.Destroy(go.GetComponent<StimDefPointer>());
+			//	Debug.Log(go.name + " StimDefPointer");
+			//}
 
-			GameObject.Destroy(go);
+			Object.Destroy(go);
 		}
 
 		/*public void DestroyRecursive(GameObject go)

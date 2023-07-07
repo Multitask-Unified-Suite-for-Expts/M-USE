@@ -118,27 +118,20 @@ public static class SessionValues
     public static IEnumerator GetFileContentString(string fileName, Action<string> callback)
     {
         string fileContent;
-        if (ConfigAccessType == "Default")
+        if (ConfigAccessType == "Local" || ConfigAccessType == "Default")
         {
-            fileContent = File.ReadAllText(Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + fileName);
+            fileContent = File.ReadAllText(LocateFile.FindFilePathInExternalFolder(ConfigFolderPath, $"*{fileName}*")); //Will need to check that this works during Web Build
             callback(fileContent);
         }
         else if (ConfigAccessType == "Server")
         {
-            ServerManager.GetFileStringAsync(ServerManager.SessionConfigFolderPath, "SessionConfig", result =>
+            yield return CoroutineHelper.StartCoroutine(ServerManager.GetFileStringAsync(ConfigFolderPath, "SessionConfig", result =>
             {
                 callback(result);
-            });
-        }
-        else if (ConfigAccessType == "Local")
-        {
-            fileContent = File.ReadAllText(LocateFile.FindFilePathInExternalFolder(ConfigFolderPath, $"*{fileName}*"));
-            callback(fileContent);
+            }));
         }
         else
-        {
             callback(null);
-        }
 
         yield break;
     }

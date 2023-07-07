@@ -43,6 +43,8 @@ namespace USE_ExperimentTemplate_Session
 
         protected SummaryData SummaryData;
         protected SessionData SessionData;
+        //private string SessionLevelDataFilePrefix;
+        private string SessionDataFilePrefix;
       //  private SessionDataControllers SessionDataControllers;
 
        // protected SerialSentData SerialSentData;
@@ -153,11 +155,12 @@ namespace USE_ExperimentTemplate_Session
 
             
             string sessionDataFolder = ServerManager.GetSessionDataFolder();
-            if(!string.IsNullOrEmpty(sessionDataFolder))
+            if (!string.IsNullOrEmpty(sessionDataFolder))
                 SessionValues.FilePrefix = sessionDataFolder.Split(new string[] { "__" }, 2, StringSplitOptions.None)[1];
             else
                 SessionValues.FilePrefix = "Session_" + SessionValues.SessionID + "__Subject_" + SessionValues.SubjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
-            ;
+            SessionDataFilePrefix = SessionValues.FilePrefix;
+            
             
             if (SessionValues.WebBuild)
             {
@@ -813,12 +816,15 @@ namespace USE_ExperimentTemplate_Session
                     SessionValues.SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialRecvData", CurrentTask.TaskName);
                     SessionValues.SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialSentData", CurrentTask.TaskName);
                 }
+
+                FrameData.AppendDataToFile();
             });
 
             //automatically finish tasks after running one - placeholder for proper selection
             //runTask.AddLateUpdateMethod
             runTask.AddUniversalInitializationMethod(() =>
             {
+
                 SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["RunTaskStarts"]);
 
 #if (!UNITY_WEBGL)
@@ -848,6 +854,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 SessionValues.SelectionTracker.UpdateActiveSelections();
                 AppendSerialData();
+                FrameData.AppendDataToBuffer();
             });
 
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
@@ -859,6 +866,7 @@ namespace USE_ExperimentTemplate_Session
 
                 SessionData.AppendDataToBuffer();
                 SessionData.AppendDataToFile();
+
 
 
                 SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
@@ -880,6 +888,7 @@ namespace USE_ExperimentTemplate_Session
 
                 taskCount++;
 
+                SessionValues.FilePrefix = SessionDataFilePrefix;
                 if (SessionValues.SessionDef.SerialPortActive)
                 {
                     SessionValues.SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.SessionDataPath, "SerialRecvData", "SessionLevel");
@@ -899,9 +908,9 @@ namespace USE_ExperimentTemplate_Session
                     SessionValues.GazeData.fileName = SessionValues.FilePrefix + "__GazeData" + SessionValues.GazeData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
                 }
 
+
                 FrameData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.SessionLevelDataPath, "FrameData", "SessionLevel");
                 FrameData.fileName = SessionValues.FilePrefix + "__FrameData" + FrameData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
-
                 FrameData.gameObject.SetActive(true);
             });
 
@@ -930,6 +939,7 @@ namespace USE_ExperimentTemplate_Session
 
             SessionData = (SessionData)SessionValues.SessionDataControllers.InstantiateDataController<SessionData>
                 ("SessionData", SessionValues.SessionDef.StoreData, SessionValues.SessionDataPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionValues.SessionDataPath);
+
             SessionData.fileName = SessionValues.FilePrefix + "__SessionData.txt";
             SessionData.sessionLevel = this;
             SessionData.InitDataController();
@@ -962,7 +972,7 @@ namespace USE_ExperimentTemplate_Session
             SessionValues.SessionLevelDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel";
 
             //if web build, create the SessionLevelDataFolder:
-            if(SessionValues.WebBuild)
+            if (SessionValues.WebBuild)
             {
                 StartCoroutine(CreateFolderOnServer(SessionValues.SessionLevelDataPath, () =>
                 {

@@ -1195,7 +1195,6 @@ namespace USE_ExperimentTemplate_Task
                 else
                     Debug.Log("No TaskDef file in config folder (THIS COULD DEFINITELY BE A PROBLEM!).");
                 TaskDefImported = true;
-                Debug.Log("TASK DEF IMPORTED? " + TaskDefImported);
             }
         }
 
@@ -1220,7 +1219,6 @@ namespace USE_ExperimentTemplate_Task
                 else
                     Debug.Log("No blockdef file in config folder (this may not be a problem).");
                 BlockDefImported = true;
-                Debug.Log("BLOCK DEF IMPORTED? " + BlockDefImported);
             }
         }
 
@@ -1266,7 +1264,6 @@ namespace USE_ExperimentTemplate_Task
                 else
                     Debug.Log("No trialDef file in config folder (this may not be a problem).");
                 TrialDefImported = true;
-                Debug.Log("TRIAL DEF IMPORTED? " + TrialDefImported);
             }
         }
 

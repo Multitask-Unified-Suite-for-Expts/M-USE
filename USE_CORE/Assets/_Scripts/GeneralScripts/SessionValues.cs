@@ -18,14 +18,13 @@ using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Session;
 using USE_Settings;
 using USE_UI;
-using static UnityEditor.ShaderData;
 
 
 public static class SessionValues
 {
-    public static bool WebBuild = false;
-    public static bool UseDefaultConfigs = false;
-    public static bool Using2DStim = false;
+    public static bool WebBuild;
+    public static bool UseDefaultConfigs;
+    public static bool Using2DStim;
     
     public static ControlLevel_Session_Template SessionLevel;
     public static SessionInfoPanel SessionInfoPanel;

@@ -256,11 +256,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.SearchDurationsList_InTask.Add(SearchDuration);
             AverageSearchDuration_InBlock = SearchDurationsList.Average();
             SetTrialSummaryString();
-            
+
+            int? depth = SessionValues.Using2DStim ? 50 : (int?)null;
+
             if (CorrectSelection) 
-                HaloFBController.ShowPositive(selectedGO, 50);
+                HaloFBController.ShowPositive(selectedGO, depth);
             else 
-                HaloFBController.ShowNegative(selectedGO, 50);
+                HaloFBController.ShowNegative(selectedGO, depth);
         });
 
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () => HaloFBController.Destroy());

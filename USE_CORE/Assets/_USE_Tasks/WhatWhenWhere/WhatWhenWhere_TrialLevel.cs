@@ -350,11 +350,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.SetUpdateDuration(fbDuration.value);
             SliderFBController.SetFlashingDuration(flashingFbDuration.value);
 
-            
+            int? depth = SessionValues.Using2DStim ? 50 : (int?)null;
+
             if (CorrectSelection)
             {
                 consecutiveError = 0;
-                HaloFBController.ShowPositive(selectedGO);
+                HaloFBController.ShowPositive(selectedGO, depth);
                 SliderFBController.UpdateSliderValue(CurrentTrialDef.SliderGain[numTouchedStims]*(1f/sliderGainSteps));
                 numTouchedStims += 1;
                 if (numTouchedStims == CurrentTrialDef.CorrectObjectTouchOrder.Length)
@@ -365,7 +366,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             else //Chose Incorrect
             {
                 consecutiveError++;
-                HaloFBController.ShowNegative(selectedGO);
+                HaloFBController.ShowNegative(selectedGO, depth);
                 if (distractorSlotError)
                     stimIdx = Array.IndexOf(CurrentTrialDef.DistractorStimsIndices, selectedSD.StimIndex); // used to index through the arrays in the config file/mapping different columns
                 else

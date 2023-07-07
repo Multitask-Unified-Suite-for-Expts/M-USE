@@ -246,11 +246,13 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             SearchDurations_InBlock.Add(SearchDuration);
             CurrentTaskLevel.SearchDurations_InTask.Add(SearchDuration);
             SetTrialSummaryString();
-            
+
+            int? depth = SessionValues.Using2DStim ? 50 : (int?)null;
+
             if (CorrectSelection) 
-                HaloFBController.ShowPositive(selectedGO, 50);
+                HaloFBController.ShowPositive(selectedGO, depth);
             else 
-                HaloFBController.ShowNegative(selectedGO, 50);
+                HaloFBController.ShowNegative(selectedGO, depth);
         });
         SelectionFeedback.AddTimer(() => selectionFbDuration.value, TokenFeedback, () => 
         {

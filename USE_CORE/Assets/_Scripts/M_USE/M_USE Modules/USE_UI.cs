@@ -43,7 +43,9 @@ namespace USE_UI
             { "THR", "Learn touching and holding the square for the correct duration to earn your reward. Holding too short, holding too long, and moving outside the square will result in negative feedback." },
             { "VisualSearch", "Each trial, a target object is displayed among distractor objects. Find the targeted object to earn your reward!" },
             { "WhatWhenWhere", "Learn the sequential relationship between objects. Select the objects in the correct sequence to earn your reward!" },
-            { "WorkingMemory", "Remember and identify the target object to earn your reward. Don't let the distractor objects fool you!" }
+            { "WorkingMemory", "Remember and identify the target object to earn your reward. Don't let the distractor objects fool you!" },
+            { "WWW_2D", "Learn the sequential relationship between objects. Select the objects in the correct sequence to earn your reward!" }
+
         };
         [HideInInspector] public Dictionary<string, string> TaskNamesDict = new Dictionary<string, string>()
         {
@@ -55,7 +57,7 @@ namespace USE_UI
             { "VisualSearch", "Visual Search" },
             { "WhatWhenWhere", "What When Where" },
             { "WorkingMemory", "Working Memory" },
-
+            { "WWW_2D", "What When Where"}
         };
 
         [HideInInspector] public Dictionary<string, Vector3> Task_HumanBackgroundPos_Dict = new Dictionary<string, Vector3>()
@@ -68,6 +70,7 @@ namespace USE_UI
             { "VisualSearch", new Vector3(0, 0, 1000f) },
             { "WhatWhenWhere", new Vector3(0, 0, 500f) },
             { "WorkingMemory", new Vector3(0, 0, 1000f) },
+            { "WWW_2D", new Vector3(0, 0, 500f) }
         };
 
         [HideInInspector] public string TaskName;
@@ -102,6 +105,8 @@ namespace USE_UI
             HumanStartPanelGO.transform.SetParent(parent.transform, false);
             HumanStartPanelGO.SetActive(false);
             HumanPanelOn = false;
+
+            Debug.Log("TASK NAME: " + taskName);
 
             TitleTextGO = HumanStartPanelGO.transform.Find("TitleText").gameObject;
             TaskName = TaskNamesDict[taskName];
@@ -299,6 +304,9 @@ namespace USE_UI
 
         public GameObject CreateStartButton(Canvas parent, Vector3? pos, float? scale, bool hover = false, string name = null)
         {
+            if (StartButtonPrefab == null)
+                Debug.Log("START BUTTON PREFAB IS NULL!");
+            
             StartButtonGO = Instantiate(StartButtonPrefab);
             StartButtonGO.name = name == null ? "StartButton" : name;
             StartButtonGO.transform.SetParent(parent.transform, false);

@@ -203,6 +203,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (MakeStimPopOut)
                 PopStimOut();
+
+            foreach(var stim in trialStims.stimDefs)
+            {
+                Debug.Log("STIM LOC: " + stim.StimLocation);
+                Debug.Log("STIM LOCAL POS: " + stim.StimGameObject.transform.localPosition);
+            }
         });
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------
@@ -299,13 +305,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
         });
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
-        ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
-        {
-            AudioFBController.Play("Negative");
-            EndBlock = true;
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["NoChoice"]);
-            AbortCode = 6;
-        });
+        //ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
+        //{
+        //    AudioFBController.Play("Negative");
+        //    EndBlock = true;
+        //    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["NoChoice"]);
+        //    AbortCode = 6;
+        //});
 
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------
         TouchFeedback.AddInitializationMethod(() =>
@@ -1027,7 +1033,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             else
                 yield return StartCoroutine(Load3DStims(RightGroup, FeedbackLocations.Take(FeedbackLocations.Length - 1).ToArray()));
 
-            
             WrongGroup = new StimGroup("Wrong");
             group.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(WrongGroup); //copy wrong stim into WrongGroup
             if(SessionValues.Using2DStim)
@@ -1041,11 +1046,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private IEnumerator LoadGridStims(StimGroup group, Transform gridParent)
     {
         TrialStims.Add(group);
+
         yield return StartCoroutine(group.LoadStims());
+
         foreach (var stim in group.stimDefs)
             CreateGridItem(gridParent, stim);
+
         if (currentTrial.StimFacingCamera)
             MakeStimsFaceCamera(group);
+
         group.ToggleVisibility(true);
     }
 

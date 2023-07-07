@@ -720,7 +720,7 @@ namespace USE_ExperimentTemplate_Task
                 foreach (DictionaryEntry entry in taskBlockResults)
                 {
                     if (count == 1)
-                        yield return new WaitForSeconds(.35f); //wait a little for the first one
+                        yield return new WaitForSeconds(.2f); //wait a little for the first one
                         
                     gridItem_AudioSource.Play();
 
@@ -729,7 +729,7 @@ namespace USE_ExperimentTemplate_Task
                     TextMeshProUGUI itemText = gridItem.GetComponentInChildren<TextMeshProUGUI>();
                     itemText.text = $"{entry.Key}: <b>{entry.Value}</b>";
                     if(count < taskBlockResults.Count)
-                        yield return new WaitForSeconds(.75f);
+                        yield return new WaitForSeconds(.5f);
                     count++;
                 }
                 BlockFbSimpleDuration += Time.time - startTime; //increase state duration so that it doesnt start until coroutine done.
@@ -1195,7 +1195,6 @@ namespace USE_ExperimentTemplate_Task
                 else
                     Debug.Log("No TaskDef file in config folder (THIS COULD DEFINITELY BE A PROBLEM!).");
                 TaskDefImported = true;
-                Debug.Log("TASK DEF IMPORTED? " + TaskDefImported);
             }
         }
 
@@ -1220,7 +1219,6 @@ namespace USE_ExperimentTemplate_Task
                 else
                     Debug.Log("No blockdef file in config folder (this may not be a problem).");
                 BlockDefImported = true;
-                Debug.Log("BLOCK DEF IMPORTED? " + BlockDefImported);
             }
         }
 
@@ -1266,7 +1264,6 @@ namespace USE_ExperimentTemplate_Task
                 else
                     Debug.Log("No trialDef file in config folder (this may not be a problem).");
                 TrialDefImported = true;
-                Debug.Log("TRIAL DEF IMPORTED? " + TrialDefImported);
             }
         }
 
@@ -1339,6 +1336,7 @@ namespace USE_ExperimentTemplate_Task
                         stim.CanvasGameObject = canvasGO;
                 }
             }
+            Debug.Log("PREFAB STIMS: " + PrefabStims.stimDefs.Count + " | " + "EXTERAL STIMS: " + ExternalStims.stimDefs.Count);
         }
 
 

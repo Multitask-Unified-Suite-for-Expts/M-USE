@@ -7,18 +7,15 @@ using USE_States;
 using USE_StimulusManagement;
 using ConfigDynamicUI;
 using JetBrains.Annotations;
-using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Task;
-using SelectionTracking;
 using USE_UI;
-using Tobii.Research;
-using Tobii.Research.Unity;
 using UnityEngine.SceneManagement;
 using System.Linq;
 using System.Collections;
 using USE_Def_Namespace;
+
 
 namespace USE_ExperimentTemplate_Trial
 {
@@ -174,8 +171,6 @@ namespace USE_ExperimentTemplate_Trial
 
             LoadTrialStims.AddUniversalInitializationMethod(() =>
             {
-                SessionValues.TaskSelectionCanvasGO.SetActive(false);
-
                 AbortCode = 0;
 
                 TrialCount_InTask++;
@@ -197,6 +192,8 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
+                SessionValues.TaskSelectionCanvasGO.SetActive(false);
+
                 if (SessionValues.WebBuild)
                     Cursor.visible = true;
                 else
@@ -215,7 +212,6 @@ namespace USE_ExperimentTemplate_Trial
                 Input.ResetInputAxes();
                 if (SessionValues.SessionDef.IsHuman)
                     SessionValues.HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
-                
             });
 
 

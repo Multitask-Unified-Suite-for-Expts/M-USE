@@ -127,9 +127,6 @@ namespace USE_ExperimentTemplate_Session
 
         [HideInInspector] public AudioSource BackgroundMusic_AudioSource;
 
-        //[HideInInspector] public HumanStartPanel HumanStartPanel;
-        // [HideInInspector] public USE_StartButton USE_StartButton;
-
 
         public override void LoadSettings()
         {
@@ -178,7 +175,7 @@ namespace USE_ExperimentTemplate_Session
                             SessionValues.SessionDef.ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
                             SessionValues.SessionDef.TaskIconsFolderPath = "DefaultResources/TaskIcons";
                             LoadSessionConfigSettings();
-                            GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
+                            DefineControlLevel();
                         }
                         else
                             Debug.Log("TRIED TO READ SESSION CONFIG BUT THE COROUTINE RESULT IS NULL!");
@@ -208,7 +205,7 @@ namespace USE_ExperimentTemplate_Session
                                     //SessionValues.SessionDef.ContextExternalFilePath = "Resources/Contexts"; //path from root server folder
                                     SessionValues.SessionDef.TaskIconsFolderPath = "Resources/TaskIcons";
                                     LoadSessionConfigSettings();
-                                    GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
+                                    DefineControlLevel();
                                 }
                                 else
                                     Debug.Log("SETTINGS ARRAY IS NULL!");
@@ -227,9 +224,8 @@ namespace USE_ExperimentTemplate_Session
                 StartCoroutine(SessionValues.BetterReadSettingsFile<SessionDef>("SessionConfig", "SingleTypeDelimited", settingsArray =>
                 {
                     SessionValues.SessionDef = settingsArray[0];
-
                     LoadSessionConfigSettings();
-                    GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
+                    DefineControlLevel();
                 }));
             }
 
@@ -1006,6 +1002,7 @@ namespace USE_ExperimentTemplate_Session
 
         private void LoadSessionConfigSettings()
         {
+            GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
 
             //MAKE SURE SYNCBOX INACTIVE FOR WEB BUILD (Can eventually remove this once thilo provides web build session configs with it marked false)
             if (SessionValues.WebBuild)
@@ -1032,13 +1029,10 @@ namespace USE_ExperimentTemplate_Session
                 eventCodeFileString = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, "*EventCode*");
                 if (!string.IsNullOrEmpty(eventCodeFileString))
                 {
-                   // SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
                    StartCoroutine(SessionValues.BetterReadSettingsFile<Dictionary<string, EventCode>>("EventCodeConfig", "SingleTypeJSON", settingsArray =>
                    {
                        SessionValues.SessionEventCodes = settingsArray[0];
                    }));            
-                   //    SessionEventCodes = SessionValues.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
-                    //SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
                 }
                 else if (SessionValues.SessionDef.EventCodesActive)
                     Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");

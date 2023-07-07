@@ -368,6 +368,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
 
         int temp = 0;
+
         tStim = new StimGroup("SearchStimuli", group, CurrentTrialDef.TrialStimIndices);
 
         if(TokensWithStimOn?? false)

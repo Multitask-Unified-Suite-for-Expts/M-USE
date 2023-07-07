@@ -112,7 +112,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             {
                 USE_Backdrop = new USE_Backdrop();
                 BackdropGO = USE_Backdrop.CreateBackdrop(THR_CanvasGO.GetComponent<Canvas>(), "BackdropGO", new Color32(0, 9, 23, 255));
+
                 USE_Square = new USE_StartButton();
+                USE_Square.StartButtonPrefab = SessionValues.USE_StartButton.StartButtonPrefab;
                 SquareGO = USE_Square.CreateStartButton(THR_CanvasGO.GetComponent<Canvas>(), null, null, false, "SquareGO");
             }
 

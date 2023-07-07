@@ -121,14 +121,15 @@ namespace USE_StimulusManagement
 				sd.StimFolderPath = StimFolderPath;
 			if (StimExtension != null)
 				sd.StimExtension = StimExtension;
-			if (StimCode != null)
-				sd.StimCode = StimCode;
 			if (StimID != null)
 				sd.StimID = StimID;
 			if (StimDimVals != null)
 				sd.StimDimVals = StimDimVals;
-			// if (StimGameObject != null)
-			// 	sd.StimGameObject = StimGameObject; // this is bad, we should be copying this
+
+			if (CanvasGameObject != null)
+				sd.CanvasGameObject = CanvasGameObject;
+
+			sd.StimCode = StimCode;
 			sd.StimLocation = StimLocation;
 			sd.StimRotation = StimRotation;
 			sd.StimScreenLocation = StimScreenLocation;
@@ -171,14 +172,15 @@ namespace USE_StimulusManagement
 				sd.StimFolderPath = StimFolderPath;
 			if (StimExtension != null)
 				sd.StimExtension = StimExtension;
-			if (StimCode != null)
-				sd.StimCode = StimCode;
 			if (StimID != null)
 				sd.StimID = StimID;
 			if (StimDimVals != null)
 				sd.StimDimVals = StimDimVals;
-			// if (StimGameObject != null)
-			// 	sd.StimGameObject = StimGameObject; // this is bad, we should be copying this
+
+			if (CanvasGameObject != null)
+				sd.CanvasGameObject = CanvasGameObject;
+
+			sd.StimCode = StimCode;
 			sd.StimLocation = StimLocation;
 			sd.StimRotation = StimRotation;
 			sd.StimScreenLocation = StimScreenLocation;
@@ -277,8 +279,7 @@ namespace USE_StimulusManagement
 
         public IEnumerator Load(Action<GameObject> callback)
         {
-	        Debug.Log(FileName);
-			SessionValues.Using2DStim = FileName.Contains("png") ? true : false;
+			SessionValues.Using2DStim = FileName.Contains("png");
 
 			bool loadFromServer = SessionValues.WebBuild && !SessionValues.UseDefaultConfigs;
 
@@ -571,116 +572,122 @@ namespace USE_StimulusManagement
 
 		public void DestroyRecursive(GameObject go)
 		{
-			//if (go.transform.childCount > 0)
-			//	for (int iChild = 0; iChild < go.transform.childCount; iChild++)
-			//		DestroyRecursive(go.transform.GetChild(iChild).gameObject);
+			if(SessionValues.UseDefaultConfigs)
+			{
+                Object.Destroy(go);
+				return;
+            }
+
+            //if (go.transform.childCount > 0)
+            //	for (int iChild = 0; iChild < go.transform.childCount; iChild++)
+            //		DestroyRecursive(go.transform.GetChild(iChild).gameObject);
 
 
-			//if (go.GetComponent<Texture>() != null)
-			//{
-   //             Object.Destroy(go.GetComponent<Texture>());
-			//	Debug.Log(go.name + " Texture");
-			//}
-			//if (go.GetComponent<Texture2D>() != null)
-			//{
-   //             Object.Destroy(go.GetComponent<Texture2D>());
-			//	Debug.Log(go.name + " Texture2D");
-			//}
+            //if (go.GetComponent<Texture>() != null)
+            //{
+            //             Object.Destroy(go.GetComponent<Texture>());
+            //	Debug.Log(go.name + " Texture");
+            //}
+            //if (go.GetComponent<Texture2D>() != null)
+            //{
+            //             Object.Destroy(go.GetComponent<Texture2D>());
+            //	Debug.Log(go.name + " Texture2D");
+            //}
 
-			//Material mat = go.GetComponent<Material>();
-			//if (mat != null)
-			//{
-			//	if (mat.shader != null)
-			//	{
-   //                 Object.Destroy(mat.shader);
-			//		Debug.Log(go.name + " Material Shader");
-			//	}
-			//	if (mat.mainTexture != null)
-			//	{
-   //                 Object.Destroy(mat.mainTexture);
-			//		Debug.Log(go.name + " Material Main Texture");
-			//	}
-   //             Object.Destroy(go.GetComponent<Material>());
-			//	Debug.Log(go.name + " Material");
-			//}
+            //Material mat = go.GetComponent<Material>();
+            //if (mat != null)
+            //{
+            //	if (mat.shader != null)
+            //	{
+            //                 Object.Destroy(mat.shader);
+            //		Debug.Log(go.name + " Material Shader");
+            //	}
+            //	if (mat.mainTexture != null)
+            //	{
+            //                 Object.Destroy(mat.mainTexture);
+            //		Debug.Log(go.name + " Material Main Texture");
+            //	}
+            //             Object.Destroy(go.GetComponent<Material>());
+            //	Debug.Log(go.name + " Material");
+            //}
 
-			//MeshRenderer mr = go.GetComponent<MeshRenderer>();
-			//if (mr != null)
-			//{
-			//	Debug.Log(go.name + " Mesh Renderer Exists");
-			//	foreach (Material material in mr.materials)
-			//	{
-			//		if (material.mainTexture != null)
-			//		{
-   //                     Object.Destroy(material.mainTexture);
-			//			Debug.Log(go.name + " Mesh Renderer Material " + material.name + " Main Texture");
-   //                     Object.Destroy(material);
-			//		}
-			//	}
-			//	foreach (Material material in mr.sharedMaterials)
-			//	{
-			//		if (material.mainTexture != null)
-			//		{
-   //                     Object.Destroy(material.mainTexture);
-			//			Debug.Log(go.name + " Mesh Renderer  Material " + material.name + " Shared Texture");
-			//		}
-			//	}
-			//}
+            //MeshRenderer mr = go.GetComponent<MeshRenderer>();
+            //if (mr != null)
+            //{
+            //	Debug.Log(go.name + " Mesh Renderer Exists");
+            //	foreach (Material material in mr.materials)
+            //	{
+            //		if (material.mainTexture != null)
+            //		{
+            //                     Object.Destroy(material.mainTexture);
+            //			Debug.Log(go.name + " Mesh Renderer Material " + material.name + " Main Texture");
+            //                     Object.Destroy(material);
+            //		}
+            //	}
+            //	foreach (Material material in mr.sharedMaterials)
+            //	{
+            //		if (material.mainTexture != null)
+            //		{
+            //                     Object.Destroy(material.mainTexture);
+            //			Debug.Log(go.name + " Mesh Renderer  Material " + material.name + " Shared Texture");
+            //		}
+            //	}
+            //}
 
-			//Renderer renderer = go.GetComponent<Renderer>();
-			//if (renderer != null)
-			//{
-			//	Debug.Log(go.name + " Plain Renderer Exists");
-			//	foreach (Material material in renderer.materials)
-			//	{
-			//		if (material.mainTexture != null)
-			//		{
-   //                     Object.Destroy(material.mainTexture);
-			//			Debug.Log(go.name + " Plain Renderer Material " + material.name + " Main Texture");
-   //                     Object.Destroy(material);
-			//		}
-			//	}
-			//	foreach (Material material in renderer.sharedMaterials)
-			//	{
-			//		if (material.mainTexture != null)
-			//		{
-   //                     Object.Destroy(material.mainTexture);
-			//			Debug.Log(go.name + " Plain Renderer Material " + material.name + " Shared Texture");
-			//		}
-			//	}
-			//}
+            //Renderer renderer = go.GetComponent<Renderer>();
+            //if (renderer != null)
+            //{
+            //	Debug.Log(go.name + " Plain Renderer Exists");
+            //	foreach (Material material in renderer.materials)
+            //	{
+            //		if (material.mainTexture != null)
+            //		{
+            //                     Object.Destroy(material.mainTexture);
+            //			Debug.Log(go.name + " Plain Renderer Material " + material.name + " Main Texture");
+            //                     Object.Destroy(material);
+            //		}
+            //	}
+            //	foreach (Material material in renderer.sharedMaterials)
+            //	{
+            //		if (material.mainTexture != null)
+            //		{
+            //                     Object.Destroy(material.mainTexture);
+            //			Debug.Log(go.name + " Plain Renderer Material " + material.name + " Shared Texture");
+            //		}
+            //	}
+            //}
 
-			//MeshCollider mc = go.GetComponent<MeshCollider>();
-			//if (mc != null)
-			//{
-			//	Debug.Log(go.name + "Mesh Collider");
-			//	if (mc.material != null)
-			//	{
-   //                 Object.Destroy(mc.material);
-			//		Debug.Log(go.name + " Mesh Collider Material " + mc.material.name);
-			//	}
-   //             Object.Destroy(mc);
-			//}
+            //MeshCollider mc = go.GetComponent<MeshCollider>();
+            //if (mc != null)
+            //{
+            //	Debug.Log(go.name + "Mesh Collider");
+            //	if (mc.material != null)
+            //	{
+            //                 Object.Destroy(mc.material);
+            //		Debug.Log(go.name + " Mesh Collider Material " + mc.material.name);
+            //	}
+            //             Object.Destroy(mc);
+            //}
 
-			//MeshFilter mf = go.GetComponent<MeshFilter>();
-			//if (mf != null)
-			//{
-			//	Debug.Log(go.name + "Mesh Filter");
-			//	if (mf.mesh != null)
-			//	{
-   //                 Object.Destroy(mf.mesh);
-			//		Debug.Log(go.name + " MeshFilter Mesh " + mf.mesh.name);
-			//	}
-   //             Object.Destroy(mf);
-			//}
+            //MeshFilter mf = go.GetComponent<MeshFilter>();
+            //if (mf != null)
+            //{
+            //	Debug.Log(go.name + "Mesh Filter");
+            //	if (mf.mesh != null)
+            //	{
+            //                 Object.Destroy(mf.mesh);
+            //		Debug.Log(go.name + " MeshFilter Mesh " + mf.mesh.name);
+            //	}
+            //             Object.Destroy(mf);
+            //}
 
-			//if (go.GetComponent<StimDefPointer>() != null)
-			//{
-   //             Object.Destroy(go.GetComponent<StimDefPointer>());
-			//	Debug.Log(go.name + " StimDefPointer");
-			//}
+            //if (go.GetComponent<StimDefPointer>() != null)
+            //{
+            //             Object.Destroy(go.GetComponent<StimDefPointer>());
+            //	Debug.Log(go.name + " StimDefPointer");
+            //}
 
-			Object.Destroy(go);
+            Object.Destroy(go);
 		}
 
 		/*public void DestroyRecursive(GameObject go)

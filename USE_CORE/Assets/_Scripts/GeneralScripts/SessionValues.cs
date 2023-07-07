@@ -3,22 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using Newtonsoft.Json;
 using SelectionTracking;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using USE_Def_Namespace;
 using USE_DisplayManagement;
 using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Session;
-using USE_Settings;
 using USE_UI;
-using static UnityEditor.ShaderData;
 
 
 public static class SessionValues

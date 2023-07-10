@@ -121,10 +121,10 @@ namespace USE_ExperimentTemplate_Session
         public GameObject ToggleAudioButton;
         public GameObject StartButtonPrefabGO;
         public AudioClip BackgroundMusic_AudioClip;
-        public AudioClip GridItem_AudioClip;
+        public AudioClip BlockResults_AudioClip;
+
 
         [HideInInspector] public float audioPlaybackSpot;
-
         [HideInInspector] public AudioSource BackgroundMusic_AudioSource;
 
 
@@ -504,7 +504,12 @@ namespace USE_ExperimentTemplate_Session
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
-                if (SessionValues.SessionDef.IsHuman && BackgroundMusic_AudioSource == null) //Background music!
+                if (!SessionValues.SessionDef.PlayBackgroundMusic)
+                {
+                    ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
+                }
+
+                if (SessionValues.SessionDef.PlayBackgroundMusic && BackgroundMusic_AudioSource == null) //Background music!
                     SetupBackgroundMusic();
 
                 if (SelectionHandler.AllSelections.Count > 0)
@@ -1077,29 +1082,38 @@ namespace USE_ExperimentTemplate_Session
                 Debug.Log("No successfulSelection from which to get the taskButton GameObject from (so we can reset its size)");
         }
 
-        private void SetupBackgroundMusic()
+        private void SetupBackgroundMusic(float audioSpot = 0)
         {
             BackgroundMusic_AudioSource = gameObject.AddComponent<AudioSource>();
             BackgroundMusic_AudioSource.clip = BackgroundMusic_AudioClip;
             BackgroundMusic_AudioSource.loop = true;
-            BackgroundMusic_AudioSource.volume = .5f;
+            BackgroundMusic_AudioSource.volume = .6f;
+            if (audioSpot != 0)
+                BackgroundMusic_AudioSource.time = audioSpot;
             BackgroundMusic_AudioSource.Play();
+            ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(false);
         }
 
         public void HandleToggleAudioButtonClick()
         {
-            if (BackgroundMusic_AudioSource.isPlaying)
+            if(BackgroundMusic_AudioSource != null)
             {
-                audioPlaybackSpot = BackgroundMusic_AudioSource.time;
-                BackgroundMusic_AudioSource.Stop();
-                ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
+                if (BackgroundMusic_AudioSource.isPlaying)
+                {
+                    audioPlaybackSpot = BackgroundMusic_AudioSource.time;
+                    BackgroundMusic_AudioSource.Stop();
+                    ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
+                }
+                else
+                {
+                    BackgroundMusic_AudioSource.time = audioPlaybackSpot;
+                    BackgroundMusic_AudioSource.Play();
+                    ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(false);
+                }
             }
             else
             {
-                BackgroundMusic_AudioSource.time = audioPlaybackSpot;
-                BackgroundMusic_AudioSource.Play();
-                ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(false);
-
+                SetupBackgroundMusic();
             }
         }
 
@@ -1107,28 +1121,30 @@ namespace USE_ExperimentTemplate_Session
         {
             SessionValues.SessionDef.IsHuman = !SessionValues.SessionDef.IsHuman;
 
-            if (SessionValues.SessionDef.IsHuman)
+            if(SessionValues.SessionDef.IsHuman)
             {
                 ToggleAudioButton.SetActive(true);
-                BackgroundMusic_AudioSource = gameObject.AddComponent<AudioSource>();
-                BackgroundMusic_AudioSource.clip = BackgroundMusic_AudioClip;
-                BackgroundMusic_AudioSource.loop = true;
-                BackgroundMusic_AudioSource.time = audioPlaybackSpot;
-                BackgroundMusic_AudioSource.Play();
+
+                if(!BackgroundMusic_AudioSource.isPlaying)
+                    ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
+
+                if (SessionValues.SessionDef.PlayBackgroundMusic)
+                    SetupBackgroundMusic(audioPlaybackSpot);
             }
             else
             {
-                audioPlaybackSpot = BackgroundMusic_AudioSource.time;
-                BackgroundMusic_AudioSource.Stop();
-                ToggleAudioButton.SetActive(false);
+                if(BackgroundMusic_AudioSource != null)
+                {
+                    audioPlaybackSpot = BackgroundMusic_AudioSource.time;
+                    BackgroundMusic_AudioSource.Stop();
+                }
+                ToggleAudioButton.SetActive(false);   
             }
 
             //Change text on button:
             HumanVersionToggleButton.GetComponentInChildren<TextMeshProUGUI>().text = SessionValues.SessionDef.IsHuman ? "Human Version" : "Primate Version";
             //Toggle Starfield:
-            TaskSelection_Starfield.SetActive(TaskSelection_Starfield.activeInHierarchy ? false : true);
-            //push task buttons up to 0 Y for humans, or back to -100 Y for monkeys
-            //TaskButtonsContainer.transform.localPosition = new Vector3(TaskButtonsContainer.transform.localPosition.x, TaskButtonsContainer.transform.localPosition.y + (IsHuman ? -125f : 125f), TaskButtonsContainer.transform.localPosition.z);
+            TaskSelection_Starfield.SetActive(!TaskSelection_Starfield.activeInHierarchy);
         }
 
         private void AppendSerialData()
@@ -1202,7 +1218,7 @@ namespace USE_ExperimentTemplate_Session
 
         public ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
-	    tl.GridItem_AudioClip = GridItem_AudioClip;
+	        tl.BlockResults_AudioClip = BlockResults_AudioClip;
             SessionValues.SessionLevel = this;
             //tl.USE_StartButton = USE_StartButton;
             //tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;

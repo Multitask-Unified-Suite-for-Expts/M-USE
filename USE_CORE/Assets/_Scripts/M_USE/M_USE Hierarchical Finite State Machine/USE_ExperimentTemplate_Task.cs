@@ -147,8 +147,7 @@ namespace USE_ExperimentTemplate_Task
         //Passed by sessionLevel
         [HideInInspector] public GameObject BlockResultsPrefab;
         [HideInInspector] public GameObject BlockResults_GridElementPrefab;
-        [HideInInspector] public AudioClip GridItem_AudioClip;
-
+        [HideInInspector] public AudioClip BlockResults_AudioClip;
         [HideInInspector] public GameObject BlockResultsGO;
 
         private bool ContinueButtonClicked;
@@ -707,17 +706,17 @@ namespace USE_ExperimentTemplate_Task
                 if (continueButtonGO != null)
                     continueButtonGO.AddComponent<Button>().onClick.AddListener(HandleContinueButtonClick);
                     
-                AudioSource gridItem_AudioSource = gameObject.AddComponent<AudioSource>();
-                gridItem_AudioSource.clip = GridItem_AudioClip;
-
                 Transform gridParent = BlockResultsGO.transform.Find("Grid");
 
-                gridItem_AudioSource.Play();
+                AudioSource blockResults_AudioSource = gameObject.AddComponent<AudioSource>();
+                blockResults_AudioSource.clip = BlockResults_AudioClip;
+                blockResults_AudioSource.volume = .9f;
+                blockResults_AudioSource.Play();
 
                 int count = 0;
                 foreach (DictionaryEntry entry in taskBlockResults)
                 {                        
-                    gridItem_AudioSource.Play();
+                    blockResults_AudioSource.Play();
 
                     GameObject gridItem = Instantiate(BlockResults_GridElementPrefab, gridParent);
                     gridItem.name = "GridElement" + count;

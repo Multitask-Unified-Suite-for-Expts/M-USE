@@ -10,26 +10,27 @@ public static class ServerManager //Used with the PHP scripts
 {
     private static readonly string ServerURL = "http://m-use.psy.vanderbilt.edu:8080";
 
+    private static readonly string RootDataFolder = "DATA";
     private static string SessionDataFolder; //Set once they hit InitScreen Confirm button
     public static string SessionDataFolderPath
     {
         get
         {
-            return $"DATA/{SessionDataFolder}";
+            return $"{RootDataFolder}/{SessionDataFolder}";
         }
     }
 
     private static string SessionConfigFolder; //Set with the value of the Dropdown after they click confirm
+    private static readonly string RootConfigFolder = "CONFIGS";
     public static string SessionConfigFolderPath
     {
         get
         {
-            return $"CONFIGS/{SessionConfigFolder}";
+            return $"{RootConfigFolder}/{SessionConfigFolder}";
         }
     }
 
     private static List<string> foldersCreatedList = new List<string>();
-
     public static bool SessionDataFolderCreated;
 
 
@@ -43,49 +44,48 @@ public static class ServerManager //Used with the PHP scripts
     public static IEnumerator CreateFolder(string folderPath)
     {
         string url = $"{ServerURL}/createFolder.php?path={folderPath}";
-
         WWWForm formData = new WWWForm();
         formData.AddField("path", folderPath);
         using UnityWebRequest request = UnityWebRequest.Post(url, formData);
         yield return request.SendWebRequest();
-        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Success creating folder at: {folderPath}." : $"FAILED! Error Creating Folder! | Error: {request.error}");
+        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Successful CreateFolder Request: {request.downloadHandler.text} | FolderPath: {folderPath}" : $"ERROR CREATING FOLDER | Error: {request.error}");
         foldersCreatedList.Add(folderPath);
     }
 
     public static IEnumerator GetSessionConfigFolders(Action<List<string>> callback)
     {
-        string url = $"{ServerURL}/getFolderNames.php?directoryPath=CONFIGS";
+        string url = $"{ServerURL}/getFolderNames.php?directoryPath={RootConfigFolder}";
 
-        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        using UnityWebRequest request = UnityWebRequest.Get(url);
+
+        var operation = request.SendWebRequest();
+        yield return operation;
+
+        if (request.result == UnityWebRequest.Result.Success)
         {
-            var operation = request.SendWebRequest();
-            yield return operation;
-
-            if (request.result == UnityWebRequest.Result.Success)
-            {
-                Debug.Log("Successfully got the folder names from the server!");
-                string plainTextResponse = request.downloadHandler.text;
-                string[] folderNameArray = plainTextResponse.Split(',');
-                List<string> folderNames = new List<string>(folderNameArray);
-                callback?.Invoke(folderNames);
-            }
-            else
-            {
-                Debug.Log($"An error occurred while getting folder names. Error: {request.error}");
-                callback?.Invoke(null);
-            }
+            Debug.Log("Successfully got the folder names from the server!");
+            string plainTextResponse = request.downloadHandler.text;
+            string[] folderNameArray = plainTextResponse.Split(',');
+            List<string> folderNames = new List<string>(folderNameArray);
+            callback?.Invoke(folderNames);
         }
+        else
+        {
+            Debug.Log($"An error occurred while getting folder names. Error: {request.error}");
+            callback?.Invoke(null);
+        }
+        
     }
+
 
     public static IEnumerator CreateFileAsync(string path, string fileName, string content)
     {
         string url = $"{ServerURL}/createFile.php?path={path}";
-
         using UnityWebRequest request = UnityWebRequest.Put(url, content);
         request.method = UnityWebRequest.kHttpVerbPUT;
         request.SetRequestHeader("Content-Type", "text/plain");
         yield return request.SendWebRequest();
-        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Successfully created file: {fileName}" : $"ERROR CREATING FILE: {fileName} | Error: {request.error}");
+        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Successful CreateFile Request: {request.downloadHandler.text} | File: {fileName}" : $"ERROR CREATING FILE: {fileName} | Error: {request.error}");
     }
 
     public static IEnumerator AppendToFileAsync(string folderPath, string fileName, string rowData)
@@ -125,13 +125,16 @@ public static class ServerManager //Used with the PHP scripts
         while (!operation.isDone)
             yield return null;
 
-        string result = "";
+        string result = request.downloadHandler.text;
         if(request.result == UnityWebRequest.Result.Success)
         {
-            result = request.downloadHandler.text;
-            Debug.Log(result == "File not found" ? ("File NOT Found on Server: " + searchString) : ("Found File On Server: " + searchString));
-            if (result == "File not found")
+            if (result.ToLower().Contains("file not found") || result.ToLower().Contains("invalid parameters"))
+            {
+                Debug.Log($"GetFile Result: {result} | SearchString: {searchString}");
                 result = null;
+            }
+            else
+                Debug.Log("Found File On Server: " + searchString);
         }
         else
         {
@@ -161,7 +164,6 @@ public static class ServerManager //Used with the PHP scripts
         else
             Debug.Log($"ERROR FINDING FILE: {searchString} | ERROR: {request.error}");
         
-
         callback?.Invoke(result);
     }
 
@@ -191,7 +193,7 @@ public static class ServerManager //Used with the PHP scripts
         }
         else
         {
-            Debug.Log($"FAILED TO LOAD PNG FILE | ERROR: {request.error}");
+            Debug.Log($"FAILED TO LOAD TEXTURE FROM SERVER | ERROR: {request.error}");
             callback?.Invoke(null);
         }
         

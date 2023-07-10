@@ -191,16 +191,11 @@ namespace USE_ExperimentTemplate_Session
                     {
                         if (!string.IsNullOrEmpty(result))
                         {
-                            Debug.Log("GOT SESSION CONFIG STRING!");
-
                             StartCoroutine(SessionValues.BetterReadSettingsFile<SessionDef>("SessionConfig", "SingleTypeDelimited", settingsArray =>
                             {
                                 if (settingsArray != null)
                                 {
-                                    Debug.Log("GOT THE SETTINGS ARRAY!");
-
                                     SessionValues.SessionDef = settingsArray[0];
-
                                     SessionValues.SessionDef.ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
                                     //SessionValues.SessionDef.ContextExternalFilePath = "Resources/Contexts"; //path from root server folder
                                     SessionValues.SessionDef.TaskIconsFolderPath = "Resources/TaskIcons";

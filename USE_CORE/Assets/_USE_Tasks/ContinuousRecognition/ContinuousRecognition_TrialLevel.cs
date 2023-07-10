@@ -203,12 +203,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (MakeStimPopOut)
                 PopStimOut();
-
-            foreach(var stim in trialStims.stimDefs)
-            {
-                Debug.Log("STIM LOC: " + stim.StimLocation);
-                Debug.Log("STIM LOCAL POS: " + stim.StimGameObject.transform.localPosition);
-            }
         });
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------

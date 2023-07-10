@@ -1327,7 +1327,6 @@ namespace USE_ExperimentTemplate_Task
                         stim.CanvasGameObject = canvasGO;
                 }
             }
-            Debug.Log("PREFAB STIMS: " + PrefabStims.stimDefs.Count + " | " + "EXTERAL STIMS: " + ExternalStims.stimDefs.Count);
         }
 
 

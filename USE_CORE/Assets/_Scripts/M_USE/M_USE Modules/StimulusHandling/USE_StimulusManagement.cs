@@ -297,10 +297,7 @@ namespace USE_StimulusManagement
 						yield return CoroutineHelper.StartCoroutine(LoadExternalStimFromServer(returnedStimGO =>
 						{
 							if (returnedStimGO != null)
-							{
-								Debug.Log("Stim returned from LoadExternalStimFromServer coroutine! Woo!");
 								StimGameObject = returnedStimGO;
-							}
 							else
 								Debug.Log("RETURNED STIM GAMEOBJECT IS NULL!!!!!!");
 						}));

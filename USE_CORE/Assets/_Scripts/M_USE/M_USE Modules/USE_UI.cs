@@ -106,8 +106,6 @@ namespace USE_UI
             HumanStartPanelGO.SetActive(false);
             HumanPanelOn = false;
 
-            Debug.Log("TASK NAME: " + taskName);
-
             TitleTextGO = HumanStartPanelGO.transform.Find("TitleText").gameObject;
             TaskName = TaskNamesDict[taskName];
             TitleTextGO.GetComponent<TextMeshProUGUI>().text = TaskName;

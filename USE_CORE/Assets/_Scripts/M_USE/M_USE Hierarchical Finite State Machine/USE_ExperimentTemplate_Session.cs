@@ -504,13 +504,16 @@ namespace USE_ExperimentTemplate_Session
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
-                if (!SessionValues.SessionDef.PlayBackgroundMusic)
+                if(SessionValues.SessionDef.PlayBackgroundMusic)
                 {
-                    ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
+                    if (BackgroundMusic_AudioSource == null)
+                        SetupBackgroundMusic();
                 }
-
-                if (SessionValues.SessionDef.PlayBackgroundMusic && BackgroundMusic_AudioSource == null) //Background music!
-                    SetupBackgroundMusic();
+                else
+                {
+                    if(ToggleAudioButton.activeInHierarchy)
+                        ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
+                }
 
                 if (SelectionHandler.AllSelections.Count > 0)
                     SelectionHandler.ClearSelections();

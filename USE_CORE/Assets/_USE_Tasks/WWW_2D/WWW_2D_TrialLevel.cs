@@ -213,8 +213,8 @@ public class WWW_2D_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddTimer(() => sbDelay, InitTrial);
 
         var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", SessionValues.MouseTracker, InitTrial, FinalFeedback);
-        
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale, WWW_2D_CanvasGO);
+        if (!SessionValues.SessionDef.IsHuman)
+            TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale, WWW_2D_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {

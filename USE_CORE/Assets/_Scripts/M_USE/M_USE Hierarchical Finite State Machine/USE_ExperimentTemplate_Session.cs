@@ -325,8 +325,6 @@ namespace USE_ExperimentTemplate_Session
                 USE_CoordinateConverter.SetScreenDetails(USE_CoordinateConverter.ScreenDetails);
             }
 
-            // Instantiating Task Selection Frame Data
-            // Instantiate normal session data controller for all tasks
 
 
             bool waitForSerialPort = false;

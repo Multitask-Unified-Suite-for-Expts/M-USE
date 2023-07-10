@@ -1,18 +1,13 @@
 OrderedDictionary<string,string>	TaskMappings	{ContinuousRecognition:ContinuousRecognition, EffortControl:EffortControl, FlexLearning:FlexLearning, MazeGame:MazeGame, THR:THR, VisualSearch:VisualSearch, WhatWhenWhere:WhatWhenWhere, WorkingMemory:WorkingMemory}
 Dictionary<string,string>	TaskIcons	{ContinuousRecognition:ContinuousRecognition, EffortControl:EffortControl, FlexLearning:FlexLearning, MazeGame:MazeGame, THR:THR, VisualSearch:VisualSearch, WhatWhenWhere:WhatWhenWhere, WorkingMemory:WorkingMemory}
-float	TaskSelectionTimeout	1000
-bool	MacMainDisplayBuild	false
-bool	IsHuman	true	
+float	TaskSelectionTimeout	2000
+bool	GuidedTaskSelection	false
+bool	IsHuman	true
 bool	StoreData	true
 bool	EventCodesActive	false
 bool	SyncBoxActive	false
-string	SerialPortAddress	"\\\\.\\COM3"
+string	SerialPortAddress	"\\\\.\\COM5"
 int	SerialPortSpeed	115200
 List<string>	SyncBoxInitCommands	{"INI", "ECH 0", "TIM 0", "LIN 33", "LVB 0", "NSU 2", "NPD 10", "NHD 2", "NDW 16", "CAO 20000", "TBP 1000", "TBW 50", "TIB 1", "LOG 1"}
 int	SplitBytes	2
-int	RewardHotKeyNumPulses	1
-int	RewardHotKeyPulseSize	250 
-bool	GuidedTaskSelection	FALSE
-float	ShotgunRaycastCircleSize_DVA	1
-float	ParticipantDistance_CM	60
-float	ShotgunRaycastSpacing_DVA	0.3
+Int	BlockResultsDuration	8

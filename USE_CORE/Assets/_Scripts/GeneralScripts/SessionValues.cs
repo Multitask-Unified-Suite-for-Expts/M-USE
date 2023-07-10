@@ -88,6 +88,8 @@ public static class SessionValues
     // public int RewardHotKeyNumPulses = 1;
     // public int RewardHotKeyPulseSize = 250;
     // public bool GuidedTaskSelection;
+    // public int BlockResultsDuration = 7;
+
 
 
     static SessionValues() // idk about this???

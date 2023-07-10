@@ -322,10 +322,7 @@ namespace USE_ExperimentTemplate_Task
                 {
                     OrderedDictionary taskBlockResults = GetBlockResultsData();
                     if(taskBlockResults != null && taskBlockResults.Count > 0)
-                    {
-                        StartCoroutine(DisplayBlockResults(taskBlockResults));
-                        BlockFbSimpleDuration = 10f; //also gets increased in the coroutine (to account for animation time) 
-                    }
+                        DisplayBlockResults(taskBlockResults);
                 }
 
                 /*if (BlockSummaryString != null)
@@ -342,7 +339,7 @@ namespace USE_ExperimentTemplate_Task
             });
             BlockFeedback.AddUpdateMethod(() =>
             {
-                if (ContinueButtonClicked || (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= BlockFbSimpleDuration))
+                if (ContinueButtonClicked || (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= SessionValues.SessionDef.BlockResultsDuration))
                     BlockFbFinished = true;
                 else
                     BlockFbFinished = false;
@@ -695,7 +692,7 @@ namespace USE_ExperimentTemplate_Task
             ContinueButtonClicked = true;
         }
 
-        private IEnumerator DisplayBlockResults(OrderedDictionary taskBlockResults)
+        private void DisplayBlockResults(OrderedDictionary taskBlockResults)
         {
             GameObject taskCanvas = GameObject.Find(TaskName + "_Canvas");
             if (taskCanvas != null)
@@ -715,24 +712,19 @@ namespace USE_ExperimentTemplate_Task
 
                 Transform gridParent = BlockResultsGO.transform.Find("Grid");
 
-                float startTime = Time.time;
-                int count = 1;
+                gridItem_AudioSource.Play();
+
+                int count = 0;
                 foreach (DictionaryEntry entry in taskBlockResults)
-                {
-                    if (count == 1)
-                        yield return new WaitForSeconds(.2f); //wait a little for the first one
-                        
+                {                        
                     gridItem_AudioSource.Play();
 
                     GameObject gridItem = Instantiate(BlockResults_GridElementPrefab, gridParent);
                     gridItem.name = "GridElement" + count;
                     TextMeshProUGUI itemText = gridItem.GetComponentInChildren<TextMeshProUGUI>();
                     itemText.text = $"{entry.Key}: <b>{entry.Value}</b>";
-                    if(count < taskBlockResults.Count)
-                        yield return new WaitForSeconds(.5f);
                     count++;
                 }
-                BlockFbSimpleDuration += Time.time - startTime; //increase state duration so that it doesnt start until coroutine done.
             }
             else
                 Debug.Log("Didn't find a Task Canvas named: " + TaskName + "_Canvas");

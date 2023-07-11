@@ -10,7 +10,7 @@ using USE_States;
 using Object = UnityEngine.Object;
 using USE_ExperimentTemplate_Classes;
 using System.Collections;
-using UnityEditor;
+
 
 namespace USE_StimulusManagement
 {
@@ -121,14 +121,15 @@ namespace USE_StimulusManagement
 				sd.StimFolderPath = StimFolderPath;
 			if (StimExtension != null)
 				sd.StimExtension = StimExtension;
-			if (StimCode != null)
-				sd.StimCode = StimCode;
 			if (StimID != null)
 				sd.StimID = StimID;
 			if (StimDimVals != null)
 				sd.StimDimVals = StimDimVals;
-			// if (StimGameObject != null)
-			// 	sd.StimGameObject = StimGameObject; // this is bad, we should be copying this
+
+			if (CanvasGameObject != null)
+				sd.CanvasGameObject = CanvasGameObject;
+
+			sd.StimCode = StimCode;
 			sd.StimLocation = StimLocation;
 			sd.StimRotation = StimRotation;
 			sd.StimScreenLocation = StimScreenLocation;
@@ -171,14 +172,15 @@ namespace USE_StimulusManagement
 				sd.StimFolderPath = StimFolderPath;
 			if (StimExtension != null)
 				sd.StimExtension = StimExtension;
-			if (StimCode != null)
-				sd.StimCode = StimCode;
 			if (StimID != null)
 				sd.StimID = StimID;
 			if (StimDimVals != null)
 				sd.StimDimVals = StimDimVals;
-			// if (StimGameObject != null)
-			// 	sd.StimGameObject = StimGameObject; // this is bad, we should be copying this
+
+			if (CanvasGameObject != null)
+				sd.CanvasGameObject = CanvasGameObject;
+
+			sd.StimCode = StimCode;
 			sd.StimLocation = StimLocation;
 			sd.StimRotation = StimRotation;
 			sd.StimScreenLocation = StimScreenLocation;
@@ -277,8 +279,7 @@ namespace USE_StimulusManagement
 
         public IEnumerator Load(Action<GameObject> callback)
         {
-	        Debug.Log(FileName);
-			SessionValues.Using2DStim = FileName.Contains("png") ? true : false;
+			SessionValues.Using2DStim = FileName.Contains("png");
 
 			bool loadFromServer = SessionValues.WebBuild && !SessionValues.UseDefaultConfigs;
 
@@ -296,10 +297,7 @@ namespace USE_StimulusManagement
 						yield return CoroutineHelper.StartCoroutine(LoadExternalStimFromServer(returnedStimGO =>
 						{
 							if (returnedStimGO != null)
-							{
-								Debug.Log("Stim returned from LoadExternalStimFromServer coroutine! Woo!");
 								StimGameObject = returnedStimGO;
-							}
 							else
 								Debug.Log("RETURNED STIM GAMEOBJECT IS NULL!!!!!!");
 						}));
@@ -568,10 +566,140 @@ namespace USE_StimulusManagement
 
 			StimGameObject = null;
 		}
-        public void DestroyRecursive(GameObject go)
+
+		public void DestroyRecursive(GameObject go)
+		{
+			if(SessionValues.UseDefaultConfigs)
+			{
+                Object.Destroy(go);
+				return;
+            }
+
+            //if (go.transform.childCount > 0)
+            //	for (int iChild = 0; iChild < go.transform.childCount; iChild++)
+            //		DestroyRecursive(go.transform.GetChild(iChild).gameObject);
+
+
+            //if (go.GetComponent<Texture>() != null)
+            //{
+            //             Object.Destroy(go.GetComponent<Texture>());
+            //	Debug.Log(go.name + " Texture");
+            //}
+            //if (go.GetComponent<Texture2D>() != null)
+            //{
+            //             Object.Destroy(go.GetComponent<Texture2D>());
+            //	Debug.Log(go.name + " Texture2D");
+            //}
+
+            //Material mat = go.GetComponent<Material>();
+            //if (mat != null)
+            //{
+            //	if (mat.shader != null)
+            //	{
+            //                 Object.Destroy(mat.shader);
+            //		Debug.Log(go.name + " Material Shader");
+            //	}
+            //	if (mat.mainTexture != null)
+            //	{
+            //                 Object.Destroy(mat.mainTexture);
+            //		Debug.Log(go.name + " Material Main Texture");
+            //	}
+            //             Object.Destroy(go.GetComponent<Material>());
+            //	Debug.Log(go.name + " Material");
+            //}
+
+            //MeshRenderer mr = go.GetComponent<MeshRenderer>();
+            //if (mr != null)
+            //{
+            //	Debug.Log(go.name + " Mesh Renderer Exists");
+            //	foreach (Material material in mr.materials)
+            //	{
+            //		if (material.mainTexture != null)
+            //		{
+            //                     Object.Destroy(material.mainTexture);
+            //			Debug.Log(go.name + " Mesh Renderer Material " + material.name + " Main Texture");
+            //                     Object.Destroy(material);
+            //		}
+            //	}
+            //	foreach (Material material in mr.sharedMaterials)
+            //	{
+            //		if (material.mainTexture != null)
+            //		{
+            //                     Object.Destroy(material.mainTexture);
+            //			Debug.Log(go.name + " Mesh Renderer  Material " + material.name + " Shared Texture");
+            //		}
+            //	}
+            //}
+
+            //Renderer renderer = go.GetComponent<Renderer>();
+            //if (renderer != null)
+            //{
+            //	Debug.Log(go.name + " Plain Renderer Exists");
+            //	foreach (Material material in renderer.materials)
+            //	{
+            //		if (material.mainTexture != null)
+            //		{
+            //                     Object.Destroy(material.mainTexture);
+            //			Debug.Log(go.name + " Plain Renderer Material " + material.name + " Main Texture");
+            //                     Object.Destroy(material);
+            //		}
+            //	}
+            //	foreach (Material material in renderer.sharedMaterials)
+            //	{
+            //		if (material.mainTexture != null)
+            //		{
+            //                     Object.Destroy(material.mainTexture);
+            //			Debug.Log(go.name + " Plain Renderer Material " + material.name + " Shared Texture");
+            //		}
+            //	}
+            //}
+
+            //MeshCollider mc = go.GetComponent<MeshCollider>();
+            //if (mc != null)
+            //{
+            //	Debug.Log(go.name + "Mesh Collider");
+            //	if (mc.material != null)
+            //	{
+            //                 Object.Destroy(mc.material);
+            //		Debug.Log(go.name + " Mesh Collider Material " + mc.material.name);
+            //	}
+            //             Object.Destroy(mc);
+            //}
+
+            //MeshFilter mf = go.GetComponent<MeshFilter>();
+            //if (mf != null)
+            //{
+            //	Debug.Log(go.name + "Mesh Filter");
+            //	if (mf.mesh != null)
+            //	{
+            //                 Object.Destroy(mf.mesh);
+            //		Debug.Log(go.name + " MeshFilter Mesh " + mf.mesh.name);
+            //	}
+            //             Object.Destroy(mf);
+            //}
+
+            //if (go.GetComponent<StimDefPointer>() != null)
+            //{
+            //             Object.Destroy(go.GetComponent<StimDefPointer>());
+            //	Debug.Log(go.name + " StimDefPointer");
+            //}
+
+            Object.Destroy(go);
+		}
+
+		/*public void DestroyRecursive(GameObject go)
         {
             Debug.Log(go.name);
-
+            if (go.GetComponent<Texture>() != null)
+            {
+                GameObject.Destroy(go.GetComponent<Texture>());
+                Debug.Log(go.name + " Texture");
+            }
+            if (go.GetComponent<Texture2D>() != null)
+            {
+                GameObject.Destroy(go.GetComponent<Texture2D>());
+                Debug.Log(go.name + " Texture2D");
+            }
             // Destroy MeshFilters and their associated Meshes
             MeshFilter[] meshFilters = go.GetComponentsInChildren<MeshFilter>();
             foreach (MeshFilter meshFilter in meshFilters)
@@ -579,7 +707,7 @@ namespace USE_StimulusManagement
                 if (meshFilter.sharedMesh != null)
                 {
                     Debug.Log(go.name + " MeshFilter Mesh " + meshFilter.sharedMesh.name);
-                    GameObject.DestroyImmediate(meshFilter.sharedMesh, false);
+                    GameObject.DestroyImmediate(meshFilter.sharedMesh, true);
                 }
                 GameObject.DestroyImmediate(meshFilter);
             }
@@ -591,7 +719,7 @@ namespace USE_StimulusManagement
                 if (skinnedMeshRenderer.sharedMesh != null)
                 {
                     Debug.Log(go.name + " SkinnedMeshRenderer Mesh " + skinnedMeshRenderer.sharedMesh.name);
-                    GameObject.DestroyImmediate(skinnedMeshRenderer.sharedMesh, false);
+                    GameObject.DestroyImmediate(skinnedMeshRenderer.sharedMesh, true);
                 }
                 GameObject.DestroyImmediate(skinnedMeshRenderer);
             }
@@ -606,23 +734,13 @@ namespace USE_StimulusManagement
                     if (material != null)
                     {
                         Debug.Log(go.name + " Material " + material.name);
-
-                        // Destroy Textures
-                        if (material.mainTexture != null)
-                        {
-                            if (material.mainTexture is Texture2D)
-                            {
-                                Debug.Log(go.name + " Texture2D " + material.mainTexture.name + " (Attached to: " + go.name + ")");
-                                GameObject.DestroyImmediate(material.mainTexture, false);
-                            }
-                            else
-                            {
-                                Debug.Log(go.name + " Texture " + material.mainTexture.name + " (Attached to: " + go.name + ")");
-                                GameObject.DestroyImmediate(material.mainTexture, false);
-                            }
-                        }
-
-                        GameObject.DestroyImmediate(material, false);
+                        GameObject.DestroyImmediate(material, true);
+                    }
+                    if (material.mainTexture != null)
+                    {
+                        GameObject.Destroy(material.mainTexture);
+                        Debug.Log(go.name + " Plain Renderer Material " + material.name + " Main Texture");
+                        GameObject.Destroy(material);
                     }
                 }
                 renderer.sharedMaterials = new Material[materials.Length];
@@ -630,13 +748,9 @@ namespace USE_StimulusManagement
 
             // Destroy GameObject
             GameObject.DestroyImmediate(go);
+        }*/
 
-        }
-
-
-
-
-        public GameObject LoadModel(string filePath, bool loadFromResources = false, bool visibiility = false)
+		public GameObject LoadModel(string filePath, bool loadFromResources = false, bool visibiility = false)
 		{
 			using (var assetLoader = new AssetLoader())
 			{
@@ -719,5 +833,293 @@ namespace USE_StimulusManagement
 
 			//return CheckFileName(folderPath, filename);
 		}
+	}
+
+
+	[System.Serializable]
+	public class StimGroup
+	{
+		public List<StimDef> stimDefs;
+		public string stimGroupName;
+		public State SetActiveOnInitialization;
+		public State SetInactiveOnTermination;
+		public bool IsActive;
+
+		public StimGroup(string groupName, State setActiveOnInit = null, State setInactiveOnTerm = null)
+		{
+			stimGroupName = groupName;
+			stimDefs = new List<StimDef>();
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
+		}
+		
+		public StimGroup(string groupName, IEnumerable<StimDef> stims, State setActiveOnInit = null, State setInactiveOnTerm = null)
+		{
+			stimGroupName = groupName;
+			stimDefs = new List<StimDef>();
+			AddStims(stims);
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
+		}
+
+		public StimGroup(string groupName, IEnumerable<GameObject> gos, State setActiveOnInit = null, State setInactiveOnTerm = null)
+		{
+			stimGroupName = groupName;
+			stimDefs = new List<StimDef>();
+			AddStims(gos);
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
+		}
+
+		public StimGroup(string groupName, IEnumerable<int[]> dimValGroup, string folderPath, IEnumerable<string[]> featureNames, string neutralPatternedColorName, Camera cam, float scale = 1, State setActiveOnInit = null, State setInactiveOnTerm = null) 
+		{
+			stimGroupName = groupName;
+			stimDefs = new List<StimDef>();
+			AddStims(dimValGroup);
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
+		}
+
+		public StimGroup(string groupName, string TaskName, string stimDefFilePath, State setActiveOnInit = null, State setInactiveOnTerm = null)
+		{
+			stimGroupName = groupName;
+			stimDefs = new List<StimDef>();
+			AddStims(TaskName, stimDefFilePath);
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
+		}
+		
+		public StimGroup(string groupName, StimGroup sgOrig, IEnumerable<int> stimSubsetIndices, State setActiveOnInit = null, State setInactiveOnTerm = null)
+		{
+			stimGroupName = groupName;
+			stimDefs = new List<StimDef>();
+			AddStims(sgOrig, stimSubsetIndices);
+			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
+		}
+
+
+		public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
+		{
+			if (setActiveOnInit != null)
+			{
+				SetActiveOnInitialization = setActiveOnInit;
+				SetActiveOnInitialization.StateInitializationFinished += ActivateOnStateInit;
+			}
+			if (setInactiveOnTerm != null)
+			{
+				SetInactiveOnTermination = setInactiveOnTerm;
+				SetInactiveOnTermination.StateTerminationFinished += InactivateOnStateTerm;
+			}
+		}
+
+		private void ActivateOnStateInit(object sender, EventArgs e)
+		{
+			ToggleVisibility(true);
+		}
+
+		private void InactivateOnStateTerm(object sender, EventArgs e)
+		{
+			ToggleVisibility(false);
+		}
+
+		public void AddStims(StimDef stim)
+		{
+			stim.AddToStimGroup(this);
+			// stim.ToggleVisibility(false);
+		}
+
+		public void AddStims(IEnumerable<StimDef> stims)
+		{
+			foreach (StimDef stim in stims)
+			{
+				stim.AddToStimGroup(this);
+				// stim.ToggleVisibility(false);
+			}
+		}
+
+		public void AddStims(GameObject go)
+		{
+			StimDef stim = new StimDef(this, go);
+		}
+		public void AddStims(IEnumerable<GameObject> gos)
+		{
+			foreach (GameObject go in gos)
+			{
+				StimDef stim = new StimDef(this, go);
+			}
+		}
+
+		public void AddStims(int[] dimVals)
+		{
+			StimDef stim = new StimDef(this, dimVals);
+			// stim.ToggleVisibility(false);
+		}
+
+		public void AddStims(IEnumerable<int[]> dimValGroup)
+		{
+			foreach (int[] dimVals in dimValGroup)
+			{
+				StimDef stim = new StimDef(this, dimVals);
+				// stim.ToggleVisibility(false);
+			}
+		}
+
+		public void AddStims(string TaskName, string stimDefFilePath)
+		{
+			SessionSettings.ImportSettings_SingleTypeArray<StimDef>(TaskName + "_StimDefs", stimDefFilePath);
+			List<StimDef> sds = (List<StimDef>)SessionSettings.Get(TaskName + "_StimDefs");
+			foreach (StimDef sd in sds)
+				sd.AddToStimGroup(this);			
+		}
+
+		public void AddStims(StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)
+		{
+			foreach (int index in stimSubsetIndices)
+			{
+				sgOrig.stimDefs[index].AddToStimGroup(this);
+				if (sgOrig.stimDefs[index].StimIndex != index)
+					Debug.LogError("Stim at StimDef index " + index + " does not correspond to the listed StimIndex: " + sgOrig.stimDefs[index].StimIndex);
+			}
+		}
+
+		public void RemoveStims(StimDef stim)
+		{
+			stim.RemoveFromStimGroup(this);
+		}
+		
+		public void RemoveStims(IEnumerable<StimDef> stims)
+		{
+			foreach (StimDef stim in stims)
+			{
+				stim.RemoveFromStimGroup(this);
+			}
+		}
+		
+		
+		public void RemoveStims(int[] dimVals)
+		{
+			foreach (StimDef sd in stimDefs)
+			{
+				if (sd.StimDimVals == dimVals)
+				{
+					sd.RemoveFromStimGroup(this);
+					return;
+				}
+			}
+			Debug.LogWarning("Attempted to remove StimDef with dimensional values " + dimVals + " from StimGroup " + stimGroupName + 
+			                 ", but this StimGroup does not include a StimDef with these dimensional values.");
+		}
+
+		public void RemoveStims(IEnumerable<int[]> dimValGroup)
+		{
+			foreach (int[] dimVals in dimValGroup)
+			{
+				RemoveStims(dimVals);
+			}
+		}
+
+		public void RemoveStims(StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)
+		{
+			foreach (int index in stimSubsetIndices)
+			{
+				sgOrig.stimDefs[index].RemoveFromStimGroup(this);
+			}
+		}
+
+		public IEnumerator LoadStims()
+		{
+			foreach (StimDef sd in stimDefs)
+			{
+				if (sd.StimGameObject == null){
+					yield return CoroutineHelper.StartCoroutine(sd.Load(stimResultGO =>
+					{
+						if (stimResultGO != null)
+							sd.StimGameObject = stimResultGO;
+						else
+							Debug.Log("LOAD COROUTINE - STIM RESULT GAMEOBJECT IS NULL!!!!!!!!!!!!");
+					}));
+				}
+			}
+		}
+
+		public void LoadPrefabStimFromResources()
+		{
+			foreach (StimDef sd in stimDefs)
+				sd.LoadPrefabFromResources();
+		}
+
+		public void LoadExternalStims()
+		{
+			foreach (StimDef sd in stimDefs)
+				sd.LoadExternalStimFromFile();
+		}
+
+		public void DestroyStimGroup()
+		{
+			int nStims = stimDefs.Count;
+			for (int iS = 0; iS < nStims; iS++)
+			{
+				StimDef sd = stimDefs[0];
+				sd.RemoveFromStimGroup(this);
+				if (sd.SetActiveOnInitialization != null)
+				{
+					sd.SetActiveOnInitialization.StateInitializationFinished -= sd.ActivateOnStateInit;
+					sd.SetActiveOnInitialization = null;
+				}
+
+				if (sd.SetInactiveOnTermination != null)
+				{
+					sd.SetInactiveOnTermination.StateTerminationFinished -= sd.InactivateOnStateTerm;
+					sd.SetInactiveOnTermination = null;
+				}
+
+				stimDefs.RemoveAt(0);
+				sd.DestroyStimGameObject();
+				// GameObject tempGo = sd.StimGameObject;
+				// sd.StimGameObject = null;
+				// foreach (Transform child in tempGo.transform)
+				// 	GameObject.Destroy(child.gameObject);
+				// GameObject.Destroy(tempGo);
+			}
+		}
+
+		public void ToggleVisibility(bool visibility)
+		{
+			foreach (StimDef stim in stimDefs)
+			{
+				stim.ToggleVisibility(visibility);
+			}
+
+			IsActive = visibility;
+		}
+
+		public void SetLocations(IEnumerable<Vector3> locs)
+		{
+			Vector3[] LocArray = locs.ToArray();
+			if (LocArray.Length == stimDefs.Count)
+			{
+				for (int iL = 0; iL < LocArray.Length; iL++)
+				{
+					stimDefs[iL].StimLocation = LocArray[iL];
+				}
+			}
+			else
+			{
+				Debug.LogError("Attempted to set the locations of stims in StimGroup " + stimGroupName +
+				               ", but there are " + stimDefs.Count + " stimuli in this group and " + LocArray.Length +
+				               " locations were given.");
+			}
+		}
+		public void SetRotations(IEnumerable<Vector3> rots)
+		{
+			Vector3[] rotArray = rots.ToArray();
+			if (rotArray.Length == stimDefs.Count)
+			{
+				for (int iL = 0; iL < rotArray.Length; iL++)
+					stimDefs[iL].StimLocation = rotArray[iL];
+			}
+			else
+			{
+				Debug.LogError("Attempted to set the rotations of stims in StimGroup " + stimGroupName +
+				               ", but there are " + stimDefs.Count + " stimuli in this group and " + rotArray.Length +
+				               " rotations were given.");
+			}
+		}
+		
 	}
 }

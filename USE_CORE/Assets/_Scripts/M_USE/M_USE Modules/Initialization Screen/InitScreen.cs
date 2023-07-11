@@ -32,7 +32,6 @@ SOFTWARE.
 */
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 
 public class InitScreen : MonoBehaviour
@@ -87,7 +86,13 @@ public class InitScreen : MonoBehaviour
             StartCoroutine(ServerManager.GetSessionConfigFolders(folders => folderDropdown.SetFolders(folders)));
 
             if (!Application.isEditor)
-                confirmButtonGO.transform.localPosition += new Vector3(0, 75f, 0);
+            {
+                if(Screen.fullScreen)   
+                    confirmButtonGO.transform.localPosition += new Vector3(0, 125f, 0);
+                else
+                    confirmButtonGO.transform.localPosition += new Vector3(0, 75f, 0);
+
+            }
             confirmButtonGO.SetActive(true);
             webBuildChildrenGO.SetActive(true);
             buttonsParentGO.SetActive(false);

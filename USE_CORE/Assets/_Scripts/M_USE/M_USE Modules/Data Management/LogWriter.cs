@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class LogWriter : MonoBehaviour
 {
-    private List<string> LogMessages = new List<string>();
+    private readonly List<string> LogMessages = new List<string>();
     public bool StoreDataIsSet; //turned true by sessionLevel script when it sets SessionValues.StoreData's value
     private bool LogFolderCreated;
     private bool LogFileCreated;
@@ -147,7 +147,7 @@ public class LogWriter : MonoBehaviour
         {
             string content = string.Join("\n", LogMessages.ToArray());
             LogMessages.Clear();
-            yield return ServerManager.AppendToFileAsync(ServerLogFilePath, "Player.log", content);
+            yield return ServerManager.AppendToFileAsync(ServerLogFolderPath, "Player.log", content);
         }
         else
         {

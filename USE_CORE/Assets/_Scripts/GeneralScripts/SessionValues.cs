@@ -3,20 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using Newtonsoft.Json;
 using SelectionTracking;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using USE_Def_Namespace;
 using USE_DisplayManagement;
 using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Session;
-using USE_Settings;
 using USE_UI;
 
 
@@ -92,6 +88,8 @@ public static class SessionValues
     // public int RewardHotKeyNumPulses = 1;
     // public int RewardHotKeyPulseSize = 250;
     // public bool GuidedTaskSelection;
+    // public float BlockResultsDuration;
+
 
 
     static SessionValues() // idk about this???
@@ -113,37 +111,30 @@ public static class SessionValues
     // public static float ShotgunRayCastCircleSize_DVA;
     // public static float ShotgunRaycastSpacing_DVA;
     // public static float ParticipantDistance_CM;
+
     public static IEnumerator GetFileContentString(string fileName, Action<string> callback)
     {
         string fileContent;
-        if (ConfigAccessType == "Default")
+        if (ConfigAccessType == "Local" || ConfigAccessType == "Default")
         {
-            fileContent = File.ReadAllText(Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + fileName);
+            fileContent = File.ReadAllText(LocateFile.FindFilePathInExternalFolder(ConfigFolderPath, $"*{fileName}*")); //Will need to check that this works during Web Build
             callback(fileContent);
         }
         else if (ConfigAccessType == "Server")
         {
-            ServerManager.GetFileStringAsync(ServerManager.SessionConfigFolderPath, "SessionConfig", result =>
+            yield return CoroutineHelper.StartCoroutine(ServerManager.GetFileStringAsync(ConfigFolderPath, "SessionConfig", result =>
             {
                 callback(result);
-            });
-        }
-        else if (ConfigAccessType == "Local")
-        {
-            fileContent = File.ReadAllText(LocateFile.FindFilePathInExternalFolder(ConfigFolderPath, $"*{fileName}*"));
-            callback(fileContent);
+            }));
         }
         else
-        {
             callback(null);
-        }
 
-        yield break;
     }
 
     public static IEnumerator BetterReadSettingsFile<T>(string fileName, string fileType, Action<T[]> callback)
     {
-        yield return GetFileContentString(fileName, result =>
+        yield return CoroutineHelper.StartCoroutine(GetFileContentString(fileName, result =>
         {
             if (result != null)
             {
@@ -160,7 +151,6 @@ public static class SessionValues
                     callback(null);
                     return;
                 }
-
                 callback(settingsArray);
             }
             else
@@ -168,7 +158,7 @@ public static class SessionValues
                 Debug.LogError("Error retrieving file content.");
                 callback(null);
             }
-        });
+        }));
     }
 
     

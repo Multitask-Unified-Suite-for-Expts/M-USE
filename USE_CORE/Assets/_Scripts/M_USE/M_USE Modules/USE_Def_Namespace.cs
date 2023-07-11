@@ -1,10 +1,9 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using UnityEngine;
 using USE_DisplayManagement;
 using USE_ExperimentTemplate_Trial;
+
 
 namespace USE_Def_Namespace
 {
@@ -51,9 +50,14 @@ namespace USE_Def_Namespace
         public int RewardHotKeyNumPulses = 1;
         public int RewardHotKeyPulseSize = 250;
 
+        public float BlockResultsDuration; //default 0, then just specify for human session configs
+
+        public bool PlayBackgroundMusic;
+
         public bool GuidedTaskSelection;
 
     }
+
     public class TaskDef
     {
         public string TaskName;

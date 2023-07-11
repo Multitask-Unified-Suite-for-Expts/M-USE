@@ -166,7 +166,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         var Handler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, InflateBalloon);
-        TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, ButtonScale*10, EC_CanvasGO);
+        TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, ButtonScale * 50, EC_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -248,11 +248,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseBalloon.SpecifyTermination(() => SideChoice != null, CenterSelection, () =>
         {
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["BalloonChosen"]);
+            if(SessionValues.EventCodeManager != null)
+            {
+                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["BalloonChosen"]);
+            }
 
             DestroyChildren(SideChoice == "Left" ? RewardContainerRight : RewardContainerLeft);
-            InflationsNeeded = (SideChoice == "Left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
+            InflationsNeeded = SideChoice == "Left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight;
             AudioFBController.Play("EC_BalloonChosen");
             RecordChoices();
         });

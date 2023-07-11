@@ -750,7 +750,7 @@ namespace USE_States
 				if (CallDefineLevelAutomatically)
 					DefineControlLevel();
 			}
-			Paused = false;
+            Paused = false;
 		}
 		public void InitializeControlLevel(State state)
 		{

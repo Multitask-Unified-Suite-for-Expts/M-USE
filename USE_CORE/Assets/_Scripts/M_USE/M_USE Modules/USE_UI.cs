@@ -44,7 +44,6 @@ namespace USE_UI
             { "VisualSearch", "Each trial, a target object is displayed among distractor objects. Find the targeted object to earn your reward!" },
             { "WhatWhenWhere", "Learn the sequential relationship between objects. Select the objects in the correct sequence to earn your reward!" },
             { "WorkingMemory", "Remember and identify the target object to earn your reward. Don't let the distractor objects fool you!" },
-            { "WWW_2D", "Learn the sequential relationship between objects. Select the objects in the correct sequence to earn your reward!" }
 
         };
         [HideInInspector] public Dictionary<string, string> TaskNamesDict = new Dictionary<string, string>()
@@ -56,8 +55,7 @@ namespace USE_UI
             { "THR", "Touch Hold Release" },
             { "VisualSearch", "Visual Search" },
             { "WhatWhenWhere", "What When Where" },
-            { "WorkingMemory", "Working Memory" },
-            { "WWW_2D", "What When Where"}
+            { "WorkingMemory", "Working Memory" }
         };
 
         [HideInInspector] public Dictionary<string, Vector3> Task_HumanBackgroundPos_Dict = new Dictionary<string, Vector3>()
@@ -69,8 +67,7 @@ namespace USE_UI
             { "THR", new Vector3(0, 0, 1000f) },
             { "VisualSearch", new Vector3(0, 0, 1000f) },
             { "WhatWhenWhere", new Vector3(0, 0, 500f) },
-            { "WorkingMemory", new Vector3(0, 0, 1000f) },
-            { "WWW_2D", new Vector3(0, 0, 500f) }
+            { "WorkingMemory", new Vector3(0, 0, 1000f) }
         };
 
         [HideInInspector] public string TaskName;

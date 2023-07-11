@@ -968,6 +968,11 @@ namespace USE_ExperimentTemplate_Session
 
         private void LoadSessionConfigSettings()
         {
+            GameObject miscScriptsObject = GameObject.Find("MiscScripts");
+            if (miscScriptsObject != null)
+            {
+                miscScriptsObject.AddComponent<LogWriter>();
+            }
             GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
 
             //MAKE SURE SYNCBOX INACTIVE FOR WEB BUILD (Can eventually remove this once thilo provides web build session configs with it marked false)

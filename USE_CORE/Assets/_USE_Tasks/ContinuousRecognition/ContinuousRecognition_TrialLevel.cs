@@ -299,13 +299,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
         });
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
-        ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
-        {
-            AudioFBController.Play("Negative");
-            EndBlock = true;
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["NoChoice"]);
-            AbortCode = 6;
-        });
+        //ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
+        //{
+        //    AudioFBController.Play("Negative");
+        //    EndBlock = true;
+        //    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["NoChoice"]);
+        //    AbortCode = 6;
+        //});
 
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------
         TouchFeedback.AddInitializationMethod(() =>
@@ -1023,7 +1023,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             else
                 yield return StartCoroutine(Load3DStims(RightGroup, FeedbackLocations.Take(FeedbackLocations.Length - 1).ToArray()));
 
-            
             WrongGroup = new StimGroup("Wrong");
             group.stimDefs[currentTrial.WrongStimIndex].CopyStimDef(WrongGroup); //copy wrong stim into WrongGroup
             if(SessionValues.Using2DStim)
@@ -1037,19 +1036,25 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private IEnumerator LoadGridStims(StimGroup group, Transform gridParent)
     {
         TrialStims.Add(group);
+
         yield return StartCoroutine(group.LoadStims());
+
         foreach (var stim in group.stimDefs)
             CreateGridItem(gridParent, stim);
+
         if (currentTrial.StimFacingCamera)
             MakeStimsFaceCamera(group);
+
         group.ToggleVisibility(true);
     }
 
     private IEnumerator Load3DStims(StimGroup group, Vector3[] locations)
     {
         TrialStims.Add(group);
-        group.SetLocations(locations);
+        group.SetLocations(locations); //sets the stimLocation but they dont seem to spawn there
         yield return StartCoroutine(group.LoadStims());
+        foreach (var stim in group.stimDefs)
+            stim.StimGameObject.transform.localPosition = stim.StimLocation; //Manually setting pos since stimLocation isn't doing anything
         Generate3DBorders(group);
         if (currentTrial.StimFacingCamera)
             MakeStimsFaceCamera(group);

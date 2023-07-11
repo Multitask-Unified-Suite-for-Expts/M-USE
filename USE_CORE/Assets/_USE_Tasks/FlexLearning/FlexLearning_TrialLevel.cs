@@ -149,7 +149,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
         var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", SessionValues.MouseTracker, InitTrial, SearchDisplay);
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale*10, FL_CanvasGO);
+        TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale*50, FL_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -370,6 +370,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
 
         int temp = 0;
+
         tStim = new StimGroup("SearchStimuli", group, CurrentTrialDef.TrialStimIndices);
 
         if(TokensWithStimOn?? false)

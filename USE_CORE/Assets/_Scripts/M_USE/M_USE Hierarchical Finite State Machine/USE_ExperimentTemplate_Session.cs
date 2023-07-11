@@ -43,8 +43,6 @@ namespace USE_ExperimentTemplate_Session
 
         protected SummaryData SummaryData;
         protected SessionData SessionData;
-        //private string SessionLevelDataFilePrefix;
-        private string SessionDataFilePrefix;
       //  private SessionDataControllers SessionDataControllers;
 
        // protected SerialSentData SerialSentData;
@@ -109,9 +107,9 @@ namespace USE_ExperimentTemplate_Session
        // private SessionInfoPanel SessionInfoPanel;
         public StringBuilder PreviousTaskSummaryString = new StringBuilder();
 
-      //  [HideInInspector] public DisplayController DisplayController;
+        //  [HideInInspector] public DisplayController DisplayController;
 
-        [HideInInspector] public GameObject TaskButtonsContainer;
+        [HideInInspector] public GameObject TaskButtonsGridContainer;
 
         //Set in inspector
         public GameObject BlockResults_GridElementPrefab;
@@ -123,15 +121,11 @@ namespace USE_ExperimentTemplate_Session
         public GameObject ToggleAudioButton;
         public GameObject StartButtonPrefabGO;
         public AudioClip BackgroundMusic_AudioClip;
-        public AudioClip GridItem_AudioClip;
+        public AudioClip BlockResults_AudioClip;
+
 
         [HideInInspector] public float audioPlaybackSpot;
-
         [HideInInspector] public AudioSource BackgroundMusic_AudioSource;
-
-        //[HideInInspector] public HumanStartPanel HumanStartPanel;
-       // [HideInInspector] public USE_StartButton USE_StartButton;
-
 
 
         public override void LoadSettings()
@@ -155,55 +149,62 @@ namespace USE_ExperimentTemplate_Session
 
             
             string sessionDataFolder = ServerManager.GetSessionDataFolder();
-            if (!string.IsNullOrEmpty(sessionDataFolder))
+            if(!string.IsNullOrEmpty(sessionDataFolder))
                 SessionValues.FilePrefix = sessionDataFolder.Split(new string[] { "__" }, 2, StringSplitOptions.None)[1];
             else
                 SessionValues.FilePrefix = "Session_" + SessionValues.SessionID + "__Subject_" + SessionValues.SubjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
-            SessionDataFilePrefix = SessionValues.FilePrefix;
-            
-            
+
+
             if (SessionValues.WebBuild)
             {
                 SessionValues.SessionDataPath = ServerManager.SessionDataFolderPath;
-                SessionValues.SessionDef.ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
 
                 if (SessionValues.UseDefaultConfigs)
                 {
-                    //ContextExternalFilePath = "Assets/_USE_Session/Resources/DefaultResources/Contexts";
                     SessionValues.ConfigAccessType = "Default";
-                    SessionValues.SessionDef.TaskIconsFolderPath = "DefaultResources/TaskIcons";
                     SessionValues.ConfigFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
-                    StartCoroutine(SessionValues.BetterReadSettingsFile<SessionDef>("SessionConfig", "SingleTypeDelimited", settingsArray =>
-                    {
-                        SessionValues.SessionDef = settingsArray[0];
-                    }));
+
                     WriteSessionConfigsToPersistantDataPath();
 
+                    StartCoroutine(SessionValues.BetterReadSettingsFile<SessionDef>("SessionConfig", "SingleTypeDelimited", settingsArray =>
+                    {
+                        if (settingsArray != null)
+                        {
+                            SessionValues.SessionDef = settingsArray[0];
 
-                    //SessionSettings.ImportSettings_MultipleType("Session", SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath , "*SessionConfig*"));
-                    LoadSessionConfigSettings();
-                    GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
+                            SessionValues.SessionDef.ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
+                            SessionValues.SessionDef.TaskIconsFolderPath = "DefaultResources/TaskIcons";
+                            LoadSessionConfigSettings();
+                            DefineControlLevel();
+                        }
+                        else
+                            Debug.Log("TRIED TO READ SESSION CONFIG BUT THE COROUTINE RESULT IS NULL!");
+                    }));
 
                 }
                 else //Using Server Configs:
                 {
-                    //ContextExternalFilePath = "Resources/Contexts"; //path from root server folder
                     SessionValues.ConfigAccessType = "Server";
-                    SessionValues.SessionDef.TaskIconsFolderPath = "Resources/TaskIcons";
-                    SessionValues.ConfigFolderPath  = ServerManager.SessionConfigFolderPath;
+                    SessionValues.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
 
-                    StartCoroutine(ServerManager.GetFileStringAsync(ServerManager.SessionConfigFolderPath, "SessionConfig", result =>
+                    StartCoroutine(ServerManager.GetFileStringAsync(SessionValues.ConfigFolderPath, "SessionConfig", result =>
                     {
                         if (!string.IsNullOrEmpty(result))
                         {
-                            //SessionSettings.ImportSettings_MultipleType("Session", SessionValues.ConfigFolderPath , result);
                             StartCoroutine(SessionValues.BetterReadSettingsFile<SessionDef>("SessionConfig", "SingleTypeDelimited", settingsArray =>
                             {
-                                SessionValues.SessionDef = settingsArray[0];
+                                if (settingsArray != null)
+                                {
+                                    SessionValues.SessionDef = settingsArray[0];
+                                    SessionValues.SessionDef.ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
+                                    //SessionValues.SessionDef.ContextExternalFilePath = "Resources/Contexts"; //path from root server folder
+                                    SessionValues.SessionDef.TaskIconsFolderPath = "Resources/TaskIcons";
+                                    LoadSessionConfigSettings();
+                                    DefineControlLevel();
+                                }
+                                else
+                                    Debug.Log("SETTINGS ARRAY IS NULL!");
                             }));
-                            LoadSessionConfigSettings();
-                            GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
-
                         }
                         else
                             Debug.Log("SESSION CONFIG COROUTINE RESULT IS EMPTY!!!");
@@ -215,19 +216,16 @@ namespace USE_ExperimentTemplate_Session
                 SessionValues.ConfigAccessType = "Local";
                 SessionValues.ConfigFolderPath = SessionValues.LocateFile.GetPath("Config Folder");
                 SessionValues.SessionDataPath = SessionValues.LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + SessionValues.FilePrefix;
-               // SessionSettings.ImportSettings_MultipleType("Session", LocateFile.FindFilePathInExternalFolder(configFileFolder, "*SessionConfig*"));
-               StartCoroutine(SessionValues.BetterReadSettingsFile<SessionDef>("SessionConfig", "SingleTypeDelimited", settingsArray =>
-               {
-                   SessionValues.SessionDef = settingsArray[0];
-               }));
- 
-                LoadSessionConfigSettings();
-                GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
-
+                StartCoroutine(SessionValues.BetterReadSettingsFile<SessionDef>("SessionConfig", "SingleTypeDelimited", settingsArray =>
+                {
+                    SessionValues.SessionDef = settingsArray[0];
+                    LoadSessionConfigSettings();
+                    DefineControlLevel();
+                }));
             }
 
-
         }
+
 
         public override void DefineControlLevel()
         {
@@ -250,7 +248,6 @@ namespace USE_ExperimentTemplate_Session
                 //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
                 GameObject initCamGO = GameObject.Find("InitCamera");
                 initCamGO.SetActive(false);
-                TaskSelection_Starfield.SetActive(true);
 #else
 
             TaskSelection_Starfield.SetActive(false);
@@ -300,18 +297,17 @@ namespace USE_ExperimentTemplate_Session
                     SessionValues.TobiiEyeTrackerController = TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
                     GameObject TrackBoxGO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"), TobiiEyeTrackerControllerGO.transform);
                     GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
-                    GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform);
-
                     GameObject CalibrationGO = Instantiate(Resources.Load<GameObject>("GazeCalibration"));
                     SessionValues.GazeTracker.enabled = true;
 
 
+                    /*  //  GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform); 
                     GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.transform.SetParent(TobiiEyeTrackerControllerGO.transform, true);
                     // Position and scale the cube as desired
                     cube.transform.position = new Vector3(0f, 1f, 60f);
                     cube.transform.localScale = new Vector3(106f, 62f, 0.1f);
-                    cube.SetActive(false);
+                    cube.SetActive(false);*/
 
                 }
             }
@@ -323,8 +319,6 @@ namespace USE_ExperimentTemplate_Session
                 USE_CoordinateConverter.SetScreenDetails(USE_CoordinateConverter.ScreenDetails);
             }
 
-            // Instantiating Task Selection Frame Data
-            // Instantiate normal session data controller for all tasks
 
 
             bool waitForSerialPort = false;
@@ -499,13 +493,21 @@ namespace USE_ExperimentTemplate_Session
                 FrameData.gameObject.SetActive(true);
             });
 
-            TaskButtonsContainer = null;
-            Dictionary<string, USE_TaskButton> taskButtonsDict = new Dictionary<string, USE_TaskButton>();
+            TaskButtonsGridContainer = null;
+            Dictionary<string, GameObject> taskButtonsDict = new Dictionary<string, GameObject>();
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
-                if (SessionValues.SessionDef.IsHuman && BackgroundMusic_AudioSource == null) //Background music!
-                    SetupBackgroundMusic();
+                if (SessionValues.SessionDef.PlayBackgroundMusic)
+                {
+                    if (BackgroundMusic_AudioSource == null)
+                        SetupBackgroundMusic();
+                }
+                else
+                {
+                    if(ToggleAudioButton.activeInHierarchy)
+                        ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
+                }
 
                 if (SelectionHandler.AllSelections.Count > 0)
                     SelectionHandler.ClearSelections();
@@ -539,7 +541,8 @@ namespace USE_ExperimentTemplate_Session
 
                 SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["SelectTaskStarts"]);
 
-                if (SessionValues.SessionDef.SerialPortActive) {
+                if (SessionValues.SessionDef.SerialPortActive)
+                {
                     SessionValues.SerialSentData.CreateFile();
                     SessionValues.SerialRecvData.CreateFile();
                 }
@@ -569,30 +572,29 @@ namespace USE_ExperimentTemplate_Session
                     return;
                 }
 
-                if (TaskButtonsContainer != null)
+                if (TaskButtonsGridContainer != null)
                 {
-                    TaskButtonsContainer.SetActive(true);
+                    TaskButtonsGridContainer.SetActive(true);
                     if (SessionValues.SessionDef.GuidedTaskSelection)
                     {
                         // if guided selection, we need to adjust the shading of the icons and buttons after the task buttons object is already created                        
                         string key = SessionValues.SessionDef.TaskMappings.Keys.Cast<string>().ElementAt(taskCount);
-                        foreach (KeyValuePair<string, USE_TaskButton> taskButton in taskButtonsDict)
+                        foreach (KeyValuePair<string, GameObject> taskButton in taskButtonsDict)
                         {
                             if (taskButton.Key == key)
                             {
-                                taskButton.Value.TaskButtonGO.GetComponent<RawImage>().color = new Color(1f, 1f, 1f, 1f);
-                                taskButton.Value.TaskButtonGO.GetComponent<RawImage>().raycastTarget = true;
+                                taskButton.Value.GetComponent<RawImage>().color = new Color(1f, 1f, 1f, 1f);
+                                taskButton.Value.GetComponent<RawImage>().raycastTarget = true;
                                 if (SessionValues.SessionDef.IsHuman)
-                                    taskButton.Value.TaskButtonGO.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
+                                    taskButton.Value.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
                             }
                             else
                             {
-                                taskButton.Value.TaskButtonGO.GetComponent<RawImage>().color = new Color(.5f, .5f, .5f, .35f);
-                                taskButton.Value.TaskButtonGO.GetComponent<RawImage>().raycastTarget = false;
+                                taskButton.Value.GetComponent<RawImage>().color = new Color(.5f, .5f, .5f, .35f);
+                                taskButton.Value.GetComponent<RawImage>().raycastTarget = false;
                                 if (SessionValues.SessionDef.IsHuman)
                                 {
-                                    HoverEffect hoverEffect = taskButton.Value.TaskButtonGO.GetComponent<HoverEffect>();
-                                    if (hoverEffect != null)
+                                    if (taskButton.Value.TryGetComponent<HoverEffect>(out var hoverEffect))
                                         Destroy(hoverEffect);
                                 }
                                 
@@ -601,54 +603,19 @@ namespace USE_ExperimentTemplate_Session
                     }
                     return;
                 }
-                // Container for all the task buttons
-                TaskButtonsContainer = new GameObject("TaskButtons");
-                TaskButtonsContainer.transform.parent = SessionValues.TaskSelectionCanvasGO.transform;
-                TaskButtonsContainer.transform.localPosition = Vector3.zero;
-                TaskButtonsContainer.transform.localScale = Vector3.one;
 
-                // We'll use height for the calculations because it is generally smaller than the width
-                int numTasks = SessionValues.SessionDef.TaskMappings.Count;
-                float buttonSize;
-                float buttonSpacing;
-                if (SessionValues.SessionDef.MacMainDisplayBuild && !Application.isEditor)
-                {
-                    buttonSize = 264f;
-                    buttonSpacing = 30f;
-                }
-                else
-                {
-                    buttonSize = 199f;
-                    buttonSpacing = 19f;
-                }
 
-                float buttonsWidth = numTasks * buttonSize + (numTasks - 1) * buttonSpacing;
-                float buttonStartX = (buttonSize - buttonsWidth) / 2;
+                TaskButtonsGridContainer = GameObject.Find("TaskButtonsGrid");
 
-                float buttonY = 0f;
-
-                if ( SessionValues.SessionDef.TaskIconLocations == null || SessionValues.SessionDef.TaskIconLocations.Count() != numTasks) //If user didn't specify in config, Generate default locations:
-                {
-                    SessionValues.SessionDef.TaskIconLocations = new Vector3[numTasks];
-                    for (int i = 0; i < numTasks; i++)
-                    {
-                        SessionValues.SessionDef.TaskIconLocations[i] = new Vector3(buttonStartX, buttonY, 0);
-                        buttonStartX += buttonSize + buttonSpacing;
-                    }
-                }
-
-                int count = 0;
-
-                //Create each individual task icon
                 foreach (DictionaryEntry task in SessionValues.SessionDef.TaskMappings)
                 {
                     // Assigns configName and taskName according to Session Config Task Mappings
                     string configName = (string)task.Key;
                     string taskName = (string)task.Value;
 
-                    USE_TaskButton taskButton = new USE_TaskButton(TaskButtonsContainer.transform.parent.GetComponent<Canvas>(), SessionValues.SessionDef.TaskIconLocations[count], buttonSize, configName);
-                    taskButton.TaskButtonGO.transform.SetParent(TaskButtonsContainer.transform, false);
-                    taskButtonsDict.Add(configName, taskButton);
+                    GameObject gridTaskButton = new GameObject(configName);
+                    gridTaskButton.SetActive(false);
+                    RawImage image = gridTaskButton.AddComponent<RawImage>();
 
                     string taskFolderPath = GetConfigFolderPath(configName);
 
@@ -656,20 +623,17 @@ namespace USE_ExperimentTemplate_Session
                     {
                         if (!Directory.Exists(taskFolderPath))
                         {
-                            Destroy(taskButton);
+                            Destroy(gridTaskButton);
                             throw new DirectoryNotFoundException($"Task folder for '{configName}' at '{taskFolderPath}' does not exist.");
                         }
                     }
-
-                    RawImage image = taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>();
 
                     if (SessionValues.WebBuild)
                     {
                         if (SessionValues.UseDefaultConfigs)
                             image.texture = Resources.Load<Texture2D>($"{SessionValues.SessionDef.TaskIconsFolderPath}/{taskName}");
-                        else
+                        else //LOAD THE ICONS FROM THE SERVER!
                         {
-                            //LOAD THE ICONS FROM THE SERVER!
                             StartCoroutine(ServerManager.LoadTextureFromServer($"{SessionValues.SessionDef.TaskIconsFolderPath}/{taskName}.png", imageResult =>
                             {
                                 if (imageResult != null)
@@ -687,30 +651,35 @@ namespace USE_ExperimentTemplate_Session
                     {
                         // If guided task selection, only make the next icon interactable
                         string key = SessionValues.SessionDef.TaskMappings.Keys.Cast<string>().ElementAt(taskCount);
-                        
 
                         if (configName == key)
                         {
                             image.color = new Color(1f, 1f, 1f, 1f);
-                            taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget = true;
-                            if(SessionValues.SessionDef.IsHuman)
-                                taskButton.TaskButtonGO.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
+                            gridTaskButton.GetComponent<RawImage>().raycastTarget = true;
+                            if (SessionValues.SessionDef.IsHuman)
+                                gridTaskButton.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
                         }
                         else
                         {
                             image.color = new Color(.5f, .5f, .5f, .35f);
-                            taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget = false;
+                            gridTaskButton.GetComponent<RawImage>().raycastTarget = false;
                         }
                     }
                     else
                     {
                         // If not guided task selection, make all icons interactable
-                        taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget = true;
-                        if(SessionValues.SessionDef.IsHuman)
-                            taskButton.TaskButtonGO.AddComponent<HoverEffect>();
+                        gridTaskButton.GetComponent<RawImage>().raycastTarget = true;
+                        if (SessionValues.SessionDef.IsHuman)
+                            gridTaskButton.AddComponent<HoverEffect>();
                     }
-                    count++;
+                    gridTaskButton.transform.SetParent(TaskButtonsGridContainer.transform);
+                    gridTaskButton.transform.localPosition = Vector3.zero;
+                    gridTaskButton.transform.localScale = Vector3.one;
+                    gridTaskButton.SetActive(true);
+
+                    taskButtonsDict.Add(configName, gridTaskButton);
                 }
+
 
                 if (SessionValues.SessionDef.IsHuman)
                 {
@@ -724,7 +693,7 @@ namespace USE_ExperimentTemplate_Session
                 SessionValues.SelectionTracker.UpdateActiveSelections();
                 if (SelectionHandler.SuccessfulSelections.Count > 0)
                 {
-                    selectedConfigName = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.GetComponent<USE_TaskButton>()?.configName;
+                    selectedConfigName = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.name;
                     if (selectedConfigName != null)
                         taskAutomaticallySelected = false;
                 }
@@ -748,7 +717,7 @@ namespace USE_ExperimentTemplate_Session
                         string configName = (string)task.Key;
 
                         // If the next task button in the task mappings is not interactable, skip until the next available config is found
-                        if (!taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget)
+                        if (!taskButtonsDict[configName].GetComponent<RawImage>().raycastTarget)
                             continue;
                         taskAutomaticallySelected = true;
                         selectedConfigName = configName;
@@ -761,17 +730,16 @@ namespace USE_ExperimentTemplate_Session
             loadTask.AddInitializationMethod(() =>
             {
                 // Make the selected task icon no longer interactable
-                TaskButtonsContainer.SetActive(false);
-                USE_TaskButton taskButton = taskButtonsDict[selectedConfigName];
-                RawImage image = taskButton.TaskButtonGO.GetComponent<RawImage>();
-                
+                TaskButtonsGridContainer.SetActive(false);
+                GameObject taskButton = taskButtonsDict[selectedConfigName];
+                RawImage image = taskButton.GetComponent<RawImage>();
+
 
                 if (!SessionValues.WebBuild) //Let patients play same task as many times as they want
                 {
-                    taskButton.TaskButtonGO.GetComponent<RawImage>().color = new Color(.5f, .5f, .5f, .35f);
-                    taskButton.TaskButtonGO.GetComponent<RawImage>().raycastTarget = false;
-                    HoverEffect hoverEffect = taskButton.TaskButtonGO.GetComponent<HoverEffect>();
-                    if (hoverEffect != null)
+                    taskButton.GetComponent<RawImage>().color = new Color(.5f, .5f, .5f, .35f);
+                    taskButton.GetComponent<RawImage>().raycastTarget = false;
+                    if (taskButton.TryGetComponent<HoverEffect>(out var hoverEffect))
                         Destroy(hoverEffect);
                 }
 
@@ -817,15 +785,12 @@ namespace USE_ExperimentTemplate_Session
                     SessionValues.SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialRecvData", CurrentTask.TaskName);
                     SessionValues.SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialSentData", CurrentTask.TaskName);
                 }
-
-                FrameData.AppendDataToFile();
             });
 
             //automatically finish tasks after running one - placeholder for proper selection
             //runTask.AddLateUpdateMethod
             runTask.AddUniversalInitializationMethod(() =>
             {
-
                 SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["RunTaskStarts"]);
 
 #if (!UNITY_WEBGL)
@@ -855,7 +820,6 @@ namespace USE_ExperimentTemplate_Session
             {
                 SessionValues.SelectionTracker.UpdateActiveSelections();
                 AppendSerialData();
-                FrameData.AppendDataToBuffer();
             });
 
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
@@ -867,7 +831,6 @@ namespace USE_ExperimentTemplate_Session
 
                 SessionData.AppendDataToBuffer();
                 SessionData.AppendDataToFile();
-
 
 
                 SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
@@ -889,7 +852,6 @@ namespace USE_ExperimentTemplate_Session
 
                 taskCount++;
 
-                SessionValues.FilePrefix = SessionDataFilePrefix;
                 if (SessionValues.SessionDef.SerialPortActive)
                 {
                     SessionValues.SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.SessionDataPath, "SerialRecvData", "SessionLevel");
@@ -909,9 +871,9 @@ namespace USE_ExperimentTemplate_Session
                     SessionValues.GazeData.fileName = SessionValues.FilePrefix + "__GazeData" + SessionValues.GazeData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
                 }
 
-
                 FrameData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.SessionLevelDataPath, "FrameData", "SessionLevel");
                 FrameData.fileName = SessionValues.FilePrefix + "__FrameData" + FrameData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
+
                 FrameData.gameObject.SetActive(true);
             });
 
@@ -940,7 +902,6 @@ namespace USE_ExperimentTemplate_Session
 
             SessionData = (SessionData)SessionValues.SessionDataControllers.InstantiateDataController<SessionData>
                 ("SessionData", SessionValues.SessionDef.StoreData, SessionValues.SessionDataPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionValues.SessionDataPath);
-
             SessionData.fileName = SessionValues.FilePrefix + "__SessionData.txt";
             SessionData.sessionLevel = this;
             SessionData.InitDataController();
@@ -973,7 +934,7 @@ namespace USE_ExperimentTemplate_Session
             SessionValues.SessionLevelDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel";
 
             //if web build, create the SessionLevelDataFolder:
-            if (SessionValues.WebBuild)
+            if(SessionValues.WebBuild)
             {
                 StartCoroutine(CreateFolderOnServer(SessionValues.SessionLevelDataPath, () =>
                 {
@@ -1007,43 +968,7 @@ namespace USE_ExperimentTemplate_Session
 
         private void LoadSessionConfigSettings()
         {
-            // if (SessionSettings.SettingExists("Session", "SyncBoxActive"))
-            //     SyncBoxActive = (bool)SessionSettings.Get("Session", "SyncBoxActive");
-            // else
-            //     SyncBoxActive = false;
-
-            // if (SessionSettings.SettingExists("Session", "EventCodesActive"))
-            //     EventCodesActive = (bool)SessionSettings.Get("Session", "EventCodesActive");
-            // else
-            //     EventCodesActive = false;
-            //
-            // if (SessionSettings.SettingExists("Session", "RewardPulsesActive"))
-            //     RewardPulsesActive = (bool)SessionSettings.Get("Session", "RewardPulsesActive");
-            // else
-            //     RewardPulsesActive = false;
-
-            // if (SessionSettings.SettingExists("Session", "SonicationActive"))
-            //     SonicationActive = (bool)SessionSettings.Get("Session", "SonicationActive");
-            // else
-            //     SonicationActive = false;
-
-            // if (SessionSettings.SettingExists("Session", "RewardHotKeyPulseSize"))
-            //     RewardHotKeyPulseSize = (int)SessionSettings.Get("Session", "RewardHotKeyPulseSize");
-            // else
-            //     RewardHotKeyPulseSize = 250;
-            //
-            // if (SessionSettings.SettingExists("Session", "RewardHotKeyNumPulses"))
-            //     RewardHotKeyNumPulses = (int)SessionSettings.Get("Session", "RewardHotKeyNumPulses");
-            // else
-            //     RewardHotKeyNumPulses = 1;
-            // if (SessionSettings.SettingExists("Session", "EyeTrackerActive"))
-            //     EyeTrackerActive = (bool)SessionSettings.Get("Session", "EyeTrackerActive");
-            // else
-            //     EyeTrackerActive = false;
-            // if (SessionSettings.SettingExists("Session", "SelectionType"))
-            //     SelectionType = (string)SessionSettings.Get("Session", "SelectionType");
-            // else
-            //     SelectionType = "mouse";
+            GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
 
             //MAKE SURE SYNCBOX INACTIVE FOR WEB BUILD (Can eventually remove this once thilo provides web build session configs with it marked false)
             if (SessionValues.WebBuild)
@@ -1070,13 +995,10 @@ namespace USE_ExperimentTemplate_Session
                 eventCodeFileString = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, "*EventCode*");
                 if (!string.IsNullOrEmpty(eventCodeFileString))
                 {
-                   // SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
                    StartCoroutine(SessionValues.BetterReadSettingsFile<Dictionary<string, EventCode>>("EventCodeConfig", "SingleTypeJSON", settingsArray =>
                    {
                        SessionValues.SessionEventCodes = settingsArray[0];
                    }));            
-                   //    SessionEventCodes = SessionValues.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", eventCodeFileString);
-                    //SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
                 }
                 else if (SessionValues.SessionDef.EventCodesActive)
                     Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");
@@ -1091,52 +1013,6 @@ namespace USE_ExperimentTemplate_Session
             else if (SessionValues.SessionDef.TaskMappings.Count == 0)
                 Debug.LogError("No task names or task mappings specified in Session config file or by other means.");
 
-            GameObject.Find("MiscScripts").GetComponent<ShotgunRaycast>().SetShotgunVariables(SessionValues.SessionDef.ShotgunRayCastCircleSize_DVA, SessionValues.SessionDef.ParticipantDistance_CM, SessionValues.SessionDef.ShotgunRaycastSpacing_DVA);
-            // if (SessionSettings.SettingExists("Session", "ShotgunRaycastCircleSize_DVA"))
-            //     ShotgunRaycastCircleSize_DVA = (float)SessionSettings.Get("Session", "ShotgunRaycastCircleSize_DVA");
-            // else
-            //     ShotgunRaycastCircleSize_DVA = 1.25f;
-            //
-            // if (SessionSettings.SettingExists("Session", "ParticipantDistance_CM"))
-            //     ParticipantDistance_CM = (float)SessionSettings.Get("Session", "ParticipantDistance_CM");
-            // else
-            //     ParticipantDistance_CM = 60f;
-            //
-            // if (SessionSettings.SettingExists("Session", "ShotgunRaycastSpacing_DVA"))
-            //     ShotgunRaycastSpacing_DVA = (float)SessionSettings.Get("Session", "ShotgunRaycastSpacing_DVA");
-            // else
-            //     ShotgunRaycastSpacing_DVA = .3f;
-
-
-            // if (SessionSettings.SettingExists("Session", "IsHuman"))
-            //     IsHuman = (bool)SessionSettings.Get("Session", "IsHuman");
-            //
-            // if (SessionSettings.SettingExists("Session", "TaskIconLocations"))
-            //     TaskIconLocations = (Vector3[])SessionSettings.Get("Session", "TaskIconLocations");
-            //
-            // if (SessionSettings.SettingExists("Session", "GuidedTaskSelection"))
-            //     GuidedTaskSelection = (bool)SessionSettings.Get("Session", "GuidedTaskSelection");
-            //
-            // if (SessionSettings.SettingExists("Session", "EyeTrackerActive"))
-            //     EyeTrackerActive = (bool)SessionSettings.Get("Session", "EyeTrackerActive");
-
-            // if (SessionSettings.SettingExists("Session", "ContextExternalFilePath"))
-            //     ContextExternalFilePath = (string)SessionSettings.Get("Session", "ContextExternalFilePath");
-
-            // if (SessionSettings.SettingExists("Session", "TaskIconsFolderPath"))
-            //     TaskIconsFolderPath = (string)SessionSettings.Get("Session", "TaskIconsFolderPath");
-            //
-            // if (SessionSettings.SettingExists("Session", "TaskIcons"))
-            //     TaskIcons = (Dictionary<string, string>)SessionSettings.Get("Session", "TaskIcons");
-
-            // if (SessionSettings.SettingExists("Session", "StoreData"))
-            //     StoreData = (bool)SessionSettings.Get("Session", "StoreData");
-
-            //Set LogWriter StoreData variable:
-
-            //
-            // if (SessionSettings.SettingExists("Session", "SerialPortActive"))
-            //     SerialPortActive = (bool)SessionSettings.Get("Session", "SerialPortActive");
         }
 
         private void WriteSessionConfigsToPersistantDataPath()
@@ -1169,29 +1045,38 @@ namespace USE_ExperimentTemplate_Session
                 Debug.Log("No successfulSelection from which to get the taskButton GameObject from (so we can reset its size)");
         }
 
-        private void SetupBackgroundMusic()
+        private void SetupBackgroundMusic(float audioSpot = 0)
         {
             BackgroundMusic_AudioSource = gameObject.AddComponent<AudioSource>();
             BackgroundMusic_AudioSource.clip = BackgroundMusic_AudioClip;
             BackgroundMusic_AudioSource.loop = true;
-            BackgroundMusic_AudioSource.volume = .5f;
+            BackgroundMusic_AudioSource.volume = .55f;
+            if (audioSpot != 0)
+                BackgroundMusic_AudioSource.time = audioSpot;
             BackgroundMusic_AudioSource.Play();
+            ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(false);
         }
 
         public void HandleToggleAudioButtonClick()
         {
-            if (BackgroundMusic_AudioSource.isPlaying)
+            if(BackgroundMusic_AudioSource != null)
             {
-                audioPlaybackSpot = BackgroundMusic_AudioSource.time;
-                BackgroundMusic_AudioSource.Stop();
-                ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
+                if (BackgroundMusic_AudioSource.isPlaying)
+                {
+                    audioPlaybackSpot = BackgroundMusic_AudioSource.time;
+                    BackgroundMusic_AudioSource.Stop();
+                    ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
+                }
+                else
+                {
+                    BackgroundMusic_AudioSource.time = audioPlaybackSpot;
+                    BackgroundMusic_AudioSource.Play();
+                    ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(false);
+                }
             }
             else
             {
-                BackgroundMusic_AudioSource.time = audioPlaybackSpot;
-                BackgroundMusic_AudioSource.Play();
-                ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(false);
-
+                SetupBackgroundMusic();
             }
         }
 
@@ -1199,28 +1084,30 @@ namespace USE_ExperimentTemplate_Session
         {
             SessionValues.SessionDef.IsHuman = !SessionValues.SessionDef.IsHuman;
 
-            if (SessionValues.SessionDef.IsHuman)
+            if(SessionValues.SessionDef.IsHuman)
             {
                 ToggleAudioButton.SetActive(true);
-                BackgroundMusic_AudioSource = gameObject.AddComponent<AudioSource>();
-                BackgroundMusic_AudioSource.clip = BackgroundMusic_AudioClip;
-                BackgroundMusic_AudioSource.loop = true;
-                BackgroundMusic_AudioSource.time = audioPlaybackSpot;
-                BackgroundMusic_AudioSource.Play();
+
+                if(!BackgroundMusic_AudioSource.isPlaying)
+                    ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
+
+                if (SessionValues.SessionDef.PlayBackgroundMusic)
+                    SetupBackgroundMusic(audioPlaybackSpot);
             }
             else
             {
-                audioPlaybackSpot = BackgroundMusic_AudioSource.time;
-                BackgroundMusic_AudioSource.Stop();
-                ToggleAudioButton.SetActive(false);
+                if(BackgroundMusic_AudioSource != null)
+                {
+                    audioPlaybackSpot = BackgroundMusic_AudioSource.time;
+                    BackgroundMusic_AudioSource.Stop();
+                }
+                ToggleAudioButton.SetActive(false);   
             }
 
             //Change text on button:
             HumanVersionToggleButton.GetComponentInChildren<TextMeshProUGUI>().text = SessionValues.SessionDef.IsHuman ? "Human Version" : "Primate Version";
             //Toggle Starfield:
-            TaskSelection_Starfield.SetActive(TaskSelection_Starfield.activeInHierarchy ? false : true);
-            //push task buttons up to 0 Y for humans, or back to -100 Y for monkeys
-            //TaskButtonsContainer.transform.localPosition = new Vector3(TaskButtonsContainer.transform.localPosition.x, TaskButtonsContainer.transform.localPosition.y + (IsHuman ? -125f : 125f), TaskButtonsContainer.transform.localPosition.z);
+            TaskSelection_Starfield.SetActive(!TaskSelection_Starfield.activeInHierarchy);
         }
 
         private void AppendSerialData()
@@ -1294,7 +1181,7 @@ namespace USE_ExperimentTemplate_Session
 
         public ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
-	    tl.GridItem_AudioClip = GridItem_AudioClip;
+	        tl.BlockResults_AudioClip = BlockResults_AudioClip;
             SessionValues.SessionLevel = this;
             //tl.USE_StartButton = USE_StartButton;
             //tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;

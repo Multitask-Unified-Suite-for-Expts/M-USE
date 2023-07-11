@@ -43,7 +43,9 @@ namespace USE_UI
             { "THR", "Learn touching and holding the square for the correct duration to earn your reward. Holding too short, holding too long, and moving outside the square will result in negative feedback." },
             { "VisualSearch", "Each trial, a target object is displayed among distractor objects. Find the targeted object to earn your reward!" },
             { "WhatWhenWhere", "Learn the sequential relationship between objects. Select the objects in the correct sequence to earn your reward!" },
-            { "WorkingMemory", "Remember and identify the target object to earn your reward. Don't let the distractor objects fool you!" }
+            { "WorkingMemory", "Remember and identify the target object to earn your reward. Don't let the distractor objects fool you!" },
+            { "WWW_2D", "Learn the sequential relationship between objects. Select the objects in the correct sequence to earn your reward!" }
+
         };
         [HideInInspector] public Dictionary<string, string> TaskNamesDict = new Dictionary<string, string>()
         {
@@ -55,7 +57,7 @@ namespace USE_UI
             { "VisualSearch", "Visual Search" },
             { "WhatWhenWhere", "What When Where" },
             { "WorkingMemory", "Working Memory" },
-
+            { "WWW_2D", "What When Where"}
         };
 
         [HideInInspector] public Dictionary<string, Vector3> Task_HumanBackgroundPos_Dict = new Dictionary<string, Vector3>()
@@ -68,6 +70,7 @@ namespace USE_UI
             { "VisualSearch", new Vector3(0, 0, 1000f) },
             { "WhatWhenWhere", new Vector3(0, 0, 500f) },
             { "WorkingMemory", new Vector3(0, 0, 1000f) },
+            { "WWW_2D", new Vector3(0, 0, 500f) }
         };
 
         [HideInInspector] public string TaskName;
@@ -129,8 +132,6 @@ namespace USE_UI
             InstructionsGO.GetComponentInChildren<Text>().text = TaskInstructionsDict[taskName];
             InstructionsGO.SetActive(false);
             InstructionsOn = false;
-
-            StartButtonGO.AddComponent<HoverEffect>();
 
             AdjustButtonPositions();
             SetStartButtonChildren();
@@ -257,7 +258,7 @@ namespace USE_UI
 
     }
 
-    public class USE_TaskButton : MonoBehaviour
+    public class USE_TaskButton : MonoBehaviour //No longer used
     {
         public GameObject TaskButtonGO;
         public float ButtonSize = 10f;
@@ -298,9 +299,9 @@ namespace USE_UI
         public State SetInactiveOnTermination;
 
         public GameObject CreateStartButton(Canvas parent, Vector3? pos, float? scale, bool hover = false, string name = null)
-        {
+        {            
             StartButtonGO = Instantiate(StartButtonPrefab);
-            StartButtonGO.name = name == null ? "StartButton" : name;
+            StartButtonGO.name = name ?? "StartButton";
             StartButtonGO.transform.SetParent(parent.transform, false);
             StartButtonGO.transform.localPosition = pos.HasValue? pos.Value : Vector3.zero;
             CoverCircle_Image = StartButtonGO.transform.Find("CoverCircle").gameObject.GetComponent<Image>();
@@ -308,7 +309,7 @@ namespace USE_UI
 
             StartButtonGO.transform.localScale = scale.HasValue ? new Vector3(scale.Value, scale.Value, 1) : new Vector3(1.2f, 1.2f, 0);
 
-            if (hover)
+            if (hover && Input.mousePresent)
                 StartButtonGO.AddComponent<HoverEffect>();
 
             PlayIconGO.GetComponent<SpriteRenderer>().color = new Color32(38, 188, 250, 255); //LightBlue PlayIcon for non-human version
@@ -473,6 +474,11 @@ namespace USE_UI
             DebugTextGO.SetActive(false);
         }
 
+        public void SetFontSize(int fontSize)
+        {
+            DebugText.fontSize = fontSize;
+        }
+
         public void SetDebugText(string text)
         {
             DebugText.text = text;
@@ -486,6 +492,16 @@ namespace USE_UI
         public void SetTextColor(Color32 color)
         {
             DebugText.color = color;
+        }
+
+        public void ActivateDebugText()
+        {
+            DebugTextGO.SetActive(true);
+        }
+
+        public void DeactivateDebugText()
+        {
+            DebugTextGO.SetActive(false);
         }
     }
 

@@ -414,9 +414,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             else
                 TrialCompletionList.Insert(0, 0);
 
-            Debug.Log("INCREMENTING TRIALS COMPLETED IN BLOCK!");
             TrialsCompleted_Block++;
-            Debug.Log("COMPLETED IN BLOCK: " + TrialsCompleted_Block);
             AddTrialTouchNumsToBlock();
 
             currentTask.CalculateBlockSummaryString();

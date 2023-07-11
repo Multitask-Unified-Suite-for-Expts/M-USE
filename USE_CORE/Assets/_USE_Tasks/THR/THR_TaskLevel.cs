@@ -112,8 +112,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
     public void AddBlockValuesToTaskValues()
     {
-        Debug.Log("THR: ADDING BLOCK VALUES TO TASK VALUES!");
-
         TrialsCompleted_Task += trialLevel.TrialsCompleted_Block;
         TrialsCorrect_Task += trialLevel.TrialsCorrect_Block;
         BlueSquareTouches_Task += trialLevel.BlueSquareTouches_Block;
@@ -125,8 +123,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         ReleasedEarly_Task += trialLevel.NumReleasedEarly_Block;
         ReleasedLate_Task += trialLevel.NumReleasedLate_Block;
         TouchesMovedOutside_Task += trialLevel.NumTouchesMovedOutside_Block;
-
-        Debug.Log("THR DONE ADDING!");
     }
 
     public override OrderedDictionary GetBlockResultsData()

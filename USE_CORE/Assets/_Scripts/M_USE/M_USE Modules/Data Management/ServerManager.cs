@@ -90,6 +90,8 @@ public static class ServerManager //Used with the PHP scripts
 
     public static IEnumerator AppendToFileAsync(string folderPath, string fileName, string rowData)
     {
+        Debug.Log("APPENDING TO FILE: " + fileName + " | " + "AT PATH: " + folderPath);
+
         yield return GetFileStringAsync(folderPath, fileName, originalFileContents =>
         {
             if (originalFileContents != null)
@@ -104,6 +106,8 @@ public static class ServerManager //Used with the PHP scripts
                 IEnumerator appendCoroutine = WriteFileCoroutine(url, formData);
                 CoroutineHelper.StartCoroutine(appendCoroutine);
             }
+            else
+                Debug.Log("ORIGINAL CONTENTS IS NULL FOR FILE: " + fileName);
         });
     }
 
@@ -125,9 +129,11 @@ public static class ServerManager //Used with the PHP scripts
         while (!operation.isDone)
             yield return null;
 
-        string result = request.downloadHandler.text;
+        string result = null;
         if(request.result == UnityWebRequest.Result.Success)
         {
+            result = request.downloadHandler.text;
+
             if (result.ToLower().Contains("file not found") || result.ToLower().Contains("invalid parameters"))
             {
                 Debug.Log($"GetFile Result: {result} | SearchString: {searchString} | Path: {path}");

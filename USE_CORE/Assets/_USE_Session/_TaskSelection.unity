@@ -498,7 +498,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a20a247e197cc49c48f04849aba52095, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  StoreDataIsSet: 0
 --- !u!1 &1213845836
 GameObject:
   m_ObjectHideFlags: 0
@@ -621,25 +620,13 @@ MonoBehaviour:
   DebugActive: 1
   Paused: 0
   SessionId_SQL: 0
-  ParticipantDistance_CM: 0
-  ShotgunRaycastSpacing_DVA: 0
-  ShotgunRaycastCircleSize_DVA: 0
   TasksFinished: 0
-  SubjectID: 
-  SessionID: 
-  FilePrefix: 
-  SessionLevelDataPath: 
   TaskSelectionSceneName: _TaskSelection
   CurrentTask: {fileID: 0}
   GazeCalibrationTaskLevel: {fileID: 0}
-  TaskIconLocations: []
-  RewardHotKeyPulseSize: 0
-  RewardHotKeyNumPulses: 0
   SessionDetails: {fileID: 454535789}
   LocateFile: {fileID: 1481219466}
-  TobiiEyeTrackerController: {fileID: 0}
   CameraMirrorTexture: {fileID: 0}
-  DisplayController: {fileID: 0}
   TaskButtonsContainer: {fileID: 0}
   BlockResults_GridElementPrefab: {fileID: 5967809598972882644, guid: 90c035b644de74843b8c74cca60656b2,
     type: 3}
@@ -658,8 +645,6 @@ MonoBehaviour:
   GridItem_AudioClip: {fileID: 8300000, guid: 92013ced391bb4bcf80c3af683286242, type: 3}
   audioPlaybackSpot: 0
   BackgroundMusic_AudioSource: {fileID: 0}
-  HumanStartPanel: {fileID: 0}
-  USE_StartButton: {fileID: 0}
 --- !u!4 &1375570696
 Transform:
   m_ObjectHideFlags: 0

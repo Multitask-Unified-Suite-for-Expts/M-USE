@@ -221,6 +221,13 @@ namespace USE_ExperimentTemplate_Session
                    SessionValues.SessionDef = settingsArray[0];
                }));
  
+               GameObject miscScriptsObject = GameObject.Find("MiscScripts");
+               if (miscScriptsObject != null)
+               {
+                   miscScriptsObject.AddComponent<LogWriter>();
+               }
+
+               
                 LoadSessionConfigSettings();
                 GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
 

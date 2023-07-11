@@ -202,8 +202,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
         var SelectionHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, ITI);
-        if (!SessionValues.SessionDef.IsHuman)
-            TouchFBController.EnableTouchFeedback(SelectionHandler, TouchFeedbackDuration, StartButtonScale, MG_CanvasGO);
+        TouchFBController.EnableTouchFeedback(SelectionHandler, TouchFeedbackDuration, StartButtonScale, MG_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {

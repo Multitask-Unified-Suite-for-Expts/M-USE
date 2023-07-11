@@ -130,7 +130,7 @@ public static class ServerManager //Used with the PHP scripts
         {
             if (result.ToLower().Contains("file not found") || result.ToLower().Contains("invalid parameters"))
             {
-                Debug.Log($"GetFile Result: {result} | SearchString: {searchString}");
+                Debug.Log($"GetFile Result: {result} | SearchString: {searchString} | Path: {path}");
                 result = null;
             }
             else

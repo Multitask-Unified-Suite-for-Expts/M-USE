@@ -107,9 +107,9 @@ namespace USE_ExperimentTemplate_Session
        // private SessionInfoPanel SessionInfoPanel;
         public StringBuilder PreviousTaskSummaryString = new StringBuilder();
 
-      //  [HideInInspector] public DisplayController DisplayController;
+        //  [HideInInspector] public DisplayController DisplayController;
 
-        [HideInInspector] public GameObject TaskButtonsContainer;
+        [HideInInspector] public GameObject TaskButtonsGridContainer;
 
         //Set in inspector
         public GameObject BlockResults_GridElementPrefab;
@@ -248,7 +248,6 @@ namespace USE_ExperimentTemplate_Session
                 //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
                 GameObject initCamGO = GameObject.Find("InitCamera");
                 initCamGO.SetActive(false);
-                TaskSelection_Starfield.SetActive(true);
 #else
 
             TaskSelection_Starfield.SetActive(false);
@@ -494,12 +493,12 @@ namespace USE_ExperimentTemplate_Session
                 FrameData.gameObject.SetActive(true);
             });
 
-            TaskButtonsContainer = null;
-            Dictionary<string, USE_TaskButton> taskButtonsDict = new Dictionary<string, USE_TaskButton>();
+            TaskButtonsGridContainer = null;
+            Dictionary<string, GameObject> taskButtonsDict = new Dictionary<string, GameObject>();
             string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
-                if(SessionValues.SessionDef.PlayBackgroundMusic)
+                if (SessionValues.SessionDef.PlayBackgroundMusic)
                 {
                     if (BackgroundMusic_AudioSource == null)
                         SetupBackgroundMusic();
@@ -542,7 +541,8 @@ namespace USE_ExperimentTemplate_Session
 
                 SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["SelectTaskStarts"]);
 
-                if (SessionValues.SessionDef.SerialPortActive) {
+                if (SessionValues.SessionDef.SerialPortActive)
+                {
                     SessionValues.SerialSentData.CreateFile();
                     SessionValues.SerialRecvData.CreateFile();
                 }
@@ -572,30 +572,29 @@ namespace USE_ExperimentTemplate_Session
                     return;
                 }
 
-                if (TaskButtonsContainer != null)
+                if (TaskButtonsGridContainer != null)
                 {
-                    TaskButtonsContainer.SetActive(true);
+                    TaskButtonsGridContainer.SetActive(true);
                     if (SessionValues.SessionDef.GuidedTaskSelection)
                     {
                         // if guided selection, we need to adjust the shading of the icons and buttons after the task buttons object is already created                        
                         string key = SessionValues.SessionDef.TaskMappings.Keys.Cast<string>().ElementAt(taskCount);
-                        foreach (KeyValuePair<string, USE_TaskButton> taskButton in taskButtonsDict)
+                        foreach (KeyValuePair<string, GameObject> taskButton in taskButtonsDict)
                         {
                             if (taskButton.Key == key)
                             {
-                                taskButton.Value.TaskButtonGO.GetComponent<RawImage>().color = new Color(1f, 1f, 1f, 1f);
-                                taskButton.Value.TaskButtonGO.GetComponent<RawImage>().raycastTarget = true;
+                                taskButton.Value.GetComponent<RawImage>().color = new Color(1f, 1f, 1f, 1f);
+                                taskButton.Value.GetComponent<RawImage>().raycastTarget = true;
                                 if (SessionValues.SessionDef.IsHuman)
-                                    taskButton.Value.TaskButtonGO.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
+                                    taskButton.Value.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
                             }
                             else
                             {
-                                taskButton.Value.TaskButtonGO.GetComponent<RawImage>().color = new Color(.5f, .5f, .5f, .35f);
-                                taskButton.Value.TaskButtonGO.GetComponent<RawImage>().raycastTarget = false;
+                                taskButton.Value.GetComponent<RawImage>().color = new Color(.5f, .5f, .5f, .35f);
+                                taskButton.Value.GetComponent<RawImage>().raycastTarget = false;
                                 if (SessionValues.SessionDef.IsHuman)
                                 {
-                                    HoverEffect hoverEffect = taskButton.Value.TaskButtonGO.GetComponent<HoverEffect>();
-                                    if (hoverEffect != null)
+                                    if (taskButton.Value.TryGetComponent<HoverEffect>(out var hoverEffect))
                                         Destroy(hoverEffect);
                                 }
                                 
@@ -604,54 +603,19 @@ namespace USE_ExperimentTemplate_Session
                     }
                     return;
                 }
-                // Container for all the task buttons
-                TaskButtonsContainer = new GameObject("TaskButtons");
-                TaskButtonsContainer.transform.parent = SessionValues.TaskSelectionCanvasGO.transform;
-                TaskButtonsContainer.transform.localPosition = Vector3.zero;
-                TaskButtonsContainer.transform.localScale = Vector3.one;
 
-                // We'll use height for the calculations because it is generally smaller than the width
-                int numTasks = SessionValues.SessionDef.TaskMappings.Count;
-                float buttonSize;
-                float buttonSpacing;
-                if (SessionValues.SessionDef.MacMainDisplayBuild && !Application.isEditor)
-                {
-                    buttonSize = 264f;
-                    buttonSpacing = 30f;
-                }
-                else
-                {
-                    buttonSize = 199f;
-                    buttonSpacing = 19f;
-                }
 
-                float buttonsWidth = numTasks * buttonSize + (numTasks - 1) * buttonSpacing;
-                float buttonStartX = (buttonSize - buttonsWidth) / 2;
+                TaskButtonsGridContainer = GameObject.Find("TaskButtonsGrid");
 
-                float buttonY = 0f;
-
-                if ( SessionValues.SessionDef.TaskIconLocations == null || SessionValues.SessionDef.TaskIconLocations.Count() != numTasks) //If user didn't specify in config, Generate default locations:
-                {
-                    SessionValues.SessionDef.TaskIconLocations = new Vector3[numTasks];
-                    for (int i = 0; i < numTasks; i++)
-                    {
-                        SessionValues.SessionDef.TaskIconLocations[i] = new Vector3(buttonStartX, buttonY, 0);
-                        buttonStartX += buttonSize + buttonSpacing;
-                    }
-                }
-
-                int count = 0;
-
-                //Create each individual task icon
                 foreach (DictionaryEntry task in SessionValues.SessionDef.TaskMappings)
                 {
                     // Assigns configName and taskName according to Session Config Task Mappings
                     string configName = (string)task.Key;
                     string taskName = (string)task.Value;
 
-                    USE_TaskButton taskButton = new USE_TaskButton(TaskButtonsContainer.transform.parent.GetComponent<Canvas>(), SessionValues.SessionDef.TaskIconLocations[count], buttonSize, configName);
-                    taskButton.TaskButtonGO.transform.SetParent(TaskButtonsContainer.transform, false);
-                    taskButtonsDict.Add(configName, taskButton);
+                    GameObject gridTaskButton = new GameObject(configName);
+                    gridTaskButton.SetActive(false);
+                    RawImage image = gridTaskButton.AddComponent<RawImage>();
 
                     string taskFolderPath = GetConfigFolderPath(configName);
 
@@ -659,20 +623,17 @@ namespace USE_ExperimentTemplate_Session
                     {
                         if (!Directory.Exists(taskFolderPath))
                         {
-                            Destroy(taskButton);
+                            Destroy(gridTaskButton);
                             throw new DirectoryNotFoundException($"Task folder for '{configName}' at '{taskFolderPath}' does not exist.");
                         }
                     }
-
-                    RawImage image = taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>();
 
                     if (SessionValues.WebBuild)
                     {
                         if (SessionValues.UseDefaultConfigs)
                             image.texture = Resources.Load<Texture2D>($"{SessionValues.SessionDef.TaskIconsFolderPath}/{taskName}");
-                        else
+                        else //LOAD THE ICONS FROM THE SERVER!
                         {
-                            //LOAD THE ICONS FROM THE SERVER!
                             StartCoroutine(ServerManager.LoadTextureFromServer($"{SessionValues.SessionDef.TaskIconsFolderPath}/{taskName}.png", imageResult =>
                             {
                                 if (imageResult != null)
@@ -690,30 +651,36 @@ namespace USE_ExperimentTemplate_Session
                     {
                         // If guided task selection, only make the next icon interactable
                         string key = SessionValues.SessionDef.TaskMappings.Keys.Cast<string>().ElementAt(taskCount);
-                        
 
                         if (configName == key)
                         {
                             image.color = new Color(1f, 1f, 1f, 1f);
-                            taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget = true;
-                            if(SessionValues.SessionDef.IsHuman)
-                                taskButton.TaskButtonGO.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
+                            gridTaskButton.GetComponent<RawImage>().raycastTarget = true;
+                            if (SessionValues.SessionDef.IsHuman)
+                                gridTaskButton.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
                         }
                         else
                         {
                             image.color = new Color(.5f, .5f, .5f, .35f);
-                            taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget = false;
+                            gridTaskButton.GetComponent<RawImage>().raycastTarget = false;
                         }
                     }
                     else
                     {
                         // If not guided task selection, make all icons interactable
-                        taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget = true;
-                        if(SessionValues.SessionDef.IsHuman)
-                            taskButton.TaskButtonGO.AddComponent<HoverEffect>();
+                        gridTaskButton.GetComponent<RawImage>().raycastTarget = true;
+                        if (SessionValues.SessionDef.IsHuman)
+                            gridTaskButton.AddComponent<HoverEffect>();
                     }
-                    count++;
+                    gridTaskButton.transform.SetParent(TaskButtonsGridContainer.transform, false);
+                    //gridTaskButton.transform.parent = TaskButtonsGridContainer.transform;
+                    gridTaskButton.transform.localPosition = Vector3.zero;
+                    gridTaskButton.transform.localScale = Vector3.one;
+                    gridTaskButton.SetActive(true);
+
+                    taskButtonsDict.Add(configName, gridTaskButton);
                 }
+
 
                 if (SessionValues.SessionDef.IsHuman)
                 {
@@ -727,7 +694,7 @@ namespace USE_ExperimentTemplate_Session
                 SessionValues.SelectionTracker.UpdateActiveSelections();
                 if (SelectionHandler.SuccessfulSelections.Count > 0)
                 {
-                    selectedConfigName = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.GetComponent<USE_TaskButton>()?.configName;
+                    selectedConfigName = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.name;
                     if (selectedConfigName != null)
                         taskAutomaticallySelected = false;
                 }
@@ -751,7 +718,7 @@ namespace USE_ExperimentTemplate_Session
                         string configName = (string)task.Key;
 
                         // If the next task button in the task mappings is not interactable, skip until the next available config is found
-                        if (!taskButtonsDict[configName].TaskButtonGO.GetComponent<RawImage>().raycastTarget)
+                        if (!taskButtonsDict[configName].GetComponent<RawImage>().raycastTarget)
                             continue;
                         taskAutomaticallySelected = true;
                         selectedConfigName = configName;
@@ -764,17 +731,16 @@ namespace USE_ExperimentTemplate_Session
             loadTask.AddInitializationMethod(() =>
             {
                 // Make the selected task icon no longer interactable
-                TaskButtonsContainer.SetActive(false);
-                USE_TaskButton taskButton = taskButtonsDict[selectedConfigName];
-                RawImage image = taskButton.TaskButtonGO.GetComponent<RawImage>();
-                
+                TaskButtonsGridContainer.SetActive(false);
+                GameObject taskButton = taskButtonsDict[selectedConfigName];
+                RawImage image = taskButton.GetComponent<RawImage>();
+
 
                 if (!SessionValues.WebBuild) //Let patients play same task as many times as they want
                 {
-                    taskButton.TaskButtonGO.GetComponent<RawImage>().color = new Color(.5f, .5f, .5f, .35f);
-                    taskButton.TaskButtonGO.GetComponent<RawImage>().raycastTarget = false;
-                    HoverEffect hoverEffect = taskButton.TaskButtonGO.GetComponent<HoverEffect>();
-                    if (hoverEffect != null)
+                    taskButton.GetComponent<RawImage>().color = new Color(.5f, .5f, .5f, .35f);
+                    taskButton.GetComponent<RawImage>().raycastTarget = false;
+                    if (taskButton.TryGetComponent<HoverEffect>(out var hoverEffect))
                         Destroy(hoverEffect);
                 }
 
@@ -1085,7 +1051,7 @@ namespace USE_ExperimentTemplate_Session
             BackgroundMusic_AudioSource = gameObject.AddComponent<AudioSource>();
             BackgroundMusic_AudioSource.clip = BackgroundMusic_AudioClip;
             BackgroundMusic_AudioSource.loop = true;
-            BackgroundMusic_AudioSource.volume = .6f;
+            BackgroundMusic_AudioSource.volume = .55f;
             if (audioSpot != 0)
                 BackgroundMusic_AudioSource.time = audioSpot;
             BackgroundMusic_AudioSource.Play();

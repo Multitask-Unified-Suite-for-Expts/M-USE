@@ -111,7 +111,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             if (SquareGO == null)
             {
                 USE_Backdrop = new USE_Backdrop();
-                BackdropGO = USE_Backdrop.CreateBackdrop(THR_CanvasGO.GetComponent<Canvas>(), "BackdropGO", new Color32(0, 9, 23, 255));
+                BackdropGO = USE_Backdrop.CreateBackdrop(THR_CanvasGO.GetComponent<Canvas>(), "BackdropGO", new Color32(28, 32, 38, 255)); //darker color is 0,9,23,255
 
                 USE_Square = new USE_StartButton();
                 USE_Square.StartButtonPrefab = SessionValues.USE_StartButton.StartButtonPrefab;

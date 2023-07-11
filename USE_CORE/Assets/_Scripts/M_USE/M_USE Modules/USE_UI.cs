@@ -133,8 +133,6 @@ namespace USE_UI
             InstructionsGO.SetActive(false);
             InstructionsOn = false;
 
-            StartButtonGO.AddComponent<HoverEffect>();
-
             AdjustButtonPositions();
             SetStartButtonChildren();
         }
@@ -260,7 +258,7 @@ namespace USE_UI
 
     }
 
-    public class USE_TaskButton : MonoBehaviour
+    public class USE_TaskButton : MonoBehaviour //No longer used
     {
         public GameObject TaskButtonGO;
         public float ButtonSize = 10f;
@@ -301,12 +299,9 @@ namespace USE_UI
         public State SetInactiveOnTermination;
 
         public GameObject CreateStartButton(Canvas parent, Vector3? pos, float? scale, bool hover = false, string name = null)
-        {
-            if (StartButtonPrefab == null)
-                Debug.Log("START BUTTON PREFAB IS NULL!");
-            
+        {            
             StartButtonGO = Instantiate(StartButtonPrefab);
-            StartButtonGO.name = name == null ? "StartButton" : name;
+            StartButtonGO.name = name ?? "StartButton";
             StartButtonGO.transform.SetParent(parent.transform, false);
             StartButtonGO.transform.localPosition = pos.HasValue? pos.Value : Vector3.zero;
             CoverCircle_Image = StartButtonGO.transform.Find("CoverCircle").gameObject.GetComponent<Image>();
@@ -314,7 +309,7 @@ namespace USE_UI
 
             StartButtonGO.transform.localScale = scale.HasValue ? new Vector3(scale.Value, scale.Value, 1) : new Vector3(1.2f, 1.2f, 0);
 
-            if (hover)
+            if (hover && Input.mousePresent)
                 StartButtonGO.AddComponent<HoverEffect>();
 
             PlayIconGO.GetComponent<SpriteRenderer>().color = new Color32(38, 188, 250, 255); //LightBlue PlayIcon for non-human version
@@ -479,6 +474,11 @@ namespace USE_UI
             DebugTextGO.SetActive(false);
         }
 
+        public void SetFontSize(int fontSize)
+        {
+            DebugText.fontSize = fontSize;
+        }
+
         public void SetDebugText(string text)
         {
             DebugText.text = text;
@@ -492,6 +492,16 @@ namespace USE_UI
         public void SetTextColor(Color32 color)
         {
             DebugText.color = color;
+        }
+
+        public void ActivateDebugText()
+        {
+            DebugTextGO.SetActive(true);
+        }
+
+        public void DeactivateDebugText()
+        {
+            DebugTextGO.SetActive(false);
         }
     }
 

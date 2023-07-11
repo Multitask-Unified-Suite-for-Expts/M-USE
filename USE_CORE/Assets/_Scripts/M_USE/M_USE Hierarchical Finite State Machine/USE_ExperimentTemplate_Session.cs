@@ -672,8 +672,7 @@ namespace USE_ExperimentTemplate_Session
                         if (SessionValues.SessionDef.IsHuman)
                             gridTaskButton.AddComponent<HoverEffect>();
                     }
-                    gridTaskButton.transform.SetParent(TaskButtonsGridContainer.transform, false);
-                    //gridTaskButton.transform.parent = TaskButtonsGridContainer.transform;
+                    gridTaskButton.transform.SetParent(TaskButtonsGridContainer.transform);
                     gridTaskButton.transform.localPosition = Vector3.zero;
                     gridTaskButton.transform.localScale = Vector3.one;
                     gridTaskButton.SetActive(true);

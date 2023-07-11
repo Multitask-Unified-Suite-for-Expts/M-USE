@@ -312,20 +312,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             if (!StimIsChosen)
                 return;
+            
+            int? depth = SessionValues.Using2DStim ? 10 : (int?)null;
 
             if (currentTrial.GotTrialCorrect)
             {
-                if (SessionValues.Using2DStim)
-                    HaloFBController.ShowPositive(ChosenGO, 10f);
-                else
-                    HaloFBController.ShowPositive(ChosenGO);
+                HaloFBController.ShowPositive(ChosenGO, depth);
             }
             else
             {
-                if(SessionValues.Using2DStim)
-                    HaloFBController.ShowNegative(ChosenGO, 10);
-                else
-                    HaloFBController.ShowNegative(ChosenGO);
+                HaloFBController.ShowNegative(ChosenGO, depth);
             }
         });
         TouchFeedback.AddTimer(() => touchFbDuration.value, TokenUpdate);

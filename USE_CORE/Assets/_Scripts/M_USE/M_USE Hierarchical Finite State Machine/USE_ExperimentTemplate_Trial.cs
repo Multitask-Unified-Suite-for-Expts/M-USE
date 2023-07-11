@@ -580,8 +580,6 @@ namespace USE_ExperimentTemplate_Trial
         public string GetContextNestedFilePath(string MaterialFilePath, string contextName, [CanBeNull] string backupContextName = null)
         {
             string contextPath = "";
-            Debug.Log("MATERIAL FILE PATH: " + MaterialFilePath);
-            Debug.Log("CONTEXT NAME: " + contextName);
             string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
 
             if (filePaths.Length >= 1)

@@ -43,7 +43,7 @@ namespace GazeCalibration_Namespace
         //Already-existing fields (inherited from TrialDef)
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
-        public int BlockID;
+       // public int BlockID;
         public string ContextName;
         public int NumTrials;
         public int NumPulses;

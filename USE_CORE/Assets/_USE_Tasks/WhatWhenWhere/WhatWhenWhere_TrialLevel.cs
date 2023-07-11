@@ -33,8 +33,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     
     // Config Variables
     public string ContextExternalFilePath;
-    [FormerlySerializedAs("ButtonPosition")] public Vector3 StartButtonPosition;
-    [FormerlySerializedAs("ButtonScale")] public float StartButtonScale;
+    [FormerlySerializedAs("ButtonPosition")] public Vector3 ButtonPosition;
+    [FormerlySerializedAs("ButtonScale")] public float ButtonScale;
     public bool StimFacingCamera;
     public string ShadowType;
     public bool NeutralITI;
@@ -127,6 +127,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     // Stimuli Variables
     private GameObject StartButton;
+    public float ExternalStimScale;
     
     // Stim Evaluation Variables
     private GameObject trialStim;
@@ -175,8 +176,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             SliderFBController.InitializeSlider();
             // Initialize FB Controller Values
-            HaloFBController.SetHaloSize(15f);
-            HaloFBController.SetHaloIntensity(2);
+            HaloFBController.SetHaloSize(12);
+            HaloFBController.SetHaloIntensity(5);
             if (StartButton == null)
             {
                 if (SessionValues.SessionDef.IsHuman)
@@ -186,7 +187,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    StartButton = SessionValues.USE_StartButton.CreateStartButton(WWW_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                    StartButton = SessionValues.USE_StartButton.CreateStartButton(WWW_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
                     SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
@@ -215,7 +216,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddTimer(()=> sbDelay, InitTrial);
 
         var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", SessionValues.MouseTracker, InitTrial, FinalFeedback);
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale, WWW_CanvasGO);
+
+
+        TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, ButtonScale * 10, WWW_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -229,6 +232,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 ShotgunHandler.ClearSelections();
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+            ShotgunHandler.MaxPixelDisplacement = 50;
 
         });
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), ChooseStimulusDelay, ()=>
@@ -349,11 +353,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.SetUpdateDuration(fbDuration.value);
             SliderFBController.SetFlashingDuration(flashingFbDuration.value);
 
-            
+            int? depth = SessionValues.Using2DStim ? 50 : (int?)null;
+
             if (CorrectSelection)
             {
                 consecutiveError = 0;
-                HaloFBController.ShowPositive(selectedGO);
+                HaloFBController.ShowPositive(selectedGO, depth);
                 SliderFBController.UpdateSliderValue(CurrentTrialDef.SliderGain[numTouchedStims]*(1f/sliderGainSteps));
                 numTouchedStims += 1;
                 if (numTouchedStims == CurrentTrialDef.CorrectObjectTouchOrder.Length)
@@ -364,7 +369,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             else //Chose Incorrect
             {
                 consecutiveError++;
-                HaloFBController.ShowNegative(selectedGO);
+                HaloFBController.ShowNegative(selectedGO, depth);
                 if (distractorSlotError)
                     stimIdx = Array.IndexOf(CurrentTrialDef.DistractorStimsIndices, selectedSD.StimIndex); // used to index through the arrays in the config file/mapping different columns
                 else
@@ -631,6 +636,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             playerViewText = playerView.CreateTextObject(CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
                 CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
                 Color.red, textLocation, textSize, playerViewParent);
+            playerViewText.SetActive(true);
             playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
             //should this ^ line be deleted and text size be congtrolled by textSize variable?
             playerViewTextList.Add(playerViewText);

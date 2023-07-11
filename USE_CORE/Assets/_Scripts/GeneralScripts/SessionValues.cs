@@ -18,9 +18,9 @@ using USE_UI;
 
 public static class SessionValues
 {
-    public static bool WebBuild = false;
-    public static bool UseDefaultConfigs = false;
-    public static bool Using2DStim = false;
+    public static bool WebBuild;
+    public static bool UseDefaultConfigs;
+    public static bool Using2DStim;
     
     public static ControlLevel_Session_Template SessionLevel;
     public static SessionInfoPanel SessionInfoPanel;

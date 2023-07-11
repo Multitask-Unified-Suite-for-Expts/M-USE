@@ -129,7 +129,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", SessionValues.MouseTracker, InitTrial, SearchDisplay);
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale, WM_CanvasGO);
+        if (!SessionValues.SessionDef.IsHuman)
+            TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale, WM_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {

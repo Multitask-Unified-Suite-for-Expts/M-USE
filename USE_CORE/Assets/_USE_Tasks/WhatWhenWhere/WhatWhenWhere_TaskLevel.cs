@@ -151,12 +151,14 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             wwwTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
         else wwwTL.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-            wwwTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
+            wwwTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
         else Debug.LogError("Start Button Position settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-            wwwTL.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonScale"))
+            wwwTL.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
         else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
+
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
             wwwTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))

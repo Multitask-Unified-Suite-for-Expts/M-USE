@@ -114,6 +114,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             PlayerViewPanelGO = GameObject.Find("MainCameraCopy");
 
             GC_CanvasGO = GameObject.Find("GazeCalibration_Canvas");
+
+            SessionValues.TobiiEyeTrackerController.ScreenBasedCalibration.EnterCalibrationMode();
         });
 
         SetupTrial.AddInitializationMethod(() =>

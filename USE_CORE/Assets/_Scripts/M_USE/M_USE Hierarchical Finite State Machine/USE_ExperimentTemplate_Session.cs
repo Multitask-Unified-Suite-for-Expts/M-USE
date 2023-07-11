@@ -300,17 +300,18 @@ namespace USE_ExperimentTemplate_Session
                     SessionValues.TobiiEyeTrackerController = TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
                     GameObject TrackBoxGO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"), TobiiEyeTrackerControllerGO.transform);
                     GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
+                    GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform);
+
                     GameObject CalibrationGO = Instantiate(Resources.Load<GameObject>("GazeCalibration"));
                     SessionValues.GazeTracker.enabled = true;
 
 
-                    /*  //  GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform); 
                     GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.transform.SetParent(TobiiEyeTrackerControllerGO.transform, true);
                     // Position and scale the cube as desired
                     cube.transform.position = new Vector3(0f, 1f, 60f);
                     cube.transform.localScale = new Vector3(106f, 62f, 0.1f);
-                    cube.SetActive(false);*/
+                    cube.SetActive(false);
 
                 }
             }
@@ -1090,7 +1091,7 @@ namespace USE_ExperimentTemplate_Session
             else if (SessionValues.SessionDef.TaskMappings.Count == 0)
                 Debug.LogError("No task names or task mappings specified in Session config file or by other means.");
 
-
+            GameObject.Find("MiscScripts").GetComponent<ShotgunRaycast>().SetShotgunVariables(SessionValues.SessionDef.ShotgunRayCastCircleSize_DVA, SessionValues.SessionDef.ParticipantDistance_CM, SessionValues.SessionDef.ShotgunRaycastSpacing_DVA);
             // if (SessionSettings.SettingExists("Session", "ShotgunRaycastCircleSize_DVA"))
             //     ShotgunRaycastCircleSize_DVA = (float)SessionSettings.Get("Session", "ShotgunRaycastCircleSize_DVA");
             // else

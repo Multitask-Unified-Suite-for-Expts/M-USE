@@ -174,25 +174,29 @@ namespace USE_ExperimentTemplate_Task
 
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
 
-            ReadSettingsFiles();
-            while (!AllDefsImported)
-                yield return new WaitForEndOfFrame();
-            TrialDefImported = false;
-            BlockDefImported = false;
-            TaskDefImported = false;
+            if(TaskName != "GazeCalibration")
+            {
+                ReadSettingsFiles();
+                while (!AllDefsImported)
+                    yield return new WaitForEndOfFrame();
+                TrialDefImported = false;
+                BlockDefImported = false;
+                TaskDefImported = false;
 
-            HandleCustomSettings();
+                HandleCustomSettings();
 
-            HandleTrialAndBlockDefs(verifyOnly);
-            while (!TrialAndBlockDefsHandled)
-                yield return new WaitForEndOfFrame();
-            TrialAndBlockDefsHandled = false;
+                HandleTrialAndBlockDefs(verifyOnly);
+                while (!TrialAndBlockDefsHandled)
+                    yield return new WaitForEndOfFrame();
+                TrialAndBlockDefsHandled = false;
 
-            FindStims();
-            while (!StimsHandled)
-                yield return new WaitForEndOfFrame();
-            
-            StimsHandled = false;
+                FindStims();
+                while (!StimsHandled)
+                    yield return new WaitForEndOfFrame();
+
+                StimsHandled = false;
+            }
+                
 
             if (verifyOnly)
                 yield break;
@@ -224,6 +228,13 @@ namespace USE_ExperimentTemplate_Task
                     else
                         configUI.store = new ConfigVarStore();
                     configUI.GenerateUI();
+
+                    if (TaskName == "GazeCalibration")
+                    {
+                        BlockDef bd = new BlockDef();
+                        BlockDefs = new BlockDef[] { bd };
+                        bd.GenerateTrialDefsFromBlockDef();
+                    }
                 }
 
 
@@ -456,19 +467,17 @@ namespace USE_ExperimentTemplate_Task
             {
                 //Setup data management
                 if (SessionValues.SessionLevel.CurrentState.StateName == "SetupSession" && TaskName == "GazeCalibration")
-                {
-                    // Store Data in the Session Level / Gaze Calibration folder if running at the session level
+                     // Store Data in the Session Level / Gaze Calibration folder if running at the session level
                     TaskDataPath = SessionValues.SessionLevelDataPath + Path.DirectorySeparatorChar + "PreTask_GazeCalibration";
-                    ConfigName = "GazeCalibration";
-                }
+                
                 else if (TaskName == "GazeCalibration")
-                {
-                    // Store Data in the Task / Gaze Calibration folder if not running at the session level
+                     // Store Data in the Task / Gaze Calibration folder if not running at the session level
                     TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigName + Path.DirectorySeparatorChar + "InTask_GazeCalibration";
-                    ConfigName = "GazeCalibration";
-                }
+                
+                ConfigName = "GazeCalibration";
+
             }
-            
+
 
             SessionValues.FilePrefix = SessionValues.FilePrefix + "_" + ConfigName;
 
@@ -778,6 +787,7 @@ namespace USE_ExperimentTemplate_Task
             //read in the TaskDef, BlockDef, TrialDef, and StimDef files (any of these may not exist)
             //if end up making coroutines again... yield return StartCoroutine((IEnumerator)shshshsh.Invoke(this, new object[] {xhxhxhx});
 
+            
             MethodInfo readTaskDef = GetType().GetMethod(nameof(this.ReadTaskDef)).MakeGenericMethod(new Type[] { TaskDefType });
             readTaskDef.Invoke(this, new object[] { TaskConfigPath });
             MethodInfo readBlockDefs = GetType().GetMethod(nameof(this.ReadBlockDefs))
@@ -789,7 +799,6 @@ namespace USE_ExperimentTemplate_Task
             MethodInfo readStimDefs = GetType().GetMethod(nameof(this.ReadStimDefs))
                 .MakeGenericMethod(new Type[] { StimDefType });
             readStimDefs.Invoke(this, new object[] { TaskConfigPath });
-
 
             LoadTaskEventCodeAndConfigUIFiles();
         }
@@ -808,18 +817,17 @@ namespace USE_ExperimentTemplate_Task
                     }
                     else
                         Debug.Log("TASK CONFIG UI RESULT IS NULL!");
+                }));
 
-                    StartCoroutine(ServerManager.GetFileStringAsync(path, "EventCode", result =>
+                StartCoroutine(ServerManager.GetFileStringAsync(path, "EventCode", result =>
+                {
+                    if (!string.IsNullOrEmpty(result))
                     {
-                        if (!string.IsNullOrEmpty(result))
-                        {
-                            SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig", path, result);
-                            CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
-                        }
-                        else
-                            Debug.Log("TASK EVENT CODE RESULT IS NULL!");
-                    }));
-
+                        SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig", path, result);
+                        CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
+                    }
+                    else
+                        Debug.Log("TASK EVENT CODE RESULT IS NULL!");
                 }));
             }
             else
@@ -838,6 +846,10 @@ namespace USE_ExperimentTemplate_Task
                     CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
                     SessionValues.SessionDef.EventCodesActive = true;
                 }
+                else
+                    Debug.Log("NORMAL BUILLD - TASK CONFIG UI RESULT IS NULL!");
+
+                
             }
         }
 

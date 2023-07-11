@@ -1085,13 +1085,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     {
         GameObject gridItem = Create2DBorder(stim);
         gridItem.name = $"GridItem_" + stim.StimIndex;
-        gridItem.transform.parent = gridParent;
+        gridItem.transform.SetParent(gridParent);
         gridItem.transform.localScale = Vector3.one;
         gridItem.transform.localPosition = new Vector3(gridItem.transform.localPosition.x, gridItem.transform.localPosition.y, 0);
 
         GameObject gridStim = stim.StimGameObject;
         gridStim.name = "Stim_Index_ " + stim.StimIndex;
-        gridStim.transform.parent = gridItem.transform;
+        gridStim.transform.SetParent(gridItem.transform);
         gridStim.transform.localPosition = Vector3.zero;
     }
 

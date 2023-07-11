@@ -88,7 +88,7 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
             ["Trials Completed"] = wmTL.TrialCount_InBlock + 1,
             ["Trials Correct"] = wmTL.NumCorrect_InBlock,
             ["Errors"] = wmTL.NumErrors_InBlock,
-            ["Avg Search Duration"] = wmTL.AverageSearchDuration_InBlock.ToString("0.00") + "s",
+            ["Avg Search Duration"] = wmTL.AverageSearchDuration_InBlock.ToString("0.0") + "s",
         };
         return data;
     }

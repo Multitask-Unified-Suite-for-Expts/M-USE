@@ -355,19 +355,12 @@ MonoBehaviour:
   Paused: 1
   TrialData: {fileID: 0}
   FrameData: {fileID: 0}
-  GazeData: {fileID: 0}
-  SerialSentData: {fileID: 0}
-  SerialRecvData: {fileID: 0}
   BlockCount: 0
   TrialCount_InTask: 0
   TrialCount_InBlock: 0
   AbortCode: 0
-  StoreData: 0
   ForceBlockEnd: 0
-  SerialPortActive: 0
-  EyetrackerActive: 0
   TaskDataPath: 
-  FilePrefix: 
   TrialSummaryString: 
   TaskLevel: {fileID: 0}
   PreloadedStims:
@@ -383,7 +376,6 @@ MonoBehaviour:
     stimGroupName: 
     IsActive: 0
   TrialStims: []
-  ExperimenterDisplayController: {fileID: 0}
   SessionInfoPanel: {fileID: 0}
   TrialCompleteTime: 0
   TouchFBController: {fileID: 0}
@@ -391,23 +383,8 @@ MonoBehaviour:
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
   SliderFBController: {fileID: 0}
-  MouseTracker: {fileID: 0}
-  GazeTracker: {fileID: 0}
-  TobiiEyeTrackerController: {fileID: 0}
-  SelectionType: 
-  EyeTrackerActive: 0
   runCalibration: 0
-  SerialPortController: {fileID: 0}
-  EventCodeManager: {fileID: 0}
-  DisplayController: {fileID: 0}
   InitialTokenAmount: 0
-  ShotgunRaycastSpacing_DVA: 0
-  ParticipantDistance_CM: 0
-  ShotgunRaycastCircleSize_DVA: 0
-  IsHuman: 0
-  HumanStartPanel: {fileID: 0}
-  USE_StartButton: {fileID: 0}
-  TaskSelectionCanvasGO: {fileID: 0}
   PauseIconGO: {fileID: 0}
   TrialStimsLoaded: 0
   HeldTooLongTexture: {fileID: 0}
@@ -440,7 +417,6 @@ MonoBehaviour:
   PerfThresholdMet: 0
   StartWithBlueSquare: 0
   TouchFeedbackDuration: 0
-  PPVolumeGO: {fileID: 0}
 --- !u!114 &900455551
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -461,45 +437,20 @@ MonoBehaviour:
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
-  ShotgunRaycastCircleSize_DVA: 0
-  ShotgunRaycastSpacing_DVA: 0
-  ParticipantDistance_CM: 0
   PrefabPath: 
   ConfigName: 
   TaskName: THR
   TaskProjectFolder: 
-  SessionLevelDataPath: 
   BlockCount: 0
   TrialLevel: {fileID: 900455550}
-  SessionLevel: {fileID: 0}
   BlockData: {fileID: 0}
   FrameData: {fileID: 0}
   TrialData: {fileID: 0}
-  GazeData: {fileID: 0}
-  SerialSentData: {fileID: 0}
-  SerialRecvData: {fileID: 0}
-  EyeTrackerActive: 0
-  GazeTracker: {fileID: 0}
-  MouseTracker: {fileID: 0}
-  TobiiEyeTrackerController: {fileID: 0}
-  StoreData: 0
-  SerialPortActive: 0
-  SyncBoxActive: 0
-  EventCodesActive: 0
-  RewardPulsesActive: 0
-  SonicationActive: 0
-  ContextExternalFilePath: 
-  SessionDataPath: 
   TaskConfigPath: 
   TaskDataPath: 
-  SubjectID: 
-  SessionID: 
-  FilePrefix: 
-  EyetrackerType: 
-  SelectionType: 
-  LocateFile: {fileID: 0}
   TaskCam: {fileID: 0}
   TaskCanvasses: []
+  StimCanvas_2D: {fileID: 0}
   PreloadedStims:
     stimGroupName: 
     IsActive: 0
@@ -514,18 +465,12 @@ MonoBehaviour:
     IsActive: 0
   PreloadedStimGameObjects: []
   PrefabStimPaths: []
-  ExperimenterDisplayController: {fileID: 0}
-  SessionInfoPanel: {fileID: 0}
-  DisplayController: {fileID: 0}
-  SerialPortController: {fileID: 0}
-  EventCodeManager: {fileID: 0}
-  InputManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
-  TaskSelectionCanvasGO: {fileID: 0}
-  IsHuman: 0
-  HumanStartPanel: {fileID: 0}
-  USE_StartButton: {fileID: 0}
   TaskLevelDefined: 0
+  BlockResultsPrefab: {fileID: 0}
+  BlockResults_GridElementPrefab: {fileID: 0}
+  BlockResults_AudioClip: {fileID: 0}
+  BlockResultsGO: {fileID: 0}
   CurrentBlockString: 
   BlockStringsAdded: 0
   TrialsCompleted_Task: 0
@@ -589,7 +534,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0, g: 0.03529412, b: 0.0627451, a: 0}
+  m_BackGroundColor: {r: 0.10980392, g: 0.1254902, b: 0.14901961, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0

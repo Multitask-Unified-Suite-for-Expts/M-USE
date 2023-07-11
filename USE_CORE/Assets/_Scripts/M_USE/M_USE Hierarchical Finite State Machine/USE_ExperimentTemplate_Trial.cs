@@ -129,7 +129,7 @@ namespace USE_ExperimentTemplate_Trial
             if (GameObject.Find("GazeCalibration(Clone)") != null)// && TaskLevel.TaskName != "GazeCalibration")
             {
                 GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts"). GetComponent<GazeCalibration_TaskLevel>();
-                GazeCalibrationTaskLevel.ConfigName = TaskLevel.TaskName;
+                //GazeCalibrationTaskLevel.ConfigName = TaskLevel.TaskName;
                 GazeCalibrationTaskLevel.TrialLevel.TaskLevel = GazeCalibrationTaskLevel;
                 
                 if (TaskLevel.TaskName != "GazeCalibration")

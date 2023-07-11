@@ -75,6 +75,18 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         AssignBlockData();
     }
 
+    public override OrderedDictionary GetBlockResultsData()
+    {
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Accuracy"] = string.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock),
+            ["Trials Completed"] = vsTL.TrialCount_InBlock + 1,
+            ["Avg Search Duration"] = vsTL.AverageSearchDuration_InBlock.ToString("0.0") + "s",
+            ["TokenBar Completions"] = vsTL.NumTokenBarFull_InBlock
+        };
+        return data;
+    }
+
     public override OrderedDictionary GetTaskSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary
@@ -93,9 +105,9 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         ClearStrings();
-        BlockSummaryString.AppendLine("Accuracy: " + String.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
+        BlockSummaryString.AppendLine("Accuracy: " + string.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
                                       "\n" + 
-                                      "\nAvg Search Duration: " + String.Format("{0:0.00}", vsTL.AverageSearchDuration_InBlock) +
+                                      "\nAvg Search Duration: " + string.Format("{0:0.00}", vsTL.AverageSearchDuration_InBlock) +
                                       "\n" + 
                                       "\nNum Aborted Trials: " + + vsTL.AbortedTrials_InBlock + 
                                       "\n"+

@@ -325,7 +325,7 @@ namespace USE_ExperimentTemplate_Session
             bool taskAutomaticallySelected = false;
             setupSession.AddDefaultInitializationMethod(() =>
             {
-                SessionData.CreateFile();
+                StartCoroutine(SessionData.CreateFile());
 
                 //Create Session Settings folder inside Data Folder: ----------------------------------------------------------------------------------------
                 if (SessionValues.WebBuild)
@@ -543,16 +543,16 @@ namespace USE_ExperimentTemplate_Session
 
                 if (SessionValues.SessionDef.SerialPortActive)
                 {
-                    SessionValues.SerialSentData.CreateFile();
-                    SessionValues.SerialRecvData.CreateFile();
+                    StartCoroutine(SessionValues.SerialSentData.CreateFile());
+                    StartCoroutine(SessionValues.SerialRecvData.CreateFile());
                 }
 
                 if (SessionValues.SessionDef.EyeTrackerActive)
                 {
-                    SessionValues.GazeData.CreateFile();
+                    StartCoroutine(SessionValues.GazeData.CreateFile());
                 }
 
-                FrameData.CreateFile();
+                StartCoroutine(FrameData.CreateFile());
 
                 SessionSettings.Restore();
                 selectedConfigName = null;
@@ -780,8 +780,8 @@ namespace USE_ExperimentTemplate_Session
                 if (SessionValues.SessionDef.SerialPortActive)
                 {
                     AppendSerialData();
-                    SessionValues.SerialRecvData.AppendDataToFile();
-                    SessionValues.SerialSentData.AppendDataToFile();
+                    StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
+                    StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
                     SessionValues.SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialRecvData", CurrentTask.TaskName);
                     SessionValues.SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialSentData", CurrentTask.TaskName);
                 }
@@ -829,8 +829,8 @@ namespace USE_ExperimentTemplate_Session
 
                 StartCoroutine(SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetTaskSummaryData()));
 
-                SessionData.AppendDataToBuffer();
-                SessionData.AppendDataToFile();
+                StartCoroutine(SessionData.AppendDataToBuffer());
+                StartCoroutine(SessionData.AppendDataToFile());
 
 
                 SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
@@ -884,20 +884,20 @@ namespace USE_ExperimentTemplate_Session
 
             finishSession.SpecifyTermination(() => true, () => null, () =>
             {
-                SessionData.AppendDataToBuffer();
-                SessionData.AppendDataToFile();
+                StartCoroutine(SessionData.AppendDataToBuffer());
+                StartCoroutine(SessionData.AppendDataToFile());
 
                 AppendSerialData();
                 if (SessionValues.SessionDef.SerialPortActive)
                 {
-                    SessionValues.SerialSentData.AppendDataToFile();
-                    SessionValues.SerialRecvData.AppendDataToFile();
+                    StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
+                    StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
                 }
 
                 if (SessionValues.SessionDef.EyeTrackerActive)
-                    SessionValues.GazeData.AppendDataToFile();
+                    StartCoroutine(SessionValues.GazeData.AppendDataToFile());
 
-                FrameData.AppendDataToFile();
+                StartCoroutine(FrameData.AppendDataToFile());
             });
 
             SessionData = (SessionData)SessionValues.SessionDataControllers.InstantiateDataController<SessionData>

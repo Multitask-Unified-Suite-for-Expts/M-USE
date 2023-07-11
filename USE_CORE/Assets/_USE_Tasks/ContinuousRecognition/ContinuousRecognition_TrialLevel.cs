@@ -162,7 +162,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (!VariablesLoaded)
                 LoadConfigUIVariables();
-
+            
             SetTrialSummaryString();
 
             currentTask.CalculateBlockSummaryString();

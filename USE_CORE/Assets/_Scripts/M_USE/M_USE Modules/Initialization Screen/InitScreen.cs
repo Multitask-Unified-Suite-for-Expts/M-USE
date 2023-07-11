@@ -88,10 +88,9 @@ public class InitScreen : MonoBehaviour
             if (!Application.isEditor)
             {
                 if(Screen.fullScreen)   
-                    confirmButtonGO.transform.localPosition += new Vector3(0, 125f, 0);
+                    confirmButtonGO.transform.localPosition += new Vector3(0, 185f, 0);
                 else
                     confirmButtonGO.transform.localPosition += new Vector3(0, 75f, 0);
-
             }
             confirmButtonGO.SetActive(true);
             webBuildChildrenGO.SetActive(true);

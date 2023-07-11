@@ -357,7 +357,7 @@ namespace USE_ExperimentTemplate_Task
             BlockFeedback.AddLateUpdateMethod(() =>
             {
                 if (SessionValues.SessionDef.StoreData)
-                    FrameData.AppendDataToBuffer();
+                    StartCoroutine(FrameData.AppendDataToBuffer());
 
                 SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
@@ -373,8 +373,8 @@ namespace USE_ExperimentTemplate_Task
 
                 if (SessionValues.SessionDef.StoreData)
                 {
-                    BlockData.AppendDataToBuffer();
-                    BlockData.AppendDataToFile();
+                    StartCoroutine(BlockData.AppendDataToBuffer());
+                    StartCoroutine(BlockData.AppendDataToFile());
                 }
             });
 
@@ -385,8 +385,8 @@ namespace USE_ExperimentTemplate_Task
 
                 if (TrialLevel.ForceBlockEnd && SessionValues.SessionDef.StoreData) //If they used end task hotkey, still write the block data!
                 {
-                    BlockData.AppendDataToBuffer();
-                    BlockData.AppendDataToFile();
+                    StartCoroutine(BlockData.AppendDataToBuffer());
+                    StartCoroutine(BlockData.AppendDataToFile());
                 }
 
 
@@ -536,10 +536,10 @@ namespace USE_ExperimentTemplate_Task
             DefineControlLevel();
 
             BlockData.AddStateTimingData(this);
-            BlockData.CreateFile();
-            FrameData.CreateFile();
+            StartCoroutine(BlockData.CreateFile());
+            StartCoroutine(FrameData.CreateFile());
             if (SessionValues.SessionDef.EyeTrackerActive)
-                SessionValues.GazeData.CreateFile();
+                StartCoroutine(SessionValues.GazeData.CreateFile());
 
 
             //AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
@@ -816,7 +816,7 @@ namespace USE_ExperimentTemplate_Task
                         ConfigUiVariables = (ConfigVarStore)SessionSettings.Get(TaskName + "_ConfigUiDetails");
                     }
                     else
-                        Debug.Log("TASK CONFIG UI RESULT IS NULL!");
+                        Debug.Log($"Task ConfigUI Result is null or empty! ({TaskName} may not have one)");
                 }));
 
                 StartCoroutine(ServerManager.GetFileStringAsync(path, "EventCode", result =>
@@ -827,7 +827,7 @@ namespace USE_ExperimentTemplate_Task
                         CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
                     }
                     else
-                        Debug.Log("TASK EVENT CODE RESULT IS NULL!");
+                        Debug.Log($"Task EventCode Result is null or empty! ({TaskName} may not have one)");
                 }));
             }
             else
@@ -1412,19 +1412,19 @@ namespace USE_ExperimentTemplate_Task
         {
             if (BlockData != null)
             {
-                BlockData.AppendDataToBuffer();
-                BlockData.AppendDataToFile();
+                StartCoroutine(BlockData.AppendDataToBuffer());
+                StartCoroutine(BlockData.AppendDataToFile());
             }
 
             if (FrameData != null)
             {
-                FrameData.AppendDataToBuffer();
-                FrameData.AppendDataToFile();
+                StartCoroutine(FrameData.AppendDataToBuffer());
+                StartCoroutine(FrameData.AppendDataToFile());
             }
 
             if (SessionValues.GazeData != null)
             {
-                SessionValues.GazeData.AppendDataToFile();
+                StartCoroutine(SessionValues.GazeData.AppendDataToFile());
             }
         }
         

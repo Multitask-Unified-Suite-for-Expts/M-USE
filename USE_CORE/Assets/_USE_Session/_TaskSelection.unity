@@ -628,7 +628,7 @@ MonoBehaviour:
   SessionDetails: {fileID: 454535789}
   LocateFile: {fileID: 1481219466}
   CameraMirrorTexture: {fileID: 0}
-  TaskButtonsContainer: {fileID: 0}
+  TaskButtonsGridContainer: {fileID: 0}
   BlockResults_GridElementPrefab: {fileID: 5967809598972882644, guid: 90c035b644de74843b8c74cca60656b2,
     type: 3}
   BlockResultsPrefab: {fileID: 6952099139267227724, guid: 3574b70e8d31c4f6fa0cf373241c135f,
@@ -1459,22 +1459,22 @@ PrefabInstance:
     - target: {fileID: 8358610373213751795, guid: 313d3489a024849fa948cea0c7f5d9bf,
         type: 3}
       propertyPath: m_Spacing.x
-      value: 30
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 8358610373213751795, guid: 313d3489a024849fa948cea0c7f5d9bf,
         type: 3}
       propertyPath: m_Spacing.y
-      value: 30
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 8358610373213751795, guid: 313d3489a024849fa948cea0c7f5d9bf,
         type: 3}
       propertyPath: m_CellSize.x
-      value: 225
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 8358610373213751795, guid: 313d3489a024849fa948cea0c7f5d9bf,
         type: 3}
       propertyPath: m_CellSize.y
-      value: 225
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 8358610373213751795, guid: 313d3489a024849fa948cea0c7f5d9bf,
         type: 3}

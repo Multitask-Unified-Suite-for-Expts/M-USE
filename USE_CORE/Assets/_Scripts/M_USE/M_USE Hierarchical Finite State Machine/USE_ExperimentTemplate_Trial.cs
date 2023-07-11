@@ -300,7 +300,7 @@ namespace USE_ExperimentTemplate_Trial
             DefineControlLevel();
             TrialData.ManuallyDefine();
             TrialData.AddStateTimingData(this);
-            TrialData.CreateFile();
+            StartCoroutine(TrialData.CreateFile());
            // TrialData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
 
 
@@ -346,16 +346,16 @@ namespace USE_ExperimentTemplate_Trial
 
         public void WriteDataFiles()
         {
-            TrialData.AppendDataToBuffer();
-            TrialData.AppendDataToFile();
-            FrameData.AppendDataToBuffer();
-            FrameData.AppendDataToFile();
+            StartCoroutine(TrialData.AppendDataToBuffer());
+            StartCoroutine(TrialData.AppendDataToFile());
+            StartCoroutine(FrameData.AppendDataToBuffer());
+            StartCoroutine(FrameData.AppendDataToFile());
             if (SessionValues.SessionDef.EyeTrackerActive)
-                SessionValues.GazeData.AppendDataToFile();
+                StartCoroutine(SessionValues.GazeData.AppendDataToFile());
             if (SessionValues.SessionDef.SerialPortActive)
             {
-                SessionValues.SerialRecvData.AppendDataToFile();
-                SessionValues.SerialSentData.AppendDataToFile();
+                StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
+                StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
             }
         }
         
@@ -384,8 +384,8 @@ namespace USE_ExperimentTemplate_Trial
         {
             if (TrialData != null)
             {
-                TrialData.AppendDataToBuffer();
-                TrialData.AppendDataToFile();
+                StartCoroutine(TrialData.AppendDataToBuffer());
+                StartCoroutine(TrialData.AppendDataToFile());
             }
         }
 

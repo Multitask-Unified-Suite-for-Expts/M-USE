@@ -248,11 +248,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseBalloon.SpecifyTermination(() => SideChoice != null, CenterSelection, () =>
         {
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["BalloonChosen"]);
+            if(SessionValues.EventCodeManager != null)
+            {
+                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["BalloonChosen"]);
+            }
 
             DestroyChildren(SideChoice == "Left" ? RewardContainerRight : RewardContainerLeft);
-            InflationsNeeded = (SideChoice == "Left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
+            InflationsNeeded = SideChoice == "Left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight;
             AudioFBController.Play("EC_BalloonChosen");
             RecordChoices();
         });

@@ -808,18 +808,17 @@ namespace USE_ExperimentTemplate_Task
                     }
                     else
                         Debug.Log("TASK CONFIG UI RESULT IS NULL!");
+                }));
 
-                    StartCoroutine(ServerManager.GetFileStringAsync(path, "EventCode", result =>
+                StartCoroutine(ServerManager.GetFileStringAsync(path, "EventCode", result =>
+                {
+                    if (!string.IsNullOrEmpty(result))
                     {
-                        if (!string.IsNullOrEmpty(result))
-                        {
-                            SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig", path, result);
-                            CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
-                        }
-                        else
-                            Debug.Log("TASK EVENT CODE RESULT IS NULL!");
-                    }));
-
+                        SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig", path, result);
+                        CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
+                    }
+                    else
+                        Debug.Log("TASK EVENT CODE RESULT IS NULL!");
                 }));
             }
             else

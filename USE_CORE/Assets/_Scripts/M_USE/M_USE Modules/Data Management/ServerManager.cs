@@ -20,8 +20,8 @@ public static class ServerManager //Used with the PHP scripts
         }
     }
 
-    private static string SessionConfigFolder; //Set with the value of the Dropdown after they click confirm
     private static readonly string RootConfigFolder = "CONFIGS"; //will move to server config
+    private static string SessionConfigFolder; //Set with the value of the Dropdown after they click confirm
     public static string SessionConfigFolderPath
     {
         get
@@ -74,9 +74,7 @@ public static class ServerManager //Used with the PHP scripts
             Debug.Log($"An error occurred while getting folder names. Error: {request.error}");
             callback?.Invoke(null);
         }
-        
     }
-
 
     public static IEnumerator CreateFileAsync(string path, string fileName, string content)
     {
@@ -90,8 +88,6 @@ public static class ServerManager //Used with the PHP scripts
 
     public static IEnumerator AppendToFileAsync(string folderPath, string fileName, string rowData)
     {
-        Debug.Log("APPENDING TO FILE: " + fileName + " | " + "AT PATH: " + folderPath);
-
         yield return GetFileStringAsync(folderPath, fileName, originalFileContents =>
         {
             if (originalFileContents != null)
@@ -129,25 +125,27 @@ public static class ServerManager //Used with the PHP scripts
         while (!operation.isDone)
             yield return null;
 
-        string result = null;
+        string result = "";
         if(request.result == UnityWebRequest.Result.Success)
         {
             result = request.downloadHandler.text;
-
-            if (result.ToLower().Contains("file not found") || result.ToLower().Contains("invalid parameters"))
-            {
-                Debug.Log($"GetFile Result: {result} | SearchString: {searchString} | Path: {path}");
+            Debug.Log(result == "File not found" ? ("File NOT Found on Server: " + searchString) : ("Found File On Server: " + searchString));
+            if (result == "File not found")
                 result = null;
-            }
-            else
-                Debug.Log("Found File On Server: " + searchString);
+
+            //result = request.downloadHandler.text;
+
+            //if (result.ToLower().Contains("file not found") || result.ToLower().Contains("invalid parameters"))
+            //{
+            //    Debug.Log($"GetFile Result: {result} | SearchString: {searchString} | Path: {path}");
+            //    result = null;
+            //}
+            //else
+            //    Debug.Log("Found File On Server: " + searchString);
         }
         else
-        {
-            result = null;
             Debug.Log($"ERROR FINDING FILE: {searchString} | ERROR: {request.error}");
-        }
-
+        
         callback?.Invoke(result);
     }
 

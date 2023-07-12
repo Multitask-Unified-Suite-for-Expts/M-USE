@@ -174,6 +174,7 @@ namespace USE_ExperimentTemplate_Task
 
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
 
+
             if(TaskName != "GazeCalibration")
             {
                 ReadSettingsFiles();
@@ -463,14 +464,14 @@ namespace USE_ExperimentTemplate_Task
             if (SessionValues.WebBuild && SessionValues.SessionDef.StoreData)
                 StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
 
-            if (SessionValues.SessionDef.EyeTrackerActive)
+            if (TaskName == "GazeCalibration")
             {
                 //Setup data management
-                if (SessionValues.SessionLevel.CurrentState.StateName == "SetupSession" && TaskName == "GazeCalibration")
+                if (SessionValues.SessionLevel.CurrentState.StateName == "SetupSession")
                      // Store Data in the Session Level / Gaze Calibration folder if running at the session level
                     TaskDataPath = SessionValues.SessionLevelDataPath + Path.DirectorySeparatorChar + "PreTask_GazeCalibration";
                 
-                else if (TaskName == "GazeCalibration")
+                else
                      // Store Data in the Task / Gaze Calibration folder if not running at the session level
                     TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigName + Path.DirectorySeparatorChar + "InTask_GazeCalibration";
                 
@@ -681,12 +682,12 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.ExternalStims = ExternalStims;
             TrialLevel.RuntimeStims = RuntimeStims;
             TrialLevel.ConfigUiVariables = ConfigUiVariables;
-      //      TrialLevel.IsHuman = IsHuman;
-   //         TrialLevel.HumanStartPanel = HumanStartPanel;
-     //       TrialLevel.USE_StartButton = USE_StartButton;
-           // TrialLevel.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
+            //      TrialLevel.IsHuman = IsHuman;
+            //         TrialLevel.HumanStartPanel = HumanStartPanel;
+            //       TrialLevel.USE_StartButton = USE_StartButton;
+            // TrialLevel.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
 
-           // TrialLevel.EyeTrackerActive = EyeTrackerActive;
+            // TrialLevel.EyeTrackerActive = EyeTrackerActive;
             TrialLevel.TaskLevel = this;
             TrialLevel.DefineTrialLevel();
 

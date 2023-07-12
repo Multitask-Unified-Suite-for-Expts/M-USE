@@ -159,7 +159,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 SessionValues.SessionDataPath = ServerManager.SessionDataFolderPath;
 
-                if (SessionValues.UseDefaultConfigs)
+                if (SessionValues.UsingDefaultConfigs)
                 {
                     SessionValues.ConfigAccessType = "Default";
                     SessionValues.ConfigFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
@@ -585,14 +585,14 @@ namespace USE_ExperimentTemplate_Session
                             {
                                 taskButton.Value.GetComponent<RawImage>().color = new Color(1f, 1f, 1f, 1f);
                                 taskButton.Value.GetComponent<RawImage>().raycastTarget = true;
-                                if (SessionValues.SessionDef.IsHuman)
-                                    taskButton.Value.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
+                                if (SessionValues.SessionDef.IsHuman && SessionValues.UsingDefaultConfigs)
+                                    taskButton.Value.AddComponent<HoverEffect>();
                             }
                             else
                             {
                                 taskButton.Value.GetComponent<RawImage>().color = new Color(.5f, .5f, .5f, .35f);
                                 taskButton.Value.GetComponent<RawImage>().raycastTarget = false;
-                                if (SessionValues.SessionDef.IsHuman)
+                                if (SessionValues.SessionDef.IsHuman && SessionValues.UsingDefaultConfigs)
                                 {
                                     if (taskButton.Value.TryGetComponent<HoverEffect>(out var hoverEffect))
                                         Destroy(hoverEffect);
@@ -630,7 +630,7 @@ namespace USE_ExperimentTemplate_Session
 
                     if (SessionValues.WebBuild)
                     {
-                        if (SessionValues.UseDefaultConfigs)
+                        if (SessionValues.UsingDefaultConfigs)
                             image.texture = Resources.Load<Texture2D>($"{SessionValues.SessionDef.TaskIconsFolderPath}/{taskName}");
                         else //LOAD THE ICONS FROM THE SERVER!
                         {
@@ -656,7 +656,7 @@ namespace USE_ExperimentTemplate_Session
                         {
                             image.color = new Color(1f, 1f, 1f, 1f);
                             gridTaskButton.GetComponent<RawImage>().raycastTarget = true;
-                            if (SessionValues.SessionDef.IsHuman)
+                            if (SessionValues.SessionDef.IsHuman && SessionValues.UsingDefaultConfigs)
                                 gridTaskButton.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
                         }
                         else
@@ -669,7 +669,7 @@ namespace USE_ExperimentTemplate_Session
                     {
                         // If not guided task selection, make all icons interactable
                         gridTaskButton.GetComponent<RawImage>().raycastTarget = true;
-                        if (SessionValues.SessionDef.IsHuman)
+                        if (SessionValues.SessionDef.IsHuman && SessionValues.UsingDefaultConfigs)
                             gridTaskButton.AddComponent<HoverEffect>();
                     }
                     gridTaskButton.transform.SetParent(TaskButtonsGridContainer.transform);
@@ -983,7 +983,7 @@ namespace USE_ExperimentTemplate_Session
             //Load the Session Event Code Config file --------------------------------------------------------------------------------------------------
             string eventCodeFileString = "";
 
-            if(SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
+            if(SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
             {
                 StartCoroutine(ServerManager.GetFileStringAsync(ServerManager.SessionConfigFolderPath, "EventCode", result =>
                 {
@@ -993,7 +993,7 @@ namespace USE_ExperimentTemplate_Session
             }
             else
             {
-                string path = SessionValues.UseDefaultConfigs ? (Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs") : SessionValues.ConfigFolderPath ;
+                string path = SessionValues.UsingDefaultConfigs ? (Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs") : SessionValues.ConfigFolderPath ;
                 eventCodeFileString = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, "*EventCode*");
                 if (!string.IsNullOrEmpty(eventCodeFileString))
                 {
@@ -1156,7 +1156,7 @@ namespace USE_ExperimentTemplate_Session
 
             if(SessionValues.WebBuild)
             {
-                if (SessionValues.UseDefaultConfigs)
+                if (SessionValues.UsingDefaultConfigs)
                     path = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
                 else
                     path = $"{ServerManager.SessionConfigFolderPath}/{configName}";
@@ -1198,7 +1198,7 @@ namespace USE_ExperimentTemplate_Session
             tl.BlockResults_GridElementPrefab = BlockResults_GridElementPrefab;
 
 
-            if (SessionValues.UseDefaultConfigs)
+            if (SessionValues.UsingDefaultConfigs)
             {
                 tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
 

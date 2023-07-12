@@ -368,7 +368,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
 
-        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UsingDefaultConfigs ? PrefabStims : ExternalStims;
 
         searchStims = new StimGroup("SearchStims", group, CurrentTrialDef.SearchStimIndices);
         //searchStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));

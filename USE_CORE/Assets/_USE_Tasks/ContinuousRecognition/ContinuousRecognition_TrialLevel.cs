@@ -870,7 +870,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         NumNew_Trial = 0;
         NumPNC_Trial = 0;
 
-        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UsingDefaultConfigs ? PrefabStims : ExternalStims;
 
 
         if (TrialCount_InBlock == 0)
@@ -1004,7 +1004,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (!StimIsChosen && ChosenStimIndices.Count < 1)
             yield break;
 
-        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UsingDefaultConfigs ? PrefabStims : ExternalStims;
 
         if(SessionValues.Using2DStim)
             DisplayResultsContainerGO.SetActive(true);

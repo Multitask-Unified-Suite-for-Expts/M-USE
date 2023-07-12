@@ -126,7 +126,7 @@ public class InitScreen : MonoBehaviour
             string sessionConfigFolder = dropdown.options[dropdown.value].text;
             ServerManager.SetSessionConfigFolderName(sessionConfigFolder);
             if (sessionConfigFolder.ToLower().Contains("default"))
-                SessionValues.UseDefaultConfigs = true;
+                SessionValues.UsingDefaultConfigs = true;
         }
 
         if (OnLoadSettings != null)
@@ -154,7 +154,7 @@ public class InitScreen : MonoBehaviour
        
         if(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name.ToLower().Contains("default"))
         {
-            SessionValues.UseDefaultConfigs = true;
+            SessionValues.UsingDefaultConfigs = true;
             Confirm();
         }
         else

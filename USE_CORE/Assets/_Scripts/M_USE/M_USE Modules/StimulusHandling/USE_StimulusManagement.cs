@@ -281,9 +281,9 @@ namespace USE_StimulusManagement
         {
 			SessionValues.Using2DStim = FileName.Contains("png");
 
-			bool loadFromServer = SessionValues.WebBuild && !SessionValues.UseDefaultConfigs;
+			bool loadFromServer = SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs;
 
-			if (SessionValues.UseDefaultConfigs)
+			if (SessionValues.UsingDefaultConfigs)
 			{
                 StimGameObject = LoadPrefabFromResources(PrefabPath);
 				callback?.Invoke(StimGameObject);
@@ -569,7 +569,7 @@ namespace USE_StimulusManagement
 
 		public void DestroyRecursive(GameObject go)
 		{
-			if(SessionValues.UseDefaultConfigs)
+			if(SessionValues.UsingDefaultConfigs)
 			{
                 Object.Destroy(go);
 				return;

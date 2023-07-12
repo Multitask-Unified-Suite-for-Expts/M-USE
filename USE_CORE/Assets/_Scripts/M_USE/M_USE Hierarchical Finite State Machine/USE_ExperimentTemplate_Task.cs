@@ -169,7 +169,7 @@ namespace USE_ExperimentTemplate_Task
         {
             TaskLevelDefined = false;
 
-            if (SessionValues.UseDefaultConfigs)
+            if (SessionValues.UsingDefaultConfigs)
                 PrefabPath = "/DefaultResources/Stimuli";
 
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
@@ -805,7 +805,7 @@ namespace USE_ExperimentTemplate_Task
 
         public void LoadTaskEventCodeAndConfigUIFiles()
         {
-            if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
+            if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
             {
                 string path = $"{ServerManager.SessionConfigFolderPath}/{TaskName}";
                 StartCoroutine(ServerManager.GetFileStringAsync(path, "ConfigUi", result =>
@@ -870,7 +870,7 @@ namespace USE_ExperimentTemplate_Task
                     string filePath = TaskConfigPath + Path.DirectorySeparatorChar + key; //initially set for not default configs, then changed below for UseDefaultConfigs
                     string settingsFileName = key.Split('.')[0];
 
-                    if (SessionValues.UseDefaultConfigs)
+                    if (SessionValues.UsingDefaultConfigs)
                     {
                         string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + TaskName + "_DefaultConfigs";
                         filePath = folderPath + Path.DirectorySeparatorChar + settingsFileName;
@@ -891,7 +891,7 @@ namespace USE_ExperimentTemplate_Task
 
                     string customSettingsValue = customSettings[key].ToLower();
 
-                    if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
+                    if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
                     {
                         StartCoroutine(ServerManager.GetFileStringAsync(TaskConfigPath, key, result =>
                         {
@@ -1181,7 +1181,7 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadTaskDef<T>(string taskConfigFolder) where T : TaskDef
         {
-            if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
+            if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
             {
                 StartCoroutine(ServerManager.GetFileStringAsync(taskConfigFolder, "TaskDef", result =>
                 {
@@ -1205,7 +1205,7 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadBlockDefs<T>(string taskConfigFolder) where T : BlockDef
         {
-            if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
+            if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
             {
                 StartCoroutine(ServerManager.GetFileStringAsync(taskConfigFolder, "BlockDef", serverBlockDefFile =>
                 {
@@ -1250,7 +1250,7 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadTrialDefs<T>(string taskConfigFolder) where T : TrialDef
         {
-            if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
+            if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
             {
                 StartCoroutine(ServerManager.GetFileStringAsync(taskConfigFolder, "TrialDef", result =>
                 {
@@ -1281,13 +1281,13 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadStimDefs<T>(string taskConfigFolder) where T : StimDef
         {
-            string key = TaskName + (SessionValues.UseDefaultConfigs ? "_PrefabStims" : "_ExternalStimDefs");
+            string key = TaskName + (SessionValues.UsingDefaultConfigs ? "_PrefabStims" : "_ExternalStimDefs");
             PrefabStims = new StimGroup("PrefabStims");
             ExternalStims = new StimGroup("ExternalStims");
 
             if (SessionValues.WebBuild)
             {
-                if (SessionValues.UseDefaultConfigs)
+                if (SessionValues.UsingDefaultConfigs)
                 {
                     string defaultStimDefFilePath = taskConfigFolder + "/" + TaskName + "_StimDeftdf.txt";
                     ImportStimDefs<T>(key, defaultStimDefFilePath);
@@ -1327,7 +1327,7 @@ namespace USE_ExperimentTemplate_Task
                 return;
             else
             {
-                if (SessionValues.UseDefaultConfigs)
+                if (SessionValues.UsingDefaultConfigs)
                 {
                     PrefabStims = new StimGroup("PrefabStims", (T[])SessionSettings.Get(key));
                     foreach (var stim in PrefabStims.stimDefs)

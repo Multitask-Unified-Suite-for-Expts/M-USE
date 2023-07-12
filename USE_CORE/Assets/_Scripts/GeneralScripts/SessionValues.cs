@@ -19,7 +19,7 @@ using USE_UI;
 public static class SessionValues
 {
     public static bool WebBuild;
-    public static bool UseDefaultConfigs;
+    public static bool UsingDefaultConfigs;
     public static bool Using2DStim;
     
     public static ControlLevel_Session_Template SessionLevel;

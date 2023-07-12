@@ -336,7 +336,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
         if(SessionValues.WebBuild)
         {
-            if (SessionValues.UseDefaultConfigs)
+            if (SessionValues.UsingDefaultConfigs)
             {
                 mgTL.MazeFilePath = "DefaultResources/Mazes";
                 mazeKeyFilePath = "DefaultSessionConfigs/MazeGame_DefaultConfigs/MazeDef.txt";
@@ -516,7 +516,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
         if(SessionValues.WebBuild)
         {
-            if(SessionValues.UseDefaultConfigs) //will need to check if this works for non editor!!
+            if(SessionValues.UsingDefaultConfigs) //will need to check if this works for non editor!!
             {
                 TextAsset textAsset = Resources.Load<TextAsset>(mgTL.MazeFilePath + "/" + mgTL.mazeDefName);
                 if (textAsset != null)

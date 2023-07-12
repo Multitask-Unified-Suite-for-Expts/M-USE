@@ -244,10 +244,10 @@ namespace USE_ExperimentTemplate_Session
             SessionCam = Camera.main;
 
 
-#if (UNITY_WEBGL)
-                //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
-                GameObject initCamGO = GameObject.Find("InitCamera");
-                initCamGO.SetActive(false);
+#if (UNITY_WEBGL)            
+            //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
+            GameObject initCamGO = GameObject.Find("InitCamera");
+            initCamGO.SetActive(false);
 #else
 
             TaskSelection_Starfield.SetActive(false);
@@ -693,7 +693,9 @@ namespace USE_ExperimentTemplate_Session
                 SessionValues.SelectionTracker.UpdateActiveSelections();
                 if (SelectionHandler.SuccessfulSelections.Count > 0)
                 {
-                    selectedConfigName = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.name;
+                    string chosen = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.name;
+                    if (chosen != null && taskButtonsDict.ContainsKey(chosen))
+                        selectedConfigName = chosen;
                     if (selectedConfigName != null)
                         taskAutomaticallySelected = false;
                 }
@@ -701,7 +703,7 @@ namespace USE_ExperimentTemplate_Session
             selectTask.AddLateUpdateMethod(() =>
             {
                 AppendSerialData();
-                FrameData.AppendDataToBuffer();
+                StartCoroutine(FrameData.AppendDataToBuffer());
             });
             selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask, () => ResetSelectedTaskButtonSize());
 

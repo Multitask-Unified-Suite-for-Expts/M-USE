@@ -33,6 +33,7 @@ SOFTWARE.
 using System.Collections;
 using UnityEngine;
 using TMPro;
+using USE_UI;
 
 public class InitScreen : MonoBehaviour
 {
@@ -85,13 +86,8 @@ public class InitScreen : MonoBehaviour
         {
             StartCoroutine(ServerManager.GetSessionConfigFolders(folders => folderDropdown.SetFolders(folders)));
 
-            if (!Application.isEditor)
-            {
-                if(Screen.fullScreen)   
-                    confirmButtonGO.transform.localPosition += new Vector3(0, 185f, 0);
-                else
-                    confirmButtonGO.transform.localPosition += new Vector3(0, 75f, 0);
-            }
+            SetConfirmButtonPosition();
+
             confirmButtonGO.SetActive(true);
             webBuildChildrenGO.SetActive(true);
             buttonsParentGO.SetActive(false);
@@ -104,6 +100,11 @@ public class InitScreen : MonoBehaviour
             //confirmButtonGO.SetActive(false); //uncomment if want them to pick between default and local configs
             //buttonsParentGO.SetActive(true); //uncomment if want them to pick between default and local configs
         }
+    }
+
+    private void Update()
+    {
+        SetConfirmButtonPosition();
     }
 
     public void Confirm()
@@ -160,6 +161,17 @@ public class InitScreen : MonoBehaviour
         {
             locateFileGO.SetActive(true);
             confirmButtonGO.SetActive(true);
+        }
+    }
+
+    private void SetConfirmButtonPosition()
+    {
+        if (!Application.isEditor)
+        {
+            if (Screen.fullScreen)
+                confirmButtonGO.transform.localPosition = new Vector3(0, -315, 0);
+            else
+                confirmButtonGO.transform.localPosition = new Vector3(0, -305, 0);
         }
     }
 

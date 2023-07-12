@@ -308,13 +308,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
         });
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
-        //ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
-        //{
-        //    AudioFBController.Play("Negative");
-        //    EndBlock = true;
-        //    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["NoChoice"]);
-        //    AbortCode = 6;
-        //});
+        ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
+        {
+            AudioFBController.Play("Negative");
+            EndBlock = true;
+            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["NoChoice"]);
+            AbortCode = 6;
+        });
 
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------
         TouchFeedback.AddInitializationMethod(() =>

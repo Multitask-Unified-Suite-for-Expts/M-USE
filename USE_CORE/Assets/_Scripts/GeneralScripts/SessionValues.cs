@@ -89,7 +89,10 @@ public static class SessionValues
     // public int RewardHotKeyPulseSize = 250;
     // public bool GuidedTaskSelection;
     // public float BlockResultsDuration;
-
+    //public int TaskButtonSize = 240; //not currently used
+    //public int TaskButtonSpacing = 45; //not currently used
+    //public int TaskButtonGridMaxPerRow = 4; //not currently used
+    //public bool UseTaskButtonsGrid;
 
 
     static SessionValues() // idk about this???

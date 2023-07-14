@@ -123,7 +123,6 @@ namespace USE_ExperimentTemplate_Session
         public AudioClip BackgroundMusic_AudioClip;
         public AudioClip BlockResults_AudioClip;
 
-
         [HideInInspector] public float audioPlaybackSpot;
         [HideInInspector] public AudioSource BackgroundMusic_AudioSource;
 
@@ -427,7 +426,6 @@ namespace USE_ExperimentTemplate_Session
                 {
                     if (!SceneLoading)
                     {
-                        //AsyncOperation loadScene;
                         SceneLoading = true;
                         taskName = (string)SessionValues.SessionDef.TaskMappings[iTask];
                         loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
@@ -812,10 +810,8 @@ namespace USE_ExperimentTemplate_Session
                         Destroy(hoverEffect);
                 }
 
-
                 string taskName = (string)SessionValues.SessionDef.TaskMappings[selectedConfigName];
                 loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-                
                 loadScene.completed += (_) =>
                 {
                     OnSceneLoaded(selectedConfigName, false);
@@ -840,7 +836,6 @@ namespace USE_ExperimentTemplate_Session
                 runTask.AddChildLevel(CurrentTask);
                 if (CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
-                SessionCam.gameObject.SetActive(false);
 
                 if (CurrentTask.TaskName != "GazeCalibration")
                     SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
@@ -862,6 +857,8 @@ namespace USE_ExperimentTemplate_Session
             //runTask.AddLateUpdateMethod
             runTask.AddUniversalInitializationMethod(() =>
             {
+                SessionCam.gameObject.SetActive(false);
+
                 SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["RunTaskStarts"]);
 
 #if (!UNITY_WEBGL)

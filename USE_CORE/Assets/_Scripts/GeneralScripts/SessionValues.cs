@@ -7,6 +7,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using SelectionTracking;
 using UnityEngine;
+using UnityEngine.UI;
 using USE_Def_Namespace;
 using USE_DisplayManagement;
 using USE_ExperimenterDisplay;
@@ -56,6 +57,7 @@ public static class SessionValues
 
     public static SelectionTracker SelectionTracker;
     public static SelectionTracker.SelectionHandler SelectionHandler;
+
 
     public static SessionDef SessionDef;
     // ===== FIELDS OF SESSIONDEF =====

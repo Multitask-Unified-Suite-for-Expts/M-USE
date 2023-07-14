@@ -207,8 +207,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-            TouchFBController.DestroyTouchFeedback();
-            TouchFBController.SetPrefabSizes(StartButtonScale);
+            if (!SessionValues.SessionDef.IsHuman)
+            {
+                TouchFBController.DestroyTouchFeedback();
+                TouchFBController.SetPrefabSizes(StartButtonScale);
+            }
             SelectionHandler.HandlerActive = true;
             if (SelectionHandler.AllSelections.Count > 0)
                 SelectionHandler.ClearSelections();
@@ -240,9 +243,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         ChooseTile.AddInitializationMethod(() =>
         {
-            TouchFBController.DestroyTouchFeedback(); // destroys prefab of previous sizing
-            tileScale = 26.25f * TileSize;
-            TouchFBController.SetPrefabSizes(tileScale);
+            if (!SessionValues.SessionDef.IsHuman)
+            {
+                TouchFBController.DestroyTouchFeedback(); // destroys prefab of previous sizing
+                tileScale = 26.25f * TileSize;
+                TouchFBController.SetPrefabSizes(tileScale);
+            }
             choiceStartTime = Time.unscaledTime;
             SelectionHandler.HandlerActive = true;
             if (SelectionHandler.AllSelections.Count > 0)

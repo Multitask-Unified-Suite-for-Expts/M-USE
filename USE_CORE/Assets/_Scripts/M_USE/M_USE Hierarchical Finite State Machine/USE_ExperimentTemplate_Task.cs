@@ -214,6 +214,11 @@ namespace USE_ExperimentTemplate_Task
 
             Add_ControlLevel_InitializationMethod(() =>
             {
+                TaskCam.gameObject.SetActive(true);
+                if (TaskCanvasses != null)
+                    foreach (Canvas canvas in TaskCanvasses)
+                        canvas.gameObject.SetActive(true);
+
                 BlockCount = -1;
                 BlockSummaryString = new StringBuilder();
                 PreviousBlockSummaryString = new StringBuilder();
@@ -237,12 +242,6 @@ namespace USE_ExperimentTemplate_Task
                         bd.GenerateTrialDefsFromBlockDef();
                     }
                 }
-
-
-                TaskCam.gameObject.SetActive(true);
-                if (TaskCanvasses != null)
-                    foreach (Canvas canvas in TaskCanvasses)
-                        canvas.gameObject.SetActive(true);
 
                 SessionValues.InputManager.SetActive(true);
             });

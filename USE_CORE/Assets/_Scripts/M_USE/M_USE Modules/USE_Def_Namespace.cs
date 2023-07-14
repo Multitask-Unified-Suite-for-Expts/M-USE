@@ -49,7 +49,7 @@ namespace USE_Def_Namespace
         public int RewardHotKeyNumPulses = 1;
         public int RewardHotKeyPulseSize = 250;
 
-        public float BlockResultsDuration; //default 0, then just specify for human session configs
+        public float BlockResultsDuration; //specify for human session configs
 
         public bool PlayBackgroundMusic;
 

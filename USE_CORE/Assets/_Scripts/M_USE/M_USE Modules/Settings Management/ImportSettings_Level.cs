@@ -18,20 +18,21 @@ public class ImportSettings_Level : ControlLevel
     public List<string> settingParsingStyles = new List<string>();
     public List<Type> settingTypes = new List<Type>(); 
     public List<string> filePathStrings;
+    
     private string currentFilePathString;
     private string currentFileContentString;
     private Type currentType;
-    public string currentFileName;
-    public object currentSetting = null;
 
     private int iSettings;
+
+    public string currentFileName;
+    public object currentSetting = null;
     public ControlLevel_Session_Template SessionLevel;
 
-    //private bool fileLoaded;
     public bool fileParsed;
+    private bool fileLoaded;
     public bool continueToNextSetting;
 
-    //type, filepath, 
     public override void DefineControlLevel()
     {
         
@@ -62,13 +63,15 @@ public class ImportSettings_Level : ControlLevel
                 if (!String.IsNullOrEmpty(contentString))
                 {
                     currentFileContentString = contentString;
-                   // fileLoaded = true;
+                    fileLoaded = true;
                 }
                 else
                     Debug.Log($"Failed to load {currentFileName}, may not be an issue for this session.");
             }));
         });
-        loadFile.SpecifyTermination(() => true, parseFile);
+        loadFile.SpecifyTermination(() => fileLoaded, parseFile);
+        loadFile.AddTimer(() => 0.5f, parseFile ); //adjust timer value for a sensible amount of time for the server to retrieve file content 
+        
         parseFile.AddDefaultInitializationMethod(() =>
         {
             if (!String.IsNullOrEmpty(currentFileContentString))

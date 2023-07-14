@@ -609,74 +609,61 @@ namespace USE_ExperimentTemplate_Session
                     return;
                 }
 
-                int numTasks = SessionValues.SessionDef.TaskMappings.Count;
-                float buttonSize = 0;
-                float buttonSpacing = 0;
 
-                TaskButtonsContainer = SessionValues.SessionDef.UseTaskButtonsGrid ? GameObject.Find("TaskButtonsGrid") : new GameObject("TaskButtons");
+                TaskButtonsContainer = GameObject.Find("TaskButtonsGrid");
 
-                if (SessionValues.SessionDef.UseTaskButtonsGrid)
+                GridLayoutGroup gridLayout = TaskButtonsContainer.GetComponent<GridLayoutGroup>();
+                int size = SessionValues.WebBuild ? 250 : SessionValues.SessionDef.TaskButtonSize; //using 250 for web build
+                gridLayout.cellSize = new Vector2(size, size);
+                gridLayout.constraintCount = SessionValues.WebBuild ? 4 : SessionValues.SessionDef.TaskButtonGridMaxPerRow; //using 4 for WebBuild
+                int spacing = SessionValues.WebBuild ? 45 : SessionValues.SessionDef.TaskButtonSpacing; //using 45 for web build
+                gridLayout.spacing = new Vector2(spacing, spacing);
+
+                List<GameObject> gridList = new List<GameObject>();
+
+                if(SessionValues.SessionDef.TaskButtonGridPositions != null)
                 {
-                    GridLayoutGroup gridLayout = TaskButtonsContainer.GetComponent<GridLayoutGroup>();
-                    gridLayout.cellSize = new Vector2(SessionValues.SessionDef.TaskButtonSize, SessionValues.SessionDef.TaskButtonSize);
-                    gridLayout.constraintCount = SessionValues.SessionDef.TaskButtonGridMaxPerRow;
-                    gridLayout.spacing = new Vector2(SessionValues.SessionDef.TaskButtonSpacing, SessionValues.SessionDef.TaskButtonSpacing);
-                }
-                else
-                {
-                    TaskButtonsContainer.transform.parent = SessionValues.TaskSelectionCanvasGO.transform;
-                    TaskButtonsContainer.transform.localPosition = Vector3.zero;
-                    TaskButtonsContainer.transform.localScale = Vector3.one;
-
-                    if (SessionValues.SessionDef.MacMainDisplayBuild && !Application.isEditor)
+                    for(int i = 0; i < SessionValues.SessionDef.NumGridCells; i++)
                     {
-                        buttonSize = 264f;
-                        buttonSpacing = 30f;
-                    }
-                    else
-                    {
-                        buttonSize = 199f;
-                        buttonSpacing = 19f;
-                    }
-
-                    float buttonsWidth = numTasks * buttonSize + (numTasks - 1) * buttonSpacing;
-                    float buttonStartX = (buttonSize - buttonsWidth) / 2;
-
-                    float buttonY = 0f;
-
-                    if (SessionValues.SessionDef.TaskIconLocations == null || SessionValues.SessionDef.TaskIconLocations.Count() != numTasks) //If user didn't specify in config, Generate default locations:
-                    {
-                        SessionValues.SessionDef.TaskIconLocations = new Vector3[numTasks];
-                        for (int i = 0; i < numTasks; i++)
-                        {
-                            SessionValues.SessionDef.TaskIconLocations[i] = new Vector3(buttonStartX, buttonY, 0);
-                            buttonStartX += buttonSize + buttonSpacing;
-                        }
+                        GameObject gridItem = new GameObject("GridItem_" + (i+1));
+                        gridItem.AddComponent<RawImage>();
+                        gridItem.GetComponent<RawImage>().enabled = false;
+                        gridItem.transform.SetParent(TaskButtonsContainer.transform);
+                        gridItem.transform.localPosition = Vector3.zero;
+                        gridItem.transform.localScale = Vector3.one;
+                        gridItem.AddComponent<Text>().text = i.ToString();
+                        gridList.Add(gridItem);
                     }
                 }
 
                 int count = 0;
                 foreach (DictionaryEntry task in SessionValues.SessionDef.TaskMappings)
                 {
-                    // Assigns configName and taskName according to Session Config Task Mappings
                     string configName = (string)task.Key;
                     string taskName = (string)task.Value;
 
                     GameObject taskButtonGO;
+                    RawImage image;
 
-                    if(SessionValues.SessionDef.UseTaskButtonsGrid)
+                    if (SessionValues.SessionDef.TaskButtonGridPositions != null)
                     {
-                        taskButtonGO = new GameObject(configName);
+                        int gridNumber = SessionValues.SessionDef.TaskButtonGridPositions[count];
+
+                        taskButtonGO = gridList[gridNumber];
+                        taskButtonGO.name = configName;
+
+                        image = taskButtonGO.GetComponent<RawImage>();
+                        image.enabled = true;
                     }
                     else
                     {
-                        USE_TaskButton taskButton = new USE_TaskButton(TaskButtonsContainer.transform.parent.GetComponent<Canvas>(), SessionValues.SessionDef.TaskIconLocations[count], buttonSize, configName);
-                        taskButton.TaskButtonGO.transform.SetParent(TaskButtonsContainer.transform, false);
-                        taskButtonGO = taskButton.TaskButtonGO;
-                        taskButtonGOs.Add(configName, taskButton.TaskButtonGO);
+                        taskButtonGO = new GameObject(configName);
+                        image = taskButtonGO.AddComponent<RawImage>();
+                        taskButtonGO.transform.SetParent(TaskButtonsContainer.transform);
+                        taskButtonGO.transform.localPosition = Vector3.zero;
+                        taskButtonGO.transform.localScale = Vector3.one;
                     }
 
-                    RawImage image = SessionValues.SessionDef.UseTaskButtonsGrid ? taskButtonGO.AddComponent<RawImage>() : taskButtonGOs[configName].GetComponent<RawImage>();
 
                     string taskFolderPath = GetConfigFolderPath(configName);
 
@@ -734,15 +721,10 @@ namespace USE_ExperimentTemplate_Session
                             taskButtonGO.AddComponent<HoverEffect>();
                     }
 
-                    if(SessionValues.SessionDef.UseTaskButtonsGrid)
-                    {
-                        taskButtonGO.transform.SetParent(TaskButtonsContainer.transform);
-                        taskButtonGO.transform.localPosition = Vector3.zero;
-                        taskButtonGO.transform.localScale = Vector3.one;
-                        taskButtonGOs.Add(configName, taskButtonGO);
-                    }
-                    else
-                        count++;
+
+                    taskButtonGOs.Add(configName, taskButtonGO);
+
+                    count++;
                 }
 
 

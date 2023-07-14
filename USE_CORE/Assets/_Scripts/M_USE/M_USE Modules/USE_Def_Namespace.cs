@@ -58,9 +58,11 @@ namespace USE_Def_Namespace
 
         //FOR TASK BUTTON GRID:
         public bool UseTaskButtonsGrid;
-        public int TaskButtonSize = 240;
-        public int TaskButtonSpacing = 45;
-        public int TaskButtonGridMaxPerRow = 4;
+        public List<int> TaskButtonGridPositions;
+        public int NumGridCells = 20;
+        public int TaskButtonSize = 225;
+        public int TaskButtonSpacing = 25;
+        public int TaskButtonGridMaxPerRow = 5;
 
     }
 

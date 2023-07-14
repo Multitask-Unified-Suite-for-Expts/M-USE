@@ -462,6 +462,7 @@ public static class SessionValues
                 }
                 fieldInfo.SetValue(settingsInstance, valuesList);
             }
+
             else if (fieldType.Equals(typeof(MonitorDetails)))
             {
                 var deserializedValue = JsonConvert.DeserializeObject<MonitorDetails>(fieldValue);

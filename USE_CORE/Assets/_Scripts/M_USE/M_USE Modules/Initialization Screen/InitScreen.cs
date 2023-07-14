@@ -65,9 +65,6 @@ public class InitScreen : MonoBehaviour
 
     void Start()
     {
-        #if (UNITY_WEBGL)
-            SessionValues.WebBuild = true;
-        #endif
 
         displayController = gameObject.AddComponent<DisplayController>();
         displayController.HandleDisplays(this);
@@ -118,10 +115,10 @@ public class InitScreen : MonoBehaviour
             
         if(SessionValues.WebBuild)
         {
-            string subjectID = session.SessionDetails.GetItemValue("SubjectID");
-            string sessionID = session.SessionDetails.GetItemValue("SessionID");
+            // string subjectID = session.SessionDetails.GetItemValue("SubjectID");
+            // string sessionID = session.SessionDetails.GetItemValue("SessionID");
 
-            yield return ServerManager.CreateSessionDataFolder(subjectID, sessionID);
+            // yield return ServerManager.CreateSessionDataFolder(subjectID, sessionID);
 
             string sessionConfigFolder = dropdown.options[dropdown.value].text;
             ServerManager.SetSessionConfigFolderName(sessionConfigFolder);

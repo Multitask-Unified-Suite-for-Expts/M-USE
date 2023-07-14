@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657815, g: 0.49641192, b: 0.57481617, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -593,6 +593,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1375570696}
   - component: {fileID: 1375570695}
+  - component: {fileID: 1375570697}
   m_Layer: 0
   m_Name: ControlLevels
   m_TagString: Untagged
@@ -613,15 +614,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: ControlLevel_Session
-  initScreen: {fileID: 1543153250}
+  initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 1
-  CallDefineLevelAutomatically: 0
+  CallDefineLevelAutomatically: 1
   quitApplicationAtEnd: 1
   DebugActive: 1
   Paused: 0
   SessionId_SQL: 0
   TasksFinished: 0
+  sessionInitScreen: {fileID: 1543153250}
   TaskSelectionSceneName: _TaskSelection
   CurrentTask: {fileID: 0}
   GazeCalibrationTaskLevel: {fileID: 0}
@@ -661,6 +663,29 @@ Transform:
   m_Father: {fileID: 2001982940}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1375570697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1375570694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33ccdd2a619ab46b89f7ef999d9ede38, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ControlLevelName: ImportSettings_Level
+  initScreen: {fileID: 0}
+  Terminated: 0
+  isMainLevel: 0
+  CallDefineLevelAutomatically: 1
+  quitApplicationAtEnd: 0
+  DebugActive: 0
+  Paused: 1
+  fileNames: []
+  settingParsingStyles: []
+  filePathStrings: []
 --- !u!1 &1391649313 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5576539015048150, guid: 810531c98dad74048995093927772f82,

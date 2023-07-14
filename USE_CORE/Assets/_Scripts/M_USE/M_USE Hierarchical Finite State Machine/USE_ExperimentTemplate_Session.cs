@@ -130,6 +130,8 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public AudioSource BackgroundMusic_AudioSource;
 
 
+        private ImportSettings_Level importSettings_Level;
+
         // public override void LoadSettings()
         private void PopulateSessionValues()
         {
@@ -160,6 +162,8 @@ namespace USE_ExperimentTemplate_Session
                     SessionValues.ConfigAccessType = "Default";
                     SessionValues.ConfigFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
 
+                    importSettings_Level.filePathStrings.Add(LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"SessionConfig"}*"));
+
                     WriteSessionConfigsToPersistantDataPath();
 
                     // StartCoroutine(SessionValues.BetterReadSettingsFile<SessionDef>("SessionConfig", "SingleTypeDelimited", settingsArray =>
@@ -183,28 +187,32 @@ namespace USE_ExperimentTemplate_Session
                     SessionValues.ConfigAccessType = "Server";
                     SessionValues.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
 
-                    StartCoroutine(ServerManager.GetFileStringAsync(SessionValues.ConfigFolderPath, "SessionConfig", result =>
-                    {
-                        if (!string.IsNullOrEmpty(result))
-                        {
-                            // StartCoroutine(SessionValues.BetterReadSettingsFile<SessionDef>("SessionConfig", "SingleTypeDelimited", settingsArray =>
-                            // {
-                            //     if (settingsArray != null)
-                            //     {
-                            //         SessionValues.SessionDef = settingsArray[0];
-                            //         SessionValues.SessionDef.ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
-                            //         //SessionValues.SessionDef.ContextExternalFilePath = "Resources/Contexts"; //path from root server folder
-                            //         SessionValues.SessionDef.TaskIconsFolderPath = "Resources/TaskIcons";
-                            //         LoadSessionConfigSettings();
-                            //         DefineControlLevel();
-                            //     }
-                            //     else
-                            //         Debug.Log("SETTINGS ARRAY IS NULL!");
-                            // }));
-                        }
-                        else
-                            Debug.Log("SESSION CONFIG COROUTINE RESULT IS EMPTY!!!");
-                    }));
+                    importSettings_Level.filePathStrings.Add(SessionValues.ConfigFolderPath);
+                    
+
+
+                    /* StartCoroutine(ServerManager.GetFileStringAsync(SessionValues.ConfigFolderPath, "SessionConfig", result =>
+                     {
+                         if (!string.IsNullOrEmpty(result))
+                         {
+                            *//*  StartCoroutine(SessionValues.BetterReadSettingsFile<SessionDef>("SessionConfig", "SingleTypeDelimited", settingsArray =>
+                              {
+                                  if (settingsArray != null)
+                                  {
+                                      SessionValues.SessionDef = settingsArray[0];
+                                      SessionValues.SessionDef.ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
+                                      //SessionValues.SessionDef.ContextExternalFilePath = "Resources/Contexts"; //path from root server folder
+                                      SessionValues.SessionDef.TaskIconsFolderPath = "Resources/TaskIcons";
+                                      LoadSessionConfigSettings();
+                                      DefineControlLevel();
+                                  }
+                                  else
+                                      Debug.Log("SETTINGS ARRAY IS NULL!");
+                              }));*//*
+                         }
+                         else
+                             Debug.Log("SESSION CONFIG COROUTINE RESULT IS EMPTY!!!");
+                     }));*/
                 }
             }
             else //Normal Build:
@@ -212,6 +220,8 @@ namespace USE_ExperimentTemplate_Session
                 SessionValues.ConfigAccessType = "Local";
                 SessionValues.ConfigFolderPath = SessionValues.LocateFile.GetPath("Config Folder");
                 SessionValues.SessionDataPath = SessionValues.LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + SessionValues.FilePrefix;
+
+                importSettings_Level.filePathStrings.Add(LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"SessionConfig"}*"));
                 // StartCoroutine(SessionValues.BetterReadSettingsFile<SessionDef>("SessionConfig", "SingleTypeDelimited", settingsArray =>
                 // {
                 //     SessionValues.SessionDef = settingsArray[0];
@@ -220,6 +230,11 @@ namespace USE_ExperimentTemplate_Session
                 // }));
             }
 
+            // All ConfigAccessTypes are loading a single type delimited SessionDef
+            importSettings_Level.settingParsingStyles.Add("SingleTypeDelimited");
+            importSettings_Level.settingTypes.Add(typeof(SessionDef));
+            // Only needed for Server, but added for all
+            importSettings_Level.fileNames.Add("SessionConfig");
         }
 
 
@@ -246,13 +261,13 @@ namespace USE_ExperimentTemplate_Session
 
             SessionCam = Camera.main;
 
-
-            
-
             bool initScreenTerminated = false;
 
 
             sessionInitScreen = GameObject.Find("InitializationScreen").GetComponent<InitScreen>();
+
+            importSettings_Level = gameObject.GetComponent<ImportSettings_Level>();
+
             initScreen.AddDefaultInitializationMethod(() =>
             {
                 sessionInitScreen.gameObject.SetActive(true);
@@ -300,6 +315,8 @@ namespace USE_ExperimentTemplate_Session
             loadSessionSettings.AddDefaultInitializationMethod(() =>
             {
                 //figure out session config paths, pass to child level
+                PopulateSessionValues();
+
                 /// session def, display config, event codes
             });
             
@@ -309,7 +326,8 @@ namespace USE_ExperimentTemplate_Session
             loadSessionSettings.SpecifyTermination(()=> loadSessionSettings.ChildLevel.Terminated, createSessionDataFolder,
                 () =>
                 {
-                    PopulateSessionValues();
+                    SessionValues.SessionDef = (SessionDef)importSettings_Level.outputSettings[0];
+                    Debug.Log("SessionDef Value: " + SessionValues.SessionDef.StoreData);
                     SetupInputManagement(selectTask, loadTask);
                     SetupSessionData();
                     SessionData.AddDatum("SelectedTaskConfigName", () => selectedConfigName);
@@ -917,8 +935,6 @@ namespace USE_ExperimentTemplate_Session
 
 
             SessionValues.SessionLevelDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel";
-
-
         }
         
         private void SetupInputManagement(State inputActive, State inputInactive)

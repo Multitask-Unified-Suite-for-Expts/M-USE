@@ -621,9 +621,9 @@ namespace USE_ExperimentTemplate_Session
 
                 List<GameObject> gridList = new List<GameObject>();
 
-                if(SessionValues.SessionDef.TaskButtonGridPositions != null)
+                if(SessionValues.SessionDef.TaskButtonGridSpots != null)
                 {
-                    for(int i = 0; i < SessionValues.SessionDef.NumGridCells; i++)
+                    for(int i = 0; i < SessionValues.SessionDef.NumGridSpots; i++)
                     {
                         GameObject gridItem = new GameObject("GridItem_" + (i+1));
                         gridItem.AddComponent<RawImage>();
@@ -631,7 +631,6 @@ namespace USE_ExperimentTemplate_Session
                         gridItem.transform.SetParent(TaskButtonsContainer.transform);
                         gridItem.transform.localPosition = Vector3.zero;
                         gridItem.transform.localScale = Vector3.one;
-                        gridItem.AddComponent<Text>().text = i.ToString();
                         gridList.Add(gridItem);
                     }
                 }
@@ -645,9 +644,9 @@ namespace USE_ExperimentTemplate_Session
                     GameObject taskButtonGO;
                     RawImage image;
 
-                    if (SessionValues.SessionDef.TaskButtonGridPositions != null)
+                    if (SessionValues.SessionDef.TaskButtonGridSpots != null)
                     {
-                        int gridNumber = SessionValues.SessionDef.TaskButtonGridPositions[count];
+                        int gridNumber = SessionValues.SessionDef.TaskButtonGridSpots[count];
 
                         taskButtonGO = gridList[gridNumber];
                         taskButtonGO.name = configName;
@@ -663,7 +662,6 @@ namespace USE_ExperimentTemplate_Session
                         taskButtonGO.transform.localPosition = Vector3.zero;
                         taskButtonGO.transform.localScale = Vector3.one;
                     }
-
 
                     string taskFolderPath = GetConfigFolderPath(configName);
 

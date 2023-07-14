@@ -54,15 +54,15 @@ namespace USE_Def_Namespace
         public bool PlayBackgroundMusic;
 
         public bool GuidedTaskSelection;
+        
 
-
-        //FOR TASK BUTTON GRID:
-        public bool UseTaskButtonsGrid;
-        public List<int> TaskButtonGridPositions;
-        public int NumGridCells = 20;
         public int TaskButtonSize = 225;
         public int TaskButtonSpacing = 25;
         public int TaskButtonGridMaxPerRow = 5;
+
+        //If Want to specify positions:
+        public List<int> TaskButtonGridSpots; //put into session config
+        public int NumGridSpots = 20; 
 
     }
 

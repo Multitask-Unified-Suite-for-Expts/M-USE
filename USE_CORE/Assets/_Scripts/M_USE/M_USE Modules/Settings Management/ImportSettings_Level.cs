@@ -69,7 +69,7 @@ public class ImportSettings_Level : ControlLevel
                     Debug.Log($"Failed to load {currentFileName}, may not be an issue for this session.");
             }));
         });
-        loadFile.SpecifyTermination(() => fileLoaded, parseFile);
+        loadFile.SpecifyTermination(() => fileLoaded, parseFile, () => fileLoaded = false) ;
         loadFile.AddTimer(() => 0.5f, parseFile ); //adjust timer value for a sensible amount of time for the server to retrieve file content 
         
         parseFile.AddDefaultInitializationMethod(() =>

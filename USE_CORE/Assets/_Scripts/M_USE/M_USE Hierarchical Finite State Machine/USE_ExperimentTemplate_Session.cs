@@ -347,6 +347,9 @@ namespace USE_ExperimentTemplate_Session
                         {
                             SessionValues.SessionEventCodes = (Dictionary<string, EventCode>)importSettings_Level.currentSetting;
                             Debug.Log("Session Event Codes are Assigned");
+
+                            if (SessionValues.SessionEventCodes == null)
+                                Debug.LogError("Event Code Active set to true in the Session Config, but Session Event Code Config is missing from the Config folder.");
                         }
 
                     }

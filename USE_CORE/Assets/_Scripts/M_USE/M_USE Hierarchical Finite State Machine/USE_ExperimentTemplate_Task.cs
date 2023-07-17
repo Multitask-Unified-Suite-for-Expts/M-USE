@@ -249,13 +249,13 @@ namespace USE_ExperimentTemplate_Task
             SetupTask.AddInitializationMethod(() =>
             {
                 SetTaskSummaryString();
-                if(SessionValues.SessionDef.EventCodesActive)
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["SetupTaskStarts"]);
+
+                SessionValues.EventCodeManager.SendCodeImmediate("SetupTaskStarts");
 
                 if (SessionValues.SessionDef.IsHuman)
                 {
                     Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
-                    SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.SessionEventCodes);
+                    SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
                     SessionValues.HumanStartPanel.SetTaskLevel(this);
                     SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
                 }
@@ -264,8 +264,7 @@ namespace USE_ExperimentTemplate_Task
 
             RunBlock.AddUniversalInitializationMethod(() =>
             {
-                if (SessionValues.SessionDef.EventCodesActive)
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["RunBlockStarts"]);
+                SessionValues.EventCodeManager.SendCodeImmediate("RunBlockStarts");
 
                 BlockCount++;
                 CurrentBlockDef = BlockDefs[BlockCount];
@@ -323,8 +322,7 @@ namespace USE_ExperimentTemplate_Task
             {
                 StartCoroutine(FrameData.AppendDataToBuffer());
 
-                if (SessionValues.SessionDef.EventCodesActive)
-                    SessionValues.EventCodeManager.EventCodeLateUpdate();
+                SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
 
@@ -349,8 +347,8 @@ namespace USE_ExperimentTemplate_Task
                     PreviousBlockSummaryString.Insert(0, BlockSummaryString); //Add current block string to full list of previous blocks. 
                     PreviousBlockSummaryString.Insert(0, blockTitle);
                 }*/
-                if (SessionValues.SessionDef.EventCodesActive)
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["BlockFeedbackStarts"]);
+
+                SessionValues.EventCodeManager.SendCodeImmediate("BlockFeedbackStarts");
             });
             BlockFeedback.AddUpdateMethod(() =>
             {
@@ -396,7 +394,7 @@ namespace USE_ExperimentTemplate_Task
                 }
 
                 if (SessionValues.SessionDef.EventCodesActive)
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["FinishTaskStarts"]);
+                    SessionValues.EventCodeManager.SendCodeImmediate("FinishTaskStarts");
 
                 //Clear trialsummarystring and Blocksummarystring at end of task:
                 if (TrialLevel.TrialSummaryString != null && BlockSummaryString != null)
@@ -428,8 +426,6 @@ namespace USE_ExperimentTemplate_Task
 
                 if (TaskStims != null)
                 {
-                    Debug.Log("TASK STIMS NOT NULL!");
-
                     int sgNum = TaskStims.AllTaskStimGroups.Count;
                     for (int iSg = 0; iSg < sgNum; iSg++)
                     {
@@ -469,7 +465,10 @@ namespace USE_ExperimentTemplate_Task
             TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
 
             if (SessionValues.WebBuild && SessionValues.SessionDef.StoreData)
+            {
+                Debug.Log("ABOUT TO CREATE FOLDER AT: " + TaskDataPath);
                 StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
+            }
 
             if (TaskName == "GazeCalibration")
             {
@@ -566,11 +565,12 @@ namespace USE_ExperimentTemplate_Task
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TotalTokensNum"))
                 totalTokensNum = (int)SessionSettings.Get(TaskName + "_TaskSettings", "TotalTokensNum");
 
-            fbControllers.GetComponent<AudioFBController>().SessionEventCodes = SessionValues.SessionEventCodes;
-            fbControllers.GetComponent<HaloFBController>().SessionEventCodes = SessionValues.SessionEventCodes;
-            fbControllers.GetComponent<TokenFBController>().SessionEventCodes = SessionValues.SessionEventCodes;
-            fbControllers.GetComponent<SliderFBController>().SessionEventCodes = SessionValues.SessionEventCodes;
-            fbControllers.GetComponent<TouchFBController>().SessionEventCodes = SessionValues.SessionEventCodes;
+            //GOTTA BE A BETTER WAY TO DO THIS:
+            fbControllers.GetComponent<AudioFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
+            fbControllers.GetComponent<HaloFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
+            fbControllers.GetComponent<TokenFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
+            fbControllers.GetComponent<SliderFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
+            fbControllers.GetComponent<TouchFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
 
            // TrialLevel.SelectionTracker = SelectionTracker;
                 

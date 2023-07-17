@@ -220,11 +220,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), Delay, () =>
         {
-            if (SessionValues.SessionDef.EventCodesActive)
-            {
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
-                SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOn"]);
-            }
+            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
+            SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOn"]);
 
             StateAfterDelay = ChooseTile;
             DelayDuration = mazeOnsetDelay.value;
@@ -301,8 +298,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             // Timeout Termination
             aborted = true;
-            if (SessionValues.SessionDef.EventCodesActive)
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["NoChoice"]);
+            SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
             AbortCode = 6;
             CurrentTaskLevel.numAbortedTrials_InBlock++;
             CurrentTaskLevel.numAbortedTrials_InTask++;
@@ -388,8 +384,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 runningPercentError.Add(percentError);
                 CurrentTaskLevel.numSliderBarFull_InBlock++;
                 CurrentTaskLevel.numSliderBarFull_InTask++;
-                if (SessionValues.SessionDef.EventCodesActive)
-                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
+                SessionValues.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderCompleteFbOn");
 
                 if (SessionValues.SyncBoxController != null)
                 {
@@ -429,13 +424,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             DisableSceneElements();
             if (!SessionValues.WebBuild)
                 DestroyChildren(playerViewParent);
-            if (SessionValues.SessionDef.EventCodesActive)
-            {
-                SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOff"]);
 
-                if (finishedMaze)
-                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["SliderFbController_SliderCompleteFbOff"]);
-            }
+            SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOff"]);
+
+            if (finishedMaze)
+                SessionValues.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderCompleteFbOff");
+            
             if (NeutralITI)
             {
                 contextName = "itiImage";
@@ -579,8 +573,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         if (touchedCoord.chessCoord == CurrentTaskLevel.currMaze.mNextStep)
         {
             Debug.Log("*Correct Tile Touch*");
-            if (SessionValues.SessionDef.EventCodesActive)
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["CorrectResponse"]);
+            SessionValues.EventCodeManager.SendCodeImmediate("CorrectResponse");
 
             correctTouches_InTrial++;
             CurrentTaskLevel.correctTouches_InBlock++;

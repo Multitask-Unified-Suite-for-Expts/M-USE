@@ -59,7 +59,11 @@ namespace USE_ExperimentTemplate_Session
         protected FrameData FrameData;
         private Camera SessionCam;
         private Camera MirrorCam;
+        private GameObject mirrorCamGO;
         [HideInInspector] public RenderTexture CameraMirrorTexture;
+
+        private GameObject experimenterDisplay;
+        private RawImage mainCameraCopy_Image;
 
        private bool TaskSceneLoaded, SceneLoading;
         private List<string> selectedConfigsList = new List<string>();
@@ -86,17 +90,10 @@ namespace USE_ExperimentTemplate_Session
 
         private ImportSettings_Level importSettings_Level;
 
-
-        private void AssignValuesForSessionConfigLoading()
+        private void SetConfigPathsAndTypes()
         {
-            //Set FilePrefix
-            SessionValues.FilePrefix = "Session_" + SessionValues.SessionID + "__Subject_" + SessionValues.SubjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
-
-            // Add necessary fields to Load Session Def from ImportSettings_Level
             if (SessionValues.WebBuild)
             {
-                SessionValues.SessionDataPath = ServerManager.SessionDataFolderPath;
-
                 if (SessionValues.UsingDefaultConfigs)
                 {
                     SessionValues.ConfigAccessType = "Default";
@@ -115,21 +112,21 @@ namespace USE_ExperimentTemplate_Session
             {
                 SessionValues.ConfigAccessType = "Local";
                 SessionValues.ConfigFolderPath = SessionValues.LocateFile.GetPath("Config Folder");
-                SessionValues.SessionDataPath = SessionValues.LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + SessionValues.FilePrefix;
                 importSettings_Level.filePathStrings.Add(LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"SessionConfig"}*"));
             }
+        }
 
+        private void SetValuesForLoading_SessionConfig()
+        {
+            // Add necessary fields to Load Session Def from ImportSettings_Level
             importSettings_Level.settingParsingStyles.Add("SingleTypeDelimited");
             importSettings_Level.settingTypes.Add(typeof(SessionDef));
             importSettings_Level.fileNames.Add("SessionConfig");
         }
 
-        private void AssignValuesForEventCodeConfigLoading()
+        private void SetValuesForLoading_EventCodeConfig()
         {
             // Add necessary fields to Load Session Event Codes from ImportSettings_Level
-            //Load the Session Event Code Config file --------------------------------------------------------------------------------------------------
-            string eventCodeFileString = "";
-
             importSettings_Level.settingParsingStyles.Add("SingleTypeJSON");
             importSettings_Level.settingTypes.Add(typeof(Dictionary<string, EventCode>));
             importSettings_Level.fileNames.Add("EventCode");
@@ -138,7 +135,7 @@ namespace USE_ExperimentTemplate_Session
                 importSettings_Level.filePathStrings.Add(SessionValues.ConfigFolderPath);
             else  // Local or Default
             {
-                eventCodeFileString = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, "*EventCode*");
+                string eventCodeFileString = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, "*EventCode*");
                 if (!String.IsNullOrEmpty(eventCodeFileString))
                     importSettings_Level.filePathStrings.Add(LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"EventCode"}*"));
                 else
@@ -195,11 +192,6 @@ namespace USE_ExperimentTemplate_Session
                 sessionInitScreen.OnConfirm += ()=> initScreenTerminated = true;
             });
             
-            GameObject experimenterDisplay = null;
-            GameObject mirrorCamGO = null;
-            Camera MirrorCam = null;
-            RawImage mainCameraCopy_Image = null;
-
             initScreen.SpecifyTermination(()=> initScreenTerminated, loadSessionSettings, () =>
             {
                 SessionValues.SubjectID = SessionDetails.GetItemValue("SubjectID");
@@ -210,63 +202,45 @@ namespace USE_ExperimentTemplate_Session
                     GameObject initCamGO = GameObject.Find("InitCamera");
                     initCamGO.SetActive(false);
                 }
-                else //create experimenter display
+                else
                 {
+                    CreateExperimenterDisplay();
+                    CreateMirrorCam();
                     TaskSelection_Starfield.SetActive(false);
-                    experimenterDisplay = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
-                    experimenterDisplay.name = "ExperimenterDisplay";
-                    SessionValues.ExperimenterDisplayController = experimenterDisplay.AddComponent<ExperimenterDisplayController>();
-                    experimenterDisplay.AddComponent<PreserveObject>();
-                    SessionValues.ExperimenterDisplayController.InitializeExperimenterDisplay(this, experimenterDisplay);
-
-                    mirrorCamGO = new GameObject("MirrorCamera");
-                    MirrorCam = mirrorCamGO.AddComponent<Camera>();
-                    MirrorCam.CopyFrom(Camera.main);
-                    MirrorCam.cullingMask = 0;
-                    mainCameraCopy_Image = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
                 }
 
-            }); 
-            
-            
+            });
+
             loadSessionSettings.AddDefaultInitializationMethod(() =>
             {
-                PassObjectsToSessionValues(); //pass a few GOs/Prefabs to SessionValues. will eventually handle prefabs differently
-                AssignValuesForSessionConfigLoading(); //Sets: FilePrefix, SessionDataPath, ConfigAccessType, ConfigFolderPath. Adds file path strings to importSettingsLevel
-                AssignValuesForEventCodeConfigLoading();
-                //Do one for DisplayConfig too?
+                SessionValues.EventCodeManager = GameObject.Find("MiscScripts").GetComponent<EventCodeManager>();
+
+                SessionValues.FilePrefix = "Session_" + SessionValues.SessionID + "__Subject_" + SessionValues.SubjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
+                ServerManager.SetSessionDataFolder("DATA__" + SessionValues.FilePrefix);
+                SessionValues.SessionDataPath = SessionValues.WebBuild ? ServerManager.SessionDataFolderPath : (SessionValues.LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + SessionValues.FilePrefix);
+                SessionValues.SessionLevelDataPath = SessionValues.WebBuild ? $"{SessionValues.SessionDataPath}/SessionLevel" : (SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel");
+
+                SetConfigPathsAndTypes();
+                SetValuesForLoading_SessionConfig();
+                SetValuesForLoading_EventCodeConfig();
+                PassObjectsToSessionValues();
             });
-            
+
             string selectedConfigName = null;
             bool taskAutomaticallySelected = false;
             loadSessionSettings.AddChildLevel(gameObject.GetComponent<ImportSettings_Level>());
 
             loadSessionSettings.AddUpdateMethod(() =>
             {
-                if(importSettings_Level.fileParsed)
+                if (importSettings_Level.fileParsed)
                 {
                     if (importSettings_Level.currentFileName == "SessionConfig")
                     {
                         SessionValues.SessionDef = (SessionDef)importSettings_Level.currentSetting;
                         Debug.Log("Session Def is Imported!");
-                        GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true;
                     }
                     else if (importSettings_Level.currentFileName == "EventCode")
-                    {
-                        if (SessionValues.SessionDef.EventCodesActive)
-                        {
-                            SessionValues.SessionEventCodes = (Dictionary<string, EventCode>)importSettings_Level.currentSetting;
-                            Debug.Log("Session Event Codes are Imported!");
-
-                            if (SessionValues.SessionEventCodes == null)
-                                Debug.LogError("Event Code Active set to true in the Session Config, but Session Event Code Config is missing from the Config folder.");
-                        }
-                    }
-                    else if(importSettings_Level.currentFileName == "DisplayConfig")
-                    {
-                        Debug.Log("Imported the DisplayConfig!");
-                        //handle/set the display config?
-                    }
+                        SessionValues.EventCodeManager.SessionEventCodes = (Dictionary<string, EventCode>)importSettings_Level.currentSetting;
                     else
                         Debug.Log($"The {importSettings_Level.currentFileName} has been parsed, but is unable to be set as it is not a SessionConfig, EventCode, or DisplayConfig file.");
 
@@ -274,19 +248,22 @@ namespace USE_ExperimentTemplate_Session
                 }
             });
             loadSessionSettings.SpecifyTermination(() => loadSessionSettings.ChildLevel.Terminated, createSessionDataFolder);
-            loadSessionSettings.AddDefaultTerminationMethod(() => SetFolderPaths_ContextsAndTaskIcons());
+            loadSessionSettings.AddDefaultTerminationMethod(() =>
+            {
+                SetWebFolderPaths_ContextsAndTaskIcons();
+
+                SetupInputManagement(selectTask, loadTask);
+
+                SetupSessionData();
+                SessionData.AddDatum("SelectedTaskConfigName", () => selectedConfigName);
+                SessionData.AddDatum("TaskAutomaticallySelected", () => taskAutomaticallySelected);
+            });
 
             bool sessionDataFolderCreated = false;
             createSessionDataFolder.AddDefaultInitializationMethod(() =>
             {
                 if (SessionValues.SessionDef.StoreData)
-                {
-                    StartCoroutine(CreateSessionDataFolder(folderCreatedResult =>
-                    {
-                        if(folderCreatedResult)
-                            sessionDataFolderCreated = true;
-                    }));
-                }
+                    StartCoroutine(CreateSessionDataFolder(result => sessionDataFolderCreated = true));
                 else
                     sessionDataFolderCreated = true; //set to true if not storing data so the state ends?
             });
@@ -295,15 +272,9 @@ namespace USE_ExperimentTemplate_Session
             bool waitForSerialPort = false;
             setupSession.AddDefaultInitializationMethod(() =>
             {
-                SetupInputManagement(selectTask, loadTask);
-                SetupSessionData();
-                SessionData.AddDatum("SelectedTaskConfigName", () => selectedConfigName);
-                SessionData.AddDatum("TaskAutomaticallySelected", () => taskAutomaticallySelected);
                 SummaryData.Init();
 
                 CreateSessionSettingsFolder();
-
-                SessionValues.EventCodeManager = GameObject.Find("MiscScripts").GetComponent<EventCodeManager>();
 
                 if (SessionValues.SessionDef.SerialPortActive)
                 {
@@ -326,32 +297,8 @@ namespace USE_ExperimentTemplate_Session
 
                     SessionValues.SerialPortController.SerialPortAddress = SessionValues.SessionDef.SerialPortAddress;
                     SessionValues.SerialPortController.SerialPortSpeed = SessionValues.SessionDef.SerialPortSpeed;
-                    
-                    // if (SessionValues.SerialPortController.SerialPortAddress == null)
-                    //     SessionValues.SerialPortController.SerialPortAddress = SessionValues.SessionDef.
-                    
-                    // if (SessionSettings.SettingExists("Session", "SerialPortAddress"))
-                    //     SerialPortController.SerialPortAddress =
-                    //         (string)SessionSettings.Get("Session", "SerialPortAddress");
-                    // else if (SessionSettings.SettingClassExists("SyncBoxConfig"))
-                    // {
-                    //     if (SessionSettings.SettingExists("SyncBoxConfig", "SerialPortAddress"))
-                    //         SerialPortController.SerialPortAddress =
-                    //             (string)SessionSettings.Get("SyncBoxConfig", "SerialPortAddress");
-                    // }
-
-                    // if (SessionSettings.SettingExists("Session", "SerialPortSpeed"))
-                    //     SerialPortController.SerialPortSpeed =
-                    //         (int)SessionSettings.Get("Session", "SerialPortSpeed");
-                    // else if (SessionSettings.SettingClassExists("SyncBoxConfig"))
-                    // {
-                    //     if (SessionSettings.SettingExists("SyncBoxConfig", "SerialPortSpeed"))
-                    //         SerialPortController.SerialPortSpeed =
-                    //             (int)SessionSettings.Get("SyncBoxConfig", "SerialPortSpeed");
-                    // }
-
+                   
                     SessionValues.SerialPortController.Initialize();
-
                 }
             });
 
@@ -416,8 +363,7 @@ namespace USE_ExperimentTemplate_Session
                     SessionValues.SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
                 }
 
-                if (SessionValues.SessionDef.EventCodesActive)
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["SetupSessionEnds"]);
+                SessionValues.EventCodeManager.SendCodeImmediate("SetupSessionEnds");
             });
 
             // Canvas[] TaskSelectionCanvasses = null;
@@ -506,8 +452,7 @@ namespace USE_ExperimentTemplate_Session
                     }
                 }
 
-                if (SessionValues.SessionDef.EventCodesActive)
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["SelectTaskStarts"]);
+                SessionValues.EventCodeManager.SendCodeImmediate("SelectTaskStarts");
 
                 if (SessionValues.SessionDef.SerialPortActive)
                 {
@@ -697,7 +642,6 @@ namespace USE_ExperimentTemplate_Session
 
             selectTask.AddLateUpdateMethod(() =>
             {
-                
                 SessionValues.SelectionTracker.UpdateActiveSelections();
                 if (SelectionHandler.SuccessfulSelections.Count > 0)
                 {
@@ -806,8 +750,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 SessionCam.gameObject.SetActive(false);
 
-                if (SessionValues.SessionDef.EventCodesActive)
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["RunTaskStarts"]);
+                SessionValues.EventCodeManager.SendCodeImmediate("RunTaskStarts");
 
                 if(!SessionValues.WebBuild)
                 {
@@ -825,11 +768,9 @@ namespace USE_ExperimentTemplate_Session
             
             runTask.AddFixedUpdateMethod(() =>
             {
-                if (SessionValues.SessionDef.EventCodesActive)
-                    SessionValues.EventCodeManager.EventCodeFixedUpdate();
+                SessionValues.EventCodeManager.EventCodeFixedUpdate();
             });
             
-
             runTask.AddLateUpdateMethod(() =>
             {
                 SessionValues.SelectionTracker.UpdateActiveSelections();
@@ -893,8 +834,7 @@ namespace USE_ExperimentTemplate_Session
 
             finishSession.AddInitializationMethod(() =>
             {
-                if (SessionValues.SessionDef.EventCodesActive)
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["FinishSessionStarts"]);
+                SessionValues.EventCodeManager.SendCodeImmediate("FinishSessionStarts");
             });
 
             finishSession.SpecifyTermination(() => true, () => null, () =>
@@ -914,12 +854,27 @@ namespace USE_ExperimentTemplate_Session
 
                 StartCoroutine(FrameData.AppendDataToFile());
             });
-
-
-            SessionValues.SessionLevelDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel";
         }
 
-        private void SetFolderPaths_ContextsAndTaskIcons()
+        private void CreateExperimenterDisplay()
+        {
+            experimenterDisplay = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
+            experimenterDisplay.name = "ExperimenterDisplay";
+            SessionValues.ExperimenterDisplayController = experimenterDisplay.AddComponent<ExperimenterDisplayController>();
+            experimenterDisplay.AddComponent<PreserveObject>();
+            SessionValues.ExperimenterDisplayController.InitializeExperimenterDisplay(this, experimenterDisplay);
+        }
+
+        private void CreateMirrorCam()
+        {
+            mirrorCamGO = new GameObject("MirrorCamera");
+            MirrorCam = mirrorCamGO.AddComponent<Camera>();
+            MirrorCam.CopyFrom(Camera.main);
+            MirrorCam.cullingMask = 0;
+            mainCameraCopy_Image = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
+        }
+
+        private void SetWebFolderPaths_ContextsAndTaskIcons()
         {
             if(SessionValues.WebBuild)
             {
@@ -930,17 +885,9 @@ namespace USE_ExperimentTemplate_Session
                 }
                 else
                 {
-                    SessionValues.SessionDef.TaskIconsFolderPath = "Resources/TaskIcons";
+                    SessionValues.SessionDef.TaskIconsFolderPath = "Resources/TaskIcons"; //Path on server
                     SessionValues.SessionDef.ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
                 }
-            }
-            else
-            {
-                Debug.Log("NEED TO SET THE TASKICONS FOLDER PATH FOR NORMAL BUILD!!!!");
-                //set TaskIcons path
-
-                Debug.Log("NEED TO SET CONTEXT PATH FOR NORMAL BUILD!");
-                //set context path
             }
         }
 
@@ -948,8 +895,9 @@ namespace USE_ExperimentTemplate_Session
         {
             if (SessionValues.WebBuild)
             {
-                if (!Application.isEditor) //DOESNT CURRENTLY WORK FOR DEFAULT CONFIGS CUZ THATS NOT A CONFIG ON THE SERVER, so it cant find it to copy from
+                if (!Application.isEditor) //Only copy the folder when not in editor
                 {
+                    //DOESNT CURRENTLY WORK FOR DEFAULT CONFIGS CUZ THATS NOT A CONFIG ON THE SERVER, so it cant find it to copy from
                     StartCoroutine(CreateFolderOnServer(SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings", () =>
                     {
                         StartCoroutine(CopySessionConfigFolderToDataFolder()); //Copy Session Config folder to Data folder so that the settings are stored
@@ -967,10 +915,12 @@ namespace USE_ExperimentTemplate_Session
         private IEnumerator CreateSessionDataFolder(Action<bool> callbackBool)
         {
             if (SessionValues.WebBuild)
-                yield return StartCoroutine(ServerManager.CreateSessionDataFolder());
-            else
-                yield return StartCoroutine(SessionData.CreateFile()); //not sure if this is right. need to test for normal build!!!
-
+            {
+                yield return StartCoroutine(ServerManager.CreateSessionDataFolder()); //Create Session Data Folder
+                yield return StartCoroutine(ServerManager.CreateFolder(SessionValues.SessionLevelDataPath)); //Create SessionLevel Sub-Folder inside Data Folder
+            }
+            yield return StartCoroutine(SessionData.CreateFile()); //Will also create session data folder for normal build
+            GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true; //tell log writer when storeData boolean has been set (in this case, waiting until data folder is created)
             callbackBool?.Invoke(true);
         }
 
@@ -1030,14 +980,12 @@ namespace USE_ExperimentTemplate_Session
 
         private void SetupSessionData()
         {
-            
             SessionData = (SessionData)SessionValues.SessionDataControllers.InstantiateDataController<SessionData>
                 ("SessionData", SessionValues.SessionDef.StoreData, SessionValues.SessionDataPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionValues.SessionDataPath);
             SessionData.fileName = SessionValues.FilePrefix + "__SessionData.txt";
             SessionData.sessionLevel = this;
             SessionData.InitDataController();
             SessionData.ManuallyDefine();
-
 
             if (SessionValues.SessionDef.SerialPortActive)
             {
@@ -1058,23 +1006,13 @@ namespace USE_ExperimentTemplate_Session
                 SessionValues.SerialRecvData.ManuallyDefine();
             }
 
-            //if web build, create the SessionLevelDataFolder:
-            if(SessionValues.WebBuild)
-            {
-                StartCoroutine(CreateFolderOnServer(SessionValues.SessionLevelDataPath, () =>
-                {
-                    Debug.Log("Done creating SessionLevel sub-folder at: " + SessionValues.SessionLevelDataPath);
-                }));
-            }
-
             FrameData = (FrameData)SessionValues.SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "SessionLevel", SessionValues.SessionDef.StoreData, SessionValues.SessionLevelDataPath + Path.DirectorySeparatorChar + "FrameData");
             FrameData.fileName = "SessionLevel__FrameData.txt";
             FrameData.sessionLevel = this;
             FrameData.InitDataController();
             FrameData.ManuallyDefine();
 
-            if (SessionValues.SessionDef.EventCodesActive)
-                FrameData.AddEventCodeColumns();
+            FrameData.AddEventCodeColumns();
 
             if (SessionValues.SessionDef.EyeTrackerActive)
             {
@@ -1089,44 +1027,6 @@ namespace USE_ExperimentTemplate_Session
 
             }
             SessionValues.MouseTracker.Init(FrameData, 0);
-        }
-
-        private void LoadSessionConfigSettings() //NOT CURRENTLY BEING CALLED!!!!!!!
-        {
-            //MAKE SURE SYNCBOX INACTIVE FOR WEB BUILD (Can eventually remove this once thilo provides web build session configs with it marked false)
-            if (SessionValues.WebBuild)
-                SessionValues.SessionDef.SyncBoxActive = false;
-
-            if (SessionValues.SessionDef.SyncBoxActive)
-                SessionValues.SessionDef.SerialPortActive = true;
-
-
-            //Load the Session Event Code Config file --------------------------------------------------------------------------------------------------
-            string eventCodeFileString = "";
-
-            if(SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
-            {
-                StartCoroutine(ServerManager.GetFileStringAsync(ServerManager.SessionConfigFolderPath, "EventCode", result =>
-                {
-                    SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>("EventCodeConfig", SessionValues.ConfigFolderPath , result);
-                    SessionValues.SessionEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get("EventCodeConfig");
-                }));
-            }
-            else
-            {
-                string path = SessionValues.UsingDefaultConfigs ? (Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs") : SessionValues.ConfigFolderPath ;
-                eventCodeFileString = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, "*EventCode*");
-            }
-
-            // List<string> taskNames;
-            if (SessionValues.SessionDef.TaskNames != null)
-            {
-                SessionValues.SessionDef.TaskMappings = new OrderedDictionary();
-                SessionValues.SessionDef.TaskNames.ForEach((taskName) => SessionValues.SessionDef.TaskMappings.Add(taskName, taskName));
-            }
-            else if (SessionValues.SessionDef.TaskMappings.Count == 0)
-                Debug.LogError("No task names or task mappings specified in Session config file or by other means.");
-
         }
 
         private void WriteSessionConfigsToPersistantDataPath()
@@ -1376,7 +1276,7 @@ namespace USE_ExperimentTemplate_Session
             //     tl.SerialPortController = SerialPortController;
             if (SessionValues.SessionDef.SyncBoxActive)
             {
-                SessionValues.SyncBoxController.SessionEventCodes = SessionValues.SessionEventCodes;
+                SessionValues.SyncBoxController.SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
              //   tl.SyncBoxController = SyncBoxController;
             }
             // tl.ShotgunRaycastCircleSize_DVA = ShotgunRaycastCircleSize_DVA;

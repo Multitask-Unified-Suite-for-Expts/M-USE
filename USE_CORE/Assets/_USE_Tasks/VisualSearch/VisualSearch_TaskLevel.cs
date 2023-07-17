@@ -52,8 +52,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 
             RenderSettings.skybox = CreateSkybox(contextFilePath);
 
-            if (SessionValues.SessionDef.EventCodesActive)
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOn"]);
+            SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
 
             vsTL.TokensWithStimOn = vsBD.TokensWithStimOn;
             vsTL.ResetBlockVariables();

@@ -46,7 +46,6 @@ public static class SessionValues
     public static GameObject InputManager;
 
     public static EventCodeManager EventCodeManager;
-    public static Dictionary<string, EventCode> SessionEventCodes;
     
     public static string ConfigAccessType;
     public static string ConfigFolderPath;

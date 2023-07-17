@@ -75,8 +75,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
             trialLevel.ContextActive = true;
 
-            if(SessionValues.SessionDef.EventCodesActive)
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOn"]);
+            SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
 
             trialLevel.TokenFBController.SetTotalTokensNum(currentBlock.NumTokenBar);
             trialLevel.TokenFBController.SetTokenBarValue(currentBlock.InitialTokenAmount);

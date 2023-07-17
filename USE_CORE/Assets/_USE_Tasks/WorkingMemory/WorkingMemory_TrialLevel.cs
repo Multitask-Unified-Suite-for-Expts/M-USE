@@ -157,8 +157,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 .SetUpdateTime(tokenUpdateDuration.value)
                 .SetFlashingTime(tokenFlashingDuration.value);
 
-            if (SessionValues.SessionDef.EventCodesActive)
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
+            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
                 
             CurrentTaskLevel.SetBlockSummaryString();
             if (TrialCount_InTask != 0)
@@ -187,11 +186,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
             searchStims.ToggleVisibility(true);
 
-            if (SessionValues.SessionDef.EventCodesActive)
-            {
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOn"]);
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["TokenBarVisible"]);
-            }
+            SessionValues.EventCodeManager.SendCodeNextFrame("StimOn");
+            SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
+            
             choiceMade = false;
 
             if (ShotgunHandler.AllSelections.Count > 0)
@@ -216,21 +213,15 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             {       
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
-                if (SessionValues.SessionDef.EventCodesActive)
-                {
-                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["CorrectResponse"]);
-                }
+                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                SessionValues.EventCodeManager.SendCodeNextFrame("CorrectResponse");
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
-                if (SessionValues.SessionDef.EventCodesActive)
-                {
-                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnDistractorObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["IncorrectResponse"]);
-                }
+                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnDistractorObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                SessionValues.EventCodeManager.SendCodeNextFrame("IncorrectResponse");
             }
 
             if (selectedGO != null)
@@ -249,9 +240,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             NumAborted_InBlock++;
             CurrentTaskLevel.NumAborted_InTask++;
             AbortCode = 6;
-            if (SessionValues.SessionDef.EventCodesActive)
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["NoChoice"]);
-
+            SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
         });
 
         SelectionFeedback.AddInitializationMethod(() =>
@@ -319,8 +308,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             {
                 ContextName = "itiImage";
                 RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName));
-                if(SessionValues.SessionDef.EventCodesActive)
-                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOff"]);
+                SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
             }
         });
         // Wait for some time at the end

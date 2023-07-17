@@ -201,8 +201,7 @@ namespace USE_ExperimentTemplate_Trial
 
                 TokenFBController.RecalculateTokenBox(); //recalculate tokenbox incase they switch to fullscreen mode
 
-                if(SessionValues.SessionDef.EventCodesActive)
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["SetupTrialStarts"]);
+                SessionValues.EventCodeManager.SendCodeImmediate("SetupTrialStarts");
 
                 ResetRelativeStartTime();
 
@@ -218,8 +217,7 @@ namespace USE_ExperimentTemplate_Trial
 
             FinishTrial.AddInitializationMethod(() =>
             {
-                if (SessionValues.SessionDef.EventCodesActive)
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["FinishTrialStarts"]);
+                SessionValues.EventCodeManager.SendCodeImmediate("FinishTrialStarts");
             });
             FinishTrial.SpecifyTermination(() => runCalibration && TaskLevel.TaskName != "GazeCalibration", () => GazeCalibration);
 

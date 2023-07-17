@@ -17,13 +17,15 @@ public class LogWriter : MonoBehaviour
     {
         get
         {
-            if (ServerManager.SessionDataFolderPath == null)
+            if (string.IsNullOrEmpty(ServerManager.SessionDataFolderPath))
             {
                 Debug.Log("Trying to Get ServerLogFolderPath but ServerManager.SessionDataFolderPath hasnt been set yet!");
                 return null;
             }
             else
+            {
                 return $"{ServerManager.SessionDataFolderPath}/LogFile";
+            }
         }
     }
 
@@ -31,7 +33,7 @@ public class LogWriter : MonoBehaviour
     {
         get
         {
-            if (SessionValues.SessionDataPath == null)
+            if (string.IsNullOrEmpty(SessionValues.SessionDataPath))
             {
                 Debug.Log("Trying to Get LocalLogFolderPath but SessionValues.SessionDataPath hasnt been set yet!");
                 return null;
@@ -45,7 +47,7 @@ public class LogWriter : MonoBehaviour
     {
         get
         {
-            if (ServerManager.SessionDataFolderPath == null)
+            if (string.IsNullOrEmpty(ServerManager.SessionDataFolderPath))
             {
                 Debug.Log("Trying to Get ServerLogFilePath but ServerManager.SessionDataFolderPath hasnt been set yet!");
                 return null;
@@ -59,7 +61,7 @@ public class LogWriter : MonoBehaviour
     {
         get
         {
-            if (SessionValues.SessionDataPath == null)
+            if (string.IsNullOrEmpty(SessionValues.SessionDataPath))
             {
                 Debug.Log("Trying to Get LocalLogFilePath but SessionValues.SessionDataPath hasnt been set yet!");
                 return null;
@@ -120,6 +122,8 @@ public class LogWriter : MonoBehaviour
 
     private IEnumerator CreateLogFolder()
     {
+        Debug.Log("CREATING LOG FOLDER AT: " + ServerLogFolderPath);
+
         if (SessionValues.WebBuild)
         {
             if (ServerManager.SessionDataFolderCreated)

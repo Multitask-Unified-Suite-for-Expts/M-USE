@@ -8,6 +8,7 @@ using USE_ExperimentTemplate_Classes;
 
 public class EventCodeManager : MonoBehaviour 
 {
+    public Dictionary<string, EventCode> SessionEventCodes;
 
     private int frameChecker = 0;
     private List<int> toSendBuffer = new List<int>();
@@ -68,6 +69,7 @@ public class EventCodeManager : MonoBehaviour
         {
             code = code * 256;
         }
+
         if (codesActive)
         {
 			if (splitBytes <= 1)
@@ -85,6 +87,13 @@ public class EventCodeManager : MonoBehaviour
         }
     }
 
+    public void SendCodeImmediate(string codeString)
+    {
+        EventCode code = SessionEventCodes[codeString];
+		if (code != null)
+			SendCodeImmediate(code);
+    }
+
     public void SendCodeImmediate(EventCode ec)
     {
         if (ec.Value != null)
@@ -100,6 +109,13 @@ public class EventCodeManager : MonoBehaviour
     {
         toSendBuffer.Add(code);
     }
+
+	public void SendCodeNextFrame(string codeString)
+	{
+		EventCode code = SessionEventCodes[codeString];
+		if (code != null)
+			SendCodeNextFrame(code);
+	}
 
     public void SendCodeNextFrame(EventCode ec)
     {

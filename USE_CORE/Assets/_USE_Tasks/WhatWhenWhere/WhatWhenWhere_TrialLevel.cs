@@ -240,12 +240,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.SliderGO.SetActive(true);
 
             //numNonStimSelections_InBlock += mouseHandler.UpdateNumNonStimSelection(); //NT: Commented this out. not yet sure where we're gonna implement nonstim touches. Current method doesnt exist in new selection tracker.  
-            if (SessionValues.SessionDef.EventCodesActive)
-            {
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOn"]);
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["SliderFbController_SliderReset"]);
-            }
+
+            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
+            SessionValues.EventCodeManager.SendCodeNextFrame("StimOn");
+            SessionValues.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderReset");
+            
         });
         ChooseStimulusDelay.AddTimer(() => chooseStimOnsetDelay.value, ChooseStimulus, ()=>
         {
@@ -292,24 +291,21 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 UpdateCounters_Correct();
                 isSliderValueIncrease = true;
-                if (SessionValues.SessionDef.EventCodesActive)
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["CorrectResponse"]);
+                SessionValues.EventCodeManager.SendCodeImmediate("CorrectResponse");
             }
             else
             {
                 runningAcc.Add(0);
                 UpdateCounters_Incorrect(correctIndex);
                 isSliderValueIncrease = false;
-                if (SessionValues.SessionDef.EventCodesActive)
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["IncorrectResponse"]);
+                SessionValues.EventCodeManager.SendCodeImmediate("IncorrectResponse");
 
                 //Repetition Error
                 if (touchedObjects.Contains(selectedSD.StimIndex))
                 {
                     repetitionErrorCount_InBlock++;
                     repetitionError = true;
-                    if (SessionValues.SessionDef.EventCodesActive)
-                        SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["RepetitionError"]);
+                    SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["RepetitionError"]);
                 }
                 // Slot Errors
                 else
@@ -320,16 +316,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         touchedObjects.Add(selectedSD.StimIndex);
                         distractorSlotErrorCount_InBlock++;
                         distractorSlotError = true;
-                        if (SessionValues.SessionDef.EventCodesActive)
-                            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["Button0PressedOnDistractorObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                        SessionValues.EventCodeManager.SendCodeImmediate("Button0PressedOnDistractorObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                     }
                     //Stimuli Slot error
                     else
                     {
                         slotErrorCount_InBlock++;
                         slotError = true;
-                        if (SessionValues.SessionDef.EventCodesActive)
-                            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["SlotError"]);
+                        SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["SlotError"]);
                     }
                 }
             }
@@ -432,12 +426,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             NumSliderBarFilled += 1;
             CurrentTaskLevel.NumSliderBarFilled_InTask++;
 
-            if(SessionValues.SessionDef.EventCodesActive)
-            {
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOff"]);
-            }
-            
+            SessionValues.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderCompleteFbOn");
+            SessionValues.EventCodeManager.SendCodeNextFrame("StimOff");
+                        
             if (SessionValues.SyncBoxController != null)
             {
                 SessionValues.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize); 
@@ -449,11 +440,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         FinalFeedback.AddTimer(() => flashingFbDuration.value, ITI, () =>
         {
-            if (SessionValues.SessionDef.EventCodesActive)
-            {
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["SliderFbController_SliderCompleteFbOff"]);
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOff"]);
-            }
+            SessionValues.EventCodeManager.SendCodeImmediate("SliderFbController_SliderCompleteFbOff");
+            SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
+            
             CurrentTaskLevel.SetBlockSummaryString();
         });
 

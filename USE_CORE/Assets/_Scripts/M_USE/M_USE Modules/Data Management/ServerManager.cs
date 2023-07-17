@@ -11,7 +11,7 @@ public static class ServerManager //Used with the PHP scripts
     private static readonly string ServerURL = "http://m-use.psy.vanderbilt.edu:8080"; //will move to serverConfig
 
     private static readonly string RootDataFolder = "DATA"; //will move to server config
-    private static string SessionDataFolder; //Set once they hit InitScreen Confirm button
+    private static string SessionDataFolder;
     public static string SessionDataFolderPath
     {
         get
@@ -36,10 +36,6 @@ public static class ServerManager //Used with the PHP scripts
 
     public static IEnumerator CreateSessionDataFolder()
     {
-        if (string.IsNullOrEmpty(SessionValues.FilePrefix))
-            Debug.LogError("TRYING TO CREATE SESSION DATA FOLDER ON SERVER BUT SessionValues.FilePrefix is null or empty!");
-
-        SessionDataFolder = $"{RootDataFolder}__{SessionValues.FilePrefix}";
         yield return CreateFolder(SessionDataFolderPath);
         SessionDataFolderCreated = true;
     }
@@ -205,10 +201,9 @@ public static class ServerManager //Used with the PHP scripts
         }
     }
 
-
-    public static string GetSessionDataFolder()
+    public static void SetSessionDataFolder(string sessionDataFolder)
     {
-        return SessionDataFolder;
+        SessionDataFolder = sessionDataFolder;
     }
 
     public static void SetSessionConfigFolderName(string sessionConfigFolderName) //Used to Set Session Config folder name based on what they picked in dropdown!

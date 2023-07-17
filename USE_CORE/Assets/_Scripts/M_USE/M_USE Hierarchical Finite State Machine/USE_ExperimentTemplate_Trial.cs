@@ -523,6 +523,7 @@ namespace USE_ExperimentTemplate_Trial
         public GameObject CreateSquare(string name, Texture2D tex, Vector3 pos, Vector3 scale)
         {
             GameObject SquareGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
             Renderer SquareRenderer = SquareGO.GetComponent<Renderer>();
             SquareGO.name = name;
             SquareRenderer.material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");

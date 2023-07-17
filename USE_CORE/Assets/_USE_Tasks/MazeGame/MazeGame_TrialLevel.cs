@@ -164,12 +164,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 mazeBgTex = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, MazeBackgroundTextureName));
             }
 
-
             if (MazeContainer == null)
-                MazeContainer = new GameObject("MazeContainer"); 
+                MazeContainer = new GameObject("MazeContainer");
+
             if (MazeBackground == null)
-                MazeBackground = CreateSquare("MazeBackground", mazeBgTex, new Vector3(0, 0.42f, 0),
-                    new Vector3(5, 5, 5));
+                MazeBackground = CreateSquare("MazeBackground", mazeBgTex, new Vector3(0, 0.42f, 0), new Vector3(5, 5, 5));
             
             //player view variables
             playerViewParent = GameObject.Find("MainCameraCopy");

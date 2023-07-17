@@ -448,6 +448,22 @@ public static class SessionValues
                 fieldInfo.SetValue(settingsInstance, finalArray);
             }
 
+            else if (fieldType.Equals(typeof(List<int>)))
+            {
+                if (StartsOrEndsWithBrackets(fieldValue))
+                    fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
+
+                string[] sArray = fieldValue.Split(',');
+                List<int> valuesList = new List<int>();
+
+                for (int sCount = 0; sCount < sArray.Length; sCount++)
+                {
+                    if (int.TryParse(sArray[sCount], out int parsedValue))
+                        valuesList.Add(parsedValue);
+                }
+                fieldInfo.SetValue(settingsInstance, valuesList);
+            }
+
             else if (fieldType.Equals(typeof(List<string>)))
             {
                 if (StartsOrEndsWithBrackets(fieldValue))

@@ -62,7 +62,7 @@ namespace USE_Def_Namespace
 
         //If Want to specify positions:
         public List<int> TaskButtonGridSpots; //put into session config
-        public int NumGridSpots = 20; 
+        public int NumGridSpots = 20; //leave as 20, but can adjust if needed
 
     }
 

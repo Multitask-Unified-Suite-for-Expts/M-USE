@@ -119,7 +119,8 @@ namespace USE_UI
             BackgroundPanelGO = HumanStartPanelGO.transform.Find("BackgroundPanel").gameObject;
 
             EndTaskButtonGO = HumanStartPanelGO.transform.Find("EndTaskButton").gameObject;
-            EndTaskButtonGO.AddComponent<HoverEffect>();
+            if (SessionValues.UsingDefaultConfigs)
+                EndTaskButtonGO.AddComponent<HoverEffect>();
             Button endTaskButton = EndTaskButtonGO.AddComponent<Button>();
             endTaskButton.onClick.AddListener(HandleEndTask);
 
@@ -273,7 +274,7 @@ namespace USE_UI
         {
             LocalPosition = localPos;
             ButtonSize = size;
-            TaskButtonGO = new GameObject(configName + "Button");
+            TaskButtonGO = new GameObject(configName);
             TaskButtonGO.AddComponent<USE_TaskButton>();
             TaskButtonGO.GetComponent<USE_TaskButton>().configName = configName;
             Image = TaskButtonGO.AddComponent<RawImage>();

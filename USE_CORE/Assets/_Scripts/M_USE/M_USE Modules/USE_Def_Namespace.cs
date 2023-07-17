@@ -49,11 +49,20 @@ namespace USE_Def_Namespace
         public int RewardHotKeyNumPulses = 1;
         public int RewardHotKeyPulseSize = 250;
 
-        public float BlockResultsDuration; //default 0, then just specify for human session configs
+        public float BlockResultsDuration; //specify for human session configs
 
         public bool PlayBackgroundMusic;
 
         public bool GuidedTaskSelection;
+        
+
+        public int TaskButtonSize = 225;
+        public int TaskButtonSpacing = 25;
+        public int TaskButtonGridMaxPerRow = 5;
+
+        //If Want to specify positions:
+        public List<int> TaskButtonGridSpots; //put into session config
+        public int NumGridSpots = 20; //leave as 20, but can adjust if needed
 
     }
 

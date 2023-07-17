@@ -56,7 +56,6 @@ namespace USE_ExperimentTemplate_Session
 
         private SelectionTracker.SelectionHandler SelectionHandler;
         private GameObject InputTrackers;
-        
         protected FrameData FrameData;
         private Camera SessionCam;
         private Camera MirrorCam;
@@ -66,7 +65,9 @@ namespace USE_ExperimentTemplate_Session
         private List<string> selectedConfigsList = new List<string>();
         public StringBuilder PreviousTaskSummaryString = new StringBuilder();
 
-        [HideInInspector] public GameObject TaskButtonsGridContainer;
+        //  [HideInInspector] public DisplayController DisplayController;
+
+        [HideInInspector] public GameObject TaskButtonsContainer;
 
         //Set in inspector
         public GameObject BlockResults_GridElementPrefab;
@@ -489,7 +490,6 @@ namespace USE_ExperimentTemplate_Session
                 {
                     if (!SceneLoading)
                     {
-                        //AsyncOperation loadScene;
                         SceneLoading = true;
                         taskName = (string)SessionValues.SessionDef.TaskMappings[iTask];
                         loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
@@ -558,10 +558,12 @@ namespace USE_ExperimentTemplate_Session
 
                 SessionValues.GazeData.folderPath = SessionValues.SessionLevelDataPath + Path.DirectorySeparatorChar + "GazeData";
                 FrameData.gameObject.SetActive(true);
+
             });
 
-            TaskButtonsGridContainer = null;
-            Dictionary<string, GameObject> taskButtonsDict = new Dictionary<string, GameObject>();
+            TaskButtonsContainer = null;
+            Dictionary<string, GameObject> taskButtonGOs = new Dictionary<string, GameObject>();
+            string selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
                 if (SessionValues.SessionDef.PlayBackgroundMusic)
@@ -638,14 +640,15 @@ namespace USE_ExperimentTemplate_Session
                     return;
                 }
 
-                if (TaskButtonsGridContainer != null)
+                if (TaskButtonsContainer != null)
                 {
-                    TaskButtonsGridContainer.SetActive(true);
+                    TaskButtonsContainer.SetActive(true);
                     if (SessionValues.SessionDef.GuidedTaskSelection)
                     {
                         // if guided selection, we need to adjust the shading of the icons and buttons after the task buttons object is already created                        
                         string key = SessionValues.SessionDef.TaskMappings.Keys.Cast<string>().ElementAt(taskCount);
-                        foreach (KeyValuePair<string, GameObject> taskButton in taskButtonsDict)
+
+                        foreach (KeyValuePair<string, GameObject> taskButton in taskButtonGOs)
                         {
                             if (taskButton.Key == key)
                             {
@@ -671,17 +674,58 @@ namespace USE_ExperimentTemplate_Session
                 }
 
 
-                TaskButtonsGridContainer = GameObject.Find("TaskButtonsGrid");
+                TaskButtonsContainer = GameObject.Find("TaskButtonsGrid");
 
+                GridLayoutGroup gridLayout = TaskButtonsContainer.GetComponent<GridLayoutGroup>();
+                int size = SessionValues.WebBuild ? 250 : SessionValues.SessionDef.TaskButtonSize; //using 250 for web build
+                gridLayout.cellSize = new Vector2(size, size);
+                gridLayout.constraintCount = SessionValues.WebBuild ? 4 : SessionValues.SessionDef.TaskButtonGridMaxPerRow; //using 4 for WebBuild
+                int spacing = SessionValues.WebBuild ? 45 : SessionValues.SessionDef.TaskButtonSpacing; //using 45 for web build
+                gridLayout.spacing = new Vector2(spacing, spacing);
+
+                List<GameObject> gridList = new List<GameObject>();
+
+                if(SessionValues.SessionDef.TaskButtonGridSpots != null)
+                {
+                    for(int i = 0; i < SessionValues.SessionDef.NumGridSpots; i++)
+                    {
+                        GameObject gridItem = new GameObject("GridItem_" + (i+1));
+                        gridItem.AddComponent<RawImage>();
+                        gridItem.GetComponent<RawImage>().enabled = false;
+                        gridItem.transform.SetParent(TaskButtonsContainer.transform);
+                        gridItem.transform.localPosition = Vector3.zero;
+                        gridItem.transform.localScale = Vector3.one;
+                        gridList.Add(gridItem);
+                    }
+                }
+
+                int count = 0;
                 foreach (DictionaryEntry task in SessionValues.SessionDef.TaskMappings)
                 {
-                    // Assigns configName and taskName according to Session Config Task Mappings
                     string configName = (string)task.Key;
                     string taskName = (string)task.Value;
 
-                    GameObject gridTaskButton = new GameObject(configName);
-                    gridTaskButton.SetActive(false);
-                    RawImage image = gridTaskButton.AddComponent<RawImage>();
+                    GameObject taskButtonGO;
+                    RawImage image;
+
+                    if (SessionValues.SessionDef.TaskButtonGridSpots != null)
+                    {
+                        int gridNumber = SessionValues.SessionDef.TaskButtonGridSpots[count];
+
+                        taskButtonGO = gridList[gridNumber];
+                        taskButtonGO.name = configName;
+
+                        image = taskButtonGO.GetComponent<RawImage>();
+                        image.enabled = true;
+                    }
+                    else
+                    {
+                        taskButtonGO = new GameObject(configName);
+                        image = taskButtonGO.AddComponent<RawImage>();
+                        taskButtonGO.transform.SetParent(TaskButtonsContainer.transform);
+                        taskButtonGO.transform.localPosition = Vector3.zero;
+                        taskButtonGO.transform.localScale = Vector3.one;
+                    }
 
                     string taskFolderPath = GetConfigFolderPath(configName);
 
@@ -689,7 +733,7 @@ namespace USE_ExperimentTemplate_Session
                     {
                         if (!Directory.Exists(taskFolderPath))
                         {
-                            Destroy(gridTaskButton);
+                            Destroy(taskButtonGO);
                             throw new DirectoryNotFoundException($"Task folder for '{configName}' at '{taskFolderPath}' does not exist.");
                         }
                     }
@@ -698,7 +742,7 @@ namespace USE_ExperimentTemplate_Session
                     {
                         if (SessionValues.UsingDefaultConfigs)
                             image.texture = Resources.Load<Texture2D>($"{SessionValues.SessionDef.TaskIconsFolderPath}/{taskName}");
-                        else //LOAD THE ICONS FROM THE SERVER!
+                        else
                         {
                             StartCoroutine(ServerManager.LoadTextureFromServer($"{SessionValues.SessionDef.TaskIconsFolderPath}/{taskName}.png", imageResult =>
                             {
@@ -721,29 +765,28 @@ namespace USE_ExperimentTemplate_Session
                         if (configName == key)
                         {
                             image.color = new Color(1f, 1f, 1f, 1f);
-                            gridTaskButton.GetComponent<RawImage>().raycastTarget = true;
+                            image.raycastTarget = true;
                             if (SessionValues.SessionDef.IsHuman && SessionValues.UsingDefaultConfigs)
-                                gridTaskButton.AddComponent<HoverEffect>(); //Adding HoverEffect to make button bigger when hovered over. 
+                                taskButtonGO.AddComponent<HoverEffect>();
                         }
                         else
                         {
                             image.color = new Color(.5f, .5f, .5f, .35f);
-                            gridTaskButton.GetComponent<RawImage>().raycastTarget = false;
+                            image.raycastTarget = false;
                         }
                     }
                     else
                     {
                         // If not guided task selection, make all icons interactable
-                        gridTaskButton.GetComponent<RawImage>().raycastTarget = true;
+                        image.raycastTarget = true;
                         if (SessionValues.SessionDef.IsHuman && SessionValues.UsingDefaultConfigs)
-                            gridTaskButton.AddComponent<HoverEffect>();
+                            taskButtonGO.AddComponent<HoverEffect>();
                     }
-                    gridTaskButton.transform.SetParent(TaskButtonsGridContainer.transform);
-                    gridTaskButton.transform.localPosition = Vector3.zero;
-                    gridTaskButton.transform.localScale = Vector3.one;
-                    gridTaskButton.SetActive(true);
 
-                    taskButtonsDict.Add(configName, gridTaskButton);
+
+                    taskButtonGOs.Add(configName, taskButtonGO);
+
+                    count++;
                 }
 
 
@@ -754,20 +797,19 @@ namespace USE_ExperimentTemplate_Session
                 }
             });
 
-            selectTask.AddUpdateMethod(() =>
+            selectTask.AddLateUpdateMethod(() =>
             {
+                
                 SessionValues.SelectionTracker.UpdateActiveSelections();
                 if (SelectionHandler.SuccessfulSelections.Count > 0)
                 {
-                    string chosen = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.name;
-                    if (chosen != null && taskButtonsDict.ContainsKey(chosen))
-                        selectedConfigName = chosen;
-                    if (selectedConfigName != null)
+                    string chosenGO = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.name;
+                    if (chosenGO != null && taskButtonGOs.ContainsKey(chosenGO))
+                    {
+                        selectedConfigName = chosenGO;
                         taskAutomaticallySelected = false;
+                    }
                 }
-            });
-            selectTask.AddLateUpdateMethod(() =>
-            {
                 AppendSerialData();
                 StartCoroutine(FrameData.AppendDataToBuffer());
             });
@@ -775,48 +817,52 @@ namespace USE_ExperimentTemplate_Session
 
 
             // Don't have automatic task selection if we encountered an error during setup
-            // if (SessionValues.SessionDef.TaskSelectionTimeout >= 0 && !LogPanel.HasError())
-            // {
-            //     selectTask.AddTimer(SessionValues.SessionDef.TaskSelectionTimeout, loadTask, () =>
-            //     {
-            //         foreach (DictionaryEntry task in SessionValues.SessionDef.TaskMappings)
-            //         {
-            //             //Find the next task in the list that is still interactable
-            //             string configName = (string)task.Key;
-            //
-            //             // If the next task button in the task mappings is not interactable, skip until the next available config is found
-            //             if (!taskButtonsDict[configName].GetComponent<RawImage>().raycastTarget)
-            //                 continue;
-            //             taskAutomaticallySelected = true;
-            //             selectedConfigName = configName;
-            //             break;
-            //         }
-            //     });
-            // }
+            if (SessionValues.SessionDef.TaskSelectionTimeout >= 0 && !LogPanel.HasError())
+            {
+                selectTask.AddTimer(SessionValues.SessionDef.TaskSelectionTimeout, loadTask, () =>
+                {
+                    foreach (DictionaryEntry task in SessionValues.SessionDef.TaskMappings)
+                    {
+                        //Find the next task in the list that is still interactable
+                        string configName = (string)task.Key;
+
+                        // If the next task button in the task mappings is not interactable, skip until the next available config is found
+                        if (!taskButtonGOs[configName].GetComponent<RawImage>().raycastTarget)
+                            continue;
+
+                        taskAutomaticallySelected = true;
+                        selectedConfigName = configName;
+                        break;
+                    }
+                });
+            }
             selectTask.SpecifyTermination(() => TasksFinished, finishSession);
 
             loadTask.AddInitializationMethod(() =>
             {
                 // Make the selected task icon no longer interactable
-                TaskButtonsGridContainer.SetActive(false);
-                GameObject taskButton = taskButtonsDict[selectedConfigName];
+                TaskButtonsContainer.SetActive(false);
+
+                GameObject taskButton = taskButtonGOs[selectedConfigName];
                 RawImage image = taskButton.GetComponent<RawImage>();
 
 
                 if (!SessionValues.WebBuild) //Let patients play same task as many times as they want
                 {
-                    taskButton.GetComponent<RawImage>().color = new Color(.5f, .5f, .5f, .35f);
-                    taskButton.GetComponent<RawImage>().raycastTarget = false;
+                    image.color = new Color(.5f, .5f, .5f, .35f);
+                    image.raycastTarget = false;
                     if (taskButton.TryGetComponent<HoverEffect>(out var hoverEffect))
                         Destroy(hoverEffect);
                 }
-
+                
                 string taskName = (string)SessionValues.SessionDef.TaskMappings[selectedConfigName];
                 loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
+                
                 loadScene.completed += (_) =>
                 {
                     OnSceneLoaded(selectedConfigName, false);
                     CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigName == selectedConfigName);
+
                     //selectedConfigsList.Add(CurrentTask.ConfigName);  
                 };
             });
@@ -835,11 +881,9 @@ namespace USE_ExperimentTemplate_Session
             loadTask.SpecifyTermination(() => CurrentTask != null && CurrentTask.TaskLevelDefined, runTask, () =>
             {
                 TaskSelection_Starfield.SetActive(false);
-
                 runTask.AddChildLevel(CurrentTask);
                 if (CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
-                SessionCam.gameObject.SetActive(false);
 
                 if (CurrentTask.TaskName != "GazeCalibration")
                     SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
@@ -861,6 +905,8 @@ namespace USE_ExperimentTemplate_Session
             //runTask.AddLateUpdateMethod
             runTask.AddUniversalInitializationMethod(() =>
             {
+                SessionCam.gameObject.SetActive(false);
+
                 SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["RunTaskStarts"]);
 
 #if (!UNITY_WEBGL)
@@ -1120,14 +1166,14 @@ namespace USE_ExperimentTemplate_Session
                 eventCodeFileString = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, "*EventCode*");
                 if (!string.IsNullOrEmpty(eventCodeFileString))
                 {
-                   // StartCoroutine(SessionValues.BetterReadSettingsFile<Dictionary<string, EventCode>>("EventCodeConfig", "SingleTypeJSON", settingsArray =>
-                   // {
-                   //     SessionValues.SessionEventCodes = settingsArray[0];
-                   // }));            
+                   StartCoroutine(SessionValues.BetterReadSettingsFile<Dictionary<string, EventCode>>("EventCodeConfig", "SingleTypeJSON", settingsArray =>
+                   {
+                       SessionValues.SessionEventCodes = settingsArray[0];
+                   }));            
                 }
                 else if (SessionValues.SessionDef.EventCodesActive)
                     Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");
-            }*/
+            }
 
             // List<string> taskNames;
             if (SessionValues.SessionDef.TaskNames != null)
@@ -1355,7 +1401,6 @@ namespace USE_ExperimentTemplate_Session
             else
                 tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName);
 
-
           //   tl.FilePrefix = FilePrefix;
           //  tl.StoreData = StoreData;
           //   tl.SubjectID = SubjectID;
@@ -1408,8 +1453,6 @@ namespace USE_ExperimentTemplate_Session
 
 
             StartCoroutine(tl.DefineTaskLevel(verifyOnly));
-
-
             //ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
             // Don't add task to ActiveTaskLevels if we're just verifying
             if (verifyOnly) return tl;
@@ -1442,6 +1485,7 @@ namespace USE_ExperimentTemplate_Session
             tl = PopulateTaskLevel(tl, verifyOnly);
             if (tl.TaskCam == null)
                 tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
+
             tl.TaskCam.gameObject.SetActive(false);
         }
         // public void FindTaskCam<T>(string taskName) where T : ControlLevel_Task_Template

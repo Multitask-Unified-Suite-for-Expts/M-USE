@@ -174,7 +174,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         });
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), SearchDisplayDelay, () =>
         {
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
         });
 
 
@@ -186,11 +187,15 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             Input.ResetInputAxes(); //reset input in case they holding down
             TokenFBController.enabled = true;
-#if (!UNITY_WEBGL)
+
+            if (!SessionValues.WebBuild)
                 ActivateChildren(playerViewParent);
-#endif
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOn"]);
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["TokenBarVisible"]);
+
+            if (SessionValues.SessionDef.EventCodesActive)
+            {
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOn"]);
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["TokenBarVisible"]);
+            }
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
@@ -221,16 +226,22 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
                 runningAcc.Add(1);
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["CorrectResponse"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                {
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["CorrectResponse"]);
+                }
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
                 runningAcc.Add(0);
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnDistractorObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["IncorrectResponse"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                {
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnDistractorObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["IncorrectResponse"]);
+                }
             }
 
             if (selectedGO != null)
@@ -250,7 +261,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             AbortCode = 6;
             aborted = true;  
             SetTrialSummaryString();
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["NoChoice"]);
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["NoChoice"]);
         });
         
         // SELECTION FEEDBACK STATE ---------------------------------------------------------------------------------------   
@@ -321,7 +333,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             {
                 ContextName = "itiImage";
                 RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage"));
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOff"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOff"]);
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);

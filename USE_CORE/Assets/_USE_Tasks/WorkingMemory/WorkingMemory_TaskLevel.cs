@@ -39,7 +39,9 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
 
             RenderSettings.skybox = CreateSkybox(contextFilePath);
 
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOn"]);
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOn"]);
+
             wmTL.ResetBlockVariables();
             wmTL.TokenFBController.SetTotalTokensNum(wmBD.NumTokenBar);
             wmTL.TokenFBController.SetTokenBarValue(wmBD.NumInitialTokens);

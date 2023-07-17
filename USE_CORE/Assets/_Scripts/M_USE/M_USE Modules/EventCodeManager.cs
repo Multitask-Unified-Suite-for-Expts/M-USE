@@ -53,7 +53,8 @@ public class EventCodeManager : MonoBehaviour
         }
     }
 
-    public void EventCodeLateUpdate() {
+    public void EventCodeLateUpdate()
+	{
         sentBuffer.Clear();
         splitSentBuffer.Clear();
 		preSplitBuffer.Clear();
@@ -86,7 +87,7 @@ public class EventCodeManager : MonoBehaviour
 
     public void SendCodeImmediate(EventCode ec)
     {
-	    if (ec.Value != null)
+        if (ec.Value != null)
 			SendCodeImmediate(ec.Value.Value);
 	    else
 	    {
@@ -102,7 +103,7 @@ public class EventCodeManager : MonoBehaviour
 
     public void SendCodeNextFrame(EventCode ec)
     {
-	    if (ec.Value != null)
+        if (ec.Value != null)
 		    SendCodeNextFrame(ec.Value.Value);
 	    else
 	    {
@@ -113,10 +114,8 @@ public class EventCodeManager : MonoBehaviour
 
 	private void SendCode(int codeToSend)
 	{
-		//Debug.Log("EventCodeManager SendCode: " + codeToSend);
 		SyncBoxController.SendCommand("NEU " + codeToSend.ToString(), new List<string> { returnedCodePrefix, codeToSend.ToString("X") });
 		sentBuffer.Add(codeToSend);
-		//}
 	}
 
 	public void SendSplitCode(int code)

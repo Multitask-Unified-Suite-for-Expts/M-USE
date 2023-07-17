@@ -65,7 +65,6 @@ public class InitScreen : MonoBehaviour
 
     void Start()
     {
-
         displayController = gameObject.AddComponent<DisplayController>();
         displayController.HandleDisplays(this);
         SessionValues.DisplayController = displayController;

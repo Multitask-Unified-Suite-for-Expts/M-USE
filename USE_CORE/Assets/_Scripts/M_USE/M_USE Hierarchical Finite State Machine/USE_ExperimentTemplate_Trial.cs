@@ -200,7 +200,9 @@ namespace USE_ExperimentTemplate_Trial
                     SessionValues.SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials", 1));
 
                 TokenFBController.RecalculateTokenBox(); //recalculate tokenbox incase they switch to fullscreen mode
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["SetupTrialStarts"]);
+
+                if(SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["SetupTrialStarts"]);
 
                 ResetRelativeStartTime();
 
@@ -214,8 +216,11 @@ namespace USE_ExperimentTemplate_Trial
                     SessionValues.HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
             });
 
-
-            FinishTrial.AddInitializationMethod(() => SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["FinishTrialStarts"]));
+            FinishTrial.AddInitializationMethod(() =>
+            {
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["FinishTrialStarts"]);
+            });
             FinishTrial.SpecifyTermination(() => runCalibration && TaskLevel.TaskName != "GazeCalibration", () => GazeCalibration);
 
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);

@@ -218,7 +218,8 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
                 .SetRevealTime(tokenRevealDuration.value)
                 .SetUpdateTime(tokenUpdateDuration.value)
                 .SetFlashingTime(tokenFlashingDuration.value);
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
 
             CurrentTaskLevel.SetBlockSummaryString();
             if (TrialCount_InTask != 0)
@@ -245,8 +246,11 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         {
             CreateTextOnExperimenterDisplay();
             multiCompStims.ToggleVisibility(true);
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOn"]);
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["TokenBarVisible"]);
+            if (SessionValues.SessionDef.EventCodesActive)
+            {
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOn"]);
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["TokenBarVisible"]);
+            }
             choiceMade = false;
             // Handler.HandlerActive = true;
             if (Handler.AllSelections.Count > 0)
@@ -278,15 +282,21 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             {
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["CorrectResponse"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                {
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["CorrectResponse"]);
+                }
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnDistractorObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["IncorrectResponse"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                {
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnDistractorObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["IncorrectResponse"]);
+                }
             }
 
             if (selectedGO != null)
@@ -307,7 +317,8 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             NumAborted_InBlock++;
             CurrentTaskLevel.NumAborted_InTask++;
             AbortCode = 6;
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["NoChoice"]);
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["NoChoice"]);
 
         });
 
@@ -386,7 +397,8 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             {
                 ContextName = "itiImage";
                 RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName));
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOff"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOff"]);
             }
 
             //Setting back the parent to the mcCompHolder for individual components

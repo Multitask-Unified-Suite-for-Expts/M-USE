@@ -249,7 +249,8 @@ namespace USE_ExperimentTemplate_Task
             SetupTask.AddInitializationMethod(() =>
             {
                 SetTaskSummaryString();
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["SetupTaskStarts"]);
+                if(SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["SetupTaskStarts"]);
 
                 if (SessionValues.SessionDef.IsHuman)
                 {
@@ -263,7 +264,8 @@ namespace USE_ExperimentTemplate_Task
 
             RunBlock.AddUniversalInitializationMethod(() =>
             {
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["RunBlockStarts"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["RunBlockStarts"]);
 
                 BlockCount++;
                 CurrentBlockDef = BlockDefs[BlockCount];
@@ -319,8 +321,10 @@ namespace USE_ExperimentTemplate_Task
 
             RunBlock.AddLateUpdateMethod(() =>
             {
-                FrameData.AppendDataToBuffer();
-                SessionValues.EventCodeManager.EventCodeLateUpdate();
+                StartCoroutine(FrameData.AppendDataToBuffer());
+
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
 
@@ -345,7 +349,8 @@ namespace USE_ExperimentTemplate_Task
                     PreviousBlockSummaryString.Insert(0, BlockSummaryString); //Add current block string to full list of previous blocks. 
                     PreviousBlockSummaryString.Insert(0, blockTitle);
                 }*/
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["BlockFeedbackStarts"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["BlockFeedbackStarts"]);
             });
             BlockFeedback.AddUpdateMethod(() =>
             {
@@ -359,7 +364,8 @@ namespace USE_ExperimentTemplate_Task
                 if (SessionValues.SessionDef.StoreData)
                     StartCoroutine(FrameData.AppendDataToBuffer());
 
-                SessionValues.EventCodeManager.EventCodeLateUpdate();
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock);
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask);
@@ -389,8 +395,8 @@ namespace USE_ExperimentTemplate_Task
                     StartCoroutine(BlockData.AppendDataToFile());
                 }
 
-
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["FinishTaskStarts"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["FinishTaskStarts"]);
 
                 //Clear trialsummarystring and Blocksummarystring at end of task:
                 if (TrialLevel.TrialSummaryString != null && BlockSummaryString != null)
@@ -422,6 +428,8 @@ namespace USE_ExperimentTemplate_Task
 
                 if (TaskStims != null)
                 {
+                    Debug.Log("TASK STIMS NOT NULL!");
+
                     int sgNum = TaskStims.AllTaskStimGroups.Count;
                     for (int iSg = 0; iSg < sgNum; iSg++)
                     {
@@ -844,12 +852,9 @@ namespace USE_ExperimentTemplate_Task
                 {
                     SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig", eventCodeFile);
                     CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
-                    SessionValues.SessionDef.EventCodesActive = true;
                 }
                 else
-                    Debug.Log("NORMAL BUILLD - TASK CONFIG UI RESULT IS NULL!");
-
-                
+                    Debug.Log("NORMAL BUILD - TASK CONFIG UI RESULT IS NULL!");
             }
         }
 

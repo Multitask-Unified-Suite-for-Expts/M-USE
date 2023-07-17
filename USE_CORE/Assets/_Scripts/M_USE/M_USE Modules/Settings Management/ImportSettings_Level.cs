@@ -55,12 +55,12 @@ public class ImportSettings_Level : ControlLevel
             currentFilePathString = filePathStrings[iSettings];
             currentFileName = fileNames[iSettings];
 
-            if (String.IsNullOrEmpty(currentFilePathString))
+            if (string.IsNullOrEmpty(currentFilePathString))
                 return;
 
             StartCoroutine(GetFileContentString(currentFilePathString, currentFileName, (contentString) =>
             {
-                if (!String.IsNullOrEmpty(contentString))
+                if (!string.IsNullOrEmpty(contentString))
                 {
                     currentFileContentString = contentString;
                     fileLoaded = true;
@@ -70,11 +70,11 @@ public class ImportSettings_Level : ControlLevel
             }));
         });
         loadFile.SpecifyTermination(() => fileLoaded, parseFile, () => fileLoaded = false) ;
-        loadFile.AddTimer(() => 0.5f, parseFile ); //adjust timer value for a sensible amount of time for the server to retrieve file content 
+        loadFile.AddTimer(() => 1f, parseFile ); //adjust timer value for a sensible amount of time for the server to retrieve file content 
         
         parseFile.AddDefaultInitializationMethod(() =>
         {
-            if (!String.IsNullOrEmpty(currentFileContentString))
+            if (!string.IsNullOrEmpty(currentFileContentString))
             {
                 currentType = settingTypes[iSettings];
                 ConvertStringToSettings();

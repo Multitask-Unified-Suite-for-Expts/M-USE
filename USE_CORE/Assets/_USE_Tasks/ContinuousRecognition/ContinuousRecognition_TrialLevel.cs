@@ -207,8 +207,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if(currentTrial.ShakeStim)
                 AddShakeStimScript(trialStims);
 
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOn"]);
+            if(SessionValues.SessionDef.EventCodesActive)
+            {
+                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOn"]);
+            }
 
             if (MakeStimPopOut)
                 PopStimOut();
@@ -255,7 +258,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 {
                     currentTrial.GotTrialCorrect = true;
 
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["CorrectResponse"]);
+                    if (SessionValues.SessionDef.EventCodesActive)
+                        SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["CorrectResponse"]);
 
                     //If chose a PNC Stim, remove it from PNC list.
                     if (currentTrial.PNC_Stim.Contains(ChosenStim.StimIndex))
@@ -292,7 +296,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 {
                     currentTrial.WrongStimIndex = ChosenStim.StimIndex; //identifies the stim they got wrong for Block FB purposes. 
                     TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["IncorrectResponse"]);
+                    if (SessionValues.SessionDef.EventCodesActive)
+                        SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["IncorrectResponse"]);
                 }
             }
 
@@ -312,7 +317,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             AudioFBController.Play("Negative");
             EndBlock = true;
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["NoChoice"]);
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["NoChoice"]);
             AbortCode = 6;
         });
 
@@ -378,8 +384,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 ScoreTextGO.SetActive(false);
                 NumTrialsTextGO.SetActive(false);
             }
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOff"]);
 
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOff"]);
         });
         //DISPLAY RESULTS state --------------------------------------------------------------------------------------------------------
         DisplayResults.AddInitializationMethod(() =>
@@ -442,7 +449,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
 
         //FinishTrial State (default state) ----------------------------------------------------------------------------------------------------------------------
-        FinishTrial.AddDefaultTerminationMethod(() => SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOff"]));
+        FinishTrial.AddDefaultTerminationMethod(() =>
+        {
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOff"]);
+        });
 
         //----------------------------------------------------------------------------------------------------------------------
         DefineTrialData();

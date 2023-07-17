@@ -34,9 +34,12 @@ public static class ServerManager //Used with the PHP scripts
     public static bool SessionDataFolderCreated;
 
 
-    public static IEnumerator CreateSessionDataFolder(string subjectID, string sessionID)
+    public static IEnumerator CreateSessionDataFolder()
     {
-        SessionDataFolder = "DATA__" + "Session_" + sessionID + "__Subject_" + subjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
+        if (string.IsNullOrEmpty(SessionValues.FilePrefix))
+            Debug.LogError("TRYING TO CREATE SESSION DATA FOLDER ON SERVER BUT SessionValues.FilePrefix is null or empty!");
+
+        SessionDataFolder = $"{RootDataFolder}__{SessionValues.FilePrefix}";
         yield return CreateFolder(SessionDataFolderPath);
         SessionDataFolderCreated = true;
     }

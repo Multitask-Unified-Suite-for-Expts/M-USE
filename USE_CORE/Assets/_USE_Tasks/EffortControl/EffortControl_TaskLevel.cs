@@ -63,7 +63,8 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
             RenderSettings.skybox = CreateSkybox(contextFilePath);
 
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["ContextOn"]);
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["ContextOn"]);
         });
 
         BlockFeedback.AddInitializationMethod(() =>

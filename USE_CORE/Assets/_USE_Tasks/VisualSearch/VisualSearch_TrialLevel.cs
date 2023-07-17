@@ -172,7 +172,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             SearchDisplayDelay, () => 
             {
                 choiceMade = false;
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
             });
         
         // Provide delay following start button selection and before stimuli onset
@@ -185,11 +186,15 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             // Toggle TokenBar and Stim to be visible
             selectionDuration = null;
             TokenFBController.enabled = true;
-            #if (!UNITY_WEBGL)
+
+            if (!SessionValues.WebBuild)
                 CreateTextOnExperimenterDisplay();
-#endif
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOn"]);
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["TokenBarVisible"]);
+
+            if (SessionValues.SessionDef.EventCodesActive)
+            {
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOn"]);
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["TokenBarVisible"]);
+            }
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
@@ -221,15 +226,21 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             {       
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnTargetObject"]); //SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["CorrectResponse"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                {
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnTargetObject"]); //SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["CorrectResponse"]);
+                }
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnDistractorObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["IncorrectResponse"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                {
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnDistractorObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["IncorrectResponse"]);
+                }
             }
 
             if (selectedGO != null)
@@ -247,7 +258,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             AbortCode = 6;
             aborted = true;
             SetTrialSummaryString();
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["NoChoice"]);
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["NoChoice"]);
         });
 
         // SELECTION FEEDBACK STATE ---------------------------------------------------------------------------------------   
@@ -316,7 +328,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             {
                 ContextName = "itiImage";
                 RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath,"itiImage"));
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOff"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOff"]);
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);

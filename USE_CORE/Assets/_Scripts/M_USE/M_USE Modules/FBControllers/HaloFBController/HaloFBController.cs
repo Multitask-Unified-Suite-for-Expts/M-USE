@@ -67,7 +67,8 @@ public class HaloFBController : MonoBehaviour
         GameObject rootObj = gameObj.transform.root.gameObject;
         instantiated = Instantiate(haloPrefab, rootObj.transform);
         instantiated.transform.SetParent(rootObj.transform);
-        EventCodeManager.SendCodeImmediate(SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
+        if(SessionValues.SessionDef.EventCodesActive)
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
 
         // Position the haloPrefab behind the game object
         float distanceBehind = 1.5f; // Set the distance behind the gameObj
@@ -87,7 +88,8 @@ public class HaloFBController : MonoBehaviour
         }
         GameObject rootObj = gameObj.transform.root.gameObject;
         instantiated = Instantiate(haloPrefab, null);
-        EventCodeManager.SendCodeImmediate(SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
+        if (SessionValues.SessionDef.EventCodesActive)
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
         Vector3 pos3d = gameObj.transform.position;
         Vector2 pos2d = Camera.main.WorldToScreenPoint(pos3d);
         Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(pos2d.x, pos2d.y, depth));
@@ -98,7 +100,8 @@ public class HaloFBController : MonoBehaviour
     public void Destroy()
     {
         Destroy(instantiated);
-        EventCodeManager.SendCodeImmediate(SessionEventCodes["HaloFbController_SelectionVisualFbOff"]);
+        if (SessionValues.SessionDef.EventCodesActive)
+            EventCodeManager.SendCodeImmediate(SessionEventCodes["HaloFbController_SelectionVisualFbOff"]);
         instantiated = null;
         state = State.None;
     }

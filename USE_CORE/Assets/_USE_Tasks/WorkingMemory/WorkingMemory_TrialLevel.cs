@@ -156,7 +156,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 .SetRevealTime(tokenRevealDuration.value)
                 .SetUpdateTime(tokenUpdateDuration.value)
                 .SetFlashingTime(tokenFlashingDuration.value);
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
+
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
                 
             CurrentTaskLevel.SetBlockSummaryString();
             if (TrialCount_InTask != 0)
@@ -180,12 +182,16 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         // Wait for a click and provide feedback accordingly
         SearchDisplay.AddInitializationMethod(() =>
         {
-            #if (!UNITY_WEBGL)
+            if (!SessionValues.WebBuild)
                 CreateTextOnExperimenterDisplay();
-            #endif
+
             searchStims.ToggleVisibility(true);
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOn"]);
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["TokenBarVisible"]);
+
+            if (SessionValues.SessionDef.EventCodesActive)
+            {
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOn"]);
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["TokenBarVisible"]);
+            }
             choiceMade = false;
 
             if (ShotgunHandler.AllSelections.Count > 0)
@@ -210,15 +216,21 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             {       
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["CorrectResponse"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                {
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["CorrectResponse"]);
+                }
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnDistractorObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["IncorrectResponse"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                {
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnDistractorObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["IncorrectResponse"]);
+                }
             }
 
             if (selectedGO != null)
@@ -237,7 +249,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             NumAborted_InBlock++;
             CurrentTaskLevel.NumAborted_InTask++;
             AbortCode = 6;
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["NoChoice"]);
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["NoChoice"]);
 
         });
 
@@ -264,10 +277,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         // The state that will handle the token feedback and wait for any animations
         TokenFeedback.AddInitializationMethod(() =>
         {
-            #if (!UNITY_WEBGL)
+            if(!SessionValues.WebBuild)
+            {
                 if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
                     DestroyChildren(GameObject.Find("MainCameraCopy"));
-            #endif
+            }
 
             searchStims.ToggleVisibility(false);
             if (selectedSD.IsTarget)
@@ -305,7 +319,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             {
                 ContextName = "itiImage";
                 RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName));
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOff"]);
+                if(SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOff"]);
             }
         });
         // Wait for some time at the end

@@ -289,11 +289,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 SessionValues.SubjectID = SessionDetails.GetItemValue("SubjectID");
                 SessionValues.SessionID = SessionDetails.GetItemValue("SessionID");
-                //set default config?
-                //set config access type
-                //set data prefix
-                //set session data folder path
-                //set config folder path
+                
 #if (UNITY_WEBGL)
                 //If WebGL Build, immedietely load taskselection screen and set initCam inactive. Otherwise create ExperimenterDisplay
                 GameObject initCamGO = GameObject.Find("InitCamera");
@@ -320,10 +316,16 @@ namespace USE_ExperimentTemplate_Session
             
             loadSessionSettings.AddDefaultInitializationMethod(() =>
             {
+                //set default config? - handled automatically by init screen
+
                 //Load accessible static variables
+                //set data prefix
                 AssignStaticVariablesAccessibleAfterInitScreenLoading();
 
                 //figure out session config paths, pass to child level
+                //set config access type
+                //set config folder path
+                //set session data folder path
                 AssignValuesForSessionConfigLoading();
                 AssignValuesForEventCodeConfigLoading();
 
@@ -563,7 +565,7 @@ namespace USE_ExperimentTemplate_Session
 
             TaskButtonsContainer = null;
             Dictionary<string, GameObject> taskButtonGOs = new Dictionary<string, GameObject>();
-            string selectedConfigName = null;
+            selectedConfigName = null;
             selectTask.AddUniversalInitializationMethod(() =>
             {
                 if (SessionValues.SessionDef.PlayBackgroundMusic)
@@ -817,7 +819,7 @@ namespace USE_ExperimentTemplate_Session
 
 
             // Don't have automatic task selection if we encountered an error during setup
-            if (SessionValues.SessionDef.TaskSelectionTimeout >= 0 && !LogPanel.HasError())
+          /*  if (SessionValues.SessionDef.TaskSelectionTimeout >= 0 && !LogPanel.HasError())
             {
                 selectTask.AddTimer(SessionValues.SessionDef.TaskSelectionTimeout, loadTask, () =>
                 {
@@ -835,7 +837,8 @@ namespace USE_ExperimentTemplate_Session
                         break;
                     }
                 });
-            }
+/*            }
+*/            
             selectTask.SpecifyTermination(() => TasksFinished, finishSession);
 
             loadTask.AddInitializationMethod(() =>
@@ -1149,7 +1152,7 @@ namespace USE_ExperimentTemplate_Session
                 SessionValues.SessionDef.SerialPortActive = true;
 
 
-            /*//Load the Session Event Code Config file --------------------------------------------------------------------------------------------------
+            //Load the Session Event Code Config file --------------------------------------------------------------------------------------------------
             string eventCodeFileString = "";
 
             if(SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
@@ -1164,7 +1167,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 string path = SessionValues.UsingDefaultConfigs ? (Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs") : SessionValues.ConfigFolderPath ;
                 eventCodeFileString = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, "*EventCode*");
-                if (!string.IsNullOrEmpty(eventCodeFileString))
+                /*if (!string.IsNullOrEmpty(eventCodeFileString))
                 {
                    StartCoroutine(SessionValues.BetterReadSettingsFile<Dictionary<string, EventCode>>("EventCodeConfig", "SingleTypeJSON", settingsArray =>
                    {
@@ -1172,7 +1175,7 @@ namespace USE_ExperimentTemplate_Session
                    }));            
                 }
                 else if (SessionValues.SessionDef.EventCodesActive)
-                    Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");
+                    Debug.LogWarning("EventCodesActive variable set to true in Session Config file but no session level event codes file is given.");*/
             }
 
             // List<string> taskNames;

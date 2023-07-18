@@ -27,7 +27,6 @@ public static class SessionValues
     public static SessionInfoPanel SessionInfoPanel;
     public static USE_StartButton USE_StartButton;
     public static GameObject TaskSelectionCanvasGO;
-    public static GameObject Starfield;
     public static HumanStartPanel HumanStartPanel;
     public static DisplayController DisplayController;
     public static ExperimenterDisplayController ExperimenterDisplayController;
@@ -95,17 +94,6 @@ public static class SessionValues
     //public int TaskButtonGridMaxPerRow = 4; //not currently used
     //public bool UseTaskButtonsGrid;
 
-
-    static SessionValues()
-    {
-        SetPrefabs();
-    }
-
-    private static void SetPrefabs()
-    {
-        TaskSelectionCanvasGO = GameObject.Find("TaskSelectionCanvas");
-        TaskSelectionCanvasGO.SetActive(false);
-    }
 
     public static IEnumerator GetFileContentString(string fileName, Action<string> callback)
     {

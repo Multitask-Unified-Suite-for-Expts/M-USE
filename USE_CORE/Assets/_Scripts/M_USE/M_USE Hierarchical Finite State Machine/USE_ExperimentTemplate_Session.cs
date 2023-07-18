@@ -37,7 +37,7 @@ namespace USE_ExperimentTemplate_Session
 
         [HideInInspector] public bool TasksFinished;
         
-        public InitScreen sessionInitScreen;
+        public InitScreen SessionInitScreen;
 
         protected SummaryData SummaryData;
         protected SessionData SessionData;
@@ -69,88 +69,32 @@ namespace USE_ExperimentTemplate_Session
         private List<string> selectedConfigsList = new List<string>();
         public StringBuilder PreviousTaskSummaryString = new StringBuilder();
 
-        //  [HideInInspector] public DisplayController DisplayController;
+        [HideInInspector] public DisplayController DisplayController;
 
         [HideInInspector] public GameObject TaskButtonsContainer;
 
-        //Set in inspector
-        public GameObject BlockResults_GridElementPrefab;
-        public GameObject BlockResultsPrefab;
-        public GameObject HumanVersionToggleButton;
-        public GameObject HumanStartPanelPrefab;
-        public GameObject ToggleAudioButton;
-        public GameObject StartButtonPrefabGO;
-        public GameObject Starfield;
-        public AudioClip BackgroundMusic_AudioClip;
-        public AudioClip BlockResults_AudioClip;
+        //Already in scene, so find them:
+        [HideInInspector] public GameObject Starfield;
+        [HideInInspector] public GameObject HumanVersionToggleButton;
+        [HideInInspector] public GameObject ToggleAudioButton;
+
+        //Load prefabs from resources:
+        [HideInInspector] public GameObject BlockResults_GridElementPrefab;
+        [HideInInspector] public GameObject BlockResultsPrefab;
+        [HideInInspector] public GameObject HumanStartPanelPrefab;
+        [HideInInspector] public GameObject StartButtonPrefabGO;
+        [HideInInspector] public AudioClip BackgroundMusic_AudioClip;
+        [HideInInspector] public AudioClip BlockResults_AudioClip;
+
 
         [HideInInspector] public float audioPlaybackSpot;
         [HideInInspector] public AudioSource BackgroundMusic_AudioSource;
 
+        [HideInInspector] public GameObject InitCamGO;
+        [HideInInspector] public LogWriter LogWriter;
+
         private ImportSettings_Level importSettings_Level;
 
-        private void SetConfigPathsAndTypes()
-        {
-            if (SessionValues.WebBuild)
-            {
-                if (SessionValues.UsingDefaultConfigs)
-                {
-                    SessionValues.ConfigAccessType = "Default";
-                    SessionValues.ConfigFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
-                    importSettings_Level.filePathStrings.Add(LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"SessionConfig"}*"));
-                    WriteSessionConfigsToPersistantDataPath();
-                }
-                else //Using Server Configs:
-                {
-                    SessionValues.ConfigAccessType = "Server";
-                    SessionValues.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
-                    importSettings_Level.filePathStrings.Add(SessionValues.ConfigFolderPath);
-                }
-            }
-            else //Normal Build:
-            {
-                SessionValues.ConfigAccessType = "Local";
-                SessionValues.ConfigFolderPath = SessionValues.LocateFile.GetPath("Config Folder");
-                importSettings_Level.filePathStrings.Add(LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"SessionConfig"}*"));
-            }
-        }
-
-        private void SetValuesForLoading_SessionConfig()
-        {
-            // Add necessary fields to Load Session Def from ImportSettings_Level
-            importSettings_Level.settingParsingStyles.Add("SingleTypeDelimited");
-            importSettings_Level.settingTypes.Add(typeof(SessionDef));
-            importSettings_Level.fileNames.Add("SessionConfig");
-        }
-
-        private void SetValuesForLoading_EventCodeConfig()
-        {
-            // Add necessary fields to Load Session Event Codes from ImportSettings_Level
-            importSettings_Level.settingParsingStyles.Add("SingleTypeJSON");
-            importSettings_Level.settingTypes.Add(typeof(Dictionary<string, EventCode>));
-            importSettings_Level.fileNames.Add("EventCode");
-
-            if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs) // Server
-                importSettings_Level.filePathStrings.Add(SessionValues.ConfigFolderPath);
-            else  // Local or Default
-            {
-                string eventCodeFileString = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, "*EventCode*");
-                if (!String.IsNullOrEmpty(eventCodeFileString))
-                    importSettings_Level.filePathStrings.Add(LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"EventCode"}*"));
-                else
-                    Debug.Log("Event Codes were not found in the config folder path. Not an issue if Event Codes are set INACTIVE.");
-            }        
-        }
-
-        private void PassObjectsToSessionValues()
-        {
-            SessionValues.HumanStartPanel = gameObject.AddComponent<HumanStartPanel>();
-            SessionValues.HumanStartPanel.SetSessionLevel(this);
-            SessionValues.HumanStartPanel.HumanStartPanelPrefab = HumanStartPanelPrefab;
-
-            SessionValues.USE_StartButton = gameObject.AddComponent<USE_StartButton>();
-            SessionValues.USE_StartButton.StartButtonPrefab = StartButtonPrefabGO;
-        }
 
 
         public override void DefineControlLevel()
@@ -162,7 +106,6 @@ namespace USE_ExperimentTemplate_Session
             SessionValues.SessionLevel = this;
 
 
-            //DontDestroyOnLoad(gameObject);
             State initScreen = new State("InitScreen");
             State loadSessionSettings = new State("LoadSessionSettings");
             State createSessionDataFolder = new State("CreateDataFolders");
@@ -174,22 +117,24 @@ namespace USE_ExperimentTemplate_Session
             State gazeCalibration = new State("GazeCalibration");
             AddActiveStates(new List<State> { initScreen, loadSessionSettings, createSessionDataFolder, setupSession, selectTask, loadTask, runTask, finishSession, gazeCalibration });
 
-            SessionValues.SessionDataControllers = new SessionDataControllers(GameObject.Find("DataControllers"));
             ActiveTaskLevels = new List<ControlLevel_Task_Template>();//new Dictionary<string, ControlLevel_Task_Template>();
 
             SessionCam = Camera.main;
 
             bool initScreenTerminated = false;
 
-            sessionInitScreen = GameObject.Find("InitializationScreen").GetComponent<InitScreen>();
+            FindGameObjects();
+            LoadPrefabs();
+
+            SetDisplayController();
 
             importSettings_Level = gameObject.GetComponent<ImportSettings_Level>();
             importSettings_Level.SessionLevel = this;
 
             initScreen.AddDefaultInitializationMethod(() =>
             {
-                sessionInitScreen.gameObject.SetActive(true);
-                sessionInitScreen.OnConfirm += ()=> initScreenTerminated = true;
+                SessionInitScreen.gameObject.SetActive(true);
+                SessionInitScreen.OnConfirm += ()=> initScreenTerminated = true;
             });
             
             initScreen.SpecifyTermination(()=> initScreenTerminated, loadSessionSettings, () =>
@@ -198,10 +143,7 @@ namespace USE_ExperimentTemplate_Session
                 SessionValues.SessionID = SessionDetails.GetItemValue("SessionID");
 
                 if(SessionValues.WebBuild) //immedietely load taskselection screen and set initCam inactive
-                {
-                    GameObject initCamGO = GameObject.Find("InitCamera");
-                    initCamGO.SetActive(false);
-                }
+                    InitCamGO.SetActive(false);
                 else
                 {
                     CreateExperimenterDisplay();
@@ -213,13 +155,7 @@ namespace USE_ExperimentTemplate_Session
 
             loadSessionSettings.AddDefaultInitializationMethod(() =>
             {
-                SessionValues.EventCodeManager = GameObject.Find("MiscScripts").GetComponent<EventCodeManager>();
-
-                SessionValues.FilePrefix = "Session_" + SessionValues.SessionID + "__Subject_" + SessionValues.SubjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
-                ServerManager.SetSessionDataFolder("DATA__" + SessionValues.FilePrefix);
-                SessionValues.SessionDataPath = SessionValues.WebBuild ? ServerManager.SessionDataFolderPath : (SessionValues.LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + SessionValues.FilePrefix);
-                SessionValues.SessionLevelDataPath = SessionValues.WebBuild ? $"{SessionValues.SessionDataPath}/SessionLevel" : (SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel");
-
+                SetDataPaths();
                 SetConfigPathsAndTypes();
                 SetValuesForLoading_SessionConfig();
                 SetValuesForLoading_EventCodeConfig();
@@ -271,7 +207,12 @@ namespace USE_ExperimentTemplate_Session
             bool waitForSerialPort = false;
             setupSession.AddDefaultInitializationMethod(() =>
             {
-                PassObjectsToSessionValues();
+                SessionValues.HumanStartPanel = gameObject.AddComponent<HumanStartPanel>();
+                SessionValues.HumanStartPanel.SetSessionLevel(this);
+                SessionValues.HumanStartPanel.HumanStartPanelPrefab = HumanStartPanelPrefab;
+
+                SessionValues.USE_StartButton = gameObject.AddComponent<USE_StartButton>();
+                SessionValues.USE_StartButton.StartButtonPrefab = StartButtonPrefabGO;
 
                 SummaryData.Init();
 
@@ -359,11 +300,9 @@ namespace USE_ExperimentTemplate_Session
                 SessionSettings.Save();
                 if (!SessionValues.WebBuild)
                 {
-                    GameObject initCamGO = GameObject.Find("InitCamera");
-                    initCamGO.SetActive(false);
+                    InitCamGO.SetActive(false);
                     SessionValues.SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
                 }
-
                 SessionValues.EventCodeManager.SendCodeImmediate("SetupSessionEnds");
             });
 
@@ -857,6 +796,117 @@ namespace USE_ExperimentTemplate_Session
             });
         }
 
+        private void FindGameObjects()
+        {
+            try
+            {
+                SessionInitScreen = GameObject.Find("InitializationScreen").GetComponent<InitScreen>();
+                InitCamGO = GameObject.Find("InitCamera");
+                SessionValues.TaskSelectionCanvasGO = GameObject.Find("TaskSelectionCanvas");
+                HumanVersionToggleButton = GameObject.Find("HumanVersionToggleButton");
+                ToggleAudioButton = GameObject.Find("AudioButton");
+                Starfield = GameObject.Find("Starfield");
+                LogWriter = GameObject.Find("MiscScripts").GetComponent<LogWriter>();
+                SessionValues.SessionDataControllers = new SessionDataControllers(GameObject.Find("DataControllers"));
+                SessionValues.EventCodeManager = GameObject.Find("MiscScripts").GetComponent<EventCodeManager>();
+
+                HumanVersionToggleButton.SetActive(false);
+                ToggleAudioButton.SetActive(false);
+                SessionValues.TaskSelectionCanvasGO.SetActive(false); //have to find HumanVersionToggleButton and ToggleAudioButton before setting TaskSelectionCanvas inactive.
+                Starfield.SetActive(false);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("FAILED FINDING GAMEOBJECTS! Error Message: " + e.Message);
+            }
+        }
+
+        private void LoadPrefabs()
+        {
+            try
+            {
+                BlockResults_GridElementPrefab = Resources.Load<GameObject>("BlockResults_GridElement");
+                BlockResultsPrefab = Resources.Load<GameObject>("BlockResults");
+                HumanStartPanelPrefab = Resources.Load<GameObject>("HumanStartPanel");
+                StartButtonPrefabGO = Resources.Load<GameObject>("StartButton");
+                BackgroundMusic_AudioClip = Resources.Load<AudioClip>("BackgroundMusic");
+                BlockResults_AudioClip = Resources.Load<AudioClip>("BlockResults");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("FAILED TO LOAD PREFAB OR AUDIO CLIP FROM RESOURCES! Error Message: " + e.Message);
+            }
+        }
+
+        private void SetDisplayController()
+        {
+            DisplayController = gameObject.AddComponent<DisplayController>();
+            DisplayController.HandleDisplays(SessionInitScreen);
+            SessionValues.DisplayController = DisplayController;
+        }
+
+        private void SetValuesForLoading_SessionConfig()
+        {
+            // Add necessary fields to Load Session Def from ImportSettings_Level
+            importSettings_Level.settingParsingStyles.Add("SingleTypeDelimited");
+            importSettings_Level.settingTypes.Add(typeof(SessionDef));
+            importSettings_Level.fileNames.Add("SessionConfig");
+        }
+
+        private void SetValuesForLoading_EventCodeConfig()
+        {
+            // Add necessary fields to Load Session Event Codes from ImportSettings_Level
+            importSettings_Level.settingParsingStyles.Add("SingleTypeJSON");
+            importSettings_Level.settingTypes.Add(typeof(Dictionary<string, EventCode>));
+            importSettings_Level.fileNames.Add("EventCode");
+
+            if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs) // Server
+                importSettings_Level.filePathStrings.Add(SessionValues.ConfigFolderPath);
+            else  // Local or Default
+            {
+                string eventCodeFileString = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, "*EventCode*");
+                if (!String.IsNullOrEmpty(eventCodeFileString))
+                    importSettings_Level.filePathStrings.Add(LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"EventCode"}*"));
+                else
+                    Debug.Log("Event Codes were not found in the config folder path. Not an issue if Event Codes are set INACTIVE.");
+            }
+        }
+
+        private void SetDataPaths()
+        {
+            SessionValues.FilePrefix = "Session_" + SessionValues.SessionID + "__Subject_" + SessionValues.SubjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
+            ServerManager.SetSessionDataFolder("DATA__" + SessionValues.FilePrefix);
+            SessionValues.SessionDataPath = SessionValues.WebBuild ? ServerManager.SessionDataFolderPath : (SessionValues.LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + SessionValues.FilePrefix);
+            SessionValues.SessionLevelDataPath = SessionValues.WebBuild ? $"{SessionValues.SessionDataPath}/SessionLevel" : (SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel");
+        }
+
+        private void SetConfigPathsAndTypes()
+        {
+            if (SessionValues.WebBuild)
+            {
+                if (SessionValues.UsingDefaultConfigs)
+                {
+                    SessionValues.ConfigAccessType = "Default";
+                    SessionValues.ConfigFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
+                    importSettings_Level.filePathStrings.Add(LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"SessionConfig"}*"));
+                    WriteSessionConfigsToPersistantDataPath();
+                }
+                else //Using Server Configs:
+                {
+                    SessionValues.ConfigAccessType = "Server";
+                    SessionValues.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
+                    importSettings_Level.filePathStrings.Add(SessionValues.ConfigFolderPath);
+                }
+            }
+            else //Normal Build:
+            {
+                SessionValues.ConfigAccessType = "Local";
+                SessionValues.ConfigFolderPath = SessionValues.LocateFile.GetPath("Config Folder");
+                importSettings_Level.filePathStrings.Add(LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"SessionConfig"}*"));
+            }
+        }
+
+
         private void CreateExperimenterDisplay()
         {
             experimenterDisplay = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
@@ -921,7 +971,7 @@ namespace USE_ExperimentTemplate_Session
                 yield return StartCoroutine(ServerManager.CreateFolder(SessionValues.SessionLevelDataPath)); //Create SessionLevel Sub-Folder inside Data Folder
             }
             yield return StartCoroutine(SessionData.CreateFile()); //Will also create session data folder for normal build
-            GameObject.Find("MiscScripts").GetComponent<LogWriter>().StoreDataIsSet = true; //tell log writer when storeData boolean has been set (in this case, waiting until data folder is created)
+            LogWriter.StoreDataIsSet = true; //tell log writer when storeData boolean has been set (in this case, waiting until data folder is created)
             callbackBool?.Invoke(true);
         }
 
@@ -1328,12 +1378,7 @@ namespace USE_ExperimentTemplate_Session
 
             tl.TaskCam.gameObject.SetActive(false);
         }
-        // public void FindTaskCam<T>(string taskName) where T : ControlLevel_Task_Template
-        // {
-        // 	ControlLevel_Task_Template tl = GameObject.Find("ControlLevels").GetComponent<T>();
-        // 	tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
-        // 	tl.TaskCam.gameObject.SetActive(false);
-        // }
+
 
 #if UNITY_STANDALONE_WIN
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]

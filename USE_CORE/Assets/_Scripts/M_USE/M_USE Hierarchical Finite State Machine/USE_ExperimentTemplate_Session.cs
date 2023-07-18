@@ -154,33 +154,39 @@ namespace USE_ExperimentTemplate_Session
 
             });
 
+            string selectedConfigName = null;
+            bool taskAutomaticallySelected = false;
+            
+            loadSessionSettings.AddChildLevel(gameObject.GetComponent<ImportSettings_Level>());
+            
             loadSessionSettings.AddDefaultInitializationMethod(() =>
             {
                 SetDataPaths();
                 SetConfigPathsAndTypes();
                 SetValuesForLoading_SessionConfig();
-                SetValuesForLoading_EventCodeConfig();
             });
 
-            string selectedConfigName = null;
-            bool taskAutomaticallySelected = false;
-            loadSessionSettings.AddChildLevel(gameObject.GetComponent<ImportSettings_Level>());
 
             loadSessionSettings.AddUpdateMethod(() =>
             {
                 if (importSettings_Level.fileParsed)
                 {
-                    if (importSettings_Level.currentFileName == "SessionConfig")
+                    if (importSettings_Level.SettingsDetails.FileName == "SessionConfig")
                     {
-                        SessionValues.SessionDef = (SessionDef)importSettings_Level.currentSetting;
+                        SessionValues.SessionDef = (SessionDef)importSettings_Level.parsedResult;
                         Debug.Log("Session Def is Imported!");
+                        SetValuesForLoading_EventCodeConfig();
+                        importSettings_Level.continueToNextSetting = true;
                     }
-                    else if (importSettings_Level.currentFileName == "EventCode")
-                        SessionValues.EventCodeManager.SessionEventCodes = (Dictionary<string, EventCode>)importSettings_Level.currentSetting;
+                    else if (importSettings_Level.SettingsDetails.FileName == "EventCode")
+                    {
+                        SessionValues.EventCodeManager.SessionEventCodes =
+                            (Dictionary<string, EventCode>) importSettings_Level.parsedResult;
+                        importSettings_Level.terminateImport = true;
+                    }
                     else
-                        Debug.Log($"The {importSettings_Level.currentFileName} has been parsed, but is unable to be set as it is not a SessionConfig, EventCode, or DisplayConfig file.");
+                        Debug.Log($"The {importSettings_Level.SettingsDetails.FileName} has been parsed, but is unable to be set as it is not a SessionConfig, EventCode, or DisplayConfig file.");
 
-                    importSettings_Level.continueToNextSetting = true;
                 }
             });
             loadSessionSettings.SpecifyTermination(() => loadSessionSettings.ChildLevel.Terminated, createSessionDataFolder);
@@ -190,7 +196,7 @@ namespace USE_ExperimentTemplate_Session
 
                 SetupInputManagement(selectTask, loadTask);
 
-                SetupSessionData();
+                SetupSessionDataControllers();
                 SessionData.AddDatum("SelectedTaskConfigName", () => selectedConfigName);
                 SessionData.AddDatum("TaskAutomaticallySelected", () => taskAutomaticallySelected);
             });
@@ -313,7 +319,7 @@ namespace USE_ExperimentTemplate_Session
                 FrameData.gameObject.SetActive(false);
 
                 GazeCalibrationTaskLevel.TaskCam = Camera.main;
-                // GazeCalibrationTaskLevel.ConfigName = "GazeCalibration";
+
                 GazeCalibrationTaskLevel.TrialLevel.runCalibration = true;
                 SessionValues.ExperimenterDisplayController.ResetTask(GazeCalibrationTaskLevel, GazeCalibrationTaskLevel.TrialLevel);
 
@@ -849,27 +855,27 @@ namespace USE_ExperimentTemplate_Session
         private void SetValuesForLoading_SessionConfig()
         {
             // Add necessary fields to Load Session Def from ImportSettings_Level
-            importSettings_Level.settingParsingStyles.Add("SingleTypeDelimited");
-            importSettings_Level.settingTypes.Add(typeof(SessionDef));
-            importSettings_Level.fileNames.Add("SessionConfig");
+            importSettings_Level.SettingsDetails.SettingParsingStyle = "SingleTypeDelimited";
+            importSettings_Level.SettingsDetails.SettingType = typeof(SessionDef);
+            importSettings_Level.SettingsDetails.FileName = "SessionConfig";
         }
-
         private void SetValuesForLoading_EventCodeConfig()
         {
             // Add necessary fields to Load Session Event Codes from ImportSettings_Level
-            importSettings_Level.settingParsingStyles.Add("SingleTypeJSON");
-            importSettings_Level.settingTypes.Add(typeof(Dictionary<string, EventCode>));
-            importSettings_Level.fileNames.Add("EventCode");
+            importSettings_Level.SettingsDetails.SettingParsingStyle = "SingleTypeJSON";
+            importSettings_Level.SettingsDetails.SettingType = typeof(Dictionary<string, EventCode>);
+            importSettings_Level.SettingsDetails.FileName = "EventCode";
 
             if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs) // Server
-                importSettings_Level.filePathStrings.Add(SessionValues.ConfigFolderPath);
+                importSettings_Level.SettingsDetails.FilePath = SessionValues.ConfigFolderPath;
             else  // Local or Default
             {
                 string eventCodeFileString = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, "*EventCode*");
                 if (!String.IsNullOrEmpty(eventCodeFileString))
-                    importSettings_Level.filePathStrings.Add(LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"EventCode"}*"));
+                    importSettings_Level.SettingsDetails.FilePath = eventCodeFileString;
                 else
-                    Debug.Log("Event Codes were not found in the config folder path. Not an issue if Event Codes are set INACTIVE.");
+                    Debug.Log(
+                        "Event Codes were not found in the config folder path. Not an issue if Event Codes are set INACTIVE.");
             }
         }
 
@@ -889,21 +895,21 @@ namespace USE_ExperimentTemplate_Session
                 {
                     SessionValues.ConfigAccessType = "Default";
                     SessionValues.ConfigFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
-                    importSettings_Level.filePathStrings.Add(LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"SessionConfig"}*"));
+                    importSettings_Level.SettingsDetails.FilePath = LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"SessionConfig"}*");
                     WriteSessionConfigsToPersistantDataPath();
                 }
                 else //Using Server Configs:
                 {
                     SessionValues.ConfigAccessType = "Server";
                     SessionValues.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
-                    importSettings_Level.filePathStrings.Add(SessionValues.ConfigFolderPath);
+                    importSettings_Level.SettingsDetails.FilePath = SessionValues.ConfigFolderPath;
                 }
             }
             else //Normal Build:
             {
                 SessionValues.ConfigAccessType = "Local";
                 SessionValues.ConfigFolderPath = SessionValues.LocateFile.GetPath("Config Folder");
-                importSettings_Level.filePathStrings.Add(LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"SessionConfig"}*"));
+                importSettings_Level.SettingsDetails.FilePath = LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"SessionConfig"}*");
             }
         }
 
@@ -1002,10 +1008,13 @@ namespace USE_ExperimentTemplate_Session
         {
             if (SessionValues.WebBuild)
             {
-                yield return StartCoroutine(ServerManager.CreateSessionDataFolder()); //Create Session Data Folder
+                //can we delete this line and have a single bool for completion of createFile
+                // yield return StartCoroutine(ServerManager.CreateSessionDataFolder()); //Create Session Data Folder
                 yield return StartCoroutine(ServerManager.CreateFolder(SessionValues.TaskSelectionDataPath)); //Create SessionLevel Sub-Folder inside Data Folder
+                //can we move this to non-server framedata creation line
             }
             yield return StartCoroutine(SessionData.CreateFile()); //Will also create session data folder for normal build
+            ServerManager.SessionDataFolderCreated = true;
             LogWriter.StoreDataIsSet = true; //tell log writer when storeData boolean has been set (in this case, waiting until data folder is created)
             callbackBool?.Invoke(true);
         }
@@ -1046,13 +1055,13 @@ namespace USE_ExperimentTemplate_Session
                     SessionValues.GazeTracker.enabled = true;
 
 
-                    /*  //  GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform); 
+                    GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform); 
                     GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.transform.SetParent(TobiiEyeTrackerControllerGO.transform, true);
                     // Position and scale the cube as desired
                     cube.transform.position = new Vector3(0f, 1f, 60f);
                     cube.transform.localScale = new Vector3(106f, 62f, 0.1f);
-                    cube.SetActive(false);*/
+                    cube.SetActive(false);
 
                 }
             }
@@ -1064,7 +1073,7 @@ namespace USE_ExperimentTemplate_Session
                 USE_CoordinateConverter.SetScreenDetails(USE_CoordinateConverter.ScreenDetails);
             }}
 
-        private void SetupSessionData()
+        private void SetupSessionDataControllers()
         {
             SessionData = (SessionData)SessionValues.SessionDataControllers.InstantiateDataController<SessionData>
                 ("SessionData", SessionValues.SessionDef.StoreData, SessionValues.SessionDataPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionValues.SessionDataPath);
@@ -1326,17 +1335,17 @@ namespace USE_ExperimentTemplate_Session
             else
                 tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName);
 
-          //   tl.FilePrefix = FilePrefix;
-          //  tl.StoreData = StoreData;
-          //   tl.SubjectID = SubjectID;
-          //   tl.SessionID = SessionID;
+            //   tl.FilePrefix = FilePrefix;
+            //  tl.StoreData = StoreData;
+            //   tl.SubjectID = SubjectID;
+            //   tl.SessionID = SessionID;
             // tl.SerialRecvData = SerialRecvData;
             // tl.SerialSentData = SerialSentData;
-           // tl.GazeData = GazeData;
+            // tl.GazeData = GazeData;
 
-        //    tl.SelectionTracker = SelectionTracker;
-            
-           // tl.EyeTrackerActive = EyeTrackerActive;
+            //    tl.SelectionTracker = SelectionTracker;
+
+            // tl.EyeTrackerActive = EyeTrackerActive;
 
             // if (EyeTrackerActive)
             // {
@@ -1345,22 +1354,24 @@ namespace USE_ExperimentTemplate_Session
             // }
             //tl.MouseTracker = MouseTracker;
 
-           // tl.InputManager = InputManager;
-         //   tl.SelectionType = SelectionType;
+            // tl.InputManager = InputManager;
+            //   tl.SelectionType = SelectionType;
 
-          //  tl.ContextExternalFilePath = ContextExternalFilePath;
-         //   tl.SerialPortActive = SerialPortActive;
-           // tl.SyncBoxActive = SyncBoxActive;
-         //   tl.EventCodeManager = EventCodeManager;
-          //  tl.EventCodesActive = EventCodesActive;
-           // tl.SessionEventCodes = SessionValues.SessionEventCodes;
+            //  tl.ContextExternalFilePath = ContextExternalFilePath;
+            //   tl.SerialPortActive = SerialPortActive;
+            // tl.SyncBoxActive = SyncBoxActive;
+            //   tl.EventCodeManager = EventCodeManager;
+            //  tl.EventCodesActive = EventCodesActive;
+            // tl.SessionEventCodes = SessionValues.SessionEventCodes;
             // if (SerialPortActive)
             //     tl.SerialPortController = SerialPortController;
+            /*Debug.Log("IS THE SyncBoxController  NULL? " + SessionValues.SyncBoxController.SessionEventCodes == null ? "YES" : "NO");
+            Debug.Log("IS THE EventCodeManager  NULL? " + SessionValues.EventCodeManager.SessionEventCodes == null ? "YES" : "NO");
             if (SessionValues.SessionDef.SyncBoxActive)
             {
                 SessionValues.SyncBoxController.SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
              //   tl.SyncBoxController = SyncBoxController;
-            }
+            }*/
             // tl.ShotgunRaycastCircleSize_DVA = ShotgunRaycastCircleSize_DVA;
             // tl.ShotgunRaycastSpacing_DVA = ShotgunRaycastSpacing_DVA;
             // tl.ParticipantDistance_CM = ParticipantDistance_CM;

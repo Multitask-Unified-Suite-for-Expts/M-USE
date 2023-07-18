@@ -589,8 +589,8 @@ namespace USE_ExperimentTemplate_Task
 
     //        TrialLevel.DisplayController = DisplayController; 
 
-            if(SessionValues.SyncBoxController != null)
-                SessionValues.SyncBoxController.EventCodeManager = SessionValues.EventCodeManager;
+            /*if(SessionValues.SyncBoxController != null)
+                SessionValues.SyncBoxController.EventCodeManager = SessionValues.EventCodeManager;*/
                 //TrialLevel.SyncBoxController.EventCodeManager = SessionValues.EventCodeManager;
 
           //  TrialLevel.EventCodeManager = EventCodeManager;

@@ -74,11 +74,12 @@ public class MazeReactionTest_TaskLevel : ControlLevel_Task_Template
         {
             FindMaze();
             LoadTextMaze(); // need currMaze here to set all the arrays
-                
-            RenderSettings.skybox = CreateSkybox(mrtTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, mrtBD.ContextName, "LinearDark"));
+
+            StartCoroutine(HandleSkybox(mrtTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, mrtBD.ContextName, "LinearDark")));
+            //RenderSettings.skybox = CreateSkybox(mrtTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, mrtBD.ContextName, "LinearDark"));
+            //SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
             mrtTL.contextName = mrtBD.ContextName;
             mrtTL.MinTrials = mrtBD.MinMaxTrials[0];
-            SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
             
             //instantiate arrays
             totalErrors_InBlock = new int[currMaze.mNumSquares];

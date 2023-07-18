@@ -51,9 +51,10 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
             else
                 contextFilePath = wwwTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, wwwBD.ContextName, "LinearDark");
 
-            RenderSettings.skybox = CreateSkybox(contextFilePath);
+            StartCoroutine(HandleSkybox(contextFilePath));
+            //RenderSettings.skybox = CreateSkybox(contextFilePath);
+            //SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
 
-            SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
 
             ErrorType_InTask.Add(string.Join(",",wwwTL.ErrorType_InBlock));
             wwwTL.ResetBlockVariables();

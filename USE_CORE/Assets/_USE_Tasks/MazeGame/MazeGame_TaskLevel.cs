@@ -116,14 +116,15 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             else
                 contextFilePath = mgTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, mgBD.ContextName, "LinearDark");
 
-            RenderSettings.skybox = CreateSkybox(contextFilePath);
+            StartCoroutine(HandleSkybox(contextFilePath));
+            //RenderSettings.skybox = CreateSkybox(contextFilePath);
+            //SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
 
             FindMaze();
             StartCoroutine(LoadTextMaze()); // need currMaze here to set all the arrays
 
             mgTL.contextName = mgBD.ContextName;
             mgTL.MinTrials = mgBD.MinMaxTrials[0];
-            SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
             
             ResetBlockVariables();
             CalculateBlockSummaryString();

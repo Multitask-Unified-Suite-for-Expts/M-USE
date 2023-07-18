@@ -938,12 +938,13 @@ namespace USE_ExperimentTemplate_Session
                 else
                 {
                     SessionValues.SessionDef.TaskIconsFolderPath = "Resources/TaskIcons"; //Path on server
-                    SessionValues.SessionDef.ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
+                    SessionValues.SessionDef.ContextExternalFilePath = "Resources/Contexts";
+                    //SessionValues.SessionDef.ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
                 }
             }
         }
 
-        private void CreateSessionSettingsFolder() //Create Session Settings Folder inside Data Folder
+        private void CreateSessionSettingsFolder() //Create Session Settings Folder inside Data Folder and copy config folder into it
         {
             if (SessionValues.WebBuild)
             {

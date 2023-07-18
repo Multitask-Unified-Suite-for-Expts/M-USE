@@ -466,7 +466,6 @@ namespace USE_ExperimentTemplate_Task
 
             if (SessionValues.WebBuild && SessionValues.SessionDef.StoreData)
             {
-                Debug.Log("ABOUT TO CREATE FOLDER AT: " + TaskDataPath);
                 StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
             }
 
@@ -611,15 +610,13 @@ namespace USE_ExperimentTemplate_Task
 
             if (SessionValues.WebBuild)
             {
-                TrialLevel.LoadTexturesFromResources(); //delete this when uncomment below
+                //TrialLevel.LoadTexturesFromResources(); //delete this when uncomment below
 
                 //UnCOMMENT BELOW WHEN WE WANT TO LOAD TEXTURES FROM SERVER!
-                //if (SessionValues.UseDefaultConfigs)
-                //    TrialLevel.LoadTexturesFromResources();
-                //else
-                //{
-                //    //need to load the images from the server!!!!!!
-                //}
+                if (SessionValues.UsingDefaultConfigs)
+                    TrialLevel.LoadTexturesFromResources();
+                else
+                    TrialLevel.LoadTexturesFromServer();
             }
             else
                 TrialLevel.LoadTextures(SessionValues.SessionDef.ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 

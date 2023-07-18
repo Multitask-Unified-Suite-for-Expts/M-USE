@@ -52,9 +52,9 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             else
                 contextFilePath = flTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, flBD.ContextName, "LinearDark");
 
-            RenderSettings.skybox = CreateSkybox(contextFilePath);
-
-            SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
+            StartCoroutine(HandleSkybox(contextFilePath));
+            //RenderSettings.skybox = CreateSkybox(contextFilePath);
+            //SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
             
             //Set the Initial Token Values for the Block
             flTL.TokenFBController.SetTotalTokensNum(flBD.NumTokenBar);

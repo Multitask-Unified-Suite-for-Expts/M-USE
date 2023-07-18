@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657815, g: 0.49641192, b: 0.57481617, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -322,7 +322,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 5576539015048150, guid: 810531c98dad74048995093927772f82, type: 3}
       propertyPath: m_Name
-      value: TaskSelection_Starfield
+      value: Starfield
       objectReference: {fileID: 0}
     - target: {fileID: 5576539015048150, guid: 810531c98dad74048995093927772f82, type: 3}
       propertyPath: m_IsActive
@@ -635,14 +635,13 @@ MonoBehaviour:
     type: 3}
   BlockResultsPrefab: {fileID: 6952099139267227724, guid: 3574b70e8d31c4f6fa0cf373241c135f,
     type: 3}
-  TaskSelection_Starfield: {fileID: 1391649313}
   HumanVersionToggleButton: {fileID: 2071187616}
   HumanStartPanelPrefab: {fileID: 7569599706748818137, guid: e3a91289f22a4401bbc1f44baba80e22,
     type: 3}
-  TaskSelectionCanvasGO: {fileID: 1551787081}
   ToggleAudioButton: {fileID: 907834252290271150}
   StartButtonPrefabGO: {fileID: 6810560367943004968, guid: 2e385ec78c77a46cc91c52da9fce59b9,
     type: 3}
+  Starfield: {fileID: 1391649313}
   BackgroundMusic_AudioClip: {fileID: 8300000, guid: d0692d04af800462aba5670b8485603c,
     type: 3}
   BlockResults_AudioClip: {fileID: 8300000, guid: b073a0c00b101453b806d8f2e5506319,
@@ -686,6 +685,10 @@ MonoBehaviour:
   fileNames: []
   settingParsingStyles: []
   filePathStrings: []
+  currentFileName: 
+  SessionLevel: {fileID: 0}
+  fileParsed: 0
+  continueToNextSetting: 0
 --- !u!1 &1391649313 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5576539015048150, guid: 810531c98dad74048995093927772f82,
@@ -1124,7 +1127,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1551787082
 MonoBehaviour:
   m_ObjectHideFlags: 0

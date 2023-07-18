@@ -122,8 +122,6 @@ public class LogWriter : MonoBehaviour
 
     private IEnumerator CreateLogFolder()
     {
-        Debug.Log("CREATING LOG FOLDER AT: " + ServerLogFolderPath);
-
         if (SessionValues.WebBuild)
         {
             if (ServerManager.SessionDataFolderCreated)

@@ -27,6 +27,7 @@ public static class SessionValues
     public static SessionInfoPanel SessionInfoPanel;
     public static USE_StartButton USE_StartButton;
     public static GameObject TaskSelectionCanvasGO;
+    public static GameObject Starfield;
     public static HumanStartPanel HumanStartPanel;
     public static DisplayController DisplayController;
     public static ExperimenterDisplayController ExperimenterDisplayController;
@@ -95,25 +96,16 @@ public static class SessionValues
     //public bool UseTaskButtonsGrid;
 
 
-    static SessionValues() // idk about this???
+    static SessionValues()
     {
-        // Perform actions when certain values are true
-
-        // if (SessionDef.SyncBoxActive)
-        // {
-        //     SyncBoxController = new SyncBoxController();
-        //     SyncBoxController.serialPortController = SerialPortController;
-        //     SerialSentData.sc = SerialPortController;
-        //     SerialRecvData.sc = SerialPortController;
-        //     SyncBoxController.SessionEventCodes = SessionEventCodes;
-        //     // SyncBoxController.SessionEventCodes = SessionEventCodes;
-        //     // tl.SyncBoxController = SyncBoxController;
-        // }
+        SetPrefabs();
     }
-    //
-    // public static float ShotgunRayCastCircleSize_DVA;
-    // public static float ShotgunRaycastSpacing_DVA;
-    // public static float ParticipantDistance_CM;
+
+    private static void SetPrefabs()
+    {
+        TaskSelectionCanvasGO = GameObject.Find("TaskSelectionCanvas");
+        TaskSelectionCanvasGO.SetActive(false);
+    }
 
     public static IEnumerator GetFileContentString(string fileName, Action<string> callback)
     {

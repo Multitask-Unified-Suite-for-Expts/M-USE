@@ -76,12 +76,11 @@ namespace USE_ExperimentTemplate_Session
         //Set in inspector
         public GameObject BlockResults_GridElementPrefab;
         public GameObject BlockResultsPrefab;
-        public GameObject TaskSelection_Starfield;
         public GameObject HumanVersionToggleButton;
         public GameObject HumanStartPanelPrefab;
-        public GameObject TaskSelectionCanvasGO;
         public GameObject ToggleAudioButton;
         public GameObject StartButtonPrefabGO;
+        public GameObject Starfield;
         public AudioClip BackgroundMusic_AudioClip;
         public AudioClip BlockResults_AudioClip;
 
@@ -151,8 +150,6 @@ namespace USE_ExperimentTemplate_Session
 
             SessionValues.USE_StartButton = gameObject.AddComponent<USE_StartButton>();
             SessionValues.USE_StartButton.StartButtonPrefab = StartButtonPrefabGO;
-
-            SessionValues.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
         }
 
 
@@ -161,7 +158,10 @@ namespace USE_ExperimentTemplate_Session
             #if (UNITY_WEBGL)
                 SessionValues.WebBuild = true;
             #endif
-            
+
+            SessionValues.SessionLevel = this;
+
+
             //DontDestroyOnLoad(gameObject);
             State initScreen = new State("InitScreen");
             State loadSessionSettings = new State("LoadSessionSettings");
@@ -206,7 +206,7 @@ namespace USE_ExperimentTemplate_Session
                 {
                     CreateExperimenterDisplay();
                     CreateMirrorCam();
-                    TaskSelection_Starfield.SetActive(false);
+                    Starfield.SetActive(false);
                 }
 
             });
@@ -223,7 +223,6 @@ namespace USE_ExperimentTemplate_Session
                 SetConfigPathsAndTypes();
                 SetValuesForLoading_SessionConfig();
                 SetValuesForLoading_EventCodeConfig();
-                PassObjectsToSessionValues();
             });
 
             string selectedConfigName = null;
@@ -272,6 +271,8 @@ namespace USE_ExperimentTemplate_Session
             bool waitForSerialPort = false;
             setupSession.AddDefaultInitializationMethod(() =>
             {
+                PassObjectsToSessionValues();
+
                 SummaryData.Init();
 
                 CreateSessionSettingsFolder();
@@ -426,7 +427,7 @@ namespace USE_ExperimentTemplate_Session
 
                 SessionValues.TaskSelectionCanvasGO.SetActive(true);
 
-                TaskSelection_Starfield.SetActive(SessionValues.SessionDef.IsHuman);
+                Starfield.SetActive(SessionValues.SessionDef.IsHuman);
 
                 if(!SessionValues.WebBuild)
                 {
@@ -723,7 +724,7 @@ namespace USE_ExperimentTemplate_Session
 
             loadTask.SpecifyTermination(() => CurrentTask != null && CurrentTask.TaskLevelDefined, runTask, () =>
             {
-                TaskSelection_Starfield.SetActive(false);
+                Starfield.SetActive(false);
                 runTask.AddChildLevel(CurrentTask);
                 if (CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
@@ -1117,11 +1118,8 @@ namespace USE_ExperimentTemplate_Session
                 }
                 ToggleAudioButton.SetActive(false);   
             }
-
-            //Change text on button:
             HumanVersionToggleButton.GetComponentInChildren<TextMeshProUGUI>().text = SessionValues.SessionDef.IsHuman ? "Human Version" : "Primate Version";
-            //Toggle Starfield:
-            TaskSelection_Starfield.SetActive(!TaskSelection_Starfield.activeInHierarchy);
+            Starfield.SetActive(!Starfield.activeInHierarchy);
         }
 
         private void AppendSerialData()
@@ -1196,7 +1194,6 @@ namespace USE_ExperimentTemplate_Session
         public ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
         {
 	        tl.BlockResults_AudioClip = BlockResults_AudioClip;
-            SessionValues.SessionLevel = this;
             //tl.USE_StartButton = USE_StartButton;
             //tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
             //tl.HumanStartPanel = HumanStartPanel;

@@ -947,13 +947,17 @@ namespace USE_ExperimentTemplate_Session
         {
             if (SessionValues.WebBuild)
             {
-                if (!Application.isEditor) //Only copy the folder when not in editor
+                if (!Application.isEditor)
                 {
-                    //DOESNT CURRENTLY WORK FOR DEFAULT CONFIGS CUZ THATS NOT A CONFIG ON THE SERVER, so it cant find it to copy from
-                    StartCoroutine(CreateFolderOnServer(SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings", () =>
+                    if (!SessionValues.UsingDefaultConfigs)
                     {
-                        StartCoroutine(CopySessionConfigFolderToDataFolder()); //Copy Session Config folder to Data folder so that the settings are stored
-                    }));
+                        StartCoroutine(CreateFolderOnServer(SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings", () =>
+                        {
+                            StartCoroutine(CopySessionConfigFolderToDataFolder()); //Copy Session Config folder to Data folder so that the settings are stored
+                        }));
+                    }
+                    else
+                        Debug.Log("Using default configs so not copying config folder to data folder");
                 }
             }
             else
@@ -1087,8 +1091,8 @@ namespace USE_ExperimentTemplate_Session
                 SessionValues.SerialRecvData.ManuallyDefine();
             }
 
-            FrameData = (FrameData)SessionValues.SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "SessionLevel", SessionValues.SessionDef.StoreData, SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "FrameData");
-            FrameData.fileName = "SessionLevel__FrameData.txt";
+            FrameData = (FrameData)SessionValues.SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection", SessionValues.SessionDef.StoreData, SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "FrameData");
+            FrameData.fileName = "TaskSelection__FrameData.txt";
             FrameData.sessionLevel = this;
             FrameData.InitDataController();
             FrameData.ManuallyDefine();
@@ -1097,9 +1101,9 @@ namespace USE_ExperimentTemplate_Session
 
             if (SessionValues.SessionDef.EyeTrackerActive)
             {
-                SessionValues.GazeData = (GazeData)SessionValues.SessionDataControllers.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", "SessionLevel", SessionValues.SessionDef.StoreData, SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "GazeData");
+                SessionValues.GazeData = (GazeData)SessionValues.SessionDataControllers.InstantiateDataController<GazeData>("GazeData", "TaskSelection", SessionValues.SessionDef.StoreData, SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "GazeData");
 
-                SessionValues.GazeData.fileName = "SessionLevel__GazeData.txt";
+                SessionValues.GazeData.fileName = "TaskSelection__GazeData.txt";
                 SessionValues.GazeData.sessionLevel = this;
                 SessionValues.GazeData.InitDataController();
                 SessionValues.GazeData.ManuallyDefine();

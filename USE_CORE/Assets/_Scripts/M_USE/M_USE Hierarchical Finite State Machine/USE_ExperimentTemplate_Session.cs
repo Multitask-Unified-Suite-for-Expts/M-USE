@@ -117,11 +117,10 @@ namespace USE_ExperimentTemplate_Session
             State gazeCalibration = new State("GazeCalibration");
             AddActiveStates(new List<State> { initScreen, loadSessionSettings, createSessionDataFolder, setupSession, selectTask, loadTask, runTask, finishSession, gazeCalibration });
 
-            ActiveTaskLevels = new List<ControlLevel_Task_Template>();//new Dictionary<string, ControlLevel_Task_Template>();
+            ActiveTaskLevels = new List<ControlLevel_Task_Template>();
 
             SessionCam = Camera.main;
 
-            bool initScreenTerminated = false;
 
             FindGameObjects();
             LoadPrefabs();
@@ -130,6 +129,8 @@ namespace USE_ExperimentTemplate_Session
 
             importSettings_Level = gameObject.GetComponent<ImportSettings_Level>();
             importSettings_Level.SessionLevel = this;
+
+            bool initScreenTerminated = false;
 
             initScreen.AddDefaultInitializationMethod(() =>
             {
@@ -337,7 +338,7 @@ namespace USE_ExperimentTemplate_Session
                     TobiiEyeTrackerController.Instance.ScreenBasedCalibration.LeaveCalibrationMode();
                 }
 
-                SessionValues.GazeData.folderPath = SessionValues.SessionLevelDataPath + Path.DirectorySeparatorChar + "GazeData";
+                SessionValues.GazeData.folderPath = SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "GazeData";
                 FrameData.gameObject.SetActive(true);
 
             });
@@ -762,11 +763,11 @@ namespace USE_ExperimentTemplate_Session
 
                 if (SessionValues.SessionDef.EyeTrackerActive)
                 {
-                    SessionValues.GazeData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.SessionLevelDataPath, "GazeData", "SessionLevel");
+                    SessionValues.GazeData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.TaskSelectionDataPath, "GazeData", "SessionLevel");
                     SessionValues.GazeData.fileName = SessionValues.FilePrefix + "__GazeData" + SessionValues.GazeData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
                 }
 
-                FrameData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.SessionLevelDataPath, "FrameData", "SessionLevel");
+                FrameData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.TaskSelectionDataPath, "FrameData", "SessionLevel");
                 FrameData.fileName = SessionValues.FilePrefix + "__FrameData" + FrameData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
 
                 FrameData.gameObject.SetActive(true);
@@ -877,7 +878,7 @@ namespace USE_ExperimentTemplate_Session
             SessionValues.FilePrefix = "Session_" + SessionValues.SessionID + "__Subject_" + SessionValues.SubjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
             ServerManager.SetSessionDataFolder("DATA__" + SessionValues.FilePrefix);
             SessionValues.SessionDataPath = SessionValues.WebBuild ? ServerManager.SessionDataFolderPath : (SessionValues.LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + SessionValues.FilePrefix);
-            SessionValues.SessionLevelDataPath = SessionValues.WebBuild ? $"{SessionValues.SessionDataPath}/SessionLevel" : (SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel");
+            SessionValues.TaskSelectionDataPath = SessionValues.WebBuild ? $"{SessionValues.SessionDataPath}/SessionLevel" : (SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel");
         }
 
         private void SetConfigPathsAndTypes()
@@ -957,10 +958,44 @@ namespace USE_ExperimentTemplate_Session
             }
             else
             {
-                string sessionSettingsFolderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
-                Directory.CreateDirectory(sessionSettingsFolderPath);
-                SessionSettings.StoreSettings(sessionSettingsFolderPath + Path.DirectorySeparatorChar);
+                string sourceFolderPath = SessionValues.ConfigFolderPath;
+                string destinationFolderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
+                CopyLocalFolder(sourceFolderPath, destinationFolderPath);
+
+                //Old way, not sure if it works:
+                //string sessionSettingsFolderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
+                //Directory.CreateDirectory(sessionSettingsFolderPath);
+                //SessionSettings.StoreSettings(sessionSettingsFolderPath + Path.DirectorySeparatorChar);
             }
+        }
+
+        public void CopyLocalFolder(string sourceFolderPath, string destinationFolderPath)
+        {
+            if (!Directory.Exists(sourceFolderPath))
+            {
+                Debug.Log("Source folder does not exist to copy from!");
+                return;
+            }
+
+            if (!Directory.Exists(destinationFolderPath))
+                Directory.CreateDirectory(destinationFolderPath);
+            
+            DirectoryInfo sourceDir = new DirectoryInfo(sourceFolderPath);
+            DirectoryInfo destinationDir = new DirectoryInfo(destinationFolderPath);
+
+            foreach (FileInfo file in sourceDir.GetFiles())
+            {
+                string destinationFilePath = Path.Combine(destinationDir.FullName, file.Name);
+                file.CopyTo(destinationFilePath, true);
+            }
+
+            foreach (DirectoryInfo subDir in sourceDir.GetDirectories())
+            {
+                string subDestinationFolderPath = Path.Combine(destinationDir.FullName, subDir.Name);
+                CopyLocalFolder(subDir.FullName, subDestinationFolderPath);
+            }
+
+            Debug.Log("Local Folder Folder copied successfully!");
         }
 
         private IEnumerator CreateSessionDataFolder(Action<bool> callbackBool)
@@ -968,7 +1003,7 @@ namespace USE_ExperimentTemplate_Session
             if (SessionValues.WebBuild)
             {
                 yield return StartCoroutine(ServerManager.CreateSessionDataFolder()); //Create Session Data Folder
-                yield return StartCoroutine(ServerManager.CreateFolder(SessionValues.SessionLevelDataPath)); //Create SessionLevel Sub-Folder inside Data Folder
+                yield return StartCoroutine(ServerManager.CreateFolder(SessionValues.TaskSelectionDataPath)); //Create SessionLevel Sub-Folder inside Data Folder
             }
             yield return StartCoroutine(SessionData.CreateFile()); //Will also create session data folder for normal build
             LogWriter.StoreDataIsSet = true; //tell log writer when storeData boolean has been set (in this case, waiting until data folder is created)
@@ -976,7 +1011,7 @@ namespace USE_ExperimentTemplate_Session
         }
 
         private void SetupInputManagement(State inputActive, State inputInactive)
-        {// Create the input tracker object
+        {
             SessionValues.InputManager = new GameObject("InputManager");
             SessionValues.InputManager.SetActive(true);
 
@@ -1057,7 +1092,7 @@ namespace USE_ExperimentTemplate_Session
                 SessionValues.SerialRecvData.ManuallyDefine();
             }
 
-            FrameData = (FrameData)SessionValues.SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "SessionLevel", SessionValues.SessionDef.StoreData, SessionValues.SessionLevelDataPath + Path.DirectorySeparatorChar + "FrameData");
+            FrameData = (FrameData)SessionValues.SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "SessionLevel", SessionValues.SessionDef.StoreData, SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "FrameData");
             FrameData.fileName = "SessionLevel__FrameData.txt";
             FrameData.sessionLevel = this;
             FrameData.InitDataController();
@@ -1067,7 +1102,7 @@ namespace USE_ExperimentTemplate_Session
 
             if (SessionValues.SessionDef.EyeTrackerActive)
             {
-                SessionValues.GazeData = (GazeData)SessionValues.SessionDataControllers.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", "SessionLevel", SessionValues.SessionDef.StoreData, SessionValues.SessionLevelDataPath + Path.DirectorySeparatorChar + "GazeData");
+                SessionValues.GazeData = (GazeData)SessionValues.SessionDataControllers.InstantiateDataController<USE_ExperimentTemplate_Data.GazeData>("GazeData", "SessionLevel", SessionValues.SessionDef.StoreData, SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "GazeData");
 
                 SessionValues.GazeData.fileName = "SessionLevel__GazeData.txt";
                 SessionValues.GazeData.sessionLevel = this;
@@ -1418,6 +1453,8 @@ namespace USE_ExperimentTemplate_Session
             string destinationPath = $"{ServerManager.SessionDataFolderPath}/SessionSettings";
             yield return ServerManager.CopyFolder(sourcePath, destinationPath);
         }
+
+
         public void OnGUI()
         {
             if (CameraMirrorTexture == null) return;

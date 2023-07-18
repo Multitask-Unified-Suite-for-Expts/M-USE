@@ -475,7 +475,7 @@ namespace USE_ExperimentTemplate_Task
                 //Setup data management
                 if (SessionValues.SessionLevel.CurrentState.StateName == "SetupSession")
                      // Store Data in the Session Level / Gaze Calibration folder if running at the session level
-                    TaskDataPath = SessionValues.SessionLevelDataPath + Path.DirectorySeparatorChar + "PreTask_GazeCalibration";
+                    TaskDataPath = SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "PreTask_GazeCalibration";
                 
                 else
                      // Store Data in the Task / Gaze Calibration folder if not running at the session level
@@ -486,13 +486,13 @@ namespace USE_ExperimentTemplate_Task
             }
 
 
-            SessionValues.FilePrefix = SessionValues.FilePrefix + "_" + ConfigName;
+            string filePrefix = $"{SessionValues.FilePrefix}_{ConfigName}";
 
             string subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "BlockData";
             BlockData = (BlockData)SessionValues.SessionDataControllers.InstantiateDataController<BlockData>("BlockData", ConfigName, SessionValues.SessionDef.StoreData, subFolderPath);
             BlockData.taskLevel = this;
             BlockData.sessionLevel = SessionValues.SessionLevel;
-            BlockData.fileName = SessionValues.FilePrefix + "__BlockData.txt";
+            BlockData.fileName = filePrefix + "__BlockData.txt";
 
             subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "TrialData";
             TrialData = (TrialData)SessionValues.SessionDataControllers.InstantiateDataController<TrialData>("TrialData", ConfigName, SessionValues.SessionDef.StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
@@ -501,7 +501,7 @@ namespace USE_ExperimentTemplate_Task
             TrialData.sessionLevel = SessionValues.SessionLevel;
 
             TrialLevel.TrialData = TrialData;
-            TrialData.fileName = SessionValues.FilePrefix + "__TrialData.txt";
+            TrialData.fileName = filePrefix + "__TrialData.txt";
 
             subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "FrameData";
             FrameData = (FrameData)SessionValues.SessionDataControllers.InstantiateDataController<FrameData>("FrameData", ConfigName, SessionValues.SessionDef.StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
@@ -510,14 +510,14 @@ namespace USE_ExperimentTemplate_Task
             FrameData.sessionLevel = SessionValues.SessionLevel;
 
             TrialLevel.FrameData = FrameData;
-            FrameData.fileName = SessionValues.FilePrefix + "__FrameData_PreTrial.txt";
+            FrameData.fileName = filePrefix + "__FrameData_PreTrial.txt";
 
             if (SessionValues.SessionDef.EyeTrackerActive)
             {
                 SessionValues.GazeData.taskLevel = this;
                 SessionValues.GazeData.trialLevel = TrialLevel;
                 SessionValues.GazeData.sessionLevel = SessionValues.SessionLevel;
-                SessionValues.GazeData.fileName = SessionValues.FilePrefix + "__GazeData_PreTrial.txt";
+                SessionValues.GazeData.fileName = filePrefix + "__GazeData_PreTrial.txt";
                 SessionValues.GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
             }
             //SessionDataControllers.InstantiateFrameData(StoreData, ConfigName,
@@ -525,7 +525,7 @@ namespace USE_ExperimentTemplate_Task
             FrameData.taskLevel = this;
             FrameData.trialLevel = TrialLevel;
             TrialLevel.FrameData = FrameData;
-            FrameData.fileName = SessionValues.FilePrefix + "__FrameData_PreTrial.txt";
+            FrameData.fileName = filePrefix + "__FrameData_PreTrial.txt";
 
             BlockData.InitDataController();
             TrialData.InitDataController();

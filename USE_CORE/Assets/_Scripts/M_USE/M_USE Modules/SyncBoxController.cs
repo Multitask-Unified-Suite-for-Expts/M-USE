@@ -20,6 +20,8 @@ public class SyncBoxController
     private string ultrasoundTriggerDurationTicks;
     private int numTrialsWithoutSonicationAfterMax;
 
+
+
     public EventCodeManager EventCodeManager;
     public Dictionary<string, EventCode> SessionEventCodes;
 

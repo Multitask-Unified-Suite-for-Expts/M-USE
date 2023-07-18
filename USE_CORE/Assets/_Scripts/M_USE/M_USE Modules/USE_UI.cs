@@ -181,7 +181,8 @@ namespace USE_UI
         {
             InstructionsGO.SetActive(InstructionsGO.activeInHierarchy ? false : true);
             InstructionsOn = InstructionsGO.activeInHierarchy ? true : false;
-            EventCodeManager.SendCodeImmediate(SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
+            if (SessionValues.SessionDef.EventCodesActive)
+                EventCodeManager.SendCodeImmediate(SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
 
         }
 
@@ -246,7 +247,8 @@ namespace USE_UI
         {
             HumanStartPanelGO.SetActive(true);
             HumanPanelOn = true;
-            EventCodeManager.SendCodeImmediate(SessionEventCodes["HumanStartPanelOn"]);
+            if(SessionValues.SessionDef.EventCodesActive)
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["HumanStartPanelOn"]);
             if (!StartButtonGO.activeInHierarchy)
                 StartButtonGO.SetActive(true);
         }
@@ -255,7 +257,8 @@ namespace USE_UI
         {
             HumanStartPanelGO.SetActive(false);
             HumanPanelOn = false;
-            EventCodeManager.SendCodeImmediate(SessionEventCodes["HumanStartPanelOff"]);
+            if (SessionValues.SessionDef.EventCodesActive)
+                EventCodeManager.SendCodeImmediate(SessionEventCodes["HumanStartPanelOff"]);
         }
 
     }

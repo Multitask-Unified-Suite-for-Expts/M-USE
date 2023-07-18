@@ -164,12 +164,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 mazeBgTex = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, MazeBackgroundTextureName));
             }
 
-
             if (MazeContainer == null)
-                MazeContainer = new GameObject("MazeContainer"); 
+                MazeContainer = new GameObject("MazeContainer");
+
             if (MazeBackground == null)
-                MazeBackground = CreateSquare("MazeBackground", mazeBgTex, new Vector3(0, 0.42f, 0),
-                    new Vector3(5, 5, 5));
+                MazeBackground = CreateSquare("MazeBackground", mazeBgTex, new Vector3(0, 0.42f, 0), new Vector3(5, 5, 5));
             
             //player view variables
             playerViewParent = GameObject.Find("MainCameraCopy");
@@ -207,8 +206,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-            TouchFBController.DestroyTouchFeedback();
-            TouchFBController.SetPrefabSizes(StartButtonScale);
+            if (!SessionValues.SessionDef.IsHuman)
+            {
+                TouchFBController.DestroyTouchFeedback();
+                TouchFBController.SetPrefabSizes(StartButtonScale);
+            }
             SelectionHandler.HandlerActive = true;
             if (SelectionHandler.AllSelections.Count > 0)
                 SelectionHandler.ClearSelections();
@@ -218,7 +220,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), Delay, () =>
         {
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
+            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
+            SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOn"]);
 
             StateAfterDelay = ChooseTile;
             DelayDuration = mazeOnsetDelay.value;
@@ -235,14 +238,16 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             mazeStartTime = Time.unscaledTime;
 
-            SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOn"]);
         });
 
         ChooseTile.AddInitializationMethod(() =>
         {
-            TouchFBController.DestroyTouchFeedback(); // destroys prefab of previous sizing
-            tileScale = 26.25f * TileSize;
-            TouchFBController.SetPrefabSizes(tileScale);
+            if (!SessionValues.SessionDef.IsHuman)
+            {
+                TouchFBController.DestroyTouchFeedback(); // destroys prefab of previous sizing
+                tileScale = 26.25f * TileSize;
+                TouchFBController.SetPrefabSizes(tileScale);
+            }
             choiceStartTime = Time.unscaledTime;
             SelectionHandler.HandlerActive = true;
             if (SelectionHandler.AllSelections.Count > 0)
@@ -275,7 +280,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             {
                 //If the tile that is selected is the start tile
                 startedMaze = true;
-                SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["MazeStart"]); 
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["MazeStart"]); 
             }
 
             if (selectedGO.GetComponent<Tile>().mCoord.chessCoord == CurrentTaskLevel.currMaze.mFinish && CurrentTaskLevel.currMaze.mNextStep == CurrentTaskLevel.currMaze.mFinish)
@@ -284,14 +290,15 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 mazeDuration = Time.unscaledTime - mazeStartTime;
                 CurrentTaskLevel.mazeDurationsList_InBlock.Add(mazeDuration);
                 CurrentTaskLevel.mazeDurationsList_InTask.Add(mazeDuration);
-                SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["MazeFinish"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["MazeFinish"]);
             }
         });
         ChooseTile.SpecifyTermination(()=> (mazeDuration > maxMazeDuration.value) || (choiceDuration > 30), ()=> FinishTrial, () =>
         {
             // Timeout Termination
             aborted = true;
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["NoChoice"]);
+            SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
             AbortCode = 6;
             CurrentTaskLevel.numAbortedTrials_InBlock++;
             CurrentTaskLevel.numAbortedTrials_InTask++;
@@ -299,7 +306,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
        
         SelectionFeedback.AddInitializationMethod(() =>
         {
-            SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["TileFbOn"]);
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["TileFbOn"]);
             choiceMade = false;
             // This is what actually determines the result of the tile choice
             selectedGO.GetComponent<Tile>().SelectionFeedback();
@@ -314,20 +322,23 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 AudioFBController.Play("Positive");
                 if (CurrentTrialDef.ErrorPenalty)
                     SliderFBController.UpdateSliderValue(selectedGO.GetComponent<Tile>().sliderValueChange);
-                //  EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]); 
+                //if (SessionValues.SessionDef.EventCodesActive)
+                    //  EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]); 
             }
             else if (ErroneousReturnToLast)
             {
                 AudioFBController.Play("Negative");
-                //EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
+                //if (SessionValues.SessionDef.EventCodesActive)
+                    //EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
             }
             else if (CorrectSelection)
             {
                 SliderFBController.UpdateSliderValue(selectedGO.GetComponent<Tile>().sliderValueChange);
-                #if (!UNITY_WEBGL)
+                if(!SessionValues.WebBuild)
                     playerViewParent.transform.Find((pathProgressIndex + 1).ToString()).GetComponent<Text>().color = new Color(0, 0.392f, 0);
-                #endif
-                // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]);
+
+                //if (SessionValues.SessionDef.EventCodesActive)
+                    // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]);
             }
             else if (selectedGO != null && !ErroneousReturnToLast)
             {
@@ -373,7 +384,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 runningPercentError.Add(percentError);
                 CurrentTaskLevel.numSliderBarFull_InBlock++;
                 CurrentTaskLevel.numSliderBarFull_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
+                SessionValues.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderCompleteFbOn");
 
                 if (SessionValues.SyncBoxController != null)
                 {
@@ -390,29 +401,35 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             {
                 StateAfterDelay = ChooseTile; // could be incorrect or correct but it will still go back
             }
-            
-            SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["TileFbOff"]);
+
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["TileFbOff"]);
             CorrectSelection = false;
             ReturnToLast = false;
             ErroneousReturnToLast = false;
         });
         TileFlashFeedback.AddInitializationMethod(() =>
         {
-            SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["FlashingTileFbOn"]);
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["FlashingTileFbOn"]);
             tile.LastCorrectFlashingFeedback();
         });
         TileFlashFeedback.AddTimer(() => tileBlinkingDuration.value, ChooseTile, () =>
         {
-            SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["FlashingTileFbOff"]);
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["FlashingTileFbOff"]);
         });
         ITI.AddInitializationMethod(() =>
         {
             DisableSceneElements();
             if (!SessionValues.WebBuild)
                 DestroyChildren(playerViewParent);
+
             SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOff"]);
+
             if (finishedMaze)
-                SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["SliderFbController_SliderCompleteFbOff"]);
+                SessionValues.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderCompleteFbOff");
+            
             if (NeutralITI)
             {
                 contextName = "itiImage";
@@ -508,7 +525,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             // Should provide flashing feedback of the last correct tile
             Debug.Log("*Perseverative Error*");
-            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["PerseverativeError"]);
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["PerseverativeError"]);
 
             perseverativeErrors_InTrial[pathProgressIndex + 1] += 1;
             CurrentTaskLevel.perseverativeErrors_InBlock[pathProgressIndex + 1] += 1;
@@ -535,7 +553,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         if (!startedMaze)
         {
             Debug.Log("*Rule Breaking Error - Not Pressing the Start Tile to Begin the Maze*");
-            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
             
             totalErrors_InTrial[0] += 1;
             CurrentTaskLevel.totalErrors_InBlock[0] += 1;
@@ -554,7 +573,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         if (touchedCoord.chessCoord == CurrentTaskLevel.currMaze.mNextStep)
         {
             Debug.Log("*Correct Tile Touch*");
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["CorrectResponse"]);
+            SessionValues.EventCodeManager.SendCodeImmediate("CorrectResponse");
 
             correctTouches_InTrial++;
             CurrentTaskLevel.correctTouches_InBlock++;
@@ -566,7 +585,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (pathProgress.Contains(touchedCoord))
             {
                 Debug.Log("*Last Correct Tile Touch*");
-                SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["LastCorrectSelection"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["LastCorrectSelection"]);
 
                 CurrentTaskLevel.currMaze.mNextStep = CurrentTaskLevel.currMaze.mPath[CurrentTaskLevel.currMaze.mPath.FindIndex(pathCoord => pathCoord == touchedCoord.chessCoord) + 1];
 
@@ -613,7 +633,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (consecutiveErrors > 0)
             {
                 Debug.Log("*Rule-Breaking Perseverative Error*");
-                SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
                 
                 totalErrors_InTrial[pathProgressIndex + 1] += 1;
                 CurrentTaskLevel.totalErrors_InBlock[pathProgressIndex + 1] += 1;
@@ -627,7 +648,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 return 20;
             }
             Debug.Log("*Rule-Abiding Incorrect Error*");
-            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleAbidingError"]);
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleAbidingError"]);
 
             totalErrors_InTrial[pathProgressIndex + 1] += 1;
             CurrentTaskLevel.totalErrors_InBlock[pathProgressIndex + 1] += 1;
@@ -653,7 +675,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (touchedCoord.Equals(pathProgress[pathProgress.Count - 1]))
             {
                 Debug.Log("*Pressed Last Correct, Without Outstanding Error*");
-                SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["LastCorrectSelection"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["LastCorrectSelection"]);
 
                 ErroneousReturnToLast = true;
 
@@ -675,7 +698,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             }
 
             Debug.Log("*Rule-Breaking Backtrack Error*");
-            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
+            if (SessionValues.SessionDef.EventCodesActive)
+                SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
 
             backtrackErrors_InTrial[pathProgressIndex + 1] += 1;
             CurrentTaskLevel.backtrackErrors_InBlock[pathProgressIndex + 1] += 1;
@@ -703,7 +727,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         // RULE BREAKING TOUCH
       
         Debug.Log("*Rule-Breaking Incorrect Error*");
-        SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
+        if (SessionValues.SessionDef.EventCodesActive)
+            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
             
         totalErrors_InTrial[pathProgressIndex + 1] += 1;
         CurrentTaskLevel.totalErrors_InBlock[pathProgressIndex + 1] += 1;
@@ -858,12 +883,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         DisableSceneElements();
 
-#if (!UNITY_WEBGL)
+        if (!SessionValues.WebBuild)
             DestroyChildren(playerViewParent);
-#endif
 
         if (mazeLoaded)
         {
+            Debug.Log("ABOUT TO DESTROY TILES!");
+
             tiles.DestroyStimGroup();
             mazeLoaded = false;
         }

@@ -194,7 +194,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
+            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
         });
 
 
@@ -249,12 +249,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseBalloon.SpecifyTermination(() => SideChoice != null, CenterSelection, () =>
         {
-            if(SessionValues.EventCodeManager != null)
-            {
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-                SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["BalloonChosen"]);
-            }
-
+            SessionValues.EventCodeManager.SendCodeImmediate("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["BalloonChosen"]);
+            
             DestroyChildren(SideChoice == "Left" ? RewardContainerRight : RewardContainerLeft);
             InflationsNeeded = SideChoice == "Left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight;
             AudioFBController.Play("EC_BalloonChosen");
@@ -382,8 +379,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
                         Handler.HandlerActive = false;
                         NumInflations++;
-                        SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["Button0PressedOnTargetObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-                        SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["CorrectResponse"]);
+    
+                        SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                        SessionValues.EventCodeManager.SendCodeNextFrame("CorrectResponse");
+                        
                         CalculateInflation(); //Sets Inflate to TRUE at end of func
                         InflateAudioPlayed = false;
                     }
@@ -435,7 +434,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 NumAborted_Block++;
                 AudioFBController.Play("TimeRanOut");
                 TokenFBController.enabled = false;
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["NoChoice"]);
+                SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
             }
             TrialStim.SetActive(false);
         });
@@ -453,7 +452,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 if (SessionValues.SyncBoxController != null)
                 {
                     GiveReward();
-                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["SyncBoxController_RewardPulseSent"]);
+                    SessionValues.EventCodeManager.SendCodeNextFrame("SyncBoxController_RewardPulseSent");
                 }
 
                 Completions_Block++;

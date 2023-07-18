@@ -78,7 +78,7 @@ public class MazeReactionTest_TaskLevel : ControlLevel_Task_Template
             RenderSettings.skybox = CreateSkybox(mrtTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, mrtBD.ContextName, "LinearDark"));
             mrtTL.contextName = mrtBD.ContextName;
             mrtTL.MinTrials = mrtBD.MinMaxTrials[0];
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOn"]);
+            SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
             
             //instantiate arrays
             totalErrors_InBlock = new int[currMaze.mNumSquares];

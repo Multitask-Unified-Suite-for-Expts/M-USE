@@ -31,7 +31,6 @@ namespace USE_ExperimentTemplate_Data
                 CoroutineHelper.StartCoroutine(ServerManager.CreateFolder(FolderPath));
             else
                 Directory.CreateDirectory(FolderPath);
-            
         }
 
         public static IEnumerator AddTaskRunData(string ConfigName, ControlLevel state, OrderedDictionary data)

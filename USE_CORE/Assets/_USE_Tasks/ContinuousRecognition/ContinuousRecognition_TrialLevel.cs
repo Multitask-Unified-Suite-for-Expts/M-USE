@@ -207,9 +207,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if(currentTrial.ShakeStim)
                 AddShakeStimScript(trialStims);
 
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOn"]);
-
+            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
+            SessionValues.EventCodeManager.SendCodeNextFrame("StimOn");
+            
             if (MakeStimPopOut)
                 PopStimOut();
         });
@@ -255,7 +255,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 {
                     currentTrial.GotTrialCorrect = true;
 
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["CorrectResponse"]);
+                    SessionValues.EventCodeManager.SendCodeImmediate("CorrectResponse");
 
                     //If chose a PNC Stim, remove it from PNC list.
                     if (currentTrial.PNC_Stim.Contains(ChosenStim.StimIndex))
@@ -292,7 +292,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 {
                     currentTrial.WrongStimIndex = ChosenStim.StimIndex; //identifies the stim they got wrong for Block FB purposes. 
                     TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["IncorrectResponse"]);
+                    SessionValues.EventCodeManager.SendCodeImmediate("IncorrectResponse");
                 }
             }
 
@@ -312,7 +312,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             AudioFBController.Play("Negative");
             EndBlock = true;
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["NoChoice"]);
+            SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
             AbortCode = 6;
         });
 
@@ -378,8 +378,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 ScoreTextGO.SetActive(false);
                 NumTrialsTextGO.SetActive(false);
             }
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOff"]);
 
+            SessionValues.EventCodeManager.SendCodeNextFrame("StimOff");
         });
         //DISPLAY RESULTS state --------------------------------------------------------------------------------------------------------
         DisplayResults.AddInitializationMethod(() =>
@@ -442,7 +442,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
 
         //FinishTrial State (default state) ----------------------------------------------------------------------------------------------------------------------
-        FinishTrial.AddDefaultTerminationMethod(() => SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOff"]));
+        FinishTrial.AddDefaultTerminationMethod(() => SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff"));
 
         //----------------------------------------------------------------------------------------------------------------------
         DefineTrialData();

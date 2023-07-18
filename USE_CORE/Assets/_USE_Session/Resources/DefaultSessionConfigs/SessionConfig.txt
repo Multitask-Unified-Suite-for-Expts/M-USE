@@ -8,4 +8,3 @@ bool	EventCodesActive	false
 bool	SyncBoxActive	false
 float	BlockResultsDuration	8
 bool	PlayBackgroundMusic	true
-bool	UseTaskButtonsGrid	true

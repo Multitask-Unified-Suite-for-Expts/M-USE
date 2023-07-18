@@ -123,7 +123,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
             mgTL.contextName = mgBD.ContextName;
             mgTL.MinTrials = mgBD.MinMaxTrials[0];
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOn"]);
+            SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
             
             ResetBlockVariables();
             CalculateBlockSummaryString();

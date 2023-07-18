@@ -200,7 +200,8 @@ namespace USE_ExperimentTemplate_Trial
                     SessionValues.SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials", 1));
 
                 TokenFBController.RecalculateTokenBox(); //recalculate tokenbox incase they switch to fullscreen mode
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["SetupTrialStarts"]);
+
+                SessionValues.EventCodeManager.SendCodeImmediate("SetupTrialStarts");
 
                 ResetRelativeStartTime();
 
@@ -214,8 +215,10 @@ namespace USE_ExperimentTemplate_Trial
                     SessionValues.HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
             });
 
-
-            FinishTrial.AddInitializationMethod(() => SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["FinishTrialStarts"]));
+            FinishTrial.AddInitializationMethod(() =>
+            {
+                SessionValues.EventCodeManager.SendCodeImmediate("FinishTrialStarts");
+            });
             FinishTrial.SpecifyTermination(() => runCalibration && TaskLevel.TaskName != "GazeCalibration", () => GazeCalibration);
 
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
@@ -518,6 +521,7 @@ namespace USE_ExperimentTemplate_Trial
         public GameObject CreateSquare(string name, Texture2D tex, Vector3 pos, Vector3 scale)
         {
             GameObject SquareGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
             Renderer SquareRenderer = SquareGO.GetComponent<Renderer>();
             SquareGO.name = name;
             SquareRenderer.material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");

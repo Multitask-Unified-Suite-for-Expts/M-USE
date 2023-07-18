@@ -11,7 +11,7 @@ public static class ServerManager //Used with the PHP scripts
     private static readonly string ServerURL = "http://m-use.psy.vanderbilt.edu:8080"; //will move to serverConfig
 
     private static readonly string RootDataFolder = "DATA"; //will move to server config
-    private static string SessionDataFolder; //Set once they hit InitScreen Confirm button
+    private static string SessionDataFolder;
     public static string SessionDataFolderPath
     {
         get
@@ -34,9 +34,8 @@ public static class ServerManager //Used with the PHP scripts
     public static bool SessionDataFolderCreated;
 
 
-    public static IEnumerator CreateSessionDataFolder(string subjectID, string sessionID)
+    public static IEnumerator CreateSessionDataFolder()
     {
-        SessionDataFolder = "DATA__" + "Session_" + sessionID + "__Subject_" + subjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
         yield return CreateFolder(SessionDataFolderPath);
         SessionDataFolderCreated = true;
     }
@@ -82,13 +81,11 @@ public static class ServerManager //Used with the PHP scripts
     public static IEnumerator CreateFileAsync(string path, string fileName, string content)
     {
         string url = $"{ServerURL}/createFile.php?path={path}";
-        using (UnityWebRequest request = UnityWebRequest.Put(url, content))
-        {
-            request.method = UnityWebRequest.kHttpVerbPUT;
-            request.SetRequestHeader("Content-Type", "text/plain");
-            yield return request.SendWebRequest();
-            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Successful CreateFile Request: {request.downloadHandler.text} | File: {fileName}" : $"ERROR CREATING FILE: {fileName} | Error: {request.error}");
-        }
+        using UnityWebRequest request = UnityWebRequest.Put(url, content);
+        request.method = UnityWebRequest.kHttpVerbPUT;
+        request.SetRequestHeader("Content-Type", "text/plain");
+        yield return request.SendWebRequest();
+        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Successful CreateFile Request: {request.downloadHandler.text} | File: {fileName}" : $"ERROR CREATING FILE: {fileName} | Error: {request.error}");
     }
 
     public static IEnumerator AppendToFileAsync(string folderPath, string fileName, string rowData)
@@ -126,27 +123,25 @@ public static class ServerManager //Used with the PHP scripts
     {
         string url = $"{ServerURL}/getFile.php?path={path}&searchString={searchString}";
 
-        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        using UnityWebRequest request = UnityWebRequest.Get(url);
+        var operation = request.SendWebRequest();
+
+        while (!operation.isDone)
+            yield return null;
+
+        string result = "";
+        if (request.result == UnityWebRequest.Result.Success)
         {
-            var operation = request.SendWebRequest();
+            result = request.downloadHandler.text;
 
-            while (!operation.isDone)
-                yield return null;
-
-            string result = "";
-            if(request.result == UnityWebRequest.Result.Success)
-            {
-                result = request.downloadHandler.text;
-
-                Debug.Log(result == "File not found" ? ("File NOT Found on Server: " + searchString) : ("Found File On Server: " + searchString));
-                if (result == "File not found")
-                    result = null;
-            }
-            else
-                Debug.Log($"ERROR FINDING FILE: {searchString} | ERROR: {request.error}");
-           
-            callback?.Invoke(result);
+            Debug.Log(result == "File not found" ? ("File NOT Found on Server: " + searchString) : ("Found File On Server: " + searchString));
+            if (result == "File not found")
+                result = null;
         }
+        else
+            Debug.Log($"ERROR FINDING FILE: {searchString} | ERROR: {request.error}");
+
+        callback?.Invoke(result);
     }
 
     public static IEnumerator GetFileBytesAsync(string path, string searchString, Action<byte[]> callback)
@@ -206,10 +201,9 @@ public static class ServerManager //Used with the PHP scripts
         }
     }
 
-
-    public static string GetSessionDataFolder()
+    public static void SetSessionDataFolder(string sessionDataFolder)
     {
-        return SessionDataFolder;
+        SessionDataFolder = sessionDataFolder;
     }
 
     public static void SetSessionConfigFolderName(string sessionConfigFolderName) //Used to Set Session Config folder name based on what they picked in dropdown!

@@ -46,10 +46,6 @@ public class InitScreen : MonoBehaviour
 
     public event System.Action OnConfirm, OnLoadSettings;
 
-    [HideInInspector]
-    public DisplayController displayController;
-
-
     //Set In Inspector
     public M_USE_ControlLevel_Session session;
     public GameObject initScreenCanvasGO;
@@ -65,11 +61,6 @@ public class InitScreen : MonoBehaviour
 
     void Start()
     {
-
-        displayController = gameObject.AddComponent<DisplayController>();
-        displayController.HandleDisplays(this);
-        SessionValues.DisplayController = displayController;
-
         folderDropdown = dropdownGO.GetComponent<FolderDropdown>();
         dropdown = dropdownGO.GetComponent<TMP_Dropdown>();
 
@@ -115,11 +106,6 @@ public class InitScreen : MonoBehaviour
             
         if(SessionValues.WebBuild)
         {
-            // string subjectID = session.SessionDetails.GetItemValue("SubjectID");
-            // string sessionID = session.SessionDetails.GetItemValue("SessionID");
-
-            // yield return ServerManager.CreateSessionDataFolder(subjectID, sessionID);
-
             string sessionConfigFolder = dropdown.options[dropdown.value].text;
             ServerManager.SetSessionConfigFolderName(sessionConfigFolder);
             if (sessionConfigFolder.ToLower().Contains("default"))

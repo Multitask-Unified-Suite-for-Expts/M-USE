@@ -214,6 +214,11 @@ namespace USE_ExperimentTemplate_Task
 
             Add_ControlLevel_InitializationMethod(() =>
             {
+                TaskCam.gameObject.SetActive(true);
+                if (TaskCanvasses != null)
+                    foreach (Canvas canvas in TaskCanvasses)
+                        canvas.gameObject.SetActive(true);
+
                 BlockCount = -1;
                 BlockSummaryString = new StringBuilder();
                 PreviousBlockSummaryString = new StringBuilder();
@@ -238,24 +243,19 @@ namespace USE_ExperimentTemplate_Task
                     }
                 }
 
-
-                TaskCam.gameObject.SetActive(true);
-                if (TaskCanvasses != null)
-                    foreach (Canvas canvas in TaskCanvasses)
-                        canvas.gameObject.SetActive(true);
-
                 SessionValues.InputManager.SetActive(true);
             });
 
             SetupTask.AddInitializationMethod(() =>
             {
                 SetTaskSummaryString();
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["SetupTaskStarts"]);
+
+                SessionValues.EventCodeManager.SendCodeImmediate("SetupTaskStarts");
 
                 if (SessionValues.SessionDef.IsHuman)
                 {
                     Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
-                    SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.SessionEventCodes);
+                    SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
                     SessionValues.HumanStartPanel.SetTaskLevel(this);
                     SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
                 }
@@ -264,7 +264,7 @@ namespace USE_ExperimentTemplate_Task
 
             RunBlock.AddUniversalInitializationMethod(() =>
             {
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["RunBlockStarts"]);
+                SessionValues.EventCodeManager.SendCodeImmediate("RunBlockStarts");
 
                 BlockCount++;
                 CurrentBlockDef = BlockDefs[BlockCount];
@@ -320,7 +320,8 @@ namespace USE_ExperimentTemplate_Task
 
             RunBlock.AddLateUpdateMethod(() =>
             {
-                FrameData.AppendDataToBuffer();
+                StartCoroutine(FrameData.AppendDataToBuffer());
+
                 SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
@@ -346,7 +347,8 @@ namespace USE_ExperimentTemplate_Task
                     PreviousBlockSummaryString.Insert(0, BlockSummaryString); //Add current block string to full list of previous blocks. 
                     PreviousBlockSummaryString.Insert(0, blockTitle);
                 }*/
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["BlockFeedbackStarts"]);
+
+                SessionValues.EventCodeManager.SendCodeImmediate("BlockFeedbackStarts");
             });
             BlockFeedback.AddUpdateMethod(() =>
             {
@@ -360,7 +362,8 @@ namespace USE_ExperimentTemplate_Task
                 if (SessionValues.SessionDef.StoreData)
                     StartCoroutine(FrameData.AppendDataToBuffer());
 
-                SessionValues.EventCodeManager.EventCodeLateUpdate();
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock);
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask);
@@ -390,8 +393,8 @@ namespace USE_ExperimentTemplate_Task
                     StartCoroutine(BlockData.AppendDataToFile());
                 }
 
-
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["FinishTaskStarts"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.SendCodeImmediate("FinishTaskStarts");
 
                 //Clear trialsummarystring and Blocksummarystring at end of task:
                 if (TrialLevel.TrialSummaryString != null && BlockSummaryString != null)
@@ -462,14 +465,17 @@ namespace USE_ExperimentTemplate_Task
             TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
 
             if (SessionValues.WebBuild && SessionValues.SessionDef.StoreData)
+            {
+                Debug.Log("ABOUT TO CREATE FOLDER AT: " + TaskDataPath);
                 StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
+            }
 
             if (TaskName == "GazeCalibration")
             {
                 //Setup data management
                 if (SessionValues.SessionLevel.CurrentState.StateName == "SetupSession")
                      // Store Data in the Session Level / Gaze Calibration folder if running at the session level
-                    TaskDataPath = SessionValues.SessionLevelDataPath + Path.DirectorySeparatorChar + "PreTask_GazeCalibration";
+                    TaskDataPath = SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "PreTask_GazeCalibration";
                 
                 else
                      // Store Data in the Task / Gaze Calibration folder if not running at the session level
@@ -480,13 +486,13 @@ namespace USE_ExperimentTemplate_Task
             }
 
 
-            SessionValues.FilePrefix = SessionValues.FilePrefix + "_" + ConfigName;
+            string filePrefix = $"{SessionValues.FilePrefix}_{ConfigName}";
 
             string subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "BlockData";
             BlockData = (BlockData)SessionValues.SessionDataControllers.InstantiateDataController<BlockData>("BlockData", ConfigName, SessionValues.SessionDef.StoreData, subFolderPath);
             BlockData.taskLevel = this;
             BlockData.sessionLevel = SessionValues.SessionLevel;
-            BlockData.fileName = SessionValues.FilePrefix + "__BlockData.txt";
+            BlockData.fileName = filePrefix + "__BlockData.txt";
 
             subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "TrialData";
             TrialData = (TrialData)SessionValues.SessionDataControllers.InstantiateDataController<TrialData>("TrialData", ConfigName, SessionValues.SessionDef.StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
@@ -495,7 +501,7 @@ namespace USE_ExperimentTemplate_Task
             TrialData.sessionLevel = SessionValues.SessionLevel;
 
             TrialLevel.TrialData = TrialData;
-            TrialData.fileName = SessionValues.FilePrefix + "__TrialData.txt";
+            TrialData.fileName = filePrefix + "__TrialData.txt";
 
             subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "FrameData";
             FrameData = (FrameData)SessionValues.SessionDataControllers.InstantiateDataController<FrameData>("FrameData", ConfigName, SessionValues.SessionDef.StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
@@ -504,14 +510,14 @@ namespace USE_ExperimentTemplate_Task
             FrameData.sessionLevel = SessionValues.SessionLevel;
 
             TrialLevel.FrameData = FrameData;
-            FrameData.fileName = SessionValues.FilePrefix + "__FrameData_PreTrial.txt";
+            FrameData.fileName = filePrefix + "__FrameData_PreTrial.txt";
 
             if (SessionValues.SessionDef.EyeTrackerActive)
             {
                 SessionValues.GazeData.taskLevel = this;
                 SessionValues.GazeData.trialLevel = TrialLevel;
                 SessionValues.GazeData.sessionLevel = SessionValues.SessionLevel;
-                SessionValues.GazeData.fileName = SessionValues.FilePrefix + "__GazeData_PreTrial.txt";
+                SessionValues.GazeData.fileName = filePrefix + "__GazeData_PreTrial.txt";
                 SessionValues.GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
             }
             //SessionDataControllers.InstantiateFrameData(StoreData, ConfigName,
@@ -519,7 +525,7 @@ namespace USE_ExperimentTemplate_Task
             FrameData.taskLevel = this;
             FrameData.trialLevel = TrialLevel;
             TrialLevel.FrameData = FrameData;
-            FrameData.fileName = SessionValues.FilePrefix + "__FrameData_PreTrial.txt";
+            FrameData.fileName = filePrefix + "__FrameData_PreTrial.txt";
 
             BlockData.InitDataController();
             TrialData.InitDataController();
@@ -559,11 +565,12 @@ namespace USE_ExperimentTemplate_Task
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TotalTokensNum"))
                 totalTokensNum = (int)SessionSettings.Get(TaskName + "_TaskSettings", "TotalTokensNum");
 
-            fbControllers.GetComponent<AudioFBController>().SessionEventCodes = SessionValues.SessionEventCodes;
-            fbControllers.GetComponent<HaloFBController>().SessionEventCodes = SessionValues.SessionEventCodes;
-            fbControllers.GetComponent<TokenFBController>().SessionEventCodes = SessionValues.SessionEventCodes;
-            fbControllers.GetComponent<SliderFBController>().SessionEventCodes = SessionValues.SessionEventCodes;
-            fbControllers.GetComponent<TouchFBController>().SessionEventCodes = SessionValues.SessionEventCodes;
+            //GOTTA BE A BETTER WAY TO DO THIS:
+            fbControllers.GetComponent<AudioFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
+            fbControllers.GetComponent<HaloFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
+            fbControllers.GetComponent<TokenFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
+            fbControllers.GetComponent<SliderFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
+            fbControllers.GetComponent<TouchFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
 
            // TrialLevel.SelectionTracker = SelectionTracker;
                 
@@ -583,8 +590,8 @@ namespace USE_ExperimentTemplate_Task
 
     //        TrialLevel.DisplayController = DisplayController; 
 
-            if(SessionValues.SyncBoxController != null)
-                SessionValues.SyncBoxController.EventCodeManager = SessionValues.EventCodeManager;
+            /*if(SessionValues.SyncBoxController != null)
+                SessionValues.SyncBoxController.EventCodeManager = SessionValues.EventCodeManager;*/
                 //TrialLevel.SyncBoxController.EventCodeManager = SessionValues.EventCodeManager;
 
           //  TrialLevel.EventCodeManager = EventCodeManager;
@@ -845,12 +852,9 @@ namespace USE_ExperimentTemplate_Task
                 {
                     SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig", eventCodeFile);
                     CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
-                    SessionValues.SessionDef.EventCodesActive = true;
                 }
                 else
-                    Debug.Log("NORMAL BUILLD - TASK CONFIG UI RESULT IS NULL!");
-
-                
+                    Debug.Log("NORMAL BUILD - TASK CONFIG UI RESULT IS NULL!");
             }
         }
 

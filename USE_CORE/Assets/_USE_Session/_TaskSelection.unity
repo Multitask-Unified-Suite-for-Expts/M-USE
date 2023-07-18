@@ -322,11 +322,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 5576539015048150, guid: 810531c98dad74048995093927772f82, type: 3}
       propertyPath: m_Name
-      value: TaskSelection_Starfield
+      value: Starfield
       objectReference: {fileID: 0}
     - target: {fileID: 5576539015048150, guid: 810531c98dad74048995093927772f82, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5576539015048151, guid: 810531c98dad74048995093927772f82, type: 3}
       propertyPath: m_RootOrder
@@ -593,6 +593,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1375570696}
   - component: {fileID: 1375570695}
+  - component: {fileID: 1375570697}
   m_Layer: 0
   m_Name: ControlLevels
   m_TagString: Untagged
@@ -613,40 +614,42 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: ControlLevel_Session
-  initScreen: {fileID: 1543153250}
+  initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 1
-  CallDefineLevelAutomatically: 0
+  CallDefineLevelAutomatically: 1
   quitApplicationAtEnd: 1
   DebugActive: 1
   Paused: 0
   SessionId_SQL: 0
   TasksFinished: 0
+  SessionInitScreen: {fileID: 0}
   TaskSelectionSceneName: _TaskSelection
   CurrentTask: {fileID: 0}
   GazeCalibrationTaskLevel: {fileID: 0}
   SessionDetails: {fileID: 454535789}
   LocateFile: {fileID: 1481219466}
   CameraMirrorTexture: {fileID: 0}
-  TaskButtonsGridContainer: {fileID: 0}
+  TaskButtonsContainer: {fileID: 0}
   BlockResults_GridElementPrefab: {fileID: 5967809598972882644, guid: 90c035b644de74843b8c74cca60656b2,
     type: 3}
   BlockResultsPrefab: {fileID: 6952099139267227724, guid: 3574b70e8d31c4f6fa0cf373241c135f,
     type: 3}
-  TaskSelection_Starfield: {fileID: 1391649313}
   HumanVersionToggleButton: {fileID: 2071187616}
   HumanStartPanelPrefab: {fileID: 7569599706748818137, guid: e3a91289f22a4401bbc1f44baba80e22,
     type: 3}
-  TaskSelectionCanvasGO: {fileID: 1551787081}
   ToggleAudioButton: {fileID: 907834252290271150}
   StartButtonPrefabGO: {fileID: 6810560367943004968, guid: 2e385ec78c77a46cc91c52da9fce59b9,
     type: 3}
+  Starfield: {fileID: 1391649313}
   BackgroundMusic_AudioClip: {fileID: 8300000, guid: d0692d04af800462aba5670b8485603c,
     type: 3}
   BlockResults_AudioClip: {fileID: 8300000, guid: b073a0c00b101453b806d8f2e5506319,
     type: 3}
   audioPlaybackSpot: 0
   BackgroundMusic_AudioSource: {fileID: 0}
+  InitCamGO: {fileID: 0}
+  LogWriter: {fileID: 0}
 --- !u!4 &1375570696
 Transform:
   m_ObjectHideFlags: 0
@@ -661,6 +664,33 @@ Transform:
   m_Father: {fileID: 2001982940}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1375570697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1375570694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33ccdd2a619ab46b89f7ef999d9ede38, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ControlLevelName: ImportSettings_Level
+  initScreen: {fileID: 0}
+  Terminated: 0
+  isMainLevel: 0
+  CallDefineLevelAutomatically: 1
+  quitApplicationAtEnd: 0
+  DebugActive: 0
+  Paused: 1
+  fileNames: []
+  settingParsingStyles: []
+  filePathStrings: []
+  currentFileName: 
+  SessionLevel: {fileID: 0}
+  fileParsed: 0
+  continueToNextSetting: 0
 --- !u!1 &1391649313 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5576539015048150, guid: 810531c98dad74048995093927772f82,
@@ -1069,18 +1099,6 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1543153247}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1543153250 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 379787011553772978, guid: 6e926400061ef460aa6b2c5b3cc000a2,
-    type: 3}
-  m_PrefabInstance: {fileID: 1543153247}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2fd7b2e598d2440bfa8cd625bebc0df2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1551787081
 GameObject:
   m_ObjectHideFlags: 0
@@ -1099,7 +1117,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1551787082
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1534,7 +1552,7 @@ PrefabInstance:
     - target: {fileID: 5917927797281788601, guid: ec96d1660b5b342f088e3f823bc5063c,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8388462663491615707, guid: ec96d1660b5b342f088e3f823bc5063c,
         type: 3}
@@ -1705,6 +1723,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: AudioButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 2936223428931228721, guid: 88336f9d81fae4277b308f94b81c27ee,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9198934288593575629, guid: 88336f9d81fae4277b308f94b81c27ee,
         type: 3}

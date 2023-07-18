@@ -55,6 +55,13 @@ namespace USE_Def_Namespace
 
         public bool GuidedTaskSelection;
 
+
+        //FOR TASK BUTTON GRID:
+        public bool UseTaskButtonsGrid;
+        public int TaskButtonSize = 240;
+        public int TaskButtonSpacing = 45;
+        public int TaskButtonGridMaxPerRow = 4;
+
     }
 
     public class TaskDef

@@ -704,7 +704,7 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
 
         multiCompStims = new StimGroup("MultiCompStims", GetStateFromName("SearchDisplay"), GetStateFromName("SelectionFeedback")); // can add state control of onset/offset
 
-        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UsingDefaultConfigs ? PrefabStims : ExternalStims;
 
         sampleStims = new StimGroup("SampleStims", group, CurrentTrialDef.sampleCompIndices);
         sampleStims.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));

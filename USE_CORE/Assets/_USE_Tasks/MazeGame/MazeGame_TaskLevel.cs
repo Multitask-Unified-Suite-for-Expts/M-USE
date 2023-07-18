@@ -185,11 +185,11 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary
         {
+            ["Maze Duration"] = mgTL.mazeDuration.ToString("0.0") + "s",
             ["Correct Touches"] = correctTouches_InBlock,
             ["Total Errors"] = totalErrors_InBlock.Sum(),
             ["Retouched Correct"] = retouchCorrect_InBlock.Sum(),
             ["Retouched Erroneous"] = retouchErroneous_InBlock.Sum(),
-            ["Maze Duration"] = mgTL.mazeDuration.ToString("0.0") + "s",
         };
         return data;
     }
@@ -336,7 +336,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
         if(SessionValues.WebBuild)
         {
-            if (SessionValues.UseDefaultConfigs)
+            if (SessionValues.UsingDefaultConfigs)
             {
                 mgTL.MazeFilePath = "DefaultResources/Mazes";
                 mazeKeyFilePath = "DefaultSessionConfigs/MazeGame_DefaultConfigs/MazeDef.txt";
@@ -516,7 +516,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
         if(SessionValues.WebBuild)
         {
-            if(SessionValues.UseDefaultConfigs) //will need to check if this works for non editor!!
+            if(SessionValues.UsingDefaultConfigs) //will need to check if this works for non editor!!
             {
                 TextAsset textAsset = Resources.Load<TextAsset>(mgTL.MazeFilePath + "/" + mgTL.mazeDefName);
                 if (textAsset != null)

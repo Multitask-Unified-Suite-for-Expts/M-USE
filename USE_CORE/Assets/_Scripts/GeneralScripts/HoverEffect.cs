@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-
 public class HoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     public Vector3 originalScale;
@@ -21,9 +20,8 @@ public class HoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         transform.localScale = originalScale;
     }
 
-    public void SetToInitialSize() //Used by sessionLevel to reset square size after grey'd out. 
+    public void SetToInitialSize() // Used by sessionLevel to reset square size after grayed out
     {
         transform.localScale = originalScale;
     }
-
 }

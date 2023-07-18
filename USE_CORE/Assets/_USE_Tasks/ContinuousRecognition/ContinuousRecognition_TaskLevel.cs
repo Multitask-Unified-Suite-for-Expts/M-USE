@@ -163,10 +163,11 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary
         {
-            ["Trials Completed"] = trialLevel.TrialCount_InBlock + 1,
+            ["Score"] = trialLevel.Score + "XP",
             ["Trials Correct"] = trialLevel.NumCorrect_Block,
-            ["TokenBar Completions"] = trialLevel.NumTbCompletions_Block,
-            ["Completion Time"] = trialLevel.TimeToCompletion_Block.ToString("0") + "s"
+            ["Trials Completed"] = trialLevel.TrialCount_InBlock + 1,
+            ["Time"] = trialLevel.TimeToCompletion_Block.ToString("0") + "s",
+            ["TokenBar Completions"] = trialLevel.NumTbCompletions_Block
         };
         return data;
     }

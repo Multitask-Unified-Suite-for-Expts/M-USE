@@ -232,7 +232,7 @@ namespace USE_Data
 				DefineDataController();
 				if (storeData)
 				{
-					CreateFile();
+					StartCoroutine(CreateFile());
 				}
 			}
 			if (updateDataNextFrame)
@@ -245,7 +245,7 @@ namespace USE_Data
 				updateDataNextFrame = false;
 				if (dataBuffer.Count == capacity | writeDataNextFrame)
 				{
-					AppendDataToFile();
+					StartCoroutine(AppendDataToFile());
 				}
 				writeDataNextFrame = false;
 			}
@@ -595,7 +595,7 @@ namespace USE_Data
 		/// <summary>
 		/// Appends current values of all Datums to data buffer.
 		/// </summary>
-		public void AppendDataToBuffer()
+		public IEnumerator AppendDataToBuffer()
 		{
 			if (storeData && Time.frameCount > frameChecker)
 			{
@@ -607,8 +607,7 @@ namespace USE_Data
 				{
 					dataBuffer.Add(String.Join("\t", currentVals));
 					if (dataBuffer.Count == capacity)
-						AppendDataToFile();
-					
+						yield return StartCoroutine(AppendDataToFile());
 				}
 				else if (dataToUpdateNextFrame.Count > 0)
 				{
@@ -617,14 +616,13 @@ namespace USE_Data
 				}
 				frameChecker = Time.frameCount;
 			}
-			if (OnLogChanged != null)
-				OnLogChanged();
-		}
+            OnLogChanged?.Invoke();
+        }
 
         /// <summary>
         /// Creates a new data file.
         /// </summary>
-        public void CreateFile()
+        public IEnumerator CreateFile()
 		{
 			if (storeData && fileName != null)
 			{
@@ -639,10 +637,10 @@ namespace USE_Data
 				if (SessionValues.WebBuild) //Create File With Headers
 				{
 					if (!ServerManager.FolderCreated(folderPath))
-						StartCoroutine(CreateServerFolder(folderPath));
+						yield return StartCoroutine(CreateServerFolder(folderPath));
 
 					if (!fileCreated)
-						StartCoroutine(CreateServerFileWithHeaders());
+						yield return StartCoroutine(CreateServerFileWithHeaders());
 				}
 				else
 				{
@@ -658,14 +656,14 @@ namespace USE_Data
 		/// <summary>
 		/// Writes the data buffer to file.
 		/// </summary>
-		public void AppendDataToFile()
+		public IEnumerator AppendDataToFile()
 		{
 			if (storeData && fileName != null && dataBuffer.Count > 0)
 			{
 				string content = String.Join("\n", dataBuffer.ToArray());
 
                 if (SessionValues.WebBuild)
-					StartCoroutine(AppendDataToServerFile(content));
+					yield return StartCoroutine(AppendDataToServerFile(content));
 				else
 				{
 					if (!updateDataNextFrame)
@@ -766,7 +764,7 @@ namespace USE_Data
 
 		void OnApplicationQuit()
 		{
-			AppendDataToFile();
+            StartCoroutine(AppendDataToFile());
 		}
 
 	}

@@ -119,12 +119,14 @@ namespace USE_UI
             BackgroundPanelGO = HumanStartPanelGO.transform.Find("BackgroundPanel").gameObject;
 
             EndTaskButtonGO = HumanStartPanelGO.transform.Find("EndTaskButton").gameObject;
-            EndTaskButtonGO.AddComponent<HoverEffect>();
+            if (SessionValues.UsingDefaultConfigs)
+                EndTaskButtonGO.AddComponent<HoverEffect>();
             Button endTaskButton = EndTaskButtonGO.AddComponent<Button>();
             endTaskButton.onClick.AddListener(HandleEndTask);
 
             InstructionsButtonGO = HumanStartPanelGO.transform.Find("InstructionsButton").gameObject;
-            InstructionsButtonGO.AddComponent<HoverEffect>();
+            if(SessionValues.UsingDefaultConfigs)
+                InstructionsButtonGO.AddComponent<HoverEffect>();
             Button button = InstructionsButtonGO.AddComponent<Button>();
             button.onClick.AddListener(ToggleInstructions);
 
@@ -272,7 +274,7 @@ namespace USE_UI
         {
             LocalPosition = localPos;
             ButtonSize = size;
-            TaskButtonGO = new GameObject(configName + "Button");
+            TaskButtonGO = new GameObject(configName);
             TaskButtonGO.AddComponent<USE_TaskButton>();
             TaskButtonGO.GetComponent<USE_TaskButton>().configName = configName;
             Image = TaskButtonGO.AddComponent<RawImage>();
@@ -308,9 +310,6 @@ namespace USE_UI
             PlayIconGO = StartButtonGO.transform.Find("PlayIcon").gameObject;
 
             StartButtonGO.transform.localScale = scale.HasValue ? new Vector3(scale.Value, scale.Value, 1) : new Vector3(1.2f, 1.2f, 0);
-
-            if (hover && Input.mousePresent)
-                StartButtonGO.AddComponent<HoverEffect>();
 
             PlayIconGO.GetComponent<SpriteRenderer>().color = new Color32(38, 188, 250, 255); //LightBlue PlayIcon for non-human version
 

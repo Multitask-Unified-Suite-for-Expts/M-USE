@@ -60,7 +60,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public List <float> TimeToChoice_Block;
 
     private int NumFeedbackRows;
-    private int Score;
+    private int score;
+    public int Score
+    {
+        get
+        {
+            return score;
+        }
+    }
+
 
     private Vector3 OriginalFbTextPosition;
     private Vector3 OriginalTitleTextPosition;
@@ -142,7 +150,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", SessionValues.MouseTracker, InitTrial, ChooseStim);
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, ButtonScale, CR_CanvasGO);
+        if(!SessionValues.SessionDef.IsHuman)
+            TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, ButtonScale, CR_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -153,7 +162,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (!VariablesLoaded)
                 LoadConfigUIVariables();
-
+            
             SetTrialSummaryString();
 
             currentTask.CalculateBlockSummaryString();
@@ -299,13 +308,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
         });
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
-        //ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
-        //{
-        //    AudioFBController.Play("Negative");
-        //    EndBlock = true;
-        //    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["NoChoice"]);
-        //    AbortCode = 6;
-        //});
+        ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
+        {
+            AudioFBController.Play("Negative");
+            EndBlock = true;
+            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["NoChoice"]);
+            AbortCode = 6;
+        });
 
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------
         TouchFeedback.AddInitializationMethod(() =>
@@ -376,7 +385,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         DisplayResults.AddInitializationMethod(() =>
         {
             if (currentTrial.GotTrialCorrect)
-                Score += ((TrialCount_InBlock + 1) * 100);
+                score += ((TrialCount_InBlock + 1) * 100);
 
             if (EndBlock)
             {
@@ -497,7 +506,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         AvgTimeToChoice_Block = 0;
         TimeToCompletion_Block = 0;
         NumRewards_Block = 0;
-        Score = 0;
+        score = 0;
     }
 
     public void SetControllerBlockValues()
@@ -612,7 +621,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     void SetScoreAndTrialsText()
     {
         //Set the Score and NumTrials texts at the beginning of the trial. 
-        ScoreTextGO.GetComponent<TextMeshProUGUI>().text = $"SCORE: {Score}";
+        ScoreTextGO.GetComponent<TextMeshProUGUI>().text = $"SCORE: {score}";
         NumTrialsTextGO.GetComponent<TextMeshProUGUI>().text = $"TRIAL: {TrialCount_InBlock + 1}";
     }
 
@@ -861,13 +870,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         NumNew_Trial = 0;
         NumPNC_Trial = 0;
 
-        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UsingDefaultConfigs ? PrefabStims : ExternalStims;
 
 
         if (TrialCount_InBlock == 0)
         {
             trialStims = null;
-            Score = 0;
+            score = 0;
 
             //clear stim lists in case it's NOT the first block!
             ClearCurrentTrialStimLists();
@@ -995,7 +1004,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (!StimIsChosen && ChosenStimIndices.Count < 1)
             yield break;
 
-        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UsingDefaultConfigs ? PrefabStims : ExternalStims;
 
         if(SessionValues.Using2DStim)
             DisplayResultsContainerGO.SetActive(true);

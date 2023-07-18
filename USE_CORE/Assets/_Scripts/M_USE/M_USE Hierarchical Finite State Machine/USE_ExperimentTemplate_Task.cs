@@ -169,10 +169,11 @@ namespace USE_ExperimentTemplate_Task
         {
             TaskLevelDefined = false;
 
-            if (SessionValues.UseDefaultConfigs)
+            if (SessionValues.UsingDefaultConfigs)
                 PrefabPath = "/DefaultResources/Stimuli";
 
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
+
 
             if(TaskName != "GazeCalibration")
             {
@@ -357,7 +358,7 @@ namespace USE_ExperimentTemplate_Task
             BlockFeedback.AddLateUpdateMethod(() =>
             {
                 if (SessionValues.SessionDef.StoreData)
-                    FrameData.AppendDataToBuffer();
+                    StartCoroutine(FrameData.AppendDataToBuffer());
 
                 SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
@@ -373,8 +374,8 @@ namespace USE_ExperimentTemplate_Task
 
                 if (SessionValues.SessionDef.StoreData)
                 {
-                    BlockData.AppendDataToBuffer();
-                    BlockData.AppendDataToFile();
+                    StartCoroutine(BlockData.AppendDataToBuffer());
+                    StartCoroutine(BlockData.AppendDataToFile());
                 }
             });
 
@@ -385,8 +386,8 @@ namespace USE_ExperimentTemplate_Task
 
                 if (TrialLevel.ForceBlockEnd && SessionValues.SessionDef.StoreData) //If they used end task hotkey, still write the block data!
                 {
-                    BlockData.AppendDataToBuffer();
-                    BlockData.AppendDataToFile();
+                    StartCoroutine(BlockData.AppendDataToBuffer());
+                    StartCoroutine(BlockData.AppendDataToFile());
                 }
 
 
@@ -463,14 +464,14 @@ namespace USE_ExperimentTemplate_Task
             if (SessionValues.WebBuild && SessionValues.SessionDef.StoreData)
                 StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
 
-            if (SessionValues.SessionDef.EyeTrackerActive)
+            if (TaskName == "GazeCalibration")
             {
                 //Setup data management
-                if (SessionValues.SessionLevel.CurrentState.StateName == "SetupSession" && TaskName == "GazeCalibration")
+                if (SessionValues.SessionLevel.CurrentState.StateName == "SetupSession")
                      // Store Data in the Session Level / Gaze Calibration folder if running at the session level
                     TaskDataPath = SessionValues.SessionLevelDataPath + Path.DirectorySeparatorChar + "PreTask_GazeCalibration";
                 
-                else if (TaskName == "GazeCalibration")
+                else
                      // Store Data in the Task / Gaze Calibration folder if not running at the session level
                     TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigName + Path.DirectorySeparatorChar + "InTask_GazeCalibration";
                 
@@ -536,10 +537,10 @@ namespace USE_ExperimentTemplate_Task
             DefineControlLevel();
 
             BlockData.AddStateTimingData(this);
-            BlockData.CreateFile();
-            FrameData.CreateFile();
+            StartCoroutine(BlockData.CreateFile());
+            StartCoroutine(FrameData.CreateFile());
             if (SessionValues.SessionDef.EyeTrackerActive)
-                SessionValues.GazeData.CreateFile();
+                StartCoroutine(SessionValues.GazeData.CreateFile());
 
 
             //AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
@@ -681,12 +682,12 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.ExternalStims = ExternalStims;
             TrialLevel.RuntimeStims = RuntimeStims;
             TrialLevel.ConfigUiVariables = ConfigUiVariables;
-      //      TrialLevel.IsHuman = IsHuman;
-   //         TrialLevel.HumanStartPanel = HumanStartPanel;
-     //       TrialLevel.USE_StartButton = USE_StartButton;
-           // TrialLevel.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
+            //      TrialLevel.IsHuman = IsHuman;
+            //         TrialLevel.HumanStartPanel = HumanStartPanel;
+            //       TrialLevel.USE_StartButton = USE_StartButton;
+            // TrialLevel.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
 
-           // TrialLevel.EyeTrackerActive = EyeTrackerActive;
+            // TrialLevel.EyeTrackerActive = EyeTrackerActive;
             TrialLevel.TaskLevel = this;
             TrialLevel.DefineTrialLevel();
 
@@ -805,7 +806,7 @@ namespace USE_ExperimentTemplate_Task
 
         public void LoadTaskEventCodeAndConfigUIFiles()
         {
-            if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
+            if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
             {
                 string path = $"{ServerManager.SessionConfigFolderPath}/{TaskName}";
                 StartCoroutine(ServerManager.GetFileStringAsync(path, "ConfigUi", result =>
@@ -816,7 +817,7 @@ namespace USE_ExperimentTemplate_Task
                         ConfigUiVariables = (ConfigVarStore)SessionSettings.Get(TaskName + "_ConfigUiDetails");
                     }
                     else
-                        Debug.Log("TASK CONFIG UI RESULT IS NULL!");
+                        Debug.Log($"Task ConfigUI Result is null or empty! ({TaskName} may not have one)");
                 }));
 
                 StartCoroutine(ServerManager.GetFileStringAsync(path, "EventCode", result =>
@@ -827,7 +828,7 @@ namespace USE_ExperimentTemplate_Task
                         CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
                     }
                     else
-                        Debug.Log("TASK EVENT CODE RESULT IS NULL!");
+                        Debug.Log($"Task EventCode Result is null or empty! ({TaskName} may not have one)");
                 }));
             }
             else
@@ -870,7 +871,7 @@ namespace USE_ExperimentTemplate_Task
                     string filePath = TaskConfigPath + Path.DirectorySeparatorChar + key; //initially set for not default configs, then changed below for UseDefaultConfigs
                     string settingsFileName = key.Split('.')[0];
 
-                    if (SessionValues.UseDefaultConfigs)
+                    if (SessionValues.UsingDefaultConfigs)
                     {
                         string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + TaskName + "_DefaultConfigs";
                         filePath = folderPath + Path.DirectorySeparatorChar + settingsFileName;
@@ -891,7 +892,7 @@ namespace USE_ExperimentTemplate_Task
 
                     string customSettingsValue = customSettings[key].ToLower();
 
-                    if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
+                    if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
                     {
                         StartCoroutine(ServerManager.GetFileStringAsync(TaskConfigPath, key, result =>
                         {
@@ -1181,7 +1182,7 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadTaskDef<T>(string taskConfigFolder) where T : TaskDef
         {
-            if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
+            if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
             {
                 StartCoroutine(ServerManager.GetFileStringAsync(taskConfigFolder, "TaskDef", result =>
                 {
@@ -1205,7 +1206,7 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadBlockDefs<T>(string taskConfigFolder) where T : BlockDef
         {
-            if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
+            if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
             {
                 StartCoroutine(ServerManager.GetFileStringAsync(taskConfigFolder, "BlockDef", serverBlockDefFile =>
                 {
@@ -1250,7 +1251,7 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadTrialDefs<T>(string taskConfigFolder) where T : TrialDef
         {
-            if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
+            if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
             {
                 StartCoroutine(ServerManager.GetFileStringAsync(taskConfigFolder, "TrialDef", result =>
                 {
@@ -1281,13 +1282,13 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadStimDefs<T>(string taskConfigFolder) where T : StimDef
         {
-            string key = TaskName + (SessionValues.UseDefaultConfigs ? "_PrefabStims" : "_ExternalStimDefs");
+            string key = TaskName + (SessionValues.UsingDefaultConfigs ? "_PrefabStims" : "_ExternalStimDefs");
             PrefabStims = new StimGroup("PrefabStims");
             ExternalStims = new StimGroup("ExternalStims");
 
             if (SessionValues.WebBuild)
             {
-                if (SessionValues.UseDefaultConfigs)
+                if (SessionValues.UsingDefaultConfigs)
                 {
                     string defaultStimDefFilePath = taskConfigFolder + "/" + TaskName + "_StimDeftdf.txt";
                     ImportStimDefs<T>(key, defaultStimDefFilePath);
@@ -1327,7 +1328,7 @@ namespace USE_ExperimentTemplate_Task
                 return;
             else
             {
-                if (SessionValues.UseDefaultConfigs)
+                if (SessionValues.UsingDefaultConfigs)
                 {
                     PrefabStims = new StimGroup("PrefabStims", (T[])SessionSettings.Get(key));
                     foreach (var stim in PrefabStims.stimDefs)
@@ -1412,19 +1413,19 @@ namespace USE_ExperimentTemplate_Task
         {
             if (BlockData != null)
             {
-                BlockData.AppendDataToBuffer();
-                BlockData.AppendDataToFile();
+                StartCoroutine(BlockData.AppendDataToBuffer());
+                StartCoroutine(BlockData.AppendDataToFile());
             }
 
             if (FrameData != null)
             {
-                FrameData.AppendDataToBuffer();
-                FrameData.AppendDataToFile();
+                StartCoroutine(FrameData.AppendDataToBuffer());
+                StartCoroutine(FrameData.AppendDataToFile());
             }
 
             if (SessionValues.GazeData != null)
             {
-                SessionValues.GazeData.AppendDataToFile();
+                StartCoroutine(SessionValues.GazeData.AppendDataToFile());
             }
         }
         

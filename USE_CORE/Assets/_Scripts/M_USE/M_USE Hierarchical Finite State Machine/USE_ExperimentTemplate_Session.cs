@@ -878,7 +878,7 @@ namespace USE_ExperimentTemplate_Session
             SessionValues.FilePrefix = "Session_" + SessionValues.SessionID + "__Subject_" + SessionValues.SubjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
             ServerManager.SetSessionDataFolder("DATA__" + SessionValues.FilePrefix);
             SessionValues.SessionDataPath = SessionValues.WebBuild ? ServerManager.SessionDataFolderPath : (SessionValues.LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + SessionValues.FilePrefix);
-            SessionValues.TaskSelectionDataPath = SessionValues.WebBuild ? $"{SessionValues.SessionDataPath}/SessionLevel" : (SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionLevel");
+            SessionValues.TaskSelectionDataPath = SessionValues.WebBuild ? $"{SessionValues.SessionDataPath}/TaskSelectionData" : (SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "TaskSelectionData");
         }
 
         private void SetConfigPathsAndTypes()
@@ -961,11 +961,6 @@ namespace USE_ExperimentTemplate_Session
                 string sourceFolderPath = SessionValues.ConfigFolderPath;
                 string destinationFolderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
                 CopyLocalFolder(sourceFolderPath, destinationFolderPath);
-
-                //Old way, not sure if it works:
-                //string sessionSettingsFolderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
-                //Directory.CreateDirectory(sessionSettingsFolderPath);
-                //SessionSettings.StoreSettings(sessionSettingsFolderPath + Path.DirectorySeparatorChar);
             }
         }
 

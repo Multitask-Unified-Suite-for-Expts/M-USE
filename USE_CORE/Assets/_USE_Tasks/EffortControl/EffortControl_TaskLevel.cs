@@ -68,6 +68,8 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddInitializationMethod(() =>
         {
+            AddBlockValuesToTaskValues();
+
             if(!SessionValues.WebBuild)
             {
                 if (BlockStringsAdded > 0)

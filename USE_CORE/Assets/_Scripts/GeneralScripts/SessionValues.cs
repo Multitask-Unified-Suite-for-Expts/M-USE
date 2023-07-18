@@ -33,7 +33,7 @@ public static class SessionValues
     public static SessionDataControllers SessionDataControllers;
     public static LocateFile LocateFile;
     public static string SessionDataPath;
-    public static string SessionLevelDataPath;
+    public static string TaskSelectionDataPath;
     public static string FilePrefix;
     public static string SubjectID;
     public static string SessionID;

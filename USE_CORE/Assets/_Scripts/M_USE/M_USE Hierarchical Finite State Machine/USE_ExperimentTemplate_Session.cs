@@ -313,7 +313,7 @@ namespace USE_ExperimentTemplate_Session
                 FrameData.gameObject.SetActive(false);
 
                 GazeCalibrationTaskLevel.TaskCam = Camera.main;
-                // GazeCalibrationTaskLevel.ConfigName = "GazeCalibration";
+
                 GazeCalibrationTaskLevel.TrialLevel.runCalibration = true;
                 SessionValues.ExperimenterDisplayController.ResetTask(GazeCalibrationTaskLevel, GazeCalibrationTaskLevel.TrialLevel);
 
@@ -1045,13 +1045,13 @@ namespace USE_ExperimentTemplate_Session
                     SessionValues.GazeTracker.enabled = true;
 
 
-                    /*  //  GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform); 
+                    GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform); 
                     GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.transform.SetParent(TobiiEyeTrackerControllerGO.transform, true);
                     // Position and scale the cube as desired
                     cube.transform.position = new Vector3(0f, 1f, 60f);
                     cube.transform.localScale = new Vector3(106f, 62f, 0.1f);
-                    cube.SetActive(false);*/
+                    cube.SetActive(false);
 
                 }
             }
@@ -1325,17 +1325,17 @@ namespace USE_ExperimentTemplate_Session
             else
                 tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName);
 
-          //   tl.FilePrefix = FilePrefix;
-          //  tl.StoreData = StoreData;
-          //   tl.SubjectID = SubjectID;
-          //   tl.SessionID = SessionID;
+            //   tl.FilePrefix = FilePrefix;
+            //  tl.StoreData = StoreData;
+            //   tl.SubjectID = SubjectID;
+            //   tl.SessionID = SessionID;
             // tl.SerialRecvData = SerialRecvData;
             // tl.SerialSentData = SerialSentData;
-           // tl.GazeData = GazeData;
+            // tl.GazeData = GazeData;
 
-        //    tl.SelectionTracker = SelectionTracker;
-            
-           // tl.EyeTrackerActive = EyeTrackerActive;
+            //    tl.SelectionTracker = SelectionTracker;
+
+            // tl.EyeTrackerActive = EyeTrackerActive;
 
             // if (EyeTrackerActive)
             // {
@@ -1344,22 +1344,24 @@ namespace USE_ExperimentTemplate_Session
             // }
             //tl.MouseTracker = MouseTracker;
 
-           // tl.InputManager = InputManager;
-         //   tl.SelectionType = SelectionType;
+            // tl.InputManager = InputManager;
+            //   tl.SelectionType = SelectionType;
 
-          //  tl.ContextExternalFilePath = ContextExternalFilePath;
-         //   tl.SerialPortActive = SerialPortActive;
-           // tl.SyncBoxActive = SyncBoxActive;
-         //   tl.EventCodeManager = EventCodeManager;
-          //  tl.EventCodesActive = EventCodesActive;
-           // tl.SessionEventCodes = SessionValues.SessionEventCodes;
+            //  tl.ContextExternalFilePath = ContextExternalFilePath;
+            //   tl.SerialPortActive = SerialPortActive;
+            // tl.SyncBoxActive = SyncBoxActive;
+            //   tl.EventCodeManager = EventCodeManager;
+            //  tl.EventCodesActive = EventCodesActive;
+            // tl.SessionEventCodes = SessionValues.SessionEventCodes;
             // if (SerialPortActive)
             //     tl.SerialPortController = SerialPortController;
+            /*Debug.Log("IS THE SyncBoxController  NULL? " + SessionValues.SyncBoxController.SessionEventCodes == null ? "YES" : "NO");
+            Debug.Log("IS THE EventCodeManager  NULL? " + SessionValues.EventCodeManager.SessionEventCodes == null ? "YES" : "NO");
             if (SessionValues.SessionDef.SyncBoxActive)
             {
                 SessionValues.SyncBoxController.SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
              //   tl.SyncBoxController = SyncBoxController;
-            }
+            }*/
             // tl.ShotgunRaycastCircleSize_DVA = ShotgunRaycastCircleSize_DVA;
             // tl.ShotgunRaycastSpacing_DVA = ShotgunRaycastSpacing_DVA;
             // tl.ParticipantDistance_CM = ParticipantDistance_CM;

@@ -154,15 +154,12 @@ namespace USE_ExperimentTemplate_Session
 
             //LoadSessionSettings State---------------------------------------------------------------------------------------------------------------
             loadSessionSettings.AddChildLevel(gameObject.GetComponent<ImportSettings_Level>());
-            
             loadSessionSettings.AddDefaultInitializationMethod(() =>
             {
                 SetDataPaths();
                 SetConfigPathsAndTypes();
                 SetValuesForLoading_SessionConfig();
             });
-
-
             loadSessionSettings.AddUpdateMethod(() =>
             {
                 if (importSettings_Level.fileParsed)

@@ -1,4 +1,4 @@
-using System;
+ using System;
 using System.Text;
 using System.Collections.Generic;
 using System.IO;
@@ -29,56 +29,29 @@ namespace USE_ExperimentTemplate_Task
 
     public abstract class ControlLevel_Task_Template : ControlLevel
     {
-        /*public float ShotgunRaycastCircleSize_DVA;
-        public float ShotgunRaycastSpacing_DVA;
-        public float ParticipantDistance_CM;*/
-
         public string PrefabPath;
 
         public string ConfigName;
         public string TaskName;
         public string TaskProjectFolder;
-   //     public string SessionLevelDataPath;
         [HideInInspector] public int BlockCount;
         protected int NumBlocksInTask;
         public ControlLevel_Trial_Template TrialLevel;
-      //  public ControlLevel_Session_Template SessionLevel;
         public BlockData BlockData;
         public FrameData FrameData;
         public TrialData TrialData;
-       // public USE_ExperimentTemplate_Data.GazeData GazeData;
-        //[HideInInspector] public SerialSentData SerialSentData;
-       // [HideInInspector] public SerialRecvData SerialRecvData;
-
-      //  [HideInInspector] public SessionDataControllers SessionDataControllers;
-       // [HideInInspector] public SelectionTracker SelectionTracker;
-      //  [HideInInspector] public bool EyeTrackerActive;
-
-       // [HideInInspector] public GazeTracker GazeTracker;
-      //  [HideInInspector] public MouseTracker MouseTracker;
-      //  [HideInInspector] public TobiiEyeTrackerController TobiiEyeTrackerController;
-
-       // [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         [HideInInspector] public string TaskConfigPath, TaskDataPath;
-       // [HideInInspector] public string ContextExternalFilePath, TaskConfigPath, TaskDataPath, EyetrackerType, SelectionType;
-        //[HideInInspector] public string ContextExternalFilePath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
-      //  [HideInInspector] public MonitorDetails MonitorDetails;
-       // [HideInInspector] public SessionValues.LocateFile SessionValues.SessionValues.LocateFile;
         [HideInInspector] public StringBuilder BlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
         private int TaskStringsAdded = 0;
-
-        // public string TaskSceneName;
         public Camera TaskCam;
         public Canvas[] TaskCanvasses;
         public GameObject StimCanvas_2D;
-
         //protected TrialDef[] AllTrialDefs;
         //protected TrialDef[] CurrentBlockTrialDefs;
         protected TaskDef TaskDef;
         protected BlockDef[] BlockDefs;
         public BlockDef CurrentBlockDef;
         protected TrialDef[] AllTrialDefs;
-
         public BlockDef currentBlockDef
         {
             get
@@ -87,25 +60,13 @@ namespace USE_ExperimentTemplate_Task
             }
         }
 
-
         public TaskStims TaskStims;
         [HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims, RuntimeStims;
         public List<GameObject> PreloadedStimGameObjects;
         public List<string> PrefabStimPaths;
         protected ConfigUI configUI;
         protected ConfigVarStore ConfigUiVariables;
-       // [HideInInspector] public ExperimenterDisplayController ExperimenterDisplayController;
-       // [HideInInspector] public SessionInfoPanel SessionInfoPanel;
-
-    //    [HideInInspector] public DisplayController DisplayController;
-
-
-  //      [HideInInspector] public SerialPortThreaded SerialPortController;
-        //[HideInInspector] public SyncBoxController SyncBoxController;
-    //    [HideInInspector] public EventCodeManager EventCodeManager;
         protected Dictionary<string, EventCode> CustomTaskEventCodes;
-       // [HideInInspector] public Dictionary<string, EventCode> SessionEventCodes;
-      //  [HideInInspector] public GameObject InputManager;
 
         public Type TaskLevelType;
         protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
@@ -117,16 +78,7 @@ namespace USE_ExperimentTemplate_Task
         protected int? MinTrials, MaxTrials;
 
         [HideInInspector] public RenderTexture DrawRenderTexture;
-
-       // [HideInInspector] public GameObject TaskSelectionCanvasGO;
-
-      //  [HideInInspector] public bool IsHuman;
-
-     //   [HideInInspector] public HumanStartPanel HumanStartPanel;
-      //  [HideInInspector] public USE_StartButton USE_StartButton;
-
         [HideInInspector] public event EventHandler TaskSkyboxSet_Event;
-
         [HideInInspector] public bool TaskLevelDefined;
 
         private bool TaskDefImported;

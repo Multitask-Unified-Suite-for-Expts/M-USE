@@ -1025,9 +1025,14 @@ namespace USE_ExperimentTemplate_Session
             SessionValues.InputManager = new GameObject("InputManager");
             SessionValues.InputManager.SetActive(true);
 
+
             InputTrackers = Instantiate(Resources.Load<GameObject>("InputTrackers"), SessionValues.InputManager.transform);
             SessionValues.MouseTracker = InputTrackers.GetComponent<MouseTracker>();
             SessionValues.GazeTracker = InputTrackers.GetComponent<GazeTracker>();
+
+
+            SessionValues.MouseTracker.ShotgunRaycast.SetShotgunVariables(SessionValues.SessionDef.ShotgunRayCastCircleSize_DVA, SessionValues.SessionDef.ParticipantDistance_CM, SessionValues.SessionDef.ShotgunRaycastSpacing_DVA);
+            SessionValues.GazeTracker.ShotgunRaycast.SetShotgunVariables(SessionValues.SessionDef.ShotgunRayCastCircleSize_DVA, SessionValues.SessionDef.ParticipantDistance_CM, SessionValues.SessionDef.ShotgunRaycastSpacing_DVA);
 
             SessionValues.SelectionTracker = new SelectionTracker();
             if (SessionValues.SessionDef.SelectionType.ToLower().Equals("gaze"))
@@ -1335,7 +1340,6 @@ namespace USE_ExperimentTemplate_Session
             }
             else
                 tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName);
-
             //   tl.FilePrefix = FilePrefix;
             //  tl.StoreData = StoreData;
             //   tl.SubjectID = SubjectID;

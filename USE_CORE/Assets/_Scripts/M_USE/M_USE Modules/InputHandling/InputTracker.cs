@@ -49,13 +49,14 @@ public abstract class InputTracker : MonoBehaviour
     //         selectionHandler.Stop();
     //     };
     // }
-
+    public void Awake()
+    {
+        ShotgunRaycast = GameObject.Find("MiscScripts").GetComponent<ShotgunRaycast>();
+    }
     public void Init(DataController frameData, int allowedDisplay)
     {
         AddFieldsToFrameData(frameData);
         AllowedDisplay = allowedDisplay;
-
-        ShotgunRaycast = GameObject.Find("MiscScripts").GetComponent<ShotgunRaycast>();
     }
 
     private void Update()

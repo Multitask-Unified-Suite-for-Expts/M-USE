@@ -3,10 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
 using UnityEngine;
-using USE_Def_Namespace;
 using USE_DisplayManagement;
 using USE_ExperimentTemplate_Session;
 using USE_States;
@@ -22,7 +22,7 @@ public class ImportSettings_Level : ControlLevel
     public SettingsDetails SettingsDetails;
     
     private string currentFilePathString;
-    private string currentFileContentString;
+    public string currentFileContentString;
     private Type currentType;
 
     private int iSettings;
@@ -33,27 +33,27 @@ public class ImportSettings_Level : ControlLevel
 
     public bool fileParsed;
     public bool terminateImport;
-    private bool fileLoaded;
+    public bool fileLoaded;
     public bool continueToNextSetting;
+    public bool continueToLoadFile;
+
 
     public override void DefineControlLevel()
     {
-        
         State loadFile = new State("LoadFile");
         State parseFile = new State("ParseFile");
-
+        AddActiveStates(new List<State> { loadFile, parseFile });
+       
         SettingsDetails = new SettingsDetails();
         
-        AddActiveStates(new List<State> { loadFile, parseFile });
-
         Add_ControlLevel_InitializationMethod(() =>
         {
             outputSettings = new List<object>();
         });
 
-
         loadFile.AddDefaultInitializationMethod(() =>
         {
+            continueToLoadFile = false;
             if (string.IsNullOrEmpty(SettingsDetails.FilePath))
                 return;
 
@@ -68,11 +68,12 @@ public class ImportSettings_Level : ControlLevel
                     Debug.Log($"Failed to load {SettingsDetails.FileName}, may not be an issue for this session.");
             }));
         });
-        loadFile.SpecifyTermination(() => fileLoaded, parseFile, () => fileLoaded = false) ;
+        loadFile.SpecifyTermination(() => continueToLoadFile, parseFile, () => { fileLoaded = false; continueToLoadFile = false; }) ;
         loadFile.AddTimer(() => 10f, parseFile ); //adjust timer value for a sensible amount of time for the server to retrieve file content 
         
         parseFile.AddDefaultInitializationMethod(() =>
         {
+            continueToNextSetting = false;
             if (!string.IsNullOrEmpty(currentFileContentString))
             {
                 currentType = SettingsDetails.SettingType;
@@ -85,13 +86,13 @@ public class ImportSettings_Level : ControlLevel
                 continueToNextSetting = true; // continue if failed to parse, may not be needed in the session
             }
         });
-        parseFile.SpecifyTermination(()=> (continueToNextSetting), loadFile, ()=>
+        parseFile.SpecifyTermination(()=> continueToNextSetting, loadFile, ()=>
         {
             continueToNextSetting = false;
             fileParsed = false;
             iSettings++;
         });
-        parseFile.SpecifyTermination(()=> (terminateImport), ()=> null, () =>
+        parseFile.SpecifyTermination(()=> terminateImport, ()=> null, () =>
         {
             continueToNextSetting = false;
             fileParsed = false;
@@ -136,7 +137,6 @@ public class ImportSettings_Level : ControlLevel
 
         if (SessionValues.ConfigAccessType == "Local" || SessionValues.ConfigAccessType == "Default")
         {
-           // fileContent = File.ReadAllText(SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{fileName}*")); //Will need to check that this works during Web Build
             fileContent = File.ReadAllText(FilePath); //Will need to check that this works during Web Build
             callback(fileContent);
         }
@@ -406,6 +406,59 @@ public class ImportSettings_Level : ControlLevel
         iSettings = 0;
     }
 
+    public string DetermineParsingStyle()
+    {
+        string assumedParsingStyle = "";
+
+        if (SettingsDetails.FileName.ToLower().Contains("json"))
+            assumedParsingStyle = "SingleTypeJSON";
+        else if (SettingsDetails.FileName.ToLower().Contains("array"))
+            assumedParsingStyle = "SingleTypeArray";
+        else if (SettingsDetails.FileName.ToLower().Contains("singletype"))
+            assumedParsingStyle = "SingleTypeDelimited";
+        else
+            Debug.LogError("Attempting to parse " + SettingsDetails.FileName + " but this name does not contain a substring indicated settings parsing type.");
+
+
+        string verifiedParsingStyle = "";
+        string[] lines = currentFileContentString.Split('\n');
+        int tabCount = 0;
+        for (int i = 0; i < lines.Length; i++)
+        {
+            string line = lines[i].Trim();
+
+            if (line.Contains('\t'))
+            {
+                tabCount = line.Split('\t').Length; //check if all lines have same number of tabs 
+                for (int j = i + 1; j < lines.Length; j++)
+                {
+                    string nextLine = lines[j].Trim();
+                    if (!string.IsNullOrEmpty(nextLine) && nextLine.Split('\t').Length != tabCount)
+                        verifiedParsingStyle = "SingleTypeJSON"; //Inconsistent number of tab-separated values
+                }
+            }
+            else
+                verifiedParsingStyle = "SingleTypeJSON";
+        }
+
+        //check for 2 tabs
+        if (tabCount != 2 && verifiedParsingStyle != "SingleTypeJSON")
+            verifiedParsingStyle = "SingleTypeArray";
+
+        if (verifiedParsingStyle != assumedParsingStyle)
+        {
+            if (tabCount == 2)
+            {
+                verifiedParsingStyle = assumedParsingStyle;
+            }
+            else
+                verifiedParsingStyle = "SingleTypeJSON";
+        }
+        if (verifiedParsingStyle == "")
+            Debug.LogError("Attempting to verify parsing of " + SettingsDetails.FileName + " but the file is not parseable as one of the three settings types.");
+
+        return verifiedParsingStyle;
+    }
 
 }
 

@@ -70,7 +70,7 @@ namespace USE_ExperimentTemplate_Task
 
         public Type TaskLevelType;
         protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
-        protected State SetupTask, RunBlock, BlockFeedback, FinishTask;
+        protected State VerifyTask, SetupTask, RunBlock, BlockFeedback, FinishTask;
         protected bool BlockFbFinished;
         protected float BlockFbSimpleDuration;
         protected TaskLevelTemplate_Methods TaskLevel_Methods;
@@ -104,6 +104,9 @@ namespace USE_ExperimentTemplate_Task
 
         private bool ContinueButtonClicked;
 
+        //Passed by session level
+        public ImportSettings_Level importSettings_Level;
+        public VerifyTask_Level verifyTask_Level;
 
 
         public virtual void SpecifyTypes()
@@ -131,18 +134,16 @@ namespace USE_ExperimentTemplate_Task
             {
                 ReadSettingsFiles();
                 while (!AllDefsImported)
-                {
                     yield return new WaitForEndOfFrame();
-                }
+                TaskDefImported = false;
+                BlockDefImported = false;
+                TrialDefImported = false;
 
                 HandleCustomSettings();
 
                 HandleTrialAndBlockDefs(verifyOnly);
                 while (!TrialAndBlockDefsHandled)
-                {
                     yield return new WaitForEndOfFrame();
-                }
-
                 TrialAndBlockDefsHandled = false;
 
                 FindStims();
@@ -152,20 +153,20 @@ namespace USE_ExperimentTemplate_Task
                 StimsHandled = false;
             }
                 
-
             if (verifyOnly)
                 yield break;
 
+            VerifyTask = new State("VerifyTask");
             SetupTask = new State("SetupTask");
             RunBlock = new State("RunBlock");
             BlockFeedback = new State("BlockFeedback");
             FinishTask = new State("FinishTask");
             RunBlock.AddChildLevel(TrialLevel);
-            AddActiveStates(new List<State> { SetupTask, RunBlock, BlockFeedback, FinishTask });
+            AddActiveStates(new List<State> { VerifyTask, SetupTask, RunBlock, BlockFeedback, FinishTask });
 
-            TrialLevel.TrialDefType = TrialDefType;
-            TrialLevel.StimDefType = StimDefType;
-
+            TrialLevel.TrialDefType = TrialDefType; //may need to be moved down after new states
+            TrialLevel.StimDefType = StimDefType;   //may need to be moved down after new states
+        
             Add_ControlLevel_InitializationMethod(() =>
             {
                 TaskCam.gameObject.SetActive(true);
@@ -200,6 +201,48 @@ namespace USE_ExperimentTemplate_Task
                 SessionValues.InputManager.SetActive(true);
             });
 
+            //VerifyTask State-----------------------------------------------------------------------------------------------------
+
+            if (verifyTask_Level == null)
+                Debug.Log("VERIFY TASK LEVEL IS NULL!");
+
+            VerifyTask.AddChildLevel(verifyTask_Level);
+            VerifyTask.AddUpdateMethod(() =>
+            {
+                if (verifyTask_Level.fileParsed)
+                {
+                    Debug.Log("FILE PARSED!");
+                    switch (verifyTask_Level.currentFileName.ToLower())
+                    {
+                        case "taskdef":
+                            TaskDef = (TaskDef)verifyTask_Level.parsedResult;
+                            if(TaskDef.CustomSettings != null)
+                            {
+                                //handle custom settings?
+                            }
+                            break;
+                        case "blockdef":
+                            BlockDefs = (BlockDef[])verifyTask_Level.parsedResult;
+                            break;
+                        case "trialdef":
+                            AllTrialDefs = (TrialDef[])verifyTask_Level.parsedResult;
+                            break;
+                        case "stimdef":
+                            StimDef[] importedStimDefs = (StimDef[])verifyTask_Level.parsedResult;
+                            AssignStimDefs(importedStimDefs);
+                            break;
+                        default:
+                            Debug.LogError("something");
+                            break;
+                    }
+                }
+            });
+            VerifyTask.SpecifyTermination(() => !verifyOnly && VerifyTask.ChildLevel.Terminated, SetupTask);
+            VerifyTask.SpecifyTermination(() => verifyOnly && VerifyTask.ChildLevel.Terminated, () => null);
+
+
+
+            //SetupTask State-----------------------------------------------------------------------------------------------------
             SetupTask.AddInitializationMethod(() =>
             {
                 SetTaskSummaryString();
@@ -216,6 +259,7 @@ namespace USE_ExperimentTemplate_Task
             });
             SetupTask.SpecifyTermination(() => true, RunBlock);
 
+            //RunBlock State-----------------------------------------------------------------------------------------------------
             RunBlock.AddUniversalInitializationMethod(() =>
             {
                 SessionValues.EventCodeManager.SendCodeImmediate("RunBlockStarts");
@@ -271,17 +315,15 @@ namespace USE_ExperimentTemplate_Task
                 });
             }
 
-
             RunBlock.AddLateUpdateMethod(() =>
             {
                 StartCoroutine(FrameData.AppendDataToBuffer());
-
                 SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
 
 
-
+            //BlockFeedback State-----------------------------------------------------------------------------------------------------
             BlockFeedback.AddUniversalInitializationMethod(() =>
             {                
                 if(SessionValues.SessionDef.IsHuman)
@@ -290,18 +332,6 @@ namespace USE_ExperimentTemplate_Task
                     if(taskBlockResults != null && taskBlockResults.Count > 0)
                         DisplayBlockResults(taskBlockResults);
                 }
-
-                /*if (BlockSummaryString != null)
-                {
-                    int trialsCompleted = (TrialLevel.AbortCode == 0 || TrialLevel.AbortCode == 6) ? TrialLevel.TrialCount_InBlock + 1 : TrialLevel.TrialCount_InBlock;
-                    string blockTitle = $"<b>\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" +
-                                        $"\n\nBlock {BlockCount + 1}" +
-                                        $"\nTrials Completed: {trialsCompleted}\n</b>";
-
-                    PreviousBlockSummaryString.Insert(0, BlockSummaryString); //Add current block string to full list of previous blocks. 
-                    PreviousBlockSummaryString.Insert(0, blockTitle);
-                }*/
-
                 SessionValues.EventCodeManager.SendCodeImmediate("BlockFeedbackStarts");
             });
             BlockFeedback.AddUpdateMethod(() =>
@@ -336,6 +366,7 @@ namespace USE_ExperimentTemplate_Task
                 }
             });
 
+            //FinishTask State-----------------------------------------------------------------------------------------------------
             FinishTask.AddDefaultInitializationMethod(() =>
             {
                 if (TrialLevel.TokenFBController.enabled)
@@ -502,13 +533,6 @@ namespace USE_ExperimentTemplate_Task
                 StartCoroutine(SessionValues.GazeData.CreateFile());
 
 
-            //AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
-
-            // fbControllers.transform.SetParent(Controllers.transform);
-            // inputTrackers.transform.SetParent(Controllers.transform);
-            // GameObject fbControllers = Instantiate(fbControllersPrefab, Controllers.transform);
-            // GameObject inputTrackers = Instantiate(inputTrackersPrefab, Controllers.transform);
-
             GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"), SessionValues.InputManager.transform);
 
             List<string> fbControllersList = new List<string>();
@@ -534,28 +558,10 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.TouchFBController = fbControllers.GetComponent<TouchFBController>();
             TrialLevel.TouchFBController.audioFBController = TrialLevel.AudioFBController;
 
-         //   TrialLevel.SerialPortController = SerialPortController;
-         //   TrialLevel.SerialPortActive = SerialPortActive;
-       //     TrialLevel.SerialRecvData = SerialRecvData;
-       //     TrialLevel.SerialSentData = SerialSentData;
-        //    TrialLevel.SyncBoxController = SyncBoxController;
-        //    TrialLevel.GazeData = GazeData;
-
-    //        TrialLevel.DisplayController = DisplayController; 
-
-            /*if(SessionValues.SyncBoxController != null)
-                SessionValues.SyncBoxController.EventCodeManager = SessionValues.EventCodeManager;*/
-                //TrialLevel.SyncBoxController.EventCodeManager = SessionValues.EventCodeManager;
-
-          //  TrialLevel.EventCodeManager = EventCodeManager;
             TrialLevel.TouchFBController.EventCodeManager = SessionValues.EventCodeManager;
 
             if (CustomTaskEventCodes != null)
                 TrialLevel.TaskEventCodes = CustomTaskEventCodes;
-            /*if (SessionValues.SessionEventCodes != null)
-                TrialLevel.SessionEventCodes = SessionValues.SessionEventCodes;*/
-
-
 
             if (SessionValues.SessionDef.EyeTrackerActive)
                 SessionValues.GazeTracker.Init(FrameData, 0);
@@ -617,32 +623,15 @@ namespace USE_ExperimentTemplate_Task
                 }
             }
 
-
-           // if (EyeTrackerActive)
-         //   {
-              //  TrialLevel.GazeTracker = GazeTracker;
-              //  TrialLevel.TobiiEyeTrackerController = TobiiEyeTrackerController;
-           // }
-            //TrialLevel.MouseTracker = MouseTracker;
-
-        //    TrialLevel.SelectionType = SelectionType;
-
             SessionValues.InputManager.SetActive(false);
 
-    //        TrialLevel.SessionDataControllers = SessionDataControllers;
-        //    TrialLevel.FilePrefix = FilePrefix;
             TrialLevel.TaskStims = TaskStims;
             TrialLevel.PreloadedStims = PreloadedStims;
             TrialLevel.PrefabStims = PrefabStims;
             TrialLevel.ExternalStims = ExternalStims;
             TrialLevel.RuntimeStims = RuntimeStims;
             TrialLevel.ConfigUiVariables = ConfigUiVariables;
-            //      TrialLevel.IsHuman = IsHuman;
-            //         TrialLevel.HumanStartPanel = HumanStartPanel;
-            //       TrialLevel.USE_StartButton = USE_StartButton;
-            // TrialLevel.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
 
-            // TrialLevel.EyeTrackerActive = EyeTrackerActive;
             TrialLevel.TaskLevel = this;
             TrialLevel.DefineTrialLevel();
 
@@ -695,8 +684,6 @@ namespace USE_ExperimentTemplate_Task
         }
 
 
-
-
         public static IEnumerator HandleCreateExternalFolder(string configName)
         {
             yield return ServerManager.CreateFolder(configName);
@@ -739,11 +726,6 @@ namespace USE_ExperimentTemplate_Task
             if (StimDefType == null)
                 StimDefType = typeof(StimDef);
 
-
-            //read in the TaskDef, BlockDef, TrialDef, and StimDef files (any of these may not exist)
-            //if end up making coroutines again... yield return StartCoroutine((IEnumerator)shshshsh.Invoke(this, new object[] {xhxhxhx});
-
-            
             MethodInfo readTaskDef = GetType().GetMethod(nameof(this.ReadTaskDef)).MakeGenericMethod(new Type[] { TaskDefType });
             readTaskDef.Invoke(this, new object[] { TaskConfigPath });
             MethodInfo readBlockDefs = GetType().GetMethod(nameof(this.ReadBlockDefs))
@@ -823,6 +805,7 @@ namespace USE_ExperimentTemplate_Task
                     string filePath = TaskConfigPath + Path.DirectorySeparatorChar + key; //initially set for not default configs, then changed below for UseDefaultConfigs
                     string settingsFileName = key.Split('.')[0];
 
+                    //Write to persistant data path for default configs:
                     if (SessionValues.UsingDefaultConfigs)
                     {
                         string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + TaskName + "_DefaultConfigs";
@@ -1202,7 +1185,6 @@ namespace USE_ExperimentTemplate_Task
             BlockDefs = (T[])SessionSettings.Get("blockDefs");
         }
 
-
         public void ReadTrialDefs<T>(string taskConfigFolder) where T : TrialDef
         {
             if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
@@ -1233,6 +1215,30 @@ namespace USE_ExperimentTemplate_Task
             AllTrialDefs = (T[])SessionSettings.Get(TaskName + "_TrialDefs");
         }
 
+        public void AssignStimDefs(StimDef[] stimDefs)
+        {
+
+            //IEnumerable<StimDef> potentials = (T[])SessionSettings.Get(key);
+
+            if (stimDefs == null || stimDefs.Count() < 1)
+                return;
+            else
+            {
+                if (SessionValues.UsingDefaultConfigs)
+                {
+                    PrefabStims = new StimGroup("PrefabStims", stimDefs);
+                    foreach (var stim in PrefabStims.stimDefs)
+                        PrefabStimPaths.Add(stim.PrefabPath + "/" + stim.FileName);
+                }
+                else
+                {
+                    ExternalStims = new StimGroup("ExternalStims", stimDefs);
+                    GameObject canvasGO = GameObject.Find(TaskName + "_Canvas");
+                    foreach (StimDef stim in ExternalStims.stimDefs)
+                        stim.CanvasGameObject = canvasGO;
+                }
+            }
+        }
 
         public void ReadStimDefs<T>(string taskConfigFolder) where T : StimDef
         {
@@ -1299,7 +1305,7 @@ namespace USE_ExperimentTemplate_Task
         }
 
 
-
+        //DELETE DUPLICATE LATER
         public bool FileStringContainsTabs(string fileContent)
         {
             string[] lines = fileContent.Split('\n');
@@ -1614,22 +1620,5 @@ namespace USE_ExperimentTemplate_Task
 
     }
 
-/*
-    public class TaskDef
-    {
-        public string TaskName;
-        public string ExternalStimFolderPath;
-        public string PrefabStimFolderPath;
-        public string ExternalStimExtension;
-        public List<string[]> FeatureNames;
-        public string neutralPatternedColorName;
-        public float? ExternalStimScale;
-        public List<string[]> FeedbackControllers;
-        public int? TotalTokensNum;
-        public bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
-        public string SelectionType;
-        public Dictionary<string, string> CustomSettings;
-
-    }*/
 
 }

@@ -91,7 +91,7 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public LogWriter LogWriter;
 
         private ImportSettings_Level importSettings_Level;
-
+        private VerifyTask_Level verifyTask_Level;
 
 
         public override void DefineControlLevel()
@@ -125,6 +125,8 @@ namespace USE_ExperimentTemplate_Session
             importSettings_Level = gameObject.GetComponent<ImportSettings_Level>();
             importSettings_Level.SessionLevel = this;
 
+            verifyTask_Level = gameObject.GetComponent<VerifyTask_Level>();
+
             bool initScreenTerminated = false;
 
             //InitScreen State---------------------------------------------------------------------------------------------------------------
@@ -153,7 +155,7 @@ namespace USE_ExperimentTemplate_Session
             bool taskAutomaticallySelected = false;
 
             //LoadSessionSettings State---------------------------------------------------------------------------------------------------------------
-            loadSessionSettings.AddChildLevel(gameObject.GetComponent<ImportSettings_Level>());
+            loadSessionSettings.AddChildLevel(importSettings_Level);
             loadSessionSettings.AddDefaultInitializationMethod(() =>
             {
                 SetDataPaths();
@@ -162,6 +164,9 @@ namespace USE_ExperimentTemplate_Session
             });
             loadSessionSettings.AddUpdateMethod(() =>
             {
+                if (importSettings_Level.fileLoaded)
+                    importSettings_Level.continueToLoadFile = true;
+
                 if (importSettings_Level.fileParsed)
                 {
                     if (importSettings_Level.SettingsDetails.FileName == "SessionConfig")
@@ -1280,8 +1285,11 @@ namespace USE_ExperimentTemplate_Session
             // return tl as ControlLevel_Task_Template; 
             //it would be nice to return type T and 
             tl.ConfigFolderName = configFolderName;
+
+            tl.importSettings_Level = importSettings_Level;
+            tl.verifyTask_Level = verifyTask_Level;
             
-            StartCoroutine((PopulateTaskLevel(tl, verifyOnly, result =>
+            StartCoroutine(PopulateTaskLevel(tl, verifyOnly, result =>
             {
                 if (result != null)
                 {
@@ -1300,7 +1308,7 @@ namespace USE_ExperimentTemplate_Session
                 {
                     Debug.Log("Tasklevel result is null");
                 }
-            })));
+            }));
         }
 
         IEnumerator PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly, Action<ControlLevel_Task_Template> callback)

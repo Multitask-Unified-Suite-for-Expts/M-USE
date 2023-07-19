@@ -594,6 +594,7 @@ GameObject:
   - component: {fileID: 1375570696}
   - component: {fileID: 1375570695}
   - component: {fileID: 1375570697}
+  - component: {fileID: 1375570698}
   m_Layer: 0
   m_Name: ControlLevels
   m_TagString: Untagged
@@ -630,18 +631,19 @@ MonoBehaviour:
   SessionDetails: {fileID: 454535789}
   LocateFile: {fileID: 1481219466}
   CameraMirrorTexture: {fileID: 0}
+  DisplayController: {fileID: 0}
   TaskButtonsContainer: {fileID: 0}
+  Starfield: {fileID: 1391649313}
+  HumanVersionToggleButton: {fileID: 2071187616}
+  ToggleAudioButton: {fileID: 907834252290271150}
   BlockResults_GridElementPrefab: {fileID: 5967809598972882644, guid: 90c035b644de74843b8c74cca60656b2,
     type: 3}
   BlockResultsPrefab: {fileID: 6952099139267227724, guid: 3574b70e8d31c4f6fa0cf373241c135f,
     type: 3}
-  HumanVersionToggleButton: {fileID: 2071187616}
   HumanStartPanelPrefab: {fileID: 7569599706748818137, guid: e3a91289f22a4401bbc1f44baba80e22,
     type: 3}
-  ToggleAudioButton: {fileID: 907834252290271150}
   StartButtonPrefabGO: {fileID: 6810560367943004968, guid: 2e385ec78c77a46cc91c52da9fce59b9,
     type: 3}
-  Starfield: {fileID: 1391649313}
   BackgroundMusic_AudioClip: {fileID: 8300000, guid: d0692d04af800462aba5670b8485603c,
     type: 3}
   BlockResults_AudioClip: {fileID: 8300000, guid: b073a0c00b101453b806d8f2e5506319,
@@ -687,10 +689,37 @@ MonoBehaviour:
   fileNames: []
   settingParsingStyles: []
   filePathStrings: []
+  currentFileContentString: 
   currentFileName: 
   SessionLevel: {fileID: 0}
   fileParsed: 0
+  terminateImport: 0
+  fileLoaded: 0
   continueToNextSetting: 0
+  continueToLoadFile: 0
+--- !u!114 &1375570698
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1375570694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9512ed038d10844579f2d3fa36048351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ControlLevelName: VerifyTask_Level
+  initScreen: {fileID: 0}
+  Terminated: 0
+  isMainLevel: 0
+  CallDefineLevelAutomatically: 1
+  quitApplicationAtEnd: 0
+  DebugActive: 0
+  Paused: 1
+  importSettings_Level: {fileID: 1375570697}
+  fileParsed: 0
+  currentFileName: 
 --- !u!1 &1391649313 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5576539015048150, guid: 810531c98dad74048995093927772f82,

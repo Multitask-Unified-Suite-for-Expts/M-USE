@@ -9,6 +9,7 @@ TagManager:
   - Game Configs
   - Center
   - PausePanel
+  - Stimulus
   layers:
   - Default
   - TransparentFX

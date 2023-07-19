@@ -4,30 +4,56 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float movementSpeed = 5f;
+    public float movementSpeed = 10f;
     public float rotationSpeed = 180f;
 
+    private Transform playerCamTransform;
     private Vector3 moveDirection;
 
-    void Update()
+    private void Start()
     {
-        float horizontalInput = Input.GetAxis("Horizontal");
-        float verticalInput = Input.GetAxis("Vertical");
-
-        moveDirection = new Vector3(horizontalInput, 0f, verticalInput).normalized;
-
-        if (moveDirection != Vector3.zero)
+        playerCamTransform = GameObject.Find("PlayerCam")?.transform;
+        if (playerCamTransform == null)
         {
-            // Rotate player towards the move direction
-            Quaternion toRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
+            playerCamTransform = GameObject.FindGameObjectWithTag("PlayerCam")?.transform;
+        }
+        if (playerCamTransform == null)
+        {
+            Debug.LogError("PlayerCam transform not found. Ensure that your camera is named 'PlayerCam' or tagged as 'PlayerCam'.");
         }
     }
 
-    void FixedUpdate()
+    private void Update()
     {
-        // Move the player based on the move direction
-        Vector3 movement = new Vector3(moveDirection.x, 0f, moveDirection.z);
-        GetComponent<Rigidbody>().MovePosition(transform.position + movement * movementSpeed * Time.fixedDeltaTime);
+        float horizontalInput = InputBroker.GetAxis("Horizontal");
+        float verticalInput = InputBroker.GetAxis("Vertical");
+
+        Vector3 cameraForward = playerCamTransform.forward;
+        Vector3 cameraRight = playerCamTransform.right;
+        cameraForward.y = 0f;
+        cameraRight.y = 0f;
+        cameraForward.Normalize();
+        cameraRight.Normalize();
+
+        if (verticalInput > 0f)
+        {
+            moveDirection = cameraForward * verticalInput;
+        }
+        else if (verticalInput < 0f)
+        {
+            moveDirection = cameraForward * verticalInput;
+        }
+        else
+        {
+            moveDirection = Vector3.zero;
+        }
+
+        Quaternion cameraRotation = Quaternion.Euler(0f, horizontalInput * rotationSpeed * Time.deltaTime, 0f);
+        playerCamTransform.rotation *= cameraRotation;
+    }
+
+    private void FixedUpdate()
+    {
+        GetComponent<Rigidbody>().MovePosition(transform.position + moveDirection * movementSpeed * Time.fixedDeltaTime);
     }
 }

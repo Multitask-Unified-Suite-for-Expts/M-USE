@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Dropbox.Api.TeamPolicies;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using USE_States;
@@ -100,6 +101,18 @@ namespace SelectionTracking
 
             mouseHover.CurrentInputLocation = () => InputBroker.mousePosition;
             DefaultSelectionHandlers.Add("MouseHover", mouseHover);
+            
+            //----------------------------------------JOYSTICK HANDLER: --------------------------------------------------
+            SelectionHandler joystickHandler = new SelectionHandler();
+
+            // Conditions: Joystick selection initiation and termination
+            joystickHandler.InitConditions.Add(joystickHandler.DefaultConditions("JoystickSelectionInitiation"));
+            joystickHandler.TerminationConditions.Add(joystickHandler.DefaultConditions("JoystickSelectionTermination"));
+
+            joystickHandler.MinDuration = 0f; // Set minDuration to 0 for instantaneous selection
+
+            joystickHandler.CurrentInputLocation = () => new Vector3(InputBroker.GetAxis("Horizontal"), 0f, InputBroker.GetAxis("Vertical"));
+            DefaultSelectionHandlers.Add("JoystickHandler", joystickHandler);
 
             //----------------------------------------TOUCH SHOTGUN HANDLER: --------------------------------------------------
             SelectionHandler touchShotgun = new SelectionHandler();
@@ -226,6 +239,7 @@ namespace SelectionTracking
             public string HandlerName;
             public string HandlerLevel;
             public bool HandlerActive;
+            public GameObject playerObject;
 
 
             public event EventHandler<TouchFBController.TouchFeedbackArgs> TouchErrorFeedback;
@@ -522,6 +536,9 @@ namespace SelectionTracking
                            && OngoingSelection.InputLocations.Count > 0
                            && Vector3.Distance(OngoingSelection.InputLocations[0], CurrentInputLocation()) > MaxPixelDisplacement;
                 });
+                DefaultConditions.Add("JoystickSelectionInitiation", () => playerObject.GetComponent<PlayerCollision>().selectedStimulus != null);
+                DefaultConditions.Add("JoystickSelectionTermination", () => playerObject.GetComponent<PlayerCollision>().selectedStimulus == null);
+                
                 DefaultConditions.Add("MouseButton0", () => InputBroker.GetMouseButton(0));
                 DefaultConditions.Add("MouseButton0Down", () => InputBroker.GetMouseButtonDown(0));
                 DefaultConditions.Add("MouseButton0Up", () => InputBroker.GetMouseButtonUp(0));

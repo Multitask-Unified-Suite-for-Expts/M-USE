@@ -62,11 +62,6 @@ public class SelectionHandler<T> where T : StimDef
         }
     }
 
-    private void UpdateSelection()
-    {
-        
-    }
-    
     private class PossibleSelection
     {
         public Vector2? SelectionStartPosition;

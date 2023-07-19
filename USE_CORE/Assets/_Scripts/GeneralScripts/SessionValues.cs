@@ -40,6 +40,7 @@ public static class SessionValues
     public static SerialSentData SerialSentData;
     public static GazeData GazeData;
     public static MouseTracker MouseTracker;
+    public static JoystickTracker JoystickTracker;
     public static GazeTracker GazeTracker;
     public static TobiiEyeTrackerController TobiiEyeTrackerController;
     public static GameObject InputManager;

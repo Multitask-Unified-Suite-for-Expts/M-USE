@@ -90,6 +90,11 @@ public class InputBroker
         }
     }
 
+    public static float GetAxis(string direction)
+    {
+	    return Input.GetAxis(direction);
+    }
+
     public static void SetMouseButtonDown(int button)
 	{
 		if (!mouseState.ContainsKey(button))

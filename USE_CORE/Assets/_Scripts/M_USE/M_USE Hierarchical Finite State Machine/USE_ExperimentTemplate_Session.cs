@@ -19,9 +19,6 @@ using USE_ExperimentTemplate_Task;
 using SelectionTracking;
 using TMPro;
 using USE_Def_Namespace;
-using System.Runtime.InteropServices;
-using Newtonsoft.Json.Linq;
-using UnityEngine.InputSystem;
 #if (!UNITY_WEBGL)
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 #endif
@@ -105,7 +102,6 @@ namespace USE_ExperimentTemplate_Session
 
             SessionValues.SessionLevel = this;
 
-
             State initScreen = new State("InitScreen");
             State loadSessionSettings = new State("LoadSessionSettings");
             State createSessionDataFolder = new State("CreateDataFolders");
@@ -121,7 +117,6 @@ namespace USE_ExperimentTemplate_Session
 
             SessionCam = Camera.main;
 
-
             FindGameObjects();
             LoadPrefabs();
 
@@ -132,6 +127,7 @@ namespace USE_ExperimentTemplate_Session
 
             bool initScreenTerminated = false;
 
+            //InitScreen State---------------------------------------------------------------------------------------------------------------
             initScreen.AddDefaultInitializationMethod(() =>
             {
                 SessionInitScreen.gameObject.SetActive(true);
@@ -151,22 +147,19 @@ namespace USE_ExperimentTemplate_Session
                     CreateMirrorCam();
                     Starfield.SetActive(false);
                 }
-
             });
 
             string selectedConfigName = null;
             bool taskAutomaticallySelected = false;
-            
+
+            //LoadSessionSettings State---------------------------------------------------------------------------------------------------------------
             loadSessionSettings.AddChildLevel(gameObject.GetComponent<ImportSettings_Level>());
-            
             loadSessionSettings.AddDefaultInitializationMethod(() =>
             {
                 SetDataPaths();
                 SetConfigPathsAndTypes();
                 SetValuesForLoading_SessionConfig();
             });
-
-
             loadSessionSettings.AddUpdateMethod(() =>
             {
                 if (importSettings_Level.fileParsed)
@@ -174,33 +167,28 @@ namespace USE_ExperimentTemplate_Session
                     if (importSettings_Level.SettingsDetails.FileName == "SessionConfig")
                     {
                         SessionValues.SessionDef = (SessionDef)importSettings_Level.parsedResult;
-                        Debug.Log("Session Def is Imported!");
                         SetValuesForLoading_EventCodeConfig();
                         importSettings_Level.continueToNextSetting = true;
                     }
                     else if (importSettings_Level.SettingsDetails.FileName == "EventCode")
                     {
-                        SessionValues.EventCodeManager.SessionEventCodes =
-                            (Dictionary<string, EventCode>) importSettings_Level.parsedResult;
+                        SessionValues.EventCodeManager.SessionEventCodes = (Dictionary<string, EventCode>) importSettings_Level.parsedResult;
                         importSettings_Level.terminateImport = true;
                     }
                     else
                         Debug.Log($"The {importSettings_Level.SettingsDetails.FileName} has been parsed, but is unable to be set as it is not a SessionConfig, EventCode, or DisplayConfig file.");
-
                 }
             });
             loadSessionSettings.SpecifyTermination(() => loadSessionSettings.ChildLevel.Terminated, createSessionDataFolder);
             loadSessionSettings.AddDefaultTerminationMethod(() =>
             {
-                SetWebFolderPaths_ContextsAndTaskIcons();
-
                 SetupInputManagement(selectTask, loadTask);
-
                 SetupSessionDataControllers();
                 SessionData.AddDatum("SelectedTaskConfigName", () => selectedConfigName);
                 SessionData.AddDatum("TaskAutomaticallySelected", () => taskAutomaticallySelected);
             });
 
+            //CreateSessionDataFolder State---------------------------------------------------------------------------------------------------------------
             bool sessionDataFolderCreated = false;
             createSessionDataFolder.AddDefaultInitializationMethod(() =>
             {
@@ -212,22 +200,20 @@ namespace USE_ExperimentTemplate_Session
             createSessionDataFolder.SpecifyTermination(() => sessionDataFolderCreated, setupSession);
 
             bool waitForSerialPort = false;
+
+            //SetupSession State---------------------------------------------------------------------------------------------------------------
             setupSession.AddDefaultInitializationMethod(() =>
             {
-                SessionValues.HumanStartPanel = gameObject.AddComponent<HumanStartPanel>();
-                SessionValues.HumanStartPanel.SetSessionLevel(this);
-                SessionValues.HumanStartPanel.HumanStartPanelPrefab = HumanStartPanelPrefab;
+                //NEED TO MOVE THIS TO WHEREVER NORMAL BUILD CREATES THE TASKSELECTIONDATA FOLDER:
+                if (SessionValues.WebBuild)
+                    StartCoroutine(ServerManager.CreateFolder(SessionValues.TaskSelectionDataPath)); //Create SessionLevel Sub-Folder inside Data Folder
 
-                SessionValues.USE_StartButton = gameObject.AddComponent<USE_StartButton>();
-                SessionValues.USE_StartButton.StartButtonPrefab = StartButtonPrefabGO;
-
+                SetHumanPanelAndStartButton();
                 SummaryData.Init();
-
                 CreateSessionSettingsFolder();
 
                 if (SessionValues.SessionDef.SerialPortActive)
                 {
-
                     SessionValues.SerialPortController = new SerialPortThreaded();
                     if (SessionValues.SessionDef.SyncBoxActive)
                     {
@@ -298,7 +284,6 @@ namespace USE_ExperimentTemplate_Session
                     }
                 }
             });
-            //setupSession.AddLateUpdateMethod(() => AppendSerialData());
 
             setupSession.SpecifyTermination(() => iTask >= SessionValues.SessionDef.TaskMappings.Count && !waitForSerialPort && SessionValues.SessionDef.EyeTrackerActive, gazeCalibration);
             setupSession.SpecifyTermination(() => iTask >= SessionValues.SessionDef.TaskMappings.Count && !waitForSerialPort && !SessionValues.SessionDef.EyeTrackerActive, selectTask);
@@ -313,8 +298,7 @@ namespace USE_ExperimentTemplate_Session
                 SessionValues.EventCodeManager.SendCodeImmediate("SetupSessionEnds");
             });
 
-
-            // Canvas[] TaskSelectionCanvasses = null;
+            //GazeCalibration State---------------------------------------------------------------------------------------------------------------
             gazeCalibration.AddInitializationMethod(() =>
             {
                 FrameData.gameObject.SetActive(false);
@@ -326,11 +310,12 @@ namespace USE_ExperimentTemplate_Session
 
                 var GazeCalibrationCanvas = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas");
                 var GazeCalibrationScripts = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts");
-                var CalibrationCube = GazeCalibrationCanvas.Find("CalibrationCube");
+                GazeCalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+                //  CalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
+                //CalibrationCanvas.GetComponent<Canvas>().worldCamera = Camera.main;
 
                 GazeCalibrationCanvas.gameObject.SetActive(true);
                 GazeCalibrationScripts.gameObject.SetActive(true);
-                CalibrationCube.gameObject.SetActive(true);
             });
             gazeCalibration.SpecifyTermination(() => !GazeCalibrationTaskLevel.TrialLevel.runCalibration, () => selectTask, () =>
             {
@@ -338,8 +323,6 @@ namespace USE_ExperimentTemplate_Session
                 GazeCalibrationTaskLevel.ConfigName = "GazeCalibration";
                 GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas").gameObject.SetActive(false);
                 GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts").gameObject.SetActive(false);
-                GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas").Find("CalibrationCube").gameObject.SetActive(false);
-
                 if (SessionValues.SessionDef.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
                 {
                     TobiiEyeTrackerController.Instance.isCalibrating = false;
@@ -354,6 +337,8 @@ namespace USE_ExperimentTemplate_Session
             TaskButtonsContainer = null;
             Dictionary<string, GameObject> taskButtonGOs = new Dictionary<string, GameObject>();
             selectedConfigName = null;
+
+            //SelectTask State---------------------------------------------------------------------------------------------------------------
             selectTask.AddUniversalInitializationMethod(() =>
             {
                 if (SessionValues.SessionDef.PlayBackgroundMusic)
@@ -630,14 +615,13 @@ namespace USE_ExperimentTemplate_Session
 */            
             selectTask.SpecifyTermination(() => TasksFinished, finishSession);
 
+            //LoadTask State---------------------------------------------------------------------------------------------------------------
             loadTask.AddInitializationMethod(() =>
             {
-                // Make the selected task icon no longer interactable
                 TaskButtonsContainer.SetActive(false);
 
                 GameObject taskButton = taskButtonGOs[selectedConfigName];
                 RawImage image = taskButton.GetComponent<RawImage>();
-
 
                 if (!SessionValues.WebBuild) //Let patients play same task as many times as they want
                 {
@@ -654,8 +638,6 @@ namespace USE_ExperimentTemplate_Session
                 {
                     OnSceneLoaded(selectedConfigName, false);
                     CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigName == selectedConfigName);
-
-                    //selectedConfigsList.Add(CurrentTask.ConfigName);  
                 };
             });
 
@@ -667,7 +649,7 @@ namespace USE_ExperimentTemplate_Session
             loadTask.AddLateUpdateMethod(() =>
             {
                 AppendSerialData();
-                FrameData.AppendDataToBuffer();
+                StartCoroutine(FrameData.AppendDataToBuffer());
             });
 
             loadTask.SpecifyTermination(() => CurrentTask != null && CurrentTask.TaskLevelDefined, runTask, () =>
@@ -695,6 +677,8 @@ namespace USE_ExperimentTemplate_Session
 
             //automatically finish tasks after running one - placeholder for proper selection
             //runTask.AddLateUpdateMethod
+
+            //RunTask State---------------------------------------------------------------------------------------------------------------
             runTask.AddUniversalInitializationMethod(() =>
             {
                 SessionCam.gameObject.SetActive(false);
@@ -768,7 +752,6 @@ namespace USE_ExperimentTemplate_Session
                 // SerialSentData.folderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar +
                 //                             SerialSentData.GetNiceIntegers(4, taskCount + 1 * 2 - 1) + "_TaskSelection";
 
-
                 if (SessionValues.SessionDef.EyeTrackerActive)
                 {
                     SessionValues.GazeData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.TaskSelectionDataPath, "GazeData", "SessionLevel");
@@ -781,6 +764,7 @@ namespace USE_ExperimentTemplate_Session
                 FrameData.gameObject.SetActive(true);
             });
 
+            //FinishSession State---------------------------------------------------------------------------------------------------------------
             finishSession.AddInitializationMethod(() =>
             {
                 SessionValues.EventCodeManager.SendCodeImmediate("FinishSessionStarts");
@@ -845,6 +829,16 @@ namespace USE_ExperimentTemplate_Session
             {
                 Debug.LogError("FAILED TO LOAD PREFAB OR AUDIO CLIP FROM RESOURCES! Error Message: " + e.Message);
             }
+        }
+
+        private void SetHumanPanelAndStartButton()
+        {
+            SessionValues.HumanStartPanel = gameObject.AddComponent<HumanStartPanel>();
+            SessionValues.HumanStartPanel.SetSessionLevel(this);
+            SessionValues.HumanStartPanel.HumanStartPanelPrefab = HumanStartPanelPrefab;
+
+            SessionValues.USE_StartButton = gameObject.AddComponent<USE_StartButton>();
+            SessionValues.USE_StartButton.StartButtonPrefab = StartButtonPrefabGO;
         }
 
         private void SetDisplayController()
@@ -934,24 +928,7 @@ namespace USE_ExperimentTemplate_Session
             mainCameraCopy_Image = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
         }
 
-        private void SetWebFolderPaths_ContextsAndTaskIcons()
-        {
-            if(SessionValues.WebBuild)
-            {
-                if (SessionValues.UsingDefaultConfigs)
-                {
-                    SessionValues.SessionDef.TaskIconsFolderPath = "DefaultResources/TaskIcons";
-                    SessionValues.SessionDef.ContextExternalFilePath = "DefaultResources/Contexts";
-                }
-                else
-                {
-                    SessionValues.SessionDef.TaskIconsFolderPath = "Resources/TaskIcons"; //Path on server
-                    SessionValues.SessionDef.ContextExternalFilePath = "DefaultResources/Contexts"; //TEMPORARILY HAVING WEB BUILD USE DEFAUULT CONTEXTS
-                }
-            }
-        }
-
-        private void CreateSessionSettingsFolder() //Create Session Settings Folder inside Data Folder
+        private void CreateSessionSettingsFolder() //Create Session Settings Folder inside Data Folder and copy config folder into it
         {
             if (SessionValues.WebBuild)
             {
@@ -1007,16 +984,9 @@ namespace USE_ExperimentTemplate_Session
 
         private IEnumerator CreateSessionDataFolder(Action<bool> callbackBool)
         {
-            if (SessionValues.WebBuild)
-            {
-                //can we delete this line and have a single bool for completion of createFile
-                // yield return StartCoroutine(ServerManager.CreateSessionDataFolder()); //Create Session Data Folder
-                yield return StartCoroutine(ServerManager.CreateFolder(SessionValues.TaskSelectionDataPath)); //Create SessionLevel Sub-Folder inside Data Folder
-                //can we move this to non-server framedata creation line
-            }
-            yield return StartCoroutine(SessionData.CreateFile()); //Will also create session data folder for normal build
+            yield return StartCoroutine(SessionData.CreateFile());
             ServerManager.SessionDataFolderCreated = true;
-            LogWriter.StoreDataIsSet = true; //tell log writer when storeData boolean has been set (in this case, waiting until data folder is created)
+            LogWriter.StoreDataIsSet = true; //tell log writer when storeData boolean has been set (waiting until data folder is created)
             callbackBool?.Invoke(true);
         }
 
@@ -1025,14 +995,9 @@ namespace USE_ExperimentTemplate_Session
             SessionValues.InputManager = new GameObject("InputManager");
             SessionValues.InputManager.SetActive(true);
 
-
             InputTrackers = Instantiate(Resources.Load<GameObject>("InputTrackers"), SessionValues.InputManager.transform);
             SessionValues.MouseTracker = InputTrackers.GetComponent<MouseTracker>();
             SessionValues.GazeTracker = InputTrackers.GetComponent<GazeTracker>();
-
-
-            SessionValues.MouseTracker.ShotgunRaycast.SetShotgunVariables(SessionValues.SessionDef.ShotgunRayCastCircleSize_DVA, SessionValues.SessionDef.ParticipantDistance_CM, SessionValues.SessionDef.ShotgunRaycastSpacing_DVA);
-            SessionValues.GazeTracker.ShotgunRaycast.SetShotgunVariables(SessionValues.SessionDef.ShotgunRayCastCircleSize_DVA, SessionValues.SessionDef.ParticipantDistance_CM, SessionValues.SessionDef.ShotgunRaycastSpacing_DVA);
 
             SessionValues.SelectionTracker = new SelectionTracker();
             if (SessionValues.SessionDef.SelectionType.ToLower().Equals("gaze"))
@@ -1062,12 +1027,12 @@ namespace USE_ExperimentTemplate_Session
 
 
                     GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform); 
-                  /*  GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.transform.SetParent(TobiiEyeTrackerControllerGO.transform, true);
                     // Position and scale the cube as desired
                     cube.transform.position = new Vector3(0f, 1f, 60f);
                     cube.transform.localScale = new Vector3(106f, 62f, 0.1f);
-                    cube.SetActive(false);*/
+                    cube.SetActive(false);
 
                 }
             }
@@ -1340,6 +1305,7 @@ namespace USE_ExperimentTemplate_Session
             }
             else
                 tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName);
+
             //   tl.FilePrefix = FilePrefix;
             //  tl.StoreData = StoreData;
             //   tl.SubjectID = SubjectID;

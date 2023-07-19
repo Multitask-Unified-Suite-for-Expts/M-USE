@@ -7,6 +7,7 @@ using UnityEngine;
 using USE_Settings;
 using USE_ExperimentTemplate_Task;
 using System.Linq;
+using System.Collections;
 
 public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 {
@@ -48,8 +49,9 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         BlockDefType = typeof(ContinuousRecognition_BlockDef);
         TrialDefType = typeof(ContinuousRecognition_TrialDef);
         StimDefType = typeof(ContinuousRecognition_StimDef);
-    } 
-    public override void DefineControlLevel() //RUNS WHEN THE TASK IS DEFINED!
+    }
+
+    public override void DefineControlLevel()
     {
         trialLevel = (ContinuousRecognition_TrialLevel)TrialLevel;
         
@@ -67,15 +69,17 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         {
             string contextFilePath;
             if (SessionValues.WebBuild)
+            {
                 contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{currentBlock.ContextName}";
+                if (!SessionValues.UsingDefaultConfigs)
+                    contextFilePath += ".png";
+            }
             else
                 contextFilePath = trialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
 
-            RenderSettings.skybox = CreateSkybox(contextFilePath);
+            StartCoroutine(HandleSkybox(contextFilePath));
 
             trialLevel.ContextActive = true;
-
-            SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
 
             trialLevel.TokenFBController.SetTotalTokensNum(currentBlock.NumTokenBar);
             trialLevel.TokenFBController.SetTokenBarValue(currentBlock.InitialTokenAmount);

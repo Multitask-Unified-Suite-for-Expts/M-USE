@@ -26,6 +26,8 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     VisualSearch_TrialDef vsTD;
     //private VisualSearch_TrialDef vsTD => GetCurrentTrialDef<VisualSearch_TrialDef>();
     VisualSearch_TrialLevel vsTL;
+
+
     public override void DefineControlLevel()
     {
         
@@ -46,13 +48,15 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 
             string contextFilePath;
             if (SessionValues.WebBuild)
+            {
                 contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{vsBD.ContextName}";
+                if (!SessionValues.UsingDefaultConfigs)
+                    contextFilePath += ".png";
+            }
             else
                 contextFilePath = vsTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, vsBD.ContextName, "LinearDark");
 
-            RenderSettings.skybox = CreateSkybox(contextFilePath);
-
-            SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
+            StartCoroutine(HandleSkybox(contextFilePath));
 
             vsTL.TokensWithStimOn = vsBD.TokensWithStimOn;
             vsTL.ResetBlockVariables();

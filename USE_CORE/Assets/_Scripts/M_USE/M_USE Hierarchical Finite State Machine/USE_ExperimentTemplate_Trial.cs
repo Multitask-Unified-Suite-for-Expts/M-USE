@@ -598,6 +598,57 @@ namespace USE_ExperimentTemplate_Trial
             return contextPath;
         }
 
+
+        public void LoadTexturesFromServer()
+        {
+            StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/HorizontalStripes.png", result =>
+            {
+                if (result != null)
+                {
+                    HeldTooLongTexture = result;
+                    TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
+                }
+                else
+                    Debug.Log("HELDTOOLONG TEXTURE NULL FROM SERVER!");
+            }));
+
+            StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/VerticalStripes.png", result =>
+            {
+                if (result != null)
+                {
+                    Debug.Log("Got the HeldTooShort Texture from the server!");
+                    HeldTooShortTexture = result;
+                    TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
+                }
+                else
+                    Debug.Log("HELDTOOSHORT TEXTURE NULL FROM SERVER!");
+            }));
+
+            StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/bg.png", result =>
+            {
+                if (result != null)
+                {
+                    Debug.Log("Got the BackdropStripesTexture from the server!");
+                    BackdropStripesTexture = result;
+                    TouchFBController.MovedTooFar_Texture = BackdropStripesTexture;
+                }
+                else
+                    Debug.Log("BACKDROP_STRIPES_TEXTURE NULL FROM SERVER");
+
+            }));
+
+            StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/Concrete4.png", result =>
+            {
+                if (result != null)
+                {
+                    Debug.Log("Got the THR_BackDropTexture from the server!");
+                    THR_BackdropTexture = result;
+                }
+                else
+                    Debug.Log("THR BACKDROP TEXTURE NULL FROM SERVER");
+            }));
+        }
+
         public void LoadTexturesFromResources()
         {
             HeldTooLongTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/HorizontalStripes");

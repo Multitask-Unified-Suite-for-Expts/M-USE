@@ -316,7 +316,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath,"itiImage"));
+                StartCoroutine(HandleSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage")));
+                //RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath,"itiImage"));
                 SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
             }
         });

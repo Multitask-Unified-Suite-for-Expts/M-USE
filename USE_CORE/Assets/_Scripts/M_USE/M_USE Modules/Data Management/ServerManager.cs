@@ -31,14 +31,9 @@ public static class ServerManager //Used with the PHP scripts
     }
 
     private static List<string> foldersCreatedList = new List<string>();
-    public static bool SessionDataFolderCreated;
 
+    public static bool SessionDataFolderCreated; //used for logWriter
 
-    public static IEnumerator CreateSessionDataFolder()
-    {
-        yield return CreateFolder(SessionDataFolderPath);
-        SessionDataFolderCreated = true;
-    }
 
     public static IEnumerator CreateFolder(string folderPath)
     {
@@ -57,24 +52,22 @@ public static class ServerManager //Used with the PHP scripts
     {
         string url = $"{ServerURL}/getFolderNames.php?directoryPath={RootConfigFolder}";
 
-        using (UnityWebRequest request = UnityWebRequest.Get(url))
-        {
-            var operation = request.SendWebRequest();
-            yield return operation;
+        using UnityWebRequest request = UnityWebRequest.Get(url);
+        var operation = request.SendWebRequest();
+        yield return operation;
 
-            if (request.result == UnityWebRequest.Result.Success)
-            {
-                Debug.Log("Successfully got the folder names from the server!");
-                string plainTextResponse = request.downloadHandler.text;
-                string[] folderNameArray = plainTextResponse.Split(',');
-                List<string> folderNames = new List<string>(folderNameArray);
-                callback?.Invoke(folderNames);
-            }
-            else
-            {
-                Debug.Log($"An error occurred while getting folder names. Error: {request.error}");
-                callback?.Invoke(null);
-            }
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log("Successfully got the folder names from the server!");
+            string plainTextResponse = request.downloadHandler.text;
+            string[] folderNameArray = plainTextResponse.Split(',');
+            List<string> folderNames = new List<string>(folderNameArray);
+            callback?.Invoke(folderNames);
+        }
+        else
+        {
+            Debug.Log($"An error occurred while getting folder names. Error: {request.error}");
+            callback?.Invoke(null);
         }
     }
 
@@ -111,12 +104,10 @@ public static class ServerManager //Used with the PHP scripts
 
     private static IEnumerator WriteFileCoroutine(string url, WWWForm formData)
     {
-        using (UnityWebRequest request = UnityWebRequest.Post(url, formData))
-        {
-            request.SetRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            yield return request.SendWebRequest();
-            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Success writing file to server!" : $"FAILED writing file! | Error: {request.error}");
-        }
+        using UnityWebRequest request = UnityWebRequest.Post(url, formData);
+        request.SetRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        yield return request.SendWebRequest();
+        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Success writing file to server!" : $"FAILED writing file! | Error: {request.error}");
     }
 
     public static IEnumerator GetFileStringAsync(string path, string searchString, Action<string> callback)
@@ -148,24 +139,22 @@ public static class ServerManager //Used with the PHP scripts
     {
         string url = $"{ServerURL}/getFile.php?path={path}&searchString={searchString}";
 
-        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        using UnityWebRequest request = UnityWebRequest.Get(url);
+        var operation = request.SendWebRequest();
+
+        while (!operation.isDone)
+            yield return null;
+
+        byte[] result = null;
+        if (request.result == UnityWebRequest.Result.Success)
         {
-            var operation = request.SendWebRequest();
-
-            while (!operation.isDone)
-                yield return null;
-
-            byte[] result = null;
-            if (request.result == UnityWebRequest.Result.Success)
-            {
-                result = request.downloadHandler.data;
-                Debug.Log(result.Length == 0 ? ("File Not Found on Server: " + searchString) : ("Found File On Server: " + searchString));
-            }
-            else
-                Debug.Log($"ERROR FINDING FILE: {searchString} | ERROR: {request.error}");
-        
-            callback?.Invoke(result);
+            result = request.downloadHandler.data;
+            Debug.Log(result.Length == 0 ? ("File Not Found on Server: " + searchString) : ("Found File On Server: " + searchString));
         }
+        else
+            Debug.Log($"ERROR FINDING FILE: {searchString} | ERROR: {request.error}");
+
+        callback?.Invoke(result);
     }
 
 
@@ -173,31 +162,27 @@ public static class ServerManager //Used with the PHP scripts
     {
         string url = $"{ServerURL}/copyFolder.php?sourcePath={sourcePath}&destinationPath={destinationPath}";
 
-        using (UnityWebRequest request = UnityWebRequest.Get(url))
-        {
-            yield return request.SendWebRequest();
-            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Folder copied successfully!" : $"FAILED TO COPY FOLDER! ERROR: {request.error}");
-        }
+        using UnityWebRequest request = UnityWebRequest.Get(url);
+        yield return request.SendWebRequest();
+        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Folder copied successfully!" : $"FAILED TO COPY FOLDER! ERROR: {request.error}");
     }
 
     public static IEnumerator LoadTextureFromServer(string filePath, Action<Texture2D> callback)
     {
         string url = $"{ServerURL}/{filePath}";
 
-        using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(url))
-        {
-            yield return request.SendWebRequest();
+        using UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
+        yield return request.SendWebRequest();
 
-            if (request.result == UnityWebRequest.Result.Success)
-            {
-                Texture2D tex = DownloadHandlerTexture.GetContent(request);
-                callback?.Invoke(tex);
-            }
-            else
-            {
-                Debug.Log($"FAILED TO LOAD TEXTURE FROM SERVER | ERROR: {request.error}");
-                callback?.Invoke(null);
-            }
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Texture2D tex = DownloadHandlerTexture.GetContent(request);
+            callback?.Invoke(tex);
+        }
+        else
+        {
+            Debug.Log($"FAILED TO LOAD TEXTURE FROM SERVER | ERROR: {request.error}");
+            callback?.Invoke(null);
         }
     }
 

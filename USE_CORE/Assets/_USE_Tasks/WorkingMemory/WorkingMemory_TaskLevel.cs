@@ -7,6 +7,7 @@ using USE_ExperimentTemplate_Task;
 using USE_Settings;
 using WorkingMemory_Namespace;
 
+
 public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
 {
     WorkingMemory_BlockDef wmBD => GetCurrentBlockDef<WorkingMemory_BlockDef>();
@@ -33,13 +34,15 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
 
             string contextFilePath;
             if (SessionValues.WebBuild)
+            {
                 contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{wmBD.ContextName}";
+                if (!SessionValues.UsingDefaultConfigs)
+                    contextFilePath += ".png";
+            }
             else
                 contextFilePath = wmTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, wmBD.ContextName, "LinearDark");
 
-            RenderSettings.skybox = CreateSkybox(contextFilePath);
-
-            SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
+            StartCoroutine(HandleSkybox(contextFilePath));
 
             wmTL.ResetBlockVariables();
             wmTL.TokenFBController.SetTotalTokensNum(wmBD.NumTokenBar);

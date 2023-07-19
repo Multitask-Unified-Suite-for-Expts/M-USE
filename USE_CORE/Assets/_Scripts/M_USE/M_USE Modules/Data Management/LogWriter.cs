@@ -128,9 +128,8 @@ public class LogWriter : MonoBehaviour
                 yield return ServerManager.CreateFolder(ServerLogFolderPath);
         }
         else
-        {
             Directory.CreateDirectory(LocalLogFolderPath);
-        }
+        
         CreatingLogFolder = false;
         LogFolderCreated = true;
     }

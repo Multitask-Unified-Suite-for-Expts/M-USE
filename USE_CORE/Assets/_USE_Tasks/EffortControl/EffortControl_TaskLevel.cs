@@ -209,7 +209,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             decimal percentChoseSameReward = Math.Round(decimal.Divide(NumSameRewardChosen_Task, (trialLevel.TrialCount_InTask)), 2) * 100;
             decimal percentChoseSameEffort = Math.Round(decimal.Divide(NumSameEffortChosen_Task, (trialLevel.TrialCount_InTask)), 2) * 100;
             
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" + 
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>" + 
                                             $"\n<b># Trials:</b> {trialLevel.TrialCount_InTask} ({percentAbortedTrials}% aborted)" + 
                                             $"\t<b># Blocks:</b> {BlockCount}" + 
                                             $"\t<b># Reward Pulses:</b> {RewardPulses_Task}" +
@@ -220,7 +220,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         }
         else
         {
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>");
         }
             
     }

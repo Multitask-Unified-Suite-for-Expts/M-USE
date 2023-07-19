@@ -31,7 +31,7 @@ namespace USE_ExperimentTemplate_Task
     {
         public string PrefabPath;
 
-        public string ConfigName;
+        public string ConfigFolderName;
         public string TaskName;
         public string TaskProjectFolder;
         [HideInInspector] public int BlockCount;
@@ -131,16 +131,18 @@ namespace USE_ExperimentTemplate_Task
             {
                 ReadSettingsFiles();
                 while (!AllDefsImported)
+                {
                     yield return new WaitForEndOfFrame();
-                TrialDefImported = false;
-                BlockDefImported = false;
-                TaskDefImported = false;
+                }
 
                 HandleCustomSettings();
 
                 HandleTrialAndBlockDefs(verifyOnly);
                 while (!TrialAndBlockDefsHandled)
+                {
                     yield return new WaitForEndOfFrame();
+                }
+
                 TrialAndBlockDefsHandled = false;
 
                 FindStims();
@@ -414,7 +416,7 @@ namespace USE_ExperimentTemplate_Task
 
 
             //Setup data management
-            TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
+            TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigFolderName;
 
             if (SessionValues.WebBuild && SessionValues.SessionDef.StoreData)
             {
@@ -430,23 +432,23 @@ namespace USE_ExperimentTemplate_Task
                 
                 else
                      // Store Data in the Task / Gaze Calibration folder if not running at the session level
-                    TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigName + Path.DirectorySeparatorChar + "InTask_GazeCalibration";
+                    TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigFolderName + Path.DirectorySeparatorChar + "InTask_GazeCalibration";
                 
-                ConfigName = "GazeCalibration";
+                ConfigFolderName = "GazeCalibration";
 
             }
 
 
-            string filePrefix = $"{SessionValues.FilePrefix}_{ConfigName}";
+            string filePrefix = $"{SessionValues.FilePrefix}_{ConfigFolderName}";
 
             string subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "BlockData";
-            BlockData = (BlockData)SessionValues.SessionDataControllers.InstantiateDataController<BlockData>("BlockData", ConfigName, SessionValues.SessionDef.StoreData, subFolderPath);
+            BlockData = (BlockData)SessionValues.SessionDataControllers.InstantiateDataController<BlockData>("BlockData", ConfigFolderName, SessionValues.SessionDef.StoreData, subFolderPath);
             BlockData.taskLevel = this;
             BlockData.sessionLevel = SessionValues.SessionLevel;
             BlockData.fileName = filePrefix + "__BlockData.txt";
 
             subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "TrialData";
-            TrialData = (TrialData)SessionValues.SessionDataControllers.InstantiateDataController<TrialData>("TrialData", ConfigName, SessionValues.SessionDef.StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
+            TrialData = (TrialData)SessionValues.SessionDataControllers.InstantiateDataController<TrialData>("TrialData", ConfigFolderName, SessionValues.SessionDef.StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
             TrialData.taskLevel = this;
             TrialData.trialLevel = TrialLevel;
             TrialData.sessionLevel = SessionValues.SessionLevel;
@@ -455,7 +457,7 @@ namespace USE_ExperimentTemplate_Task
             TrialData.fileName = filePrefix + "__TrialData.txt";
 
             subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "FrameData";
-            FrameData = (FrameData)SessionValues.SessionDataControllers.InstantiateDataController<FrameData>("FrameData", ConfigName, SessionValues.SessionDef.StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
+            FrameData = (FrameData)SessionValues.SessionDataControllers.InstantiateDataController<FrameData>("FrameData", ConfigFolderName, SessionValues.SessionDef.StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
             FrameData.taskLevel = this;
             FrameData.trialLevel = TrialLevel;
             FrameData.sessionLevel = SessionValues.SessionLevel;
@@ -888,6 +890,8 @@ namespace USE_ExperimentTemplate_Task
         public void HandleTrialAndBlockDefs(bool verifyOnly)
         {
             //handling of block and trial defs so that each BlockDef contains a TrialDef[] array
+            
+            
             if (AllTrialDefs == null || AllTrialDefs.Count() == 0) //no trialDefs have been imported from settings files
             {
                 if (BlockDefs == null)
@@ -1387,7 +1391,7 @@ namespace USE_ExperimentTemplate_Task
 
         public virtual void SetTaskSummaryString()
         {
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>");
         }
 
 

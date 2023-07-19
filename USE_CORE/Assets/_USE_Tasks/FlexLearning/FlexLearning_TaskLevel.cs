@@ -176,7 +176,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         if (flTL.TrialCount_InTask != 0)
         {
             CurrentTaskSummaryString.Clear();
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" + 
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>" + 
                                                         $"\n<b># Trials:</b> {flTL.TrialCount_InTask} ({(Math.Round(decimal.Divide(AbortedTrials_InTask,(flTL.TrialCount_InTask)),2))*100}% aborted)" + 
                                                         $"\t<b># Blocks:</b> {BlockCount}" + 
                                                         $"\t<b># Reward Pulses:</b> {NumRewardPulses_InTask}" +
@@ -187,7 +187,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         }
         else
         {
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>");
         }
     }
 

@@ -344,7 +344,7 @@ public class MazeReactionTest_TaskLevel : ControlLevel_Task_Template
             percentAborted = 0;
     
         CurrentTaskSummaryString.Clear();
-        CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" +
+        CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>" +
                                         $"\n<b># Trials:</b> {mrtTL.TrialCount_InTask} ({percentAborted}% aborted)" +
                                         $"\t<b># Blocks:</b> {BlockCount}" +
                                         $"\t<b># Reward Pulses:</b> {numRewardPulses_InTask}" +

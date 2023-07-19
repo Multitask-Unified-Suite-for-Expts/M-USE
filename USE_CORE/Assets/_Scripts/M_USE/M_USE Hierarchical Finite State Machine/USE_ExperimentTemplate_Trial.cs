@@ -246,7 +246,7 @@ namespace USE_ExperimentTemplate_Trial
             {
                 GazeCalibrationTaskLevel.TaskCam = TaskLevel.TaskCam;
 
-                GazeCalibrationTaskLevel.ConfigName = "GazeCalibration";
+                GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
                 GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
 
                 UnityEngine.SceneManagement.Scene originalScene = SceneManager.GetSceneByName(TaskLevel.TaskName);

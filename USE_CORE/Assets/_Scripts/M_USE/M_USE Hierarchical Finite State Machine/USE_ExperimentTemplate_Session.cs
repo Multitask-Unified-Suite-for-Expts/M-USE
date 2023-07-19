@@ -149,7 +149,7 @@ namespace USE_ExperimentTemplate_Session
                 }
             });
 
-            string selectedConfigName = null;
+            string selectedConfigFolderName = null;
             bool taskAutomaticallySelected = false;
 
             //LoadSessionSettings State---------------------------------------------------------------------------------------------------------------
@@ -184,7 +184,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 SetupInputManagement(selectTask, loadTask);
                 SetupSessionDataControllers();
-                SessionData.AddDatum("SelectedTaskConfigName", () => selectedConfigName);
+                SessionData.AddDatum("SelectedTaskConfigName", () => selectedConfigFolderName);
                 SessionData.AddDatum("TaskAutomaticallySelected", () => taskAutomaticallySelected);
             });
 
@@ -255,14 +255,16 @@ namespace USE_ExperimentTemplate_Session
                     //Have to add calibration task level as child of calibration state here, because it isn't available prior
                     GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
                     GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
-                    GazeCalibrationTaskLevel.ConfigName = "GazeCalibration";
-                    PopulateTaskLevel(GazeCalibrationTaskLevel, false);
-                    gazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
-                    GazeCalibrationTaskLevel.TrialLevel.TaskLevel = GazeCalibrationTaskLevel;
-                    GazeCalibrationTaskLevel.gameObject.SetActive(false);
+                    GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
+                    StartCoroutine(PopulateTaskLevel(GazeCalibrationTaskLevel, false, result =>
+                    {
+                        GazeCalibrationTaskLevel = result;
+                        gazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
+                        GazeCalibrationTaskLevel.TrialLevel.TaskLevel = GazeCalibrationTaskLevel;
+                        GazeCalibrationTaskLevel.gameObject.SetActive(false);
+                    }));
                 }
-
-
+                
                 if (iTask < SessionValues.SessionDef.TaskMappings.Count)
                 {
                     if (!SceneLoading)
@@ -270,23 +272,23 @@ namespace USE_ExperimentTemplate_Session
                         SceneLoading = true;
                         taskName = (string)SessionValues.SessionDef.TaskMappings[iTask];
                         loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-                        string configName = SessionValues.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
+                        string configFolderName = SessionValues.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
                         // Unload it after memory because this loads the assets into memory but destroys the objects
                         loadScene.completed += (_) =>
                         {
                             SessionSettings.Save();
-                            OnSceneLoaded(configName, true);
-                            SessionSettings.Restore();
-                            SceneManager.UnloadSceneAsync(taskName);
-                            SceneLoading = false;
+                            OnTaskSceneLoaded(configFolderName, true);
+                            // SessionSettings.Restore();
+                            // SceneManager.UnloadSceneAsync(taskName);
+                            // SceneLoading = false;
                             iTask++;
                         };
                     }
                 }
             });
 
-            setupSession.SpecifyTermination(() => iTask >= SessionValues.SessionDef.TaskMappings.Count && !waitForSerialPort && SessionValues.SessionDef.EyeTrackerActive, gazeCalibration);
-            setupSession.SpecifyTermination(() => iTask >= SessionValues.SessionDef.TaskMappings.Count && !waitForSerialPort && !SessionValues.SessionDef.EyeTrackerActive, selectTask);
+            setupSession.SpecifyTermination(() => !SceneLoading && iTask >= SessionValues.SessionDef.TaskMappings.Count && !waitForSerialPort && SessionValues.SessionDef.EyeTrackerActive, gazeCalibration);
+            setupSession.SpecifyTermination(() => !SceneLoading && iTask >= SessionValues.SessionDef.TaskMappings.Count && !waitForSerialPort && !SessionValues.SessionDef.EyeTrackerActive, selectTask);
             setupSession.AddDefaultTerminationMethod(() =>
             {
                 SessionSettings.Save();
@@ -320,7 +322,7 @@ namespace USE_ExperimentTemplate_Session
             gazeCalibration.SpecifyTermination(() => !GazeCalibrationTaskLevel.TrialLevel.runCalibration, () => selectTask, () =>
             {
                 GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
-                GazeCalibrationTaskLevel.ConfigName = "GazeCalibration";
+                GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
                 GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas").gameObject.SetActive(false);
                 GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts").gameObject.SetActive(false);
                 if (SessionValues.SessionDef.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
@@ -336,7 +338,7 @@ namespace USE_ExperimentTemplate_Session
 
             TaskButtonsContainer = null;
             Dictionary<string, GameObject> taskButtonGOs = new Dictionary<string, GameObject>();
-            selectedConfigName = null;
+            selectedConfigFolderName = null;
 
             //SelectTask State---------------------------------------------------------------------------------------------------------------
             selectTask.AddUniversalInitializationMethod(() =>
@@ -402,7 +404,7 @@ namespace USE_ExperimentTemplate_Session
                 StartCoroutine(FrameData.CreateFile());
 
                 SessionSettings.Restore();
-                selectedConfigName = null;
+                selectedConfigFolderName = null;
                 taskAutomaticallySelected = false; // gives another chance to select even if previous task loading was due to timeout
 
                 SessionCam.gameObject.SetActive(true);
@@ -582,14 +584,14 @@ namespace USE_ExperimentTemplate_Session
                     string chosenGO = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.name;
                     if (chosenGO != null && taskButtonGOs.ContainsKey(chosenGO))
                     {
-                        selectedConfigName = chosenGO;
+                        selectedConfigFolderName = chosenGO;
                         taskAutomaticallySelected = false;
                     }
                 }
                 AppendSerialData();
                 StartCoroutine(FrameData.AppendDataToBuffer());
             });
-            selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask, () => ResetSelectedTaskButtonSize());
+            selectTask.SpecifyTermination(() => selectedConfigFolderName != null, loadTask, () => ResetSelectedTaskButtonSize());
 
 
             // Don't have automatic task selection if we encountered an error during setup
@@ -620,7 +622,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 TaskButtonsContainer.SetActive(false);
 
-                GameObject taskButton = taskButtonGOs[selectedConfigName];
+                GameObject taskButton = taskButtonGOs[selectedConfigFolderName];
                 RawImage image = taskButton.GetComponent<RawImage>();
 
                 if (!SessionValues.WebBuild) //Let patients play same task as many times as they want
@@ -631,13 +633,13 @@ namespace USE_ExperimentTemplate_Session
                         Destroy(hoverEffect);
                 }
                 
-                string taskName = (string)SessionValues.SessionDef.TaskMappings[selectedConfigName];
+                string taskName = (string)SessionValues.SessionDef.TaskMappings[selectedConfigFolderName];
                 loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-                
+                SceneLoading = true;
                 loadScene.completed += (_) =>
                 {
-                    OnSceneLoaded(selectedConfigName, false);
-                    CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigName == selectedConfigName);
+                    OnTaskSceneLoaded(selectedConfigFolderName, false);
+                    //CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigFolderName == selectedConfigFolderName);
                 };
             });
 
@@ -652,7 +654,7 @@ namespace USE_ExperimentTemplate_Session
                 StartCoroutine(FrameData.AppendDataToBuffer());
             });
 
-            loadTask.SpecifyTermination(() => CurrentTask != null && CurrentTask.TaskLevelDefined, runTask, () =>
+            loadTask.SpecifyTermination(() => !SceneLoading && CurrentTask != null && CurrentTask.TaskLevelDefined, runTask, () =>
             {
                 Starfield.SetActive(false);
                 runTask.AddChildLevel(CurrentTask);
@@ -715,7 +717,7 @@ namespace USE_ExperimentTemplate_Session
                 if (PreviousTaskSummaryString != null && CurrentTask.CurrentTaskSummaryString != null)
                     PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
 
-                StartCoroutine(SummaryData.AddTaskRunData(CurrentTask.ConfigName, CurrentTask, CurrentTask.GetTaskSummaryData()));
+                StartCoroutine(SummaryData.AddTaskRunData(CurrentTask.ConfigFolderName, CurrentTask, CurrentTask.GetTaskSummaryData()));
 
                 StartCoroutine(SessionData.AppendDataToBuffer());
                 StartCoroutine(SessionData.AppendDataToFile());
@@ -1255,18 +1257,59 @@ namespace USE_ExperimentTemplate_Session
             }
             return path;
         }
-
-        public ControlLevel_Task_Template PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly)
+        
+        void OnTaskSceneLoaded(string configFolderName, bool verifyOnly)
         {
+            //We need to wait until the scene is loaded (async) to get
+            //the task type in order to call PrepareTaskLevel
+            string taskName = (string)SessionValues.SessionDef.TaskMappings[configFolderName];
+            var methodInfo = GetType().GetMethod(nameof(this.GetTaskLevelType));
+            
+            Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
+            MethodInfo GetTaskLevelType = methodInfo.MakeGenericMethod(new Type[] { taskType });
+            GetTaskLevelType.Invoke(this, new object[] { configFolderName, verifyOnly });
+            
+            
+        }
+
+        public void GetTaskLevelType<T>(string configFolderName, bool verifyOnly) where T : ControlLevel_Task_Template
+        {
+            //Gets the task level type using reflection which cannot be done outside an invoked method
+            string taskName = (string)SessionValues.SessionDef.TaskMappings[configFolderName];
+            ControlLevel_Task_Template tl = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
+            // return tl as ControlLevel_Task_Template; 
+            //it would be nice to return type T and 
+            tl.ConfigFolderName = configFolderName;
+            
+            StartCoroutine((PopulateTaskLevel(tl, verifyOnly, result =>
+            {
+                if (result != null)
+                {
+                    tl = result;
+                    if (verifyOnly)
+                    {
+                        SessionSettings.Restore();
+                        SceneManager.UnloadSceneAsync(taskName);
+                    }
+                    else
+                        CurrentTask = tl;
+
+                    SceneLoading = false;
+                }
+                else
+                {
+                    Debug.Log("Tasklevel result is null");
+                }
+            })));
+        }
+
+        IEnumerator PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly, Action<ControlLevel_Task_Template> callback)
+        {
+            if (tl.TaskCam == null)
+                tl.TaskCam = GameObject.Find(tl.TaskName + "_Camera").GetComponent<Camera>();
+
+            tl.TaskCam.gameObject.SetActive(false);
 	        tl.BlockResults_AudioClip = BlockResults_AudioClip;
-            //tl.USE_StartButton = USE_StartButton;
-            //tl.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
-            //tl.HumanStartPanel = HumanStartPanel;
-           // tl.IsHuman = IsHuman;
-           // tl.DisplayController = DisplayController;
-           // tl.SessionDataControllers = SessionDataControllers;
-           // tl.LocateFile = LocateFile;
-           // tl.SessionLevelDataPath = SessionLevelDataPath;
 
             tl.BlockResultsPrefab = BlockResultsPrefab;
             tl.BlockResults_GridElementPrefab = BlockResults_GridElementPrefab;
@@ -1274,7 +1317,7 @@ namespace USE_ExperimentTemplate_Session
 
             if (SessionValues.UsingDefaultConfigs)
             {
-                tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
+                tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigFolderName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
 
                 //Write Task Config Folder and its files to Persistant data path for Webbuild using default configs---------------------
                 if (!Directory.Exists(tl.TaskConfigPath))
@@ -1304,98 +1347,21 @@ namespace USE_ExperimentTemplate_Session
                 }
             }
             else
-                tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigName);
-
-            //   tl.FilePrefix = FilePrefix;
-            //  tl.StoreData = StoreData;
-            //   tl.SubjectID = SubjectID;
-            //   tl.SessionID = SessionID;
-            // tl.SerialRecvData = SerialRecvData;
-            // tl.SerialSentData = SerialSentData;
-            // tl.GazeData = GazeData;
-
-            //    tl.SelectionTracker = SelectionTracker;
-
-            // tl.EyeTrackerActive = EyeTrackerActive;
-
-            // if (EyeTrackerActive)
-            // {
-            //     tl.GazeTracker = GazeTracker;
-            //    // tl.TobiiEyeTrackerController = TobiiEyeTrackerController;
-            // }
-            //tl.MouseTracker = MouseTracker;
-
-            // tl.InputManager = InputManager;
-            //   tl.SelectionType = SelectionType;
-
-            //  tl.ContextExternalFilePath = ContextExternalFilePath;
-            //   tl.SerialPortActive = SerialPortActive;
-            // tl.SyncBoxActive = SyncBoxActive;
-            //   tl.EventCodeManager = EventCodeManager;
-            //  tl.EventCodesActive = EventCodesActive;
-            // tl.SessionEventCodes = SessionValues.SessionEventCodes;
-            // if (SerialPortActive)
-            //     tl.SerialPortController = SerialPortController;
-            /*Debug.Log("IS THE SyncBoxController  NULL? " + SessionValues.SyncBoxController.SessionEventCodes == null ? "YES" : "NO");
-            Debug.Log("IS THE EventCodeManager  NULL? " + SessionValues.EventCodeManager.SessionEventCodes == null ? "YES" : "NO");
-            if (SessionValues.SessionDef.SyncBoxActive)
+                tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigFolderName);
+            
+            yield return StartCoroutine(tl.DefineTaskLevel(verifyOnly));
+            if (verifyOnly)
             {
-                SessionValues.SyncBoxController.SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
-             //   tl.SyncBoxController = SyncBoxController;
-            }*/
-            // tl.ShotgunRaycastCircleSize_DVA = ShotgunRaycastCircleSize_DVA;
-            // tl.ShotgunRaycastSpacing_DVA = ShotgunRaycastSpacing_DVA;
-            // tl.ParticipantDistance_CM = ParticipantDistance_CM;
-
-            //
-            // if (SessionSettings.SettingExists("Session", "RewardPulsesActive"))
-            //     tl.RewardPulsesActive = (bool)SessionSettings.Get("Session", "RewardPulsesActive");
-            // else
-            //     tl.RewardPulsesActive = false;
-            //
-            // if (SessionSettings.SettingExists("Session", "SonicationActive"))
-            //     tl.SonicationActive = (bool)SessionSettings.Get("Session", "SonicationActive");
-            // else
-            //     tl.SonicationActive = false;
-
-
-            StartCoroutine(tl.DefineTaskLevel(verifyOnly));
-            //ActiveTaskTypes.Add(tl.TaskName, tl.TaskLevelType);
-            // Don't add task to ActiveTaskLevels if we're just verifying
-            if (verifyOnly) return tl;
+                callback?.Invoke(tl);
+                yield break;
+            }
 
             ActiveTaskLevels.Add(tl);
             if (tl.TaskCanvasses != null)
                 foreach (Canvas canvas in tl.TaskCanvasses)
                     canvas.gameObject.SetActive(true);
-            return tl;
+            callback?.Invoke(tl);
         }
-
-
-        void OnSceneLoaded(string configName, bool verifyOnly)
-        {
-            string taskName = (string)SessionValues.SessionDef.TaskMappings[configName];
-            var methodInfo = GetType().GetMethod(nameof(this.PrepareTaskLevel));
-            
-            Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
-            MethodInfo prepareTaskLevel = methodInfo.MakeGenericMethod(new Type[] { taskType });
-            prepareTaskLevel.Invoke(this, new object[] { configName, verifyOnly });
-            // TaskSceneLoaded = true;
-            SceneLoading = false;
-        }
-
-        public void PrepareTaskLevel<T>(string configName, bool verifyOnly) where T : ControlLevel_Task_Template
-        {
-            string taskName = (string)SessionValues.SessionDef.TaskMappings[configName];
-            ControlLevel_Task_Template tl = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
-            tl.ConfigName = configName;
-            tl = PopulateTaskLevel(tl, verifyOnly);
-            if (tl.TaskCam == null)
-                tl.TaskCam = GameObject.Find(taskName + "_Camera").GetComponent<Camera>();
-
-            tl.TaskCam.gameObject.SetActive(false);
-        }
-
 
 #if UNITY_STANDALONE_WIN
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]

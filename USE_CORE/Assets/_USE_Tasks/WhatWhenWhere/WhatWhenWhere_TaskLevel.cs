@@ -121,7 +121,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
             decimal percentAbortedTrials = (Math.Round(decimal.Divide(AbortedTrials_InTask, (wwwTL.TrialCount_InTask)), 2)) * 100;
 
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" +
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>" +
                                             $"\n<b># Trials:</b> {wwwTL.TrialCount_InTask} ({percentAbortedTrials}% aborted)" +
                                             $"\t<b># Blocks:</b> {BlockCount}" +
                                             $"\t<b># Reward Pulses:</b> {NumRewardPulses_InTask}" +
@@ -130,7 +130,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         }
         else
         {
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>");
         }
             
     }

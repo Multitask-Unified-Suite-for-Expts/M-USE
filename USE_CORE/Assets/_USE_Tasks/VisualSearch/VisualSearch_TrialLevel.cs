@@ -482,7 +482,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                                                                                                               ////configured token fb duration
         configUIVariablesLoaded = true;
     }
-    void SetTrialSummaryString()
+    private void SetTrialSummaryString()
     {
         TrialSummaryString = "Selected Object Index: " + SelectedStimIndex +
                              "\nSelected Object Location: " + SelectedStimLocation +

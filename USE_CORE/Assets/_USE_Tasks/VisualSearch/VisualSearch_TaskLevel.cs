@@ -114,9 +114,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
                                       "\nNum Reward Given: " + vsTL.NumRewardPulses_InBlock + 
                                       "\nNum Token Bar Filled: " + vsTL.NumTokenBarFull_InBlock +
                                       "\nTotal Tokens Collected: " + vsTL.TotalTokensCollected_InBlock);
-        BlockSummaryString.AppendLine(CurrentBlockString);
-        /*if (PreviousBlocksString.Length > 0)
-            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());*/
     }
 
     public override void SetTaskSummaryString()
@@ -188,7 +185,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     }
     public void ClearStrings()
     {
-        CurrentBlockString = "";
         BlockSummaryString.Clear();
     }
     public void ResetTaskVariables()

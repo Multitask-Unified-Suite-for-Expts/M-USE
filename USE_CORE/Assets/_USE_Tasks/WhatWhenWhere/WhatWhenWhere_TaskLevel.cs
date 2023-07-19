@@ -47,7 +47,11 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{wwwBD.ContextName}.png";
+            {
+                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{wwwBD.ContextName}";
+                if (!SessionValues.UsingDefaultConfigs)
+                    contextFilePath += ".png";
+            }
             else
                 contextFilePath = wwwTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, wwwBD.ContextName, "LinearDark");
 

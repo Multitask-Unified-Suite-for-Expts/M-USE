@@ -112,13 +112,15 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         {
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{mgBD.ContextName}.png";
+            {
+                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{mgBD.ContextName}";
+                if (!SessionValues.UsingDefaultConfigs)
+                    contextFilePath += ".png";
+            }
             else
                 contextFilePath = mgTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, mgBD.ContextName, "LinearDark");
 
             StartCoroutine(HandleSkybox(contextFilePath));
-            //RenderSettings.skybox = CreateSkybox(contextFilePath);
-            //SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
 
             FindMaze();
             StartCoroutine(LoadTextMaze()); // need currMaze here to set all the arrays

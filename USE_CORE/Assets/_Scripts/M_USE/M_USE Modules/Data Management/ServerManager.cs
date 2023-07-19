@@ -171,8 +171,6 @@ public static class ServerManager //Used with the PHP scripts
     {
         string url = $"{ServerURL}/{filePath}";
 
-        Debug.Log("URL: " + url);
-
         using UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
         yield return request.SendWebRequest();
 

@@ -48,7 +48,11 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{flBD.ContextName}.png";
+            {
+                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{flBD.ContextName}";
+                if (!SessionValues.UsingDefaultConfigs)
+                    contextFilePath += ".png";
+            }
             else
                 contextFilePath = flTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, flBD.ContextName, "LinearDark");
 

@@ -58,9 +58,14 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             currentBlock.ContextName = currentBlock.ContextName.Trim();
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{currentBlock.ContextName}.png";
+            {
+                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{currentBlock.ContextName}";
+                if (!SessionValues.UsingDefaultConfigs)
+                    contextFilePath += ".png";
+            }
             else
                 contextFilePath = trialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
+
             StartCoroutine(HandleSkybox(contextFilePath));
         });
 

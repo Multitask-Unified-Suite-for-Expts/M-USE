@@ -51,7 +51,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         StimDefType = typeof(ContinuousRecognition_StimDef);
     }
 
-    public override void DefineControlLevel() //RUNS WHEN THE TASK IS DEFINED!
+    public override void DefineControlLevel()
     {
         trialLevel = (ContinuousRecognition_TrialLevel)TrialLevel;
         
@@ -69,7 +69,11 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         {
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{currentBlock.ContextName}.png";
+            {
+                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{currentBlock.ContextName}";
+                if (!SessionValues.UsingDefaultConfigs)
+                    contextFilePath += ".png";
+            }
             else
                 contextFilePath = trialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
 

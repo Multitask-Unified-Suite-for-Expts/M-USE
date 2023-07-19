@@ -307,6 +307,7 @@ namespace USE_ExperimentTemplate_Session
                 SessionValues.EventCodeManager.SendCodeImmediate("SetupSessionEnds");
             });
 
+
             // Canvas[] TaskSelectionCanvasses = null;
             gazeCalibration.AddInitializationMethod(() =>
             {
@@ -319,12 +320,11 @@ namespace USE_ExperimentTemplate_Session
 
                 var GazeCalibrationCanvas = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas");
                 var GazeCalibrationScripts = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts");
-                GazeCalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
-                //  CalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
-                //CalibrationCanvas.GetComponent<Canvas>().worldCamera = Camera.main;
+                var CalibrationCube = GazeCalibrationCanvas.Find("CalibrationCube");
 
                 GazeCalibrationCanvas.gameObject.SetActive(true);
                 GazeCalibrationScripts.gameObject.SetActive(true);
+                CalibrationCube.gameObject.SetActive(true);
             });
             gazeCalibration.SpecifyTermination(() => !GazeCalibrationTaskLevel.TrialLevel.runCalibration, () => selectTask, () =>
             {
@@ -332,6 +332,8 @@ namespace USE_ExperimentTemplate_Session
                 GazeCalibrationTaskLevel.ConfigName = "GazeCalibration";
                 GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas").gameObject.SetActive(false);
                 GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts").gameObject.SetActive(false);
+                GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas").Find("CalibrationCube").gameObject.SetActive(false);
+
                 if (SessionValues.SessionDef.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
                 {
                     TobiiEyeTrackerController.Instance.isCalibrating = false;
@@ -1042,12 +1044,12 @@ namespace USE_ExperimentTemplate_Session
 
 
                     GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform); 
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                  /*  GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.transform.SetParent(TobiiEyeTrackerControllerGO.transform, true);
                     // Position and scale the cube as desired
                     cube.transform.position = new Vector3(0f, 1f, 60f);
                     cube.transform.localScale = new Vector3(106f, 62f, 0.1f);
-                    cube.SetActive(false);
+                    cube.SetActive(false);*/
 
                 }
             }

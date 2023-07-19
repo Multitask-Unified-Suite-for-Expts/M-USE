@@ -129,7 +129,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
 
             // Assign UI Circles for the calib circles if not yet created
-            if (GameObject.Find("GazeCalibration(Clone)").transform.Find("CalibrationCircle") == null)
+            if (GC_CanvasGO.transform.Find("CalibrationCircle") == null)
             {
                 CalibCircle = new USE_Circle(GC_CanvasGO.GetComponent<Canvas>(), Vector3.zero, MaxCircleScale, "CalibrationCircle");
                 CalibCircle.CircleGO.SetActive(false);

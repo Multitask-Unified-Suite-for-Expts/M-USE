@@ -421,6 +421,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         HkPanel.TrialLevel.ClearActiveTrialHandlers();
                         HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
                         HkPanel.TrialLevel.runCalibration = false;
+                        HkPanel.TrialLevel.ForceBlockEnd = true;
 
                         //Only toggle calibration data off
                         HkPanel.TaskLevel.FrameData.gameObject.SetActive(false);

@@ -55,19 +55,24 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         {
             trialLevel.ResetBlockVariables();
 
+            currentBlock.ContextName = currentBlock.ContextName.Trim();
             string contextFilePath;
             if (SessionValues.WebBuild)
+            {
                 contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{currentBlock.ContextName}";
+                if (!SessionValues.UsingDefaultConfigs)
+                    contextFilePath += ".png";
+            }
             else
                 contextFilePath = trialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
 
-            RenderSettings.skybox = CreateSkybox(contextFilePath);
-
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["ContextOn"]);
+            StartCoroutine(HandleSkybox(contextFilePath));
         });
 
         BlockFeedback.AddInitializationMethod(() =>
         {
+            AddBlockValuesToTaskValues();
+
             if(!SessionValues.WebBuild)
             {
                 if (BlockStringsAdded > 0)

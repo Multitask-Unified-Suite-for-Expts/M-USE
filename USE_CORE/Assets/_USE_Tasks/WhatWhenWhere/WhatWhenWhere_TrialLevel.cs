@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,13 +11,11 @@ using USE_Settings;
 using USE_DisplayManagement;
 using System.Linq;
 using System.IO;
-using UnityEngine.AI;
 using UnityEngine.Serialization;
 using USE_ExperimentTemplate_Trial;
 using USE_ExperimentTemplate_Task;
 using USE_UI;
 using USE_Utilities;
-using VisualSearch_Namespace;
 
 public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 {
@@ -32,8 +31,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     
     // Config Variables
     public string ContextExternalFilePath;
-    [FormerlySerializedAs("ButtonPosition")] public Vector3 StartButtonPosition;
-    [FormerlySerializedAs("ButtonScale")] public float StartButtonScale;
+    [FormerlySerializedAs("ButtonPosition")] public Vector3 ButtonPosition;
+    [FormerlySerializedAs("ButtonScale")] public float ButtonScale;
     public bool StimFacingCamera;
     public string ShadowType;
     public bool NeutralITI;
@@ -126,6 +125,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     // Stimuli Variables
     private GameObject StartButton;
+    public float ExternalStimScale;
     
     // Stim Evaluation Variables
     private GameObject trialStim;
@@ -174,8 +174,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             SliderFBController.InitializeSlider();
             // Initialize FB Controller Values
-            HaloFBController.SetHaloSize(15f);
-            HaloFBController.SetHaloIntensity(2);
+            HaloFBController.SetHaloSize(12);
+            HaloFBController.SetHaloIntensity(5);
             if (StartButton == null)
             {
                 if (SessionValues.SessionDef.IsHuman)
@@ -185,7 +185,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    StartButton = SessionValues.USE_StartButton.CreateStartButton(WWW_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                    StartButton = SessionValues.USE_StartButton.CreateStartButton(WWW_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
                     SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
@@ -214,7 +214,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddTimer(()=> sbDelay, InitTrial);
 
         var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", SessionValues.MouseTracker, InitTrial, FinalFeedback);
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale, WWW_CanvasGO);
+
+        if (!SessionValues.SessionDef.IsHuman)
+            TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, ButtonScale * 10, WWW_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -228,6 +230,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 ShotgunHandler.ClearSelections();
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+            ShotgunHandler.MaxPixelDisplacement = 50;
 
         });
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), ChooseStimulusDelay, ()=>
@@ -237,9 +240,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.SliderGO.SetActive(true);
 
             //numNonStimSelections_InBlock += mouseHandler.UpdateNumNonStimSelection(); //NT: Commented this out. not yet sure where we're gonna implement nonstim touches. Current method doesnt exist in new selection tracker.  
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["StartButtonSelected"]);
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOn"]);
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["SliderFbController_SliderReset"]);
+
+            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
+            SessionValues.EventCodeManager.SendCodeNextFrame("StimOn");
+            SessionValues.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderReset");
+            
         });
         ChooseStimulusDelay.AddTimer(() => chooseStimOnsetDelay.value, ChooseStimulus, ()=>
         {
@@ -286,14 +291,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 UpdateCounters_Correct();
                 isSliderValueIncrease = true;
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["CorrectResponse"]);
+                SessionValues.EventCodeManager.SendCodeImmediate("CorrectResponse");
             }
             else
             {
                 runningAcc.Add(0);
                 UpdateCounters_Incorrect(correctIndex);
                 isSliderValueIncrease = false;
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["IncorrectResponse"]);
+                SessionValues.EventCodeManager.SendCodeImmediate("IncorrectResponse");
 
                 //Repetition Error
                 if (touchedObjects.Contains(selectedSD.StimIndex))
@@ -311,7 +316,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         touchedObjects.Add(selectedSD.StimIndex);
                         distractorSlotErrorCount_InBlock++;
                         distractorSlotError = true;
-                        SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["Button0PressedOnDistractorObject"]);//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                        SessionValues.EventCodeManager.SendCodeImmediate("Button0PressedOnDistractorObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                     }
                     //Stimuli Slot error
                     else
@@ -414,16 +419,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             errorTypeString = "None";
 
             //Destroy all created text objects on Player View of Experimenter Display
-            #if (!UNITY_WEBGL)
+            if(!SessionValues.WebBuild)
                 DestroyChildren(GameObject.Find("MainCameraCopy"));
-            #endif
 
             runningAcc.Add(1);
             NumSliderBarFilled += 1;
             CurrentTaskLevel.NumSliderBarFilled_InTask++;
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["StimOff"]);
-            
+
+            SessionValues.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderCompleteFbOn");
+            SessionValues.EventCodeManager.SendCodeNextFrame("StimOff");
+                        
             if (SessionValues.SyncBoxController != null)
             {
                 SessionValues.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize); 
@@ -435,8 +440,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         FinalFeedback.AddTimer(() => flashingFbDuration.value, ITI, () =>
         {
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["SliderFbController_SliderCompleteFbOff"]);
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOff"]);
+            SessionValues.EventCodeManager.SendCodeImmediate("SliderFbController_SliderCompleteFbOff");
+            SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
+            
             CurrentTaskLevel.SetBlockSummaryString();
         });
 
@@ -464,7 +470,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+                StartCoroutine(HandleSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png"));
+                //RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
             }
 
             GenerateAccuracyLog();
@@ -631,6 +638,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             playerViewText = playerView.CreateTextObject(CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
                 CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
                 Color.red, textLocation, textSize, playerViewParent);
+            playerViewText.SetActive(true);
             playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
             //should this ^ line be deleted and text size be congtrolled by textSize variable?
             playerViewTextList.Add(playerViewText);
@@ -654,7 +662,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //-----------------------------------------------------DEFINE QUADDLES-------------------------------------------------------------------------------------
     protected override void DefineTrialStims()
     {
-        StimGroup group = SessionValues.UseDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = SessionValues.UsingDefaultConfigs ? PrefabStims : ExternalStims;
 
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish

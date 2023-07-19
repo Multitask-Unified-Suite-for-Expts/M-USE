@@ -8,21 +8,24 @@ public class LogWriter : MonoBehaviour
 {
     private readonly List<string> LogMessages = new List<string>();
     public bool StoreDataIsSet; //turned true by sessionLevel script when it sets SessionValues.StoreData's value
+    private bool CreatingLogFolder;
     private bool LogFolderCreated;
     private bool LogFileCreated;
-    private readonly int Capacity = 100;
+    private readonly int Capacity = 50;
 
     private string ServerLogFolderPath
     {
         get
         {
-            if (ServerManager.SessionDataFolderPath == null)
+            if (string.IsNullOrEmpty(ServerManager.SessionDataFolderPath))
             {
                 Debug.Log("Trying to Get ServerLogFolderPath but ServerManager.SessionDataFolderPath hasnt been set yet!");
                 return null;
             }
             else
+            {
                 return $"{ServerManager.SessionDataFolderPath}/LogFile";
+            }
         }
     }
 
@@ -30,7 +33,7 @@ public class LogWriter : MonoBehaviour
     {
         get
         {
-            if (SessionValues.SessionDataPath == null)
+            if (string.IsNullOrEmpty(SessionValues.SessionDataPath))
             {
                 Debug.Log("Trying to Get LocalLogFolderPath but SessionValues.SessionDataPath hasnt been set yet!");
                 return null;
@@ -44,7 +47,7 @@ public class LogWriter : MonoBehaviour
     {
         get
         {
-            if (ServerManager.SessionDataFolderPath == null)
+            if (string.IsNullOrEmpty(ServerManager.SessionDataFolderPath))
             {
                 Debug.Log("Trying to Get ServerLogFilePath but ServerManager.SessionDataFolderPath hasnt been set yet!");
                 return null;
@@ -58,7 +61,7 @@ public class LogWriter : MonoBehaviour
     {
         get
         {
-            if (SessionValues.SessionDataPath == null)
+            if (string.IsNullOrEmpty(SessionValues.SessionDataPath))
             {
                 Debug.Log("Trying to Get LocalLogFilePath but SessionValues.SessionDataPath hasnt been set yet!");
                 return null;
@@ -80,17 +83,23 @@ public class LogWriter : MonoBehaviour
     {
         LogMessages.Add(logMessage);
 
-        if (!StoreDataIsSet)
+        if (!StoreDataIsSet) //Wait for StoreData to be set
             return;
 
-        if (!SessionValues.SessionDef.StoreData)
+        if (!SessionValues.SessionDef.StoreData) //if storedata is set, but its False, return:
         {
             LogMessages.Clear();
             return;
         }
 
         if(!LogFolderCreated)
-            StartCoroutine(CreateLogFolder());
+        {
+            if(!CreatingLogFolder)
+            {
+                CreatingLogFolder = true;
+                StartCoroutine(CreateLogFolder());
+            }
+        }
 
         if (LogMessages.Count >= Capacity)
         {
@@ -119,9 +128,9 @@ public class LogWriter : MonoBehaviour
                 yield return ServerManager.CreateFolder(ServerLogFolderPath);
         }
         else
-        {
             Directory.CreateDirectory(LocalLogFolderPath);
-        }
+        
+        CreatingLogFolder = false;
         LogFolderCreated = true;
     }
 
@@ -161,6 +170,9 @@ public class LogWriter : MonoBehaviour
     {
         if (!SessionValues.SessionDef.StoreData)
             return;
+
+        if (!LogFolderCreated)
+            Debug.Log("TRYING TO WRITE DATA ONAPPLICATIONQUIT BUT LOG FOLDER HASNT BEEN CREATED YET!");
 
         if (LogFileCreated)
             StartCoroutine(AppendDataToLogFile());

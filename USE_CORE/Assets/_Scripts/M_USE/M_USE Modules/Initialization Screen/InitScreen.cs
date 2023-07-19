@@ -33,6 +33,7 @@ SOFTWARE.
 using System.Collections;
 using UnityEngine;
 using TMPro;
+using USE_UI;
 
 public class InitScreen : MonoBehaviour
 {
@@ -44,10 +45,6 @@ public class InitScreen : MonoBehaviour
     public bool Confirmed;
 
     public event System.Action OnConfirm, OnLoadSettings;
-
-    [HideInInspector]
-    public DisplayController displayController;
-
 
     //Set In Inspector
     public M_USE_ControlLevel_Session session;
@@ -64,14 +61,6 @@ public class InitScreen : MonoBehaviour
 
     void Start()
     {
-        #if (UNITY_WEBGL)
-            SessionValues.WebBuild = true;
-        #endif
-
-        displayController = gameObject.AddComponent<DisplayController>();
-        displayController.HandleDisplays(this);
-        SessionValues.DisplayController = displayController;
-
         folderDropdown = dropdownGO.GetComponent<FolderDropdown>();
         dropdown = dropdownGO.GetComponent<TMP_Dropdown>();
 
@@ -85,14 +74,8 @@ public class InitScreen : MonoBehaviour
         {
             StartCoroutine(ServerManager.GetSessionConfigFolders(folders => folderDropdown.SetFolders(folders)));
 
-            if (!Application.isEditor)
-            {
-                if(Screen.fullScreen)   
-                    confirmButtonGO.transform.localPosition += new Vector3(0, 125f, 0);
-                else
-                    confirmButtonGO.transform.localPosition += new Vector3(0, 75f, 0);
+            SetConfirmButtonPosition();
 
-            }
             confirmButtonGO.SetActive(true);
             webBuildChildrenGO.SetActive(true);
             buttonsParentGO.SetActive(false);
@@ -107,6 +90,11 @@ public class InitScreen : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        SetConfirmButtonPosition();
+    }
+
     public void Confirm()
     {
         StartCoroutine(HandleConfirm());
@@ -118,15 +106,10 @@ public class InitScreen : MonoBehaviour
             
         if(SessionValues.WebBuild)
         {
-            string subjectID = session.SessionDetails.GetItemValue("SubjectID");
-            string sessionID = session.SessionDetails.GetItemValue("SessionID");
-
-            yield return ServerManager.CreateSessionDataFolder(subjectID, sessionID);
-
             string sessionConfigFolder = dropdown.options[dropdown.value].text;
             ServerManager.SetSessionConfigFolderName(sessionConfigFolder);
             if (sessionConfigFolder.ToLower().Contains("default"))
-                SessionValues.UseDefaultConfigs = true;
+                SessionValues.UsingDefaultConfigs = true;
         }
 
         if (OnLoadSettings != null)
@@ -154,13 +137,24 @@ public class InitScreen : MonoBehaviour
        
         if(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name.ToLower().Contains("default"))
         {
-            SessionValues.UseDefaultConfigs = true;
+            SessionValues.UsingDefaultConfigs = true;
             Confirm();
         }
         else
         {
             locateFileGO.SetActive(true);
             confirmButtonGO.SetActive(true);
+        }
+    }
+
+    private void SetConfirmButtonPosition()
+    {
+        if (!Application.isEditor)
+        {
+            if (Screen.fullScreen)
+                confirmButtonGO.transform.localPosition = new Vector3(0, -315, 0);
+            else
+                confirmButtonGO.transform.localPosition = new Vector3(0, -305, 0);
         }
     }
 

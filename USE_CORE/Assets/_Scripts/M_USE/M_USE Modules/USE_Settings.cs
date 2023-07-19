@@ -601,7 +601,7 @@ namespace USE_Settings
 
 		public static void StoreSettings(string dataPath, Settings settings)
 		{
-			System.IO.Directory.CreateDirectory(dataPath);
+			Directory.CreateDirectory(dataPath);
 			File.Copy(settings.FilePath, dataPath + Path.DirectorySeparatorChar + Path.GetFileName(settings.FilePath), true);
 		}
 

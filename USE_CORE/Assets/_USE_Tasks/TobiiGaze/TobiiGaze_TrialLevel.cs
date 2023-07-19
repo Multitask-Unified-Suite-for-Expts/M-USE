@@ -1,13 +1,11 @@
 using System;
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using USE_States;
-using USE_Settings;
 using USE_ExperimentTemplate_Trial;
-using USE_StimulusManagement;
 using TobiiGaze_Namespace;
 using Tobii.Research.Unity;
+
 
 public class TobiiGaze_TrialLevel : ControlLevel_Trial_Template
 {
@@ -30,8 +28,9 @@ public class TobiiGaze_TrialLevel : ControlLevel_Trial_Template
             eyeTracker = GameObject.Find("[EyeTracker]").GetComponent<EyeTracker>();
         });
         SetupTrial.AddInitializationMethod(() =>
-        { 
-            RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "DarkGrey"));
+        {
+            StartCoroutine(HandleSkybox(GetContextNestedFilePath(ContextExternalFilePath, "DarkGrey")));
+            //RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "DarkGrey"));
             
             // auto set save data true every trial, can turn off before calibration starts
             screenBasedSaveData.SaveData = true;

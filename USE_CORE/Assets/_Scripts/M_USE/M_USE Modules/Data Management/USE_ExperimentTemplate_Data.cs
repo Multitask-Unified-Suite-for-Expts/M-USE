@@ -31,7 +31,6 @@ namespace USE_ExperimentTemplate_Data
                 CoroutineHelper.StartCoroutine(ServerManager.CreateFolder(FolderPath));
             else
                 Directory.CreateDirectory(FolderPath);
-            
         }
 
         public static IEnumerator AddTaskRunData(string ConfigName, ControlLevel state, OrderedDictionary data)
@@ -228,7 +227,7 @@ namespace USE_ExperimentTemplate_Data
         {
             fileCreated = false;
             fileName = filePrefix + "__" + DataControllerName + "_Trial_" + GetNiceIntegers(4, trialCount) + ".txt";
-            CreateFile();
+            StartCoroutine(CreateFile());
         }
 
         public void CreateNewTaskIndexedFolder(int taskCount, string sessionDataPath, string parentFolder, string suffix)

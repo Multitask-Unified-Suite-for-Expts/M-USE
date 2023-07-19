@@ -21,10 +21,11 @@ public class DisplayController : MonoBehaviour
         InitScreen = initScreen;
         InitScreenCanvas = initScreen.GetComponentInParent<Canvas>();
 
-        #if (!UNITY_WEBGL)
+        if(!SessionValues.WebBuild)
+        {
             LoadDisplaySettings();
             SetDisplays();
-        #endif
+        }
     }
 
     public void LoadDisplaySettings()

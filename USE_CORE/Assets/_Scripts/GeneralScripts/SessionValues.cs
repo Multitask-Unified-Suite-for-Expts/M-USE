@@ -7,6 +7,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using SelectionTracking;
 using UnityEngine;
+using UnityEngine.UI;
 using USE_Def_Namespace;
 using USE_DisplayManagement;
 using USE_ExperimenterDisplay;
@@ -19,7 +20,7 @@ using USE_UI;
 public static class SessionValues
 {
     public static bool WebBuild;
-    public static bool UseDefaultConfigs;
+    public static bool UsingDefaultConfigs;
     public static bool Using2DStim;
     
     public static ControlLevel_Session_Template SessionLevel;
@@ -32,7 +33,7 @@ public static class SessionValues
     public static SessionDataControllers SessionDataControllers;
     public static LocateFile LocateFile;
     public static string SessionDataPath;
-    public static string SessionLevelDataPath;
+    public static string TaskSelectionDataPath;
     public static string FilePrefix;
     public static string SubjectID;
     public static string SessionID;
@@ -46,7 +47,6 @@ public static class SessionValues
     public static GameObject InputManager;
 
     public static EventCodeManager EventCodeManager;
-    public static Dictionary<string, EventCode> SessionEventCodes;
     
     public static string ConfigAccessType;
     public static string ConfigFolderPath;
@@ -90,28 +90,11 @@ public static class SessionValues
     // public int RewardHotKeyPulseSize = 250;
     // public bool GuidedTaskSelection;
     // public float BlockResultsDuration;
+    //public int TaskButtonSize = 240; //not currently used
+    //public int TaskButtonSpacing = 45; //not currently used
+    //public int TaskButtonGridMaxPerRow = 4; //not currently used
+    //public bool UseTaskButtonsGrid;
 
-
-
-    static SessionValues() // idk about this???
-    {
-        // Perform actions when certain values are true
-
-        // if (SessionDef.SyncBoxActive)
-        // {
-        //     SyncBoxController = new SyncBoxController();
-        //     SyncBoxController.serialPortController = SerialPortController;
-        //     SerialSentData.sc = SerialPortController;
-        //     SerialRecvData.sc = SerialPortController;
-        //     SyncBoxController.SessionEventCodes = SessionEventCodes;
-        //     // SyncBoxController.SessionEventCodes = SessionEventCodes;
-        //     // tl.SyncBoxController = SyncBoxController;
-        // }
-    }
-    //
-    // public static float ShotgunRayCastCircleSize_DVA;
-    // public static float ShotgunRaycastSpacing_DVA;
-    // public static float ParticipantDistance_CM;
 
     public static IEnumerator GetFileContentString(string fileName, Action<string> callback)
     {
@@ -133,220 +116,34 @@ public static class SessionValues
 
     }
 
-    public static IEnumerator BetterReadSettingsFile<T>(string fileName, string fileType, Action<T[]> callback)
-    {
-        yield return CoroutineHelper.StartCoroutine(GetFileContentString(fileName, result =>
-        {
-            if (result != null)
-            {
-                T[] settingsArray = null;
-                if (fileType == "SingleTypeArray")
-                    settingsArray = ImportSettings_SingleTypeArray<T>(fileType, result);
-                else if (fileType == "SingleTypeJSON")
-                    settingsArray = ImportSettings_SingleTypeJSON<T>(fileType, result);
-                else if (fileType == "SingleTypeDelimited")
-                    settingsArray = ImportSettings_SingleTypeDelimited<T>(fileType, result);
-                else
-                {
-                    Debug.Log("Failed to read Settings File. This is a problem.");
-                    callback(null);
-                    return;
-                }
-                callback(settingsArray);
-            }
-            else
-            {
-                Debug.LogError("Error retrieving file content.");
-                callback(null);
-            }
-        }));
-    }
-
-    
-    public static T[] ImportSettings_SingleTypeArray<T>(string settingsCategory, string fileContentString, char delimiter = '\t')
-    {
-        //Settings settings = new Settings(settingsCategory, settingsPath);
-
-        Debug.Log("Attempting to load settings file " + settingsCategory);
-        //
-        // if (serverFileString == null)
-        // {
-        //     if (!File.Exists(settingsPath))
-        //         return null;
-        // }
-
-    string[] lines;
-
-        if (ConfigAccessType == "Server")
-        {
-            string[] splitLines = fileContentString.Split('\n');
-            List<string> stringList = new List<string>();
-            foreach (var line in splitLines)
-            {
-                if (string.IsNullOrEmpty(line.Trim()) || line.Trim().StartsWith("//", StringComparison.Ordinal)) // Skip empty and/or commented out lines
-                    continue;
-                stringList.Add(line);
-            }
-            lines = stringList.ToArray();
-        }
-        else
-        {
-            lines = new[] { "idk" };
-        }
-        // if (serverFileString != null)
-        // {
-        //     string[] splitLines = serverFileString.Split('\n');
-        //     List<string> stringList = new List<string>();
-        //     foreach (var line in splitLines)
-        //     {
-        //         if (string.IsNullOrEmpty(line.Trim()) || line.Trim().StartsWith("//", StringComparison.Ordinal)) // Skip empty and/or commented out lines
-        //             continue;
-        //         stringList.Add(line);
-        //     }
-        //     lines = stringList.ToArray();
-        // } 
-        // else
-        // {
-        //     lines = ReadSettingsFile(settingsPath, "//", "...");
-        // }
-
-    T[] settingsArray = new T[lines.Length - 1];
-
-    string[] fieldNames = lines[0].Split(delimiter);
-
-        foreach (string fieldName in fieldNames)
-        {
-            string tempFieldName = fieldName.Trim();
-            if (typeof(T).GetProperty(tempFieldName) == null && typeof(T).GetField(tempFieldName) == null)
-            {
-                throw new Exception("Settings file \"" + settingsCategory + "\" contains the header \""
-                                    + tempFieldName + "\" but this is not a public property or field of the provided type "
-                                    + typeof(T) + ".");
-            }
-        }
-
-    FieldInfo[] fieldInfos = typeof(T).GetFields();
-
-    for (int iLine = 1; iLine < lines.Length; iLine++)
-    {
-        // Creates an instance for the entire line (ie. BlockDef)
-        settingsArray[iLine - 1] = Activator.CreateInstance<T>();
-        
-        // Splits the separate fields for the single instance (ie. fields of BlockDef)
-        string[] values = lines[iLine].Split(delimiter);
-        for (int iVal = 0; iVal < fieldNames.Length; iVal++)
-        {
-            string fieldName = fieldNames[iVal].Trim();
-            try
-            {
-                PropertyInfo propertyInfo = typeof(T).GetProperty(fieldName);
-                FieldInfo fieldInfo = typeof(T).GetField(fieldName);
-                
-                // Checks if the value is a Field or Property of the type T, and sets the value 
-                if (propertyInfo != null)
-                {
-                    Type propertyType = propertyInfo.PropertyType;
-                    propertyInfo.SetValue(settingsArray[iLine - 1], Convert.ChangeType(values[iVal], propertyType));
-                }
-                else if (fieldInfo != null)
-                {
-                    Type fieldType = fieldInfo.FieldType;
-
-                        fieldInfo.SetValue(settingsArray[iLine - 1], Convert.ChangeType(values[iVal], fieldType));
-                    }
-                }
-                catch (Exception e)
-                {
-                    Debug.Log(fieldNames[iVal] + ": " + values[iVal]);
-                    Debug.Log("Error adding TDF file \"" + settingsCategory + "\" to Settings \"" + settingsCategory + "\".");
-                    throw new Exception(e.Message + "\t" + e.StackTrace);
-                }
-            }
-        }
-
-        return settingsArray;
-
-    }
-   // public static T[] ImportSettings_SingleTypeJSON<T>(string settingsCategory, string settingsPath, string serverFileString = null, string dictName = "")
-    public static T[] ImportSettings_SingleTypeJSON<T>(string settingsCategory, string fileContentString, string dictName = "")
-    {
-        Debug.Log("Attempting to load settings file " + settingsCategory + ".");
-        // if (dictName == "")
-        //     dictName = settingsCategory;
-        //
-        // string dataAsJsonString = serverFileString == null ? File.ReadAllText(settingsPath) : serverFileString;
-        T settingsInstance = Activator.CreateInstance<T>();
-        try
-        {
-            settingsInstance = JsonConvert.DeserializeObject<T>(fileContentString);
-        }
-        catch (Exception e)
-        {
-            Debug.Log("Error adding JSON file \"" + settingsCategory + "\" to Settings \"" + settingsCategory + "\".");
-            throw new Exception(e.Message + "\t" + e.StackTrace);
-         }
-
-        T[] settingsArray = new T[] { settingsInstance };
-        return settingsArray;
-    }
-  //  public static T ImportSettings_SingleTypeDelimited<T>(string settingsCategory, string settingsPath, string serverFileString = null, char delimiter = '\t')
-    public static T[] ImportSettings_SingleTypeDelimited<T>(string settingsCategory, string fileContentString, char delimiter = '\t')
-    {
-        Debug.Log("Attempting to load settings file " + settingsCategory);
-        
-        string[] lines;
-        lines = fileContentString.Split('\n');
-        
-        T settingsInstance = Activator.CreateInstance<T>();
-
-        foreach (string line in lines)
-        {
-            if (string.IsNullOrEmpty(line.Trim()) || line.Trim().StartsWith("//", StringComparison.Ordinal)) //Skip empty and/or commented out lines
-                continue;
-            string[] splitString = line.Split(delimiter);
-            try
-            {
-                string fieldName = splitString[1].Trim();
-                string fieldValue = splitString[2].Trim();
-                
-                if(SurroundedByQuotes(fieldValue))
-                    fieldValue = fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
-
-                AssignFieldValue(fieldName, fieldValue, settingsInstance);
-            
-                // FieldInfo fieldInfo = typeof(T).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                // PropertyInfo propertyInfo = typeof(T).GetProperty(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                //
-                // if (propertyInfo != null)
-                // {
-                //     Type propertyType = propertyInfo.PropertyType;
-                //     propertyInfo.SetValue(settingsInstance, Convert.ChangeType(stringValue, propertyType));
-                // }
-                // else if (fieldInfo != null)
-                // {
-                //     Type fieldType = fieldInfo.FieldType;
-                //     fieldInfo.SetValue(settingsInstance, Convert.ChangeType(stringValue, fieldType));
-                // }
-            }
-            catch (Exception e)
-            {
-                Debug.Log("Attempted to import Settings file \"" + settingsCategory + "\" but line \"" + line + "\" has " + line.Length + " entries, 3 expected.");
-                throw new Exception(e.Message + "\t" + e.StackTrace);
-            }
-        }
-
-        // Need to be returning an array for the callback method to be consistent across all three
-        T[] settingsArray = new T[] { settingsInstance };
-        // FieldInfo[] fields = typeof(T).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        //
-        // foreach (FieldInfo field in fields)
-        // {
-        //     object value = field.GetValue(settingsInstance);
-        //     Debug.Log($"Field: {field.Name}, Value: {value}");
-        // }
-        //
-        return settingsArray;
-    }
+    // public static IEnumerator BetterReadSettingsFile<T>(string fileName, string fileType, Action<T[]> callback)
+    // {
+    //     yield return CoroutineHelper.StartCoroutine(GetFileContentString(fileName, result =>
+    //     {
+    //         if (result != null)
+    //         {
+    //             T[] settingsArray = null;
+    //             if (fileType == "SingleTypeArray")
+    //                 settingsArray = ImportSettings_SingleTypeArray<T>(fileType, result);
+    //             else if (fileType == "SingleTypeJSON")
+    //                 settingsArray = ImportSettings_SingleTypeJSON<T>(fileType, result);
+    //             else if (fileType == "SingleTypeDelimited")
+    //                 settingsArray = ImportSettings_SingleTypeDelimited<T>(fileType, result);
+    //             else
+    //             {
+    //                 Debug.Log("Failed to read Settings File. This is a problem.");
+    //                 callback(null);
+    //                 return;
+    //             }
+    //             callback(settingsArray);
+    //         }
+    //         else
+    //         {
+    //             Debug.LogError("Error retrieving file content.");
+    //             callback(null);
+    //         }
+    //     }));
+    // }
 
 
     /*private static string[] ReadSettingsFile(string settingsPath, string commentPrefix = "", string continueSuffix = "")
@@ -444,6 +241,22 @@ public static class SessionValues
                 fieldInfo.SetValue(settingsInstance, finalArray);
             }
 
+            else if (fieldType.Equals(typeof(List<int>)))
+            {
+                if (StartsOrEndsWithBrackets(fieldValue))
+                    fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
+
+                string[] sArray = fieldValue.Split(',');
+                List<int> valuesList = new List<int>();
+
+                for (int sCount = 0; sCount < sArray.Length; sCount++)
+                {
+                    if (int.TryParse(sArray[sCount], out int parsedValue))
+                        valuesList.Add(parsedValue);
+                }
+                fieldInfo.SetValue(settingsInstance, valuesList);
+            }
+
             else if (fieldType.Equals(typeof(List<string>)))
             {
                 if (StartsOrEndsWithBrackets(fieldValue))
@@ -458,6 +271,7 @@ public static class SessionValues
                 }
                 fieldInfo.SetValue(settingsInstance, valuesList);
             }
+
             else if (fieldType.Equals(typeof(MonitorDetails)))
             {
                 var deserializedValue = JsonConvert.DeserializeObject<MonitorDetails>(fieldValue);

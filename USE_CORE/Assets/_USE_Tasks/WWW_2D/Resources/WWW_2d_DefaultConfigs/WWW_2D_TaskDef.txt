@@ -1,8 +1,0 @@
-bool	StimFacingCamera	TRUE
-float	ExternalStimScale	14.5
-string	ShadowType	"None"
-Vector3	StartButtonPosition	(0, 0, 0)
-float	StartButtonScale	300
-float	TouchFeedbackDuration	0.3
-List<string>	FeedbackControllers	["Audio", "Halo", "Slider"]
-bool	NeutralITI	false

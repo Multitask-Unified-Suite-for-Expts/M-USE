@@ -1,4 +1,4 @@
-using System;
+ using System;
 using System.Text;
 using System.Collections.Generic;
 using System.IO;
@@ -29,56 +29,29 @@ namespace USE_ExperimentTemplate_Task
 
     public abstract class ControlLevel_Task_Template : ControlLevel
     {
-        /*public float ShotgunRaycastCircleSize_DVA;
-        public float ShotgunRaycastSpacing_DVA;
-        public float ParticipantDistance_CM;*/
-
         public string PrefabPath;
 
         public string ConfigName;
         public string TaskName;
         public string TaskProjectFolder;
-   //     public string SessionLevelDataPath;
         [HideInInspector] public int BlockCount;
         protected int NumBlocksInTask;
         public ControlLevel_Trial_Template TrialLevel;
-      //  public ControlLevel_Session_Template SessionLevel;
         public BlockData BlockData;
         public FrameData FrameData;
         public TrialData TrialData;
-       // public USE_ExperimentTemplate_Data.GazeData GazeData;
-        //[HideInInspector] public SerialSentData SerialSentData;
-       // [HideInInspector] public SerialRecvData SerialRecvData;
-
-      //  [HideInInspector] public SessionDataControllers SessionDataControllers;
-       // [HideInInspector] public SelectionTracker SelectionTracker;
-      //  [HideInInspector] public bool EyeTrackerActive;
-
-       // [HideInInspector] public GazeTracker GazeTracker;
-      //  [HideInInspector] public MouseTracker MouseTracker;
-      //  [HideInInspector] public TobiiEyeTrackerController TobiiEyeTrackerController;
-
-       // [HideInInspector] public bool StoreData, SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         [HideInInspector] public string TaskConfigPath, TaskDataPath;
-       // [HideInInspector] public string ContextExternalFilePath, TaskConfigPath, TaskDataPath, EyetrackerType, SelectionType;
-        //[HideInInspector] public string ContextExternalFilePath, TaskConfigPath, TaskDataPath, SubjectID, SessionID, FilePrefix, EyetrackerType, SelectionType;
-      //  [HideInInspector] public MonitorDetails MonitorDetails;
-       // [HideInInspector] public SessionValues.LocateFile SessionValues.SessionValues.LocateFile;
         [HideInInspector] public StringBuilder BlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
         private int TaskStringsAdded = 0;
-
-        // public string TaskSceneName;
         public Camera TaskCam;
         public Canvas[] TaskCanvasses;
         public GameObject StimCanvas_2D;
-
         //protected TrialDef[] AllTrialDefs;
         //protected TrialDef[] CurrentBlockTrialDefs;
         protected TaskDef TaskDef;
         protected BlockDef[] BlockDefs;
         public BlockDef CurrentBlockDef;
         protected TrialDef[] AllTrialDefs;
-
         public BlockDef currentBlockDef
         {
             get
@@ -87,25 +60,13 @@ namespace USE_ExperimentTemplate_Task
             }
         }
 
-
         public TaskStims TaskStims;
         [HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims, RuntimeStims;
         public List<GameObject> PreloadedStimGameObjects;
         public List<string> PrefabStimPaths;
         protected ConfigUI configUI;
         protected ConfigVarStore ConfigUiVariables;
-       // [HideInInspector] public ExperimenterDisplayController ExperimenterDisplayController;
-       // [HideInInspector] public SessionInfoPanel SessionInfoPanel;
-
-    //    [HideInInspector] public DisplayController DisplayController;
-
-
-  //      [HideInInspector] public SerialPortThreaded SerialPortController;
-        //[HideInInspector] public SyncBoxController SyncBoxController;
-    //    [HideInInspector] public EventCodeManager EventCodeManager;
         protected Dictionary<string, EventCode> CustomTaskEventCodes;
-       // [HideInInspector] public Dictionary<string, EventCode> SessionEventCodes;
-      //  [HideInInspector] public GameObject InputManager;
 
         public Type TaskLevelType;
         protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
@@ -117,16 +78,7 @@ namespace USE_ExperimentTemplate_Task
         protected int? MinTrials, MaxTrials;
 
         [HideInInspector] public RenderTexture DrawRenderTexture;
-
-       // [HideInInspector] public GameObject TaskSelectionCanvasGO;
-
-      //  [HideInInspector] public bool IsHuman;
-
-     //   [HideInInspector] public HumanStartPanel HumanStartPanel;
-      //  [HideInInspector] public USE_StartButton USE_StartButton;
-
         [HideInInspector] public event EventHandler TaskSkyboxSet_Event;
-
         [HideInInspector] public bool TaskLevelDefined;
 
         private bool TaskDefImported;
@@ -169,30 +121,35 @@ namespace USE_ExperimentTemplate_Task
         {
             TaskLevelDefined = false;
 
-            if (SessionValues.UseDefaultConfigs)
+            if (SessionValues.UsingDefaultConfigs)
                 PrefabPath = "/DefaultResources/Stimuli";
 
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
 
-            ReadSettingsFiles();
-            while (!AllDefsImported)
-                yield return new WaitForEndOfFrame();
-            TrialDefImported = false;
-            BlockDefImported = false;
-            TaskDefImported = false;
 
-            HandleCustomSettings();
+            if(TaskName != "GazeCalibration")
+            {
+                ReadSettingsFiles();
+                while (!AllDefsImported)
+                    yield return new WaitForEndOfFrame();
+                TrialDefImported = false;
+                BlockDefImported = false;
+                TaskDefImported = false;
 
-            HandleTrialAndBlockDefs(verifyOnly);
-            while (!TrialAndBlockDefsHandled)
-                yield return new WaitForEndOfFrame();
-            TrialAndBlockDefsHandled = false;
+                HandleCustomSettings();
 
-            FindStims();
-            while (!StimsHandled)
-                yield return new WaitForEndOfFrame();
-            
-            StimsHandled = false;
+                HandleTrialAndBlockDefs(verifyOnly);
+                while (!TrialAndBlockDefsHandled)
+                    yield return new WaitForEndOfFrame();
+                TrialAndBlockDefsHandled = false;
+
+                FindStims();
+                while (!StimsHandled)
+                    yield return new WaitForEndOfFrame();
+
+                StimsHandled = false;
+            }
+                
 
             if (verifyOnly)
                 yield break;
@@ -209,6 +166,11 @@ namespace USE_ExperimentTemplate_Task
 
             Add_ControlLevel_InitializationMethod(() =>
             {
+                TaskCam.gameObject.SetActive(true);
+                if (TaskCanvasses != null)
+                    foreach (Canvas canvas in TaskCanvasses)
+                        canvas.gameObject.SetActive(true);
+
                 BlockCount = -1;
                 BlockSummaryString = new StringBuilder();
                 PreviousBlockSummaryString = new StringBuilder();
@@ -224,13 +186,14 @@ namespace USE_ExperimentTemplate_Task
                     else
                         configUI.store = new ConfigVarStore();
                     configUI.GenerateUI();
+
+                    if (TaskName == "GazeCalibration")
+                    {
+                        BlockDef bd = new BlockDef();
+                        BlockDefs = new BlockDef[] { bd };
+                        bd.GenerateTrialDefsFromBlockDef();
+                    }
                 }
-
-
-                TaskCam.gameObject.SetActive(true);
-                if (TaskCanvasses != null)
-                    foreach (Canvas canvas in TaskCanvasses)
-                        canvas.gameObject.SetActive(true);
 
                 SessionValues.InputManager.SetActive(true);
             });
@@ -238,12 +201,13 @@ namespace USE_ExperimentTemplate_Task
             SetupTask.AddInitializationMethod(() =>
             {
                 SetTaskSummaryString();
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["SetupTaskStarts"]);
+
+                SessionValues.EventCodeManager.SendCodeImmediate("SetupTaskStarts");
 
                 if (SessionValues.SessionDef.IsHuman)
                 {
                     Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
-                    SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.SessionEventCodes);
+                    SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
                     SessionValues.HumanStartPanel.SetTaskLevel(this);
                     SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
                 }
@@ -252,7 +216,7 @@ namespace USE_ExperimentTemplate_Task
 
             RunBlock.AddUniversalInitializationMethod(() =>
             {
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["RunBlockStarts"]);
+                SessionValues.EventCodeManager.SendCodeImmediate("RunBlockStarts");
 
                 BlockCount++;
                 CurrentBlockDef = BlockDefs[BlockCount];
@@ -308,7 +272,8 @@ namespace USE_ExperimentTemplate_Task
 
             RunBlock.AddLateUpdateMethod(() =>
             {
-                FrameData.AppendDataToBuffer();
+                StartCoroutine(FrameData.AppendDataToBuffer());
+
                 SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
@@ -334,7 +299,8 @@ namespace USE_ExperimentTemplate_Task
                     PreviousBlockSummaryString.Insert(0, BlockSummaryString); //Add current block string to full list of previous blocks. 
                     PreviousBlockSummaryString.Insert(0, blockTitle);
                 }*/
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["BlockFeedbackStarts"]);
+
+                SessionValues.EventCodeManager.SendCodeImmediate("BlockFeedbackStarts");
             });
             BlockFeedback.AddUpdateMethod(() =>
             {
@@ -346,9 +312,10 @@ namespace USE_ExperimentTemplate_Task
             BlockFeedback.AddLateUpdateMethod(() =>
             {
                 if (SessionValues.SessionDef.StoreData)
-                    FrameData.AppendDataToBuffer();
+                    StartCoroutine(FrameData.AppendDataToBuffer());
 
-                SessionValues.EventCodeManager.EventCodeLateUpdate();
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock);
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask);
@@ -362,8 +329,8 @@ namespace USE_ExperimentTemplate_Task
 
                 if (SessionValues.SessionDef.StoreData)
                 {
-                    BlockData.AppendDataToBuffer();
-                    BlockData.AppendDataToFile();
+                    StartCoroutine(BlockData.AppendDataToBuffer());
+                    StartCoroutine(BlockData.AppendDataToFile());
                 }
             });
 
@@ -374,12 +341,12 @@ namespace USE_ExperimentTemplate_Task
 
                 if (TrialLevel.ForceBlockEnd && SessionValues.SessionDef.StoreData) //If they used end task hotkey, still write the block data!
                 {
-                    BlockData.AppendDataToBuffer();
-                    BlockData.AppendDataToFile();
+                    StartCoroutine(BlockData.AppendDataToBuffer());
+                    StartCoroutine(BlockData.AppendDataToFile());
                 }
 
-
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["FinishTaskStarts"]);
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.SendCodeImmediate("FinishTaskStarts");
 
                 //Clear trialsummarystring and Blocksummarystring at end of task:
                 if (TrialLevel.TrialSummaryString != null && BlockSummaryString != null)
@@ -450,33 +417,33 @@ namespace USE_ExperimentTemplate_Task
             TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigName;
 
             if (SessionValues.WebBuild && SessionValues.SessionDef.StoreData)
+            {
                 StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
+            }
 
-            if (SessionValues.SessionDef.EyeTrackerActive)
+            if (TaskName == "GazeCalibration")
             {
                 //Setup data management
-                if (SessionValues.SessionLevel.CurrentState.StateName == "SetupSession" && TaskName == "GazeCalibration")
-                {
-                    // Store Data in the Session Level / Gaze Calibration folder if running at the session level
-                    TaskDataPath = SessionValues.SessionLevelDataPath + Path.DirectorySeparatorChar + "PreTask_GazeCalibration";
-                    ConfigName = "GazeCalibration";
-                }
-                else if (TaskName == "GazeCalibration")
-                {
-                    // Store Data in the Task / Gaze Calibration folder if not running at the session level
+                if (SessionValues.SessionLevel.CurrentState.StateName == "SetupSession")
+                     // Store Data in the Session Level / Gaze Calibration folder if running at the session level
+                    TaskDataPath = SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "PreTask_GazeCalibration";
+                
+                else
+                     // Store Data in the Task / Gaze Calibration folder if not running at the session level
                     TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigName + Path.DirectorySeparatorChar + "InTask_GazeCalibration";
-                    ConfigName = "GazeCalibration";
-                }
-            }
-            
+                
+                ConfigName = "GazeCalibration";
 
-            SessionValues.FilePrefix = SessionValues.FilePrefix + "_" + ConfigName;
+            }
+
+
+            string filePrefix = $"{SessionValues.FilePrefix}_{ConfigName}";
 
             string subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "BlockData";
             BlockData = (BlockData)SessionValues.SessionDataControllers.InstantiateDataController<BlockData>("BlockData", ConfigName, SessionValues.SessionDef.StoreData, subFolderPath);
             BlockData.taskLevel = this;
             BlockData.sessionLevel = SessionValues.SessionLevel;
-            BlockData.fileName = SessionValues.FilePrefix + "__BlockData.txt";
+            BlockData.fileName = filePrefix + "__BlockData.txt";
 
             subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "TrialData";
             TrialData = (TrialData)SessionValues.SessionDataControllers.InstantiateDataController<TrialData>("TrialData", ConfigName, SessionValues.SessionDef.StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
@@ -485,7 +452,7 @@ namespace USE_ExperimentTemplate_Task
             TrialData.sessionLevel = SessionValues.SessionLevel;
 
             TrialLevel.TrialData = TrialData;
-            TrialData.fileName = SessionValues.FilePrefix + "__TrialData.txt";
+            TrialData.fileName = filePrefix + "__TrialData.txt";
 
             subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "FrameData";
             FrameData = (FrameData)SessionValues.SessionDataControllers.InstantiateDataController<FrameData>("FrameData", ConfigName, SessionValues.SessionDef.StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
@@ -494,14 +461,14 @@ namespace USE_ExperimentTemplate_Task
             FrameData.sessionLevel = SessionValues.SessionLevel;
 
             TrialLevel.FrameData = FrameData;
-            FrameData.fileName = SessionValues.FilePrefix + "__FrameData_PreTrial.txt";
+            FrameData.fileName = filePrefix + "__FrameData_PreTrial.txt";
 
             if (SessionValues.SessionDef.EyeTrackerActive)
             {
                 SessionValues.GazeData.taskLevel = this;
                 SessionValues.GazeData.trialLevel = TrialLevel;
                 SessionValues.GazeData.sessionLevel = SessionValues.SessionLevel;
-                SessionValues.GazeData.fileName = SessionValues.FilePrefix + "__GazeData_PreTrial.txt";
+                SessionValues.GazeData.fileName = filePrefix + "__GazeData_PreTrial.txt";
                 SessionValues.GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
             }
             //SessionDataControllers.InstantiateFrameData(StoreData, ConfigName,
@@ -509,7 +476,7 @@ namespace USE_ExperimentTemplate_Task
             FrameData.taskLevel = this;
             FrameData.trialLevel = TrialLevel;
             TrialLevel.FrameData = FrameData;
-            FrameData.fileName = SessionValues.FilePrefix + "__FrameData_PreTrial.txt";
+            FrameData.fileName = filePrefix + "__FrameData_PreTrial.txt";
 
             BlockData.InitDataController();
             TrialData.InitDataController();
@@ -527,10 +494,10 @@ namespace USE_ExperimentTemplate_Task
             DefineControlLevel();
 
             BlockData.AddStateTimingData(this);
-            BlockData.CreateFile();
-            FrameData.CreateFile();
+            StartCoroutine(BlockData.CreateFile());
+            StartCoroutine(FrameData.CreateFile());
             if (SessionValues.SessionDef.EyeTrackerActive)
-                SessionValues.GazeData.CreateFile();
+                StartCoroutine(SessionValues.GazeData.CreateFile());
 
 
             //AddDataController(BlockData, StoreData, TaskDataPath + Path.DirectorySeparatorChar + "BlockData", FilePrefix + "_BlockData.txt");
@@ -549,11 +516,12 @@ namespace USE_ExperimentTemplate_Task
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TotalTokensNum"))
                 totalTokensNum = (int)SessionSettings.Get(TaskName + "_TaskSettings", "TotalTokensNum");
 
-            fbControllers.GetComponent<AudioFBController>().SessionEventCodes = SessionValues.SessionEventCodes;
-            fbControllers.GetComponent<HaloFBController>().SessionEventCodes = SessionValues.SessionEventCodes;
-            fbControllers.GetComponent<TokenFBController>().SessionEventCodes = SessionValues.SessionEventCodes;
-            fbControllers.GetComponent<SliderFBController>().SessionEventCodes = SessionValues.SessionEventCodes;
-            fbControllers.GetComponent<TouchFBController>().SessionEventCodes = SessionValues.SessionEventCodes;
+            //GOTTA BE A BETTER WAY TO DO THIS:
+            fbControllers.GetComponent<AudioFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
+            fbControllers.GetComponent<HaloFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
+            fbControllers.GetComponent<TokenFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
+            fbControllers.GetComponent<SliderFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
+            fbControllers.GetComponent<TouchFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
 
            // TrialLevel.SelectionTracker = SelectionTracker;
                 
@@ -573,8 +541,8 @@ namespace USE_ExperimentTemplate_Task
 
     //        TrialLevel.DisplayController = DisplayController; 
 
-            if(SessionValues.SyncBoxController != null)
-                SessionValues.SyncBoxController.EventCodeManager = SessionValues.EventCodeManager;
+            /*if(SessionValues.SyncBoxController != null)
+                SessionValues.SyncBoxController.EventCodeManager = SessionValues.EventCodeManager;*/
                 //TrialLevel.SyncBoxController.EventCodeManager = SessionValues.EventCodeManager;
 
           //  TrialLevel.EventCodeManager = EventCodeManager;
@@ -594,15 +562,10 @@ namespace USE_ExperimentTemplate_Task
 
             if (SessionValues.WebBuild)
             {
-                TrialLevel.LoadTexturesFromResources(); //delete this when uncomment below
-
-                //UnCOMMENT BELOW WHEN WE WANT TO LOAD TEXTURES FROM SERVER!
-                //if (SessionValues.UseDefaultConfigs)
-                //    TrialLevel.LoadTexturesFromResources();
-                //else
-                //{
-                //    //need to load the images from the server!!!!!!
-                //}
+                if (SessionValues.UsingDefaultConfigs)
+                    TrialLevel.LoadTexturesFromResources();
+                else
+                    TrialLevel.LoadTexturesFromServer();
             }
             else
                 TrialLevel.LoadTextures(SessionValues.SessionDef.ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 
@@ -672,12 +635,12 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.ExternalStims = ExternalStims;
             TrialLevel.RuntimeStims = RuntimeStims;
             TrialLevel.ConfigUiVariables = ConfigUiVariables;
-      //      TrialLevel.IsHuman = IsHuman;
-   //         TrialLevel.HumanStartPanel = HumanStartPanel;
-     //       TrialLevel.USE_StartButton = USE_StartButton;
-           // TrialLevel.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
+            //      TrialLevel.IsHuman = IsHuman;
+            //         TrialLevel.HumanStartPanel = HumanStartPanel;
+            //       TrialLevel.USE_StartButton = USE_StartButton;
+            // TrialLevel.TaskSelectionCanvasGO = TaskSelectionCanvasGO;
 
-           // TrialLevel.EyeTrackerActive = EyeTrackerActive;
+            // TrialLevel.EyeTrackerActive = EyeTrackerActive;
             TrialLevel.TaskLevel = this;
             TrialLevel.DefineTrialLevel();
 
@@ -778,6 +741,7 @@ namespace USE_ExperimentTemplate_Task
             //read in the TaskDef, BlockDef, TrialDef, and StimDef files (any of these may not exist)
             //if end up making coroutines again... yield return StartCoroutine((IEnumerator)shshshsh.Invoke(this, new object[] {xhxhxhx});
 
+            
             MethodInfo readTaskDef = GetType().GetMethod(nameof(this.ReadTaskDef)).MakeGenericMethod(new Type[] { TaskDefType });
             readTaskDef.Invoke(this, new object[] { TaskConfigPath });
             MethodInfo readBlockDefs = GetType().GetMethod(nameof(this.ReadBlockDefs))
@@ -790,13 +754,12 @@ namespace USE_ExperimentTemplate_Task
                 .MakeGenericMethod(new Type[] { StimDefType });
             readStimDefs.Invoke(this, new object[] { TaskConfigPath });
 
-
             LoadTaskEventCodeAndConfigUIFiles();
         }
 
         public void LoadTaskEventCodeAndConfigUIFiles()
         {
-            if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
+            if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
             {
                 string path = $"{ServerManager.SessionConfigFolderPath}/{TaskName}";
                 StartCoroutine(ServerManager.GetFileStringAsync(path, "ConfigUi", result =>
@@ -807,7 +770,7 @@ namespace USE_ExperimentTemplate_Task
                         ConfigUiVariables = (ConfigVarStore)SessionSettings.Get(TaskName + "_ConfigUiDetails");
                     }
                     else
-                        Debug.Log("TASK CONFIG UI RESULT IS NULL!");
+                        Debug.Log($"Task ConfigUI Result is null or empty! ({TaskName} may not have one)");
                 }));
 
                 StartCoroutine(ServerManager.GetFileStringAsync(path, "EventCode", result =>
@@ -818,7 +781,7 @@ namespace USE_ExperimentTemplate_Task
                         CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
                     }
                     else
-                        Debug.Log("TASK EVENT CODE RESULT IS NULL!");
+                        Debug.Log($"Task EventCode Result is null or empty! ({TaskName} may not have one)");
                 }));
             }
             else
@@ -835,8 +798,9 @@ namespace USE_ExperimentTemplate_Task
                 {
                     SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig", eventCodeFile);
                     CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
-                    SessionValues.SessionDef.EventCodesActive = true;
                 }
+                else
+                    Debug.Log("NORMAL BUILD - TASK CONFIG UI RESULT IS NULL!");
             }
         }
 
@@ -857,7 +821,7 @@ namespace USE_ExperimentTemplate_Task
                     string filePath = TaskConfigPath + Path.DirectorySeparatorChar + key; //initially set for not default configs, then changed below for UseDefaultConfigs
                     string settingsFileName = key.Split('.')[0];
 
-                    if (SessionValues.UseDefaultConfigs)
+                    if (SessionValues.UsingDefaultConfigs)
                     {
                         string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + TaskName + "_DefaultConfigs";
                         filePath = folderPath + Path.DirectorySeparatorChar + settingsFileName;
@@ -878,7 +842,7 @@ namespace USE_ExperimentTemplate_Task
 
                     string customSettingsValue = customSettings[key].ToLower();
 
-                    if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
+                    if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
                     {
                         StartCoroutine(ServerManager.GetFileStringAsync(TaskConfigPath, key, result =>
                         {
@@ -1168,7 +1132,7 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadTaskDef<T>(string taskConfigFolder) where T : TaskDef
         {
-            if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
+            if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
             {
                 StartCoroutine(ServerManager.GetFileStringAsync(taskConfigFolder, "TaskDef", result =>
                 {
@@ -1192,7 +1156,7 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadBlockDefs<T>(string taskConfigFolder) where T : BlockDef
         {
-            if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
+            if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
             {
                 StartCoroutine(ServerManager.GetFileStringAsync(taskConfigFolder, "BlockDef", serverBlockDefFile =>
                 {
@@ -1237,7 +1201,7 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadTrialDefs<T>(string taskConfigFolder) where T : TrialDef
         {
-            if (SessionValues.WebBuild && !SessionValues.UseDefaultConfigs)
+            if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
             {
                 StartCoroutine(ServerManager.GetFileStringAsync(taskConfigFolder, "TrialDef", result =>
                 {
@@ -1268,13 +1232,13 @@ namespace USE_ExperimentTemplate_Task
 
         public void ReadStimDefs<T>(string taskConfigFolder) where T : StimDef
         {
-            string key = TaskName + (SessionValues.UseDefaultConfigs ? "_PrefabStims" : "_ExternalStimDefs");
+            string key = TaskName + (SessionValues.UsingDefaultConfigs ? "_PrefabStims" : "_ExternalStimDefs");
             PrefabStims = new StimGroup("PrefabStims");
             ExternalStims = new StimGroup("ExternalStims");
 
             if (SessionValues.WebBuild)
             {
-                if (SessionValues.UseDefaultConfigs)
+                if (SessionValues.UsingDefaultConfigs)
                 {
                     string defaultStimDefFilePath = taskConfigFolder + "/" + TaskName + "_StimDeftdf.txt";
                     ImportStimDefs<T>(key, defaultStimDefFilePath);
@@ -1314,7 +1278,7 @@ namespace USE_ExperimentTemplate_Task
                 return;
             else
             {
-                if (SessionValues.UseDefaultConfigs)
+                if (SessionValues.UsingDefaultConfigs)
                 {
                     PrefabStims = new StimGroup("PrefabStims", (T[])SessionSettings.Get(key));
                     foreach (var stim in PrefabStims.stimDefs)
@@ -1399,19 +1363,19 @@ namespace USE_ExperimentTemplate_Task
         {
             if (BlockData != null)
             {
-                BlockData.AppendDataToBuffer();
-                BlockData.AppendDataToFile();
+                StartCoroutine(BlockData.AppendDataToBuffer());
+                StartCoroutine(BlockData.AppendDataToFile());
             }
 
             if (FrameData != null)
             {
-                FrameData.AppendDataToBuffer();
-                FrameData.AppendDataToFile();
+                StartCoroutine(FrameData.AppendDataToBuffer());
+                StartCoroutine(FrameData.AppendDataToFile());
             }
 
             if (SessionValues.GazeData != null)
             {
-                SessionValues.GazeData.AppendDataToFile();
+                StartCoroutine(SessionValues.GazeData.AppendDataToFile());
             }
         }
         

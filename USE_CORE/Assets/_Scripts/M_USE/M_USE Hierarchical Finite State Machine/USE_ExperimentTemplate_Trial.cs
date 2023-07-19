@@ -129,7 +129,7 @@ namespace USE_ExperimentTemplate_Trial
             if (GameObject.Find("GazeCalibration(Clone)") != null)// && TaskLevel.TaskName != "GazeCalibration")
             {
                 GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts"). GetComponent<GazeCalibration_TaskLevel>();
-                GazeCalibrationTaskLevel.ConfigName = TaskLevel.TaskName;
+                //GazeCalibrationTaskLevel.ConfigName = TaskLevel.TaskName;
                 GazeCalibrationTaskLevel.TrialLevel.TaskLevel = GazeCalibrationTaskLevel;
                 
                 if (TaskLevel.TaskName != "GazeCalibration")
@@ -200,7 +200,8 @@ namespace USE_ExperimentTemplate_Trial
                     SessionValues.SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials", 1));
 
                 TokenFBController.RecalculateTokenBox(); //recalculate tokenbox incase they switch to fullscreen mode
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["SetupTrialStarts"]);
+
+                SessionValues.EventCodeManager.SendCodeImmediate("SetupTrialStarts");
 
                 ResetRelativeStartTime();
 
@@ -214,8 +215,10 @@ namespace USE_ExperimentTemplate_Trial
                     SessionValues.HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
             });
 
-
-            FinishTrial.AddInitializationMethod(() => SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.SessionEventCodes["FinishTrialStarts"]));
+            FinishTrial.AddInitializationMethod(() =>
+            {
+                SessionValues.EventCodeManager.SendCodeImmediate("FinishTrialStarts");
+            });
             FinishTrial.SpecifyTermination(() => runCalibration && TaskLevel.TaskName != "GazeCalibration", () => GazeCalibration);
 
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
@@ -256,16 +259,17 @@ namespace USE_ExperimentTemplate_Trial
                 }
 
                 var GazeCalibrationCanvas = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas");
+                var CalibrationCube = GazeCalibrationCanvas.Find("CalibrationCube");
                 var GazeCalibrationScripts = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts");
-                //  var CalibrationGazeTrail = GameObject.Find("TobiiEyeTrackerController").transform.Find("GazeTrail(Clone)");
+                var CalibrationGazeTrail = GameObject.Find("TobiiEyeTrackerController").transform.Find("GazeTrail(Clone)");
                 //  var CalibrationCube = GameObject.Find("TobiiEyeTrackerController").transform.Find("Cube");
 
                 GazeCalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
                 GazeCalibrationCanvas.GetComponent<Canvas>().worldCamera = Camera.main;
                 GazeCalibrationCanvas.gameObject.SetActive(true);
-             //   CalibrationGazeTrail.gameObject.SetActive(true);
+                CalibrationGazeTrail.gameObject.SetActive(true);
+                CalibrationCube.gameObject.SetActive(true);
                 GazeCalibrationScripts.gameObject.SetActive(true);
-                //  CalibrationCube.gameObject.SetActive(true);
 
                 GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(true);
                 GazeCalibrationTaskLevel.FrameData.gameObject.SetActive(true);
@@ -300,7 +304,7 @@ namespace USE_ExperimentTemplate_Trial
             DefineControlLevel();
             TrialData.ManuallyDefine();
             TrialData.AddStateTimingData(this);
-            TrialData.CreateFile();
+            StartCoroutine(TrialData.CreateFile());
            // TrialData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
 
 
@@ -346,16 +350,16 @@ namespace USE_ExperimentTemplate_Trial
 
         public void WriteDataFiles()
         {
-            TrialData.AppendDataToBuffer();
-            TrialData.AppendDataToFile();
-            FrameData.AppendDataToBuffer();
-            FrameData.AppendDataToFile();
+            StartCoroutine(TrialData.AppendDataToBuffer());
+            StartCoroutine(TrialData.AppendDataToFile());
+            StartCoroutine(FrameData.AppendDataToBuffer());
+            StartCoroutine(FrameData.AppendDataToFile());
             if (SessionValues.SessionDef.EyeTrackerActive)
-                SessionValues.GazeData.AppendDataToFile();
+                StartCoroutine(SessionValues.GazeData.AppendDataToFile());
             if (SessionValues.SessionDef.SerialPortActive)
             {
-                SessionValues.SerialRecvData.AppendDataToFile();
-                SessionValues.SerialSentData.AppendDataToFile();
+                StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
+                StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
             }
         }
         
@@ -384,8 +388,8 @@ namespace USE_ExperimentTemplate_Trial
         {
             if (TrialData != null)
             {
-                TrialData.AppendDataToBuffer();
-                TrialData.AppendDataToFile();
+                StartCoroutine(TrialData.AppendDataToBuffer());
+                StartCoroutine(TrialData.AppendDataToFile());
             }
         }
 
@@ -518,6 +522,7 @@ namespace USE_ExperimentTemplate_Trial
         public GameObject CreateSquare(string name, Texture2D tex, Vector3 pos, Vector3 scale)
         {
             GameObject SquareGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
             Renderer SquareRenderer = SquareGO.GetComponent<Renderer>();
             SquareGO.name = name;
             SquareRenderer.material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
@@ -591,6 +596,57 @@ namespace USE_ExperimentTemplate_Trial
             }
 
             return contextPath;
+        }
+
+
+        public void LoadTexturesFromServer()
+        {
+            StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/HorizontalStripes.png", result =>
+            {
+                if (result != null)
+                {
+                    HeldTooLongTexture = result;
+                    TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
+                }
+                else
+                    Debug.Log("HELDTOOLONG TEXTURE NULL FROM SERVER!");
+            }));
+
+            StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/VerticalStripes.png", result =>
+            {
+                if (result != null)
+                {
+                    Debug.Log("Got the HeldTooShort Texture from the server!");
+                    HeldTooShortTexture = result;
+                    TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
+                }
+                else
+                    Debug.Log("HELDTOOSHORT TEXTURE NULL FROM SERVER!");
+            }));
+
+            StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/bg.png", result =>
+            {
+                if (result != null)
+                {
+                    Debug.Log("Got the BackdropStripesTexture from the server!");
+                    BackdropStripesTexture = result;
+                    TouchFBController.MovedTooFar_Texture = BackdropStripesTexture;
+                }
+                else
+                    Debug.Log("BACKDROP_STRIPES_TEXTURE NULL FROM SERVER");
+
+            }));
+
+            StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/Concrete4.png", result =>
+            {
+                if (result != null)
+                {
+                    Debug.Log("Got the THR_BackDropTexture from the server!");
+                    THR_BackdropTexture = result;
+                }
+                else
+                    Debug.Log("THR BACKDROP TEXTURE NULL FROM SERVER");
+            }));
         }
 
         public void LoadTexturesFromResources()

@@ -11,7 +11,7 @@ public static class ServerManager //Used with the PHP scripts
     private static readonly string ServerURL = "http://m-use.psy.vanderbilt.edu:8080"; //will move to serverConfig
 
     private static readonly string RootDataFolder = "DATA"; //will move to server config
-    private static string SessionDataFolder; //Set once they hit InitScreen Confirm button
+    private static string SessionDataFolder;
     public static string SessionDataFolderPath
     {
         get
@@ -31,24 +31,20 @@ public static class ServerManager //Used with the PHP scripts
     }
 
     private static List<string> foldersCreatedList = new List<string>();
-    public static bool SessionDataFolderCreated;
 
+    public static bool SessionDataFolderCreated; //used for logWriter
 
-    public static IEnumerator CreateSessionDataFolder(string subjectID, string sessionID)
-    {
-        SessionDataFolder = "DATA__" + "Session_" + sessionID + "__Subject_" + subjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
-        yield return CreateFolder(SessionDataFolderPath);
-        SessionDataFolderCreated = true;
-    }
 
     public static IEnumerator CreateFolder(string folderPath)
     {
         string url = $"{ServerURL}/createFolder.php?path={folderPath}";
         WWWForm formData = new WWWForm();
         formData.AddField("path", folderPath);
-        using UnityWebRequest request = UnityWebRequest.Post(url, formData);
-        yield return request.SendWebRequest();
-        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Successful CreateFolder Request: {request.downloadHandler.text} | FolderPath: {folderPath}" : $"ERROR CREATING FOLDER | Error: {request.error}");
+        using (UnityWebRequest request = UnityWebRequest.Post(url, formData))
+        {
+            yield return request.SendWebRequest();
+            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Successful CreateFolder Request: {request.downloadHandler.text} | FolderPath: {folderPath}" : $"ERROR CREATING FOLDER | Error: {request.error}");
+        }
         foldersCreatedList.Add(folderPath);
     }
 
@@ -57,7 +53,6 @@ public static class ServerManager //Used with the PHP scripts
         string url = $"{ServerURL}/getFolderNames.php?directoryPath={RootConfigFolder}";
 
         using UnityWebRequest request = UnityWebRequest.Get(url);
-
         var operation = request.SendWebRequest();
         yield return operation;
 
@@ -126,26 +121,17 @@ public static class ServerManager //Used with the PHP scripts
             yield return null;
 
         string result = "";
-        if(request.result == UnityWebRequest.Result.Success)
+        if (request.result == UnityWebRequest.Result.Success)
         {
             result = request.downloadHandler.text;
+
             Debug.Log(result == "File not found" ? ("File NOT Found on Server: " + searchString) : ("Found File On Server: " + searchString));
             if (result == "File not found")
                 result = null;
-
-            //result = request.downloadHandler.text;
-
-            //if (result.ToLower().Contains("file not found") || result.ToLower().Contains("invalid parameters"))
-            //{
-            //    Debug.Log($"GetFile Result: {result} | SearchString: {searchString} | Path: {path}");
-            //    result = null;
-            //}
-            //else
-            //    Debug.Log("Found File On Server: " + searchString);
         }
         else
             Debug.Log($"ERROR FINDING FILE: {searchString} | ERROR: {request.error}");
-        
+
         callback?.Invoke(result);
     }
 
@@ -167,7 +153,7 @@ public static class ServerManager //Used with the PHP scripts
         }
         else
             Debug.Log($"ERROR FINDING FILE: {searchString} | ERROR: {request.error}");
-        
+
         callback?.Invoke(result);
     }
 
@@ -177,7 +163,6 @@ public static class ServerManager //Used with the PHP scripts
         string url = $"{ServerURL}/copyFolder.php?sourcePath={sourcePath}&destinationPath={destinationPath}";
 
         using UnityWebRequest request = UnityWebRequest.Get(url);
-
         yield return request.SendWebRequest();
         Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Folder copied successfully!" : $"FAILED TO COPY FOLDER! ERROR: {request.error}");
     }
@@ -187,7 +172,6 @@ public static class ServerManager //Used with the PHP scripts
         string url = $"{ServerURL}/{filePath}";
 
         using UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
-
         yield return request.SendWebRequest();
 
         if (request.result == UnityWebRequest.Result.Success)
@@ -200,13 +184,11 @@ public static class ServerManager //Used with the PHP scripts
             Debug.Log($"FAILED TO LOAD TEXTURE FROM SERVER | ERROR: {request.error}");
             callback?.Invoke(null);
         }
-        
     }
 
-
-    public static string GetSessionDataFolder()
+    public static void SetSessionDataFolder(string sessionDataFolder)
     {
-        return SessionDataFolder;
+        SessionDataFolder = sessionDataFolder;
     }
 
     public static void SetSessionConfigFolderName(string sessionConfigFolderName) //Used to Set Session Config folder name based on what they picked in dropdown!

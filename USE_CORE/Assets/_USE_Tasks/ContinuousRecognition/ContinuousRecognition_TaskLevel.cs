@@ -69,12 +69,11 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         {
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{currentBlock.ContextName}";
+                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{currentBlock.ContextName}.png";
             else
                 contextFilePath = trialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
 
             StartCoroutine(HandleSkybox(contextFilePath));
-            //RenderSettings.skybox = CreateSkybox(contextFilePath);
 
             trialLevel.ContextActive = true;
 

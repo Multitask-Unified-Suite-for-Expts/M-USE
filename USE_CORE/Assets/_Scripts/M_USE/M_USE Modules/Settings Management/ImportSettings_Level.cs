@@ -49,26 +49,18 @@ public class ImportSettings_Level : ControlLevel
         Add_ControlLevel_InitializationMethod(() =>
         {
             outputSettings = new List<object>();
-            // filePathStrings = new List<string>(fileType_Dict.Keys);
-            //settingParsingStyles = new List<string>();
         });
 
 
         loadFile.AddDefaultInitializationMethod(() =>
         {
-            // currentFilePathString = filePathStrings[iSettings];
-            // currentFileName = fileNames[iSettings];
-
-            Debug.Log("filepath: " + SettingsDetails.FilePath);
-            Debug.Log("filename: " + SettingsDetails.FileName);
-            if (string.IsNullOrEmpty(SettingsDetails.FilePath))//(currentFilePathString))
+            if (string.IsNullOrEmpty(SettingsDetails.FilePath))
                 return;
 
             StartCoroutine(GetFileContentString(SettingsDetails.FilePath, SettingsDetails.FileName, (contentString) =>
             {
                 if (!string.IsNullOrEmpty(contentString))
                 {
-                    Debug.Log(contentString);
                     currentFileContentString = contentString;
                     fileLoaded = true;
                 }
@@ -116,7 +108,6 @@ public class ImportSettings_Level : ControlLevel
             object result = ConvertTextToSettings_SingleTypeArray_meth.Invoke(this, new object[] { currentFileContentString });
 
             parsedResult = result;
-            //outputSettings.Add(result); // Add the result to the outputSettings list
         }
         else if (SettingsDetails.SettingParsingStyle == "SingleTypeJSON")
         {
@@ -125,7 +116,6 @@ public class ImportSettings_Level : ControlLevel
             object result = ConvertTextToSettings_SingleTypeJSON_meth.Invoke(this, new object[] { currentFileContentString});
 
             parsedResult = result;
-            //outputSettings.Add(result);
         }
         else if (SettingsDetails.SettingParsingStyle == "SingleTypeDelimited")
         {
@@ -134,7 +124,6 @@ public class ImportSettings_Level : ControlLevel
             object result = ConvertTextToSettings_SingleTypeDelimited_meth.Invoke(this, new object[] { currentFileContentString, '\t' });
             
             parsedResult = result;
-            // outputSettings.Add(result); // Add the result to the outputSettings list
         }
         else
         {
@@ -145,8 +134,6 @@ public class ImportSettings_Level : ControlLevel
     {
         string fileContent;
 
-        Debug.Log("filepath: " + FilePath);
-        Debug.Log("filename: " + FileName);
         if (SessionValues.ConfigAccessType == "Local" || SessionValues.ConfigAccessType == "Default")
         {
            // fileContent = File.ReadAllText(SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{fileName}*")); //Will need to check that this works during Web Build

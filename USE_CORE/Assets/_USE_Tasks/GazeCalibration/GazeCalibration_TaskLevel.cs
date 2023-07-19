@@ -16,7 +16,6 @@ public class GazeCalibration_TaskLevel : ControlLevel_Task_Template
         {
             // Set the Background image as defined in the BlockDef
             StartCoroutine(HandleSkybox(gcTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "Gray_1", "LinearDark")));
-            //RenderSettings.skybox = CreateSkybox(gcTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "Gray_1", "LinearDark"));
         });
     }
     private void SetSettings()

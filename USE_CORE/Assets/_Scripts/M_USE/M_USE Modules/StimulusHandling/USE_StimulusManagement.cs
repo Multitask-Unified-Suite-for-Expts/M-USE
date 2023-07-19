@@ -569,7 +569,7 @@ namespace USE_StimulusManagement
 
         public void DestroyRecursive(GameObject go)
         {
-            if (SessionValues.UsingDefaultConfigs) //need to eventually delete when get better solution
+            if (SessionValues.WebBuild) //need to eventually delete when get better solution
             {
                 Object.Destroy(go);
                 return;

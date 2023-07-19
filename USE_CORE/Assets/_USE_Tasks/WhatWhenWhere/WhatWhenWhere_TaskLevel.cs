@@ -47,14 +47,11 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{wwwBD.ContextName}";
+                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{wwwBD.ContextName}.png";
             else
                 contextFilePath = wwwTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, wwwBD.ContextName, "LinearDark");
 
             StartCoroutine(HandleSkybox(contextFilePath));
-            //RenderSettings.skybox = CreateSkybox(contextFilePath);
-            //SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
-
 
             ErrorType_InTask.Add(string.Join(",",wwwTL.ErrorType_InBlock));
             wwwTL.ResetBlockVariables();

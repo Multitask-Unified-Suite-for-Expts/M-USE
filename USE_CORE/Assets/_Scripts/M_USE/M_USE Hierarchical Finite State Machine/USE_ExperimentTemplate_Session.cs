@@ -174,19 +174,16 @@ namespace USE_ExperimentTemplate_Session
                     if (importSettings_Level.SettingsDetails.FileName == "SessionConfig")
                     {
                         SessionValues.SessionDef = (SessionDef)importSettings_Level.parsedResult;
-                        Debug.Log("Session Def is Imported!");
                         SetValuesForLoading_EventCodeConfig();
                         importSettings_Level.continueToNextSetting = true;
                     }
                     else if (importSettings_Level.SettingsDetails.FileName == "EventCode")
                     {
-                        SessionValues.EventCodeManager.SessionEventCodes =
-                            (Dictionary<string, EventCode>) importSettings_Level.parsedResult;
+                        SessionValues.EventCodeManager.SessionEventCodes = (Dictionary<string, EventCode>) importSettings_Level.parsedResult;
                         importSettings_Level.terminateImport = true;
                     }
                     else
                         Debug.Log($"The {importSettings_Level.SettingsDetails.FileName} has been parsed, but is unable to be set as it is not a SessionConfig, EventCode, or DisplayConfig file.");
-
                 }
             });
             loadSessionSettings.SpecifyTermination(() => loadSessionSettings.ChildLevel.Terminated, createSessionDataFolder);
@@ -214,12 +211,11 @@ namespace USE_ExperimentTemplate_Session
             bool waitForSerialPort = false;
             setupSession.AddDefaultInitializationMethod(() =>
             {
-                SessionValues.HumanStartPanel = gameObject.AddComponent<HumanStartPanel>();
-                SessionValues.HumanStartPanel.SetSessionLevel(this);
-                SessionValues.HumanStartPanel.HumanStartPanelPrefab = HumanStartPanelPrefab;
+                //NEED TO MOVE THIS TO WHEREVER NORMAL BUILD CREATES THE TASKSELECTIONDATA FOLDER:
+                if (SessionValues.WebBuild)
+                    StartCoroutine(ServerManager.CreateFolder(SessionValues.TaskSelectionDataPath)); //Create SessionLevel Sub-Folder inside Data Folder
 
-                SessionValues.USE_StartButton = gameObject.AddComponent<USE_StartButton>();
-                SessionValues.USE_StartButton.StartButtonPrefab = StartButtonPrefabGO;
+                SetHumanPanelAndStartButton();
 
                 SummaryData.Init();
 
@@ -665,7 +661,7 @@ namespace USE_ExperimentTemplate_Session
             loadTask.AddLateUpdateMethod(() =>
             {
                 AppendSerialData();
-                FrameData.AppendDataToBuffer();
+                StartCoroutine(FrameData.AppendDataToBuffer());
             });
 
             loadTask.SpecifyTermination(() => CurrentTask != null && CurrentTask.TaskLevelDefined, runTask, () =>
@@ -845,6 +841,16 @@ namespace USE_ExperimentTemplate_Session
             }
         }
 
+        private void SetHumanPanelAndStartButton()
+        {
+            SessionValues.HumanStartPanel = gameObject.AddComponent<HumanStartPanel>();
+            SessionValues.HumanStartPanel.SetSessionLevel(this);
+            SessionValues.HumanStartPanel.HumanStartPanelPrefab = HumanStartPanelPrefab;
+
+            SessionValues.USE_StartButton = gameObject.AddComponent<USE_StartButton>();
+            SessionValues.USE_StartButton.StartButtonPrefab = StartButtonPrefabGO;
+        }
+
         private void SetDisplayController()
         {
             DisplayController = gameObject.AddComponent<DisplayController>();
@@ -1006,16 +1012,9 @@ namespace USE_ExperimentTemplate_Session
 
         private IEnumerator CreateSessionDataFolder(Action<bool> callbackBool)
         {
-            if (SessionValues.WebBuild)
-            {
-                //can we delete this line and have a single bool for completion of createFile
-                // yield return StartCoroutine(ServerManager.CreateSessionDataFolder()); //Create Session Data Folder
-                yield return StartCoroutine(ServerManager.CreateFolder(SessionValues.TaskSelectionDataPath)); //Create SessionLevel Sub-Folder inside Data Folder
-                //can we move this to non-server framedata creation line
-            }
-            yield return StartCoroutine(SessionData.CreateFile()); //Will also create session data folder for normal build
+            yield return StartCoroutine(SessionData.CreateFile());
             ServerManager.SessionDataFolderCreated = true;
-            LogWriter.StoreDataIsSet = true; //tell log writer when storeData boolean has been set (in this case, waiting until data folder is created)
+            LogWriter.StoreDataIsSet = true; //tell log writer when storeData boolean has been set (waiting until data folder is created)
             callbackBool?.Invoke(true);
         }
 

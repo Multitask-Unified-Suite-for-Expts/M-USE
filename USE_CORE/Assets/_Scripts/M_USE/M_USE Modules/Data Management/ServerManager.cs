@@ -31,14 +31,9 @@ public static class ServerManager //Used with the PHP scripts
     }
 
     private static List<string> foldersCreatedList = new List<string>();
-    public static bool SessionDataFolderCreated;
 
+    public static bool SessionDataFolderCreated; //used for logWriter
 
-    public static IEnumerator CreateSessionDataFolder()
-    {
-        yield return CreateFolder(SessionDataFolderPath);
-        SessionDataFolderCreated = true;
-    }
 
     public static IEnumerator CreateFolder(string folderPath)
     {
@@ -175,6 +170,8 @@ public static class ServerManager //Used with the PHP scripts
     public static IEnumerator LoadTextureFromServer(string filePath, Action<Texture2D> callback)
     {
         string url = $"{ServerURL}/{filePath}";
+
+        Debug.Log("URL: " + url);
 
         using UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
         yield return request.SendWebRequest();

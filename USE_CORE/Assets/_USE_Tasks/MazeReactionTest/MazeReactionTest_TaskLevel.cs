@@ -76,8 +76,7 @@ public class MazeReactionTest_TaskLevel : ControlLevel_Task_Template
             LoadTextMaze(); // need currMaze here to set all the arrays
 
             StartCoroutine(HandleSkybox(mrtTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, mrtBD.ContextName, "LinearDark")));
-            //RenderSettings.skybox = CreateSkybox(mrtTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, mrtBD.ContextName, "LinearDark"));
-            //SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
+
             mrtTL.contextName = mrtBD.ContextName;
             mrtTL.MinTrials = mrtBD.MinMaxTrials[0];
             

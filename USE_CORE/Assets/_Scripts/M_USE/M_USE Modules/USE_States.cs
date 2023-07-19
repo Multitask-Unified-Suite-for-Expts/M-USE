@@ -1400,16 +1400,18 @@ namespace USE_States
             yield return LoadTexture(filePath, result =>
             {
                 if (result != null)
-                {
-                    Debug.Log("Got the texture!");
-                    tex = result;
-                }
+					tex = result;
                 else
                     Debug.Log("TEX RESULT IS NULL!");
             });
 
-            RenderSettings.skybox = CreateSkybox(tex);
-            SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
+			if (tex != null)
+			{
+				RenderSettings.skybox = CreateSkybox(tex);
+				SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
+			}
+			else
+				Debug.Log("NOT SETTING SKYBOX BECAUSE TEX IS NULL!");
         }
 
         public static IEnumerator LoadTexture(string filePath, Action<Texture2D> callback)
@@ -1426,10 +1428,7 @@ namespace USE_States
 					yield return CoroutineHelper.StartCoroutine(ServerManager.LoadTextureFromServer(filePath, result =>
                     {
                         if (result != null)
-                        {
-                            Debug.Log("Got the Texture from the server!!!!!!!!!");
-                            tex = result;
-                        }
+							tex = result;
                         else
                             Debug.Log("TRIED TO GET TEXTURE FROM SERVER BUT THE RESULT IS NULL!");
                     }));
@@ -1437,6 +1436,8 @@ namespace USE_States
 			}
 			else
 				tex = LoadPNG(filePath);
+
+			callback?.Invoke(tex);
         }
 
         public static Material CreateSkybox(Texture2D tex)

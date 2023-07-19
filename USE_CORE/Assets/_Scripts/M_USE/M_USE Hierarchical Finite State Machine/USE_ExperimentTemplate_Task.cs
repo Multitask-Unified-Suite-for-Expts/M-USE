@@ -610,9 +610,6 @@ namespace USE_ExperimentTemplate_Task
 
             if (SessionValues.WebBuild)
             {
-                //TrialLevel.LoadTexturesFromResources(); //delete this when uncomment below
-
-                //UnCOMMENT BELOW WHEN WE WANT TO LOAD TEXTURES FROM SERVER!
                 if (SessionValues.UsingDefaultConfigs)
                     TrialLevel.LoadTexturesFromResources();
                 else

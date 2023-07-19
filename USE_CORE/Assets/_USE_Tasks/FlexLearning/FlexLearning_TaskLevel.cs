@@ -48,13 +48,11 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 
             string contextFilePath;
             if (SessionValues.WebBuild)
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{flBD.ContextName}";
+                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{flBD.ContextName}.png";
             else
                 contextFilePath = flTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, flBD.ContextName, "LinearDark");
 
             StartCoroutine(HandleSkybox(contextFilePath));
-            //RenderSettings.skybox = CreateSkybox(contextFilePath);
-            //SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
             
             //Set the Initial Token Values for the Block
             flTL.TokenFBController.SetTotalTokensNum(flBD.NumTokenBar);

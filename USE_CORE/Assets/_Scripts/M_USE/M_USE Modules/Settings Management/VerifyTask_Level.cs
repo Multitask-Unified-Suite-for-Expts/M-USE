@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using ConfigDynamicUI;
 using UnityEngine;
 using USE_Def_Namespace;
+using USE_ExperimentTemplate_Classes;
+using USE_ExperimentTemplate_Task;
 using USE_States;
 using USE_StimulusManagement;
 
@@ -11,6 +14,7 @@ public class VerifyTask_Level : ControlLevel
     public bool fileParsed;
     public string currentFileName;
     public object parsedResult = null;
+    public ControlLevel_Task_Template CurrentTask;
 
 
     public override void DefineControlLevel()
@@ -22,7 +26,12 @@ public class VerifyTask_Level : ControlLevel
         AddActiveStates(new List<State> { ImportSettings, HandleTrialAndBlockDefs, FindStims });
 
         ImportSettings.AddChildLevel(importSettings_Level);
-        ImportSettings.AddInitializationMethod(() => SetValuesForLoading("TaskDef"));
+        ImportSettings.AddInitializationMethod(() =>
+        {
+            Debug.Log("STARTING IMPORT SETTINGS STATE!");
+            SetValuesForLoading("TaskDef");
+        });
+
         ImportSettings.AddUpdateMethod(() =>
         {
             if (importSettings_Level.fileLoaded)
@@ -36,19 +45,24 @@ public class VerifyTask_Level : ControlLevel
                 parsedResult = importSettings_Level.parsedResult;
                 fileParsed = true;
 
-                if (currentFileName == "TaskDef")
+                if (currentFileName.ToLower().Contains("taskdef"))
                     SetValuesForLoading("BlockDef");
-                else if (currentFileName == "BlockDef")
+                else if (currentFileName.ToLower().Contains("blockdef"))
                     SetValuesForLoading("TrialDef");
-                else if (currentFileName == "TrialDef")
+                else if (currentFileName.ToLower().Contains("trialdef"))
                     SetValuesForLoading("StimDef");
-                else if (currentFileName == "StimDef")
-                    Debug.Log("Parsed the final file (stim def), so not setting anymore values for loading");
+                else if (currentFileName.ToLower().Contains("stimdef"))
+                    SetValuesForLoading("EventCode");
+                else if (currentFileName.ToLower().Contains("eventcode"))
+                    SetValuesForLoading("ConfigUi");
+                else if (currentFileName.ToLower().Contains("configui"))
+                    Debug.Log("Parsed ConfigUI and no more to parse");
+
                 else
-                    Debug.LogError($"{currentFileName} has been parsed, but is not a TaskDef, BlockDef, TrialDef, or StimDef.");
+                    Debug.LogError($"{currentFileName} has been parsed, but is not a TaskDef, BlockDef, TrialDef, StimDef, EventCode, or ConfigUI.");
             }
         });
-        ImportSettings.SpecifyTermination(() => ImportSettings.ChildLevel.Terminated, HandleTrialAndBlockDefs);
+        ImportSettings.SpecifyTermination(() => ImportSettings.ChildLevel.Terminated, HandleTrialAndBlockDefs, () => Debug.Log("DONE WITH IMPORT SETTINGS STATE!"));
 
         HandleTrialAndBlockDefs.AddInitializationMethod(() =>
         {
@@ -68,23 +82,27 @@ public class VerifyTask_Level : ControlLevel
         importSettings_Level.continueToNextSetting = true;
     }
 
-    private void SetFilePath(string fileName)
+    private void SetFilePath(string searchString)
     {
-        if (importSettings_Level.SettingsDetails == null)
-            Debug.Log("SETTINGS DETAILS IS NULL!");
+        string pathToFolder;
+
+        if (SessionValues.WebBuild && SessionValues.UsingDefaultConfigs)
+            pathToFolder = $"{SessionValues.ConfigFolderPath}/{CurrentTask.TaskName}_DefaultConfigs";
+        else
+            pathToFolder = $"{SessionValues.ConfigFolderPath}/{CurrentTask.TaskName}"; //test for windows!
 
         if (SessionValues.ConfigAccessType == "Default" || SessionValues.ConfigAccessType == "Local")
-            importSettings_Level.SettingsDetails.FilePath = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{fileName}*");
+            importSettings_Level.SettingsDetails.FilePath = SessionValues.LocateFile.FindFilePathInExternalFolder(pathToFolder, $"*{searchString}*");
         else //Server
-            importSettings_Level.SettingsDetails.FilePath = SessionValues.ConfigFolderPath;
+            importSettings_Level.SettingsDetails.FilePath = pathToFolder;
     }
 
-    private void SetValuesForLoading(string fileName)
+    private void SetValuesForLoading(string searchString)
     {
-        importSettings_Level.SettingsDetails.FileName = fileName;
-        SetFilePath(importSettings_Level.SettingsDetails.FileName);
+        importSettings_Level.SettingsDetails.SearchString = searchString;
+        SetFilePath(importSettings_Level.SettingsDetails.SearchString);
 
-        switch (fileName.ToLower())
+        switch (searchString.ToLower())
         {
             case "taskdef":
                 importSettings_Level.SettingsDetails.SettingType = typeof(TaskDef);
@@ -98,11 +116,16 @@ public class VerifyTask_Level : ControlLevel
             case "stimdef":
                 importSettings_Level.SettingsDetails.SettingType = typeof(StimDef[]);
                 break;
+            case "eventcode":
+                importSettings_Level.SettingsDetails.SettingType = typeof(Dictionary<string, EventCode>); //this correct for event code?
+                break;
+            case "configui":
+                importSettings_Level.SettingsDetails.SettingType = typeof(ConfigVarStore); //this correct for ConfigUI?
+                break;
             default:
                 Debug.LogError("SET VALUES FOR LOADING DEFAULT SWITCH STATEMENT!");
                 break;
         }
-
     }
 
 }

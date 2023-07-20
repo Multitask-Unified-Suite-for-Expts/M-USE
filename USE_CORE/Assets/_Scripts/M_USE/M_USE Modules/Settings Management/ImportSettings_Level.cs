@@ -57,7 +57,7 @@ public class ImportSettings_Level : ControlLevel
             if (string.IsNullOrEmpty(SettingsDetails.FilePath))
                 return;
 
-            StartCoroutine(GetFileContentString(SettingsDetails.FilePath, SettingsDetails.FileName, (contentString) =>
+            StartCoroutine(GetFileContentString(SettingsDetails.FilePath, SettingsDetails.SearchString, (contentString) =>
             {
                 if (!string.IsNullOrEmpty(contentString))
                 {
@@ -65,7 +65,7 @@ public class ImportSettings_Level : ControlLevel
                     fileLoaded = true;
                 }
                 else
-                    Debug.Log($"Failed to load {SettingsDetails.FileName}, may not be an issue for this session.");
+                    Debug.Log($"Failed to load {SettingsDetails.FileName}");
             }));
         });
         loadFile.SpecifyTermination(() => continueToLoadFile, parseFile, () => { fileLoaded = false; continueToLoadFile = false; }) ;
@@ -102,59 +102,60 @@ public class ImportSettings_Level : ControlLevel
 
     private void ConvertStringToSettings()
     {
-        if (SettingsDetails.SettingParsingStyle == "SingleTypeArray")
+        if (SettingsDetails.SettingParsingStyle == "Array")
         {
-            MethodInfo methodInfo = GetType().GetMethod(nameof(ConvertTextToSettings_SingleTypeArray));
+            MethodInfo methodInfo = GetType().GetMethod(nameof(ConvertTextToSettings_Array));
             MethodInfo ConvertTextToSettings_SingleTypeArray_meth = methodInfo.MakeGenericMethod(new Type[] { currentType });
             object result = ConvertTextToSettings_SingleTypeArray_meth.Invoke(this, new object[] { currentFileContentString });
-
             parsedResult = result;
         }
-        else if (SettingsDetails.SettingParsingStyle == "SingleTypeJSON")
+        else if (SettingsDetails.SettingParsingStyle == "JSON")
         {
-            MethodInfo methodInfo = GetType().GetMethod(nameof(ConvertTextToSettings_SingleTypeJSON));
+            MethodInfo methodInfo = GetType().GetMethod(nameof(ConvertTextToSettings_JSON));
             MethodInfo ConvertTextToSettings_SingleTypeJSON_meth = methodInfo.MakeGenericMethod(new Type[] { currentType });
             object result = ConvertTextToSettings_SingleTypeJSON_meth.Invoke(this, new object[] { currentFileContentString});
-
             parsedResult = result;
         }
-        else if (SettingsDetails.SettingParsingStyle == "SingleTypeDelimited")
+        else if (SettingsDetails.SettingParsingStyle == "SingleType")
         {
-            MethodInfo methodInfo = GetType().GetMethod(nameof(ConvertTextToSettings_SingleTypeDelimited));
+            MethodInfo methodInfo = GetType().GetMethod(nameof(ConvertTextToSettings_SingleType));
             MethodInfo ConvertTextToSettings_SingleTypeDelimited_meth = methodInfo.MakeGenericMethod(new Type[] { currentType });
             object result = ConvertTextToSettings_SingleTypeDelimited_meth.Invoke(this, new object[] { currentFileContentString, '\t' });
-            
             parsedResult = result;
         }
         else
-        {
             Debug.LogError("Settings parsing style is " + settingParsingStyles[iSettings] + ", but this is not handled by script.");
-        }
     }
-    private IEnumerator GetFileContentString(string FilePath, string FileName, Action<string> callback)
+    private IEnumerator GetFileContentString(string filePath, string searchString, Action<string> callback)
     {
         string fileContent;
 
         if (SessionValues.ConfigAccessType == "Local" || SessionValues.ConfigAccessType == "Default")
         {
-            fileContent = File.ReadAllText(FilePath); //Will need to check that this works during Web Build
+            fileContent = File.ReadAllText(filePath); //Will need to check that this works during Web Build
             callback(fileContent);
         }
         else if (SessionValues.ConfigAccessType == "Server")
         {
-            yield return CoroutineHelper.StartCoroutine(ServerManager.GetFileStringAsync(FilePath, FileName, result =>
+            yield return CoroutineHelper.StartCoroutine(ServerManager.GetFileStringAsync(filePath, searchString, result =>
             {
-                callback(result);
+                SettingsDetails.FileName = result[0];
+                if(result != null)
+                    callback(result[1]);
+                else
+                {
+                    Debug.Log("GET FILE STRING ASYNC RESULT IS NULL!");
+                    callback(null);
+                }
             }));
         }
         else
             callback(null);
 
     }
-    public T[] ConvertTextToSettings_SingleTypeArray<T>(string fileContentString, char delimiter = '\t')
+    public T[] ConvertTextToSettings_Array<T>(string fileContentString, char delimiter = '\t')
     {
-
-    string[] lines;
+        string[] lines;
 
         if (SessionValues.ConfigAccessType == "Server")
         {
@@ -173,9 +174,9 @@ public class ImportSettings_Level : ControlLevel
             lines = new[] { "idk" };
         }
 
-    T[] settingsArray = new T[lines.Length - 1];
+        T[] settingsArray = new T[lines.Length - 1];
 
-    string[] fieldNames = lines[0].Split(delimiter);
+        string[] fieldNames = lines[0].Split(delimiter);
 
         foreach (string fieldName in fieldNames)
         {
@@ -188,52 +189,54 @@ public class ImportSettings_Level : ControlLevel
             }
         }
 
-    FieldInfo[] fieldInfos = typeof(T).GetFields();
+        FieldInfo[] fieldInfos = typeof(T).GetFields();
 
-    for (int iLine = 1; iLine < lines.Length; iLine++)
-    {
-        // Creates an instance for the entire line (ie. BlockDef)
-        settingsArray[iLine - 1] = Activator.CreateInstance<T>();
-        
-        // Splits the separate fields for the single instance (ie. fields of BlockDef)
-        string[] values = lines[iLine].Split(delimiter);
-        for (int iVal = 0; iVal < fieldNames.Length; iVal++)
+        for (int iLine = 1; iLine < lines.Length; iLine++)
         {
-            string fieldName = fieldNames[iVal].Trim();
-            try
+            // Creates an instance for the entire line (ie. BlockDef)
+            settingsArray[iLine - 1] = Activator.CreateInstance<T>();
+        
+            // Splits the separate fields for the single instance (ie. fields of BlockDef)
+            string[] values = lines[iLine].Split(delimiter);
+            for (int iVal = 0; iVal < fieldNames.Length; iVal++)
             {
-                PropertyInfo propertyInfo = typeof(T).GetProperty(fieldName);
-                FieldInfo fieldInfo = typeof(T).GetField(fieldName);
+                string fieldName = fieldNames[iVal].Trim();
+                try
+                {
+                    PropertyInfo propertyInfo = typeof(T).GetProperty(fieldName);
+                    FieldInfo fieldInfo = typeof(T).GetField(fieldName);
                 
-                // Checks if the value is a Field or Property of the type T, and sets the value 
-                if (propertyInfo != null)
-                {
-                    Type propertyType = propertyInfo.PropertyType;
-                    propertyInfo.SetValue(settingsArray[iLine - 1], Convert.ChangeType(values[iVal], propertyType));
-                }
-                else if (fieldInfo != null)
-                {
-                    Type fieldType = fieldInfo.FieldType;
+                    // Checks if the value is a Field or Property of the type T, and sets the value 
+                    if (propertyInfo != null)
+                    {
+                        Type propertyType = propertyInfo.PropertyType;
+                        propertyInfo.SetValue(settingsArray[iLine - 1], Convert.ChangeType(values[iVal], propertyType));
+                    }
+                    else if (fieldInfo != null)
+                    {
+                        Type fieldType = fieldInfo.FieldType;
 
-                        fieldInfo.SetValue(settingsArray[iLine - 1], Convert.ChangeType(values[iVal], fieldType));
+                            fieldInfo.SetValue(settingsArray[iLine - 1], Convert.ChangeType(values[iVal], fieldType));
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.Log(fieldNames[iVal] + ": " + values[iVal]);
+                        // Debug.Log("Error adding TDF file \"" + settingsCategory + "\" to Settings \"" + settingsCategory + "\".");
+                        throw new Exception(e.Message + "\t" + e.StackTrace);
                     }
                 }
-                catch (Exception e)
-                {
-                    Debug.Log(fieldNames[iVal] + ": " + values[iVal]);
-                    // Debug.Log("Error adding TDF file \"" + settingsCategory + "\" to Settings \"" + settingsCategory + "\".");
-                    throw new Exception(e.Message + "\t" + e.StackTrace);
-                }
             }
-        }
 
         return settingsArray;
 
     }
    // public static T[] ImportSettings_SingleTypeJSON<T>(string settingsCategory, string settingsPath, string serverFileString = null, string dictName = "")
-    public T ConvertTextToSettings_SingleTypeJSON<T>(string fileContentString)
+    public T ConvertTextToSettings_JSON<T>(string fileContentString)
     {
-        // Debug.Log("Attempting to load settings file " + settingsCategory + ".");
+        Debug.Log("FILE NAME: " + SettingsDetails.FileName);
+        Debug.Log("PARSING TYPE = " + SettingsDetails.SettingParsingStyle);
+        
         T settingsInstance = Activator.CreateInstance<T>();
         try
         {
@@ -249,8 +252,8 @@ public class ImportSettings_Level : ControlLevel
         return settingsInstance;
     }
   //  public static T ImportSettings_SingleTypeDelimited<T>(string settingsCategory, string settingsPath, string serverFileString = null, char delimiter = '\t')
-    public T ConvertTextToSettings_SingleTypeDelimited<T>(string fileContentString, char delimiter = '\t')
-    {   
+    public T ConvertTextToSettings_SingleType<T>(string fileContentString, char delimiter = '\t')
+    {
         string[] lines;
         lines = fileContentString.Split('\n');
         
@@ -294,6 +297,7 @@ public class ImportSettings_Level : ControlLevel
         else if (fieldInfo != null)
         {
             Type fieldType = fieldInfo.FieldType;
+
             if (fieldType.Equals(typeof(OrderedDictionary)))
             {
                 if (StartsOrEndsWithBrackets(fieldValue.Trim()))
@@ -336,7 +340,6 @@ public class ImportSettings_Level : ControlLevel
                 }
                 fieldInfo.SetValue(settingsInstance, finalArray);
             }
-
             else if (fieldType.Equals(typeof(List<string>)))
             {
                 if (StartsOrEndsWithBrackets(fieldValue))
@@ -363,6 +366,7 @@ public class ImportSettings_Level : ControlLevel
             }
             else
             {
+                Debug.Log("FIELD TYPE: " + fieldType);
                 fieldInfo.SetValue(settingsInstance, Convert.ChangeType(fieldValue, fieldType));
             }
         }
@@ -410,54 +414,61 @@ public class ImportSettings_Level : ControlLevel
     {
         string assumedParsingStyle = "";
 
+        Debug.Log("FILE NAME: " + SettingsDetails.FileName);
+
         if (SettingsDetails.FileName.ToLower().Contains("json"))
-            assumedParsingStyle = "SingleTypeJSON";
+            assumedParsingStyle = "JSON";
         else if (SettingsDetails.FileName.ToLower().Contains("array"))
-            assumedParsingStyle = "SingleTypeArray";
+            assumedParsingStyle = "Array";
         else if (SettingsDetails.FileName.ToLower().Contains("singletype"))
-            assumedParsingStyle = "SingleTypeDelimited";
+            assumedParsingStyle = "SingleType";
         else
-            Debug.LogError("Attempting to parse " + SettingsDetails.FileName + " but this name does not contain a substring indicated settings parsing type.");
+            Debug.LogError("Attempting to parse FileName: " + SettingsDetails.FileName + " , but this name does not contain a substring indicated settings parsing type.");
 
+        Debug.Log("ASSUMED PARSING STYLE: " + assumedParsingStyle);
 
-        string verifiedParsingStyle = "";
-        string[] lines = currentFileContentString.Split('\n');
-        int tabCount = 0;
-        for (int i = 0; i < lines.Length; i++)
-        {
-            string line = lines[i].Trim();
+        return assumedParsingStyle;
 
-            if (line.Contains('\t'))
-            {
-                tabCount = line.Split('\t').Length; //check if all lines have same number of tabs 
-                for (int j = i + 1; j < lines.Length; j++)
-                {
-                    string nextLine = lines[j].Trim();
-                    if (!string.IsNullOrEmpty(nextLine) && nextLine.Split('\t').Length != tabCount)
-                        verifiedParsingStyle = "SingleTypeJSON"; //Inconsistent number of tab-separated values
-                }
-            }
-            else
-                verifiedParsingStyle = "SingleTypeJSON";
-        }
+        //string verifiedParsingStyle = "";
+        //string[] lines = currentFileContentString.Split('\n');
+        //int tabCount = 0;
+        //for (int i = 0; i < lines.Length; i++)
+        //{
+        //    string line = lines[i].Trim();
 
-        //check for 2 tabs
-        if (tabCount != 2 && verifiedParsingStyle != "SingleTypeJSON")
-            verifiedParsingStyle = "SingleTypeArray";
+        //    if (line.Contains('\t'))
+        //    {
+        //        tabCount = line.Split('\t').Length; //check if all lines have same number of tabs 
+        //        for (int j = i + 1; j < lines.Length; j++)
+        //        {
+        //            string nextLine = lines[j].Trim();
+        //            if (!string.IsNullOrEmpty(nextLine) && nextLine.Split('\t').Length != tabCount)
+        //                verifiedParsingStyle = "SingleTypeJSON"; //Inconsistent number of tab-separated values
+        //        }
+        //    }
+        //    else
+        //        verifiedParsingStyle = "SingleTypeJSON";
+        //}
 
-        if (verifiedParsingStyle != assumedParsingStyle)
-        {
-            if (tabCount == 2)
-            {
-                verifiedParsingStyle = assumedParsingStyle;
-            }
-            else
-                verifiedParsingStyle = "SingleTypeJSON";
-        }
-        if (verifiedParsingStyle == "")
-            Debug.LogError("Attempting to verify parsing of " + SettingsDetails.FileName + " but the file is not parseable as one of the three settings types.");
+        ////check for 2 tabs
+        //if (tabCount != 2 && verifiedParsingStyle != "SingleTypeJSON")
+        //    verifiedParsingStyle = "SingleTypeArray";
 
-        return verifiedParsingStyle;
+        //if (verifiedParsingStyle != assumedParsingStyle)
+        //{
+        //    if (tabCount == 2)
+        //    {
+        //        verifiedParsingStyle = assumedParsingStyle;
+        //    }
+        //    else
+        //        verifiedParsingStyle = "SingleTypeJSON";
+        //}
+        //if (verifiedParsingStyle == "")
+        //    Debug.LogError("Attempting to verify parsing of " + SettingsDetails.FileName + " but the file is not parseable as one of the three settings types.");
+
+        //Debug.Log("VERIFIED PARSING STYLE!");
+
+        //return verifiedParsingStyle;
     }
 
 }
@@ -467,5 +478,6 @@ public class SettingsDetails
     public string SettingParsingStyle;
     public string FilePath;
     public string FileName;
+    public string SearchString;
     public Type SettingType;
 }

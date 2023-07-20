@@ -1,4 +1,4 @@
- using System;
+using System;
 using System.Text;
 using System.Collections.Generic;
 using System.IO;
@@ -6,20 +6,14 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
-using USE_UI;
 using USE_States;
 using USE_Settings;
 using USE_StimulusManagement;
 using ConfigDynamicUI;
-using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Trial;
-using SelectionTracking;
-using USE_DisplayManagement;
-using Tobii.Research;
 using System.Collections;
-using USE_ExperimentTemplate_Session;
 using USE_Def_Namespace;
 using System.Collections.Specialized;
 using TMPro;
@@ -46,12 +40,11 @@ namespace USE_ExperimentTemplate_Task
         public Camera TaskCam;
         public Canvas[] TaskCanvasses;
         public GameObject StimCanvas_2D;
-        //protected TrialDef[] AllTrialDefs;
-        //protected TrialDef[] CurrentBlockTrialDefs;
+        protected TrialDef[] AllTrialDefs;
+        protected TrialDef[] CurrentBlockTrialDefs;
         protected TaskDef TaskDef;
         protected BlockDef[] BlockDefs;
         public BlockDef CurrentBlockDef;
-        protected TrialDef[] AllTrialDefs;
         public BlockDef currentBlockDef
         {
             get
@@ -129,8 +122,7 @@ namespace USE_ExperimentTemplate_Task
 
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
 
-
-            if(TaskName != "GazeCalibration")
+            if (TaskName != "GazeCalibration")
             {
                 ReadSettingsFiles();
                 while (!AllDefsImported)
@@ -152,7 +144,7 @@ namespace USE_ExperimentTemplate_Task
 
                 StimsHandled = false;
             }
-                
+
             if (verifyOnly)
                 yield break;
 
@@ -202,44 +194,42 @@ namespace USE_ExperimentTemplate_Task
             });
 
             //VerifyTask State-----------------------------------------------------------------------------------------------------
-
-            if (verifyTask_Level == null)
-                Debug.Log("VERIFY TASK LEVEL IS NULL!");
-
+            verifyTask_Level.CurrentTask = this;
             VerifyTask.AddChildLevel(verifyTask_Level);
+            VerifyTask.AddInitializationMethod(() => Debug.Log("STARTING VERIFY TASK STATE"));
             VerifyTask.AddUpdateMethod(() =>
             {
-                if (verifyTask_Level.fileParsed)
-                {
-                    Debug.Log("FILE PARSED!");
-                    switch (verifyTask_Level.currentFileName.ToLower())
-                    {
-                        case "taskdef":
-                            TaskDef = (TaskDef)verifyTask_Level.parsedResult;
-                            if(TaskDef.CustomSettings != null)
-                            {
-                                //handle custom settings?
-                            }
-                            break;
-                        case "blockdef":
-                            BlockDefs = (BlockDef[])verifyTask_Level.parsedResult;
-                            break;
-                        case "trialdef":
-                            AllTrialDefs = (TrialDef[])verifyTask_Level.parsedResult;
-                            break;
-                        case "stimdef":
-                            StimDef[] importedStimDefs = (StimDef[])verifyTask_Level.parsedResult;
-                            AssignStimDefs(importedStimDefs);
-                            break;
-                        default:
-                            Debug.LogError("something");
-                            break;
-                    }
-                }
+                //if (verifyTask_Level.fileParsed)
+                //{
+                //    Debug.Log("FILE PARSED!!!!!! " + verifyTask_Level.currentFileName.ToLower());
+                //    switch (verifyTask_Level.currentFileName.ToLower())
+                //    {
+                //        case "taskdef":
+                //            TaskDef = (TaskDef)verifyTask_Level.parsedResult;
+                //            if(TaskDef.CustomSettings != null)
+                //            {
+                //                Debug.Log("would be handling custom settings!");
+                //                //handle custom settings?
+                //            }
+                //            break;
+                //        case "blockdef":
+                //            BlockDefs = (BlockDef[])verifyTask_Level.parsedResult;
+                //            break;
+                //        case "trialdef":
+                //            AllTrialDefs = (TrialDef[])verifyTask_Level.parsedResult;
+                //            break;
+                //        case "stimdef":
+                //            StimDef[] importedStimDefs = (StimDef[])verifyTask_Level.parsedResult;
+                //            AssignStimDefs(importedStimDefs);
+                //            break;
+                //        default:
+                //            Debug.LogError("DEFAULT VERIFY TASK SWITCH STATEMENT!");
+                //            break;
+                //    }
+                //}
             });
             VerifyTask.SpecifyTermination(() => !verifyOnly && VerifyTask.ChildLevel.Terminated, SetupTask);
             VerifyTask.SpecifyTermination(() => verifyOnly && VerifyTask.ChildLevel.Terminated, () => null);
-
 
 
             //SetupTask State-----------------------------------------------------------------------------------------------------
@@ -748,10 +738,11 @@ namespace USE_ExperimentTemplate_Task
                 string path = $"{ServerManager.SessionConfigFolderPath}/{TaskName}";
                 StartCoroutine(ServerManager.GetFileStringAsync(path, "ConfigUi", result =>
                 {
-                    if (!string.IsNullOrEmpty(result))
+                    if (result != null)
                     {
-                        SessionSettings.ImportSettings_SingleTypeJSON<ConfigVarStore>(TaskName + "_ConfigUiDetails", path, result);
-                        ConfigUiVariables = (ConfigVarStore)SessionSettings.Get(TaskName + "_ConfigUiDetails");
+                        //importSettings_Level.SettingsDetails.FileName = result[0]; //implement later?
+                        SessionSettings.ImportSettings_SingleTypeJSON<ConfigVarStore>(TaskName + "_ConfigUiDetails_json", path, result[1]);
+                        ConfigUiVariables = (ConfigVarStore)SessionSettings.Get(TaskName + "_ConfigUiDetails_json");
                     }
                     else
                         Debug.Log($"Task ConfigUI Result is null or empty! ({TaskName} may not have one)");
@@ -759,10 +750,11 @@ namespace USE_ExperimentTemplate_Task
 
                 StartCoroutine(ServerManager.GetFileStringAsync(path, "EventCode", result =>
                 {
-                    if (!string.IsNullOrEmpty(result))
+                    if (result != null)
                     {
-                        SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig", path, result);
-                        CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
+                        //importSettings_Level.SettingsDetails.FileName = result[0]; //implement later?
+                        SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig_json", path, result[1]);
+                        CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig_json");
                     }
                     else
                         Debug.Log($"Task EventCode Result is null or empty! ({TaskName} may not have one)");
@@ -811,14 +803,19 @@ namespace USE_ExperimentTemplate_Task
                         string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + TaskName + "_DefaultConfigs";
                         filePath = folderPath + Path.DirectorySeparatorChar + settingsFileName;
 
+                        Debug.Log("FILE PATH: " + filePath);
+
                         if (!Directory.Exists(folderPath))
                             Directory.CreateDirectory(folderPath);
 
                         if (!File.Exists(filePath))
                         {
+                            Debug.Log("LOADING FROM: " + "DefaultSessionConfigs/" + TaskName + "_DefaultConfigs/" + settingsFileName);
                             var db = Resources.Load<TextAsset>("DefaultSessionConfigs/" + TaskName + "_DefaultConfigs/" + settingsFileName);
+                            if (db == null)
+                                Debug.Log("DB IS NULL!!!!!!!!!!!!");
                             byte[] data = db.bytes;
-                            System.IO.File.WriteAllBytes(filePath, data);
+                            File.WriteAllBytes(filePath, data);
                         }
                         else
                             settingsFilePath = SessionValues.LocateFile.FindFilePathInExternalFolder(TaskConfigPath, "*" + TaskName + "*" + settingsFileName + "*");
@@ -831,8 +828,12 @@ namespace USE_ExperimentTemplate_Task
                     {
                         StartCoroutine(ServerManager.GetFileStringAsync(TaskConfigPath, key, result =>
                         {
-                            if (!string.IsNullOrEmpty(result))
-                                ImportCustomSetting(customSettingsValue, TaskConfigPath, settingsFileName, result);
+                            if (!string.IsNullOrEmpty(result[1]))
+                            {
+                                //importSettings_Level.SettingsDetails.FileName = result[0]; //implement later?
+
+                                ImportCustomSetting(customSettingsValue, TaskConfigPath, settingsFileName, result[1]);
+                            }
                             else
                                 Debug.Log("CUSTOM SETTINGS RESULT IS NULL!!!!!");
                         }));
@@ -1123,8 +1124,11 @@ namespace USE_ExperimentTemplate_Task
             {
                 StartCoroutine(ServerManager.GetFileStringAsync(taskConfigFolder, "TaskDef", result =>
                 {
-                    if (!string.IsNullOrEmpty(result))
-                        SessionSettings.ImportSettings_MultipleType(TaskName + "_TaskSettings", taskConfigFolder, result);
+                    if (result != null)
+                    {
+                        importSettings_Level.SettingsDetails.FileName = result[0]; //check this
+                        SessionSettings.ImportSettings_MultipleType(TaskName + "_TaskSettings", taskConfigFolder, result[1]);
+                    }
                     else
                         Debug.Log("No TaskDef file in server config folder (THIS COULD DEFINITELY BE A PROBLEM!).");
                     TaskDefImported = true;
@@ -1132,6 +1136,7 @@ namespace USE_ExperimentTemplate_Task
             }
             else
             {
+                Debug.Log("TASK CONFIG FOLDER: " + taskConfigFolder);
                 string taskDefFilePath = SessionValues.LocateFile.FindFilePathInExternalFolder(taskConfigFolder, "*" + TaskName + "*Task*");
                 if (!string.IsNullOrEmpty(taskDefFilePath))
                     SessionSettings.ImportSettings_MultipleType(TaskName + "_TaskSettings", taskDefFilePath);
@@ -1145,10 +1150,13 @@ namespace USE_ExperimentTemplate_Task
         {
             if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
             {
-                StartCoroutine(ServerManager.GetFileStringAsync(taskConfigFolder, "BlockDef", serverBlockDefFile =>
+                StartCoroutine(ServerManager.GetFileStringAsync(taskConfigFolder, "BlockDef", result =>
                 {
-                    if (!string.IsNullOrEmpty(serverBlockDefFile))
-                        ImportBlockDefs<T>(taskConfigFolder, serverBlockDefFile);
+                    if (result != null)
+                    {
+                        importSettings_Level.SettingsDetails.FileName = result[0]; //check this
+                        ImportBlockDefs<T>(taskConfigFolder, result[1]);
+                    }
                     else
                         Debug.Log("No blockdef file in server config folder (this may not be a problem).");
                     BlockDefImported = true;
@@ -1191,8 +1199,11 @@ namespace USE_ExperimentTemplate_Task
             {
                 StartCoroutine(ServerManager.GetFileStringAsync(taskConfigFolder, "TrialDef", result =>
                 {
-                    if (!string.IsNullOrEmpty(result))
-                        ImportTrialDefs<T>(taskConfigFolder, result);
+                    if (result != null)
+                    {
+                        importSettings_Level.SettingsDetails.FileName = result[0];
+                        ImportTrialDefs<T>(taskConfigFolder, result[1]);
+                    }
                     else
                         Debug.Log("No trialDef file in server config folder (this may not be a problem).");
                     TrialDefImported = true;
@@ -1258,8 +1269,11 @@ namespace USE_ExperimentTemplate_Task
                 {
                     StartCoroutine(ServerManager.GetFileStringAsync(taskConfigFolder, "StimDef", result =>
                     {
-                        if (!string.IsNullOrEmpty(result))
-                            ImportStimDefs<T>(key, taskConfigFolder, result);
+                        if (result != null)
+                        {
+                            importSettings_Level.SettingsDetails.FileName = result[0]; //check this
+                            ImportStimDefs<T>(key, taskConfigFolder, result[1]);
+                        }
                         else
                             Debug.Log("No Stim Def file in Server config folder (this may not be a problem).");
                         StimsHandled = true;

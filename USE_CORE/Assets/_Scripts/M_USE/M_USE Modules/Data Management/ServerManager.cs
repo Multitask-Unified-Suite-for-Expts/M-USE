@@ -83,14 +83,14 @@ public static class ServerManager //Used with the PHP scripts
 
     public static IEnumerator AppendToFileAsync(string folderPath, string fileName, string rowData)
     {
-        yield return GetFileStringAsync(folderPath, fileName, originalFileContents =>
+        yield return GetFileStringAsync(folderPath, fileName, originalFileContentsArray =>
         {
-            if (originalFileContents != null)
+            if (originalFileContentsArray != null)
             {
                 string path = $"{folderPath}/{fileName}";
                 string url = $"{ServerURL}/updateFile.php?path={path}";
 
-                string updatedFileContents = originalFileContents + "\n" + rowData;
+                string updatedFileContents = originalFileContentsArray[1] + "\n" + rowData;
                 WWWForm formData = new WWWForm();
                 formData.AddField("data", updatedFileContents);
 
@@ -110,7 +110,7 @@ public static class ServerManager //Used with the PHP scripts
         Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Success writing file to server!" : $"FAILED writing file! | Error: {request.error}");
     }
 
-    public static IEnumerator GetFileStringAsync(string path, string searchString, Action<string> callback)
+    public static IEnumerator GetFileStringAsync(string path, string searchString, Action<string[]> callback)
     {
         string url = $"{ServerURL}/getFile.php?path={path}&searchString={searchString}";
 
@@ -120,19 +120,25 @@ public static class ServerManager //Used with the PHP scripts
         while (!operation.isDone)
             yield return null;
 
-        string result = "";
+        string[] resultArray;
         if (request.result == UnityWebRequest.Result.Success)
         {
-            result = request.downloadHandler.text;
+            string result = request.downloadHandler.text;
 
             Debug.Log(result == "File not found" ? ("File NOT Found on Server: " + searchString) : ("Found File On Server: " + searchString));
             if (result == "File not found")
-                result = null;
+                resultArray = null;
+            else
+            {
+                resultArray = result.Split(new[] { "\n##########\n" }, StringSplitOptions.None);
+            }
         }
         else
+        {
+            resultArray = null;
             Debug.Log($"ERROR FINDING FILE: {searchString} | ERROR: {request.error}");
-
-        callback?.Invoke(result);
+        }
+        callback?.Invoke(resultArray);
     }
 
     public static IEnumerator GetFileBytesAsync(string path, string searchString, Action<byte[]> callback)

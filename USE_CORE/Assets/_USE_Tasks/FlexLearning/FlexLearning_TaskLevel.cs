@@ -25,6 +25,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int BlockStringsAdded = 0;
     FlexLearning_BlockDef flBD => GetCurrentBlockDef<FlexLearning_BlockDef>();
     FlexLearning_TrialLevel flTL;
+
     public override void DefineControlLevel()
     {   
         flTL = (FlexLearning_TrialLevel)TrialLevel;
@@ -86,20 +87,19 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             flTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
         else
             flTL.StartButtonPosition = new Vector3(0, 0, 0);
-        if (SessionSettings.SettingExists(TaskName +"_TaskSettings", "StartButtonScale"))
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonScale"))
             flTL.StartButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
         else
             flTL.StartButtonScale = 120f;
-
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
             flTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
-        else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");
+        //else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))
             flTL.ShadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
-        else Debug.LogError("Shadow Type setting not defined in the TaskDef");
+        //else Debug.LogError("Shadow Type setting not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))
             flTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");
-        else Debug.LogError("Neutral ITI setting not defined in the TaskDef");
+        //else Debug.LogError("Neutral ITI setting not defined in the TaskDef");
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
             flTL.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");

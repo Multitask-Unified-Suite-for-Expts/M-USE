@@ -199,34 +199,34 @@ namespace USE_ExperimentTemplate_Task
             VerifyTask.AddInitializationMethod(() => Debug.Log("STARTING VERIFY TASK STATE"));
             VerifyTask.AddUpdateMethod(() =>
             {
-                //if (verifyTask_Level.fileParsed)
-                //{
-                //    Debug.Log("FILE PARSED!!!!!! " + verifyTask_Level.currentFileName.ToLower());
-                //    switch (verifyTask_Level.currentFileName.ToLower())
-                //    {
-                //        case "taskdef":
-                //            TaskDef = (TaskDef)verifyTask_Level.parsedResult;
-                //            if(TaskDef.CustomSettings != null)
-                //            {
-                //                Debug.Log("would be handling custom settings!");
-                //                //handle custom settings?
-                //            }
-                //            break;
-                //        case "blockdef":
-                //            BlockDefs = (BlockDef[])verifyTask_Level.parsedResult;
-                //            break;
-                //        case "trialdef":
-                //            AllTrialDefs = (TrialDef[])verifyTask_Level.parsedResult;
-                //            break;
-                //        case "stimdef":
-                //            StimDef[] importedStimDefs = (StimDef[])verifyTask_Level.parsedResult;
-                //            AssignStimDefs(importedStimDefs);
-                //            break;
-                //        default:
-                //            Debug.LogError("DEFAULT VERIFY TASK SWITCH STATEMENT!");
-                //            break;
-                //    }
-                //}
+                if (verifyTask_Level.fileParsed)
+                {
+                    Debug.Log("FILE PARSED!!!!!! " + verifyTask_Level.currentFileName.ToLower());
+                    switch (verifyTask_Level.currentFileName.ToLower())
+                    {
+                        case "taskdef":
+                            TaskDef = (TaskDef)verifyTask_Level.parsedResult;
+                            if (TaskDef.CustomSettings != null)
+                            {
+                                Debug.Log("would be handling custom settings!");
+                                //handle custom settings?
+                            }
+                            break;
+                        case "blockdef":
+                            BlockDefs = (BlockDef[])verifyTask_Level.parsedResult;
+                            break;
+                        case "trialdef":
+                            AllTrialDefs = (TrialDef[])verifyTask_Level.parsedResult;
+                            break;
+                        case "stimdef":
+                            StimDef[] importedStimDefs = (StimDef[])verifyTask_Level.parsedResult;
+                            AssignStimDefs(importedStimDefs);
+                            break;
+                        default:
+                            Debug.LogError("DEFAULT VERIFY TASK SWITCH STATEMENT!");
+                            break;
+                    }
+                }
             });
             VerifyTask.SpecifyTermination(() => !verifyOnly && VerifyTask.ChildLevel.Terminated, SetupTask);
             VerifyTask.SpecifyTermination(() => verifyOnly && VerifyTask.ChildLevel.Terminated, () => null);

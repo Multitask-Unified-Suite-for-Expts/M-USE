@@ -332,6 +332,10 @@ namespace USE_ExperimentTemplate_Session
                 GazeCalibrationScripts.gameObject.SetActive(true);
                 CalibrationCube.gameObject.SetActive(true);
             });
+            gazeCalibration.AddLateUpdateMethod(() =>
+            {
+                SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
+            });
             gazeCalibration.SpecifyTermination(() => !GazeCalibrationTaskLevel.TrialLevel.runCalibration, () => selectTask, () =>
             {
                 GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
@@ -603,6 +607,7 @@ namespace USE_ExperimentTemplate_Session
                 }
                 AppendSerialData();
                 StartCoroutine(FrameData.AppendDataToBuffer());
+                SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
             });
             selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask, () => ResetSelectedTaskButtonSize());
 
@@ -667,7 +672,8 @@ namespace USE_ExperimentTemplate_Session
             loadTask.AddLateUpdateMethod(() =>
             {
                 AppendSerialData();
-                FrameData.AppendDataToBuffer();
+                StartCoroutine(FrameData.AppendDataToBuffer());
+                SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
             });
 
             loadTask.SpecifyTermination(() => CurrentTask != null && CurrentTask.TaskLevelDefined, runTask, () =>
@@ -690,6 +696,8 @@ namespace USE_ExperimentTemplate_Session
                     StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
                     SessionValues.SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialRecvData", CurrentTask.TaskName);
                     SessionValues.SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialSentData", CurrentTask.TaskName);
+
+                    StartCoroutine(SessionValues.GazeData.AppendDataToFile());
                 }
             });
 
@@ -1123,7 +1131,6 @@ namespace USE_ExperimentTemplate_Session
                 SessionValues.GazeData.sessionLevel = this;
                 SessionValues.GazeData.InitDataController();
                 SessionValues.GazeData.ManuallyDefine();
-                SessionValues.TobiiEyeTrackerController.GazeData = SessionValues.GazeData;
                 SessionValues.GazeTracker.Init(FrameData, 0);
 
             }

@@ -23,6 +23,7 @@ using USE_ExperimentTemplate_Session;
 using USE_Def_Namespace;
 using System.Collections.Specialized;
 using TMPro;
+using GazeCalibration_Namespace;
 
 namespace USE_ExperimentTemplate_Task
 {
@@ -237,8 +238,8 @@ namespace USE_ExperimentTemplate_Task
 
                     if (TaskName == "GazeCalibration")
                     {
-                        BlockDef bd = new BlockDef();
-                        BlockDefs = new BlockDef[] { bd };
+                        GazeCalibration_BlockDef bd = new GazeCalibration_BlockDef();
+                        BlockDefs = new GazeCalibration_Namespace.GazeCalibration_BlockDef[] { bd };
                         bd.GenerateTrialDefsFromBlockDef();
                     }
                 }
@@ -321,6 +322,7 @@ namespace USE_ExperimentTemplate_Task
             RunBlock.AddLateUpdateMethod(() =>
             {
                 StartCoroutine(FrameData.AppendDataToBuffer());
+                SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
 
                 SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
@@ -360,7 +362,11 @@ namespace USE_ExperimentTemplate_Task
             BlockFeedback.AddLateUpdateMethod(() =>
             {
                 if (SessionValues.SessionDef.StoreData)
+                {
                     StartCoroutine(FrameData.AppendDataToBuffer());
+                    if (SessionValues.SessionDef.EyeTrackerActive)
+                        SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
+                }
 
                 if (SessionValues.SessionDef.EventCodesActive)
                     SessionValues.EventCodeManager.EventCodeLateUpdate();
@@ -1429,6 +1435,7 @@ namespace USE_ExperimentTemplate_Task
 
             if (SessionValues.GazeData != null)
             {
+                SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
                 StartCoroutine(SessionValues.GazeData.AppendDataToFile());
             }
         }

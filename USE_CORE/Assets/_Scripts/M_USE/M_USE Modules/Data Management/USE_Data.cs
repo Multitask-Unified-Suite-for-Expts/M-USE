@@ -597,7 +597,7 @@ namespace USE_Data
 		/// </summary>
 		public IEnumerator AppendDataToBuffer()
 		{
-			if (storeData && Time.frameCount > frameChecker)
+			if (storeData) //&& Time.frameCount > frameChecker)
 			{
 				string[] currentVals = new string[data.Count];
 				for (int i = 0; i < data.Count; i++)

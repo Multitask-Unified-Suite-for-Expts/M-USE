@@ -355,14 +355,20 @@ namespace USE_ExperimentTemplate_Trial
             StartCoroutine(FrameData.AppendDataToBuffer());
             StartCoroutine(FrameData.AppendDataToFile());
             if (SessionValues.SessionDef.EyeTrackerActive)
+            {
+                //SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
                 StartCoroutine(SessionValues.GazeData.AppendDataToFile());
+
+            }
             if (SessionValues.SessionDef.SerialPortActive)
             {
                 StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
                 StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
             }
+
+
         }
-        
+
         public bool CheckForcedBlockEnd()
         {
             if (ForceBlockEnd)
@@ -390,6 +396,12 @@ namespace USE_ExperimentTemplate_Trial
             {
                 StartCoroutine(TrialData.AppendDataToBuffer());
                 StartCoroutine(TrialData.AppendDataToFile());
+            }
+
+            if (SessionValues.SessionDef.EyeTrackerActive)
+            {
+                SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
+                StartCoroutine(SessionValues.GazeData.AppendDataToFile());
             }
         }
 

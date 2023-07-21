@@ -84,6 +84,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.TokenFBController.SetTotalTokensNum(currentBlock.NumTokenBar);
             trialLevel.TokenFBController.SetTokenBarValue(currentBlock.InitialTokenAmount);
             trialLevel.ResetBlockVariables();
+
             CalculateBlockSummaryString();
         });
         RunBlock.AddDefaultTerminationMethod(() => AddBlockValuesToTaskValues());

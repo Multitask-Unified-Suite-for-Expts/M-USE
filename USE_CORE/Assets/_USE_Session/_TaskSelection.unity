@@ -720,6 +720,7 @@ MonoBehaviour:
   importSettings_Level: {fileID: 1375570697}
   fileParsed: 0
   currentFileName: 
+  CurrentTask: {fileID: 0}
 --- !u!1 &1391649313 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5576539015048150, guid: 810531c98dad74048995093927772f82,
@@ -1018,6 +1019,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 561856523827188284, guid: 6e926400061ef460aa6b2c5b3cc000a2,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 561856523827188284, guid: 6e926400061ef460aa6b2c5b3cc000a2,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.2
       objectReference: {fileID: 0}
     - target: {fileID: 561856523827188284, guid: 6e926400061ef460aa6b2c5b3cc000a2,
         type: 3}

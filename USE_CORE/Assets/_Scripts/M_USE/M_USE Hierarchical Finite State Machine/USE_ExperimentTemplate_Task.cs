@@ -322,7 +322,8 @@ namespace USE_ExperimentTemplate_Task
             RunBlock.AddLateUpdateMethod(() =>
             {
                 StartCoroutine(FrameData.AppendDataToBuffer());
-                SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
+                if (SessionValues.TobiiEyeTrackerController != null)
+                    SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
 
                 SessionValues.EventCodeManager.EventCodeLateUpdate();
             });

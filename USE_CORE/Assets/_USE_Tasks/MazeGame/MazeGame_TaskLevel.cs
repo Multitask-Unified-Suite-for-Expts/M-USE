@@ -382,6 +382,16 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             Debug.Log("Tile Size settings not defined in the TaskDef. Default setting of " + mgTL.TileSize +
                       " is used instead.");
         }
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "SpaceBetweenTiles"))
+        {
+            mgTL.SpaceBetweenTiles = (float)SessionSettings.Get(TaskName + "_TaskSettings", "SpaceBetweenTiles");
+        }
+        else
+        {
+            mgTL.SpaceBetweenTiles = 1f; // default value in the case it isn't specified
+            Debug.Log("Space Between Tiles settings not defined in the TaskDef. Default setting of " + mgTL.SpaceBetweenTiles +
+                      " is used instead.");
+        }
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TileTexture"))
             mgTL.TileTexture = (string)SessionSettings.Get(TaskName + "_TaskSettings", "TileTexture");
@@ -431,6 +441,21 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         {
             mgTL.MazeBackgroundTextureName = "MazeBackground";
             Debug.Log("Maze Background Texture settings not defined in the TaskDef, set as default of MazeBackground");
+        }
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazePosition"))
+            mgTL.MazePosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "MazePosition");
+        else
+        {
+            mgTL.MazePosition = new Vector3(0, 0.42f, 0);
+            Debug.Log("Maze Position settings not defined in the TaskDef, set as default of (0, 0.42, 0)");
+        }
+
+        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "GuidedMazeSelection"))
+            mgTL.GuidedMazeSelection = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "GuidedMazeSelection");
+        else
+        {
+            mgTL.GuidedMazeSelection = false;
+            Debug.Log("Guided Maze Selection settings not defined in the TaskDef, set as default of false");
         }
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))

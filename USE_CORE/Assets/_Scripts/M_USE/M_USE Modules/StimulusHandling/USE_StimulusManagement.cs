@@ -575,6 +575,11 @@ namespace USE_StimulusManagement
                 return;
             }
 
+			if(go.GetComponent<Tile>()  != null)
+			{
+				return;
+			}
+
             // Destroy MeshFilters and their associated Meshes
             MeshFilter[] meshFilters = go.GetComponentsInChildren<MeshFilter>();
             foreach (MeshFilter meshFilter in meshFilters)

@@ -356,7 +356,8 @@ namespace USE_ExperimentTemplate_Trial
             StartCoroutine(FrameData.AppendDataToFile());
             if (SessionValues.SessionDef.EyeTrackerActive)
             {
-                //SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
+                if (SessionValues.TobiiEyeTrackerController != null)
+                    SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
                 StartCoroutine(SessionValues.GazeData.AppendDataToFile());
 
             }

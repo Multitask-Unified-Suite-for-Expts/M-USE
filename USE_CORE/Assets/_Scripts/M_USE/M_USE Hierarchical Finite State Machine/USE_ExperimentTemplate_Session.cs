@@ -334,7 +334,8 @@ namespace USE_ExperimentTemplate_Session
             });
             gazeCalibration.AddLateUpdateMethod(() =>
             {
-                SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
+                if (SessionValues.TobiiEyeTrackerController != null)
+                    SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
             });
             gazeCalibration.SpecifyTermination(() => !GazeCalibrationTaskLevel.TrialLevel.runCalibration, () => selectTask, () =>
             {
@@ -607,7 +608,8 @@ namespace USE_ExperimentTemplate_Session
                 }
                 AppendSerialData();
                 StartCoroutine(FrameData.AppendDataToBuffer());
-                SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
+                if(SessionValues.TobiiEyeTrackerController != null) 
+                    SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
             });
             selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask, () => ResetSelectedTaskButtonSize());
 
@@ -673,7 +675,8 @@ namespace USE_ExperimentTemplate_Session
             {
                 AppendSerialData();
                 StartCoroutine(FrameData.AppendDataToBuffer());
-                SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
+                if (SessionValues.TobiiEyeTrackerController != null)
+                    SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
             });
 
             loadTask.SpecifyTermination(() => CurrentTask != null && CurrentTask.TaskLevelDefined, runTask, () =>

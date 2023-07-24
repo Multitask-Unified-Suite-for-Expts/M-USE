@@ -25,13 +25,10 @@ public class SliderFBController : MonoBehaviour
     private float animationEndTime;
     private float flashingTime = 0.5f;
     private float updateTime = 0.5f;
-    private int flashingNumBeeps = 3; //Num beeps for tokenbar flashing audio
-    private int sliderInitialValue = 0;
     private int numSliderBarFull = 0;
 
     private float targetValue;
     private float sliderValueChange;
-    private double frameRate = 0.0167;
     
     // Audio
     AudioFBController audioFBController;

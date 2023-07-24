@@ -36,12 +36,12 @@ public class VerifyTask_Level : ControlLevel
         {
             if (importSettings_Level.fileLoaded)
             {
-                importSettings_Level.SettingsDetails.SettingParsingStyle = importSettings_Level.DetermineParsingStyle();
-                importSettings_Level.continueToLoadFile = true;
+                importSettings_Level.SettingsDetails[0].SettingParsingStyle = importSettings_Level.DetermineParsingStyle();
+                importSettings_Level.importPaused = false;
             }
             if (importSettings_Level.fileParsed)
             {
-                currentFileName = importSettings_Level.SettingsDetails.FileName;
+                currentFileName = importSettings_Level.SettingsDetails[0].FileName;
                 parsedResult = importSettings_Level.parsedResult;
                 fileParsed = true;
 
@@ -79,7 +79,7 @@ public class VerifyTask_Level : ControlLevel
 
     public void ContinueToNextSetting()
     {
-        importSettings_Level.continueToNextSetting = true;
+        importSettings_Level.importPaused = false;
     }
 
     private void SetFilePath(string searchString)
@@ -92,35 +92,35 @@ public class VerifyTask_Level : ControlLevel
             pathToFolder = $"{SessionValues.ConfigFolderPath}/{CurrentTask.TaskName}"; //test for windows!
 
         if (SessionValues.ConfigAccessType == "Default" || SessionValues.ConfigAccessType == "Local")
-            importSettings_Level.SettingsDetails.FilePath = SessionValues.LocateFile.FindFilePathInExternalFolder(pathToFolder, $"*{searchString}*");
+            importSettings_Level.SettingsDetails[0].FilePath = SessionValues.LocateFile.FindFilePathInExternalFolder(pathToFolder, $"*{searchString}*");
         else //Server
-            importSettings_Level.SettingsDetails.FilePath = pathToFolder;
+            importSettings_Level.SettingsDetails[0].FilePath = pathToFolder;
     }
 
     private void SetValuesForLoading(string searchString)
     {
-        importSettings_Level.SettingsDetails.SearchString = searchString;
-        SetFilePath(importSettings_Level.SettingsDetails.SearchString);
+        importSettings_Level.SettingsDetails[0].SearchString = searchString;
+        SetFilePath(importSettings_Level.SettingsDetails[0].SearchString);
 
         switch (searchString.ToLower())
         {
             case "taskdef":
-                importSettings_Level.SettingsDetails.SettingType = typeof(TaskDef);
+                importSettings_Level.SettingsDetails[0].SettingType = typeof(TaskDef);
                 break;
             case "blockdef":
-                importSettings_Level.SettingsDetails.SettingType = typeof(BlockDef[]);
+                importSettings_Level.SettingsDetails[0].SettingType = typeof(BlockDef[]);
                 break;
             case "trialdef":
-                importSettings_Level.SettingsDetails.SettingType = typeof(TrialDef[]);
+                importSettings_Level.SettingsDetails[0].SettingType = typeof(TrialDef[]);
                 break;
             case "stimdef":
-                importSettings_Level.SettingsDetails.SettingType = typeof(StimDef[]);
+                importSettings_Level.SettingsDetails[0].SettingType = typeof(StimDef[]);
                 break;
             case "eventcode":
-                importSettings_Level.SettingsDetails.SettingType = typeof(Dictionary<string, EventCode>); //this correct for event code?
+                importSettings_Level.SettingsDetails[0].SettingType = typeof(Dictionary<string, EventCode>); //this correct for event code?
                 break;
             case "configui":
-                importSettings_Level.SettingsDetails.SettingType = typeof(ConfigVarStore); //this correct for ConfigUI?
+                importSettings_Level.SettingsDetails[0].SettingType = typeof(ConfigVarStore); //this correct for ConfigUI?
                 break;
             default:
                 Debug.LogError("SET VALUES FOR LOADING DEFAULT SWITCH STATEMENT!");

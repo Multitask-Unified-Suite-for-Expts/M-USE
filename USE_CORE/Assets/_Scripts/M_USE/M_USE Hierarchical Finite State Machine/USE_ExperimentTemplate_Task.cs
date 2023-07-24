@@ -117,6 +117,9 @@ namespace USE_ExperimentTemplate_Task
         {
             TaskLevelDefined = false;
 
+            importSettings_Level = GameObject.Find("ControlLevels").GetComponent<ImportSettings_Level>();
+            verifyTask_Level = GameObject.Find("ControlLevels").GetComponent<VerifyTask_Level>();
+            
             if (SessionValues.UsingDefaultConfigs)
                 PrefabPath = "/DefaultResources/Stimuli";
 
@@ -1130,7 +1133,7 @@ namespace USE_ExperimentTemplate_Task
                 {
                     if (result != null)
                     {
-                        importSettings_Level.SettingsDetails.FileName = result[0]; //check this
+                        importSettings_Level.SettingsDetails[0].FileName = result[0]; //check this
                         SessionSettings.ImportSettings_MultipleType(TaskName + "_TaskSettings", taskConfigFolder, result[1]);
                     }
                     else
@@ -1158,7 +1161,7 @@ namespace USE_ExperimentTemplate_Task
                 {
                     if (result != null)
                     {
-                        importSettings_Level.SettingsDetails.FileName = result[0]; //check this
+                        importSettings_Level.SettingsDetails[0].FileName = result[0]; //check this
                         ImportBlockDefs<T>(taskConfigFolder, result[1]);
                     }
                     else
@@ -1205,7 +1208,7 @@ namespace USE_ExperimentTemplate_Task
                 {
                     if (result != null)
                     {
-                        importSettings_Level.SettingsDetails.FileName = result[0];
+                        importSettings_Level.SettingsDetails[0].FileName = result[0];
                         ImportTrialDefs<T>(taskConfigFolder, result[1]);
                     }
                     else
@@ -1275,7 +1278,7 @@ namespace USE_ExperimentTemplate_Task
                     {
                         if (result != null)
                         {
-                            importSettings_Level.SettingsDetails.FileName = result[0]; //check this
+                            importSettings_Level.SettingsDetails[0].FileName = result[0]; //check this
                             ImportStimDefs<T>(key, taskConfigFolder, result[1]);
                         }
                         else

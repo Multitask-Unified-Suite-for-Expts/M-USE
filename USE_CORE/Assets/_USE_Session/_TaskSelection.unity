@@ -515,6 +515,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   leftLuminanceFactor: 0
   rightLuminanceFactor: 0
+  runPattern: 0
 --- !u!1 &1017469087
 GameObject:
   m_ObjectHideFlags: 0
@@ -798,6 +799,8 @@ GameObject:
   - component: {fileID: 1375570696}
   - component: {fileID: 1375570695}
   - component: {fileID: 1375570697}
+  - component: {fileID: 1375570699}
+  - component: {fileID: 1375570698}
   m_Layer: 0
   m_Name: ControlLevels
   m_TagString: Untagged
@@ -833,6 +836,7 @@ MonoBehaviour:
   GazeCalibrationTaskLevel: {fileID: 0}
   SessionDetails: {fileID: 454535789}
   LocateFile: {fileID: 1481219466}
+  FrameData: {fileID: 0}
   CameraMirrorTexture: {fileID: 0}
   DisplayController: {fileID: 0}
   TaskButtonsContainer: {fileID: 0}
@@ -885,18 +889,69 @@ MonoBehaviour:
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
-  CallDefineLevelAutomatically: 1
+  CallDefineLevelAutomatically: 0
   quitApplicationAtEnd: 0
-  DebugActive: 0
+  DebugActive: 1
   Paused: 1
   fileNames: []
   settingParsingStyles: []
   filePathStrings: []
-  currentFileName: 
-  SessionLevel: {fileID: 0}
   fileParsed: 0
-  terminateImport: 0
-  continueToNextSetting: 0
+  fileLoaded: 0
+  importPaused: 0
+--- !u!114 &1375570698
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1375570694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9512ed038d10844579f2d3fa36048351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ControlLevelName: VerifyTask_Level
+  initScreen: {fileID: 0}
+  Terminated: 0
+  isMainLevel: 0
+  CallDefineLevelAutomatically: 0
+  quitApplicationAtEnd: 0
+  DebugActive: 1
+  Paused: 1
+  importSettings_Level: {fileID: 0}
+  fileParsed: 0
+  currentFileName: 
+  CurrentTask: {fileID: 0}
+--- !u!114 &1375570699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1375570694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2c52c6b2245d49289736e37b00af5b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ControlLevelName: SetupSession_Level
+  initScreen: {fileID: 0}
+  Terminated: 0
+  isMainLevel: 0
+  CallDefineLevelAutomatically: 0
+  quitApplicationAtEnd: 0
+  DebugActive: 1
+  Paused: 1
+  settingsImported: 0
+  dataFolderCreated: 0
+  taskSceneLoaded: 0
+  taskVerified: 0
+  setupPaused: 0
+  importSettings_Level: {fileID: 0}
+  SessionData: {fileID: 0}
+  FrameData: {fileID: 0}
+  SessionLevel: {fileID: 0}
 --- !u!1 &1391649313 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5576539015048150, guid: 810531c98dad74048995093927772f82,

@@ -350,7 +350,6 @@ namespace USE_ExperimentTemplate_Session
             //SelectTask State---------------------------------------------------------------------------------------------------------------
             selectTask.AddUniversalInitializationMethod(() =>
             {
-                Debug.Log("SelectionHandler: " + SelectionHandler);
                 if (SessionValues.SessionDef.PlayBackgroundMusic)
                 {
                     if (BackgroundMusic_AudioSource == null)

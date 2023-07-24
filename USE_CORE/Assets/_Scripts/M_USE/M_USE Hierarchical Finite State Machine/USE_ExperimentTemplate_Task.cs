@@ -122,31 +122,32 @@ namespace USE_ExperimentTemplate_Task
 
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
 
-            if (TaskName != "GazeCalibration")
-            {
-                ReadSettingsFiles();
-                while (!AllDefsImported)
-                    yield return new WaitForEndOfFrame();
-                TaskDefImported = false;
-                BlockDefImported = false;
-                TrialDefImported = false;
+            //if (TaskName != "GazeCalibration")
+            //{
+            //    ReadSettingsFiles();
+            //    while (!AllDefsImported)
+            //        yield return new WaitForEndOfFrame();
+            //    TaskDefImported = false;
+            //    BlockDefImported = false;
+            //    TrialDefImported = false;
 
-                HandleCustomSettings();
+            //    HandleCustomSettings();
 
-                HandleTrialAndBlockDefs(verifyOnly);
-                while (!TrialAndBlockDefsHandled)
-                    yield return new WaitForEndOfFrame();
-                TrialAndBlockDefsHandled = false;
+            //    HandleTrialAndBlockDefs(verifyOnly);
+            //    while (!TrialAndBlockDefsHandled)
+            //        yield return new WaitForEndOfFrame();
+            //    TrialAndBlockDefsHandled = false;
 
-                FindStims();
-                while (!StimsHandled)
-                    yield return new WaitForEndOfFrame();
+            //    FindStims();
+            //    while (!StimsHandled)
+            //        yield return new WaitForEndOfFrame();
 
-                StimsHandled = false;
-            }
+            //    StimsHandled = false;
+            //}
 
-            if (verifyOnly)
-                yield break;
+            //if (verifyOnly)
+            //    yield break;
+
 
             VerifyTask = new State("VerifyTask");
             SetupTask = new State("SetupTask");

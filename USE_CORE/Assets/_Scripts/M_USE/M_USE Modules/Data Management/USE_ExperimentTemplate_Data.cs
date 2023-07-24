@@ -328,6 +328,11 @@ namespace USE_ExperimentTemplate_Data
             AddDatum("FrameStartUnity", () => Time.time);
         }
 
+        public void AddFlashPanelColumns()
+        {
+            AddDatum("FlashPanelLStatus", ()=> SessionValues.FlashPanelController.leftLuminanceFactor);
+            AddDatum("FlashPanelLStatus", ()=> SessionValues.FlashPanelController.rightLuminanceFactor);
+        }
         public void AddEventCodeColumns()
         {
             AddDatum("EventCodes", () => taskLevel != null ? string.Join(",", SessionValues.EventCodeManager.GetBuffer("sent")) : "NoTaskActive");

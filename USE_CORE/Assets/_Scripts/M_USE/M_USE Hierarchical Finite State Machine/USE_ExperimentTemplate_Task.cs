@@ -363,7 +363,7 @@ namespace USE_ExperimentTemplate_Task
 
             FinishTask.SpecifyTermination(() => true, () => null);
 
-            AddDefaultTerminationMethod(() =>
+            AddDefaultControlLevelTerminationMethod(() =>
             {
                 if (SessionValues.SessionDataControllers != null)
                 {
@@ -491,6 +491,9 @@ namespace USE_ExperimentTemplate_Task
 
             if (SessionValues.SessionDef.EventCodesActive)
                 FrameData.AddEventCodeColumns();
+            if (SessionValues.SessionDef.FlashPanelsActive)
+                FrameData.AddFlashPanelColumns();
+                FrameData.AddFlashPanelColumns();
 
             //user-defined task control level 
             DefineControlLevel();

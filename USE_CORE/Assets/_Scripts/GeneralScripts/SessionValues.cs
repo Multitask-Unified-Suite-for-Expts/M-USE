@@ -44,6 +44,7 @@ public static class SessionValues
     public static GazeTracker GazeTracker;
     public static TobiiEyeTrackerController TobiiEyeTrackerController;
     public static GameObject InputManager;
+    public static FlashPanelController FlashPanelController;
 
     public static EventCodeManager EventCodeManager;
     

@@ -92,6 +92,8 @@ namespace USE_ExperimentTemplate_Session
 
         private ImportSettings_Level importSettings_Level;
 
+        private FlashPanelController FlashPanelController;
+
 
 
         public override void DefineControlLevel()
@@ -212,6 +214,13 @@ namespace USE_ExperimentTemplate_Session
                 SummaryData.Init();
                 CreateSessionSettingsFolder();
 
+                SessionValues.FlashPanelController = GameObject.Find("UI_Canvas").GetComponent<FlashPanelController>();
+
+                if (!SessionValues.SessionDef.FlashPanelsActive)
+                    SessionValues.FlashPanelController.TurnOffFlashPanels();
+                else
+                    SessionValues.FlashPanelController.runPattern = true;
+                
                 if (SessionValues.SessionDef.SerialPortActive)
                 {
                     SessionValues.SerialPortController = new SerialPortThreaded();
@@ -1080,7 +1089,10 @@ namespace USE_ExperimentTemplate_Session
             FrameData.InitDataController();
             FrameData.ManuallyDefine();
 
-            FrameData.AddEventCodeColumns();
+            if (SessionValues.SessionDef.EventCodesActive)
+                FrameData.AddEventCodeColumns();
+            if (SessionValues.SessionDef.FlashPanelsActive)
+                FrameData.AddFlashPanelColumns();
 
             if (SessionValues.SessionDef.EyeTrackerActive)
             {

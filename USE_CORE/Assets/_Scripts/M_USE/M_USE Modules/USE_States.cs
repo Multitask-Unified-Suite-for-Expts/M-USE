@@ -778,7 +778,7 @@ namespace USE_States
 		/// Adds the control level default termination method.
 		/// </summary>
 		/// <param name="method">Method.</param>
-		public void AddDefaultTerminationMethod(VoidDelegate method)
+		public void AddDefaultControlLevelTerminationMethod(VoidDelegate method)
 		{
 			controlLevelDefaultTermination += method;
 		}

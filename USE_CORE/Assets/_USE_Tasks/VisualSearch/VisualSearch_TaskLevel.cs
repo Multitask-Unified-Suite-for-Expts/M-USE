@@ -163,13 +163,13 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
             vsTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
-        else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");
+        //else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))
             vsTL.ShadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
-        else Debug.LogError("Shadow Type setting not defined in the TaskDef");
+        //else Debug.LogError("Shadow Type setting not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))
             vsTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");
-        else Debug.LogError("Neutral ITI setting not defined in the TaskDef");
+        //else Debug.LogError("Neutral ITI setting not defined in the TaskDef");
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
             vsTL.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");

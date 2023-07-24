@@ -354,20 +354,20 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         {
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeKeyFilePath"))
                 mazeKeyFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeKeyFilePath");
-            else Debug.LogError("Maze key file path settings not defined in the TaskDef");
+            //else Debug.LogError("Maze key file path settings not defined in the TaskDef");
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeFilePath"))
                 mgTL.MazeFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeFilePath");
-            else Debug.LogError("Maze File Path not defined in the TaskDef");
+            //else Debug.LogError("Maze File Path not defined in the TaskDef");
         }
         
 
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
             mgTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
-        else Debug.LogError("Start Button Position settings not defined in the TaskDef");
+        //else Debug.LogError("Start Button Position settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonScale"))
             mgTL.StartButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
-        else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
+        //else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))
             mgTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");
         else
@@ -397,30 +397,30 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NumBlinks"))
             mgTL.NumBlinks = (int)SessionSettings.Get(TaskName + "_TaskSettings", "NumBlinks");
-        else Debug.LogError("Num Blinks settings not defined in the TaskDef");
+        //else Debug.LogError("Num Blinks settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartColor"))
             mgTL.startColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "StartColor");
-        else Debug.LogError("Start Color settings not defined in the TaskDef");
+        //else Debug.LogError("Start Color settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FinishColor"))
             mgTL.finishColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "FinishColor");
-        else Debug.LogError("Finish Color settings not defined in the TaskDef");
+        //else Debug.LogError("Finish Color settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "CorrectColor"))
             mgTL.correctColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "CorrectColor");
-        else Debug.LogError("Correct Color settings not defined in the TaskDef");
+        //else Debug.LogError("Correct Color settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "LastCorrectColor"))
             mgTL.lastCorrectColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "LastCorrectColor");
-        else Debug.LogError("Last Correct Color settings not defined in the TaskDef");
+        //else Debug.LogError("Last Correct Color settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "IncorrectRuleAbidingColor"))
             mgTL.incorrectRuleAbidingColor =
                 (float[])SessionSettings.Get(TaskName + "_TaskSettings", "IncorrectRuleAbidingColor");
-        else Debug.LogError("Incorrect Rule Abiding Color settings not defined in the TaskDef");
+        //else Debug.LogError("Incorrect Rule Abiding Color settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "IncorrectRuleBreakingColor"))
             mgTL.incorrectRuleBreakingColor =
                 (float[])SessionSettings.Get(TaskName + "_TaskSettings", "IncorrectRuleBreakingColor");
-        else Debug.LogError("Incorrect Rule Breaking Color settings not defined in the TaskDef");
+        //else Debug.LogError("Incorrect Rule Breaking Color settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "DefaultTileColor"))
             mgTL.defaultTileColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "DefaultTileColor");
-        else Debug.LogError("Default Tile Color settings not defined in the TaskDef");
+        //else Debug.LogError("Default Tile Color settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "UsingFixedRatioReward"))
             mgTL.UsingFixedRatioReward = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "UsingFixedRatioReward");
         else
@@ -445,18 +445,18 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
     public override Type GetTaskCustomSettingsType(string typeName)
     {
-        if(typeName.ToLower() == "mazedef")
+        if (typeName.ToLower().Contains("mazedef"))
             return typeof(MazeDef);
         else
         {
-            Debug.LogError("TYPE ERROR!");
+            Debug.LogError("TYPE ERROR INSIDE MAZEGAMES GETTASKCUSTOMSETTINGS OVERRIDE METHOD!");
             return null;
         }
     }
 
     public override void ProcessCustomSettingsFiles()
     {
-        MazeDefs = (MazeDef[])SessionSettings.Get("MazeDef");
+        MazeDefs = (MazeDef[])SessionSettings.Get("MazeDef_array");
 
         if (MazeDefs == null)
             Debug.LogError("MAZE DEFS ARE NULL!");
@@ -531,9 +531,11 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             {
                 yield return StartCoroutine(ServerManager.GetFileStringAsync(mgTL.MazeFilePath, mgTL.mazeDefName, result =>
                 {
-                    if (!string.IsNullOrEmpty(result))
+                    //SettingsDetails.FileName = result[0]; //implement later
+
+                    if (!string.IsNullOrEmpty(result[1]))
                     {
-                        jsonString = result;
+                        jsonString = result[1];
                         currMaze = new Maze(jsonString);
                     }
                     else

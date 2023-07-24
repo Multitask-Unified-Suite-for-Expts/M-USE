@@ -127,6 +127,8 @@ namespace USE_ExperimentTemplate_Session
             importSettings_Level = gameObject.GetComponent<ImportSettings_Level>();
             importSettings_Level.SessionLevel = this;
 
+            verifyTask_Level = gameObject.GetComponent<VerifyTask_Level>();
+
             bool initScreenTerminated = false;
 
             //InitScreen State---------------------------------------------------------------------------------------------------------------
@@ -155,7 +157,7 @@ namespace USE_ExperimentTemplate_Session
             bool taskAutomaticallySelected = false;
 
             //LoadSessionSettings State---------------------------------------------------------------------------------------------------------------
-            loadSessionSettings.AddChildLevel(gameObject.GetComponent<ImportSettings_Level>());
+            loadSessionSettings.AddChildLevel(importSettings_Level);
             loadSessionSettings.AddDefaultInitializationMethod(() =>
             {
                 SetDataPaths();
@@ -164,21 +166,26 @@ namespace USE_ExperimentTemplate_Session
             });
             loadSessionSettings.AddUpdateMethod(() =>
             {
+                if (importSettings_Level.fileLoaded)
+                    importSettings_Level.continueToLoadFile = true;
+
                 if (importSettings_Level.fileParsed)
                 {
-                    if (importSettings_Level.SettingsDetails.FileName == "SessionConfig")
+                    Debug.Log("FILE PARSED! SEARCH STRING: " + importSettings_Level.SettingsDetails.SearchString);
+
+                    if (importSettings_Level.SettingsDetails.SearchString == "SessionConfig")
                     {
                         SessionValues.SessionDef = (SessionDef)importSettings_Level.parsedResult;
                         SetValuesForLoading_EventCodeConfig();
                         importSettings_Level.continueToNextSetting = true;
                     }
-                    else if (importSettings_Level.SettingsDetails.FileName == "EventCode")
+                    else if (importSettings_Level.SettingsDetails.SearchString == "EventCode")
                     {
                         SessionValues.EventCodeManager.SessionEventCodes = (Dictionary<string, EventCode>) importSettings_Level.parsedResult;
                         importSettings_Level.terminateImport = true;
                     }
                     else
-                        Debug.Log($"The {importSettings_Level.SettingsDetails.FileName} has been parsed, but is unable to be set as it is not a SessionConfig, EventCode, or DisplayConfig file.");
+                        Debug.Log($"The {importSettings_Level.SettingsDetails.SearchString} has been parsed, but is unable to be set as it is not a SessionConfig, EventCode, or DisplayConfig file.");
                 }
             });
             loadSessionSettings.SpecifyTermination(() => loadSessionSettings.ChildLevel.Terminated, createSessionDataFolder);
@@ -862,16 +869,16 @@ namespace USE_ExperimentTemplate_Session
         private void SetValuesForLoading_SessionConfig()
         {
             // Add necessary fields to Load Session Def from ImportSettings_Level
-            importSettings_Level.SettingsDetails.SettingParsingStyle = "SingleTypeDelimited";
+            importSettings_Level.SettingsDetails.SettingParsingStyle = "SingleType";
             importSettings_Level.SettingsDetails.SettingType = typeof(SessionDef);
-            importSettings_Level.SettingsDetails.FileName = "SessionConfig";
+            importSettings_Level.SettingsDetails.SearchString = "SessionConfig";
         }
         private void SetValuesForLoading_EventCodeConfig()
         {
             // Add necessary fields to Load Session Event Codes from ImportSettings_Level
-            importSettings_Level.SettingsDetails.SettingParsingStyle = "SingleTypeJSON";
+            importSettings_Level.SettingsDetails.SettingParsingStyle = "JSON";
             importSettings_Level.SettingsDetails.SettingType = typeof(Dictionary<string, EventCode>);
-            importSettings_Level.SettingsDetails.FileName = "EventCode";
+            importSettings_Level.SettingsDetails.SearchString = "EventCode";
 
             if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs) // Server
                 importSettings_Level.SettingsDetails.FilePath = SessionValues.ConfigFolderPath;
@@ -1117,11 +1124,18 @@ namespace USE_ExperimentTemplate_Session
             if (!Directory.Exists(SessionValues.ConfigFolderPath ))
             {
                 Directory.CreateDirectory(SessionValues.ConfigFolderPath );
-                List<string> configsToWrite = new List<string>() { "SessionConfig", "EventCodeConfig", "DisplayConfig" };
+                List<string> configsToWrite = new List<string>() { "SessionConfig_singleType", "EventCodeConfig_json", "DisplayConfig_json" };
                 foreach (string config in configsToWrite)
                 {
                     byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + config).bytes;
-                    File.WriteAllBytes(SessionValues.ConfigFolderPath  + Path.DirectorySeparatorChar + config + ".txt", textFileBytes);
+                    string configName = config;
+                    if (configName.ToLower().Contains("sessionconfig"))
+                        configName += ".txt";
+                    else if (configName.ToLower().Contains("eventcode") || configName.ToLower().Contains("displayconfig"))
+                        configName += ".json";
+                    File.WriteAllBytes(SessionValues.ConfigFolderPath  + Path.DirectorySeparatorChar + configName, textFileBytes);
+
+                    Debug.Log("WROTE " + configName + " TO PERSISTANT PATH!");
                 }
             }
         }
@@ -1292,8 +1306,11 @@ namespace USE_ExperimentTemplate_Session
             // return tl as ControlLevel_Task_Template; 
             //it would be nice to return type T and 
             tl.ConfigFolderName = configFolderName;
+
+            tl.importSettings_Level = importSettings_Level;
+            tl.verifyTask_Level = verifyTask_Level;
             
-            StartCoroutine((PopulateTaskLevel(tl, verifyOnly, result =>
+            StartCoroutine(PopulateTaskLevel(tl, verifyOnly, result =>
             {
                 if (result != null)
                 {
@@ -1312,7 +1329,7 @@ namespace USE_ExperimentTemplate_Session
                 {
                     Debug.Log("Tasklevel result is null");
                 }
-            })));
+            }));
         }
 
         IEnumerator PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly, Action<ControlLevel_Task_Template> callback)
@@ -1338,14 +1355,13 @@ namespace USE_ExperimentTemplate_Session
 
                     Dictionary<string, string> configDict = new Dictionary<string, string>
                     {
-                        {"_TaskDef", "_TaskDef.txt"},
-                        {"_TaskDeftdf", "_TaskDef.txt"},
-                        {"_BlockDeftdf", "_BlockDeftdf.txt"},
-                        {"_TrialDeftdf", "_TrialDeftdf.txt"},
-                        {"_StimDeftdf", "_StimDeftdf.txt"},
-                        {"_ConfigUiDetails", "_ConfigUiDetails.json"},
-                        {"_EventCodeConfig", "_EventCodeConfig.json"},
-                        {"MazeDef", "MazeDef.txt"}
+                        {"_TaskDef_singleType", "_TaskDef_singleType.txt"},
+                        {"_BlockDef_array", "_BlockDef_array.txt"},
+                        {"_TrialDef_array", "_TrialDef_array.txt"},
+                        {"_StimDef_array", "_StimDef_array.txt"},
+                        {"_ConfigUiDetails_json", "_ConfigUiDetails_json.json"},
+                        {"_EventCodeConfig_json", "_EventCodeConfig_json.json"},
+                        {"MazeDef_array", "MazeDef_array.txt"}
                     };
                     TextAsset configTextAsset;
                     foreach (var entry in configDict)

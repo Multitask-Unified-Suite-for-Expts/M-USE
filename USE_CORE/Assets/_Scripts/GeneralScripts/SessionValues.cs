@@ -96,25 +96,25 @@ public static class SessionValues
     //public bool UseTaskButtonsGrid;
 
 
-    public static IEnumerator GetFileContentString(string fileName, Action<string> callback)
-    {
-        string fileContent;
-        if (ConfigAccessType == "Local" || ConfigAccessType == "Default")
-        {
-            fileContent = File.ReadAllText(LocateFile.FindFilePathInExternalFolder(ConfigFolderPath, $"*{fileName}*")); //Will need to check that this works during Web Build
-            callback(fileContent);
-        }
-        else if (ConfigAccessType == "Server")
-        {
-            yield return CoroutineHelper.StartCoroutine(ServerManager.GetFileStringAsync(ConfigFolderPath, "SessionConfig", result =>
-            {
-                callback(result);
-            }));
-        }
-        else
-            callback(null);
+    //public static IEnumerator GetFileContentString(string fileName, Action<string> callback)
+    //{
+    //    string fileContent;
+    //    if (ConfigAccessType == "Local" || ConfigAccessType == "Default")
+    //    {
+    //        fileContent = File.ReadAllText(LocateFile.FindFilePathInExternalFolder(ConfigFolderPath, $"*{fileName}*")); //Will need to check that this works during Web Build
+    //        callback(fileContent);
+    //    }
+    //    else if (ConfigAccessType == "Server")
+    //    {
+    //        yield return CoroutineHelper.StartCoroutine(ServerManager.GetFileStringAsync(ConfigFolderPath, "SessionConfig", result =>
+    //        {
+    //            callback(result);
+    //        }));
+    //    }
+    //    else
+    //        callback(null);
 
-    }
+    //}
 
     // public static IEnumerator BetterReadSettingsFile<T>(string fileName, string fileType, Action<T[]> callback)
     // {

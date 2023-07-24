@@ -42,7 +42,9 @@ namespace SelectionTracking
             foreach (string key in ActiveSelectionHandlers.Keys)
             {
                 if (ActiveSelectionHandlers[key].HandlerActive)
+                {
                     ActiveSelectionHandlers[key].UpdateSelections();
+                }
             }
         }
 
@@ -338,7 +340,6 @@ namespace SelectionTracking
                 {
                     if (OngoingSelection != null)
                     {
-                        // the previous frame was a selection
                         CheckTermination();
                     } 
                     return;

@@ -54,33 +54,41 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             trialLevel.ResetBlockVariables();
-
             currentBlock.ContextName = currentBlock.ContextName.Trim();
-            string contextFilePath;
-            if (SessionValues.WebBuild)
-            {
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{currentBlock.ContextName}";
-                if (!SessionValues.UsingDefaultConfigs)
-                    contextFilePath += ".png";
-            }
-            else
-                contextFilePath = trialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
-
-            StartCoroutine(HandleSkybox(contextFilePath));
+            SetSkyBox();
         });
 
         BlockFeedback.AddInitializationMethod(() =>
         {
             AddBlockValuesToTaskValues();
-
-            if(!SessionValues.WebBuild)
-            {
-                if (BlockStringsAdded > 0)
-                    CurrentBlockString += "\n";
-                PreviousBlocksString.Insert(0, CurrentBlockString);
-                BlockStringsAdded++;
-            }
+            HandleBlockStrings();
         });
+    }
+
+    private void HandleBlockStrings()
+    {
+        if (!SessionValues.WebBuild)
+        {
+            if (BlockStringsAdded > 0)
+                CurrentBlockString += "\n";
+            PreviousBlocksString.Insert(0, CurrentBlockString);
+            BlockStringsAdded++;
+        }
+    }
+
+    private void SetSkyBox()
+    {
+        string contextFilePath;
+        if (SessionValues.WebBuild)
+        {
+            contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{currentBlock.ContextName}";
+            if (!SessionValues.UsingDefaultConfigs)
+                contextFilePath += ".png";
+        }
+        else
+            contextFilePath = trialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
+
+        StartCoroutine(HandleSkybox(contextFilePath));
     }
 
     public void SetSettings()

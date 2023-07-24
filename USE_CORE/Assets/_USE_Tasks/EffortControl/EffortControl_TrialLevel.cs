@@ -5,8 +5,6 @@ using EffortControl_Namespace;
 using System.Linq;
 using USE_ExperimentTemplate_Trial;
 using ConfigDynamicUI;
-using USE_UI;
-using SelectionTracking;
 using UnityEngine.UI;
 using TMPro;
 
@@ -156,12 +154,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
+
         SetupTrial.AddInitializationMethod(() =>
         {
             LoadConfigUIVariables();
             if (TrialCount_InTask != 0)
                 currentTask.SetTaskSummaryString();
         });
+
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
@@ -270,7 +270,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if (Screen.fullScreen && Screen.width > 1920)
                 xValue = Screen.width > 3000 ? .96f : .88f; //test the .95 its for mac
 
-            CenteredPos = new Vector3((SideChoice == "Left" ? xValue : -xValue), 0, 0);
+            CenteredPos = new Vector3(SideChoice == "Left" ? xValue : -xValue, 0, 0);
 
             MiddleBarrier.SetActive(false);
 
@@ -287,7 +287,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 StimLeft.SetActive(false);
             }
         });
-
         CenterSelection.AddUpdateMethod(() =>
         {
             if(Wrapper.transform.position != CenteredPos)

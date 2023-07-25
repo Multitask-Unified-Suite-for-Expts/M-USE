@@ -105,15 +105,15 @@ namespace USE_ExperimentTemplate_Session
             SessionValues.SessionLevel = this;
 
             State initScreen = new State("InitScreen");
-            State loadSessionSettings = new State("LoadSessionSettings");
-            State createSessionDataFolder = new State("CreateDataFolders");
+            // State loadSessionSettings = new State("LoadSessionSettings");
+            // State createSessionDataFolder = new State("CreateDataFolders");
             State setupSession = new State("SetupSession");
             State selectTask = new State("SelectTask");
             State loadTask = new State("LoadTask");
             State runTask = new State("RunTask");
             State finishSession = new State("FinishSession");
             State gazeCalibration = new State("GazeCalibration");
-            AddActiveStates(new List<State> { initScreen, loadSessionSettings, createSessionDataFolder, setupSession, selectTask, loadTask, runTask, finishSession, gazeCalibration });
+            AddActiveStates(new List<State> { initScreen, setupSession, selectTask, loadTask, runTask, finishSession, gazeCalibration });
 
             ActiveTaskLevels = new List<ControlLevel_Task_Template>();
 
@@ -138,7 +138,7 @@ namespace USE_ExperimentTemplate_Session
                 SessionInitScreen.OnConfirm += ()=> initScreenTerminated = true;
             });
             
-            initScreen.SpecifyTermination(()=> initScreenTerminated, loadSessionSettings, () =>
+            initScreen.SpecifyTermination(()=> initScreenTerminated, setupSession, () =>
             {
                 SessionValues.SubjectID = SessionDetails.GetItemValue("SubjectID");
                 SessionValues.SessionID = SessionDetails.GetItemValue("SessionID");
@@ -212,8 +212,10 @@ namespace USE_ExperimentTemplate_Session
 
             // setupSession.AddChildLevel(set);
             //SetupSession State---------------------------------------------------------------------------------------------------------------
-            
-            setupSession.AddChildLevel(GameObject.Find("ControlLevels").GetComponent<SetupSession_Level>());
+
+            SetupSession_Level setupSessionLevel = GameObject.Find("ControlLevels").GetComponent<SetupSession_Level>();
+            setupSession.AddChildLevel(setupSessionLevel);
+            setupSessionLevel.SessionLevel = this;
             
             setupSession.AddDefaultInitializationMethod(() =>
             {
@@ -221,6 +223,80 @@ namespace USE_ExperimentTemplate_Session
                 // if (SessionValues.WebBuild)
                 //     StartCoroutine(ServerManager.CreateFolder(SessionValues.TaskSelectionDataPath)); //Create SessionLevel Sub-Folder inside Data Folder
 
+            });
+            //
+            // if (SessionValues.SessionDef.SelectionType.ToLower().Equals("gaze"))
+            // {
+            //     SelectionHandler = SessionValues.SelectionTracker.SetupSelectionHandler("session", "GazeSelection", SessionValues.GazeTracker, inputActive, inputInactive);
+            //     SelectionHandler.MinDuration = 0.7f;
+            // }
+            // else
+            // {
+            //     SelectionHandler = SessionValues.SelectionTracker.SetupSelectionHandler("session", "MouseButton0Click", SessionValues.MouseTracker, inputActive, inputInactive);
+            //     SessionValues.MouseTracker.enabled = true;
+            //     SelectionHandler.MinDuration = 0.01f;
+            //     SelectionHandler.MaxDuration = 2f;
+            // }
+            //
+            // SessionData.AddDatum("SelectedTaskConfigName", () => selectedConfigFolderName);
+            // SessionData.AddDatum("TaskAutomaticallySelected", () => taskAutomaticallySelected);
+
+            int iTask = 0;
+            SceneLoading = false;
+            string taskName = "";
+            AsyncOperation loadScene = null;
+            setupSession.AddUpdateMethod(() =>
+            {
+                if (waitForSerialPort && Time.time - StartTimeAbsolute > SessionValues.SerialPortController.initTimeout / 1000f + 0.5f)
+                {
+                    if (SessionValues.SessionDef.SyncBoxActive && SessionValues.SessionDef.SyncBoxInitCommands != null)
+                        SessionValues.SyncBoxController.SendCommand((List<string>)SessionValues.SessionDef.SyncBoxInitCommands);
+                    waitForSerialPort = false;
+                }
+
+                if (SessionValues.SessionDef != null && SessionValues.SessionDef.EyeTrackerActive && GazeCalibrationTaskLevel == null)
+                {
+                    //Have to add calibration task level as child of calibration state here, because it isn't available prior
+                    GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
+                    GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
+                    GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
+                    StartCoroutine(PopulateTaskLevel(GazeCalibrationTaskLevel, false, result =>
+                    {
+                        GazeCalibrationTaskLevel = result;
+                        gazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
+                        GazeCalibrationTaskLevel.TrialLevel.TaskLevel = GazeCalibrationTaskLevel;
+                        GazeCalibrationTaskLevel.gameObject.SetActive(false);
+                    }));
+                }
+                //
+                // if (iTask < SessionValues.SessionDef.TaskMappings.Count)
+                // {
+                //     if (!SceneLoading)
+                //     {
+                //         SceneLoading = true;
+                //         taskName = (string)SessionValues.SessionDef.TaskMappings[iTask];
+                //         loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
+                //         string configFolderName = SessionValues.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
+                //         // Unload it after memory because this loads the assets into memory but destroys the objects
+                //         loadScene.completed += (_) =>
+                //         {
+                //             SessionSettings.Save();
+                //             OnTaskSceneLoaded(configFolderName, true);
+                //             // SessionSettings.Restore();
+                //             // SceneManager.UnloadSceneAsync(taskName);
+                //             // SceneLoading = false;
+                //             iTask++;
+                //         };
+                //     }
+                // }
+            });
+
+            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && SessionValues.SessionDef.EyeTrackerActive, gazeCalibration);
+            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && !SessionValues.SessionDef.EyeTrackerActive, selectTask);
+            setupSession.AddDefaultTerminationMethod(() =>
+            {
+                SessionSettings.Save();
+                
                 SetHumanPanelAndStartButton();
                 SummaryData.Init();
                 CreateSessionSettingsFolder();
@@ -255,79 +331,6 @@ namespace USE_ExperimentTemplate_Session
                    
                     SessionValues.SerialPortController.Initialize();
                 }
-            });
-            //
-            // if (SessionValues.SessionDef.SelectionType.ToLower().Equals("gaze"))
-            // {
-            //     SelectionHandler = SessionValues.SelectionTracker.SetupSelectionHandler("session", "GazeSelection", SessionValues.GazeTracker, inputActive, inputInactive);
-            //     SelectionHandler.MinDuration = 0.7f;
-            // }
-            // else
-            // {
-            //     SelectionHandler = SessionValues.SelectionTracker.SetupSelectionHandler("session", "MouseButton0Click", SessionValues.MouseTracker, inputActive, inputInactive);
-            //     SessionValues.MouseTracker.enabled = true;
-            //     SelectionHandler.MinDuration = 0.01f;
-            //     SelectionHandler.MaxDuration = 2f;
-            // }
-            //
-            // SessionData.AddDatum("SelectedTaskConfigName", () => selectedConfigFolderName);
-            // SessionData.AddDatum("TaskAutomaticallySelected", () => taskAutomaticallySelected);
-
-            int iTask = 0;
-            SceneLoading = false;
-            string taskName = "";
-            AsyncOperation loadScene = null;
-            setupSession.AddUpdateMethod(() =>
-            {
-                if (waitForSerialPort && Time.time - StartTimeAbsolute > SessionValues.SerialPortController.initTimeout / 1000f + 0.5f)
-                {
-                    if (SessionValues.SessionDef.SyncBoxActive && SessionValues.SessionDef.SyncBoxInitCommands != null)
-                        SessionValues.SyncBoxController.SendCommand((List<string>)SessionValues.SessionDef.SyncBoxInitCommands);
-                    waitForSerialPort = false;
-                }
-
-                if (SessionValues.SessionDef.EyeTrackerActive && GazeCalibrationTaskLevel == null)
-                {
-                    //Have to add calibration task level as child of calibration state here, because it isn't available prior
-                    GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
-                    GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
-                    GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
-                    StartCoroutine(PopulateTaskLevel(GazeCalibrationTaskLevel, false, result =>
-                    {
-                        GazeCalibrationTaskLevel = result;
-                        gazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
-                        GazeCalibrationTaskLevel.TrialLevel.TaskLevel = GazeCalibrationTaskLevel;
-                        GazeCalibrationTaskLevel.gameObject.SetActive(false);
-                    }));
-                }
-                
-                if (iTask < SessionValues.SessionDef.TaskMappings.Count)
-                {
-                    if (!SceneLoading)
-                    {
-                        SceneLoading = true;
-                        taskName = (string)SessionValues.SessionDef.TaskMappings[iTask];
-                        loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-                        string configFolderName = SessionValues.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
-                        // Unload it after memory because this loads the assets into memory but destroys the objects
-                        loadScene.completed += (_) =>
-                        {
-                            SessionSettings.Save();
-                            OnTaskSceneLoaded(configFolderName, true);
-                            // SessionSettings.Restore();
-                            // SceneManager.UnloadSceneAsync(taskName);
-                            // SceneLoading = false;
-                            iTask++;
-                        };
-                    }
-                }
-            });
-
-            setupSession.SpecifyTermination(() => !SceneLoading && iTask >= SessionValues.SessionDef.TaskMappings.Count && !waitForSerialPort && SessionValues.SessionDef.EyeTrackerActive, gazeCalibration);
-            setupSession.SpecifyTermination(() => !SceneLoading && iTask >= SessionValues.SessionDef.TaskMappings.Count && !waitForSerialPort && !SessionValues.SessionDef.EyeTrackerActive, selectTask);
-            setupSession.AddDefaultTerminationMethod(() =>
-            {
-                SessionSettings.Save();
                 if (!SessionValues.WebBuild)
                 {
                     InitCamGO.SetActive(false);

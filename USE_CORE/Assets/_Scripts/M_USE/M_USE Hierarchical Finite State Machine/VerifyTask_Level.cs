@@ -25,10 +25,22 @@ public class VerifyTask_Level : ControlLevel
 
         AddActiveStates(new List<State> { ImportSettings, HandleTrialAndBlockDefs, FindStims });
 
+        importSettings_Level = GameObject.Find("ControlLevels").GetComponent<ImportSettings_Level>();
         ImportSettings.AddChildLevel(importSettings_Level);
         ImportSettings.AddInitializationMethod(() =>
         {
             Debug.Log("STARTING IMPORT SETTINGS STATE!");
+            Debug.Log("CURRENT TASK: " + CurrentTask);
+            CurrentTask.SpecifyTypes();
+            importSettings_Level.SettingsDetails = new List<SettingsDetails>()
+            {
+                new SettingsDetails("TaskDef", CurrentTask.TaskDefType),
+                new SettingsDetails("BlockDef", CurrentTask.BlockDefType),
+                new SettingsDetails("TrialDef", CurrentTask.TrialDefType),
+                new SettingsDetails("StimDef", CurrentTask.StimDefType),
+                new SettingsDetails("EventCode", typeof(Dictionary<string, EventCode>)),
+                new SettingsDetails("ConfigUI", typeof(ConfigVarStore)),
+            };
             SetValuesForLoading("TaskDef");
         });
 
@@ -36,7 +48,6 @@ public class VerifyTask_Level : ControlLevel
         {
             if (importSettings_Level.fileLoaded)
             {
-                importSettings_Level.SettingsDetails[0].SettingParsingStyle = importSettings_Level.DetermineParsingStyle();
                 importSettings_Level.importPaused = false;
             }
             if (importSettings_Level.fileParsed)
@@ -66,15 +77,15 @@ public class VerifyTask_Level : ControlLevel
 
         HandleTrialAndBlockDefs.AddInitializationMethod(() =>
         {
-
+            CurrentTask.HandleTrialAndBlockDefs(true);
         });
-        HandleTrialAndBlockDefs.SpecifyTermination(() => true, FindStims);
+        HandleTrialAndBlockDefs.SpecifyTermination(() => CurrentTask.TrialAndBlockDefsHandled, FindStims);
 
         FindStims.AddInitializationMethod(() =>
         {
-
+            CurrentTask.FindStims();
         });
-        FindStims.SpecifyTermination(() => true, () => null);
+        FindStims.SpecifyTermination(() => CurrentTask.StimsHandled, () => null);
     }
 
     public void ContinueToNextSetting()
@@ -82,7 +93,7 @@ public class VerifyTask_Level : ControlLevel
         importSettings_Level.importPaused = false;
     }
 
-    private void SetFilePath(string searchString)
+    private string SetFilePath(string searchString)
     {
         string pathToFolder;
 
@@ -92,9 +103,9 @@ public class VerifyTask_Level : ControlLevel
             pathToFolder = $"{SessionValues.ConfigFolderPath}/{CurrentTask.TaskName}"; //test for windows!
 
         if (SessionValues.ConfigAccessType == "Default" || SessionValues.ConfigAccessType == "Local")
-            importSettings_Level.SettingsDetails[0].FilePath = SessionValues.LocateFile.FindFilePathInExternalFolder(pathToFolder, $"*{searchString}*");
+            return importSettings_Level.SettingsDetails[0].FilePath = SessionValues.LocateFile.FindFilePathInExternalFolder(pathToFolder, $"*{searchString}*");
         else //Server
-            importSettings_Level.SettingsDetails[0].FilePath = pathToFolder;
+            return importSettings_Level.SettingsDetails[0].FilePath = pathToFolder;
     }
 
     private void SetValuesForLoading(string searchString)
@@ -105,16 +116,16 @@ public class VerifyTask_Level : ControlLevel
         switch (searchString.ToLower())
         {
             case "taskdef":
-                importSettings_Level.SettingsDetails[0].SettingType = typeof(TaskDef);
+                importSettings_Level.SettingsDetails[0].SettingType = CurrentTask.TaskDefType;
                 break;
             case "blockdef":
-                importSettings_Level.SettingsDetails[0].SettingType = typeof(BlockDef[]);
+                importSettings_Level.SettingsDetails[0].SettingType = CurrentTask.BlockDefType;
                 break;
             case "trialdef":
-                importSettings_Level.SettingsDetails[0].SettingType = typeof(TrialDef[]);
+                importSettings_Level.SettingsDetails[0].SettingType = CurrentTask.TrialDefType;
                 break;
             case "stimdef":
-                importSettings_Level.SettingsDetails[0].SettingType = typeof(StimDef[]);
+                importSettings_Level.SettingsDetails[0].SettingType = CurrentTask.StimDefType;
                 break;
             case "eventcode":
                 importSettings_Level.SettingsDetails[0].SettingType = typeof(Dictionary<string, EventCode>); //this correct for event code?

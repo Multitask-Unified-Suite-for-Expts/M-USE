@@ -71,7 +71,9 @@ public class ImportSettings_Level : ControlLevel
         {
             if (!string.IsNullOrEmpty(currentSettingsDetails.FileContentString))
             {
-                currentSettingsDetails.SettingType = currentSettingsDetails.SettingType;
+                // currentSettingsDetails.SettingType = currentSettingsDetails.SettingType;
+                if (string.IsNullOrEmpty(currentSettingsDetails.SettingParsingStyle))
+                    currentSettingsDetails.SettingParsingStyle = DetermineParsingStyle(currentSettingsDetails.FilePath);
                 ConvertStringToSettings();
                 fileParsed = true;
                 importPaused = true;
@@ -81,15 +83,16 @@ public class ImportSettings_Level : ControlLevel
                 Debug.Log($"Failed to load {currentSettingsDetails.FileName}, because the file content is empty or not located in the correct path. Continuing onto loading the next setting.");
             }
         });
-        parseFile.SpecifyTermination(()=> !importPaused && SettingsDetails.Count > 0, loadFile, ()=>
+        parseFile.SpecifyTermination(()=> !importPaused && SettingsDetails.Count > 1, loadFile, ()=>
         {
             importPaused = false;
             fileParsed = false;
             iSettings++;
             SettingsDetails.RemoveAt(0);
         });
-        parseFile.SpecifyTermination(() => !importPaused && SettingsDetails.Count == 0, ()=> null,() =>
+        parseFile.SpecifyTermination(() => !importPaused && SettingsDetails.Count == 1, ()=> null,() =>
         {
+            SettingsDetails.RemoveAt(0);
             fileParsed = false;
             importPaused = false;
             ResetVariables();
@@ -124,6 +127,8 @@ public class ImportSettings_Level : ControlLevel
     }
     private IEnumerator GetFileContentString(string filePath, string searchString, Action<string> callback)
     {
+        Debug.Log("FILE PATH: " + filePath);
+        Debug.Log(("SEARCH STRING: " + searchString));
         string fileContent;
 
         if (SessionValues.ConfigAccessType == "Local" || SessionValues.ConfigAccessType == "Default")
@@ -362,7 +367,7 @@ public class ImportSettings_Level : ControlLevel
             }
             else
             {
-                Debug.Log("FIELD TYPE: " + fieldType);
+                // Debug.Log("FIELD TYPE: " + fieldType);
                 fieldInfo.SetValue(settingsInstance, Convert.ChangeType(fieldValue, fieldType));
             }
         }
@@ -401,20 +406,20 @@ public class ImportSettings_Level : ControlLevel
         currentSettingsDetails = null;
     }
 
-    public string DetermineParsingStyle()
+    public string DetermineParsingStyle(string filename)
     {
         string assumedParsingStyle = "";
 
-        Debug.Log("FILE NAME: " + currentSettingsDetails.FileName);
+        Debug.Log("FILE NAME: " + filename);
 
-        if (currentSettingsDetails.FileName.ToLower().Contains("json"))
+        if (filename.ToLower().Contains("json"))
             assumedParsingStyle = "JSON";
-        else if (currentSettingsDetails.FileName.ToLower().Contains("array"))
+        else if (filename.ToLower().Contains("array"))
             assumedParsingStyle = "Array";
-        else if (currentSettingsDetails.FileName.ToLower().Contains("singletype"))
+        else if (filename.ToLower().Contains("singletype"))
             assumedParsingStyle = "SingleType";
         else
-            Debug.LogError("Attempting to parse FileName: " + currentSettingsDetails.FileName + " , but this name does not contain a substring indicated settings parsing type.");
+            Debug.LogError("Attempting to parse FileName: " + filename + " , but this name does not contain a substring indicated settings parsing type.");
 
         Debug.Log("ASSUMED PARSING STYLE: " + assumedParsingStyle);
 
@@ -476,6 +481,12 @@ public class SettingsDetails
     public SettingsDetails(string settingParsingStyle, string searchString, Type settingType)
     {
         SettingParsingStyle = settingParsingStyle;
+        SearchString = searchString;
+        SettingType = settingType;
+    }
+
+    public SettingsDetails(string searchString, Type settingType)
+    {
         SearchString = searchString;
         SettingType = settingType;
     }

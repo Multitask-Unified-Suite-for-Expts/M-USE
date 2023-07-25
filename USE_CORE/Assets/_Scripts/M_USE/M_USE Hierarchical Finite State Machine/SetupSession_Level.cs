@@ -1,15 +1,20 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using USE_States;
 using System.IO;
+using System.Linq;
 using SelectionTracking;
+using UnityEngine.SceneManagement;
 using USE_Def_Namespace;
 using USE_DisplayManagement;
 using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Session;
+using USE_ExperimentTemplate_Task;
+using USE_StimulusManagement;
 
 
 public class SetupSession_Level : ControlLevel
@@ -22,6 +27,8 @@ public class SetupSession_Level : ControlLevel
     public SessionData SessionData;
     public FrameData FrameData;
     public ControlLevel_Session_Template SessionLevel;
+
+    private ControlLevel_Task_Template taskLevel;
     public override void DefineControlLevel()
     {
         ImportSessionSettings = new State("ImportSessionSettings");
@@ -32,7 +39,8 @@ public class SetupSession_Level : ControlLevel
             ImportSessionSettings, CreateDataFolder, LoadTaskScene, VerifyTask
         });
         
-        
+        // importSettings_Level.DefineControlLevel();
+        importSettings_Level = GameObject.Find("ControlLevels").GetComponent<ImportSettings_Level>();
         ImportSessionSettings.AddChildLevel(importSettings_Level);
         ImportSessionSettings.AddDefaultInitializationMethod(() =>
         {
@@ -84,7 +92,7 @@ public class SetupSession_Level : ControlLevel
                     
                     importSettings_Level.importPaused = false;
                     settingsImported = true;
-                    setupPaused = true;
+                    setupPaused = false;
                 }
             });
         ImportSessionSettings.SpecifyTermination(() => ImportSessionSettings.ChildLevel.Terminated && !setupPaused, CreateDataFolder, 
@@ -110,13 +118,57 @@ public class SetupSession_Level : ControlLevel
         });
 
         CreateDataFolder.SpecifyTermination(()=> dataFolderCreated && !setupPaused, LoadTaskScene);
+
+        int iTask = 0;
+        string taskName = "";
+        AsyncOperation loadScene = null;
+        
+        LoadTaskScene.AddInitializationMethod(() =>
+            {
+                taskSceneLoaded = false;
+                taskName = (string)SessionValues.SessionDef.TaskMappings[iTask];
+                loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
+                string configFolderName = SessionValues.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
+                loadScene.completed += (_) =>
+                {
+                    taskSceneLoaded = true;
+                };
+            }
+        );
         
         LoadTaskScene.SpecifyTermination(()=> taskSceneLoaded && !setupPaused, VerifyTask);
         
-        VerifyTask.SpecifyTermination(()=> taskVerified && !setupPaused && unverifiedTasks.Count > 0, LoadTaskScene);
-        VerifyTask.SpecifyTermination(()=> taskVerified && !setupPaused && unverifiedTasks.Count == 0, ()=> null);
+        
+        VerifyTask_Level verifyTask_Level = GameObject.Find("ControlLevels").GetComponent<VerifyTask_Level>();
+
+        VerifyTask.AddChildLevel(verifyTask_Level);
+        VerifyTask.AddInitializationMethod(() =>
+        {
+            Debug.Log("STARTING VERIFY TASK STATE");
+            var methodInfo = GetType().GetMethod(nameof(this.GetTaskLevelType));
+            Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
+            MethodInfo GetTaskLevelType = methodInfo.MakeGenericMethod(new Type[] { taskType });
+            string configFolderName = SessionValues.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
+
+            GetTaskLevelType.Invoke(this, new object[] { configFolderName, verifyTask_Level });
+        });
+
+        VerifyTask.SpecifyTermination(()=> verifyTask_Level.Terminated && !setupPaused && iTask < SessionValues.SessionDef.TaskMappings.Count - 1, LoadTaskScene,
+            () =>
+            {
+                SceneManager.UnloadSceneAsync(taskName);
+                iTask++;
+            });
+        VerifyTask.SpecifyTermination(()=> verifyTask_Level.Terminated && !setupPaused && iTask == SessionValues.SessionDef.TaskMappings.Count - 1, ()=> null);
     }
-    
+
+
+    public void GetTaskLevelType<T>(string configFolderName, VerifyTask_Level verifyTask_Level) where T : ControlLevel_Task_Template
+    {
+        //Gets the task level type using reflection which cannot be done outside an invoked method
+        string taskName = (string) SessionValues.SessionDef.TaskMappings[configFolderName];
+        verifyTask_Level.CurrentTask = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
+    }
 
     private void SetDataPaths()
     {

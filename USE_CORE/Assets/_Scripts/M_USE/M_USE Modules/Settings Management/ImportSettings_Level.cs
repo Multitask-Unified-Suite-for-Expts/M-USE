@@ -19,23 +19,16 @@ public class ImportSettings_Level : ControlLevel
     public List<Type> settingTypes = new List<Type>(); 
     public List<string> filePathStrings;
 
-    public SettingsDetails SettingsDetails;
-    
-    private string currentFilePathString;
-    public string currentFileContentString;
-    private Type currentType;
+    public List<SettingsDetails> SettingsDetails;
+    public SettingsDetails currentSettingsDetails;
 
     private int iSettings;
 
-    public string currentFileName;
     public object parsedResult = null;
-    public ControlLevel_Session_Template SessionLevel;
 
     public bool fileParsed;
-    public bool terminateImport;
     public bool fileLoaded;
-    public bool continueToNextSetting;
-    public bool continueToLoadFile;
+    public bool importPaused;
 
 
     public override void DefineControlLevel()
@@ -43,8 +36,8 @@ public class ImportSettings_Level : ControlLevel
         State loadFile = new State("LoadFile");
         State parseFile = new State("ParseFile");
         AddActiveStates(new List<State> { loadFile, parseFile });
-       
-        SettingsDetails = new SettingsDetails();
+
+        SettingsDetails = new List<SettingsDetails>();
         
         Add_ControlLevel_InitializationMethod(() =>
         {
@@ -53,74 +46,77 @@ public class ImportSettings_Level : ControlLevel
 
         loadFile.AddDefaultInitializationMethod(() =>
         {
-            continueToLoadFile = false;
-            if (string.IsNullOrEmpty(SettingsDetails.FilePath))
+            fileLoaded = false;
+            currentSettingsDetails = SettingsDetails[0];
+            if (string.IsNullOrEmpty(currentSettingsDetails.FilePath))
                 return;
 
-            StartCoroutine(GetFileContentString(SettingsDetails.FilePath, SettingsDetails.SearchString, (contentString) =>
+            StartCoroutine(GetFileContentString(currentSettingsDetails.FilePath, currentSettingsDetails.SearchString, (contentString) =>
             {
                 if (!string.IsNullOrEmpty(contentString))
                 {
-                    currentFileContentString = contentString;
+                    currentSettingsDetails.FileContentString = contentString;
                     fileLoaded = true;
                 }
                 else
-                    Debug.Log($"Failed to load {SettingsDetails.FileName}");
+                    Debug.Log($"Failed to load {currentSettingsDetails.FileName}");
             }));
         });
-        loadFile.SpecifyTermination(() => continueToLoadFile, parseFile, () => { fileLoaded = false; continueToLoadFile = false; }) ;
+        loadFile.SpecifyTermination(() => fileLoaded, parseFile, () => fileLoaded = false);
+        // loadFile.SpecifyTermination(() => !importPaused && SettingsDetails.Count == 0, parseFile);
+        //     parseFile, () => { fileLoaded = false; continueToLoadFile = false; }) ;
         loadFile.AddTimer(() => 10f, parseFile ); //adjust timer value for a sensible amount of time for the server to retrieve file content 
         
         parseFile.AddDefaultInitializationMethod(() =>
         {
-            continueToNextSetting = false;
-            if (!string.IsNullOrEmpty(currentFileContentString))
+            if (!string.IsNullOrEmpty(currentSettingsDetails.FileContentString))
             {
-                currentType = SettingsDetails.SettingType;
+                currentSettingsDetails.SettingType = currentSettingsDetails.SettingType;
                 ConvertStringToSettings();
                 fileParsed = true;
+                importPaused = true;
             }
             else
             {
-                Debug.Log($"Failed to load {SettingsDetails.FileName}, because the file content is empty or not located in the correct path. Continuing onto loading the next setting.");
-                continueToNextSetting = true; // continue if failed to parse, may not be needed in the session
+                Debug.Log($"Failed to load {currentSettingsDetails.FileName}, because the file content is empty or not located in the correct path. Continuing onto loading the next setting.");
             }
         });
-        parseFile.SpecifyTermination(()=> continueToNextSetting, loadFile, ()=>
+        parseFile.SpecifyTermination(()=> !importPaused && SettingsDetails.Count > 0, loadFile, ()=>
         {
-            continueToNextSetting = false;
+            importPaused = false;
             fileParsed = false;
             iSettings++;
+            SettingsDetails.RemoveAt(0);
         });
-        parseFile.SpecifyTermination(()=> terminateImport, ()=> null, () =>
+        parseFile.SpecifyTermination(() => !importPaused && SettingsDetails.Count == 0, ()=> null,() =>
         {
-            continueToNextSetting = false;
             fileParsed = false;
+            importPaused = false;
             ResetVariables();
         });
     }
 
     private void ConvertStringToSettings()
     {
-        if (SettingsDetails.SettingParsingStyle == "Array")
+        if (currentSettingsDetails.SettingParsingStyle == "Array")
         {
             MethodInfo methodInfo = GetType().GetMethod(nameof(ConvertTextToSettings_Array));
-            MethodInfo ConvertTextToSettings_SingleTypeArray_meth = methodInfo.MakeGenericMethod(new Type[] { currentType });
-            object result = ConvertTextToSettings_SingleTypeArray_meth.Invoke(this, new object[] { currentFileContentString });
+            MethodInfo ConvertTextToSettings_SingleTypeArray_meth = methodInfo.MakeGenericMethod(new Type[] { currentSettingsDetails.SettingType });
+            object result = ConvertTextToSettings_SingleTypeArray_meth.Invoke(this, new object[] { currentSettingsDetails.FileContentString });
             parsedResult = result;
         }
-        else if (SettingsDetails.SettingParsingStyle == "JSON")
+        else if (currentSettingsDetails.SettingParsingStyle == "JSON")
         {
             MethodInfo methodInfo = GetType().GetMethod(nameof(ConvertTextToSettings_JSON));
-            MethodInfo ConvertTextToSettings_SingleTypeJSON_meth = methodInfo.MakeGenericMethod(new Type[] { currentType });
-            object result = ConvertTextToSettings_SingleTypeJSON_meth.Invoke(this, new object[] { currentFileContentString});
+            MethodInfo ConvertTextToSettings_SingleTypeJSON_meth = methodInfo.MakeGenericMethod(new Type[] { currentSettingsDetails.SettingType });
+            object result = ConvertTextToSettings_SingleTypeJSON_meth.Invoke(this, new object[] { currentSettingsDetails.FileContentString});
             parsedResult = result;
         }
-        else if (SettingsDetails.SettingParsingStyle == "SingleType")
+        else if (currentSettingsDetails.SettingParsingStyle == "SingleType")
         {
             MethodInfo methodInfo = GetType().GetMethod(nameof(ConvertTextToSettings_SingleType));
-            MethodInfo ConvertTextToSettings_SingleTypeDelimited_meth = methodInfo.MakeGenericMethod(new Type[] { currentType });
-            object result = ConvertTextToSettings_SingleTypeDelimited_meth.Invoke(this, new object[] { currentFileContentString, '\t' });
+            MethodInfo ConvertTextToSettings_SingleTypeDelimited_meth = methodInfo.MakeGenericMethod(new Type[] { currentSettingsDetails.SettingType });
+            object result = ConvertTextToSettings_SingleTypeDelimited_meth.Invoke(this, new object[] { currentSettingsDetails.FileContentString, '\t' });
             parsedResult = result;
         }
         else
@@ -139,7 +135,7 @@ public class ImportSettings_Level : ControlLevel
         {
             yield return CoroutineHelper.StartCoroutine(ServerManager.GetFileStringAsync(filePath, searchString, result =>
             {
-                SettingsDetails.FileName = result[0];
+                currentSettingsDetails.FileName = result[0];
                 if(result != null)
                     callback(result[1]);
                 else
@@ -234,8 +230,8 @@ public class ImportSettings_Level : ControlLevel
    // public static T[] ImportSettings_SingleTypeJSON<T>(string settingsCategory, string settingsPath, string serverFileString = null, string dictName = "")
     public T ConvertTextToSettings_JSON<T>(string fileContentString)
     {
-        Debug.Log("FILE NAME: " + SettingsDetails.FileName);
-        Debug.Log("PARSING TYPE = " + SettingsDetails.SettingParsingStyle);
+        Debug.Log("FILE NAME: " + currentSettingsDetails.FileName);
+        Debug.Log("PARSING TYPE = " + currentSettingsDetails.SettingParsingStyle);
         
         T settingsInstance = Activator.CreateInstance<T>();
         try
@@ -402,28 +398,23 @@ public class ImportSettings_Level : ControlLevel
         settingTypes.Clear();
         filePathStrings.Clear();
 
-        currentFilePathString = null;
-        currentFileContentString = null;
-        currentType = null;
-        currentFileName = null;
-
-        iSettings = 0;
+        currentSettingsDetails = null;
     }
 
     public string DetermineParsingStyle()
     {
         string assumedParsingStyle = "";
 
-        Debug.Log("FILE NAME: " + SettingsDetails.FileName);
+        Debug.Log("FILE NAME: " + currentSettingsDetails.FileName);
 
-        if (SettingsDetails.FileName.ToLower().Contains("json"))
+        if (currentSettingsDetails.FileName.ToLower().Contains("json"))
             assumedParsingStyle = "JSON";
-        else if (SettingsDetails.FileName.ToLower().Contains("array"))
+        else if (currentSettingsDetails.FileName.ToLower().Contains("array"))
             assumedParsingStyle = "Array";
-        else if (SettingsDetails.FileName.ToLower().Contains("singletype"))
+        else if (currentSettingsDetails.FileName.ToLower().Contains("singletype"))
             assumedParsingStyle = "SingleType";
         else
-            Debug.LogError("Attempting to parse FileName: " + SettingsDetails.FileName + " , but this name does not contain a substring indicated settings parsing type.");
+            Debug.LogError("Attempting to parse FileName: " + currentSettingsDetails.FileName + " , but this name does not contain a substring indicated settings parsing type.");
 
         Debug.Log("ASSUMED PARSING STYLE: " + assumedParsingStyle);
 
@@ -479,5 +470,13 @@ public class SettingsDetails
     public string FilePath;
     public string FileName;
     public string SearchString;
+    public string FileContentString;
     public Type SettingType;
+
+    public SettingsDetails(string settingParsingStyle, string searchString, Type settingType)
+    {
+        SettingParsingStyle = settingParsingStyle;
+        SearchString = searchString;
+        SettingType = settingType;
+    }
 }

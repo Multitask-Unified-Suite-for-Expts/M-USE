@@ -54,6 +54,8 @@ namespace USE_Def_Namespace
         public bool PlayBackgroundMusic;
 
         public bool GuidedTaskSelection;
+
+        public bool FlashPanelsActive;
         
 
         public int TaskButtonSize = 225;

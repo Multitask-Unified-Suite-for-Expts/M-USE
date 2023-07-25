@@ -40,10 +40,12 @@ public static class SessionValues
     public static SerialRecvData SerialRecvData;
     public static SerialSentData SerialSentData;
     public static GazeData GazeData;
+    public static GameObject InputTrackers;
     public static MouseTracker MouseTracker;
     public static GazeTracker GazeTracker;
     public static TobiiEyeTrackerController TobiiEyeTrackerController;
     public static GameObject InputManager;
+    public static FlashPanelController FlashPanelController;
 
     public static EventCodeManager EventCodeManager;
     

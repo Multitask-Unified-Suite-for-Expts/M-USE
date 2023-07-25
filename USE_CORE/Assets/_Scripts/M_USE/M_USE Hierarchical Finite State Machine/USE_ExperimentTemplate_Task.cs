@@ -62,7 +62,7 @@ namespace USE_ExperimentTemplate_Task
         protected Dictionary<string, EventCode> CustomTaskEventCodes;
 
         public Type TaskLevelType;
-        protected Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
+        public Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
         protected State VerifyTask, SetupTask, RunBlock, BlockFeedback, FinishTask;
         protected bool BlockFbFinished;
         protected float BlockFbSimpleDuration;
@@ -86,8 +86,8 @@ namespace USE_ExperimentTemplate_Task
             }
         }
 
-        private bool TrialAndBlockDefsHandled;
-        private bool StimsHandled;
+        public bool TrialAndBlockDefsHandled;
+        public bool StimsHandled;
 
         //Passed by sessionLevel
         [HideInInspector] public GameObject BlockResultsPrefab;
